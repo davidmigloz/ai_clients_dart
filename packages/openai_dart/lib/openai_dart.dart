@@ -56,6 +56,8 @@ export 'src/models/common/common.dart';
 export 'src/models/completions/completions.dart';
 // Models - Containers
 export 'src/models/containers/containers.dart';
+// Models - Content Provenance Checks
+export 'src/models/content_provenance_checks/content_provenance_checks.dart';
 // Models - Conversations
 export 'src/models/conversations/conversations.dart';
 // Models - Embeddings

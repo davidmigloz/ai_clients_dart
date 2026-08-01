@@ -1,7 +1,25 @@
 import 'package:meta/meta.dart';
 
+import '../audio/transcription.dart'
+    show
+        TranscriptTextUsageDuration,
+        TranscriptTextUsageTokens,
+        TranscriptUsage,
+        TranscriptionLanguage;
 import '../common/equality_helpers.dart';
 import 'realtime_session.dart';
+
+// Re-exported so importers of `openai_dart_realtime.dart` alone can name
+// the audio-transcription types used by [InputAudioTranscriptionCompletedEvent]
+// (`usage`/`languages`) without also importing `openai_dart.dart`.
+export '../audio/transcription.dart'
+    show
+        TranscriptTextUsageDuration,
+        TranscriptTextUsageTokens,
+        TranscriptUsage,
+        TranscriptUsageInputTokenDetails,
+        TranscriptUsageUnknown,
+        TranscriptionLanguage;
 
 /// Base class for all realtime events.
 ///
@@ -602,6 +620,7 @@ class InputAudioTranscriptionCompletedEvent implements RealtimeEvent {
     required this.contentIndex,
     required this.transcript,
     this.usage,
+    this.languages,
   });
 
   /// Creates an [InputAudioTranscriptionCompletedEvent] from JSON.
@@ -613,7 +632,14 @@ class InputAudioTranscriptionCompletedEvent implements RealtimeEvent {
       itemId: json['item_id'] as String,
       contentIndex: json['content_index'] as int,
       transcript: json['transcript'] as String,
-      usage: json['usage'] as Map<String, dynamic>?,
+      usage: json['usage'] != null
+          ? TranscriptUsage.fromJson(json['usage'] as Map<String, dynamic>)
+          : null,
+      languages: (json['languages'] as List<dynamic>?)
+          ?.map(
+            (e) => TranscriptionLanguage.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
     );
   }
 
@@ -632,8 +658,15 @@ class InputAudioTranscriptionCompletedEvent implements RealtimeEvent {
   /// The complete transcript.
   final String transcript;
 
-  /// Token usage information.
-  final Map<String, dynamic>? usage;
+  /// Billed usage for this transcription.
+  ///
+  /// Tokens ([TranscriptTextUsageTokens]) for `gpt-4o-transcribe`-class
+  /// models, duration ([TranscriptTextUsageDuration]) for Whisper-class
+  /// models.
+  final TranscriptUsage? usage;
+
+  /// The languages detected in the input audio.
+  final List<TranscriptionLanguage>? languages;
 
   @override
   Map<String, dynamic> toJson() => {
@@ -642,7 +675,9 @@ class InputAudioTranscriptionCompletedEvent implements RealtimeEvent {
     'item_id': itemId,
     'content_index': contentIndex,
     'transcript': transcript,
-    if (usage != null) 'usage': usage,
+    if (usage != null) 'usage': usage!.toJson(),
+    if (languages != null)
+      'languages': languages!.map((l) => l.toJson()).toList(),
   };
 
   @override

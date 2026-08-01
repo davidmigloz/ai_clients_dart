@@ -11,6 +11,7 @@ export 'chat_resource.dart';
 export 'chatkit_resource.dart';
 export 'completions_resource.dart';
 export 'containers_resource.dart';
+export 'content_provenance_checks_resource.dart';
 export 'conversations_resource.dart';
 export 'embeddings_resource.dart';
 export 'evals_resource.dart';

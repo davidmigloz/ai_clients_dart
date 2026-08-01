@@ -1577,9 +1577,24 @@
             ],
             "type": "string"
           },
+          "keywords": {
+            "description": "Words or phrases to guide transcription of the input audio. Supported by `gpt-transcribe` and `gpt-live-transcribe`.\n",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "language": {
             "description": "The language of the input audio. Supplying the input language in\n[ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) (e.g. `en`) format\nwill improve accuracy and latency.\n",
             "type": "string"
+          },
+          "languages": {
+            "description": "Possible languages of the input audio, in [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) format. Supported by `gpt-transcribe` and `gpt-live-transcribe`.\n",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
           },
           "model": {
             "anyOf": [
@@ -1589,6 +1604,8 @@
               {
                 "enum": [
                   "whisper-1",
+                  "gpt-transcribe",
+                  "gpt-live-transcribe",
                   "gpt-4o-mini-transcribe",
                   "gpt-4o-mini-transcribe-2025-12-15",
                   "gpt-4o-transcribe",
@@ -1598,7 +1615,7 @@
                 "type": "string"
               }
             ],
-            "description": "The model to use for transcription. Current options are `whisper-1`, `gpt-4o-mini-transcribe`, `gpt-4o-mini-transcribe-2025-12-15`, `gpt-4o-transcribe`, `gpt-4o-transcribe-diarize`, and `gpt-realtime-whisper`. Use `gpt-4o-transcribe-diarize` when you need diarization with speaker labels.\n"
+            "description": "The model to use for transcription. Current options are `whisper-1`, `gpt-transcribe`, `gpt-live-transcribe`, `gpt-4o-mini-transcribe`, `gpt-4o-mini-transcribe-2025-12-15`, `gpt-4o-transcribe`, `gpt-4o-transcribe-diarize`, and `gpt-realtime-whisper`. Use `gpt-4o-transcribe-diarize` when you need diarization with speaker labels.\n"
           },
           "prompt": {
             "description": "An optional text to guide the model's style or continue a previous audio\nsegment.\nFor `whisper-1`, the [prompt is a list of keywords](https://platform.openai.com/docs/guides/speech-to-text#prompting).\nFor `gpt-4o-transcribe` models (excluding `gpt-4o-transcribe-diarize`), the prompt is a free text string, for example \"expect words related to technology\".\nPrompt is not supported with `gpt-realtime-whisper` in GA Realtime sessions.\n",
@@ -1613,6 +1630,14 @@
             "description": "The language of the input audio.\n",
             "type": "string"
           },
+          "languages": {
+            "description": "The possible input audio languages configured for transcription, in [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) format.\n",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
           "model": {
             "anyOf": [
               {
@@ -1621,6 +1646,8 @@
               {
                 "enum": [
                   "whisper-1",
+                  "gpt-transcribe",
+                  "gpt-live-transcribe",
                   "gpt-4o-mini-transcribe",
                   "gpt-4o-mini-transcribe-2025-12-15",
                   "gpt-4o-transcribe",
@@ -1630,7 +1657,7 @@
                 "type": "string"
               }
             ],
-            "description": "The model used for transcription. Current options are `whisper-1`, `gpt-4o-mini-transcribe`, `gpt-4o-mini-transcribe-2025-12-15`, `gpt-4o-transcribe`, `gpt-4o-transcribe-diarize`, and `gpt-realtime-whisper`.\n"
+            "description": "The model used for transcription. Current options are `whisper-1`, `gpt-transcribe`, `gpt-live-transcribe`, `gpt-4o-mini-transcribe`, `gpt-4o-mini-transcribe-2025-12-15`, `gpt-4o-transcribe`, `gpt-4o-transcribe-diarize`, and `gpt-realtime-whisper`.\n"
           },
           "prompt": {
             "description": "The prompt configured for input audio transcription, when present.\n",
@@ -2902,7 +2929,91 @@
           "service_account.deleted",
           "user.added",
           "user.updated",
-          "user.deleted"
+          "user.deleted",
+          "tenant.metadata.updated",
+          "tenant.microsoft_entra_mapping.upserted",
+          "tenant.microsoft_entra_mapping.deleted",
+          "tenant.workload_identity.provider.created",
+          "tenant.workload_identity.provider.updated",
+          "tenant.workload_identity.provider.archived",
+          "tenant.workload_identity.mapping.created",
+          "tenant.workload_identity.mapping.updated",
+          "tenant.workload_identity.mapping.archived",
+          "tenant.workload_identity.binding.created",
+          "tenant.workload_identity.principal.provisioned",
+          "tenant.admin_api_key.created",
+          "tenant.admin_api_key.updated",
+          "tenant.admin_api_key.deleted",
+          "tenant.project_api_key.created",
+          "tenant.chatgpt_access_token.revoked",
+          "tenant.migration.completed",
+          "tenant.sso.migrated",
+          "tenant.domains.migrated",
+          "tenant.sso_connection.created",
+          "tenant.sso_connection.updated",
+          "tenant.sso_connection.deleted",
+          "tenant.sso_connection.setup.started",
+          "tenant.policy.created",
+          "tenant.policy.updated",
+          "tenant.policy.deleted",
+          "tenant.policy.attached",
+          "tenant.policy.detached",
+          "tenant.principal_authentication_policy.resolved",
+          "tenant.scim.setup.started",
+          "tenant.scim.deletion.requested",
+          "tenant.scim.directory.created",
+          "tenant.product_access_policy.updated",
+          "tenant.resource_share_grant.created",
+          "tenant.resource_share_grant.updated",
+          "tenant.resource_share_grant.accepted",
+          "tenant.resource_share_grant.declined",
+          "tenant.resource_share_grant.revoked",
+          "tenant.resource_share_grant.deleted",
+          "tenant.service_account.updated",
+          "tenant.service_account.deleted",
+          "tenant.service_account.token.revoked",
+          "tenant.billing.overage_limit.updated",
+          "tenant.billing.alerts.updated",
+          "tenant.billing.info.updated",
+          "tenant.usage_limit.workspace.updated",
+          "tenant.usage_limit.group.updated",
+          "tenant.usage_limit.user.updated",
+          "tenant.usage_limit.increase_request.updated",
+          "tenant.usage_limit.increase_request.resolved",
+          "tenant.group.created",
+          "tenant.group.updated",
+          "tenant.group.deleted",
+          "tenant.group.member.added",
+          "tenant.group.member.removed",
+          "tenant.migration_rollout.status.updated",
+          "tenant.migration_rollout.tier.updated",
+          "tenant.role.metadata.updated",
+          "tenant.custom_role.created",
+          "tenant.custom_role.updated",
+          "tenant.custom_role.deleted",
+          "tenant.role_assignment.created",
+          "tenant.role_assignment.deleted",
+          "tenant.resource_role_assignment.created",
+          "tenant.resource_role_assignment.deleted",
+          "tenant.resource_access.updated",
+          "tenant.resource_access.deleted",
+          "tenant.session_policy.created",
+          "tenant.session_policy.updated",
+          "tenant.session_policy.deleted",
+          "tenant.session_revocation.started",
+          "tenant.third_party_app_policy.updated",
+          "tenant.user.added",
+          "tenant.user.updated",
+          "tenant.user.removed",
+          "tenant.user.looked_up",
+          "tenant.user.invited",
+          "tenant.membership.revoked",
+          "tenant.api_organization_invite.upserted",
+          "tenant.api_organization_invite.deleted",
+          "tenant.chatgpt_workspace_invite.upserted",
+          "tenant.membership.accepted",
+          "tenant.membership.declined",
+          "tenant.workspace_invite_email_settings.updated"
         ],
         "type": "string"
       },
@@ -4524,7 +4635,7 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/BetaServiceTierEnum",
-                "description": "The service tier to use for this request."
+                "description": "Specifies the processing type used for serving the request.   - If set to 'auto', then the request will be processed with the service tier configured in the Project settings. Unless otherwise configured, the Project will use 'default'.   - If set to 'default', then the request will be processed with the standard pricing and performance for the selected model.   - If set to '[flex](https://platform.openai.com/docs/guides/flex-processing)', then the request will be processed with the Flex Processing service tier.   - To opt-in to [Fast mode](/api/docs/guides/fast-mode) at the request level, include the `service_tier=fast` or `service_tier=priority` parameter for Responses or Chat Completions. The response will show `service_tier=priority` regardless of if you specify `service_tier=fast` or `priority` in your request.   - When not set, the default behavior is 'auto'.\n  When the `service_tier` parameter is set, the response body will include the `service_tier` value based on the processing mode actually used to serve the request. This response value may be different from the value set in the parameter."
               },
               {
                 "type": "null"
@@ -10016,9 +10127,16 @@
             "$ref": "#/components/schemas/BetaMetadata"
           },
           "prompt_cache_key": {
-            "description": "Used by OpenAI to cache responses for similar requests to optimize your cache hit rates. Replaces the `user` field. [Learn more](https://platform.openai.com/docs/guides/prompt-caching).\n",
-            "example": "prompt-cache-key-1234",
-            "type": "string"
+            "anyOf": [
+              {
+                "description": "Used by OpenAI to cache responses for similar requests to optimize your cache hit rates. Replaces the `user` field. [Learn more](https://platform.openai.com/docs/guides/prompt-caching).\n",
+                "example": "prompt-cache-key-1234",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "prompt_cache_retention": {
             "anyOf": [
@@ -10037,10 +10155,17 @@
             "deprecated": true
           },
           "safety_identifier": {
-            "description": "A stable identifier used to help detect users of your application that may be violating OpenAI's usage policies.\nThe IDs should be a string that uniquely identifies each user, with a maximum length of 64 characters. We recommend hashing their username or email address, in order to avoid sending us any identifying information. [Learn more](https://platform.openai.com/docs/guides/safety-best-practices#safety-identifiers).\n",
-            "example": "safety-identifier-1234",
-            "maxLength": 64,
-            "type": "string"
+            "anyOf": [
+              {
+                "description": "A stable identifier used to help detect users of your application that may be violating OpenAI's usage policies.\nThe IDs should be a string that uniquely identifies each user, with a maximum length of 64 characters. We recommend hashing their username or email address, in order to avoid sending us any identifying information. [Learn more](https://platform.openai.com/docs/guides/safety-best-practices#safety-identifiers).\n",
+                "example": "safety-identifier-1234",
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "service_tier": {
             "$ref": "#/components/schemas/BetaServiceTier"
@@ -10914,27 +11039,24 @@
       "BetaOutputTextContentParam": {
         "properties": {
           "annotations": {
-            "anyOf": [
-              {
-                "items": {
+            "description": "Citations associated with the text content.",
+            "items": {
+              "anyOf": [
+                {
                   "$ref": "#/components/schemas/BetaFileCitationParam"
                 },
-                "type": "array"
-              },
-              {
-                "items": {
+                {
                   "$ref": "#/components/schemas/BetaUrlCitationParam"
                 },
-                "type": "array"
-              },
-              {
-                "items": {
+                {
                   "$ref": "#/components/schemas/BetaContainerFileCitationParam"
-                },
-                "type": "array"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "type"
               }
-            ],
-            "description": "Citations associated with the text content."
+            },
+            "type": "array"
           },
           "text": {
             "description": "The text content.",
@@ -11392,7 +11514,7 @@
           "context": {
             "anyOf": [
               {
-                "description": "Controls which reasoning items are rendered back to the model on later turns.\nWhen returned on a response, this is the effective reasoning context mode\nused for the response.\n",
+                "description": "Controls which reasoning items are rendered back to the model on later turns.\nIf omitted or set to `auto`, the model determines the context mode. The\n`gpt-5.6` model family defaults to `all_turns`; earlier models default to\n`current_turn`.\n\nWhen returned on a response, this is the effective reasoning context mode\nused for the response.\n",
                 "enum": [
                   "auto",
                   "current_turn",
@@ -11494,7 +11616,7 @@
           "encrypted_content": {
             "anyOf": [
               {
-                "description": "The encrypted content of the reasoning item - populated when a response is\ngenerated with `reasoning.encrypted_content` in the `include` parameter.\n",
+                "description": "The encrypted content of the reasoning item. This is populated by default\nfor reasoning items returned by `POST /v1/responses` and WebSocket\n`response.create` requests.\n",
                 "type": "string"
               },
               {
@@ -12569,6 +12691,7 @@
           "server_error",
           "rate_limit_exceeded",
           "invalid_prompt",
+          "data_residency_mismatch",
           "bio_policy",
           "vector_store_timeout",
           "invalid_image",
@@ -15378,13 +15501,14 @@
         "anyOf": [
           {
             "default": "auto",
-            "description": "Specifies the processing type used for serving the request.\n  - If set to 'auto', then the request will be processed with the service tier configured in the Project settings. Unless otherwise configured, the Project will use 'default'.\n  - If set to 'default', then the request will be processed with the standard pricing and performance for the selected model.\n  - If set to '[flex](https://platform.openai.com/docs/guides/flex-processing)' or '[priority](https://openai.com/api-priority-processing/)', then the request will be processed with the corresponding service tier.\n  - When not set, the default behavior is 'auto'.\n\n  When the `service_tier` parameter is set, the response body will include the `service_tier` value based on the processing mode actually used to serve the request. This response value may be different from the value set in the parameter.\n",
+            "description": "Specifies the processing type used for serving the request.\n  - If set to 'auto', then the request will be processed with the service tier configured in the Project settings. Unless otherwise configured, the Project will use 'default'.\n  - If set to 'default', then the request will be processed with the standard pricing and performance for the selected model.\n  - If set to '[flex](https://platform.openai.com/docs/guides/flex-processing)', then the request will be processed with the Flex Processing service tier.\n  - To opt-in to [Fast mode](/api/docs/guides/fast-mode) at the request level, include the `service_tier=fast` or `service_tier=priority` parameter for Responses or Chat Completions. The response will show `service_tier=priority` regardless of if you specify `service_tier=fast` or `priority` in your request.\n  - When not set, the default behavior is 'auto'.\n\n  When the `service_tier` parameter is set, the response body will include the `service_tier` value based on the processing mode actually used to serve the request. This response value may be different from the value set in the parameter.\n",
             "enum": [
               "auto",
               "default",
               "flex",
               "scale",
-              "priority"
+              "priority",
+              "fast"
             ],
             "type": "string"
           },
@@ -15397,6 +15521,7 @@
         "enum": [
           "auto",
           "default",
+          "fast",
           "flex",
           "priority"
         ],
@@ -16518,7 +16643,7 @@
         "anyOf": [
           {
             "default": "medium",
-            "description": "Constrains the verbosity of the model's response. Lower values will result in\nmore concise responses, while higher values will result in more verbose responses.\nCurrently supported values are `low`, `medium`, and `high`.\n",
+            "description": "Constrains the verbosity of the model's response. Lower values will result in\nmore concise responses, while higher values will result in more verbose responses.\nCurrently supported values are `low`, `medium`, and `high`. The default is\n`medium`.\n",
             "enum": [
               "low",
               "medium",
@@ -16917,6 +17042,78 @@
         ],
         "type": "object",
         "x-oai-beta": "responses_multi_agent=v1"
+      },
+      "C2PAProvenanceResult": {
+        "properties": {
+          "generated_at": {
+            "anyOf": [
+              {
+                "description": "The UTC RFC 3339 timestamp recorded by the provenance signal for when the asset was generated, when available.",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "issuer": {
+            "anyOf": [
+              {
+                "description": "The C2PA manifest issuer, when available.",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "model": {
+            "anyOf": [
+              {
+                "description": "The OpenAI model recorded by the provenance signal, when available.",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/ProvenanceDetectionResultApi",
+            "description": "Whether a supported OpenAI C2PA provenance signal was detected.\nIf `not_detected`, it means the tool did not find supported signals in the uploaded file. The content could still have been generated by OpenAI if the metadata was stripped or has evidence of tampering, the watermark was degraded, it comes from a legacy generation model, or it was created before provenance signals were available. Content could also still be AI-generated by another company's model, which the tool currently does not detect."
+          },
+          "type": {
+            "default": "c2pa",
+            "description": "The provenance signal type. Always `c2pa`.",
+            "enum": [
+              "c2pa"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          },
+          "validation_state": {
+            "$ref": "#/components/schemas/C2PAValidationStateApi",
+            "description": "The validation status of the C2PA manifest in the uploaded image."
+          }
+        },
+        "required": [
+          "type",
+          "outcome",
+          "validation_state",
+          "issuer",
+          "model",
+          "generated_at"
+        ],
+        "type": "object"
+      },
+      "C2PAValidationStateApi": {
+        "enum": [
+          "trusted",
+          "valid",
+          "invalid",
+          "not_present"
+        ],
+        "type": "string"
       },
       "CallableToolAllowedCaller": {
         "enum": [
@@ -19526,7 +19723,7 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ServiceTierEnum",
-                "description": "The service tier to use for this request."
+                "description": "Specifies the processing type used for serving the request.   - If set to 'auto', then the request will be processed with the service tier configured in the Project settings. Unless otherwise configured, the Project will use 'default'.   - If set to 'default', then the request will be processed with the standard pricing and performance for the selected model.   - If set to '[flex](https://platform.openai.com/docs/guides/flex-processing)', then the request will be processed with the Flex Processing service tier.   - To opt-in to [Fast mode](/api/docs/guides/fast-mode) at the request level, include the `service_tier=fast` or `service_tier=priority` parameter for Responses or Chat Completions. The response will show `service_tier=priority` regardless of if you specify `service_tier=fast` or `priority` in your request.   - When not set, the default behavior is 'auto'.\n  When the `service_tier` parameter is set, the response body will include the `service_tier` value based on the processing mode actually used to serve the request. This response value may be different from the value set in the parameter."
               },
               {
                 "type": "null"
@@ -21353,6 +21550,47 @@
         ],
         "type": "object"
       },
+      "CreateBatchRequest": {
+        "properties": {
+          "completion_window": {
+            "description": "The time frame within which the batch should be processed. Currently only `24h` is supported.",
+            "enum": [
+              "24h"
+            ],
+            "type": "string"
+          },
+          "endpoint": {
+            "description": "The endpoint to be used for all requests in the batch. Currently `/v1/responses`, `/v1/chat/completions`, `/v1/embeddings`, `/v1/completions`, `/v1/moderations`, `/v1/images/generations`, `/v1/images/edits`, and `/v1/videos` are supported. Note that `/v1/embeddings` batches are also restricted to a maximum of 50,000 embedding inputs across all requests in the batch.",
+            "enum": [
+              "/v1/responses",
+              "/v1/chat/completions",
+              "/v1/embeddings",
+              "/v1/completions",
+              "/v1/moderations",
+              "/v1/images/generations",
+              "/v1/images/edits",
+              "/v1/videos"
+            ],
+            "type": "string"
+          },
+          "input_file_id": {
+            "description": "The ID of an uploaded file that contains requests for the new batch.\n\nSee [upload file](https://platform.openai.com/docs/api-reference/files/create) for how to upload a file.\n\nYour input file must be formatted as a [JSONL file](https://platform.openai.com/docs/api-reference/batch/request-input), and must be uploaded with the purpose `batch`. The file can contain up to 50,000 requests, and can be up to 200 MB in size.\n",
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          },
+          "output_expires_after": {
+            "$ref": "#/components/schemas/BatchFileExpirationAfter"
+          }
+        },
+        "required": [
+          "input_file_id",
+          "endpoint",
+          "completion_window"
+        ],
+        "type": "object"
+      },
       "CreateChatCompletionRequest": {
         "allOf": [
           {
@@ -22319,6 +22557,19 @@
           }
         },
         "required": [],
+        "type": "object"
+      },
+      "CreateContentProvenanceBody": {
+        "properties": {
+          "file": {
+            "description": "The image or audio file to check for supported OpenAI provenance signals.",
+            "format": "binary",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
         "type": "object"
       },
       "CreateConversationBody": {
@@ -24340,6 +24591,25 @@
           "name": "The moderation object"
         }
       },
+      "CreateProjectServiceAccountApiKeyBody": {
+        "description": "The service account API key create request payload.",
+        "properties": {
+          "name": {
+            "description": "API key name.",
+            "type": "string"
+          },
+          "scopes": {
+            "description": "API key scopes.",
+            "items": {
+              "description": "API key scope.",
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [],
+        "type": "object"
+      },
       "CreateResponse": {
         "allOf": [
           {
@@ -25446,6 +25716,13 @@
             },
             "type": "array"
           },
+          "keywords": {
+            "description": "Words or phrases to guide transcription of the input audio. Supported by `gpt-transcribe`.\n",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "known_speaker_names": {
             "description": "Optional list of speaker names that correspond to the audio samples provided in `known_speaker_references[]`. Each entry should be a short identifier (for example `customer` or `agent`). Up to 4 speakers are supported.\n",
             "items": {
@@ -25466,6 +25743,14 @@
             "description": "The language of the input audio. Supplying the input language in [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) (e.g. `en`) format will improve accuracy and latency.\n",
             "type": "string"
           },
+          "languages": {
+            "description": "Possible languages of the input audio, in [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) format. Supported by `gpt-transcribe`.\n",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
           "model": {
             "anyOf": [
               {
@@ -25474,6 +25759,7 @@
               {
                 "enum": [
                   "whisper-1",
+                  "gpt-transcribe",
                   "gpt-4o-transcribe",
                   "gpt-4o-mini-transcribe",
                   "gpt-4o-mini-transcribe-2025-12-15",
@@ -25484,7 +25770,7 @@
                 "x-stainless-nominal": false
               }
             ],
-            "description": "ID of the model to use. The options are `gpt-4o-transcribe`, `gpt-4o-mini-transcribe`, `gpt-4o-mini-transcribe-2025-12-15`, `whisper-1` (which is powered by our open source Whisper V2 model), and `gpt-4o-transcribe-diarize`.\n",
+            "description": "ID of the model to use. The options are `gpt-transcribe`, `gpt-4o-transcribe`, `gpt-4o-mini-transcribe`, `gpt-4o-mini-transcribe-2025-12-15`, `whisper-1` (which is powered by our open source Whisper V2 model), and `gpt-4o-transcribe-diarize`.\n",
             "example": "gpt-4o-transcribe",
             "x-oaiTypeLabel": "string"
           },
@@ -25594,6 +25880,13 @@
       "CreateTranscriptionResponseJson": {
         "description": "Represents a transcription response returned by model, based on the provided input.",
         "properties": {
+          "languages": {
+            "description": "The languages detected in the audio. Returned by `gpt-transcribe`. An empty array indicates that no language could be reliably detected.\n",
+            "items": {
+              "$ref": "#/components/schemas/TranscriptionLanguage"
+            },
+            "type": "array"
+          },
           "logprobs": {
             "description": "The log probabilities of the tokens in the transcription. Only returned with the models `gpt-4o-transcribe` and `gpt-4o-mini-transcribe` if `logprobs` is added to the `include` array.\n",
             "items": {
@@ -36553,9 +36846,16 @@
             "$ref": "#/components/schemas/Metadata"
           },
           "prompt_cache_key": {
-            "description": "Used by OpenAI to cache responses for similar requests to optimize your cache hit rates. Replaces the `user` field. [Learn more](https://platform.openai.com/docs/guides/prompt-caching).\n",
-            "example": "prompt-cache-key-1234",
-            "type": "string"
+            "anyOf": [
+              {
+                "description": "Used by OpenAI to cache responses for similar requests to optimize your cache hit rates. Replaces the `user` field. [Learn more](https://platform.openai.com/docs/guides/prompt-caching).\n",
+                "example": "prompt-cache-key-1234",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "prompt_cache_retention": {
             "anyOf": [
@@ -36574,10 +36874,17 @@
             "deprecated": true
           },
           "safety_identifier": {
-            "description": "A stable identifier used to help detect users of your application that may be violating OpenAI's usage policies.\nThe IDs should be a string that uniquely identifies each user, with a maximum length of 64 characters. We recommend hashing their username or email address, in order to avoid sending us any identifying information. [Learn more](https://platform.openai.com/docs/guides/safety-best-practices#safety-identifiers).\n",
-            "example": "safety-identifier-1234",
-            "maxLength": 64,
-            "type": "string"
+            "anyOf": [
+              {
+                "description": "A stable identifier used to help detect users of your application that may be violating OpenAI's usage policies.\nThe IDs should be a string that uniquely identifies each user, with a maximum length of 64 characters. We recommend hashing their username or email address, in order to avoid sending us any identifying information. [Learn more](https://platform.openai.com/docs/guides/safety-best-practices#safety-identifiers).\n",
+                "example": "safety-identifier-1234",
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "service_tier": {
             "$ref": "#/components/schemas/ServiceTier"
@@ -37698,6 +38005,67 @@
         ],
         "type": "object"
       },
+      "OrganizationSpendLimitDeletedResource": {
+        "description": "Confirmation payload returned after deleting an organization hard spend limit.",
+        "properties": {
+          "deleted": {
+            "description": "Whether the hard spend limit was deleted.",
+            "type": "boolean"
+          },
+          "object": {
+            "default": "organization.spend_limit.deleted",
+            "description": "The object type, which is always `organization.spend_limit.deleted`.",
+            "enum": [
+              "organization.spend_limit.deleted"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "object",
+          "deleted"
+        ],
+        "type": "object"
+      },
+      "OrganizationSpendLimitResource": {
+        "description": "Represents a hard spend limit configured at the organization level.",
+        "properties": {
+          "currency": {
+            "$ref": "#/components/schemas/SpendLimitCurrency",
+            "description": "The currency for the threshold amount. Currently, only `USD` is supported."
+          },
+          "enforcement": {
+            "$ref": "#/components/schemas/SpendLimitEnforcement",
+            "description": "The current enforcement state of the hard spend limit."
+          },
+          "interval": {
+            "$ref": "#/components/schemas/SpendLimitInterval",
+            "description": "The time interval for evaluating spend against the threshold. Currently, only `month` is supported."
+          },
+          "object": {
+            "default": "organization.spend_limit",
+            "description": "The object type, which is always `organization.spend_limit`.",
+            "enum": [
+              "organization.spend_limit"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          },
+          "threshold_amount": {
+            "description": "The hard spend limit amount, in cents.",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "object",
+          "threshold_amount",
+          "currency",
+          "interval",
+          "enforcement"
+        ],
+        "type": "object"
+      },
       "OtherChunkingStrategyResponseParam": {
         "additionalProperties": false,
         "description": "This is returned when the chunking strategy is unknown. Typically, this is because the file was indexed before the `chunking_strategy` concept was introduced in the API.",
@@ -38401,6 +38769,14 @@
             },
             "type": "object"
           },
+          "owner_project_access": {
+            "description": "Whether the API key's owner currently has effective access to the project.",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "type": "string"
+          },
           "redacted_value": {
             "description": "The redacted value of the API key",
             "type": "string"
@@ -38413,11 +38789,12 @@
           "created_at",
           "last_used_at",
           "id",
+          "owner_project_access",
           "owner"
         ],
         "type": "object",
         "x-oaiMeta": {
-          "example": "{\n    \"object\": \"organization.project.api_key\",\n    \"redacted_value\": \"sk-abc...def\",\n    \"name\": \"My API Key\",\n    \"created_at\": 1711471533,\n    \"last_used_at\": 1711471534,\n    \"id\": \"key_abc\",\n    \"owner\": {\n        \"type\": \"user\",\n        \"user\": {\n            \"id\": \"user_abc\",\n            \"name\": \"First Last\",\n            \"email\": \"user@example.com\",\n            \"role\": \"owner\",\n            \"created_at\": 1711471533\n        }\n    }\n}\n",
+          "example": "{\n    \"object\": \"organization.project.api_key\",\n    \"redacted_value\": \"sk-abc...def\",\n    \"name\": \"My API Key\",\n    \"created_at\": 1711471533,\n    \"last_used_at\": 1711471534,\n    \"id\": \"key_abc\",\n    \"owner_project_access\": \"active\",\n    \"owner\": {\n        \"type\": \"user\",\n        \"user\": {\n            \"id\": \"user_abc\",\n            \"name\": \"First Last\",\n            \"email\": \"user@example.com\",\n            \"role\": \"owner\",\n            \"created_at\": 1711471533\n        }\n    }\n}\n",
           "name": "The project API key object"
         }
       },
@@ -39127,10 +39504,11 @@
             "x-stainless-const": true
           },
           "role": {
-            "description": "`owner` or `member`",
+            "description": "`owner`, `member`, or `none`",
             "enum": [
               "owner",
-              "member"
+              "member",
+              "none"
             ],
             "type": "string"
           }
@@ -39183,6 +39561,17 @@
       },
       "ProjectServiceAccountCreateRequest": {
         "properties": {
+          "create_service_account_only": {
+            "anyOf": [
+              {
+                "description": "Create the service account without default roles or an API key.",
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "name": {
             "description": "The name of the service account being created.",
             "type": "string"
@@ -39223,12 +39612,12 @@
             "x-stainless-const": true
           },
           "role": {
-            "description": "Service accounts can only have one role of type `member`",
+            "description": "Service accounts created with default project membership have role `member`. Accounts created with `create_service_account_only` have role `none`.\n",
             "enum": [
-              "member"
+              "member",
+              "none"
             ],
-            "type": "string",
-            "x-stainless-const": true
+            "type": "string"
           }
         },
         "required": [
@@ -39439,6 +39828,67 @@
           "first_id",
           "last_id",
           "has_more"
+        ],
+        "type": "object"
+      },
+      "ProjectSpendLimitDeletedResource": {
+        "description": "Confirmation payload returned after deleting a project hard spend limit.",
+        "properties": {
+          "deleted": {
+            "description": "Whether the hard spend limit was deleted.",
+            "type": "boolean"
+          },
+          "object": {
+            "default": "project.spend_limit.deleted",
+            "description": "The object type, which is always `project.spend_limit.deleted`.",
+            "enum": [
+              "project.spend_limit.deleted"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "object",
+          "deleted"
+        ],
+        "type": "object"
+      },
+      "ProjectSpendLimitResource": {
+        "description": "Represents a hard spend limit configured at the project level.",
+        "properties": {
+          "currency": {
+            "$ref": "#/components/schemas/SpendLimitCurrency",
+            "description": "The currency for the threshold amount. Currently, only `USD` is supported."
+          },
+          "enforcement": {
+            "$ref": "#/components/schemas/SpendLimitEnforcement",
+            "description": "The current enforcement state of the hard spend limit."
+          },
+          "interval": {
+            "$ref": "#/components/schemas/SpendLimitInterval",
+            "description": "The time interval for evaluating spend against the threshold. Currently, only `month` is supported."
+          },
+          "object": {
+            "default": "project.spend_limit",
+            "description": "The object type, which is always `project.spend_limit`.",
+            "enum": [
+              "project.spend_limit"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          },
+          "threshold_amount": {
+            "description": "The hard spend limit amount, in cents.",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "object",
+          "threshold_amount",
+          "currency",
+          "interval",
+          "enforcement"
         ],
         "type": "object"
       },
@@ -39780,6 +40230,55 @@
           "30m"
         ],
         "type": "string"
+      },
+      "ProvenanceCheckObject": {
+        "enum": [
+          "content_provenance_check"
+        ],
+        "type": "string"
+      },
+      "ProvenanceDetectionResultApi": {
+        "enum": [
+          "detected",
+          "not_detected"
+        ],
+        "type": "string"
+      },
+      "ProvenanceResource": {
+        "properties": {
+          "created_at": {
+            "description": "The Unix timestamp, in seconds, when the provenance check was created.",
+            "format": "unixtime",
+            "type": "integer"
+          },
+          "object": {
+            "$ref": "#/components/schemas/ProvenanceCheckObject",
+            "description": "The object type. Always `content_provenance_check` for this endpoint."
+          },
+          "results": {
+            "description": "The provenance results that apply to the uploaded file. Image results include C2PA and SynthID; audio results include SynthID.",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/C2PAProvenanceResult"
+                },
+                {
+                  "$ref": "#/components/schemas/SynthIDProvenanceResult"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "type"
+              }
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "object",
+          "created_at",
+          "results"
+        ],
+        "type": "object"
       },
       "PublicAssignOrganizationGroupRoleBody": {
         "description": "Request payload for assigning a role to a group or user.",
@@ -40750,6 +41249,13 @@
           "item_id": {
             "description": "The ID of the user message item containing the audio.",
             "type": "string"
+          },
+          "languages": {
+            "description": "The languages detected in the audio. Returned by `gpt-transcribe`. An empty array indicates that no language could be reliably detected.\n",
+            "items": {
+              "$ref": "#/components/schemas/TranscriptionLanguage"
+            },
+            "type": "array"
           },
           "logprobs": {
             "anyOf": [
@@ -44371,6 +44877,13 @@
           "item_id": {
             "description": "The ID of the item containing the audio that is being transcribed.",
             "type": "string"
+          },
+          "languages": {
+            "description": "The languages detected in the audio. Returned by `gpt-transcribe`. An empty array indicates that no language could be reliably detected.\n",
+            "items": {
+              "$ref": "#/components/schemas/TranscriptionLanguage"
+            },
+            "type": "array"
           },
           "logprobs": {
             "anyOf": [
@@ -48330,7 +48843,7 @@
           "context": {
             "anyOf": [
               {
-                "description": "Controls which reasoning items are rendered back to the model on later turns.\nWhen returned on a response, this is the effective reasoning context mode\nused for the response.\n",
+                "description": "Controls which reasoning items are rendered back to the model on later turns.\nIf omitted or set to `auto`, the model determines the context mode. The\n`gpt-5.6` model family defaults to `all_turns`; earlier models default to\n`current_turn`.\n\nWhen returned on a response, this is the effective reasoning context mode\nused for the response.\n",
                 "enum": [
                   "auto",
                   "current_turn",
@@ -48421,7 +48934,7 @@
           "encrypted_content": {
             "anyOf": [
               {
-                "description": "The encrypted content of the reasoning item - populated when a response is\ngenerated with `reasoning.encrypted_content` in the `include` parameter.\n",
+                "description": "The encrypted content of the reasoning item. This is populated by default\nfor reasoning items returned by `POST /v1/responses` and WebSocket\n`response.create` requests.\n",
                 "type": "string"
               },
               {
@@ -49331,6 +49844,7 @@
           "server_error",
           "rate_limit_exceeded",
           "invalid_prompt",
+          "data_residency_mismatch",
           "bio_policy",
           "vector_store_timeout",
           "invalid_image",
@@ -53673,17 +54187,56 @@
         ],
         "type": "string"
       },
+      "ServiceAccountApiKeyBody": {
+        "properties": {
+          "created_at": {
+            "description": "The Unix timestamp (in seconds) when the API key was created.",
+            "format": "unixtime",
+            "type": "integer"
+          },
+          "id": {
+            "description": "The identifier of the API key.",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the API key.",
+            "type": "string"
+          },
+          "object": {
+            "default": "organization.project.service_account.api_key",
+            "description": "The object type, which is always `organization.project.service_account.api_key`",
+            "enum": [
+              "organization.project.service_account.api_key"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          },
+          "value": {
+            "description": "The unredacted API key value.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "object",
+          "value",
+          "name",
+          "created_at",
+          "id"
+        ],
+        "type": "object"
+      },
       "ServiceTier": {
         "anyOf": [
           {
             "default": "auto",
-            "description": "Specifies the processing type used for serving the request.\n  - If set to 'auto', then the request will be processed with the service tier configured in the Project settings. Unless otherwise configured, the Project will use 'default'.\n  - If set to 'default', then the request will be processed with the standard pricing and performance for the selected model.\n  - If set to '[flex](https://platform.openai.com/docs/guides/flex-processing)' or '[priority](https://openai.com/api-priority-processing/)', then the request will be processed with the corresponding service tier.\n  - When not set, the default behavior is 'auto'.\n\n  When the `service_tier` parameter is set, the response body will include the `service_tier` value based on the processing mode actually used to serve the request. This response value may be different from the value set in the parameter.\n",
+            "description": "Specifies the processing type used for serving the request.\n  - If set to 'auto', then the request will be processed with the service tier configured in the Project settings. Unless otherwise configured, the Project will use 'default'.\n  - If set to 'default', then the request will be processed with the standard pricing and performance for the selected model.\n  - If set to '[flex](https://platform.openai.com/docs/guides/flex-processing)', then the request will be processed with the Flex Processing service tier.\n  - To opt-in to [Fast mode](/api/docs/guides/fast-mode) at the request level, include the `service_tier=fast` or `service_tier=priority` parameter for Responses or Chat Completions. The response will show `service_tier=priority` regardless of if you specify `service_tier=fast` or `priority` in your request.\n  - When not set, the default behavior is 'auto'.\n\n  When the `service_tier` parameter is set, the response body will include the `service_tier` value based on the processing mode actually used to serve the request. This response value may be different from the value set in the parameter.\n",
             "enum": [
               "auto",
               "default",
               "flex",
               "scale",
-              "priority"
+              "priority",
+              "fast"
             ],
             "type": "string"
           },
@@ -53696,6 +54249,7 @@
         "enum": [
           "auto",
           "default",
+          "fast",
           "flex",
           "priority"
         ],
@@ -54105,6 +54659,59 @@
         ],
         "type": "object"
       },
+      "SpendLimitCurrency": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "enum": [
+              "USD"
+            ],
+            "type": "string"
+          }
+        ]
+      },
+      "SpendLimitEnforcement": {
+        "description": "The current enforcement state of a hard spend limit.",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/SpendLimitEnforcementStatus",
+            "description": "Whether the hard spend limit is currently enforcing."
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "SpendLimitEnforcementStatus": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "enum": [
+              "inactive",
+              "enforcing"
+            ],
+            "type": "string"
+          }
+        ]
+      },
+      "SpendLimitInterval": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "enum": [
+              "month"
+            ],
+            "type": "string"
+          }
+        ]
+      },
       "StaticChunkingStrategy": {
         "additionalProperties": false,
         "properties": {
@@ -54300,6 +54907,52 @@
           "text"
         ],
         "title": "Summary text",
+        "type": "object"
+      },
+      "SynthIDProvenanceResult": {
+        "properties": {
+          "generated_at": {
+            "anyOf": [
+              {
+                "description": "The UTC RFC 3339 timestamp recorded by the provenance signal for when the asset was generated, when available.",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "model": {
+            "anyOf": [
+              {
+                "description": "The OpenAI model recorded by the provenance signal, when available.",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/ProvenanceDetectionResultApi",
+            "description": "Whether a supported OpenAI SynthID watermark was detected.\nIf `not_detected`, it means the tool did not find supported signals in the uploaded file. The content could still have been generated by OpenAI if the metadata was stripped or has evidence of tampering, the watermark was degraded, it comes from a legacy generation model, or it was created before provenance signals were available. Content could also still be AI-generated by another company's model, which the tool currently does not detect."
+          },
+          "type": {
+            "default": "synthid",
+            "description": "The provenance signal type. Always `synthid`.",
+            "enum": [
+              "synthid"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type",
+          "outcome",
+          "model",
+          "generated_at"
+        ],
         "type": "object"
       },
       "TaskGroupItem": {
@@ -55745,6 +56398,13 @@
       "TranscriptTextDoneEvent": {
         "description": "Emitted when the transcription is complete. Contains the complete transcription text. Only emitted when you [create a transcription](https://platform.openai.com/docs/api-reference/audio/create-transcription) with the `Stream` parameter set to `true`.",
         "properties": {
+          "languages": {
+            "description": "The languages detected in the audio. Returned by `gpt-transcribe`. An empty array indicates that no language could be reliably detected.\n",
+            "items": {
+              "$ref": "#/components/schemas/TranscriptionLanguage"
+            },
+            "type": "array"
+          },
           "logprobs": {
             "description": "The log probabilities of the individual tokens in the transcription. Only included if you [create a transcription](https://platform.openai.com/docs/api-reference/audio/create-transcription) with the `include[]` parameter set to `logprobs`.\n",
             "items": {
@@ -55991,6 +56651,19 @@
         ],
         "type": "string"
       },
+      "TranscriptionLanguage": {
+        "description": "A language detected in transcribed audio.",
+        "properties": {
+          "code": {
+            "description": "The code of a language detected in the audio.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "type": "object"
+      },
       "TranscriptionSegment": {
         "properties": {
           "avg_logprob": {
@@ -56191,6 +56864,36 @@
         ],
         "type": "object"
       },
+      "UpdateOrganizationSpendLimitBody": {
+        "description": "Parameters for the hard spend limit you want to create or replace.",
+        "properties": {
+          "currency": {
+            "description": "The currency for the threshold amount. Currently, only `USD` is supported.",
+            "enum": [
+              "USD"
+            ],
+            "type": "string"
+          },
+          "interval": {
+            "description": "The time interval for evaluating spend against the threshold. Currently, only `month` is supported.",
+            "enum": [
+              "month"
+            ],
+            "type": "string"
+          },
+          "threshold_amount": {
+            "description": "The hard spend limit amount, in cents.",
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "threshold_amount",
+          "currency",
+          "interval"
+        ],
+        "type": "object"
+      },
       "UpdateProjectDataRetentionBody": {
         "description": "Parameters for updating project data retention controls.",
         "properties": {
@@ -56228,6 +56931,36 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "UpdateProjectSpendLimitBody": {
+        "description": "Parameters for the hard spend limit you want to create or replace.",
+        "properties": {
+          "currency": {
+            "description": "The currency for the threshold amount. Currently, only `USD` is supported.",
+            "enum": [
+              "USD"
+            ],
+            "type": "string"
+          },
+          "interval": {
+            "description": "The time interval for evaluating spend against the threshold. Currently, only `month` is supported.",
+            "enum": [
+              "month"
+            ],
+            "type": "string"
+          },
+          "threshold_amount": {
+            "description": "The hard spend limit amount, in cents.",
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "threshold_amount",
+          "currency",
+          "interval"
+        ],
         "type": "object"
       },
       "UpdateVectorStoreFileAttributesRequest": {
@@ -56752,15 +57485,43 @@
             ]
           },
           "input_audio_tokens": {
-            "description": "The aggregated number of audio input tokens used, including cached tokens.",
+            "description": "The aggregated number of uncached audio input tokens used.",
+            "type": "integer"
+          },
+          "input_cache_write_tokens": {
+            "description": "The aggregated number of input tokens written to the cache.",
+            "type": "integer"
+          },
+          "input_cached_audio_tokens": {
+            "description": "The aggregated number of cached audio input tokens used.",
+            "type": "integer"
+          },
+          "input_cached_image_tokens": {
+            "description": "The aggregated number of cached image input tokens used.",
+            "type": "integer"
+          },
+          "input_cached_text_tokens": {
+            "description": "The aggregated number of cached text input tokens used.",
             "type": "integer"
           },
           "input_cached_tokens": {
-            "description": "The aggregated number of text input tokens that has been cached from previous requests. For customers subscribe to scale tier, this includes scale tier tokens.",
+            "description": "The aggregated number of cached input tokens used across text, audio, and image inputs. For customers subscribed to Scale Tier, this includes Scale Tier tokens.",
+            "type": "integer"
+          },
+          "input_image_tokens": {
+            "description": "The aggregated number of uncached image input tokens used.",
+            "type": "integer"
+          },
+          "input_text_tokens": {
+            "description": "The aggregated number of uncached text input tokens used, excluding cache-write tokens.",
             "type": "integer"
           },
           "input_tokens": {
-            "description": "The aggregated number of text input tokens used, including cached tokens. For customers subscribe to scale tier, this includes scale tier tokens.",
+            "description": "The aggregated number of input tokens used, including cached and cache-write tokens. This includes text, audio, and image tokens. For customers subscribed to Scale Tier, this includes Scale Tier tokens.",
+            "type": "integer"
+          },
+          "input_uncached_tokens": {
+            "description": "The aggregated number of uncached input tokens used across text, audio, and image inputs, excluding cache-write tokens.",
             "type": "integer"
           },
           "model": {
@@ -56789,8 +57550,16 @@
             "description": "The aggregated number of audio output tokens used.",
             "type": "integer"
           },
+          "output_image_tokens": {
+            "description": "The aggregated number of image output tokens used.",
+            "type": "integer"
+          },
+          "output_text_tokens": {
+            "description": "The aggregated number of text output tokens used.",
+            "type": "integer"
+          },
           "output_tokens": {
-            "description": "The aggregated number of text output tokens used. For customers subscribe to scale tier, this includes scale tier tokens.",
+            "description": "The aggregated number of output tokens used across text, audio, and image outputs. For customers subscribed to Scale Tier, this includes Scale Tier tokens.",
             "type": "integer"
           },
           "project_id": {
@@ -56835,7 +57604,7 @@
         ],
         "type": "object",
         "x-oaiMeta": {
-          "example": "{\n    \"object\": \"organization.usage.completions.result\",\n    \"input_tokens\": 5000,\n    \"output_tokens\": 1000,\n    \"input_cached_tokens\": 4000,\n    \"input_audio_tokens\": 300,\n    \"output_audio_tokens\": 200,\n    \"num_model_requests\": 5,\n    \"project_id\": \"proj_abc\",\n    \"user_id\": \"user-abc\",\n    \"api_key_id\": \"key_abc\",\n    \"model\": \"gpt-4o-mini-2024-07-18\",\n    \"batch\": false,\n    \"service_tier\": \"default\"\n}\n",
+          "example": "{\n    \"object\": \"organization.usage.completions.result\",\n    \"input_tokens\": 5000,\n    \"input_cached_tokens\": 1800,\n    \"input_cache_write_tokens\": 200,\n    \"input_uncached_tokens\": 3000,\n    \"output_tokens\": 1000,\n    \"input_text_tokens\": 2500,\n    \"output_text_tokens\": 800,\n    \"input_cached_text_tokens\": 1500,\n    \"input_audio_tokens\": 300,\n    \"input_cached_audio_tokens\": 100,\n    \"output_audio_tokens\": 100,\n    \"input_image_tokens\": 200,\n    \"input_cached_image_tokens\": 200,\n    \"output_image_tokens\": 100,\n    \"num_model_requests\": 5,\n    \"project_id\": \"proj_abc\",\n    \"user_id\": \"user-abc\",\n    \"api_key_id\": \"key_abc\",\n    \"model\": \"gpt-4o-mini-2024-07-18\",\n    \"batch\": false,\n    \"service_tier\": \"default\"\n}\n",
           "name": "Completions usage object"
         }
       },
@@ -58656,7 +59425,7 @@
         "anyOf": [
           {
             "default": "medium",
-            "description": "Constrains the verbosity of the model's response. Lower values will result in\nmore concise responses, while higher values will result in more verbose responses.\nCurrently supported values are `low`, `medium`, and `high`.\n",
+            "description": "Constrains the verbosity of the model's response. Lower values will result in\nmore concise responses, while higher values will result in more verbose responses.\nCurrently supported values are `low`, `medium`, and `high`. The default is\n`medium`.\n",
             "enum": [
               "low",
               "medium",
@@ -60113,8 +60882,87 @@
           "name": "fine_tuning.job.succeeded"
         }
       },
+      "WebhookLiveCallIncoming": {
+        "description": "Sent when an incoming API SIP session is available for Live acceptance. The\nsame pending session can also emit `realtime.call.incoming`; the first\nsuccessful Realtime or Live accept endpoint selects the runtime surface.\n",
+        "properties": {
+          "created_at": {
+            "description": "The Unix timestamp (in seconds) of when the event was created.\n",
+            "format": "unixtime",
+            "type": "integer"
+          },
+          "data": {
+            "description": "Event data payload.\n",
+            "properties": {
+              "session_id": {
+                "description": "The Transceiver `rtc_...` ID of the pending SIP session. The same\nvalue appears as `call_id` in `realtime.call.incoming`.\n",
+                "type": "string"
+              },
+              "sip_headers": {
+                "description": "Headers from the SIP Invite.\n",
+                "items": {
+                  "description": "A header from the SIP Invite.\n",
+                  "properties": {
+                    "name": {
+                      "description": "Name of the SIP Header.\n",
+                      "type": "string"
+                    },
+                    "value": {
+                      "description": "Value of the SIP Header.\n",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "session_id",
+              "sip_headers"
+            ],
+            "type": "object"
+          },
+          "id": {
+            "description": "The unique ID of the event.\n",
+            "type": "string"
+          },
+          "object": {
+            "description": "The object of the event. Always `event`.\n",
+            "enum": [
+              "event"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          },
+          "type": {
+            "description": "The type of the event. Always `live.call.incoming`.\n",
+            "enum": [
+              "live.call.incoming"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "created_at",
+          "id",
+          "data",
+          "type"
+        ],
+        "title": "live.call.incoming",
+        "type": "object",
+        "x-oaiMeta": {
+          "example": "{\n  \"id\": \"evt_abc123\",\n  \"type\": \"live.call.incoming\",\n  \"created_at\": 1719168000,\n  \"data\": {\n    \"session_id\": \"rtc_479a275623b54bdb9b6fbae2f7cbd408\",\n    \"sip_headers\": [\n      {\"name\": \"Max-Forwards\", \"value\": \"63\"},\n      {\"name\": \"CSeq\", \"value\": \"851287 INVITE\"},\n      {\"name\": \"Content-Type\", \"value\": \"application/sdp\"},\n    ]\n  }\n}\n",
+          "group": "webhook-events",
+          "name": "live.call.incoming"
+        }
+      },
       "WebhookRealtimeCallIncoming": {
-        "description": "Sent when Realtime API Receives a incoming SIP call.\n",
+        "description": "Sent when an incoming API SIP session is available for Realtime acceptance.\nThe same pending session can also emit `live.call.incoming`; the first\nsuccessful Realtime or Live accept endpoint selects the runtime surface.\n",
         "properties": {
           "created_at": {
             "description": "The Unix timestamp (in seconds) of when the model response was completed.\n",
@@ -60125,7 +60973,7 @@
             "description": "Event data payload.\n",
             "properties": {
               "call_id": {
-                "description": "The unique ID of this call.\n",
+                "description": "The Transceiver `rtc_...` ID of the pending SIP session. The same\nvalue appears as `session_id` in `live.call.incoming`.\n",
                 "type": "string"
               },
               "sip_headers": {
@@ -60416,80 +61264,6 @@
           "name": "response.incomplete"
         }
       },
-      "WebhookSafetyIdentifierBlocked": {
-        "description": "Sent when a request associated with a safety identifier has been blocked.\n",
-        "properties": {
-          "created_at": {
-            "description": "The Unix timestamp (in seconds) of when the request was blocked.\n",
-            "format": "unixtime",
-            "type": "integer"
-          },
-          "data": {
-            "description": "Event data payload.\n",
-            "properties": {
-              "model": {
-                "description": "The model used for the blocked request, if available.\n",
-                "type": "string"
-              },
-              "project_id": {
-                "description": "The project associated with the blocked request, if available.\n",
-                "type": "string"
-              },
-              "request_id": {
-                "description": "The OpenAI request ID for the blocked request, if available.\n",
-                "type": "string"
-              },
-              "safety_category": {
-                "description": "The safety category that triggered the block, such as `bio` or `cyber`.\n",
-                "type": "string"
-              },
-              "safety_identifier": {
-                "description": "The stable safety identifier associated with the blocked request.\n",
-                "maxLength": 64,
-                "type": "string"
-              }
-            },
-            "required": [
-              "safety_identifier",
-              "safety_category"
-            ],
-            "type": "object"
-          },
-          "id": {
-            "description": "The unique ID of the event.\n",
-            "type": "string"
-          },
-          "object": {
-            "description": "The object of the event. Always `event`.\n",
-            "enum": [
-              "event"
-            ],
-            "type": "string",
-            "x-stainless-const": true
-          },
-          "type": {
-            "description": "The type of the event. Always `safety_identifier.blocked`.\n",
-            "enum": [
-              "safety_identifier.blocked"
-            ],
-            "type": "string",
-            "x-stainless-const": true
-          }
-        },
-        "required": [
-          "created_at",
-          "id",
-          "data",
-          "type"
-        ],
-        "title": "safety_identifier.blocked",
-        "type": "object",
-        "x-oaiMeta": {
-          "example": "{\n  \"id\": \"evt_abc123\",\n  \"type\": \"safety_identifier.blocked\",\n  \"created_at\": 1719168000,\n  \"data\": {\n    \"safety_identifier\": \"safety-identifier-1234\",\n    \"safety_category\": \"cyber\",\n    \"request_id\": \"req_abc123\",\n    \"project_id\": \"proj_abc123\",\n    \"model\": \"gpt-4.1\"\n  }\n}\n",
-          "group": "webhook-events",
-          "name": "safety_identifier.blocked"
-        }
-      },
       "WidgetMessageItem": {
         "description": "Thread item that renders a widget payload.",
         "properties": {
@@ -60616,8 +61390,8 @@
     },
     "description": "The OpenAI REST API. Please see https://platform.openai.com/docs/api-reference for more details.",
     "license": {
-      "name": "MIT",
-      "url": "https://github.com/openai/openai-openapi/blob/master/LICENSE"
+      "identifier": "MIT",
+      "name": "MIT"
     },
     "termsOfService": "https://openai.com/policies/terms-of-use",
     "title": "OpenAI API",
@@ -61463,45 +62237,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "completion_window": {
-                    "description": "The time frame within which the batch should be processed. Currently only `24h` is supported.",
-                    "enum": [
-                      "24h"
-                    ],
-                    "type": "string"
-                  },
-                  "endpoint": {
-                    "description": "The endpoint to be used for all requests in the batch. Currently `/v1/responses`, `/v1/chat/completions`, `/v1/embeddings`, `/v1/completions`, `/v1/moderations`, `/v1/images/generations`, `/v1/images/edits`, and `/v1/videos` are supported. Note that `/v1/embeddings` batches are also restricted to a maximum of 50,000 embedding inputs across all requests in the batch.",
-                    "enum": [
-                      "/v1/responses",
-                      "/v1/chat/completions",
-                      "/v1/embeddings",
-                      "/v1/completions",
-                      "/v1/moderations",
-                      "/v1/images/generations",
-                      "/v1/images/edits",
-                      "/v1/videos"
-                    ],
-                    "type": "string"
-                  },
-                  "input_file_id": {
-                    "description": "The ID of an uploaded file that contains requests for the new batch.\n\nSee [upload file](https://platform.openai.com/docs/api-reference/files/create) for how to upload a file.\n\nYour input file must be formatted as a [JSONL file](https://platform.openai.com/docs/api-reference/batch/request-input), and must be uploaded with the purpose `batch`. The file can contain up to 50,000 requests, and can be up to 200 MB in size.\n",
-                    "type": "string"
-                  },
-                  "metadata": {
-                    "$ref": "#/components/schemas/Metadata"
-                  },
-                  "output_expires_after": {
-                    "$ref": "#/components/schemas/BatchFileExpirationAfter"
-                  }
-                },
-                "required": [
-                  "input_file_id",
-                  "endpoint",
-                  "completion_window"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/CreateBatchRequest"
               }
             }
           },
@@ -62882,6 +63618,38 @@
           "group": "containers",
           "name": "Retrieve container file content",
           "path": "get"
+        }
+      }
+    },
+    "/content_provenance_checks": {
+      "post": {
+        "description": "Check whether an image or audio file contains known OpenAI provenance signals. [Learn more about content provenance](/api/docs/guides/content-provenance).\n\nIf `not_detected`, it means the tool did not find supported signals in the uploaded file. The content could still have been generated by OpenAI if the metadata was stripped or has evidence of tampering, the watermark was degraded, it comes from a legacy generation model, or it was created before provenance signals were available. Content could also still be AI-generated by another company's model, which the tool currently does not detect.",
+        "operationId": "Createcontentprovenancecheck",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContentProvenanceBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProvenanceResource"
+                }
+              }
+            },
+            "description": "Success"
+          }
+        },
+        "summary": "Create content provenance check",
+        "x-oaiMeta": {
+          "name": "Create content provenance check"
         }
       }
     },
@@ -67825,6 +68593,20 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "description": "Filter API keys by whether the owner currently has effective access to the project. Use `active` for owners with access, `inactive` for owners without access, or `any` for all enabled project API keys. If omitted, the endpoint applies its existing membership-based visibility rules, which may exclude some enabled keys.\n",
+            "in": "query",
+            "name": "owner_project_access",
+            "required": false,
+            "schema": {
+              "enum": [
+                "active",
+                "inactive",
+                "any"
+              ],
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -67851,9 +68633,9 @@
         "x-oaiMeta": {
           "examples": {
             "request": {
-              "curl": "curl https://api.openai.com/v1/organization/projects/proj_abc/api_keys?after=key_abc&limit=20 \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+              "curl": "curl https://api.openai.com/v1/organization/projects/proj_abc/api_keys?after=key_abc&limit=20&owner_project_access=any \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
             },
-            "response": "{\n    \"object\": \"list\",\n    \"data\": [\n        {\n            \"object\": \"organization.project.api_key\",\n            \"redacted_value\": \"sk-abc...def\",\n            \"name\": \"My API Key\",\n            \"created_at\": 1711471533,\n            \"last_used_at\": 1711471534,\n            \"id\": \"key_abc\",\n            \"owner\": {\n                \"type\": \"user\",\n                \"user\": {\n                    \"id\": \"user_abc\",\n                    \"name\": \"First Last\",\n                    \"email\": \"user@example.com\",\n                    \"role\": \"owner\",\n                    \"created_at\": 1711471533\n                }\n            }\n        }\n    ],\n    \"first_id\": \"key_abc\",\n    \"last_id\": \"key_xyz\",\n    \"has_more\": false\n}\n"
+            "response": "{\n    \"object\": \"list\",\n    \"data\": [\n        {\n            \"object\": \"organization.project.api_key\",\n            \"redacted_value\": \"sk-abc...def\",\n            \"name\": \"My API Key\",\n            \"created_at\": 1711471533,\n            \"last_used_at\": 1711471534,\n            \"id\": \"key_abc\",\n            \"owner_project_access\": \"active\",\n            \"owner\": {\n                \"type\": \"user\",\n                \"user\": {\n                    \"id\": \"user_abc\",\n                    \"name\": \"First Last\",\n                    \"email\": \"user@example.com\",\n                    \"role\": \"owner\",\n                    \"created_at\": 1711471533\n                }\n            }\n        }\n    ],\n    \"first_id\": \"key_abc\",\n    \"last_id\": \"key_xyz\",\n    \"has_more\": false\n}\n"
           },
           "group": "administration",
           "name": "List project API keys"
@@ -67975,7 +68757,7 @@
             "request": {
               "curl": "curl https://api.openai.com/v1/organization/projects/proj_abc/api_keys/key_abc \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
             },
-            "response": "{\n    \"object\": \"organization.project.api_key\",\n    \"redacted_value\": \"sk-abc...def\",\n    \"name\": \"My API Key\",\n    \"created_at\": 1711471533,\n    \"last_used_at\": 1711471534,\n    \"id\": \"key_abc\",\n    \"owner\": {\n        \"type\": \"user\",\n        \"user\": {\n            \"id\": \"user_abc\",\n            \"name\": \"First Last\",\n            \"email\": \"user@example.com\",\n            \"role\": \"owner\",\n            \"created_at\": 1711471533\n        }\n    }\n}\n"
+            "response": "{\n    \"object\": \"organization.project.api_key\",\n    \"redacted_value\": \"sk-abc...def\",\n    \"name\": \"My API Key\",\n    \"created_at\": 1711471533,\n    \"last_used_at\": 1711471534,\n    \"id\": \"key_abc\",\n    \"owner_project_access\": \"active\",\n    \"owner\": {\n        \"type\": \"user\",\n        \"user\": {\n            \"id\": \"user_abc\",\n            \"name\": \"First Last\",\n            \"email\": \"user@example.com\",\n            \"role\": \"owner\",\n            \"created_at\": 1711471533\n        }\n    }\n}\n"
           },
           "group": "administration",
           "name": "Retrieve project API key"
@@ -69088,7 +69870,7 @@
         }
       },
       "post": {
-        "description": "Creates a new service account in the project. This also returns an unredacted API key for the service account.",
+        "description": "Creates a new service account in the project. By default, this also returns an unredacted API key for the service account.",
         "operationId": "create-project-service-account",
         "parameters": [
           {
@@ -69330,6 +70112,72 @@
           },
           "group": "administration",
           "name": "Update project service account"
+        }
+      }
+    },
+    "/organization/projects/{project_id}/service_accounts/{service_account_id}/api_keys": {
+      "post": {
+        "description": "Creates an API key for a service account in the project.",
+        "operationId": "CreateanAPIkeyforaserviceaccount",
+        "parameters": [
+          {
+            "description": "The ID of the project.",
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "description": "The ID of the project.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ID of the service account.",
+            "in": "path",
+            "name": "service_account_id",
+            "required": true,
+            "schema": {
+              "description": "The ID of the service account.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProjectServiceAccountApiKeyBody"
+              }
+            }
+          },
+          "description": "The service account API key create request payload."
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceAccountApiKeyBody"
+                }
+              }
+            },
+            "description": "Service account API key created successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Create project service account API key",
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl -X POST https://api.openai.com/v1/organization/projects/proj_abc/service_accounts/svc_acct_abc/api_keys \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n      \"name\": \"Production App\",\n      \"scopes\": [\"api.responses.write\"]\n  }'\n"
+            },
+            "response": "{\n    \"object\": \"organization.project.service_account.api_key\",\n    \"value\": \"sk-abcdefghijklmnop123\",\n    \"name\": \"Production App\",\n    \"created_at\": 1711471533,\n    \"id\": \"key_abc\"\n}\n"
+          },
+          "group": "administration",
+          "name": "Create project service account API key"
         }
       }
     },
@@ -69656,6 +70504,151 @@
           },
           "group": "administration",
           "name": "Update project spend alert"
+        }
+      }
+    },
+    "/organization/projects/{project_id}/spend_limit": {
+      "delete": {
+        "description": "Delete a project's hard spend limit.",
+        "operationId": "Deleteprojectspendlimit",
+        "parameters": [
+          {
+            "description": "The ID of the project whose hard spend limit is being managed.",
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "example": "proj_123",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectSpendLimitDeletedResource"
+                }
+              }
+            },
+            "description": "Hard spend limit deleted successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Delete project spend limit",
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl -X DELETE https://api.openai.com/v1/organization/projects/proj_abc/spend_limit \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"object\": \"project.spend_limit.deleted\",\n    \"deleted\": true\n}\n"
+          },
+          "group": "administration",
+          "name": "Delete project spend limit"
+        }
+      },
+      "get": {
+        "description": "Get a project's hard spend limit.",
+        "operationId": "Getprojectspendlimit",
+        "parameters": [
+          {
+            "description": "The ID of the project whose hard spend limit is being managed.",
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "example": "proj_123",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectSpendLimitResource"
+                }
+              }
+            },
+            "description": "Hard spend limit retrieved successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Retrieve project spend limit",
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl https://api.openai.com/v1/organization/projects/proj_abc/spend_limit \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"object\": \"project.spend_limit\",\n    \"threshold_amount\": 10000,\n    \"currency\": \"USD\",\n    \"interval\": \"month\",\n    \"enforcement\": {\n        \"status\": \"enforcing\"\n    }\n}\n"
+          },
+          "group": "administration",
+          "name": "Retrieve project spend limit"
+        }
+      },
+      "post": {
+        "description": "Create or replace a project's hard spend limit.",
+        "operationId": "Updateprojectspendlimit",
+        "parameters": [
+          {
+            "description": "The ID of the project whose hard spend limit is being managed.",
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "example": "proj_123",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProjectSpendLimitBody"
+              }
+            }
+          },
+          "description": "Parameters for the hard spend limit you want to create or replace.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectSpendLimitResource"
+                }
+              }
+            },
+            "description": "Hard spend limit created or replaced successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Update project spend limit",
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl -X POST https://api.openai.com/v1/organization/projects/proj_abc/spend_limit \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n      \"threshold_amount\": 10000,\n      \"currency\": \"USD\",\n      \"interval\": \"month\"\n  }'\n"
+            },
+            "response": "{\n    \"object\": \"project.spend_limit\",\n    \"threshold_amount\": 10000,\n    \"currency\": \"USD\",\n    \"interval\": \"month\",\n    \"enforcement\": {\n        \"status\": \"enforcing\"\n    }\n}\n"
+          },
+          "group": "administration",
+          "name": "Update project spend limit"
         }
       }
     },
@@ -70551,6 +71544,118 @@
         }
       }
     },
+    "/organization/spend_limit": {
+      "delete": {
+        "description": "Delete the organization's hard spend limit.",
+        "operationId": "Deleteorganizationspendlimit",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationSpendLimitDeletedResource"
+                }
+              }
+            },
+            "description": "Hard spend limit deleted successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Delete organization spend limit",
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl -X DELETE https://api.openai.com/v1/organization/spend_limit \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"object\": \"organization.spend_limit.deleted\",\n    \"deleted\": true\n}\n"
+          },
+          "group": "administration",
+          "name": "Delete organization spend limit"
+        }
+      },
+      "get": {
+        "description": "Get the organization's hard spend limit.",
+        "operationId": "Getorganizationspendlimit",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationSpendLimitResource"
+                }
+              }
+            },
+            "description": "Hard spend limit retrieved successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Retrieve organization spend limit",
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl https://api.openai.com/v1/organization/spend_limit \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"object\": \"organization.spend_limit\",\n    \"threshold_amount\": 10000,\n    \"currency\": \"USD\",\n    \"interval\": \"month\",\n    \"enforcement\": {\n        \"status\": \"enforcing\"\n    }\n}\n"
+          },
+          "group": "administration",
+          "name": "Retrieve organization spend limit"
+        }
+      },
+      "post": {
+        "description": "Create or replace the organization's hard spend limit.",
+        "operationId": "Updateorganizationspendlimit",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrganizationSpendLimitBody"
+              }
+            }
+          },
+          "description": "Parameters for the hard spend limit you want to create or replace.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationSpendLimitResource"
+                }
+              }
+            },
+            "description": "Hard spend limit created or replaced successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Update organization spend limit",
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl -X POST https://api.openai.com/v1/organization/spend_limit \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n      \"threshold_amount\": 10000,\n      \"currency\": \"USD\",\n      \"interval\": \"month\"\n  }'\n"
+            },
+            "response": "{\n    \"object\": \"organization.spend_limit\",\n    \"threshold_amount\": 10000,\n    \"currency\": \"USD\",\n    \"interval\": \"month\",\n    \"enforcement\": {\n        \"status\": \"enforcing\"\n    }\n}\n"
+          },
+          "group": "administration",
+          "name": "Update organization spend limit"
+        }
+      }
+    },
     "/organization/usage/audio_speeches": {
       "get": {
         "description": "Get audio speeches usage details for the organization.",
@@ -71136,7 +72241,7 @@
             "request": {
               "curl": "curl \"https://api.openai.com/v1/organization/usage/completions?start_time=1730419200&limit=1\" \\\n-H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n-H \"Content-Type: application/json\"\n"
             },
-            "response": "{\n    \"object\": \"page\",\n    \"data\": [\n        {\n            \"object\": \"bucket\",\n            \"start_time\": 1730419200,\n            \"end_time\": 1730505600,\n            \"results\": [\n                {\n                    \"object\": \"organization.usage.completions.result\",\n                    \"input_tokens\": 1000,\n                    \"output_tokens\": 500,\n                    \"input_cached_tokens\": 800,\n                    \"input_audio_tokens\": 0,\n                    \"output_audio_tokens\": 0,\n                    \"num_model_requests\": 5,\n                    \"project_id\": null,\n                    \"user_id\": null,\n                    \"api_key_id\": null,\n                    \"model\": null,\n                    \"batch\": null,\n                    \"service_tier\": null\n                }\n            ]\n        }\n    ],\n    \"has_more\": true,\n    \"next_page\": \"page_AAAAAGdGxdEiJdKOAAAAAGcqsYA=\"\n}\n"
+            "response": "{\n    \"object\": \"page\",\n    \"data\": [\n        {\n            \"object\": \"bucket\",\n            \"start_time\": 1730419200,\n            \"end_time\": 1730505600,\n            \"results\": [\n                {\n                    \"object\": \"organization.usage.completions.result\",\n                    \"input_tokens\": 1000,\n                    \"input_cached_tokens\": 400,\n                    \"input_cache_write_tokens\": 100,\n                    \"input_uncached_tokens\": 500,\n                    \"output_tokens\": 500,\n                    \"input_text_tokens\": 400,\n                    \"output_text_tokens\": 400,\n                    \"input_cached_text_tokens\": 300,\n                    \"input_audio_tokens\": 50,\n                    \"input_cached_audio_tokens\": 50,\n                    \"output_audio_tokens\": 50,\n                    \"input_image_tokens\": 50,\n                    \"input_cached_image_tokens\": 50,\n                    \"output_image_tokens\": 50,\n                    \"num_model_requests\": 5,\n                    \"project_id\": null,\n                    \"user_id\": null,\n                    \"api_key_id\": null,\n                    \"model\": null,\n                    \"batch\": null,\n                    \"service_tier\": null\n                }\n            ]\n        }\n    ],\n    \"has_more\": true,\n    \"next_page\": \"page_AAAAAGdGxdEiJdKOAAAAAGcqsYA=\"\n}\n"
           },
           "group": "usage-completions",
           "name": "Completions"
@@ -73910,7 +75015,7 @@
                 "javascript": "import OpenAI from \"openai\";\n\nconst openai = new OpenAI();\n\nconst response = await openai.responses.create({\n    model: \"gpt-5.4\",\n    input: \"Tell me a three sentence bedtime story about a unicorn.\"\n});\n\nconsole.log(response);\n",
                 "python": "from openai import OpenAI\n\nclient = OpenAI()\n\nresponse = client.responses.create(\n  model=\"gpt-5.4\",\n  input=\"Tell me a three sentence bedtime story about a unicorn.\"\n)\n\nprint(response)\n"
               },
-              "response": "{\n  \"id\": \"resp_67ccd2bed1ec8190b14f964abc0542670bb6a6b452d3795b\",\n  \"object\": \"response\",\n  \"created_at\": 1741476542,\n  \"status\": \"completed\",\n  \"completed_at\": 1741476543,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"gpt-5.4\",\n  \"output\": [\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67ccd2bf17f0819081ff3bb2cf6508e60bb6a6b452d3795b\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"In a peaceful grove beneath a silver moon, a unicorn named Lumina discovered a hidden pool that reflected the stars. As she dipped her horn into the water, the pool began to shimmer, revealing a pathway to a magical realm of endless night skies. Filled with wonder, Lumina whispered a wish for all who dream to find their own hidden magic, and as she glanced back, her hoofprints sparkled like stardust.\",\n          \"annotations\": []\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 36,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0\n    },\n    \"output_tokens\": 87,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 123\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
+              "response": "{\n  \"id\": \"resp_67ccd2bed1ec8190b14f964abc0542670bb6a6b452d3795b\",\n  \"object\": \"response\",\n  \"created_at\": 1741476542,\n  \"status\": \"completed\",\n  \"completed_at\": 1741476543,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"gpt-5.4\",\n  \"output\": [\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67ccd2bf17f0819081ff3bb2cf6508e60bb6a6b452d3795b\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"In a peaceful grove beneath a silver moon, a unicorn named Lumina discovered a hidden pool that reflected the stars. As she dipped her horn into the water, the pool began to shimmer, revealing a pathway to a magical realm of endless night skies. Filled with wonder, Lumina whispered a wish for all who dream to find their own hidden magic, and as she glanced back, her hoofprints sparkled like stardust.\",\n          \"annotations\": []\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 36,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"cache_write_tokens\": 0\n    },\n    \"output_tokens\": 87,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 123\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
               "title": "Text input"
             },
             {
@@ -73920,7 +75025,7 @@
                 "javascript": "import OpenAI from \"openai\";\n\nconst openai = new OpenAI();\n\nconst response = await openai.responses.create({\n    model: \"gpt-5.4\",\n    input: [\n        {\n            role: \"user\",\n            content: [\n                { type: \"input_text\", text: \"what is in this image?\" },\n                {\n                    type: \"input_image\",\n                    image_url:\n                        \"https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg\",\n                },\n            ],\n        },\n    ],\n});\n\nconsole.log(response);\n",
                 "python": "from openai import OpenAI\n\nclient = OpenAI()\n\nresponse = client.responses.create(\n    model=\"gpt-5.4\",\n    input=[\n        {\n            \"role\": \"user\",\n            \"content\": [\n                { \"type\": \"input_text\", \"text\": \"what is in this image?\" },\n                {\n                    \"type\": \"input_image\",\n                    \"image_url\": \"https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg\"\n                }\n            ]\n        }\n    ]\n)\n\nprint(response)\n"
               },
-              "response": "{\n  \"id\": \"resp_67ccd3a9da748190baa7f1570fe91ac604becb25c45c1d41\",\n  \"object\": \"response\",\n  \"created_at\": 1741476777,\n  \"status\": \"completed\",\n  \"completed_at\": 1741476778,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"gpt-5.4\",\n  \"output\": [\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67ccd3acc8d48190a77525dc6de64b4104becb25c45c1d41\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"The image depicts a scenic landscape with a wooden boardwalk or pathway leading through lush, green grass under a blue sky with some clouds. The setting suggests a peaceful natural area, possibly a park or nature reserve. There are trees and shrubs in the background.\",\n          \"annotations\": []\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 328,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0\n    },\n    \"output_tokens\": 52,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 380\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
+              "response": "{\n  \"id\": \"resp_67ccd3a9da748190baa7f1570fe91ac604becb25c45c1d41\",\n  \"object\": \"response\",\n  \"created_at\": 1741476777,\n  \"status\": \"completed\",\n  \"completed_at\": 1741476778,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"gpt-5.4\",\n  \"output\": [\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67ccd3acc8d48190a77525dc6de64b4104becb25c45c1d41\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"The image depicts a scenic landscape with a wooden boardwalk or pathway leading through lush, green grass under a blue sky with some clouds. The setting suggests a peaceful natural area, possibly a park or nature reserve. There are trees and shrubs in the background.\",\n          \"annotations\": []\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 328,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"cache_write_tokens\": 0\n    },\n    \"output_tokens\": 52,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 380\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
               "title": "Image input"
             },
             {
@@ -73929,7 +75034,7 @@
                 "javascript": "import OpenAI from \"openai\";\n\nconst openai = new OpenAI();\n\nconst response = await openai.responses.create({\n    model: \"gpt-5.4\",\n    input: [\n        {\n            role: \"user\",\n            content: [\n                { type: \"input_text\", text: \"what is in this file?\" },\n                {\n                    type: \"input_file\",\n                    file_url: \"https://www.berkshirehathaway.com/letters/2024ltr.pdf\",\n                    detail: \"auto\",\n                },\n            ],\n        },\n    ],\n});\n\nconsole.log(response);\n",
                 "python": "from openai import OpenAI\n\nclient = OpenAI()\n\nresponse = client.responses.create(\n    model=\"gpt-5.4\",\n    input=[\n        {\n            \"role\": \"user\",\n            \"content\": [\n                { \"type\": \"input_text\", \"text\": \"what is in this file?\" },\n                {\n                    \"type\": \"input_file\",\n                    \"file_url\": \"https://www.berkshirehathaway.com/letters/2024ltr.pdf\",\n                    \"detail\": \"auto\"\n                }\n            ]\n        }\n    ]\n)\n\nprint(response)\n"
               },
-              "response": "{\n  \"id\": \"resp_686eef60237881a2bd1180bb8b13de430e34c516d176ff86\",\n  \"object\": \"response\",\n  \"created_at\": 1752100704,\n  \"status\": \"completed\",\n  \"completed_at\": 1752100705,\n  \"background\": false,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"max_tool_calls\": null,\n  \"model\": \"gpt-5.4\",\n  \"output\": [\n    {\n      \"id\": \"msg_686eef60d3e081a29283bdcbc4322fd90e34c516d176ff86\",\n      \"type\": \"message\",\n      \"status\": \"completed\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"annotations\": [],\n          \"logprobs\": [],\n          \"text\": \"The file seems to contain excerpts from a letter to the shareholders of Berkshire Hathaway Inc., likely written by Warren Buffett. It covers several topics:\\n\\n1. **Communication Philosophy**: Buffett emphasizes the importance of transparency and candidness in reporting mistakes and successes to shareholders.\\n\\n2. **Mistakes and Learnings**: The letter acknowledges past mistakes in business assessments and management hires, highlighting the importance of correcting errors promptly.\\n\\n3. **CEO Succession**: Mention of Greg Abel stepping in as the new CEO and continuing the tradition of honest communication.\\n\\n4. **Pete Liegl Story**: A detailed account of acquiring Forest River and the relationship with its founder, highlighting trust and effective business decisions.\\n\\n5. **2024 Performance**: Overview of business performance, particularly in insurance and investment activities, with a focus on GEICO's improvement.\\n\\n6. **Tax Contributions**: Discussion of significant tax payments to the U.S. Treasury, credited to shareholders' reinvestments.\\n\\n7. **Investment Strategy**: A breakdown of Berkshire\\u2019s investments in both controlled subsidiaries and marketable equities, along with a focus on long-term holding strategies.\\n\\n8. **American Capitalism**: Reflections on America\\u2019s economic development and Berkshire\\u2019s role within it.\\n\\n9. **Property-Casualty Insurance**: Insights into the P/C insurance business model and its challenges and benefits.\\n\\n10. **Japanese Investments**: Information about Berkshire\\u2019s investments in Japanese companies and future plans.\\n\\n11. **Annual Meeting**: Details about the upcoming annual gathering in Omaha, including schedule changes and new book releases.\\n\\n12. **Personal Anecdotes**: Light-hearted stories about family and interactions, conveying Buffett's personable approach.\\n\\n13. **Financial Performance Data**: Tables comparing Berkshire\\u2019s annual performance to the S&P 500, showing impressive long-term gains.\\n\\nOverall, the letter reinforces Berkshire Hathaway's commitment to transparency, investment in both its businesses and the wider economy, and emphasizes strong leadership and prudent financial management.\"\n        }\n      ],\n      \"role\": \"assistant\"\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"service_tier\": \"default\",\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [],\n  \"top_logprobs\": 0,\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 8438,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0\n    },\n    \"output_tokens\": 398,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 8836\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
+              "response": "{\n  \"id\": \"resp_686eef60237881a2bd1180bb8b13de430e34c516d176ff86\",\n  \"object\": \"response\",\n  \"created_at\": 1752100704,\n  \"status\": \"completed\",\n  \"completed_at\": 1752100705,\n  \"background\": false,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"max_tool_calls\": null,\n  \"model\": \"gpt-5.4\",\n  \"output\": [\n    {\n      \"id\": \"msg_686eef60d3e081a29283bdcbc4322fd90e34c516d176ff86\",\n      \"type\": \"message\",\n      \"status\": \"completed\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"annotations\": [],\n          \"logprobs\": [],\n          \"text\": \"The file seems to contain excerpts from a letter to the shareholders of Berkshire Hathaway Inc., likely written by Warren Buffett. It covers several topics:\\n\\n1. **Communication Philosophy**: Buffett emphasizes the importance of transparency and candidness in reporting mistakes and successes to shareholders.\\n\\n2. **Mistakes and Learnings**: The letter acknowledges past mistakes in business assessments and management hires, highlighting the importance of correcting errors promptly.\\n\\n3. **CEO Succession**: Mention of Greg Abel stepping in as the new CEO and continuing the tradition of honest communication.\\n\\n4. **Pete Liegl Story**: A detailed account of acquiring Forest River and the relationship with its founder, highlighting trust and effective business decisions.\\n\\n5. **2024 Performance**: Overview of business performance, particularly in insurance and investment activities, with a focus on GEICO's improvement.\\n\\n6. **Tax Contributions**: Discussion of significant tax payments to the U.S. Treasury, credited to shareholders' reinvestments.\\n\\n7. **Investment Strategy**: A breakdown of Berkshire\\u2019s investments in both controlled subsidiaries and marketable equities, along with a focus on long-term holding strategies.\\n\\n8. **American Capitalism**: Reflections on America\\u2019s economic development and Berkshire\\u2019s role within it.\\n\\n9. **Property-Casualty Insurance**: Insights into the P/C insurance business model and its challenges and benefits.\\n\\n10. **Japanese Investments**: Information about Berkshire\\u2019s investments in Japanese companies and future plans.\\n\\n11. **Annual Meeting**: Details about the upcoming annual gathering in Omaha, including schedule changes and new book releases.\\n\\n12. **Personal Anecdotes**: Light-hearted stories about family and interactions, conveying Buffett's personable approach.\\n\\n13. **Financial Performance Data**: Tables comparing Berkshire\\u2019s annual performance to the S&P 500, showing impressive long-term gains.\\n\\nOverall, the letter reinforces Berkshire Hathaway's commitment to transparency, investment in both its businesses and the wider economy, and emphasizes strong leadership and prudent financial management.\"\n        }\n      ],\n      \"role\": \"assistant\"\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"service_tier\": \"default\",\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [],\n  \"top_logprobs\": 0,\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 8438,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"cache_write_tokens\": 0\n    },\n    \"output_tokens\": 398,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 8836\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
               "title": "File input"
             },
             {
@@ -73939,7 +75044,7 @@
                 "javascript": "import OpenAI from \"openai\";\n\nconst openai = new OpenAI();\n\nconst response = await openai.responses.create({\n    model: \"gpt-5.4\",\n    tools: [{ type: \"web_search_preview\" }],\n    input: \"What was a positive news story from today?\",\n});\n\nconsole.log(response);\n",
                 "python": "from openai import OpenAI\n\nclient = OpenAI()\n\nresponse = client.responses.create(\n    model=\"gpt-5.4\",\n    tools=[{ \"type\": \"web_search_preview\" }],\n    input=\"What was a positive news story from today?\",\n)\n\nprint(response)\n"
               },
-              "response": "{\n  \"id\": \"resp_67ccf18ef5fc8190b16dbee19bc54e5f087bb177ab789d5c\",\n  \"object\": \"response\",\n  \"created_at\": 1741484430,\n  \"status\": \"completed\",\n  \"completed_at\": 1741484431,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"gpt-5.4\",\n  \"output\": [\n    {\n      \"type\": \"web_search_call\",\n      \"id\": \"ws_67ccf18f64008190a39b619f4c8455ef087bb177ab789d5c\",\n      \"status\": \"completed\"\n    },\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67ccf190ca3881909d433c50b1f6357e087bb177ab789d5c\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"As of today, March 9, 2025, one notable positive news story...\",\n          \"annotations\": [\n            {\n              \"type\": \"url_citation\",\n              \"start_index\": 442,\n              \"end_index\": 557,\n              \"url\": \"https://.../?utm_source=chatgpt.com\",\n              \"title\": \"...\"\n            },\n            {\n              \"type\": \"url_citation\",\n              \"start_index\": 962,\n              \"end_index\": 1077,\n              \"url\": \"https://.../?utm_source=chatgpt.com\",\n              \"title\": \"...\"\n            },\n            {\n              \"type\": \"url_citation\",\n              \"start_index\": 1336,\n              \"end_index\": 1451,\n              \"url\": \"https://.../?utm_source=chatgpt.com\",\n              \"title\": \"...\"\n            }\n          ]\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [\n    {\n      \"type\": \"web_search_preview\",\n      \"domains\": [],\n      \"search_context_size\": \"medium\",\n      \"user_location\": {\n        \"type\": \"approximate\",\n        \"city\": null,\n        \"country\": \"US\",\n        \"region\": null,\n        \"timezone\": null\n      }\n    }\n  ],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 328,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0\n    },\n    \"output_tokens\": 356,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 684\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
+              "response": "{\n  \"id\": \"resp_67ccf18ef5fc8190b16dbee19bc54e5f087bb177ab789d5c\",\n  \"object\": \"response\",\n  \"created_at\": 1741484430,\n  \"status\": \"completed\",\n  \"completed_at\": 1741484431,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"gpt-5.4\",\n  \"output\": [\n    {\n      \"type\": \"web_search_call\",\n      \"id\": \"ws_67ccf18f64008190a39b619f4c8455ef087bb177ab789d5c\",\n      \"status\": \"completed\"\n    },\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67ccf190ca3881909d433c50b1f6357e087bb177ab789d5c\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"As of today, March 9, 2025, one notable positive news story...\",\n          \"annotations\": [\n            {\n              \"type\": \"url_citation\",\n              \"start_index\": 442,\n              \"end_index\": 557,\n              \"url\": \"https://.../?utm_source=chatgpt.com\",\n              \"title\": \"...\"\n            },\n            {\n              \"type\": \"url_citation\",\n              \"start_index\": 962,\n              \"end_index\": 1077,\n              \"url\": \"https://.../?utm_source=chatgpt.com\",\n              \"title\": \"...\"\n            },\n            {\n              \"type\": \"url_citation\",\n              \"start_index\": 1336,\n              \"end_index\": 1451,\n              \"url\": \"https://.../?utm_source=chatgpt.com\",\n              \"title\": \"...\"\n            }\n          ]\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [\n    {\n      \"type\": \"web_search_preview\",\n      \"domains\": [],\n      \"search_context_size\": \"medium\",\n      \"user_location\": {\n        \"type\": \"approximate\",\n        \"city\": null,\n        \"country\": \"US\",\n        \"region\": null,\n        \"timezone\": null\n      }\n    }\n  ],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 328,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"cache_write_tokens\": 0\n    },\n    \"output_tokens\": 356,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 684\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
               "title": "Web search"
             },
             {
@@ -73949,7 +75054,7 @@
                 "javascript": "import OpenAI from \"openai\";\n\nconst openai = new OpenAI();\n\nconst response = await openai.responses.create({\n    model: \"gpt-5.4\",\n    tools: [{\n      type: \"file_search\",\n      vector_store_ids: [\"vs_1234567890\"],\n      max_num_results: 20\n    }],\n    input: \"What are the attributes of an ancient brown dragon?\",\n});\n\nconsole.log(response);\n",
                 "python": "from openai import OpenAI\n\nclient = OpenAI()\n\nresponse = client.responses.create(\n    model=\"gpt-5.4\",\n    tools=[{\n      \"type\": \"file_search\",\n      \"vector_store_ids\": [\"vs_1234567890\"],\n      \"max_num_results\": 20\n    }],\n    input=\"What are the attributes of an ancient brown dragon?\",\n)\n\nprint(response)\n"
               },
-              "response": "{\n  \"id\": \"resp_67ccf4c55fc48190b71bd0463ad3306d09504fb6872380d7\",\n  \"object\": \"response\",\n  \"created_at\": 1741485253,\n  \"status\": \"completed\",\n  \"completed_at\": 1741485254,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"gpt-5.4\",\n  \"output\": [\n    {\n      \"type\": \"file_search_call\",\n      \"id\": \"fs_67ccf4c63cd08190887ef6464ba5681609504fb6872380d7\",\n      \"status\": \"completed\",\n      \"queries\": [\n        \"attributes of an ancient brown dragon\"\n      ],\n      \"results\": null\n    },\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67ccf4c93e5c81909d595b369351a9d309504fb6872380d7\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"The attributes of an ancient brown dragon include...\",\n          \"annotations\": [\n            {\n              \"type\": \"file_citation\",\n              \"index\": 320,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 576,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 815,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 815,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 1030,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 1030,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 1156,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 1225,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            }\n          ]\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [\n    {\n      \"type\": \"file_search\",\n      \"filters\": null,\n      \"max_num_results\": 20,\n      \"ranking_options\": {\n        \"ranker\": \"auto\",\n        \"score_threshold\": 0.0\n      },\n      \"vector_store_ids\": [\n        \"vs_1234567890\"\n      ]\n    }\n  ],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 18307,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0\n    },\n    \"output_tokens\": 348,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 18655\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
+              "response": "{\n  \"id\": \"resp_67ccf4c55fc48190b71bd0463ad3306d09504fb6872380d7\",\n  \"object\": \"response\",\n  \"created_at\": 1741485253,\n  \"status\": \"completed\",\n  \"completed_at\": 1741485254,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"gpt-5.4\",\n  \"output\": [\n    {\n      \"type\": \"file_search_call\",\n      \"id\": \"fs_67ccf4c63cd08190887ef6464ba5681609504fb6872380d7\",\n      \"status\": \"completed\",\n      \"queries\": [\n        \"attributes of an ancient brown dragon\"\n      ],\n      \"results\": null\n    },\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67ccf4c93e5c81909d595b369351a9d309504fb6872380d7\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"The attributes of an ancient brown dragon include...\",\n          \"annotations\": [\n            {\n              \"type\": \"file_citation\",\n              \"index\": 320,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 576,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 815,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 815,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 1030,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 1030,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 1156,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 1225,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            }\n          ]\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [\n    {\n      \"type\": \"file_search\",\n      \"filters\": null,\n      \"max_num_results\": 20,\n      \"ranking_options\": {\n        \"ranker\": \"auto\",\n        \"score_threshold\": 0.0\n      },\n      \"vector_store_ids\": [\n        \"vs_1234567890\"\n      ]\n    }\n  ],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 18307,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"cache_write_tokens\": 0\n    },\n    \"output_tokens\": 348,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 18655\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
               "title": "File search"
             },
             {
@@ -73979,7 +75084,7 @@
                 "javascript": "import OpenAI from \"openai\";\nconst openai = new OpenAI();\n\nconst response = await openai.responses.create({\n    model: \"o3-mini\",\n    input: \"How much wood would a woodchuck chuck?\",\n    reasoning: {\n      effort: \"high\"\n    }\n});\n\nconsole.log(response);\n",
                 "python": "from openai import OpenAI\nclient = OpenAI()\n\nresponse = client.responses.create(\n    model=\"o3-mini\",\n    input=\"How much wood would a woodchuck chuck?\",\n    reasoning={\n        \"effort\": \"high\"\n    }\n)\n\nprint(response)\n"
               },
-              "response": "{\n  \"id\": \"resp_67ccd7eca01881908ff0b5146584e408072912b2993db808\",\n  \"object\": \"response\",\n  \"created_at\": 1741477868,\n  \"status\": \"completed\",\n  \"completed_at\": 1741477869,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"o1-2024-12-17\",\n  \"output\": [\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67ccd7f7b5848190a6f3e95d809f6b44072912b2993db808\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"The classic tongue twister...\",\n          \"annotations\": []\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": \"high\",\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 81,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0\n    },\n    \"output_tokens\": 1035,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 832\n    },\n    \"total_tokens\": 1116\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
+              "response": "{\n  \"id\": \"resp_67ccd7eca01881908ff0b5146584e408072912b2993db808\",\n  \"object\": \"response\",\n  \"created_at\": 1741477868,\n  \"status\": \"completed\",\n  \"completed_at\": 1741477869,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"o1-2024-12-17\",\n  \"output\": [\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67ccd7f7b5848190a6f3e95d809f6b44072912b2993db808\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"The classic tongue twister...\",\n          \"annotations\": []\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": \"high\",\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 81,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"cache_write_tokens\": 0\n    },\n    \"output_tokens\": 1035,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 832\n    },\n    \"total_tokens\": 1116\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
               "title": "Reasoning"
             }
           ],
@@ -74023,7 +75128,7 @@
               "javascript": "import OpenAI from \"openai\";\n\nconst openai = new OpenAI();\n\n// Compact the previous response if you are running out of tokens\nconst compactedResponse = await openai.responses.compact({\n  model: \"gpt-5.1-codex-max\",\n  input: [\n    {\n      role: \"user\",\n      content: \"Create a simple landing page for a dog petting caf\u00e9.\",\n    },\n    // All items returned from previous requests are included here, like reasoning, message, function call, etc.\n    {\n      id: \"msg_030d085c0b53e67e0069332e3a72d4819c96c6f2c4adc15d33\",\n      type: \"message\",\n      status: \"completed\",\n      content: [\n        {\n          type: \"output_text\",\n          annotations: [],\n          logprobs: [],\n          text: \"Below is a single file, ready-to-use landing page for a dog petting caf\u00e9:...\",\n        },\n      ],\n      role: \"assistant\",\n    },\n  ],\n});\n\n// Pass the compactedResponse.output as input to the next request\nconsole.log(compactedResponse);\n",
               "python": "from openai import OpenAI\n\nclient = OpenAI()\n\ncompacted_response = client.responses.compact(\n    model=\"gpt-5.1-codex-max\",\n    input=[\n    {\n        \"role\": \"user\",\n        \"content\": \"Create a simple landing page for a dog petting cafe.\",\n    },\n    # All items returned from previous requests are included here, like reasoning, message, function call, etc.\n    {\n        \"id\": \"msg_001\",\n        \"type\": \"message\",\n        \"status\": \"completed\",\n        \"content\": [\n        {\n            \"type\": \"output_text\",\n            \"annotations\": [],\n            \"logprobs\": [],\n            \"text\": \"Below is a single file, ready-to-use landing page for a dog petting caf\u00e9:...\",\n        },\n        ],\n        \"role\": \"assistant\",\n    },\n    ]\n)\n# Pass the compacted_response.output as input to the next request\nprint(compacted_response)\n"
             },
-            "response": "{\n  \"id\": \"resp_001\",\n  \"object\": \"response.compaction\",\n  \"created_at\": 1764967971,\n  \"output\": [\n    {\n      \"id\": \"msg_000\",\n      \"type\": \"message\",\n      \"status\": \"completed\",\n      \"content\": [\n        {\n          \"type\": \"input_text\",\n          \"text\": \"Create a simple landing page for a dog petting cafe.\"\n        }\n      ],\n      \"role\": \"user\"\n    },\n    {\n      \"id\": \"cmp_001\",\n      \"type\": \"compaction\",\n      \"encrypted_content\": \"gAAAAABpM0Yj-...=\"\n    }\n  ],\n  \"usage\": {\n    \"input_tokens\": 139,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0\n    },\n    \"output_tokens\": 438,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 64\n    },\n    \"total_tokens\": 577\n  }\n}\n"
+            "response": "{\n  \"id\": \"resp_001\",\n  \"object\": \"response.compaction\",\n  \"created_at\": 1764967971,\n  \"output\": [\n    {\n      \"id\": \"msg_000\",\n      \"type\": \"message\",\n      \"status\": \"completed\",\n      \"content\": [\n        {\n          \"type\": \"input_text\",\n          \"text\": \"Create a simple landing page for a dog petting cafe.\"\n        }\n      ],\n      \"role\": \"user\"\n    },\n    {\n      \"id\": \"cmp_001\",\n      \"type\": \"compaction\",\n      \"encrypted_content\": \"gAAAAABpM0Yj-...=\"\n    }\n  ],\n  \"usage\": {\n    \"input_tokens\": 139,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"cache_write_tokens\": 0\n    },\n    \"output_tokens\": 438,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 64\n    },\n    \"total_tokens\": 577\n  }\n}\n"
           },
           "group": "responses",
           "name": "Compact a response"
@@ -74083,7 +75188,7 @@
               "javascript": "import OpenAI from \"openai\";\n\nconst openai = new OpenAI();\n\n// Compact the previous response if you are running out of tokens\nconst compactedResponse = await openai.responses.compact({\n  model: \"gpt-5.1-codex-max\",\n  input: [\n    {\n      role: \"user\",\n      content: \"Create a simple landing page for a dog petting caf\u00e9.\",\n    },\n    // All items returned from previous requests are included here, like reasoning, message, function call, etc.\n    {\n      id: \"msg_030d085c0b53e67e0069332e3a72d4819c96c6f2c4adc15d33\",\n      type: \"message\",\n      status: \"completed\",\n      content: [\n        {\n          type: \"output_text\",\n          annotations: [],\n          logprobs: [],\n          text: \"Below is a single file, ready-to-use landing page for a dog petting caf\u00e9:...\",\n        },\n      ],\n      role: \"assistant\",\n    },\n  ],\n});\n\n// Pass the compactedResponse.output as input to the next request\nconsole.log(compactedResponse);\n",
               "python": "from openai import OpenAI\n\nclient = OpenAI()\n\ncompacted_response = client.responses.compact(\n    model=\"gpt-5.1-codex-max\",\n    input=[\n    {\n        \"role\": \"user\",\n        \"content\": \"Create a simple landing page for a dog petting cafe.\",\n    },\n    # All items returned from previous requests are included here, like reasoning, message, function call, etc.\n    {\n        \"id\": \"msg_001\",\n        \"type\": \"message\",\n        \"status\": \"completed\",\n        \"content\": [\n        {\n            \"type\": \"output_text\",\n            \"annotations\": [],\n            \"logprobs\": [],\n            \"text\": \"Below is a single file, ready-to-use landing page for a dog petting caf\u00e9:...\",\n        },\n        ],\n        \"role\": \"assistant\",\n    },\n    ]\n)\n# Pass the compacted_response.output as input to the next request\nprint(compacted_response)\n"
             },
-            "response": "{\n  \"id\": \"resp_001\",\n  \"object\": \"response.compaction\",\n  \"created_at\": 1764967971,\n  \"output\": [\n    {\n      \"id\": \"msg_000\",\n      \"type\": \"message\",\n      \"status\": \"completed\",\n      \"content\": [\n        {\n          \"type\": \"input_text\",\n          \"text\": \"Create a simple landing page for a dog petting cafe.\"\n        }\n      ],\n      \"role\": \"user\"\n    },\n    {\n      \"id\": \"cmp_001\",\n      \"type\": \"compaction\",\n      \"encrypted_content\": \"gAAAAABpM0Yj-...=\"\n    }\n  ],\n  \"usage\": {\n    \"input_tokens\": 139,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0\n    },\n    \"output_tokens\": 438,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 64\n    },\n    \"total_tokens\": 577\n  }\n}\n"
+            "response": "{\n  \"id\": \"resp_001\",\n  \"object\": \"response.compaction\",\n  \"created_at\": 1764967971,\n  \"output\": [\n    {\n      \"id\": \"msg_000\",\n      \"type\": \"message\",\n      \"status\": \"completed\",\n      \"content\": [\n        {\n          \"type\": \"input_text\",\n          \"text\": \"Create a simple landing page for a dog petting cafe.\"\n        }\n      ],\n      \"role\": \"user\"\n    },\n    {\n      \"id\": \"cmp_001\",\n      \"type\": \"compaction\",\n      \"encrypted_content\": \"gAAAAABpM0Yj-...=\"\n    }\n  ],\n  \"usage\": {\n    \"input_tokens\": 139,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"cache_write_tokens\": 0\n    },\n    \"output_tokens\": 438,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 64\n    },\n    \"total_tokens\": 577\n  }\n}\n"
           },
           "group": "responses",
           "name": "Compact a response"
@@ -74318,7 +75423,7 @@
               "javascript": "import OpenAI from \"openai\";\nconst client = new OpenAI();\n\nconst response = await client.responses.retrieve(\"resp_123\");\nconsole.log(response);\n",
               "python": "from openai import OpenAI\nclient = OpenAI()\n\nresponse = client.responses.retrieve(\"resp_123\")\nprint(response)\n"
             },
-            "response": "{\n  \"id\": \"resp_67cb71b351908190a308f3859487620d06981a8637e6bc44\",\n  \"object\": \"response\",\n  \"created_at\": 1741386163,\n  \"status\": \"completed\",\n  \"completed_at\": 1741386164,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"gpt-4o-2024-08-06\",\n  \"output\": [\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67cb71b3c2b0819084d481baaaf148f206981a8637e6bc44\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"Silent circuits hum,  \\nThoughts emerge in data streams\u2014  \\nDigital dawn breaks.\",\n          \"annotations\": []\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 32,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0\n    },\n    \"output_tokens\": 18,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 50\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n"
+            "response": "{\n  \"id\": \"resp_67cb71b351908190a308f3859487620d06981a8637e6bc44\",\n  \"object\": \"response\",\n  \"created_at\": 1741386163,\n  \"status\": \"completed\",\n  \"completed_at\": 1741386164,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"gpt-4o-2024-08-06\",\n  \"output\": [\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67cb71b3c2b0819084d481baaaf148f206981a8637e6bc44\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"Silent circuits hum,  \\nThoughts emerge in data streams\u2014  \\nDigital dawn breaks.\",\n          \"annotations\": []\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 32,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"cache_write_tokens\": 0\n    },\n    \"output_tokens\": 18,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 50\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n"
           },
           "group": "responses",
           "name": "Get a model response"
@@ -74802,7 +75907,7 @@
               "javascript": "import OpenAI from \"openai\";\nconst client = new OpenAI();\n\nconst response = await client.responses.retrieve(\"resp_123\");\nconsole.log(response);\n",
               "python": "from openai import OpenAI\nclient = OpenAI()\n\nresponse = client.responses.retrieve(\"resp_123\")\nprint(response)\n"
             },
-            "response": "{\n  \"id\": \"resp_67cb71b351908190a308f3859487620d06981a8637e6bc44\",\n  \"object\": \"response\",\n  \"created_at\": 1741386163,\n  \"status\": \"completed\",\n  \"completed_at\": 1741386164,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"gpt-4o-2024-08-06\",\n  \"output\": [\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67cb71b3c2b0819084d481baaaf148f206981a8637e6bc44\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"Silent circuits hum,  \\nThoughts emerge in data streams\u2014  \\nDigital dawn breaks.\",\n          \"annotations\": []\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 32,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0\n    },\n    \"output_tokens\": 18,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 50\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n"
+            "response": "{\n  \"id\": \"resp_67cb71b351908190a308f3859487620d06981a8637e6bc44\",\n  \"object\": \"response\",\n  \"created_at\": 1741386163,\n  \"status\": \"completed\",\n  \"completed_at\": 1741386164,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"gpt-4o-2024-08-06\",\n  \"output\": [\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67cb71b3c2b0819084d481baaaf148f206981a8637e6bc44\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"Silent circuits hum,  \\nThoughts emerge in data streams\u2014  \\nDigital dawn breaks.\",\n          \"annotations\": []\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 32,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"cache_write_tokens\": 0\n    },\n    \"output_tokens\": 18,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 50\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n"
           },
           "group": "responses",
           "name": "Get a model response"
@@ -74873,7 +75978,7 @@
                 "javascript": "import OpenAI from \"openai\";\n\nconst openai = new OpenAI();\n\nconst response = await openai.responses.create({\n    model: \"gpt-5.4\",\n    input: \"Tell me a three sentence bedtime story about a unicorn.\"\n});\n\nconsole.log(response);\n",
                 "python": "from openai import OpenAI\n\nclient = OpenAI()\n\nresponse = client.responses.create(\n  model=\"gpt-5.4\",\n  input=\"Tell me a three sentence bedtime story about a unicorn.\"\n)\n\nprint(response)\n"
               },
-              "response": "{\n  \"id\": \"resp_67ccd2bed1ec8190b14f964abc0542670bb6a6b452d3795b\",\n  \"object\": \"response\",\n  \"created_at\": 1741476542,\n  \"status\": \"completed\",\n  \"completed_at\": 1741476543,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"gpt-5.4\",\n  \"output\": [\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67ccd2bf17f0819081ff3bb2cf6508e60bb6a6b452d3795b\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"In a peaceful grove beneath a silver moon, a unicorn named Lumina discovered a hidden pool that reflected the stars. As she dipped her horn into the water, the pool began to shimmer, revealing a pathway to a magical realm of endless night skies. Filled with wonder, Lumina whispered a wish for all who dream to find their own hidden magic, and as she glanced back, her hoofprints sparkled like stardust.\",\n          \"annotations\": []\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 36,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0\n    },\n    \"output_tokens\": 87,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 123\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
+              "response": "{\n  \"id\": \"resp_67ccd2bed1ec8190b14f964abc0542670bb6a6b452d3795b\",\n  \"object\": \"response\",\n  \"created_at\": 1741476542,\n  \"status\": \"completed\",\n  \"completed_at\": 1741476543,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"gpt-5.4\",\n  \"output\": [\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67ccd2bf17f0819081ff3bb2cf6508e60bb6a6b452d3795b\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"In a peaceful grove beneath a silver moon, a unicorn named Lumina discovered a hidden pool that reflected the stars. As she dipped her horn into the water, the pool began to shimmer, revealing a pathway to a magical realm of endless night skies. Filled with wonder, Lumina whispered a wish for all who dream to find their own hidden magic, and as she glanced back, her hoofprints sparkled like stardust.\",\n          \"annotations\": []\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 36,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"cache_write_tokens\": 0\n    },\n    \"output_tokens\": 87,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 123\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
               "title": "Text input"
             },
             {
@@ -74883,7 +75988,7 @@
                 "javascript": "import OpenAI from \"openai\";\n\nconst openai = new OpenAI();\n\nconst response = await openai.responses.create({\n    model: \"gpt-5.4\",\n    input: [\n        {\n            role: \"user\",\n            content: [\n                { type: \"input_text\", text: \"what is in this image?\" },\n                {\n                    type: \"input_image\",\n                    image_url:\n                        \"https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg\",\n                },\n            ],\n        },\n    ],\n});\n\nconsole.log(response);\n",
                 "python": "from openai import OpenAI\n\nclient = OpenAI()\n\nresponse = client.responses.create(\n    model=\"gpt-5.4\",\n    input=[\n        {\n            \"role\": \"user\",\n            \"content\": [\n                { \"type\": \"input_text\", \"text\": \"what is in this image?\" },\n                {\n                    \"type\": \"input_image\",\n                    \"image_url\": \"https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg\"\n                }\n            ]\n        }\n    ]\n)\n\nprint(response)\n"
               },
-              "response": "{\n  \"id\": \"resp_67ccd3a9da748190baa7f1570fe91ac604becb25c45c1d41\",\n  \"object\": \"response\",\n  \"created_at\": 1741476777,\n  \"status\": \"completed\",\n  \"completed_at\": 1741476778,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"gpt-5.4\",\n  \"output\": [\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67ccd3acc8d48190a77525dc6de64b4104becb25c45c1d41\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"The image depicts a scenic landscape with a wooden boardwalk or pathway leading through lush, green grass under a blue sky with some clouds. The setting suggests a peaceful natural area, possibly a park or nature reserve. There are trees and shrubs in the background.\",\n          \"annotations\": []\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 328,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0\n    },\n    \"output_tokens\": 52,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 380\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
+              "response": "{\n  \"id\": \"resp_67ccd3a9da748190baa7f1570fe91ac604becb25c45c1d41\",\n  \"object\": \"response\",\n  \"created_at\": 1741476777,\n  \"status\": \"completed\",\n  \"completed_at\": 1741476778,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"gpt-5.4\",\n  \"output\": [\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67ccd3acc8d48190a77525dc6de64b4104becb25c45c1d41\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"The image depicts a scenic landscape with a wooden boardwalk or pathway leading through lush, green grass under a blue sky with some clouds. The setting suggests a peaceful natural area, possibly a park or nature reserve. There are trees and shrubs in the background.\",\n          \"annotations\": []\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 328,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"cache_write_tokens\": 0\n    },\n    \"output_tokens\": 52,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 380\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
               "title": "Image input"
             },
             {
@@ -74892,7 +75997,7 @@
                 "javascript": "import OpenAI from \"openai\";\n\nconst openai = new OpenAI();\n\nconst response = await openai.responses.create({\n    model: \"gpt-5.4\",\n    input: [\n        {\n            role: \"user\",\n            content: [\n                { type: \"input_text\", text: \"what is in this file?\" },\n                {\n                    type: \"input_file\",\n                    file_url: \"https://www.berkshirehathaway.com/letters/2024ltr.pdf\",\n                    detail: \"auto\",\n                },\n            ],\n        },\n    ],\n});\n\nconsole.log(response);\n",
                 "python": "from openai import OpenAI\n\nclient = OpenAI()\n\nresponse = client.responses.create(\n    model=\"gpt-5.4\",\n    input=[\n        {\n            \"role\": \"user\",\n            \"content\": [\n                { \"type\": \"input_text\", \"text\": \"what is in this file?\" },\n                {\n                    \"type\": \"input_file\",\n                    \"file_url\": \"https://www.berkshirehathaway.com/letters/2024ltr.pdf\",\n                    \"detail\": \"auto\"\n                }\n            ]\n        }\n    ]\n)\n\nprint(response)\n"
               },
-              "response": "{\n  \"id\": \"resp_686eef60237881a2bd1180bb8b13de430e34c516d176ff86\",\n  \"object\": \"response\",\n  \"created_at\": 1752100704,\n  \"status\": \"completed\",\n  \"completed_at\": 1752100705,\n  \"background\": false,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"max_tool_calls\": null,\n  \"model\": \"gpt-5.4\",\n  \"output\": [\n    {\n      \"id\": \"msg_686eef60d3e081a29283bdcbc4322fd90e34c516d176ff86\",\n      \"type\": \"message\",\n      \"status\": \"completed\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"annotations\": [],\n          \"logprobs\": [],\n          \"text\": \"The file seems to contain excerpts from a letter to the shareholders of Berkshire Hathaway Inc., likely written by Warren Buffett. It covers several topics:\\n\\n1. **Communication Philosophy**: Buffett emphasizes the importance of transparency and candidness in reporting mistakes and successes to shareholders.\\n\\n2. **Mistakes and Learnings**: The letter acknowledges past mistakes in business assessments and management hires, highlighting the importance of correcting errors promptly.\\n\\n3. **CEO Succession**: Mention of Greg Abel stepping in as the new CEO and continuing the tradition of honest communication.\\n\\n4. **Pete Liegl Story**: A detailed account of acquiring Forest River and the relationship with its founder, highlighting trust and effective business decisions.\\n\\n5. **2024 Performance**: Overview of business performance, particularly in insurance and investment activities, with a focus on GEICO's improvement.\\n\\n6. **Tax Contributions**: Discussion of significant tax payments to the U.S. Treasury, credited to shareholders' reinvestments.\\n\\n7. **Investment Strategy**: A breakdown of Berkshire\\u2019s investments in both controlled subsidiaries and marketable equities, along with a focus on long-term holding strategies.\\n\\n8. **American Capitalism**: Reflections on America\\u2019s economic development and Berkshire\\u2019s role within it.\\n\\n9. **Property-Casualty Insurance**: Insights into the P/C insurance business model and its challenges and benefits.\\n\\n10. **Japanese Investments**: Information about Berkshire\\u2019s investments in Japanese companies and future plans.\\n\\n11. **Annual Meeting**: Details about the upcoming annual gathering in Omaha, including schedule changes and new book releases.\\n\\n12. **Personal Anecdotes**: Light-hearted stories about family and interactions, conveying Buffett's personable approach.\\n\\n13. **Financial Performance Data**: Tables comparing Berkshire\\u2019s annual performance to the S&P 500, showing impressive long-term gains.\\n\\nOverall, the letter reinforces Berkshire Hathaway's commitment to transparency, investment in both its businesses and the wider economy, and emphasizes strong leadership and prudent financial management.\"\n        }\n      ],\n      \"role\": \"assistant\"\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"service_tier\": \"default\",\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [],\n  \"top_logprobs\": 0,\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 8438,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0\n    },\n    \"output_tokens\": 398,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 8836\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
+              "response": "{\n  \"id\": \"resp_686eef60237881a2bd1180bb8b13de430e34c516d176ff86\",\n  \"object\": \"response\",\n  \"created_at\": 1752100704,\n  \"status\": \"completed\",\n  \"completed_at\": 1752100705,\n  \"background\": false,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"max_tool_calls\": null,\n  \"model\": \"gpt-5.4\",\n  \"output\": [\n    {\n      \"id\": \"msg_686eef60d3e081a29283bdcbc4322fd90e34c516d176ff86\",\n      \"type\": \"message\",\n      \"status\": \"completed\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"annotations\": [],\n          \"logprobs\": [],\n          \"text\": \"The file seems to contain excerpts from a letter to the shareholders of Berkshire Hathaway Inc., likely written by Warren Buffett. It covers several topics:\\n\\n1. **Communication Philosophy**: Buffett emphasizes the importance of transparency and candidness in reporting mistakes and successes to shareholders.\\n\\n2. **Mistakes and Learnings**: The letter acknowledges past mistakes in business assessments and management hires, highlighting the importance of correcting errors promptly.\\n\\n3. **CEO Succession**: Mention of Greg Abel stepping in as the new CEO and continuing the tradition of honest communication.\\n\\n4. **Pete Liegl Story**: A detailed account of acquiring Forest River and the relationship with its founder, highlighting trust and effective business decisions.\\n\\n5. **2024 Performance**: Overview of business performance, particularly in insurance and investment activities, with a focus on GEICO's improvement.\\n\\n6. **Tax Contributions**: Discussion of significant tax payments to the U.S. Treasury, credited to shareholders' reinvestments.\\n\\n7. **Investment Strategy**: A breakdown of Berkshire\\u2019s investments in both controlled subsidiaries and marketable equities, along with a focus on long-term holding strategies.\\n\\n8. **American Capitalism**: Reflections on America\\u2019s economic development and Berkshire\\u2019s role within it.\\n\\n9. **Property-Casualty Insurance**: Insights into the P/C insurance business model and its challenges and benefits.\\n\\n10. **Japanese Investments**: Information about Berkshire\\u2019s investments in Japanese companies and future plans.\\n\\n11. **Annual Meeting**: Details about the upcoming annual gathering in Omaha, including schedule changes and new book releases.\\n\\n12. **Personal Anecdotes**: Light-hearted stories about family and interactions, conveying Buffett's personable approach.\\n\\n13. **Financial Performance Data**: Tables comparing Berkshire\\u2019s annual performance to the S&P 500, showing impressive long-term gains.\\n\\nOverall, the letter reinforces Berkshire Hathaway's commitment to transparency, investment in both its businesses and the wider economy, and emphasizes strong leadership and prudent financial management.\"\n        }\n      ],\n      \"role\": \"assistant\"\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"service_tier\": \"default\",\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [],\n  \"top_logprobs\": 0,\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 8438,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"cache_write_tokens\": 0\n    },\n    \"output_tokens\": 398,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 8836\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
               "title": "File input"
             },
             {
@@ -74902,7 +76007,7 @@
                 "javascript": "import OpenAI from \"openai\";\n\nconst openai = new OpenAI();\n\nconst response = await openai.responses.create({\n    model: \"gpt-5.4\",\n    tools: [{ type: \"web_search_preview\" }],\n    input: \"What was a positive news story from today?\",\n});\n\nconsole.log(response);\n",
                 "python": "from openai import OpenAI\n\nclient = OpenAI()\n\nresponse = client.responses.create(\n    model=\"gpt-5.4\",\n    tools=[{ \"type\": \"web_search_preview\" }],\n    input=\"What was a positive news story from today?\",\n)\n\nprint(response)\n"
               },
-              "response": "{\n  \"id\": \"resp_67ccf18ef5fc8190b16dbee19bc54e5f087bb177ab789d5c\",\n  \"object\": \"response\",\n  \"created_at\": 1741484430,\n  \"status\": \"completed\",\n  \"completed_at\": 1741484431,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"gpt-5.4\",\n  \"output\": [\n    {\n      \"type\": \"web_search_call\",\n      \"id\": \"ws_67ccf18f64008190a39b619f4c8455ef087bb177ab789d5c\",\n      \"status\": \"completed\"\n    },\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67ccf190ca3881909d433c50b1f6357e087bb177ab789d5c\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"As of today, March 9, 2025, one notable positive news story...\",\n          \"annotations\": [\n            {\n              \"type\": \"url_citation\",\n              \"start_index\": 442,\n              \"end_index\": 557,\n              \"url\": \"https://.../?utm_source=chatgpt.com\",\n              \"title\": \"...\"\n            },\n            {\n              \"type\": \"url_citation\",\n              \"start_index\": 962,\n              \"end_index\": 1077,\n              \"url\": \"https://.../?utm_source=chatgpt.com\",\n              \"title\": \"...\"\n            },\n            {\n              \"type\": \"url_citation\",\n              \"start_index\": 1336,\n              \"end_index\": 1451,\n              \"url\": \"https://.../?utm_source=chatgpt.com\",\n              \"title\": \"...\"\n            }\n          ]\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [\n    {\n      \"type\": \"web_search_preview\",\n      \"domains\": [],\n      \"search_context_size\": \"medium\",\n      \"user_location\": {\n        \"type\": \"approximate\",\n        \"city\": null,\n        \"country\": \"US\",\n        \"region\": null,\n        \"timezone\": null\n      }\n    }\n  ],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 328,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0\n    },\n    \"output_tokens\": 356,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 684\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
+              "response": "{\n  \"id\": \"resp_67ccf18ef5fc8190b16dbee19bc54e5f087bb177ab789d5c\",\n  \"object\": \"response\",\n  \"created_at\": 1741484430,\n  \"status\": \"completed\",\n  \"completed_at\": 1741484431,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"gpt-5.4\",\n  \"output\": [\n    {\n      \"type\": \"web_search_call\",\n      \"id\": \"ws_67ccf18f64008190a39b619f4c8455ef087bb177ab789d5c\",\n      \"status\": \"completed\"\n    },\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67ccf190ca3881909d433c50b1f6357e087bb177ab789d5c\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"As of today, March 9, 2025, one notable positive news story...\",\n          \"annotations\": [\n            {\n              \"type\": \"url_citation\",\n              \"start_index\": 442,\n              \"end_index\": 557,\n              \"url\": \"https://.../?utm_source=chatgpt.com\",\n              \"title\": \"...\"\n            },\n            {\n              \"type\": \"url_citation\",\n              \"start_index\": 962,\n              \"end_index\": 1077,\n              \"url\": \"https://.../?utm_source=chatgpt.com\",\n              \"title\": \"...\"\n            },\n            {\n              \"type\": \"url_citation\",\n              \"start_index\": 1336,\n              \"end_index\": 1451,\n              \"url\": \"https://.../?utm_source=chatgpt.com\",\n              \"title\": \"...\"\n            }\n          ]\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [\n    {\n      \"type\": \"web_search_preview\",\n      \"domains\": [],\n      \"search_context_size\": \"medium\",\n      \"user_location\": {\n        \"type\": \"approximate\",\n        \"city\": null,\n        \"country\": \"US\",\n        \"region\": null,\n        \"timezone\": null\n      }\n    }\n  ],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 328,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"cache_write_tokens\": 0\n    },\n    \"output_tokens\": 356,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 684\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
               "title": "Web search"
             },
             {
@@ -74912,7 +76017,7 @@
                 "javascript": "import OpenAI from \"openai\";\n\nconst openai = new OpenAI();\n\nconst response = await openai.responses.create({\n    model: \"gpt-5.4\",\n    tools: [{\n      type: \"file_search\",\n      vector_store_ids: [\"vs_1234567890\"],\n      max_num_results: 20\n    }],\n    input: \"What are the attributes of an ancient brown dragon?\",\n});\n\nconsole.log(response);\n",
                 "python": "from openai import OpenAI\n\nclient = OpenAI()\n\nresponse = client.responses.create(\n    model=\"gpt-5.4\",\n    tools=[{\n      \"type\": \"file_search\",\n      \"vector_store_ids\": [\"vs_1234567890\"],\n      \"max_num_results\": 20\n    }],\n    input=\"What are the attributes of an ancient brown dragon?\",\n)\n\nprint(response)\n"
               },
-              "response": "{\n  \"id\": \"resp_67ccf4c55fc48190b71bd0463ad3306d09504fb6872380d7\",\n  \"object\": \"response\",\n  \"created_at\": 1741485253,\n  \"status\": \"completed\",\n  \"completed_at\": 1741485254,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"gpt-5.4\",\n  \"output\": [\n    {\n      \"type\": \"file_search_call\",\n      \"id\": \"fs_67ccf4c63cd08190887ef6464ba5681609504fb6872380d7\",\n      \"status\": \"completed\",\n      \"queries\": [\n        \"attributes of an ancient brown dragon\"\n      ],\n      \"results\": null\n    },\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67ccf4c93e5c81909d595b369351a9d309504fb6872380d7\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"The attributes of an ancient brown dragon include...\",\n          \"annotations\": [\n            {\n              \"type\": \"file_citation\",\n              \"index\": 320,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 576,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 815,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 815,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 1030,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 1030,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 1156,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 1225,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            }\n          ]\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [\n    {\n      \"type\": \"file_search\",\n      \"filters\": null,\n      \"max_num_results\": 20,\n      \"ranking_options\": {\n        \"ranker\": \"auto\",\n        \"score_threshold\": 0.0\n      },\n      \"vector_store_ids\": [\n        \"vs_1234567890\"\n      ]\n    }\n  ],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 18307,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0\n    },\n    \"output_tokens\": 348,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 18655\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
+              "response": "{\n  \"id\": \"resp_67ccf4c55fc48190b71bd0463ad3306d09504fb6872380d7\",\n  \"object\": \"response\",\n  \"created_at\": 1741485253,\n  \"status\": \"completed\",\n  \"completed_at\": 1741485254,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"gpt-5.4\",\n  \"output\": [\n    {\n      \"type\": \"file_search_call\",\n      \"id\": \"fs_67ccf4c63cd08190887ef6464ba5681609504fb6872380d7\",\n      \"status\": \"completed\",\n      \"queries\": [\n        \"attributes of an ancient brown dragon\"\n      ],\n      \"results\": null\n    },\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67ccf4c93e5c81909d595b369351a9d309504fb6872380d7\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"The attributes of an ancient brown dragon include...\",\n          \"annotations\": [\n            {\n              \"type\": \"file_citation\",\n              \"index\": 320,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 576,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 815,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 815,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 1030,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 1030,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 1156,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            },\n            {\n              \"type\": \"file_citation\",\n              \"index\": 1225,\n              \"file_id\": \"file-4wDz5b167pAf72nx1h9eiN\",\n              \"filename\": \"dragons.pdf\"\n            }\n          ]\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": null,\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [\n    {\n      \"type\": \"file_search\",\n      \"filters\": null,\n      \"max_num_results\": 20,\n      \"ranking_options\": {\n        \"ranker\": \"auto\",\n        \"score_threshold\": 0.0\n      },\n      \"vector_store_ids\": [\n        \"vs_1234567890\"\n      ]\n    }\n  ],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 18307,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"cache_write_tokens\": 0\n    },\n    \"output_tokens\": 348,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 0\n    },\n    \"total_tokens\": 18655\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
               "title": "File search"
             },
             {
@@ -74942,7 +76047,7 @@
                 "javascript": "import OpenAI from \"openai\";\nconst openai = new OpenAI();\n\nconst response = await openai.responses.create({\n    model: \"o3-mini\",\n    input: \"How much wood would a woodchuck chuck?\",\n    reasoning: {\n      effort: \"high\"\n    }\n});\n\nconsole.log(response);\n",
                 "python": "from openai import OpenAI\nclient = OpenAI()\n\nresponse = client.responses.create(\n    model=\"o3-mini\",\n    input=\"How much wood would a woodchuck chuck?\",\n    reasoning={\n        \"effort\": \"high\"\n    }\n)\n\nprint(response)\n"
               },
-              "response": "{\n  \"id\": \"resp_67ccd7eca01881908ff0b5146584e408072912b2993db808\",\n  \"object\": \"response\",\n  \"created_at\": 1741477868,\n  \"status\": \"completed\",\n  \"completed_at\": 1741477869,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"o1-2024-12-17\",\n  \"output\": [\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67ccd7f7b5848190a6f3e95d809f6b44072912b2993db808\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"The classic tongue twister...\",\n          \"annotations\": []\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": \"high\",\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 81,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0\n    },\n    \"output_tokens\": 1035,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 832\n    },\n    \"total_tokens\": 1116\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
+              "response": "{\n  \"id\": \"resp_67ccd7eca01881908ff0b5146584e408072912b2993db808\",\n  \"object\": \"response\",\n  \"created_at\": 1741477868,\n  \"status\": \"completed\",\n  \"completed_at\": 1741477869,\n  \"error\": null,\n  \"incomplete_details\": null,\n  \"instructions\": null,\n  \"max_output_tokens\": null,\n  \"model\": \"o1-2024-12-17\",\n  \"output\": [\n    {\n      \"type\": \"message\",\n      \"id\": \"msg_67ccd7f7b5848190a6f3e95d809f6b44072912b2993db808\",\n      \"status\": \"completed\",\n      \"role\": \"assistant\",\n      \"content\": [\n        {\n          \"type\": \"output_text\",\n          \"text\": \"The classic tongue twister...\",\n          \"annotations\": []\n        }\n      ]\n    }\n  ],\n  \"parallel_tool_calls\": true,\n  \"previous_response_id\": null,\n  \"reasoning\": {\n    \"effort\": \"high\",\n    \"summary\": null\n  },\n  \"store\": true,\n  \"temperature\": 1.0,\n  \"text\": {\n    \"format\": {\n      \"type\": \"text\"\n    }\n  },\n  \"tool_choice\": \"auto\",\n  \"tools\": [],\n  \"top_p\": 1.0,\n  \"truncation\": \"disabled\",\n  \"usage\": {\n    \"input_tokens\": 81,\n    \"input_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"cache_write_tokens\": 0\n    },\n    \"output_tokens\": 1035,\n    \"output_tokens_details\": {\n      \"reasoning_tokens\": 832\n    },\n    \"total_tokens\": 1116\n  },\n  \"user\": null,\n  \"metadata\": {}\n}\n",
               "title": "Reasoning"
             }
           ],
@@ -78529,6 +79634,25 @@
         }
       }
     },
+    "live_call_incoming": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookLiveCallIncoming"
+              }
+            }
+          },
+          "description": "The event payload sent by the API."
+        },
+        "responses": {
+          "200": {
+            "description": "Return a 200 status code to acknowledge receipt of the event. Non-200\nstatus codes will be retried.\n"
+          }
+        }
+      }
+    },
     "realtime_call_incoming": {
       "post": {
         "requestBody": {
@@ -78620,25 +79744,6 @@
         "responses": {
           "200": {
             "description": "Return a 200 status code to acknowledge receipt of the event. Non-200 \nstatus codes will be retried.\n"
-          }
-        }
-      }
-    },
-    "safety_identifier_blocked": {
-      "post": {
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WebhookSafetyIdentifierBlocked"
-              }
-            }
-          },
-          "description": "The event payload sent by the API."
-        },
-        "responses": {
-          "200": {
-            "description": "Return a 200 status code to acknowledge receipt of the event. Non-200\nstatus codes will be retried.\n"
           }
         }
       }
@@ -79197,11 +80302,6 @@
             "type": "object"
           },
           {
-            "key": "WebhookSafetyIdentifierBlocked",
-            "path": "<auto>",
-            "type": "object"
-          },
-          {
             "key": "WebhookBatchCompleted",
             "path": "<auto>",
             "type": "object"
@@ -79253,6 +80353,11 @@
           },
           {
             "key": "WebhookRealtimeCallIncoming",
+            "path": "<auto>",
+            "type": "object"
+          },
+          {
+            "key": "WebhookLiveCallIncoming",
             "path": "<auto>",
             "type": "object"
           }

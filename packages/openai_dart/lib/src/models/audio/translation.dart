@@ -2,7 +2,8 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
-import 'transcription.dart';
+import '../common/equality_helpers.dart';
+import 'transcription.dart' show TranscriptionSegment;
 
 /// A request to translate audio into English text.
 ///
@@ -52,7 +53,7 @@ class TranslationRequest {
   /// The format of the translation output.
   ///
   /// Defaults to `json`.
-  final TranscriptionResponseFormat? responseFormat;
+  final TranslationResponseFormat? responseFormat;
 
   /// The sampling temperature, between 0 and 1.
   ///
@@ -64,14 +65,71 @@ class TranslationRequest {
       identical(this, other) ||
       other is TranslationRequest &&
           runtimeType == other.runtimeType &&
+          listsEqual(file, other.file) &&
           filename == other.filename &&
-          model == other.model;
+          model == other.model &&
+          prompt == other.prompt &&
+          responseFormat == other.responseFormat &&
+          temperature == other.temperature;
 
   @override
-  int get hashCode => Object.hash(filename, model);
+  int get hashCode => Object.hash(
+    listHash(file),
+    filename,
+    model,
+    prompt,
+    responseFormat,
+    temperature,
+  );
 
   @override
   String toString() => 'TranslationRequest(filename: $filename, model: $model)';
+}
+
+/// The format of the translation output.
+///
+/// `CreateTranslationRequest.response_format` is its own inline enum in the
+/// spec — it does not include `diarized_json` and does not reference the
+/// shared `AudioResponseFormat` component used by transcriptions, so it is
+/// modeled as a separate type here rather than being widened to
+/// [AudioResponseFormat].
+enum TranslationResponseFormat {
+  /// Unknown format — forward-compat fallback for unrecognized server values.
+  unknown._('unknown'),
+
+  /// JSON format with just the text.
+  json._('json'),
+
+  /// Plain text format.
+  text._('text'),
+
+  /// SubRip subtitle format.
+  srt._('srt'),
+
+  /// Verbose JSON with timestamps and metadata.
+  verboseJson._('verbose_json'),
+
+  /// WebVTT subtitle format.
+  vtt._('vtt');
+
+  const TranslationResponseFormat._(this._value);
+
+  /// Creates from JSON string. Unknown values map to
+  /// [TranslationResponseFormat.unknown].
+  factory TranslationResponseFormat.fromJson(String json) {
+    return values.firstWhere(
+      (e) => e._value == json,
+      orElse: () => TranslationResponseFormat.unknown,
+    );
+  }
+
+  final String _value;
+
+  /// Converts to JSON string.
+  String toJson() => _value;
+
+  @override
+  String toString() => _value;
 }
 
 /// A translation response.

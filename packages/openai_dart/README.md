@@ -44,7 +44,7 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 ### Operational APIs
 
 - Files, uploads, batches, fine-tuning, moderations, evals, and model management
-- Conversations, containers, ChatKit, and skills
+- Conversations, containers, content provenance checks, ChatKit, and skills
 - Assistants and vector stores (deprecated — use Responses API instead)
 
 See [API Coverage](#api-coverage) for the full coverage table.
@@ -705,6 +705,35 @@ print('Flagged: ${result.results.first.flagged}');
 
 </details>
 
+### How do I check content provenance?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use the content provenance checks API to detect OpenAI C2PA/SynthID signals in an uploaded image or audio file. Results are a sealed union — dispatch on the concrete type to read the fields specific to each signal.
+
+```dart
+final check = await client.contentProvenanceChecks.create(
+  bytes: File('image.png').readAsBytesSync(),
+  filename: 'image.png',
+);
+
+for (final result in check.results) {
+  switch (result) {
+    case C2PAProvenanceResult():
+      print('C2PA: ${result.outcome}, trust: ${result.validationState}');
+    case SynthIDProvenanceResult():
+      print('SynthID: ${result.outcome}');
+    case UnknownProvenanceResult():
+      print('Unrecognized signal: ${result.type}');
+  }
+}
+```
+
+→ [Full example](example/content_provenance_checks_example.dart)
+
+</details>
+
 ## Error Handling
 
 <details>
@@ -768,6 +797,7 @@ See the [example/](example/) directory for complete examples:
 | [`models_example.dart`](example/models_example.dart) | Model listing and retrieval |
 | [`batches_example.dart`](example/batches_example.dart) | Batch processing for async jobs |
 | [`moderation_example.dart`](example/moderation_example.dart) | Content moderation |
+| [`content_provenance_checks_example.dart`](example/content_provenance_checks_example.dart) | Content provenance (C2PA/SynthID) detection |
 | [`web_search_example.dart`](example/web_search_example.dart) | Web search with Responses API |
 | [`realtime_example.dart`](example/realtime_example.dart) | Realtime API (WebSocket and WebRTC) |
 | [`fine_tuning_example.dart`](example/fine_tuning_example.dart) | Fine-tuning job management |
@@ -796,6 +826,7 @@ See the [example/](example/) directory for complete examples:
 | Evals | ✅ Full |
 | Conversations | ✅ Full |
 | Containers | ✅ Full |
+| Content Provenance Checks | ✅ Full |
 | ChatKit Beta | ✅ Full |
 | Realtime | ✅ Full (separate import) |
 | Assistants (Deprecated) | ✅ Full (separate import) |
