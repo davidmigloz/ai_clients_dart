@@ -6,7 +6,7 @@ import '../common/copy_with_sentinel.dart';
 ///
 /// The API models this as a `oneOf` between base64-encoded binary content
 /// ([rawContent]) and plain-text content ([textContent]); exactly one of the
-/// two is expected to be set. Use the [SkillAssetContent.raw] and
+/// two must be set. Use the [SkillAssetContent.raw] and
 /// [SkillAssetContent.text] factories to construct instances unambiguously.
 @immutable
 class SkillAssetContent {
@@ -20,11 +20,16 @@ class SkillAssetContent {
   final bool? isExecutable;
 
   /// Creates a [SkillAssetContent].
+  ///
+  /// Asserts that exactly one of [rawContent] or [textContent] is non-null.
   const SkillAssetContent({
     this.rawContent,
     this.textContent,
     this.isExecutable,
-  });
+  }) : assert(
+         (rawContent != null) != (textContent != null),
+         'Exactly one of rawContent or textContent must be set.',
+       );
 
   /// Creates a [SkillAssetContent] carrying base64-encoded binary content.
   const SkillAssetContent.raw({required String rawContent, bool? isExecutable})
@@ -37,12 +42,24 @@ class SkillAssetContent {
   }) : this(textContent: textContent, isExecutable: isExecutable);
 
   /// Creates a [SkillAssetContent] from JSON.
-  factory SkillAssetContent.fromJson(Map<String, dynamic> json) =>
-      SkillAssetContent(
-        rawContent: json['rawContent'] as String?,
-        textContent: json['textContent'] as String?,
-        isExecutable: json['isExecutable'] as bool?,
+  ///
+  /// Throws a [FormatException] unless exactly one of `rawContent` or
+  /// `textContent` is present in [json].
+  factory SkillAssetContent.fromJson(Map<String, dynamic> json) {
+    final hasRaw = json.containsKey('rawContent');
+    final hasText = json.containsKey('textContent');
+    if (hasRaw == hasText) {
+      throw FormatException(
+        'SkillAssetContent: expected exactly one of "rawContent" or '
+        '"textContent", got ${hasRaw ? 'both' : 'neither'}: $json',
       );
+    }
+    return SkillAssetContent(
+      rawContent: json['rawContent'] as String?,
+      textContent: json['textContent'] as String?,
+      isExecutable: json['isExecutable'] as bool?,
+    );
+  }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {

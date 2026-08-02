@@ -51,22 +51,37 @@ class WorkflowRegistration {
   });
 
   /// Creates a [WorkflowRegistration] from JSON.
-  factory WorkflowRegistration.fromJson(Map<String, dynamic> json) =>
-      WorkflowRegistration(
-        id: json['id'] as String? ?? '',
-        deploymentId: json['deployment_id'] as String?,
-        deploymentName: json['deployment_name'] as String?,
-        taskQueue: json['task_queue'] as String?,
-        definition: WorkflowCodeDefinition.fromJson(
-          json['definition'] as Map<String, dynamic>,
-        ),
-        workflowId: json['workflow_id'] as String? ?? '',
-        compatibleWithChatAssistant:
-            json['compatible_with_chat_assistant'] as bool? ?? false,
-        workflow: json['workflow'] != null
-            ? Workflow.fromJson(json['workflow'] as Map<String, dynamic>)
-            : null,
+  ///
+  /// Throws a [FormatException] if a required field is missing.
+  factory WorkflowRegistration.fromJson(Map<String, dynamic> json) {
+    final id = json['id'] as String?;
+    if (id == null) {
+      throw const FormatException(
+        'WorkflowRegistration: missing required field "id"',
       );
+    }
+    final workflowId = json['workflow_id'] as String?;
+    if (workflowId == null) {
+      throw const FormatException(
+        'WorkflowRegistration: missing required field "workflow_id"',
+      );
+    }
+    return WorkflowRegistration(
+      id: id,
+      deploymentId: json['deployment_id'] as String?,
+      deploymentName: json['deployment_name'] as String?,
+      taskQueue: json['task_queue'] as String?,
+      definition: WorkflowCodeDefinition.fromJson(
+        json['definition'] as Map<String, dynamic>,
+      ),
+      workflowId: workflowId,
+      compatibleWithChatAssistant:
+          json['compatible_with_chat_assistant'] as bool? ?? false,
+      workflow: json['workflow'] != null
+          ? Workflow.fromJson(json['workflow'] as Map<String, dynamic>)
+          : null,
+    );
+  }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {

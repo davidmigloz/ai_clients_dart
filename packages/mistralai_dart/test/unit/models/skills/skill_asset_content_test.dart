@@ -46,6 +46,23 @@ void main() {
         expect(asset.textContent, 'hello');
         expect(asset.isExecutable, isNull);
       });
+
+      test('throws FormatException when neither key is present', () {
+        expect(
+          () => SkillAssetContent.fromJson(const {'isExecutable': true}),
+          throwsFormatException,
+        );
+      });
+
+      test('throws FormatException when both keys are present', () {
+        expect(
+          () => SkillAssetContent.fromJson(const {
+            'rawContent': 'aGVsbG8=',
+            'textContent': 'hello',
+          }),
+          throwsFormatException,
+        );
+      });
     });
 
     group('toJson', () {
@@ -83,6 +100,19 @@ void main() {
       });
     });
 
+    group('constructor', () {
+      test('asserts when neither rawContent nor textContent is set', () {
+        expect(SkillAssetContent.new, throwsA(isA<AssertionError>()));
+      });
+
+      test('asserts when both rawContent and textContent are set', () {
+        expect(
+          () => SkillAssetContent(rawContent: 'a', textContent: 'b'),
+          throwsA(isA<AssertionError>()),
+        );
+      });
+    });
+
     group('copyWith', () {
       test('replaces fields', () {
         const original = SkillAssetContent.text(textContent: 'a');
@@ -107,6 +137,24 @@ void main() {
         const original = SkillAssetContent.text(textContent: 'a');
 
         expect(original.copyWith(), equals(original));
+      });
+
+      test('asserts when the result would have neither content set', () {
+        const original = SkillAssetContent.text(textContent: 'a');
+
+        expect(
+          () => original.copyWith(textContent: null),
+          throwsA(isA<AssertionError>()),
+        );
+      });
+
+      test('asserts when the result would have both contents set', () {
+        const original = SkillAssetContent.text(textContent: 'a');
+
+        expect(
+          () => original.copyWith(rawContent: 'b'),
+          throwsA(isA<AssertionError>()),
+        );
       });
     });
 

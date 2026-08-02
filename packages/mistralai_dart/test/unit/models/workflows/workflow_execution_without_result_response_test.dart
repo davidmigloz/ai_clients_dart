@@ -102,5 +102,21 @@ void main() {
       expect(response.toString(), contains('userId: user-1'));
       expect(response.toString(), contains('workflowId: workflow-1'));
     });
+
+    test('throws FormatException when a required field is missing', () {
+      for (final key in [
+        'workflow_name',
+        'execution_id',
+        'root_execution_id',
+        'start_time',
+      ]) {
+        final json = responseJson()..remove(key);
+        expect(
+          () => WorkflowExecutionWithoutResultResponse.fromJson(json),
+          throwsFormatException,
+          reason: 'missing $key',
+        );
+      }
+    });
   });
 }

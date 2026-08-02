@@ -77,32 +77,71 @@ class WorkflowExecutionTraceOTelResponse {
   });
 
   /// Creates a [WorkflowExecutionTraceOTelResponse] from JSON.
+  ///
+  /// Throws a [FormatException] if a required field is missing.
   factory WorkflowExecutionTraceOTelResponse.fromJson(
     Map<String, dynamic> json,
-  ) => WorkflowExecutionTraceOTelResponse(
-    workflowName: json['workflow_name'] as String? ?? '',
-    executionId: json['execution_id'] as String? ?? '',
-    rootExecutionId: json['root_execution_id'] as String? ?? '',
-    status: json['status'] != null
-        ? WorkflowExecutionStatus.fromJson(json['status'] as String)
-        : null,
-    startTime: json['start_time'] as String? ?? '',
-    endTime: json['end_time'] as String?,
-    result: json['result'],
-    dataSource: json['data_source'] as String? ?? '',
-    otelTraceData: json['otel_trace_data'] != null
-        ? TempoGetTraceResponse.fromJson(
-            json['otel_trace_data'] as Map<String, dynamic>,
-          )
-        : null,
-    otelTraceId: json['otel_trace_id'] as String?,
-    parentExecutionId: json['parent_execution_id'] as String?,
-    totalDurationMs: json['total_duration_ms'] as int?,
-    runId: json['run_id'] as String?,
-    deploymentName: json['deployment_name'] as String?,
-    userId: json['user_id'] as String?,
-    workflowId: json['workflow_id'] as String?,
-  );
+  ) {
+    final workflowName = json['workflow_name'] as String?;
+    if (workflowName == null) {
+      throw const FormatException(
+        'WorkflowExecutionTraceOTelResponse: missing required field '
+        '"workflow_name"',
+      );
+    }
+    final executionId = json['execution_id'] as String?;
+    if (executionId == null) {
+      throw const FormatException(
+        'WorkflowExecutionTraceOTelResponse: missing required field '
+        '"execution_id"',
+      );
+    }
+    final rootExecutionId = json['root_execution_id'] as String?;
+    if (rootExecutionId == null) {
+      throw const FormatException(
+        'WorkflowExecutionTraceOTelResponse: missing required field '
+        '"root_execution_id"',
+      );
+    }
+    final startTime = json['start_time'] as String?;
+    if (startTime == null) {
+      throw const FormatException(
+        'WorkflowExecutionTraceOTelResponse: missing required field '
+        '"start_time"',
+      );
+    }
+    final dataSource = json['data_source'] as String?;
+    if (dataSource == null) {
+      throw const FormatException(
+        'WorkflowExecutionTraceOTelResponse: missing required field '
+        '"data_source"',
+      );
+    }
+    return WorkflowExecutionTraceOTelResponse(
+      workflowName: workflowName,
+      executionId: executionId,
+      rootExecutionId: rootExecutionId,
+      status: json['status'] != null
+          ? WorkflowExecutionStatus.fromJson(json['status'] as String)
+          : null,
+      startTime: startTime,
+      endTime: json['end_time'] as String?,
+      result: json['result'],
+      dataSource: dataSource,
+      otelTraceData: json['otel_trace_data'] != null
+          ? TempoGetTraceResponse.fromJson(
+              json['otel_trace_data'] as Map<String, dynamic>,
+            )
+          : null,
+      otelTraceId: json['otel_trace_id'] as String?,
+      parentExecutionId: json['parent_execution_id'] as String?,
+      totalDurationMs: json['total_duration_ms'] as int?,
+      runId: json['run_id'] as String?,
+      deploymentName: json['deployment_name'] as String?,
+      userId: json['user_id'] as String?,
+      workflowId: json['workflow_id'] as String?,
+    );
+  }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {

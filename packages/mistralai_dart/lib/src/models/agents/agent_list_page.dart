@@ -86,6 +86,7 @@ class AgentListPage {
   String toString() =>
       'AgentListPage('
       'data: ${data.length} items, '
-      'nextPageToken: $nextPageToken'
+      'nextPageToken: $nextPageToken, '
+      'object: $object'
       ')';
 }

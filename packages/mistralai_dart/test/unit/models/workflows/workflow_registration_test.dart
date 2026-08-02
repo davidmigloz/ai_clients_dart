@@ -73,5 +73,16 @@ void main() {
         contains('deploymentName: deployment-name-1'),
       );
     });
+
+    test('throws FormatException when a required field is missing', () {
+      for (final key in ['id', 'workflow_id']) {
+        final json = registrationJson()..remove(key);
+        expect(
+          () => WorkflowRegistration.fromJson(json),
+          throwsFormatException,
+          reason: 'missing $key',
+        );
+      }
+    });
   });
 }

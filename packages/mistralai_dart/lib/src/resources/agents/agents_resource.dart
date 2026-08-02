@@ -58,6 +58,7 @@ class AgentsResource extends ResourceBase with StreamingResource {
   ///
   /// Returns an [AgentList] containing the agents.
   Future<AgentList> list({int? page, int? pageSize}) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{
       if (page != null) 'page': page.toString(),
       if (pageSize != null) 'page_size': pageSize.toString(),
@@ -101,6 +102,7 @@ class AgentsResource extends ResourceBase with StreamingResource {
     Map<String, dynamic>? metadata,
     String? pageToken,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, dynamic>{};
     if (pageSize != null) queryParams['page_size'] = pageSize.toString();
     if (deploymentChat != null) {
@@ -132,6 +134,7 @@ class AgentsResource extends ResourceBase with StreamingResource {
   ///
   /// Returns the created [Agent].
   Future<Agent> create({required CreateAgentRequest request}) async {
+    ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/agents');
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
@@ -153,6 +156,7 @@ class AgentsResource extends ResourceBase with StreamingResource {
   ///
   /// Returns the [Agent].
   Future<Agent> retrieve({required String agentId, int? version}) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{
       if (version != null) 'version': version.toString(),
     };
@@ -180,6 +184,7 @@ class AgentsResource extends ResourceBase with StreamingResource {
     required String agentId,
     required UpdateAgentRequest request,
   }) async {
+    ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/agents/$agentId');
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
@@ -198,6 +203,7 @@ class AgentsResource extends ResourceBase with StreamingResource {
   ///
   /// The [agentId] identifies the agent to delete.
   Future<void> delete({required String agentId}) async {
+    ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/agents/$agentId');
     final headers = requestBuilder.buildHeaders();
 
@@ -216,6 +222,7 @@ class AgentsResource extends ResourceBase with StreamingResource {
     required String agentId,
     required int version,
   }) async {
+    ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/agents/$agentId/version');
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
@@ -241,6 +248,7 @@ class AgentsResource extends ResourceBase with StreamingResource {
     int? page,
     int? pageSize,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{
       if (page != null) 'page': page.toString(),
       if (pageSize != null) 'page_size': pageSize.toString(),
@@ -272,6 +280,7 @@ class AgentsResource extends ResourceBase with StreamingResource {
     required String agentId,
     required String version,
   }) async {
+    ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
       '/v1/agents/$agentId/versions/$version',
     );
@@ -292,6 +301,7 @@ class AgentsResource extends ResourceBase with StreamingResource {
   Future<List<AgentAliasResponse>> listAliases({
     required String agentId,
   }) async {
+    ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/agents/$agentId/aliases');
     final headers = requestBuilder.buildHeaders();
 
@@ -316,6 +326,7 @@ class AgentsResource extends ResourceBase with StreamingResource {
     required String alias,
     required int version,
   }) async {
+    ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
       '/v1/agents/$agentId/aliases',
       queryParams: {'alias': alias, 'version': version.toString()},
@@ -337,6 +348,7 @@ class AgentsResource extends ResourceBase with StreamingResource {
     required String agentId,
     required String alias,
   }) async {
+    ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
       '/v1/agents/$agentId/aliases',
       queryParams: {'alias': alias},
@@ -367,6 +379,7 @@ class AgentsResource extends ResourceBase with StreamingResource {
   Future<AgentCompletionResponse> complete({
     required AgentCompletionRequest request,
   }) async {
+    ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/agents/completions');
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
@@ -407,6 +420,13 @@ class AgentsResource extends ResourceBase with StreamingResource {
   /// }
   /// ```
   Stream<ChatCompletionStreamResponse> completeStream({
+    required AgentCompletionRequest request,
+  }) {
+    ensureNotClosed?.call();
+    return _completeStreamImpl(request: request);
+  }
+
+  Stream<ChatCompletionStreamResponse> _completeStreamImpl({
     required AgentCompletionRequest request,
   }) async* {
     final url = requestBuilder.buildUrl('/v1/agents/completions');

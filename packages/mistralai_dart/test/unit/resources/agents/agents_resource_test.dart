@@ -75,5 +75,35 @@ void main() {
         jsonEncode({'env': 'prod'}),
       );
     });
+
+    test('guards against a closed client', () async {
+      final client = clientReturning({'data': <dynamic>[]})..close();
+
+      // listPages is a regular `async` method: per Dart semantics a throw
+      // before the first `await` still completes the returned Future with
+      // the error rather than throwing synchronously at the call site, so
+      // this is checked by awaiting the Future, not via `throwsStateError`
+      // on the call expression itself.
+      await expectLater(client.agents.listPages(), throwsStateError);
+    });
+  });
+
+  group('AgentsResource.completeStream', () {
+    test('guards against a closed client eagerly (before subscription)', () {
+      final client = MistralClient(
+        config: const MistralConfig(authProvider: ApiKeyProvider('test-key')),
+        httpClient: MockClient((_) async => http.Response('', 200)),
+      )..close();
+
+      expect(
+        () => client.agents.completeStream(
+          request: const AgentCompletionRequest(
+            agentId: 'agent-1',
+            messages: [],
+          ),
+        ),
+        throwsStateError,
+      );
+    });
   });
 }

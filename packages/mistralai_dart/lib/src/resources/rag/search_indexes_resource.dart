@@ -274,8 +274,15 @@ class SearchIndexesResource extends ResourceBase with StreamingResource {
   Stream<SummaryStreamEvent> generateSummary({
     required String indexId,
     required SummaryLanguage language,
-  }) async* {
+  }) {
     ensureNotClosed?.call();
+    return _generateSummaryImpl(indexId: indexId, language: language);
+  }
+
+  Stream<SummaryStreamEvent> _generateSummaryImpl({
+    required String indexId,
+    required SummaryLanguage language,
+  }) async* {
     final url = requestBuilder.buildUrl(
       '/v1/rag/indexes/index/$indexId/summary_field/${language.toJson()}',
     );
@@ -345,8 +352,20 @@ class SearchIndexesResource extends ResourceBase with StreamingResource {
     required String indexId,
     required String schemaId,
     required SummaryLanguage language,
-  }) async* {
+  }) {
     ensureNotClosed?.call();
+    return _generateSchemaSummaryImpl(
+      indexId: indexId,
+      schemaId: schemaId,
+      language: language,
+    );
+  }
+
+  Stream<SummaryStreamEvent> _generateSchemaSummaryImpl({
+    required String indexId,
+    required String schemaId,
+    required SummaryLanguage language,
+  }) async* {
     final url = requestBuilder.buildUrl(
       '/v1/rag/indexes/index/$indexId/schemas/schema/$schemaId'
       '/summary_field/${language.toJson()}',

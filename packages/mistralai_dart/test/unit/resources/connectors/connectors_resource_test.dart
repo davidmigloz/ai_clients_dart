@@ -375,5 +375,23 @@ void main() {
       expect(captured.body, isEmpty);
       expect(result.message, 'shared');
     });
+
+    test('guards against a closed client', () async {
+      final client = clientReturning({'message': 'shared'})..close();
+
+      // These are regular `async` methods: per Dart semantics a throw
+      // before the first `await` still completes the returned Future with
+      // the error rather than throwing synchronously at the call site, so
+      // this is checked by awaiting the Future, not via `throwsStateError`
+      // on the call expression itself.
+      await expectLater(
+        client.connectors.share(connectorId: 'c-1'),
+        throwsStateError,
+      );
+      await expectLater(
+        client.connectors.deleteAllUserCredentials(connectorIdOrName: 'c-1'),
+        throwsStateError,
+      );
+    });
   });
 }

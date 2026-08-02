@@ -19,11 +19,13 @@ class ExecutionTool {
   final Map<String, dynamic>? executionConfig;
 
   /// Creates an [ExecutionTool].
-  const ExecutionTool({
+  ExecutionTool({
     required this.name,
     required this.integrationId,
-    this.executionConfig,
-  });
+    Map<String, dynamic>? executionConfig,
+  }) : executionConfig = executionConfig == null
+           ? null
+           : Map.unmodifiable(executionConfig);
 
   /// Creates an [ExecutionTool] from JSON.
   factory ExecutionTool.fromJson(Map<String, dynamic> json) => ExecutionTool(

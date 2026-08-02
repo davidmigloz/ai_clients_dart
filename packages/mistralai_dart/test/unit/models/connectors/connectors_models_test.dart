@@ -256,6 +256,45 @@ void main() {
       });
       expect(PublicExecutionEnv.fromJson(env.toJson()), env);
     });
+
+    test('ExecutionTool.executionConfig is unmodifiable and deep-compared', () {
+      final tool = ExecutionTool(
+        name: 'search',
+        integrationId: 'conn-1',
+        executionConfig: const {
+          'nested': {
+            'list': [1, 2],
+          },
+        },
+      );
+      expect(
+        () => tool.executionConfig!['nested'] = 'mutated',
+        throwsUnsupportedError,
+      );
+
+      final same = ExecutionTool(
+        name: 'search',
+        integrationId: 'conn-1',
+        executionConfig: const {
+          'nested': {
+            'list': [1, 2],
+          },
+        },
+      );
+      expect(tool, equals(same));
+      expect(tool.hashCode, equals(same.hashCode));
+
+      final different = ExecutionTool(
+        name: 'search',
+        integrationId: 'conn-1',
+        executionConfig: const {
+          'nested': {
+            'list': [1, 3],
+          },
+        },
+      );
+      expect(tool, isNot(equals(different)));
+    });
   });
 
   group('forward-compatible connector enums', () {

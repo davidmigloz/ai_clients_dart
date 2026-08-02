@@ -421,5 +421,30 @@ void main() {
         expect(events.single, isA<SummaryStreamChunk>());
       },
     );
+
+    test('generateSummary guards against a closed client eagerly', () {
+      final client = streamingClient([])..close();
+
+      expect(
+        () => client.rag.searchIndexes.generateSummary(
+          indexId: 'idx-1',
+          language: SummaryLanguage.en,
+        ),
+        throwsStateError,
+      );
+    });
+
+    test('generateSchemaSummary guards against a closed client eagerly', () {
+      final client = streamingClient([])..close();
+
+      expect(
+        () => client.rag.searchIndexes.generateSchemaSummary(
+          indexId: 'idx-1',
+          schemaId: 'schema-1',
+          language: SummaryLanguage.en,
+        ),
+        throwsStateError,
+      );
+    });
   });
 }

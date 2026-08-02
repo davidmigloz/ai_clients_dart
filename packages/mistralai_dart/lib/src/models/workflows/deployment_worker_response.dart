@@ -32,18 +32,45 @@ class DeploymentWorkerResponse {
   });
 
   /// Creates a [DeploymentWorkerResponse] from JSON.
-  factory DeploymentWorkerResponse.fromJson(Map<String, dynamic> json) =>
-      DeploymentWorkerResponse(
-        name: json['name'] as String? ?? '',
-        isActive: json['is_active'] as bool? ?? false,
-        createdAt: json['created_at'] as String? ?? '',
-        updatedAt: json['updated_at'] as String? ?? '',
-        location: json['location'] == null
-            ? null
-            : DeploymentLocation.fromJson(
-                json['location'] as Map<String, dynamic>,
-              ),
+  ///
+  /// Throws a [FormatException] if a required field is missing.
+  factory DeploymentWorkerResponse.fromJson(Map<String, dynamic> json) {
+    final name = json['name'] as String?;
+    if (name == null) {
+      throw const FormatException(
+        'DeploymentWorkerResponse: missing required field "name"',
       );
+    }
+    final isActive = json['is_active'] as bool?;
+    if (isActive == null) {
+      throw const FormatException(
+        'DeploymentWorkerResponse: missing required field "is_active"',
+      );
+    }
+    final createdAt = json['created_at'] as String?;
+    if (createdAt == null) {
+      throw const FormatException(
+        'DeploymentWorkerResponse: missing required field "created_at"',
+      );
+    }
+    final updatedAt = json['updated_at'] as String?;
+    if (updatedAt == null) {
+      throw const FormatException(
+        'DeploymentWorkerResponse: missing required field "updated_at"',
+      );
+    }
+    return DeploymentWorkerResponse(
+      name: name,
+      isActive: isActive,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      location: json['location'] == null
+          ? null
+          : DeploymentLocation.fromJson(
+              json['location'] as Map<String, dynamic>,
+            ),
+    );
+  }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {

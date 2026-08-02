@@ -3,6 +3,10 @@ import 'package:meta/meta.dart';
 import '../common/equality_helpers.dart';
 
 /// A single retrievable document stored within a RAG search index (beta).
+///
+/// [fields] is arbitrary JSON (`additionalProperties: true` in the spec), so
+/// it is stored unmodifiable and compared/hashed deeply to account for
+/// nested maps and lists.
 @immutable
 class SearchIndexRetrievable {
   /// The native ID of the document in the underlying index.
@@ -12,7 +16,10 @@ class SearchIndexRetrievable {
   final Map<String, dynamic> fields;
 
   /// Creates a [SearchIndexRetrievable].
-  const SearchIndexRetrievable({required this.id, required this.fields});
+  SearchIndexRetrievable({
+    required this.id,
+    required Map<String, dynamic> fields,
+  }) : fields = Map.unmodifiable(fields);
 
   /// Creates a [SearchIndexRetrievable] from JSON.
   factory SearchIndexRetrievable.fromJson(Map<String, dynamic> json) =>
@@ -34,10 +41,10 @@ class SearchIndexRetrievable {
       other is SearchIndexRetrievable &&
           runtimeType == other.runtimeType &&
           id == other.id &&
-          mapsEqual(fields, other.fields);
+          mapsDeepEqual(fields, other.fields);
 
   @override
-  int get hashCode => Object.hash(id, mapHash(fields));
+  int get hashCode => Object.hash(id, mapDeepHashCode(fields));
 
   @override
   String toString() =>

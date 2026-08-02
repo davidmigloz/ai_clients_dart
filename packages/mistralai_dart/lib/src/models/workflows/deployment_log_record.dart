@@ -34,19 +34,34 @@ class DeploymentLogRecord {
   }) : logAttributes = Map.unmodifiable(logAttributes);
 
   /// Creates a [DeploymentLogRecord] from JSON.
-  factory DeploymentLogRecord.fromJson(Map<String, dynamic> json) =>
-      DeploymentLogRecord(
-        timestamp: json['timestamp'] as String? ?? '',
-        traceId: json['trace_id'] as String? ?? '',
-        spanId: json['span_id'] as String? ?? '',
-        severityText: json['severity_text'] as String? ?? '',
-        body: json['body'] as String? ?? '',
-        logAttributes:
-            (json['log_attributes'] as Map<String, dynamic>?)?.map(
-              (k, v) => MapEntry(k, v as String),
-            ) ??
-            const {},
+  ///
+  /// Throws a [FormatException] if a required field is missing.
+  factory DeploymentLogRecord.fromJson(Map<String, dynamic> json) {
+    String require(String key) {
+      final value = json[key];
+      if (value is! String) {
+        throw FormatException(
+          'DeploymentLogRecord: missing required field "$key"',
+        );
+      }
+      return value;
+    }
+
+    final logAttributesJson = json['log_attributes'];
+    if (logAttributesJson is! Map<String, dynamic>) {
+      throw const FormatException(
+        'DeploymentLogRecord: missing required field "log_attributes"',
       );
+    }
+    return DeploymentLogRecord(
+      timestamp: require('timestamp'),
+      traceId: require('trace_id'),
+      spanId: require('span_id'),
+      severityText: require('severity_text'),
+      body: require('body'),
+      logAttributes: logAttributesJson.map((k, v) => MapEntry(k, v as String)),
+    );
+  }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {

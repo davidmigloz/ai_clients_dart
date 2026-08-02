@@ -55,5 +55,13 @@ void main() {
         AgentListPage.fromJson(json).hashCode,
       );
     });
+
+    test('toString includes object', () {
+      final page = AgentListPage.fromJson(const {
+        'data': <dynamic>[],
+        'object': 'list',
+      });
+      expect(page.toString(), contains('object: list'));
+    });
   });
 }

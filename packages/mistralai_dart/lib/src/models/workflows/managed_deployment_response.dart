@@ -96,14 +96,26 @@ class ManagedDeploymentResponse {
         'ManagedDeploymentResponse: missing required field "status"',
       );
     }
+    final createdAt = json['created_at'] as String?;
+    if (createdAt == null) {
+      throw const FormatException(
+        'ManagedDeploymentResponse: missing required field "created_at"',
+      );
+    }
+    final updatedAt = json['updated_at'] as String?;
+    if (updatedAt == null) {
+      throw const FormatException(
+        'ManagedDeploymentResponse: missing required field "updated_at"',
+      );
+    }
     return ManagedDeploymentResponse(
       serviceId: serviceId,
       name: name,
       spec: DeploymentWorkerSpecResponse.fromJson(specJson),
       resources: DeploymentResourceConfig.fromJson(resourcesJson),
       status: DeploymentObservedState.fromJson(statusJson),
-      createdAt: json['created_at'] as String? ?? '',
-      updatedAt: json['updated_at'] as String? ?? '',
+      createdAt: createdAt,
+      updatedAt: updatedAt,
       createdBy: json['created_by'] as String?,
       deployedAt: json['deployed_at'] as String?,
       deployedBy: json['deployed_by'] as String?,

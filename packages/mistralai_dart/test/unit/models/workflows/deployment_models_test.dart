@@ -107,6 +107,52 @@ void main() {
       final cleared = request.copyWith(resources: null);
       expect(cleared.resources, isNull);
     });
+
+    test('emits explicit null when clearResources/clearSpec are set', () {
+      const request = UpdateDeploymentRequest(
+        clearResources: true,
+        clearSpec: true,
+      );
+      expect(request.toJson(), {'resources': null, 'spec': null});
+    });
+
+    test('fromJson distinguishes absent key from explicit null', () {
+      final cleared = UpdateDeploymentRequest.fromJson(const {
+        'resources': null,
+      });
+      expect(cleared.resources, isNull);
+      expect(cleared.clearResources, isTrue);
+
+      final omitted = UpdateDeploymentRequest.fromJson(const {});
+      expect(omitted.resources, isNull);
+      expect(omitted.clearResources, isFalse);
+    });
+
+    test('asserts when a value and its clearX flag are both set', () {
+      expect(
+        () => UpdateDeploymentRequest(
+          resources: const DeploymentResourceConfigUpdate(replicas: 1),
+          clearResources: true,
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => UpdateDeploymentRequest(
+          spec: const WorkflowsWorkerSpecUpdate(revision: 'v2'),
+          clearSpec: true,
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('copyWith clearX: true resets the value', () {
+      const request = UpdateDeploymentRequest(
+        resources: DeploymentResourceConfigUpdate(replicas: 5),
+      );
+      final cleared = request.copyWith(clearResources: true);
+      expect(cleared.resources, isNull);
+      expect(cleared.clearResources, isTrue);
+    });
   });
 
   group('DeploymentBuildState / DeploymentObservedState', () {
@@ -161,6 +207,20 @@ void main() {
       );
     });
 
+    test('throws FormatException when created_at/updated_at are missing', () {
+      final withoutCreatedAt = json()..remove('created_at');
+      expect(
+        () => ManagedDeploymentResponse.fromJson(withoutCreatedAt),
+        throwsFormatException,
+      );
+
+      final withoutUpdatedAt = json()..remove('updated_at');
+      expect(
+        () => ManagedDeploymentResponse.fromJson(withoutUpdatedAt),
+        throwsFormatException,
+      );
+    });
+
     test('equality and copyWith clear optional fields', () {
       final response = ManagedDeploymentResponse.fromJson(json());
       final other = ManagedDeploymentResponse.fromJson(json());
@@ -194,6 +254,31 @@ void main() {
       expect(response.results, hasLength(1));
       expect(response.nextCursor, 'cursor-1');
       expect(DeploymentLogSearchResponse.fromJson(response.toJson()), response);
+    });
+
+    test('throws FormatException when a required field is missing', () {
+      expect(
+        () => DeploymentLogRecord.fromJson(const {
+          'timestamp': '2030-01-01T00:00:00Z',
+          'trace_id': 'trace-1',
+          'span_id': 'span-1',
+          'severity_text': 'INFO',
+          // 'body' missing
+          'log_attributes': <String, dynamic>{},
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => DeploymentLogRecord.fromJson(const {
+          'timestamp': '2030-01-01T00:00:00Z',
+          'trace_id': 'trace-1',
+          'span_id': 'span-1',
+          'severity_text': 'INFO',
+          'body': 'hello',
+          // 'log_attributes' missing
+        }),
+        throwsFormatException,
+      );
     });
   });
 
@@ -260,6 +345,13 @@ void main() {
       expect(response.locations, isEmpty);
       expect(response.managed, isNull);
     });
+
+    test('throws FormatException when a required field is missing', () {
+      expect(
+        () => DeploymentResponse.fromJson(const {}),
+        throwsFormatException,
+      );
+    });
   });
 
   group('DeploymentDetailResponse field additions', () {
@@ -280,6 +372,13 @@ void main() {
       expect(response.workerCount, 1);
       expect(response.locations, [LocationType.local]);
       expect(DeploymentDetailResponse.fromJson(response.toJson()), response);
+    });
+
+    test('throws FormatException when a required field is missing', () {
+      expect(
+        () => DeploymentDetailResponse.fromJson(const {}),
+        throwsFormatException,
+      );
     });
   });
 
@@ -306,6 +405,13 @@ void main() {
         'updated_at': '2030-01-02T00:00:00Z',
       });
       expect(worker.location, isNull);
+    });
+
+    test('throws FormatException when a required field is missing', () {
+      expect(
+        () => DeploymentWorkerResponse.fromJson(const {}),
+        throwsFormatException,
+      );
     });
   });
 }

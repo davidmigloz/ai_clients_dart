@@ -9,7 +9,7 @@ class RegisterVespaIndexRequest {
   /// The discriminator value identifying this index as a Vespa index.
   ///
   /// Always `'vespa'`.
-  final String type;
+  String get type => 'vespa';
 
   /// The Kubernetes cluster hosting the Vespa instance.
   final String k8sCluster;
@@ -31,7 +31,6 @@ class RegisterVespaIndexRequest {
 
   /// Creates a [RegisterVespaIndexRequest].
   const RegisterVespaIndexRequest({
-    this.type = 'vespa',
     required this.k8sCluster,
     required this.k8sNamespace,
     required this.vespaInstanceName,
@@ -41,22 +40,29 @@ class RegisterVespaIndexRequest {
   });
 
   /// Creates a [RegisterVespaIndexRequest] from JSON.
-  factory RegisterVespaIndexRequest.fromJson(Map<String, dynamic> json) =>
-      RegisterVespaIndexRequest(
-        type: json['type'] as String? ?? 'vespa',
-        k8sCluster: json['k8s_cluster'] as String,
-        k8sNamespace: json['k8s_namespace'] as String,
-        vespaInstanceName: json['vespa_instance_name'] as String,
-        vespaVersion: json['vespa_version'] as String,
-        schemas: (json['schemas'] as List<dynamic>)
-            .map(
-              (e) => RegisterVespaSchemaRequest.fromJson(
-                e as Map<String, dynamic>,
-              ),
-            )
-            .toList(),
-        queryUrl: json['query_url'] as String,
+  ///
+  /// Throws a [FormatException] if `type` is present and not `"vespa"`.
+  factory RegisterVespaIndexRequest.fromJson(Map<String, dynamic> json) {
+    final type = json['type'];
+    if (type != null && type != 'vespa') {
+      throw FormatException(
+        'RegisterVespaIndexRequest: expected type "vespa", got "$type"',
       );
+    }
+    return RegisterVespaIndexRequest(
+      k8sCluster: json['k8s_cluster'] as String,
+      k8sNamespace: json['k8s_namespace'] as String,
+      vespaInstanceName: json['vespa_instance_name'] as String,
+      vespaVersion: json['vespa_version'] as String,
+      schemas: (json['schemas'] as List<dynamic>)
+          .map(
+            (e) =>
+                RegisterVespaSchemaRequest.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
+      queryUrl: json['query_url'] as String,
+    );
+  }
 
   /// Converts this object to JSON.
   Map<String, dynamic> toJson() => {
@@ -71,7 +77,6 @@ class RegisterVespaIndexRequest {
 
   /// Creates a copy with the given fields replaced.
   RegisterVespaIndexRequest copyWith({
-    String? type,
     String? k8sCluster,
     String? k8sNamespace,
     String? vespaInstanceName,
@@ -79,7 +84,6 @@ class RegisterVespaIndexRequest {
     List<RegisterVespaSchemaRequest>? schemas,
     String? queryUrl,
   }) => RegisterVespaIndexRequest(
-    type: type ?? this.type,
     k8sCluster: k8sCluster ?? this.k8sCluster,
     k8sNamespace: k8sNamespace ?? this.k8sNamespace,
     vespaInstanceName: vespaInstanceName ?? this.vespaInstanceName,

@@ -9,7 +9,7 @@ class VespaIndexSummary {
   /// The discriminator value identifying this index as a Vespa index.
   ///
   /// Always `'vespa'`.
-  final String type;
+  String get type => 'vespa';
 
   /// The Kubernetes cluster hosting the Vespa instance.
   final String k8sCluster;
@@ -25,7 +25,6 @@ class VespaIndexSummary {
 
   /// Creates a [VespaIndexSummary].
   const VespaIndexSummary({
-    this.type = 'vespa',
     required this.k8sCluster,
     required this.k8sNamespace,
     required this.vespaInstanceName,
@@ -33,16 +32,24 @@ class VespaIndexSummary {
   });
 
   /// Creates a [VespaIndexSummary] from JSON.
-  factory VespaIndexSummary.fromJson(Map<String, dynamic> json) =>
-      VespaIndexSummary(
-        type: json['type'] as String? ?? 'vespa',
-        k8sCluster: json['k8s_cluster'] as String,
-        k8sNamespace: json['k8s_namespace'] as String,
-        vespaInstanceName: json['vespa_instance_name'] as String,
-        schemas: (json['schemas'] as List<dynamic>)
-            .map((e) => VespaSchemaSummary.fromJson(e as Map<String, dynamic>))
-            .toList(),
+  ///
+  /// Throws a [FormatException] if `type` is present and not `"vespa"`.
+  factory VespaIndexSummary.fromJson(Map<String, dynamic> json) {
+    final type = json['type'];
+    if (type != null && type != 'vespa') {
+      throw FormatException(
+        'VespaIndexSummary: expected type "vespa", got "$type"',
       );
+    }
+    return VespaIndexSummary(
+      k8sCluster: json['k8s_cluster'] as String,
+      k8sNamespace: json['k8s_namespace'] as String,
+      vespaInstanceName: json['vespa_instance_name'] as String,
+      schemas: (json['schemas'] as List<dynamic>)
+          .map((e) => VespaSchemaSummary.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 
   /// Converts this object to JSON.
   Map<String, dynamic> toJson() => {
@@ -55,13 +62,11 @@ class VespaIndexSummary {
 
   /// Creates a copy with the given fields replaced.
   VespaIndexSummary copyWith({
-    String? type,
     String? k8sCluster,
     String? k8sNamespace,
     String? vespaInstanceName,
     List<VespaSchemaSummary>? schemas,
   }) => VespaIndexSummary(
-    type: type ?? this.type,
     k8sCluster: k8sCluster ?? this.k8sCluster,
     k8sNamespace: k8sNamespace ?? this.k8sNamespace,
     vespaInstanceName: vespaInstanceName ?? this.vespaInstanceName,

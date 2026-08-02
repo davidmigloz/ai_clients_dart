@@ -17,6 +17,24 @@ void main() {
 
         expect(request.toJson(), <String, dynamic>{});
       });
+
+      test('emits explicit null when clearSharingScope is set', () {
+        const request = UpdateSkillRequest(clearSharingScope: true);
+
+        expect(request.toJson(), {'sharingScope': null});
+      });
+    });
+
+    group('constructor', () {
+      test('asserts when sharingScope and clearSharingScope are both set', () {
+        expect(
+          () => UpdateSkillRequest(
+            sharingScope: RegistrySharingScope.workspace,
+            clearSharingScope: true,
+          ),
+          throwsA(isA<AssertionError>()),
+        );
+      });
     });
 
     group('copyWith', () {
@@ -48,6 +66,17 @@ void main() {
         );
 
         expect(original.copyWith(), equals(original));
+      });
+
+      test('clearSharingScope: true clears the field and resets the value', () {
+        const original = UpdateSkillRequest(
+          sharingScope: RegistrySharingScope.private,
+        );
+
+        final cleared = original.copyWith(clearSharingScope: true);
+
+        expect(cleared.sharingScope, isNull);
+        expect(cleared.clearSharingScope, isTrue);
       });
     });
 

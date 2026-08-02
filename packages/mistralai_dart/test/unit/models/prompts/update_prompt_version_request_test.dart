@@ -33,6 +33,21 @@ void main() {
 
         expect(request.toJson(), {'notes': 'notes'});
       });
+
+      test('emits explicit null for notes when clearNotes is set', () {
+        const request = UpdatePromptVersionRequest(clearNotes: true);
+
+        expect(request.toJson(), {'notes': null});
+      });
+    });
+
+    group('constructor', () {
+      test('asserts when notes and clearNotes are both set', () {
+        expect(
+          () => UpdatePromptVersionRequest(notes: 'x', clearNotes: true),
+          throwsA(isA<AssertionError>()),
+        );
+      });
     });
 
     group('copyWith', () {
@@ -56,6 +71,15 @@ void main() {
         const original = UpdatePromptVersionRequest(notes: 'a');
 
         expect(original.copyWith(), equals(original));
+      });
+
+      test('clearNotes: true clears the field and resets the value', () {
+        const original = UpdatePromptVersionRequest(notes: 'a');
+
+        final cleared = original.copyWith(clearNotes: true);
+
+        expect(cleared.notes, isNull);
+        expect(cleared.clearNotes, isTrue);
       });
     });
 

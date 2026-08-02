@@ -3802,6 +3802,10 @@
       "dart_class": "RegisterVespaIndexRequest",
       "file": "lib/src/models/rag/register_vespa_index_request.dart",
       "schema": "RegisterSearchIndexRequestVespaIndex",
+      "excluded_properties": [
+        "type"
+      ],
+      "note": "`type` is a const `vespa` discriminator modeled as a constant getter (validated in fromJson); excluded from field verification.",
       "tags": []
     },
     "RegisterVespaSchemaRequest": {
@@ -3882,6 +3886,10 @@
       "dart_class": "VespaIndexSummary",
       "file": "lib/src/models/rag/vespa_index_summary.dart",
       "schema": "GetSearchIndexSummaryResponseVespaIndex",
+      "excluded_properties": [
+        "type"
+      ],
+      "note": "`type` is a const `vespa` discriminator modeled as a constant getter (validated in fromJson); excluded from field verification.",
       "tags": []
     },
     "VespaSchemaSummary": {

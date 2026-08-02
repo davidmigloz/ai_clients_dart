@@ -23,6 +23,40 @@ void main() {
 
         expect(request.toJson(), <String, dynamic>{});
       });
+
+      test('emits explicit null when clearX flags are set', () {
+        const request = UpdatePromptRequest(
+          clearDescription: true,
+          clearTitle: true,
+          clearSharingScope: true,
+        );
+
+        expect(request.toJson(), {
+          'description': null,
+          'title': null,
+          'sharingScope': null,
+        });
+      });
+    });
+
+    group('constructor', () {
+      test('asserts when a clearX flag and its value are both set', () {
+        expect(
+          () => UpdatePromptRequest(description: 'x', clearDescription: true),
+          throwsA(isA<AssertionError>()),
+        );
+        expect(
+          () => UpdatePromptRequest(title: 'x', clearTitle: true),
+          throwsA(isA<AssertionError>()),
+        );
+        expect(
+          () => UpdatePromptRequest(
+            sharingScope: RegistrySharingScope.workspace,
+            clearSharingScope: true,
+          ),
+          throwsA(isA<AssertionError>()),
+        );
+      });
     });
 
     group('copyWith', () {
@@ -46,6 +80,25 @@ void main() {
         const original = UpdatePromptRequest(description: 'a');
 
         expect(original.copyWith(), equals(original));
+      });
+
+      test('clearX: true clears the field and resets the value', () {
+        const original = UpdatePromptRequest(description: 'a');
+
+        final cleared = original.copyWith(clearDescription: true);
+
+        expect(cleared.description, isNull);
+        expect(cleared.clearDescription, isTrue);
+        expect(cleared.toJson(), {'description': null});
+      });
+
+      test('a new non-null value resets the clearX flag', () {
+        const original = UpdatePromptRequest(clearDescription: true);
+
+        final replaced = original.copyWith(description: 'b');
+
+        expect(replaced.description, 'b');
+        expect(replaced.clearDescription, isFalse);
       });
     });
 

@@ -71,6 +71,7 @@ class ConnectorsResource extends ResourceBase {
   ///
   /// [request] contains the connector configuration.
   Future<Connector> create({required CreateConnectorRequest request}) async {
+    ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/connectors');
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
@@ -97,6 +98,7 @@ class ConnectorsResource extends ResourceBase {
     String? cursor,
     int? pageSize,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{
       if (queryFilters?.active != null)
         'active': queryFilters!.active.toString(),
@@ -132,6 +134,7 @@ class ConnectorsResource extends ResourceBase {
     bool? fetchUserData,
     bool? fetchCustomerData,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, dynamic>{};
     if (fetchUserData != null) {
       queryParams['fetch_user_data'] = fetchUserData.toString();
@@ -163,6 +166,7 @@ class ConnectorsResource extends ResourceBase {
     required String connectorId,
     required UpdateConnectorRequest request,
   }) async {
+    ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/connectors/$connectorId');
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
@@ -184,6 +188,7 @@ class ConnectorsResource extends ResourceBase {
   ///
   /// [connectorId] is the unique identifier of the connector to delete.
   Future<MessageResponse> delete({required String connectorId}) async {
+    ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/connectors/$connectorId');
     final headers = requestBuilder.buildHeaders();
 
@@ -215,6 +220,7 @@ class ConnectorsResource extends ResourceBase {
     String? credentialsName,
     bool? githubInstallationLink,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{
       'app_return_url': ?appReturnUrl,
       if (methodType != null) 'method_type': methodType.value,
@@ -245,6 +251,7 @@ class ConnectorsResource extends ResourceBase {
   Future<List<PublicAuthenticationMethod>> getAuthenticationMethods({
     required String connectorIdOrName,
   }) async {
+    ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
       '/v1/connectors/$connectorIdOrName/authentication_methods',
     );
@@ -288,6 +295,7 @@ class ConnectorsResource extends ResourceBase {
     bool? pretty,
     String? credentialsName,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{
       if (page != null) 'page': page.toString(),
       if (pageSize != null) 'page_size': pageSize.toString(),
@@ -324,6 +332,7 @@ class ConnectorsResource extends ResourceBase {
     ConnectorCallToolRequest request = const ConnectorCallToolRequest(),
     String? credentialsName,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{'credentials_name': ?credentialsName};
 
     final url = requestBuilder.buildUrl(
@@ -398,6 +407,7 @@ class ConnectorsResource extends ResourceBase {
     OutboundAuthenticationType? authType,
     bool? fetchDefault,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{
       if (authType != null) 'auth_type': authType.value,
       if (fetchDefault != null) 'fetch_default': fetchDefault.toString(),
@@ -460,6 +470,7 @@ class ConnectorsResource extends ResourceBase {
     required String level,
     required CredentialsCreateOrUpdate request,
   }) async {
+    ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
       '/v1/connectors/$connectorIdOrName/$level/credentials',
     );
@@ -523,6 +534,7 @@ class ConnectorsResource extends ResourceBase {
     required String level,
     required String credentialsName,
   }) async {
+    ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
       '/v1/connectors/$connectorIdOrName/$level/credentials/$credentialsName',
     );
@@ -544,6 +556,7 @@ class ConnectorsResource extends ResourceBase {
   Future<MessageResponse> deleteAllUserCredentials({
     required String connectorIdOrName,
   }) async {
+    ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
       '/v1/connectors/$connectorIdOrName/user/credentials',
     );
@@ -576,6 +589,7 @@ class ConnectorsResource extends ResourceBase {
   ///
   /// [connectorId] is the unique identifier of the connector to share.
   Future<MessageResponse> share({required String connectorId}) async {
+    ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/connectors/$connectorId/share');
     final headers = requestBuilder.buildHeaders();
 
@@ -660,6 +674,7 @@ class ConnectorsResource extends ResourceBase {
     required String level,
     ToolExecutionConfiguration? toolConfiguration,
   }) async {
+    ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
       '/v1/connectors/$connectorId/$level/activate',
     );
@@ -680,6 +695,7 @@ class ConnectorsResource extends ResourceBase {
     required String connectorId,
     required String level,
   }) async {
+    ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
       '/v1/connectors/$connectorId/$level/deactivate',
     );

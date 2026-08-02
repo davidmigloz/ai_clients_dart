@@ -102,10 +102,19 @@ void main() {
       expect(RegisterVespaIndexRequest.fromJson(withoutType).type, 'vespa');
     });
 
+    test('fromJson throws FormatException for a non-vespa type', () {
+      final invalid = Map<String, dynamic>.from(json)..['type'] = 'other';
+      expect(
+        () => RegisterVespaIndexRequest.fromJson(invalid),
+        throwsFormatException,
+      );
+    });
+
     test('copyWith and equality are value-based', () {
       final index = RegisterVespaIndexRequest.fromJson(json);
       expect(index, RegisterVespaIndexRequest.fromJson(json));
       expect(index.copyWith(k8sCluster: 'other').k8sCluster, 'other');
+      expect(index.copyWith(k8sCluster: 'other').type, 'vespa');
       expect(index.toString(), contains('cluster'));
     });
   });
@@ -376,10 +385,16 @@ void main() {
       expect(summary.toJson(), json);
     });
 
+    test('fromJson throws FormatException for a non-vespa type', () {
+      final invalid = Map<String, dynamic>.from(json)..['type'] = 'other';
+      expect(() => VespaIndexSummary.fromJson(invalid), throwsFormatException);
+    });
+
     test('copyWith and equality are value-based', () {
       final summary = VespaIndexSummary.fromJson(json);
       expect(summary, VespaIndexSummary.fromJson(json));
       expect(summary.copyWith(k8sCluster: 'other').k8sCluster, 'other');
+      expect(summary.copyWith(k8sCluster: 'other').type, 'vespa');
       expect(summary.toString(), contains('cluster'));
     });
   });
@@ -449,6 +464,45 @@ void main() {
       );
       expect(retrievable.copyWith(id: 'doc-2').id, 'doc-2');
       expect(retrievable.toString(), contains('doc-1'));
+    });
+
+    test('fields is unmodifiable', () {
+      final retrievable = SearchIndexRetrievable.fromJson(json);
+      expect(
+        () => retrievable.fields['title'] = 'mutated',
+        throwsUnsupportedError,
+      );
+    });
+
+    test('equality is deep for nested maps/lists', () {
+      final a = SearchIndexRetrievable(
+        id: 'doc-1',
+        fields: const {
+          'nested': {
+            'list': [1, 2, 3],
+          },
+        },
+      );
+      final b = SearchIndexRetrievable(
+        id: 'doc-1',
+        fields: const {
+          'nested': {
+            'list': [1, 2, 3],
+          },
+        },
+      );
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+
+      final c = SearchIndexRetrievable(
+        id: 'doc-1',
+        fields: const {
+          'nested': {
+            'list': [1, 2, 4],
+          },
+        },
+      );
+      expect(a, isNot(equals(c)));
     });
   });
 

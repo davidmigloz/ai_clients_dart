@@ -59,32 +59,65 @@ class DeploymentResponse {
   }) : locations = List.unmodifiable(locations);
 
   /// Creates a [DeploymentResponse] from JSON.
-  factory DeploymentResponse.fromJson(Map<String, dynamic> json) =>
-      DeploymentResponse(
-        id: json['id'] as String? ?? '',
-        name: json['name'] as String? ?? '',
-        isActive: json['is_active'] as bool? ?? false,
-        createdAt: json['created_at'] as String? ?? '',
-        updatedAt: json['updated_at'] as String? ?? '',
-        isHardened: json['is_hardened'] as bool? ?? false,
-        location: json['location'] == null
-            ? null
-            : DeploymentLocation.fromJson(
-                json['location'] as Map<String, dynamic>,
-              ),
-        activeWorkerCount: json['active_worker_count'] as int? ?? 0,
-        workerCount: json['worker_count'] as int? ?? 0,
-        locations:
-            (json['locations'] as List?)
-                ?.map((e) => LocationType.fromJson(e as String?))
-                .toList() ??
-            const [],
-        managed: json['managed'] == null
-            ? null
-            : ManagedDeploymentResponse.fromJson(
-                json['managed'] as Map<String, dynamic>,
-              ),
+  ///
+  /// Throws a [FormatException] if a required field is missing.
+  factory DeploymentResponse.fromJson(Map<String, dynamic> json) {
+    final id = json['id'] as String?;
+    if (id == null) {
+      throw const FormatException(
+        'DeploymentResponse: missing required field "id"',
       );
+    }
+    final name = json['name'] as String?;
+    if (name == null) {
+      throw const FormatException(
+        'DeploymentResponse: missing required field "name"',
+      );
+    }
+    final isActive = json['is_active'] as bool?;
+    if (isActive == null) {
+      throw const FormatException(
+        'DeploymentResponse: missing required field "is_active"',
+      );
+    }
+    final createdAt = json['created_at'] as String?;
+    if (createdAt == null) {
+      throw const FormatException(
+        'DeploymentResponse: missing required field "created_at"',
+      );
+    }
+    final updatedAt = json['updated_at'] as String?;
+    if (updatedAt == null) {
+      throw const FormatException(
+        'DeploymentResponse: missing required field "updated_at"',
+      );
+    }
+    return DeploymentResponse(
+      id: id,
+      name: name,
+      isActive: isActive,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      isHardened: json['is_hardened'] as bool? ?? false,
+      location: json['location'] == null
+          ? null
+          : DeploymentLocation.fromJson(
+              json['location'] as Map<String, dynamic>,
+            ),
+      activeWorkerCount: json['active_worker_count'] as int? ?? 0,
+      workerCount: json['worker_count'] as int? ?? 0,
+      locations:
+          (json['locations'] as List?)
+              ?.map((e) => LocationType.fromJson(e as String?))
+              .toList() ??
+          const [],
+      managed: json['managed'] == null
+          ? null
+          : ManagedDeploymentResponse.fromJson(
+              json['managed'] as Map<String, dynamic>,
+            ),
+    );
+  }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
