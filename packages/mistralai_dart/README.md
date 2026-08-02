@@ -43,17 +43,20 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 
 ### Operational APIs
 
-- Files, fine-tuning, and batch processing
+- Files, fine-tuned model management, and batch processing
 - Agents, conversations, connectors, and libraries (beta)
+- Prompts and skills: versioned, shareable templates and instructions (beta)
 - Observability: campaigns, datasets, judges, and chat completion events (beta)
-- Workflows: execution, scheduling, deployments, and management (beta)
+- Workflows: execution, scheduling, managed deployments, and management (beta)
+- RAG: ingestion pipeline configuration and search index management (beta)
+- Users: current authenticated user identity (beta)
 
 ## Why choose this client?
 
 - Pure Dart with no Flutter dependency — works in mobile apps, backends, and CLIs.
 - Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
 - Streaming, retries, interceptors, and error handling built into the client.
-- Covers the full Mistral AI API surface, including beta agents, conversations, connectors, libraries, observability, and workflows.
+- Covers the full Mistral AI API surface, including beta agents, conversations, connectors, libraries, prompts, skills, observability, workflows, RAG, and users.
 - Strict [semver](https://semver.org/) versioning so downstream packages can depend on stable, predictable version ranges.
 
 ## Quickstart
@@ -501,43 +504,32 @@ await client.files.delete(fileId: file.id);
 
 </details>
 
-### How do I fine-tune and batch?
+### How do I manage fine-tuned models and batch?
 
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.fineTuning.jobs` to create and monitor fine-tuning jobs, and `client.batch.jobs` for batch processing. Both support polling helpers for long-running operations.
+The fine-tuning jobs API has been removed upstream; use `client.fineTuning.models` to manage the fine-tuned models that result from training runs launched outside this client, and `client.batch.jobs` for batch processing. Batch jobs support a polling helper for long-running operations.
 
 ```dart
-// Create a fine-tuning job
-final job = await client.fineTuning.jobs.create(
-  request: CreateFineTuningJobRequest(
-    model: 'mistral-small-latest',
-    trainingFiles: [TrainingFile(fileId: 'file-abc123')],
-    hyperparameters: Hyperparameters(
-      epochs: 3,
-      learningRate: 0.0001,
-    ),
-  ),
+// Update a fine-tuned model's metadata
+final updated = await client.fineTuning.models.update(
+  modelId: 'ft:mistral-small:my-model:xyz',
+  name: 'My Model v2',
 );
 
-// Poll for completion
-final poller = FineTuningJobPoller(
-  client: client,
-  jobId: job.id,
-  pollInterval: Duration(seconds: 30),
-  timeout: Duration(hours: 2),
-);
-final completedJob = await poller.poll();
+// Archive / unarchive a fine-tuned model
+await client.fineTuning.models.archive(modelId: updated.id);
+await client.fineTuning.models.unarchive(modelId: updated.id);
 
-// List jobs with pagination
-final paginator = Paginator<FineTuningJob, FineTuningJobList>(
-  fetcher: (page, size) => client.fineTuning.jobs.list(page: page, pageSize: size),
+// List available models with pagination
+final paginator = Paginator<AgentList, Agent>(
+  fetcher: (page, size) => client.agents.list(page: page, pageSize: size),
   getItems: (response) => response.data,
 );
 
-await for (final job in paginator.items()) {
-  print('Job: ${job.id} - ${job.status}');
+await for (final agent in paginator.items()) {
+  print('Agent: ${agent.id}');
 }
 ```
 
@@ -839,12 +831,113 @@ await client.libraries.delete(libraryId: library.id);
 
 </details>
 
+### How do I use prompts?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.prompts` to manage versioned, shareable prompt templates (Beta). Each prompt has one or more versions; aliases (e.g. `production`) let you point consumers at a specific version without changing their code.
+
+```dart
+// Create a prompt
+final prompt = await client.prompts.create(
+  request: const CreatePromptRequest(
+    name: 'greeting',
+    definition: PromptDefinition(content: 'Hello, {{name}}!'),
+  ),
+);
+
+// List prompts
+final prompts = await client.prompts.list(pageSize: 10);
+
+// Create a new version
+final version = await client.prompts.createVersion(
+  promptId: prompt.id,
+  request: const CreatePromptVersionRequest(
+    definition: PromptDefinition(content: 'Hi there, {{name}}!'),
+  ),
+);
+
+// Point an alias at the new version
+await client.prompts.updateVersion(
+  promptId: prompt.id,
+  version: version.version ?? 2,
+  request: const UpdatePromptVersionRequest(
+    aliases: AliasList(values: ['production']),
+  ),
+);
+
+// Retrieve by alias
+final latest = await client.prompts.retrieve(
+  promptId: prompt.id,
+  alias: 'production',
+);
+print(latest.definition?.content);
+
+// Delete the prompt
+await client.prompts.delete(promptId: prompt.id);
+```
+
+→ [Full example](example/prompts_example.dart)
+
+</details>
+
+### How do I use skills?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.skills` to manage versioned, shareable model instructions with optional file assets (Beta). Skills follow the same version/alias model as prompts.
+
+```dart
+// Create a skill with a text asset
+final skill = await client.skills.create(
+  request: const CreateSkillRequest(
+    name: 'summarizer',
+    definition: SkillDefinition(
+      description: 'Summarizes long documents.',
+      body: 'Summarize the input in three bullet points.',
+      assets: {
+        'style_guide.txt': SkillAssetContent.text(
+          textContent: 'Use concise, plain language.',
+        ),
+      },
+    ),
+  ),
+);
+
+// List skills
+final skills = await client.skills.list(pageSize: 10);
+
+// Create a new version and point an alias at it
+final version = await client.skills.createVersion(
+  skillId: skill.id,
+  request: const CreateSkillVersionRequest(
+    definition: SkillDefinition(body: 'Summarize in three short bullets.'),
+  ),
+);
+await client.skills.updateVersion(
+  skillId: skill.id,
+  version: version.version ?? 2,
+  request: const UpdateSkillVersionRequest(
+    aliases: AliasList(values: ['production']),
+  ),
+);
+
+// Delete the skill
+await client.skills.delete(skillId: skill.id);
+```
+
+→ [Full example](example/skills_example.dart)
+
+</details>
+
 ### How do I use connectors?
 
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.connectors` to manage MCP connectors (Beta): create and configure connectors, manage their credentials, activate or deactivate them at the organization, workspace, or user level, and list or call their tools.
+Use `client.connectors` to manage MCP connectors (Beta): create and configure connectors, manage their credentials, activate or deactivate them at the organization, workspace, or user level, share a private connector with the workspace, and list or call their tools.
 
 ```dart
 // Create an MCP connector
@@ -853,7 +946,7 @@ final connector = await client.connectors.create(
     name: 'my_connector',
     description: 'My MCP connector',
     server: 'https://mcp.example.com',
-    visibility: ResourceVisibility.sharedOrg,
+    visibility: PublicResourceVisibility.sharedOrg,
   ),
 );
 
@@ -868,6 +961,14 @@ await client.connectors.createOrUpdateUserCredentials(
 
 // Activate the connector for the organization
 await client.connectors.activateForOrganization(connectorId: connector.id);
+
+// Share a private connector with the current workspace
+await client.connectors.share(connectorId: connector.id);
+
+// Remove all user-level credentials for the connector
+await client.connectors.deleteAllUserCredentials(
+  connectorIdOrName: connector.id,
+);
 
 // List and call the connector's tools
 final tools = await client.connectors.listTools(
@@ -939,7 +1040,7 @@ final logs = await client.observability.logs.search();
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.rag` to configure document ingestion pipelines and manage the search indexes used for retrieval (Beta). The `ingestionPipelineConfigurations` sub-resource registers and lists pipeline configurations, while the `searchIndexes` sub-resource inspects and registers search indexes.
+Use `client.rag` to configure document ingestion pipelines and manage the Vespa-backed search indexes used for retrieval (Beta). The `ingestionPipelineConfigurations` sub-resource registers and lists pipeline configurations, while the `searchIndexes` sub-resource registers, inspects, and unregisters search indexes.
 
 ```dart
 // List ingestion pipeline configurations
@@ -961,19 +1062,29 @@ await client.rag.ingestionPipelineConfigurations.updateRunInfo(
   ),
 );
 
-// Inspect and register search indexes
-final indexes = await client.rag.searchIndexes.list();
-final index = await client.rag.searchIndexes.register(
-  request: const CreateSearchIndexInfoRequest(
+// Register a Vespa-backed search index
+final registered = await client.rag.searchIndexes.register(
+  request: const RegisterSearchIndexRequest(
     name: 'My search index',
-    index: CreateVespaSearchIndexInfoRequest(
+    index: RegisterVespaIndexRequest(
       k8sCluster: 'cluster',
       k8sNamespace: 'namespace',
       vespaInstanceName: 'instance',
-      schemas: [CreateVespaSchemaRequest(name: 'documents')],
+      vespaVersion: '8.0.0',
+      queryUrl: 'https://vespa.example.com',
+      schemas: [],
     ),
   ),
 );
+
+// Fetch detailed information and list summaries
+final detail = await client.rag.searchIndexes.getDetail(
+  indexId: registered.id,
+);
+final summaries = await client.rag.searchIndexes.listSummaries();
+
+// Unregister the search index
+await client.rag.searchIndexes.unregister(indexId: registered.id);
 ```
 
 → [Full example](example/rag_index_example.dart)
@@ -1023,9 +1134,50 @@ final registrations = await client.workflows.registrations.list();
 
 // List schedules
 final schedules = await client.workflows.schedules.list();
+
+// Create, start, and monitor a managed deployment
+final deployment = await client.workflows.deployments.create(
+  request: const CreateDeploymentRequest(
+    name: 'my-deployment',
+    spec: DeploymentWorkerSpecInput(
+      githubUrl: 'https://github.com/my-org/my-worker',
+    ),
+  ),
+);
+await client.workflows.deployments.start(name: deployment.name);
+
+final logs = await client.workflows.deployments.getLogs(
+  name: deployment.name,
+  limit: 50,
+);
+print('Fetched ${logs.results.length} log record(s)');
+await for (final log in client.workflows.deployments.streamLogs(
+  name: deployment.name,
+)) {
+  print('${log.severityText}: ${log.body}');
+}
 ```
 
 → [Full example](example/workflows_example.dart)
+
+</details>
+
+### How do I get the current user?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.users` to retrieve the identity of the currently authenticated user (Beta), including their organization, workspace, and the API key used for the request.
+
+```dart
+final identity = await client.users.me();
+
+print('Signed in as: ${identity.email}');
+print('Organization: ${identity.organization?.name}');
+print('Workspace: ${identity.workspace?.name}');
+```
+
+→ [Full example](example/users_example.dart)
 
 </details>
 
@@ -1081,7 +1233,7 @@ See the [example/](example/) directory for complete examples:
 | [`embeddings_example.dart`](example/embeddings_example.dart) | Text embeddings |
 | [`fim_example.dart`](example/fim_example.dart) | Code completion |
 | [`files_example.dart`](example/files_example.dart) | File management |
-| [`fine_tuning_example.dart`](example/fine_tuning_example.dart) | Model training |
+| [`fine_tuning_example.dart`](example/fine_tuning_example.dart) | Fine-tuned model management |
 | [`batch_example.dart`](example/batch_example.dart) | Batch processing |
 | [`moderation_example.dart`](example/moderation_example.dart) | Content moderation |
 | [`classification_example.dart`](example/classification_example.dart) | Text classification |
@@ -1090,9 +1242,13 @@ See the [example/](example/) directory for complete examples:
 | [`agents_example.dart`](example/agents_example.dart) | AI agents (beta) |
 | [`conversations_example.dart`](example/conversations_example.dart) | Multi-turn conversations (beta) |
 | [`libraries_example.dart`](example/libraries_example.dart) | Document storage (beta) |
+| [`prompts_example.dart`](example/prompts_example.dart) | Versioned prompt templates (beta) |
+| [`skills_example.dart`](example/skills_example.dart) | Versioned model instructions and assets (beta) |
+| [`connectors_example.dart`](example/connectors_example.dart) | MCP connector management (beta) |
 | [`observability_example.dart`](example/observability_example.dart) | Observability: datasets, judges, campaigns (beta) |
-| [`workflows_example.dart`](example/workflows_example.dart) | Workflow execution and scheduling (beta) |
+| [`workflows_example.dart`](example/workflows_example.dart) | Workflow execution, scheduling, and managed deployments (beta) |
 | [`rag_index_example.dart`](example/rag_index_example.dart) | RAG ingestion pipelines and search indexes (beta) |
+| [`users_example.dart`](example/users_example.dart) | Current authenticated user identity (beta) |
 | [`models_example.dart`](example/models_example.dart) | Model listing |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
 | [`config_example.dart`](example/config_example.dart) | Client configuration options |
@@ -1111,7 +1267,7 @@ See the [example/](example/) directory for complete examples:
 | Models | ✅ Full |
 | FIM | ✅ Full |
 | Files | ✅ Full |
-| Fine-tuning | ✅ Full |
+| Fine-tuned models (management) | ✅ Full |
 | Batch | ✅ Full |
 | Moderations | ✅ Full |
 | Classifications | ✅ Full |
@@ -1120,8 +1276,13 @@ See the [example/](example/) directory for complete examples:
 | Agents (Beta) | ✅ Full |
 | Conversations (Beta) | ✅ Full |
 | Libraries (Beta) | ✅ Full |
+| Connectors (Beta) | ✅ Full |
+| Prompts (Beta) | ✅ Full |
+| Skills (Beta) | ✅ Full |
 | Observability (Beta) | ✅ Full |
 | Workflows (Beta) | ✅ Full |
+| RAG (Beta) | ✅ Full |
+| Users (Beta) | ✅ Full |
 
 ## Official Documentation
 
