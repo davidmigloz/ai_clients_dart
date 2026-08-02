@@ -242,6 +242,15 @@
       "schema": "ChatResponse",
       "tags": []
     },
+    "CreateRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateRequest",
+      "file": "lib/src/models/models/create_request.dart",
+      "schema": "CreateRequest",
+      "note": "Dart class adds client-ahead fields (files, adapters, draft_quantize, draft_files, remote_host, requires, info) sourced from Ollama api/types.go + docs/api.md; upstream docs/openapi.yaml omits them.",
+      "tags": []
+    },
     "GenerateRequest": {
       "spec": "main",
       "kind": "object",

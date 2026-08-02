@@ -322,8 +322,16 @@
             "description": "Key-value parameters for the model",
             "type": "object"
           },
+          "parser": {
+            "description": "Name of the parser for the model",
+            "type": "string"
+          },
           "quantize": {
             "description": "Quantization level to apply (e.g. `q4_K_M`, `q8_0`)",
+            "type": "string"
+          },
+          "renderer": {
+            "description": "Name of the renderer for the model",
             "type": "string"
           },
           "stream": {
