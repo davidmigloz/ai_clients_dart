@@ -116,8 +116,19 @@
     }
   },
   "coverage": {
-    "excluded_paths": [],
-    "excluded_tags": [],
+    "excluded_paths": [
+      "^/v1/admin(/|$)"
+    ],
+    "excluded_tags": [
+      "beta.admin.api-keys",
+      "beta.admin.audit-logs",
+      "beta.admin.billing",
+      "beta.admin.user-groups",
+      "beta.admin.users",
+      "beta.admin.vibe-code-analytics",
+      "beta.admin.vibe-work-analytics",
+      "beta.admin.workspaces"
+    ],
     "priority_resources": [
       "chat",
       "embeddings",
@@ -125,7 +136,9 @@
       "files",
       "agents"
     ],
-    "notes": {},
+    "notes": {
+      "admin": "beta.admin.* org-console surface (41 endpoints, ~100 schemas) deliberately excluded from coverage in the 2026-08 spec sync; candidate for a follow-up PR."
+    },
     "expected_properties": {},
     "excluded_properties": {
       "global": []
@@ -156,54 +169,6 @@
       "dart_class": "UpdateRunInfo",
       "file": "lib/src/models/rag/update_run_info.dart",
       "schema": "UpdateRunInfo",
-      "tags": []
-    },
-    "SearchIndexResponse": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "SearchIndexResponse",
-      "file": "lib/src/models/rag/search_index_response.dart",
-      "schema": "SearchIndexResponse",
-      "tags": []
-    },
-    "CreateSearchIndexInfoRequest": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "CreateSearchIndexInfoRequest",
-      "file": "lib/src/models/rag/create_search_index_info_request.dart",
-      "schema": "CreateSearchIndexInfoRequest",
-      "tags": []
-    },
-    "VespaSearchIndexInfoResponse": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "VespaSearchIndexInfoResponse",
-      "file": "lib/src/models/rag/vespa_search_index_info_response.dart",
-      "schema": "VespaSearchIndexInfoResponse",
-      "tags": []
-    },
-    "CreateVespaSearchIndexInfoRequest": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "CreateVespaSearchIndexInfoRequest",
-      "file": "lib/src/models/rag/create_vespa_search_index_info_request.dart",
-      "schema": "CreateVespaSearchIndexInfoRequest",
-      "tags": []
-    },
-    "VespaSchemaResponse": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "VespaSchemaResponse",
-      "file": "lib/src/models/rag/vespa_schema_response.dart",
-      "schema": "VespaSchemaResponse",
-      "tags": []
-    },
-    "CreateVespaSchemaRequest": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "CreateVespaSchemaRequest",
-      "file": "lib/src/models/rag/create_vespa_schema_request.dart",
-      "schema": "CreateVespaSchemaRequest",
       "tags": []
     },
     "DeleteBatchJobResponse": {
@@ -745,28 +710,6 @@
       },
       "note": null
     },
-    "ConversationPayload": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": "ConversationPayload",
-      "file": "lib/src/models/observability/conversation_payload.dart",
-      "schema": "ConversationPayload",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal platform API"
-    },
-    "ConversationSource": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": "ConversationSource",
-      "file": "lib/src/models/observability/conversation_source.dart",
-      "schema": "ConversationSource",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal platform API"
-    },
     "CustomConnector": {
       "spec": "main",
       "kind": "sealed_variant",
@@ -943,6 +886,50 @@
       "dart_class": "DatasetRecord",
       "file": "lib/src/models/observability/dataset_record.dart",
       "schema": "DatasetRecord",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "DatasetRecordPayload": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "DatasetRecordPayload",
+      "file": "lib/src/models/observability/dataset_record_payload.dart",
+      "schema": "DatasetRecordPayload",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API"
+    },
+    "DatasetRecordSource": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "DatasetRecordSource",
+      "file": "lib/src/models/observability/dataset_record_source.dart",
+      "schema": "DatasetRecordSource",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API"
+    },
+    "CreateDatasetRecordRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CreateDatasetRecordRequest",
+      "file": "lib/src/models/observability/create_dataset_record_request.dart",
+      "schema": "CreateDatasetRecordRequest",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "UpdateDatasetRecordPayloadRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "UpdateDatasetRecordPayloadRequest",
+      "file": "lib/src/models/observability/update_dataset_record_payload_request.dart",
+      "schema": "UpdateDatasetRecordPayloadRequest",
       "tags": [
         "acknowledged"
       ],
@@ -2017,17 +2004,6 @@
       ],
       "note": "Internal platform API \u2014 datasets"
     },
-    "PostDatasetRecordInSchema": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": "PostDatasetRecordInSchema",
-      "file": "lib/src/models/observability/post_dataset_record_in_schema.dart",
-      "schema": "PostDatasetRecordInSchema",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal platform API \u2014 datasets"
-    },
     "PostDatasetRecordJudgingInSchema": {
       "spec": "main",
       "kind": "skip",
@@ -2060,17 +2036,6 @@
         "acknowledged"
       ],
       "note": "Spec schema is now empty/unreferenced; Dart model retained (matches official client) but no longer used by UsageInfo"
-    },
-    "PutDatasetRecordPayloadInSchema": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": "PutDatasetRecordPayloadInSchema",
-      "file": "lib/src/models/observability/put_dataset_record_payload_in_schema.dart",
-      "schema": "PutDatasetRecordPayloadInSchema",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal platform API \u2014 datasets"
     },
     "PutDatasetRecordPropertiesInSchema": {
       "spec": "main",
@@ -3612,6 +3577,593 @@
         "acknowledged"
       ],
       "note": "Reuses generic FeedResult<T>"
+    },
+    "AliasList": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AliasList",
+      "file": "lib/src/models/registry/alias_list.dart",
+      "schema": "AliasList",
+      "tags": []
+    },
+    "RegistrySharingScope": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "RegistrySharingScope",
+      "file": "lib/src/models/registry/registry_sharing_scope.dart",
+      "schema": "RegistrySharingScope",
+      "tags": []
+    },
+    "Timestamp": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Timestamp",
+      "file": "",
+      "schema": "Timestamp",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "string/date-time; modeled as a plain Dart String field wherever referenced (Prompt.createdAt, etc.) rather than a wrapper class. The spec's \"1s\"/\"1.000340012s\" examples describe a duration format that does not match the declared date-time format; format wins."
+    },
+    "Prompt": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Prompt",
+      "file": "lib/src/models/prompts/prompt.dart",
+      "schema": "Prompt",
+      "tags": []
+    },
+    "PromptDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PromptDefinition",
+      "file": "lib/src/models/prompts/prompt_definition.dart",
+      "schema": "PromptDefinition",
+      "tags": []
+    },
+    "PromptVariable": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PromptVariable",
+      "file": "lib/src/models/prompts/prompt_variable.dart",
+      "schema": "PromptVariable",
+      "tags": []
+    },
+    "PromptVersion": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PromptVersion",
+      "file": "lib/src/models/prompts/prompt_version.dart",
+      "schema": "PromptVersion",
+      "tags": []
+    },
+    "CreatePromptRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreatePromptRequest",
+      "file": "lib/src/models/prompts/create_prompt_request.dart",
+      "schema": "CreatePromptRequest",
+      "tags": []
+    },
+    "CreatePromptVersionResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreatePromptVersionResponse",
+      "file": "lib/src/models/prompts/create_prompt_version_response.dart",
+      "schema": "CreatePromptVersionResponse",
+      "tags": []
+    },
+    "ListPromptsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ListPromptsResponse",
+      "file": "lib/src/models/prompts/list_prompts_response.dart",
+      "schema": "ListPromptsResponse",
+      "tags": []
+    },
+    "ListPromptVersionsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ListPromptVersionsResponse",
+      "file": "lib/src/models/prompts/list_prompt_versions_response.dart",
+      "schema": "ListPromptVersionsResponse",
+      "tags": []
+    },
+    "DeletePromptResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "DeletePromptResponse",
+      "file": "",
+      "schema": "DeletePromptResponse",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Property-less response schema (additionalProperties: false, no properties). PromptsResource.delete() returns Future<void> instead of a Dart class."
+    },
+    "Skill": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Skill",
+      "file": "lib/src/models/skills/skill.dart",
+      "schema": "Skill",
+      "tags": []
+    },
+    "SkillDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SkillDefinition",
+      "file": "lib/src/models/skills/skill_definition.dart",
+      "schema": "SkillDefinition",
+      "tags": []
+    },
+    "SkillVersion": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SkillVersion",
+      "file": "lib/src/models/skills/skill_version.dart",
+      "schema": "SkillVersion",
+      "tags": []
+    },
+    "SkillAssetContent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SkillAssetContent",
+      "file": "lib/src/models/skills/skill_asset_content.dart",
+      "schema": "SkillAssetContent",
+      "tags": [],
+      "note": "Ref-less inline oneOf (rawContent base64 | textContent) with a shared isExecutable property. Modeled as a single class with all three fields nullable plus named factories SkillAssetContent.raw(...)/SkillAssetContent.text(...) for unambiguous construction, rather than a sealed_parent/sealed_variant split."
+    },
+    "CreateSkillRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateSkillRequest",
+      "file": "lib/src/models/skills/create_skill_request.dart",
+      "schema": "CreateSkillRequest",
+      "tags": []
+    },
+    "CreateSkillVersionResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateSkillVersionResponse",
+      "file": "lib/src/models/skills/create_skill_version_response.dart",
+      "schema": "CreateSkillVersionResponse",
+      "tags": []
+    },
+    "ListSkillsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ListSkillsResponse",
+      "file": "lib/src/models/skills/list_skills_response.dart",
+      "schema": "ListSkillsResponse",
+      "tags": []
+    },
+    "ListSkillVersionsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ListSkillVersionsResponse",
+      "file": "lib/src/models/skills/list_skill_versions_response.dart",
+      "schema": "ListSkillVersionsResponse",
+      "tags": []
+    },
+    "DeleteSkillResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "DeleteSkillResponse",
+      "file": "",
+      "schema": "DeleteSkillResponse",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Property-less response schema (additionalProperties: false, no properties). SkillsResource.delete() returns Future<void> instead of a Dart class."
+    },
+    "UserIdentity": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UserIdentity",
+      "file": "lib/src/models/users/user_identity.dart",
+      "schema": "UserIdentity",
+      "tags": []
+    },
+    "UserIdentityApiKey": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UserIdentityApiKey",
+      "file": "lib/src/models/users/user_identity_api_key.dart",
+      "schema": "UserIdentityApiKey",
+      "tags": []
+    },
+    "UserIdentityOrganization": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UserIdentityOrganization",
+      "file": "lib/src/models/users/user_identity_organization.dart",
+      "schema": "UserIdentityOrganization",
+      "tags": []
+    },
+    "UserIdentityWorkspace": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UserIdentityWorkspace",
+      "file": "lib/src/models/users/user_identity_workspace.dart",
+      "schema": "UserIdentityWorkspace",
+      "tags": []
+    },
+    "RegisterSearchIndexRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RegisterSearchIndexRequest",
+      "file": "lib/src/models/rag/register_search_index_request.dart",
+      "schema": "RegisterSearchIndexRequestIndex",
+      "tags": []
+    },
+    "RegisterVespaIndexRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RegisterVespaIndexRequest",
+      "file": "lib/src/models/rag/register_vespa_index_request.dart",
+      "schema": "RegisterSearchIndexRequestVespaIndex",
+      "tags": []
+    },
+    "RegisterVespaSchemaRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RegisterVespaSchemaRequest",
+      "file": "lib/src/models/rag/register_vespa_schema_request.dart",
+      "schema": "RegisterSearchIndexRequestVespaSchemaModel",
+      "tags": []
+    },
+    "RegisterVespaSchemaFieldRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RegisterVespaSchemaFieldRequest",
+      "file": "lib/src/models/rag/register_vespa_schema_field_request.dart",
+      "schema": "RegisterSearchIndexRequestVespaSchemaField",
+      "tags": []
+    },
+    "RegisterSearchIndexResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RegisterSearchIndexResponse",
+      "file": "lib/src/models/rag/register_search_index_response.dart",
+      "schema": "RegisterSearchIndexResponseIndex",
+      "tags": []
+    },
+    "SearchIndexDetail": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchIndexDetail",
+      "file": "lib/src/models/rag/search_index_detail.dart",
+      "schema": "GetSearchIndexDetailResponseIndex",
+      "tags": []
+    },
+    "SearchIndexDetailSchema": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchIndexDetailSchema",
+      "file": "lib/src/models/rag/search_index_detail_schema.dart",
+      "schema": "GetSearchIndexDetailResponseSchemaModel",
+      "tags": []
+    },
+    "SearchIndexSchemaDetail": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchIndexSchemaDetail",
+      "file": "lib/src/models/rag/search_index_schema_detail.dart",
+      "schema": "GetSearchIndexSchemaDetailResponseSchemaModel",
+      "tags": []
+    },
+    "SearchIndexSchemaField": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchIndexSchemaField",
+      "file": "lib/src/models/rag/search_index_schema_field.dart",
+      "schema": "GetSearchIndexSchemaDetailResponseField",
+      "tags": []
+    },
+    "SearchIndexSchemaSdFile": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchIndexSchemaSdFile",
+      "file": "lib/src/models/rag/search_index_schema_sd_file.dart",
+      "schema": "GetSearchIndexSchemaSDFileResponseSDFile",
+      "tags": []
+    },
+    "SearchIndexSummary": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchIndexSummary",
+      "file": "lib/src/models/rag/search_index_summary.dart",
+      "schema": "GetSearchIndexSummaryResponseIndex",
+      "tags": []
+    },
+    "VespaIndexSummary": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VespaIndexSummary",
+      "file": "lib/src/models/rag/vespa_index_summary.dart",
+      "schema": "GetSearchIndexSummaryResponseVespaIndex",
+      "tags": []
+    },
+    "VespaSchemaSummary": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VespaSchemaSummary",
+      "file": "lib/src/models/rag/vespa_schema_summary.dart",
+      "schema": "GetSearchIndexSummaryResponseVespaSchemaModel",
+      "tags": []
+    },
+    "SearchIndexRetrievable": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchIndexRetrievable",
+      "file": "lib/src/models/rag/search_index_retrievable.dart",
+      "schema": "VespaGetRetrievableResponseRetrievable",
+      "tags": []
+    },
+    "SummaryFieldResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SummaryFieldResponse",
+      "file": "lib/src/models/rag/summary_field_response.dart",
+      "schema": "GetSummaryResponseSummary",
+      "tags": []
+    },
+    "UpdateSummaryRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateSummaryRequest",
+      "file": "lib/src/models/rag/update_summary_request.dart",
+      "schema": "UpdateSummaryRequestSummary",
+      "tags": [],
+      "note": "Spec inline status enum only allows 'handwritten'/'generated_confirmed' (2 values); Dart reuses the shared 3-value SummaryStatus enum (also 'generated') for round-trip simplicity with GetSummaryResponseSummary. Restriction documented via dartdoc, not enforced by the type."
+    },
+    "SchemaMetrics": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SchemaMetrics",
+      "file": "lib/src/models/rag/schema_metrics.dart",
+      "schema": "UpdateIndexMetricsRequestSchemaMetrics",
+      "tags": []
+    },
+    "UpdateIndexMetricsRequest": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "UpdateIndexMetricsRequest",
+      "file": "lib/src/models/rag/update_index_metrics_request.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "status",
+        "mapping": {
+          "UpdateIndexMetricsOnlineRequest": "online",
+          "UpdateIndexMetricsOfflineRequest": "offline"
+        }
+      }
+    },
+    "UpdateIndexMetricsOnlineRequest": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "UpdateIndexMetricsOnlineRequest",
+      "file": "lib/src/models/rag/update_index_metrics_request.dart",
+      "schema": "UpdateIndexMetricsRequestIndexMetricsOnline",
+      "parent": "UpdateIndexMetricsRequest"
+    },
+    "UpdateIndexMetricsOfflineRequest": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "UpdateIndexMetricsOfflineRequest",
+      "file": "lib/src/models/rag/update_index_metrics_request.dart",
+      "schema": "UpdateIndexMetricsRequestIndexMetricsOffline",
+      "parent": "UpdateIndexMetricsRequest"
+    },
+    "SchemaFieldDataType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "SchemaFieldDataType",
+      "file": "lib/src/models/rag/schema_field_data_type.dart",
+      "schema": "SchemaFieldDataType",
+      "tags": [],
+      "note": "Wire values int/bool/string renamed to intType/boolType/stringType to avoid colliding with Dart's built-in type names."
+    },
+    "SchemaFieldIndex": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "SchemaFieldIndex",
+      "file": "lib/src/models/rag/schema_field_index.dart",
+      "schema": "SchemaFieldIndex",
+      "tags": []
+    },
+    "SchemaFieldRankingType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "SchemaFieldRankingType",
+      "file": "lib/src/models/rag/schema_field_ranking_type.dart",
+      "schema": "SchemaFieldRankingType",
+      "tags": [],
+      "note": "Wire values string/bool/int renamed to stringType/boolType/intType to avoid colliding with Dart's built-in type names."
+    },
+    "SchemaFieldStorage": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "SchemaFieldStorage",
+      "file": "lib/src/models/rag/schema_field_storage.dart",
+      "schema": "SchemaFieldStorage",
+      "tags": []
+    },
+    "SummaryStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "SummaryStatus",
+      "file": "lib/src/models/rag/summary_status.dart",
+      "schema": "SummaryStatus",
+      "tags": []
+    },
+    "AgentListPage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentListPage",
+      "file": "lib/src/models/agents/agent_list_page.dart",
+      "schema": "AgentListPage",
+      "tags": []
+    },
+    "CredentialsStatusErrorReason": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "CredentialsStatusErrorReason",
+      "file": "lib/src/models/connectors/credentials_status_error_reason.dart",
+      "schema": "CredentialsStatusErrorReason",
+      "tags": []
+    },
+    "ExecutionTool": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ExecutionTool",
+      "file": "lib/src/models/connectors/execution_tool.dart",
+      "schema": "ExecutionTool",
+      "tags": []
+    },
+    "PublicConnectorExecutionData": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PublicConnectorExecutionData",
+      "file": "lib/src/models/connectors/public_connector_execution_data.dart",
+      "schema": "PublicConnectorExecutionData",
+      "tags": []
+    },
+    "PublicExecutionConnectionConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PublicExecutionConnectionConfig",
+      "file": "lib/src/models/connectors/public_execution_connection_config.dart",
+      "schema": "PublicExecutionConnectionConfig",
+      "tags": []
+    },
+    "PublicExecutionConnector": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PublicExecutionConnector",
+      "file": "lib/src/models/connectors/public_execution_connector.dart",
+      "schema": "PublicExecutionConnector",
+      "tags": []
+    },
+    "PublicExecutionEnv": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PublicExecutionEnv",
+      "file": "lib/src/models/connectors/public_execution_env.dart",
+      "schema": "PublicExecutionEnv",
+      "tags": []
+    },
+    "PublicResourceVisibility": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "PublicResourceVisibility",
+      "file": "lib/src/models/connectors/public_resource_visibility.dart",
+      "schema": "PublicResourceVisibility",
+      "tags": []
+    },
+    "CreateDeploymentRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateDeploymentRequest",
+      "file": "lib/src/models/workflows/create_deployment_request.dart",
+      "schema": "CreateDeploymentRequest",
+      "tags": []
+    },
+    "DeploymentBuildState": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentBuildState",
+      "file": "lib/src/models/workflows/deployment_build_state.dart",
+      "schema": "DeploymentBuildState",
+      "tags": []
+    },
+    "DeploymentLogRecord": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentLogRecord",
+      "file": "lib/src/models/workflows/deployment_log_record.dart",
+      "schema": "DeploymentLogRecord",
+      "tags": []
+    },
+    "DeploymentLogSearchResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentLogSearchResponse",
+      "file": "lib/src/models/workflows/deployment_log_search_response.dart",
+      "schema": "DeploymentLogSearchResponse",
+      "tags": []
+    },
+    "DeploymentObservedState": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentObservedState",
+      "file": "lib/src/models/workflows/deployment_observed_state.dart",
+      "schema": "DeploymentObservedState",
+      "tags": []
+    },
+    "DeploymentResourceConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentResourceConfig",
+      "file": "lib/src/models/workflows/deployment_resource_config.dart",
+      "schema": "DeploymentResourceConfig",
+      "tags": []
+    },
+    "DeploymentResourceConfigUpdate": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentResourceConfigUpdate",
+      "file": "lib/src/models/workflows/deployment_resource_config_update.dart",
+      "schema": "DeploymentResourceConfigUpdate",
+      "tags": []
+    },
+    "DeploymentWorkerSpecInput": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentWorkerSpecInput",
+      "file": "lib/src/models/workflows/deployment_worker_spec_input.dart",
+      "schema": "DeploymentWorkerSpecInput",
+      "tags": []
+    },
+    "DeploymentWorkerSpecResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentWorkerSpecResponse",
+      "file": "lib/src/models/workflows/deployment_worker_spec_response.dart",
+      "schema": "DeploymentWorkerSpecResponse",
+      "tags": []
+    },
+    "ExecutionTraceInfoResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ExecutionTraceInfoResponse",
+      "file": "lib/src/models/workflows/execution_trace_info_response.dart",
+      "schema": "ExecutionTraceInfoResponse",
+      "tags": []
+    },
+    "ManagedDeploymentResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedDeploymentResponse",
+      "file": "lib/src/models/workflows/managed_deployment_response.dart",
+      "schema": "ManagedDeploymentResponse",
+      "tags": []
+    },
+    "UpdateDeploymentRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateDeploymentRequest",
+      "file": "lib/src/models/workflows/update_deployment_request.dart",
+      "schema": "UpdateDeploymentRequest",
+      "tags": []
+    },
+    "WorkflowsWorkerSpecUpdate": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowsWorkerSpecUpdate",
+      "file": "lib/src/models/workflows/workflows_worker_spec_update.dart",
+      "schema": "WorkflowsWorkerSpecUpdate",
+      "tags": []
     }
   }
 }
