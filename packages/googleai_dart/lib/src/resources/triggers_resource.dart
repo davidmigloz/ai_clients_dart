@@ -172,11 +172,9 @@ class TriggersResource extends ResourceBase {
       '/{version}/triggers/$triggerId/executions',
     );
 
-    final headers = _buildHeaders(const {'Content-Type': 'application/json'});
+    final headers = _buildHeaders();
 
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(<String, dynamic>{});
+    final httpRequest = http.Request('POST', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
 

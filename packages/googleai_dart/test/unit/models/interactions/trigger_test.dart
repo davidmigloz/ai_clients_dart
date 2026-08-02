@@ -2,9 +2,11 @@ import 'package:googleai_dart/googleai_dart.dart';
 import 'package:test/test.dart';
 
 void main() {
-  const modelInteraction = Interaction(
-    id: 'interaction_template',
-    status: InteractionStatus.completed,
+  // A trigger's `interaction` is a request template (model/agent + input),
+  // not a completed Interaction — it carries no `id`/`status`.
+  const modelInteraction = CreateModelInteractionParams(
+    model: 'gemini-3.5-flash',
+    input: InteractionInput.text('hi'),
   );
 
   group('Trigger', () {
@@ -63,7 +65,11 @@ void main() {
 
       final restored = Trigger.fromJson(json);
       expect(restored.id, trigger.id);
-      expect(restored.interaction.id, trigger.interaction.id);
+      expect(restored.interaction, isA<CreateModelInteractionParams>());
+      expect(
+        (restored.interaction as CreateModelInteractionParams).model,
+        (trigger.interaction as CreateModelInteractionParams).model,
+      );
       expect(restored.schedule, trigger.schedule);
       expect(restored.timeZone, trigger.timeZone);
       expect(restored.displayName, trigger.displayName);
@@ -128,6 +134,40 @@ void main() {
       final unchanged = trigger.copyWith();
       expect(unchanged.id, trigger.id);
       expect(unchanged.schedule, trigger.schedule);
+    });
+
+    test('parses a real API payload whose interaction is a bare request '
+        'template (no id/status) without throwing', () {
+      // Regression test: `interaction` used to be typed as `Interaction`,
+      // whose fromJson hard-casts `json['id'] as String` and throws on a
+      // request-shaped payload like this one (matching real trigger
+      // lifecycle payloads, which never carry a completed Interaction).
+      final trigger = Trigger.fromJson({
+        'id': 'trg_1',
+        'interaction': {'model': 'gemini-3.5-flash', 'input': 'hi'},
+        'schedule': '0 * * * *',
+        'time_zone': 'UTC',
+      });
+      expect(trigger.interaction, isA<CreateModelInteractionParams>());
+      expect(
+        (trigger.interaction as CreateModelInteractionParams).model,
+        'gemini-3.5-flash',
+      );
+    });
+
+    test('parses an agent-based request template interaction (dispatch on '
+        '"agent" key)', () {
+      final trigger = Trigger.fromJson({
+        'id': 'trg_1',
+        'interaction': {'agent': 'agents/research'},
+        'schedule': '0 0 * * *',
+        'time_zone': 'America/New_York',
+      });
+      expect(trigger.interaction, isA<CreateAgentInteractionParams>());
+      expect(
+        (trigger.interaction as CreateAgentInteractionParams).agent,
+        'agents/research',
+      );
     });
   });
 

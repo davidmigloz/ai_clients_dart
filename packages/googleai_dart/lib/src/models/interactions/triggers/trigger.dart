@@ -38,7 +38,11 @@ class Trigger {
   final String id;
 
   /// Required. The interaction request template to be executed.
-  final Interaction interaction;
+  ///
+  /// This is a request template (a [CreateModelInteractionParams] or
+  /// [CreateAgentInteractionParams]), not a completed [Interaction] — it
+  /// carries no `id`/`status`.
+  final CreateInteractionParams interaction;
 
   /// Required. The cron schedule on which the trigger should run. Standard
   /// cron format.
@@ -112,7 +116,7 @@ class Trigger {
   /// Creates a [Trigger] from JSON.
   factory Trigger.fromJson(Map<String, dynamic> json) => Trigger(
     id: json['id'] as String,
-    interaction: Interaction.fromJson(
+    interaction: CreateInteractionParams.fromJson(
       json['interaction'] as Map<String, dynamic>,
     ),
     schedule: json['schedule'] as String,
@@ -195,7 +199,7 @@ class Trigger {
       id: id == unsetCopyWithValue ? this.id : id! as String,
       interaction: interaction == unsetCopyWithValue
           ? this.interaction
-          : interaction! as Interaction,
+          : interaction! as CreateInteractionParams,
       schedule: schedule == unsetCopyWithValue
           ? this.schedule
           : schedule! as String,

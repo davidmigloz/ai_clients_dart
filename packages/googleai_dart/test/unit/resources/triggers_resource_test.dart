@@ -24,13 +24,15 @@ http.StreamedResponse _jsonResponse(Object? body, {int status = 200}) {
 }
 
 /// A minimal trigger response payload including the fields the spec marks
-/// required (`id`, `interaction`, `schedule`, `time_zone`).
+/// required (`id`, `interaction`, `schedule`, `time_zone`). `interaction` is
+/// a request template (model/agent + input), not a completed Interaction —
+/// it carries no `id`/`status`.
 Map<String, dynamic> _triggerJson({
   String id = 'trg_1',
   Map<String, dynamic>? extra,
 }) => {
   'id': id,
-  'interaction': {'id': 'i_template', 'status': 'completed'},
+  'interaction': {'model': 'gemini-3.5-flash', 'input': 'hi'},
   'schedule': '0 * * * *',
   'time_zone': 'UTC',
   ...?extra,
@@ -202,7 +204,7 @@ void main() {
       },
     );
 
-    test('run() POSTs an empty body to /triggers/{id}/executions', () async {
+    test('run() POSTs with no body and no forced JSON content-type', () async {
       stubJsonResponse({'id': 'exec_1', 'trigger_id': 'trg_1'});
 
       final result = await resource.run(triggerId: 'trg_1');
@@ -211,7 +213,8 @@ void main() {
       expect(req.method, 'POST');
       expect(req.url.path, '/v1beta/triggers/trg_1/executions');
       expect(req.headers['Api-Revision'], '2026-05-20');
-      expect(utf8.decode(capturedBodies.single!), '{}');
+      expect(req.headers.containsKey('Content-Type'), isFalse);
+      expect(utf8.decode(capturedBodies.single!), isEmpty);
       expect(result.id, 'exec_1');
     });
   });
