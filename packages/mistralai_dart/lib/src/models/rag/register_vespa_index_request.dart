@@ -1,11 +1,11 @@
 import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
-import 'create_vespa_schema_request.dart';
+import 'register_vespa_schema_request.dart';
 
 /// Vespa-specific information when registering a RAG search index (beta).
 @immutable
-class CreateVespaSearchIndexInfoRequest {
+class RegisterVespaIndexRequest {
   /// The discriminator value identifying this index as a Vespa index.
   ///
   /// Always `'vespa'`.
@@ -20,32 +20,43 @@ class CreateVespaSearchIndexInfoRequest {
   /// The name of the Vespa instance.
   final String vespaInstanceName;
 
-  /// The schemas to define within the Vespa index.
-  final List<CreateVespaSchemaRequest> schemas;
+  /// The version of Vespa running the instance.
+  final String vespaVersion;
 
-  /// Creates a [CreateVespaSearchIndexInfoRequest].
-  const CreateVespaSearchIndexInfoRequest({
+  /// The schemas to define within the Vespa index.
+  final List<RegisterVespaSchemaRequest> schemas;
+
+  /// The query URL of the Vespa instance.
+  final String queryUrl;
+
+  /// Creates a [RegisterVespaIndexRequest].
+  const RegisterVespaIndexRequest({
     this.type = 'vespa',
     required this.k8sCluster,
     required this.k8sNamespace,
     required this.vespaInstanceName,
+    required this.vespaVersion,
     required this.schemas,
+    required this.queryUrl,
   });
 
-  /// Creates a [CreateVespaSearchIndexInfoRequest] from JSON.
-  factory CreateVespaSearchIndexInfoRequest.fromJson(
-    Map<String, dynamic> json,
-  ) => CreateVespaSearchIndexInfoRequest(
-    type: json['type'] as String? ?? 'vespa',
-    k8sCluster: json['k8s_cluster'] as String,
-    k8sNamespace: json['k8s_namespace'] as String,
-    vespaInstanceName: json['vespa_instance_name'] as String,
-    schemas: (json['schemas'] as List<dynamic>)
-        .map(
-          (e) => CreateVespaSchemaRequest.fromJson(e as Map<String, dynamic>),
-        )
-        .toList(),
-  );
+  /// Creates a [RegisterVespaIndexRequest] from JSON.
+  factory RegisterVespaIndexRequest.fromJson(Map<String, dynamic> json) =>
+      RegisterVespaIndexRequest(
+        type: json['type'] as String? ?? 'vespa',
+        k8sCluster: json['k8s_cluster'] as String,
+        k8sNamespace: json['k8s_namespace'] as String,
+        vespaInstanceName: json['vespa_instance_name'] as String,
+        vespaVersion: json['vespa_version'] as String,
+        schemas: (json['schemas'] as List<dynamic>)
+            .map(
+              (e) => RegisterVespaSchemaRequest.fromJson(
+                e as Map<String, dynamic>,
+              ),
+            )
+            .toList(),
+        queryUrl: json['query_url'] as String,
+      );
 
   /// Converts this object to JSON.
   Map<String, dynamic> toJson() => {
@@ -53,34 +64,42 @@ class CreateVespaSearchIndexInfoRequest {
     'k8s_cluster': k8sCluster,
     'k8s_namespace': k8sNamespace,
     'vespa_instance_name': vespaInstanceName,
+    'vespa_version': vespaVersion,
     'schemas': schemas.map((e) => e.toJson()).toList(),
+    'query_url': queryUrl,
   };
 
   /// Creates a copy with the given fields replaced.
-  CreateVespaSearchIndexInfoRequest copyWith({
+  RegisterVespaIndexRequest copyWith({
     String? type,
     String? k8sCluster,
     String? k8sNamespace,
     String? vespaInstanceName,
-    List<CreateVespaSchemaRequest>? schemas,
-  }) => CreateVespaSearchIndexInfoRequest(
+    String? vespaVersion,
+    List<RegisterVespaSchemaRequest>? schemas,
+    String? queryUrl,
+  }) => RegisterVespaIndexRequest(
     type: type ?? this.type,
     k8sCluster: k8sCluster ?? this.k8sCluster,
     k8sNamespace: k8sNamespace ?? this.k8sNamespace,
     vespaInstanceName: vespaInstanceName ?? this.vespaInstanceName,
+    vespaVersion: vespaVersion ?? this.vespaVersion,
     schemas: schemas ?? this.schemas,
+    queryUrl: queryUrl ?? this.queryUrl,
   );
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is CreateVespaSearchIndexInfoRequest &&
+      other is RegisterVespaIndexRequest &&
           runtimeType == other.runtimeType &&
           type == other.type &&
           k8sCluster == other.k8sCluster &&
           k8sNamespace == other.k8sNamespace &&
           vespaInstanceName == other.vespaInstanceName &&
-          listsEqual(schemas, other.schemas);
+          vespaVersion == other.vespaVersion &&
+          listsEqual(schemas, other.schemas) &&
+          queryUrl == other.queryUrl;
 
   @override
   int get hashCode => Object.hash(
@@ -88,13 +107,15 @@ class CreateVespaSearchIndexInfoRequest {
     k8sCluster,
     k8sNamespace,
     vespaInstanceName,
+    vespaVersion,
     listHash(schemas),
+    queryUrl,
   );
 
   @override
   String toString() =>
-      'CreateVespaSearchIndexInfoRequest('
+      'RegisterVespaIndexRequest('
       'type: $type, k8sCluster: $k8sCluster, k8sNamespace: $k8sNamespace, '
-      'vespaInstanceName: $vespaInstanceName, '
-      'schemas: ${schemas.length} items)';
+      'vespaInstanceName: $vespaInstanceName, vespaVersion: $vespaVersion, '
+      'schemas: ${schemas.length} items, queryUrl: $queryUrl)';
 }

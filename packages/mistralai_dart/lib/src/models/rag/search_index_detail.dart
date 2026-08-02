@@ -1,14 +1,13 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
+import 'search_index_detail_schema.dart';
 import 'search_index_status.dart';
-import 'vespa_search_index_info_response.dart';
 
-/// Information about a registered RAG search index (beta).
+/// Detailed information about a RAG search index (beta).
 @immutable
-class SearchIndexResponse {
-  /// The unique identifier of the search index.
-  final String id;
-
+class SearchIndexDetail {
   /// The human-readable name of the search index.
   final String name;
 
@@ -27,101 +26,109 @@ class SearchIndexResponse {
   /// When the search index was last modified.
   final DateTime modifiedAt;
 
-  /// The backend-specific information about the index.
-  ///
-  /// Currently only Vespa indexes are supported.
-  final VespaSearchIndexInfoResponse index;
+  /// The version of Vespa running the index, or `null` if unknown.
+  final String? vespaVersion;
 
-  /// Creates a [SearchIndexResponse].
-  const SearchIndexResponse({
-    required this.id,
+  /// Summary information about the schemas defined within the index.
+  final List<SearchIndexDetailSchema> schemas;
+
+  /// Creates a [SearchIndexDetail].
+  const SearchIndexDetail({
     required this.name,
     required this.creatorId,
     required this.documentCount,
     required this.status,
     required this.createdAt,
     required this.modifiedAt,
-    required this.index,
+    required this.vespaVersion,
+    required this.schemas,
   });
 
-  /// Creates a [SearchIndexResponse] from JSON.
-  factory SearchIndexResponse.fromJson(Map<String, dynamic> json) =>
-      SearchIndexResponse(
-        id: json['id'] as String,
+  /// Creates a [SearchIndexDetail] from JSON.
+  factory SearchIndexDetail.fromJson(Map<String, dynamic> json) =>
+      SearchIndexDetail(
         name: json['name'] as String,
         creatorId: json['creator_id'] as String,
         documentCount: json['document_count'] as int,
         status: SearchIndexStatus.fromJson(json['status'] as String?),
         createdAt: DateTime.parse(json['created_at'] as String),
         modifiedAt: DateTime.parse(json['modified_at'] as String),
-        index: VespaSearchIndexInfoResponse.fromJson(
-          json['index'] as Map<String, dynamic>,
-        ),
+        vespaVersion: json['vespa_version'] as String?,
+        schemas: (json['schemas'] as List<dynamic>)
+            .map(
+              (e) =>
+                  SearchIndexDetailSchema.fromJson(e as Map<String, dynamic>),
+            )
+            .toList(),
       );
 
   /// Converts this object to JSON.
   Map<String, dynamic> toJson() => {
-    'id': id,
     'name': name,
     'creator_id': creatorId,
     'document_count': documentCount,
     'status': status.toJson(),
     'created_at': createdAt.toIso8601String(),
     'modified_at': modifiedAt.toIso8601String(),
-    'index': index.toJson(),
+    'vespa_version': vespaVersion,
+    'schemas': schemas.map((e) => e.toJson()).toList(),
   };
 
   /// Creates a copy with the given fields replaced.
-  SearchIndexResponse copyWith({
-    String? id,
+  ///
+  /// Pass `null` for nullable fields to clear them explicitly; omit to keep.
+  SearchIndexDetail copyWith({
     String? name,
     String? creatorId,
     int? documentCount,
     SearchIndexStatus? status,
     DateTime? createdAt,
     DateTime? modifiedAt,
-    VespaSearchIndexInfoResponse? index,
-  }) => SearchIndexResponse(
-    id: id ?? this.id,
+    Object? vespaVersion = unsetCopyWithValue,
+    List<SearchIndexDetailSchema>? schemas,
+  }) => SearchIndexDetail(
     name: name ?? this.name,
     creatorId: creatorId ?? this.creatorId,
     documentCount: documentCount ?? this.documentCount,
     status: status ?? this.status,
     createdAt: createdAt ?? this.createdAt,
     modifiedAt: modifiedAt ?? this.modifiedAt,
-    index: index ?? this.index,
+    vespaVersion: vespaVersion == unsetCopyWithValue
+        ? this.vespaVersion
+        : vespaVersion as String?,
+    schemas: schemas ?? this.schemas,
   );
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is SearchIndexResponse &&
+      other is SearchIndexDetail &&
           runtimeType == other.runtimeType &&
-          id == other.id &&
           name == other.name &&
           creatorId == other.creatorId &&
           documentCount == other.documentCount &&
           status == other.status &&
           createdAt == other.createdAt &&
           modifiedAt == other.modifiedAt &&
-          index == other.index;
+          vespaVersion == other.vespaVersion &&
+          listsEqual(schemas, other.schemas);
 
   @override
   int get hashCode => Object.hash(
-    id,
     name,
     creatorId,
     documentCount,
     status,
     createdAt,
     modifiedAt,
-    index,
+    vespaVersion,
+    listHash(schemas),
   );
 
   @override
   String toString() =>
-      'SearchIndexResponse('
-      'id: $id, name: $name, creatorId: $creatorId, '
-      'documentCount: $documentCount, status: $status, '
-      'createdAt: $createdAt, modifiedAt: $modifiedAt, index: $index)';
+      'SearchIndexDetail('
+      'name: $name, creatorId: $creatorId, documentCount: $documentCount, '
+      'status: $status, createdAt: $createdAt, modifiedAt: $modifiedAt, '
+      'vespaVersion: $vespaVersion, schemas: ${schemas.length} items)';
 }

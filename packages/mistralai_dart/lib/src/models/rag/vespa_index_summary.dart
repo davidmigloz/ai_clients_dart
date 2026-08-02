@@ -1,11 +1,11 @@
 import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
-import 'vespa_schema_response.dart';
+import 'vespa_schema_summary.dart';
 
-/// Vespa-specific information about a RAG search index (beta).
+/// Summary of the Vespa-specific information for a RAG search index (beta).
 @immutable
-class VespaSearchIndexInfoResponse {
+class VespaIndexSummary {
   /// The discriminator value identifying this index as a Vespa index.
   ///
   /// Always `'vespa'`.
@@ -20,11 +20,11 @@ class VespaSearchIndexInfoResponse {
   /// The name of the Vespa instance.
   final String vespaInstanceName;
 
-  /// The schemas defined within the Vespa index.
-  final List<VespaSchemaResponse> schemas;
+  /// Summary information about the schemas defined within the index.
+  final List<VespaSchemaSummary> schemas;
 
-  /// Creates a [VespaSearchIndexInfoResponse].
-  const VespaSearchIndexInfoResponse({
+  /// Creates a [VespaIndexSummary].
+  const VespaIndexSummary({
     this.type = 'vespa',
     required this.k8sCluster,
     required this.k8sNamespace,
@@ -32,15 +32,15 @@ class VespaSearchIndexInfoResponse {
     required this.schemas,
   });
 
-  /// Creates a [VespaSearchIndexInfoResponse] from JSON.
-  factory VespaSearchIndexInfoResponse.fromJson(Map<String, dynamic> json) =>
-      VespaSearchIndexInfoResponse(
+  /// Creates a [VespaIndexSummary] from JSON.
+  factory VespaIndexSummary.fromJson(Map<String, dynamic> json) =>
+      VespaIndexSummary(
         type: json['type'] as String? ?? 'vespa',
         k8sCluster: json['k8s_cluster'] as String,
         k8sNamespace: json['k8s_namespace'] as String,
         vespaInstanceName: json['vespa_instance_name'] as String,
         schemas: (json['schemas'] as List<dynamic>)
-            .map((e) => VespaSchemaResponse.fromJson(e as Map<String, dynamic>))
+            .map((e) => VespaSchemaSummary.fromJson(e as Map<String, dynamic>))
             .toList(),
       );
 
@@ -54,13 +54,13 @@ class VespaSearchIndexInfoResponse {
   };
 
   /// Creates a copy with the given fields replaced.
-  VespaSearchIndexInfoResponse copyWith({
+  VespaIndexSummary copyWith({
     String? type,
     String? k8sCluster,
     String? k8sNamespace,
     String? vespaInstanceName,
-    List<VespaSchemaResponse>? schemas,
-  }) => VespaSearchIndexInfoResponse(
+    List<VespaSchemaSummary>? schemas,
+  }) => VespaIndexSummary(
     type: type ?? this.type,
     k8sCluster: k8sCluster ?? this.k8sCluster,
     k8sNamespace: k8sNamespace ?? this.k8sNamespace,
@@ -71,7 +71,7 @@ class VespaSearchIndexInfoResponse {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is VespaSearchIndexInfoResponse &&
+      other is VespaIndexSummary &&
           runtimeType == other.runtimeType &&
           type == other.type &&
           k8sCluster == other.k8sCluster &&
@@ -90,7 +90,7 @@ class VespaSearchIndexInfoResponse {
 
   @override
   String toString() =>
-      'VespaSearchIndexInfoResponse('
+      'VespaIndexSummary('
       'type: $type, k8sCluster: $k8sCluster, k8sNamespace: $k8sNamespace, '
       'vespaInstanceName: $vespaInstanceName, '
       'schemas: ${schemas.length} items)';
