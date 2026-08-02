@@ -37,9 +37,6 @@ class Interaction {
   /// The time at which the interaction was last updated (ISO 8601 format).
   final DateTime? updated;
 
-  /// The name of the cached content used as context to serve the prediction.
-  final String? cachedContent;
-
   /// The inputs for the interaction.
   ///
   /// Can be a [TextInput], a [StepListInput], a [ContentListInput],
@@ -112,7 +109,6 @@ class Interaction {
     this.agent,
     this.created,
     this.updated,
-    this.cachedContent,
     this.input,
     this.steps,
     this.usage,
@@ -145,7 +141,6 @@ class Interaction {
     updated: json['updated'] != null
         ? DateTime.parse(json['updated'] as String)
         : null,
-    cachedContent: json['cached_content'] as String?,
     input: json['input'] != null
         ? InteractionInput.fromJson(json['input'] as Object)
         : null,
@@ -204,7 +199,6 @@ class Interaction {
     if (agent != null) 'agent': agent,
     if (created != null) 'created': created!.toIso8601String(),
     if (updated != null) 'updated': updated!.toIso8601String(),
-    if (cachedContent != null) 'cached_content': cachedContent,
     if (input != null) 'input': input!.toJson(),
     if (steps != null) 'steps': steps!.map((e) => e.toJson()).toList(),
     if (usage != null) 'usage': usage!.toJson(),
@@ -240,7 +234,6 @@ class Interaction {
     Object? agent = unsetCopyWithValue,
     Object? created = unsetCopyWithValue,
     Object? updated = unsetCopyWithValue,
-    Object? cachedContent = unsetCopyWithValue,
     Object? input = unsetCopyWithValue,
     Object? steps = unsetCopyWithValue,
     Object? usage = unsetCopyWithValue,
@@ -273,9 +266,6 @@ class Interaction {
       updated: updated == unsetCopyWithValue
           ? this.updated
           : updated as DateTime?,
-      cachedContent: cachedContent == unsetCopyWithValue
-          ? this.cachedContent
-          : cachedContent as String?,
       input: input == unsetCopyWithValue
           ? this.input
           : input as InteractionInput?,
@@ -332,13 +322,25 @@ class Interaction {
   }
 }
 
+/// Parameters for creating an interaction — either model-based or agent-based.
+sealed class CreateInteractionParams {
+  const CreateInteractionParams();
+
+  /// Creates the appropriate variant from JSON ('agent' key → agent params,
+  /// otherwise model params).
+  factory CreateInteractionParams.fromJson(Map<String, dynamic> json) =>
+      json.containsKey('agent')
+      ? CreateAgentInteractionParams.fromJson(json)
+      : CreateModelInteractionParams.fromJson(json);
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson();
+}
+
 /// Parameters for creating an interaction with a model.
-class CreateModelInteractionParams {
+class CreateModelInteractionParams extends CreateInteractionParams {
   /// The name of the model to use.
   final String model;
-
-  /// The name of the cached content to use as context for the interaction.
-  final String? cachedContent;
 
   /// The input for the interaction.
   ///
@@ -394,7 +396,6 @@ class CreateModelInteractionParams {
   /// Creates a [CreateModelInteractionParams] instance.
   const CreateModelInteractionParams({
     required this.model,
-    this.cachedContent,
     this.input,
     this.systemInstruction,
     this.tools,
@@ -416,7 +417,6 @@ class CreateModelInteractionParams {
     Map<String, dynamic> json,
   ) => CreateModelInteractionParams(
     model: json['model'] as String,
-    cachedContent: json['cached_content'] as String?,
     input: json['input'] != null
         ? InteractionInput.fromJson(json['input'] as Object)
         : null,
@@ -458,9 +458,9 @@ class CreateModelInteractionParams {
   );
 
   /// Converts to JSON.
+  @override
   Map<String, dynamic> toJson() => {
     'model': model,
-    if (cachedContent != null) 'cached_content': cachedContent,
     if (input != null) 'input': input!.toJson(),
     if (systemInstruction != null) 'system_instruction': systemInstruction,
     if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
@@ -486,7 +486,7 @@ class CreateModelInteractionParams {
 }
 
 /// Parameters for creating an interaction with an agent.
-class CreateAgentInteractionParams {
+class CreateAgentInteractionParams extends CreateInteractionParams {
   /// The name of the agent to use.
   final String agent;
 
@@ -577,6 +577,7 @@ class CreateAgentInteractionParams {
   );
 
   /// Converts to JSON.
+  @override
   Map<String, dynamic> toJson() => {
     'agent': agent,
     if (input != null) 'input': input!.toJson(),

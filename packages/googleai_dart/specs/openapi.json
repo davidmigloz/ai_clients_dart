@@ -198,11 +198,23 @@
         "description": "The audio transcription configuration.",
         "properties": {
           "adaptationPhrases": {
+            "deprecated": true,
             "description": "Optional. A list of phrases used for speech adaptation, which biases the ASR model to\nimprove recognition of these specific terms.",
             "items": {
               "type": "string"
             },
             "type": "array"
+          },
+          "customVocabulary": {
+            "description": "Optional. A list of custom vocabulary phrases to bias the speech recognition model\ntoward recognizing specific terms (product names, proper nouns, jargon).",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "diarization": {
+            "description": "Optional. Configures speaker diarization.",
+            "type": "boolean"
           },
           "languageAuto": {
             "allOf": [
@@ -210,7 +222,15 @@
                 "$ref": "#/components/schemas/LanguageAuto"
               }
             ],
+            "deprecated": true,
             "description": "Optional. The model will detect the language automatically."
+          },
+          "languageCodes": {
+            "description": "Optional. BCP-47 language codes providing hints about the languages present in the\naudio. If omitted or empty, defaults to automatic language detection.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "languageHints": {
             "allOf": [
@@ -218,7 +238,12 @@
                 "$ref": "#/components/schemas/LanguageHints"
               }
             ],
+            "deprecated": true,
             "description": "Optional. Specifies one or more languages in the audio."
+          },
+          "wordTimestamp": {
+            "description": "Optional. Configures word-level timestamp generation.",
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -247,6 +272,12 @@
             "description": "Optional. Input only. Immutable. If field_mask is empty, and `bidi_generate_content_setup` is not present,\nthen the effective `BidiGenerateContentSetup` message is taken from the\nLive API connection.\n\nIf field_mask is empty, and `bidi_generate_content_setup` _is_ present,\nthen the effective `BidiGenerateContentSetup` message is taken entirely\nfrom `bidi_generate_content_setup` in this request. The setup message from\nthe Live API connection is ignored.\n\nIf field_mask is not empty, then the corresponding fields from\n`bidi_generate_content_setup` will overwrite the fields from the setup\nmessage in the Live API connection.",
             "format": "google-fieldmask",
             "pattern": "^(\\s*[^,\\s.]+(\\s*[,.]\\s*[^,\\s.]+)*)?$",
+            "type": "string",
+            "writeOnly": true,
+            "x-google-immutable": true
+          },
+          "interactionId": {
+            "description": "Optional. Input only. Immutable. The interaction ID that this token is scoped to.\nSpecific to the Live Interactions API.",
             "type": "string",
             "writeOnly": true,
             "x-google-immutable": true
@@ -1436,6 +1467,39 @@
         },
         "type": "object"
       },
+      "CreateEnvironmentRequest": {
+        "description": "Request for `CreateEnvironment`.",
+        "properties": {
+          "networkAllowlist": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EnvironmentNetworkEgressAllowlist"
+              }
+            ],
+            "description": "Allow only specific domains."
+          },
+          "networkMode": {
+            "description": "Network egress mode.",
+            "enum": [
+              "NETWORK_MODE_UNSPECIFIED",
+              "DISABLED"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Default value. Unused.",
+              "All network egress is blocked."
+            ]
+          },
+          "sources": {
+            "description": "Sources to be mounted into the environment.",
+            "items": {
+              "$ref": "#/components/schemas/Source"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "CreateFileRequest": {
         "description": "Request for `CreateFile`.",
         "properties": {
@@ -1823,6 +1887,23 @@
         },
         "type": "object"
       },
+      "EgressRule": {
+        "description": "A network egress rule that controls which external domains the\nenvironment is allowed to reach.  Each rule identifies a target domain\nand, optionally, a set of HTTP headers to inject into every matching\noutbound request.",
+        "properties": {
+          "domain": {
+            "description": "The domain pattern to match for this rule.\nUse an exact hostname (e.g., `github.com`), a wildcard prefix\n(e.g., `*.googleapis.com`), or `*` to match all domains.",
+            "type": "string"
+          },
+          "transform": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Headers to inject into requests matching this rule.\nKey: header name (e.g., \"Authorization\").\nValue: header value (e.g., \"Bearer your-token\").",
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
       "EmbedContentBatch": {
         "description": "A resource representing a batch of `EmbedContent` requests.",
         "properties": {
@@ -2133,6 +2214,102 @@
       },
       "Empty": {
         "description": "A generic empty message that you can re-use to avoid defining duplicated\nempty messages in your APIs. A typical example is to use it as the request\nor the response type of an API method. For instance:\n\n    service Foo {\n      rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty);\n    }",
+        "type": "object"
+      },
+      "Environment": {
+        "description": "An execution environment for an agent.",
+        "properties": {
+          "created": {
+            "description": "Output only. The time at which the environment was created in ISO 8601 format\n(YYYY-MM-DDThh:mm:ssZ).",
+            "readOnly": true,
+            "type": "string"
+          },
+          "fileCount": {
+            "description": "Output only. The number of files in the environment, output only.",
+            "format": "int64",
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "Required. Output only. The ID of the environment.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "lastAccessed": {
+            "description": "Output only. The time at which the environment was last accessed in ISO 8601 format\n(YYYY-MM-DDThh:mm:ssZ).",
+            "readOnly": true,
+            "type": "string"
+          },
+          "network_allowlist": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EnvironmentNetworkEgressAllowlist"
+              }
+            ],
+            "description": "Allow only specific domains."
+          },
+          "network_mode": {
+            "description": "Network egress mode.",
+            "enum": [
+              "NETWORK_MODE_UNSPECIFIED",
+              "DISABLED"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Default value. Unused.",
+              "All network egress is blocked."
+            ]
+          },
+          "sizeBytes": {
+            "description": "Output only. The total size of the environment files in bytes, output only.",
+            "format": "int64",
+            "readOnly": true,
+            "type": "string"
+          },
+          "sources": {
+            "description": "Sources to be mounted into the environment.",
+            "items": {
+              "$ref": "#/components/schemas/Source"
+            },
+            "type": "array"
+          },
+          "status": {
+            "description": "Output only. The status of the environment container.",
+            "enum": [
+              "STATUS_UNSPECIFIED",
+              "ACTIVE",
+              "EXPIRED"
+            ],
+            "readOnly": true,
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "",
+              "",
+              ""
+            ]
+          },
+          "updated": {
+            "description": "Output only. The time at which the environment was last updated in ISO 8601 format\n(YYYY-MM-DDThh:mm:ssZ).",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "EnvironmentNetworkEgressAllowlist": {
+        "description": "Network egress configuration for the environment.",
+        "properties": {
+          "allowlist": {
+            "description": "List of allowed domains and their configurations.",
+            "items": {
+              "$ref": "#/components/schemas/EgressRule"
+            },
+            "type": "array"
+          }
+        },
         "type": "object"
       },
       "Example": {
@@ -3317,12 +3494,25 @@
         "description": "Configuration options for model generation and outputs. Not all parameters\nare configurable for every model.",
         "properties": {
           "_responseJsonSchema": {
+            "deprecated": true,
             "description": "Optional. Output schema of the generated response. This is an alternative to\n`response_schema` that accepts [JSON Schema](https://json-schema.org/).\n\nIf set, `response_schema` must be omitted, but `response_mime_type` is\nrequired.\n\nWhile the full JSON Schema may be sent, not all features are supported.\nSpecifically, only the following properties are supported:\n\n- `$id`\n- `$defs`\n- `$ref`\n- `$anchor`\n- `type`\n- `format`\n- `title`\n- `description`\n- `enum` (for strings and numbers)\n- `items`\n- `prefixItems`\n- `minItems`\n- `maxItems`\n- `minimum`\n- `maximum`\n- `anyOf`\n- `oneOf` (interpreted the same as `anyOf`)\n- `properties`\n- `additionalProperties`\n- `required`\n\nThe non-standard `propertyOrdering` property may also be set.\n\nCyclic references are unrolled to a limited degree and, as such, may only\nbe used within non-required properties. (Nullable properties are not\nsufficient.) If `$ref` is set on a sub-schema, no other properties, except\nfor than those starting as a `$`, may be set."
+          },
+          "audioTranscriptionConfig": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AudioTranscriptionConfig"
+              }
+            ],
+            "description": "Optional. Config for audio transcription (speech recognition)."
           },
           "candidateCount": {
             "description": "Optional. Number of generated responses to return. If unset, this will default\nto 1. Please note that this doesn't work for previous generation\nmodels (Gemini 1.0 family)",
             "format": "int32",
             "type": "integer"
+          },
+          "enableAffectiveDialog": {
+            "description": "Optional. If enabled, the model will detect emotions and adapt its responses\naccordingly.",
+            "type": "boolean"
           },
           "enableEnhancedCivicAnswers": {
             "description": "Optional. Enables enhanced civic answers. It may not be available for all models.",
@@ -3416,6 +3606,7 @@
                 "$ref": "#/components/schemas/Schema"
               }
             ],
+            "deprecated": true,
             "description": "Optional. Output schema of the generated candidate text. Schemas must be a\nsubset of the [OpenAPI schema](https://spec.openapis.org/oas/v3.0.3#schema)\nand can be objects, primitives or arrays.\n\nIf set, a compatible `response_mime_type` must also be set.\nCompatible MIME types:\n`application/json`: Schema for JSON response.\nRefer to the [JSON text generation\nguide](https://ai.google.dev/gemini-api/docs/json-mode) for more details."
           },
           "seed": {
@@ -3858,6 +4049,31 @@
           "initialHistoryInClientContent": {
             "description": "Optional. If true, after sending `setup_complete`, the server will wait\nand at first process `client_content` messages until `turn_complete` is\n`true`. This initial history will not trigger a model call and\nmay end with role `MODEL`. After `turn_complete` is `true`, the client\ncan start the realtime conversation via `realtime_input`.",
             "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "HttpBody": {
+        "description": "Message that represents an arbitrary HTTP body. It should only be used for\npayload formats that can't be represented as JSON, such as raw binary or\nan HTML page.\n\n\nThis message can be used both in streaming and non-streaming API methods in\nthe request as well as the response.\n\nIt can be used as a top-level request field, which is convenient if one\nwants to extract parameters from either the URL or HTTP template into the\nrequest fields and also want access to the raw HTTP body.\n\nExample:\n\n    message GetResourceRequest {\n      // A unique request id.\n      string request_id = 1;\n\n      // The raw HTTP body is bound to this field.\n      google.api.HttpBody http_body = 2;\n\n    }\n\n    service ResourceService {\n      rpc GetResource(GetResourceRequest)\n        returns (google.api.HttpBody);\n      rpc UpdateResource(google.api.HttpBody)\n        returns (google.protobuf.Empty);\n\n    }\n\nExample with streaming methods:\n\n    service CaldavService {\n      rpc GetCalendar(stream google.api.HttpBody)\n        returns (stream google.api.HttpBody);\n      rpc UpdateCalendar(stream google.api.HttpBody)\n        returns (stream google.api.HttpBody);\n\n    }\n\nUse of this type only changes how the request and response bodies are\nhandled, all other features will continue to work unchanged.",
+        "properties": {
+          "contentType": {
+            "description": "The HTTP Content-Type header value specifying the content type of the body.",
+            "type": "string"
+          },
+          "data": {
+            "description": "The HTTP request/response body as raw binary.",
+            "format": "byte",
+            "type": "string"
+          },
+          "extensions": {
+            "description": "Application specific response metadata. Must be set in the first response\nfor streaming APIs.",
+            "items": {
+              "additionalProperties": {
+                "description": "Properties of the object. Contains field @type with type URL."
+              },
+              "type": "object"
+            },
+            "type": "array"
           }
         },
         "type": "object"
@@ -4340,13 +4556,16 @@
         "type": "object"
       },
       "LanguageAuto": {
+        "deprecated": true,
         "description": "Indicates the language of the audio should be automatically detected.",
         "type": "object"
       },
       "LanguageHints": {
+        "deprecated": true,
         "description": "Provides hints to the model about possible languages present in the audio.",
         "properties": {
           "languageCodes": {
+            "deprecated": true,
             "description": "Required. BCP-47 language codes.",
             "items": {
               "type": "string"
@@ -4421,6 +4640,23 @@
           },
           "nextPageToken": {
             "description": "A token, which can be sent as `page_token` to retrieve the next page.\nIf this field is omitted, there are no more pages.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ListEnvironmentsResponse": {
+        "description": "Response for `ListEnvironments`.",
+        "properties": {
+          "environments": {
+            "description": "Environments belonging to the provided project.",
+            "items": {
+              "$ref": "#/components/schemas/Environment"
+            },
+            "type": "array"
+          },
+          "nextPageToken": {
+            "description": "Pagination token.",
             "type": "string"
           }
         },
@@ -4998,7 +5234,7 @@
           "mediaResolution": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/MediaResolution"
+                "$ref": "#/components/schemas/V1mainMediaResolution"
               }
             ],
             "description": "Optional. Media resolution for the input media."
@@ -5803,6 +6039,43 @@
         },
         "type": "object"
       },
+      "Source": {
+        "description": "A source to be mounted into the environment.",
+        "properties": {
+          "content": {
+            "description": "The inline content if `type` is `INLINE`.",
+            "type": "string"
+          },
+          "encoding": {
+            "description": "Optional encoding for inline content (e.g. `base64`).",
+            "type": "string"
+          },
+          "source": {
+            "description": "The source of the environment.\nFor GCS, this is the GCS path.\nFor GitHub, this is the GitHub path.",
+            "type": "string"
+          },
+          "target": {
+            "description": "Where the source should appear in the environment.",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "TYPE_UNSPECIFIED",
+              "GCS",
+              "INLINE",
+              "REPOSITORY"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "",
+              "A GCS bucket.",
+              "Inline content.",
+              "A generic repository. The protocol prefix in the source URL\nidentifies the provider (e.g., github://, gcs://)."
+            ]
+          }
+        },
+        "type": "object"
+      },
       "SpeakerVoiceConfig": {
         "description": "The configuration for a single speaker in a multi speaker setup.",
         "properties": {
@@ -6131,10 +6404,14 @@
             "description": "Optional. Unique identifier of the tool call.\nThe server returns the tool response with the matching `id`.",
             "type": "string"
           },
+          "toolName": {
+            "description": "Optional. The name of the tool that was called.",
+            "type": "string"
+          },
           "toolType": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/ToolType"
+                "$ref": "#/components/schemas/V1mainToolType"
               }
             ],
             "description": "Required. The type of tool that was called."
@@ -6188,7 +6465,7 @@
           "toolType": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/ToolType"
+                "$ref": "#/components/schemas/V1mainToolType"
               }
             ],
             "description": "Required. The type of tool that was called, matching the `tool_type` in the\ncorresponding `ToolCall`."
@@ -6690,6 +6967,111 @@
         },
         "type": "object"
       },
+      "V1mainCreateTunedModelMetadata": {
+        "description": "Metadata about the state and progress of creating a tuned model returned from\nthe long-running operation",
+        "properties": {
+          "completedPercent": {
+            "description": "The completed percentage for the tuning operation.",
+            "format": "float",
+            "type": "number"
+          },
+          "completedSteps": {
+            "description": "The number of steps completed.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "snapshots": {
+            "description": "Metrics collected during tuning.",
+            "items": {
+              "$ref": "#/components/schemas/V1mainTuningSnapshot"
+            },
+            "type": "array"
+          },
+          "totalSteps": {
+            "description": "The total number of tuning steps.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "tunedModel": {
+            "description": "Name of the tuned model associated with the tuning operation.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1mainMediaResolution": {
+        "description": "Media resolution for tokenization.",
+        "properties": {
+          "level": {
+            "description": "The tokenization quality used for given media.\n for Gemini API support .",
+            "enum": [
+              "MEDIA_RESOLUTION_UNSPECIFIED",
+              "MEDIA_RESOLUTION_LOW",
+              "MEDIA_RESOLUTION_MEDIUM",
+              "MEDIA_RESOLUTION_HIGH",
+              "MEDIA_RESOLUTION_ULTRA_HIGH"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Media resolution has not been set.",
+              "Media resolution set to low.",
+              "Media resolution set to medium.",
+              "Media resolution set to high.",
+              "Media resolution set to ultra high."
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1mainToolType": {
+        "enum": [
+          "TOOL_TYPE_UNSPECIFIED",
+          "GOOGLE_SEARCH_WEB",
+          "GOOGLE_SEARCH_IMAGE",
+          "URL_CONTEXT",
+          "GOOGLE_MAPS",
+          "FILE_SEARCH"
+        ],
+        "type": "string",
+        "x-google-enum-descriptions": [
+          "Unspecified tool type.",
+          "Google search tool, maps to Tool.google_search.search_types.web_search.",
+          "Image search tool, maps to Tool.google_search.search_types.image_search.",
+          "URL context tool, maps to Tool.url_context.",
+          "Google maps tool, maps to Tool.google_maps.",
+          "File search tool, maps to Tool.file_search."
+        ]
+      },
+      "V1mainTuningSnapshot": {
+        "description": "Record for a single tuning step.",
+        "properties": {
+          "computeTime": {
+            "description": "Output only. The timestamp when this metric was computed.",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "epoch": {
+            "description": "Output only. The epoch this step was part of.",
+            "format": "int32",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "meanLoss": {
+            "description": "Output only. The mean loss of the training examples for this step.",
+            "format": "float",
+            "readOnly": true,
+            "type": "number"
+          },
+          "step": {
+            "description": "Output only. The tuning step.",
+            "format": "int32",
+            "readOnly": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "Video": {
         "description": "Representation of a video.",
         "properties": {
@@ -6831,7 +7213,7 @@
     "description": "The Gemini API allows developers to build generative AI applications using Gemini models. Gemini is our most capable model, built from the ground up to be multimodal. It can generalize and seamlessly understand, operate across, and combine different types of information including language, images, audio, video, and code. You can use the Gemini API for use cases like reasoning across text and images, content generation, dialogue agents, summarization and classification systems, and more.",
     "title": "Gemini API",
     "version": "v1beta",
-    "x-google-revision": "20260709"
+    "x-google-revision": "20260731"
   },
   "openapi": "3.0.3",
   "paths": {
@@ -8110,6 +8492,366 @@
         ],
         "x-google-operation-name": "StreamGenerateContent"
       }
+    },
+    "/v1beta/environments": {
+      "get": {
+        "description": "Lists environments (HTTP endpoint).",
+        "operationId": "ListEnvironmentsHttp",
+        "parameters": [
+          {
+            "description": "Optional. Maximum number of environments to return.\nIf unspecified, defaults to 50. Maximum is 1000.",
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Optional. Pagination token.",
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpBody"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": [],
+        "tags": [
+          "generativelanguage"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/alt"
+        },
+        {
+          "$ref": "#/components/parameters/callback"
+        },
+        {
+          "$ref": "#/components/parameters/prettyPrint"
+        },
+        {
+          "$ref": "#/components/parameters/_.xgafv"
+        }
+      ],
+      "post": {
+        "description": "Creates an environment (HTTP endpoint).",
+        "operationId": "CreateEnvironmentHttp",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HttpBody"
+              }
+            }
+          },
+          "description": "Required. The environment to create (HTTP request body)."
+        },
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpBody"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": [],
+        "tags": [
+          "generativelanguage"
+        ]
+      }
+    },
+    "/v1beta/environments/{id}": {
+      "delete": {
+        "description": "Deletes an environment (HTTP endpoint).",
+        "operationId": "DeleteEnvironmentHttp",
+        "parameters": [
+          {
+            "description": "Required. The identifier of the environment to delete.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpBody"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": [],
+        "tags": [
+          "generativelanguage"
+        ]
+      },
+      "get": {
+        "description": "Gets an environment (HTTP endpoint).",
+        "operationId": "GetEnvironmentHttp",
+        "parameters": [
+          {
+            "description": "Required. The identifier of the environment to retrieve.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpBody"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": [],
+        "tags": [
+          "generativelanguage"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/alt"
+        },
+        {
+          "$ref": "#/components/parameters/callback"
+        },
+        {
+          "$ref": "#/components/parameters/prettyPrint"
+        },
+        {
+          "$ref": "#/components/parameters/_.xgafv"
+        }
+      ]
+    },
+    "/v1beta/environments/{id}:delete": {
+      "delete": {
+        "description": "Deletes an environment.",
+        "operationId": "DeleteEnvironment",
+        "parameters": [
+          {
+            "description": "Required. The identifier of the environment to delete.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Empty"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": [],
+        "tags": [
+          "generativelanguage"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/alt"
+        },
+        {
+          "$ref": "#/components/parameters/callback"
+        },
+        {
+          "$ref": "#/components/parameters/prettyPrint"
+        },
+        {
+          "$ref": "#/components/parameters/_.xgafv"
+        }
+      ]
+    },
+    "/v1beta/environments/{id}:get": {
+      "get": {
+        "description": "Gets an environment.",
+        "operationId": "GetEnvironment",
+        "parameters": [
+          {
+            "description": "Required. The identifier of the environment to retrieve.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Environment"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": [],
+        "tags": [
+          "generativelanguage"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/alt"
+        },
+        {
+          "$ref": "#/components/parameters/callback"
+        },
+        {
+          "$ref": "#/components/parameters/prettyPrint"
+        },
+        {
+          "$ref": "#/components/parameters/_.xgafv"
+        }
+      ]
+    },
+    "/v1beta/environments:create": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/alt"
+        },
+        {
+          "$ref": "#/components/parameters/callback"
+        },
+        {
+          "$ref": "#/components/parameters/prettyPrint"
+        },
+        {
+          "$ref": "#/components/parameters/_.xgafv"
+        }
+      ],
+      "post": {
+        "description": "Creates an environment.",
+        "operationId": "CreateEnvironment",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEnvironmentRequest"
+              }
+            }
+          },
+          "description": "The request body."
+        },
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Environment"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": [],
+        "tags": [
+          "generativelanguage"
+        ]
+      }
+    },
+    "/v1beta/environments:list": {
+      "get": {
+        "description": "Lists environments.",
+        "operationId": "ListEnvironments",
+        "parameters": [
+          {
+            "description": "Optional. Maximum number of environments to return.\nIf unspecified, defaults to 50. Maximum is 1000.",
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Optional. Pagination token.",
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListEnvironmentsResponse"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": [],
+        "tags": [
+          "generativelanguage"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/alt"
+        },
+        {
+          "$ref": "#/components/parameters/callback"
+        },
+        {
+          "$ref": "#/components/parameters/prettyPrint"
+        },
+        {
+          "$ref": "#/components/parameters/_.xgafv"
+        }
+      ]
     },
     "/v1beta/fileSearchStores": {
       "get": {

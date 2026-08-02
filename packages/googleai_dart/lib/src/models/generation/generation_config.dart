@@ -1,6 +1,7 @@
 import '../common/speech_config.dart';
 import '../content/media_resolution.dart';
 import '../copy_with_sentinel.dart';
+import 'audio_transcription_config.dart';
 import 'image_config.dart';
 import 'response_formats/response_format_config.dart';
 import 'response_modality.dart';
@@ -94,6 +95,12 @@ class GenerationConfig {
   /// Config for translation.
   final TranslationConfig? translationConfig;
 
+  /// Config for audio transcription output.
+  final GenerationAudioTranscriptionConfig? audioTranscriptionConfig;
+
+  /// Enables affective dialog for supported models.
+  final bool? enableAffectiveDialog;
+
   /// Creates a [GenerationConfig].
   const GenerationConfig({
     this.candidateCount,
@@ -118,6 +125,8 @@ class GenerationConfig {
     this.speechConfig,
     this.responseFormat,
     this.translationConfig,
+    this.audioTranscriptionConfig,
+    this.enableAffectiveDialog,
   });
 
   /// Creates a [GenerationConfig] from JSON.
@@ -167,6 +176,12 @@ class GenerationConfig {
                 json['translationConfig'] as Map<String, dynamic>,
               )
             : null,
+        audioTranscriptionConfig: json['audioTranscriptionConfig'] != null
+            ? GenerationAudioTranscriptionConfig.fromJson(
+                json['audioTranscriptionConfig'] as Map<String, dynamic>,
+              )
+            : null,
+        enableAffectiveDialog: json['enableAffectiveDialog'] as bool?,
       );
 
   /// Converts to JSON.
@@ -199,6 +214,10 @@ class GenerationConfig {
     if (responseFormat != null) 'responseFormat': responseFormat!.toJson(),
     if (translationConfig != null)
       'translationConfig': translationConfig!.toJson(),
+    if (audioTranscriptionConfig != null)
+      'audioTranscriptionConfig': audioTranscriptionConfig!.toJson(),
+    if (enableAffectiveDialog != null)
+      'enableAffectiveDialog': enableAffectiveDialog,
   };
 
   /// Creates a copy with replaced values.
@@ -225,6 +244,8 @@ class GenerationConfig {
     Object? speechConfig = unsetCopyWithValue,
     Object? responseFormat = unsetCopyWithValue,
     Object? translationConfig = unsetCopyWithValue,
+    Object? audioTranscriptionConfig = unsetCopyWithValue,
+    Object? enableAffectiveDialog = unsetCopyWithValue,
   }) {
     return GenerationConfig(
       candidateCount: candidateCount == unsetCopyWithValue
@@ -288,6 +309,12 @@ class GenerationConfig {
       translationConfig: translationConfig == unsetCopyWithValue
           ? this.translationConfig
           : translationConfig as TranslationConfig?,
+      audioTranscriptionConfig: audioTranscriptionConfig == unsetCopyWithValue
+          ? this.audioTranscriptionConfig
+          : audioTranscriptionConfig as GenerationAudioTranscriptionConfig?,
+      enableAffectiveDialog: enableAffectiveDialog == unsetCopyWithValue
+          ? this.enableAffectiveDialog
+          : enableAffectiveDialog as bool?,
     );
   }
 }

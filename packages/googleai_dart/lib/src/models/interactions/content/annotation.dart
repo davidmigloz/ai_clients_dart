@@ -2,19 +2,24 @@ part of 'content.dart';
 
 /// Citation information for model-generated content.
 ///
-/// This is a sealed class with 3 subtypes: [UrlCitation], [FileCitation],
-/// and [PlaceCitation].
+/// This is a sealed class with 4 subtypes: [UrlCitation], [FileCitation],
+/// [PlaceCitation], and [WordInfo], plus an [UnknownAnnotation] fallback for
+/// any `type` this client does not yet model.
 sealed class Annotation {
   /// Creates an [Annotation].
   const Annotation();
 
   /// Creates an [Annotation] from JSON.
+  ///
+  /// Unrecognized `type` values are surfaced as [UnknownAnnotation] (raw JSON
+  /// preserved) so a new/undocumented annotation type cannot break parsing.
   factory Annotation.fromJson(Map<String, dynamic> json) {
     return switch (json['type']) {
       'url_citation' => UrlCitation.fromJson(json),
       'file_citation' => FileCitation.fromJson(json),
       'place_citation' => PlaceCitation.fromJson(json),
-      _ => throw ArgumentError('Unknown annotation type: ${json['type']}'),
+      'word_info' => WordInfo.fromJson(json),
+      _ => UnknownAnnotation.fromJson(json),
     };
   }
 
@@ -259,4 +264,119 @@ class PlaceCitation extends Annotation {
           : reviewSnippets as List<InteractionReviewSnippet>?,
     );
   }
+}
+
+/// A word-level ASR annotation for transcription output.
+///
+/// Carries the word text, optional timing, and optional speaker attribution.
+class WordInfo extends Annotation {
+  /// End of the attributed segment, exclusive.
+  final int? endIndex;
+
+  /// End offset in time of the word relative to the start of the audio
+  /// (a google-duration string, e.g. `"1.5s"`).
+  ///
+  /// Present when `timestamp_granularities` contains `"word"`.
+  final String? endOffset;
+
+  /// Speaker label for this word (e.g. `"spk_1"`, `"spk_2"`).
+  ///
+  /// Present when `diarization_mode` is set in [TranscriptionConfig].
+  final String? speaker;
+
+  /// Start of segment of the response that is attributed to this source.
+  final int? startIndex;
+
+  /// Start offset in time of the word relative to the start of the audio
+  /// (a google-duration string, e.g. `"1.5s"`).
+  ///
+  /// Present when `timestamp_granularities` contains `"word"`.
+  final String? startOffset;
+
+  /// The transcribed word.
+  final String? text;
+
+  /// Creates a [WordInfo] instance.
+  const WordInfo({
+    this.endIndex,
+    this.endOffset,
+    this.speaker,
+    this.startIndex,
+    this.startOffset,
+    this.text,
+  });
+
+  /// Creates a [WordInfo] from JSON.
+  factory WordInfo.fromJson(Map<String, dynamic> json) => WordInfo(
+    endIndex: json['end_index'] as int?,
+    endOffset: json['end_offset'] as String?,
+    speaker: json['speaker'] as String?,
+    startIndex: json['start_index'] as int?,
+    startOffset: json['start_offset'] as String?,
+    text: json['text'] as String?,
+  );
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'word_info',
+    if (endIndex != null) 'end_index': endIndex,
+    if (endOffset != null) 'end_offset': endOffset,
+    if (speaker != null) 'speaker': speaker,
+    if (startIndex != null) 'start_index': startIndex,
+    if (startOffset != null) 'start_offset': startOffset,
+    if (text != null) 'text': text,
+  };
+
+  /// Creates a copy with replaced values.
+  WordInfo copyWith({
+    Object? endIndex = unsetCopyWithValue,
+    Object? endOffset = unsetCopyWithValue,
+    Object? speaker = unsetCopyWithValue,
+    Object? startIndex = unsetCopyWithValue,
+    Object? startOffset = unsetCopyWithValue,
+    Object? text = unsetCopyWithValue,
+  }) {
+    return WordInfo(
+      endIndex: endIndex == unsetCopyWithValue
+          ? this.endIndex
+          : endIndex as int?,
+      endOffset: endOffset == unsetCopyWithValue
+          ? this.endOffset
+          : endOffset as String?,
+      speaker: speaker == unsetCopyWithValue
+          ? this.speaker
+          : speaker as String?,
+      startIndex: startIndex == unsetCopyWithValue
+          ? this.startIndex
+          : startIndex as int?,
+      startOffset: startOffset == unsetCopyWithValue
+          ? this.startOffset
+          : startOffset as String?,
+      text: text == unsetCopyWithValue ? this.text : text as String?,
+    );
+  }
+}
+
+/// An [Annotation] whose `type` is not one of the documented variants.
+///
+/// The Interactions API is experimental and evolving; new annotation types
+/// may be returned before this client models them. Such annotations are
+/// surfaced here with their raw JSON preserved instead of failing to parse,
+/// keeping parsing resilient and forward-compatible.
+class UnknownAnnotation extends Annotation {
+  /// The raw JSON payload of the annotation, preserved verbatim.
+  final Map<String, dynamic> rawJson;
+
+  /// The type discriminator, read from [rawJson].
+  String get type => rawJson['type'] as String? ?? 'unknown';
+
+  /// Creates an [UnknownAnnotation] instance.
+  const UnknownAnnotation({required this.rawJson});
+
+  /// Creates an [UnknownAnnotation] from JSON.
+  factory UnknownAnnotation.fromJson(Map<String, dynamic> json) =>
+      UnknownAnnotation(rawJson: json);
+
+  @override
+  Map<String, dynamic> toJson() => rawJson;
 }

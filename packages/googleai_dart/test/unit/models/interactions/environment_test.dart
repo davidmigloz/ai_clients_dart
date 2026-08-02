@@ -173,6 +173,160 @@ void main() {
     });
   });
 
+  group('Environment', () {
+    test('creates with only required id', () {
+      const environment = Environment(id: 'env_1');
+      expect(environment.id, 'env_1');
+      expect(environment.status, isNull);
+    });
+
+    test('round-trips all fields', () {
+      final environment = Environment(
+        id: 'env_1',
+        created: DateTime.utc(2026, 1, 1),
+        updated: DateTime.utc(2026, 1, 2),
+        lastAccessed: DateTime.utc(2026, 1, 3),
+        fileCount: '5',
+        sizeBytes: '1024',
+        network: const EnvironmentNetworkAllowlist(
+          allowlist: [AllowlistEntry(domain: 'example.com')],
+        ),
+        sources: const [Source(type: SourceType.inline, content: 'hi')],
+        status: EnvironmentStatus.active,
+      );
+
+      final json = environment.toJson();
+      expect(json['id'], 'env_1');
+      expect(json['created'], '2026-01-01T00:00:00.000Z');
+      expect(json['updated'], '2026-01-02T00:00:00.000Z');
+      expect(json['last_accessed'], '2026-01-03T00:00:00.000Z');
+      expect(json['file_count'], '5');
+      expect(json['size_bytes'], '1024');
+      expect(json['network'], isA<Map<String, dynamic>>());
+      expect(json['sources'], hasLength(1));
+      expect(json['status'], 'active');
+
+      final restored = Environment.fromJson(json);
+      expect(restored.id, environment.id);
+      expect(restored.created, environment.created);
+      expect(restored.updated, environment.updated);
+      expect(restored.lastAccessed, environment.lastAccessed);
+      expect(restored.fileCount, environment.fileCount);
+      expect(restored.sizeBytes, environment.sizeBytes);
+      expect(restored.network, isA<EnvironmentNetworkAllowlist>());
+      expect(restored.sources!.first.content, 'hi');
+      expect(restored.status, EnvironmentStatus.active);
+    });
+
+    test('network "disabled" string form round-trips', () {
+      const environment = Environment(
+        id: 'env_1',
+        network: EnvironmentNetworkDisabled(),
+      );
+      final json = environment.toJson();
+      expect(json['network'], 'disabled');
+
+      final restored = Environment.fromJson(json);
+      expect(restored.network, isA<EnvironmentNetworkDisabled>());
+    });
+
+    test('omits null optional fields from JSON', () {
+      const environment = Environment(id: 'env_1');
+      final json = environment.toJson();
+      expect(json.containsKey('created'), isFalse);
+      expect(json.containsKey('updated'), isFalse);
+      expect(json.containsKey('last_accessed'), isFalse);
+      expect(json.containsKey('file_count'), isFalse);
+      expect(json.containsKey('size_bytes'), isFalse);
+      expect(json.containsKey('network'), isFalse);
+      expect(json.containsKey('sources'), isFalse);
+      expect(json.containsKey('status'), isFalse);
+    });
+
+    test('unknown status parses to null', () {
+      final environment = Environment.fromJson({
+        'id': 'env_1',
+        'status': 'something_new',
+      });
+      expect(environment.status, isNull);
+    });
+
+    test('copyWith replaces and preserves values', () {
+      const environment = Environment(id: 'env_1', fileCount: '1');
+      final replaced = environment.copyWith(
+        id: 'env_2',
+        status: EnvironmentStatus.expired,
+      );
+      expect(replaced.id, 'env_2');
+      expect(replaced.status, EnvironmentStatus.expired);
+      expect(replaced.fileCount, '1');
+
+      final unchanged = environment.copyWith();
+      expect(unchanged.id, environment.id);
+      expect(unchanged.fileCount, environment.fileCount);
+    });
+  });
+
+  group('CreateEnvironmentRequest', () {
+    test('round-trips network and sources', () {
+      const request = CreateEnvironmentRequest(
+        network: EnvironmentNetworkDisabled(),
+        sources: [Source(type: SourceType.gcs, source: 'gs://bucket')],
+      );
+      final json = request.toJson();
+      expect(json['network'], 'disabled');
+      expect(json['sources'], hasLength(1));
+
+      final restored = CreateEnvironmentRequest.fromJson(json);
+      expect(restored.network, isA<EnvironmentNetworkDisabled>());
+      expect(restored.sources!.first.source, 'gs://bucket');
+    });
+
+    test('omits null fields from JSON', () {
+      expect(const CreateEnvironmentRequest().toJson(), isEmpty);
+    });
+
+    test('copyWith replaces and preserves values', () {
+      const request = CreateEnvironmentRequest(
+        network: EnvironmentNetworkDisabled(),
+      );
+      final replaced = request.copyWith(network: null);
+      expect(replaced.network, isNull);
+
+      final unchanged = request.copyWith();
+      expect(unchanged.network, request.network);
+    });
+  });
+
+  group('ListEnvironmentsResponse', () {
+    test('round-trips environments and nextPageToken', () {
+      const response = ListEnvironmentsResponse(
+        environments: [Environment(id: 'env_1')],
+        nextPageToken: 'tok',
+      );
+      final json = response.toJson();
+      expect(json['environments'], hasLength(1));
+      expect(json['next_page_token'], 'tok');
+
+      final restored = ListEnvironmentsResponse.fromJson(json);
+      expect(restored.environments!.single.id, 'env_1');
+      expect(restored.nextPageToken, 'tok');
+    });
+
+    test('omits null fields from JSON', () {
+      expect(const ListEnvironmentsResponse().toJson(), isEmpty);
+    });
+
+    test('copyWith replaces and preserves values', () {
+      const response = ListEnvironmentsResponse(nextPageToken: 'tok');
+      final replaced = response.copyWith(nextPageToken: 'tok2');
+      expect(replaced.nextPageToken, 'tok2');
+
+      final unchanged = response.copyWith();
+      expect(unchanged.nextPageToken, response.nextPageToken);
+    });
+  });
+
   group('environment wiring on interaction models', () {
     test('CreateModelInteractionParams serializes environment', () {
       const params = CreateModelInteractionParams(

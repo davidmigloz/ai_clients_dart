@@ -64,7 +64,6 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   Future<Interaction> create({
     required String model,
     InteractionInput? input,
-    String? cachedContent,
     String? systemInstruction,
     List<InteractionTool>? tools,
     InteractionGenerationConfig? generationConfig,
@@ -82,7 +81,6 @@ class InteractionsResource extends ResourceBase with StreamingResource {
 
     final body = <String, dynamic>{
       'model': model,
-      'cached_content': ?cachedContent,
       if (input != null) 'input': input.toJson(),
       'system_instruction': ?systemInstruction,
       if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
@@ -212,7 +210,6 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   Stream<InteractionEvent> createStream({
     required String model,
     InteractionInput? input,
-    String? cachedContent,
     String? systemInstruction,
     List<InteractionTool>? tools,
     InteractionGenerationConfig? generationConfig,
@@ -232,7 +229,6 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     final body = <String, dynamic>{
       'model': model,
       'stream': true,
-      'cached_content': ?cachedContent,
       if (input != null) 'input': input.toJson(),
       'system_instruction': ?systemInstruction,
       if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),

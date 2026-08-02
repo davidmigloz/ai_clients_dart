@@ -9,6 +9,7 @@ import 'package:googleai_dart/src/models/content/content.dart';
 import 'package:googleai_dart/src/models/content/file_data.dart';
 import 'package:googleai_dart/src/models/content/part.dart';
 import 'package:googleai_dart/src/models/embeddings/embed_content_request.dart';
+import 'package:googleai_dart/src/models/generation/audio_transcription_config.dart';
 import 'package:googleai_dart/src/models/generation/generation_config.dart';
 import 'package:googleai_dart/src/models/generation/thinking_config.dart';
 import 'package:googleai_dart/src/models/generation/thinking_level.dart';
@@ -126,6 +127,80 @@ void main() {
 
         expect(updated.temperature, original.temperature);
         expect(updated.thinkingConfig?.thinkingLevel, ThinkingLevel.low);
+      });
+
+      test('copyWith replaces audioTranscriptionConfig field', () {
+        const original = GenerationConfig(
+          temperature: 0.7,
+          audioTranscriptionConfig: GenerationAudioTranscriptionConfig(
+            diarization: false,
+          ),
+        );
+        const newConfig = GenerationAudioTranscriptionConfig(diarization: true);
+        final updated = original.copyWith(audioTranscriptionConfig: newConfig);
+
+        expect(updated.temperature, original.temperature);
+        expect(updated.audioTranscriptionConfig?.diarization, isTrue);
+      });
+
+      test('copyWith preserves audioTranscriptionConfig by default', () {
+        const original = GenerationConfig(
+          temperature: 0.7,
+          audioTranscriptionConfig: GenerationAudioTranscriptionConfig(
+            diarization: true,
+          ),
+        );
+        final updated = original.copyWith();
+
+        expect(
+          updated.audioTranscriptionConfig?.diarization,
+          original.audioTranscriptionConfig?.diarization,
+        );
+      });
+
+      test('copyWith clears audioTranscriptionConfig explicitly', () {
+        const original = GenerationConfig(
+          temperature: 0.7,
+          audioTranscriptionConfig: GenerationAudioTranscriptionConfig(
+            diarization: true,
+          ),
+        );
+        final updated = original.copyWith(audioTranscriptionConfig: null);
+
+        expect(updated.audioTranscriptionConfig, isNull);
+        expect(updated.temperature, original.temperature);
+      });
+
+      test('copyWith replaces enableAffectiveDialog field', () {
+        const original = GenerationConfig(
+          temperature: 0.7,
+          enableAffectiveDialog: false,
+        );
+        final updated = original.copyWith(enableAffectiveDialog: true);
+
+        expect(updated.enableAffectiveDialog, isTrue);
+        expect(updated.temperature, original.temperature);
+      });
+
+      test('copyWith preserves enableAffectiveDialog by default', () {
+        const original = GenerationConfig(
+          temperature: 0.7,
+          enableAffectiveDialog: true,
+        );
+        final updated = original.copyWith();
+
+        expect(updated.enableAffectiveDialog, original.enableAffectiveDialog);
+      });
+
+      test('copyWith clears enableAffectiveDialog explicitly', () {
+        const original = GenerationConfig(
+          temperature: 0.7,
+          enableAffectiveDialog: true,
+        );
+        final updated = original.copyWith(enableAffectiveDialog: null);
+
+        expect(updated.enableAffectiveDialog, isNull);
+        expect(updated.temperature, original.temperature);
       });
     });
 

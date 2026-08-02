@@ -704,5 +704,57 @@ void main() {
         InteractionVideoConfigTask.imageToVideo,
       );
     });
+
+    test('temperature and top_p are no longer part of toJson', () {
+      final json = InteractionGenerationConfig.fromJson(const {
+        'temperature': 0.7,
+        'top_p': 0.9,
+        'seed': 42,
+      }).toJson();
+
+      expect(json.containsKey('temperature'), isFalse);
+      expect(json.containsKey('top_p'), isFalse);
+      expect(json['seed'], 42);
+    });
+
+    test('fromJson and toJson round-trip transcriptionConfig', () {
+      const original = InteractionGenerationConfig(
+        transcriptionConfig: TranscriptionConfig(
+          diarizationMode: 'speaker',
+          languageCodes: ['en-US'],
+          timestampGranularities: ['word'],
+        ),
+      );
+
+      final json = original.toJson();
+      final restored = InteractionGenerationConfig.fromJson(json);
+
+      expect(json['transcription_config'], isA<Map<String, dynamic>>());
+      expect(restored.transcriptionConfig, isNotNull);
+      expect(restored.transcriptionConfig!.diarizationMode, 'speaker');
+      expect(restored.transcriptionConfig!.languageCodes, ['en-US']);
+      expect(restored.transcriptionConfig!.timestampGranularities, ['word']);
+    });
+  });
+
+  group('cached_content removal', () {
+    test('Interaction.fromJson ignores a stray cached_content key and never '
+        'emits it', () {
+      final interaction = Interaction.fromJson(const {
+        'id': 'i_1',
+        'status': 'in_progress',
+        'cached_content': 'cachedContents/abc',
+      });
+      expect(interaction.toJson().containsKey('cached_content'), isFalse);
+    });
+
+    test('CreateModelInteractionParams.fromJson ignores a stray '
+        'cached_content key and never emits it', () {
+      final params = CreateModelInteractionParams.fromJson(const {
+        'model': 'gemini-3.5-flash',
+        'cached_content': 'cachedContents/abc',
+      });
+      expect(params.toJson().containsKey('cached_content'), isFalse);
+    });
   });
 }

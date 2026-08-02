@@ -96,6 +96,78 @@ void main() {
         expect(restored.mediaId, 'img-1');
         expect(restored.customMetadata, {'priority': 'high'});
       });
+
+      test('with word_info annotation', () {
+        final json = {
+          'type': 'text',
+          'text': 'Hello world',
+          'annotations': [
+            {
+              'type': 'word_info',
+              'text': 'Hello',
+              'start_index': 0,
+              'end_index': 5,
+              'start_offset': '0s',
+              'end_offset': '0.5s',
+              'speaker': 'spk_1',
+            },
+          ],
+        };
+        final textContent = InteractionContent.fromJson(json) as TextContent;
+        expect(textContent.annotations, hasLength(1));
+        final wordInfo = textContent.annotations![0] as WordInfo;
+        expect(wordInfo.text, 'Hello');
+        expect(wordInfo.startIndex, 0);
+        expect(wordInfo.endIndex, 5);
+        expect(wordInfo.startOffset, '0s');
+        expect(wordInfo.endOffset, '0.5s');
+        expect(wordInfo.speaker, 'spk_1');
+      });
+    });
+
+    group('WordInfo', () {
+      test('roundtrip preserves all fields', () {
+        const wordInfo = WordInfo(
+          text: 'world',
+          startIndex: 6,
+          endIndex: 11,
+          startOffset: '0.5s',
+          endOffset: '1s',
+          speaker: 'spk_2',
+        );
+        final restored = Annotation.fromJson(wordInfo.toJson()) as WordInfo;
+        expect(restored.text, 'world');
+        expect(restored.startIndex, 6);
+        expect(restored.endIndex, 11);
+        expect(restored.startOffset, '0.5s');
+        expect(restored.endOffset, '1s');
+        expect(restored.speaker, 'spk_2');
+      });
+
+      test('toJson emits type discriminator first', () {
+        const wordInfo = WordInfo(text: 'hi');
+        expect(wordInfo.toJson()['type'], 'word_info');
+      });
+
+      test('copyWith replaces and preserves fields', () {
+        const wordInfo = WordInfo(text: 'hi', speaker: 'spk_1');
+        final copy = wordInfo.copyWith(text: 'bye');
+        expect(copy.text, 'bye');
+        expect(copy.speaker, 'spk_1');
+      });
+    });
+
+    group('UnknownAnnotation', () {
+      test('unrecognized annotation type parses as UnknownAnnotation '
+          'preserving raw JSON', () {
+        final json = {'type': 'some_future_annotation', 'foo': 'bar'};
+        final annotation = Annotation.fromJson(json);
+        expect(annotation, isA<UnknownAnnotation>());
+        expect(annotation.toJson(), json);
+        final unknown = annotation as UnknownAnnotation;
+        expect(unknown.type, 'some_future_annotation');
+        expect(unknown.rawJson['foo'], 'bar');
+      });
     });
 
     group('ImageContent', () {

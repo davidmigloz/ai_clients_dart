@@ -11,14 +11,10 @@ class StepStartEvent extends InteractionEvent {
   /// The starting step.
   final InteractionStep step;
 
-  /// Optional metadata accompanying this streamed event.
-  final StreamMetadata? metadata;
-
   /// Creates a [StepStartEvent] instance.
   const StepStartEvent({
     required this.index,
     required this.step,
-    this.metadata,
     super.eventId,
   });
 
@@ -35,9 +31,6 @@ class StepStartEvent extends InteractionEvent {
     return StepStartEvent(
       index: index,
       step: InteractionStep.fromJson(step),
-      metadata: json['metadata'] != null
-          ? StreamMetadata.fromJson(json['metadata'] as Map<String, dynamic>)
-          : null,
       eventId: json['event_id'] as String?,
     );
   }
@@ -47,7 +40,6 @@ class StepStartEvent extends InteractionEvent {
     'event_type': eventType,
     'index': index,
     'step': step.toJson(),
-    if (metadata != null) 'metadata': metadata!.toJson(),
     if (eventId != null) 'event_id': eventId,
   };
 }

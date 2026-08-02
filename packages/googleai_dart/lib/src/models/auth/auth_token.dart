@@ -69,6 +69,10 @@ class AuthToken {
   /// from [bidiGenerateContentSetup] overwrite the connection's setup fields.
   final String? fieldMask;
 
+  /// Optional. Input only. Immutable. The interaction ID this token is
+  /// scoped to (Live Interactions API).
+  final String? interactionId;
+
   /// Creates an [AuthToken] with the specified configuration.
   const AuthToken({
     this.name,
@@ -77,6 +81,7 @@ class AuthToken {
     this.uses,
     this.bidiGenerateContentSetup,
     this.fieldMask,
+    this.interactionId,
   });
 
   /// Creates an AuthToken from JSON.
@@ -96,6 +101,7 @@ class AuthToken {
             )
           : null,
       fieldMask: json['fieldMask'] as String?,
+      interactionId: json['interactionId'] as String?,
     );
   }
 
@@ -111,6 +117,7 @@ class AuthToken {
       if (bidiGenerateContentSetup != null)
         'bidiGenerateContentSetup': bidiGenerateContentSetup!.toJson()['setup'],
       if (fieldMask != null) 'fieldMask': fieldMask,
+      if (interactionId != null) 'interactionId': interactionId,
     };
   }
 
@@ -122,6 +129,7 @@ class AuthToken {
     int? uses,
     BidiGenerateContentSetup? bidiGenerateContentSetup,
     String? fieldMask,
+    String? interactionId,
   }) {
     return AuthToken(
       name: name ?? this.name,
@@ -131,6 +139,7 @@ class AuthToken {
       bidiGenerateContentSetup:
           bidiGenerateContentSetup ?? this.bidiGenerateContentSetup,
       fieldMask: fieldMask ?? this.fieldMask,
+      interactionId: interactionId ?? this.interactionId,
     );
   }
 
@@ -159,7 +168,8 @@ class AuthToken {
         'newSessionExpireTime: $newSessionExpireTime, '
         'uses: $uses, '
         'bidiGenerateContentSetup: ${bidiGenerateContentSetup != null ? "..." : "null"}, '
-        'fieldMask: $fieldMask'
+        'fieldMask: $fieldMask, '
+        'interactionId: $interactionId'
         ')';
   }
 
@@ -172,7 +182,8 @@ class AuthToken {
         other.newSessionExpireTime == newSessionExpireTime &&
         other.uses == uses &&
         other.bidiGenerateContentSetup == bidiGenerateContentSetup &&
-        other.fieldMask == fieldMask;
+        other.fieldMask == fieldMask &&
+        other.interactionId == interactionId;
   }
 
   @override
@@ -184,6 +195,7 @@ class AuthToken {
       uses,
       bidiGenerateContentSetup,
       fieldMask,
+      interactionId,
     );
   }
 }

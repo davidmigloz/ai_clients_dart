@@ -11,14 +11,10 @@ class InteractionStatusUpdateEvent extends InteractionEvent {
   /// The new status of the interaction.
   final InteractionStatus? status;
 
-  /// Optional metadata accompanying this streamed event.
-  final StreamMetadata? metadata;
-
   /// Creates an [InteractionStatusUpdateEvent] instance.
   const InteractionStatusUpdateEvent({
     this.interactionId,
     this.status,
-    this.metadata,
     super.eventId,
   });
 
@@ -29,9 +25,6 @@ class InteractionStatusUpdateEvent extends InteractionEvent {
         status: json['status'] != null
             ? InteractionStatus.fromString(json['status'] as String)
             : null,
-        metadata: json['metadata'] != null
-            ? StreamMetadata.fromJson(json['metadata'] as Map<String, dynamic>)
-            : null,
         eventId: json['event_id'] as String?,
       );
 
@@ -40,7 +33,6 @@ class InteractionStatusUpdateEvent extends InteractionEvent {
     'event_type': eventType,
     if (interactionId != null) 'interaction_id': interactionId,
     if (status != null) 'status': status!.toJson(),
-    if (metadata != null) 'metadata': metadata!.toJson(),
     if (eventId != null) 'event_id': eventId,
   };
 }

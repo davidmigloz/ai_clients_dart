@@ -4,16 +4,11 @@ import 'speech_config.dart';
 import 'thinking_level.dart';
 import 'thinking_summaries.dart';
 import 'tool_choice.dart';
+import 'transcription_config.dart';
 import 'video_config.dart';
 
 /// Configuration parameters for model interactions.
 class InteractionGenerationConfig {
-  /// Controls the randomness of the output.
-  final double? temperature;
-
-  /// The maximum cumulative probability of tokens to consider when sampling.
-  final double? topP;
-
   /// Seed used in decoding for reproducibility.
   final int? seed;
 
@@ -41,10 +36,11 @@ class InteractionGenerationConfig {
   /// Configuration for video generation.
   final InteractionVideoConfig? videoConfig;
 
+  /// Configuration for speech recognition (transcription).
+  final TranscriptionConfig? transcriptionConfig;
+
   /// Creates an [InteractionGenerationConfig] instance.
   const InteractionGenerationConfig({
-    this.temperature,
-    this.topP,
     this.seed,
     this.stopSequences,
     this.toolChoice,
@@ -54,14 +50,13 @@ class InteractionGenerationConfig {
     this.speechConfig,
     this.imageConfig,
     this.videoConfig,
+    this.transcriptionConfig,
   });
 
   /// Creates an [InteractionGenerationConfig] from JSON.
   factory InteractionGenerationConfig.fromJson(
     Map<String, dynamic> json,
   ) => InteractionGenerationConfig(
-    temperature: (json['temperature'] as num?)?.toDouble(),
-    topP: (json['top_p'] as num?)?.toDouble(),
     seed: json['seed'] as int?,
     stopSequences: (json['stop_sequences'] as List<dynamic>?)?.cast<String>(),
     toolChoice: json['tool_choice'] != null
@@ -91,12 +86,15 @@ class InteractionGenerationConfig {
             json['video_config'] as Map<String, dynamic>,
           )
         : null,
+    transcriptionConfig: json['transcription_config'] != null
+        ? TranscriptionConfig.fromJson(
+            json['transcription_config'] as Map<String, dynamic>,
+          )
+        : null,
   );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    if (temperature != null) 'temperature': temperature,
-    if (topP != null) 'top_p': topP,
     if (seed != null) 'seed': seed,
     if (stopSequences != null) 'stop_sequences': stopSequences,
     if (toolChoice != null) 'tool_choice': toolChoice!.toJson(),
@@ -111,12 +109,12 @@ class InteractionGenerationConfig {
       'speech_config': speechConfig!.map((e) => e.toJson()).toList(),
     if (imageConfig != null) 'image_config': imageConfig!.toJson(),
     if (videoConfig != null) 'video_config': videoConfig!.toJson(),
+    if (transcriptionConfig != null)
+      'transcription_config': transcriptionConfig!.toJson(),
   };
 
   /// Creates a copy with replaced values.
   InteractionGenerationConfig copyWith({
-    Object? temperature = unsetCopyWithValue,
-    Object? topP = unsetCopyWithValue,
     Object? seed = unsetCopyWithValue,
     Object? stopSequences = unsetCopyWithValue,
     Object? toolChoice = unsetCopyWithValue,
@@ -126,12 +124,9 @@ class InteractionGenerationConfig {
     Object? speechConfig = unsetCopyWithValue,
     Object? imageConfig = unsetCopyWithValue,
     Object? videoConfig = unsetCopyWithValue,
+    Object? transcriptionConfig = unsetCopyWithValue,
   }) {
     return InteractionGenerationConfig(
-      temperature: temperature == unsetCopyWithValue
-          ? this.temperature
-          : temperature as double?,
-      topP: topP == unsetCopyWithValue ? this.topP : topP as double?,
       seed: seed == unsetCopyWithValue ? this.seed : seed as int?,
       stopSequences: stopSequences == unsetCopyWithValue
           ? this.stopSequences
@@ -157,6 +152,9 @@ class InteractionGenerationConfig {
       videoConfig: videoConfig == unsetCopyWithValue
           ? this.videoConfig
           : videoConfig as InteractionVideoConfig?,
+      transcriptionConfig: transcriptionConfig == unsetCopyWithValue
+          ? this.transcriptionConfig
+          : transcriptionConfig as TranscriptionConfig?,
     );
   }
 }

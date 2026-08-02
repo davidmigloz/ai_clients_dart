@@ -12,7 +12,7 @@ class StepDeltaEvent extends InteractionEvent {
   final StepDeltaData delta;
 
   /// Optional metadata accompanying this streamed event.
-  final StreamMetadata? metadata;
+  final StepDeltaMetadata? metadata;
 
   /// Creates a [StepDeltaEvent] instance.
   const StepDeltaEvent({
@@ -36,7 +36,7 @@ class StepDeltaEvent extends InteractionEvent {
       index: index,
       delta: StepDeltaData.fromJson(delta),
       metadata: json['metadata'] != null
-          ? StreamMetadata.fromJson(json['metadata'] as Map<String, dynamic>)
+          ? StepDeltaMetadata.fromJson(json['metadata'] as Map<String, dynamic>)
           : null,
       eventId: json['event_id'] as String?,
     );

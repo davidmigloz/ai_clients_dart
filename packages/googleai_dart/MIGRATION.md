@@ -6,6 +6,49 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v10.x to v11.0.0
+
+v11.0.0 syncs `googleai_dart` to the July 2026 Gemini main and interactions specs. The breaking changes are confined to the experimental Interactions API — chat/generation callers need no changes. Everything else (Environments API, Triggers API, Antigravity/CodeMender agent configs, ASR transcription with word-level annotations, and new `GenerationConfig` fields) is additive.
+
+### 1) SSE event `metadata` removed; `StreamMetadata` renamed to `StepDeltaMetadata`
+
+The spec dropped the `metadata` field from every streamed interaction event except `step.delta`, and renamed the schema to `StepDeltaMetadata` (same shape — `totalUsage`). The Dart `metadata` field is removed from `InteractionCreatedEvent`, `InteractionCompletedEvent`, `InteractionStatusUpdateEvent`, `StepStartEvent`, `StepStopEvent`, and `ErrorEvent`; `StepDeltaEvent.metadata` is now a `StepDeltaMetadata?`.
+
+```dart
+// Before — running usage read from any event's metadata
+if (event is StepStopEvent) {
+  final usage = event.metadata?.totalUsage;
+}
+
+// After — running usage is only on step.delta events (StepDeltaMetadata);
+// final usage remains available on InteractionCompletedEvent.interaction.usage
+if (event is StepDeltaEvent) {
+  final usage = event.metadata?.totalUsage;
+}
+```
+
+### 2) `cachedContent` removed from interactions
+
+The Interactions API no longer supports `cached_content`; the field is removed from `Interaction`, `CreateModelInteractionParams`, and the `cachedContent` parameter of `InteractionsResource.create()` / `createStream()`.
+
+### 3) `InteractionGenerationConfig.temperature` and `topP` removed
+
+The Gemini API deprecated the sampling parameters `temperature`, `top_p`, and `top_k` (July 2026); the Interactions API spec no longer accepts them.
+
+```dart
+// Before
+final config = InteractionGenerationConfig(temperature: 0.7, topP: 0.9);
+
+// After — drop the sampling parameters
+final config = InteractionGenerationConfig();
+```
+
+### 4) Unknown annotation types no longer throw
+
+`Annotation.fromJson` previously threw `ArgumentError` on unrecognized `type` values; it now returns an `UnknownAnnotation` preserving the raw JSON, so new server-side annotation types (like this release's `word_info`) don't break streaming parsers.
+
+---
+
 ## Migrating from v9.x to v10.0.0
 
 v10.0.0 syncs `googleai_dart` to the June 2026 Gemini main and interactions specs. The only breaking change is the removal of two ineffective generation-config fields — everything else (safety settings, video generation, Computer Use safety policies, retrieval streaming deltas, and the expanded `HarmCategory` enum) is additive.

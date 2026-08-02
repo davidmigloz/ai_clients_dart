@@ -1,4 +1,5 @@
 import '../../copy_with_sentinel.dart';
+import '../agent_config.dart';
 import '../environments/environments.dart';
 import '../tools/tools.dart';
 
@@ -28,9 +29,16 @@ class Agent {
 
   /// The tools the agent may use.
   ///
-  /// Agents support the [CodeExecutionTool], [GoogleSearchTool],
-  /// [UrlContextTool], and [McpServerTool] variants of [InteractionTool].
+  /// Agents support the [CodeExecutionTool], [FunctionTool],
+  /// [GoogleSearchTool], [UrlContextTool], and [McpServerTool] variants of
+  /// [InteractionTool].
   final List<InteractionTool>? tools;
+
+  /// Configuration for the agent.
+  ///
+  /// The spec currently restricts this to [AntigravityAgentConfig], but the
+  /// full [AgentConfig] union is accepted here for forward compatibility.
+  final AgentConfig? agentConfig;
 
   /// Creates an [Agent].
   const Agent({
@@ -40,6 +48,7 @@ class Agent {
     this.description,
     this.systemInstruction,
     this.tools,
+    this.agentConfig,
   });
 
   /// Creates an [Agent] from JSON.
@@ -54,6 +63,9 @@ class Agent {
     tools: (json['tools'] as List<dynamic>?)
         ?.map((e) => InteractionTool.fromJson(e as Map<String, dynamic>))
         .toList(),
+    agentConfig: json['agent_config'] != null
+        ? AgentConfig.fromJson(json['agent_config'] as Map<String, dynamic>)
+        : null,
   );
 
   /// Converts to JSON.
@@ -64,6 +76,7 @@ class Agent {
     if (description != null) 'description': description,
     if (systemInstruction != null) 'system_instruction': systemInstruction,
     if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
+    if (agentConfig != null) 'agent_config': agentConfig!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -74,6 +87,7 @@ class Agent {
     Object? description = unsetCopyWithValue,
     Object? systemInstruction = unsetCopyWithValue,
     Object? tools = unsetCopyWithValue,
+    Object? agentConfig = unsetCopyWithValue,
   }) {
     return Agent(
       id: id == unsetCopyWithValue ? this.id : id as String?,
@@ -92,6 +106,9 @@ class Agent {
       tools: tools == unsetCopyWithValue
           ? this.tools
           : tools as List<InteractionTool>?,
+      agentConfig: agentConfig == unsetCopyWithValue
+          ? this.agentConfig
+          : agentConfig as AgentConfig?,
     );
   }
 }

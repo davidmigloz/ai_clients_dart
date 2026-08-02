@@ -13,11 +13,13 @@ import '../resources/auth_tokens_resource.dart';
 import '../resources/batches_resource.dart';
 import '../resources/cached_contents_resource.dart';
 import '../resources/corpora_resource.dart';
+import '../resources/environments_resource.dart';
 import '../resources/file_search_stores/file_search_stores_resource.dart';
 import '../resources/files/files_resource.dart';
 import '../resources/generated_files_resource.dart';
 import '../resources/interactions_resource.dart';
 import '../resources/models_resource.dart';
+import '../resources/triggers_resource.dart';
 import '../resources/tuned_models_resource.dart';
 import '../resources/webhooks_resource.dart';
 import 'config.dart';
@@ -43,6 +45,8 @@ import 'retry_wrapper.dart';
 /// - [fileSearchStores] - File search store management for file-based retrieval
 /// - [interactions] - Server-side state management for conversations (experimental)
 /// - [agents] - Reusable agent definitions for interactions (experimental)
+/// - [environments] - Execution environments for agents (experimental)
+/// - [triggers] - Scheduled triggers that run agent interactions (experimental)
 /// - [webhooks] - Webhook subscriptions for batches and interactions (experimental)
 /// - [authTokens] - Ephemeral token management for secure client-side auth
 ///
@@ -138,6 +142,23 @@ class GoogleAIClient {
   ///
   /// This is an experimental API and is subject to change.
   late final AgentsResource agents;
+
+  /// Resource for environments API (experimental).
+  ///
+  /// The Environments API manages execution environments (sandboxes) that
+  /// agents and interactions can run in, including their mounted sources and
+  /// network egress configuration.
+  ///
+  /// This is an experimental API and is subject to change.
+  late final EnvironmentsResource environments;
+
+  /// Resource for triggers API (experimental).
+  ///
+  /// The Triggers API manages scheduled triggers that run agent interactions
+  /// on a cron schedule, and exposes their execution history.
+  ///
+  /// This is an experimental API and is subject to change.
+  late final TriggersResource triggers;
 
   /// Resource for webhooks API (experimental).
   ///
@@ -257,6 +278,22 @@ class GoogleAIClient {
     );
 
     agents = AgentsResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    environments = EnvironmentsResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    triggers = TriggersResource(
       config: this.config,
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,

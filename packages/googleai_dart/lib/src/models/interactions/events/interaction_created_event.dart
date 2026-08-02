@@ -11,15 +11,8 @@ class InteractionCreatedEvent extends InteractionEvent {
   /// The created interaction.
   final Interaction interaction;
 
-  /// Optional metadata accompanying this streamed event.
-  final StreamMetadata? metadata;
-
   /// Creates an [InteractionCreatedEvent] instance.
-  const InteractionCreatedEvent({
-    required this.interaction,
-    this.metadata,
-    super.eventId,
-  });
+  const InteractionCreatedEvent({required this.interaction, super.eventId});
 
   /// Creates an [InteractionCreatedEvent] from JSON.
   factory InteractionCreatedEvent.fromJson(Map<String, dynamic> json) {
@@ -31,9 +24,6 @@ class InteractionCreatedEvent extends InteractionEvent {
     }
     return InteractionCreatedEvent(
       interaction: Interaction.fromJson(interaction),
-      metadata: json['metadata'] != null
-          ? StreamMetadata.fromJson(json['metadata'] as Map<String, dynamic>)
-          : null,
       eventId: json['event_id'] as String?,
     );
   }
@@ -42,7 +32,6 @@ class InteractionCreatedEvent extends InteractionEvent {
   Map<String, dynamic> toJson() => {
     'event_type': eventType,
     'interaction': interaction.toJson(),
-    if (metadata != null) 'metadata': metadata!.toJson(),
     if (eventId != null) 'event_id': eventId,
   };
 }

@@ -1,8 +1,8 @@
 import '../deltas/deltas.dart';
 import '../interaction.dart';
 import '../interaction_status.dart';
+import '../step_delta_metadata.dart';
 import '../steps/steps.dart';
-import '../stream_metadata.dart';
 import '../usage.dart';
 
 part 'error_event.dart';
