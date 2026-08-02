@@ -167,6 +167,11 @@ Derive from the commits:
 
 Title must be **under 70 characters**. If the user provided a title override via `$ARGUMENTS`, use it — but warn if it doesn't follow conventional commit format.
 
+For spec-sync or feature-batch PRs, the description part must name the most
+significant user-facing features (e.g. `feat(googleai_dart)!: Environments &
+Triggers APIs, agent configs, ASR config`) — generic activity titles like
+"sync/update to latest spec" are not acceptable.
+
 ---
 
 ## Step 8: Generate PR Description
