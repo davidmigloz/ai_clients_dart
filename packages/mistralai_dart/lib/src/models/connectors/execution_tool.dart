@@ -1,12 +1,14 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/deep_unmodifiable_json.dart';
 import '../common/equality_helpers.dart';
 
 /// A tool made available for execution against a connector integration.
 ///
 /// [executionConfig] is intentionally untyped (freeform JSON): the API keeps
-/// this shape open since MCP configuration is not yet stable.
+/// this shape open since MCP configuration is not yet stable. It is stored
+/// deeply unmodifiable (nested maps/lists included).
 @immutable
 class ExecutionTool {
   /// The tool name.
@@ -23,9 +25,8 @@ class ExecutionTool {
     required this.name,
     required this.integrationId,
     Map<String, dynamic>? executionConfig,
-  }) : executionConfig = executionConfig == null
-           ? null
-           : Map.unmodifiable(executionConfig);
+  }) : executionConfig =
+           deepUnmodifiableJson(executionConfig) as Map<String, dynamic>?;
 
   /// Creates an [ExecutionTool] from JSON.
   factory ExecutionTool.fromJson(Map<String, dynamic> json) => ExecutionTool(

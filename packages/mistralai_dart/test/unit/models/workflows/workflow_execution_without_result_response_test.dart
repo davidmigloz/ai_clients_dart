@@ -109,6 +109,8 @@ void main() {
         'execution_id',
         'root_execution_id',
         'start_time',
+        'status',
+        'end_time',
       ]) {
         final json = responseJson()..remove(key);
         expect(
@@ -117,6 +119,16 @@ void main() {
           reason: 'missing $key',
         );
       }
+    });
+
+    test('accepts explicit null for required-nullable status/end_time', () {
+      final json = responseJson()
+        ..['status'] = null
+        ..['end_time'] = null;
+
+      final response = WorkflowExecutionWithoutResultResponse.fromJson(json);
+      expect(response.status, isNull);
+      expect(response.endTime, isNull);
     });
   });
 }

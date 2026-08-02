@@ -272,6 +272,14 @@ void main() {
         throwsUnsupportedError,
       );
 
+      final nestedMap = tool.executionConfig!['nested'] as Map<String, dynamic>;
+      expect(() => nestedMap['list'] = <int>[], throwsUnsupportedError);
+
+      final nestedList = nestedMap['list'] as List<dynamic>;
+      expect(() => nestedList.add(3), throwsUnsupportedError);
+
+      expect(tool.hashCode, tool.hashCode);
+
       final same = ExecutionTool(
         name: 'search',
         integrationId: 'conn-1',

@@ -44,11 +44,13 @@ class UpdateSkillVersionRequest {
 
   /// Creates a copy with the specified fields replaced.
   ///
-  /// Pass `null` explicitly to clear [aliases]. Omit [notes] to preserve its
-  /// current value (including whether it is currently marked for clearing);
-  /// pass a value to replace it; pass `clearNotes: true` to clear it, or
-  /// `clearNotes: false` to return a cleared field to the omitted / no-change
-  /// state.
+  /// Passing `null` for [aliases] resets it to the "leave unchanged"
+  /// (omitted) state, not a clear — [aliases] carries presence, so to
+  /// actually clear all aliases pass `AliasList(values: [])` instead. Omit
+  /// [notes] to preserve its current value (including whether it is
+  /// currently marked for clearing); pass a value to replace it; pass
+  /// `clearNotes: true` to clear it, or `clearNotes: false` to return a
+  /// cleared field to the omitted / no-change state.
   UpdateSkillVersionRequest copyWith({
     Object? aliases = unsetCopyWithValue,
     Object? notes = unsetCopyWithValue,

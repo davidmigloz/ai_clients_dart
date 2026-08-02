@@ -1,12 +1,13 @@
 import 'package:meta/meta.dart';
 
+import '../common/deep_unmodifiable_json.dart';
 import '../common/equality_helpers.dart';
 
 /// A single retrievable document stored within a RAG search index (beta).
 ///
 /// [fields] is arbitrary JSON (`additionalProperties: true` in the spec), so
-/// it is stored unmodifiable and compared/hashed deeply to account for
-/// nested maps and lists.
+/// it is stored deeply unmodifiable (nested maps/lists included) and
+/// compared/hashed deeply to account for nested maps and lists.
 @immutable
 class SearchIndexRetrievable {
   /// The native ID of the document in the underlying index.
@@ -19,7 +20,7 @@ class SearchIndexRetrievable {
   SearchIndexRetrievable({
     required this.id,
     required Map<String, dynamic> fields,
-  }) : fields = Map.unmodifiable(fields);
+  }) : fields = deepUnmodifiableJson(fields)! as Map<String, dynamic>;
 
   /// Creates a [SearchIndexRetrievable] from JSON.
   factory SearchIndexRetrievable.fromJson(Map<String, dynamic> json) =>

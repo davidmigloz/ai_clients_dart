@@ -107,6 +107,9 @@ void main() {
         'execution_id',
         'root_execution_id',
         'start_time',
+        'status',
+        'end_time',
+        'result',
       ]) {
         final json = responseJson()..remove(key);
         expect(
@@ -116,5 +119,20 @@ void main() {
         );
       }
     });
+
+    test(
+      'accepts explicit null for required-nullable status/end_time/result',
+      () {
+        final json = responseJson()
+          ..['status'] = null
+          ..['end_time'] = null
+          ..['result'] = null;
+
+        final response = WorkflowExecutionTraceEventsResponse.fromJson(json);
+        expect(response.status, isNull);
+        expect(response.endTime, isNull);
+        expect(response.result, isNull);
+      },
+    );
   });
 }

@@ -117,6 +117,24 @@ class WorkflowExecutionTraceOTelResponse {
         '"data_source"',
       );
     }
+    if (!json.containsKey('status')) {
+      throw const FormatException(
+        'WorkflowExecutionTraceOTelResponse: missing required field '
+        '"status"',
+      );
+    }
+    if (!json.containsKey('end_time')) {
+      throw const FormatException(
+        'WorkflowExecutionTraceOTelResponse: missing required field '
+        '"end_time"',
+      );
+    }
+    if (!json.containsKey('result')) {
+      throw const FormatException(
+        'WorkflowExecutionTraceOTelResponse: missing required field '
+        '"result"',
+      );
+    }
     return WorkflowExecutionTraceOTelResponse(
       workflowName: workflowName,
       executionId: executionId,

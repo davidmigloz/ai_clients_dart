@@ -63,6 +63,24 @@ void main() {
           throwsFormatException,
         );
       });
+
+      test('throws FormatException when the present key is null', () {
+        expect(
+          () => SkillAssetContent.fromJson(const {'rawContent': null}),
+          throwsFormatException,
+        );
+        expect(
+          () => SkillAssetContent.fromJson(const {'textContent': null}),
+          throwsFormatException,
+        );
+      });
+
+      test('throws FormatException when the present key is not a String', () {
+        expect(
+          () => SkillAssetContent.fromJson(const {'rawContent': 123}),
+          throwsFormatException,
+        );
+      });
     });
 
     group('toJson', () {
@@ -101,14 +119,25 @@ void main() {
     });
 
     group('constructor', () {
-      test('asserts when neither rawContent nor textContent is set', () {
-        expect(SkillAssetContent.new, throwsA(isA<AssertionError>()));
+      test('throws ArgumentError when neither rawContent nor textContent is '
+          'set', () {
+        expect(SkillAssetContent.new, throwsArgumentError);
       });
 
-      test('asserts when both rawContent and textContent are set', () {
+      test('throws ArgumentError when both rawContent and textContent are '
+          'set', () {
         expect(
           () => SkillAssetContent(rawContent: 'a', textContent: 'b'),
-          throwsA(isA<AssertionError>()),
+          throwsArgumentError,
+        );
+      });
+
+      test('validation is not stripped in release mode (not an assert)', () {
+        // Regression guard: this must be a runtime check (ArgumentError),
+        // not `assert`, since asserts are stripped from release builds.
+        expect(
+          () => SkillAssetContent(rawContent: 'a', textContent: 'b'),
+          throwsA(isNot(isA<AssertionError>())),
         );
       });
     });
@@ -139,22 +168,30 @@ void main() {
         expect(original.copyWith(), equals(original));
       });
 
-      test('asserts when the result would have neither content set', () {
+      test('throws ArgumentError when the result would have neither content '
+          'set', () {
         const original = SkillAssetContent.text(textContent: 'a');
 
-        expect(
-          () => original.copyWith(textContent: null),
-          throwsA(isA<AssertionError>()),
-        );
+        expect(() => original.copyWith(textContent: null), throwsArgumentError);
       });
 
-      test('asserts when the result would have both contents set', () {
+      test('throws ArgumentError when the result would have both contents '
+          'set', () {
         const original = SkillAssetContent.text(textContent: 'a');
 
-        expect(
-          () => original.copyWith(rawContent: 'b'),
-          throwsA(isA<AssertionError>()),
-        );
+        // Switching content kind requires explicitly clearing the other
+        // field in the same call (see the copyWith doc comment); passing
+        // only the new field leaves the old one set too.
+        expect(() => original.copyWith(rawContent: 'b'), throwsArgumentError);
+      });
+
+      test('switching content kind requires clearing the other field', () {
+        const original = SkillAssetContent.text(textContent: 'a');
+
+        final switched = original.copyWith(rawContent: 'b', textContent: null);
+
+        expect(switched.rawContent, 'b');
+        expect(switched.textContent, isNull);
       });
     });
 

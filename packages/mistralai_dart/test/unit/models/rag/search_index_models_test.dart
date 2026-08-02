@@ -474,6 +474,30 @@ void main() {
       );
     });
 
+    test('fields is deeply unmodifiable (nested map and list)', () {
+      final retrievable = SearchIndexRetrievable(
+        id: 'doc-1',
+        fields: const {
+          'nested': {
+            'list': <int>[1, 2, 3],
+          },
+        },
+      );
+
+      final nestedMap = retrievable.fields['nested'] as Map<String, dynamic>;
+      expect(() => nestedMap['list'] = <int>[], throwsUnsupportedError);
+
+      final nestedList = nestedMap['list'] as List<dynamic>;
+      expect(() => nestedList.add(4), throwsUnsupportedError);
+    });
+
+    test('hashCode is stable across repeated calls', () {
+      final retrievable = SearchIndexRetrievable.fromJson(json);
+      final first = retrievable.hashCode;
+      final second = retrievable.hashCode;
+      expect(first, second);
+    });
+
     test('equality is deep for nested maps/lists', () {
       final a = SearchIndexRetrievable(
         id: 'doc-1',

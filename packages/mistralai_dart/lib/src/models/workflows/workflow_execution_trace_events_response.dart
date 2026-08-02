@@ -101,6 +101,24 @@ class WorkflowExecutionTraceEventsResponse {
         '"start_time"',
       );
     }
+    if (!json.containsKey('status')) {
+      throw const FormatException(
+        'WorkflowExecutionTraceEventsResponse: missing required field '
+        '"status"',
+      );
+    }
+    if (!json.containsKey('end_time')) {
+      throw const FormatException(
+        'WorkflowExecutionTraceEventsResponse: missing required field '
+        '"end_time"',
+      );
+    }
+    if (!json.containsKey('result')) {
+      throw const FormatException(
+        'WorkflowExecutionTraceEventsResponse: missing required field '
+        '"result"',
+      );
+    }
     return WorkflowExecutionTraceEventsResponse(
       workflowName: workflowName,
       executionId: executionId,

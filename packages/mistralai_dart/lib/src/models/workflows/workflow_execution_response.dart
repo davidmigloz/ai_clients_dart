@@ -92,6 +92,21 @@ class WorkflowExecutionResponse {
         'WorkflowExecutionResponse: missing required field "start_time"',
       );
     }
+    if (!json.containsKey('status')) {
+      throw const FormatException(
+        'WorkflowExecutionResponse: missing required field "status"',
+      );
+    }
+    if (!json.containsKey('end_time')) {
+      throw const FormatException(
+        'WorkflowExecutionResponse: missing required field "end_time"',
+      );
+    }
+    if (!json.containsKey('result')) {
+      throw const FormatException(
+        'WorkflowExecutionResponse: missing required field "result"',
+      );
+    }
     return WorkflowExecutionResponse(
       workflowName: workflowName,
       executionId: executionId,
