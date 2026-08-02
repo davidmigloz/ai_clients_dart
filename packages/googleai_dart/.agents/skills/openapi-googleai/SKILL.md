@@ -64,3 +64,13 @@ dart analyze --fatal-infos
 dart format --set-exit-if-changed .
 dart test test/unit/
 ```
+
+## Pull Request
+
+PR titles must enumerate the headline user-facing features shipped by the sync —
+never generic activity wording like "sync clients to latest Gemini API specs".
+
+- Good: `feat(googleai_dart)!: Environments & Triggers APIs, agent configs, ASR config`
+- Bad: `feat(googleai_dart)!: sync clients to latest Gemini API specs`
+
+Keep conventional-commit format, `!` when breaking, under 70 characters.

@@ -76,12 +76,13 @@ void main() {
     });
   });
 
-  group('StreamMetadata', () {
-    test('parses total_usage and round-trips on a streamed event', () {
+  group('StepDeltaMetadata', () {
+    test('parses total_usage and round-trips on a step.delta event', () {
       final event =
           InteractionEvent.fromJson({
-                'event_type': 'step.stop',
-                'index': 1,
+                'event_type': 'step.delta',
+                'index': 0,
+                'delta': {'type': 'text', 'text': 'hi'},
                 'metadata': {
                   'total_usage': {
                     'total_tokens': 42,
@@ -89,7 +90,7 @@ void main() {
                   },
                 },
               })
-              as StepStopEvent;
+              as StepDeltaEvent;
       expect(event.metadata, isNotNull);
       expect(event.metadata!.totalUsage, isNotNull);
       expect(event.metadata!.totalUsage!.totalTokens, 42);
@@ -104,10 +105,51 @@ void main() {
 
     test('metadata is absent when not provided', () {
       final event =
-          InteractionEvent.fromJson({'event_type': 'step.stop', 'index': 0})
-              as StepStopEvent;
+          InteractionEvent.fromJson({
+                'event_type': 'step.delta',
+                'index': 0,
+                'delta': {'type': 'text', 'text': 'hi'},
+              })
+              as StepDeltaEvent;
       expect(event.metadata, isNull);
       expect(event.toJson().containsKey('metadata'), isFalse);
+    });
+  });
+
+  group('legacy metadata field removal', () {
+    test('a stray metadata key on step.stop is ignored, not emitted', () {
+      final event =
+          InteractionEvent.fromJson({
+                'event_type': 'step.stop',
+                'index': 0,
+                'metadata': {
+                  'total_usage': {'total_tokens': 1},
+                },
+              })
+              as StepStopEvent;
+
+      final json = event.toJson();
+      expect(json.containsKey('metadata'), isFalse);
+    });
+
+    test('a stray metadata key on interaction.created is ignored, not '
+        'emitted', () {
+      final event =
+          InteractionEvent.fromJson({
+                'event_type': 'interaction.created',
+                'interaction': {
+                  'id': 'i_1',
+                  'status': 'in_progress',
+                  'object': 'interaction',
+                },
+                'metadata': {
+                  'total_usage': {'total_tokens': 1},
+                },
+              })
+              as InteractionCreatedEvent;
+
+      final json = event.toJson();
+      expect(json.containsKey('metadata'), isFalse);
     });
   });
 

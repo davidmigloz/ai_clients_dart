@@ -8,9 +8,6 @@ class StepStopEvent extends InteractionEvent {
   /// The index of the step in the interaction's `steps` list.
   final int index;
 
-  /// Optional metadata accompanying this streamed event.
-  final StreamMetadata? metadata;
-
   /// Cumulative model usage stats from the start of the session.
   final InteractionUsage? usage;
 
@@ -20,7 +17,6 @@ class StepStopEvent extends InteractionEvent {
   /// Creates a [StepStopEvent] instance.
   const StepStopEvent({
     required this.index,
-    this.metadata,
     this.usage,
     this.stepUsage,
     super.eventId,
@@ -34,9 +30,6 @@ class StepStopEvent extends InteractionEvent {
     }
     return StepStopEvent(
       index: index,
-      metadata: json['metadata'] != null
-          ? StreamMetadata.fromJson(json['metadata'] as Map<String, dynamic>)
-          : null,
       usage: json['usage'] != null
           ? InteractionUsage.fromJson(json['usage'] as Map<String, dynamic>)
           : null,
@@ -53,7 +46,6 @@ class StepStopEvent extends InteractionEvent {
   Map<String, dynamic> toJson() => {
     'event_type': eventType,
     'index': index,
-    if (metadata != null) 'metadata': metadata!.toJson(),
     if (usage != null) 'usage': usage!.toJson(),
     if (stepUsage != null) 'step_usage': stepUsage!.toJson(),
     if (eventId != null) 'event_id': eventId,

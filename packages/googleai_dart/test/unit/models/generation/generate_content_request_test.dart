@@ -135,5 +135,39 @@ void main() {
       expect(restored.store, true);
       expect(restored.contents, hasLength(1));
     });
+
+    test('round-trip preserves generationConfig audio transcription and '
+        'affective dialog fields', () {
+      final request = GenerateContentRequest(
+        contents: [Content.text('Hello')],
+        generationConfig: const GenerationConfig(
+          audioTranscriptionConfig: GenerationAudioTranscriptionConfig(
+            diarization: true,
+            languageCodes: ['en-US'],
+          ),
+          enableAffectiveDialog: true,
+        ),
+      );
+
+      final json = request.toJson();
+      final generationConfigJson =
+          json['generationConfig'] as Map<String, dynamic>;
+      expect(generationConfigJson['audioTranscriptionConfig'], {
+        'diarization': true,
+        'languageCodes': ['en-US'],
+      });
+      expect(generationConfigJson['enableAffectiveDialog'], isTrue);
+
+      final restored = GenerateContentRequest.fromJson(json);
+      expect(
+        restored.generationConfig?.audioTranscriptionConfig?.diarization,
+        isTrue,
+      );
+      expect(
+        restored.generationConfig?.audioTranscriptionConfig?.languageCodes,
+        ['en-US'],
+      );
+      expect(restored.generationConfig?.enableAffectiveDialog, isTrue);
+    });
   });
 }

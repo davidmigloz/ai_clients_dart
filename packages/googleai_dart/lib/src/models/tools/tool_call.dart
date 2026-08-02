@@ -15,14 +15,18 @@ class ToolCall {
   /// The type of tool being called.
   final ToolType toolType;
 
+  /// The name of the tool.
+  final String? toolName;
+
   /// Creates a [ToolCall].
-  const ToolCall({this.args, this.id, required this.toolType});
+  const ToolCall({this.args, this.id, required this.toolType, this.toolName});
 
   /// Creates a [ToolCall] from JSON.
   factory ToolCall.fromJson(Map<String, dynamic> json) => ToolCall(
     args: json['args'] as Map<String, dynamic>?,
     id: json['id'] as String?,
     toolType: toolTypeFromString(json['toolType'] as String?),
+    toolName: json['toolName'] as String?,
   );
 
   /// Converts to JSON.
@@ -30,6 +34,7 @@ class ToolCall {
     if (args != null) 'args': args,
     if (id != null) 'id': id,
     'toolType': toolTypeToString(toolType),
+    if (toolName != null) 'toolName': toolName,
   };
 
   /// Creates a copy with replaced values.
@@ -37,6 +42,7 @@ class ToolCall {
     Object? args = unsetCopyWithValue,
     Object? id = unsetCopyWithValue,
     Object? toolType = unsetCopyWithValue,
+    Object? toolName = unsetCopyWithValue,
   }) {
     return ToolCall(
       args: args == unsetCopyWithValue
@@ -46,6 +52,9 @@ class ToolCall {
       toolType: toolType == unsetCopyWithValue
           ? this.toolType
           : toolType! as ToolType,
+      toolName: toolName == unsetCopyWithValue
+          ? this.toolName
+          : toolName as String?,
     );
   }
 }

@@ -126,14 +126,18 @@
       "tunedModels"
     ],
     "notes": {
-      "files:register": "POST /v1beta/files:register \u2014 Registers GCS files with FileService. Models (RegisterFilesRequest/RegisterFilesResponse) are implemented; resource method not yet added to the files resource."
+      "files:register": "POST /v1beta/files:register \u2014 Registers GCS files with FileService. Models (RegisterFilesRequest/RegisterFilesResponse) are implemented; resource method not yet added to the files resource.",
+      "environments:create": "Custom-verb alias of the environments resource (path /v1beta/environments:create); duplicates POST /v1beta/environments. Aliased to environments (EnvironmentsResource), which implements the REST-shaped family per the interactions spec.",
+      "environments:list": "Custom-verb alias of the environments resource (path /v1beta/environments:list); duplicates GET /v1beta/environments. Same handling as environments:create."
     },
     "expected_properties": {},
     "excluded_properties": {
       "global": []
     },
     "resource_aliases": {
-      "dynamic": "models"
+      "dynamic": "models",
+      "environments:create": "environments",
+      "environments:list": "environments"
     },
     "excluded_resources": [
       "files:register"
@@ -169,7 +173,8 @@
         "mapping": {
           "url_citation": "#/components/schemas/UrlCitation",
           "file_citation": "#/components/schemas/FileCitation",
-          "place_citation": "#/components/schemas/PlaceCitation"
+          "place_citation": "#/components/schemas/PlaceCitation",
+          "word_info": "#/components/schemas/WordInfo"
         }
       }
     },
@@ -957,14 +962,11 @@
     },
     "MediaResolution": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "MediaResolution",
       "file": "lib/src/models/content/media_resolution.dart",
-      "schema": "MediaResolution",
-      "note": "Retained for compatibility with python-genai and js-genai SDKs; numTokens field added to match PartMediaResolution in reference SDKs.",
-      "tags": [
-        "acknowledged"
-      ]
+      "schema": "V1mainMediaResolution",
+      "note": "Spec schema restored under the renamed key V1mainMediaResolution (previously a dangling ref from Part.mediaResolution). Dart keeps the class name MediaResolution; Dart-only numTokens field retained for parity with PartMediaResolution in python-genai/js-genai."
     },
     "ModalityTokens": {
       "spec": "interactions",
@@ -1192,13 +1194,10 @@
     "StepDeltaMetadata": {
       "spec": "interactions",
       "schema": "StepDeltaMetadata",
-      "kind": "skip",
-      "dart_class": "StreamMetadata",
-      "file": "lib/src/models/interactions/stream_metadata.dart",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Structurally identical to StreamMetadata ({total_usage: Usage}); StepDeltaEvent.metadata reuses StreamMetadata, so no separate DTO is tracked."
+      "kind": "object",
+      "dart_class": "StepDeltaMetadata",
+      "file": "lib/src/models/interactions/step_delta_metadata.dart",
+      "note": "Renamed from StreamMetadata when the spec dropped metadata from all events except step.delta; same shape ({total_usage: Usage})."
     },
     "StepDeltaData": {
       "spec": "interactions",
@@ -1257,13 +1256,6 @@
         "acknowledged"
       ],
       "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
-    },
-    "StreamMetadata": {
-      "spec": "interactions",
-      "schema": "StreamMetadata",
-      "dart_class": "StreamMetadata",
-      "file": "lib/src/models/interactions/stream_metadata.dart",
-      "kind": "object"
     },
     "TextAnnotationDelta": {
       "spec": "interactions",
@@ -1451,14 +1443,11 @@
     },
     "ToolType": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "enum",
       "dart_class": "ToolType",
       "file": "lib/src/models/tools/tool_type.dart",
-      "schema": "ToolType",
-      "note": "Removed from spec; kept for Part.toolCall()/toolResponse() convenience APIs",
-      "tags": [
-        "acknowledged"
-      ]
+      "schema": "V1mainToolType",
+      "note": "Spec schema restored under the renamed key V1mainToolType (previously a dangling ref from ToolCall/ToolResponse.toolType). Values match the Dart enum exactly; 'unspecified' is the fallback member."
     },
     "Turn": {
       "spec": "interactions",
@@ -2219,7 +2208,8 @@
       "schema": "Agent",
       "kind": "object",
       "dart_class": "Agent",
-      "file": "lib/src/models/interactions/agents/agent.dart"
+      "file": "lib/src/models/interactions/agents/agent.dart",
+      "note": "agent_config is typed as the AgentConfig union for forward-compat although the spec restricts it to AntigravityAgentConfig."
     },
     "ListAgentsResponse": {
       "spec": "interactions",
@@ -2237,7 +2227,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "AgentTool is a subset (CodeExecution/GoogleSearch/UrlContext/McpServer) of the InteractionTool sealed union; Agent.tools reuses List<InteractionTool>."
+      "note": "AgentTool is a subset (CodeExecution/Function/GoogleSearch/UrlContext/McpServer) of the InteractionTool sealed union; Agent.tools reuses List<InteractionTool>."
     },
     "EnvironmentConfig": {
       "spec": "interactions",
@@ -2250,7 +2240,7 @@
         "type"
       ]
     },
-    "Source": {
+    "interactions:Source": {
       "spec": "interactions",
       "schema": "Source",
       "kind": "object",
@@ -2264,7 +2254,7 @@
       "dart_class": "AllowlistEntry",
       "file": "lib/src/models/interactions/environments/allowlist_entry.dart"
     },
-    "EnvironmentNetworkEgressAllowlist": {
+    "interactions:EnvironmentNetworkEgressAllowlist": {
       "spec": "interactions",
       "schema": "EnvironmentNetworkEgressAllowlist",
       "kind": "skip",
@@ -2328,6 +2318,268 @@
       ],
       "note": "Dart-only \"disabled\" string variant of EnvironmentNetworkEgressAllowlist.",
       "parent": "EnvironmentNetworkEgressAllowlist"
+    },
+    "AudioTranscriptionConfig": {
+      "spec": "main",
+      "schema": "AudioTranscriptionConfig",
+      "kind": "object",
+      "dart_class": "GenerationAudioTranscriptionConfig",
+      "file": "lib/src/models/generation/audio_transcription_config.dart",
+      "note": "Main-spec ASR config referenced by GenerationConfig.audioTranscriptionConfig and BidiGenerateContentSetup. Dart class is prefixed because the bare name AudioTranscriptionConfig is taken by the Live API model (websocket manifest, wire shape {enabled}). Matches python-genai AudioTranscriptionConfig (7 fields incl. deprecated adaptationPhrases/languageAuto/languageHints)."
+    },
+    "LanguageAuto": {
+      "spec": "main",
+      "schema": "LanguageAuto",
+      "kind": "skip",
+      "dart_class": "LanguageAuto",
+      "file": "lib/src/models/generation/audio_transcription_config.dart",
+      "note": "Deprecated empty-marker schema (no properties) referenced by AudioTranscriptionConfig.languageAuto. Implemented as an empty Dart class; kind skip because the verifier rejects object schemas with no properties.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "LanguageHints": {
+      "spec": "main",
+      "schema": "LanguageHints",
+      "kind": "object",
+      "dart_class": "LanguageHints",
+      "file": "lib/src/models/generation/audio_transcription_config.dart",
+      "note": "Deprecated by the API in favor of AudioTranscriptionConfig.languageCodes; kept for wire compatibility (python-genai parity)."
+    },
+    "V1mainCreateTunedModelMetadata": {
+      "spec": "main",
+      "schema": "V1mainCreateTunedModelMetadata",
+      "kind": "skip",
+      "note": "Orphan duplicate of CreateTunedModelMetadata (identical except snapshots items ref V1mainTuningSnapshot); referenced by no path or schema. See V1mainTuningSnapshot entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "V1mainTuningSnapshot": {
+      "spec": "main",
+      "schema": "V1mainTuningSnapshot",
+      "kind": "skip",
+      "note": "Byte-identical duplicate of TuningSnapshot, reachable only through the orphan V1mainCreateTunedModelMetadata. See V1mainCreateTunedModelMetadata entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "Environment": {
+      "spec": "main",
+      "schema": "Environment",
+      "kind": "skip",
+      "note": "Main-spec Environments API schema. Canonical Dart implementation follows the interactions spec (EnvironmentsResource + lib/src/models/interactions/environments/*). Main-spec wire shape differs (split network_mode enum + network_allowlist instead of the interactions single 'network' oneOf, mixed snake/camel keys); python-genai does not implement the main-spec shape. See coverage.notes['environments:create'].",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "CreateEnvironmentRequest": {
+      "spec": "main",
+      "schema": "CreateEnvironmentRequest",
+      "kind": "skip",
+      "note": "Main-spec Environments API request (RPC :create verb). See Environment entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "EnvironmentNetworkEgressAllowlist": {
+      "spec": "main",
+      "schema": "EnvironmentNetworkEgressAllowlist",
+      "kind": "skip",
+      "note": "Main-spec variant ({allowlist: [EgressRule]}) of the interactions EnvironmentNetworkEgressAllowlist oneOf (see interactions:EnvironmentNetworkEgressAllowlist). Not implemented; see Environment entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "EgressRule": {
+      "spec": "main",
+      "schema": "EgressRule",
+      "kind": "skip",
+      "note": "Main-spec Environments API type (domain + transform header map); interactions implementation uses AllowlistEntry. See Environment entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "Source": {
+      "spec": "main",
+      "schema": "Source",
+      "kind": "skip",
+      "note": "Main-spec Environments API mount source; the interactions Source (interactions:Source) is the implemented Dart model. See Environment entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ListEnvironmentsResponse": {
+      "spec": "main",
+      "schema": "ListEnvironmentsResponse",
+      "kind": "skip",
+      "note": "Main-spec Environments API list envelope. See Environment entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "HttpBody": {
+      "spec": "main",
+      "schema": "HttpBody",
+      "kind": "skip",
+      "note": "google.api.HttpBody generic envelope used only by the REST-shaped /v1beta/environments endpoints (which duplicate the typed RPC custom-verb family). Not modeled. See Environment entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "TranscriptionConfig": {
+      "spec": "interactions",
+      "schema": "TranscriptionConfig",
+      "kind": "object",
+      "dart_class": "TranscriptionConfig",
+      "file": "lib/src/models/interactions/transcription_config.dart"
+    },
+    "WordInfo": {
+      "spec": "interactions",
+      "schema": "WordInfo",
+      "parent": "Annotation",
+      "kind": "skip",
+      "dart_class": "WordInfo",
+      "file": "lib/src/models/interactions/content/annotation.dart",
+      "note": "Handled by Annotation sealed class with type discriminator; appears in JSON as { \"type\": \"word_info\", ... }.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "UnknownAnnotation": {
+      "spec": "interactions",
+      "parent": "Annotation",
+      "kind": "extension",
+      "dart_class": "UnknownAnnotation",
+      "file": "lib/src/models/interactions/content/annotation.dart",
+      "note": "Fallback variant of Annotation for unrecognized type values; preserves raw JSON.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "AntigravityAgentConfig": {
+      "spec": "interactions",
+      "schema": "AntigravityAgentConfig",
+      "kind": "object",
+      "dart_class": "AntigravityAgentConfig",
+      "file": "lib/src/models/interactions/agent_config.dart"
+    },
+    "CodeMenderAgentConfig": {
+      "spec": "interactions",
+      "schema": "CodeMenderAgentConfig",
+      "kind": "object",
+      "dart_class": "CodeMenderAgentConfig",
+      "file": "lib/src/models/interactions/agent_config.dart"
+    },
+    "FindRequest": {
+      "spec": "interactions",
+      "schema": "FindRequest",
+      "kind": "object",
+      "dart_class": "FindRequest",
+      "file": "lib/src/models/interactions/agent_config.dart"
+    },
+    "FixRequest": {
+      "spec": "interactions",
+      "schema": "FixRequest",
+      "kind": "object",
+      "dart_class": "FixRequest",
+      "file": "lib/src/models/interactions/agent_config.dart"
+    },
+    "SessionConfig": {
+      "spec": "interactions",
+      "schema": "SessionConfig",
+      "kind": "object",
+      "dart_class": "SessionConfig",
+      "file": "lib/src/models/interactions/agent_config.dart"
+    },
+    "FileContent": {
+      "spec": "interactions",
+      "schema": "FileContent",
+      "kind": "object",
+      "dart_class": "FileContent",
+      "file": "lib/src/models/interactions/agent_config.dart"
+    },
+    "interactions:Environment": {
+      "spec": "interactions",
+      "schema": "Environment",
+      "kind": "object",
+      "dart_class": "Environment",
+      "file": "lib/src/models/interactions/environments/environment.dart"
+    },
+    "interactions:CreateEnvironmentRequest": {
+      "spec": "interactions",
+      "schema": "CreateEnvironmentRequest",
+      "kind": "object",
+      "dart_class": "CreateEnvironmentRequest",
+      "file": "lib/src/models/interactions/environments/create_environment_request.dart"
+    },
+    "interactions:ListEnvironmentsResponse": {
+      "spec": "interactions",
+      "schema": "ListEnvironmentsResponse",
+      "kind": "object",
+      "dart_class": "ListEnvironmentsResponse",
+      "file": "lib/src/models/interactions/environments/list_environments_response.dart"
+    },
+    "CreateInteractionParams": {
+      "spec": "interactions",
+      "kind": "extension",
+      "dart_class": "CreateInteractionParams",
+      "file": "lib/src/models/interactions/interaction.dart",
+      "note": "Dart-only sealed parent unifying CreateAgentInteractionParams/CreateModelInteractionParams for the TriggerCreateParams.interaction oneOf.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "Trigger": {
+      "spec": "interactions",
+      "schema": "Trigger",
+      "kind": "object",
+      "dart_class": "Trigger",
+      "file": "lib/src/models/interactions/triggers/trigger.dart"
+    },
+    "TriggerCreateParams": {
+      "spec": "interactions",
+      "schema": "TriggerCreateParams",
+      "kind": "object",
+      "dart_class": "TriggerCreateParams",
+      "file": "lib/src/models/interactions/triggers/trigger_create_params.dart"
+    },
+    "TriggerUpdate": {
+      "spec": "interactions",
+      "schema": "TriggerUpdate",
+      "kind": "object",
+      "dart_class": "TriggerUpdate",
+      "file": "lib/src/models/interactions/triggers/trigger_update.dart"
+    },
+    "TriggerExecution": {
+      "spec": "interactions",
+      "schema": "TriggerExecution",
+      "kind": "object",
+      "dart_class": "TriggerExecution",
+      "file": "lib/src/models/interactions/triggers/trigger_execution.dart"
+    },
+    "ListTriggersResponse": {
+      "spec": "interactions",
+      "schema": "ListTriggersResponse",
+      "kind": "object",
+      "dart_class": "ListTriggersResponse",
+      "file": "lib/src/models/interactions/triggers/list_triggers_response.dart"
+    },
+    "ListTriggerExecutionsResponse": {
+      "spec": "interactions",
+      "schema": "ListTriggerExecutionsResponse",
+      "kind": "object",
+      "dart_class": "ListTriggerExecutionsResponse",
+      "file": "lib/src/models/interactions/triggers/list_trigger_executions_response.dart"
+    },
+    "RunTriggerRequest": {
+      "spec": "interactions",
+      "schema": "RunTriggerRequest",
+      "kind": "skip",
+      "note": "Empty request schema (no properties); TriggersResource.run posts an empty JSON body. The verifier fails on object schemas with no properties, so kept as skip per implementation-patterns.md.",
+      "tags": [
+        "acknowledged"
+      ]
     }
   }
 }

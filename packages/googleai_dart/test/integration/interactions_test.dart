@@ -85,7 +85,6 @@ void main() {
         model: defaultInteractionsModel,
         input: const InteractionInput.text('Count from 1 to 3.'),
         generationConfig: const InteractionGenerationConfig(
-          temperature: 0.1,
           maxOutputTokens: 200,
         ),
       );

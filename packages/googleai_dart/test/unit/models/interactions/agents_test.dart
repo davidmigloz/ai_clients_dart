@@ -41,6 +41,34 @@ void main() {
       expect(agent.copyWith(description: 'new').description, 'new');
       expect(agent.copyWith().description, 'old');
     });
+
+    test('agentConfig round-trips', () {
+      const agent = Agent(
+        id: 'agent_1',
+        agentConfig: AntigravityAgentConfig(
+          model: 'gemini-3.5-flash',
+          maxTotalTokens: '1000000',
+        ),
+      );
+
+      final json = agent.toJson();
+      expect(json['agent_config'], isA<Map<String, dynamic>>());
+      expect((json['agent_config'] as Map)['type'], 'antigravity');
+
+      final restored = Agent.fromJson(json);
+      expect(restored.agentConfig, isA<AntigravityAgentConfig>());
+      final config = restored.agentConfig! as AntigravityAgentConfig;
+      expect(config.model, 'gemini-3.5-flash');
+      expect(config.maxTotalTokens, '1000000');
+    });
+
+    test('copyWith replaces agentConfig', () {
+      const agent = Agent(id: 'a');
+      final copy = agent.copyWith(
+        agentConfig: const AntigravityAgentConfig(model: 'gemini-3.5-flash'),
+      );
+      expect(copy.agentConfig, isA<AntigravityAgentConfig>());
+    });
   });
 
   group('ListAgentsResponse', () {
