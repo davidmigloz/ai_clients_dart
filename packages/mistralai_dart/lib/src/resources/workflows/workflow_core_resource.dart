@@ -76,6 +76,8 @@ class WorkflowCoreResource extends ResourceBase {
   /// - [cursor] is the pagination cursor.
   /// - [limit] is the maximum number of items to return.
   /// - [activeOnly] is deprecated; use [deploymentStatus] instead.
+  /// - [search] is a fuzzy search query for workflow name, display name,
+  ///   description, or ID.
   Future<WorkflowListResponse> listWorkflows({
     List<String>? status,
     bool? includeShared,
@@ -89,6 +91,7 @@ class WorkflowCoreResource extends ResourceBase {
     String? cursor,
     int? limit,
     bool? activeOnly,
+    String? search,
   }) async {
     ensureNotClosed?.call();
     // Array query params (status/deployment_name/tags) use form/explode
@@ -117,6 +120,7 @@ class WorkflowCoreResource extends ResourceBase {
     if (cursor != null) queryParams['cursor'] = cursor;
     if (limit != null) queryParams['limit'] = limit.toString();
     if (activeOnly != null) queryParams['active_only'] = activeOnly.toString();
+    if (search != null) queryParams['search'] = search;
 
     final url = requestBuilder.buildUrl(
       '/v1/workflows',

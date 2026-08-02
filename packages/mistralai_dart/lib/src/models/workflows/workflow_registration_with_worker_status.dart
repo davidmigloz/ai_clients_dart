@@ -12,7 +12,13 @@ class WorkflowRegistrationWithWorkerStatus {
   final String id;
 
   /// The deployment identifier.
+  ///
+  /// Deprecated: use [deploymentName] instead. Will be removed in a future
+  /// release.
   final String? deploymentId;
+
+  /// The name of the deployment this registration belongs to.
+  final String? deploymentName;
 
   /// The task queue.
   ///
@@ -39,6 +45,7 @@ class WorkflowRegistrationWithWorkerStatus {
   const WorkflowRegistrationWithWorkerStatus({
     required this.id,
     this.deploymentId,
+    this.deploymentName,
     @Deprecated('task_queue is deprecated in the Mistral API') this.taskQueue,
     required this.definition,
     required this.workflowId,
@@ -53,6 +60,7 @@ class WorkflowRegistrationWithWorkerStatus {
   ) => WorkflowRegistrationWithWorkerStatus(
     id: json['id'] as String? ?? '',
     deploymentId: json['deployment_id'] as String?,
+    deploymentName: json['deployment_name'] as String?,
     taskQueue: json['task_queue'] as String?,
     definition: WorkflowCodeDefinition.fromJson(
       json['definition'] as Map<String, dynamic>,
@@ -70,6 +78,7 @@ class WorkflowRegistrationWithWorkerStatus {
   Map<String, dynamic> toJson() => {
     'id': id,
     if (deploymentId != null) 'deployment_id': deploymentId,
+    if (deploymentName != null) 'deployment_name': deploymentName,
     if (taskQueue != null) 'task_queue': taskQueue,
     'definition': definition.toJson(),
     'workflow_id': workflowId,
@@ -82,6 +91,7 @@ class WorkflowRegistrationWithWorkerStatus {
   WorkflowRegistrationWithWorkerStatus copyWith({
     String? id,
     Object? deploymentId = unsetCopyWithValue,
+    Object? deploymentName = unsetCopyWithValue,
     Object? taskQueue = unsetCopyWithValue,
     WorkflowCodeDefinition? definition,
     String? workflowId,
@@ -94,6 +104,9 @@ class WorkflowRegistrationWithWorkerStatus {
       deploymentId: deploymentId == unsetCopyWithValue
           ? this.deploymentId
           : deploymentId as String?,
+      deploymentName: deploymentName == unsetCopyWithValue
+          ? this.deploymentName
+          : deploymentName as String?,
       taskQueue: taskQueue == unsetCopyWithValue
           ? this.taskQueue
           : taskQueue as String?,
@@ -115,6 +128,7 @@ class WorkflowRegistrationWithWorkerStatus {
     if (runtimeType != other.runtimeType) return false;
     return id == other.id &&
         deploymentId == other.deploymentId &&
+        deploymentName == other.deploymentName &&
         taskQueue == other.taskQueue &&
         definition == other.definition &&
         workflowId == other.workflowId &&
@@ -127,6 +141,7 @@ class WorkflowRegistrationWithWorkerStatus {
   int get hashCode => Object.hash(
     id,
     deploymentId,
+    deploymentName,
     taskQueue,
     definition,
     workflowId,
@@ -140,6 +155,7 @@ class WorkflowRegistrationWithWorkerStatus {
       'WorkflowRegistrationWithWorkerStatus('
       'id: $id, '
       'deploymentId: $deploymentId, '
+      'deploymentName: $deploymentName, '
       'taskQueue: $taskQueue, '
       'definition: $definition, '
       'workflowId: $workflowId, '

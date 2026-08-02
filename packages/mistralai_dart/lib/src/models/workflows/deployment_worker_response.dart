@@ -1,5 +1,8 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+import 'deployment_location.dart';
+
 /// Response for a deployment worker.
 @immutable
 class DeploymentWorkerResponse {
@@ -15,12 +18,17 @@ class DeploymentWorkerResponse {
   /// Last update timestamp.
   final String updatedAt;
 
+  /// Where the worker is running; `null` if the worker did not report a
+  /// location.
+  final DeploymentLocation? location;
+
   /// Creates a [DeploymentWorkerResponse].
   const DeploymentWorkerResponse({
     required this.name,
     required this.isActive,
     required this.createdAt,
     required this.updatedAt,
+    this.location,
   });
 
   /// Creates a [DeploymentWorkerResponse] from JSON.
@@ -30,6 +38,11 @@ class DeploymentWorkerResponse {
         isActive: json['is_active'] as bool? ?? false,
         createdAt: json['created_at'] as String? ?? '',
         updatedAt: json['updated_at'] as String? ?? '',
+        location: json['location'] == null
+            ? null
+            : DeploymentLocation.fromJson(
+                json['location'] as Map<String, dynamic>,
+              ),
       );
 
   /// Converts to JSON.
@@ -38,6 +51,7 @@ class DeploymentWorkerResponse {
     'is_active': isActive,
     'created_at': createdAt,
     'updated_at': updatedAt,
+    if (location != null) 'location': location!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -46,12 +60,16 @@ class DeploymentWorkerResponse {
     bool? isActive,
     String? createdAt,
     String? updatedAt,
+    Object? location = unsetCopyWithValue,
   }) {
     return DeploymentWorkerResponse(
       name: name ?? this.name,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      location: location == unsetCopyWithValue
+          ? this.location
+          : location as DeploymentLocation?,
     );
   }
 
@@ -63,13 +81,15 @@ class DeploymentWorkerResponse {
     return name == other.name &&
         isActive == other.isActive &&
         createdAt == other.createdAt &&
-        updatedAt == other.updatedAt;
+        updatedAt == other.updatedAt &&
+        location == other.location;
   }
 
   @override
-  int get hashCode => Object.hash(name, isActive, createdAt, updatedAt);
+  int get hashCode =>
+      Object.hash(name, isActive, createdAt, updatedAt, location);
 
   @override
   String toString() =>
-      'DeploymentWorkerResponse(name: $name, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt)';
+      'DeploymentWorkerResponse(name: $name, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt, location: $location)';
 }

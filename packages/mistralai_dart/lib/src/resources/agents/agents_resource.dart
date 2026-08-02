@@ -7,6 +7,7 @@ import '../../models/agents/agent_alias_response.dart';
 import '../../models/agents/agent_completion_request.dart';
 import '../../models/agents/agent_completion_response.dart';
 import '../../models/agents/agent_list.dart';
+import '../../models/agents/agent_list_page.dart';
 import '../../models/agents/create_agent_request.dart';
 import '../../models/agents/update_agent_request.dart';
 import '../../models/chat/chat_completion_stream_response.dart';
@@ -70,6 +71,59 @@ class AgentsResource extends ResourceBase with StreamingResource {
     final response = await interceptorChain.execute(httpRequest);
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
     return AgentList.fromJson(responseBody);
+  }
+
+  /// Lists agent entities, cursor-paginated.
+  ///
+  /// Unlike the deprecated [list], this paginates by opaque cursor and
+  /// honors per-agent sharing, returning only agents the caller is
+  /// authorized to see.
+  ///
+  /// - [pageSize] is the number of agents per page (default 20, max 1000).
+  /// - [deploymentChat] filters by deployment-chat availability.
+  /// - [sources] filters by request source (e.g. `api`, `playground`,
+  ///   `agent_builder_v1`).
+  /// - [name] filters by exact agent name.
+  /// - [search] searches agents by name or ID.
+  /// - [id] filters by agent ID.
+  /// - [metadata] filters by metadata key/value pairs; sent as a JSON-encoded
+  ///   query parameter since the API declares it as a `content: application/`
+  ///   `json` query param rather than a plain string.
+  /// - [pageToken] is the opaque cursor from a previous response's
+  ///   `next_page_token`.
+  Future<AgentListPage> listPages({
+    int? pageSize,
+    bool? deploymentChat,
+    List<String>? sources,
+    String? name,
+    String? search,
+    String? id,
+    Map<String, dynamic>? metadata,
+    String? pageToken,
+  }) async {
+    final queryParams = <String, dynamic>{};
+    if (pageSize != null) queryParams['page_size'] = pageSize.toString();
+    if (deploymentChat != null) {
+      queryParams['deployment_chat'] = deploymentChat.toString();
+    }
+    if (sources != null) queryParams['sources'] = sources;
+    if (name != null) queryParams['name'] = name;
+    if (search != null) queryParams['search'] = search;
+    if (id != null) queryParams['id'] = id;
+    if (metadata != null) queryParams['metadata'] = jsonEncode(metadata);
+    if (pageToken != null) queryParams['page_token'] = pageToken;
+
+    final url = requestBuilder.buildUrl(
+      '/v1/agents/pages',
+      queryParams: queryParams,
+    );
+    final headers = requestBuilder.buildHeaders();
+
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+
+    final response = await interceptorChain.execute(httpRequest);
+    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+    return AgentListPage.fromJson(responseBody);
   }
 
   /// Creates a new agent.

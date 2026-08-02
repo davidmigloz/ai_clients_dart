@@ -41,6 +41,15 @@ class WorkflowExecutionTraceSummaryResponse {
   /// The run identifier.
   final String? runId;
 
+  /// The name of the deployment that ran this execution.
+  final String? deploymentName;
+
+  /// The ID of the user who triggered the execution.
+  final String? userId;
+
+  /// The ID of the workflow.
+  final String? workflowId;
+
   /// Creates a [WorkflowExecutionTraceSummaryResponse].
   const WorkflowExecutionTraceSummaryResponse({
     required this.workflowName,
@@ -54,6 +63,9 @@ class WorkflowExecutionTraceSummaryResponse {
     this.parentExecutionId,
     this.totalDurationMs,
     this.runId,
+    this.deploymentName,
+    this.userId,
+    this.workflowId,
   });
 
   /// Creates a [WorkflowExecutionTraceSummaryResponse] from JSON.
@@ -77,6 +89,9 @@ class WorkflowExecutionTraceSummaryResponse {
     parentExecutionId: json['parent_execution_id'] as String?,
     totalDurationMs: json['total_duration_ms'] as int?,
     runId: json['run_id'] as String?,
+    deploymentName: json['deployment_name'] as String?,
+    userId: json['user_id'] as String?,
+    workflowId: json['workflow_id'] as String?,
   );
 
   /// Converts to JSON.
@@ -92,6 +107,9 @@ class WorkflowExecutionTraceSummaryResponse {
     if (parentExecutionId != null) 'parent_execution_id': parentExecutionId,
     if (totalDurationMs != null) 'total_duration_ms': totalDurationMs,
     if (runId != null) 'run_id': runId,
+    if (deploymentName != null) 'deployment_name': deploymentName,
+    if (userId != null) 'user_id': userId,
+    if (workflowId != null) 'workflow_id': workflowId,
   };
 
   /// Creates a copy with replaced values.
@@ -107,6 +125,9 @@ class WorkflowExecutionTraceSummaryResponse {
     Object? parentExecutionId = unsetCopyWithValue,
     Object? totalDurationMs = unsetCopyWithValue,
     Object? runId = unsetCopyWithValue,
+    Object? deploymentName = unsetCopyWithValue,
+    Object? userId = unsetCopyWithValue,
+    Object? workflowId = unsetCopyWithValue,
   }) {
     return WorkflowExecutionTraceSummaryResponse(
       workflowName: workflowName ?? this.workflowName,
@@ -130,6 +151,13 @@ class WorkflowExecutionTraceSummaryResponse {
           ? this.totalDurationMs
           : totalDurationMs as int?,
       runId: runId == unsetCopyWithValue ? this.runId : runId as String?,
+      deploymentName: deploymentName == unsetCopyWithValue
+          ? this.deploymentName
+          : deploymentName as String?,
+      userId: userId == unsetCopyWithValue ? this.userId : userId as String?,
+      workflowId: workflowId == unsetCopyWithValue
+          ? this.workflowId
+          : workflowId as String?,
     );
   }
 
@@ -148,7 +176,10 @@ class WorkflowExecutionTraceSummaryResponse {
         spanTree == other.spanTree &&
         parentExecutionId == other.parentExecutionId &&
         totalDurationMs == other.totalDurationMs &&
-        runId == other.runId;
+        runId == other.runId &&
+        deploymentName == other.deploymentName &&
+        userId == other.userId &&
+        workflowId == other.workflowId;
   }
 
   @override
@@ -164,6 +195,9 @@ class WorkflowExecutionTraceSummaryResponse {
     parentExecutionId,
     totalDurationMs,
     runId,
+    deploymentName,
+    userId,
+    workflowId,
   );
 
   @override
@@ -179,6 +213,9 @@ class WorkflowExecutionTraceSummaryResponse {
       'spanTree: $spanTree, '
       'parentExecutionId: $parentExecutionId, '
       'totalDurationMs: $totalDurationMs, '
-      'runId: $runId'
+      'runId: $runId, '
+      'deploymentName: $deploymentName, '
+      'userId: $userId, '
+      'workflowId: $workflowId'
       ')';
 }

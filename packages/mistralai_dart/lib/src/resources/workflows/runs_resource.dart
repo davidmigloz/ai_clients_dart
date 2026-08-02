@@ -30,6 +30,14 @@ class RunsResource extends ResourceBase {
   /// - [startTimeAfter]/[startTimeBefore] bound the start time (ISO 8601).
   /// - [endTimeAfter]/[endTimeBefore] bound the end time (ISO 8601).
   /// - [userId] filters by user ID (`current` for the authenticated user).
+  /// - [rootExecutionId] filters by root execution ID, returning the whole
+  ///   execution tree (the root and all its descendant sub-workflows).
+  /// - [includeInternal] includes runs of internal/technical workflows (e.g.
+  ///   `parallel-execution`); defaults to `true` server-side.
+  /// - [searchKey] filters executions by search key as repeated `key:value`
+  ///   entries; entries are AND'd together (max 3).
+  /// - [workflowTags] filters to runs of workflows tagged with all listed
+  ///   tags (AND); max 20.
   Future<WorkflowExecutionListResponse> list({
     String? workflowIdentifier,
     String? search,
@@ -44,9 +52,16 @@ class RunsResource extends ResourceBase {
     String? userId,
     int? pageSize,
     String? nextPageToken,
+    String? rootExecutionId,
+    bool? includeInternal,
+    List<String>? searchKey,
+    List<String>? workflowTags,
   }) async {
     ensureNotClosed?.call();
-    final queryParams = <String, String>{};
+    // Array query params (search_key/workflow_tags) use form/explode
+    // serialization — each value is sent as a repeated parameter, not
+    // comma-joined.
+    final queryParams = <String, dynamic>{};
     if (workflowIdentifier != null) {
       queryParams['workflow_identifier'] = workflowIdentifier;
     }
@@ -66,6 +81,14 @@ class RunsResource extends ResourceBase {
     if (userId != null) queryParams['user_id'] = userId;
     if (pageSize != null) queryParams['page_size'] = pageSize.toString();
     if (nextPageToken != null) queryParams['next_page_token'] = nextPageToken;
+    if (rootExecutionId != null) {
+      queryParams['root_execution_id'] = rootExecutionId;
+    }
+    if (includeInternal != null) {
+      queryParams['include_internal'] = includeInternal.toString();
+    }
+    if (searchKey != null) queryParams['search_key'] = searchKey;
+    if (workflowTags != null) queryParams['workflow_tags'] = workflowTags;
 
     final url = requestBuilder.buildUrl(
       '/v1/workflows/runs',

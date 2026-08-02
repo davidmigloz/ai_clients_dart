@@ -4,6 +4,8 @@ import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import 'deployment_location.dart';
 import 'deployment_worker_response.dart';
+import 'location_type.dart';
+import 'managed_deployment_response.dart';
 
 /// Detailed response for a deployment.
 @immutable
@@ -32,6 +34,19 @@ class DeploymentDetailResponse {
   /// The deployment location.
   final DeploymentLocation? location;
 
+  /// Number of workers currently live within the liveness cutoff.
+  final int activeWorkerCount;
+
+  /// Number of workers registered to the deployment.
+  final int workerCount;
+
+  /// Distinct location types reported by the deployment's workers.
+  final List<LocationType> locations;
+
+  /// Live managed service state for managed deployments; `null` for
+  /// self-hosted deployments or when managed services are unavailable.
+  final ManagedDeploymentResponse? managed;
+
   /// Creates a [DeploymentDetailResponse].
   DeploymentDetailResponse({
     required this.id,
@@ -42,7 +57,12 @@ class DeploymentDetailResponse {
     required List<DeploymentWorkerResponse> workers,
     this.isHardened = false,
     this.location,
-  }) : workers = List.unmodifiable(workers);
+    this.activeWorkerCount = 0,
+    this.workerCount = 0,
+    List<LocationType> locations = const [],
+    this.managed,
+  }) : workers = List.unmodifiable(workers),
+       locations = List.unmodifiable(locations);
 
   /// Creates a [DeploymentDetailResponse] from JSON.
   factory DeploymentDetailResponse.fromJson(
@@ -65,6 +85,18 @@ class DeploymentDetailResponse {
     location: json['location'] == null
         ? null
         : DeploymentLocation.fromJson(json['location'] as Map<String, dynamic>),
+    activeWorkerCount: json['active_worker_count'] as int? ?? 0,
+    workerCount: json['worker_count'] as int? ?? 0,
+    locations:
+        (json['locations'] as List?)
+            ?.map((e) => LocationType.fromJson(e as String?))
+            .toList() ??
+        const [],
+    managed: json['managed'] == null
+        ? null
+        : ManagedDeploymentResponse.fromJson(
+            json['managed'] as Map<String, dynamic>,
+          ),
   );
 
   /// Converts to JSON.
@@ -77,6 +109,10 @@ class DeploymentDetailResponse {
     'workers': workers.map((e) => e.toJson()).toList(),
     'is_hardened': isHardened,
     if (location != null) 'location': location!.toJson(),
+    'active_worker_count': activeWorkerCount,
+    'worker_count': workerCount,
+    'locations': locations.map((e) => e.toJson()).toList(),
+    if (managed != null) 'managed': managed!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -89,6 +125,10 @@ class DeploymentDetailResponse {
     List<DeploymentWorkerResponse>? workers,
     bool? isHardened,
     Object? location = unsetCopyWithValue,
+    int? activeWorkerCount,
+    int? workerCount,
+    List<LocationType>? locations,
+    Object? managed = unsetCopyWithValue,
   }) {
     return DeploymentDetailResponse(
       id: id ?? this.id,
@@ -101,6 +141,12 @@ class DeploymentDetailResponse {
       location: location == unsetCopyWithValue
           ? this.location
           : location as DeploymentLocation?,
+      activeWorkerCount: activeWorkerCount ?? this.activeWorkerCount,
+      workerCount: workerCount ?? this.workerCount,
+      locations: locations ?? this.locations,
+      managed: managed == unsetCopyWithValue
+          ? this.managed
+          : managed as ManagedDeploymentResponse?,
     );
   }
 
@@ -110,13 +156,17 @@ class DeploymentDetailResponse {
     if (other is! DeploymentDetailResponse) return false;
     if (runtimeType != other.runtimeType) return false;
     if (!listsEqual(workers, other.workers)) return false;
+    if (!listsEqual(locations, other.locations)) return false;
     return id == other.id &&
         name == other.name &&
         isActive == other.isActive &&
         createdAt == other.createdAt &&
         updatedAt == other.updatedAt &&
         isHardened == other.isHardened &&
-        location == other.location;
+        location == other.location &&
+        activeWorkerCount == other.activeWorkerCount &&
+        workerCount == other.workerCount &&
+        managed == other.managed;
   }
 
   @override
@@ -129,6 +179,9 @@ class DeploymentDetailResponse {
     listHash(workers),
     isHardened,
     location,
+    activeWorkerCount,
+    workerCount,
+    Object.hash(listHash(locations), managed),
   );
 
   @override
@@ -141,6 +194,10 @@ class DeploymentDetailResponse {
       'updatedAt: $updatedAt, '
       'workers: ${workers.length}, '
       'isHardened: $isHardened, '
-      'location: $location'
+      'location: $location, '
+      'activeWorkerCount: $activeWorkerCount, '
+      'workerCount: $workerCount, '
+      'locations: $locations, '
+      'managed: $managed'
       ')';
 }
