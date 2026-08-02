@@ -1,3 +1,12 @@
+## 6.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Adds `client.prompts` and `client.skills` v2 registries with versioning and aliases, managed workflow deployments (create/start/stop/restart with SSE log streaming), and new `client.users.me()` and connector `share`/`deleteAllUserCredentials` endpoints. **Breaking:** the RAG search index API is replaced by a fully Vespa-typed `/v1/rag/indexes` surface, and the fine-tuning jobs API (along with `FineTuningJobPoller`) is removed entirely — a confirmed upstream deprecation per the [Mistral changelog](https://docs.mistral.ai/getting-started/changelog/) and [deprecated fine-tuning endpoints notice](https://docs.mistral.ai/api/endpoint/deprecated/fine-tuning) — with only fine-tuned-model management remaining. Connector request fields and observability dataset record types are also renamed/retyped to match the current spec.
+
+- **BREAKING** **FEAT**: Prompts/skills registries, RAG index redesign, managed deployments; drop deprecated fine-tuning jobs ([#287](https://github.com/davidmigloz/ai_clients_dart/issues/287)). ([8bc0db54](https://github.com/davidmigloz/ai_clients_dart/commit/8bc0db540723a20d2eee9afd379919f8c095e56c))
+
 ## 5.0.0
 
 > [!CAUTION]

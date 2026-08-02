@@ -1,3 +1,9 @@
+## 2.5.0
+
+Adds `renderer` and `parser` to `CreateRequest`, matching the upstream OpenAPI spec's new tool-calling prompt renderer (e.g. `qwen3.5`) and output parser (e.g. `harmony`) fields. Also adds client-ahead fields for full [`api/types.go`](https://github.com/ollama/ollama/blob/main/api/types.go) parity that the spec still omits — `files`/`adapters` (filename → SHA256 digest maps, per the [Create a Model docs](https://github.com/ollama/ollama/blob/main/docs/api.md#create-a-model)) for creating models from GGUF/Safetensors and LoRA adapters, plus `draftQuantize`/`draftFiles`, `remoteHost`, `requires`, and `info`. Also fixes `CreateRequest`'s `==`/`hashCode`/`toString` contract, which previously only compared `model`, to cover all 18 fields with content-based map/list equality.
+
+- **FEAT**: CreateRequest renderer/parser and files/adapters ([#285](https://github.com/davidmigloz/ai_clients_dart/issues/285)). ([c8a61de9](https://github.com/davidmigloz/ai_clients_dart/commit/c8a61de97e41e44663786f946a8a9a259e71e435))
+
 ## 2.4.0
 
 Adds the new `max` thinking level (`ThinkLevel.max`), matching Ollama's spec update that added `"max"` to the `think` enum on `ChatRequest` and `GenerateRequest` — use `ChatRequest(..., think: ThinkWithLevel(ThinkLevel.max))` to request the highest thinking level on supported reasoning models. Also fixes `buildUrl` producing a double slash (`//api/...`) when `OllamaConfig.baseUrl` (or `OLLAMA_HOST`) has a trailing slash, and preserves base-URL query params (including repeated keys) that were previously dropped — proxy setups with tokens in the base URL now work correctly.

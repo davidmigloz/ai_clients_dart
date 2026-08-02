@@ -6,6 +6,61 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v5.x to v6.0.0
+
+v6.0.0 adds prompt/skill registries, managed workflow deployments, and a redesigned RAG search index API. The breaking changes are: the fine-tuning jobs API is removed (a real upstream deprecation, not a spec regression), the RAG search index surface is replaced with a fully Vespa-typed API, a few connector request fields are removed or retyped to match the spec, and some observability dataset record types are renamed.
+
+### 1) Fine-tuning jobs API removed
+
+The legacy fine-tuning jobs endpoints (`client.fineTuning.jobs`) and `FineTuningJobPoller` were dropped by Mistral — confirmed via the official `mistralai/client-python` and `client-ts` SDKs (which ship only fine-tuned-model management) and the [deprecated fine-tuning endpoints notice](https://docs.mistral.ai/api/endpoint/deprecated/fine-tuning). Only fine-tuned model management remains. If you depend on the jobs API, pin the previous package version.
+
+```dart
+// Before
+final job = await client.fineTuning.jobs.create(request: ...);
+
+// After — jobs API no longer exists; only model management remains
+await client.fineTuning.models.update(modelId: 'ft:...', request: ...);
+await client.fineTuning.models.archive(modelId: 'ft:...');
+```
+
+### 2) RAG search index API replaced
+
+The two legacy `/v1/rag/search_index` endpoints are replaced by the new `/v1/rag/indexes` surface (15 endpoints covering registration, schema details, SD files, retrievables, summary fields, and metrics). Registration now carries fully-typed Vespa schema fields instead of the old `{name, document_count}` shape.
+
+```dart
+// Before
+final indexes = await client.rag.searchIndexes.list();
+await client.rag.searchIndexes.register(request: CreateSearchIndexInfoRequest(...));
+
+// After
+final summaries = await client.rag.searchIndexes.listSummaries();
+await client.rag.searchIndexes.register(
+  request: RegisterSearchIndexRequest(index: RegisterVespaIndexRequest(...)),
+);
+```
+
+### 3) Connector request fields removed/retyped
+
+- `CreateConnectorRequest`: `protocol` removed; `visibility` retyped from `ResourceVisibility` to `PublicResourceVisibility`.
+- `UpdateConnectorRequest`: `connectionConfig`/`connectionSecrets` removed; `protocol` is now a constant `'mcp'` getter.
+- `CredentialsStatus.errorMessage` retyped from `String?` to the structured `CredentialsStatusErrorReason?` enum.
+
+Update any code constructing these requests or reading `errorMessage` to match the new shapes.
+
+### 4) Observability dataset record types renamed
+
+`ConversationPayload`/`ConversationSource` are renamed to `DatasetRecordPayload`/`DatasetRecordSource`, and the request wrappers `PostDatasetRecordInSchema`/`PutDatasetRecordPayloadInSchema` are renamed to `CreateDatasetRecordRequest`/`UpdateDatasetRecordPayloadRequest`. `DatasetRecordPayload` is now a pure open map — the `messages` field no longer exists.
+
+```dart
+// Before
+final payload = ConversationPayload(messages: [...]);
+
+// After — messages field removed; payload is now an open map
+final payload = DatasetRecordPayload({'messages': [...]});
+```
+
+---
+
 ## Migrating from v4.x to v5.0.0
 
 v5.0.0 adds OCR-4 paragraph-level block extraction and the new comma-separated page-range form. The single breaking change is on the OCR request: `pages` becomes a sealed union so it can carry either an explicit page list or the new string/range form (this also corrects a pre-existing drift — the spec already typed `pages` as `string | array<int> | null`). Only OCR callers that pass `pages` are affected.

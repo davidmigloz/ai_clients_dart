@@ -1,3 +1,12 @@
+## 11.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Syncs `googleai_dart` to the latest main and interactions Gemini OpenAPI specs ([July 2026 updates](https://ai.google.dev/gemini-api/docs/changelog)), adding an Environments API for managing sandboxed [Managed Agent](https://ai.google.dev/gemini-api/docs/agents) environments, a Triggers API for scheduling agent interactions on a cron expression, new Antigravity and CodeMender agent configs, and Automatic Speech Recognition (ASR) transcription support with word-level annotations. Unknown annotation types now decode safely instead of throwing mid-stream. **Breaking:** the streaming `metadata` field is now only present on `step.delta` events (`StreamMetadata` is renamed to `StepDeltaMetadata`), `cachedContent` is removed from interactions, and `InteractionGenerationConfig.temperature`/`topP` are removed following their deprecation by the Gemini API.
+
+- **BREAKING** **FEAT**: Environments/Triggers APIs, agent configs, ASR ([#286](https://github.com/davidmigloz/ai_clients_dart/issues/286)). ([2f0b4044](https://github.com/davidmigloz/ai_clients_dart/commit/2f0b4044f031b457ad836e8ac94517aafad91010))
+
 ## 10.0.0
 
 > [!CAUTION]
