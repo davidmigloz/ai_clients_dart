@@ -42,6 +42,7 @@ void main() {
         tags: const ['a', 'b'],
         limit: 10,
         deploymentStatus: 'active',
+        search: 'nightly',
       );
 
       expect(captured.method, 'GET');
@@ -56,6 +57,7 @@ void main() {
       expect(captured.url.queryParametersAll['tags'], ['a', 'b']);
       expect(captured.url.queryParameters['limit'], '10');
       expect(captured.url.queryParameters['deployment_status'], 'active');
+      expect(captured.url.queryParameters['search'], 'nightly');
       expect(result.workflows, hasLength(1));
       expect(result.nextCursor, 'cursor-1');
     });
@@ -293,6 +295,46 @@ void main() {
         '2030-02-01T00:00:00Z',
       );
       expect(captured.url.queryParameters['user_id'], 'current');
+    });
+
+    test('runs.list plumbs the new filter query parameters', () async {
+      final client = clientReturning({'executions': <dynamic>[]});
+      addTearDown(client.close);
+
+      await client.workflows.runs.list(
+        includeInternal: false,
+        rootExecutionId: 'root-1',
+        searchKey: const ['k1:v1', 'k2:v2'],
+        workflowTags: const ['tag-a', 'tag-b'],
+      );
+
+      expect(captured.url.path, '/v1/workflows/runs');
+      expect(captured.url.queryParameters['include_internal'], 'false');
+      expect(captured.url.queryParameters['root_execution_id'], 'root-1');
+      // Array params are serialized as repeated query parameters
+      // (form/explode), not comma-joined.
+      expect(captured.url.queryParametersAll['search_key'], ['k1:v1', 'k2:v2']);
+      expect(captured.url.queryParametersAll['workflow_tags'], [
+        'tag-a',
+        'tag-b',
+      ]);
+    });
+
+    test('executions.traceInfo hits GET /trace/info', () async {
+      final client = clientReturning({
+        'has_trace_data': true,
+        'otel_trace_id': 'otel-1',
+      });
+      addTearDown(client.close);
+
+      final result = await client.workflows.executions.traceInfo(
+        executionId: 'exec-1',
+      );
+
+      expect(captured.method, 'GET');
+      expect(captured.url.path, '/v1/workflows/executions/exec-1/trace/info');
+      expect(result.hasTraceData, isTrue);
+      expect(result.otelTraceId, 'otel-1');
     });
   });
 }

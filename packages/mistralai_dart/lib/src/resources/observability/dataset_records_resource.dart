@@ -6,8 +6,8 @@ import '../../models/observability/dataset_record.dart';
 import '../../models/observability/delete_dataset_records_in_schema.dart';
 import '../../models/observability/judge_output.dart';
 import '../../models/observability/post_dataset_record_judging_in_schema.dart';
-import '../../models/observability/put_dataset_record_payload_in_schema.dart';
 import '../../models/observability/put_dataset_record_properties_in_schema.dart';
+import '../../models/observability/update_dataset_record_payload_request.dart';
 import '../base_resource.dart';
 
 /// Resource for dataset record operations.
@@ -114,7 +114,7 @@ class DatasetRecordsResource extends ResourceBase {
   /// Updates a dataset record's conversation payload.
   Future<void> updatePayload({
     required String datasetRecordId,
-    required PutDatasetRecordPayloadInSchema request,
+    required UpdateDatasetRecordPayloadRequest request,
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(

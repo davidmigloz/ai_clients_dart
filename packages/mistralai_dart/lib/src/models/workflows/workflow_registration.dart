@@ -12,7 +12,13 @@ class WorkflowRegistration {
   final String id;
 
   /// The deployment identifier.
+  ///
+  /// Deprecated: use [deploymentName] instead. Will be removed in a future
+  /// release.
   final String? deploymentId;
+
+  /// The name of the deployment this registration belongs to.
+  final String? deploymentName;
 
   /// The task queue.
   ///
@@ -36,6 +42,7 @@ class WorkflowRegistration {
   const WorkflowRegistration({
     required this.id,
     this.deploymentId,
+    this.deploymentName,
     @Deprecated('task_queue is deprecated in the Mistral API') this.taskQueue,
     required this.definition,
     required this.workflowId,
@@ -44,26 +51,43 @@ class WorkflowRegistration {
   });
 
   /// Creates a [WorkflowRegistration] from JSON.
-  factory WorkflowRegistration.fromJson(Map<String, dynamic> json) =>
-      WorkflowRegistration(
-        id: json['id'] as String? ?? '',
-        deploymentId: json['deployment_id'] as String?,
-        taskQueue: json['task_queue'] as String?,
-        definition: WorkflowCodeDefinition.fromJson(
-          json['definition'] as Map<String, dynamic>,
-        ),
-        workflowId: json['workflow_id'] as String? ?? '',
-        compatibleWithChatAssistant:
-            json['compatible_with_chat_assistant'] as bool? ?? false,
-        workflow: json['workflow'] != null
-            ? Workflow.fromJson(json['workflow'] as Map<String, dynamic>)
-            : null,
+  ///
+  /// Throws a [FormatException] if a required field is missing.
+  factory WorkflowRegistration.fromJson(Map<String, dynamic> json) {
+    final id = json['id'] as String?;
+    if (id == null) {
+      throw const FormatException(
+        'WorkflowRegistration: missing required field "id"',
       );
+    }
+    final workflowId = json['workflow_id'] as String?;
+    if (workflowId == null) {
+      throw const FormatException(
+        'WorkflowRegistration: missing required field "workflow_id"',
+      );
+    }
+    return WorkflowRegistration(
+      id: id,
+      deploymentId: json['deployment_id'] as String?,
+      deploymentName: json['deployment_name'] as String?,
+      taskQueue: json['task_queue'] as String?,
+      definition: WorkflowCodeDefinition.fromJson(
+        json['definition'] as Map<String, dynamic>,
+      ),
+      workflowId: workflowId,
+      compatibleWithChatAssistant:
+          json['compatible_with_chat_assistant'] as bool? ?? false,
+      workflow: json['workflow'] != null
+          ? Workflow.fromJson(json['workflow'] as Map<String, dynamic>)
+          : null,
+    );
+  }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'id': id,
     if (deploymentId != null) 'deployment_id': deploymentId,
+    if (deploymentName != null) 'deployment_name': deploymentName,
     if (taskQueue != null) 'task_queue': taskQueue,
     'definition': definition.toJson(),
     'workflow_id': workflowId,
@@ -75,6 +99,7 @@ class WorkflowRegistration {
   WorkflowRegistration copyWith({
     String? id,
     Object? deploymentId = unsetCopyWithValue,
+    Object? deploymentName = unsetCopyWithValue,
     Object? taskQueue = unsetCopyWithValue,
     WorkflowCodeDefinition? definition,
     String? workflowId,
@@ -86,6 +111,9 @@ class WorkflowRegistration {
       deploymentId: deploymentId == unsetCopyWithValue
           ? this.deploymentId
           : deploymentId as String?,
+      deploymentName: deploymentName == unsetCopyWithValue
+          ? this.deploymentName
+          : deploymentName as String?,
       taskQueue: taskQueue == unsetCopyWithValue
           ? this.taskQueue
           : taskQueue as String?,
@@ -106,6 +134,7 @@ class WorkflowRegistration {
     if (runtimeType != other.runtimeType) return false;
     return id == other.id &&
         deploymentId == other.deploymentId &&
+        deploymentName == other.deploymentName &&
         taskQueue == other.taskQueue &&
         definition == other.definition &&
         workflowId == other.workflowId &&
@@ -117,6 +146,7 @@ class WorkflowRegistration {
   int get hashCode => Object.hash(
     id,
     deploymentId,
+    deploymentName,
     taskQueue,
     definition,
     workflowId,
@@ -129,6 +159,7 @@ class WorkflowRegistration {
       'WorkflowRegistration('
       'id: $id, '
       'deploymentId: $deploymentId, '
+      'deploymentName: $deploymentName, '
       'taskQueue: $taskQueue, '
       'definition: $definition, '
       'workflowId: $workflowId, '

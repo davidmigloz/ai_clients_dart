@@ -7,6 +7,7 @@ import '../../models/workflows/batch_execution_response.dart';
 import '../../models/workflows/event_source.dart';
 import '../../models/workflows/execution_log_record.dart';
 import '../../models/workflows/execution_log_search_response.dart';
+import '../../models/workflows/execution_trace_info_response.dart';
 import '../../models/workflows/query_invocation_body.dart';
 import '../../models/workflows/query_workflow_response.dart';
 import '../../models/workflows/reset_invocation_body.dart';
@@ -184,7 +185,11 @@ class ExecutionsResource extends ResourceBase with StreamingResource {
       '/v1/workflows/executions/$executionId/logs/stream',
       queryParams: queryParams,
     );
-    final headers = requestBuilder.buildHeaders();
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: lastEventId != null
+          ? {'Last-Event-ID': lastEventId}
+          : null,
+    );
 
     var httpRequest = http.Request('GET', url)..headers.addAll(headers);
     httpRequest = await prepareStreamingRequest(httpRequest);
@@ -394,6 +399,21 @@ class ExecutionsResource extends ResourceBase with StreamingResource {
     final response = await interceptorChain.execute(httpRequest);
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
     return WorkflowExecutionTraceOTelResponse.fromJson(responseBody);
+  }
+
+  /// Gets trace availability info for a workflow execution.
+  Future<ExecutionTraceInfoResponse> traceInfo({
+    required String executionId,
+  }) async {
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
+      '/v1/workflows/executions/$executionId/trace/info',
+    );
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+    return ExecutionTraceInfoResponse.fromJson(responseBody);
   }
 
   /// Gets a trace summary for a workflow execution.

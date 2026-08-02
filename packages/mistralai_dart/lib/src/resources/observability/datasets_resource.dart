@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../models/observability/create_dataset_record_request.dart';
 import '../../models/observability/dataset.dart';
 import '../../models/observability/dataset_export.dart';
 import '../../models/observability/dataset_import_task.dart';
@@ -17,7 +18,6 @@ import '../../models/observability/post_dataset_import_from_explorer_in_schema.d
 import '../../models/observability/post_dataset_import_from_file_in_schema.dart';
 import '../../models/observability/post_dataset_import_from_playground_in_schema.dart';
 import '../../models/observability/post_dataset_in_schema.dart';
-import '../../models/observability/post_dataset_record_in_schema.dart';
 import '../base_resource.dart';
 
 /// Resource for observability dataset operations.
@@ -289,7 +289,7 @@ class DatasetsResource extends ResourceBase {
   /// Adds a conversation to a dataset.
   Future<DatasetRecord> createRecord({
     required String datasetId,
-    required PostDatasetRecordInSchema request,
+    required CreateDatasetRecordRequest request,
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(

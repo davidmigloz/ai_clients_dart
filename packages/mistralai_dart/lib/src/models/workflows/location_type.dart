@@ -6,6 +6,9 @@ enum LocationType {
   /// Runs on a Kubernetes cluster.
   k8s('k8s'),
 
+  /// Runs on Mistral-managed infrastructure.
+  managed('managed'),
+
   /// Unknown location type (forward-compatibility fallback).
   unknown('unknown');
 

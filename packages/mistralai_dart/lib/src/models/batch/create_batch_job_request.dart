@@ -29,6 +29,7 @@ class CreateBatchJobRequest {
   /// Timeout in hours for completing the batch job.
   ///
   /// If not completed within this time, the job will be marked as timed out.
+  /// Must be between 1 and 168.
   final int? timeoutHours;
 
   /// Inline batch requests.

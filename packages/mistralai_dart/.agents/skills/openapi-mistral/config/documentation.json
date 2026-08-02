@@ -1,5 +1,14 @@
 {
-  "removed_apis": [],
+  "removed_apis": [
+    {
+      "api": "client.fineTuning.jobs",
+      "reason": "Fine-tuning jobs API removed upstream (2026-08 spec); only /v1/fine_tuning/models/{model_id} update/archive/unarchive remain"
+    },
+    {
+      "api": "FineTuningJobPoller",
+      "reason": "Removed with the fine-tuning jobs API"
+    }
+  ],
   "tool_properties": {
     "function": {
       "description": "Function/tool calling support",

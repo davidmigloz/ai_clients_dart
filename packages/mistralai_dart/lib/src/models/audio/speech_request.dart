@@ -31,6 +31,9 @@ class SpeechRequest {
   /// Custom request metadata.
   final Map<String, dynamic>? metadata;
 
+  /// Cache key for reusing prompt processing across requests.
+  final String? promptCacheKey;
+
   /// Additional properties not covered by the named fields.
   final Map<String, dynamic>? extra;
 
@@ -43,6 +46,7 @@ class SpeechRequest {
     this.responseFormat,
     this.stream,
     this.metadata,
+    this.promptCacheKey,
     this.extra,
   });
 
@@ -56,6 +60,7 @@ class SpeechRequest {
       'response_format',
       'stream',
       'metadata',
+      'prompt_cache_key',
     };
     final extraEntries = {
       for (final entry in json.entries)
@@ -71,6 +76,7 @@ class SpeechRequest {
       ),
       stream: json['stream'] as bool?,
       metadata: json['metadata'] as Map<String, dynamic>?,
+      promptCacheKey: json['prompt_cache_key'] as String?,
       extra: extraEntries.isEmpty ? null : extraEntries,
     );
   }
@@ -88,6 +94,7 @@ class SpeechRequest {
     if (responseFormat != null) 'response_format': responseFormat!.value,
     if (stream != null) 'stream': stream,
     if (metadata != null) 'metadata': metadata,
+    if (promptCacheKey != null) 'prompt_cache_key': promptCacheKey,
   };
 
   /// Creates a copy with replaced values.
@@ -99,6 +106,7 @@ class SpeechRequest {
     Object? responseFormat = unsetCopyWithValue,
     Object? stream = unsetCopyWithValue,
     Object? metadata = unsetCopyWithValue,
+    Object? promptCacheKey = unsetCopyWithValue,
     Object? extra = unsetCopyWithValue,
   }) {
     return SpeechRequest(
@@ -117,6 +125,9 @@ class SpeechRequest {
       metadata: metadata == unsetCopyWithValue
           ? this.metadata
           : metadata as Map<String, dynamic>?,
+      promptCacheKey: promptCacheKey == unsetCopyWithValue
+          ? this.promptCacheKey
+          : promptCacheKey as String?,
       extra: extra == unsetCopyWithValue
           ? this.extra
           : extra as Map<String, dynamic>?,
@@ -135,6 +146,7 @@ class SpeechRequest {
           responseFormat == other.responseFormat &&
           stream == other.stream &&
           mapsDeepEqual(metadata, other.metadata) &&
+          promptCacheKey == other.promptCacheKey &&
           mapsDeepEqual(extra, other.extra);
 
   @override
@@ -146,6 +158,7 @@ class SpeechRequest {
     responseFormat,
     stream,
     mapDeepHashCode(metadata),
+    promptCacheKey,
     mapDeepHashCode(extra),
   );
 
@@ -158,5 +171,6 @@ class SpeechRequest {
       'responseFormat: $responseFormat, '
       'stream: $stream, '
       'metadata: $metadata, '
+      'promptCacheKey: $promptCacheKey, '
       'extra: ${extra != null ? '${extra!.length} entries' : null})';
 }

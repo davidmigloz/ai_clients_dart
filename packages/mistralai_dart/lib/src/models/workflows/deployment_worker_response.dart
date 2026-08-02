@@ -1,5 +1,8 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+import 'deployment_location.dart';
+
 /// Response for a deployment worker.
 @immutable
 class DeploymentWorkerResponse {
@@ -15,22 +18,59 @@ class DeploymentWorkerResponse {
   /// Last update timestamp.
   final String updatedAt;
 
+  /// Where the worker is running; `null` if the worker did not report a
+  /// location.
+  final DeploymentLocation? location;
+
   /// Creates a [DeploymentWorkerResponse].
   const DeploymentWorkerResponse({
     required this.name,
     required this.isActive,
     required this.createdAt,
     required this.updatedAt,
+    this.location,
   });
 
   /// Creates a [DeploymentWorkerResponse] from JSON.
-  factory DeploymentWorkerResponse.fromJson(Map<String, dynamic> json) =>
-      DeploymentWorkerResponse(
-        name: json['name'] as String? ?? '',
-        isActive: json['is_active'] as bool? ?? false,
-        createdAt: json['created_at'] as String? ?? '',
-        updatedAt: json['updated_at'] as String? ?? '',
+  ///
+  /// Throws a [FormatException] if a required field is missing.
+  factory DeploymentWorkerResponse.fromJson(Map<String, dynamic> json) {
+    final name = json['name'] as String?;
+    if (name == null) {
+      throw const FormatException(
+        'DeploymentWorkerResponse: missing required field "name"',
       );
+    }
+    final isActive = json['is_active'] as bool?;
+    if (isActive == null) {
+      throw const FormatException(
+        'DeploymentWorkerResponse: missing required field "is_active"',
+      );
+    }
+    final createdAt = json['created_at'] as String?;
+    if (createdAt == null) {
+      throw const FormatException(
+        'DeploymentWorkerResponse: missing required field "created_at"',
+      );
+    }
+    final updatedAt = json['updated_at'] as String?;
+    if (updatedAt == null) {
+      throw const FormatException(
+        'DeploymentWorkerResponse: missing required field "updated_at"',
+      );
+    }
+    return DeploymentWorkerResponse(
+      name: name,
+      isActive: isActive,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      location: json['location'] == null
+          ? null
+          : DeploymentLocation.fromJson(
+              json['location'] as Map<String, dynamic>,
+            ),
+    );
+  }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
@@ -38,6 +78,7 @@ class DeploymentWorkerResponse {
     'is_active': isActive,
     'created_at': createdAt,
     'updated_at': updatedAt,
+    if (location != null) 'location': location!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -46,12 +87,16 @@ class DeploymentWorkerResponse {
     bool? isActive,
     String? createdAt,
     String? updatedAt,
+    Object? location = unsetCopyWithValue,
   }) {
     return DeploymentWorkerResponse(
       name: name ?? this.name,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      location: location == unsetCopyWithValue
+          ? this.location
+          : location as DeploymentLocation?,
     );
   }
 
@@ -63,13 +108,15 @@ class DeploymentWorkerResponse {
     return name == other.name &&
         isActive == other.isActive &&
         createdAt == other.createdAt &&
-        updatedAt == other.updatedAt;
+        updatedAt == other.updatedAt &&
+        location == other.location;
   }
 
   @override
-  int get hashCode => Object.hash(name, isActive, createdAt, updatedAt);
+  int get hashCode =>
+      Object.hash(name, isActive, createdAt, updatedAt, location);
 
   @override
   String toString() =>
-      'DeploymentWorkerResponse(name: $name, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt)';
+      'DeploymentWorkerResponse(name: $name, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt, location: $location)';
 }

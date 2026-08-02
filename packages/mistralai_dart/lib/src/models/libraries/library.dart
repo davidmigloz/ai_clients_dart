@@ -150,10 +150,25 @@ class LibraryList {
   final List<Library> data;
 
   /// The total number of libraries available.
+  ///
+  /// Deprecated: this offset-pagination metadata is only populated for
+  /// callers using the deprecated `page` parameter. Use [nextPageToken]
+  /// instead.
   final int? total;
 
   /// Whether there are more libraries to fetch.
+  ///
+  /// Deprecated: this offset-pagination metadata is only populated for
+  /// callers using the deprecated `page` parameter. Use [nextPageToken]
+  /// instead.
   final bool? hasMore;
+
+  /// Opaque continuation token for the next page.
+  ///
+  /// Pass it back as `page_token` to fetch the next page. Null when there
+  /// are no more results. Prefer this over the deprecated offset `page`
+  /// parameter.
+  final String? nextPageToken;
 
   /// Creates a [LibraryList].
   const LibraryList({
@@ -161,6 +176,7 @@ class LibraryList {
     required this.data,
     this.total,
     this.hasMore,
+    this.nextPageToken,
   });
 
   /// Creates a [LibraryList] from JSON.
@@ -174,6 +190,7 @@ class LibraryList {
           [],
       total: json['total'] as int?,
       hasMore: json['has_more'] as bool?,
+      nextPageToken: json['next_page_token'] as String?,
     );
   }
 
@@ -184,6 +201,7 @@ class LibraryList {
       'data': data.map((e) => e.toJson()).toList(),
       if (total != null) 'total': total,
       if (hasMore != null) 'has_more': hasMore,
+      if (nextPageToken != null) 'next_page_token': nextPageToken,
     };
   }
 
@@ -204,11 +222,15 @@ class LibraryList {
           object == other.object &&
           listsEqual(data, other.data) &&
           total == other.total &&
-          hasMore == other.hasMore;
+          hasMore == other.hasMore &&
+          nextPageToken == other.nextPageToken;
 
   @override
-  int get hashCode => Object.hash(object, Object.hashAll(data), total, hasMore);
+  int get hashCode =>
+      Object.hash(object, Object.hashAll(data), total, hasMore, nextPageToken);
 
   @override
-  String toString() => 'LibraryList(count: $length, total: $total)';
+  String toString() =>
+      'LibraryList(count: $length, total: $total, '
+      'nextPageToken: $nextPageToken)';
 }

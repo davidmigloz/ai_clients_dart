@@ -23,6 +23,9 @@ class AuthenticationConfiguration {
   /// Whether this is the default credential for its auth method.
   final bool isDefault;
 
+  /// An optional human-readable title for the credential.
+  final String? title;
+
   /// Creates an [AuthenticationConfiguration].
   const AuthenticationConfiguration({
     required this.name,
@@ -30,6 +33,7 @@ class AuthenticationConfiguration {
     required this.scope,
     this.status,
     this.isDefault = false,
+    this.title,
   });
 
   /// Creates an [AuthenticationConfiguration] from JSON.
@@ -44,6 +48,7 @@ class AuthenticationConfiguration {
             ? CredentialsStatus.fromJson(json['status'] as Map<String, dynamic>)
             : null,
         isDefault: json['is_default'] as bool? ?? false,
+        title: json['title'] as String?,
       );
 
   /// Converts this object to JSON.
@@ -53,17 +58,19 @@ class AuthenticationConfiguration {
     'scope': scope.toJson(),
     if (status != null) 'status': status!.toJson(),
     'is_default': isDefault,
+    if (title != null) 'title': title,
   };
 
   /// Creates a copy with the given fields replaced.
   ///
-  /// Pass `null` for [status] to clear it explicitly; omit to keep.
+  /// Pass `null` for nullable fields to clear them explicitly; omit to keep.
   AuthenticationConfiguration copyWith({
     String? name,
     OutboundAuthenticationType? authenticationType,
     ConsumerType? scope,
     Object? status = unsetCopyWithValue,
     bool? isDefault,
+    Object? title = unsetCopyWithValue,
   }) => AuthenticationConfiguration(
     name: name ?? this.name,
     authenticationType: authenticationType ?? this.authenticationType,
@@ -72,6 +79,7 @@ class AuthenticationConfiguration {
         ? this.status
         : status as CredentialsStatus?,
     isDefault: isDefault ?? this.isDefault,
+    title: title == unsetCopyWithValue ? this.title : title as String?,
   );
 
   @override
@@ -83,11 +91,12 @@ class AuthenticationConfiguration {
           authenticationType == other.authenticationType &&
           scope == other.scope &&
           status == other.status &&
-          isDefault == other.isDefault;
+          isDefault == other.isDefault &&
+          title == other.title;
 
   @override
   int get hashCode =>
-      Object.hash(name, authenticationType, scope, status, isDefault);
+      Object.hash(name, authenticationType, scope, status, isDefault, title);
 
   @override
   String toString() =>
@@ -96,5 +105,6 @@ class AuthenticationConfiguration {
       'authenticationType: $authenticationType, '
       'scope: $scope, '
       'status: $status, '
-      'isDefault: $isDefault)';
+      'isDefault: $isDefault, '
+      'title: $title)';
 }

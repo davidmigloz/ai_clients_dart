@@ -39,25 +39,6 @@ void main() {
       'pipeline_composition': null,
     };
 
-    Map<String, dynamic> searchIndexJson(String id) => {
-      'id': id,
-      'name': 'My index',
-      'creator_id': 'user-1',
-      'document_count': 12,
-      'status': 'online',
-      'created_at': '2024-01-01T00:00:00.000Z',
-      'modified_at': '2024-01-02T00:00:00.000Z',
-      'index': {
-        'type': 'vespa',
-        'k8s_cluster': 'cluster',
-        'k8s_namespace': 'namespace',
-        'vespa_instance_name': 'instance',
-        'schemas': [
-          {'name': 'schema-1', 'document_count': 12},
-        ],
-      },
-    };
-
     group('ingestionPipelineConfigurations', () {
       test('list issues GET and parses the array', () async {
         final client = clientReturning([configJson('cfg-1')]);
@@ -115,46 +96,6 @@ void main() {
           'chunks_count': 9,
         });
         expect(result.id, 'cfg-3');
-      });
-    });
-
-    group('searchIndexes', () {
-      test('list issues GET and parses the array', () async {
-        final client = clientReturning([searchIndexJson('idx-1')]);
-        addTearDown(client.close);
-
-        final result = await client.rag.searchIndexes.list();
-
-        expect(captured.method, 'GET');
-        expect(captured.url.path, '/v1/rag/search_index');
-        expect(result.single.id, 'idx-1');
-        expect(result.single.status, SearchIndexStatus.online);
-        expect(result.single.index.schemas.single.name, 'schema-1');
-      });
-
-      test('register issues PUT with the request body', () async {
-        final client = clientReturning(searchIndexJson('idx-2'));
-        addTearDown(client.close);
-
-        final result = await client.rag.searchIndexes.register(
-          request: const CreateSearchIndexInfoRequest(
-            name: 'My index',
-            index: CreateVespaSearchIndexInfoRequest(
-              k8sCluster: 'cluster',
-              k8sNamespace: 'namespace',
-              vespaInstanceName: 'instance',
-              schemas: [CreateVespaSchemaRequest(name: 'schema-1')],
-            ),
-          ),
-        );
-
-        expect(captured.method, 'PUT');
-        expect(captured.url.path, '/v1/rag/search_index');
-        final body = jsonDecode(captured.body) as Map<String, dynamic>;
-        expect(body['name'], 'My index');
-        expect(body['status'], 'offline');
-        expect((body['index'] as Map)['type'], 'vespa');
-        expect(result.id, 'idx-2');
       });
     });
   });

@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import 'auth_status.dart';
+import 'credentials_status_error_reason.dart';
 
 /// The status of a connector credential.
 @immutable
@@ -16,7 +17,7 @@ class CredentialsStatus {
   final int? errorHttpCode;
 
   /// A human-readable reason describing the error.
-  final String? errorMessage;
+  final CredentialsStatusErrorReason? errorMessage;
 
   /// Creates a [CredentialsStatus].
   const CredentialsStatus({
@@ -34,7 +35,11 @@ class CredentialsStatus {
             ? DateTime.tryParse(json['last_checked_at'] as String)
             : null,
         errorHttpCode: json['error_http_code'] as int?,
-        errorMessage: json['error_message'] as String?,
+        errorMessage: json['error_message'] != null
+            ? CredentialsStatusErrorReason.fromJson(
+                json['error_message'] as String?,
+              )
+            : null,
       );
 
   /// Converts this object to JSON.
@@ -43,7 +48,7 @@ class CredentialsStatus {
     if (lastCheckedAt != null)
       'last_checked_at': lastCheckedAt!.toIso8601String(),
     if (errorHttpCode != null) 'error_http_code': errorHttpCode,
-    if (errorMessage != null) 'error_message': errorMessage,
+    if (errorMessage != null) 'error_message': errorMessage!.toJson(),
   };
 
   /// Creates a copy with the given fields replaced.
@@ -64,7 +69,7 @@ class CredentialsStatus {
         : errorHttpCode as int?,
     errorMessage: errorMessage == unsetCopyWithValue
         ? this.errorMessage
-        : errorMessage as String?,
+        : errorMessage as CredentialsStatusErrorReason?,
   );
 
   @override

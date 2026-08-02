@@ -37,7 +37,7 @@ Future<void> connectorManagementExample(MistralClient client) async {
       name: 'my_connector',
       description: 'My MCP connector',
       server: 'https://mcp.example.com',
-      visibility: ResourceVisibility.sharedOrg,
+      visibility: PublicResourceVisibility.sharedOrg,
     ),
   );
   print('Created connector: ${connector.id} (${connector.name})');

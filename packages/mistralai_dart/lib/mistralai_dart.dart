@@ -33,7 +33,7 @@
 /// - **Embeddings**: Generate text embeddings for semantic search
 /// - **Files**: Upload and manage files for fine-tuning and batch processing
 /// - **FIM**: Fill-in-the-Middle code completions with Codestral
-/// - **Fine-tuning**: Train custom models
+/// - **Fine-tuned models**: Update, archive, and unarchive fine-tuned models
 /// - **Batch**: Asynchronous large-scale processing
 /// - **OCR**: Extract text from documents and images
 /// - **Audio**: Speech-to-text transcription, text-to-speech synthesis, and voice management
@@ -41,8 +41,12 @@
 /// - **Conversations** (Beta): Flexible multi-turn interactions
 /// - **Connectors** (Beta): MCP connector management
 /// - **Libraries** (Beta): Document storage for RAG
+/// - **Prompts** (Beta): Versioned, shareable prompt templates
+/// - **Skills** (Beta): Versioned, shareable model instructions and assets
 /// - **Observability** (Beta): Campaigns, datasets, judges, chat completion events
-/// - **Workflows** (Beta): Workflow execution, scheduling, and management
+/// - **Workflows** (Beta): Workflow execution, scheduling, managed deployments, and management
+/// - **RAG** (Beta): Ingestion pipeline configuration and search index management
+/// - **Users** (Beta): Current authenticated user identity
 /// - **Models**: List and manage available models
 /// - **Moderations**: Content moderation for safety
 /// - **Multimodal**: Support for text and image inputs
@@ -70,6 +74,7 @@ export 'src/models/agents/agent_alias_response.dart';
 export 'src/models/agents/agent_completion_request.dart';
 export 'src/models/agents/agent_completion_response.dart';
 export 'src/models/agents/agent_list.dart';
+export 'src/models/agents/agent_list_page.dart';
 export 'src/models/agents/create_agent_request.dart';
 export 'src/models/agents/update_agent_request.dart';
 // --- Models: Audio ---
@@ -128,12 +133,19 @@ export 'src/models/connectors/create_connector_request.dart';
 export 'src/models/connectors/credentials_create_or_update.dart';
 export 'src/models/connectors/credentials_response.dart';
 export 'src/models/connectors/credentials_status.dart';
+export 'src/models/connectors/credentials_status_error_reason.dart';
+export 'src/models/connectors/execution_tool.dart';
 export 'src/models/connectors/message_response.dart';
 export 'src/models/connectors/oauth2_token.dart';
 export 'src/models/connectors/outbound_authentication_type.dart';
 export 'src/models/connectors/pagination_response.dart';
 export 'src/models/connectors/public_authentication_method.dart';
 export 'src/models/connectors/public_connection_config.dart';
+export 'src/models/connectors/public_connector_execution_data.dart';
+export 'src/models/connectors/public_execution_connection_config.dart';
+export 'src/models/connectors/public_execution_connector.dart';
+export 'src/models/connectors/public_execution_env.dart';
+export 'src/models/connectors/public_resource_visibility.dart';
 export 'src/models/connectors/resource_type.dart';
 export 'src/models/connectors/resource_visibility.dart';
 export 'src/models/connectors/tool_execution_configuration.dart';
@@ -166,19 +178,10 @@ export 'src/models/fim/fim_completion_response.dart';
 export 'src/models/fim/fim_completion_stream_response.dart';
 // --- Models: Fine-tuning ---
 export 'src/models/fine_tuning/archive_ft_model_response.dart';
-export 'src/models/fine_tuning/checkpoint.dart';
 export 'src/models/fine_tuning/classifier_target_out.dart';
-export 'src/models/fine_tuning/create_fine_tuning_job_request.dart';
-export 'src/models/fine_tuning/fine_tuning_integration.dart';
-export 'src/models/fine_tuning/fine_tuning_job.dart';
-export 'src/models/fine_tuning/fine_tuning_job_list.dart';
-export 'src/models/fine_tuning/fine_tuning_job_status.dart';
 export 'src/models/fine_tuning/ft_classifier_loss_function.dart';
 export 'src/models/fine_tuning/ft_model_capabilities_out.dart';
 export 'src/models/fine_tuning/ft_model_out.dart';
-export 'src/models/fine_tuning/hyperparameters.dart';
-export 'src/models/fine_tuning/training_event.dart';
-export 'src/models/fine_tuning/training_file.dart';
 export 'src/models/fine_tuning/update_ft_model_request.dart';
 // --- Models: Libraries (Beta) ---
 export 'src/models/libraries/entity_type.dart';
@@ -225,8 +228,7 @@ export 'src/models/observability/chat_completion_events.dart';
 export 'src/models/observability/chat_completion_field_options.dart';
 export 'src/models/observability/chat_completion_fields.dart';
 export 'src/models/observability/chat_transcription_event.dart';
-export 'src/models/observability/conversation_payload.dart';
-export 'src/models/observability/conversation_source.dart';
+export 'src/models/observability/create_dataset_record_request.dart';
 export 'src/models/observability/dataset.dart';
 export 'src/models/observability/dataset_export.dart';
 export 'src/models/observability/dataset_import_task.dart';
@@ -234,6 +236,8 @@ export 'src/models/observability/dataset_import_tasks.dart';
 export 'src/models/observability/dataset_preview.dart';
 export 'src/models/observability/dataset_previews.dart';
 export 'src/models/observability/dataset_record.dart';
+export 'src/models/observability/dataset_record_payload.dart';
+export 'src/models/observability/dataset_record_source.dart';
 export 'src/models/observability/dataset_records.dart';
 export 'src/models/observability/delete_dataset_records_in_schema.dart';
 export 'src/models/observability/feed_result.dart';
@@ -288,15 +292,14 @@ export 'src/models/observability/post_dataset_import_from_explorer_in_schema.dar
 export 'src/models/observability/post_dataset_import_from_file_in_schema.dart';
 export 'src/models/observability/post_dataset_import_from_playground_in_schema.dart';
 export 'src/models/observability/post_dataset_in_schema.dart';
-export 'src/models/observability/post_dataset_record_in_schema.dart';
 export 'src/models/observability/post_dataset_record_judging_in_schema.dart';
 export 'src/models/observability/post_judge_in_schema.dart';
-export 'src/models/observability/put_dataset_record_payload_in_schema.dart';
 export 'src/models/observability/put_dataset_record_properties_in_schema.dart';
 export 'src/models/observability/put_judge_in_schema.dart';
 export 'src/models/observability/span_evaluations_request.dart';
 export 'src/models/observability/spans_request.dart';
 export 'src/models/observability/traces_request.dart';
+export 'src/models/observability/update_dataset_record_payload_request.dart';
 // --- Models: OCR ---
 export 'src/models/ocr/ocr_block.dart';
 export 'src/models/ocr/ocr_confidence_score.dart';
@@ -312,17 +315,63 @@ export 'src/models/ocr/ocr_response.dart';
 export 'src/models/ocr/ocr_table.dart';
 export 'src/models/ocr/ocr_table_format.dart';
 export 'src/models/ocr/ocr_usage_info.dart';
+// --- Models: Prompts (Beta) ---
+export 'src/models/prompts/create_prompt_request.dart';
+export 'src/models/prompts/create_prompt_version_request.dart';
+export 'src/models/prompts/create_prompt_version_response.dart';
+export 'src/models/prompts/list_prompt_versions_response.dart';
+export 'src/models/prompts/list_prompts_response.dart';
+export 'src/models/prompts/prompt.dart';
+export 'src/models/prompts/prompt_definition.dart';
+export 'src/models/prompts/prompt_variable.dart';
+export 'src/models/prompts/prompt_version.dart';
+export 'src/models/prompts/update_prompt_request.dart';
+export 'src/models/prompts/update_prompt_version_request.dart';
 // --- Models: RAG (Beta) ---
 export 'src/models/rag/create_ingestion_pipeline_configuration_request.dart';
-export 'src/models/rag/create_search_index_info_request.dart';
-export 'src/models/rag/create_vespa_schema_request.dart';
-export 'src/models/rag/create_vespa_search_index_info_request.dart';
 export 'src/models/rag/ingestion_pipeline_configuration.dart';
-export 'src/models/rag/search_index_response.dart';
+export 'src/models/rag/register_search_index_request.dart';
+export 'src/models/rag/register_search_index_response.dart';
+export 'src/models/rag/register_vespa_index_request.dart';
+export 'src/models/rag/register_vespa_schema_field_request.dart';
+export 'src/models/rag/register_vespa_schema_request.dart';
+export 'src/models/rag/schema_field_data_type.dart';
+export 'src/models/rag/schema_field_index.dart';
+export 'src/models/rag/schema_field_ranking_type.dart';
+export 'src/models/rag/schema_field_storage.dart';
+export 'src/models/rag/schema_metrics.dart';
+export 'src/models/rag/search_index_detail.dart';
+export 'src/models/rag/search_index_detail_schema.dart';
+export 'src/models/rag/search_index_retrievable.dart';
+export 'src/models/rag/search_index_schema_detail.dart';
+export 'src/models/rag/search_index_schema_field.dart';
+export 'src/models/rag/search_index_schema_sd_file.dart';
 export 'src/models/rag/search_index_status.dart';
+export 'src/models/rag/search_index_summary.dart';
+export 'src/models/rag/summary_field_response.dart';
+export 'src/models/rag/summary_language.dart';
+export 'src/models/rag/summary_status.dart';
+export 'src/models/rag/summary_stream_event.dart';
+export 'src/models/rag/update_index_metrics_request.dart';
 export 'src/models/rag/update_run_info.dart';
-export 'src/models/rag/vespa_schema_response.dart';
-export 'src/models/rag/vespa_search_index_info_response.dart';
+export 'src/models/rag/update_summary_request.dart';
+export 'src/models/rag/vespa_index_summary.dart';
+export 'src/models/rag/vespa_schema_summary.dart';
+// --- Models: Registry (Beta) ---
+export 'src/models/registry/alias_list.dart';
+export 'src/models/registry/registry_sharing_scope.dart';
+// --- Models: Skills (Beta) ---
+export 'src/models/skills/create_skill_request.dart';
+export 'src/models/skills/create_skill_version_request.dart';
+export 'src/models/skills/create_skill_version_response.dart';
+export 'src/models/skills/list_skill_versions_response.dart';
+export 'src/models/skills/list_skills_response.dart';
+export 'src/models/skills/skill.dart';
+export 'src/models/skills/skill_asset_content.dart';
+export 'src/models/skills/skill_definition.dart';
+export 'src/models/skills/skill_version.dart';
+export 'src/models/skills/update_skill_request.dart';
+export 'src/models/skills/update_skill_version_request.dart';
 // --- Models: Tools ---
 export 'src/models/tools/connector_auth.dart';
 export 'src/models/tools/function_call.dart';
@@ -332,6 +381,11 @@ export 'src/models/tools/tool_call.dart';
 export 'src/models/tools/tool_call_confirmation.dart';
 export 'src/models/tools/tool_choice.dart';
 export 'src/models/tools/tool_configuration.dart';
+// --- Models: Users (Beta) ---
+export 'src/models/users/user_identity.dart';
+export 'src/models/users/user_identity_api_key.dart';
+export 'src/models/users/user_identity_organization.dart';
+export 'src/models/users/user_identity_workspace.dart';
 // --- Models: Workflows (Beta) ---
 export 'src/models/workflows/activity_task_completed_attributes_response.dart';
 export 'src/models/workflows/activity_task_completed_response.dart';
@@ -344,6 +398,7 @@ export 'src/models/workflows/activity_task_started_response.dart';
 export 'src/models/workflows/batch_execution_body.dart';
 export 'src/models/workflows/batch_execution_response.dart';
 export 'src/models/workflows/batch_execution_result.dart';
+export 'src/models/workflows/create_deployment_request.dart';
 export 'src/models/workflows/custom_task_canceled_attributes.dart';
 export 'src/models/workflows/custom_task_canceled_response.dart';
 export 'src/models/workflows/custom_task_completed_attributes_response.dart';
@@ -356,11 +411,19 @@ export 'src/models/workflows/custom_task_started_attributes_response.dart';
 export 'src/models/workflows/custom_task_started_response.dart';
 export 'src/models/workflows/custom_task_timed_out_attributes.dart';
 export 'src/models/workflows/custom_task_timed_out_response.dart';
+export 'src/models/workflows/deployment_build_state.dart';
 export 'src/models/workflows/deployment_detail_response.dart';
 export 'src/models/workflows/deployment_list_response.dart';
 export 'src/models/workflows/deployment_location.dart';
+export 'src/models/workflows/deployment_log_record.dart';
+export 'src/models/workflows/deployment_log_search_response.dart';
+export 'src/models/workflows/deployment_observed_state.dart';
+export 'src/models/workflows/deployment_resource_config.dart';
+export 'src/models/workflows/deployment_resource_config_update.dart';
 export 'src/models/workflows/deployment_response.dart';
 export 'src/models/workflows/deployment_worker_response.dart';
+export 'src/models/workflows/deployment_worker_spec_input.dart';
+export 'src/models/workflows/deployment_worker_spec_response.dart';
 export 'src/models/workflows/encoded_payload_options.dart';
 export 'src/models/workflows/encrypted_patch_value.dart';
 export 'src/models/workflows/event_progress_status.dart';
@@ -368,6 +431,7 @@ export 'src/models/workflows/event_source.dart';
 export 'src/models/workflows/event_type.dart';
 export 'src/models/workflows/execution_log_record.dart';
 export 'src/models/workflows/execution_log_search_response.dart';
+export 'src/models/workflows/execution_trace_info_response.dart';
 export 'src/models/workflows/failure.dart';
 export 'src/models/workflows/json_patch_add.dart';
 export 'src/models/workflows/json_patch_append.dart';
@@ -378,6 +442,7 @@ export 'src/models/workflows/json_patch_replace.dart';
 export 'src/models/workflows/json_payload_response.dart';
 export 'src/models/workflows/list_workflow_event_response.dart';
 export 'src/models/workflows/location_type.dart';
+export 'src/models/workflows/managed_deployment_response.dart';
 export 'src/models/workflows/network_encoded_input.dart';
 export 'src/models/workflows/partial_schedule_definition.dart';
 export 'src/models/workflows/query_definition.dart';
@@ -414,6 +479,7 @@ export 'src/models/workflows/tempo_trace_scope_span.dart';
 export 'src/models/workflows/tempo_trace_span.dart';
 export 'src/models/workflows/time_series_metric.dart';
 export 'src/models/workflows/update_definition.dart';
+export 'src/models/workflows/update_deployment_request.dart';
 export 'src/models/workflows/update_invocation_body.dart';
 export 'src/models/workflows/update_workflow_response.dart';
 export 'src/models/workflows/workflow.dart';
@@ -471,6 +537,7 @@ export 'src/models/workflows/workflow_unarchive_response.dart';
 export 'src/models/workflows/workflow_update_request.dart';
 export 'src/models/workflows/workflow_update_response.dart';
 export 'src/models/workflows/workflow_with_worker_status.dart';
+export 'src/models/workflows/workflows_worker_spec_update.dart';
 // --- Utils ---
 export 'src/utils/job_poller.dart';
 export 'src/utils/paginator.dart';

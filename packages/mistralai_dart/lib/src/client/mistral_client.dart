@@ -21,7 +21,10 @@ import '../resources/models_resource.dart';
 import '../resources/moderations_resource.dart';
 import '../resources/observability/observability_resource.dart';
 import '../resources/ocr_resource.dart';
+import '../resources/prompts/prompts_resource.dart';
 import '../resources/rag/rag_resource.dart';
+import '../resources/skills/skills_resource.dart';
+import '../resources/users/users_resource.dart';
 import '../resources/workflows/workflows_resource.dart';
 import 'config.dart';
 import 'interceptor_chain.dart';
@@ -50,6 +53,9 @@ import 'retry_wrapper.dart';
 /// - [connectors] - MCP connectors (Beta)
 /// - [libraries] - Document libraries for RAG (Beta)
 /// - [observability] - Observability: campaigns, datasets, judges (Beta)
+/// - [prompts] - Registered prompt templates (Beta)
+/// - [skills] - Registered reusable model instructions (Beta)
+/// - [users] - Current authenticated user identity (Beta)
 /// - [rag] - RAG ingestion pipelines and search indexes (Beta)
 /// - [workflows] - Workflow execution, scheduling, management (Beta)
 /// - [models] - Model listing and management
@@ -172,6 +178,15 @@ class MistralClient {
 
   /// Resource for observability operations (Beta).
   late final ObservabilityResource observability;
+
+  /// Resource for registered prompt templates (Beta).
+  late final PromptsResource prompts;
+
+  /// Resource for registered reusable model instructions (Beta).
+  late final SkillsResource skills;
+
+  /// Resource for the current authenticated user identity (Beta).
+  late final UsersResource users;
 
   /// Resource for RAG ingestion pipelines and search indexes (Beta).
   late final RagResource rag;
@@ -345,6 +360,30 @@ class MistralClient {
     );
 
     observability = ObservabilityResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    prompts = PromptsResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    skills = SkillsResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    users = UsersResource(
       config: this.config,
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,

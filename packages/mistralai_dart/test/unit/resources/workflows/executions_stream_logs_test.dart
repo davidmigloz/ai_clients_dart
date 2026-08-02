@@ -11,10 +11,12 @@ import 'package:test/test.dart';
 void main() {
   group('ExecutionsResource.streamLogs', () {
     Uri? capturedUrl;
+    Map<String, String>? capturedHeaders;
 
     MistralClient streamingClient(List<String> sseLines) {
       final mockClient = MockClient.streaming((request, _) async {
         capturedUrl = request.url;
+        capturedHeaders = request.headers;
         return http.StreamedResponse(
           Stream.fromIterable(sseLines.map(utf8.encode)),
           200,
@@ -57,6 +59,21 @@ void main() {
       expect(capturedUrl?.queryParameters['run_id'], 'run-1');
       expect(capturedUrl?.queryParameters['after'], 'now');
     });
+
+    test(
+      'sends lastEventId as both query param and Last-Event-ID header',
+      () async {
+        final client = streamingClient(['data: [DONE]\n\n']);
+        addTearDown(client.close);
+
+        await client.workflows.executions
+            .streamLogs(executionId: 'exec-1', lastEventId: 'evt-42')
+            .toList();
+
+        expect(capturedUrl?.queryParameters['last_event_id'], 'evt-42');
+        expect(capturedHeaders?['Last-Event-ID'], 'evt-42');
+      },
+    );
 
     test('error event raises StreamException', () async {
       final errorPayload = jsonEncode({'error': 'internal', 'reason': 'boom'});

@@ -2,8 +2,8 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
-import 'conversation_payload.dart';
-import 'conversation_source.dart';
+import 'dataset_record_payload.dart';
+import 'dataset_record_source.dart';
 
 /// A record within an observability dataset.
 @immutable
@@ -23,14 +23,14 @@ class DatasetRecord {
   /// The dataset this record belongs to.
   final String datasetId;
 
-  /// The conversation payload.
-  final ConversationPayload payload;
+  /// The record's payload.
+  final DatasetRecordPayload payload;
 
   /// Additional properties (free-form).
   final Map<String, dynamic> properties;
 
-  /// Source of the conversation.
-  final ConversationSource source;
+  /// Source of the record.
+  final DatasetRecordSource source;
 
   /// Creates a [DatasetRecord].
   DatasetRecord({
@@ -57,11 +57,11 @@ class DatasetRecord {
         ? DateTime.tryParse(json['deleted_at'] as String)
         : null,
     datasetId: json['dataset_id'] as String? ?? '',
-    payload: ConversationPayload.fromJson(
+    payload: DatasetRecordPayload.fromJson(
       json['payload'] as Map<String, dynamic>? ?? {},
     ),
     properties: Map<String, dynamic>.from(json['properties'] as Map? ?? {}),
-    source: ConversationSource.fromJson(json['source'] as String?),
+    source: DatasetRecordSource.fromJson(json['source'] as String?),
   );
 
   /// Converts to JSON.
@@ -83,9 +83,9 @@ class DatasetRecord {
     DateTime? updatedAt,
     Object? deletedAt = unsetCopyWithValue,
     String? datasetId,
-    ConversationPayload? payload,
+    DatasetRecordPayload? payload,
     Map<String, dynamic>? properties,
-    ConversationSource? source,
+    DatasetRecordSource? source,
   }) {
     return DatasetRecord(
       id: id ?? this.id,

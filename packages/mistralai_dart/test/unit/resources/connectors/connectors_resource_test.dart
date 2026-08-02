@@ -47,7 +47,7 @@ void main() {
           name: 'my_connector',
           description: 'desc',
           server: 'https://mcp.example.com',
-          visibility: ResourceVisibility.sharedOrg,
+          visibility: PublicResourceVisibility.sharedOrg,
         ),
       );
 
@@ -57,7 +57,6 @@ void main() {
         'name': 'my_connector',
         'description': 'desc',
         'server': 'https://mcp.example.com',
-        'protocol': 'mcp',
         'visibility': 'shared_org',
       });
       expect(result.id, 'c-1');
@@ -347,6 +346,52 @@ void main() {
       expect(captured.method, 'POST');
       expect(captured.url.path, '/v1/connectors/c-1/user/deactivate');
       expect(result.message, 'deactivated');
+    });
+
+    test(
+      'deleteAllUserCredentials DELETEs the user credentials path',
+      () async {
+        final client = clientReturning({'message': 'all removed'});
+        addTearDown(client.close);
+
+        final result = await client.connectors.deleteAllUserCredentials(
+          connectorIdOrName: 'c-1',
+        );
+
+        expect(captured.method, 'DELETE');
+        expect(captured.url.path, '/v1/connectors/c-1/user/credentials');
+        expect(result.message, 'all removed');
+      },
+    );
+
+    test('share PUTs to the share path with no request body', () async {
+      final client = clientReturning({'message': 'shared'});
+      addTearDown(client.close);
+
+      final result = await client.connectors.share(connectorId: 'c-1');
+
+      expect(captured.method, 'PUT');
+      expect(captured.url.path, '/v1/connectors/c-1/share');
+      expect(captured.body, isEmpty);
+      expect(result.message, 'shared');
+    });
+
+    test('guards against a closed client', () async {
+      final client = clientReturning({'message': 'shared'})..close();
+
+      // These are regular `async` methods: per Dart semantics a throw
+      // before the first `await` still completes the returned Future with
+      // the error rather than throwing synchronously at the call site, so
+      // this is checked by awaiting the Future, not via `throwsStateError`
+      // on the call expression itself.
+      await expectLater(
+        client.connectors.share(connectorId: 'c-1'),
+        throwsStateError,
+      );
+      await expectLater(
+        client.connectors.deleteAllUserCredentials(connectorIdOrName: 'c-1'),
+        throwsStateError,
+      );
     });
   });
 }

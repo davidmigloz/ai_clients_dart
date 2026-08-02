@@ -18,6 +18,7 @@ void main() {
         expect(model.defaultModelTemperature, isNull);
         expect(model.type, isNull);
         expect(model.capabilities, const ModelCapabilities());
+        expect(model.internal, isFalse);
       });
 
       test('creates with all fields', () {
@@ -42,6 +43,7 @@ void main() {
           defaultModelTemperature: 0.7,
           type: 'base',
           capabilities: capabilities,
+          internal: true,
         );
 
         expect(model.id, 'mistral-large');
@@ -55,6 +57,7 @@ void main() {
         expect(model.defaultModelTemperature, 0.7);
         expect(model.type, 'base');
         expect(model.capabilities, capabilities);
+        expect(model.internal, isTrue);
       });
     });
 
@@ -80,6 +83,7 @@ void main() {
             'classification': false,
             'audio_transcription': false,
           },
+          'internal': true,
         };
 
         final model = Model.fromJson(json);
@@ -101,6 +105,7 @@ void main() {
         expect(model.capabilities.vision, isTrue);
         expect(model.capabilities.classification, isFalse);
         expect(model.capabilities.audioTranscription, isFalse);
+        expect(model.internal, isTrue);
       });
 
       test('handles missing optional fields', () {
@@ -119,6 +124,7 @@ void main() {
         expect(model.defaultModelTemperature, isNull);
         expect(model.type, isNull);
         expect(model.capabilities, const ModelCapabilities());
+        expect(model.internal, isFalse);
       });
 
       test('handles missing required fields with defaults', () {
@@ -162,6 +168,7 @@ void main() {
         expect(json.containsKey('default_model_temperature'), isFalse);
         expect(json.containsKey('type'), isFalse);
         expect(json['capabilities'], isA<Map<String, dynamic>>());
+        expect(json['internal'], isFalse);
       });
 
       test('serializes all fields', () {
@@ -177,6 +184,7 @@ void main() {
           defaultModelTemperature: 0.7,
           type: 'base',
           capabilities: ModelCapabilities(completionChat: true, vision: false),
+          internal: true,
         );
         final json = model.toJson();
 
@@ -194,6 +202,7 @@ void main() {
         final caps = json['capabilities'] as Map<String, dynamic>;
         expect(caps['completion_chat'], isTrue);
         expect(caps['vision'], isFalse);
+        expect(json['internal'], isTrue);
       });
     });
 
@@ -227,6 +236,7 @@ void main() {
         expect(copy.defaultModelTemperature, original.defaultModelTemperature);
         expect(copy.type, original.type);
         expect(copy.capabilities, original.capabilities);
+        expect(copy.internal, original.internal);
       });
 
       test('copies with all changes', () {
@@ -242,6 +252,7 @@ void main() {
           defaultModelTemperature: 0.9,
           type: 'fine-tuned',
           capabilities: const ModelCapabilities(vision: true),
+          internal: true,
         );
 
         expect(copy.id, 'mistral-large');
@@ -255,6 +266,7 @@ void main() {
         expect(copy.defaultModelTemperature, 0.9);
         expect(copy.type, 'fine-tuned');
         expect(copy.capabilities.vision, isTrue);
+        expect(copy.internal, isTrue);
       });
 
       test('copies with partial changes', () {
@@ -330,6 +342,17 @@ void main() {
 
         expect(model1, isNot(equals(model2)));
       });
+
+      test('not equal with different internal', () {
+        const model1 = Model(id: 'mistral-small', object: 'model');
+        const model2 = Model(
+          id: 'mistral-small',
+          object: 'model',
+          internal: true,
+        );
+
+        expect(model1, isNot(equals(model2)));
+      });
     });
 
     group('hashCode', () {
@@ -364,6 +387,7 @@ void main() {
       expect(str, contains('1700000000'));
       expect(str, contains('mistralai'));
       expect(str, contains('Mistral Large'));
+      expect(str, contains('internal: false'));
     });
 
     test('round-trip preserves all data through JSON', () {
@@ -387,6 +411,7 @@ void main() {
           classification: false,
           audioTranscription: false,
         ),
+        internal: true,
       );
 
       final json = original.toJson();
@@ -407,6 +432,7 @@ void main() {
       );
       expect(restored.type, original.type);
       expect(restored.capabilities, original.capabilities);
+      expect(restored.internal, original.internal);
     });
   });
 
@@ -421,6 +447,7 @@ void main() {
           'vision': true,
           'classification': false,
           'audio_transcription': true,
+          'unified_resources': true,
         };
 
         final caps = ModelCapabilities.fromJson(json);
@@ -432,6 +459,7 @@ void main() {
         expect(caps.vision, isTrue);
         expect(caps.classification, isFalse);
         expect(caps.audioTranscription, isTrue);
+        expect(caps.unifiedResources, isTrue);
       });
 
       test('handles empty JSON', () {
@@ -444,6 +472,7 @@ void main() {
         expect(caps.vision, isNull);
         expect(caps.classification, isNull);
         expect(caps.audioTranscription, isNull);
+        expect(caps.unifiedResources, isNull);
       });
     });
 
@@ -457,6 +486,7 @@ void main() {
           vision: true,
           classification: false,
           audioTranscription: true,
+          unifiedResources: true,
         );
 
         final json = caps.toJson();
@@ -468,6 +498,7 @@ void main() {
         expect(json['vision'], isTrue);
         expect(json['classification'], isFalse);
         expect(json['audio_transcription'], isTrue);
+        expect(json['unified_resources'], isTrue);
       });
 
       test('omits null fields', () {
@@ -482,6 +513,7 @@ void main() {
         expect(json.containsKey('vision'), isFalse);
         expect(json.containsKey('classification'), isFalse);
         expect(json.containsKey('audio_transcription'), isFalse);
+        expect(json.containsKey('unified_resources'), isFalse);
       });
     });
 
@@ -496,6 +528,13 @@ void main() {
       test('not equal with different fields', () {
         const caps1 = ModelCapabilities(completionChat: true);
         const caps2 = ModelCapabilities(completionChat: false);
+
+        expect(caps1, isNot(equals(caps2)));
+      });
+
+      test('not equal with different unifiedResources', () {
+        const caps1 = ModelCapabilities(unifiedResources: true);
+        const caps2 = ModelCapabilities(unifiedResources: false);
 
         expect(caps1, isNot(equals(caps2)));
       });
@@ -514,6 +553,7 @@ void main() {
         completionFim: false,
         functionCalling: true,
         vision: true,
+        unifiedResources: true,
       );
 
       final str = caps.toString();
@@ -521,6 +561,7 @@ void main() {
       expect(str, contains('completionFim: false'));
       expect(str, contains('functionCalling: true'));
       expect(str, contains('vision: true'));
+      expect(str, contains('unifiedResources: true'));
     });
   });
 }

@@ -12,7 +12,13 @@ class WorkflowRegistrationWithWorkerStatus {
   final String id;
 
   /// The deployment identifier.
+  ///
+  /// Deprecated: use [deploymentName] instead. Will be removed in a future
+  /// release.
   final String? deploymentId;
+
+  /// The name of the deployment this registration belongs to.
+  final String? deploymentName;
 
   /// The task queue.
   ///
@@ -39,6 +45,7 @@ class WorkflowRegistrationWithWorkerStatus {
   const WorkflowRegistrationWithWorkerStatus({
     required this.id,
     this.deploymentId,
+    this.deploymentName,
     @Deprecated('task_queue is deprecated in the Mistral API') this.taskQueue,
     required this.definition,
     required this.workflowId,
@@ -48,28 +55,54 @@ class WorkflowRegistrationWithWorkerStatus {
   });
 
   /// Creates a [WorkflowRegistrationWithWorkerStatus] from JSON.
+  ///
+  /// Throws a [FormatException] if a required field is missing.
   factory WorkflowRegistrationWithWorkerStatus.fromJson(
     Map<String, dynamic> json,
-  ) => WorkflowRegistrationWithWorkerStatus(
-    id: json['id'] as String? ?? '',
-    deploymentId: json['deployment_id'] as String?,
-    taskQueue: json['task_queue'] as String?,
-    definition: WorkflowCodeDefinition.fromJson(
-      json['definition'] as Map<String, dynamic>,
-    ),
-    workflowId: json['workflow_id'] as String? ?? '',
-    active: json['active'] as bool? ?? false,
-    compatibleWithChatAssistant:
-        json['compatible_with_chat_assistant'] as bool? ?? false,
-    workflow: json['workflow'] != null
-        ? Workflow.fromJson(json['workflow'] as Map<String, dynamic>)
-        : null,
-  );
+  ) {
+    final id = json['id'] as String?;
+    if (id == null) {
+      throw const FormatException(
+        'WorkflowRegistrationWithWorkerStatus: missing required field "id"',
+      );
+    }
+    final workflowId = json['workflow_id'] as String?;
+    if (workflowId == null) {
+      throw const FormatException(
+        'WorkflowRegistrationWithWorkerStatus: missing required field '
+        '"workflow_id"',
+      );
+    }
+    final active = json['active'] as bool?;
+    if (active == null) {
+      throw const FormatException(
+        'WorkflowRegistrationWithWorkerStatus: missing required field '
+        '"active"',
+      );
+    }
+    return WorkflowRegistrationWithWorkerStatus(
+      id: id,
+      deploymentId: json['deployment_id'] as String?,
+      deploymentName: json['deployment_name'] as String?,
+      taskQueue: json['task_queue'] as String?,
+      definition: WorkflowCodeDefinition.fromJson(
+        json['definition'] as Map<String, dynamic>,
+      ),
+      workflowId: workflowId,
+      active: active,
+      compatibleWithChatAssistant:
+          json['compatible_with_chat_assistant'] as bool? ?? false,
+      workflow: json['workflow'] != null
+          ? Workflow.fromJson(json['workflow'] as Map<String, dynamic>)
+          : null,
+    );
+  }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'id': id,
     if (deploymentId != null) 'deployment_id': deploymentId,
+    if (deploymentName != null) 'deployment_name': deploymentName,
     if (taskQueue != null) 'task_queue': taskQueue,
     'definition': definition.toJson(),
     'workflow_id': workflowId,
@@ -82,6 +115,7 @@ class WorkflowRegistrationWithWorkerStatus {
   WorkflowRegistrationWithWorkerStatus copyWith({
     String? id,
     Object? deploymentId = unsetCopyWithValue,
+    Object? deploymentName = unsetCopyWithValue,
     Object? taskQueue = unsetCopyWithValue,
     WorkflowCodeDefinition? definition,
     String? workflowId,
@@ -94,6 +128,9 @@ class WorkflowRegistrationWithWorkerStatus {
       deploymentId: deploymentId == unsetCopyWithValue
           ? this.deploymentId
           : deploymentId as String?,
+      deploymentName: deploymentName == unsetCopyWithValue
+          ? this.deploymentName
+          : deploymentName as String?,
       taskQueue: taskQueue == unsetCopyWithValue
           ? this.taskQueue
           : taskQueue as String?,
@@ -115,6 +152,7 @@ class WorkflowRegistrationWithWorkerStatus {
     if (runtimeType != other.runtimeType) return false;
     return id == other.id &&
         deploymentId == other.deploymentId &&
+        deploymentName == other.deploymentName &&
         taskQueue == other.taskQueue &&
         definition == other.definition &&
         workflowId == other.workflowId &&
@@ -127,6 +165,7 @@ class WorkflowRegistrationWithWorkerStatus {
   int get hashCode => Object.hash(
     id,
     deploymentId,
+    deploymentName,
     taskQueue,
     definition,
     workflowId,
@@ -140,6 +179,7 @@ class WorkflowRegistrationWithWorkerStatus {
       'WorkflowRegistrationWithWorkerStatus('
       'id: $id, '
       'deploymentId: $deploymentId, '
+      'deploymentName: $deploymentName, '
       'taskQueue: $taskQueue, '
       'definition: $definition, '
       'workflowId: $workflowId, '

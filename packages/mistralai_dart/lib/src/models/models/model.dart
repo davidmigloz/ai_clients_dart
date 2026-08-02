@@ -39,6 +39,9 @@ class Model {
   /// The capabilities of this model.
   final ModelCapabilities capabilities;
 
+  /// Whether this model is internal-only.
+  final bool internal;
+
   /// Creates a [Model].
   const Model({
     required this.id,
@@ -52,6 +55,7 @@ class Model {
     this.defaultModelTemperature,
     this.type,
     this.capabilities = const ModelCapabilities(),
+    this.internal = false,
   });
 
   /// Creates a [Model] from JSON.
@@ -72,6 +76,7 @@ class Model {
             json['capabilities'] as Map<String, dynamic>,
           )
         : const ModelCapabilities(),
+    internal: json['internal'] as bool? ?? false,
   );
 
   /// Creates a copy with the given fields replaced.
@@ -87,6 +92,7 @@ class Model {
     Object? defaultModelTemperature = unsetCopyWithValue,
     Object? type = unsetCopyWithValue,
     ModelCapabilities? capabilities,
+    bool? internal,
   }) => Model(
     id: id ?? this.id,
     object: object ?? this.object,
@@ -107,6 +113,7 @@ class Model {
         : defaultModelTemperature as double?,
     type: type == unsetCopyWithValue ? this.type : type as String?,
     capabilities: capabilities ?? this.capabilities,
+    internal: internal ?? this.internal,
   );
 
   /// Converts to JSON.
@@ -123,6 +130,7 @@ class Model {
       'default_model_temperature': defaultModelTemperature,
     if (type != null) 'type': type,
     'capabilities': capabilities.toJson(),
+    'internal': internal,
   };
 
   @override
@@ -140,7 +148,8 @@ class Model {
           listsEqual(aliases, other.aliases) &&
           defaultModelTemperature == other.defaultModelTemperature &&
           type == other.type &&
-          capabilities == other.capabilities;
+          capabilities == other.capabilities &&
+          internal == other.internal;
 
   @override
   int get hashCode => Object.hash(
@@ -155,6 +164,7 @@ class Model {
     defaultModelTemperature,
     type,
     capabilities,
+    internal,
   );
 
   @override
@@ -163,7 +173,7 @@ class Model {
       'ownedBy: $ownedBy, name: $name, description: $description, '
       'maxContextLength: $maxContextLength, aliases: $aliases, '
       'defaultModelTemperature: $defaultModelTemperature, '
-      'type: $type, capabilities: $capabilities)';
+      'type: $type, capabilities: $capabilities, internal: $internal)';
 }
 
 /// Capabilities of a model.
@@ -208,6 +218,9 @@ class ModelCapabilities {
   /// Whether the model supports OCR.
   final bool? ocr;
 
+  /// Whether the model supports unified resources.
+  final bool? unifiedResources;
+
   /// Creates [ModelCapabilities].
   const ModelCapabilities({
     this.completionChat,
@@ -223,6 +236,7 @@ class ModelCapabilities {
     this.audio,
     this.moderation,
     this.ocr,
+    this.unifiedResources,
   });
 
   /// Creates [ModelCapabilities] from JSON.
@@ -242,6 +256,7 @@ class ModelCapabilities {
         audio: json['audio'] as bool?,
         moderation: json['moderation'] as bool?,
         ocr: json['ocr'] as bool?,
+        unifiedResources: json['unified_resources'] as bool?,
       );
 
   /// Converts to JSON.
@@ -260,6 +275,7 @@ class ModelCapabilities {
     if (audio != null) 'audio': audio,
     if (moderation != null) 'moderation': moderation,
     if (ocr != null) 'ocr': ocr,
+    if (unifiedResources != null) 'unified_resources': unifiedResources,
   };
 
   /// Creates a copy with replaced values.
@@ -277,6 +293,7 @@ class ModelCapabilities {
     Object? audio = unsetCopyWithValue,
     Object? moderation = unsetCopyWithValue,
     Object? ocr = unsetCopyWithValue,
+    Object? unifiedResources = unsetCopyWithValue,
   }) => ModelCapabilities(
     completionChat: completionChat == unsetCopyWithValue
         ? this.completionChat
@@ -311,6 +328,9 @@ class ModelCapabilities {
         ? this.moderation
         : moderation as bool?,
     ocr: ocr == unsetCopyWithValue ? this.ocr : ocr as bool?,
+    unifiedResources: unifiedResources == unsetCopyWithValue
+        ? this.unifiedResources
+        : unifiedResources as bool?,
   );
 
   @override
@@ -330,7 +350,8 @@ class ModelCapabilities {
           reasoning == other.reasoning &&
           audio == other.audio &&
           moderation == other.moderation &&
-          ocr == other.ocr;
+          ocr == other.ocr &&
+          unifiedResources == other.unifiedResources;
 
   @override
   int get hashCode => Object.hash(
@@ -347,6 +368,7 @@ class ModelCapabilities {
     audio,
     moderation,
     ocr,
+    unifiedResources,
   );
 
   @override
@@ -364,5 +386,6 @@ class ModelCapabilities {
       'reasoning: $reasoning, '
       'audio: $audio, '
       'moderation: $moderation, '
-      'ocr: $ocr)';
+      'ocr: $ocr, '
+      'unifiedResources: $unifiedResources)';
 }
