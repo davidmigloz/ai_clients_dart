@@ -11,6 +11,7 @@ void main() {
       expect(request.refAudio, isNull);
       expect(request.responseFormat, isNull);
       expect(request.stream, isNull);
+      expect(request.promptCacheKey, isNull);
     });
 
     test('constructor with all fields', () {
@@ -21,6 +22,7 @@ void main() {
         refAudio: 'base64audio',
         responseFormat: SpeechOutputFormat.mp3,
         stream: true,
+        promptCacheKey: 'cache-key-1',
       );
       expect(request.input, 'Hello world');
       expect(request.model, 'mistral-tts-latest');
@@ -28,6 +30,7 @@ void main() {
       expect(request.refAudio, 'base64audio');
       expect(request.responseFormat, SpeechOutputFormat.mp3);
       expect(request.stream, isTrue);
+      expect(request.promptCacheKey, 'cache-key-1');
     });
 
     test('fromJson with all fields', () {
@@ -38,6 +41,7 @@ void main() {
         'ref_audio': 'base64audio',
         'response_format': 'mp3',
         'stream': true,
+        'prompt_cache_key': 'cache-key-1',
       });
       expect(request.input, 'Hello world');
       expect(request.model, 'mistral-tts-latest');
@@ -45,6 +49,7 @@ void main() {
       expect(request.refAudio, 'base64audio');
       expect(request.responseFormat, SpeechOutputFormat.mp3);
       expect(request.stream, isTrue);
+      expect(request.promptCacheKey, 'cache-key-1');
     });
 
     test('fromJson with required fields only', () {
@@ -55,6 +60,7 @@ void main() {
       expect(request.refAudio, isNull);
       expect(request.responseFormat, isNull);
       expect(request.stream, isNull);
+      expect(request.promptCacheKey, isNull);
     });
 
     test('toJson omits null fields', () {
@@ -66,6 +72,16 @@ void main() {
       expect(json.containsKey('ref_audio'), isFalse);
       expect(json.containsKey('response_format'), isFalse);
       expect(json.containsKey('stream'), isFalse);
+      expect(json.containsKey('prompt_cache_key'), isFalse);
+    });
+
+    test('toJson includes promptCacheKey when set', () {
+      const request = SpeechRequest(
+        input: 'Hello world',
+        promptCacheKey: 'cache-key-1',
+      );
+      final json = request.toJson();
+      expect(json['prompt_cache_key'], 'cache-key-1');
     });
 
     test('toJson serializes responseFormat as string value', () {
@@ -85,6 +101,7 @@ void main() {
         refAudio: 'base64audio',
         responseFormat: SpeechOutputFormat.wav,
         stream: false,
+        promptCacheKey: 'cache-key-1',
       );
       final copy = original.copyWith();
       expect(copy, original);
@@ -102,12 +119,14 @@ void main() {
         voiceId: 'voice-2',
         responseFormat: SpeechOutputFormat.opus,
         stream: true,
+        promptCacheKey: 'cache-key-2',
       );
       expect(copy.input, 'Goodbye');
       expect(copy.model, 'other-model');
       expect(copy.voiceId, 'voice-2');
       expect(copy.responseFormat, SpeechOutputFormat.opus);
       expect(copy.stream, isTrue);
+      expect(copy.promptCacheKey, 'cache-key-2');
     });
 
     test('copyWith can set nullable fields to null', () {
@@ -118,6 +137,7 @@ void main() {
         refAudio: 'base64audio',
         responseFormat: SpeechOutputFormat.mp3,
         stream: true,
+        promptCacheKey: 'cache-key-1',
       );
       final copy = original.copyWith(
         model: null,
@@ -125,6 +145,7 @@ void main() {
         refAudio: null,
         responseFormat: null,
         stream: null,
+        promptCacheKey: null,
       );
       expect(copy.input, 'Hello world');
       expect(copy.model, isNull);
@@ -132,6 +153,16 @@ void main() {
       expect(copy.refAudio, isNull);
       expect(copy.responseFormat, isNull);
       expect(copy.stream, isNull);
+      expect(copy.promptCacheKey, isNull);
+    });
+
+    test('copyWith preserves promptCacheKey when not specified', () {
+      const original = SpeechRequest(
+        input: 'Hello world',
+        promptCacheKey: 'cache-key-1',
+      );
+      final copy = original.copyWith(input: 'Goodbye');
+      expect(copy.promptCacheKey, 'cache-key-1');
     });
 
     test('equality and hashCode', () {
@@ -139,28 +170,43 @@ void main() {
         input: 'Hello',
         model: 'model-1',
         responseFormat: SpeechOutputFormat.mp3,
+        promptCacheKey: 'cache-key-1',
       );
       const b = SpeechRequest(
         input: 'Hello',
         model: 'model-1',
         responseFormat: SpeechOutputFormat.mp3,
+        promptCacheKey: 'cache-key-1',
       );
       const c = SpeechRequest(
         input: 'Different',
         model: 'model-1',
         responseFormat: SpeechOutputFormat.mp3,
+        promptCacheKey: 'cache-key-1',
+      );
+      const d = SpeechRequest(
+        input: 'Hello',
+        model: 'model-1',
+        responseFormat: SpeechOutputFormat.mp3,
+        promptCacheKey: 'cache-key-2',
       );
       expect(a, equals(b));
       expect(a.hashCode, b.hashCode);
       expect(a, isNot(equals(c)));
+      expect(a, isNot(equals(d)));
     });
 
     test('toString', () {
-      const request = SpeechRequest(input: 'Hello', model: 'model-1');
+      const request = SpeechRequest(
+        input: 'Hello',
+        model: 'model-1',
+        promptCacheKey: 'cache-key-1',
+      );
       final str = request.toString();
       expect(str, contains('SpeechRequest'));
       expect(str, contains('Hello'));
       expect(str, contains('model-1'));
+      expect(str, contains('promptCacheKey: cache-key-1'));
     });
 
     group('extra field', () {

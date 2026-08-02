@@ -535,6 +535,57 @@ class ConnectorsResource extends ResourceBase {
     return MessageResponse.fromJson(responseBody);
   }
 
+  /// Deletes all credentials configured at the user level for a connector.
+  ///
+  /// Maps to the official `connectors.delete_all_user_credentials`
+  /// (`DELETE /v1/connectors/{connector_id_or_name}/user/credentials`).
+  ///
+  /// [connectorIdOrName] is the connector ID or name.
+  Future<MessageResponse> deleteAllUserCredentials({
+    required String connectorIdOrName,
+  }) async {
+    final url = requestBuilder.buildUrl(
+      '/v1/connectors/$connectorIdOrName/user/credentials',
+    );
+    final headers = requestBuilder.buildHeaders();
+
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+
+    final response = await interceptorChain.execute(httpRequest);
+    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+    return MessageResponse.fromJson(responseBody);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Sharing
+  // ---------------------------------------------------------------------------
+
+  /// Shares a private, user-owned connector with the current workspace.
+  ///
+  /// Maps to the official `connectors.share`
+  /// (`PUT /v1/connectors/{connector_id}/share`).
+  ///
+  /// This transfers ownership of the connector to the current workspace,
+  /// making it available to all workspace members. This action is
+  /// irreversible: once shared, the connector belongs to the workspace and
+  /// can no longer be used privately across other workspaces. Any
+  /// authentication flows that rely on the original owner's identity (e.g.
+  /// OAuth on-behalf-of) will be affected and must be reconfigured after
+  /// sharing. Only the connector's creator can call this; it requires the
+  /// `ShareConnectorToWorkspace` workspace permission.
+  ///
+  /// [connectorId] is the unique identifier of the connector to share.
+  Future<MessageResponse> share({required String connectorId}) async {
+    final url = requestBuilder.buildUrl('/v1/connectors/$connectorId/share');
+    final headers = requestBuilder.buildHeaders();
+
+    final httpRequest = http.Request('PUT', url)..headers.addAll(headers);
+
+    final response = await interceptorChain.execute(httpRequest);
+    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+    return MessageResponse.fromJson(responseBody);
+  }
+
   // ---------------------------------------------------------------------------
   // Activation
   // ---------------------------------------------------------------------------

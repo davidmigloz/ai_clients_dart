@@ -10,6 +10,7 @@ import 'connector_tool.dart';
 import 'pagination_response.dart';
 import 'public_authentication_method.dart';
 import 'public_connection_config.dart';
+import 'public_execution_env.dart';
 import 'resource_type.dart';
 import 'resource_visibility.dart';
 
@@ -94,6 +95,13 @@ class Connector {
   /// The public connection configuration.
   final PublicConnectionConfig? connectionConfig;
 
+  /// The ID of the connector's creator.
+  final String? creatorId;
+
+  /// The credentials-free execution environment projection for this
+  /// connector, when available.
+  final PublicExecutionEnv? executionEnv;
+
   /// Creates a [Connector].
   const Connector({
     required this.id,
@@ -121,6 +129,8 @@ class Connector {
     this.tools,
     this.systemPromptRoute,
     this.connectionConfig,
+    this.creatorId,
+    this.executionEnv,
   });
 
   /// Creates a [Connector] from JSON.
@@ -175,6 +185,12 @@ class Connector {
             json['connection_config'] as Map<String, dynamic>,
           )
         : null,
+    creatorId: json['creator_id'] as String?,
+    executionEnv: json['execution_env'] != null
+        ? PublicExecutionEnv.fromJson(
+            json['execution_env'] as Map<String, dynamic>,
+          )
+        : null,
   );
 
   /// Converts this connector to JSON.
@@ -214,6 +230,8 @@ class Connector {
     if (systemPromptRoute != null) 'system_prompt_route': systemPromptRoute,
     if (connectionConfig != null)
       'connection_config': connectionConfig!.toJson(),
+    if (creatorId != null) 'creator_id': creatorId,
+    if (executionEnv != null) 'execution_env': executionEnv!.toJson(),
   };
 
   /// Creates a copy with the given fields replaced.
@@ -245,6 +263,8 @@ class Connector {
     Object? tools = unsetCopyWithValue,
     Object? systemPromptRoute = unsetCopyWithValue,
     Object? connectionConfig = unsetCopyWithValue,
+    Object? creatorId = unsetCopyWithValue,
+    Object? executionEnv = unsetCopyWithValue,
   }) => Connector(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -293,6 +313,12 @@ class Connector {
     connectionConfig: connectionConfig == unsetCopyWithValue
         ? this.connectionConfig
         : connectionConfig as PublicConnectionConfig?,
+    creatorId: creatorId == unsetCopyWithValue
+        ? this.creatorId
+        : creatorId as String?,
+    executionEnv: executionEnv == unsetCopyWithValue
+        ? this.executionEnv
+        : executionEnv as PublicExecutionEnv?,
   );
 
   @override
@@ -324,7 +350,9 @@ class Connector {
           isAuthenticated == other.isAuthenticated &&
           listsEqual(tools, other.tools) &&
           systemPromptRoute == other.systemPromptRoute &&
-          connectionConfig == other.connectionConfig;
+          connectionConfig == other.connectionConfig &&
+          creatorId == other.creatorId &&
+          executionEnv == other.executionEnv;
 
   @override
   int get hashCode => Object.hashAll([
@@ -353,6 +381,8 @@ class Connector {
     listHash(tools),
     systemPromptRoute,
     connectionConfig,
+    creatorId,
+    executionEnv,
   ]);
 
   @override
@@ -385,7 +415,9 @@ class Connector {
       'isAuthenticated: $isAuthenticated, '
       'tools: ${tools == null ? 'null' : '${tools!.length} items'}, '
       'systemPromptRoute: $systemPromptRoute, '
-      'connectionConfig: $connectionConfig)';
+      'connectionConfig: $connectionConfig, '
+      'creatorId: $creatorId, '
+      'executionEnv: $executionEnv)';
 }
 
 /// A paginated list of connectors.

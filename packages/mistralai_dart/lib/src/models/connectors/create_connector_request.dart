@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import 'auth_data.dart';
-import 'resource_visibility.dart';
+import 'public_resource_visibility.dart';
 
 /// Request body for creating a connector.
 @immutable
@@ -18,17 +18,15 @@ class CreateConnectorRequest {
   /// The URL of the MCP server.
   final String server;
 
-  /// The connector protocol. Always "mcp".
-  final String protocol;
-
   /// An optional human-readable title for the connector.
   final String? title;
 
   /// The optional URL of the icon to associate with the connector.
   final String? iconUrl;
 
-  /// The connector visibility.
-  final ResourceVisibility? visibility;
+  /// The connector visibility. Defaults to `private` server-side when
+  /// omitted.
+  final PublicResourceVisibility? visibility;
 
   /// Optional organization-level headers to send to the MCP server.
   final Map<String, dynamic>? headers;
@@ -51,7 +49,6 @@ class CreateConnectorRequest {
     required this.name,
     required this.description,
     required this.server,
-    this.protocol = 'mcp',
     this.title,
     this.iconUrl,
     this.visibility,
@@ -68,11 +65,10 @@ class CreateConnectorRequest {
         name: json['name'] as String? ?? '',
         description: json['description'] as String? ?? '',
         server: json['server'] as String? ?? '',
-        protocol: json['protocol'] as String? ?? 'mcp',
         title: json['title'] as String?,
         iconUrl: json['icon_url'] as String?,
         visibility: json['visibility'] != null
-            ? ResourceVisibility.fromJson(json['visibility'] as String?)
+            ? PublicResourceVisibility.fromJson(json['visibility'] as String?)
             : null,
         headers: json['headers'] as Map<String, dynamic>?,
         authData: json['auth_data'] != null
@@ -89,7 +85,6 @@ class CreateConnectorRequest {
     'name': name,
     'description': description,
     'server': server,
-    'protocol': protocol,
     if (title != null) 'title': title,
     if (iconUrl != null) 'icon_url': iconUrl,
     if (visibility != null) 'visibility': visibility!.toJson(),
@@ -109,7 +104,6 @@ class CreateConnectorRequest {
     String? name,
     String? description,
     String? server,
-    String? protocol,
     Object? title = unsetCopyWithValue,
     Object? iconUrl = unsetCopyWithValue,
     Object? visibility = unsetCopyWithValue,
@@ -122,12 +116,11 @@ class CreateConnectorRequest {
     name: name ?? this.name,
     description: description ?? this.description,
     server: server ?? this.server,
-    protocol: protocol ?? this.protocol,
     title: title == unsetCopyWithValue ? this.title : title as String?,
     iconUrl: iconUrl == unsetCopyWithValue ? this.iconUrl : iconUrl as String?,
     visibility: visibility == unsetCopyWithValue
         ? this.visibility
-        : visibility as ResourceVisibility?,
+        : visibility as PublicResourceVisibility?,
     headers: headers == unsetCopyWithValue
         ? this.headers
         : headers as Map<String, dynamic>?,
@@ -153,7 +146,6 @@ class CreateConnectorRequest {
           name == other.name &&
           description == other.description &&
           server == other.server &&
-          protocol == other.protocol &&
           title == other.title &&
           iconUrl == other.iconUrl &&
           visibility == other.visibility &&
@@ -168,7 +160,6 @@ class CreateConnectorRequest {
     name,
     description,
     server,
-    protocol,
     title,
     iconUrl,
     visibility,
@@ -185,7 +176,6 @@ class CreateConnectorRequest {
       'name: $name, '
       'description: $description, '
       'server: $server, '
-      'protocol: $protocol, '
       'title: $title, '
       'iconUrl: $iconUrl, '
       'visibility: $visibility, '

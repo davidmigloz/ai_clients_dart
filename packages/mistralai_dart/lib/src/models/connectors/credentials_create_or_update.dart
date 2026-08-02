@@ -15,11 +15,15 @@ class CredentialsCreateOrUpdate {
   /// The credential data (headers, bearer token, etc.).
   final ConnectionCredentials? credentials;
 
+  /// An optional human-readable title for the credentials.
+  final String? title;
+
   /// Creates a [CredentialsCreateOrUpdate].
   const CredentialsCreateOrUpdate({
     required this.name,
     this.isDefault,
     this.credentials,
+    this.title,
   });
 
   /// Creates a [CredentialsCreateOrUpdate] from JSON.
@@ -32,6 +36,7 @@ class CredentialsCreateOrUpdate {
                 json['credentials'] as Map<String, dynamic>,
               )
             : null,
+        title: json['title'] as String?,
       );
 
   /// Converts this request to JSON.
@@ -39,6 +44,7 @@ class CredentialsCreateOrUpdate {
     'name': name,
     if (isDefault != null) 'is_default': isDefault,
     if (credentials != null) 'credentials': credentials!.toJson(),
+    if (title != null) 'title': title,
   };
 
   /// Creates a copy with the given fields replaced.
@@ -48,6 +54,7 @@ class CredentialsCreateOrUpdate {
     String? name,
     Object? isDefault = unsetCopyWithValue,
     Object? credentials = unsetCopyWithValue,
+    Object? title = unsetCopyWithValue,
   }) => CredentialsCreateOrUpdate(
     name: name ?? this.name,
     isDefault: isDefault == unsetCopyWithValue
@@ -56,6 +63,7 @@ class CredentialsCreateOrUpdate {
     credentials: credentials == unsetCopyWithValue
         ? this.credentials
         : credentials as ConnectionCredentials?,
+    title: title == unsetCopyWithValue ? this.title : title as String?,
   );
 
   @override
@@ -65,15 +73,17 @@ class CredentialsCreateOrUpdate {
           runtimeType == other.runtimeType &&
           name == other.name &&
           isDefault == other.isDefault &&
-          credentials == other.credentials;
+          credentials == other.credentials &&
+          title == other.title;
 
   @override
-  int get hashCode => Object.hash(name, isDefault, credentials);
+  int get hashCode => Object.hash(name, isDefault, credentials, title);
 
   @override
   String toString() =>
       'CredentialsCreateOrUpdate('
       'name: $name, '
       'isDefault: $isDefault, '
-      'credentials: ${credentials == null ? null : 'ConnectionCredentials([redacted])'})';
+      'credentials: ${credentials == null ? null : 'ConnectionCredentials([redacted])'}, '
+      'title: $title)';
 }

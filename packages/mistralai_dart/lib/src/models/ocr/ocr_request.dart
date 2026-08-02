@@ -33,7 +33,7 @@ class OcrRequest {
   /// Whether to return paragraph-level bounding boxes for all content blocks.
   ///
   /// When `true`, each processed [OcrPage] includes a `blocks` list of
-  /// [OcrBlock]s in reading order. Defaults to false.
+  /// [OcrBlock]s in reading order. Defaults to true.
   final bool? includeBlocks;
 
   /// Image limits for processing.

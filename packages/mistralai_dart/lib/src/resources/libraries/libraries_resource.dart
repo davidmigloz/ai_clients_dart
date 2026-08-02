@@ -83,17 +83,22 @@ class LibrariesResource extends ResourceBase {
 
   /// Lists all libraries.
   ///
-  /// [page] is the page number to retrieve (0-indexed).
+  /// [page] is the page number to retrieve (0-indexed). Deprecated: use
+  /// [pageToken] instead.
   /// [pageSize] is the number of libraries per page.
+  /// [pageToken] is a continuation token from a previous response's
+  /// `next_page_token`. Preferred over [page].
   /// [filterOwnedByMe] filters to libraries owned by the caller (deprecated).
   Future<LibraryList> list({
     int? page,
     int? pageSize,
+    String? pageToken,
     bool? filterOwnedByMe,
   }) async {
     final queryParams = <String, String>{
       if (page != null) 'page': page.toString(),
       if (pageSize != null) 'page_size': pageSize.toString(),
+      'page_token': ?pageToken,
       if (filterOwnedByMe != null)
         'filter_owned_by_me': filterOwnedByMe.toString(),
     };

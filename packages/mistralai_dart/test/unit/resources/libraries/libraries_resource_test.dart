@@ -61,6 +61,17 @@ void main() {
       expect(captured.url.queryParameters['filter_owned_by_me'], 'true');
     });
 
+    test('list plumbs page_token query param', () async {
+      final client = clientReturning({'data': <dynamic>[]});
+      addTearDown(client.close);
+
+      await client.libraries.list(pageToken: 'token-abc');
+
+      expect(captured.method, 'GET');
+      expect(captured.url.path, '/v1/libraries');
+      expect(captured.url.queryParameters['page_token'], 'token-abc');
+    });
+
     test('document updatePartial issues PATCH with request body', () async {
       final client = clientReturning({
         'id': 'doc-1',

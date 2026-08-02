@@ -220,6 +220,7 @@ void main() {
         expect(list.object, 'list');
         expect(list.total, isNull);
         expect(list.hasMore, isNull);
+        expect(list.nextPageToken, isNull);
       });
 
       test('creates with all parameters', () {
@@ -231,10 +232,12 @@ void main() {
           ],
           total: 10,
           hasMore: true,
+          nextPageToken: 'token-abc',
         );
         expect(list.data, hasLength(2));
         expect(list.total, 10);
         expect(list.hasMore, isTrue);
+        expect(list.nextPageToken, 'token-abc');
       });
     });
 
@@ -244,12 +247,14 @@ void main() {
           data: [Library(id: 'lib-1', name: 'Test')],
           total: 5,
           hasMore: false,
+          nextPageToken: 'token-abc',
         );
         final json = list.toJson();
         expect(json['object'], 'list');
         expect(json['data'], hasLength(1));
         expect(json['total'], 5);
         expect(json['has_more'], false);
+        expect(json['next_page_token'], 'token-abc');
       });
 
       test('omits null fields', () {
@@ -257,6 +262,7 @@ void main() {
         final json = list.toJson();
         expect(json.containsKey('total'), isFalse);
         expect(json.containsKey('has_more'), isFalse);
+        expect(json.containsKey('next_page_token'), isFalse);
       });
     });
 
@@ -270,6 +276,7 @@ void main() {
           ],
           'total': 20,
           'has_more': true,
+          'next_page_token': 'token-abc',
         };
         final list = LibraryList.fromJson(json);
         expect(list.data, hasLength(2));
@@ -277,6 +284,7 @@ void main() {
         expect(list.data[1].id, 'lib-2');
         expect(list.total, 20);
         expect(list.hasMore, isTrue);
+        expect(list.nextPageToken, 'token-abc');
       });
 
       test('handles missing data', () {
@@ -341,6 +349,12 @@ void main() {
         const list2 = LibraryList(data: []);
         expect(list1, isNot(equals(list2)));
       });
+
+      test('not equals with different nextPageToken', () {
+        const list1 = LibraryList(data: [], nextPageToken: 'a');
+        const list2 = LibraryList(data: [], nextPageToken: 'b');
+        expect(list1, isNot(equals(list2)));
+      });
     });
 
     group('toString', () {
@@ -348,8 +362,12 @@ void main() {
         const list = LibraryList(
           data: [Library(id: '1', name: 'A')],
           total: 10,
+          nextPageToken: 'token-abc',
         );
-        expect(list.toString(), 'LibraryList(count: 1, total: 10)');
+        expect(
+          list.toString(),
+          'LibraryList(count: 1, total: 10, nextPageToken: token-abc)',
+        );
       });
     });
   });
