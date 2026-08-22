@@ -22,6 +22,7 @@ import 'config.dart';
 import 'interceptor_chain.dart';
 import 'request_builder.dart';
 import 'retry_wrapper.dart';
+import 'utf8_response_client.dart';
 
 /// Dart client for the Anthropic API.
 ///
@@ -116,7 +117,7 @@ class AnthropicClient {
   /// [close] is called. If provided, you are responsible for closing it.
   AnthropicClient({AnthropicConfig? config, http.Client? httpClient})
     : config = config ?? const AnthropicConfig(),
-      _httpClient = httpClient ?? http.Client(),
+      _httpClient = Utf8ResponseClient(httpClient ?? http.Client()),
       _ownsHttpClient = httpClient == null {
     _initialize();
   }
