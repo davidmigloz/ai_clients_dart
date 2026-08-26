@@ -42,12 +42,17 @@ void main() {
 
   group('ChatMessage', () {
     test('fromJson creates message correctly', () {
-      final json = {'role': 'user', 'content': 'Hello, world!'};
+      final json = {
+        'role': 'assistant',
+        'content': 'Hello, world!',
+        'thinking': 'I should greet the user.',
+      };
 
       final message = ChatMessage.fromJson(json);
 
-      expect(message.role, MessageRole.user);
+      expect(message.role, MessageRole.assistant);
       expect(message.content, 'Hello, world!');
+      expect(message.thinking, 'I should greet the user.');
       expect(message.images, isNull);
       expect(message.toolCalls, isNull);
     });
@@ -56,12 +61,14 @@ void main() {
       const message = ChatMessage(
         role: MessageRole.assistant,
         content: 'Hello!',
+        thinking: 'A short greeting is enough.',
       );
 
       final json = message.toJson();
 
       expect(json['role'], 'assistant');
       expect(json['content'], 'Hello!');
+      expect(json['thinking'], 'A short greeting is enough.');
       expect(json.containsKey('images'), isFalse);
     });
 
@@ -74,9 +81,13 @@ void main() {
       expect(user.role, MessageRole.user);
       expect(user.content, 'Hi');
 
-      const assistant = ChatMessage.assistant('Hello');
+      const assistant = ChatMessage.assistant(
+        'Hello',
+        thinking: 'I should greet the user.',
+      );
       expect(assistant.role, MessageRole.assistant);
       expect(assistant.content, 'Hello');
+      expect(assistant.thinking, 'I should greet the user.');
 
       const tool = ChatMessage.tool('{"result": 42}');
       expect(tool.role, MessageRole.tool);
