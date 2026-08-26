@@ -15,10 +15,40 @@ import 'media_resolution.dart';
 
 /// A single unit of content (text, media, function call, etc.).
 ///
-/// Exactly one field must be set.
+/// Typed data parts contain one data field plus any common metadata fields.
+/// Metadata can also appear without data in a [MetadataPart]. Unrecognized or
+/// ambiguous wire representations are retained as [UnknownPart].
 sealed class Part {
   /// Creates a [Part].
-  const Part();
+  const Part({
+    this.thought,
+    this.thoughtSignature,
+    this.partMetadata,
+    this.mediaResolution,
+    this.videoMetadata,
+    this.additionalProperties = const {},
+  });
+
+  /// Whether this part represents the model's thought process or reasoning.
+  final bool? thought;
+
+  /// Opaque thought signature bytes that must be echoed back unchanged.
+  final List<int>? thoughtSignature;
+
+  /// Custom metadata associated with this part.
+  final Map<String, dynamic>? partMetadata;
+
+  /// Media resolution for this part.
+  final MediaResolution? mediaResolution;
+
+  /// Video metadata associated with this part.
+  final VideoMetadata? videoMetadata;
+
+  /// Unrecognized non-reserved fields retained for forward compatibility.
+  ///
+  /// Reserved Part keys are rejected by [toJson] so they cannot overwrite a
+  /// typed data or metadata field.
+  final Map<String, dynamic> additionalProperties;
 
   /// Creates a text part.
   ///
@@ -119,107 +149,240 @@ sealed class Part {
 
   /// Creates a [Part] from JSON.
   factory Part.fromJson(Map<String, dynamic> json) {
-    // `text` must be checked before the standalone `thought` and
-    // `thoughtSignature` keys (below), because a JSON object can contain
-    // all three — the thought/signature belong to the text part in that case.
-    if (json.containsKey('text')) {
-      return TextPart(
+    final dataKeys = _partDataKeys
+        .where(json.containsKey)
+        .toList(growable: false);
+    if (dataKeys.length > 1) {
+      return UnknownPart(json);
+    }
+
+    final additionalProperties = <String, dynamic>{
+      for (final entry in json.entries)
+        if (!_partReservedKeys.contains(entry.key)) entry.key: entry.value,
+    };
+    if (dataKeys.isEmpty && additionalProperties.isNotEmpty) {
+      return UnknownPart(json);
+    }
+
+    final common = _PartCommonValues.fromJson(
+      json,
+      additionalProperties: additionalProperties,
+    );
+    if (dataKeys.isEmpty) {
+      return MetadataPart(
+        thought: common.thought,
+        thoughtSignature: common.thoughtSignature,
+        partMetadata: common.partMetadata,
+        mediaResolution: common.mediaResolution,
+        videoMetadata: common.videoMetadata,
+      );
+    }
+
+    return switch (dataKeys.single) {
+      'text' => TextPart(
         json['text'] as String,
-        thought: json['thought'] as bool?,
-        thoughtSignature: json['thoughtSignature'] != null
-            ? base64Decode(json['thoughtSignature'] as String)
-            : null,
-      );
-    }
-    if (json.containsKey('inlineData')) {
-      return InlineDataPart(
+        thought: common.thought,
+        thoughtSignature: common.thoughtSignature,
+        partMetadata: common.partMetadata,
+        mediaResolution: common.mediaResolution,
+        videoMetadata: common.videoMetadata,
+        additionalProperties: common.additionalProperties,
+      ),
+      'inlineData' => InlineDataPart(
         Blob.fromJson(json['inlineData'] as Map<String, dynamic>),
-        mediaResolution: json['mediaResolution'] != null
-            ? MediaResolution.fromJson(
-                json['mediaResolution'] as Map<String, dynamic>,
-              )
-            : null,
-      );
-    }
-    if (json.containsKey('fileData')) {
-      return FileDataPart(
+        thought: common.thought,
+        thoughtSignature: common.thoughtSignature,
+        partMetadata: common.partMetadata,
+        mediaResolution: common.mediaResolution,
+        videoMetadata: common.videoMetadata,
+        additionalProperties: common.additionalProperties,
+      ),
+      'fileData' => FileDataPart(
         FileData.fromJson(json['fileData'] as Map<String, dynamic>),
-        mediaResolution: json['mediaResolution'] != null
-            ? MediaResolution.fromJson(
-                json['mediaResolution'] as Map<String, dynamic>,
-              )
-            : null,
-      );
-    }
-    // `functionCall` must be checked before the standalone `thoughtSignature`
-    // key (below), because a JSON object can contain both keys — the signature
-    // belongs to the function call in that case.
-    if (json.containsKey('functionCall')) {
-      return FunctionCallPart(
+        thought: common.thought,
+        thoughtSignature: common.thoughtSignature,
+        partMetadata: common.partMetadata,
+        mediaResolution: common.mediaResolution,
+        videoMetadata: common.videoMetadata,
+        additionalProperties: common.additionalProperties,
+      ),
+      'functionCall' => FunctionCallPart(
         FunctionCall.fromJson(json['functionCall'] as Map<String, dynamic>),
-        thoughtSignature: json['thoughtSignature'] != null
-            ? base64Decode(json['thoughtSignature'] as String)
-            : null,
-      );
-    }
-    if (json.containsKey('functionResponse')) {
-      return FunctionResponsePart(
+        thought: common.thought,
+        thoughtSignature: common.thoughtSignature,
+        partMetadata: common.partMetadata,
+        mediaResolution: common.mediaResolution,
+        videoMetadata: common.videoMetadata,
+        additionalProperties: common.additionalProperties,
+      ),
+      'functionResponse' => FunctionResponsePart(
         FunctionResponse.fromJson(
           json['functionResponse'] as Map<String, dynamic>,
         ),
-      );
-    }
-    if (json.containsKey('executableCode')) {
-      return ExecutableCodePart(
+        thought: common.thought,
+        thoughtSignature: common.thoughtSignature,
+        partMetadata: common.partMetadata,
+        mediaResolution: common.mediaResolution,
+        videoMetadata: common.videoMetadata,
+        additionalProperties: common.additionalProperties,
+      ),
+      'executableCode' => ExecutableCodePart(
         ExecutableCode.fromJson(json['executableCode'] as Map<String, dynamic>),
-      );
-    }
-    if (json.containsKey('codeExecutionResult')) {
-      return CodeExecutionResultPart(
+        thought: common.thought,
+        thoughtSignature: common.thoughtSignature,
+        partMetadata: common.partMetadata,
+        mediaResolution: common.mediaResolution,
+        videoMetadata: common.videoMetadata,
+        additionalProperties: common.additionalProperties,
+      ),
+      'codeExecutionResult' => CodeExecutionResultPart(
         CodeExecutionResult.fromJson(
           json['codeExecutionResult'] as Map<String, dynamic>,
         ),
-      );
-    }
-    if (json.containsKey('toolCall')) {
-      return ToolCallPart(
+        thought: common.thought,
+        thoughtSignature: common.thoughtSignature,
+        partMetadata: common.partMetadata,
+        mediaResolution: common.mediaResolution,
+        videoMetadata: common.videoMetadata,
+        additionalProperties: common.additionalProperties,
+      ),
+      'toolCall' => ToolCallPart(
         ToolCall.fromJson(json['toolCall'] as Map<String, dynamic>),
-      );
-    }
-    if (json.containsKey('toolResponse')) {
-      return ToolResponsePart(
+        thought: common.thought,
+        thoughtSignature: common.thoughtSignature,
+        partMetadata: common.partMetadata,
+        mediaResolution: common.mediaResolution,
+        videoMetadata: common.videoMetadata,
+        additionalProperties: common.additionalProperties,
+      ),
+      'toolResponse' => ToolResponsePart(
         ToolResponse.fromJson(json['toolResponse'] as Map<String, dynamic>),
-      );
-    }
-    if (json.containsKey('videoMetadata')) {
-      return VideoMetadataPart(
-        VideoMetadata.fromJson(json['videoMetadata'] as Map<String, dynamic>),
-      );
-    }
-    // `thought` must be checked before the standalone `thoughtSignature` key
-    // (below), because a JSON object can contain both — the signature belongs
-    // to the thought part in that case.
-    if (json.containsKey('thought')) {
-      return ThoughtPart(
-        thought: json['thought'] as bool,
-        thoughtSignature: json['thoughtSignature'] != null
-            ? base64Decode(json['thoughtSignature'] as String)
-            : null,
-      );
-    }
-    if (json.containsKey('thoughtSignature')) {
-      return ThoughtSignaturePart(
-        base64Decode(json['thoughtSignature'] as String),
-      );
-    }
-    if (json.containsKey('partMetadata')) {
-      return PartMetadataPart(json['partMetadata'] as Map<String, dynamic>);
-    }
-    throw FormatException('Unknown Part type: ${json.keys}');
+        thought: common.thought,
+        thoughtSignature: common.thoughtSignature,
+        partMetadata: common.partMetadata,
+        mediaResolution: common.mediaResolution,
+        videoMetadata: common.videoMetadata,
+        additionalProperties: common.additionalProperties,
+      ),
+      final key => throw StateError('Unhandled Part data key: $key'),
+    };
   }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson();
+
+  Map<String, dynamic> _commonFieldsToJson() {
+    final collisions = additionalProperties.keys
+        .where(_partReservedKeys.contains)
+        .toList(growable: false);
+    if (collisions.isNotEmpty) {
+      throw ArgumentError.value(
+        additionalProperties,
+        'additionalProperties',
+        'Contains reserved Part keys: ${collisions.join(', ')}',
+      );
+    }
+    return {
+      ...additionalProperties,
+      if (thought != null) 'thought': thought,
+      if (thoughtSignature != null)
+        'thoughtSignature': base64Encode(thoughtSignature!),
+      if (partMetadata != null) 'partMetadata': partMetadata,
+      if (mediaResolution != null) 'mediaResolution': mediaResolution!.toJson(),
+      if (videoMetadata != null) 'videoMetadata': videoMetadata!.toJson(),
+    };
+  }
+
+  Map<String, dynamic> _dataToJson(String key, Object? value) => {
+    key: value,
+    ..._commonFieldsToJson(),
+  };
+
+  _PartCommonValues _copyCommon({
+    Object? thought = unsetCopyWithValue,
+    Object? thoughtSignature = unsetCopyWithValue,
+    Object? partMetadata = unsetCopyWithValue,
+    Object? mediaResolution = unsetCopyWithValue,
+    Object? videoMetadata = unsetCopyWithValue,
+    Object? additionalProperties = unsetCopyWithValue,
+  }) => _PartCommonValues(
+    thought: thought == unsetCopyWithValue ? this.thought : thought as bool?,
+    thoughtSignature: thoughtSignature == unsetCopyWithValue
+        ? this.thoughtSignature
+        : thoughtSignature as List<int>?,
+    partMetadata: partMetadata == unsetCopyWithValue
+        ? this.partMetadata
+        : partMetadata as Map<String, dynamic>?,
+    mediaResolution: mediaResolution == unsetCopyWithValue
+        ? this.mediaResolution
+        : mediaResolution as MediaResolution?,
+    videoMetadata: videoMetadata == unsetCopyWithValue
+        ? this.videoMetadata
+        : videoMetadata as VideoMetadata?,
+    additionalProperties: additionalProperties == unsetCopyWithValue
+        ? this.additionalProperties
+        : additionalProperties! as Map<String, dynamic>,
+  );
+}
+
+const _partDataKeys = <String>{
+  'text',
+  'inlineData',
+  'fileData',
+  'functionCall',
+  'functionResponse',
+  'executableCode',
+  'codeExecutionResult',
+  'toolCall',
+  'toolResponse',
+};
+
+const _partCommonKeys = <String>{
+  'thought',
+  'thoughtSignature',
+  'partMetadata',
+  'mediaResolution',
+  'videoMetadata',
+};
+
+const _partReservedKeys = <String>{..._partDataKeys, ..._partCommonKeys};
+
+class _PartCommonValues {
+  const _PartCommonValues({
+    this.thought,
+    this.thoughtSignature,
+    this.partMetadata,
+    this.mediaResolution,
+    this.videoMetadata,
+    this.additionalProperties = const {},
+  });
+
+  factory _PartCommonValues.fromJson(
+    Map<String, dynamic> json, {
+    required Map<String, dynamic> additionalProperties,
+  }) => _PartCommonValues(
+    thought: json['thought'] as bool?,
+    thoughtSignature: json['thoughtSignature'] == null
+        ? null
+        : base64Decode(json['thoughtSignature'] as String),
+    partMetadata: json['partMetadata'] as Map<String, dynamic>?,
+    mediaResolution: json['mediaResolution'] == null
+        ? null
+        : MediaResolution.fromJson(
+            json['mediaResolution'] as Map<String, dynamic>,
+          ),
+    videoMetadata: json['videoMetadata'] == null
+        ? null
+        : VideoMetadata.fromJson(json['videoMetadata'] as Map<String, dynamic>),
+    additionalProperties: additionalProperties,
+  );
+
+  final bool? thought;
+  final List<int>? thoughtSignature;
+  final Map<String, dynamic>? partMetadata;
+  final MediaResolution? mediaResolution;
+  final VideoMetadata? videoMetadata;
+  final Map<String, dynamic> additionalProperties;
 }
 
 /// Text content.
@@ -227,42 +390,46 @@ class TextPart extends Part {
   /// Plain text content.
   final String text;
 
-  /// Whether this text is a thought/reasoning step.
-  ///
-  /// The Gemini API returns reasoning text as
-  /// `{"text": "...", "thought": true}`. When `true`, this part contains
-  /// model reasoning rather than final output.
-  final bool? thought;
-
-  /// Optional opaque thought signature bytes.
-  ///
-  /// The API may return this alongside thought text; it must be preserved
-  /// and sent back unchanged when echoing the conversation history.
-  final List<int>? thoughtSignature;
-
   /// Creates a [TextPart].
-  const TextPart(this.text, {this.thought, this.thoughtSignature});
+  const TextPart(
+    this.text, {
+    super.thought,
+    super.thoughtSignature,
+    super.partMetadata,
+    super.mediaResolution,
+    super.videoMetadata,
+    super.additionalProperties,
+  });
 
   @override
-  Map<String, dynamic> toJson() => {
-    'text': text,
-    if (thought != null) 'thought': thought,
-    if (thoughtSignature != null)
-      'thoughtSignature': base64Encode(thoughtSignature!),
-  };
+  Map<String, dynamic> toJson() => _dataToJson('text', text);
 
   /// Creates a copy with replaced values.
   TextPart copyWith({
     Object? text = unsetCopyWithValue,
     Object? thought = unsetCopyWithValue,
     Object? thoughtSignature = unsetCopyWithValue,
+    Object? partMetadata = unsetCopyWithValue,
+    Object? mediaResolution = unsetCopyWithValue,
+    Object? videoMetadata = unsetCopyWithValue,
+    Object? additionalProperties = unsetCopyWithValue,
   }) {
+    final common = _copyCommon(
+      thought: thought,
+      thoughtSignature: thoughtSignature,
+      partMetadata: partMetadata,
+      mediaResolution: mediaResolution,
+      videoMetadata: videoMetadata,
+      additionalProperties: additionalProperties,
+    );
     return TextPart(
       text == unsetCopyWithValue ? this.text : text! as String,
-      thought: thought == unsetCopyWithValue ? this.thought : thought as bool?,
-      thoughtSignature: thoughtSignature == unsetCopyWithValue
-          ? this.thoughtSignature
-          : thoughtSignature as List<int>?,
+      thought: common.thought,
+      thoughtSignature: common.thoughtSignature,
+      partMetadata: common.partMetadata,
+      mediaResolution: common.mediaResolution,
+      videoMetadata: common.videoMetadata,
+      additionalProperties: common.additionalProperties,
     );
   }
 }
@@ -272,28 +439,47 @@ class InlineDataPart extends Part {
   /// Inline binary data.
   final Blob inlineData;
 
-  /// Optional media resolution for the input media.
-  final MediaResolution? mediaResolution;
-
   /// Creates an [InlineDataPart].
-  const InlineDataPart(this.inlineData, {this.mediaResolution});
+  const InlineDataPart(
+    this.inlineData, {
+    super.thought,
+    super.thoughtSignature,
+    super.partMetadata,
+    super.mediaResolution,
+    super.videoMetadata,
+    super.additionalProperties,
+  });
 
   @override
-  Map<String, dynamic> toJson() => {
-    'inlineData': inlineData.toJson(),
-    if (mediaResolution != null) 'mediaResolution': mediaResolution!.toJson(),
-  };
+  Map<String, dynamic> toJson() =>
+      _dataToJson('inlineData', inlineData.toJson());
 
   /// Creates a copy with replaced values.
   InlineDataPart copyWith({
     Object? inlineData = unsetCopyWithValue,
+    Object? thought = unsetCopyWithValue,
+    Object? thoughtSignature = unsetCopyWithValue,
+    Object? partMetadata = unsetCopyWithValue,
     Object? mediaResolution = unsetCopyWithValue,
+    Object? videoMetadata = unsetCopyWithValue,
+    Object? additionalProperties = unsetCopyWithValue,
   }) {
+    final common = _copyCommon(
+      thought: thought,
+      thoughtSignature: thoughtSignature,
+      partMetadata: partMetadata,
+      mediaResolution: mediaResolution,
+      videoMetadata: videoMetadata,
+      additionalProperties: additionalProperties,
+    );
     return InlineDataPart(
       inlineData == unsetCopyWithValue ? this.inlineData : inlineData! as Blob,
-      mediaResolution: mediaResolution == unsetCopyWithValue
-          ? this.mediaResolution
-          : mediaResolution as MediaResolution?,
+      thought: common.thought,
+      thoughtSignature: common.thoughtSignature,
+      partMetadata: common.partMetadata,
+      mediaResolution: common.mediaResolution,
+      videoMetadata: common.videoMetadata,
+      additionalProperties: common.additionalProperties,
     );
   }
 }
@@ -303,28 +489,46 @@ class FileDataPart extends Part {
   /// File reference.
   final FileData fileData;
 
-  /// Optional media resolution for the input media.
-  final MediaResolution? mediaResolution;
-
   /// Creates a [FileDataPart].
-  const FileDataPart(this.fileData, {this.mediaResolution});
+  const FileDataPart(
+    this.fileData, {
+    super.thought,
+    super.thoughtSignature,
+    super.partMetadata,
+    super.mediaResolution,
+    super.videoMetadata,
+    super.additionalProperties,
+  });
 
   @override
-  Map<String, dynamic> toJson() => {
-    'fileData': fileData.toJson(),
-    if (mediaResolution != null) 'mediaResolution': mediaResolution!.toJson(),
-  };
+  Map<String, dynamic> toJson() => _dataToJson('fileData', fileData.toJson());
 
   /// Creates a copy with replaced values.
   FileDataPart copyWith({
     Object? fileData = unsetCopyWithValue,
+    Object? thought = unsetCopyWithValue,
+    Object? thoughtSignature = unsetCopyWithValue,
+    Object? partMetadata = unsetCopyWithValue,
     Object? mediaResolution = unsetCopyWithValue,
+    Object? videoMetadata = unsetCopyWithValue,
+    Object? additionalProperties = unsetCopyWithValue,
   }) {
+    final common = _copyCommon(
+      thought: thought,
+      thoughtSignature: thoughtSignature,
+      partMetadata: partMetadata,
+      mediaResolution: mediaResolution,
+      videoMetadata: videoMetadata,
+      additionalProperties: additionalProperties,
+    );
     return FileDataPart(
       fileData == unsetCopyWithValue ? this.fileData : fileData! as FileData,
-      mediaResolution: mediaResolution == unsetCopyWithValue
-          ? this.mediaResolution
-          : mediaResolution as MediaResolution?,
+      thought: common.thought,
+      thoughtSignature: common.thoughtSignature,
+      partMetadata: common.partMetadata,
+      mediaResolution: common.mediaResolution,
+      videoMetadata: common.videoMetadata,
+      additionalProperties: common.additionalProperties,
     );
   }
 }
@@ -334,36 +538,49 @@ class FunctionCallPart extends Part {
   /// Function call.
   final FunctionCall functionCall;
 
-  /// Optional opaque thought signature bytes.
-  ///
-  /// Required by new Gemini models when echoing function calls
-  /// back in the chat history. The API returns this as a base64-encoded
-  /// string alongside the function call; it must be preserved and sent
-  /// back unchanged.
-  final List<int>? thoughtSignature;
-
   /// Creates a [FunctionCallPart].
-  const FunctionCallPart(this.functionCall, {this.thoughtSignature});
+  const FunctionCallPart(
+    this.functionCall, {
+    super.thought,
+    super.thoughtSignature,
+    super.partMetadata,
+    super.mediaResolution,
+    super.videoMetadata,
+    super.additionalProperties,
+  });
 
   @override
-  Map<String, dynamic> toJson() => {
-    'functionCall': functionCall.toJson(),
-    if (thoughtSignature != null)
-      'thoughtSignature': base64Encode(thoughtSignature!),
-  };
+  Map<String, dynamic> toJson() =>
+      _dataToJson('functionCall', functionCall.toJson());
 
   /// Creates a copy with replaced values.
   FunctionCallPart copyWith({
     Object? functionCall = unsetCopyWithValue,
+    Object? thought = unsetCopyWithValue,
     Object? thoughtSignature = unsetCopyWithValue,
+    Object? partMetadata = unsetCopyWithValue,
+    Object? mediaResolution = unsetCopyWithValue,
+    Object? videoMetadata = unsetCopyWithValue,
+    Object? additionalProperties = unsetCopyWithValue,
   }) {
+    final common = _copyCommon(
+      thought: thought,
+      thoughtSignature: thoughtSignature,
+      partMetadata: partMetadata,
+      mediaResolution: mediaResolution,
+      videoMetadata: videoMetadata,
+      additionalProperties: additionalProperties,
+    );
     return FunctionCallPart(
       functionCall == unsetCopyWithValue
           ? this.functionCall
           : functionCall! as FunctionCall,
-      thoughtSignature: thoughtSignature == unsetCopyWithValue
-          ? this.thoughtSignature
-          : thoughtSignature as List<int>?,
+      thought: common.thought,
+      thoughtSignature: common.thoughtSignature,
+      partMetadata: common.partMetadata,
+      mediaResolution: common.mediaResolution,
+      videoMetadata: common.videoMetadata,
+      additionalProperties: common.additionalProperties,
     );
   }
 }
@@ -374,21 +591,48 @@ class FunctionResponsePart extends Part {
   final FunctionResponse functionResponse;
 
   /// Creates a [FunctionResponsePart].
-  const FunctionResponsePart(this.functionResponse);
+  const FunctionResponsePart(
+    this.functionResponse, {
+    super.thought,
+    super.thoughtSignature,
+    super.partMetadata,
+    super.mediaResolution,
+    super.videoMetadata,
+    super.additionalProperties,
+  });
 
   @override
-  Map<String, dynamic> toJson() => {
-    'functionResponse': functionResponse.toJson(),
-  };
+  Map<String, dynamic> toJson() =>
+      _dataToJson('functionResponse', functionResponse.toJson());
 
   /// Creates a copy with replaced values.
   FunctionResponsePart copyWith({
     Object? functionResponse = unsetCopyWithValue,
+    Object? thought = unsetCopyWithValue,
+    Object? thoughtSignature = unsetCopyWithValue,
+    Object? partMetadata = unsetCopyWithValue,
+    Object? mediaResolution = unsetCopyWithValue,
+    Object? videoMetadata = unsetCopyWithValue,
+    Object? additionalProperties = unsetCopyWithValue,
   }) {
+    final common = _copyCommon(
+      thought: thought,
+      thoughtSignature: thoughtSignature,
+      partMetadata: partMetadata,
+      mediaResolution: mediaResolution,
+      videoMetadata: videoMetadata,
+      additionalProperties: additionalProperties,
+    );
     return FunctionResponsePart(
       functionResponse == unsetCopyWithValue
           ? this.functionResponse
           : functionResponse! as FunctionResponse,
+      thought: common.thought,
+      thoughtSignature: common.thoughtSignature,
+      partMetadata: common.partMetadata,
+      mediaResolution: common.mediaResolution,
+      videoMetadata: common.videoMetadata,
+      additionalProperties: common.additionalProperties,
     );
   }
 }
@@ -399,17 +643,48 @@ class ExecutableCodePart extends Part {
   final ExecutableCode executableCode;
 
   /// Creates an [ExecutableCodePart].
-  const ExecutableCodePart(this.executableCode);
+  const ExecutableCodePart(
+    this.executableCode, {
+    super.thought,
+    super.thoughtSignature,
+    super.partMetadata,
+    super.mediaResolution,
+    super.videoMetadata,
+    super.additionalProperties,
+  });
 
   @override
-  Map<String, dynamic> toJson() => {'executableCode': executableCode.toJson()};
+  Map<String, dynamic> toJson() =>
+      _dataToJson('executableCode', executableCode.toJson());
 
   /// Creates a copy with replaced values.
-  ExecutableCodePart copyWith({Object? executableCode = unsetCopyWithValue}) {
+  ExecutableCodePart copyWith({
+    Object? executableCode = unsetCopyWithValue,
+    Object? thought = unsetCopyWithValue,
+    Object? thoughtSignature = unsetCopyWithValue,
+    Object? partMetadata = unsetCopyWithValue,
+    Object? mediaResolution = unsetCopyWithValue,
+    Object? videoMetadata = unsetCopyWithValue,
+    Object? additionalProperties = unsetCopyWithValue,
+  }) {
+    final common = _copyCommon(
+      thought: thought,
+      thoughtSignature: thoughtSignature,
+      partMetadata: partMetadata,
+      mediaResolution: mediaResolution,
+      videoMetadata: videoMetadata,
+      additionalProperties: additionalProperties,
+    );
     return ExecutableCodePart(
       executableCode == unsetCopyWithValue
           ? this.executableCode
           : executableCode! as ExecutableCode,
+      thought: common.thought,
+      thoughtSignature: common.thoughtSignature,
+      partMetadata: common.partMetadata,
+      mediaResolution: common.mediaResolution,
+      videoMetadata: common.videoMetadata,
+      additionalProperties: common.additionalProperties,
     );
   }
 }
@@ -420,35 +695,120 @@ class CodeExecutionResultPart extends Part {
   final CodeExecutionResult codeExecutionResult;
 
   /// Creates a [CodeExecutionResultPart].
-  const CodeExecutionResultPart(this.codeExecutionResult);
+  const CodeExecutionResultPart(
+    this.codeExecutionResult, {
+    super.thought,
+    super.thoughtSignature,
+    super.partMetadata,
+    super.mediaResolution,
+    super.videoMetadata,
+    super.additionalProperties,
+  });
 
   @override
-  Map<String, dynamic> toJson() => {
-    'codeExecutionResult': codeExecutionResult.toJson(),
-  };
+  Map<String, dynamic> toJson() =>
+      _dataToJson('codeExecutionResult', codeExecutionResult.toJson());
 
   /// Creates a copy with replaced values.
   CodeExecutionResultPart copyWith({
     Object? codeExecutionResult = unsetCopyWithValue,
+    Object? thought = unsetCopyWithValue,
+    Object? thoughtSignature = unsetCopyWithValue,
+    Object? partMetadata = unsetCopyWithValue,
+    Object? mediaResolution = unsetCopyWithValue,
+    Object? videoMetadata = unsetCopyWithValue,
+    Object? additionalProperties = unsetCopyWithValue,
   }) {
+    final common = _copyCommon(
+      thought: thought,
+      thoughtSignature: thoughtSignature,
+      partMetadata: partMetadata,
+      mediaResolution: mediaResolution,
+      videoMetadata: videoMetadata,
+      additionalProperties: additionalProperties,
+    );
     return CodeExecutionResultPart(
       codeExecutionResult == unsetCopyWithValue
           ? this.codeExecutionResult
           : codeExecutionResult! as CodeExecutionResult,
+      thought: common.thought,
+      thoughtSignature: common.thoughtSignature,
+      partMetadata: common.partMetadata,
+      mediaResolution: common.mediaResolution,
+      videoMetadata: common.videoMetadata,
+      additionalProperties: common.additionalProperties,
     );
   }
 }
 
-/// Video timing/sampling metadata.
-class VideoMetadataPart extends Part {
-  /// Video metadata.
-  final VideoMetadata videoMetadata;
-
-  /// Creates a [VideoMetadataPart].
-  const VideoMetadataPart(this.videoMetadata);
+/// A Part containing metadata without a data field.
+class MetadataPart extends Part {
+  /// Creates a [MetadataPart].
+  const MetadataPart({
+    super.thought,
+    super.thoughtSignature,
+    super.partMetadata,
+    super.mediaResolution,
+    super.videoMetadata,
+  });
 
   @override
-  Map<String, dynamic> toJson() => {'videoMetadata': videoMetadata.toJson()};
+  Map<String, dynamic> toJson() => _commonFieldsToJson();
+
+  /// Creates a copy with replaced values.
+  MetadataPart copyWith({
+    Object? thought = unsetCopyWithValue,
+    Object? thoughtSignature = unsetCopyWithValue,
+    Object? partMetadata = unsetCopyWithValue,
+    Object? mediaResolution = unsetCopyWithValue,
+    Object? videoMetadata = unsetCopyWithValue,
+  }) {
+    final common = _copyCommon(
+      thought: thought,
+      thoughtSignature: thoughtSignature,
+      partMetadata: partMetadata,
+      mediaResolution: mediaResolution,
+      videoMetadata: videoMetadata,
+    );
+    return MetadataPart(
+      thought: common.thought,
+      thoughtSignature: common.thoughtSignature,
+      partMetadata: common.partMetadata,
+      mediaResolution: common.mediaResolution,
+      videoMetadata: common.videoMetadata,
+    );
+  }
+}
+
+/// An unrecognized or structurally ambiguous Part.
+///
+/// The original JSON is retained so future API variants can be echoed back
+/// without data loss before this client adds a typed representation.
+class UnknownPart extends Part {
+  /// Creates an [UnknownPart] retaining [rawJson].
+  UnknownPart(Map<String, dynamic> rawJson)
+    : rawJson = Map.unmodifiable(rawJson);
+
+  /// The original JSON representation.
+  final Map<String, dynamic> rawJson;
+
+  @override
+  Map<String, dynamic> toJson() => Map<String, dynamic>.of(rawJson);
+}
+
+/// Video timing/sampling metadata.
+@Deprecated('Use MetadataPart(videoMetadata: ...) instead.')
+class VideoMetadataPart extends Part {
+  /// Creates a [VideoMetadataPart].
+  @Deprecated('Use MetadataPart(videoMetadata: ...) instead.')
+  const VideoMetadataPart(VideoMetadata videoMetadata)
+    : super(videoMetadata: videoMetadata);
+
+  @override
+  VideoMetadata get videoMetadata => super.videoMetadata!;
+
+  @override
+  Map<String, dynamic> toJson() => _commonFieldsToJson();
 
   /// Creates a copy with replaced values.
   VideoMetadataPart copyWith({Object? videoMetadata = unsetCopyWithValue}) {
@@ -461,25 +821,20 @@ class VideoMetadataPart extends Part {
 }
 
 /// Reasoning step indicator.
+@Deprecated('Use MetadataPart(thought: ...) instead.')
 class ThoughtPart extends Part {
-  /// Whether this is a thought/reasoning step.
-  final bool thought;
-
-  /// Optional opaque thought signature bytes.
-  ///
-  /// The API may return this alongside the thought flag; it must be preserved
-  /// and sent back unchanged when echoing the conversation history.
-  final List<int>? thoughtSignature;
-
   /// Creates a [ThoughtPart].
-  const ThoughtPart({required this.thought, this.thoughtSignature});
+  @Deprecated('Use MetadataPart(thought: ...) instead.')
+  // The explicit parameters keep the deprecated constructor's non-null API.
+  // ignore: use_super_parameters
+  const ThoughtPart({required bool thought, List<int>? thoughtSignature})
+    : super(thought: thought, thoughtSignature: thoughtSignature);
 
   @override
-  Map<String, dynamic> toJson() => {
-    'thought': thought,
-    if (thoughtSignature != null)
-      'thoughtSignature': base64Encode(thoughtSignature!),
-  };
+  bool get thought => super.thought!;
+
+  @override
+  Map<String, dynamic> toJson() => _commonFieldsToJson();
 
   /// Creates a copy with replaced values.
   ThoughtPart copyWith({
@@ -496,17 +851,18 @@ class ThoughtPart extends Part {
 }
 
 /// Cached thought key (base64).
+@Deprecated('Use MetadataPart(thoughtSignature: ...) instead.')
 class ThoughtSignaturePart extends Part {
-  /// Thought signature bytes.
-  final List<int> thoughtSignature;
-
   /// Creates a [ThoughtSignaturePart].
-  const ThoughtSignaturePart(this.thoughtSignature);
+  @Deprecated('Use MetadataPart(thoughtSignature: ...) instead.')
+  const ThoughtSignaturePart(List<int> thoughtSignature)
+    : super(thoughtSignature: thoughtSignature);
 
   @override
-  Map<String, dynamic> toJson() => {
-    'thoughtSignature': base64Encode(thoughtSignature),
-  };
+  List<int> get thoughtSignature => super.thoughtSignature!;
+
+  @override
+  Map<String, dynamic> toJson() => _commonFieldsToJson();
 
   /// Creates a copy with replaced values.
   ThoughtSignaturePart copyWith({
@@ -526,15 +882,45 @@ class ToolCallPart extends Part {
   final ToolCall toolCall;
 
   /// Creates a [ToolCallPart].
-  const ToolCallPart(this.toolCall);
+  const ToolCallPart(
+    this.toolCall, {
+    super.thought,
+    super.thoughtSignature,
+    super.partMetadata,
+    super.mediaResolution,
+    super.videoMetadata,
+    super.additionalProperties,
+  });
 
   @override
-  Map<String, dynamic> toJson() => {'toolCall': toolCall.toJson()};
+  Map<String, dynamic> toJson() => _dataToJson('toolCall', toolCall.toJson());
 
   /// Creates a copy with replaced values.
-  ToolCallPart copyWith({Object? toolCall = unsetCopyWithValue}) {
+  ToolCallPart copyWith({
+    Object? toolCall = unsetCopyWithValue,
+    Object? thought = unsetCopyWithValue,
+    Object? thoughtSignature = unsetCopyWithValue,
+    Object? partMetadata = unsetCopyWithValue,
+    Object? mediaResolution = unsetCopyWithValue,
+    Object? videoMetadata = unsetCopyWithValue,
+    Object? additionalProperties = unsetCopyWithValue,
+  }) {
+    final common = _copyCommon(
+      thought: thought,
+      thoughtSignature: thoughtSignature,
+      partMetadata: partMetadata,
+      mediaResolution: mediaResolution,
+      videoMetadata: videoMetadata,
+      additionalProperties: additionalProperties,
+    );
     return ToolCallPart(
       toolCall == unsetCopyWithValue ? this.toolCall : toolCall! as ToolCall,
+      thought: common.thought,
+      thoughtSignature: common.thoughtSignature,
+      partMetadata: common.partMetadata,
+      mediaResolution: common.mediaResolution,
+      videoMetadata: common.videoMetadata,
+      additionalProperties: common.additionalProperties,
     );
   }
 }
@@ -545,31 +931,65 @@ class ToolResponsePart extends Part {
   final ToolResponse toolResponse;
 
   /// Creates a [ToolResponsePart].
-  const ToolResponsePart(this.toolResponse);
+  const ToolResponsePart(
+    this.toolResponse, {
+    super.thought,
+    super.thoughtSignature,
+    super.partMetadata,
+    super.mediaResolution,
+    super.videoMetadata,
+    super.additionalProperties,
+  });
 
   @override
-  Map<String, dynamic> toJson() => {'toolResponse': toolResponse.toJson()};
+  Map<String, dynamic> toJson() =>
+      _dataToJson('toolResponse', toolResponse.toJson());
 
   /// Creates a copy with replaced values.
-  ToolResponsePart copyWith({Object? toolResponse = unsetCopyWithValue}) {
+  ToolResponsePart copyWith({
+    Object? toolResponse = unsetCopyWithValue,
+    Object? thought = unsetCopyWithValue,
+    Object? thoughtSignature = unsetCopyWithValue,
+    Object? partMetadata = unsetCopyWithValue,
+    Object? mediaResolution = unsetCopyWithValue,
+    Object? videoMetadata = unsetCopyWithValue,
+    Object? additionalProperties = unsetCopyWithValue,
+  }) {
+    final common = _copyCommon(
+      thought: thought,
+      thoughtSignature: thoughtSignature,
+      partMetadata: partMetadata,
+      mediaResolution: mediaResolution,
+      videoMetadata: videoMetadata,
+      additionalProperties: additionalProperties,
+    );
     return ToolResponsePart(
       toolResponse == unsetCopyWithValue
           ? this.toolResponse
           : toolResponse! as ToolResponse,
+      thought: common.thought,
+      thoughtSignature: common.thoughtSignature,
+      partMetadata: common.partMetadata,
+      mediaResolution: common.mediaResolution,
+      videoMetadata: common.videoMetadata,
+      additionalProperties: common.additionalProperties,
     );
   }
 }
 
 /// Custom metadata.
+@Deprecated('Use MetadataPart(partMetadata: ...) instead.')
 class PartMetadataPart extends Part {
-  /// Part metadata.
-  final Map<String, dynamic> partMetadata;
-
   /// Creates a [PartMetadataPart].
-  const PartMetadataPart(this.partMetadata);
+  @Deprecated('Use MetadataPart(partMetadata: ...) instead.')
+  const PartMetadataPart(Map<String, dynamic> partMetadata)
+    : super(partMetadata: partMetadata);
 
   @override
-  Map<String, dynamic> toJson() => {'partMetadata': partMetadata};
+  Map<String, dynamic> get partMetadata => super.partMetadata!;
+
+  @override
+  Map<String, dynamic> toJson() => _commonFieldsToJson();
 
   /// Creates a copy with replaced values.
   PartMetadataPart copyWith({Object? partMetadata = unsetCopyWithValue}) {
