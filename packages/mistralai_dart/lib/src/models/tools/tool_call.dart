@@ -14,11 +14,17 @@ class ToolCall {
   /// The function call details.
   final FunctionCall function;
 
+  /// The index of this tool call in a streaming response.
+  ///
+  /// Mistral uses this value to correlate deltas for parallel tool calls.
+  final int? index;
+
   /// Creates a [ToolCall].
   const ToolCall({
     required this.id,
     this.type = 'function',
     required this.function,
+    this.index,
   });
 
   /// Creates a [ToolCall] from JSON.
@@ -28,6 +34,7 @@ class ToolCall {
     function: FunctionCall.fromJson(
       json['function'] as Map<String, dynamic>? ?? {},
     ),
+    index: json['index'] as int?,
   );
 
   /// Converts to JSON.
@@ -35,6 +42,7 @@ class ToolCall {
     'id': id,
     'type': type,
     'function': function.toJson(),
+    if (index != null) 'index': index,
   };
 
   @override
@@ -44,11 +52,13 @@ class ToolCall {
           runtimeType == other.runtimeType &&
           id == other.id &&
           type == other.type &&
-          function == other.function;
+          function == other.function &&
+          index == other.index;
 
   @override
-  int get hashCode => Object.hash(id, type, function);
+  int get hashCode => Object.hash(id, type, function, index);
 
   @override
-  String toString() => 'ToolCall(id: $id, type: $type, function: $function)';
+  String toString() =>
+      'ToolCall(id: $id, type: $type, function: $function, index: $index)';
 }
