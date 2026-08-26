@@ -676,20 +676,17 @@ void main() {
           'videoMetadata': {'videoDuration': '30s'},
         };
         final part = Part.fromJson(json);
-        expect(part, isA<VideoMetadataPart>());
-        expect(
-          (part as VideoMetadataPart).videoMetadata.videoDuration,
-          equals('30s'),
-        );
+        expect(part, isA<MetadataPart>());
+        expect(part.videoMetadata?.videoDuration, equals('30s'));
       });
 
       test('roundtrip serialization', () {
         const original = VideoMetadataPart(VideoMetadata(videoDuration: '20s'));
         final json = original.toJson();
         final deserialized = Part.fromJson(json);
-        expect(deserialized, isA<VideoMetadataPart>());
+        expect(deserialized, isA<MetadataPart>());
         expect(
-          (deserialized as VideoMetadataPart).videoMetadata.videoDuration,
+          deserialized.videoMetadata?.videoDuration,
           equals(original.videoMetadata.videoDuration),
         );
       });
@@ -710,16 +707,16 @@ void main() {
       test('deserializes from JSON', () {
         final json = {'thought': true};
         final part = Part.fromJson(json);
-        expect(part, isA<ThoughtPart>());
-        expect((part as ThoughtPart).thought, isTrue);
+        expect(part, isA<MetadataPart>());
+        expect(part.thought, isTrue);
       });
 
       test('roundtrip serialization', () {
         const original = ThoughtPart(thought: true);
         final json = original.toJson();
         final deserialized = Part.fromJson(json);
-        expect(deserialized, isA<ThoughtPart>());
-        expect((deserialized as ThoughtPart).thought, equals(original.thought));
+        expect(deserialized, isA<MetadataPart>());
+        expect(deserialized.thought, equals(original.thought));
       });
 
       group('with thoughtSignature', () {
@@ -729,10 +726,9 @@ void main() {
             'thoughtSignature': base64.encode([10, 20, 30]),
           };
           final part = Part.fromJson(json);
-          expect(part, isA<ThoughtPart>());
-          final thoughtPart = part as ThoughtPart;
-          expect(thoughtPart.thought, isTrue);
-          expect(thoughtPart.thoughtSignature, equals([10, 20, 30]));
+          expect(part, isA<MetadataPart>());
+          expect(part.thought, isTrue);
+          expect(part.thoughtSignature, equals([10, 20, 30]));
         });
 
         test('serializes thoughtSignature to JSON when present', () {
@@ -757,7 +753,8 @@ void main() {
             thoughtSignature: [100, 200, 50],
           );
           final json = original.toJson();
-          final deserialized = Part.fromJson(json) as ThoughtPart;
+          final deserialized = Part.fromJson(json);
+          expect(deserialized, isA<MetadataPart>());
           expect(
             deserialized.thoughtSignature,
             equals(original.thoughtSignature),
@@ -810,20 +807,17 @@ void main() {
           'thoughtSignature': base64.encode([10, 20, 30]),
         };
         final part = Part.fromJson(json);
-        expect(part, isA<ThoughtSignaturePart>());
-        expect(
-          (part as ThoughtSignaturePart).thoughtSignature,
-          equals([10, 20, 30]),
-        );
+        expect(part, isA<MetadataPart>());
+        expect(part.thoughtSignature, equals([10, 20, 30]));
       });
 
       test('roundtrip serialization', () {
         const original = ThoughtSignaturePart([100, 200, 50]);
         final json = original.toJson();
         final deserialized = Part.fromJson(json);
-        expect(deserialized, isA<ThoughtSignaturePart>());
+        expect(deserialized, isA<MetadataPart>());
         expect(
-          (deserialized as ThoughtSignaturePart).thoughtSignature,
+          deserialized.thoughtSignature,
           equals(original.thoughtSignature),
         );
       });
@@ -851,8 +845,8 @@ void main() {
           'partMetadata': {'test': 'data', 'value': 123},
         };
         final part = Part.fromJson(json);
-        expect(part, isA<PartMetadataPart>());
-        expect((part as PartMetadataPart).partMetadata['test'], equals('data'));
+        expect(part, isA<MetadataPart>());
+        expect(part.partMetadata?['test'], equals('data'));
       });
 
       test('roundtrip serialization', () {
@@ -862,11 +856,8 @@ void main() {
         });
         final json = original.toJson();
         final deserialized = Part.fromJson(json);
-        expect(deserialized, isA<PartMetadataPart>());
-        expect(
-          (deserialized as PartMetadataPart).partMetadata['x'],
-          equals('y'),
-        );
+        expect(deserialized, isA<MetadataPart>());
+        expect(deserialized.partMetadata?['x'], equals('y'));
       });
     });
 
@@ -975,12 +966,14 @@ void main() {
     });
 
     group('Exhaustive Matching', () {
-      test('throws FormatException for unknown Part type', () {
+      test('retains unknown Part JSON', () {
         final json = {'unknownField': 'value'};
-        expect(() => Part.fromJson(json), throwsA(isA<FormatException>()));
+        final part = Part.fromJson(json);
+        expect(part, isA<UnknownPart>());
+        expect(part.toJson(), json);
       });
 
-      test('all 13 Part variants can be deserialized', () {
+      test('all supported Part representations can be deserialized', () {
         final variants = <Map<String, dynamic>>[
           {'text': 'test'},
           {
@@ -1023,6 +1016,150 @@ void main() {
         for (final json in variants) {
           expect(() => Part.fromJson(json), returnsNormally);
         }
+      });
+    });
+
+    group('common metadata and forward compatibility', () {
+      final dataVariants = <Map<String, dynamic>>[
+        {'text': 'test'},
+        {
+          'inlineData': {'mimeType': 'image/png', 'data': 'YWJj'},
+        },
+        {
+          'fileData': {'fileUri': 'gs://bucket/file'},
+        },
+        {
+          'functionCall': {'name': 'test', 'args': <String, dynamic>{}},
+        },
+        {
+          'functionResponse': {'name': 'test', 'response': <String, dynamic>{}},
+        },
+        {
+          'executableCode': {'language': 'PYTHON', 'code': 'x=1'},
+        },
+        {
+          'codeExecutionResult': {'outcome': 'OUTCOME_OK', 'output': 'ok'},
+        },
+        {
+          'toolCall': {'toolType': 'GOOGLE_SEARCH_WEB'},
+        },
+        {
+          'toolResponse': {'toolType': 'FILE_SEARCH'},
+        },
+      ];
+      final commonMetadata = <String, dynamic>{
+        'thought': true,
+        'thoughtSignature': base64.encode([1, 2, 3]),
+        'partMetadata': <String, dynamic>{'source': 'unit-test'},
+        'mediaResolution': <String, dynamic>{
+          'level': 'MEDIA_RESOLUTION_HIGH',
+          'numTokens': 256,
+        },
+        'videoMetadata': <String, dynamic>{'videoDuration': '3.5s'},
+      };
+
+      test('every data variant retains every common metadata field', () {
+        for (final data in dataVariants) {
+          final json = <String, dynamic>{
+            ...data,
+            ...commonMetadata,
+            'futureField': <String, dynamic>{'value': 42},
+          };
+
+          final part = Part.fromJson(json);
+
+          expect(part, isNot(isA<UnknownPart>()), reason: '$data');
+          expect(part.thought, isTrue, reason: '$data');
+          expect(part.thoughtSignature, [1, 2, 3], reason: '$data');
+          expect(part.partMetadata, {'source': 'unit-test'}, reason: '$data');
+          expect(
+            part.mediaResolution?.level,
+            MediaResolutionLevel.high,
+            reason: '$data',
+          );
+          expect(part.videoMetadata?.videoDuration, '3.5s', reason: '$data');
+          expect(part.additionalProperties, {
+            'futureField': {'value': 42},
+          }, reason: '$data');
+          expect(part.toJson(), json, reason: '$data');
+        }
+      });
+
+      test('metadata-only JSON has one canonical representation', () {
+        final part = Part.fromJson(commonMetadata);
+
+        expect(part, isA<MetadataPart>());
+        expect(part.toJson(), commonMetadata);
+      });
+
+      test(
+        'deprecated metadata-only variants canonicalize to MetadataPart',
+        () {
+          final deprecatedParts = <Part>[
+            const VideoMetadataPart(VideoMetadata(videoDuration: '1s')),
+            const ThoughtPart(thought: true),
+            const ThoughtSignaturePart([1, 2, 3]),
+            const PartMetadataPart({'source': 'legacy'}),
+          ];
+
+          for (final deprecatedPart in deprecatedParts) {
+            expect(Part.fromJson(deprecatedPart.toJson()), isA<MetadataPart>());
+          }
+        },
+      );
+
+      test('unknown data with common metadata is retained untouched', () {
+        final json = <String, dynamic>{
+          'futureData': <String, dynamic>{'value': 42},
+          'thoughtSignature': base64.encode([4, 5, 6]),
+        };
+
+        final part = Part.fromJson(json);
+
+        expect(part, isA<UnknownPart>());
+        expect(part.toJson(), json);
+      });
+
+      test('conflicting known data discriminators are retained untouched', () {
+        final json = <String, dynamic>{
+          'text': 'hello',
+          'functionCall': <String, dynamic>{'name': 'test'},
+          'thoughtSignature': base64.encode([7, 8, 9]),
+        };
+
+        final part = Part.fromJson(json);
+
+        expect(part, isA<UnknownPart>());
+        expect(part.toJson(), json);
+      });
+
+      test('reserved additional-property collisions are rejected', () {
+        const part = TextPart(
+          'hello',
+          additionalProperties: {'thoughtSignature': 'override'},
+        );
+
+        expect(part.toJson, throwsArgumentError);
+      });
+
+      test('copyWith preserves and updates common metadata', () {
+        const original = FunctionResponsePart(
+          FunctionResponse(name: 'test', response: {}),
+          thought: true,
+          thoughtSignature: [1, 2, 3],
+          partMetadata: {'source': 'original'},
+          additionalProperties: {'futureField': 1},
+        );
+
+        final copy = original.copyWith(
+          thought: false,
+          partMetadata: {'source': 'copy'},
+        );
+
+        expect(copy.thought, isFalse);
+        expect(copy.thoughtSignature, [1, 2, 3]);
+        expect(copy.partMetadata, {'source': 'copy'});
+        expect(copy.additionalProperties, {'futureField': 1});
       });
     });
 
