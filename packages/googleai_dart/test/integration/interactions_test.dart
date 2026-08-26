@@ -431,25 +431,29 @@ void main() {
   });
 
   group('Interactions - URL Context', () {
-    test('fetches and analyzes content from a URL', () async {
-      if (apiKey == null) {
-        markTestSkipped('API key not available');
-        return;
-      }
+    test(
+      'fetches and analyzes content from a URL',
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
 
-      final interaction = await client!.interactions.create(
-        model: defaultInteractionsModel,
-        input: const InteractionInput.text(
-          'What is Dart according to https://dart.dev/overview ?',
-        ),
-        tools: const [UrlContextTool()],
-      );
+        final interaction = await client!.interactions.create(
+          model: defaultInteractionsModel,
+          input: const InteractionInput.text(
+            'What is Dart according to https://dart.dev/overview ?',
+          ),
+          tools: const [UrlContextTool()],
+        );
 
-      expect(interaction.status, InteractionStatus.completed);
-      expect(interaction.text, isNotNull);
-      // Should reference Dart programming language
-      expect(interaction.text!.toLowerCase(), contains('dart'));
-    }, timeout: const Timeout(Duration(seconds: 120)));
+        expect(interaction.status, InteractionStatus.completed);
+        expect(interaction.text, isNotNull);
+        // Should reference Dart programming language
+        expect(interaction.text!.toLowerCase(), contains('dart'));
+      },
+      timeout: const Timeout(Duration(seconds: 120)),
+    );
   });
 
   group('Interactions - Streaming', () {
