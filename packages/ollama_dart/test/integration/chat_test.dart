@@ -211,34 +211,30 @@ void main() {
       expect(response.evalCount, lessThanOrEqualTo(2));
     });
 
-    test(
-      'image input works with vision model',
-      () async {
-        final visionModel =
-            Platform.environment['OLLAMA_VISION_MODEL'] ?? 'llava';
+    test('image input works with vision model', () async {
+      final visionModel =
+          Platform.environment['OLLAMA_VISION_MODEL'] ?? 'llava';
 
-        final response = await client.chat.create(
-          request: ChatRequest(
-            model: visionModel,
-            messages: const [
-              ChatMessage.system('You are a helpful assistant.'),
-              ChatMessage(
-                role: MessageRole.user,
-                content: 'Describe the contents of the image.',
-                images: [
-                  // Small base64 encoded star image
-                  'iVBORw0KGgoAAAANSUhEUgAAAAkAAAANCAIAAAD0YtNRAAAABnRSTlMA/AD+APzoM1ogAAAAWklEQVR4AWP48+8PLkR7uUdzcMvtU8EhdykHKAciEXL3pvw5FQIURaBDJkARoDhY3zEXiCgCHbNBmAlUiyaBkENoxZSDWnOtBmoAQu7TnT+3WuDOA7KBIkAGAGwiNeqjusp/AAAAAElFTkSuQmCC',
-                ],
-              ),
-            ],
-          ),
-        );
+      final response = await client.chat.create(
+        request: ChatRequest(
+          model: visionModel,
+          messages: const [
+            ChatMessage.system('You are a helpful assistant.'),
+            ChatMessage(
+              role: MessageRole.user,
+              content: 'Describe the contents of the image.',
+              images: [
+                // Small base64 encoded star image
+                'iVBORw0KGgoAAAANSUhEUgAAAAkAAAANCAIAAAD0YtNRAAAABnRSTlMA/AD+APzoM1ogAAAAWklEQVR4AWP48+8PLkR7uUdzcMvtU8EhdykHKAciEXL3pvw5FQIURaBDJkARoDhY3zEXiCgCHbNBmAlUiyaBkENoxZSDWnOtBmoAQu7TnT+3WuDOA7KBIkAGAGwiNeqjusp/AAAAAElFTkSuQmCC',
+              ],
+            ),
+          ],
+        ),
+      );
 
-        expect(response.message, isNotNull);
-        final content = response.message!.content?.toLowerCase() ?? '';
-        expect(content, contains('star'));
-      },
-      skip: 'Requires a vision model (e.g., llava) to be available',
-    );
+      expect(response.message, isNotNull);
+      final content = response.message!.content?.toLowerCase() ?? '';
+      expect(content, contains('star'));
+    }, skip: 'Requires a vision model (e.g., llava) to be available');
   });
 }
