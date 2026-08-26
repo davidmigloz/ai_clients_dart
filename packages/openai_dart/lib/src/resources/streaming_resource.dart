@@ -36,17 +36,17 @@ mixin StreamingResource on ResourceBase {
     ensureNotClosed?.call();
 
     // Add streaming-specific headers
-    final streamHeaders = requestBuilder.buildStreamingHeaders(
-      additionalHeaders: additionalHeaders,
-    );
+    final streamHeaders = request is http.MultipartRequest
+        ? requestBuilder.buildMultipartHeaders(
+            additionalHeaders: {
+              ...?additionalHeaders,
+              'Accept': 'text/event-stream',
+            },
+          )
+        : requestBuilder.buildStreamingHeaders(
+            additionalHeaders: additionalHeaders,
+          );
     request.headers.addAll(streamHeaders);
-
-    // Multipart requests set their own Content-Type (with a boundary) at
-    // finalize time. Drop the JSON content-type added by buildStreamingHeaders
-    // so the multipart header isn't shadowed on the wire.
-    if (request is http.MultipartRequest) {
-      request.headers.removeWhere((k, _) => k.toLowerCase() == 'content-type');
-    }
 
     // Set body AFTER headers so body setter adds charset to Content-Type
     // (e.g., application/json → application/json; charset=utf-8).

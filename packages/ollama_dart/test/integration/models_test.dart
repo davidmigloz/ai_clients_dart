@@ -68,55 +68,47 @@ void main() {
       expect(response.parameters, isNotNull);
     });
 
-    test(
-      'create model from base model',
-      () async {
-        const modelName = 'test-model-create';
+    test('create model from base model', () async {
+      const modelName = 'test-model-create';
 
-        final response = await client.models.create(
-          request: CreateRequest(
-            model: modelName,
-            from: model,
-            system: 'You are a helpful assistant.',
-          ),
-        );
+      final response = await client.models.create(
+        request: CreateRequest(
+          model: modelName,
+          from: model,
+          system: 'You are a helpful assistant.',
+        ),
+      );
 
-        expect(response.status, equals('success'));
+      expect(response.status, equals('success'));
 
-        // Cleanup
-        await client.models.delete(
-          request: const DeleteRequest(model: modelName),
-        );
-      },
-      skip: 'Destructive test - creates a new model',
-    );
+      // Cleanup
+      await client.models.delete(
+        request: const DeleteRequest(model: modelName),
+      );
+    }, skip: 'Destructive test - creates a new model');
 
-    test(
-      'createStream yields progress updates',
-      () async {
-        const modelName = 'test-model-stream';
+    test('createStream yields progress updates', () async {
+      const modelName = 'test-model-stream';
 
-        final events = <StatusEvent>[];
-        await client.models
-            .createStream(
-              request: CreateRequest(
-                model: modelName,
-                from: model,
-                system: 'You are a helpful assistant.',
-              ),
-            )
-            .forEach(events.add);
+      final events = <StatusEvent>[];
+      await client.models
+          .createStream(
+            request: CreateRequest(
+              model: modelName,
+              from: model,
+              system: 'You are a helpful assistant.',
+            ),
+          )
+          .forEach(events.add);
 
-        expect(events, isNotEmpty);
-        expect(events.last.status, equals('success'));
+      expect(events, isNotEmpty);
+      expect(events.last.status, equals('success'));
 
-        // Cleanup
-        await client.models.delete(
-          request: const DeleteRequest(model: modelName),
-        );
-      },
-      skip: 'Destructive test - creates a new model',
-    );
+      // Cleanup
+      await client.models.delete(
+        request: const DeleteRequest(model: modelName),
+      );
+    }, skip: 'Destructive test - creates a new model');
 
     test('copy creates a duplicate model', () async {
       const newName = 'test-model-copy';
@@ -132,62 +124,48 @@ void main() {
       await client.models.delete(request: const DeleteRequest(model: newName));
     }, skip: 'Destructive test - copies a model');
 
-    test(
-      'delete removes a model',
-      () async {
-        const copyName = 'test-model-delete';
+    test('delete removes a model', () async {
+      const copyName = 'test-model-delete';
 
-        // First create a copy to delete
-        await client.models.copy(
-          request: CopyRequest(source: model, destination: copyName),
-        );
+      // First create a copy to delete
+      await client.models.copy(
+        request: CopyRequest(source: model, destination: copyName),
+      );
 
-        // Verify it exists
-        final before = await client.models.list();
-        expect(before.models?.any((m) => m.name == '$copyName:latest'), isTrue);
+      // Verify it exists
+      final before = await client.models.list();
+      expect(before.models?.any((m) => m.name == '$copyName:latest'), isTrue);
 
-        // Delete it
-        await client.models.delete(
-          request: const DeleteRequest(model: copyName),
-        );
+      // Delete it
+      await client.models.delete(request: const DeleteRequest(model: copyName));
 
-        // Verify it's gone
-        final after = await client.models.list();
-        expect(after.models?.any((m) => m.name == '$copyName:latest'), isFalse);
-      },
-      skip: 'Destructive test - creates and deletes a model',
-    );
+      // Verify it's gone
+      final after = await client.models.list();
+      expect(after.models?.any((m) => m.name == '$copyName:latest'), isFalse);
+    }, skip: 'Destructive test - creates and deletes a model');
 
-    test(
-      'pull downloads a model',
-      () async {
-        final response = await client.models.pull(
-          request: const PullRequest(model: 'nomic-embed-text:latest'),
-        );
+    test('pull downloads a model', () async {
+      final response = await client.models.pull(
+        request: const PullRequest(model: 'nomic-embed-text:latest'),
+      );
 
-        expect(response.status, isNotNull);
-      },
-      skip: 'Long running test - downloads a model from registry',
-    );
+      expect(response.status, isNotNull);
+    }, skip: 'Long running test - downloads a model from registry');
 
-    test(
-      'pullStream yields download progress',
-      () async {
-        final events = <StatusEvent>[];
+    test('pullStream yields download progress', () async {
+      final events = <StatusEvent>[];
 
-        await client.models
-            .pullStream(
-              request: const PullRequest(model: 'nomic-embed-text:latest'),
-            )
-            .forEach(events.add);
+      await client.models
+          .pullStream(
+            request: const PullRequest(model: 'nomic-embed-text:latest'),
+          )
+          .forEach(events.add);
 
-        expect(events, isNotEmpty);
-        // Check that we got progress updates
-        final hasProgress = events.any((e) => e.total != null && e.total! > 0);
-        expect(hasProgress, isTrue);
-      },
-      skip: 'Long running test - downloads a model from registry',
-    );
+      expect(events, isNotEmpty);
+      // Check that we got progress updates
+      final hasProgress = events.any((e) => e.total != null && e.total! > 0);
+      expect(hasProgress, isTrue);
+    }, skip: 'Long running test - downloads a model from registry');
   });
 
   group('VersionResource', () {

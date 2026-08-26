@@ -165,7 +165,7 @@ class InterceptorChain {
 
           try {
             final streamedResponse = await httpClient.send(abortableRequest);
-            return http.Response.fromStream(streamedResponse);
+            return await http.Response.fromStream(streamedResponse);
           } on http.RequestAbortedException catch (e) {
             // Convert http package's abort exception to our AbortedException
             throw AbortedException(
