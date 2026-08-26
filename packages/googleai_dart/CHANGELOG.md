@@ -1,3 +1,13 @@
+## 12.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Reworks Gemini `Part` handling so metadata survives an exact response-to-request round trip. Every typed part (`TextPart`, `InlineDataPart`, `FunctionCallPart`, and the rest) now carries the [common `thought`, `thoughtSignature`, `partMetadata`, `mediaResolution`, and `videoMetadata` fields](https://ai.google.dev/api/generate-content#Part) that the Gemini API models as siblings of the data discriminator — matching the flat representation used by the [official Python](https://googleapis.github.io/python-genai/genai.html#google.genai.types.Part) and [TypeScript](https://googleapis.github.io/js-genai/) SDKs, and required for [thought signatures](https://ai.google.dev/gemini-api/docs/generate-content/thought-signatures), which must be echoed back unchanged. Metadata-only payloads now canonicalize to a new `MetadataPart`, unknown or structurally ambiguous payloads decode to a lossless `UnknownPart` instead of throwing, and unrecognized non-reserved fields are retained through `additionalProperties`. Also fixes Vertex AI embeddings, where the typed `EmbedContentConfig` was ignored by the `predict` adapter — task type, title, output dimensionality, auto-truncation, document OCR, and audio extraction settings were silently dropped for callers following the current API.
+
+- **BREAKING** **FEAT**: Preserve complete Part representations ([#292](https://github.com/davidmigloz/ai_clients_dart/issues/292)). ([914b9e6d](https://github.com/davidmigloz/ai_clients_dart/commit/914b9e6dde739643f77237553ac561ff12817775))
+- **FIX**: Preserve embedding config in Vertex requests ([#294](https://github.com/davidmigloz/ai_clients_dart/issues/294)). ([de0b2c19](https://github.com/davidmigloz/ai_clients_dart/commit/de0b2c19afd84cee719a21bd023112ac7882c6e7))
+
 ## 11.0.0
 
 > [!CAUTION]

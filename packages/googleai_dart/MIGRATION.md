@@ -6,6 +6,86 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v11.x to v12.0.0
+
+v12.0.0 reworks how `Part` represents Gemini content. The API models `thought`, `thoughtSignature`, `partMetadata`, `mediaResolution`, and `videoMetadata` as siblings of the data discriminator (`text`, `functionCall`, `inlineData`, and so on), but the previous Dart hierarchy attached only selected metadata to selected subclasses and modeled the rest as standalone parts — which lost valid combinations. Every typed part now accepts all of the common metadata, two new variants (`MetadataPart`, `UnknownPart`) join the sealed hierarchy, and unrecognized payloads are retained instead of throwing. Code that constructs typed parts and reads their data fields needs no changes; exhaustive `switch` statements over `Part` and code that catches `FormatException` from `Part.fromJson` do.
+
+### 1) `MetadataPart` and `UnknownPart` are new `Part` subtypes
+
+`Part` is sealed, so any exhaustive `switch` over it must now handle both new cases.
+
+```dart
+// Before
+switch (part) {
+  case TextPart(:final text):
+  // ... the other typed variants
+}
+
+// After
+switch (part) {
+  case TextPart(:final text):
+  // ... the other typed variants
+  case MetadataPart():
+    // Inspect thought, thoughtSignature, partMetadata, mediaResolution,
+    // videoMetadata — no data field is present.
+  case UnknownPart(:final rawJson):
+    // A future or ambiguous API representation, retained verbatim.
+}
+```
+
+### 2) `Part.fromJson` no longer throws on unknown parts
+
+Unrecognized data keys, or several recognized data keys in one payload, previously threw a `FormatException`. They now decode to `UnknownPart`, which holds the untouched JSON so it can be replayed without loss.
+
+```dart
+// Before
+try {
+  final part = Part.fromJson(json);
+  // ...
+} on FormatException {
+  // Unknown part discarded or handled out of band.
+}
+
+// After — no exception; the payload is preserved
+final part = Part.fromJson(json);
+if (part is UnknownPart) {
+  // Echo part.toJson() back unchanged, or inspect part.rawJson.
+}
+```
+
+### 3) Metadata-only payloads canonicalize to `MetadataPart`
+
+JSON carrying only metadata no longer parses into `VideoMetadataPart`, `ThoughtPart`, `ThoughtSignaturePart`, or `PartMetadataPart`. Those four classes remain available but are deprecated; use `MetadataPart` instead.
+
+```dart
+// Before (deprecated)
+const part = ThoughtSignaturePart([1, 2, 3]);
+
+// After
+const part = MetadataPart(thoughtSignature: [1, 2, 3]);
+```
+
+Metadata that accompanies data no longer needs a separate part at all — pass it to the typed constructor:
+
+```dart
+// Before — the signature had to travel as its own part
+const parts = [
+  FunctionCallPart(call),
+  ThoughtSignaturePart([1, 2, 3]),
+];
+
+// After — one part carries both
+const parts = [
+  FunctionCallPart(call, thoughtSignature: [1, 2, 3]),
+];
+```
+
+### 4) Unknown fields on recognized parts are retained
+
+Non-reserved fields that this client does not yet model are kept in `Part.additionalProperties` and re-emitted by `toJson()`, rather than being dropped. `toJson()` rejects reserved `Part` keys placed in `additionalProperties`, so a typed data or metadata field can never be overwritten or emitted twice.
+
+---
+
 ## Migrating from v10.x to v11.0.0
 
 v11.0.0 syncs `googleai_dart` to the July 2026 Gemini main and interactions specs. The breaking changes are confined to the experimental Interactions API — chat/generation callers need no changes. Everything else (Environments API, Triggers API, Antigravity/CodeMender agent configs, ASR transcription with word-level annotations, and new `GenerationConfig` fields) is additive.

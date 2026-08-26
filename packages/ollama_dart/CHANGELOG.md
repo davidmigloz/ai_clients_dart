@@ -1,3 +1,9 @@
+## 2.6.0
+
+Adds the official `thinking` field to `ChatMessage`, so a model's reasoning trace can be replayed in the follow-up assistant message. Ollama's tool-calling guidance requires accumulated thinking, content, and tool calls to be sent back together, but the thinking trace was previously dropped from chat history. Set it via `ChatMessage.assistant(content, thinking: ...)`; it round-trips through JSON and is covered by `==`, `hashCode`, and `toString`.
+
+- **FIX**: Support assistant thinking replay ([#296](https://github.com/davidmigloz/ai_clients_dart/issues/296)). ([b10c8fdd](https://github.com/davidmigloz/ai_clients_dart/commit/b10c8fdd18011a249f63f0fcf231b885d45a3184))
+
 ## 2.5.0
 
 Adds `renderer` and `parser` to `CreateRequest`, matching the upstream OpenAPI spec's new tool-calling prompt renderer (e.g. `qwen3.5`) and output parser (e.g. `harmony`) fields. Also adds client-ahead fields for full [`api/types.go`](https://github.com/ollama/ollama/blob/main/api/types.go) parity that the spec still omits — `files`/`adapters` (filename → SHA256 digest maps, per the [Create a Model docs](https://github.com/ollama/ollama/blob/main/docs/api.md#create-a-model)) for creating models from GGUF/Safetensors and LoRA adapters, plus `draftQuantize`/`draftFiles`, `remoteHost`, `requires`, and `info`. Also fixes `CreateRequest`'s `==`/`hashCode`/`toString` contract, which previously only compared `model`, to cover all 18 fields with content-based map/list equality.

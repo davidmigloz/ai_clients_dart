@@ -1,3 +1,9 @@
+## 6.1.0
+
+Adds the official `index` field to `ToolCall`, which Mistral sets on streamed tool-call deltas. Without it, deltas from parallel calls to the same tool could not be correlated, so their arguments were conflated while accumulating a stream. The field round-trips through JSON and is included in `==`, `hashCode`, and `toString`.
+
+- **FIX**: Retain streamed tool-call indexes ([#295](https://github.com/davidmigloz/ai_clients_dart/issues/295)). ([045c5b9d](https://github.com/davidmigloz/ai_clients_dart/commit/045c5b9d3f68672e99784e1cfb8e3559c552a965))
+
 ## 6.0.0
 
 > [!CAUTION]

@@ -1,3 +1,9 @@
+## 8.0.1
+
+Fixes a `LinkedHashMap` failure on Dart 3.13.2 that broke streaming multipart requests. The client added a JSON content-type header and later removed it, and `MultipartRequest.finalize()` reinserting the same case-insensitive key then threw. Streaming multipart requests now build their headers directly and add the required SSE `Accept` header, leaving the generated multipart boundary owned by `package:http`.
+
+- **FIX**: Restore Dart 3.13 compatibility ([#293](https://github.com/davidmigloz/ai_clients_dart/issues/293)). ([9def8ac4](https://github.com/davidmigloz/ai_clients_dart/commit/9def8ac415b087b8b2f12a0a2198c1ae94bb32b3))
+
 ## 8.0.0
 
 > [!CAUTION]
