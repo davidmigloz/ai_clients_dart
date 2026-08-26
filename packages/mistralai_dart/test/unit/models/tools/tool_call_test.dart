@@ -6,6 +6,7 @@ void main() {
     test('creates with required fields', () {
       const toolCall = ToolCall(
         id: 'call_123',
+        index: 2,
         function: FunctionCall(
           name: 'get_weather',
           arguments: '{"location": "Paris"}',
@@ -14,6 +15,7 @@ void main() {
 
       expect(toolCall.id, 'call_123');
       expect(toolCall.type, 'function');
+      expect(toolCall.index, 2);
       expect(toolCall.function.name, 'get_weather');
       expect(toolCall.function.arguments, '{"location": "Paris"}');
     });
@@ -22,6 +24,7 @@ void main() {
       final json = {
         'id': 'call_123',
         'type': 'function',
+        'index': 2,
         'function': {
           'name': 'get_weather',
           'arguments': '{"location": "Paris"}',
@@ -31,6 +34,7 @@ void main() {
 
       expect(toolCall.id, 'call_123');
       expect(toolCall.type, 'function');
+      expect(toolCall.index, 2);
       expect(toolCall.function.name, 'get_weather');
       expect(toolCall.function.arguments, '{"location": "Paris"}');
     });
@@ -76,6 +80,7 @@ void main() {
       const toolCall = ToolCall(
         id: 'call_123',
         type: 'function',
+        index: 2,
         function: FunctionCall(
           name: 'get_weather',
           arguments: '{"location": "Paris"}',
@@ -85,6 +90,7 @@ void main() {
 
       expect(json['id'], 'call_123');
       expect(json['type'], 'function');
+      expect(json['index'], 2);
       final functionJson = json['function'] as Map<String, dynamic>;
       expect(functionJson['name'], 'get_weather');
       expect(functionJson['arguments'], '{"location": "Paris"}');
