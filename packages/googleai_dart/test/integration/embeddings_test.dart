@@ -221,7 +221,9 @@ void main() {
         model: defaultEmbeddingModel,
         request: const EmbedContentRequest(
           content: Content(parts: [TextPart('Hello, world!')]),
-          outputDimensionality: reducedDimension,
+          embedContentConfig: EmbedContentConfig(
+            outputDimensionality: reducedDimension,
+          ),
         ),
       );
 
