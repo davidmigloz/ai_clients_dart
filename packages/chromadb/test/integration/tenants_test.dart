@@ -26,13 +26,18 @@ void main() {
       expect(tenant.name, equals('default_tenant'));
     });
 
-    test('create creates a new tenant', () async {
-      final tenantName = 'test_tenant_${DateTime.now().millisecondsSinceEpoch}';
+    test(
+      'create creates a new tenant',
+      () async {
+        final tenantName =
+            'test_tenant_${DateTime.now().millisecondsSinceEpoch}';
 
-      final tenant = await client.tenants.create(name: tenantName);
+        final tenant = await client.tenants.create(name: tenantName);
 
-      expect(tenant.name, equals(tenantName));
-    }, skip: 'Destructive test - creates a tenant that cannot be deleted');
+        expect(tenant.name, equals(tenantName));
+      },
+      skip: 'Destructive test - creates a tenant that cannot be deleted',
+    );
 
     test('update modifies tenant name', () async {
       // Note: Update may not work on all ChromaDB versions

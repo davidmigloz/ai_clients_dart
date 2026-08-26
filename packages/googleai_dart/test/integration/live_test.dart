@@ -39,151 +39,171 @@ void main() {
   });
 
   group('Connection & Setup', () {
-    test('connects to Live API and receives setup complete', () async {
-      if (apiKey == null) {
-        markTestSkipped('API key not available');
-        return;
-      }
-
-      final session = await liveClient!.connect(
-        model: defaultLiveModel,
-        liveConfig: LiveConfig(
-          generationConfig: LiveGenerationConfig.audioOnly(),
-        ),
-      );
-
-      expect(session, isNotNull);
-      expect(session.isConnected, isTrue);
-
-      await session.close();
-    }, timeout: const Timeout(Duration(seconds: 30)));
-
-    test('establishes connection and can receive messages', () async {
-      if (apiKey == null) {
-        markTestSkipped('API key not available');
-        return;
-      }
-
-      final session = await liveClient!.connect(
-        model: defaultLiveModel,
-        liveConfig: LiveConfig(
-          generationConfig: LiveGenerationConfig.audioOnly(),
-        ),
-      );
-
-      // Connection is established after setup completes
-      expect(session.isConnected, isTrue);
-
-      // Send a text message and verify we can receive a response
-      session.sendText('Hi');
-
-      // Wait for at least one message (content or turn complete)
-      var receivedMessage = false;
-      await for (final message in session.messages) {
-        receivedMessage = true;
-        if (message is BidiGenerateContentServerContent) {
-          if (message.turnComplete ?? false) break;
+    test(
+      'connects to Live API and receives setup complete',
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
         }
-      }
 
-      expect(receivedMessage, isTrue);
+        final session = await liveClient!.connect(
+          model: defaultLiveModel,
+          liveConfig: LiveConfig(
+            generationConfig: LiveGenerationConfig.audioOnly(),
+          ),
+        );
 
-      await session.close();
-    }, timeout: const Timeout(Duration(seconds: 60)));
+        expect(session, isNotNull);
+        expect(session.isConnected, isTrue);
+
+        await session.close();
+      },
+      timeout: const Timeout(Duration(seconds: 30)),
+    );
+
+    test(
+      'establishes connection and can receive messages',
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        final session = await liveClient!.connect(
+          model: defaultLiveModel,
+          liveConfig: LiveConfig(
+            generationConfig: LiveGenerationConfig.audioOnly(),
+          ),
+        );
+
+        // Connection is established after setup completes
+        expect(session.isConnected, isTrue);
+
+        // Send a text message and verify we can receive a response
+        session.sendText('Hi');
+
+        // Wait for at least one message (content or turn complete)
+        var receivedMessage = false;
+        await for (final message in session.messages) {
+          receivedMessage = true;
+          if (message is BidiGenerateContentServerContent) {
+            if (message.turnComplete ?? false) break;
+          }
+        }
+
+        expect(receivedMessage, isTrue);
+
+        await session.close();
+      },
+      timeout: const Timeout(Duration(seconds: 60)),
+    );
   });
 
   group('Text Exchange', () {
-    test('sends text and receives response', () async {
-      if (apiKey == null) {
-        markTestSkipped('API key not available');
-        return;
-      }
-
-      final session = await liveClient!.connect(
-        model: defaultLiveModel,
-        liveConfig: LiveConfig(
-          generationConfig: LiveGenerationConfig.audioOnly(),
-        ),
-      );
-
-      // Send text
-      session.sendText('Say hello');
-
-      // Wait for turn complete
-      var receivedResponse = false;
-      messageLoop:
-      await for (final message in session.messages) {
-        switch (message) {
-          case BidiGenerateContentServerContent(:final turnComplete):
-            receivedResponse = true;
-            if (turnComplete ?? false) {
-              break messageLoop;
-            }
-          default:
-            // Ignore other message types
-            break;
+    test(
+      'sends text and receives response',
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
         }
-      }
 
-      expect(receivedResponse, isTrue);
+        final session = await liveClient!.connect(
+          model: defaultLiveModel,
+          liveConfig: LiveConfig(
+            generationConfig: LiveGenerationConfig.audioOnly(),
+          ),
+        );
 
-      await session.close();
-    }, timeout: const Timeout(Duration(seconds: 60)));
+        // Send text
+        session.sendText('Say hello');
 
-    test('receives turn complete signal', () async {
-      if (apiKey == null) {
-        markTestSkipped('API key not available');
-        return;
-      }
-
-      final session = await liveClient!.connect(
-        model: defaultLiveModel,
-        liveConfig: LiveConfig(
-          generationConfig: LiveGenerationConfig.audioOnly(),
-        ),
-      );
-
-      session.sendText('Hi');
-
-      var turnCompleted = false;
-      await for (final message in session.messages) {
-        if (message is BidiGenerateContentServerContent) {
-          if (message.turnComplete ?? false) {
-            turnCompleted = true;
-            break;
+        // Wait for turn complete
+        var receivedResponse = false;
+        messageLoop:
+        await for (final message in session.messages) {
+          switch (message) {
+            case BidiGenerateContentServerContent(:final turnComplete):
+              receivedResponse = true;
+              if (turnComplete ?? false) {
+                break messageLoop;
+              }
+            default:
+              // Ignore other message types
+              break;
           }
         }
-      }
 
-      expect(turnCompleted, isTrue);
+        expect(receivedResponse, isTrue);
 
-      await session.close();
-    }, timeout: const Timeout(Duration(seconds: 60)));
+        await session.close();
+      },
+      timeout: const Timeout(Duration(seconds: 60)),
+    );
+
+    test(
+      'receives turn complete signal',
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        final session = await liveClient!.connect(
+          model: defaultLiveModel,
+          liveConfig: LiveConfig(
+            generationConfig: LiveGenerationConfig.audioOnly(),
+          ),
+        );
+
+        session.sendText('Hi');
+
+        var turnCompleted = false;
+        await for (final message in session.messages) {
+          if (message is BidiGenerateContentServerContent) {
+            if (message.turnComplete ?? false) {
+              turnCompleted = true;
+              break;
+            }
+          }
+        }
+
+        expect(turnCompleted, isTrue);
+
+        await session.close();
+      },
+      timeout: const Timeout(Duration(seconds: 60)),
+    );
   });
 
   group('VAD Modes', () {
-    test('automatic VAD mode configuration works', () async {
-      if (apiKey == null) {
-        markTestSkipped('API key not available');
-        return;
-      }
+    test(
+      'automatic VAD mode configuration works',
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
 
-      final session = await liveClient!.connect(
-        model: defaultLiveModel,
-        liveConfig: LiveConfig(
-          generationConfig: LiveGenerationConfig.audioOnly(),
-          realtimeInputConfig: RealtimeInputConfig.withVAD(
-            silenceDurationMs: 500,
-            activityHandling: ActivityHandling.startOfActivityInterrupts,
+        final session = await liveClient!.connect(
+          model: defaultLiveModel,
+          liveConfig: LiveConfig(
+            generationConfig: LiveGenerationConfig.audioOnly(),
+            realtimeInputConfig: RealtimeInputConfig.withVAD(
+              silenceDurationMs: 500,
+              activityHandling: ActivityHandling.startOfActivityInterrupts,
+            ),
           ),
-        ),
-      );
+        );
 
-      // If we got here without exception, VAD config was accepted
-      expect(session.isConnected, isTrue);
+        // If we got here without exception, VAD config was accepted
+        expect(session.isConnected, isTrue);
 
-      await session.close();
-    }, timeout: const Timeout(Duration(seconds: 30)));
+        await session.close();
+      },
+      timeout: const Timeout(Duration(seconds: 30)),
+    );
 
     test('manual VAD signals work', () async {
       if (apiKey == null) {
@@ -229,103 +249,111 @@ void main() {
   });
 
   group('Tool Calling', () {
-    test('can configure tools in session', () async {
-      if (apiKey == null) {
-        markTestSkipped('API key not available');
-        return;
-      }
-
-      // Define a simple tool
-      const tools = [
-        Tool(
-          functionDeclarations: [
-            FunctionDeclaration(
-              name: 'get_current_time',
-              description: 'Gets the current time in a specific timezone',
-              parameters: Schema(
-                type: SchemaType.object,
-                properties: {
-                  'timezone': Schema(
-                    type: SchemaType.string,
-                    description: 'The timezone to get time for',
-                  ),
-                },
-              ),
-            ),
-          ],
-        ),
-      ];
-
-      // Verify we can create a session with tools configured
-      final session = await liveClient!.connect(
-        model: defaultLiveModel,
-        liveConfig: LiveConfig(
-          generationConfig: LiveGenerationConfig.audioOnly(),
-          tools: tools,
-        ),
-      );
-
-      expect(session.isConnected, isTrue);
-
-      // Send a message and get a response
-      session.sendText('Hello');
-
-      var receivedResponse = false;
-      messageLoop:
-      await for (final message in session.messages) {
-        switch (message) {
-          case BidiGenerateContentServerContent(:final turnComplete):
-            receivedResponse = true;
-            if (turnComplete ?? false) break messageLoop;
-          case BidiGenerateContentToolCall():
-            receivedResponse = true;
-            break messageLoop;
-          default:
-            break;
+    test(
+      'can configure tools in session',
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
         }
-      }
 
-      expect(receivedResponse, isTrue);
+        // Define a simple tool
+        const tools = [
+          Tool(
+            functionDeclarations: [
+              FunctionDeclaration(
+                name: 'get_current_time',
+                description: 'Gets the current time in a specific timezone',
+                parameters: Schema(
+                  type: SchemaType.object,
+                  properties: {
+                    'timezone': Schema(
+                      type: SchemaType.string,
+                      description: 'The timezone to get time for',
+                    ),
+                  },
+                ),
+              ),
+            ],
+          ),
+        ];
 
-      await session.close();
-    }, timeout: const Timeout(Duration(seconds: 60)));
+        // Verify we can create a session with tools configured
+        final session = await liveClient!.connect(
+          model: defaultLiveModel,
+          liveConfig: LiveConfig(
+            generationConfig: LiveGenerationConfig.audioOnly(),
+            tools: tools,
+          ),
+        );
+
+        expect(session.isConnected, isTrue);
+
+        // Send a message and get a response
+        session.sendText('Hello');
+
+        var receivedResponse = false;
+        messageLoop:
+        await for (final message in session.messages) {
+          switch (message) {
+            case BidiGenerateContentServerContent(:final turnComplete):
+              receivedResponse = true;
+              if (turnComplete ?? false) break messageLoop;
+            case BidiGenerateContentToolCall():
+              receivedResponse = true;
+              break messageLoop;
+            default:
+              break;
+          }
+        }
+
+        expect(receivedResponse, isTrue);
+
+        await session.close();
+      },
+      timeout: const Timeout(Duration(seconds: 60)),
+    );
   });
 
   group('Session Resumption', () {
-    test('can enable session resumption', () async {
-      if (apiKey == null) {
-        markTestSkipped('API key not available');
-        return;
-      }
-
-      // Verify we can create a session with resumption enabled
-      final session = await liveClient!.connect(
-        model: defaultLiveModel,
-        liveConfig: LiveConfig(
-          generationConfig: LiveGenerationConfig.audioOnly(),
-          sessionResumption: const SessionResumptionConfig.enabled(),
-        ),
-      );
-
-      expect(session.isConnected, isTrue);
-
-      session.sendText('Hello');
-
-      // Wait for turn complete
-      messageLoop:
-      await for (final message in session.messages) {
-        switch (message) {
-          case BidiGenerateContentServerContent(:final turnComplete):
-            if (turnComplete ?? false) break messageLoop;
-          default:
-            break;
+    test(
+      'can enable session resumption',
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
         }
-      }
 
-      // The resumption token may or may not be provided depending on the model
-      // We just verify the session worked with resumption enabled
-      await session.close();
-    }, timeout: const Timeout(Duration(seconds: 60)));
+        // Verify we can create a session with resumption enabled
+        final session = await liveClient!.connect(
+          model: defaultLiveModel,
+          liveConfig: LiveConfig(
+            generationConfig: LiveGenerationConfig.audioOnly(),
+            sessionResumption: const SessionResumptionConfig.enabled(),
+          ),
+        );
+
+        expect(session.isConnected, isTrue);
+
+        session.sendText('Hello');
+
+        // Wait for turn complete
+        messageLoop:
+        await for (final message in session.messages) {
+          switch (message) {
+            case BidiGenerateContentServerContent(:final turnComplete):
+              if (turnComplete ?? false) break messageLoop;
+            default:
+              break;
+          }
+        }
+
+        // The resumption token may or may not be provided depending on the model
+        // We just verify the session worked with resumption enabled
+        await session.close();
+      },
+      timeout: const Timeout(Duration(seconds: 60)),
+    );
 
     test('resumes session with token', () async {
       if (apiKey == null) {
