@@ -356,19 +356,28 @@ class ModelsResource extends ResourceBase with StreamingResource {
       throw ArgumentError('Content must contain at least one text part');
     }
     final text = textParts.first.text;
+    final embedConfig = request.embedContentConfig;
+    final taskType = embedConfig?.taskType ?? request.taskType;
+    final title = embedConfig?.title ?? request.title;
+    final outputDimensionality =
+        embedConfig?.outputDimensionality ?? request.outputDimensionality;
 
     // Build instance in Vertex AI format
     final instance = <String, dynamic>{
       'content': text,
-      if (request.taskType != null)
-        'task_type': taskTypeToString(request.taskType!),
-      if (request.title != null) 'title': request.title,
+      if (taskType != null) 'task_type': taskTypeToString(taskType),
+      'title': ?title,
     };
 
     // Build parameters
     final parameters = <String, dynamic>{
-      if (request.outputDimensionality != null)
-        'outputDimensionality': request.outputDimensionality,
+      'outputDimensionality': ?outputDimensionality,
+      if (embedConfig?.autoTruncate != null)
+        'autoTruncate': embedConfig!.autoTruncate,
+      if (embedConfig?.documentOcr != null)
+        'documentOcr': embedConfig!.documentOcr,
+      if (embedConfig?.audioTrackExtraction != null)
+        'audioTrackExtraction': embedConfig!.audioTrackExtraction,
     };
 
     // Call predict endpoint
