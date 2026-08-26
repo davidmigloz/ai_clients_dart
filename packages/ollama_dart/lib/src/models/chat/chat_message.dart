@@ -64,6 +64,9 @@ class ChatMessage {
   /// Message text content.
   final String content;
 
+  /// Deliberate thinking trace to replay for an assistant message.
+  final String? thinking;
+
   /// Optional list of inline images for multimodal models.
   ///
   /// Images should be base64-encoded.
@@ -76,6 +79,7 @@ class ChatMessage {
   const ChatMessage({
     required this.role,
     required this.content,
+    this.thinking,
     this.images,
     this.toolCalls,
   });
@@ -89,8 +93,16 @@ class ChatMessage {
     : this(role: MessageRole.system, content: content);
 
   /// Creates an assistant message.
-  const ChatMessage.assistant(String content, {List<ToolCall>? toolCalls})
-    : this(role: MessageRole.assistant, content: content, toolCalls: toolCalls);
+  const ChatMessage.assistant(
+    String content, {
+    String? thinking,
+    List<ToolCall>? toolCalls,
+  }) : this(
+         role: MessageRole.assistant,
+         content: content,
+         thinking: thinking,
+         toolCalls: toolCalls,
+       );
 
   /// Creates a tool result message.
   const ChatMessage.tool(String content)
@@ -100,6 +112,7 @@ class ChatMessage {
   factory ChatMessage.fromJson(Map<String, dynamic> json) => ChatMessage(
     role: messageRoleFromString(json['role'] as String?),
     content: json['content'] as String? ?? '',
+    thinking: json['thinking'] as String?,
     images: (json['images'] as List?)?.cast<String>(),
     toolCalls: (json['tool_calls'] as List?)
         ?.map((e) => ToolCall.fromJson(e as Map<String, dynamic>))
@@ -110,6 +123,7 @@ class ChatMessage {
   Map<String, dynamic> toJson() => {
     'role': messageRoleToString(role),
     'content': content,
+    if (thinking != null) 'thinking': thinking,
     if (images != null) 'images': images,
     if (toolCalls != null)
       'tool_calls': toolCalls!.map((e) => e.toJson()).toList(),
@@ -119,12 +133,16 @@ class ChatMessage {
   ChatMessage copyWith({
     MessageRole? role,
     String? content,
+    Object? thinking = unsetCopyWithValue,
     Object? images = unsetCopyWithValue,
     Object? toolCalls = unsetCopyWithValue,
   }) {
     return ChatMessage(
       role: role ?? this.role,
       content: content ?? this.content,
+      thinking: thinking == unsetCopyWithValue
+          ? this.thinking
+          : thinking as String?,
       images: images == unsetCopyWithValue
           ? this.images
           : images as List<String>?,
@@ -141,18 +159,25 @@ class ChatMessage {
           runtimeType == other.runtimeType &&
           role == other.role &&
           content == other.content &&
+          thinking == other.thinking &&
           listsEqual(images, other.images) &&
           listsEqual(toolCalls, other.toolCalls);
 
   @override
-  int get hashCode =>
-      Object.hash(role, content, listHash(images), listHash(toolCalls));
+  int get hashCode => Object.hash(
+    role,
+    content,
+    thinking,
+    listHash(images),
+    listHash(toolCalls),
+  );
 
   @override
   String toString() =>
       'ChatMessage('
       'role: $role, '
       'content: $content, '
+      'thinking: $thinking, '
       'images: $images, '
       'toolCalls: $toolCalls)';
 }
