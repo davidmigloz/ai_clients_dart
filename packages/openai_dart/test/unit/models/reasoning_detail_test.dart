@@ -3,123 +3,188 @@ import 'package:test/test.dart';
 
 void main() {
   group('ReasoningDetail', () {
-    test('fromJson parses summary type', () {
-      final json = {
+    test('round-trips every documented field and future properties', () {
+      final json = <String, dynamic>{
+        'type': 'reasoning.text',
+        'id': 'reasoning-text-1',
+        'format': 'anthropic-claude-v1',
+        'index': 2,
+        'text': 'Let me think.',
+        'signature': null,
+        'future': {
+          'nested': [
+            1,
+            {'keep': true},
+          ],
+        },
+      };
+
+      final detail = ReasoningDetail.fromJson(json);
+
+      expect(detail.id, 'reasoning-text-1');
+      expect(detail.format, 'anthropic-claude-v1');
+      expect(detail.index, 2);
+      expect(detail.text, 'Let me think.');
+      expect(detail.signature, isNull);
+      expect(detail.additionalProperties, contains('future'));
+      expect(detail.toJson(), equals(json));
+      expect(detail.toJson(), containsPair('signature', null));
+    });
+
+    test('round-trips summary and encrypted shapes', () {
+      final summary = ReasoningDetail.fromJson(const {
         'type': 'reasoning.summary',
-        'text': 'This is a summary of the reasoning.',
-      };
-
-      final detail = ReasoningDetail.fromJson(json);
-
-      expect(detail.type, 'reasoning.summary');
-      expect(detail.text, 'This is a summary of the reasoning.');
-      expect(detail.data, isNull);
-      expect(detail.isSummary, true);
-      expect(detail.isText, false);
-      expect(detail.isEncrypted, false);
-    });
-
-    test('fromJson parses text type', () {
-      final json = {
-        'type': 'reasoning.text',
-        'text': 'Full reasoning text here.',
-      };
-
-      final detail = ReasoningDetail.fromJson(json);
-
-      expect(detail.type, 'reasoning.text');
-      expect(detail.text, 'Full reasoning text here.');
-      expect(detail.isSummary, false);
-      expect(detail.isText, true);
-      expect(detail.isEncrypted, false);
-    });
-
-    test('fromJson parses encrypted type', () {
-      final json = {
+        'summary': 'Checked the constraints.',
+        'id': 'summary-1',
+        'format': 'openai-responses-v1',
+        'index': 0,
+      });
+      final encrypted = ReasoningDetail.fromJson(const {
         'type': 'reasoning.encrypted',
-        'data': 'YmFzZTY0ZW5jb2RlZGRhdGE=',
-      };
+        'data': 'ZW5jcnlwdGVk',
+        'id': 'encrypted-1',
+        'format': 'anthropic-claude-v1',
+        'index': 1,
+      });
 
-      final detail = ReasoningDetail.fromJson(json);
-
-      expect(detail.type, 'reasoning.encrypted');
-      expect(detail.text, isNull);
-      expect(detail.data, 'YmFzZTY0ZW5jb2RlZGRhdGE=');
-      expect(detail.isSummary, false);
-      expect(detail.isText, false);
-      expect(detail.isEncrypted, true);
+      expect(summary.summary, 'Checked the constraints.');
+      expect(summary.toJson()['summary'], 'Checked the constraints.');
+      expect(encrypted.data, 'ZW5jcnlwdGVk');
+      expect(encrypted.toJson()['data'], 'ZW5jcnlwdGVk');
     });
 
-    test('toJson produces correct output', () {
+    test('keeps the existing const constructor source compatible', () {
+      const first = ReasoningDetail(
+        type: 'reasoning.summary',
+        text: 'Legacy summary text',
+      );
+      const same = ReasoningDetail(
+        type: 'reasoning.summary',
+        text: 'Legacy summary text',
+      );
+
+      expect(first.isSummary, isTrue);
+      expect(first.isText, isFalse);
+      expect(first.isEncrypted, isFalse);
+      expect(first.toJson(), {
+        'type': 'reasoning.summary',
+        'text': 'Legacy summary text',
+      });
+      expect(first, same);
+      expect(first.hashCode, same.hashCode);
+      expect(first.toString(), contains('19 chars'));
+    });
+
+    test('programmatic constructor serializes all typed fields', () {
       const detail = ReasoningDetail(
-        type: 'reasoning.summary',
-        text: 'Summary text',
+        type: 'reasoning.text',
+        id: 'detail-1',
+        format: 'anthropic-claude-v1',
+        index: 3,
+        text: 'Thinking',
+        signature: 'sig-1',
       );
 
-      final json = detail.toJson();
-
-      expect(json['type'], 'reasoning.summary');
-      expect(json['text'], 'Summary text');
-      expect(json.containsKey('data'), false); // null fields excluded
-    });
-
-    test('toJson round-trip', () {
-      final original = {
+      expect(detail.toJson(), {
         'type': 'reasoning.text',
-        'text': 'Some reasoning content',
+        'id': 'detail-1',
+        'format': 'anthropic-claude-v1',
+        'index': 3,
+        'text': 'Thinking',
+        'signature': 'sig-1',
+      });
+    });
+
+    test('parsed payload is isolated from source and returned JSON', () {
+      final source = <String, dynamic>{
+        'type': 'reasoning.text',
+        'future': {
+          'items': [1, 2],
+        },
       };
+      final detail = ReasoningDetail.fromJson(source);
 
-      final detail = ReasoningDetail.fromJson(original);
-      final json = detail.toJson();
+      (source['future'] as Map<String, dynamic>)['items'] = [3];
+      final serialized = detail.toJson();
+      ((serialized['future'] as Map<String, dynamic>)['items'] as List).add(4);
 
-      expect(json['type'], original['type']);
-      expect(json['text'], original['text']);
+      expect(detail.toJson()['future'], {
+        'items': [1, 2],
+      });
+      expect(
+        () => detail.additionalProperties['future'] = false,
+        throwsUnsupportedError,
+      );
     });
 
-    test('equality works correctly', () {
-      const detail1 = ReasoningDetail(
-        type: 'reasoning.summary',
-        text: 'Same text',
+    test('rejects reserved additional-property collisions', () {
+      expect(
+        () => ReasoningDetail.withAdditionalProperties(
+          type: 'reasoning.text',
+          additionalProperties: const {'signature': 'duplicate'},
+        ),
+        throwsArgumentError,
       );
-      const detail2 = ReasoningDetail(
-        type: 'reasoning.summary',
-        text: 'Same text',
-      );
-      const detail3 = ReasoningDetail(
-        type: 'reasoning.summary',
-        text: 'Different text',
-      );
-
-      expect(detail1, equals(detail2));
-      expect(detail1, isNot(equals(detail3)));
     });
 
-    test('hashCode is consistent', () {
-      const detail1 = ReasoningDetail(
-        type: 'reasoning.summary',
-        text: 'Test text',
-      );
-      const detail2 = ReasoningDetail(
-        type: 'reasoning.summary',
-        text: 'Test text',
-      );
+    test('equality and hash include complete serialized payload', () {
+      final first = ReasoningDetail.fromJson(const {
+        'type': 'reasoning.text',
+        'signature': null,
+        'future': {'value': 1},
+      });
+      final same = ReasoningDetail.fromJson(const {
+        'future': {'value': 1},
+        'signature': null,
+        'type': 'reasoning.text',
+      });
+      final missingNull = ReasoningDetail.fromJson(const {
+        'type': 'reasoning.text',
+        'future': {'value': 1},
+      });
 
-      expect(detail1.hashCode, equals(detail2.hashCode));
+      expect(first, same);
+      expect(first.hashCode, same.hashCode);
+      expect(first, isNot(missingNull));
     });
 
-    test('toString produces readable output', () {
-      const summaryDetail = ReasoningDetail(
-        type: 'reasoning.summary',
-        text: 'Short',
-      );
-      const encryptedDetail = ReasoningDetail(
-        type: 'reasoning.encrypted',
-        data: 'base64data',
+    test('chat request preserves reasoning details exactly', () {
+      final details = [
+        ReasoningDetail.fromJson(const {
+          'type': 'reasoning.text',
+          'text': '',
+          'signature': 'sig-1',
+          'id': 'detail-1',
+          'format': 'anthropic-claude-v1',
+          'index': 0,
+          'future': {'opaque': true},
+        }),
+      ];
+      final request = ChatCompletionCreateRequest(
+        model: 'provider/model',
+        messages: [
+          AssistantMessage(toolCalls: const [], reasoningDetails: details),
+        ],
       );
 
-      expect(summaryDetail.toString(), contains('reasoning.summary'));
-      expect(summaryDetail.toString(), contains('5 chars'));
-      expect(encryptedDetail.toString(), contains('reasoning.encrypted'));
+      final message =
+          (request.toJson()['messages'] as List).single as Map<String, dynamic>;
+      expect(
+        message['reasoning_details'],
+        equals(details.map((detail) => detail.toJson()).toList()),
+      );
+    });
+
+    test('assistant retains an explicitly empty reasoning array', () {
+      final message = AssistantMessage.fromJson(const {
+        'role': 'assistant',
+        'content': null,
+        'reasoning_details': <dynamic>[],
+      });
+
+      expect(message.hasReasoningContent, isTrue);
+      expect(message.reasoningDetails, isEmpty);
+      expect(message.toJson(), containsPair('reasoning_details', <dynamic>[]));
     });
   });
 }
