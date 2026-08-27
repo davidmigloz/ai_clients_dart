@@ -1,3 +1,9 @@
+## 12.0.1
+
+Fixes embeddings on the Gemini Developer API, where a typed `EmbedContentConfig` was serialized as a nested object the API ignores — task type, title, and output dimensionality were silently dropped for callers using the canonical config API. Both `embedContent` and `batchEmbedContents` now flatten the config into the [top-level request fields](https://ai.google.dev/api/embeddings#method:-models.embedContent) the endpoint expects, matching Google's official clients, and raise an `ArgumentError` for `autoTruncate`, `documentOcr`, and `audioTrackExtraction`, which Google documents as unavailable outside Vertex AI. This is the Gemini Developer API counterpart to the Vertex AI embedding fix shipped in 12.0.0.
+
+- **FIX**: Serialize Gemini embedding config ([#298](https://github.com/davidmigloz/ai_clients_dart/issues/298)). ([d5b710b4](https://github.com/davidmigloz/ai_clients_dart/commit/d5b710b488dc8d6a47eda8660dafc7a15e3400a2))
+
 ## 12.0.0
 
 > [!CAUTION]

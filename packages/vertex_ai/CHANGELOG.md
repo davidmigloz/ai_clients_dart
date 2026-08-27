@@ -1,3 +1,9 @@
+## 0.2.5
+
+Repoints the package's `documentation:` metadata from the retired `langchaindart.dev` domain to its [pub.dev API reference](https://pub.dev/documentation/vertex_ai/latest/), so the documentation link shown on pub.dev resolves again. Metadata-only release — no code or API changes.
+
+- **CHORE**: Replace dead langchaindart.dev documentation URL ([#248](https://github.com/davidmigloz/ai_clients_dart/issues/248)). ([c0765c27](https://github.com/davidmigloz/ai_clients_dart/commit/c0765c2784d6feffc3d528edb1000be7bdd2e3e9))
+
 ## 0.2.4
 
 Annotates `llms.txt` with per-link token counts and per-package totals so coding agents can budget context before fetching documentation, examples, or changelogs — inspired by Addy Osmani's [Agentic Engine Optimization](https://addyosmani.com/blog/agentic-engine-optimization/) article.
