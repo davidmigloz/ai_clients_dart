@@ -330,7 +330,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
 
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
+      ..body = jsonEncode(_embedContentRequestToGoogleAIJson(request));
 
     final response = await interceptorChain.execute(
       httpRequest,
@@ -442,11 +442,14 @@ class ModelsResource extends ResourceBase with StreamingResource {
     );
 
     // Add model to each request as required by the API
-    final requestJson = request.toJson();
-    final requests = (requestJson['requests'] as List<dynamic>).map((r) {
-      final requestMap = r as Map<String, dynamic>;
-      return {...requestMap, 'model': 'models/$model'};
-    }).toList();
+    final requests = request.requests
+        .map(
+          (embedRequest) => {
+            ..._embedContentRequestToGoogleAIJson(embedRequest),
+            'model': 'models/$model',
+          },
+        )
+        .toList();
 
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
@@ -456,6 +459,34 @@ class ModelsResource extends ResourceBase with StreamingResource {
 
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
     return BatchEmbedContentsResponse.fromJson(responseBody);
+  }
+
+  Map<String, dynamic> _embedContentRequestToGoogleAIJson(
+    EmbedContentRequest request,
+  ) {
+    final embedConfig = request.embedContentConfig;
+    if (embedConfig == null) return request.toJson();
+
+    if (embedConfig.autoTruncate != null ||
+        embedConfig.documentOcr != null ||
+        embedConfig.audioTrackExtraction != null) {
+      throw ArgumentError(
+        'autoTruncate, documentOcr, and audioTrackExtraction are not '
+            'supported by the Gemini Developer API.',
+        'request',
+      );
+    }
+
+    final taskType = embedConfig.taskType ?? request.taskType;
+    final title = embedConfig.title ?? request.title;
+    final outputDimensionality =
+        embedConfig.outputDimensionality ?? request.outputDimensionality;
+    return {
+      'content': request.content.toJson(),
+      if (taskType != null) 'taskType': taskTypeToString(taskType),
+      'title': ?title,
+      'outputDimensionality': ?outputDimensionality,
+    };
   }
 
   /// Enqueues a batch of embed content requests for asynchronous processing.

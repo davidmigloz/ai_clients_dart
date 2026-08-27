@@ -20,15 +20,11 @@ void main() {
   });
 
   group('AuthResource', () {
-    test(
-      'identity returns user info when authenticated',
-      () async {
-        final response = await client.auth.identity();
+    test('identity returns user info when authenticated', () async {
+      final response = await client.auth.identity();
 
-        expect(response, isNotNull);
-        // The response may have null fields for unauthenticated servers
-      },
-      skip: 'Requires authentication to be enabled on the server',
-    );
+      expect(response, isNotNull);
+      // The response may have null fields for unauthenticated servers
+    }, skip: 'Requires authentication to be enabled on the server');
   });
 }
