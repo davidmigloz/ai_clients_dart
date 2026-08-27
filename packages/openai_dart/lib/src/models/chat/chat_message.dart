@@ -395,9 +395,7 @@ class AssistantMessage extends ChatMessage {
 
   /// Whether this message contains reasoning content.
   bool get hasReasoningContent =>
-      reasoningContent != null ||
-      reasoning != null ||
-      (reasoningDetails != null && reasoningDetails!.isNotEmpty);
+      reasoningContent != null || reasoning != null || reasoningDetails != null;
 
   @override
   String get role => 'assistant';

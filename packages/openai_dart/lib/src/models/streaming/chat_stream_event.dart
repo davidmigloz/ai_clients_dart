@@ -7,6 +7,7 @@ import '../chat/chat_completion_moderation.dart';
 import '../chat/chat_message.dart';
 import '../chat/reasoning_detail.dart';
 import '../chat/tool_call.dart';
+import '../common/equality_helpers.dart';
 import '../common/finish_reason.dart';
 import '../common/logprobs.dart';
 import '../common/usage.dart';
@@ -301,8 +302,7 @@ class ChatDelta {
 
   /// Whether this delta has reasoning content.
   bool get hasReasoningContent =>
-      (reasoningContent != null && reasoningContent!.isNotEmpty) ||
-      (reasoning != null && reasoning!.isNotEmpty);
+      reasoningContent != null || reasoning != null || reasoningDetails != null;
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
@@ -325,12 +325,21 @@ class ChatDelta {
           role == other.role &&
           content == other.content &&
           refusal == other.refusal &&
+          listsEqual(toolCalls, other.toolCalls) &&
           reasoningContent == other.reasoningContent &&
-          reasoning == other.reasoning;
+          reasoning == other.reasoning &&
+          listsEqual(reasoningDetails, other.reasoningDetails);
 
   @override
-  int get hashCode =>
-      Object.hash(role, content, refusal, reasoningContent, reasoning);
+  int get hashCode => Object.hash(
+    role,
+    content,
+    refusal,
+    toolCalls != null ? Object.hashAll(toolCalls!) : null,
+    reasoningContent,
+    reasoning,
+    reasoningDetails != null ? Object.hashAll(reasoningDetails!) : null,
+  );
 
   @override
   String toString() {
@@ -474,6 +483,7 @@ class AccumulatedChoice {
     required this.reasoningContent,
     required this.reasoning,
     required this.reasoningDetails,
+    required this.reasoningDetailsPresent,
     required this.logprobs,
   });
 
@@ -504,6 +514,11 @@ class AccumulatedChoice {
   /// **OpenRouter only.** The accumulated reasoning details.
   final List<ReasoningDetail> reasoningDetails;
 
+  /// Whether at least one delta contained the `reasoning_details` field.
+  ///
+  /// This distinguishes an explicitly empty array from an absent field.
+  final bool reasoningDetailsPresent;
+
   /// Log probability information.
   final Logprobs? logprobs;
 
@@ -512,7 +527,9 @@ class AccumulatedChoice {
 
   /// Whether there is any reasoning content.
   bool get hasReasoningContent =>
-      reasoningContent.isNotEmpty || reasoning.isNotEmpty;
+      reasoningContent.isNotEmpty ||
+      reasoning.isNotEmpty ||
+      reasoningDetailsPresent;
 }
 
 /// Helper class for accumulating streaming chunks into a complete response.
@@ -601,6 +618,7 @@ class ChatStreamAccumulator {
       }
 
       if (delta.reasoningDetails != null) {
+        accumulated.reasoningDetailsPresent = true;
         accumulated.reasoningDetails.addAll(delta.reasoningDetails!);
       }
 
@@ -711,7 +729,8 @@ class ChatStreamAccumulator {
   bool get hasReasoningContent =>
       _choices.isNotEmpty &&
       (_choices[0].reasoningContent.isNotEmpty ||
-          _choices[0].reasoning.isNotEmpty);
+          _choices[0].reasoning.isNotEmpty ||
+          _choices[0].reasoningDetailsPresent);
 
   /// The message role.
   ///
@@ -765,6 +784,7 @@ class ChatStreamAccumulator {
         reasoningContent: _choices[i].reasoningContent.toString(),
         reasoning: _choices[i].reasoning.toString(),
         reasoningDetails: List.unmodifiable(_choices[i].reasoningDetails),
+        reasoningDetailsPresent: _choices[i].reasoningDetailsPresent,
         logprobs: _buildLogprobs(_choices[i]),
       ),
   ];
@@ -820,7 +840,9 @@ class ChatStreamAccumulator {
             ? reasoningContentStr
             : null,
         reasoning: reasoningStr.isNotEmpty ? reasoningStr : null,
-        reasoningDetails: rds.isNotEmpty ? List.unmodifiable(rds) : null,
+        reasoningDetails: choice.reasoningDetailsPresent
+            ? List.unmodifiable(rds)
+            : null,
       ),
     );
   }
@@ -848,6 +870,7 @@ class _AccumulatedChoice {
   final StringBuffer reasoningContent = StringBuffer();
   final StringBuffer reasoning = StringBuffer();
   final List<ReasoningDetail> reasoningDetails = [];
+  bool reasoningDetailsPresent = false;
   final List<_AccumulatedToolCall> toolCalls = [];
   final List<TokenLogprob> logprobsContent = [];
   final List<TokenLogprob> logprobsRefusal = [];

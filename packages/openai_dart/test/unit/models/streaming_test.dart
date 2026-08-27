@@ -146,6 +146,74 @@ void main() {
       expect(delta.toolCalls!.first.id, 'call_abc123');
       expect(delta.toolCalls!.first.function!.name, 'get_weather');
     });
+
+    test('equality and hash include tool calls and reasoning details', () {
+      final json = jsonDecode_(r'''
+        {
+          "tool_calls": [
+            {
+              "index": 0,
+              "id": "call_1",
+              "type": "function",
+              "function": {"name": "lookup", "arguments": "{}"}
+            }
+          ],
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "thinking",
+              "signature": "sig-1"
+            }
+          ]
+        }
+      ''');
+      final sameJson = jsonDecode_(r'''
+        {
+          "tool_calls": [
+            {
+              "index": 0,
+              "id": "call_1",
+              "type": "function",
+              "function": {"name": "lookup", "arguments": "{}"}
+            }
+          ],
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "thinking",
+              "signature": "sig-1"
+            }
+          ]
+        }
+      ''');
+      final differentJson = jsonDecode_(r'''
+        {
+          "tool_calls": [
+            {
+              "index": 0,
+              "id": "call_2",
+              "type": "function",
+              "function": {"name": "lookup", "arguments": "{}"}
+            }
+          ],
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "thinking",
+              "signature": "sig-2"
+            }
+          ]
+        }
+      ''');
+
+      final first = ChatDelta.fromJson(json);
+      final same = ChatDelta.fromJson(sameJson);
+      final different = ChatDelta.fromJson(differentJson);
+
+      expect(first, same);
+      expect(first.hashCode, same.hashCode);
+      expect(first, isNot(different));
+    });
   });
 
   group('ChatStreamAccumulator', () {
@@ -940,6 +1008,125 @@ void main() {
         expect(choices[0].reasoningDetails[0].text, equals('Step 1'));
         expect(choices[0].reasoningDetails[1].type, equals('reasoning.text'));
         expect(choices[0].reasoningDetails[1].text, equals('Step 2 details'));
+        expect(choices[0].reasoningDetailsPresent, isTrue);
+        expect(choices[0].hasReasoningContent, isTrue);
+      });
+
+      test('empty reasoningDetails remains present after accumulation', () {
+        final accumulator = ChatStreamAccumulator()
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-empty-rd",
+                "model": "provider/model",
+                "choices": [
+                  {
+                    "index": 0,
+                    "delta": {"reasoning_details": []},
+                    "finish_reason": "tool_calls"
+                  }
+                ]
+              }
+            '''),
+            ),
+          );
+
+        expect(accumulator.hasReasoningContent, isTrue);
+        expect(accumulator.choices.single.reasoningDetailsPresent, isTrue);
+        expect(accumulator.choices.single.reasoningDetails, isEmpty);
+        final message = accumulator.toChatCompletion().choices.single.message;
+        expect(message.reasoningDetails, isNotNull);
+        expect(message.reasoningDetails, isEmpty);
+        expect(
+          message.toJson(),
+          containsPair('reasoning_details', <dynamic>[]),
+        );
+      });
+
+      test('reasoning detail chunks retain exact order and fields', () {
+        final accumulator = ChatStreamAccumulator()
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-ordered-rd",
+                "model": "provider/model",
+                "choices": [
+                  {
+                    "index": 0,
+                    "delta": {
+                      "reasoning_details": [
+                        {
+                          "type": "reasoning.text",
+                          "text": "first",
+                          "signature": null,
+                          "id": "r-1",
+                          "format": "anthropic-claude-v1",
+                          "index": 0
+                        }
+                      ]
+                    },
+                    "finish_reason": null
+                  }
+                ]
+              }
+            '''),
+            ),
+          )
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-ordered-rd",
+                "model": "provider/model",
+                "choices": [
+                  {
+                    "index": 0,
+                    "delta": {
+                      "reasoning_details": [
+                        {
+                          "type": "reasoning.encrypted",
+                          "data": "opaque",
+                          "id": "r-2",
+                          "format": "anthropic-claude-v1",
+                          "index": 1,
+                          "future": {"keep": true}
+                        }
+                      ]
+                    },
+                    "finish_reason": "tool_calls"
+                  }
+                ]
+              }
+            '''),
+            ),
+          );
+
+        final json = accumulator
+            .toChatCompletion()
+            .choices
+            .single
+            .message
+            .toJson();
+        expect(json['reasoning_details'], [
+          {
+            'type': 'reasoning.text',
+            'text': 'first',
+            'signature': null,
+            'id': 'r-1',
+            'format': 'anthropic-claude-v1',
+            'index': 0,
+          },
+          {
+            'type': 'reasoning.encrypted',
+            'data': 'opaque',
+            'id': 'r-2',
+            'format': 'anthropic-claude-v1',
+            'index': 1,
+            'future': {'keep': true},
+          },
+        ]);
       });
 
       test('logprobs and reasoningDetails in toChatCompletion()', () {
