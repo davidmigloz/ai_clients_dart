@@ -1,3 +1,9 @@
+## 8.1.0
+
+`ReasoningDetail` now round-trips OpenRouter `reasoning_details` payloads exactly — explicit `null` values, nested unknown data, and ordered detail chunks all survive parsing and re-serialization, which [OpenRouter requires](https://openrouter.ai/docs/guides/best-practices/reasoning-tokens) when reasoning is replayed between requests. The type also exposes typed `id`, `format`, `index`, `summary`, and `signature` fields plus a `ReasoningDetail.withAdditionalProperties` factory for future non-reserved fields, stream accumulation retains explicitly empty reasoning arrays, and `ChatDelta` equality and hashing now account for tool calls and reasoning details.
+
+- **FIX**: Preserve reasoning detail fidelity ([#299](https://github.com/davidmigloz/ai_clients_dart/issues/299)). ([6cc6bc03](https://github.com/davidmigloz/ai_clients_dart/commit/6cc6bc0375c2e6914d30bfdc18e27b61f62736e3))
+
 ## 8.0.1
 
 Fixes a `LinkedHashMap` failure on Dart 3.13.2 that broke streaming multipart requests. The client added a JSON content-type header and later removed it, and `MultipartRequest.finalize()` reinserting the same case-insensitive key then threw. Streaming multipart requests now build their headers directly and add the required SSE `Accept` header, leaving the generated multipart boundary owned by `package:http`.
