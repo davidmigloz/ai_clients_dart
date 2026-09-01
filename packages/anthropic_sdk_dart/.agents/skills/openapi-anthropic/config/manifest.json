@@ -1113,6 +1113,8 @@
           "ImageBlockParam": "image",
           "DocumentBlockParam": "document",
           "SearchResultBlockParam": "search_result",
+          "ThinkingBlockParam": "thinking",
+          "RedactedThinkingBlockParam": "redacted_thinking",
           "ToolUseBlockParam": "tool_use",
           "ToolResultBlockParam": "tool_result",
           "ServerToolUseBlockParam": "server_tool_use",
@@ -1223,6 +1225,46 @@
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "RequestSearchResultBlock",
       "parent": "InputContentBlock"
+    },
+    "ThinkingBlockParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ThinkingInputBlock",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": "RequestThinkingBlock",
+      "parent": "InputContentBlock"
+    },
+    "BetaRequestThinkingBlock": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ThinkingInputBlock",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": "BetaRequestThinkingBlock",
+      "parent": "InputContentBlock",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Beta variant maps to same Dart class as GA RequestThinkingBlock."
+    },
+    "RedactedThinkingBlockParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "RedactedThinkingInputBlock",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": "RequestRedactedThinkingBlock",
+      "parent": "InputContentBlock"
+    },
+    "BetaRequestRedactedThinkingBlock": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "RedactedThinkingInputBlock",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": "BetaRequestRedactedThinkingBlock",
+      "parent": "InputContentBlock",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Beta variant maps to same Dart class as GA RequestRedactedThinkingBlock."
     },
     "ToolUseBlockParam": {
       "spec": "main",

@@ -115,11 +115,6 @@ void main() {
         final toolUse = response1.toolUseBlocks.first;
         expect(toolUse.name, 'get_weather');
 
-        // Convert ContentBlocks to InputContentBlocks via JSON roundtrip
-        final assistantBlocks = response1.content
-            .map((block) => InputContentBlock.fromJson(block.toJson()))
-            .toList();
-
         // Second turn - provide tool result
         final response2 = await client!.messages.create(
           MessageCreateRequest(
@@ -128,7 +123,7 @@ void main() {
             tools: [ToolDefinition.custom(weatherTool)],
             messages: [
               InputMessage.user('What is the weather in Paris?'),
-              InputMessage.assistantBlocks(assistantBlocks),
+              response1.toInputMessage(),
               InputMessage.userBlocks([
                 InputContentBlock.toolResult(
                   toolUseId: toolUse.id,

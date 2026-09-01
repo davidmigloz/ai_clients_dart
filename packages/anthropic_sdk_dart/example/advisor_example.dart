@@ -103,12 +103,7 @@ final response1 = await client.messages.create(request, betas: [...]);
 // Build next turn — include full assistant content (with advisor blocks)
 final messages = [
   InputMessage.user('Build a Go worker pool.'),
-  InputMessage(
-    role: MessageRole.assistant,
-    content: response1.content
-        .map((b) => InputContentBlock.fromJson(b.toJson()))
-        .toList(),
-  ),
+  response1.toInputMessage(),
   InputMessage.user('Now add a max-in-flight limit of 10.'),
 ];
 

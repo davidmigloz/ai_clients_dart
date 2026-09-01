@@ -605,6 +605,191 @@ void main() {
       });
     });
 
+    group('ThinkingInputBlock', () {
+      test('round-trips thinking block', () {
+        const block = ThinkingInputBlock(
+          thinking: 'Let me think about this...',
+          signature: 'sig123',
+        );
+        final json = block.toJson();
+
+        expect(json['type'], 'thinking');
+        expect(json['thinking'], 'Let me think about this...');
+        expect(json['signature'], 'sig123');
+        expect(json.containsKey('cache_control'), isFalse);
+        expect(json, hasLength(3));
+
+        final parsed = InputContentBlock.fromJson(json);
+        expect(parsed, isA<ThinkingInputBlock>());
+        expect(parsed, equals(block));
+      });
+
+      test('fromJson parses thinking block as typed variant '
+          '(not UnknownInputContentBlock)', () {
+        final block = InputContentBlock.fromJson({
+          'type': 'thinking',
+          'thinking': 'Reasoning...',
+          'signature': 'sig456',
+        });
+
+        expect(block, isA<ThinkingInputBlock>());
+        expect(block, isNot(isA<UnknownInputContentBlock>()));
+      });
+
+      test('fromJson throws on missing required fields', () {
+        expect(
+          () => InputContentBlock.fromJson({'type': 'thinking'}),
+          throwsFormatException,
+        );
+        expect(
+          () => InputContentBlock.fromJson({
+            'type': 'thinking',
+            'thinking': 'Reasoning...',
+          }),
+          throwsFormatException,
+        );
+      });
+
+      test('fromJson accepts empty-but-present fields', () {
+        final block =
+            InputContentBlock.fromJson({
+                  'type': 'thinking',
+                  'thinking': '',
+                  'signature': '',
+                })
+                as ThinkingInputBlock;
+
+        expect(block.thinking, '');
+        expect(block.signature, '');
+      });
+
+      test('factory creates ThinkingInputBlock', () {
+        final block = InputContentBlock.thinking(
+          thinking: 'Some reasoning',
+          signature: 'sig789',
+        );
+
+        expect(block, isA<ThinkingInputBlock>());
+        final thinkingBlock = block as ThinkingInputBlock;
+        expect(thinkingBlock.thinking, 'Some reasoning');
+        expect(thinkingBlock.signature, 'sig789');
+      });
+
+      test('copyWith replaces fields independently', () {
+        const block = ThinkingInputBlock(
+          thinking: 'Original thinking',
+          signature: 'original_sig',
+        );
+
+        final withNewThinking = block.copyWith(thinking: 'New thinking');
+        expect(withNewThinking.thinking, 'New thinking');
+        expect(withNewThinking.signature, 'original_sig');
+
+        final withNewSignature = block.copyWith(signature: 'new_sig');
+        expect(withNewSignature.thinking, 'Original thinking');
+        expect(withNewSignature.signature, 'new_sig');
+      });
+
+      test('equality and hashCode', () {
+        const a = ThinkingInputBlock(thinking: 'Same', signature: 'sig');
+        const b = ThinkingInputBlock(thinking: 'Same', signature: 'sig');
+        const differentThinking = ThinkingInputBlock(
+          thinking: 'Different',
+          signature: 'sig',
+        );
+        const differentSignature = ThinkingInputBlock(
+          thinking: 'Same',
+          signature: 'other',
+        );
+
+        expect(a, equals(b));
+        expect(a.hashCode, b.hashCode);
+        expect(a, isNot(equals(differentThinking)));
+        expect(a, isNot(equals(differentSignature)));
+      });
+
+      test('toString does not leak content', () {
+        const block = ThinkingInputBlock(thinking: 'abcde', signature: 'sig');
+        expect(block.toString(), contains('[5 chars]'));
+        expect(block.toString(), isNot(contains('abcde')));
+      });
+    });
+
+    group('RedactedThinkingInputBlock', () {
+      test('round-trips redacted thinking block', () {
+        const block = RedactedThinkingInputBlock(data: 'opaque_payload');
+        final json = block.toJson();
+
+        expect(json['type'], 'redacted_thinking');
+        expect(json['data'], 'opaque_payload');
+        expect(json.containsKey('cache_control'), isFalse);
+        expect(json, hasLength(2));
+
+        final parsed = InputContentBlock.fromJson(json);
+        expect(parsed, isA<RedactedThinkingInputBlock>());
+        expect(parsed, equals(block));
+      });
+
+      test('fromJson parses redacted thinking block as typed variant '
+          '(not UnknownInputContentBlock)', () {
+        final block = InputContentBlock.fromJson({
+          'type': 'redacted_thinking',
+          'data': 'encrypted_data',
+        });
+
+        expect(block, isA<RedactedThinkingInputBlock>());
+        expect(block, isNot(isA<UnknownInputContentBlock>()));
+      });
+
+      test('fromJson throws on missing required data', () {
+        expect(
+          () => InputContentBlock.fromJson({'type': 'redacted_thinking'}),
+          throwsFormatException,
+        );
+      });
+
+      test('fromJson accepts an empty-but-present data', () {
+        final block =
+            InputContentBlock.fromJson({
+                  'type': 'redacted_thinking',
+                  'data': '',
+                })
+                as RedactedThinkingInputBlock;
+
+        expect(block.data, '');
+      });
+
+      test('factory creates RedactedThinkingInputBlock', () {
+        final block = InputContentBlock.redactedThinking(data: 'opaque');
+
+        expect(block, isA<RedactedThinkingInputBlock>());
+        expect((block as RedactedThinkingInputBlock).data, 'opaque');
+      });
+
+      test('copyWith replaces data', () {
+        const block = RedactedThinkingInputBlock(data: 'original');
+        final copy = block.copyWith(data: 'updated');
+
+        expect(copy.data, 'updated');
+      });
+
+      test('equality and hashCode', () {
+        const a = RedactedThinkingInputBlock(data: 'same');
+        const b = RedactedThinkingInputBlock(data: 'same');
+        const c = RedactedThinkingInputBlock(data: 'different');
+
+        expect(a, equals(b));
+        expect(a.hashCode, b.hashCode);
+        expect(a, isNot(equals(c)));
+      });
+
+      test('toString does not leak content', () {
+        const block = RedactedThinkingInputBlock(data: 'abcde');
+        expect(block.toString(), contains('[5 chars]'));
+        expect(block.toString(), isNot(contains('abcde')));
+      });
+    });
+
     group('SearchResultInputBlock', () {
       Map<String, dynamic> sampleJson() => {
         'type': 'search_result',

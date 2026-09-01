@@ -1,6 +1,8 @@
 import '../models/content/content_block.dart';
+import '../models/messages/input_message.dart';
 import '../models/messages/message.dart';
 import '../models/metadata/stop_reason.dart';
+import 'content_block_extensions.dart';
 
 /// Extensions on [Message] for convenient access to content.
 extension MessageExtensions on Message {
@@ -60,4 +62,18 @@ extension MessageExtensions on Message {
 
   /// Returns true if the message stopped due to a refusal.
   bool get isRefusal => stopReason == StopReason.refusal;
+
+  /// Converts this response into an [InputMessage] for replay in a follow-up
+  /// request (e.g. multi-turn tool use or extended thinking).
+  ///
+  /// Carries over this message's [role] — [MessageRole.assistant] for every
+  /// API response — and preserves block order, which is load-bearing:
+  /// thinking blocks must be passed back unmodified and in their original
+  /// position.
+  InputMessage toInputMessage() => InputMessage(
+    role: role,
+    content: MessageContent.blocks(
+      content.map((block) => block.toInputBlock()).toList(),
+    ),
+  );
 }
