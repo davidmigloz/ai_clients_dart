@@ -64,18 +64,7 @@ void main() async {
             tools: [ToolDefinition.custom(weatherTool)],
             messages: [
               InputMessage.user('What is the weather in San Francisco?'),
-              InputMessage.assistantBlocks(
-                response.content
-                    .map(
-                      (b) => switch (b) {
-                        TextBlock(:final text) => TextInputBlock(text),
-                        ToolUseBlock(:final id, :final name, :final input) =>
-                          ToolUseInputBlock(id: id, name: name, input: input),
-                        _ => throw StateError('Unexpected block type'),
-                      },
-                    )
-                    .toList(),
-              ),
+              response.toInputMessage(),
               InputMessage(
                 role: MessageRole.user,
                 content: MessageContent.blocks([

@@ -34,7 +34,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Messages with typed inputs, system prompts, and multi-turn history
 - Mid-conversation system messages: update instructions inside the messages array, no user turn required (Opus 4.8)
 - SSE streaming with cancelation and token counting
-- Extended thinking and adaptive thinking controls, with `outputTokensDetails` reasoning-token breakdown
+- Extended thinking and adaptive thinking controls, with `outputTokensDetails` reasoning-token breakdown, typed `thinking`/`redacted_thinking` input blocks, and `Message.toInputMessage()` for multi-turn replay
 - Prompt-cache diagnostics: report why the cache prefix diverged between turns (beta)
 - Server-side fallback: automatically re-run refused requests on another model via the `fallbacks` chain, or retry manually with the refusal `fallback_credit_token` — including best-effort redemption mode and per-response `fallback_credit` usage outcomes (beta)
 
@@ -293,6 +293,24 @@ Future<void> main() async {
     client.close();
   }
 }
+```
+
+For a multi-turn conversation (e.g. tool use) that keeps thinking enabled, replay the assistant turn with `response.toInputMessage()` instead of hand-picking blocks — thinking blocks must be passed back unmodified and in their original order, or the API returns a 400 error.
+
+```dart
+final messages = [
+  userMessage,
+  response.toInputMessage(), // preserves thinking blocks + order
+  InputMessage(
+    role: MessageRole.user,
+    content: MessageContent.blocks([
+      InputContentBlock.toolResult(
+        toolUseId: toolUse.id,
+        content: [ToolResultContent.text(toolResult)],
+      ),
+    ]),
+  ),
+];
 ```
 
 → [Full example](example/thinking_example.dart)
@@ -671,7 +689,7 @@ See the [example/](example/) directory for complete examples:
 | [`web_search_example.dart`](example/web_search_example.dart) | Web search tool |
 | [`advisor_example.dart`](example/advisor_example.dart) | Advisor tool (beta) |
 | [`computer_use_example.dart`](example/computer_use_example.dart) | Computer use tool |
-| [`thinking_example.dart`](example/thinking_example.dart) | Extended thinking |
+| [`thinking_example.dart`](example/thinking_example.dart) | Extended thinking and multi-turn thinking replay |
 | [`diagnostics_example.dart`](example/diagnostics_example.dart) | Prompt-cache diagnostics: why the cache prefix diverged (beta) |
 | [`fallback_example.dart`](example/fallback_example.dart) | Server-side fallback chain and refusal credit-token retry (beta) |
 | [`vision_example.dart`](example/vision_example.dart) | Image and document inputs |

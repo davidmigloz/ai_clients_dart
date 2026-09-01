@@ -1,4 +1,6 @@
 // ignore_for_file: avoid_print
+import 'dart:convert';
+
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 
 /// Extended thinking example.
@@ -8,6 +10,7 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// - Accessing thinking blocks from responses
 /// - Streaming with thinking blocks
 /// - Budget tokens configuration
+/// - Multi-turn conversation with thinking replay (tool use)
 ///
 /// Note: Extended thinking requires compatible models like claude-sonnet-4.
 void main() async {
@@ -133,6 +136,94 @@ void main() async {
     if (textBlocks.isNotEmpty) {
       print('\nFinal answer:');
       print(textBlocks.map((b) => b.text).join('\n'));
+    }
+
+    // Example 4: Multi-turn conversation with thinking replay
+    print('\n=== Multi-Turn Conversation with Thinking Replay ===');
+
+    // Define a simple client tool
+    const exchangeRateTool = Tool(
+      name: 'get_exchange_rate',
+      description: 'Get the current exchange rate between two currencies.',
+      inputSchema: InputSchema(
+        properties: {
+          'from': {
+            'type': 'string',
+            'description': 'Source currency code, e.g. "USD"',
+          },
+          'to': {
+            'type': 'string',
+            'description': 'Target currency code, e.g. "EUR"',
+          },
+        },
+        required: ['from', 'to'],
+        extra: {'additionalProperties': false},
+      ),
+    );
+
+    final userMessage = InputMessage.user(
+      'Convert 250 USD to EUR and tell me if that is enough to buy a '
+      '€200 item.',
+    );
+
+    final toolResponse = await client.messages.create(
+      MessageCreateRequest(
+        model: 'claude-sonnet-4-6',
+        maxTokens: 16000,
+        thinking: const ThinkingEnabled(budgetTokens: 10000),
+        tools: [ToolDefinition.custom(exchangeRateTool)],
+        messages: [userMessage],
+      ),
+    );
+
+    for (final block in toolResponse.content) {
+      switch (block) {
+        case ThinkingBlock(:final thinking):
+          print('Thinking process:');
+          print(thinking);
+          print('');
+        case ToolUseBlock(:final name, :final input):
+          print('Claude wants to use tool: $name');
+          print('With input: ${jsonEncode(input)}');
+        default:
+          break;
+      }
+    }
+
+    if (toolResponse.hasToolUse) {
+      final toolUse = toolResponse.toolUseBlocks.first;
+
+      // Simulate tool execution
+      final toolResult = jsonEncode({'rate': 0.92});
+
+      final finalResponse = await client.messages.create(
+        MessageCreateRequest(
+          model: 'claude-sonnet-4-6',
+          maxTokens: 16000,
+          thinking: const ThinkingEnabled(budgetTokens: 10000),
+          tools: [ToolDefinition.custom(exchangeRateTool)],
+          messages: [
+            userMessage,
+            // Preserves block order, which is load-bearing here: the API
+            // requires thinking blocks to be replayed unmodified and in
+            // their original position when continuing a turn that used
+            // extended thinking together with tool use.
+            toolResponse.toInputMessage(),
+            InputMessage(
+              role: MessageRole.user,
+              content: MessageContent.blocks([
+                InputContentBlock.toolResult(
+                  toolUseId: toolUse.id,
+                  content: [ToolResultContent.text(toolResult)],
+                ),
+              ]),
+            ),
+          ],
+        ),
+      );
+
+      print('\nFinal answer:');
+      print(finalResponse.text);
     }
   } finally {
     client.close();

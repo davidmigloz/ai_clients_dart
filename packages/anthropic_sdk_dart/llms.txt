@@ -4,16 +4,16 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~5.4k tokens): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/CHANGELOG.md) (~11k tokens): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) (~7.2k tokens): Upgrade notes and breaking-change guidance.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~5.6k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/CHANGELOG.md) (~11.5k tokens): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) (~7.6k tokens): Upgrade notes and breaking-change guidance.
 
 ## Examples
 
 - [messages_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/messages_example.dart) (~821 tokens): Basic message creation.
 - [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/streaming_example.dart) (~1.3k tokens): Streaming responses.
-- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/tool_calling_example.dart) (~777 tokens): Tool calling with schemas.
-- [thinking_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/thinking_example.dart) (~937 tokens): Extended thinking.
+- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/tool_calling_example.dart) (~689 tokens): Tool calling with schemas.
+- [thinking_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/thinking_example.dart) (~1.6k tokens): Extended thinking and multi-turn thinking replay.
 - [vision_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/vision_example.dart) (~1.2k tokens): Image and document inputs.
 - [token_counting_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/token_counting_example.dart) (~1.1k tokens): Token counting.
 - [message_batches_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/message_batches_example.dart) (~859 tokens): Batch processing.
@@ -25,10 +25,10 @@
 - [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/error_handling_example.dart) (~632 tokens): Exception handling patterns.
 - [mid_conversation_system_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/mid_conversation_system_example.dart) (~458 tokens): Mid-conversation system messages (Opus 4.8).
 - [web_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/web_search_example.dart) (~793 tokens): Web search tool.
-- [advisor_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/advisor_example.dart) (~967 tokens): Advisor tool (beta).
+- [advisor_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/advisor_example.dart) (~932 tokens): Advisor tool (beta).
 - [computer_use_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/computer_use_example.dart) (~866 tokens): Computer use tool.
 - [diagnostics_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/diagnostics_example.dart) (~660 tokens): Prompt-cache diagnostics: why the cache prefix diverged (beta).
-- [fallback_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/fallback_example.dart) (~784 tokens): Server-side fallback chain and refusal credit-token retry (beta).
+- [fallback_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/fallback_example.dart) (~896 tokens): Server-side fallback chain and refusal credit-token retry (beta).
 - [document_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/document_example.dart) (~937 tokens): Document inputs with citations.
 - [search_result_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/search_result_example.dart) (~710 tokens): Supplying your own cited `search_result` blocks (RAG).
 - [mcp_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/mcp_example.dart) (~904 tokens): MCP tool integration.
@@ -42,4 +42,4 @@
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/anthropic_sdk_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~46.7k tokens**
+**Total: ~48.3k tokens**
