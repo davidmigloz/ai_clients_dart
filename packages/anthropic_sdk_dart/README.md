@@ -301,15 +301,14 @@ For a multi-turn conversation (e.g. tool use) that keeps thinking enabled, repla
 final messages = [
   userMessage,
   response.toInputMessage(), // preserves thinking blocks + order
-  InputMessage(
-    role: MessageRole.user,
-    content: MessageContent.blocks([
+  // One tool_result per replayed tool_use block, or the API rejects the turn.
+  InputMessage.userBlocks([
+    for (final toolUse in response.toolUseBlocks)
       InputContentBlock.toolResult(
         toolUseId: toolUse.id,
         content: [ToolResultContent.text(toolResult)],
       ),
-    ]),
-  ),
+  ]),
 ];
 ```
 

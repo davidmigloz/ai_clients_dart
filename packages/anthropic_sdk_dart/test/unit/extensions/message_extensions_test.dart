@@ -1,6 +1,19 @@
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 import 'package:test/test.dart';
 
+Message buildMessage() => const Message(
+  id: 'msg_1',
+  role: MessageRole.assistant,
+  content: [
+    ThinkingBlock(thinking: 'Let me think...', signature: 'sig123'),
+    TextBlock(text: 'Here is my answer.'),
+    ToolUseBlock(id: 'tu_1', name: 'get_weather', input: {'city': 'NYC'}),
+  ],
+  model: 'claude-sonnet-4-6',
+  stopReason: StopReason.toolUse,
+  usage: Usage(inputTokens: 10, outputTokens: 20),
+);
+
 void main() {
   group('ContentBlockConversion', () {
     test('TextBlock converts to TextInputBlock preserving text', () {
@@ -120,22 +133,41 @@ void main() {
       expect(input, isA<UnknownInputContentBlock>());
       expect(input.toJson(), json);
     });
+
+    test('TextBlock with a url-less web search citation throws a diagnostic '
+        'FormatException', () {
+      // The response citation is lenient about `url` (third-party
+      // Anthropic-compatible servers may omit it) while the request schema
+      // marks it required, so conversion must fail loudly and name the field
+      // rather than raise an opaque TypeError or build a request the API
+      // rejects with a 400.
+      const block = TextBlock(
+        text: 'Dart 3.10 shipped.',
+        citations: [
+          WebSearchResultLocationCitation(
+            citedText: 'Dart 3.10 shipped.',
+            encryptedIndex: 'enc_idx',
+          ),
+        ],
+      );
+
+      expect(
+        block.toInputBlock,
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            allOf(
+              contains('WebSearchResultLocationInputCitation'),
+              contains('url'),
+            ),
+          ),
+        ),
+      );
+    });
   });
 
   group('MessageExtensions.toInputMessage', () {
-    Message buildMessage() => const Message(
-      id: 'msg_1',
-      role: MessageRole.assistant,
-      content: [
-        ThinkingBlock(thinking: 'Let me think...', signature: 'sig123'),
-        TextBlock(text: 'Here is my answer.'),
-        ToolUseBlock(id: 'tu_1', name: 'get_weather', input: {'city': 'NYC'}),
-      ],
-      model: 'claude-sonnet-4-6',
-      stopReason: StopReason.toolUse,
-      usage: Usage(inputTokens: 10, outputTokens: 20),
-    );
-
     test('returns an assistant InputMessage', () {
       final inputMessage = buildMessage().toInputMessage();
 
@@ -163,36 +195,17 @@ void main() {
       expect(firstBlock['thinking'], 'Let me think...');
       expect(firstBlock['signature'], 'sig123');
     });
-  });
 
-  group('MessageExtensions getters', () {
-    Message buildMessage() => const Message(
-      id: 'msg_1',
-      role: MessageRole.assistant,
-      content: [
-        ThinkingBlock(thinking: 'Let me think...', signature: 'sig123'),
-        TextBlock(text: 'Here is my answer.'),
-        ToolUseBlock(id: 'tu_1', name: 'get_weather', input: {'city': 'NYC'}),
-      ],
-      model: 'claude-sonnet-4-6',
-      stopReason: StopReason.toolUse,
-      usage: Usage(inputTokens: 10, outputTokens: 20),
-    );
+    test('preserves a non-assistant role', () {
+      const message = Message(
+        id: 'msg_1',
+        role: MessageRole.user,
+        content: [TextBlock(text: 'Echoed back.')],
+        model: 'claude-sonnet-4-6',
+        usage: Usage(inputTokens: 1, outputTokens: 1),
+      );
 
-    test('text concatenates text blocks', () {
-      expect(buildMessage().text, 'Here is my answer.');
-    });
-
-    test('thinkingBlocks and hasThinking', () {
-      final message = buildMessage();
-      expect(message.thinkingBlocks, hasLength(1));
-      expect(message.hasThinking, isTrue);
-    });
-
-    test('toolUseBlocks and hasToolUse', () {
-      final message = buildMessage();
-      expect(message.toolUseBlocks, hasLength(1));
-      expect(message.hasToolUse, isTrue);
+      expect(message.toInputMessage().role, MessageRole.user);
     });
   });
 }

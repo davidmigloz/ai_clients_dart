@@ -343,11 +343,28 @@ class ThinkingInputBlock extends InputContentBlock {
   const ThinkingInputBlock({required this.thinking, required this.signature});
 
   /// Creates a [ThinkingInputBlock] from JSON.
+  ///
+  /// Both fields are `required` on the request schema, so a missing key throws
+  /// [FormatException]. Unlike the response-side [ThinkingBlock] — which
+  /// tolerates absent fields because a streaming `content_block_start` carries
+  /// a partial block whose `signature` arrives later in a `signature_delta` —
+  /// there is no partial form on the request side, and silently substituting
+  /// an empty `signature` would send a block the API rejects with an opaque
+  /// 400. An empty-but-present value still parses.
   factory ThinkingInputBlock.fromJson(Map<String, dynamic> json) {
-    return ThinkingInputBlock(
-      thinking: json['thinking'] as String? ?? '',
-      signature: json['signature'] as String? ?? '',
-    );
+    final thinking = json['thinking'] as String?;
+    if (thinking == null) {
+      throw const FormatException(
+        'ThinkingInputBlock: missing required "thinking"',
+      );
+    }
+    final signature = json['signature'] as String?;
+    if (signature == null) {
+      throw const FormatException(
+        'ThinkingInputBlock: missing required "signature"',
+      );
+    }
+    return ThinkingInputBlock(thinking: thinking, signature: signature);
   }
 
   @override
@@ -397,8 +414,18 @@ class RedactedThinkingInputBlock extends InputContentBlock {
   const RedactedThinkingInputBlock({required this.data});
 
   /// Creates a [RedactedThinkingInputBlock] from JSON.
+  ///
+  /// [data] is `required` on the request schema, so a missing key throws
+  /// [FormatException] rather than silently substituting an empty payload the
+  /// API would reject. An empty-but-present value still parses.
   factory RedactedThinkingInputBlock.fromJson(Map<String, dynamic> json) {
-    return RedactedThinkingInputBlock(data: json['data'] as String? ?? '');
+    final data = json['data'] as String?;
+    if (data == null) {
+      throw const FormatException(
+        'RedactedThinkingInputBlock: missing required "data"',
+      );
+    }
+    return RedactedThinkingInputBlock(data: data);
   }
 
   @override
@@ -2341,11 +2368,16 @@ class MidConversationSystemInputBlock extends InputContentBlock {
 @immutable
 class UnknownInputContentBlock extends InputContentBlock {
   /// The raw JSON for this unknown input content block.
+  ///
+  /// Stored deeply unmodifiable (nested maps and lists are frozen too), so a
+  /// block converted from a response via `ContentBlock.toInputBlock()` cannot
+  /// be mutated through the map it was decoded from — which would otherwise
+  /// change this block's [hashCode] and serialized output after construction.
   final Map<String, dynamic> raw;
 
   /// Creates an [UnknownInputContentBlock].
   UnknownInputContentBlock({required Map<String, dynamic> raw})
-    : raw = Map.unmodifiable(raw);
+    : raw = deepUnmodifiableMap(raw);
 
   /// Creates an [UnknownInputContentBlock] from JSON.
   factory UnknownInputContentBlock.fromJson(Map<String, dynamic> json) {
@@ -2717,6 +2749,13 @@ class WebSearchResultLocationInputCitation extends InputCitation {
   final String? title;
 
   /// URL of the source.
+  ///
+  /// Required and non-nullable per the request schema. The response-side
+  /// `WebSearchResultLocationCitation.url` is deliberately more lenient
+  /// (nullable, for Anthropic-compatible third-party servers that omit it),
+  /// so echoing such a citation back via `ContentBlock.toInputBlock()` throws
+  /// a [FormatException] rather than silently building a request the API
+  /// would reject.
   final String url;
 
   /// Creates a [WebSearchResultLocationInputCitation].
@@ -2731,11 +2770,17 @@ class WebSearchResultLocationInputCitation extends InputCitation {
   factory WebSearchResultLocationInputCitation.fromJson(
     Map<String, dynamic> json,
   ) {
+    final url = json['url'] as String?;
+    if (url == null) {
+      throw const FormatException(
+        'WebSearchResultLocationInputCitation: missing required "url"',
+      );
+    }
     return WebSearchResultLocationInputCitation(
       citedText: json['cited_text'] as String,
       encryptedIndex: json['encrypted_index'] as String,
       title: json['title'] as String?,
-      url: json['url'] as String,
+      url: url,
     );
   }
 

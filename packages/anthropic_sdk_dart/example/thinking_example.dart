@@ -190,11 +190,21 @@ void main() async {
       }
     }
 
-    if (toolResponse.hasToolUse) {
-      final toolUse = toolResponse.toolUseBlocks.first;
-
-      // Simulate tool execution
-      final toolResult = jsonEncode({'rate': 0.92});
+    final toolUses = toolResponse.toolUseBlocks;
+    if (toolUses.isNotEmpty) {
+      // Every replayed tool_use block needs its own tool_result in the next
+      // message — Claude can request several tools in a single turn, and the
+      // API rejects the request if any of them goes unanswered.
+      final toolResults = [
+        for (final toolUse in toolUses)
+          InputContentBlock.toolResult(
+            toolUseId: toolUse.id,
+            // Simulate tool execution
+            content: [
+              ToolResultContent.text(jsonEncode({'rate': 0.92})),
+            ],
+          ),
+      ];
 
       final finalResponse = await client.messages.create(
         MessageCreateRequest(
@@ -209,15 +219,7 @@ void main() async {
             // their original position when continuing a turn that used
             // extended thinking together with tool use.
             toolResponse.toInputMessage(),
-            InputMessage(
-              role: MessageRole.user,
-              content: MessageContent.blocks([
-                InputContentBlock.toolResult(
-                  toolUseId: toolUse.id,
-                  content: [ToolResultContent.text(toolResult)],
-                ),
-              ]),
-            ),
+            InputMessage.userBlocks(toolResults),
           ],
         ),
       );

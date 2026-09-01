@@ -7,10 +7,18 @@ extension ContentBlockConversion on ContentBlock {
   /// assistant turn in a follow-up request (e.g. multi-turn tool use or
   /// extended thinking).
   ///
-  /// Round-trips through JSON, so every block type is handled: types without a
-  /// typed input counterpart become [UnknownInputContentBlock], preserving the
-  /// raw payload verbatim. Thinking blocks must be replayed unmodified and in
-  /// their original order; a modified block results in a 400
-  /// `invalid_request_error`.
+  /// Round-trips through JSON: an *unrecognized* block type becomes an
+  /// [UnknownInputContentBlock] that preserves the raw payload verbatim, so
+  /// new server-side block types replay without an SDK update.
+  ///
+  /// A *malformed* block is not silently degraded. Throws [FormatException]
+  /// when a response block omits a field the request schema requires — the
+  /// response models are deliberately lenient about fields that
+  /// Anthropic-compatible third-party servers may drop, and failing here
+  /// names the offending field instead of sending a request the API rejects
+  /// with an opaque 400.
+  ///
+  /// Thinking blocks must be replayed unmodified and in their original order;
+  /// a modified block results in a 400 `invalid_request_error`.
   InputContentBlock toInputBlock() => InputContentBlock.fromJson(toJson());
 }

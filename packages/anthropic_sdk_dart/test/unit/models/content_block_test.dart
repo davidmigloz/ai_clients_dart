@@ -636,9 +636,27 @@ void main() {
         expect(block, isNot(isA<UnknownInputContentBlock>()));
       });
 
-      test('fromJson tolerates missing fields', () {
+      test('fromJson throws on missing required fields', () {
+        expect(
+          () => InputContentBlock.fromJson({'type': 'thinking'}),
+          throwsFormatException,
+        );
+        expect(
+          () => InputContentBlock.fromJson({
+            'type': 'thinking',
+            'thinking': 'Reasoning...',
+          }),
+          throwsFormatException,
+        );
+      });
+
+      test('fromJson accepts empty-but-present fields', () {
         final block =
-            InputContentBlock.fromJson({'type': 'thinking'})
+            InputContentBlock.fromJson({
+                  'type': 'thinking',
+                  'thinking': '',
+                  'signature': '',
+                })
                 as ThinkingInputBlock;
 
         expect(block.thinking, '');
@@ -723,9 +741,19 @@ void main() {
         expect(block, isNot(isA<UnknownInputContentBlock>()));
       });
 
-      test('fromJson tolerates missing fields', () {
+      test('fromJson throws on missing required data', () {
+        expect(
+          () => InputContentBlock.fromJson({'type': 'redacted_thinking'}),
+          throwsFormatException,
+        );
+      });
+
+      test('fromJson accepts an empty-but-present data', () {
         final block =
-            InputContentBlock.fromJson({'type': 'redacted_thinking'})
+            InputContentBlock.fromJson({
+                  'type': 'redacted_thinking',
+                  'data': '',
+                })
                 as RedactedThinkingInputBlock;
 
         expect(block.data, '');

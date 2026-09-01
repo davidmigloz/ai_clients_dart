@@ -63,12 +63,17 @@ extension MessageExtensions on Message {
   /// Returns true if the message stopped due to a refusal.
   bool get isRefusal => stopReason == StopReason.refusal;
 
-  /// Converts this response into an assistant [InputMessage] for replay in a
-  /// follow-up request (e.g. multi-turn tool use or extended thinking).
+  /// Converts this response into an [InputMessage] for replay in a follow-up
+  /// request (e.g. multi-turn tool use or extended thinking).
   ///
-  /// Preserves block order, which is load-bearing: thinking blocks must be
-  /// passed back unmodified and in their original position.
-  InputMessage toInputMessage() => InputMessage.assistantBlocks(
-    content.map((block) => block.toInputBlock()).toList(),
+  /// Carries over this message's [role] — [MessageRole.assistant] for every
+  /// API response — and preserves block order, which is load-bearing:
+  /// thinking blocks must be passed back unmodified and in their original
+  /// position.
+  InputMessage toInputMessage() => InputMessage(
+    role: role,
+    content: MessageContent.blocks(
+      content.map((block) => block.toInputBlock()).toList(),
+    ),
   );
 }
