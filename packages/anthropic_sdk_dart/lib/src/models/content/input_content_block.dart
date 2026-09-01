@@ -23,6 +23,25 @@ sealed class InputContentBlock {
     CacheControlEphemeral? cacheControl,
   }) = TextInputBlock;
 
+  /// Creates a thinking content block.
+  ///
+  /// Used to replay an assistant turn's extended thinking in a follow-up
+  /// request (e.g. multi-turn tool use). Thinking blocks must be passed back
+  /// unmodified and in their original order; a modified block results in a
+  /// 400 `invalid_request_error`.
+  factory InputContentBlock.thinking({
+    required String thinking,
+    required String signature,
+  }) = ThinkingInputBlock;
+
+  /// Creates a redacted thinking content block.
+  ///
+  /// Used to replay an assistant turn's redacted thinking in a follow-up
+  /// request. The [data] payload is opaque and encrypted; pass it back
+  /// unchanged.
+  factory InputContentBlock.redactedThinking({required String data}) =
+      RedactedThinkingInputBlock;
+
   /// Creates an image content block.
   factory InputContentBlock.image(
     ImageSource source, {
@@ -188,6 +207,8 @@ sealed class InputContentBlock {
     final type = json['type'] as String;
     return switch (type) {
       'text' => TextInputBlock.fromJson(json),
+      'thinking' => ThinkingInputBlock.fromJson(json),
+      'redacted_thinking' => RedactedThinkingInputBlock.fromJson(json),
       'image' => ImageInputBlock.fromJson(json),
       'document' => DocumentInputBlock.fromJson(json),
       'search_result' => SearchResultInputBlock.fromJson(json),
@@ -299,6 +320,108 @@ class TextInputBlock extends InputContentBlock {
   String toString() =>
       'TextInputBlock(text: [${text.length} chars], citations: $citations, '
       'cacheControl: $cacheControl)';
+}
+
+/// Thinking (reasoning) content block for input.
+///
+/// Replays an assistant turn's extended thinking in a follow-up request
+/// (e.g. multi-turn tool use). Thinking blocks must be passed back unmodified
+/// and in their original order; a modified block results in a 400
+/// `invalid_request_error`. Unlike most input blocks, thinking blocks do not
+/// support `cache_control`.
+@immutable
+class ThinkingInputBlock extends InputContentBlock {
+  /// The `thinking` text of this block, exactly as returned by the API.
+  final String thinking;
+
+  /// The `signature` value of this thinking block, exactly as returned by the
+  /// API in a previous response. Used to verify that the block was generated
+  /// by Claude.
+  final String signature;
+
+  /// Creates a [ThinkingInputBlock].
+  const ThinkingInputBlock({required this.thinking, required this.signature});
+
+  /// Creates a [ThinkingInputBlock] from JSON.
+  factory ThinkingInputBlock.fromJson(Map<String, dynamic> json) {
+    return ThinkingInputBlock(
+      thinking: json['thinking'] as String? ?? '',
+      signature: json['signature'] as String? ?? '',
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'thinking',
+    'thinking': thinking,
+    'signature': signature,
+  };
+
+  /// Creates a copy with replaced values.
+  ThinkingInputBlock copyWith({String? thinking, String? signature}) {
+    return ThinkingInputBlock(
+      thinking: thinking ?? this.thinking,
+      signature: signature ?? this.signature,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ThinkingInputBlock &&
+          runtimeType == other.runtimeType &&
+          thinking == other.thinking &&
+          signature == other.signature;
+
+  @override
+  int get hashCode => Object.hash(thinking, signature);
+
+  @override
+  String toString() =>
+      'ThinkingInputBlock(thinking: [${thinking.length} chars], '
+      'signature: [${signature.length} chars])';
+}
+
+/// Redacted thinking content block for input.
+///
+/// Replays an assistant turn's redacted thinking in a follow-up request. The
+/// [data] payload is opaque and encrypted; pass it back unchanged. Unlike most
+/// input blocks, redacted thinking blocks do not support `cache_control`.
+@immutable
+class RedactedThinkingInputBlock extends InputContentBlock {
+  /// The `data` value of this redacted thinking block, exactly as returned by
+  /// the API in a previous response. Opaque and encrypted.
+  final String data;
+
+  /// Creates a [RedactedThinkingInputBlock].
+  const RedactedThinkingInputBlock({required this.data});
+
+  /// Creates a [RedactedThinkingInputBlock] from JSON.
+  factory RedactedThinkingInputBlock.fromJson(Map<String, dynamic> json) {
+    return RedactedThinkingInputBlock(data: json['data'] as String? ?? '');
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'redacted_thinking', 'data': data};
+
+  /// Creates a copy with replaced values.
+  RedactedThinkingInputBlock copyWith({String? data}) {
+    return RedactedThinkingInputBlock(data: data ?? this.data);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RedactedThinkingInputBlock &&
+          runtimeType == other.runtimeType &&
+          data == other.data;
+
+  @override
+  int get hashCode => data.hashCode;
+
+  @override
+  String toString() =>
+      'RedactedThinkingInputBlock(data: [${data.length} chars])';
 }
 
 /// Image content block for input.
