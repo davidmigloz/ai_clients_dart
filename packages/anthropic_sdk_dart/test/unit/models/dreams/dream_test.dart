@@ -103,6 +103,16 @@ void main() {
       expect(body['session_id'], isNull);
     });
 
+    test('throws FormatException when output_behavior is missing', () {
+      final json = _dreamJson()..remove('output_behavior');
+      expect(() => Dream.fromJson(json), throwsA(isA<FormatException>()));
+    });
+
+    test('throws FormatException when output_behavior is null', () {
+      final json = _dreamJson()..['output_behavior'] = null;
+      expect(() => Dream.fromJson(json), throwsA(isA<FormatException>()));
+    });
+
     test('parses a failed dream with error detail', () {
       final dream = Dream.fromJson(
         _dreamJson(

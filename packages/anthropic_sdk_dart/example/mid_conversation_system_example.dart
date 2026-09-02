@@ -15,8 +15,9 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 ///   changes the response effort from the next user turn on, without
 ///   carrying any content.
 ///
-/// Mid-conversation system messages are supported by Claude Opus 4.8 and
-/// later.
+/// Mid-conversation system messages, the turn-scoped `clear_at`, and
+/// per-message effort are supported on Claude Opus 4.8 and later Opus/Fable
+/// models — not on Sonnet 5, so this example targets `claude-opus-5`.
 void main() async {
   final client = AnthropicClient(
     config: const AnthropicConfig(
@@ -38,7 +39,7 @@ void main() async {
 
     final response = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-5',
+        model: 'claude-opus-5',
         maxTokens: 1024,
         system: SystemPrompt.text(
           'You are a helpful assistant. Answer concisely.',
@@ -71,7 +72,7 @@ void main() async {
 
     final reminderResponse = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-5',
+        model: 'claude-opus-5',
         maxTokens: 1024,
         system: SystemPrompt.text(
           'You are a helpful assistant. Answer concisely.',
@@ -88,7 +89,7 @@ void main() async {
     print('\n=== Next turn (reminder now cleared) ===');
     final nextTurnResponse = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-5',
+        model: 'claude-opus-5',
         maxTokens: 1024,
         system: SystemPrompt.text(
           'You are a helpful assistant. Answer concisely.',
@@ -109,7 +110,7 @@ void main() async {
     print('\n=== Effort-only system message ===');
     final effortResponse = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-5',
+        model: 'claude-opus-5',
         maxTokens: 1024,
         messages: [
           InputMessage.systemEffort(EffortLevel.low),

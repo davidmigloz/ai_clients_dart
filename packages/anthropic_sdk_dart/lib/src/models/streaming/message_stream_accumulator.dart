@@ -314,6 +314,7 @@ class MessageStreamAccumulator {
         name: initial.name,
         input: _parseJson(acc.inputJsonBuffer),
         caller: initial.caller,
+        toolsetName: initial.toolsetName,
       ),
       CompactionBlock() => CompactionBlock(
         content: acc.compactionBuffer.isEmpty

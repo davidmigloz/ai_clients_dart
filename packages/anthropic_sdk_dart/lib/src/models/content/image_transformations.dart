@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+
 /// What the server does when an image exceeds the model's maximum image
 /// size.
 enum OversizedImageBehavior {
@@ -70,9 +72,11 @@ class ImageTransformations {
   };
 
   /// Creates a copy with replaced values.
-  ImageTransformations copyWith({OversizedImageBehavior? oversizedImage}) {
+  ImageTransformations copyWith({Object? oversizedImage = unsetCopyWithValue}) {
     return ImageTransformations(
-      oversizedImage: oversizedImage ?? this.oversizedImage,
+      oversizedImage: oversizedImage == unsetCopyWithValue
+          ? this.oversizedImage
+          : oversizedImage as OversizedImageBehavior?,
     );
   }
 

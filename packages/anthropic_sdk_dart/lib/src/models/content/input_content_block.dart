@@ -1277,12 +1277,13 @@ class ToolResultInputBlock extends InputContentBlock {
   }
 
   /// Creates a [ToolResultInputBlock] from JSON.
+  ///
+  /// [json]'s `content` may be a list of content blocks or a plain string;
+  /// a string is normalized to a single [ToolResultContent.text] block.
   factory ToolResultInputBlock.fromJson(Map<String, dynamic> json) {
     return ToolResultInputBlock(
       toolUseId: json['tool_use_id'] as String,
-      content: (json['content'] as List?)
-          ?.map((e) => ToolResultContent.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      content: _parseContent(json['content']),
       isError: json['is_error'] as bool?,
       cacheControl: json['cache_control'] != null
           ? CacheControlEphemeral.fromJson(
@@ -1351,6 +1352,22 @@ class ToolResultInputBlock extends InputContentBlock {
       'ToolResultInputBlock(toolUseId: $toolUseId, content: $content, '
       'isError: $isError, cacheControl: $cacheControl, '
       'toolsetName: $toolsetName)';
+
+  /// Parses a `content` field that may be a list of content blocks, a plain
+  /// string (normalized to a single text block), `null`, or absent.
+  static List<ToolResultContent>? _parseContent(Object? content) {
+    return switch (content) {
+      null => null,
+      final String text => [ToolResultContent.text(text)],
+      final List<dynamic> list =>
+        list
+            .map((e) => ToolResultContent.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      _ => throw const FormatException(
+        'ToolResultInputBlock: "content" must be a string or list',
+      ),
+    };
+  }
 }
 
 /// Server tool use block for assistant messages in input.

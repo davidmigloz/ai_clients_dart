@@ -1096,6 +1096,69 @@ void main() {
 
         expect(json['is_error'], isTrue);
       });
+
+      test('fromJson normalizes a plain string content to a single text '
+          'block', () {
+        final json = {
+          'type': 'tool_result',
+          'tool_use_id': 'tu_str',
+          'content': 'Sunny, 22°C',
+        };
+
+        final block = ToolResultInputBlock.fromJson(json);
+
+        expect(block.content, hasLength(1));
+        expect(
+          (block.content!.single as ToolResultTextContent).text,
+          'Sunny, 22°C',
+        );
+      });
+
+      test('fromJson still accepts list content', () {
+        final json = {
+          'type': 'tool_result',
+          'tool_use_id': 'tu_list',
+          'content': [
+            {'type': 'text', 'text': 'hi'},
+          ],
+        };
+
+        final block = ToolResultInputBlock.fromJson(json);
+
+        expect(block.content, hasLength(1));
+        expect((block.content!.single as ToolResultTextContent).text, 'hi');
+      });
+
+      test('fromJson throws FormatException for non-string/list content', () {
+        final json = {
+          'type': 'tool_result',
+          'tool_use_id': 'tu_bad',
+          'content': 42,
+        };
+
+        expect(
+          () => ToolResultInputBlock.fromJson(json),
+          throwsFormatException,
+        );
+      });
+
+      test('toolsetName round-trips through fromJson/toJson', () {
+        final json = {
+          'type': 'tool_result',
+          'tool_use_id': 'tu_toolset',
+          'toolset_name': 'computer_toolset_20260801',
+        };
+
+        final block = ToolResultInputBlock.fromJson(json);
+
+        expect(block.toolsetName, 'computer_toolset_20260801');
+        expect(block.toJson(), json);
+      });
+
+      test('omits toolset_name when absent', () {
+        const block = ToolResultInputBlock(toolUseId: 'tu_no_toolset');
+        expect(block.toJson().containsKey('toolset_name'), isFalse);
+      });
     });
 
     group('ToolResultContent variants', () {
@@ -1239,6 +1302,39 @@ void main() {
           expect(content.toJson(), json);
         },
       );
+    });
+
+    group('ImageTransformations', () {
+      test('copyWith(oversizedImage: null) clears the field', () {
+        const original = ImageTransformations(
+          oversizedImage: OversizedImageBehavior.error,
+        );
+
+        final cleared = original.copyWith(oversizedImage: null);
+
+        expect(cleared.oversizedImage, isNull);
+        expect(cleared, const ImageTransformations());
+      });
+
+      test('copyWith with no arguments keeps the original value', () {
+        const original = ImageTransformations(
+          oversizedImage: OversizedImageBehavior.error,
+        );
+
+        expect(original.copyWith(), equals(original));
+      });
+
+      test('copyWith replaces the value when given', () {
+        const original = ImageTransformations(
+          oversizedImage: OversizedImageBehavior.downsize,
+        );
+
+        final updated = original.copyWith(
+          oversizedImage: OversizedImageBehavior.error,
+        );
+
+        expect(updated.oversizedImage, OversizedImageBehavior.error);
+      });
     });
 
     group('CompactionInputBlock', () {

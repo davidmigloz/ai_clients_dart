@@ -145,6 +145,18 @@ void main() {
       expect(def.tool, isA<ComputerToolset>());
     });
 
+    test('a future computer_toolset_* version still routes to ComputerToolset '
+        'and preserves its type, instead of falling into ComputerUseTool '
+        '(which requires display_width_px)', () {
+      final json = {'type': 'computer_toolset_20991231'};
+      final tool = BuiltInTool.fromJson(json);
+
+      expect(tool, isA<ComputerToolset>());
+      final toolset = tool as ComputerToolset;
+      expect(toolset.type, 'computer_toolset_20991231');
+      expect(toolset.toJson(), json);
+    });
+
     test('BuiltInTool.computerToolset factory', () {
       final tool = BuiltInTool.computerToolset(
         configs: const ComputerToolsetConfigs(
@@ -189,6 +201,17 @@ void main() {
       final json = {'type': 'browser_toolset_20260801'};
       final def = ToolDefinition.fromJson(json) as BuiltInToolDefinition;
       expect(def.tool, isA<BrowserToolset>());
+    });
+
+    test('a future browser_toolset_* version routes to BrowserToolset instead '
+        'of throwing, and preserves its type', () {
+      final json = {'type': 'browser_toolset_20991231'};
+      final tool = BuiltInTool.fromJson(json);
+
+      expect(tool, isA<BrowserToolset>());
+      final toolset = tool as BrowserToolset;
+      expect(toolset.type, 'browser_toolset_20991231');
+      expect(toolset.toJson(), json);
     });
 
     test('BuiltInTool.browserToolset factory', () {

@@ -34,8 +34,10 @@ class SkillFile {
           listsEqual(bytes, other.bytes) &&
           mimeType == other.mimeType;
 
+  // Hashes the byte length rather than every byte (files can be large);
+  // equality above still compares the exact bytes.
   @override
-  int get hashCode => Object.hash(path, listHash(bytes), mimeType);
+  int get hashCode => Object.hash(path, bytes.length, mimeType);
 
   @override
   String toString() =>

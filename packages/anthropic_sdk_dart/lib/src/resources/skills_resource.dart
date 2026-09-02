@@ -12,6 +12,7 @@ import '../models/skills/skill_list_response.dart';
 import '../models/skills/skill_source.dart';
 import '../models/skills/skill_version.dart';
 import 'base_resource.dart';
+import 'media_type.dart';
 
 /// Resource for the Skills API.
 ///
@@ -32,7 +33,9 @@ class SkillsResource extends ResourceBase {
   /// Creates a new skill.
   ///
   /// The [files] must all share one top-level directory that contains a
-  /// `SKILL.md` file at its root (e.g. `my-skill/SKILL.md`).
+  /// `SKILL.md` file at its root (e.g. `my-skill/SKILL.md`). Each file is
+  /// sent as a separate multipart part under the repeated field name
+  /// `files[]`.
   /// The [displayName] is an optional human-readable label for the skill;
   /// when omitted, it's derived from the `SKILL.md` frontmatter `name`.
   ///
@@ -59,11 +62,11 @@ class SkillsResource extends ResourceBase {
     for (final file in files) {
       request.files.add(
         http.MultipartFile.fromBytes(
-          'files',
+          'files[]',
           file.bytes,
           filename: file.path,
           contentType: file.mimeType != null
-              ? _parseMediaType(file.mimeType!)
+              ? parseMediaTypeOrOctetStream(file.mimeType!)
               : null,
         ),
       );
@@ -177,7 +180,9 @@ class SkillsResource extends ResourceBase {
   ///
   /// The [skillId] is the unique identifier of the skill.
   /// The [files] must all share one top-level directory that contains a
-  /// `SKILL.md` file at its root (e.g. `my-skill/SKILL.md`).
+  /// `SKILL.md` file at its root (e.g. `my-skill/SKILL.md`). Each file is
+  /// sent as a separate multipart part under the repeated field name
+  /// `files[]`.
   ///
   /// Returns a [SkillVersion] with information about the created version.
   ///
@@ -202,11 +207,11 @@ class SkillsResource extends ResourceBase {
     for (final file in files) {
       request.files.add(
         http.MultipartFile.fromBytes(
-          'files',
+          'files[]',
           file.bytes,
           filename: file.path,
           contentType: file.mimeType != null
-              ? _parseMediaType(file.mimeType!)
+              ? parseMediaTypeOrOctetStream(file.mimeType!)
               : null,
         ),
       );
@@ -380,15 +385,6 @@ class SkillsResource extends ResourceBase {
     return DeletedSkillVersion.fromJson(
       jsonDecode(response.body) as Map<String, dynamic>,
     );
-  }
-
-  /// Parses a MIME type string to http.MediaType.
-  http.MediaType _parseMediaType(String mimeType) {
-    final parts = mimeType.split('/');
-    if (parts.length == 2) {
-      return http.MediaType(parts[0], parts[1]);
-    }
-    return http.MediaType('application', 'octet-stream');
   }
 
   /// Throws an appropriate error from an HTTP response.

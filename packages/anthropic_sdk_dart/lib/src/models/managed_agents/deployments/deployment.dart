@@ -246,7 +246,9 @@ class Deployment {
     status,
     pausedReason,
     createdAt,
-    Object.hash(updatedAt, archivedAt, budget),
+    updatedAt,
+    archivedAt,
+    budget,
   );
 
   @override

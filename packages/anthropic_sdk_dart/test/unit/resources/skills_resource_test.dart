@@ -76,7 +76,7 @@ void main() {
       expect(request.method, 'POST');
       expect(request.headers.containsKey('anthropic-beta'), isFalse);
       expect(request.files, hasLength(2));
-      expect(request.files.every((f) => f.field == 'files'), isTrue);
+      expect(request.files.every((f) => f.field == 'files[]'), isTrue);
       expect(request.files.map((f) => f.filename).toList(), [
         'my-skill/SKILL.md',
         'my-skill/scripts/run.py',
@@ -176,7 +176,7 @@ void main() {
       expect(request.url.path, '/v1/skills/skill_abc123/versions');
       expect(request.headers.containsKey('anthropic-beta'), isFalse);
       expect(request.files, hasLength(1));
-      expect(request.files.single.field, 'files');
+      expect(request.files.single.field, 'files[]');
     });
   });
 

@@ -10,6 +10,7 @@ import '../models/files/file_delete_response.dart';
 import '../models/files/file_list_response.dart';
 import '../models/files/file_metadata.dart';
 import 'base_resource.dart';
+import 'media_type.dart';
 
 /// Resource for the Files API (IO implementation).
 ///
@@ -121,7 +122,7 @@ class FilesResource extends ResourceBase {
           'file',
           bytes,
           filename: fileName,
-          contentType: _parseMediaType(inferredMimeType),
+          contentType: parseMediaTypeOrOctetStream(inferredMimeType),
         ),
       );
     if (expiresInSeconds != null) {
@@ -294,15 +295,6 @@ class FilesResource extends ResourceBase {
       'webm' => 'video/webm',
       _ => 'application/octet-stream',
     };
-  }
-
-  /// Parses a MIME type string to http.MediaType.
-  http.MediaType _parseMediaType(String mimeType) {
-    final parts = mimeType.split('/');
-    if (parts.length == 2) {
-      return http.MediaType(parts[0], parts[1]);
-    }
-    return http.MediaType('application', 'octet-stream');
   }
 
   /// Throws an appropriate error from an HTTP response.

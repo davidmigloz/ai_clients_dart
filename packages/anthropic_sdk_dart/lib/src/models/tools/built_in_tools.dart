@@ -268,10 +268,14 @@ sealed class BuiltInTool {
   factory BuiltInTool.fromJson(Map<String, dynamic> json) {
     final type = json['type'] as String;
     return switch (type) {
-      // Exact-match toolset types must be checked before the `computer_`
-      // prefix routing below, or they would be misrouted to ComputerUseTool.
-      'computer_toolset_20260801' => ComputerToolset.fromJson(json),
-      'browser_toolset_20260801' => BrowserToolset.fromJson(json),
+      // Toolset prefix guards must be checked before the `computer_` prefix
+      // routing below, or a future `computer_toolset_*`/`browser_toolset_*`
+      // version would be misrouted to ComputerUseTool.fromJson (which
+      // crashes on a missing `display_width_px`) or rejected outright.
+      final String t when t.startsWith('computer_toolset_') =>
+        ComputerToolset.fromJson(json),
+      final String t when t.startsWith('browser_toolset_') =>
+        BrowserToolset.fromJson(json),
       'bash_20250124' => BashTool.fromJson(json),
       'text_editor_20250124' => TextEditorTool20250124.fromJson(json),
       'text_editor_20250429' => TextEditorTool20250429.fromJson(json),
@@ -1673,12 +1677,13 @@ class ComputerToolset extends BuiltInTool {
   final CacheControlEphemeral? cacheControl;
 
   /// Creates a [ComputerToolset].
-  const ComputerToolset({this.configs, this.cacheControl})
-    : type = 'computer_toolset_20260801';
+  const ComputerToolset({String? type, this.configs, this.cacheControl})
+    : type = type ?? 'computer_toolset_20260801';
 
   /// Creates a [ComputerToolset] from JSON.
   factory ComputerToolset.fromJson(Map<String, dynamic> json) {
     return ComputerToolset(
+      type: json['type'] as String? ?? 'computer_toolset_20260801',
       configs: json['configs'] != null
           ? ComputerToolsetConfigs.fromJson(
               json['configs'] as Map<String, dynamic>,
@@ -1701,10 +1706,12 @@ class ComputerToolset extends BuiltInTool {
 
   /// Creates a copy with replaced values.
   ComputerToolset copyWith({
+    String? type,
     Object? configs = unsetCopyWithValue,
     Object? cacheControl = unsetCopyWithValue,
   }) {
     return ComputerToolset(
+      type: type ?? this.type,
       configs: configs == unsetCopyWithValue
           ? this.configs
           : configs as ComputerToolsetConfigs?,
@@ -1761,12 +1768,13 @@ class BrowserToolset extends BuiltInTool {
   final CacheControlEphemeral? cacheControl;
 
   /// Creates a [BrowserToolset].
-  const BrowserToolset({this.configs, this.cacheControl})
-    : type = 'browser_toolset_20260801';
+  const BrowserToolset({String? type, this.configs, this.cacheControl})
+    : type = type ?? 'browser_toolset_20260801';
 
   /// Creates a [BrowserToolset] from JSON.
   factory BrowserToolset.fromJson(Map<String, dynamic> json) {
     return BrowserToolset(
+      type: json['type'] as String? ?? 'browser_toolset_20260801',
       configs: json['configs'] != null
           ? BrowserToolsetConfigs.fromJson(
               json['configs'] as Map<String, dynamic>,
@@ -1789,10 +1797,12 @@ class BrowserToolset extends BuiltInTool {
 
   /// Creates a copy with replaced values.
   BrowserToolset copyWith({
+    String? type,
     Object? configs = unsetCopyWithValue,
     Object? cacheControl = unsetCopyWithValue,
   }) {
     return BrowserToolset(
+      type: type ?? this.type,
       configs: configs == unsetCopyWithValue
           ? this.configs
           : configs as BrowserToolsetConfigs?,

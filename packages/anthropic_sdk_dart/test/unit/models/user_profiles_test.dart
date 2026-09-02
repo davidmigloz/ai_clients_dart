@@ -363,6 +363,16 @@ void main() {
       },
     );
 
+    test('fromJson throws FormatException for explicit null '
+        'external_user_onboarded_at', () {
+      expect(
+        () => UpdateUserProfileRequest.fromJson(const {
+          'external_user_onboarded_at': null,
+        }),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
     test('serializes name, accessType and externalUserOnboardedAt updates', () {
       final request = UpdateUserProfileRequest(
         name: 'Acme Corp',

@@ -120,7 +120,12 @@ class UpdateUserProfileRequest {
                 : null)
           : _notSet,
       externalUserOnboardedAt: json.containsKey('external_user_onboarded_at')
-          ? DateTime.parse(json['external_user_onboarded_at'] as String)
+          ? (json['external_user_onboarded_at'] != null
+                ? DateTime.parse(json['external_user_onboarded_at'] as String)
+                : throw const FormatException(
+                    'UpdateUserProfileRequest: '
+                    '"external_user_onboarded_at" cannot be null',
+                  ))
           : _notSet,
       metadata: json.containsKey('metadata')
           ? (json['metadata'] as Map<String, dynamic>?)?.map(

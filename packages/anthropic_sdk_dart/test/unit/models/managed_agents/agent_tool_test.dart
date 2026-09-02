@@ -1,6 +1,28 @@
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 import 'package:test/test.dart';
 
+/// Maps a simple tool type discriminator to a matcher for its concrete
+/// response-side config class.
+final _responseConfigTypeMatcher = <String, Matcher>{
+  'bash': isA<BashToolConfig>(),
+  'edit': isA<EditToolConfig>(),
+  'read': isA<ReadToolConfig>(),
+  'write': isA<WriteToolConfig>(),
+  'glob': isA<GlobToolConfig>(),
+  'grep': isA<GrepToolConfig>(),
+};
+
+/// Maps a simple tool type discriminator to a matcher for its concrete
+/// request-side config params class.
+final _paramsConfigTypeMatcher = <String, Matcher>{
+  'bash': isA<BashToolConfigParams>(),
+  'edit': isA<EditToolConfigParams>(),
+  'read': isA<ReadToolConfigParams>(),
+  'write': isA<WriteToolConfigParams>(),
+  'glob': isA<GlobToolConfigParams>(),
+  'grep': isA<GrepToolConfigParams>(),
+};
+
 void main() {
   group('AgentToolConfig (response union)', () {
     test('dispatches all six simple tool configs', () {
@@ -13,11 +35,21 @@ void main() {
           'permission_policy': {'type': 'always_ask'},
         };
         final config = AgentToolConfig.fromJson(json);
+        expect(config, _responseConfigTypeMatcher[type]);
         expect(config.name, AgentToolName.fromJson(type));
         expect(config.enabled, isTrue);
         expect(config.permissionPolicy, isA<AlwaysAskPolicy>());
         expect(config.toJson(), json);
       }
+    });
+
+    test('dispatches by name when type is absent', () {
+      final config = AgentToolConfig.fromJson(const {
+        'name': 'read',
+        'enabled': true,
+        'permission_policy': {'type': 'always_ask'},
+      });
+      expect(config, isA<ReadToolConfig>());
     });
 
     test('web_fetch config round-trips with domain filters', () {
@@ -93,11 +125,35 @@ void main() {
       for (final type in types) {
         final json = {'name': type, 'enabled': false};
         final config = AgentToolConfigParams.fromJson(json);
+        expect(config, _paramsConfigTypeMatcher[type]);
         expect(config.name, AgentToolName.fromJson(type));
         expect(config.enabled, isFalse);
         expect(config.permissionPolicy, isNull);
         expect(config.toJson(), {'type': type, 'name': type, 'enabled': false});
       }
+    });
+
+    test('name is a fixed constant, not a settable field', () {
+      const a = BashToolConfigParams();
+      const b = BashToolConfigParams();
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(a.name, AgentToolName.bash);
+      expect(a.toJson(), {'type': 'bash', 'name': 'bash'});
+    });
+
+    test('fromJson throws FormatException when name disagrees with type', () {
+      expect(
+        () => BashToolConfigParams.fromJson(const {'name': 'edit'}),
+        throwsA(isA<FormatException>()),
+      );
+      expect(
+        () => AgentToolConfigParams.fromJson(const {
+          'type': 'bash',
+          'name': 'edit',
+        }),
+        throwsA(isA<FormatException>()),
+      );
     });
 
     test('dispatches by name when type is absent (params fromJson input)', () {
@@ -123,7 +179,7 @@ void main() {
     test('web_search params round-trip with a user location', () {
       final config = AgentToolConfigParams.webSearch(
         blockedDomains: ['ads.example.com'],
-        userLocation: const ManagedAgentsUserLocation(country: 'US'),
+        userLocation: const UserLocation(country: 'US'),
       );
       final json = config.toJson();
       expect(json['blocked_domains'], ['ads.example.com']);
@@ -204,34 +260,29 @@ void main() {
     });
   });
 
-  group('ManagedAgentsUserLocation', () {
-    test('round-trips through fromJson/toJson', () {
-      const json = {
+  group('WebSearchToolConfig(Params) reuse the shared UserLocation type', () {
+    test('response userLocation is the built-in-tools UserLocation', () {
+      const config = WebSearchToolConfig(
+        enabled: true,
+        permissionPolicy: AlwaysAskPolicy(),
+        userLocation: UserLocation(city: 'San Francisco'),
+      );
+      expect(config.userLocation, isA<UserLocation>());
+      expect(config.toJson()['user_location'], {
         'type': 'approximate',
         'city': 'San Francisco',
-        'country': 'US',
-        'region': 'California',
-        'timezone': 'America/Los_Angeles',
-      };
-      final location = ManagedAgentsUserLocation.fromJson(json);
-      expect(location.city, 'San Francisco');
-      expect(location.toJson(), json);
+      });
     });
 
-    test('copyWith replaces and preserves fields', () {
-      const location = ManagedAgentsUserLocation(city: 'SF');
-      final updated = location.copyWith(country: 'US');
-      expect(updated.city, 'SF');
-      expect(updated.country, 'US');
-    });
-
-    test('equality and hashCode', () {
-      const a = ManagedAgentsUserLocation(city: 'SF');
-      const b = ManagedAgentsUserLocation(city: 'SF');
-      const c = ManagedAgentsUserLocation(city: 'NY');
-      expect(a, equals(b));
-      expect(a.hashCode, equals(b.hashCode));
-      expect(a, isNot(equals(c)));
+    test('params userLocation is the built-in-tools UserLocation', () {
+      const config = WebSearchToolConfigParams(
+        userLocation: UserLocation(city: 'San Francisco'),
+      );
+      expect(config.userLocation, isA<UserLocation>());
+      expect(config.toJson()['user_location'], {
+        'type': 'approximate',
+        'city': 'San Francisco',
+      });
     });
   });
 }

@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import '../../tools/built_in_tools.dart' show UserLocation;
 import 'permission_policy.dart';
 
 // ---------------------------------------------------------------------------
@@ -980,7 +981,7 @@ sealed class AgentToolConfig {
 
   /// Creates an [AgentToolConfig] from JSON.
   factory AgentToolConfig.fromJson(Map<String, dynamic> json) {
-    final type = json['type'] as String?;
+    final type = (json['type'] ?? json['name']) as String?;
     return switch (type) {
       'bash' => BashToolConfig.fromJson(json),
       'edit' => EditToolConfig.fromJson(json),
@@ -1628,7 +1629,7 @@ class WebSearchToolConfig extends AgentToolConfig {
   final List<String>? blockedDomains;
 
   /// Approximate user location for search result localization.
-  final ManagedAgentsUserLocation? userLocation;
+  final UserLocation? userLocation;
 
   /// Creates a [WebSearchToolConfig].
   const WebSearchToolConfig({
@@ -1657,9 +1658,7 @@ class WebSearchToolConfig extends AgentToolConfig {
           ?.map((e) => e as String)
           .toList(),
       userLocation: json['user_location'] != null
-          ? ManagedAgentsUserLocation.fromJson(
-              json['user_location'] as Map<String, dynamic>,
-            )
+          ? UserLocation.fromJson(json['user_location'] as Map<String, dynamic>)
           : null,
     );
   }
@@ -1698,7 +1697,7 @@ class WebSearchToolConfig extends AgentToolConfig {
           : blockedDomains as List<String>?,
       userLocation: userLocation == unsetCopyWithValue
           ? this.userLocation
-          : userLocation as ManagedAgentsUserLocation?,
+          : userLocation as UserLocation?,
     );
   }
 
@@ -1745,21 +1744,23 @@ class UnknownAgentToolConfig extends AgentToolConfig {
   /// The raw JSON map.
   final Map<String, dynamic> raw;
 
-  const UnknownAgentToolConfig._({required this.rawType, required this.raw});
+  @override
+  final AgentToolName name;
 
   @override
-  AgentToolName get name =>
-      AgentToolName.fromJson(raw['name'] as String? ?? '');
+  final bool enabled;
 
   @override
-  bool get enabled => raw['enabled'] as bool? ?? false;
+  final PermissionPolicy permissionPolicy;
 
-  @override
-  PermissionPolicy get permissionPolicy => raw['permission_policy'] != null
-      ? PermissionPolicy.fromJson(
-          raw['permission_policy'] as Map<String, dynamic>,
-        )
-      : const AlwaysAskPolicy();
+  UnknownAgentToolConfig._({required this.rawType, required this.raw})
+    : name = AgentToolName.fromJson(raw['name'] as String? ?? ''),
+      enabled = raw['enabled'] as bool? ?? false,
+      permissionPolicy = raw['permission_policy'] != null
+          ? PermissionPolicy.fromJson(
+              raw['permission_policy'] as Map<String, dynamic>,
+            )
+          : const AlwaysAskPolicy();
 
   @override
   Map<String, dynamic> toJson() => raw;
@@ -1777,98 +1778,6 @@ class UnknownAgentToolConfig extends AgentToolConfig {
 
   @override
   String toString() => 'UnknownAgentToolConfig(rawType: $rawType, raw: $raw)';
-}
-
-/// Approximate user location for search result localization, used by
-/// [WebSearchToolConfig] and [WebSearchToolConfigParams].
-///
-/// Distinct from the Messages-API `UserLocation` (a different schema).
-@immutable
-class ManagedAgentsUserLocation {
-  /// Location precision. Only `approximate` is supported.
-  final String type;
-
-  /// City name.
-  final String? city;
-
-  /// Two-letter ISO 3166-1 country code, uppercase.
-  final String? country;
-
-  /// Region or state name.
-  final String? region;
-
-  /// IANA timezone identifier, e.g. `America/Los_Angeles`.
-  final String? timezone;
-
-  /// Creates a [ManagedAgentsUserLocation].
-  const ManagedAgentsUserLocation({
-    this.type = 'approximate',
-    this.city,
-    this.country,
-    this.region,
-    this.timezone,
-  });
-
-  /// Creates a [ManagedAgentsUserLocation] from JSON.
-  factory ManagedAgentsUserLocation.fromJson(Map<String, dynamic> json) {
-    return ManagedAgentsUserLocation(
-      type: json['type'] as String? ?? 'approximate',
-      city: json['city'] as String?,
-      country: json['country'] as String?,
-      region: json['region'] as String?,
-      timezone: json['timezone'] as String?,
-    );
-  }
-
-  /// Converts to JSON.
-  Map<String, dynamic> toJson() => {
-    'type': type,
-    if (city != null) 'city': city,
-    if (country != null) 'country': country,
-    if (region != null) 'region': region,
-    if (timezone != null) 'timezone': timezone,
-  };
-
-  /// Creates a copy with replaced values.
-  ManagedAgentsUserLocation copyWith({
-    String? type,
-    Object? city = unsetCopyWithValue,
-    Object? country = unsetCopyWithValue,
-    Object? region = unsetCopyWithValue,
-    Object? timezone = unsetCopyWithValue,
-  }) {
-    return ManagedAgentsUserLocation(
-      type: type ?? this.type,
-      city: city == unsetCopyWithValue ? this.city : city as String?,
-      country: country == unsetCopyWithValue
-          ? this.country
-          : country as String?,
-      region: region == unsetCopyWithValue ? this.region : region as String?,
-      timezone: timezone == unsetCopyWithValue
-          ? this.timezone
-          : timezone as String?,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ManagedAgentsUserLocation &&
-          runtimeType == other.runtimeType &&
-          type == other.type &&
-          city == other.city &&
-          country == other.country &&
-          region == other.region &&
-          timezone == other.timezone;
-
-  @override
-  int get hashCode => Object.hash(type, city, country, region, timezone);
-
-  @override
-  String toString() =>
-      'ManagedAgentsUserLocation('
-      'type: $type, city: $city, country: $country, '
-      'region: $region, timezone: $timezone)';
 }
 
 /// Configuration for a specific MCP tool (response variant).
@@ -2061,7 +1970,7 @@ sealed class AgentToolConfigParams {
     PermissionPolicy? permissionPolicy,
     List<String>? allowedDomains,
     List<String>? blockedDomains,
-    ManagedAgentsUserLocation? userLocation,
+    UserLocation? userLocation,
   }) => WebSearchToolConfigParams(
     enabled: enabled,
     permissionPolicy: permissionPolicy,
@@ -2074,11 +1983,27 @@ sealed class AgentToolConfigParams {
   Map<String, dynamic> toJson();
 }
 
+/// Validates that a request-side tool config's JSON `name` (if present)
+/// agrees with the variant's constant [expected] name, throwing a
+/// [FormatException] otherwise.
+void _checkAgentToolConfigParamsName(
+  Map<String, dynamic> json,
+  AgentToolName expected,
+  String className,
+) {
+  final rawName = json['name'] as String?;
+  if (rawName != null && AgentToolName.fromJson(rawName) != expected) {
+    throw FormatException(
+      '$className: "name" must be "${expected.value}", got "$rawName"',
+    );
+  }
+}
+
 /// Configuration override for the `bash` tool (request variant).
 @immutable
 class BashToolConfigParams extends AgentToolConfigParams {
   @override
-  final AgentToolName name;
+  AgentToolName get name => AgentToolName.bash;
 
   @override
   final bool? enabled;
@@ -2087,14 +2012,15 @@ class BashToolConfigParams extends AgentToolConfigParams {
   final PermissionPolicy? permissionPolicy;
 
   /// Creates a [BashToolConfigParams].
-  const BashToolConfigParams({
-    this.name = AgentToolName.bash,
-    this.enabled,
-    this.permissionPolicy,
-  });
+  const BashToolConfigParams({this.enabled, this.permissionPolicy});
 
   /// Creates a [BashToolConfigParams] from JSON.
   factory BashToolConfigParams.fromJson(Map<String, dynamic> json) {
+    _checkAgentToolConfigParamsName(
+      json,
+      AgentToolName.bash,
+      'BashToolConfigParams',
+    );
     return BashToolConfigParams(
       enabled: json['enabled'] as bool?,
       permissionPolicy: json['permission_policy'] != null
@@ -2136,7 +2062,7 @@ class BashToolConfigParams extends AgentToolConfigParams {
           permissionPolicy == other.permissionPolicy;
 
   @override
-  int get hashCode => Object.hash(name, enabled, permissionPolicy);
+  int get hashCode => Object.hash(enabled, permissionPolicy);
 
   @override
   String toString() =>
@@ -2148,7 +2074,7 @@ class BashToolConfigParams extends AgentToolConfigParams {
 @immutable
 class EditToolConfigParams extends AgentToolConfigParams {
   @override
-  final AgentToolName name;
+  AgentToolName get name => AgentToolName.edit;
 
   @override
   final bool? enabled;
@@ -2157,14 +2083,15 @@ class EditToolConfigParams extends AgentToolConfigParams {
   final PermissionPolicy? permissionPolicy;
 
   /// Creates an [EditToolConfigParams].
-  const EditToolConfigParams({
-    this.name = AgentToolName.edit,
-    this.enabled,
-    this.permissionPolicy,
-  });
+  const EditToolConfigParams({this.enabled, this.permissionPolicy});
 
   /// Creates an [EditToolConfigParams] from JSON.
   factory EditToolConfigParams.fromJson(Map<String, dynamic> json) {
+    _checkAgentToolConfigParamsName(
+      json,
+      AgentToolName.edit,
+      'EditToolConfigParams',
+    );
     return EditToolConfigParams(
       enabled: json['enabled'] as bool?,
       permissionPolicy: json['permission_policy'] != null
@@ -2206,7 +2133,7 @@ class EditToolConfigParams extends AgentToolConfigParams {
           permissionPolicy == other.permissionPolicy;
 
   @override
-  int get hashCode => Object.hash(name, enabled, permissionPolicy);
+  int get hashCode => Object.hash(enabled, permissionPolicy);
 
   @override
   String toString() =>
@@ -2218,7 +2145,7 @@ class EditToolConfigParams extends AgentToolConfigParams {
 @immutable
 class ReadToolConfigParams extends AgentToolConfigParams {
   @override
-  final AgentToolName name;
+  AgentToolName get name => AgentToolName.read;
 
   @override
   final bool? enabled;
@@ -2227,14 +2154,15 @@ class ReadToolConfigParams extends AgentToolConfigParams {
   final PermissionPolicy? permissionPolicy;
 
   /// Creates a [ReadToolConfigParams].
-  const ReadToolConfigParams({
-    this.name = AgentToolName.read,
-    this.enabled,
-    this.permissionPolicy,
-  });
+  const ReadToolConfigParams({this.enabled, this.permissionPolicy});
 
   /// Creates a [ReadToolConfigParams] from JSON.
   factory ReadToolConfigParams.fromJson(Map<String, dynamic> json) {
+    _checkAgentToolConfigParamsName(
+      json,
+      AgentToolName.read,
+      'ReadToolConfigParams',
+    );
     return ReadToolConfigParams(
       enabled: json['enabled'] as bool?,
       permissionPolicy: json['permission_policy'] != null
@@ -2276,7 +2204,7 @@ class ReadToolConfigParams extends AgentToolConfigParams {
           permissionPolicy == other.permissionPolicy;
 
   @override
-  int get hashCode => Object.hash(name, enabled, permissionPolicy);
+  int get hashCode => Object.hash(enabled, permissionPolicy);
 
   @override
   String toString() =>
@@ -2288,7 +2216,7 @@ class ReadToolConfigParams extends AgentToolConfigParams {
 @immutable
 class WriteToolConfigParams extends AgentToolConfigParams {
   @override
-  final AgentToolName name;
+  AgentToolName get name => AgentToolName.write;
 
   @override
   final bool? enabled;
@@ -2297,14 +2225,15 @@ class WriteToolConfigParams extends AgentToolConfigParams {
   final PermissionPolicy? permissionPolicy;
 
   /// Creates a [WriteToolConfigParams].
-  const WriteToolConfigParams({
-    this.name = AgentToolName.write,
-    this.enabled,
-    this.permissionPolicy,
-  });
+  const WriteToolConfigParams({this.enabled, this.permissionPolicy});
 
   /// Creates a [WriteToolConfigParams] from JSON.
   factory WriteToolConfigParams.fromJson(Map<String, dynamic> json) {
+    _checkAgentToolConfigParamsName(
+      json,
+      AgentToolName.write,
+      'WriteToolConfigParams',
+    );
     return WriteToolConfigParams(
       enabled: json['enabled'] as bool?,
       permissionPolicy: json['permission_policy'] != null
@@ -2346,7 +2275,7 @@ class WriteToolConfigParams extends AgentToolConfigParams {
           permissionPolicy == other.permissionPolicy;
 
   @override
-  int get hashCode => Object.hash(name, enabled, permissionPolicy);
+  int get hashCode => Object.hash(enabled, permissionPolicy);
 
   @override
   String toString() =>
@@ -2358,7 +2287,7 @@ class WriteToolConfigParams extends AgentToolConfigParams {
 @immutable
 class GlobToolConfigParams extends AgentToolConfigParams {
   @override
-  final AgentToolName name;
+  AgentToolName get name => AgentToolName.glob;
 
   @override
   final bool? enabled;
@@ -2367,14 +2296,15 @@ class GlobToolConfigParams extends AgentToolConfigParams {
   final PermissionPolicy? permissionPolicy;
 
   /// Creates a [GlobToolConfigParams].
-  const GlobToolConfigParams({
-    this.name = AgentToolName.glob,
-    this.enabled,
-    this.permissionPolicy,
-  });
+  const GlobToolConfigParams({this.enabled, this.permissionPolicy});
 
   /// Creates a [GlobToolConfigParams] from JSON.
   factory GlobToolConfigParams.fromJson(Map<String, dynamic> json) {
+    _checkAgentToolConfigParamsName(
+      json,
+      AgentToolName.glob,
+      'GlobToolConfigParams',
+    );
     return GlobToolConfigParams(
       enabled: json['enabled'] as bool?,
       permissionPolicy: json['permission_policy'] != null
@@ -2416,7 +2346,7 @@ class GlobToolConfigParams extends AgentToolConfigParams {
           permissionPolicy == other.permissionPolicy;
 
   @override
-  int get hashCode => Object.hash(name, enabled, permissionPolicy);
+  int get hashCode => Object.hash(enabled, permissionPolicy);
 
   @override
   String toString() =>
@@ -2428,7 +2358,7 @@ class GlobToolConfigParams extends AgentToolConfigParams {
 @immutable
 class GrepToolConfigParams extends AgentToolConfigParams {
   @override
-  final AgentToolName name;
+  AgentToolName get name => AgentToolName.grep;
 
   @override
   final bool? enabled;
@@ -2437,14 +2367,15 @@ class GrepToolConfigParams extends AgentToolConfigParams {
   final PermissionPolicy? permissionPolicy;
 
   /// Creates a [GrepToolConfigParams].
-  const GrepToolConfigParams({
-    this.name = AgentToolName.grep,
-    this.enabled,
-    this.permissionPolicy,
-  });
+  const GrepToolConfigParams({this.enabled, this.permissionPolicy});
 
   /// Creates a [GrepToolConfigParams] from JSON.
   factory GrepToolConfigParams.fromJson(Map<String, dynamic> json) {
+    _checkAgentToolConfigParamsName(
+      json,
+      AgentToolName.grep,
+      'GrepToolConfigParams',
+    );
     return GrepToolConfigParams(
       enabled: json['enabled'] as bool?,
       permissionPolicy: json['permission_policy'] != null
@@ -2486,7 +2417,7 @@ class GrepToolConfigParams extends AgentToolConfigParams {
           permissionPolicy == other.permissionPolicy;
 
   @override
-  int get hashCode => Object.hash(name, enabled, permissionPolicy);
+  int get hashCode => Object.hash(enabled, permissionPolicy);
 
   @override
   String toString() =>
@@ -2498,7 +2429,7 @@ class GrepToolConfigParams extends AgentToolConfigParams {
 @immutable
 class WebFetchToolConfigParams extends AgentToolConfigParams {
   @override
-  final AgentToolName name;
+  AgentToolName get name => AgentToolName.webFetch;
 
   @override
   final bool? enabled;
@@ -2522,7 +2453,6 @@ class WebFetchToolConfigParams extends AgentToolConfigParams {
 
   /// Creates a [WebFetchToolConfigParams].
   const WebFetchToolConfigParams({
-    this.name = AgentToolName.webFetch,
     this.enabled,
     this.permissionPolicy,
     this.allowedDomains,
@@ -2532,6 +2462,11 @@ class WebFetchToolConfigParams extends AgentToolConfigParams {
 
   /// Creates a [WebFetchToolConfigParams] from JSON.
   factory WebFetchToolConfigParams.fromJson(Map<String, dynamic> json) {
+    _checkAgentToolConfigParamsName(
+      json,
+      AgentToolName.webFetch,
+      'WebFetchToolConfigParams',
+    );
     return WebFetchToolConfigParams(
       enabled: json['enabled'] as bool?,
       permissionPolicy: json['permission_policy'] != null
@@ -2599,7 +2534,6 @@ class WebFetchToolConfigParams extends AgentToolConfigParams {
 
   @override
   int get hashCode => Object.hash(
-    name,
     enabled,
     permissionPolicy,
     listHash(allowedDomains),
@@ -2619,7 +2553,7 @@ class WebFetchToolConfigParams extends AgentToolConfigParams {
 @immutable
 class WebSearchToolConfigParams extends AgentToolConfigParams {
   @override
-  final AgentToolName name;
+  AgentToolName get name => AgentToolName.webSearch;
 
   @override
   final bool? enabled;
@@ -2638,11 +2572,10 @@ class WebSearchToolConfigParams extends AgentToolConfigParams {
   final List<String>? blockedDomains;
 
   /// Approximate user location for search result localization.
-  final ManagedAgentsUserLocation? userLocation;
+  final UserLocation? userLocation;
 
   /// Creates a [WebSearchToolConfigParams].
   const WebSearchToolConfigParams({
-    this.name = AgentToolName.webSearch,
     this.enabled,
     this.permissionPolicy,
     this.allowedDomains,
@@ -2652,6 +2585,11 @@ class WebSearchToolConfigParams extends AgentToolConfigParams {
 
   /// Creates a [WebSearchToolConfigParams] from JSON.
   factory WebSearchToolConfigParams.fromJson(Map<String, dynamic> json) {
+    _checkAgentToolConfigParamsName(
+      json,
+      AgentToolName.webSearch,
+      'WebSearchToolConfigParams',
+    );
     return WebSearchToolConfigParams(
       enabled: json['enabled'] as bool?,
       permissionPolicy: json['permission_policy'] != null
@@ -2666,9 +2604,7 @@ class WebSearchToolConfigParams extends AgentToolConfigParams {
           ?.map((e) => e as String)
           .toList(),
       userLocation: json['user_location'] != null
-          ? ManagedAgentsUserLocation.fromJson(
-              json['user_location'] as Map<String, dynamic>,
-            )
+          ? UserLocation.fromJson(json['user_location'] as Map<String, dynamic>)
           : null,
     );
   }
@@ -2706,7 +2642,7 @@ class WebSearchToolConfigParams extends AgentToolConfigParams {
           : blockedDomains as List<String>?,
       userLocation: userLocation == unsetCopyWithValue
           ? this.userLocation
-          : userLocation as ManagedAgentsUserLocation?,
+          : userLocation as UserLocation?,
     );
   }
 
@@ -2723,7 +2659,6 @@ class WebSearchToolConfigParams extends AgentToolConfigParams {
 
   @override
   int get hashCode => Object.hash(
-    name,
     enabled,
     permissionPolicy,
     listHash(allowedDomains),
@@ -2749,24 +2684,23 @@ class UnknownAgentToolConfigParams extends AgentToolConfigParams {
   /// The raw JSON map.
   final Map<String, dynamic> raw;
 
-  const UnknownAgentToolConfigParams._({
-    required this.rawType,
-    required this.raw,
-  });
+  @override
+  final AgentToolName name;
 
   @override
-  AgentToolName get name =>
-      AgentToolName.fromJson(raw['name'] as String? ?? '');
+  final bool? enabled;
 
   @override
-  bool? get enabled => raw['enabled'] as bool?;
+  final PermissionPolicy? permissionPolicy;
 
-  @override
-  PermissionPolicy? get permissionPolicy => raw['permission_policy'] != null
-      ? PermissionPolicy.fromJson(
-          raw['permission_policy'] as Map<String, dynamic>,
-        )
-      : null;
+  UnknownAgentToolConfigParams._({required this.rawType, required this.raw})
+    : name = AgentToolName.fromJson(raw['name'] as String? ?? ''),
+      enabled = raw['enabled'] as bool?,
+      permissionPolicy = raw['permission_policy'] != null
+          ? PermissionPolicy.fromJson(
+              raw['permission_policy'] as Map<String, dynamic>,
+            )
+          : null;
 
   @override
   Map<String, dynamic> toJson() => raw;

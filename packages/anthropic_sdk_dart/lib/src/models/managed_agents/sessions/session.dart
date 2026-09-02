@@ -268,7 +268,8 @@ class Session {
     listHash(outcomeEvaluations),
     createdAt,
     updatedAt,
-    Object.hash(archivedAt, budget),
+    archivedAt,
+    budget,
   );
 
   @override

@@ -129,9 +129,13 @@ class Dream {
       instructions: json['instructions'] as String?,
       sessionId: json['session_id'] as String?,
       usage: DreamUsage.fromJson(json['usage'] as Map<String, dynamic>),
-      outputBehavior: OutputBehavior.fromJson(
-        json['output_behavior'] as Map<String, dynamic>,
-      ),
+      outputBehavior: json['output_behavior'] != null
+          ? OutputBehavior.fromJson(
+              json['output_behavior'] as Map<String, dynamic>,
+            )
+          : throw const FormatException(
+              'Dream: missing required "output_behavior"',
+            ),
     );
   }
 

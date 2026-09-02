@@ -382,5 +382,22 @@ void main() {
       expect(a.hashCode, b.hashCode);
       expect(a, isNot(equals(c)));
     });
+
+    test('hashCode is based on byte length, not every byte', () {
+      // Two files with the same path/length/mimeType but different byte
+      // content hash the same (hashCode need not distinguish unequal
+      // objects), while equality still compares the exact bytes.
+      final a = SkillFile(
+        path: 'my-skill/SKILL.md',
+        bytes: Uint8List.fromList([1, 2, 3]),
+      );
+      final b = SkillFile(
+        path: 'my-skill/SKILL.md',
+        bytes: Uint8List.fromList([9, 9, 9]),
+      );
+
+      expect(a.hashCode, b.hashCode);
+      expect(a, isNot(equals(b)));
+    });
   });
 }

@@ -7159,11 +7159,14 @@
     },
     "ManagedAgentsUserLocation": {
       "spec": "main",
-      "kind": "object",
-      "dart_class": "ManagedAgentsUserLocation",
-      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "kind": "skip",
+      "dart_class": "UserLocation",
+      "file": "lib/src/models/tools/built_in_tools.dart",
       "schema": "BetaManagedAgentsUserLocation",
-      "note": "Distinct from the unrelated Messages-API UserLocation in lib/src/models/tools/built_in_tools.dart (different schema)."
+      "note": "Same wire shape as UserLocation (type approximate, city/country/region/timezone); unified with the Messages-API UserLocation class.",
+      "tags": [
+        "acknowledged"
+      ]
     },
     "MultiagentRosterEntry": {
       "spec": "main",

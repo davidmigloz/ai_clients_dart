@@ -321,6 +321,31 @@ void main() {
         expect(acc.toolUseBlocks[0].name, 'get_weather');
       });
 
+      test('tool use stream preserves toolset_name', () {
+        final acc = _accumulate([
+          _messageStartJson(),
+          _contentBlockStartJson(0, {
+            ..._toolUseBlockJson(name: 'left_click'),
+            'toolset_name': 'computer_toolset_20260801',
+          }),
+          _contentBlockDeltaJson(0, _inputJsonDeltaJson('{"key":')),
+          _contentBlockDeltaJson(0, _inputJsonDeltaJson('"val"}')),
+          _contentBlockStopJson(0),
+          _messageDeltaJson(stopReason: 'tool_use'),
+          _messageStopJson,
+        ]);
+
+        expect(acc.toolUseBlocks, hasLength(1));
+        expect(
+          acc.toolUseBlocks.single.toolsetName,
+          'computer_toolset_20260801',
+        );
+
+        final restored = acc.toMessage();
+        final toolUse = restored.content.single as ToolUseBlock;
+        expect(toolUse.toolsetName, 'computer_toolset_20260801');
+      });
+
       test('multiple content blocks (text + tool use)', () {
         final acc = _accumulate([
           _messageStartJson(),

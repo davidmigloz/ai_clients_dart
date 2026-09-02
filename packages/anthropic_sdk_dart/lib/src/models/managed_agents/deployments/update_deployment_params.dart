@@ -229,7 +229,8 @@ class UpdateDeploymentParams {
     _metadata == _notSet ? _notSet : mapHash(metadata),
     _resources == _notSet ? _notSet : listHash(resources),
     _schedule,
-    Object.hash(_vaultIds == _notSet ? _notSet : listHash(vaultIds), _budget),
+    _vaultIds == _notSet ? _notSet : listHash(vaultIds),
+    _budget,
   );
 
   @override
