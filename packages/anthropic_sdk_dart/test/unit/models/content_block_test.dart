@@ -188,6 +188,32 @@ void main() {
         final block = ContentBlock.fromJson(json) as ToolUseBlock;
         expect(block.caller, isA<ServerToolCaller>());
       });
+
+      test('parses and round-trips toolsetName when present', () {
+        final json = {
+          'type': 'tool_use',
+          'id': 'tu_1',
+          'name': 'left_click',
+          'input': {'x': 1, 'y': 2},
+          'toolset_name': 'computer_toolset_20260801',
+        };
+
+        final block = ContentBlock.fromJson(json) as ToolUseBlock;
+        expect(block.toolsetName, 'computer_toolset_20260801');
+        expect(block.toJson(), json);
+      });
+
+      test('omits toolset_name when absent', () {
+        const block = ToolUseBlock(id: 'tu_1', name: 'search', input: {});
+        expect(block.toJson().containsKey('toolset_name'), isFalse);
+      });
+
+      test('copyWith updates toolsetName', () {
+        const block = ToolUseBlock(id: 'tu_1', name: 'search', input: {});
+        final updated = block.copyWith(toolsetName: 'browser_toolset_20260801');
+        expect(updated.toolsetName, 'browser_toolset_20260801');
+        expect(updated.copyWith(toolsetName: null).toolsetName, isNull);
+      });
     });
 
     group('ServerToolUseBlock', () {
@@ -874,89 +900,19 @@ void main() {
       });
     });
 
-    group('MidConversationSystemInputBlock', () {
-      Map<String, dynamic> sampleJson() => {
-        'type': 'mid_conv_system',
-        'content': [
-          {'type': 'text', 'text': 'From now on, answer in French.'},
-        ],
-        'cache_control': {'type': 'ephemeral'},
-      };
-
-      test('factory creates a mid-conversation system block', () {
-        final block = InputContentBlock.midConversationSystem(
-          content: const [TextInputBlock('Answer in French.')],
-        );
-        expect(block, isA<MidConversationSystemInputBlock>());
-        final b = block as MidConversationSystemInputBlock;
-        expect(b.content, hasLength(1));
-        expect(b.content.first.text, 'Answer in French.');
-        expect(b.cacheControl, isNull);
-      });
-
-      test('dispatches via InputContentBlock.fromJson and round-trips', () {
-        final json = sampleJson();
-        final block = InputContentBlock.fromJson(json);
-        expect(block, isA<MidConversationSystemInputBlock>());
-        expect(block.toJson(), json);
-      });
-
-      test('omits cache_control when absent', () {
-        const block = MidConversationSystemInputBlock(
-          content: [TextInputBlock('x')],
-        );
-        expect(block.toJson().containsKey('cache_control'), isFalse);
-      });
-
-      test('fromJson rejects mismatched discriminator', () {
-        final json = <String, dynamic>{'type': 'text', 'content': <dynamic>[]};
-        expect(
-          () => MidConversationSystemInputBlock.fromJson(json),
-          throwsFormatException,
-        );
-      });
-
-      test('fromJson rejects non-list content', () {
-        final json = <String, dynamic>{
+    group('mid_conv_system removal', () {
+      test('fromJson falls back to UnknownInputContentBlock '
+          '(type removed from the spec)', () {
+        final json = {
           'type': 'mid_conv_system',
-          'content': 'not-a-list',
+          'content': [
+            {'type': 'text', 'text': 'From now on, answer in French.'},
+          ],
+          'cache_control': {'type': 'ephemeral'},
         };
-        expect(
-          () => MidConversationSystemInputBlock.fromJson(json),
-          throwsFormatException,
-        );
-      });
-
-      test('copyWith updates content and clears cacheControl', () {
-        const block = MidConversationSystemInputBlock(
-          content: [TextInputBlock('x')],
-          cacheControl: CacheControlEphemeral(),
-        );
-        expect(
-          block
-              .copyWith(content: const [TextInputBlock('y')])
-              .content
-              .first
-              .text,
-          'y',
-        );
-        expect(block.copyWith(cacheControl: null).cacheControl, isNull);
-      });
-
-      test('equality and toString', () {
-        const a = MidConversationSystemInputBlock(
-          content: [TextInputBlock('x')],
-        );
-        const b = MidConversationSystemInputBlock(
-          content: [TextInputBlock('x')],
-        );
-        const c = MidConversationSystemInputBlock(
-          content: [TextInputBlock('y')],
-        );
-        expect(a, equals(b));
-        expect(a.hashCode, equals(b.hashCode));
-        expect(a, isNot(equals(c)));
-        expect(a.toString(), contains('MidConversationSystemInputBlock'));
+        final block = InputContentBlock.fromJson(json);
+        expect(block, isA<UnknownInputContentBlock>());
+        expect(block.toJson(), json);
       });
     });
 
@@ -1029,6 +985,27 @@ void main() {
         final source = json['source'] as Map<String, dynamic>;
         expect(source['type'], 'url');
         expect(source['url'], 'https://example.com/image.png');
+      });
+    });
+
+    group('ToolUseInputBlock', () {
+      test('round-trips toolsetName', () {
+        final json = {
+          'type': 'tool_use',
+          'id': 'tu_1',
+          'name': 'left_click',
+          'input': {'x': 1, 'y': 2},
+          'toolset_name': 'computer_toolset_20260801',
+        };
+
+        final block = InputContentBlock.fromJson(json) as ToolUseInputBlock;
+        expect(block.toolsetName, 'computer_toolset_20260801');
+        expect(block.toJson(), json);
+      });
+
+      test('omits toolset_name when absent', () {
+        const block = ToolUseInputBlock(id: 'tu_1', name: 'search', input: {});
+        expect(block.toJson().containsKey('toolset_name'), isFalse);
       });
     });
 
@@ -1118,6 +1095,245 @@ void main() {
         final json = block.toJson();
 
         expect(json['is_error'], isTrue);
+      });
+
+      test('fromJson normalizes a plain string content to a single text '
+          'block', () {
+        final json = {
+          'type': 'tool_result',
+          'tool_use_id': 'tu_str',
+          'content': 'Sunny, 22°C',
+        };
+
+        final block = ToolResultInputBlock.fromJson(json);
+
+        expect(block.content, hasLength(1));
+        expect(
+          (block.content!.single as ToolResultTextContent).text,
+          'Sunny, 22°C',
+        );
+      });
+
+      test('fromJson still accepts list content', () {
+        final json = {
+          'type': 'tool_result',
+          'tool_use_id': 'tu_list',
+          'content': [
+            {'type': 'text', 'text': 'hi'},
+          ],
+        };
+
+        final block = ToolResultInputBlock.fromJson(json);
+
+        expect(block.content, hasLength(1));
+        expect((block.content!.single as ToolResultTextContent).text, 'hi');
+      });
+
+      test('fromJson throws FormatException for non-string/list content', () {
+        final json = {
+          'type': 'tool_result',
+          'tool_use_id': 'tu_bad',
+          'content': 42,
+        };
+
+        expect(
+          () => ToolResultInputBlock.fromJson(json),
+          throwsFormatException,
+        );
+      });
+
+      test('toolsetName round-trips through fromJson/toJson', () {
+        final json = {
+          'type': 'tool_result',
+          'tool_use_id': 'tu_toolset',
+          'toolset_name': 'computer_toolset_20260801',
+        };
+
+        final block = ToolResultInputBlock.fromJson(json);
+
+        expect(block.toolsetName, 'computer_toolset_20260801');
+        expect(block.toJson(), json);
+      });
+
+      test('omits toolset_name when absent', () {
+        const block = ToolResultInputBlock(toolUseId: 'tu_no_toolset');
+        expect(block.toJson().containsKey('toolset_name'), isFalse);
+      });
+    });
+
+    group('ToolResultContent variants', () {
+      test('image content round-trips transformations', () {
+        final json = {
+          'type': 'image',
+          'source': {'type': 'url', 'url': 'https://example.com/image.png'},
+          'transformations': {'oversized_image': 'error'},
+        };
+        final content =
+            ToolResultContent.fromJson(json) as ToolResultImageContent;
+        expect(
+          content.transformations,
+          const ImageTransformations(
+            oversizedImage: OversizedImageBehavior.error,
+          ),
+        );
+        expect(content.toJson(), json);
+      });
+
+      test('document content wraps DocumentInputBlock', () {
+        final json = {
+          'type': 'document',
+          'source': {
+            'type': 'text',
+            'media_type': 'text/plain',
+            'data': 'hello',
+          },
+        };
+        final content =
+            ToolResultContent.fromJson(json) as ToolResultDocumentContent;
+        expect(content.document, isA<DocumentInputBlock>());
+        expect(content.toJson(), json);
+
+        final built = ToolResultContent.document(content.document);
+        expect(built, equals(content));
+      });
+
+      test('search_result content wraps SearchResultInputBlock', () {
+        final json = {
+          'type': 'search_result',
+          'content': [
+            {'type': 'text', 'text': 'Some fact'},
+          ],
+          'source': 'kb://astro',
+          'title': 'Astronomy',
+        };
+        final content =
+            ToolResultContent.fromJson(json) as ToolResultSearchResultContent;
+        expect(content.searchResult, isA<SearchResultInputBlock>());
+        expect(content.toJson(), json);
+      });
+
+      test('tool_reference content wraps ToolReferenceInputBlock', () {
+        final json = {'type': 'tool_reference', 'tool_name': 'get_weather'};
+        final content =
+            ToolResultContent.fromJson(json) as ToolResultToolReferenceContent;
+        expect(content.toolReference.toolName, 'get_weather');
+        expect(content.toJson(), json);
+      });
+
+      test('browser_state content round-trips tabs and state changes', () {
+        final json = {
+          'type': 'browser_state',
+          'tabs': [
+            {
+              'tab_id': 'tab_1',
+              'title': 'Example',
+              'url': 'https://example.com',
+              'active': true,
+            },
+          ],
+          'state_changes': [
+            {'type': 'tab_opened', 'tab_id': 'tab_2'},
+            {
+              'type': 'download_started',
+              'download_id': 'dl_1',
+              'url': 'https://example.com/f.pdf',
+            },
+            {
+              'type': 'download_completed',
+              'download_id': 'dl_1',
+              'url': 'https://example.com/f.pdf',
+              'path': '/tmp/f.pdf',
+              'size_bytes': 1024,
+            },
+            {
+              'type': 'download_failed',
+              'download_id': 'dl_2',
+              'url': 'https://example.com/g.pdf',
+              'error': 'network error',
+            },
+          ],
+        };
+        final content =
+            ToolResultContent.fromJson(json) as ToolResultBrowserStateContent;
+        expect(content.tabs, hasLength(1));
+        expect(content.tabs.first.active, isTrue);
+        expect(content.stateChanges, hasLength(4));
+        expect(content.stateChanges![0], isA<BrowserStateChangeTabOpened>());
+        expect(
+          content.stateChanges![1],
+          isA<BrowserStateChangeDownloadStarted>(),
+        );
+        expect(
+          content.stateChanges![2],
+          isA<BrowserStateChangeDownloadCompleted>(),
+        );
+        expect(
+          content.stateChanges![3],
+          isA<BrowserStateChangeDownloadFailed>(),
+        );
+        expect(content.toJson(), json);
+      });
+
+      test('browser_state active defaults to false when absent', () {
+        final entry = BrowserStateTabEntry.fromJson(const {
+          'tab_id': 'tab_1',
+          'title': '',
+          'url': '',
+        });
+        expect(entry.active, isFalse);
+      });
+
+      test(
+        'unrecognized state change falls back to UnknownBrowserStateChange',
+        () {
+          final change = BrowserStateChange.fromJson({'type': 'something_new'});
+          expect(change, isA<UnknownBrowserStateChange>());
+          expect(change.toJson(), {'type': 'something_new'});
+        },
+      );
+
+      test(
+        'unrecognized content type falls back to UnknownToolResultContent',
+        () {
+          final json = {'type': 'something_new', 'foo': 'bar'};
+          final content = ToolResultContent.fromJson(json);
+          expect(content, isA<UnknownToolResultContent>());
+          expect((content as UnknownToolResultContent).type, 'something_new');
+          expect(content.toJson(), json);
+        },
+      );
+    });
+
+    group('ImageTransformations', () {
+      test('copyWith(oversizedImage: null) clears the field', () {
+        const original = ImageTransformations(
+          oversizedImage: OversizedImageBehavior.error,
+        );
+
+        final cleared = original.copyWith(oversizedImage: null);
+
+        expect(cleared.oversizedImage, isNull);
+        expect(cleared, const ImageTransformations());
+      });
+
+      test('copyWith with no arguments keeps the original value', () {
+        const original = ImageTransformations(
+          oversizedImage: OversizedImageBehavior.error,
+        );
+
+        expect(original.copyWith(), equals(original));
+      });
+
+      test('copyWith replaces the value when given', () {
+        const original = ImageTransformations(
+          oversizedImage: OversizedImageBehavior.downsize,
+        );
+
+        final updated = original.copyWith(
+          oversizedImage: OversizedImageBehavior.error,
+        );
+
+        expect(updated.oversizedImage, OversizedImageBehavior.error);
       });
     });
 

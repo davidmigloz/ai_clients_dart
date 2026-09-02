@@ -54,8 +54,13 @@ void main() async {
     final thread = await client.sessions
         .threads(sessionId)
         .retrieve(firstThread.id);
+    final agentLabel = switch (thread.agent) {
+      SessionThreadAgent(:final name) => name,
+      Advisor(:final model) => 'advisor:$model',
+      _ => 'unknown',
+    };
     print(
-      'Thread ${thread.id} (agent: ${thread.agent.name}, '
+      'Thread ${thread.id} (agent: $agentLabel, '
       'status: ${thread.status.value})',
     );
 

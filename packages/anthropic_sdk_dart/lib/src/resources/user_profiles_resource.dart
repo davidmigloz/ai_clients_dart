@@ -8,10 +8,11 @@ import '../models/user_profiles/list_user_profiles_response.dart';
 import '../models/user_profiles/update_user_profile_request.dart';
 import '../models/user_profiles/user_profile.dart';
 import '../models/user_profiles/user_profile_list_order.dart';
+import '../models/user_profiles/user_profile_list_order_by.dart';
 import 'base_resource.dart';
 
 /// Beta header for the User Profiles API.
-const _betaHeader = 'user-profiles-2026-03-24';
+const _betaHeader = 'user-profiles-2026-08-18';
 
 /// Resource for the User Profiles API (Beta).
 ///
@@ -64,11 +65,14 @@ class UserProfilesResource extends ResourceBase {
   /// - [limit]: Maximum number of user profiles to return.
   /// - [page]: Pagination cursor from a previous response's `nextPage`.
   /// - [order]: Sort order for the results.
+  /// - [orderBy]: Sort field for the results (`created_at` by default, or
+  ///   `name`).
   /// - [abortTrigger]: Allows canceling the request.
   Future<ListUserProfilesResponse> list({
     int? limit,
     String? page,
     UserProfileListOrder? order,
+    UserProfileListOrderBy? orderBy,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
@@ -76,6 +80,7 @@ class UserProfilesResource extends ResourceBase {
       'limit': ?limit?.toString(),
       'page': ?page,
       'order': ?order?.toJson(),
+      'order_by': ?orderBy?.toJson(),
     };
 
     final url = requestBuilder.buildUrl(

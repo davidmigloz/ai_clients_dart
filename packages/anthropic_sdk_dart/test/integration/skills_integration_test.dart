@@ -40,7 +40,6 @@ void main() {
 
         // Should return a list (may be empty if no skills exist)
         expect(response.data, isA<List<Skill>>());
-        expect(response.hasMore, isA<bool>());
       },
     );
 
@@ -56,30 +55,30 @@ void main() {
         // List only anthropic-provided skills
         final anthropicSkills = await client!.skills.list(
           limit: 10,
-          source: SkillSource.anthropic,
+          source: SkillSourceType.anthropic,
         );
 
         // All returned skills should be from anthropic
         for (final skill in anthropicSkills.data) {
-          expect(skill.source, SkillSource.anthropic);
+          expect(skill.source.type, SkillSourceType.anthropic);
         }
 
         // List only custom skills
         final customSkills = await client!.skills.list(
           limit: 10,
-          source: SkillSource.custom,
+          source: SkillSourceType.custom,
         );
 
         // All returned skills should be custom
         for (final skill in customSkills.data) {
-          expect(skill.source, SkillSource.custom);
+          expect(skill.source.type, SkillSourceType.custom);
         }
       },
     );
 
-    // Note: Creating/uploading skills requires a valid skill ZIP file,
-    // which is complex to generate in a test. These tests would require
-    // a pre-built test skill file to be included.
+    // Note: Creating/uploading skills requires a valid set of skill files
+    // (at minimum a SKILL.md), which is complex to generate in a test. These
+    // tests would require pre-built test skill files to be included.
 
     test(
       'handles pagination correctly',
@@ -96,7 +95,7 @@ void main() {
         expect(firstPage.data, isA<List<Skill>>());
 
         // If there are more pages, get the next one
-        if (firstPage.hasMore && firstPage.nextPage != null) {
+        if (firstPage.nextPage != null) {
           final secondPage = await client!.skills.list(
             limit: 2,
             page: firstPage.nextPage,
@@ -138,8 +137,11 @@ void main() {
         final skill = await client!.skills.retrieve(skillId: skillId);
 
         expect(skill.id, skillId);
-        expect(skill.displayTitle, isNotEmpty);
-        expect(skill.source, anyOf(SkillSource.custom, SkillSource.anthropic));
+        expect(skill.displayName, isNotEmpty);
+        expect(
+          skill.source.type,
+          anyOf(SkillSourceType.custom, SkillSourceType.anthropic),
+        );
       },
     );
 
@@ -174,7 +176,6 @@ void main() {
         for (final version in versionsResponse.data) {
           expect(version.id, isNotEmpty);
           expect(version.skillId, skillId);
-          expect(version.version, isNotEmpty);
           expect(version.name, isNotEmpty);
         }
       },
@@ -210,7 +211,7 @@ void main() {
           return;
         }
 
-        final versionId = versionsResponse.data.first.version;
+        final versionId = versionsResponse.data.first.id;
 
         // Retrieve specific version
         final version = await client!.skills.retrieveVersion(
@@ -219,7 +220,7 @@ void main() {
         );
 
         expect(version.skillId, skill.id);
-        expect(version.version, versionId);
+        expect(version.id, versionId);
       },
     );
   });

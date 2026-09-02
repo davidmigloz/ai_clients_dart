@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../../common/equality_helpers.dart';
+import '../sessions/session.dart' show SessionRosterEntry;
 
 /// Resolved multiagent orchestration configuration as returned in API
 /// responses.
@@ -35,8 +36,8 @@ class MultiagentCoordinator extends Multiagent {
   String get type => 'coordinator';
 
   /// Agents the coordinator may spawn as session threads, each resolved to a
-  /// specific version.
-  final List<AgentReference> agents;
+  /// specific version, or the platform advisor entry.
+  final List<MultiagentRosterEntry> agents;
 
   /// Creates a [MultiagentCoordinator].
   const MultiagentCoordinator({required this.agents});
@@ -45,7 +46,7 @@ class MultiagentCoordinator extends Multiagent {
   factory MultiagentCoordinator.fromJson(Map<String, dynamic> json) {
     return MultiagentCoordinator(
       agents: (json['agents'] as List)
-          .map((e) => AgentReference.fromJson(e as Map<String, dynamic>))
+          .map((e) => MultiagentRosterEntry.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
   }
@@ -57,7 +58,7 @@ class MultiagentCoordinator extends Multiagent {
   };
 
   /// Creates a copy with replaced values.
-  MultiagentCoordinator copyWith({List<AgentReference>? agents}) {
+  MultiagentCoordinator copyWith({List<MultiagentRosterEntry>? agents}) {
     return MultiagentCoordinator(agents: agents ?? this.agents);
   }
 
@@ -75,9 +76,41 @@ class MultiagentCoordinator extends Multiagent {
   String toString() => 'MultiagentCoordinator(agents: $agents)';
 }
 
+// ---------------------------------------------------------------------------
+// MultiagentRosterEntry — sealed union
+// ---------------------------------------------------------------------------
+
+/// A resolved multiagent roster entry.
+///
+/// Variants:
+/// - [AgentReference] — an agent resolved to a concrete version
+///   (`type: "agent"`).
+/// - [Advisor] — the platform advisor roster entry (`type: "advisor"`).
+/// - [UnknownMultiagentRosterEntry] — unrecognized entry type (preserves raw
+///   JSON).
+sealed class MultiagentRosterEntry {
+  const MultiagentRosterEntry();
+
+  /// Creates a [MultiagentRosterEntry] from JSON.
+  ///
+  /// Dispatches on the `type` discriminator; unrecognized values fall back to
+  /// [UnknownMultiagentRosterEntry].
+  factory MultiagentRosterEntry.fromJson(Map<String, dynamic> json) {
+    final type = json['type'] as String?;
+    return switch (type) {
+      'agent' => AgentReference.fromJson(json),
+      'advisor' => Advisor.fromJson(json),
+      _ => UnknownMultiagentRosterEntry(rawJson: json),
+    };
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson();
+}
+
 /// A resolved agent reference with a concrete version.
 @immutable
-class AgentReference {
+class AgentReference extends MultiagentRosterEntry {
   /// The object type, always 'agent'.
   final String type;
 
@@ -103,7 +136,7 @@ class AgentReference {
     );
   }
 
-  /// Converts to JSON.
+  @override
   Map<String, dynamic> toJson() => {'type': type, 'id': id, 'version': version};
 
   /// Creates a copy with replaced values.
@@ -130,6 +163,85 @@ class AgentReference {
   @override
   String toString() =>
       'AgentReference(type: $type, id: $id, version: $version)';
+}
+
+/// Platform advisor roster entry: a model the session's primary thread may
+/// consult mid-turn.
+///
+/// Shared by [MultiagentRosterEntry] and `SessionRosterEntry` (declared in
+/// `sessions/session.dart`) — both discriminated unions resolve their
+/// `advisor` variant to this same class. It `implements SessionRosterEntry`
+/// (rather than `extends`) because that union lives in a different library;
+/// see the doc comment on `SessionRosterEntry` for why that union is a plain
+/// abstract class rather than `sealed`.
+@immutable
+class Advisor extends MultiagentRosterEntry implements SessionRosterEntry {
+  /// The entry type, always 'advisor'.
+  final String type;
+
+  /// The advisor model id. Must be permitted as an advisor for the agent's
+  /// model.
+  final String model;
+
+  /// Creates an [Advisor].
+  const Advisor({this.type = 'advisor', required this.model});
+
+  /// Creates an [Advisor] from JSON.
+  factory Advisor.fromJson(Map<String, dynamic> json) {
+    return Advisor(
+      type: json['type'] as String? ?? 'advisor',
+      model: json['model'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': type, 'model': model};
+
+  /// Creates a copy with replaced values.
+  Advisor copyWith({String? type, String? model}) {
+    return Advisor(type: type ?? this.type, model: model ?? this.model);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Advisor &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          model == other.model;
+
+  @override
+  int get hashCode => Object.hash(type, model);
+
+  @override
+  String toString() => 'Advisor(type: $type, model: $model)';
+}
+
+/// Unrecognized [MultiagentRosterEntry] type — preserves raw JSON for forward
+/// compatibility.
+@immutable
+class UnknownMultiagentRosterEntry extends MultiagentRosterEntry {
+  /// The raw JSON.
+  final Map<String, dynamic> rawJson;
+
+  /// Creates an [UnknownMultiagentRosterEntry].
+  const UnknownMultiagentRosterEntry({required this.rawJson});
+
+  @override
+  Map<String, dynamic> toJson() => rawJson;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownMultiagentRosterEntry &&
+          runtimeType == other.runtimeType &&
+          mapsDeepEqual(rawJson, other.rawJson);
+
+  @override
+  int get hashCode => mapDeepHashCode(rawJson);
+
+  @override
+  String toString() => 'UnknownMultiagentRosterEntry(rawJson: $rawJson)';
 }
 
 /// Unrecognized multiagent topology — preserves raw JSON for forward

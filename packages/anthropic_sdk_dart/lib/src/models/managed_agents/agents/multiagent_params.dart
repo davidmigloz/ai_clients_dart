@@ -110,12 +110,13 @@ class UnknownMultiagentParams extends MultiagentParams {
 }
 
 /// An entry in a multiagent roster: an agent ID string, a versioned agent
-/// reference, or `self`.
+/// reference, `self`, or the platform advisor entry.
 ///
 /// Variants:
 /// - [MultiagentRosterEntryAgent] — an agent ID string or versioned reference
 ///   (reuses the [AgentParams] family).
 /// - [MultiagentSelfParams] — the sentinel `self` entry.
+/// - [MultiagentRosterEntryAdvisor] — the platform advisor entry.
 /// - [UnknownMultiagentRosterEntryParams] — unrecognized object form.
 sealed class MultiagentRosterEntryParams {
   const MultiagentRosterEntryParams();
@@ -124,7 +125,8 @@ sealed class MultiagentRosterEntryParams {
   ///
   /// A [String] or `{"type":"agent",…}` object becomes a
   /// [MultiagentRosterEntryAgent]; `{"type":"self"}` becomes a
-  /// [MultiagentSelfParams]; any other object falls back to
+  /// [MultiagentSelfParams]; `{"type":"advisor",…}` becomes a
+  /// [MultiagentRosterEntryAdvisor]; any other object falls back to
   /// [UnknownMultiagentRosterEntryParams].
   static MultiagentRosterEntryParams fromJson(Object json) {
     if (json is String) {
@@ -136,9 +138,14 @@ sealed class MultiagentRosterEntryParams {
       'agent' => MultiagentRosterEntryAgent(
         agent: AgentParamsObject.fromJson(map),
       ),
+      'advisor' => MultiagentRosterEntryAdvisor.fromJson(map),
       _ => UnknownMultiagentRosterEntryParams(rawJson: map),
     };
   }
+
+  /// Creates a [MultiagentRosterEntryAdvisor] for the given advisor [model].
+  factory MultiagentRosterEntryParams.advisor(String model) =>
+      MultiagentRosterEntryAdvisor(model: model);
 
   /// Converts to JSON.
   Object toJson();
@@ -199,6 +206,50 @@ class MultiagentSelfParams extends MultiagentRosterEntryParams {
 
   @override
   String toString() => 'MultiagentSelfParams()';
+}
+
+/// Platform advisor roster entry: a model the session's primary thread may
+/// consult mid-turn.
+///
+/// At most one per roster; the entry occupies the roster name
+/// `anthropic.advisor`.
+@immutable
+class MultiagentRosterEntryAdvisor extends MultiagentRosterEntryParams {
+  /// The entry type, always 'advisor'.
+  String get type => 'advisor';
+
+  /// A Claude model id. The model must be permitted as an advisor for this
+  /// agent's model.
+  final String model;
+
+  /// Creates a [MultiagentRosterEntryAdvisor].
+  const MultiagentRosterEntryAdvisor({required this.model});
+
+  /// Creates a [MultiagentRosterEntryAdvisor] from JSON.
+  factory MultiagentRosterEntryAdvisor.fromJson(Map<String, dynamic> json) {
+    return MultiagentRosterEntryAdvisor(model: json['model'] as String);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': type, 'model': model};
+
+  /// Creates a copy with replaced values.
+  MultiagentRosterEntryAdvisor copyWith({String? model}) {
+    return MultiagentRosterEntryAdvisor(model: model ?? this.model);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MultiagentRosterEntryAdvisor &&
+          runtimeType == other.runtimeType &&
+          model == other.model;
+
+  @override
+  int get hashCode => model.hashCode;
+
+  @override
+  String toString() => 'MultiagentRosterEntryAdvisor(model: $model)';
 }
 
 /// Unrecognized roster entry object — preserves raw JSON for forward

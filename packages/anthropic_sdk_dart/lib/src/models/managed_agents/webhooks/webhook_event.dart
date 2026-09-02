@@ -84,6 +84,7 @@ class WebhookEvent {
 ///
 /// Variants:
 /// - [WebhookSessionArchivedEventData] — `session.archived`.
+/// - [WebhookSessionBudgetReachedEventData] — `session.budget_reached`.
 /// - [WebhookSessionCreatedEventData] — `session.created`.
 /// - [WebhookSessionDeletedEventData] — `session.deleted`.
 /// - [WebhookSessionIdledEventData] — `session.idled`.
@@ -139,6 +140,9 @@ sealed class WebhookEventData {
     final type = json['type'] as String?;
     return switch (type) {
       'session.archived' => WebhookSessionArchivedEventData.fromJson(json),
+      'session.budget_reached' => WebhookSessionBudgetReachedEventData.fromJson(
+        json,
+      ),
       'session.created' => WebhookSessionCreatedEventData.fromJson(json),
       'session.deleted' => WebhookSessionDeletedEventData.fromJson(json),
       'session.idled' => WebhookSessionIdledEventData.fromJson(json),
@@ -296,6 +300,79 @@ class WebhookSessionArchivedEventData extends WebhookEventData {
   String toString() =>
       'WebhookSessionArchivedEventData(id: $id, organizationId: $organizationId, '
       'workspaceId: $workspaceId)';
+}
+
+/// Webhook event data signalling a session's tracked list cost reached its
+/// budget.
+@immutable
+class WebhookSessionBudgetReachedEventData extends WebhookEventData {
+  /// The event-data type, always 'session.budget_reached'.
+  String get type => 'session.budget_reached';
+
+  /// ID of the session that triggered the event.
+  final String id;
+
+  /// ID of the organization that owns the resource.
+  final String organizationId;
+
+  /// ID of the workspace that owns the resource.
+  final String workspaceId;
+
+  /// Creates a [WebhookSessionBudgetReachedEventData].
+  const WebhookSessionBudgetReachedEventData({
+    required this.id,
+    required this.organizationId,
+    required this.workspaceId,
+  });
+
+  /// Creates a [WebhookSessionBudgetReachedEventData] from JSON.
+  factory WebhookSessionBudgetReachedEventData.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return WebhookSessionBudgetReachedEventData(
+      id: json['id'] as String,
+      organizationId: json['organization_id'] as String,
+      workspaceId: json['workspace_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'organization_id': organizationId,
+    'workspace_id': workspaceId,
+  };
+
+  /// Creates a copy with replaced values.
+  WebhookSessionBudgetReachedEventData copyWith({
+    String? id,
+    String? organizationId,
+    String? workspaceId,
+  }) {
+    return WebhookSessionBudgetReachedEventData(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      workspaceId: workspaceId ?? this.workspaceId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebhookSessionBudgetReachedEventData &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          organizationId == other.organizationId &&
+          workspaceId == other.workspaceId;
+
+  @override
+  int get hashCode => Object.hash(id, organizationId, workspaceId);
+
+  @override
+  String toString() =>
+      'WebhookSessionBudgetReachedEventData(id: $id, '
+      'organizationId: $organizationId, workspaceId: $workspaceId)';
 }
 
 /// Webhook event data signalling a session was created.

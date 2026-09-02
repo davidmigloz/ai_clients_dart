@@ -14,6 +14,7 @@ Map<String, dynamic> _messageStartJson({
   int inputTokens = 100,
   int outputTokens = 0,
   Map<String, dynamic>? usageExtra,
+  List<Map<String, dynamic>>? inputTransformations,
 }) {
   final usage = <String, dynamic>{
     'input_tokens': inputTokens,
@@ -29,6 +30,7 @@ Map<String, dynamic> _messageStartJson({
       'content': <dynamic>[],
       'model': model,
       'usage': usage,
+      'input_transformations': ?inputTransformations,
     },
   };
 }
@@ -55,6 +57,7 @@ Map<String, dynamic> _messageDeltaJson({
   Map<String, dynamic>? container,
   int outputTokens = 50,
   Map<String, dynamic>? usageExtra,
+  List<Map<String, dynamic>>? inputTransformations,
 }) {
   final delta = <String, dynamic>{
     'stop_reason': ?stopReason,
@@ -66,7 +69,12 @@ Map<String, dynamic> _messageDeltaJson({
     'output_tokens': outputTokens,
     ...?usageExtra,
   };
-  return {'type': 'message_delta', 'delta': delta, 'usage': usage};
+  return {
+    'type': 'message_delta',
+    'delta': delta,
+    'usage': usage,
+    'input_transformations': ?inputTransformations,
+  };
 }
 
 const _messageStopJson = {'type': 'message_stop'};
@@ -311,6 +319,31 @@ void main() {
         expect(acc.toolUseBlocks[0].input, {'city': 'San Francisco'});
         expect(acc.toolUseBlocks[0].id, 'toolu_123');
         expect(acc.toolUseBlocks[0].name, 'get_weather');
+      });
+
+      test('tool use stream preserves toolset_name', () {
+        final acc = _accumulate([
+          _messageStartJson(),
+          _contentBlockStartJson(0, {
+            ..._toolUseBlockJson(name: 'left_click'),
+            'toolset_name': 'computer_toolset_20260801',
+          }),
+          _contentBlockDeltaJson(0, _inputJsonDeltaJson('{"key":')),
+          _contentBlockDeltaJson(0, _inputJsonDeltaJson('"val"}')),
+          _contentBlockStopJson(0),
+          _messageDeltaJson(stopReason: 'tool_use'),
+          _messageStopJson,
+        ]);
+
+        expect(acc.toolUseBlocks, hasLength(1));
+        expect(
+          acc.toolUseBlocks.single.toolsetName,
+          'computer_toolset_20260801',
+        );
+
+        final restored = acc.toMessage();
+        final toolUse = restored.content.single as ToolUseBlock;
+        expect(toolUse.toolsetName, 'computer_toolset_20260801');
       });
 
       test('multiple content blocks (text + tool use)', () {
@@ -636,6 +669,91 @@ void main() {
         expect(acc.container!.id, 'ctr_123');
       });
 
+      test('inputTransformations from message_start survives', () {
+        final acc = _accumulate([
+          _messageStartJson(
+            inputTransformations: [
+              {
+                'type': 'thinking_dropped',
+                'path': 'messages.0.content.0',
+                'reason': 'model_binding_mismatch',
+              },
+            ],
+          ),
+          _contentBlockStartJson(0, _textBlockJson()),
+          _contentBlockDeltaJson(0, _textDeltaJson('Hi')),
+          _contentBlockStopJson(0),
+          _messageDeltaJson(stopReason: 'end_turn'),
+          _messageStopJson,
+        ]);
+
+        expect(acc.inputTransformations, hasLength(1));
+        final message = acc.toMessage();
+        expect(message.inputTransformations, hasLength(1));
+      });
+
+      test(
+        'inputTransformations from message_delta replaces message_start value',
+        () {
+          final acc = _accumulate([
+            _messageStartJson(
+              inputTransformations: [
+                {
+                  'type': 'thinking_dropped',
+                  'path': 'messages.0.content.0',
+                  'reason': 'model_binding_mismatch',
+                },
+              ],
+            ),
+            _contentBlockStartJson(0, _textBlockJson()),
+            _contentBlockDeltaJson(0, _textDeltaJson('Hi')),
+            _contentBlockStopJson(0),
+            _messageDeltaJson(
+              stopReason: 'end_turn',
+              inputTransformations: [
+                {
+                  'type': 'thinking_dropped',
+                  'path': 'messages.1.content.0',
+                  'reason': 'prefix_binding_mismatch',
+                },
+              ],
+            ),
+            _messageStopJson,
+          ]);
+
+          final transformations = acc.inputTransformations!;
+          expect(transformations, hasLength(1));
+          final transformation =
+              transformations.first as ThinkingDroppedInputTransformation;
+          expect(transformation.path, 'messages.1.content.0');
+        },
+      );
+
+      test('inputTransformations preserved when message_delta omits it', () {
+        final acc = _accumulate([
+          _messageStartJson(
+            inputTransformations: [
+              {
+                'type': 'thinking_dropped',
+                'path': 'messages.0.content.0',
+                'reason': 'model_binding_mismatch',
+              },
+            ],
+          ),
+          _contentBlockStartJson(0, _textBlockJson()),
+          _contentBlockDeltaJson(0, _textDeltaJson('Hi')),
+          _contentBlockStopJson(0),
+          _messageDeltaJson(stopReason: 'end_turn'),
+          _messageStopJson,
+        ]);
+
+        expect(acc.inputTransformations, hasLength(1));
+        final transformation =
+            acc.inputTransformations!.first
+                as ThinkingDroppedInputTransformation;
+        expect(transformation.path, 'messages.0.content.0');
+      });
+
       test('model, id, role from message_start', () {
         final acc = MessageStreamAccumulator();
         expect(acc.id, isNull);
@@ -876,6 +994,7 @@ void main() {
         expect(acc.stopReason, isNull);
         expect(acc.stopSequence, isNull);
         expect(acc.container, isNull);
+        expect(acc.inputTransformations, isNull);
         expect(acc.text, '');
         expect(acc.thinking, '');
         expect(acc.hasThinking, isFalse);

@@ -80,7 +80,9 @@ void main() async {
       }
     }
 
-    // 5. List memory versions for the store.
+    // 5. List memory versions for the store. Filters like [memoryId] and
+    //    [serviceAccountId] (for versions created by a specific service
+    //    account) can be combined to narrow the results.
     print('\n=== List Memory Versions ===');
     final versions = client.memoryStores.memoryVersions(store.id);
     final versionList = await versions.list(memoryId: greetingMemory.id);

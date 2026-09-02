@@ -230,12 +230,16 @@ class ToolUseBlock extends ContentBlock {
   /// Caller metadata for this tool invocation.
   final ToolCaller? caller;
 
+  /// For a toolset member tool use, the toolset family.
+  final String? toolsetName;
+
   /// Creates a [ToolUseBlock].
   const ToolUseBlock({
     required this.id,
     required this.name,
     required this.input,
     this.caller,
+    this.toolsetName,
   });
 
   /// Creates a [ToolUseBlock] from JSON.
@@ -247,6 +251,7 @@ class ToolUseBlock extends ContentBlock {
       caller: json['caller'] != null
           ? ToolCaller.fromJson(json['caller'] as Map<String, dynamic>)
           : null,
+      toolsetName: json['toolset_name'] as String?,
     );
   }
 
@@ -257,6 +262,7 @@ class ToolUseBlock extends ContentBlock {
     'name': name,
     'input': input,
     if (caller != null) 'caller': caller!.toJson(),
+    if (toolsetName != null) 'toolset_name': toolsetName,
   };
 
   /// Creates a copy with replaced values.
@@ -265,6 +271,7 @@ class ToolUseBlock extends ContentBlock {
     String? name,
     Map<String, dynamic>? input,
     Object? caller = unsetCopyWithValue,
+    Object? toolsetName = unsetCopyWithValue,
   }) {
     return ToolUseBlock(
       id: id ?? this.id,
@@ -273,6 +280,9 @@ class ToolUseBlock extends ContentBlock {
       caller: caller == unsetCopyWithValue
           ? this.caller
           : caller as ToolCaller?,
+      toolsetName: toolsetName == unsetCopyWithValue
+          ? this.toolsetName
+          : toolsetName as String?,
     );
   }
 
@@ -284,14 +294,17 @@ class ToolUseBlock extends ContentBlock {
           id == other.id &&
           name == other.name &&
           mapsEqual(input, other.input) &&
-          caller == other.caller;
+          caller == other.caller &&
+          toolsetName == other.toolsetName;
 
   @override
-  int get hashCode => Object.hash(id, name, mapHash(input), caller);
+  int get hashCode =>
+      Object.hash(id, name, mapHash(input), caller, toolsetName);
 
   @override
   String toString() =>
-      'ToolUseBlock(id: $id, name: $name, input: $input, caller: $caller)';
+      'ToolUseBlock(id: $id, name: $name, input: $input, caller: $caller, '
+      'toolsetName: $toolsetName)';
 }
 
 /// Server-side tool use block (e.g., web search).

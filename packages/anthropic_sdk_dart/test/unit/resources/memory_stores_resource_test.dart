@@ -388,6 +388,7 @@ void main() {
             memoryId: 'mem_test123',
             sessionId: 'session_x',
             apiKeyId: 'apikey_y',
+            serviceAccountId: 'svcacct_z',
             operation: MemoryVersionOperation.modified,
             createdAtGte: '2026-04-01T00:00:00Z',
             createdAtLte: '2026-04-30T00:00:00Z',
@@ -412,6 +413,7 @@ void main() {
       expect(request.url.queryParameters['memory_id'], 'mem_test123');
       expect(request.url.queryParameters['session_id'], 'session_x');
       expect(request.url.queryParameters['api_key_id'], 'apikey_y');
+      expect(request.url.queryParameters['service_account_id'], 'svcacct_z');
       expect(request.url.queryParameters['operation'], 'modified');
       expect(
         request.url.queryParameters['created_at[gte]'],

@@ -43,6 +43,7 @@ class _DreamFixtures {
         'cache_read_input_tokens': 10,
         'cache_creation_input_tokens': 5,
       },
+      'output_behavior': {'type': 'create_new'},
     };
   }
 }

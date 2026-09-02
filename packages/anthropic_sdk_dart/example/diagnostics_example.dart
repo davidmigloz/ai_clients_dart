@@ -23,7 +23,7 @@ Future<void> main() async {
     // against by passing `previousMessageId: null`.
     final first = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-5',
         maxTokens: 1024,
         diagnostics: const DiagnosticsParam(),
         messages: [InputMessage.user('Summarize the rules of chess.')],
@@ -36,7 +36,7 @@ Future<void> main() async {
     // `diagnostics.cacheMissReason` explains any prompt-cache divergence.
     final second = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-5',
         maxTokens: 1024,
         diagnostics: DiagnosticsParam(previousMessageId: first.id),
         messages: [InputMessage.user('Now explain en passant.')],

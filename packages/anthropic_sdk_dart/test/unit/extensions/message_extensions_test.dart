@@ -88,6 +88,24 @@ void main() {
       expect(toolUseInput.id, 'tu_1');
       expect(toolUseInput.name, 'get_weather');
       expect(toolUseInput.input, {'city': 'San Francisco'});
+      expect(toolUseInput.toolsetName, isNull);
+    });
+
+    test('ToolUseBlock with toolsetName preserves it in ToolUseInputBlock', () {
+      const block = ToolUseBlock(
+        id: 'tu_2',
+        name: 'left_click',
+        input: {'x': 1, 'y': 2},
+        toolsetName: 'computer_toolset_20260801',
+      );
+
+      final input = block.toInputBlock();
+
+      expect(input, isA<ToolUseInputBlock>());
+      expect(
+        (input as ToolUseInputBlock).toolsetName,
+        'computer_toolset_20260801',
+      );
     });
 
     test('ServerToolUseBlock converts to ServerToolUseInputBlock preserving '

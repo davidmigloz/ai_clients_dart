@@ -150,6 +150,96 @@ class FallbackConfigV2 {
       'extra: $extra)';
 }
 
+/// The `fallbacks` request field: either an explicit ordered chain of
+/// [FallbackConfigV2] attempts (1-3 items), or the literal string
+/// `"default"` requesting the model's server-defined default fallback
+/// configuration.
+///
+/// Requires the `server-side-fallback-2026-07-01` beta header to use the
+/// `"default"` form.
+sealed class FallbacksParam {
+  const FallbacksParam();
+
+  /// An explicit ordered chain of fallback attempts.
+  const factory FallbacksParam.list(List<FallbackConfigV2> fallbacks) =
+      FallbacksList;
+
+  /// Requests the model's server-defined default fallback configuration.
+  const factory FallbacksParam.defaultMode() = FallbacksDefault;
+
+  /// Creates a [FallbacksParam] from JSON.
+  ///
+  /// A JSON list becomes a [FallbacksList]; the literal string `"default"`
+  /// becomes a [FallbacksDefault].
+  factory FallbacksParam.fromJson(dynamic json) {
+    if (json is List) {
+      return FallbacksList(
+        json
+            .map((e) => FallbackConfigV2.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+    }
+    if (json == 'default') {
+      return const FallbacksDefault();
+    }
+    throw FormatException(
+      'FallbacksParam: expected a List or the string "default", '
+      'got ${json.runtimeType}',
+    );
+  }
+
+  /// Converts to JSON.
+  dynamic toJson();
+}
+
+/// An explicit ordered chain of fallback attempts.
+@immutable
+class FallbacksList extends FallbacksParam {
+  /// The fallback chain (1-3 items).
+  final List<FallbackConfigV2> fallbacks;
+
+  /// Creates a [FallbacksList].
+  const FallbacksList(this.fallbacks);
+
+  @override
+  List<Map<String, dynamic>> toJson() =>
+      fallbacks.map((e) => e.toJson()).toList();
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FallbacksList &&
+          runtimeType == other.runtimeType &&
+          listsEqual(fallbacks, other.fallbacks);
+
+  @override
+  int get hashCode => listHash(fallbacks);
+
+  @override
+  String toString() => 'FallbacksList(fallbacks: $fallbacks)';
+}
+
+/// Requests the model's server-defined default fallback configuration.
+@immutable
+class FallbacksDefault extends FallbacksParam {
+  /// Creates a [FallbacksDefault].
+  const FallbacksDefault();
+
+  @override
+  String toJson() => 'default';
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FallbacksDefault && runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() => 'FallbacksDefault()';
+}
+
 /// Identifies one hop of a fallback transition.
 ///
 /// Used by both request and response fallback blocks.

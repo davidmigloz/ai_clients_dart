@@ -4,16 +4,17 @@ import 'dart:typed_data';
 
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 
-/// Files API example (Beta).
+/// Files API example.
 ///
 /// This example demonstrates:
-/// - Uploading files to the API
-/// - Listing uploaded files
+/// - Uploading files to the API (optionally with an expiration)
+/// - Listing uploaded files (page-cursor pagination)
 /// - Retrieving file metadata
 /// - Downloading files
 /// - Deleting files
 ///
-/// Note: The Files API is a beta feature and requires the anthropic-beta header.
+/// Note: The Files API is generally available and does not require an
+/// anthropic-beta header.
 void main() async {
   final client = AnthropicClient(
     config: const AnthropicConfig(
@@ -31,6 +32,7 @@ void main() async {
       final uploadedFile = await client.files.upload(
         filePath: filePath,
         mimeType: 'image/jpeg',
+        expiresInSeconds: 86400, // Expires in 1 day.
       );
 
       print('File uploaded:');
@@ -39,16 +41,22 @@ void main() async {
       print('  MIME type: ${uploadedFile.mimeType}');
       print('  Size: ${uploadedFile.sizeBytes} bytes');
       print('  Created at: ${uploadedFile.createdAt}');
+      print('  Expires at: ${uploadedFile.expiresAt}');
 
-      // Example 2: List files
+      // Example 2: List files, following page cursors.
       print('\n=== List Files ===');
-      final fileList = await client.files.list(limit: 10);
-
-      print('Files (${fileList.data.length} total):');
-      for (final f in fileList.data) {
-        print('  - ${f.id}: ${f.filename} (${f.sizeBytes} bytes)');
+      var fileList = await client.files.list(limit: 10);
+      var totalListed = 0;
+      while (true) {
+        for (final f in fileList.data) {
+          print('  - ${f.id}: ${f.filename} (${f.sizeBytes} bytes)');
+          totalListed++;
+        }
+        final nextPage = fileList.nextPage;
+        if (nextPage == null) break;
+        fileList = await client.files.list(limit: 10, page: nextPage);
       }
-      print('Has more: ${fileList.hasMore}');
+      print('Listed $totalListed file(s) total.');
 
       // Example 3: Retrieve file metadata
       print('\n=== Retrieve File ===');

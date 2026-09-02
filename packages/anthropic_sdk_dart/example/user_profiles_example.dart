@@ -8,7 +8,7 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// (e.g., `cyber`), and generate short-lived enrollment URLs to send to
 /// the end user.
 ///
-/// Requires the `user-profiles-2026-03-24` beta header, which the
+/// Requires the `user-profiles-2026-08-18` beta header, which the
 /// [UserProfilesResource] sets automatically.
 void main() async {
   final client = AnthropicClient(
@@ -21,19 +21,24 @@ void main() async {
     // 1. Create a user profile.
     print('=== Create ===');
     final profile = await client.userProfiles.create(
-      const CreateUserProfileRequest(
+      CreateUserProfileRequest(
         externalId: 'user_12345',
-        metadata: {'tier': 'pro', 'region': 'eu'},
+        metadata: const {'tier': 'pro', 'region': 'eu'},
+        accessType: UserProfileAccessType.application,
+        externalUserOnboardedAt: DateTime.utc(2024, 11, 2, 8, 15),
       ),
     );
-    print('Created ${profile.id} (external_id: ${profile.externalId})');
+    print(
+      'Created ${profile.id} '
+      '(external_id: ${profile.externalId}, accessType: ${profile.accessType})',
+    );
 
     // 2. Send a message attributed to this user. The profile ID is sent as the
     //    `anthropic-user-profile-id` header, not as a request-body field.
     print('\n=== Send message attributed to the profile ===');
     final reply = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-opus-4-8',
+        model: 'claude-sonnet-5',
         maxTokens: 256,
         messages: [InputMessage.user('Hello!')],
       ),
@@ -41,11 +46,12 @@ void main() async {
     );
     print('Model replied: ${reply.content.first.runtimeType}');
 
-    // 3. List user profiles (paginated).
+    // 3. List user profiles (paginated, sorted by name).
     print('\n=== List ===');
     final page = await client.userProfiles.list(
       limit: 10,
       order: UserProfileListOrder.desc,
+      orderBy: UserProfileListOrderBy.name,
     );
     print('Returned ${page.data.length} profile(s); nextPage=${page.nextPage}');
 

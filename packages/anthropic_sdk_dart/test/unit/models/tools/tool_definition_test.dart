@@ -241,7 +241,6 @@ void main() {
         );
 
         expect(tool.type, 'code_execution_20260521');
-        expect(tool.container, isNull);
 
         final json = tool.toJson();
         expect(json['type'], 'code_execution_20260521');
@@ -269,6 +268,30 @@ void main() {
         final computer = builtIn as ComputerUseTool;
         expect(computer.displayWidthPx, 1920);
         expect(computer.displayHeightPx, 1080);
+      });
+
+      test('parses a future computer_toolset_* version as ComputerToolset, '
+          'not ComputerUseTool (which would crash on missing '
+          'display_width_px)', () {
+        final json = {'type': 'computer_toolset_20991231'};
+
+        final definition = ToolDefinition.fromJson(json);
+
+        expect(definition, isA<BuiltInToolDefinition>());
+        final builtIn = (definition as BuiltInToolDefinition).tool;
+        expect(builtIn, isA<ComputerToolset>());
+        expect((builtIn as ComputerToolset).type, 'computer_toolset_20991231');
+      });
+
+      test('parses a future browser_toolset_* version as BrowserToolset', () {
+        final json = {'type': 'browser_toolset_20991231'};
+
+        final definition = ToolDefinition.fromJson(json);
+
+        expect(definition, isA<BuiltInToolDefinition>());
+        final builtIn = (definition as BuiltInToolDefinition).tool;
+        expect(builtIn, isA<BrowserToolset>());
+        expect((builtIn as BrowserToolset).type, 'browser_toolset_20991231');
       });
 
       test('parses mcp built-in tool', () {

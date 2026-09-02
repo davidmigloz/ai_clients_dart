@@ -38,7 +38,7 @@ void main() async {
 
     final response = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-5',
         maxTokens: 1024,
         messages: [
           InputMessage.userBlocks([

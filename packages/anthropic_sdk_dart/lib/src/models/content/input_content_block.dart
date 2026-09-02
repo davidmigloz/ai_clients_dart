@@ -8,8 +8,10 @@ import '../sources/document_source.dart';
 import '../sources/image_source.dart';
 import '../tools/tool_caller.dart';
 import '../tools/tool_change_reference.dart';
+import 'browser_state.dart';
 import 'citations_config.dart';
 import 'content_block.dart';
+import 'image_transformations.dart';
 
 /// Content block for input messages.
 ///
@@ -46,6 +48,7 @@ sealed class InputContentBlock {
   factory InputContentBlock.image(
     ImageSource source, {
     CacheControlEphemeral? cacheControl,
+    ImageTransformations? transformations,
   }) = ImageInputBlock;
 
   /// Creates a document content block.
@@ -77,6 +80,7 @@ sealed class InputContentBlock {
     required String name,
     required Map<String, dynamic> input,
     CacheControlEphemeral? cacheControl,
+    String? toolsetName,
   }) = ToolUseInputBlock;
 
   /// Creates a tool result block (for user messages).
@@ -85,6 +89,7 @@ sealed class InputContentBlock {
     List<ToolResultContent>? content,
     bool? isError,
     CacheControlEphemeral? cacheControl,
+    String? toolsetName,
   }) = ToolResultInputBlock;
 
   /// Creates a tool result block with a single text result.
@@ -93,6 +98,7 @@ sealed class InputContentBlock {
     required String text,
     bool? isError,
     CacheControlEphemeral? cacheControl,
+    String? toolsetName,
   }) = ToolResultInputBlock.text;
 
   /// Creates a server tool use block (for assistant messages).
@@ -182,16 +188,6 @@ sealed class InputContentBlock {
     CacheControlEphemeral? cacheControl,
   }) = ToolRemovalInputBlock;
 
-  /// Creates a mid-conversation system block.
-  ///
-  /// Injects updated system instructions partway through a conversation (e.g.
-  /// with Claude Opus 4.8) without requiring a user turn or disrupting prompt
-  /// caching. The [content] holds the new system instruction as text blocks.
-  factory InputContentBlock.midConversationSystem({
-    required List<TextInputBlock> content,
-    CacheControlEphemeral? cacheControl,
-  }) = MidConversationSystemInputBlock;
-
   /// Creates a fallback block echoed back from a prior response.
   ///
   /// Callers should echo the assistant turn verbatim, including this block — its
@@ -234,7 +230,6 @@ sealed class InputContentBlock {
       'mcp_tool_use' => MCPToolUseInputBlock.fromJson(json),
       'mcp_tool_result' => MCPToolResultInputBlock.fromJson(json),
       'advisor_tool_result' => AdvisorToolResultInputBlock.fromJson(json),
-      'mid_conv_system' => MidConversationSystemInputBlock.fromJson(json),
       'fallback' => FallbackInputBlock.fromJson(json),
       _ => UnknownInputContentBlock.fromJson(json),
     };
@@ -460,8 +455,12 @@ class ImageInputBlock extends InputContentBlock {
   /// Cache control for this block.
   final CacheControlEphemeral? cacheControl;
 
+  /// Configures the transformations the server applies to this image before
+  /// the model observes it.
+  final ImageTransformations? transformations;
+
   /// Creates an [ImageInputBlock].
-  const ImageInputBlock(this.source, {this.cacheControl});
+  const ImageInputBlock(this.source, {this.cacheControl, this.transformations});
 
   /// Creates an [ImageInputBlock] from JSON.
   factory ImageInputBlock.fromJson(Map<String, dynamic> json) {
@@ -472,6 +471,11 @@ class ImageInputBlock extends InputContentBlock {
               json['cache_control'] as Map<String, dynamic>,
             )
           : null,
+      transformations: json['transformations'] != null
+          ? ImageTransformations.fromJson(
+              json['transformations'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -480,18 +484,23 @@ class ImageInputBlock extends InputContentBlock {
     'type': 'image',
     'source': source.toJson(),
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
+    if (transformations != null) 'transformations': transformations!.toJson(),
   };
 
   /// Creates a copy with replaced values.
   ImageInputBlock copyWith({
     ImageSource? source,
     Object? cacheControl = unsetCopyWithValue,
+    Object? transformations = unsetCopyWithValue,
   }) {
     return ImageInputBlock(
       source ?? this.source,
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
           : cacheControl as CacheControlEphemeral?,
+      transformations: transformations == unsetCopyWithValue
+          ? this.transformations
+          : transformations as ImageTransformations?,
     );
   }
 
@@ -501,14 +510,16 @@ class ImageInputBlock extends InputContentBlock {
       other is ImageInputBlock &&
           runtimeType == other.runtimeType &&
           source == other.source &&
-          cacheControl == other.cacheControl;
+          cacheControl == other.cacheControl &&
+          transformations == other.transformations;
 
   @override
-  int get hashCode => Object.hash(source, cacheControl);
+  int get hashCode => Object.hash(source, cacheControl, transformations);
 
   @override
   String toString() =>
-      'ImageInputBlock(source: $source, cacheControl: $cacheControl)';
+      'ImageInputBlock(source: $source, cacheControl: $cacheControl, '
+      'transformations: $transformations)';
 }
 
 /// Document content block for input.
@@ -741,6 +752,10 @@ class ToolUseInputBlock extends InputContentBlock {
   /// Cache control for this block.
   final CacheControlEphemeral? cacheControl;
 
+  /// For a toolset member tool use, the toolset family this member belongs
+  /// to.
+  final String? toolsetName;
+
   /// Creates a [ToolUseInputBlock].
   const ToolUseInputBlock({
     required this.id,
@@ -748,6 +763,7 @@ class ToolUseInputBlock extends InputContentBlock {
     required this.input,
     this.caller,
     this.cacheControl,
+    this.toolsetName,
   });
 
   /// Creates a [ToolUseInputBlock] from JSON.
@@ -764,6 +780,7 @@ class ToolUseInputBlock extends InputContentBlock {
               json['cache_control'] as Map<String, dynamic>,
             )
           : null,
+      toolsetName: json['toolset_name'] as String?,
     );
   }
 
@@ -775,6 +792,7 @@ class ToolUseInputBlock extends InputContentBlock {
     'input': input,
     if (caller != null) 'caller': caller!.toJson(),
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
+    if (toolsetName != null) 'toolset_name': toolsetName,
   };
 
   /// Creates a copy with replaced values.
@@ -784,6 +802,7 @@ class ToolUseInputBlock extends InputContentBlock {
     Map<String, dynamic>? input,
     Object? caller = unsetCopyWithValue,
     Object? cacheControl = unsetCopyWithValue,
+    Object? toolsetName = unsetCopyWithValue,
   }) {
     return ToolUseInputBlock(
       id: id ?? this.id,
@@ -795,6 +814,9 @@ class ToolUseInputBlock extends InputContentBlock {
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
           : cacheControl as CacheControlEphemeral?,
+      toolsetName: toolsetName == unsetCopyWithValue
+          ? this.toolsetName
+          : toolsetName as String?,
     );
   }
 
@@ -807,16 +829,18 @@ class ToolUseInputBlock extends InputContentBlock {
           name == other.name &&
           mapsEqual(input, other.input) &&
           caller == other.caller &&
-          cacheControl == other.cacheControl;
+          cacheControl == other.cacheControl &&
+          toolsetName == other.toolsetName;
 
   @override
   int get hashCode =>
-      Object.hash(id, name, mapHash(input), caller, cacheControl);
+      Object.hash(id, name, mapHash(input), caller, cacheControl, toolsetName);
 
   @override
   String toString() =>
       'ToolUseInputBlock(id: $id, name: $name, input: $input, '
-      'caller: $caller, cacheControl: $cacheControl)';
+      'caller: $caller, cacheControl: $cacheControl, '
+      'toolsetName: $toolsetName)';
 }
 
 /// Content type for tool results.
@@ -827,7 +851,33 @@ sealed class ToolResultContent {
   factory ToolResultContent.text(String text) = ToolResultTextContent;
 
   /// Creates an image result.
-  factory ToolResultContent.image(ImageSource source) = ToolResultImageContent;
+  factory ToolResultContent.image(
+    ImageSource source, {
+    ImageTransformations? transformations,
+  }) = ToolResultImageContent;
+
+  /// Creates a document result.
+  factory ToolResultContent.document(DocumentInputBlock block) =
+      ToolResultDocumentContent;
+
+  /// Creates a search result.
+  factory ToolResultContent.searchResult(SearchResultInputBlock block) =
+      ToolResultSearchResultContent;
+
+  /// Creates a tool reference result.
+  factory ToolResultContent.toolReference(ToolReferenceInputBlock block) =
+      ToolResultToolReferenceContent;
+
+  /// Creates a browser state result.
+  ///
+  /// At most one per `tool_result`, only on a non-error result answering a
+  /// browser toolset member `tool_use`. The server renders the model-visible
+  /// text from it; the model never sees the raw fields.
+  factory ToolResultContent.browserState({
+    required List<BrowserStateTabEntry> tabs,
+    List<BrowserStateChange>? stateChanges,
+    CacheControlEphemeral? cacheControl,
+  }) = ToolResultBrowserStateContent;
 
   /// Creates a [ToolResultContent] from JSON.
   factory ToolResultContent.fromJson(Map<String, dynamic> json) {
@@ -835,7 +885,11 @@ sealed class ToolResultContent {
     return switch (type) {
       'text' => ToolResultTextContent.fromJson(json),
       'image' => ToolResultImageContent.fromJson(json),
-      _ => throw FormatException('Unknown ToolResultContent type: $type'),
+      'document' => ToolResultDocumentContent.fromJson(json),
+      'search_result' => ToolResultSearchResultContent.fromJson(json),
+      'tool_reference' => ToolResultToolReferenceContent.fromJson(json),
+      'browser_state' => ToolResultBrowserStateContent.fromJson(json),
+      _ => UnknownToolResultContent(raw: json),
     };
   }
 
@@ -880,31 +934,301 @@ class ToolResultImageContent extends ToolResultContent {
   /// The image source.
   final ImageSource source;
 
+  /// Configures the transformations the server applies to this image before
+  /// the model observes it.
+  final ImageTransformations? transformations;
+
   /// Creates a [ToolResultImageContent].
-  const ToolResultImageContent(this.source);
+  const ToolResultImageContent(this.source, {this.transformations});
 
   /// Creates a [ToolResultImageContent] from JSON.
   factory ToolResultImageContent.fromJson(Map<String, dynamic> json) {
     return ToolResultImageContent(
       ImageSource.fromJson(json['source'] as Map<String, dynamic>),
+      transformations: json['transformations'] != null
+          ? ImageTransformations.fromJson(
+              json['transformations'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'image', 'source': source.toJson()};
+  Map<String, dynamic> toJson() => {
+    'type': 'image',
+    'source': source.toJson(),
+    if (transformations != null) 'transformations': transformations!.toJson(),
+  };
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ToolResultImageContent &&
           runtimeType == other.runtimeType &&
-          source == other.source;
+          source == other.source &&
+          transformations == other.transformations;
 
   @override
-  int get hashCode => source.hashCode;
+  int get hashCode => Object.hash(source, transformations);
 
   @override
-  String toString() => 'ToolResultImageContent(source: $source)';
+  String toString() =>
+      'ToolResultImageContent(source: $source, '
+      'transformations: $transformations)';
+}
+
+/// Document result content for tool results.
+///
+/// Thin wrapper around a [DocumentInputBlock]; serializes and compares by the
+/// wrapped block.
+@immutable
+class ToolResultDocumentContent extends ToolResultContent {
+  /// The wrapped document block.
+  final DocumentInputBlock document;
+
+  /// Creates a [ToolResultDocumentContent].
+  const ToolResultDocumentContent(this.document);
+
+  /// Creates a [ToolResultDocumentContent] from JSON.
+  factory ToolResultDocumentContent.fromJson(Map<String, dynamic> json) {
+    return ToolResultDocumentContent(DocumentInputBlock.fromJson(json));
+  }
+
+  @override
+  Map<String, dynamic> toJson() => document.toJson();
+
+  /// Creates a copy with replaced values.
+  ToolResultDocumentContent copyWith({DocumentInputBlock? document}) {
+    return ToolResultDocumentContent(document ?? this.document);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ToolResultDocumentContent &&
+          runtimeType == other.runtimeType &&
+          document == other.document;
+
+  @override
+  int get hashCode => document.hashCode;
+
+  @override
+  String toString() => 'ToolResultDocumentContent(document: $document)';
+}
+
+/// Search result content for tool results.
+///
+/// Thin wrapper around a [SearchResultInputBlock]; serializes and compares by
+/// the wrapped block.
+@immutable
+class ToolResultSearchResultContent extends ToolResultContent {
+  /// The wrapped search result block.
+  final SearchResultInputBlock searchResult;
+
+  /// Creates a [ToolResultSearchResultContent].
+  const ToolResultSearchResultContent(this.searchResult);
+
+  /// Creates a [ToolResultSearchResultContent] from JSON.
+  factory ToolResultSearchResultContent.fromJson(Map<String, dynamic> json) {
+    return ToolResultSearchResultContent(SearchResultInputBlock.fromJson(json));
+  }
+
+  @override
+  Map<String, dynamic> toJson() => searchResult.toJson();
+
+  /// Creates a copy with replaced values.
+  ToolResultSearchResultContent copyWith({
+    SearchResultInputBlock? searchResult,
+  }) {
+    return ToolResultSearchResultContent(searchResult ?? this.searchResult);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ToolResultSearchResultContent &&
+          runtimeType == other.runtimeType &&
+          searchResult == other.searchResult;
+
+  @override
+  int get hashCode => searchResult.hashCode;
+
+  @override
+  String toString() =>
+      'ToolResultSearchResultContent(searchResult: $searchResult)';
+}
+
+/// Tool reference content for tool results.
+///
+/// Thin wrapper around a [ToolReferenceInputBlock]; serializes and compares
+/// by the wrapped block.
+@immutable
+class ToolResultToolReferenceContent extends ToolResultContent {
+  /// The wrapped tool reference block.
+  final ToolReferenceInputBlock toolReference;
+
+  /// Creates a [ToolResultToolReferenceContent].
+  const ToolResultToolReferenceContent(this.toolReference);
+
+  /// Creates a [ToolResultToolReferenceContent] from JSON.
+  factory ToolResultToolReferenceContent.fromJson(Map<String, dynamic> json) {
+    return ToolResultToolReferenceContent(
+      ToolReferenceInputBlock.fromJson(json),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => toolReference.toJson();
+
+  /// Creates a copy with replaced values.
+  ToolResultToolReferenceContent copyWith({
+    ToolReferenceInputBlock? toolReference,
+  }) {
+    return ToolResultToolReferenceContent(toolReference ?? this.toolReference);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ToolResultToolReferenceContent &&
+          runtimeType == other.runtimeType &&
+          toolReference == other.toolReference;
+
+  @override
+  int get hashCode => toolReference.hashCode;
+
+  @override
+  String toString() =>
+      'ToolResultToolReferenceContent(toolReference: $toolReference)';
+}
+
+/// Browser state result content for tool results.
+///
+/// The caller's browser state after a browser toolset member call — the full
+/// inventory of open tabs, which tab is active, and any side effects (tabs
+/// opened, download state changes) the call produced.
+///
+/// At most one per `tool_result`, only on a non-error result answering a
+/// browser toolset member `tool_use`. The server renders the model-visible
+/// text from it; the model never sees the raw fields.
+@immutable
+class ToolResultBrowserStateContent extends ToolResultContent {
+  /// All tabs open in the browser after this call — the full inventory, not
+  /// a delta. May be empty. Whenever non-empty, exactly one entry carries
+  /// `active: true`.
+  final List<BrowserStateTabEntry> tabs;
+
+  /// Tabs opened and download state changes during this call.
+  ///
+  /// "Nothing to report" is expressed by omitting the field, never by an
+  /// empty list.
+  final List<BrowserStateChange>? stateChanges;
+
+  /// Cache control for this block.
+  final CacheControlEphemeral? cacheControl;
+
+  /// Creates a [ToolResultBrowserStateContent].
+  const ToolResultBrowserStateContent({
+    required this.tabs,
+    this.stateChanges,
+    this.cacheControl,
+  });
+
+  /// Creates a [ToolResultBrowserStateContent] from JSON.
+  factory ToolResultBrowserStateContent.fromJson(Map<String, dynamic> json) {
+    final rawTabs = json['tabs'];
+    if (rawTabs is! List) {
+      throw const FormatException(
+        'ToolResultBrowserStateContent: missing required "tabs"',
+      );
+    }
+    return ToolResultBrowserStateContent(
+      tabs: rawTabs
+          .map((e) => BrowserStateTabEntry.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      stateChanges: (json['state_changes'] as List?)
+          ?.map((e) => BrowserStateChange.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      cacheControl: json['cache_control'] != null
+          ? CacheControlEphemeral.fromJson(
+              json['cache_control'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'browser_state',
+    'tabs': tabs.map((e) => e.toJson()).toList(),
+    if (stateChanges != null)
+      'state_changes': stateChanges!.map((e) => e.toJson()).toList(),
+    if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  ToolResultBrowserStateContent copyWith({
+    List<BrowserStateTabEntry>? tabs,
+    Object? stateChanges = unsetCopyWithValue,
+    Object? cacheControl = unsetCopyWithValue,
+  }) {
+    return ToolResultBrowserStateContent(
+      tabs: tabs ?? this.tabs,
+      stateChanges: stateChanges == unsetCopyWithValue
+          ? this.stateChanges
+          : stateChanges as List<BrowserStateChange>?,
+      cacheControl: cacheControl == unsetCopyWithValue
+          ? this.cacheControl
+          : cacheControl as CacheControlEphemeral?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ToolResultBrowserStateContent &&
+          runtimeType == other.runtimeType &&
+          listsEqual(tabs, other.tabs) &&
+          listsEqual(stateChanges, other.stateChanges) &&
+          cacheControl == other.cacheControl;
+
+  @override
+  int get hashCode =>
+      Object.hash(listHash(tabs), listHash(stateChanges), cacheControl);
+
+  @override
+  String toString() =>
+      'ToolResultBrowserStateContent(tabs: $tabs, '
+      'stateChanges: $stateChanges, cacheControl: $cacheControl)';
+}
+
+/// Forward-compatible fallback for unrecognized [ToolResultContent] types.
+@immutable
+class UnknownToolResultContent extends ToolResultContent {
+  /// The raw JSON for this unknown tool result content.
+  final Map<String, dynamic> raw;
+
+  /// Creates an [UnknownToolResultContent].
+  const UnknownToolResultContent({required this.raw});
+
+  /// The wire discriminator value of this unrecognized content.
+  String get type => raw['type'] as String? ?? '';
+
+  @override
+  Map<String, dynamic> toJson() => Map<String, dynamic>.from(raw);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownToolResultContent &&
+          runtimeType == other.runtimeType &&
+          mapsDeepEqual(raw, other.raw);
+
+  @override
+  int get hashCode => mapDeepHashCode(raw);
+
+  @override
+  String toString() => 'UnknownToolResultContent(raw: ${raw.length} entries)';
 }
 
 /// Tool result block for user messages.
@@ -922,12 +1246,17 @@ class ToolResultInputBlock extends InputContentBlock {
   /// Cache control for this block.
   final CacheControlEphemeral? cacheControl;
 
+  /// For a toolset member tool result, the toolset family of the paired
+  /// tool use.
+  final String? toolsetName;
+
   /// Creates a [ToolResultInputBlock].
   const ToolResultInputBlock({
     required this.toolUseId,
     this.content,
     this.isError,
     this.cacheControl,
+    this.toolsetName,
   });
 
   /// Creates a [ToolResultInputBlock] with a single text result.
@@ -936,28 +1265,32 @@ class ToolResultInputBlock extends InputContentBlock {
     required String text,
     bool? isError,
     CacheControlEphemeral? cacheControl,
+    String? toolsetName,
   }) {
     return ToolResultInputBlock(
       toolUseId: toolUseId,
       content: [ToolResultContent.text(text)],
       isError: isError,
       cacheControl: cacheControl,
+      toolsetName: toolsetName,
     );
   }
 
   /// Creates a [ToolResultInputBlock] from JSON.
+  ///
+  /// [json]'s `content` may be a list of content blocks or a plain string;
+  /// a string is normalized to a single [ToolResultContent.text] block.
   factory ToolResultInputBlock.fromJson(Map<String, dynamic> json) {
     return ToolResultInputBlock(
       toolUseId: json['tool_use_id'] as String,
-      content: (json['content'] as List?)
-          ?.map((e) => ToolResultContent.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      content: _parseContent(json['content']),
       isError: json['is_error'] as bool?,
       cacheControl: json['cache_control'] != null
           ? CacheControlEphemeral.fromJson(
               json['cache_control'] as Map<String, dynamic>,
             )
           : null,
+      toolsetName: json['toolset_name'] as String?,
     );
   }
 
@@ -968,6 +1301,7 @@ class ToolResultInputBlock extends InputContentBlock {
     if (content != null) 'content': content!.map((e) => e.toJson()).toList(),
     if (isError != null) 'is_error': isError,
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
+    if (toolsetName != null) 'toolset_name': toolsetName,
   };
 
   /// Creates a copy with replaced values.
@@ -976,6 +1310,7 @@ class ToolResultInputBlock extends InputContentBlock {
     Object? content = unsetCopyWithValue,
     Object? isError = unsetCopyWithValue,
     Object? cacheControl = unsetCopyWithValue,
+    Object? toolsetName = unsetCopyWithValue,
   }) {
     return ToolResultInputBlock(
       toolUseId: toolUseId ?? this.toolUseId,
@@ -986,6 +1321,9 @@ class ToolResultInputBlock extends InputContentBlock {
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
           : cacheControl as CacheControlEphemeral?,
+      toolsetName: toolsetName == unsetCopyWithValue
+          ? this.toolsetName
+          : toolsetName as String?,
     );
   }
 
@@ -997,16 +1335,39 @@ class ToolResultInputBlock extends InputContentBlock {
           toolUseId == other.toolUseId &&
           listsEqual(content, other.content) &&
           isError == other.isError &&
+          toolsetName == other.toolsetName &&
           cacheControl == other.cacheControl;
 
   @override
-  int get hashCode =>
-      Object.hash(toolUseId, listHash(content), isError, cacheControl);
+  int get hashCode => Object.hash(
+    toolUseId,
+    listHash(content),
+    isError,
+    cacheControl,
+    toolsetName,
+  );
 
   @override
   String toString() =>
       'ToolResultInputBlock(toolUseId: $toolUseId, content: $content, '
-      'isError: $isError, cacheControl: $cacheControl)';
+      'isError: $isError, cacheControl: $cacheControl, '
+      'toolsetName: $toolsetName)';
+
+  /// Parses a `content` field that may be a list of content blocks, a plain
+  /// string (normalized to a single text block), `null`, or absent.
+  static List<ToolResultContent>? _parseContent(Object? content) {
+    return switch (content) {
+      null => null,
+      final String text => [ToolResultContent.text(text)],
+      final List<dynamic> list =>
+        list
+            .map((e) => ToolResultContent.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      _ => throw const FormatException(
+        'ToolResultInputBlock: "content" must be a string or list',
+      ),
+    };
+  }
 }
 
 /// Server tool use block for assistant messages in input.
@@ -2272,92 +2633,6 @@ class MCPToolResultInputBlock extends InputContentBlock {
   String toString() =>
       'MCPToolResultInputBlock(toolUseId: $toolUseId, '
       'content: $content, isError: $isError, '
-      'cacheControl: $cacheControl)';
-}
-
-/// Mid-conversation system content block for input.
-///
-/// Injects updated system instructions partway through a conversation (e.g.
-/// with Claude Opus 4.8) without requiring a user turn or disrupting prompt
-/// caching. The [content] holds the new system instruction as text blocks.
-@immutable
-class MidConversationSystemInputBlock extends InputContentBlock {
-  /// System instruction text blocks.
-  final List<TextInputBlock> content;
-
-  /// Cache control for this block.
-  final CacheControlEphemeral? cacheControl;
-
-  /// Creates a [MidConversationSystemInputBlock].
-  const MidConversationSystemInputBlock({
-    required this.content,
-    this.cacheControl,
-  });
-
-  /// Creates a [MidConversationSystemInputBlock] from JSON.
-  factory MidConversationSystemInputBlock.fromJson(Map<String, dynamic> json) {
-    final type = json['type'] as String?;
-    if (type != 'mid_conv_system') {
-      throw FormatException('Expected type "mid_conv_system", got "$type"');
-    }
-    final rawContent = json['content'];
-    if (rawContent is! List) {
-      throw FormatException(
-        'mid_conv_system: "content" must be a List, '
-        'got ${rawContent.runtimeType}',
-      );
-    }
-    return MidConversationSystemInputBlock(
-      content: rawContent.map((e) {
-        if (e is! Map<String, dynamic>) {
-          throw FormatException(
-            'mid_conv_system content: expected Map, got ${e.runtimeType}',
-          );
-        }
-        return TextInputBlock.fromJson(e);
-      }).toList(),
-      cacheControl: json['cache_control'] != null
-          ? CacheControlEphemeral.fromJson(
-              json['cache_control'] as Map<String, dynamic>,
-            )
-          : null,
-    );
-  }
-
-  @override
-  Map<String, dynamic> toJson() => {
-    'type': 'mid_conv_system',
-    'content': content.map((e) => e.toJson()).toList(),
-    if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
-  };
-
-  /// Creates a copy with replaced values.
-  MidConversationSystemInputBlock copyWith({
-    List<TextInputBlock>? content,
-    Object? cacheControl = unsetCopyWithValue,
-  }) {
-    return MidConversationSystemInputBlock(
-      content: content ?? this.content,
-      cacheControl: cacheControl == unsetCopyWithValue
-          ? this.cacheControl
-          : cacheControl as CacheControlEphemeral?,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is MidConversationSystemInputBlock &&
-          runtimeType == other.runtimeType &&
-          listsEqual(content, other.content) &&
-          cacheControl == other.cacheControl;
-
-  @override
-  int get hashCode => Object.hash(listHash(content), cacheControl);
-
-  @override
-  String toString() =>
-      'MidConversationSystemInputBlock(content: $content, '
       'cacheControl: $cacheControl)';
 }
 

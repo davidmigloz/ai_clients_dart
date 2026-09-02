@@ -1,6 +1,5 @@
 import 'package:meta/meta.dart';
 
-import '../common/copy_with_sentinel.dart';
 import 'skill_source.dart';
 
 /// A skill in the Anthropic API.
@@ -14,11 +13,18 @@ class Skill {
   /// The format and length of IDs may change over time.
   final String id;
 
-  /// Display title for the skill.
+  /// Human-readable, single-line label for the skill. Maximum 255
+  /// characters. Always set: derived from the `SKILL.md` frontmatter `name`
+  /// when omitted at creation. Not unique.
+  final String displayName;
+
+  /// ID of the newest skill version — what `latest` references resolve to.
   ///
-  /// This is a human-readable label that is not included in the prompt
-  /// sent to the model.
-  final String? displayTitle;
+  /// Always set: a skill holds at least one version.
+  final String latestVersionId;
+
+  /// Where the skill comes from.
+  final SkillSource source;
 
   /// ISO 8601 timestamp of when the skill was created.
   final DateTime createdAt;
@@ -26,41 +32,49 @@ class Skill {
   /// ISO 8601 timestamp of when the skill was last updated.
   final DateTime updatedAt;
 
-  /// The latest version identifier for the skill.
-  ///
-  /// This represents the most recent version of the skill that has been
-  /// created.
-  final String? latestVersion;
-
-  /// Source of the skill.
-  ///
-  /// Indicates whether this skill was created by a user ([SkillSource.custom])
-  /// or provided by Anthropic ([SkillSource.anthropic]).
-  final SkillSource source;
-
   /// Object type. Always "skill".
   final String type;
 
   /// Creates a [Skill].
   const Skill({
     required this.id,
-    required this.displayTitle,
+    required this.displayName,
+    required this.latestVersionId,
+    required this.source,
     required this.createdAt,
     required this.updatedAt,
-    required this.latestVersion,
-    required this.source,
     this.type = 'skill',
   });
 
   /// Creates a [Skill] from JSON.
   factory Skill.fromJson(Map<String, dynamic> json) {
     return Skill(
-      id: json['id'] as String,
-      displayTitle: json['display_title'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
-      latestVersion: json['latest_version'] as String?,
-      source: SkillSource.fromJson(json['source'] as String),
+      id:
+          json['id'] as String? ??
+          (throw const FormatException('Skill: missing required "id"')),
+      displayName:
+          json['display_name'] as String? ??
+          (throw const FormatException(
+            'Skill: missing required "display_name"',
+          )),
+      latestVersionId:
+          json['latest_version_id'] as String? ??
+          (throw const FormatException(
+            'Skill: missing required "latest_version_id"',
+          )),
+      source: json['source'] != null
+          ? SkillSource.fromJson(json['source'] as Map<String, dynamic>)
+          : (throw const FormatException('Skill: missing required "source"')),
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : (throw const FormatException(
+              'Skill: missing required "created_at"',
+            )),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String)
+          : (throw const FormatException(
+              'Skill: missing required "updated_at"',
+            )),
       type: json['type'] as String? ?? 'skill',
     );
   }
@@ -68,39 +82,31 @@ class Skill {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'id': id,
-    'display_title': displayTitle,
+    'display_name': displayName,
+    'latest_version_id': latestVersionId,
+    'source': source.toJson(),
     'created_at': createdAt.toUtc().toIso8601String(),
     'updated_at': updatedAt.toUtc().toIso8601String(),
-    'latest_version': latestVersion,
-    'source': source.toJson(),
     'type': type,
   };
 
   /// Creates a copy with replaced values.
-  ///
-  /// For nullable fields ([displayTitle], [latestVersion]), pass the sentinel
-  /// value [unsetCopyWithValue] (or omit) to keep the original value, or pass
-  /// `null` explicitly to set the field to null.
   Skill copyWith({
     String? id,
-    Object? displayTitle = unsetCopyWithValue,
+    String? displayName,
+    String? latestVersionId,
+    SkillSource? source,
     DateTime? createdAt,
     DateTime? updatedAt,
-    Object? latestVersion = unsetCopyWithValue,
-    SkillSource? source,
     String? type,
   }) {
     return Skill(
       id: id ?? this.id,
-      displayTitle: displayTitle == unsetCopyWithValue
-          ? this.displayTitle
-          : displayTitle as String?,
+      displayName: displayName ?? this.displayName,
+      latestVersionId: latestVersionId ?? this.latestVersionId,
+      source: source ?? this.source,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      latestVersion: latestVersion == unsetCopyWithValue
-          ? this.latestVersion
-          : latestVersion as String?,
-      source: source ?? this.source,
       type: type ?? this.type,
     );
   }
@@ -111,21 +117,21 @@ class Skill {
       other is Skill &&
           runtimeType == other.runtimeType &&
           id == other.id &&
-          displayTitle == other.displayTitle &&
+          displayName == other.displayName &&
+          latestVersionId == other.latestVersionId &&
+          source == other.source &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt &&
-          latestVersion == other.latestVersion &&
-          source == other.source &&
           type == other.type;
 
   @override
   int get hashCode => Object.hash(
     id,
-    displayTitle,
+    displayName,
+    latestVersionId,
+    source,
     createdAt,
     updatedAt,
-    latestVersion,
-    source,
     type,
   );
 
@@ -133,10 +139,10 @@ class Skill {
   String toString() =>
       'Skill('
       'id: $id, '
-      'displayTitle: $displayTitle, '
+      'displayName: $displayName, '
+      'latestVersionId: $latestVersionId, '
+      'source: $source, '
       'createdAt: $createdAt, '
       'updatedAt: $updatedAt, '
-      'latestVersion: $latestVersion, '
-      'source: $source, '
       'type: $type)';
 }

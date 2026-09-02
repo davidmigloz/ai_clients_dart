@@ -6,13 +6,16 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// Extended thinking example.
 ///
 /// This example demonstrates:
-/// - Enabling extended thinking mode
+/// - Enabling adaptive extended thinking mode
 /// - Accessing thinking blocks from responses
 /// - Streaming with thinking blocks
-/// - Budget tokens configuration
+/// - Progress updates via [ThinkingDisplayMode.updates]
+/// - Preserved thinking / block binding controls
 /// - Multi-turn conversation with thinking replay (tool use)
 ///
-/// Note: Extended thinking requires compatible models like claude-sonnet-4.
+/// Note: current-generation models (e.g. `claude-sonnet-5`) have adaptive
+/// thinking always on and reject `enabled`/`disabled` thinking
+/// configurations — use [ThinkingConfig.adaptive] instead.
 void main() async {
   final client = AnthropicClient(
     config: const AnthropicConfig(
@@ -25,9 +28,11 @@ void main() async {
     print('=== Extended Thinking ===');
     final thinkingResponse = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-5',
         maxTokens: 16000,
-        thinking: const ThinkingEnabled(budgetTokens: 10000),
+        thinking: ThinkingConfig.adaptive(
+          display: ThinkingDisplayMode.summarized,
+        ),
         messages: [
           InputMessage.user(
             'Solve this step by step: If a train travels 120 km in 2 hours, '
@@ -61,9 +66,11 @@ void main() async {
     print('\n=== Streaming with Thinking ===');
     final thinkingStream = client.messages.createStream(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-5',
         maxTokens: 16000,
-        thinking: const ThinkingEnabled(budgetTokens: 5000),
+        thinking: ThinkingConfig.adaptive(
+          display: ThinkingDisplayMode.summarized,
+        ),
         messages: [InputMessage.user('What is 15% of 240? Show your work.')],
       ),
     );
@@ -105,9 +112,11 @@ void main() async {
     print('\n=== Complex Reasoning ===');
     final complexResponse = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-5',
         maxTokens: 16000,
-        thinking: const ThinkingEnabled(budgetTokens: 8000),
+        thinking: ThinkingConfig.adaptive(
+          display: ThinkingDisplayMode.summarized,
+        ),
         messages: [
           InputMessage.user(
             'A farmer has chickens and cows. '
@@ -138,7 +147,74 @@ void main() async {
       print(textBlocks.map((b) => b.text).join('\n'));
     }
 
-    // Example 4: Multi-turn conversation with thinking replay
+    // Example 4: Progress updates
+    //
+    // With `display: ThinkingDisplayMode.updates`, reasoning blocks come
+    // back with an empty `thinking` field, while the short progress updates
+    // the model writes between tool calls come back as text: any `thinking`
+    // block with non-empty text is a progress update you can show the user.
+    print('\n=== Progress Updates ===');
+    final updatesResponse = await client.messages.create(
+      MessageCreateRequest(
+        model: 'claude-sonnet-5',
+        maxTokens: 16000,
+        thinking: ThinkingConfig.adaptive(display: ThinkingDisplayMode.updates),
+        messages: [
+          InputMessage.user(
+            'Plan a 3-day itinerary for a trip to Kyoto, Japan.',
+          ),
+        ],
+      ),
+      betas: ['thinking-display-updates-2026-08-18'],
+    );
+
+    for (final block in updatesResponse.content) {
+      if (block case ThinkingBlock(:final thinking) when thinking.isNotEmpty) {
+        print('[Status] $thinking');
+      }
+    }
+    print('\nFinal answer:');
+    print(updatesResponse.text);
+
+    // Example 5: Preserved thinking / block binding
+    //
+    // `blockBinding` controls what happens when a replayed thinking block
+    // fails the conversation check (e.g. it came from a different
+    // conversation). `dropBlock` removes the failing block instead of
+    // erroring, and reports each removal in `inputTransformations` — an
+    // append-only history of changes the API made to the request's input.
+    print('\n=== Preserved Thinking / Block Binding ===');
+    final bindingResponse = await client.messages.create(
+      MessageCreateRequest(
+        model: 'claude-sonnet-5',
+        maxTokens: 16000,
+        thinking: ThinkingConfig.adaptive(
+          display: ThinkingDisplayMode.summarized,
+          blockBinding: const ThinkingBlockBinding(
+            prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.dropBlock,
+          ),
+        ),
+        messages: [InputMessage.user('What is the square root of 2025?')],
+      ),
+      betas: ['thinking-binding-controls-2026-08-01'],
+    );
+
+    print(bindingResponse.text);
+    final transformations = bindingResponse.inputTransformations ?? const [];
+    if (transformations.isEmpty) {
+      print('No input transformations (nothing was dropped).');
+    } else {
+      for (final transformation in transformations) {
+        if (transformation case ThinkingDroppedInputTransformation(
+          :final path,
+          :final reason,
+        )) {
+          print('Dropped thinking block at $path: ${reason.toJson()}');
+        }
+      }
+    }
+
+    // Example 6: Multi-turn conversation with thinking replay
     print('\n=== Multi-Turn Conversation with Thinking Replay ===');
 
     // Define a simple client tool
@@ -168,9 +244,11 @@ void main() async {
 
     final toolResponse = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-5',
         maxTokens: 16000,
-        thinking: const ThinkingEnabled(budgetTokens: 10000),
+        thinking: ThinkingConfig.adaptive(
+          display: ThinkingDisplayMode.summarized,
+        ),
         tools: [ToolDefinition.custom(exchangeRateTool)],
         messages: [userMessage],
       ),
@@ -208,9 +286,11 @@ void main() async {
 
       final finalResponse = await client.messages.create(
         MessageCreateRequest(
-          model: 'claude-sonnet-4-6',
+          model: 'claude-sonnet-5',
           maxTokens: 16000,
-          thinking: const ThinkingEnabled(budgetTokens: 10000),
+          thinking: ThinkingConfig.adaptive(
+            display: ThinkingDisplayMode.summarized,
+          ),
           tools: [ToolDefinition.custom(exchangeRateTool)],
           messages: [
             userMessage,

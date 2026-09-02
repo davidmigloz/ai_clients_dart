@@ -23,7 +23,11 @@ class FilesResource {
   /// Uploads a file.
   ///
   /// This method is not supported on the current platform.
-  Future<FileMetadata> upload({required String filePath, String? mimeType}) {
+  Future<FileMetadata> upload({
+    required String filePath,
+    String? mimeType,
+    int? expiresInSeconds,
+  }) {
     throw UnsupportedError(
       'File upload is not supported on this platform. '
       'Use a platform that supports dart:io.',
@@ -37,6 +41,7 @@ class FilesResource {
     required Uint8List bytes,
     required String fileName,
     String? mimeType,
+    int? expiresInSeconds,
   }) {
     throw UnsupportedError(
       'File upload is not supported on this platform. '
@@ -49,8 +54,8 @@ class FilesResource {
   /// This method is not supported on the current platform.
   Future<FileListResponse> list({
     int? limit,
-    String? beforeId,
-    String? afterId,
+    String? page,
+    List<String>? ids,
     String? scopeId,
   }) {
     throw UnsupportedError(

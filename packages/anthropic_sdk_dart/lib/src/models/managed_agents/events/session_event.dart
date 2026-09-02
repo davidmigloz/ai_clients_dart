@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import '../../beta_timestamp.dart';
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import '../common/budget.dart';
 import '../config/agent_tool.dart' show AgentEvaluatedPermission;
 import '../outcomes/rubric.dart';
 import '../sessions/session.dart' show SessionAgent;
@@ -39,6 +40,7 @@ import 'telemetry.dart';
 /// - [SessionErrorEvent] — session error.
 /// - [SessionDeletedEvent] — session deleted.
 /// - [SessionUpdatedEvent] — an UpdateSession request changed a field.
+/// - [SessionUsageEvent] — periodic snapshot of the session's usage and cost.
 /// - [SpanModelRequestStartEvent] — model request started.
 /// - [SpanModelRequestEndEvent] — model request completed.
 /// - [SpanOutcomeEvaluationStartEvent] — outcome evaluation cycle began.
@@ -94,6 +96,7 @@ sealed class SessionEvent {
       'session.error' => SessionErrorEvent.fromJson(json),
       'session.deleted' => SessionDeletedEvent.fromJson(json),
       'session.updated' => SessionUpdatedEvent.fromJson(json),
+      'session.usage' => SessionUsageEvent.fromJson(json),
       'span.model_request_start' => SpanModelRequestStartEvent.fromJson(json),
       'span.model_request_end' => SpanModelRequestEndEvent.fromJson(json),
       'span.outcome_evaluation_start' =>
@@ -127,8 +130,8 @@ class AgentMessageEvent extends SessionEvent {
   /// Unique identifier for this event.
   final String id;
 
-  /// Array of text blocks comprising the agent response.
-  final List<Map<String, dynamic>> content;
+  /// Array of content blocks comprising the agent response.
+  final List<AgentMessageContentBlock> content;
 
   /// Timestamp when this response was generated.
   final BetaTimestamp processedAt;
@@ -145,7 +148,9 @@ class AgentMessageEvent extends SessionEvent {
     return AgentMessageEvent(
       id: json['id'] as String,
       content: (json['content'] as List)
-          .map((e) => e as Map<String, dynamic>)
+          .map(
+            (e) => AgentMessageContentBlock.fromJson(e as Map<String, dynamic>),
+          )
           .toList(),
       processedAt: DateTime.parse(json['processed_at'] as String),
     );
@@ -155,14 +160,14 @@ class AgentMessageEvent extends SessionEvent {
   Map<String, dynamic> toJson() => {
     'type': type,
     'id': id,
-    'content': content,
+    'content': content.map((e) => e.toJson()).toList(),
     'processed_at': processedAt.toUtc().toIso8601String(),
   };
 
   /// Creates a copy with replaced values.
   AgentMessageEvent copyWith({
     String? id,
-    List<Map<String, dynamic>>? content,
+    List<AgentMessageContentBlock>? content,
     BetaTimestamp? processedAt,
   }) {
     return AgentMessageEvent(
@@ -178,16 +183,136 @@ class AgentMessageEvent extends SessionEvent {
       other is AgentMessageEvent &&
           runtimeType == other.runtimeType &&
           id == other.id &&
-          listOfMapsDeepEqual(content, other.content) &&
+          listsEqual(content, other.content) &&
           processedAt == other.processedAt;
 
   @override
-  int get hashCode => Object.hash(id, listOfMapsHashCode(content), processedAt);
+  int get hashCode => Object.hash(id, listHash(content), processedAt);
 
   @override
   String toString() =>
       'AgentMessageEvent(id: $id, content: $content, '
       'processedAt: $processedAt)';
+}
+
+/// Content block in an [AgentMessageEvent].
+///
+/// Variants:
+/// - [ManagedAgentsTextBlock] — regular text content.
+/// - [ManagedAgentsRedactedBlock] — content withheld by Anthropic model
+///   policy.
+/// - [UnknownAgentMessageContentBlock] — unrecognized block type (preserves
+///   raw JSON).
+sealed class AgentMessageContentBlock {
+  const AgentMessageContentBlock();
+
+  /// Creates an [AgentMessageContentBlock] from JSON.
+  factory AgentMessageContentBlock.fromJson(Map<String, dynamic> json) {
+    final type = json['type'] as String?;
+    return switch (type) {
+      'text' => ManagedAgentsTextBlock.fromJson(json),
+      'redacted' => ManagedAgentsRedactedBlock.fromJson(json),
+      _ => UnknownAgentMessageContentBlock(rawJson: json),
+    };
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson();
+}
+
+/// Regular text content.
+@immutable
+class ManagedAgentsTextBlock extends AgentMessageContentBlock {
+  /// The block type, always 'text'.
+  String get type => 'text';
+
+  /// The text content.
+  final String text;
+
+  /// Creates a [ManagedAgentsTextBlock].
+  const ManagedAgentsTextBlock({required this.text});
+
+  /// Creates a [ManagedAgentsTextBlock] from JSON.
+  factory ManagedAgentsTextBlock.fromJson(Map<String, dynamic> json) {
+    return ManagedAgentsTextBlock(text: json['text'] as String);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': type, 'text': text};
+
+  /// Creates a copy with replaced values.
+  ManagedAgentsTextBlock copyWith({String? text}) {
+    return ManagedAgentsTextBlock(text: text ?? this.text);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ManagedAgentsTextBlock &&
+          runtimeType == other.runtimeType &&
+          text == other.text;
+
+  @override
+  int get hashCode => text.hashCode;
+
+  @override
+  String toString() => 'ManagedAgentsTextBlock(text: $text)';
+}
+
+/// Placeholder for content withheld by Anthropic model policy.
+@immutable
+class ManagedAgentsRedactedBlock extends AgentMessageContentBlock {
+  /// The block type, always 'redacted'.
+  String get type => 'redacted';
+
+  /// Creates a [ManagedAgentsRedactedBlock].
+  const ManagedAgentsRedactedBlock();
+
+  /// Creates a [ManagedAgentsRedactedBlock] from JSON.
+  factory ManagedAgentsRedactedBlock.fromJson(Map<String, dynamic> _) {
+    return const ManagedAgentsRedactedBlock();
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': type};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ManagedAgentsRedactedBlock && runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() => 'ManagedAgentsRedactedBlock()';
+}
+
+/// Unrecognized [AgentMessageContentBlock] type — preserves raw JSON for
+/// forward compatibility.
+@immutable
+class UnknownAgentMessageContentBlock extends AgentMessageContentBlock {
+  /// The raw JSON.
+  final Map<String, dynamic> rawJson;
+
+  /// Creates an [UnknownAgentMessageContentBlock].
+  const UnknownAgentMessageContentBlock({required this.rawJson});
+
+  @override
+  Map<String, dynamic> toJson() => rawJson;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownAgentMessageContentBlock &&
+          runtimeType == other.runtimeType &&
+          mapsDeepEqual(rawJson, other.rawJson);
+
+  @override
+  int get hashCode => mapDeepHashCode(rawJson);
+
+  @override
+  String toString() => 'UnknownAgentMessageContentBlock(rawJson: $rawJson)';
 }
 
 /// Agent thinking progress signal.
@@ -1516,6 +1641,8 @@ class SessionStatusRunningEvent extends SessionEvent {
 /// - [SessionEndTurn] — agent completed its turn naturally.
 /// - [SessionRequiresAction] — agent is waiting on blocking user input.
 /// - [SessionRetriesExhausted] — turn ended because retry budget exhausted.
+/// - [SessionBudgetReached] — turn ended because the session's budget was
+///   reached.
 /// - [UnknownSessionStopReason] — unrecognized stop reason.
 sealed class SessionStopReason {
   const SessionStopReason();
@@ -1527,6 +1654,7 @@ sealed class SessionStopReason {
       'end_turn' => SessionEndTurn.fromJson(json),
       'requires_action' => SessionRequiresAction.fromJson(json),
       'retries_exhausted' => SessionRetriesExhausted.fromJson(json),
+      'budget_reached' => SessionBudgetReached.fromJson(json),
       _ => UnknownSessionStopReason(rawJson: json),
     };
   }
@@ -1632,6 +1760,38 @@ class SessionRetriesExhausted extends SessionStopReason {
 
   @override
   String toString() => 'SessionRetriesExhausted()';
+}
+
+/// The agent stopped because the session's tracked list cost reached its
+/// budget, or because its usage includes a model with no list price (which
+/// the budget cannot measure). Raise the budget to continue — or, if raising
+/// is rejected because a model has no list price, remove the budget.
+@immutable
+class SessionBudgetReached extends SessionStopReason {
+  /// The type, always 'budget_reached'.
+  String get type => 'budget_reached';
+
+  /// Creates a [SessionBudgetReached].
+  const SessionBudgetReached();
+
+  /// Creates a [SessionBudgetReached] from JSON.
+  factory SessionBudgetReached.fromJson(Map<String, dynamic> _) {
+    return const SessionBudgetReached();
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': type};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SessionBudgetReached && runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() => 'SessionBudgetReached()';
 }
 
 /// Unrecognized stop reason — preserves raw JSON.
@@ -1997,6 +2157,11 @@ class SessionUpdatedEvent extends SessionEvent {
   /// The updated session title, if it changed.
   final String? title;
 
+  /// The session's budget after the update: the new budget when set or
+  /// replaced, or null when the update removed it. Present only when the
+  /// update changed the budget.
+  final Budget? budget;
+
   /// Creates a [SessionUpdatedEvent].
   const SessionUpdatedEvent({
     required this.id,
@@ -2004,6 +2169,7 @@ class SessionUpdatedEvent extends SessionEvent {
     this.agent,
     this.metadata,
     this.title,
+    this.budget,
   });
 
   /// Creates a [SessionUpdatedEvent] from JSON.
@@ -2018,6 +2184,9 @@ class SessionUpdatedEvent extends SessionEvent {
         (k, v) => MapEntry(k, v as String),
       ),
       title: json['title'] as String?,
+      budget: json['budget'] != null
+          ? Budget.fromJson(json['budget'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -2029,6 +2198,7 @@ class SessionUpdatedEvent extends SessionEvent {
     if (agent != null) 'agent': agent!.toJson(),
     if (metadata != null) 'metadata': metadata,
     if (title != null) 'title': title,
+    if (budget != null) 'budget': budget!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -2038,6 +2208,7 @@ class SessionUpdatedEvent extends SessionEvent {
     Object? agent = unsetCopyWithValue,
     Object? metadata = unsetCopyWithValue,
     Object? title = unsetCopyWithValue,
+    Object? budget = unsetCopyWithValue,
   }) {
     return SessionUpdatedEvent(
       id: id ?? this.id,
@@ -2047,6 +2218,7 @@ class SessionUpdatedEvent extends SessionEvent {
           ? this.metadata
           : metadata as Map<String, String>?,
       title: title == unsetCopyWithValue ? this.title : title as String?,
+      budget: budget == unsetCopyWithValue ? this.budget : budget as Budget?,
     );
   }
 
@@ -2059,16 +2231,246 @@ class SessionUpdatedEvent extends SessionEvent {
           processedAt == other.processedAt &&
           agent == other.agent &&
           mapsEqual(metadata, other.metadata) &&
-          title == other.title;
+          title == other.title &&
+          budget == other.budget;
 
   @override
   int get hashCode =>
-      Object.hash(id, processedAt, agent, mapHash(metadata), title);
+      Object.hash(id, processedAt, agent, mapHash(metadata), title, budget);
 
   @override
   String toString() =>
       'SessionUpdatedEvent(id: $id, processedAt: $processedAt, '
-      'agent: $agent, metadata: $metadata, title: $title)';
+      'agent: $agent, metadata: $metadata, title: $title, budget: $budget)';
+}
+
+/// Periodic snapshot of the session's cumulative usage and tracked list cost.
+@immutable
+class SessionUsageEvent extends SessionEvent {
+  /// The event type, always 'session.usage'.
+  String get type => 'session.usage';
+
+  /// Unique identifier for this event.
+  final String id;
+
+  /// Timestamp when the snapshot was taken.
+  final BetaTimestamp processedAt;
+
+  /// The session's configured budget at the snapshot time, or null when the
+  /// session has no budget.
+  final Budget? budget;
+
+  /// The session's cumulative usage at the snapshot time.
+  final SessionUsageSnapshot usage;
+
+  /// Creates a [SessionUsageEvent].
+  const SessionUsageEvent({
+    required this.id,
+    required this.processedAt,
+    this.budget,
+    required this.usage,
+  });
+
+  /// Creates a [SessionUsageEvent] from JSON.
+  factory SessionUsageEvent.fromJson(Map<String, dynamic> json) {
+    return SessionUsageEvent(
+      id: json['id'] as String,
+      processedAt: DateTime.parse(json['processed_at'] as String),
+      budget: json['budget'] != null
+          ? Budget.fromJson(json['budget'] as Map<String, dynamic>)
+          : null,
+      usage: SessionUsageSnapshot.fromJson(
+        json['usage'] as Map<String, dynamic>,
+      ),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'processed_at': processedAt.toUtc().toIso8601String(),
+    if (budget != null) 'budget': budget!.toJson(),
+    'usage': usage.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  SessionUsageEvent copyWith({
+    String? id,
+    BetaTimestamp? processedAt,
+    Object? budget = unsetCopyWithValue,
+    SessionUsageSnapshot? usage,
+  }) {
+    return SessionUsageEvent(
+      id: id ?? this.id,
+      processedAt: processedAt ?? this.processedAt,
+      budget: budget == unsetCopyWithValue ? this.budget : budget as Budget?,
+      usage: usage ?? this.usage,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SessionUsageEvent &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          processedAt == other.processedAt &&
+          budget == other.budget &&
+          usage == other.usage;
+
+  @override
+  int get hashCode => Object.hash(id, processedAt, budget, usage);
+
+  @override
+  String toString() =>
+      'SessionUsageEvent(id: $id, processedAt: $processedAt, '
+      'budget: $budget, usage: $usage)';
+}
+
+/// Point-in-time snapshot of a session's cumulative usage.
+@immutable
+class SessionUsageSnapshot {
+  /// Total input tokens consumed across all turns.
+  final int? inputTokens;
+
+  /// Total output tokens generated across all turns.
+  final int? outputTokens;
+
+  /// Total tokens read from prompt cache.
+  final int? cacheReadInputTokens;
+
+  /// Tokens used to create prompt cache entries, broken down by cache TTL.
+  final CacheCreationUsage? cacheCreation;
+
+  /// Cumulative time in seconds during which the session had at least one
+  /// thread in running status. Overlapping activity from concurrent threads
+  /// is counted once. This is the duration the session's runtime cost is
+  /// priced on.
+  final double? activeSeconds;
+
+  /// Cumulative list cost of the session across all turns, priced at public
+  /// list rates.
+  final MonetaryAmount? listCost;
+
+  /// Cumulative server-executed tool usage across all turns.
+  final ManagedAgentsServerToolUsage? serverToolUse;
+
+  /// Creates a [SessionUsageSnapshot].
+  const SessionUsageSnapshot({
+    this.inputTokens,
+    this.outputTokens,
+    this.cacheReadInputTokens,
+    this.cacheCreation,
+    this.activeSeconds,
+    this.listCost,
+    this.serverToolUse,
+  });
+
+  /// Creates a [SessionUsageSnapshot] from JSON.
+  factory SessionUsageSnapshot.fromJson(Map<String, dynamic> json) {
+    return SessionUsageSnapshot(
+      inputTokens: json['input_tokens'] as int?,
+      outputTokens: json['output_tokens'] as int?,
+      cacheReadInputTokens: json['cache_read_input_tokens'] as int?,
+      cacheCreation: json['cache_creation'] != null
+          ? CacheCreationUsage.fromJson(
+              json['cache_creation'] as Map<String, dynamic>,
+            )
+          : null,
+      activeSeconds: (json['active_seconds'] as num?)?.toDouble(),
+      listCost: json['list_cost'] != null
+          ? MonetaryAmount.fromJson(json['list_cost'] as Map<String, dynamic>)
+          : null,
+      serverToolUse: json['server_tool_use'] != null
+          ? ManagedAgentsServerToolUsage.fromJson(
+              json['server_tool_use'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    if (inputTokens != null) 'input_tokens': inputTokens,
+    if (outputTokens != null) 'output_tokens': outputTokens,
+    if (cacheReadInputTokens != null)
+      'cache_read_input_tokens': cacheReadInputTokens,
+    if (cacheCreation != null) 'cache_creation': cacheCreation!.toJson(),
+    if (activeSeconds != null) 'active_seconds': activeSeconds,
+    if (listCost != null) 'list_cost': listCost!.toJson(),
+    if (serverToolUse != null) 'server_tool_use': serverToolUse!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  SessionUsageSnapshot copyWith({
+    Object? inputTokens = unsetCopyWithValue,
+    Object? outputTokens = unsetCopyWithValue,
+    Object? cacheReadInputTokens = unsetCopyWithValue,
+    Object? cacheCreation = unsetCopyWithValue,
+    Object? activeSeconds = unsetCopyWithValue,
+    Object? listCost = unsetCopyWithValue,
+    Object? serverToolUse = unsetCopyWithValue,
+  }) {
+    return SessionUsageSnapshot(
+      inputTokens: inputTokens == unsetCopyWithValue
+          ? this.inputTokens
+          : inputTokens as int?,
+      outputTokens: outputTokens == unsetCopyWithValue
+          ? this.outputTokens
+          : outputTokens as int?,
+      cacheReadInputTokens: cacheReadInputTokens == unsetCopyWithValue
+          ? this.cacheReadInputTokens
+          : cacheReadInputTokens as int?,
+      cacheCreation: cacheCreation == unsetCopyWithValue
+          ? this.cacheCreation
+          : cacheCreation as CacheCreationUsage?,
+      activeSeconds: activeSeconds == unsetCopyWithValue
+          ? this.activeSeconds
+          : activeSeconds as double?,
+      listCost: listCost == unsetCopyWithValue
+          ? this.listCost
+          : listCost as MonetaryAmount?,
+      serverToolUse: serverToolUse == unsetCopyWithValue
+          ? this.serverToolUse
+          : serverToolUse as ManagedAgentsServerToolUsage?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SessionUsageSnapshot &&
+          runtimeType == other.runtimeType &&
+          inputTokens == other.inputTokens &&
+          outputTokens == other.outputTokens &&
+          cacheReadInputTokens == other.cacheReadInputTokens &&
+          cacheCreation == other.cacheCreation &&
+          activeSeconds == other.activeSeconds &&
+          listCost == other.listCost &&
+          serverToolUse == other.serverToolUse;
+
+  @override
+  int get hashCode => Object.hash(
+    inputTokens,
+    outputTokens,
+    cacheReadInputTokens,
+    cacheCreation,
+    activeSeconds,
+    listCost,
+    serverToolUse,
+  );
+
+  @override
+  String toString() =>
+      'SessionUsageSnapshot('
+      'inputTokens: $inputTokens, '
+      'outputTokens: $outputTokens, '
+      'cacheReadInputTokens: $cacheReadInputTokens, '
+      'cacheCreation: $cacheCreation, '
+      'activeSeconds: $activeSeconds, '
+      'listCost: $listCost, '
+      'serverToolUse: $serverToolUse)';
 }
 
 // ---------------------------------------------------------------------------

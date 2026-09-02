@@ -166,6 +166,71 @@ class CacheCreationUsage {
       'ephemeral1hInputTokens: $ephemeral1hInputTokens)';
 }
 
+/// Cumulative count of server-executed tool invocations, broken down by tool.
+///
+/// Named with a `ManagedAgents` prefix to avoid colliding with the
+/// Messages-API [ServerToolUsage].
+@immutable
+class ManagedAgentsServerToolUsage {
+  /// Number of server-executed web fetch requests.
+  final int? webFetchRequests;
+
+  /// Number of server-executed web search requests.
+  final int? webSearchRequests;
+
+  /// Creates a [ManagedAgentsServerToolUsage].
+  const ManagedAgentsServerToolUsage({
+    this.webFetchRequests,
+    this.webSearchRequests,
+  });
+
+  /// Creates a [ManagedAgentsServerToolUsage] from JSON.
+  factory ManagedAgentsServerToolUsage.fromJson(Map<String, dynamic> json) {
+    return ManagedAgentsServerToolUsage(
+      webFetchRequests: json['web_fetch_requests'] as int?,
+      webSearchRequests: json['web_search_requests'] as int?,
+    );
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    if (webFetchRequests != null) 'web_fetch_requests': webFetchRequests,
+    if (webSearchRequests != null) 'web_search_requests': webSearchRequests,
+  };
+
+  /// Creates a copy with replaced values.
+  ManagedAgentsServerToolUsage copyWith({
+    Object? webFetchRequests = unsetCopyWithValue,
+    Object? webSearchRequests = unsetCopyWithValue,
+  }) {
+    return ManagedAgentsServerToolUsage(
+      webFetchRequests: webFetchRequests == unsetCopyWithValue
+          ? this.webFetchRequests
+          : webFetchRequests as int?,
+      webSearchRequests: webSearchRequests == unsetCopyWithValue
+          ? this.webSearchRequests
+          : webSearchRequests as int?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ManagedAgentsServerToolUsage &&
+          runtimeType == other.runtimeType &&
+          webFetchRequests == other.webFetchRequests &&
+          webSearchRequests == other.webSearchRequests;
+
+  @override
+  int get hashCode => Object.hash(webFetchRequests, webSearchRequests);
+
+  @override
+  String toString() =>
+      'ManagedAgentsServerToolUsage('
+      'webFetchRequests: $webFetchRequests, '
+      'webSearchRequests: $webSearchRequests)';
+}
+
 /// What the client should do next in response to a session error.
 ///
 /// Variants:

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import '../beta/config/container.dart';
 import '../content/content_block.dart';
+import '../messages/input_transformation.dart';
 import '../messages/message.dart';
 import '../messages/message_role.dart';
 import '../metadata/stop_reason.dart';
@@ -55,6 +56,7 @@ class MessageStreamAccumulator {
   RefusalStopDetails? _stopDetails;
   String? _stopSequence;
   Container? _container;
+  List<InputTransformation>? _inputTransformations;
   final List<_AccumulatedContentBlock> _blocks = [];
 
   /// Adds a streaming event to the accumulator.
@@ -65,6 +67,7 @@ class MessageStreamAccumulator {
         _model = message.model;
         _role = message.role;
         _usage = message.usage;
+        _inputTransformations = message.inputTransformations;
       case ContentBlockStartEvent(:final contentBlock):
         _blocks.add(_AccumulatedContentBlock(contentBlock));
       case ContentBlockDeltaEvent(:final index, :final delta):
@@ -73,11 +76,16 @@ class MessageStreamAccumulator {
         }
       case ContentBlockStopEvent():
         break;
-      case MessageDeltaEvent(:final delta, :final usage):
+      case MessageDeltaEvent(
+        :final delta,
+        :final usage,
+        :final inputTransformations,
+      ):
         _stopReason = delta.stopReason ?? _stopReason;
         _stopDetails = delta.stopDetails ?? _stopDetails;
         _stopSequence = delta.stopSequence ?? _stopSequence;
         _container = delta.container ?? _container;
+        _inputTransformations = inputTransformations ?? _inputTransformations;
         _mergeUsage(usage);
       case MessageStopEvent():
         break;
@@ -165,6 +173,10 @@ class MessageStreamAccumulator {
 
   /// The container metadata from the `message_delta` event.
   Container? get container => _container;
+
+  /// The input transformations, from `message_start` or a later
+  /// `message_delta` (after a mid-stream server-side fallback).
+  List<InputTransformation>? get inputTransformations => _inputTransformations;
 
   /// Returns the concatenated text from all text blocks.
   String get text {
@@ -266,6 +278,7 @@ class MessageStreamAccumulator {
       stopSequence: _stopSequence,
       usage: _usage!,
       container: _container,
+      inputTransformations: _inputTransformations,
     );
   }
 
@@ -279,6 +292,7 @@ class MessageStreamAccumulator {
     _stopDetails = null;
     _stopSequence = null;
     _container = null;
+    _inputTransformations = null;
     _blocks.clear();
   }
 
@@ -300,6 +314,7 @@ class MessageStreamAccumulator {
         name: initial.name,
         input: _parseJson(acc.inputJsonBuffer),
         caller: initial.caller,
+        toolsetName: initial.toolsetName,
       ),
       CompactionBlock() => CompactionBlock(
         content: acc.compactionBuffer.isEmpty

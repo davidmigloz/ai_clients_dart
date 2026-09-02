@@ -2,8 +2,9 @@ import 'package:meta/meta.dart';
 
 import '../../beta_timestamp.dart';
 import '../../common/copy_with_sentinel.dart';
+import '../common/budget.dart' show MonetaryAmount;
 import '../events/telemetry.dart';
-import 'session.dart' show SessionAgent, SessionStatus;
+import 'session.dart' show SessionRosterEntry, SessionStatus;
 
 /// A thread within a Managed Agents session.
 ///
@@ -24,8 +25,9 @@ class SessionThread {
   /// Current thread status.
   final SessionStatus status;
 
-  /// Resolved agent snapshot at thread creation time.
-  final SessionAgent agent;
+  /// Resolved agent snapshot at thread creation time: either a saved-agent
+  /// snapshot or the platform advisor entry.
+  final SessionRosterEntry agent;
 
   /// Identifier of the parent thread, when this thread was spawned by another.
   /// `null` for top-level threads.
@@ -68,7 +70,7 @@ class SessionThread {
       type: json['type'] as String? ?? 'session_thread',
       sessionId: json['session_id'] as String,
       status: SessionStatus.fromJson(json['status'] as String),
-      agent: SessionAgent.fromJson(json['agent'] as Map<String, dynamic>),
+      agent: SessionRosterEntry.fromJson(json['agent'] as Map<String, dynamic>),
       parentThreadId: json['parent_thread_id'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
@@ -109,7 +111,7 @@ class SessionThread {
     String? type,
     String? sessionId,
     SessionStatus? status,
-    SessionAgent? agent,
+    SessionRosterEntry? agent,
     Object? parentThreadId = unsetCopyWithValue,
     BetaTimestamp? createdAt,
     BetaTimestamp? updatedAt,
@@ -278,12 +280,32 @@ class SessionThreadUsage {
   /// Tokens used to create prompt cache entries.
   final CacheCreationUsage? cacheCreation;
 
+  /// Cumulative time in seconds this thread spent in running status. Equal
+  /// to `stats.activeSeconds`; surfaced here so a thread's usage carries
+  /// every quantity its cost is priced on.
+  final double? activeSeconds;
+
+  /// Cumulative list cost of this thread across all turns, priced at public
+  /// list rates. Absent until cost tracking is available for the thread.
+  /// Each figure is rounded to the nearest cent independently and the
+  /// session's aggregate usage additionally includes session runtime, so
+  /// per-thread costs do not sum exactly to the session figure; the session
+  /// figure is authoritative and is what a budget is enforced against.
+  final MonetaryAmount? listCost;
+
+  /// Cumulative server-executed tool usage across all turns of this thread.
+  /// Absent until server-tool tracking is available for the thread.
+  final ManagedAgentsServerToolUsage? serverToolUse;
+
   /// Creates a [SessionThreadUsage].
   const SessionThreadUsage({
     this.inputTokens,
     this.outputTokens,
     this.cacheReadInputTokens,
     this.cacheCreation,
+    this.activeSeconds,
+    this.listCost,
+    this.serverToolUse,
   });
 
   /// Creates a [SessionThreadUsage] from JSON.
@@ -297,6 +319,15 @@ class SessionThreadUsage {
               json['cache_creation'] as Map<String, dynamic>,
             )
           : null,
+      activeSeconds: (json['active_seconds'] as num?)?.toDouble(),
+      listCost: json['list_cost'] != null
+          ? MonetaryAmount.fromJson(json['list_cost'] as Map<String, dynamic>)
+          : null,
+      serverToolUse: json['server_tool_use'] != null
+          ? ManagedAgentsServerToolUsage.fromJson(
+              json['server_tool_use'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -307,6 +338,9 @@ class SessionThreadUsage {
     if (cacheReadInputTokens != null)
       'cache_read_input_tokens': cacheReadInputTokens,
     if (cacheCreation != null) 'cache_creation': cacheCreation!.toJson(),
+    if (activeSeconds != null) 'active_seconds': activeSeconds,
+    if (listCost != null) 'list_cost': listCost!.toJson(),
+    if (serverToolUse != null) 'server_tool_use': serverToolUse!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -315,6 +349,9 @@ class SessionThreadUsage {
     Object? outputTokens = unsetCopyWithValue,
     Object? cacheReadInputTokens = unsetCopyWithValue,
     Object? cacheCreation = unsetCopyWithValue,
+    Object? activeSeconds = unsetCopyWithValue,
+    Object? listCost = unsetCopyWithValue,
+    Object? serverToolUse = unsetCopyWithValue,
   }) {
     return SessionThreadUsage(
       inputTokens: inputTokens == unsetCopyWithValue
@@ -329,6 +366,15 @@ class SessionThreadUsage {
       cacheCreation: cacheCreation == unsetCopyWithValue
           ? this.cacheCreation
           : cacheCreation as CacheCreationUsage?,
+      activeSeconds: activeSeconds == unsetCopyWithValue
+          ? this.activeSeconds
+          : activeSeconds as double?,
+      listCost: listCost == unsetCopyWithValue
+          ? this.listCost
+          : listCost as MonetaryAmount?,
+      serverToolUse: serverToolUse == unsetCopyWithValue
+          ? this.serverToolUse
+          : serverToolUse as ManagedAgentsServerToolUsage?,
     );
   }
 
@@ -340,7 +386,10 @@ class SessionThreadUsage {
           inputTokens == other.inputTokens &&
           outputTokens == other.outputTokens &&
           cacheReadInputTokens == other.cacheReadInputTokens &&
-          cacheCreation == other.cacheCreation;
+          cacheCreation == other.cacheCreation &&
+          activeSeconds == other.activeSeconds &&
+          listCost == other.listCost &&
+          serverToolUse == other.serverToolUse;
 
   @override
   int get hashCode => Object.hash(
@@ -348,6 +397,9 @@ class SessionThreadUsage {
     outputTokens,
     cacheReadInputTokens,
     cacheCreation,
+    activeSeconds,
+    listCost,
+    serverToolUse,
   );
 
   @override
@@ -356,5 +408,8 @@ class SessionThreadUsage {
       'inputTokens: $inputTokens, '
       'outputTokens: $outputTokens, '
       'cacheReadInputTokens: $cacheReadInputTokens, '
-      'cacheCreation: $cacheCreation)';
+      'cacheCreation: $cacheCreation, '
+      'activeSeconds: $activeSeconds, '
+      'listCost: $listCost, '
+      'serverToolUse: $serverToolUse)';
 }

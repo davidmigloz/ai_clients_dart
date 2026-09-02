@@ -38,6 +38,43 @@ Map<String, dynamic> _sessionJson({Object? deploymentId = #absent}) {
 }
 
 void main() {
+  group('Session.budget', () {
+    test('round-trips when present', () {
+      final json = _sessionJson();
+      json['budget'] = {
+        'type': 'limit',
+        'max_list_cost': {'amount': '2500', 'currency': 'USD'},
+      };
+      final session = Session.fromJson(json);
+
+      expect(session.budget, isA<BudgetLimit>());
+      expect((session.budget! as BudgetLimit).maxListCost.amount, '2500');
+      expect(session.toJson()['budget'], json['budget']);
+    });
+
+    test('is null when absent', () {
+      final session = Session.fromJson(_sessionJson());
+
+      expect(session.budget, isNull);
+      expect(session.toJson()['budget'], isNull);
+    });
+
+    test('copyWith replaces and clears budget', () {
+      final json = _sessionJson();
+      json['budget'] = {
+        'type': 'limit',
+        'max_list_cost': {'amount': '2500', 'currency': 'USD'},
+      };
+      final session = Session.fromJson(json);
+
+      final cleared = session.copyWith(budget: null);
+      expect(cleared.budget, isNull);
+
+      final preserved = session.copyWith();
+      expect(preserved.budget, isA<BudgetLimit>());
+    });
+  });
+
   group('Session.deploymentId', () {
     test('round-trips when present', () {
       final session = Session.fromJson(_sessionJson(deploymentId: 'dpl_123'));

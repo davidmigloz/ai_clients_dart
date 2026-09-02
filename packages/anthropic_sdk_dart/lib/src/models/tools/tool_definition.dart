@@ -64,6 +64,7 @@ sealed class ToolDefinition {
         type.startsWith('memory_') ||
         type.startsWith('tool_search_tool_') ||
         type.startsWith('computer_') ||
+        type.startsWith('browser_toolset_') ||
         type.startsWith('code_execution_') ||
         type.startsWith('mcp_');
   }

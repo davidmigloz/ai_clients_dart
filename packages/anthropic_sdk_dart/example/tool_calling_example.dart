@@ -39,7 +39,7 @@ void main() async {
     print('Asking Claude about the weather...');
     final response = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-5',
         maxTokens: 1024,
         tools: [ToolDefinition.custom(weatherTool)],
         messages: [InputMessage.user('What is the weather in San Francisco?')],
@@ -59,7 +59,7 @@ void main() async {
         // Send tool result back to Claude
         final finalResponse = await client.messages.create(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-6',
+            model: 'claude-sonnet-5',
             maxTokens: 1024,
             tools: [ToolDefinition.custom(weatherTool)],
             messages: [

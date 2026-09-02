@@ -87,6 +87,11 @@ class ToolChoiceAuto extends ToolChoice {
 }
 
 /// The model will use any available tools.
+///
+/// Not supported on Claude Fable 5.1 or Mythos 5.1 — the API rejects it with
+/// a 400 `invalid_request_error` (`tool_choice: type "tool" and "any" are not
+/// supported for this model`). Use [ToolChoiceAuto] with strict tool use or
+/// structured outputs instead on those models.
 @immutable
 class ToolChoiceAny extends ToolChoice {
   /// Whether to disable parallel tool use.
@@ -138,6 +143,11 @@ class ToolChoiceAny extends ToolChoice {
 }
 
 /// The model will use the specified tool.
+///
+/// Not supported on Claude Fable 5.1 or Mythos 5.1 — the API rejects it with
+/// a 400 `invalid_request_error` (`tool_choice: type "tool" and "any" are not
+/// supported for this model`). Use [ToolChoiceAuto] with strict tool use or
+/// structured outputs instead on those models.
 @immutable
 class ToolChoiceTool extends ToolChoice {
   /// The name of the tool to use.

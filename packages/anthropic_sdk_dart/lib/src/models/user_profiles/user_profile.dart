@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 import '../beta_timestamp.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
-import 'user_profile_relationship.dart';
+import 'user_profile_access_type.dart';
 import 'user_profile_trust_grant.dart';
 
 /// A user profile representing an end-user of a platform built on Claude.
@@ -22,17 +22,19 @@ class UserProfile {
   /// Platform's own identifier for this user. Not enforced unique.
   final String? externalId;
 
-  /// Display name of the entity this profile represents.
-  ///
-  /// Required when [relationship] is `resold` (the resold-to company's name);
-  /// optional otherwise. Maximum 255 characters.
+  /// Real-world name of the entity this profile represents (company or
+  /// individual). For a company the platform resells Claude access to
+  /// ([UserProfileAccessType.passthrough]), this is that company's name.
   final String? name;
 
-  /// How the entity relates to the platform.
-  ///
-  /// `external` (default): an individual end-user. `resold`: a company the
-  /// platform resells Claude access to. `internal`: the platform's own usage.
-  final BetaUserProfileRelationship relationship;
+  /// How the platform uses the API for this entity: `application` (default)
+  /// or `passthrough`.
+  final UserProfileAccessType? accessType;
+
+  /// When the entity this profile represents opened its account with the
+  /// platform, as stated by the platform. `null` until the platform
+  /// supplies one.
+  final BetaTimestamp? externalUserOnboardedAt;
 
   /// Arbitrary key-value metadata. Maximum 16 pairs, keys up to 64 chars,
   /// values up to 512 chars. Always present; may be empty.
@@ -57,7 +59,8 @@ class UserProfile {
     this.type = 'user_profile',
     this.externalId,
     this.name,
-    required this.relationship,
+    this.accessType,
+    this.externalUserOnboardedAt,
     required this.metadata,
     required this.trustGrants,
     required this.createdAt,
@@ -72,9 +75,12 @@ class UserProfile {
       type: json['type'] as String? ?? 'user_profile',
       externalId: json['external_id'] as String?,
       name: json['name'] as String?,
-      relationship: BetaUserProfileRelationship.fromJson(
-        json['relationship'] as String,
-      ),
+      accessType: json['access_type'] != null
+          ? UserProfileAccessType.fromJson(json['access_type'] as String)
+          : null,
+      externalUserOnboardedAt: json['external_user_onboarded_at'] != null
+          ? DateTime.parse(json['external_user_onboarded_at'] as String)
+          : null,
       metadata:
           (json['metadata'] as Map<String, dynamic>?)?.map(
             (k, v) => MapEntry(k, v as String),
@@ -99,7 +105,11 @@ class UserProfile {
     'type': type,
     'external_id': externalId,
     'name': name,
-    'relationship': relationship.toJson(),
+    if (accessType != null) 'access_type': accessType!.toJson(),
+    if (externalUserOnboardedAt != null)
+      'external_user_onboarded_at': externalUserOnboardedAt!
+          .toUtc()
+          .toIso8601String(),
     'metadata': metadata,
     'trust_grants': trustGrants.map((k, v) => MapEntry(k, v.toJson())),
     'created_at': createdAt.toUtc().toIso8601String(),
@@ -108,15 +118,17 @@ class UserProfile {
 
   /// Creates a copy with replaced values.
   ///
-  /// For nullable fields ([externalId], [name]), pass the sentinel value
-  /// [unsetCopyWithValue] (or omit) to keep the original value, or pass
-  /// `null` explicitly to set the field to null.
+  /// For nullable fields ([externalId], [name], [accessType],
+  /// [externalUserOnboardedAt]), pass the sentinel value [unsetCopyWithValue]
+  /// (or omit) to keep the original value, or pass `null` explicitly to set
+  /// the field to null.
   UserProfile copyWith({
     String? id,
     String? type,
     Object? externalId = unsetCopyWithValue,
     Object? name = unsetCopyWithValue,
-    BetaUserProfileRelationship? relationship,
+    Object? accessType = unsetCopyWithValue,
+    Object? externalUserOnboardedAt = unsetCopyWithValue,
     Map<String, String>? metadata,
     Map<String, UserProfileTrustGrant>? trustGrants,
     BetaTimestamp? createdAt,
@@ -129,7 +141,12 @@ class UserProfile {
           ? this.externalId
           : externalId as String?,
       name: name == unsetCopyWithValue ? this.name : name as String?,
-      relationship: relationship ?? this.relationship,
+      accessType: accessType == unsetCopyWithValue
+          ? this.accessType
+          : accessType as UserProfileAccessType?,
+      externalUserOnboardedAt: externalUserOnboardedAt == unsetCopyWithValue
+          ? this.externalUserOnboardedAt
+          : externalUserOnboardedAt as BetaTimestamp?,
       metadata: metadata ?? this.metadata,
       trustGrants: trustGrants ?? this.trustGrants,
       createdAt: createdAt ?? this.createdAt,
@@ -146,7 +163,8 @@ class UserProfile {
           type == other.type &&
           externalId == other.externalId &&
           name == other.name &&
-          relationship == other.relationship &&
+          accessType == other.accessType &&
+          externalUserOnboardedAt == other.externalUserOnboardedAt &&
           mapsEqual(metadata, other.metadata) &&
           mapsEqual(trustGrants, other.trustGrants) &&
           createdAt == other.createdAt &&
@@ -158,7 +176,8 @@ class UserProfile {
     type,
     externalId,
     name,
-    relationship,
+    accessType,
+    externalUserOnboardedAt,
     mapHash(metadata),
     mapHash(trustGrants),
     createdAt,
@@ -172,7 +191,8 @@ class UserProfile {
       'type: $type, '
       'externalId: $externalId, '
       'name: $name, '
-      'relationship: $relationship, '
+      'accessType: $accessType, '
+      'externalUserOnboardedAt: $externalUserOnboardedAt, '
       'metadata: $metadata, '
       'trustGrants: $trustGrants, '
       'createdAt: $createdAt, '

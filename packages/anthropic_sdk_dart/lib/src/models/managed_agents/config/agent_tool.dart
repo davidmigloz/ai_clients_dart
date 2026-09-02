@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import '../../tools/built_in_tools.dart' show UserLocation;
 import 'permission_policy.dart';
 
 // ---------------------------------------------------------------------------
@@ -966,28 +967,74 @@ class MCPToolsetDefaultConfigParams {
 // Tool config types (response)
 // ---------------------------------------------------------------------------
 
-/// Configuration for a specific agent tool (response variant).
-@immutable
-class AgentToolConfig {
+/// Configuration for a specific built-in agent tool (response variant).
+///
+/// Variants:
+/// - [BashToolConfig], [EditToolConfig], [ReadToolConfig], [WriteToolConfig],
+///   [GlobToolConfig], [GrepToolConfig] — the file/shell tools, all sharing
+///   the same `{name, enabled, permissionPolicy}` shape.
+/// - [WebFetchToolConfig] — adds domain filtering and a content-token cap.
+/// - [WebSearchToolConfig] — adds domain filtering and a user location.
+/// - [UnknownAgentToolConfig] — unrecognised tool type (preserves raw JSON).
+sealed class AgentToolConfig {
+  const AgentToolConfig();
+
+  /// Creates an [AgentToolConfig] from JSON.
+  factory AgentToolConfig.fromJson(Map<String, dynamic> json) {
+    final type = (json['type'] ?? json['name']) as String?;
+    return switch (type) {
+      'bash' => BashToolConfig.fromJson(json),
+      'edit' => EditToolConfig.fromJson(json),
+      'read' => ReadToolConfig.fromJson(json),
+      'write' => WriteToolConfig.fromJson(json),
+      'glob' => GlobToolConfig.fromJson(json),
+      'grep' => GrepToolConfig.fromJson(json),
+      'web_fetch' => WebFetchToolConfig.fromJson(json),
+      'web_search' => WebSearchToolConfig.fromJson(json),
+      _ => UnknownAgentToolConfig._(rawType: type, raw: json),
+    };
+  }
+
   /// The tool name.
-  final AgentToolName name;
+  AgentToolName get name;
 
   /// Whether this tool is enabled.
-  final bool enabled;
+  bool get enabled;
 
   /// Permission policy for this tool.
+  PermissionPolicy get permissionPolicy;
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson();
+}
+
+/// Configuration for the `bash` tool (response variant).
+@immutable
+class BashToolConfig extends AgentToolConfig {
+  /// The type discriminator. Always `bash`.
+  final String type;
+
+  @override
+  final AgentToolName name;
+
+  @override
+  final bool enabled;
+
+  @override
   final PermissionPolicy permissionPolicy;
 
-  /// Creates an [AgentToolConfig].
-  const AgentToolConfig({
-    required this.name,
+  /// Creates a [BashToolConfig].
+  const BashToolConfig({
+    this.type = 'bash',
+    this.name = AgentToolName.bash,
     required this.enabled,
     required this.permissionPolicy,
   });
 
-  /// Creates an [AgentToolConfig] from JSON.
-  factory AgentToolConfig.fromJson(Map<String, dynamic> json) {
-    return AgentToolConfig(
+  /// Creates a [BashToolConfig] from JSON.
+  factory BashToolConfig.fromJson(Map<String, dynamic> json) {
+    return BashToolConfig(
+      type: json['type'] as String? ?? 'bash',
       name: AgentToolName.fromJson(json['name'] as String),
       enabled: json['enabled'] as bool,
       permissionPolicy: PermissionPolicy.fromJson(
@@ -996,20 +1043,23 @@ class AgentToolConfig {
     );
   }
 
-  /// Converts to JSON.
+  @override
   Map<String, dynamic> toJson() => {
+    'type': type,
     'name': name.toJson(),
     'enabled': enabled,
     'permission_policy': permissionPolicy.toJson(),
   };
 
   /// Creates a copy with replaced values.
-  AgentToolConfig copyWith({
+  BashToolConfig copyWith({
+    String? type,
     AgentToolName? name,
     bool? enabled,
     PermissionPolicy? permissionPolicy,
   }) {
-    return AgentToolConfig(
+    return BashToolConfig(
+      type: type ?? this.type,
       name: name ?? this.name,
       enabled: enabled ?? this.enabled,
       permissionPolicy: permissionPolicy ?? this.permissionPolicy,
@@ -1019,20 +1069,715 @@ class AgentToolConfig {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is AgentToolConfig &&
+      other is BashToolConfig &&
           runtimeType == other.runtimeType &&
+          type == other.type &&
           name == other.name &&
           enabled == other.enabled &&
           permissionPolicy == other.permissionPolicy;
 
   @override
-  int get hashCode => Object.hash(name, enabled, permissionPolicy);
+  int get hashCode => Object.hash(type, name, enabled, permissionPolicy);
 
   @override
   String toString() =>
-      'AgentToolConfig('
-      'name: $name, enabled: $enabled, '
+      'BashToolConfig('
+      'type: $type, name: $name, enabled: $enabled, '
       'permissionPolicy: $permissionPolicy)';
+}
+
+/// Configuration for the `edit` tool (response variant).
+@immutable
+class EditToolConfig extends AgentToolConfig {
+  /// The type discriminator. Always `edit`.
+  final String type;
+
+  @override
+  final AgentToolName name;
+
+  @override
+  final bool enabled;
+
+  @override
+  final PermissionPolicy permissionPolicy;
+
+  /// Creates an [EditToolConfig].
+  const EditToolConfig({
+    this.type = 'edit',
+    this.name = AgentToolName.edit,
+    required this.enabled,
+    required this.permissionPolicy,
+  });
+
+  /// Creates an [EditToolConfig] from JSON.
+  factory EditToolConfig.fromJson(Map<String, dynamic> json) {
+    return EditToolConfig(
+      type: json['type'] as String? ?? 'edit',
+      name: AgentToolName.fromJson(json['name'] as String),
+      enabled: json['enabled'] as bool,
+      permissionPolicy: PermissionPolicy.fromJson(
+        json['permission_policy'] as Map<String, dynamic>,
+      ),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'name': name.toJson(),
+    'enabled': enabled,
+    'permission_policy': permissionPolicy.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  EditToolConfig copyWith({
+    String? type,
+    AgentToolName? name,
+    bool? enabled,
+    PermissionPolicy? permissionPolicy,
+  }) {
+    return EditToolConfig(
+      type: type ?? this.type,
+      name: name ?? this.name,
+      enabled: enabled ?? this.enabled,
+      permissionPolicy: permissionPolicy ?? this.permissionPolicy,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EditToolConfig &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          name == other.name &&
+          enabled == other.enabled &&
+          permissionPolicy == other.permissionPolicy;
+
+  @override
+  int get hashCode => Object.hash(type, name, enabled, permissionPolicy);
+
+  @override
+  String toString() =>
+      'EditToolConfig('
+      'type: $type, name: $name, enabled: $enabled, '
+      'permissionPolicy: $permissionPolicy)';
+}
+
+/// Configuration for the `read` tool (response variant).
+@immutable
+class ReadToolConfig extends AgentToolConfig {
+  /// The type discriminator. Always `read`.
+  final String type;
+
+  @override
+  final AgentToolName name;
+
+  @override
+  final bool enabled;
+
+  @override
+  final PermissionPolicy permissionPolicy;
+
+  /// Creates a [ReadToolConfig].
+  const ReadToolConfig({
+    this.type = 'read',
+    this.name = AgentToolName.read,
+    required this.enabled,
+    required this.permissionPolicy,
+  });
+
+  /// Creates a [ReadToolConfig] from JSON.
+  factory ReadToolConfig.fromJson(Map<String, dynamic> json) {
+    return ReadToolConfig(
+      type: json['type'] as String? ?? 'read',
+      name: AgentToolName.fromJson(json['name'] as String),
+      enabled: json['enabled'] as bool,
+      permissionPolicy: PermissionPolicy.fromJson(
+        json['permission_policy'] as Map<String, dynamic>,
+      ),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'name': name.toJson(),
+    'enabled': enabled,
+    'permission_policy': permissionPolicy.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  ReadToolConfig copyWith({
+    String? type,
+    AgentToolName? name,
+    bool? enabled,
+    PermissionPolicy? permissionPolicy,
+  }) {
+    return ReadToolConfig(
+      type: type ?? this.type,
+      name: name ?? this.name,
+      enabled: enabled ?? this.enabled,
+      permissionPolicy: permissionPolicy ?? this.permissionPolicy,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ReadToolConfig &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          name == other.name &&
+          enabled == other.enabled &&
+          permissionPolicy == other.permissionPolicy;
+
+  @override
+  int get hashCode => Object.hash(type, name, enabled, permissionPolicy);
+
+  @override
+  String toString() =>
+      'ReadToolConfig('
+      'type: $type, name: $name, enabled: $enabled, '
+      'permissionPolicy: $permissionPolicy)';
+}
+
+/// Configuration for the `write` tool (response variant).
+@immutable
+class WriteToolConfig extends AgentToolConfig {
+  /// The type discriminator. Always `write`.
+  final String type;
+
+  @override
+  final AgentToolName name;
+
+  @override
+  final bool enabled;
+
+  @override
+  final PermissionPolicy permissionPolicy;
+
+  /// Creates a [WriteToolConfig].
+  const WriteToolConfig({
+    this.type = 'write',
+    this.name = AgentToolName.write,
+    required this.enabled,
+    required this.permissionPolicy,
+  });
+
+  /// Creates a [WriteToolConfig] from JSON.
+  factory WriteToolConfig.fromJson(Map<String, dynamic> json) {
+    return WriteToolConfig(
+      type: json['type'] as String? ?? 'write',
+      name: AgentToolName.fromJson(json['name'] as String),
+      enabled: json['enabled'] as bool,
+      permissionPolicy: PermissionPolicy.fromJson(
+        json['permission_policy'] as Map<String, dynamic>,
+      ),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'name': name.toJson(),
+    'enabled': enabled,
+    'permission_policy': permissionPolicy.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  WriteToolConfig copyWith({
+    String? type,
+    AgentToolName? name,
+    bool? enabled,
+    PermissionPolicy? permissionPolicy,
+  }) {
+    return WriteToolConfig(
+      type: type ?? this.type,
+      name: name ?? this.name,
+      enabled: enabled ?? this.enabled,
+      permissionPolicy: permissionPolicy ?? this.permissionPolicy,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WriteToolConfig &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          name == other.name &&
+          enabled == other.enabled &&
+          permissionPolicy == other.permissionPolicy;
+
+  @override
+  int get hashCode => Object.hash(type, name, enabled, permissionPolicy);
+
+  @override
+  String toString() =>
+      'WriteToolConfig('
+      'type: $type, name: $name, enabled: $enabled, '
+      'permissionPolicy: $permissionPolicy)';
+}
+
+/// Configuration for the `glob` tool (response variant).
+@immutable
+class GlobToolConfig extends AgentToolConfig {
+  /// The type discriminator. Always `glob`.
+  final String type;
+
+  @override
+  final AgentToolName name;
+
+  @override
+  final bool enabled;
+
+  @override
+  final PermissionPolicy permissionPolicy;
+
+  /// Creates a [GlobToolConfig].
+  const GlobToolConfig({
+    this.type = 'glob',
+    this.name = AgentToolName.glob,
+    required this.enabled,
+    required this.permissionPolicy,
+  });
+
+  /// Creates a [GlobToolConfig] from JSON.
+  factory GlobToolConfig.fromJson(Map<String, dynamic> json) {
+    return GlobToolConfig(
+      type: json['type'] as String? ?? 'glob',
+      name: AgentToolName.fromJson(json['name'] as String),
+      enabled: json['enabled'] as bool,
+      permissionPolicy: PermissionPolicy.fromJson(
+        json['permission_policy'] as Map<String, dynamic>,
+      ),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'name': name.toJson(),
+    'enabled': enabled,
+    'permission_policy': permissionPolicy.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  GlobToolConfig copyWith({
+    String? type,
+    AgentToolName? name,
+    bool? enabled,
+    PermissionPolicy? permissionPolicy,
+  }) {
+    return GlobToolConfig(
+      type: type ?? this.type,
+      name: name ?? this.name,
+      enabled: enabled ?? this.enabled,
+      permissionPolicy: permissionPolicy ?? this.permissionPolicy,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GlobToolConfig &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          name == other.name &&
+          enabled == other.enabled &&
+          permissionPolicy == other.permissionPolicy;
+
+  @override
+  int get hashCode => Object.hash(type, name, enabled, permissionPolicy);
+
+  @override
+  String toString() =>
+      'GlobToolConfig('
+      'type: $type, name: $name, enabled: $enabled, '
+      'permissionPolicy: $permissionPolicy)';
+}
+
+/// Configuration for the `grep` tool (response variant).
+@immutable
+class GrepToolConfig extends AgentToolConfig {
+  /// The type discriminator. Always `grep`.
+  final String type;
+
+  @override
+  final AgentToolName name;
+
+  @override
+  final bool enabled;
+
+  @override
+  final PermissionPolicy permissionPolicy;
+
+  /// Creates a [GrepToolConfig].
+  const GrepToolConfig({
+    this.type = 'grep',
+    this.name = AgentToolName.grep,
+    required this.enabled,
+    required this.permissionPolicy,
+  });
+
+  /// Creates a [GrepToolConfig] from JSON.
+  factory GrepToolConfig.fromJson(Map<String, dynamic> json) {
+    return GrepToolConfig(
+      type: json['type'] as String? ?? 'grep',
+      name: AgentToolName.fromJson(json['name'] as String),
+      enabled: json['enabled'] as bool,
+      permissionPolicy: PermissionPolicy.fromJson(
+        json['permission_policy'] as Map<String, dynamic>,
+      ),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'name': name.toJson(),
+    'enabled': enabled,
+    'permission_policy': permissionPolicy.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  GrepToolConfig copyWith({
+    String? type,
+    AgentToolName? name,
+    bool? enabled,
+    PermissionPolicy? permissionPolicy,
+  }) {
+    return GrepToolConfig(
+      type: type ?? this.type,
+      name: name ?? this.name,
+      enabled: enabled ?? this.enabled,
+      permissionPolicy: permissionPolicy ?? this.permissionPolicy,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GrepToolConfig &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          name == other.name &&
+          enabled == other.enabled &&
+          permissionPolicy == other.permissionPolicy;
+
+  @override
+  int get hashCode => Object.hash(type, name, enabled, permissionPolicy);
+
+  @override
+  String toString() =>
+      'GrepToolConfig('
+      'type: $type, name: $name, enabled: $enabled, '
+      'permissionPolicy: $permissionPolicy)';
+}
+
+/// Configuration for the `web_fetch` tool (response variant).
+@immutable
+class WebFetchToolConfig extends AgentToolConfig {
+  /// The type discriminator. Always `web_fetch`.
+  final String type;
+
+  @override
+  final AgentToolName name;
+
+  @override
+  final bool enabled;
+
+  @override
+  final PermissionPolicy permissionPolicy;
+
+  /// Only fetch URLs whose host is one of these domains or a subdomain of
+  /// one. Mutually exclusive with [blockedDomains].
+  final List<String>? allowedDomains;
+
+  /// Never fetch URLs whose host is one of these domains or a subdomain of
+  /// one. Mutually exclusive with [allowedDomains].
+  final List<String>? blockedDomains;
+
+  /// Maximum number of tokens of fetched text content to include in context
+  /// per call. Does not apply to binary content such as PDFs.
+  final int? maxContentTokens;
+
+  /// Creates a [WebFetchToolConfig].
+  const WebFetchToolConfig({
+    this.type = 'web_fetch',
+    this.name = AgentToolName.webFetch,
+    required this.enabled,
+    required this.permissionPolicy,
+    this.allowedDomains,
+    this.blockedDomains,
+    this.maxContentTokens,
+  });
+
+  /// Creates a [WebFetchToolConfig] from JSON.
+  factory WebFetchToolConfig.fromJson(Map<String, dynamic> json) {
+    return WebFetchToolConfig(
+      type: json['type'] as String? ?? 'web_fetch',
+      name: AgentToolName.fromJson(json['name'] as String),
+      enabled: json['enabled'] as bool,
+      permissionPolicy: PermissionPolicy.fromJson(
+        json['permission_policy'] as Map<String, dynamic>,
+      ),
+      allowedDomains: (json['allowed_domains'] as List?)
+          ?.map((e) => e as String)
+          .toList(),
+      blockedDomains: (json['blocked_domains'] as List?)
+          ?.map((e) => e as String)
+          .toList(),
+      maxContentTokens: json['max_content_tokens'] as int?,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'name': name.toJson(),
+    'enabled': enabled,
+    'permission_policy': permissionPolicy.toJson(),
+    if (allowedDomains != null) 'allowed_domains': allowedDomains,
+    if (blockedDomains != null) 'blocked_domains': blockedDomains,
+    if (maxContentTokens != null) 'max_content_tokens': maxContentTokens,
+  };
+
+  /// Creates a copy with replaced values.
+  WebFetchToolConfig copyWith({
+    String? type,
+    AgentToolName? name,
+    bool? enabled,
+    PermissionPolicy? permissionPolicy,
+    Object? allowedDomains = unsetCopyWithValue,
+    Object? blockedDomains = unsetCopyWithValue,
+    Object? maxContentTokens = unsetCopyWithValue,
+  }) {
+    return WebFetchToolConfig(
+      type: type ?? this.type,
+      name: name ?? this.name,
+      enabled: enabled ?? this.enabled,
+      permissionPolicy: permissionPolicy ?? this.permissionPolicy,
+      allowedDomains: allowedDomains == unsetCopyWithValue
+          ? this.allowedDomains
+          : allowedDomains as List<String>?,
+      blockedDomains: blockedDomains == unsetCopyWithValue
+          ? this.blockedDomains
+          : blockedDomains as List<String>?,
+      maxContentTokens: maxContentTokens == unsetCopyWithValue
+          ? this.maxContentTokens
+          : maxContentTokens as int?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebFetchToolConfig &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          name == other.name &&
+          enabled == other.enabled &&
+          permissionPolicy == other.permissionPolicy &&
+          listsEqual(allowedDomains, other.allowedDomains) &&
+          listsEqual(blockedDomains, other.blockedDomains) &&
+          maxContentTokens == other.maxContentTokens;
+
+  @override
+  int get hashCode => Object.hash(
+    type,
+    name,
+    enabled,
+    permissionPolicy,
+    listHash(allowedDomains),
+    listHash(blockedDomains),
+    maxContentTokens,
+  );
+
+  @override
+  String toString() =>
+      'WebFetchToolConfig('
+      'type: $type, name: $name, enabled: $enabled, '
+      'permissionPolicy: $permissionPolicy, '
+      'allowedDomains: $allowedDomains, '
+      'blockedDomains: $blockedDomains, '
+      'maxContentTokens: $maxContentTokens)';
+}
+
+/// Configuration for the `web_search` tool (response variant).
+@immutable
+class WebSearchToolConfig extends AgentToolConfig {
+  /// The type discriminator. Always `web_search`.
+  final String type;
+
+  @override
+  final AgentToolName name;
+
+  @override
+  final bool enabled;
+
+  @override
+  final PermissionPolicy permissionPolicy;
+
+  /// Only return search results whose host is one of these domains or a
+  /// subdomain of one. Mutually exclusive with [blockedDomains].
+  final List<String>? allowedDomains;
+
+  /// Never return search results whose host is one of these domains or a
+  /// subdomain of one. Mutually exclusive with [allowedDomains].
+  final List<String>? blockedDomains;
+
+  /// Approximate user location for search result localization.
+  final UserLocation? userLocation;
+
+  /// Creates a [WebSearchToolConfig].
+  const WebSearchToolConfig({
+    this.type = 'web_search',
+    this.name = AgentToolName.webSearch,
+    required this.enabled,
+    required this.permissionPolicy,
+    this.allowedDomains,
+    this.blockedDomains,
+    this.userLocation,
+  });
+
+  /// Creates a [WebSearchToolConfig] from JSON.
+  factory WebSearchToolConfig.fromJson(Map<String, dynamic> json) {
+    return WebSearchToolConfig(
+      type: json['type'] as String? ?? 'web_search',
+      name: AgentToolName.fromJson(json['name'] as String),
+      enabled: json['enabled'] as bool,
+      permissionPolicy: PermissionPolicy.fromJson(
+        json['permission_policy'] as Map<String, dynamic>,
+      ),
+      allowedDomains: (json['allowed_domains'] as List?)
+          ?.map((e) => e as String)
+          .toList(),
+      blockedDomains: (json['blocked_domains'] as List?)
+          ?.map((e) => e as String)
+          .toList(),
+      userLocation: json['user_location'] != null
+          ? UserLocation.fromJson(json['user_location'] as Map<String, dynamic>)
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'name': name.toJson(),
+    'enabled': enabled,
+    'permission_policy': permissionPolicy.toJson(),
+    if (allowedDomains != null) 'allowed_domains': allowedDomains,
+    if (blockedDomains != null) 'blocked_domains': blockedDomains,
+    if (userLocation != null) 'user_location': userLocation!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  WebSearchToolConfig copyWith({
+    String? type,
+    AgentToolName? name,
+    bool? enabled,
+    PermissionPolicy? permissionPolicy,
+    Object? allowedDomains = unsetCopyWithValue,
+    Object? blockedDomains = unsetCopyWithValue,
+    Object? userLocation = unsetCopyWithValue,
+  }) {
+    return WebSearchToolConfig(
+      type: type ?? this.type,
+      name: name ?? this.name,
+      enabled: enabled ?? this.enabled,
+      permissionPolicy: permissionPolicy ?? this.permissionPolicy,
+      allowedDomains: allowedDomains == unsetCopyWithValue
+          ? this.allowedDomains
+          : allowedDomains as List<String>?,
+      blockedDomains: blockedDomains == unsetCopyWithValue
+          ? this.blockedDomains
+          : blockedDomains as List<String>?,
+      userLocation: userLocation == unsetCopyWithValue
+          ? this.userLocation
+          : userLocation as UserLocation?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebSearchToolConfig &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          name == other.name &&
+          enabled == other.enabled &&
+          permissionPolicy == other.permissionPolicy &&
+          listsEqual(allowedDomains, other.allowedDomains) &&
+          listsEqual(blockedDomains, other.blockedDomains) &&
+          userLocation == other.userLocation;
+
+  @override
+  int get hashCode => Object.hash(
+    type,
+    name,
+    enabled,
+    permissionPolicy,
+    listHash(allowedDomains),
+    listHash(blockedDomains),
+    userLocation,
+  );
+
+  @override
+  String toString() =>
+      'WebSearchToolConfig('
+      'type: $type, name: $name, enabled: $enabled, '
+      'permissionPolicy: $permissionPolicy, '
+      'allowedDomains: $allowedDomains, '
+      'blockedDomains: $blockedDomains, '
+      'userLocation: $userLocation)';
+}
+
+/// Unrecognised agent tool config type — preserves the raw JSON.
+@immutable
+class UnknownAgentToolConfig extends AgentToolConfig {
+  /// The unrecognised type discriminator.
+  final String? rawType;
+
+  /// The raw JSON map.
+  final Map<String, dynamic> raw;
+
+  @override
+  final AgentToolName name;
+
+  @override
+  final bool enabled;
+
+  @override
+  final PermissionPolicy permissionPolicy;
+
+  UnknownAgentToolConfig._({required this.rawType, required this.raw})
+    : name = AgentToolName.fromJson(raw['name'] as String? ?? ''),
+      enabled = raw['enabled'] as bool? ?? false,
+      permissionPolicy = raw['permission_policy'] != null
+          ? PermissionPolicy.fromJson(
+              raw['permission_policy'] as Map<String, dynamic>,
+            )
+          : const AlwaysAskPolicy();
+
+  @override
+  Map<String, dynamic> toJson() => raw;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownAgentToolConfig &&
+          runtimeType == other.runtimeType &&
+          rawType == other.rawType &&
+          mapsDeepEqual(raw, other.raw);
+
+  @override
+  int get hashCode => Object.hash(rawType, mapDeepHashCode(raw));
+
+  @override
+  String toString() => 'UnknownAgentToolConfig(rawType: $rawType, raw: $raw)';
 }
 
 /// Configuration for a specific MCP tool (response variant).
@@ -1108,29 +1853,175 @@ class MCPToolConfig {
 // Tool config types (request)
 // ---------------------------------------------------------------------------
 
-/// Configuration override for a specific agent tool (request variant).
-@immutable
-class AgentToolConfigParams {
-  /// The tool name.
-  final AgentToolName name;
-
-  /// Whether this tool is enabled.
-  final bool? enabled;
-
-  /// Permission policy for this tool.
-  final PermissionPolicy? permissionPolicy;
-
-  /// Creates an [AgentToolConfigParams].
-  const AgentToolConfigParams({
-    required this.name,
-    this.enabled,
-    this.permissionPolicy,
-  });
+/// Configuration override for a specific built-in agent tool (request
+/// variant).
+///
+/// Variants:
+/// - [BashToolConfigParams], [EditToolConfigParams], [ReadToolConfigParams],
+///   [WriteToolConfigParams], [GlobToolConfigParams], [GrepToolConfigParams]
+///   — the file/shell tools, all sharing the same
+///   `{name, enabled?, permissionPolicy?}` shape.
+/// - [WebFetchToolConfigParams] — adds domain filtering and a content-token
+///   cap.
+/// - [WebSearchToolConfigParams] — adds domain filtering and a user
+///   location.
+/// - [UnknownAgentToolConfigParams] — unrecognised tool type (preserves raw
+///   JSON).
+sealed class AgentToolConfigParams {
+  const AgentToolConfigParams();
 
   /// Creates an [AgentToolConfigParams] from JSON.
   factory AgentToolConfigParams.fromJson(Map<String, dynamic> json) {
-    return AgentToolConfigParams(
-      name: AgentToolName.fromJson(json['name'] as String),
+    final type = (json['type'] ?? json['name']) as String?;
+    return switch (type) {
+      'bash' => BashToolConfigParams.fromJson(json),
+      'edit' => EditToolConfigParams.fromJson(json),
+      'read' => ReadToolConfigParams.fromJson(json),
+      'write' => WriteToolConfigParams.fromJson(json),
+      'glob' => GlobToolConfigParams.fromJson(json),
+      'grep' => GrepToolConfigParams.fromJson(json),
+      'web_fetch' => WebFetchToolConfigParams.fromJson(json),
+      'web_search' => WebSearchToolConfigParams.fromJson(json),
+      _ => UnknownAgentToolConfigParams._(rawType: type, raw: json),
+    };
+  }
+
+  /// The tool name.
+  AgentToolName get name;
+
+  /// Whether this tool is enabled. Overrides the `default_config` setting.
+  bool? get enabled;
+
+  /// Permission policy for this tool.
+  PermissionPolicy? get permissionPolicy;
+
+  /// Creates a [BashToolConfigParams].
+  factory AgentToolConfigParams.bash({
+    bool? enabled,
+    PermissionPolicy? permissionPolicy,
+  }) => BashToolConfigParams(
+    enabled: enabled,
+    permissionPolicy: permissionPolicy,
+  );
+
+  /// Creates an [EditToolConfigParams].
+  factory AgentToolConfigParams.edit({
+    bool? enabled,
+    PermissionPolicy? permissionPolicy,
+  }) => EditToolConfigParams(
+    enabled: enabled,
+    permissionPolicy: permissionPolicy,
+  );
+
+  /// Creates a [ReadToolConfigParams].
+  factory AgentToolConfigParams.read({
+    bool? enabled,
+    PermissionPolicy? permissionPolicy,
+  }) => ReadToolConfigParams(
+    enabled: enabled,
+    permissionPolicy: permissionPolicy,
+  );
+
+  /// Creates a [WriteToolConfigParams].
+  factory AgentToolConfigParams.write({
+    bool? enabled,
+    PermissionPolicy? permissionPolicy,
+  }) => WriteToolConfigParams(
+    enabled: enabled,
+    permissionPolicy: permissionPolicy,
+  );
+
+  /// Creates a [GlobToolConfigParams].
+  factory AgentToolConfigParams.glob({
+    bool? enabled,
+    PermissionPolicy? permissionPolicy,
+  }) => GlobToolConfigParams(
+    enabled: enabled,
+    permissionPolicy: permissionPolicy,
+  );
+
+  /// Creates a [GrepToolConfigParams].
+  factory AgentToolConfigParams.grep({
+    bool? enabled,
+    PermissionPolicy? permissionPolicy,
+  }) => GrepToolConfigParams(
+    enabled: enabled,
+    permissionPolicy: permissionPolicy,
+  );
+
+  /// Creates a [WebFetchToolConfigParams].
+  factory AgentToolConfigParams.webFetch({
+    bool? enabled,
+    PermissionPolicy? permissionPolicy,
+    List<String>? allowedDomains,
+    List<String>? blockedDomains,
+    int? maxContentTokens,
+  }) => WebFetchToolConfigParams(
+    enabled: enabled,
+    permissionPolicy: permissionPolicy,
+    allowedDomains: allowedDomains,
+    blockedDomains: blockedDomains,
+    maxContentTokens: maxContentTokens,
+  );
+
+  /// Creates a [WebSearchToolConfigParams].
+  factory AgentToolConfigParams.webSearch({
+    bool? enabled,
+    PermissionPolicy? permissionPolicy,
+    List<String>? allowedDomains,
+    List<String>? blockedDomains,
+    UserLocation? userLocation,
+  }) => WebSearchToolConfigParams(
+    enabled: enabled,
+    permissionPolicy: permissionPolicy,
+    allowedDomains: allowedDomains,
+    blockedDomains: blockedDomains,
+    userLocation: userLocation,
+  );
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson();
+}
+
+/// Validates that a request-side tool config's JSON `name` (if present)
+/// agrees with the variant's constant [expected] name, throwing a
+/// [FormatException] otherwise.
+void _checkAgentToolConfigParamsName(
+  Map<String, dynamic> json,
+  AgentToolName expected,
+  String className,
+) {
+  final rawName = json['name'] as String?;
+  if (rawName != null && AgentToolName.fromJson(rawName) != expected) {
+    throw FormatException(
+      '$className: "name" must be "${expected.value}", got "$rawName"',
+    );
+  }
+}
+
+/// Configuration override for the `bash` tool (request variant).
+@immutable
+class BashToolConfigParams extends AgentToolConfigParams {
+  @override
+  AgentToolName get name => AgentToolName.bash;
+
+  @override
+  final bool? enabled;
+
+  @override
+  final PermissionPolicy? permissionPolicy;
+
+  /// Creates a [BashToolConfigParams].
+  const BashToolConfigParams({this.enabled, this.permissionPolicy});
+
+  /// Creates a [BashToolConfigParams] from JSON.
+  factory BashToolConfigParams.fromJson(Map<String, dynamic> json) {
+    _checkAgentToolConfigParamsName(
+      json,
+      AgentToolName.bash,
+      'BashToolConfigParams',
+    );
+    return BashToolConfigParams(
       enabled: json['enabled'] as bool?,
       permissionPolicy: json['permission_policy'] != null
           ? PermissionPolicy.fromJson(
@@ -1140,8 +2031,9 @@ class AgentToolConfigParams {
     );
   }
 
-  /// Converts to JSON.
+  @override
   Map<String, dynamic> toJson() => {
+    'type': 'bash',
     'name': name.toJson(),
     if (enabled != null) 'enabled': enabled,
     if (permissionPolicy != null)
@@ -1149,13 +2041,11 @@ class AgentToolConfigParams {
   };
 
   /// Creates a copy with replaced values.
-  AgentToolConfigParams copyWith({
-    AgentToolName? name,
+  BashToolConfigParams copyWith({
     Object? enabled = unsetCopyWithValue,
     Object? permissionPolicy = unsetCopyWithValue,
   }) {
-    return AgentToolConfigParams(
-      name: name ?? this.name,
+    return BashToolConfigParams(
       enabled: enabled == unsetCopyWithValue ? this.enabled : enabled as bool?,
       permissionPolicy: permissionPolicy == unsetCopyWithValue
           ? this.permissionPolicy
@@ -1166,20 +2056,669 @@ class AgentToolConfigParams {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is AgentToolConfigParams &&
+      other is BashToolConfigParams &&
           runtimeType == other.runtimeType &&
-          name == other.name &&
           enabled == other.enabled &&
           permissionPolicy == other.permissionPolicy;
 
   @override
-  int get hashCode => Object.hash(name, enabled, permissionPolicy);
+  int get hashCode => Object.hash(enabled, permissionPolicy);
 
   @override
   String toString() =>
-      'AgentToolConfigParams('
-      'name: $name, enabled: $enabled, '
+      'BashToolConfigParams(enabled: $enabled, '
       'permissionPolicy: $permissionPolicy)';
+}
+
+/// Configuration override for the `edit` tool (request variant).
+@immutable
+class EditToolConfigParams extends AgentToolConfigParams {
+  @override
+  AgentToolName get name => AgentToolName.edit;
+
+  @override
+  final bool? enabled;
+
+  @override
+  final PermissionPolicy? permissionPolicy;
+
+  /// Creates an [EditToolConfigParams].
+  const EditToolConfigParams({this.enabled, this.permissionPolicy});
+
+  /// Creates an [EditToolConfigParams] from JSON.
+  factory EditToolConfigParams.fromJson(Map<String, dynamic> json) {
+    _checkAgentToolConfigParamsName(
+      json,
+      AgentToolName.edit,
+      'EditToolConfigParams',
+    );
+    return EditToolConfigParams(
+      enabled: json['enabled'] as bool?,
+      permissionPolicy: json['permission_policy'] != null
+          ? PermissionPolicy.fromJson(
+              json['permission_policy'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'edit',
+    'name': name.toJson(),
+    if (enabled != null) 'enabled': enabled,
+    if (permissionPolicy != null)
+      'permission_policy': permissionPolicy!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  EditToolConfigParams copyWith({
+    Object? enabled = unsetCopyWithValue,
+    Object? permissionPolicy = unsetCopyWithValue,
+  }) {
+    return EditToolConfigParams(
+      enabled: enabled == unsetCopyWithValue ? this.enabled : enabled as bool?,
+      permissionPolicy: permissionPolicy == unsetCopyWithValue
+          ? this.permissionPolicy
+          : permissionPolicy as PermissionPolicy?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EditToolConfigParams &&
+          runtimeType == other.runtimeType &&
+          enabled == other.enabled &&
+          permissionPolicy == other.permissionPolicy;
+
+  @override
+  int get hashCode => Object.hash(enabled, permissionPolicy);
+
+  @override
+  String toString() =>
+      'EditToolConfigParams(enabled: $enabled, '
+      'permissionPolicy: $permissionPolicy)';
+}
+
+/// Configuration override for the `read` tool (request variant).
+@immutable
+class ReadToolConfigParams extends AgentToolConfigParams {
+  @override
+  AgentToolName get name => AgentToolName.read;
+
+  @override
+  final bool? enabled;
+
+  @override
+  final PermissionPolicy? permissionPolicy;
+
+  /// Creates a [ReadToolConfigParams].
+  const ReadToolConfigParams({this.enabled, this.permissionPolicy});
+
+  /// Creates a [ReadToolConfigParams] from JSON.
+  factory ReadToolConfigParams.fromJson(Map<String, dynamic> json) {
+    _checkAgentToolConfigParamsName(
+      json,
+      AgentToolName.read,
+      'ReadToolConfigParams',
+    );
+    return ReadToolConfigParams(
+      enabled: json['enabled'] as bool?,
+      permissionPolicy: json['permission_policy'] != null
+          ? PermissionPolicy.fromJson(
+              json['permission_policy'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'read',
+    'name': name.toJson(),
+    if (enabled != null) 'enabled': enabled,
+    if (permissionPolicy != null)
+      'permission_policy': permissionPolicy!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  ReadToolConfigParams copyWith({
+    Object? enabled = unsetCopyWithValue,
+    Object? permissionPolicy = unsetCopyWithValue,
+  }) {
+    return ReadToolConfigParams(
+      enabled: enabled == unsetCopyWithValue ? this.enabled : enabled as bool?,
+      permissionPolicy: permissionPolicy == unsetCopyWithValue
+          ? this.permissionPolicy
+          : permissionPolicy as PermissionPolicy?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ReadToolConfigParams &&
+          runtimeType == other.runtimeType &&
+          enabled == other.enabled &&
+          permissionPolicy == other.permissionPolicy;
+
+  @override
+  int get hashCode => Object.hash(enabled, permissionPolicy);
+
+  @override
+  String toString() =>
+      'ReadToolConfigParams(enabled: $enabled, '
+      'permissionPolicy: $permissionPolicy)';
+}
+
+/// Configuration override for the `write` tool (request variant).
+@immutable
+class WriteToolConfigParams extends AgentToolConfigParams {
+  @override
+  AgentToolName get name => AgentToolName.write;
+
+  @override
+  final bool? enabled;
+
+  @override
+  final PermissionPolicy? permissionPolicy;
+
+  /// Creates a [WriteToolConfigParams].
+  const WriteToolConfigParams({this.enabled, this.permissionPolicy});
+
+  /// Creates a [WriteToolConfigParams] from JSON.
+  factory WriteToolConfigParams.fromJson(Map<String, dynamic> json) {
+    _checkAgentToolConfigParamsName(
+      json,
+      AgentToolName.write,
+      'WriteToolConfigParams',
+    );
+    return WriteToolConfigParams(
+      enabled: json['enabled'] as bool?,
+      permissionPolicy: json['permission_policy'] != null
+          ? PermissionPolicy.fromJson(
+              json['permission_policy'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'write',
+    'name': name.toJson(),
+    if (enabled != null) 'enabled': enabled,
+    if (permissionPolicy != null)
+      'permission_policy': permissionPolicy!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  WriteToolConfigParams copyWith({
+    Object? enabled = unsetCopyWithValue,
+    Object? permissionPolicy = unsetCopyWithValue,
+  }) {
+    return WriteToolConfigParams(
+      enabled: enabled == unsetCopyWithValue ? this.enabled : enabled as bool?,
+      permissionPolicy: permissionPolicy == unsetCopyWithValue
+          ? this.permissionPolicy
+          : permissionPolicy as PermissionPolicy?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WriteToolConfigParams &&
+          runtimeType == other.runtimeType &&
+          enabled == other.enabled &&
+          permissionPolicy == other.permissionPolicy;
+
+  @override
+  int get hashCode => Object.hash(enabled, permissionPolicy);
+
+  @override
+  String toString() =>
+      'WriteToolConfigParams(enabled: $enabled, '
+      'permissionPolicy: $permissionPolicy)';
+}
+
+/// Configuration override for the `glob` tool (request variant).
+@immutable
+class GlobToolConfigParams extends AgentToolConfigParams {
+  @override
+  AgentToolName get name => AgentToolName.glob;
+
+  @override
+  final bool? enabled;
+
+  @override
+  final PermissionPolicy? permissionPolicy;
+
+  /// Creates a [GlobToolConfigParams].
+  const GlobToolConfigParams({this.enabled, this.permissionPolicy});
+
+  /// Creates a [GlobToolConfigParams] from JSON.
+  factory GlobToolConfigParams.fromJson(Map<String, dynamic> json) {
+    _checkAgentToolConfigParamsName(
+      json,
+      AgentToolName.glob,
+      'GlobToolConfigParams',
+    );
+    return GlobToolConfigParams(
+      enabled: json['enabled'] as bool?,
+      permissionPolicy: json['permission_policy'] != null
+          ? PermissionPolicy.fromJson(
+              json['permission_policy'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'glob',
+    'name': name.toJson(),
+    if (enabled != null) 'enabled': enabled,
+    if (permissionPolicy != null)
+      'permission_policy': permissionPolicy!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  GlobToolConfigParams copyWith({
+    Object? enabled = unsetCopyWithValue,
+    Object? permissionPolicy = unsetCopyWithValue,
+  }) {
+    return GlobToolConfigParams(
+      enabled: enabled == unsetCopyWithValue ? this.enabled : enabled as bool?,
+      permissionPolicy: permissionPolicy == unsetCopyWithValue
+          ? this.permissionPolicy
+          : permissionPolicy as PermissionPolicy?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GlobToolConfigParams &&
+          runtimeType == other.runtimeType &&
+          enabled == other.enabled &&
+          permissionPolicy == other.permissionPolicy;
+
+  @override
+  int get hashCode => Object.hash(enabled, permissionPolicy);
+
+  @override
+  String toString() =>
+      'GlobToolConfigParams(enabled: $enabled, '
+      'permissionPolicy: $permissionPolicy)';
+}
+
+/// Configuration override for the `grep` tool (request variant).
+@immutable
+class GrepToolConfigParams extends AgentToolConfigParams {
+  @override
+  AgentToolName get name => AgentToolName.grep;
+
+  @override
+  final bool? enabled;
+
+  @override
+  final PermissionPolicy? permissionPolicy;
+
+  /// Creates a [GrepToolConfigParams].
+  const GrepToolConfigParams({this.enabled, this.permissionPolicy});
+
+  /// Creates a [GrepToolConfigParams] from JSON.
+  factory GrepToolConfigParams.fromJson(Map<String, dynamic> json) {
+    _checkAgentToolConfigParamsName(
+      json,
+      AgentToolName.grep,
+      'GrepToolConfigParams',
+    );
+    return GrepToolConfigParams(
+      enabled: json['enabled'] as bool?,
+      permissionPolicy: json['permission_policy'] != null
+          ? PermissionPolicy.fromJson(
+              json['permission_policy'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'grep',
+    'name': name.toJson(),
+    if (enabled != null) 'enabled': enabled,
+    if (permissionPolicy != null)
+      'permission_policy': permissionPolicy!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  GrepToolConfigParams copyWith({
+    Object? enabled = unsetCopyWithValue,
+    Object? permissionPolicy = unsetCopyWithValue,
+  }) {
+    return GrepToolConfigParams(
+      enabled: enabled == unsetCopyWithValue ? this.enabled : enabled as bool?,
+      permissionPolicy: permissionPolicy == unsetCopyWithValue
+          ? this.permissionPolicy
+          : permissionPolicy as PermissionPolicy?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GrepToolConfigParams &&
+          runtimeType == other.runtimeType &&
+          enabled == other.enabled &&
+          permissionPolicy == other.permissionPolicy;
+
+  @override
+  int get hashCode => Object.hash(enabled, permissionPolicy);
+
+  @override
+  String toString() =>
+      'GrepToolConfigParams(enabled: $enabled, '
+      'permissionPolicy: $permissionPolicy)';
+}
+
+/// Configuration override for the `web_fetch` tool (request variant).
+@immutable
+class WebFetchToolConfigParams extends AgentToolConfigParams {
+  @override
+  AgentToolName get name => AgentToolName.webFetch;
+
+  @override
+  final bool? enabled;
+
+  @override
+  final PermissionPolicy? permissionPolicy;
+
+  /// Only fetch URLs whose host is one of these domains or a subdomain of
+  /// one. At most 64 entries; an empty list is rejected (omit the field
+  /// instead). Mutually exclusive with [blockedDomains].
+  final List<String>? allowedDomains;
+
+  /// Never fetch URLs whose host is one of these domains or a subdomain of
+  /// one. At most 64 entries; an empty list is rejected (omit the field
+  /// instead). Mutually exclusive with [allowedDomains].
+  final List<String>? blockedDomains;
+
+  /// Maximum number of tokens of fetched text content to include in context
+  /// per call. Does not apply to binary content such as PDFs.
+  final int? maxContentTokens;
+
+  /// Creates a [WebFetchToolConfigParams].
+  const WebFetchToolConfigParams({
+    this.enabled,
+    this.permissionPolicy,
+    this.allowedDomains,
+    this.blockedDomains,
+    this.maxContentTokens,
+  });
+
+  /// Creates a [WebFetchToolConfigParams] from JSON.
+  factory WebFetchToolConfigParams.fromJson(Map<String, dynamic> json) {
+    _checkAgentToolConfigParamsName(
+      json,
+      AgentToolName.webFetch,
+      'WebFetchToolConfigParams',
+    );
+    return WebFetchToolConfigParams(
+      enabled: json['enabled'] as bool?,
+      permissionPolicy: json['permission_policy'] != null
+          ? PermissionPolicy.fromJson(
+              json['permission_policy'] as Map<String, dynamic>,
+            )
+          : null,
+      allowedDomains: (json['allowed_domains'] as List?)
+          ?.map((e) => e as String)
+          .toList(),
+      blockedDomains: (json['blocked_domains'] as List?)
+          ?.map((e) => e as String)
+          .toList(),
+      maxContentTokens: json['max_content_tokens'] as int?,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'web_fetch',
+    'name': name.toJson(),
+    if (enabled != null) 'enabled': enabled,
+    if (permissionPolicy != null)
+      'permission_policy': permissionPolicy!.toJson(),
+    if (allowedDomains != null) 'allowed_domains': allowedDomains,
+    if (blockedDomains != null) 'blocked_domains': blockedDomains,
+    if (maxContentTokens != null) 'max_content_tokens': maxContentTokens,
+  };
+
+  /// Creates a copy with replaced values.
+  WebFetchToolConfigParams copyWith({
+    Object? enabled = unsetCopyWithValue,
+    Object? permissionPolicy = unsetCopyWithValue,
+    Object? allowedDomains = unsetCopyWithValue,
+    Object? blockedDomains = unsetCopyWithValue,
+    Object? maxContentTokens = unsetCopyWithValue,
+  }) {
+    return WebFetchToolConfigParams(
+      enabled: enabled == unsetCopyWithValue ? this.enabled : enabled as bool?,
+      permissionPolicy: permissionPolicy == unsetCopyWithValue
+          ? this.permissionPolicy
+          : permissionPolicy as PermissionPolicy?,
+      allowedDomains: allowedDomains == unsetCopyWithValue
+          ? this.allowedDomains
+          : allowedDomains as List<String>?,
+      blockedDomains: blockedDomains == unsetCopyWithValue
+          ? this.blockedDomains
+          : blockedDomains as List<String>?,
+      maxContentTokens: maxContentTokens == unsetCopyWithValue
+          ? this.maxContentTokens
+          : maxContentTokens as int?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebFetchToolConfigParams &&
+          runtimeType == other.runtimeType &&
+          enabled == other.enabled &&
+          permissionPolicy == other.permissionPolicy &&
+          listsEqual(allowedDomains, other.allowedDomains) &&
+          listsEqual(blockedDomains, other.blockedDomains) &&
+          maxContentTokens == other.maxContentTokens;
+
+  @override
+  int get hashCode => Object.hash(
+    enabled,
+    permissionPolicy,
+    listHash(allowedDomains),
+    listHash(blockedDomains),
+    maxContentTokens,
+  );
+
+  @override
+  String toString() =>
+      'WebFetchToolConfigParams('
+      'enabled: $enabled, permissionPolicy: $permissionPolicy, '
+      'allowedDomains: $allowedDomains, blockedDomains: $blockedDomains, '
+      'maxContentTokens: $maxContentTokens)';
+}
+
+/// Configuration override for the `web_search` tool (request variant).
+@immutable
+class WebSearchToolConfigParams extends AgentToolConfigParams {
+  @override
+  AgentToolName get name => AgentToolName.webSearch;
+
+  @override
+  final bool? enabled;
+
+  @override
+  final PermissionPolicy? permissionPolicy;
+
+  /// Only return search results whose host is one of these domains or a
+  /// subdomain of one. At most 64 entries; an empty list is rejected (omit
+  /// the field instead). Mutually exclusive with [blockedDomains].
+  final List<String>? allowedDomains;
+
+  /// Never return search results whose host is one of these domains or a
+  /// subdomain of one. At most 64 entries; an empty list is rejected (omit
+  /// the field instead). Mutually exclusive with [allowedDomains].
+  final List<String>? blockedDomains;
+
+  /// Approximate user location for search result localization.
+  final UserLocation? userLocation;
+
+  /// Creates a [WebSearchToolConfigParams].
+  const WebSearchToolConfigParams({
+    this.enabled,
+    this.permissionPolicy,
+    this.allowedDomains,
+    this.blockedDomains,
+    this.userLocation,
+  });
+
+  /// Creates a [WebSearchToolConfigParams] from JSON.
+  factory WebSearchToolConfigParams.fromJson(Map<String, dynamic> json) {
+    _checkAgentToolConfigParamsName(
+      json,
+      AgentToolName.webSearch,
+      'WebSearchToolConfigParams',
+    );
+    return WebSearchToolConfigParams(
+      enabled: json['enabled'] as bool?,
+      permissionPolicy: json['permission_policy'] != null
+          ? PermissionPolicy.fromJson(
+              json['permission_policy'] as Map<String, dynamic>,
+            )
+          : null,
+      allowedDomains: (json['allowed_domains'] as List?)
+          ?.map((e) => e as String)
+          .toList(),
+      blockedDomains: (json['blocked_domains'] as List?)
+          ?.map((e) => e as String)
+          .toList(),
+      userLocation: json['user_location'] != null
+          ? UserLocation.fromJson(json['user_location'] as Map<String, dynamic>)
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'web_search',
+    'name': name.toJson(),
+    if (enabled != null) 'enabled': enabled,
+    if (permissionPolicy != null)
+      'permission_policy': permissionPolicy!.toJson(),
+    if (allowedDomains != null) 'allowed_domains': allowedDomains,
+    if (blockedDomains != null) 'blocked_domains': blockedDomains,
+    if (userLocation != null) 'user_location': userLocation!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  WebSearchToolConfigParams copyWith({
+    Object? enabled = unsetCopyWithValue,
+    Object? permissionPolicy = unsetCopyWithValue,
+    Object? allowedDomains = unsetCopyWithValue,
+    Object? blockedDomains = unsetCopyWithValue,
+    Object? userLocation = unsetCopyWithValue,
+  }) {
+    return WebSearchToolConfigParams(
+      enabled: enabled == unsetCopyWithValue ? this.enabled : enabled as bool?,
+      permissionPolicy: permissionPolicy == unsetCopyWithValue
+          ? this.permissionPolicy
+          : permissionPolicy as PermissionPolicy?,
+      allowedDomains: allowedDomains == unsetCopyWithValue
+          ? this.allowedDomains
+          : allowedDomains as List<String>?,
+      blockedDomains: blockedDomains == unsetCopyWithValue
+          ? this.blockedDomains
+          : blockedDomains as List<String>?,
+      userLocation: userLocation == unsetCopyWithValue
+          ? this.userLocation
+          : userLocation as UserLocation?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebSearchToolConfigParams &&
+          runtimeType == other.runtimeType &&
+          enabled == other.enabled &&
+          permissionPolicy == other.permissionPolicy &&
+          listsEqual(allowedDomains, other.allowedDomains) &&
+          listsEqual(blockedDomains, other.blockedDomains) &&
+          userLocation == other.userLocation;
+
+  @override
+  int get hashCode => Object.hash(
+    enabled,
+    permissionPolicy,
+    listHash(allowedDomains),
+    listHash(blockedDomains),
+    userLocation,
+  );
+
+  @override
+  String toString() =>
+      'WebSearchToolConfigParams('
+      'enabled: $enabled, permissionPolicy: $permissionPolicy, '
+      'allowedDomains: $allowedDomains, blockedDomains: $blockedDomains, '
+      'userLocation: $userLocation)';
+}
+
+/// Unrecognised agent tool config params type — preserves the raw JSON.
+@immutable
+class UnknownAgentToolConfigParams extends AgentToolConfigParams {
+  /// The unrecognised type discriminator (from `type`, falling back to
+  /// `name`).
+  final String? rawType;
+
+  /// The raw JSON map.
+  final Map<String, dynamic> raw;
+
+  @override
+  final AgentToolName name;
+
+  @override
+  final bool? enabled;
+
+  @override
+  final PermissionPolicy? permissionPolicy;
+
+  UnknownAgentToolConfigParams._({required this.rawType, required this.raw})
+    : name = AgentToolName.fromJson(raw['name'] as String? ?? ''),
+      enabled = raw['enabled'] as bool?,
+      permissionPolicy = raw['permission_policy'] != null
+          ? PermissionPolicy.fromJson(
+              raw['permission_policy'] as Map<String, dynamic>,
+            )
+          : null;
+
+  @override
+  Map<String, dynamic> toJson() => raw;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownAgentToolConfigParams &&
+          runtimeType == other.runtimeType &&
+          rawType == other.rawType &&
+          mapsDeepEqual(raw, other.raw);
+
+  @override
+  int get hashCode => Object.hash(rawType, mapDeepHashCode(raw));
+
+  @override
+  String toString() =>
+      'UnknownAgentToolConfigParams(rawType: $rawType, raw: $raw)';
 }
 
 /// Configuration override for a specific MCP tool (request variant).

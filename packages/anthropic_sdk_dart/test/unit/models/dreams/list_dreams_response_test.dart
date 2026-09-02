@@ -21,6 +21,7 @@ Map<String, dynamic> _dreamJson() {
       'cache_read_input_tokens': 0,
       'cache_creation_input_tokens': 0,
     },
+    'output_behavior': {'type': 'create_new'},
   };
 }
 

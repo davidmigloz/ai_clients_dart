@@ -74,6 +74,12 @@ class FileMetadata {
   /// The scope of this file, indicating the context in which it was created.
   final FileScope? scope;
 
+  /// When this file will expire and become unavailable for download.
+  ///
+  /// `null` if the file does not expire. For files uploaded with
+  /// `expiresInSeconds`, this is the upload time plus that value.
+  final DateTime? expiresAt;
+
   /// Creates a [FileMetadata].
   const FileMetadata({
     required this.id,
@@ -84,6 +90,7 @@ class FileMetadata {
     this.type = 'file',
     this.downloadable = false,
     this.scope,
+    this.expiresAt,
   });
 
   /// Creates a [FileMetadata] from JSON.
@@ -99,6 +106,9 @@ class FileMetadata {
       scope: json['scope'] != null
           ? FileScope.fromJson(json['scope'] as Map<String, dynamic>)
           : null,
+      expiresAt: json['expires_at'] != null
+          ? DateTime.parse(json['expires_at'] as String)
+          : null,
     );
   }
 
@@ -112,6 +122,7 @@ class FileMetadata {
     'type': type,
     'downloadable': downloadable,
     if (scope != null) 'scope': scope!.toJson(),
+    if (expiresAt != null) 'expires_at': expiresAt!.toUtc().toIso8601String(),
   };
 
   /// Creates a copy with replaced values.
@@ -124,6 +135,7 @@ class FileMetadata {
     String? type,
     bool? downloadable,
     Object? scope = unsetCopyWithValue,
+    Object? expiresAt = unsetCopyWithValue,
   }) {
     return FileMetadata(
       id: id ?? this.id,
@@ -134,6 +146,9 @@ class FileMetadata {
       type: type ?? this.type,
       downloadable: downloadable ?? this.downloadable,
       scope: scope == unsetCopyWithValue ? this.scope : scope as FileScope?,
+      expiresAt: expiresAt == unsetCopyWithValue
+          ? this.expiresAt
+          : expiresAt as DateTime?,
     );
   }
 
@@ -149,7 +164,8 @@ class FileMetadata {
           createdAt == other.createdAt &&
           type == other.type &&
           downloadable == other.downloadable &&
-          scope == other.scope;
+          scope == other.scope &&
+          expiresAt == other.expiresAt;
 
   @override
   int get hashCode => Object.hash(
@@ -161,6 +177,7 @@ class FileMetadata {
     type,
     downloadable,
     scope,
+    expiresAt,
   );
 
   @override
@@ -173,5 +190,6 @@ class FileMetadata {
       'createdAt: $createdAt, '
       'type: $type, '
       'downloadable: $downloadable, '
-      'scope: $scope)';
+      'scope: $scope, '
+      'expiresAt: $expiresAt)';
 }

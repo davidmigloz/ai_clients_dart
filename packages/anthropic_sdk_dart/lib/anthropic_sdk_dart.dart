@@ -80,8 +80,10 @@ export 'src/models/beta_timestamp.dart';
 export 'src/models/completions/completion.dart';
 
 // Models - Content
+export 'src/models/content/browser_state.dart';
 export 'src/models/content/citations_config.dart';
 export 'src/models/content/content_block.dart';
+export 'src/models/content/image_transformations.dart';
 export 'src/models/content/input_content_block.dart';
 
 // Models - Dreams (Beta, research preview)
@@ -94,8 +96,9 @@ export 'src/models/dreams/dream_output.dart';
 export 'src/models/dreams/dream_status.dart';
 export 'src/models/dreams/dream_usage.dart';
 export 'src/models/dreams/list_dreams_response.dart';
+export 'src/models/dreams/output_behavior.dart';
 
-// Models - Files (Beta)
+// Models - Files
 export 'src/models/files/file_delete_response.dart';
 export 'src/models/files/file_list_response.dart';
 export 'src/models/files/file_metadata.dart';
@@ -108,6 +111,7 @@ export 'src/models/managed_agents/agents/create_agent_params.dart';
 export 'src/models/managed_agents/agents/multiagent.dart';
 export 'src/models/managed_agents/agents/multiagent_params.dart';
 export 'src/models/managed_agents/agents/update_agent_params.dart';
+export 'src/models/managed_agents/common/budget.dart';
 export 'src/models/managed_agents/common/list_order.dart';
 export 'src/models/managed_agents/common/managed_agent_actor.dart';
 export 'src/models/managed_agents/config/agent_skill.dart';
@@ -184,6 +188,7 @@ export 'src/models/messages/diagnostics_param.dart';
 export 'src/models/messages/fallback_config.dart';
 export 'src/models/messages/fallback_credit_token_param.dart';
 export 'src/models/messages/input_message.dart';
+export 'src/models/messages/input_transformation.dart';
 export 'src/models/messages/message.dart';
 export 'src/models/messages/message_create_request.dart';
 export 'src/models/messages/message_role.dart';
@@ -203,8 +208,10 @@ export 'src/models/metadata/usage.dart';
 export 'src/models/models/model_capabilities.dart';
 export 'src/models/models/model_info.dart';
 
-// Models - Skills (Beta)
+// Models - Skills
+export 'src/models/skills/deleted_skill.dart';
 export 'src/models/skills/skill.dart';
+export 'src/models/skills/skill_file.dart';
 export 'src/models/skills/skill_list_response.dart';
 export 'src/models/skills/skill_source.dart';
 export 'src/models/skills/skill_version.dart';
@@ -231,6 +238,7 @@ export 'src/models/tools/tool_caller.dart';
 export 'src/models/tools/tool_change_reference.dart';
 export 'src/models/tools/tool_choice.dart';
 export 'src/models/tools/tool_definition.dart';
+export 'src/models/tools/toolsets.dart';
 
 // Models - User Profiles (Beta)
 export 'src/models/user_profiles/create_user_profile_request.dart';
@@ -238,8 +246,9 @@ export 'src/models/user_profiles/enrollment_url.dart';
 export 'src/models/user_profiles/list_user_profiles_response.dart';
 export 'src/models/user_profiles/update_user_profile_request.dart';
 export 'src/models/user_profiles/user_profile.dart';
+export 'src/models/user_profiles/user_profile_access_type.dart';
 export 'src/models/user_profiles/user_profile_list_order.dart';
-export 'src/models/user_profiles/user_profile_relationship.dart';
+export 'src/models/user_profiles/user_profile_list_order_by.dart';
 export 'src/models/user_profiles/user_profile_trust_grant.dart';
 
 // Resources

@@ -5,6 +5,11 @@ void main() {
   // (discriminator type, has vault_id, matcher) for every spec variant.
   final variants = <(String, bool, Matcher)>[
     ('session.archived', false, isA<WebhookSessionArchivedEventData>()),
+    (
+      'session.budget_reached',
+      false,
+      isA<WebhookSessionBudgetReachedEventData>(),
+    ),
     ('session.created', false, isA<WebhookSessionCreatedEventData>()),
     ('session.deleted', false, isA<WebhookSessionDeletedEventData>()),
     ('session.idled', false, isA<WebhookSessionIdledEventData>()),
@@ -123,8 +128,8 @@ void main() {
   }
 
   group('WebhookEventData dispatch', () {
-    test('covers all 43 spec variants', () {
-      expect(variants, hasLength(43));
+    test('covers all 44 spec variants', () {
+      expect(variants, hasLength(44));
     });
 
     for (final (type, withVault, matcher) in variants) {

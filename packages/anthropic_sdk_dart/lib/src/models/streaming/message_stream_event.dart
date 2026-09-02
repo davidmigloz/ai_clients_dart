@@ -1,6 +1,9 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import '../content/content_block.dart';
+import '../messages/input_transformation.dart';
 import '../messages/message.dart';
 import 'content_block_delta.dart';
 import 'message_delta.dart';
@@ -82,14 +85,31 @@ class MessageDeltaEvent extends MessageStreamEvent {
   /// Updated usage information.
   final MessageDeltaUsage usage;
 
+  /// Changes the API made to the request's input before showing it to the
+  /// model.
+  ///
+  /// The array is final in `message_start`; this field carries it again
+  /// only when a server-side model fallback happened mid-stream, in which
+  /// case it holds the serving model's entries and replaces the one from
+  /// `message_start`. Present only with
+  /// `anthropic-beta: thinking-binding-controls-2026-08-01`.
+  final List<InputTransformation>? inputTransformations;
+
   /// Creates a [MessageDeltaEvent].
-  const MessageDeltaEvent({required this.delta, required this.usage});
+  const MessageDeltaEvent({
+    required this.delta,
+    required this.usage,
+    this.inputTransformations,
+  });
 
   /// Creates a [MessageDeltaEvent] from JSON.
   factory MessageDeltaEvent.fromJson(Map<String, dynamic> json) {
     return MessageDeltaEvent(
       delta: MessageDelta.fromJson(json['delta'] as Map<String, dynamic>),
       usage: MessageDeltaUsage.fromJson(json['usage'] as Map<String, dynamic>),
+      inputTransformations: (json['input_transformations'] as List?)
+          ?.map((e) => InputTransformation.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 
@@ -98,13 +118,24 @@ class MessageDeltaEvent extends MessageStreamEvent {
     'type': type,
     'delta': delta.toJson(),
     'usage': usage.toJson(),
+    if (inputTransformations != null)
+      'input_transformations': inputTransformations!
+          .map((e) => e.toJson())
+          .toList(),
   };
 
   /// Creates a copy with replaced values.
-  MessageDeltaEvent copyWith({MessageDelta? delta, MessageDeltaUsage? usage}) {
+  MessageDeltaEvent copyWith({
+    MessageDelta? delta,
+    MessageDeltaUsage? usage,
+    Object? inputTransformations = unsetCopyWithValue,
+  }) {
     return MessageDeltaEvent(
       delta: delta ?? this.delta,
       usage: usage ?? this.usage,
+      inputTransformations: inputTransformations == unsetCopyWithValue
+          ? this.inputTransformations
+          : inputTransformations as List<InputTransformation>?,
     );
   }
 
@@ -114,13 +145,16 @@ class MessageDeltaEvent extends MessageStreamEvent {
       other is MessageDeltaEvent &&
           runtimeType == other.runtimeType &&
           delta == other.delta &&
-          usage == other.usage;
+          usage == other.usage &&
+          listsEqual(inputTransformations, other.inputTransformations);
 
   @override
-  int get hashCode => Object.hash(delta, usage);
+  int get hashCode => Object.hash(delta, usage, listHash(inputTransformations));
 
   @override
-  String toString() => 'MessageDeltaEvent(delta: $delta, usage: $usage)';
+  String toString() =>
+      'MessageDeltaEvent(delta: $delta, usage: $usage, '
+      'inputTransformations: $inputTransformations)';
 }
 
 /// Event indicating the end of message generation.

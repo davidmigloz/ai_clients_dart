@@ -123,4 +123,83 @@ void main() {
       expect(params.toString(), contains('initialEvents:'));
     });
   });
+
+  group('CreateSessionParams.budget', () {
+    test('round-trips when present', () {
+      final json = {
+        'agent': 'agt_1',
+        'environment_id': 'env_1',
+        'budget': {
+          'type': 'limit',
+          'max_list_cost': {'amount': '2500', 'currency': 'USD'},
+        },
+      };
+      final params = CreateSessionParams.fromJson(json);
+      expect(params.budget, isA<BudgetLimit>());
+      expect(params.toJson(), json);
+    });
+
+    test('is omitted from toJson when absent', () {
+      final params = CreateSessionParams.fromJson(const {
+        'agent': 'agt_1',
+        'environment_id': 'env_1',
+      });
+      expect(params.budget, isNull);
+      expect(params.toJson().containsKey('budget'), isFalse);
+    });
+  });
+
+  group('UpdateSessionParams.budget', () {
+    test('omitted: no budget key in toJson', () {
+      const params = UpdateSessionParams();
+      expect(params.budget, isNull);
+      expect(params.toJson().containsKey('budget'), isFalse);
+    });
+
+    test('explicit null: emits budget: null to clear it', () {
+      const params = UpdateSessionParams(budget: null);
+      expect(params.budget, isNull);
+      expect(params.toJson().containsKey('budget'), isTrue);
+      expect(params.toJson()['budget'], isNull);
+    });
+
+    test('value: emits the serialized budget', () {
+      final params = UpdateSessionParams(
+        budget: Budget.limit(
+          maxListCost: const MonetaryAmount(amount: '2500', currency: 'USD'),
+        ),
+      );
+      expect(params.toJson()['budget'], {
+        'type': 'limit',
+        'max_list_cost': {'amount': '2500', 'currency': 'USD'},
+      });
+    });
+
+    test('fromJson round-trips each state', () {
+      final omitted = UpdateSessionParams.fromJson(const {});
+      expect(omitted.toJson().containsKey('budget'), isFalse);
+
+      final cleared = UpdateSessionParams.fromJson(const {'budget': null});
+      expect(cleared.toJson().containsKey('budget'), isTrue);
+      expect(cleared.toJson()['budget'], isNull);
+
+      final set = UpdateSessionParams.fromJson(const {
+        'budget': {
+          'type': 'limit',
+          'max_list_cost': {'amount': '2500', 'currency': 'USD'},
+        },
+      });
+      expect(set.budget, isA<BudgetLimit>());
+    });
+
+    test('copyWith replaces and clears budget', () {
+      final params = UpdateSessionParams(
+        budget: Budget.limit(
+          maxListCost: const MonetaryAmount(amount: '2500', currency: 'USD'),
+        ),
+      );
+      expect(params.copyWith(budget: null).budget, isNull);
+      expect(params.copyWith().budget, isA<BudgetLimit>());
+    });
+  });
 }

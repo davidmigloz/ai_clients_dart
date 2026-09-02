@@ -5,6 +5,7 @@ import '../common/equality_helpers.dart';
 import '../content/citations_config.dart';
 import '../metadata/cache_control.dart';
 import 'response_inclusion.dart';
+import 'toolsets.dart';
 
 // RequestCitationsConfig now lives in content/citations_config.dart but is part
 // of this library's API surface (e.g. WebFetchTool.citations), so re-export it
@@ -227,10 +228,54 @@ sealed class BuiltInTool {
     CacheControlEphemeral? cacheControl,
   }) = McpToolset;
 
+  /// Creates a computer toolset.
+  ///
+  /// A single `tools[]` entry (carrying no `name`) that declares the
+  /// computer tool family. Unlike the single [ComputerUseTool], this GA
+  /// toolset serves the whole family batched under one entry, with any
+  /// members disabled via [configs] removed from the served schema. Every
+  /// member is enabled by default, including `zoom`; disable a member with
+  /// e.g. `configs: ComputerToolsetConfigs(zoom: ToolsetMemberConfig(enabled:
+  /// false))`. A toolset entry carries no `name`, and the single-tool
+  /// options `display_number`/`enable_zoom` are not fields of a toolset
+  /// entry.
+  ///
+  /// Migrating from `computer_20251124`: use this toolset instead of
+  /// [BuiltInTool.computerUse] to get batch actions and per-member control.
+  /// Available on Claude Fable 5.1, Mythos 5.1, Opus 5, Sonnet 5, and Opus
+  /// 4.8.
+  factory BuiltInTool.computerToolset({
+    ComputerToolsetConfigs? configs,
+    CacheControlEphemeral? cacheControl,
+  }) = ComputerToolset;
+
+  /// Creates a browser toolset.
+  ///
+  /// A client toolset for a browser your application hosts — Claude drives
+  /// it via member tool calls (`navigate`, `screenshot`, `read_page`, etc.).
+  /// A single `tools[]` entry (carrying no `name`) that declares the browser
+  /// tool family; the model is served the family's tool with any members
+  /// disabled via [configs] removed from its schema. Tool results answering
+  /// a browser toolset member `tool_use` may include a `browser_state`
+  /// block (see `ToolResultContent.browserState`) reporting the caller's
+  /// open tabs and any side effects the call produced.
+  factory BuiltInTool.browserToolset({
+    BrowserToolsetConfigs? configs,
+    CacheControlEphemeral? cacheControl,
+  }) = BrowserToolset;
+
   /// Creates a [BuiltInTool] from JSON.
   factory BuiltInTool.fromJson(Map<String, dynamic> json) {
     final type = json['type'] as String;
     return switch (type) {
+      // Toolset prefix guards must be checked before the `computer_` prefix
+      // routing below, or a future `computer_toolset_*`/`browser_toolset_*`
+      // version would be misrouted to ComputerUseTool.fromJson (which
+      // crashes on a missing `display_width_px`) or rejected outright.
+      final String t when t.startsWith('computer_toolset_') =>
+        ComputerToolset.fromJson(json),
+      final String t when t.startsWith('browser_toolset_') =>
+        BrowserToolset.fromJson(json),
       'bash_20250124' => BashTool.fromJson(json),
       'text_editor_20250124' => TextEditorTool20250124.fromJson(json),
       'text_editor_20250429' => TextEditorTool20250429.fromJson(json),
@@ -1597,4 +1642,190 @@ class CodeExecutionBuiltInTool extends BuiltInTool {
       'CodeExecutionBuiltInTool(type: $type, cacheControl: $cacheControl, '
       'allowedCallers: $allowedCallers, deferLoading: $deferLoading, '
       'strict: $strict)';
+}
+
+// ============================================================================
+// Computer Toolset
+// ============================================================================
+
+/// The computer toolset: a single `tools[]` entry (carrying no `name`) that
+/// declares the computer tool family.
+///
+/// The model is served the family's tool with any members disabled via
+/// [configs] removed from its schema. Every member is enabled by default,
+/// zoom included. The single-tool options `display_number` and `enable_zoom`
+/// (see [ComputerUseTool]) are not fields of a toolset entry — it carries
+/// only `type`, [configs], and [cacheControl]; zoom is controlled via
+/// `configs.zoom.enabled`.
+///
+/// This GA toolset supersedes the versioned single-tool `computer_*` entries
+/// for callers that want batched actions and per-member enable/disable
+/// control. Available on Claude Fable 5.1, Mythos 5.1, Opus 5, Sonnet 5, and
+/// Opus 4.8.
+@immutable
+class ComputerToolset extends BuiltInTool {
+  /// The tool type, always `computer_toolset_20260801`.
+  final String type;
+
+  /// Sparse per-member overrides, keyed by member name.
+  ///
+  /// Absent, `null`, and an empty [ComputerToolsetConfigs] are equivalent; a
+  /// member's defaults apply wherever its key is absent.
+  final ComputerToolsetConfigs? configs;
+
+  /// Cache control for this tool definition.
+  final CacheControlEphemeral? cacheControl;
+
+  /// Creates a [ComputerToolset].
+  const ComputerToolset({String? type, this.configs, this.cacheControl})
+    : type = type ?? 'computer_toolset_20260801';
+
+  /// Creates a [ComputerToolset] from JSON.
+  factory ComputerToolset.fromJson(Map<String, dynamic> json) {
+    return ComputerToolset(
+      type: json['type'] as String? ?? 'computer_toolset_20260801',
+      configs: json['configs'] != null
+          ? ComputerToolsetConfigs.fromJson(
+              json['configs'] as Map<String, dynamic>,
+            )
+          : null,
+      cacheControl: json['cache_control'] != null
+          ? CacheControlEphemeral.fromJson(
+              json['cache_control'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    if (configs != null) 'configs': configs!.toJson(),
+    if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  ComputerToolset copyWith({
+    String? type,
+    Object? configs = unsetCopyWithValue,
+    Object? cacheControl = unsetCopyWithValue,
+  }) {
+    return ComputerToolset(
+      type: type ?? this.type,
+      configs: configs == unsetCopyWithValue
+          ? this.configs
+          : configs as ComputerToolsetConfigs?,
+      cacheControl: cacheControl == unsetCopyWithValue
+          ? this.cacheControl
+          : cacheControl as CacheControlEphemeral?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ComputerToolset &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          configs == other.configs &&
+          cacheControl == other.cacheControl;
+
+  @override
+  int get hashCode => Object.hash(type, configs, cacheControl);
+
+  @override
+  String toString() =>
+      'ComputerToolset(type: $type, configs: $configs, '
+      'cacheControl: $cacheControl)';
+}
+
+// ============================================================================
+// Browser Toolset
+// ============================================================================
+
+/// The browser toolset: a single `tools[]` entry (carrying no `name`) that
+/// declares the browser tool family.
+///
+/// A client toolset for a browser your application hosts — Claude drives it
+/// via member tool calls (`navigate`, `screenshot`, `read_page`, etc.). The
+/// model is served the family's tool with any members disabled via [configs]
+/// removed from its schema. Tool results answering a browser toolset member
+/// `tool_use` may include a `browser_state` block (see
+/// `ToolResultContent.browserState`) reporting the caller's open tabs and any
+/// side effects the call produced.
+@immutable
+class BrowserToolset extends BuiltInTool {
+  /// The tool type, always `browser_toolset_20260801`.
+  final String type;
+
+  /// Sparse per-member overrides, keyed by member name.
+  ///
+  /// Absent, `null`, and an empty [BrowserToolsetConfigs] are equivalent; a
+  /// member's defaults apply wherever its key is absent.
+  final BrowserToolsetConfigs? configs;
+
+  /// Cache control for this tool definition.
+  final CacheControlEphemeral? cacheControl;
+
+  /// Creates a [BrowserToolset].
+  const BrowserToolset({String? type, this.configs, this.cacheControl})
+    : type = type ?? 'browser_toolset_20260801';
+
+  /// Creates a [BrowserToolset] from JSON.
+  factory BrowserToolset.fromJson(Map<String, dynamic> json) {
+    return BrowserToolset(
+      type: json['type'] as String? ?? 'browser_toolset_20260801',
+      configs: json['configs'] != null
+          ? BrowserToolsetConfigs.fromJson(
+              json['configs'] as Map<String, dynamic>,
+            )
+          : null,
+      cacheControl: json['cache_control'] != null
+          ? CacheControlEphemeral.fromJson(
+              json['cache_control'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    if (configs != null) 'configs': configs!.toJson(),
+    if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  BrowserToolset copyWith({
+    String? type,
+    Object? configs = unsetCopyWithValue,
+    Object? cacheControl = unsetCopyWithValue,
+  }) {
+    return BrowserToolset(
+      type: type ?? this.type,
+      configs: configs == unsetCopyWithValue
+          ? this.configs
+          : configs as BrowserToolsetConfigs?,
+      cacheControl: cacheControl == unsetCopyWithValue
+          ? this.cacheControl
+          : cacheControl as CacheControlEphemeral?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BrowserToolset &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          configs == other.configs &&
+          cacheControl == other.cacheControl;
+
+  @override
+  int get hashCode => Object.hash(type, configs, cacheControl);
+
+  @override
+  String toString() =>
+      'BrowserToolset(type: $type, configs: $configs, '
+      'cacheControl: $cacheControl)';
 }

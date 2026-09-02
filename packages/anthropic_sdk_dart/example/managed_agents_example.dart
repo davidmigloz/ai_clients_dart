@@ -24,12 +24,22 @@ void main() async {
     // =========================================================================
     print('=== Agents ===');
 
-    // Create an agent with a model and system prompt
+    // Create an agent with a model, system prompt, and typed per-tool
+    // configuration — restrict web search to a domain allowlist.
     final agent = await client.agents.create(
-      const CreateAgentParams(
+      CreateAgentParams(
         name: 'Helper Agent',
-        model: ModelParamsId(id: 'claude-sonnet-4-6'),
+        model: const ModelParamsId(id: 'claude-sonnet-4-6'),
         system: 'You are a helpful assistant.',
+        tools: [
+          AgentToolset20260401Params(
+            configs: [
+              AgentToolConfigParams.webSearch(
+                allowedDomains: ['docs.anthropic.com'],
+              ),
+            ],
+          ),
+        ],
       ),
     );
     print('Created agent: ${agent.id} (v${agent.version})');
@@ -122,15 +132,23 @@ void main() async {
           agents: [
             MultiagentRosterEntryAgent(agent: AgentParamsId(id: worker.id)),
             const MultiagentSelfParams(),
+            // The platform advisor: a model the primary thread may consult
+            // mid-turn. At most one per roster.
+            MultiagentRosterEntryParams.advisor('claude-fable-5-1'),
           ],
         ),
       ),
     );
     final resolved = coordinator.multiagent;
     if (resolved is MultiagentCoordinator) {
-      print(
-        'Coordinator roster: ${resolved.agents.map((a) => a.id).join(', ')}',
+      final roster = resolved.agents.map(
+        (entry) => switch (entry) {
+          AgentReference(:final id) => id,
+          Advisor(:final model) => 'advisor:$model',
+          _ => 'unknown',
+        },
       );
+      print('Coordinator roster: ${roster.join(', ')}');
     }
 
     // Define an outcome the agent should work toward, graded by a rubric.

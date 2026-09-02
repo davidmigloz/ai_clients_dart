@@ -3,6 +3,8 @@ import 'package:meta/meta.dart';
 import '../../beta_timestamp.dart';
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import '../agents/multiagent.dart' show Advisor;
+import '../common/budget.dart';
 import '../config/agent_skill.dart';
 import '../config/agent_tool.dart';
 import '../config/mcp_server.dart';
@@ -99,6 +101,9 @@ class Session {
   /// When the session was archived. Null if not archived.
   final BetaTimestamp? archivedAt;
 
+  /// The session's enforced spend ceiling, or null when no budget is set.
+  final Budget? budget;
+
   /// Creates a [Session].
   const Session({
     required this.id,
@@ -117,6 +122,7 @@ class Session {
     required this.createdAt,
     required this.updatedAt,
     required this.archivedAt,
+    this.budget,
   });
 
   /// Creates a [Session] from JSON.
@@ -150,6 +156,9 @@ class Session {
       archivedAt: json['archived_at'] != null
           ? DateTime.parse(json['archived_at'] as String)
           : null,
+      budget: json['budget'] != null
+          ? Budget.fromJson(json['budget'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -171,6 +180,7 @@ class Session {
     'created_at': createdAt.toUtc().toIso8601String(),
     'updated_at': updatedAt.toUtc().toIso8601String(),
     'archived_at': archivedAt?.toUtc().toIso8601String(),
+    'budget': budget?.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -191,6 +201,7 @@ class Session {
     BetaTimestamp? createdAt,
     BetaTimestamp? updatedAt,
     Object? archivedAt = unsetCopyWithValue,
+    Object? budget = unsetCopyWithValue,
   }) {
     return Session(
       id: id ?? this.id,
@@ -213,6 +224,7 @@ class Session {
       archivedAt: archivedAt == unsetCopyWithValue
           ? this.archivedAt
           : archivedAt as BetaTimestamp?,
+      budget: budget == unsetCopyWithValue ? this.budget : budget as Budget?,
     );
   }
 
@@ -236,7 +248,8 @@ class Session {
           listsEqual(outcomeEvaluations, other.outcomeEvaluations) &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt &&
-          archivedAt == other.archivedAt;
+          archivedAt == other.archivedAt &&
+          budget == other.budget;
 
   @override
   int get hashCode => Object.hash(
@@ -256,6 +269,7 @@ class Session {
     createdAt,
     updatedAt,
     archivedAt,
+    budget,
   );
 
   @override
@@ -276,7 +290,8 @@ class Session {
       'outcomeEvaluations: $outcomeEvaluations, '
       'createdAt: $createdAt, '
       'updatedAt: $updatedAt, '
-      'archivedAt: $archivedAt)';
+      'archivedAt: $archivedAt, '
+      'budget: $budget)';
 }
 
 /// Resolved agent definition for a session — snapshot at session creation time.
@@ -534,12 +549,30 @@ class SessionUsage {
   /// Tokens used to create prompt cache entries.
   final CacheCreationUsage? cacheCreation;
 
+  /// Cumulative time in seconds during which the session had at least one
+  /// thread in running status. Overlapping activity from concurrent threads
+  /// is counted once, unlike `stats.activeSeconds`, which sums each thread's
+  /// own active time. This is the duration the session's runtime cost is
+  /// priced on.
+  final double? activeSeconds;
+
+  /// Cumulative list cost of the session across all turns, priced at public
+  /// list rates. Absent until cost tracking is available for the session.
+  final MonetaryAmount? listCost;
+
+  /// Cumulative server-executed tool usage across all turns. Absent until
+  /// server-tool tracking is available for the session.
+  final ManagedAgentsServerToolUsage? serverToolUse;
+
   /// Creates a [SessionUsage].
   const SessionUsage({
     this.inputTokens,
     this.outputTokens,
     this.cacheReadInputTokens,
     this.cacheCreation,
+    this.activeSeconds,
+    this.listCost,
+    this.serverToolUse,
   });
 
   /// Creates a [SessionUsage] from JSON.
@@ -553,6 +586,15 @@ class SessionUsage {
               json['cache_creation'] as Map<String, dynamic>,
             )
           : null,
+      activeSeconds: (json['active_seconds'] as num?)?.toDouble(),
+      listCost: json['list_cost'] != null
+          ? MonetaryAmount.fromJson(json['list_cost'] as Map<String, dynamic>)
+          : null,
+      serverToolUse: json['server_tool_use'] != null
+          ? ManagedAgentsServerToolUsage.fromJson(
+              json['server_tool_use'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -563,6 +605,9 @@ class SessionUsage {
     if (cacheReadInputTokens != null)
       'cache_read_input_tokens': cacheReadInputTokens,
     if (cacheCreation != null) 'cache_creation': cacheCreation!.toJson(),
+    if (activeSeconds != null) 'active_seconds': activeSeconds,
+    if (listCost != null) 'list_cost': listCost!.toJson(),
+    if (serverToolUse != null) 'server_tool_use': serverToolUse!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -571,6 +616,9 @@ class SessionUsage {
     Object? outputTokens = unsetCopyWithValue,
     Object? cacheReadInputTokens = unsetCopyWithValue,
     Object? cacheCreation = unsetCopyWithValue,
+    Object? activeSeconds = unsetCopyWithValue,
+    Object? listCost = unsetCopyWithValue,
+    Object? serverToolUse = unsetCopyWithValue,
   }) {
     return SessionUsage(
       inputTokens: inputTokens == unsetCopyWithValue
@@ -585,6 +633,15 @@ class SessionUsage {
       cacheCreation: cacheCreation == unsetCopyWithValue
           ? this.cacheCreation
           : cacheCreation as CacheCreationUsage?,
+      activeSeconds: activeSeconds == unsetCopyWithValue
+          ? this.activeSeconds
+          : activeSeconds as double?,
+      listCost: listCost == unsetCopyWithValue
+          ? this.listCost
+          : listCost as MonetaryAmount?,
+      serverToolUse: serverToolUse == unsetCopyWithValue
+          ? this.serverToolUse
+          : serverToolUse as ManagedAgentsServerToolUsage?,
     );
   }
 
@@ -596,7 +653,10 @@ class SessionUsage {
           inputTokens == other.inputTokens &&
           outputTokens == other.outputTokens &&
           cacheReadInputTokens == other.cacheReadInputTokens &&
-          cacheCreation == other.cacheCreation;
+          cacheCreation == other.cacheCreation &&
+          activeSeconds == other.activeSeconds &&
+          listCost == other.listCost &&
+          serverToolUse == other.serverToolUse;
 
   @override
   int get hashCode => Object.hash(
@@ -604,6 +664,9 @@ class SessionUsage {
     outputTokens,
     cacheReadInputTokens,
     cacheCreation,
+    activeSeconds,
+    listCost,
+    serverToolUse,
   );
 
   @override
@@ -612,7 +675,10 @@ class SessionUsage {
       'inputTokens: $inputTokens, '
       'outputTokens: $outputTokens, '
       'cacheReadInputTokens: $cacheReadInputTokens, '
-      'cacheCreation: $cacheCreation)';
+      'cacheCreation: $cacheCreation, '
+      'activeSeconds: $activeSeconds, '
+      'listCost: $listCost, '
+      'serverToolUse: $serverToolUse)';
 }
 
 /// Confirmation that a session has been permanently deleted.
@@ -692,7 +758,7 @@ class SessionMultiagentCoordinator extends SessionMultiagent {
   String get type => 'coordinator';
 
   /// Full agent definitions the coordinator may spawn as session threads.
-  final List<SessionAgent> agents;
+  final List<SessionRosterEntry> agents;
 
   /// Creates a [SessionMultiagentCoordinator].
   const SessionMultiagentCoordinator({required this.agents});
@@ -701,7 +767,7 @@ class SessionMultiagentCoordinator extends SessionMultiagent {
   factory SessionMultiagentCoordinator.fromJson(Map<String, dynamic> json) {
     return SessionMultiagentCoordinator(
       agents: (json['agents'] as List)
-          .map((e) => SessionAgent.fromJson(e as Map<String, dynamic>))
+          .map((e) => SessionRosterEntry.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
   }
@@ -713,7 +779,7 @@ class SessionMultiagentCoordinator extends SessionMultiagent {
   };
 
   /// Creates a copy with replaced values.
-  SessionMultiagentCoordinator copyWith({List<SessionAgent>? agents}) {
+  SessionMultiagentCoordinator copyWith({List<SessionRosterEntry>? agents}) {
     return SessionMultiagentCoordinator(agents: agents ?? this.agents);
   }
 
@@ -756,4 +822,233 @@ class UnknownSessionMultiagent extends SessionMultiagent {
 
   @override
   String toString() => 'UnknownSessionMultiagent(rawJson: $rawJson)';
+}
+
+// ---------------------------------------------------------------------------
+// SessionRosterEntry
+// ---------------------------------------------------------------------------
+
+/// The resolved agent a coordinator roster entry or session thread runs: a
+/// saved-agent snapshot or the platform advisor entry.
+///
+/// Deliberately declared as a plain abstract class rather than `sealed`: the
+/// [Advisor] variant is shared with [MultiagentRosterEntry] (a separate union
+/// declared in a different library), and Dart's `sealed` modifier restricts
+/// direct subtypes to the declaring library. Exhaustiveness is instead
+/// enforced by the [fromJson] dispatch (with an `Unknown*` fallback), matching
+/// the forward-compatibility pattern used throughout this package.
+///
+/// Variants:
+/// - [SessionThreadAgent] — a saved-agent snapshot (`type: "agent"`).
+/// - [Advisor] — the platform advisor roster entry (`type: "advisor"`).
+/// - [UnknownSessionRosterEntry] — unrecognized entry type (preserves raw
+///   JSON).
+abstract class SessionRosterEntry {
+  /// Const constructor for subclasses.
+  const SessionRosterEntry();
+
+  /// Creates a [SessionRosterEntry] from JSON.
+  factory SessionRosterEntry.fromJson(Map<String, dynamic> json) {
+    final type = json['type'] as String?;
+    return switch (type) {
+      'agent' => SessionThreadAgent.fromJson(json),
+      'advisor' => Advisor.fromJson(json),
+      _ => UnknownSessionRosterEntry(rawJson: json),
+    };
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson();
+}
+
+/// Resolved `agent` definition for a single session thread — a snapshot of
+/// the agent at thread creation time. The multiagent roster is not repeated
+/// here; read it from `Session.agent`.
+@immutable
+class SessionThreadAgent extends SessionRosterEntry {
+  /// Agent identifier.
+  final String id;
+
+  /// Object type. Always "agent".
+  final String type;
+
+  /// Agent version.
+  final int version;
+
+  /// Agent name.
+  final String name;
+
+  /// Agent description.
+  final String? description;
+
+  /// System prompt.
+  final String? system;
+
+  /// Model configuration.
+  final ModelConfig model;
+
+  /// MCP servers connected to this agent.
+  final List<MCPServer> mcpServers;
+
+  /// Skills attached to this agent.
+  final List<AgentSkill> skills;
+
+  /// Tool configurations for this agent.
+  final List<AgentTool> tools;
+
+  /// Creates a [SessionThreadAgent].
+  const SessionThreadAgent({
+    required this.id,
+    this.type = 'agent',
+    required this.version,
+    required this.name,
+    this.description,
+    this.system,
+    required this.model,
+    required this.mcpServers,
+    required this.skills,
+    required this.tools,
+  });
+
+  /// Creates a [SessionThreadAgent] from JSON.
+  factory SessionThreadAgent.fromJson(Map<String, dynamic> json) {
+    return SessionThreadAgent(
+      id: json['id'] as String,
+      type: json['type'] as String? ?? 'agent',
+      version: json['version'] as int,
+      name: json['name'] as String,
+      description: json['description'] as String?,
+      system: json['system'] as String?,
+      model: ModelConfig.fromJson(json['model'] as Map<String, dynamic>),
+      mcpServers:
+          (json['mcp_servers'] as List?)
+              ?.map((e) => MCPServer.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      skills:
+          (json['skills'] as List?)
+              ?.map((e) => AgentSkill.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      tools:
+          (json['tools'] as List?)
+              ?.map((e) => AgentTool.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'type': type,
+    'version': version,
+    'name': name,
+    'description': description,
+    'system': system,
+    'model': model.toJson(),
+    'mcp_servers': mcpServers.map((e) => e.toJson()).toList(),
+    'skills': skills.map((e) => e.toJson()).toList(),
+    'tools': tools.map((e) => e.toJson()).toList(),
+  };
+
+  /// Creates a copy with replaced values.
+  SessionThreadAgent copyWith({
+    String? id,
+    String? type,
+    int? version,
+    String? name,
+    Object? description = unsetCopyWithValue,
+    Object? system = unsetCopyWithValue,
+    ModelConfig? model,
+    List<MCPServer>? mcpServers,
+    List<AgentSkill>? skills,
+    List<AgentTool>? tools,
+  }) {
+    return SessionThreadAgent(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      version: version ?? this.version,
+      name: name ?? this.name,
+      description: description == unsetCopyWithValue
+          ? this.description
+          : description as String?,
+      system: system == unsetCopyWithValue ? this.system : system as String?,
+      model: model ?? this.model,
+      mcpServers: mcpServers ?? this.mcpServers,
+      skills: skills ?? this.skills,
+      tools: tools ?? this.tools,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SessionThreadAgent &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          type == other.type &&
+          version == other.version &&
+          name == other.name &&
+          description == other.description &&
+          system == other.system &&
+          model == other.model &&
+          listsEqual(mcpServers, other.mcpServers) &&
+          listsEqual(skills, other.skills) &&
+          listsEqual(tools, other.tools);
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    type,
+    version,
+    name,
+    description,
+    system,
+    model,
+    listHash(mcpServers),
+    listHash(skills),
+    listHash(tools),
+  );
+
+  @override
+  String toString() =>
+      'SessionThreadAgent('
+      'id: $id, '
+      'type: $type, '
+      'version: $version, '
+      'name: $name, '
+      'description: $description, '
+      'system: $system, '
+      'model: $model, '
+      'mcpServers: $mcpServers, '
+      'skills: $skills, '
+      'tools: $tools)';
+}
+
+/// Unrecognized [SessionRosterEntry] type — preserves raw JSON for forward
+/// compatibility.
+@immutable
+class UnknownSessionRosterEntry extends SessionRosterEntry {
+  /// The raw JSON.
+  final Map<String, dynamic> rawJson;
+
+  /// Creates an [UnknownSessionRosterEntry].
+  const UnknownSessionRosterEntry({required this.rawJson});
+
+  @override
+  Map<String, dynamic> toJson() => rawJson;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownSessionRosterEntry &&
+          runtimeType == other.runtimeType &&
+          mapsDeepEqual(rawJson, other.rawJson);
+
+  @override
+  int get hashCode => mapDeepHashCode(rawJson);
+
+  @override
+  String toString() => 'UnknownSessionRosterEntry(rawJson: $rawJson)';
 }

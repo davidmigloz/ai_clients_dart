@@ -1,8 +1,9 @@
 import 'package:meta/meta.dart';
 
+import '../beta_timestamp.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
-import 'user_profile_relationship.dart';
+import 'user_profile_access_type.dart';
 
 /// Private sentinel to distinguish "not provided" from explicit `null`.
 const Object _notSet = Object();
@@ -38,16 +39,31 @@ class UpdateUserProfileRequest {
   bool get hasName => _name != _notSet;
   final Object? _name;
 
-  /// Updated relationship to the platform.
+  /// Updated access type, or `null` to clear it.
   ///
-  /// Returns `null` when omitted. Use [hasRelationship] to disambiguate.
-  BetaUserProfileRelationship? get relationship => _relationship == _notSet
-      ? null
-      : _relationship as BetaUserProfileRelationship?;
+  /// Returns `null` both when omitted and when explicitly set to `null`.
+  /// Use [hasAccessType] to disambiguate if needed.
+  UserProfileAccessType? get accessType =>
+      _accessType == _notSet ? null : _accessType as UserProfileAccessType?;
 
-  /// Whether a relationship update was provided.
-  bool get hasRelationship => _relationship != _notSet;
-  final Object? _relationship;
+  /// Whether an access type update was provided.
+  bool get hasAccessType => _accessType != _notSet;
+  final Object? _accessType;
+
+  /// Updated account-creation time.
+  ///
+  /// Once set, this value cannot be cleared: the API rejects an explicit
+  /// `null`, so this field only supports being left unset or set to a
+  /// timestamp. Returns `null` when omitted. Use
+  /// [hasExternalUserOnboardedAt] to disambiguate.
+  BetaTimestamp? get externalUserOnboardedAt =>
+      _externalUserOnboardedAt == _notSet
+      ? null
+      : _externalUserOnboardedAt as BetaTimestamp?;
+
+  /// Whether an account-creation-time update was provided.
+  bool get hasExternalUserOnboardedAt => _externalUserOnboardedAt != _notSet;
+  final Object? _externalUserOnboardedAt;
 
   /// Metadata patch: keys to upsert into the stored metadata.
   ///
@@ -62,23 +78,33 @@ class UpdateUserProfileRequest {
 
   /// Creates an [UpdateUserProfileRequest].
   ///
-  /// Omit a field to leave its stored value unchanged. Pass `null` explicitly
-  /// for [externalId], [name], or [relationship] to clear them. [metadata] is
-  /// not nullable per the spec — to delete a stored key, include it in
-  /// [metadata] with an empty-string value; to leave metadata entirely
-  /// unchanged, omit the parameter.
+  /// Omit a field to leave its stored value unchanged. Pass `null`
+  /// explicitly for [externalId], [name], or [accessType] to clear them.
+  /// [externalUserOnboardedAt] cannot be cleared once set — the API rejects
+  /// an explicit `null` for it — so only omit it or pass a timestamp.
+  /// [metadata] is not nullable per the spec — to delete a stored key,
+  /// include it in [metadata] with an empty-string value; to leave metadata
+  /// entirely unchanged, omit the parameter.
   const UpdateUserProfileRequest({
     Object? externalId = _notSet,
     Object? name = _notSet,
-    Object? relationship = _notSet,
+    Object? accessType = _notSet,
+    Object? externalUserOnboardedAt = _notSet,
     Object? metadata = _notSet,
   }) : assert(
          metadata == _notSet || metadata is Map<String, String>,
          'metadata must be a Map<String, String> when provided; use empty-string values to remove keys, or omit the metadata parameter to leave it unchanged',
        ),
+       assert(
+         externalUserOnboardedAt == _notSet ||
+             externalUserOnboardedAt is DateTime,
+         'externalUserOnboardedAt cannot be cleared with null once set; omit '
+         'it to leave it unchanged, or pass a DateTime',
+       ),
        _externalId = externalId,
        _name = name,
-       _relationship = relationship,
+       _accessType = accessType,
+       _externalUserOnboardedAt = externalUserOnboardedAt,
        _metadata = metadata;
 
   /// Creates an [UpdateUserProfileRequest] from JSON.
@@ -88,12 +114,18 @@ class UpdateUserProfileRequest {
           ? json['external_id'] as String?
           : _notSet,
       name: json.containsKey('name') ? json['name'] as String? : _notSet,
-      relationship: json.containsKey('relationship')
-          ? (json['relationship'] != null
-                ? BetaUserProfileRelationship.fromJson(
-                    json['relationship'] as String,
-                  )
+      accessType: json.containsKey('access_type')
+          ? (json['access_type'] != null
+                ? UserProfileAccessType.fromJson(json['access_type'] as String)
                 : null)
+          : _notSet,
+      externalUserOnboardedAt: json.containsKey('external_user_onboarded_at')
+          ? (json['external_user_onboarded_at'] != null
+                ? DateTime.parse(json['external_user_onboarded_at'] as String)
+                : throw const FormatException(
+                    'UpdateUserProfileRequest: '
+                    '"external_user_onboarded_at" cannot be null',
+                  ))
           : _notSet,
       metadata: json.containsKey('metadata')
           ? (json['metadata'] as Map<String, dynamic>?)?.map(
@@ -111,8 +143,12 @@ class UpdateUserProfileRequest {
   Map<String, dynamic> toJson() => {
     if (_externalId != _notSet) 'external_id': _externalId,
     if (_name != _notSet) 'name': _name,
-    if (_relationship != _notSet)
-      'relationship': (_relationship as BetaUserProfileRelationship?)?.toJson(),
+    if (_accessType != _notSet)
+      'access_type': (_accessType as UserProfileAccessType?)?.toJson(),
+    if (_externalUserOnboardedAt != _notSet)
+      'external_user_onboarded_at': (_externalUserOnboardedAt as DateTime?)
+          ?.toUtc()
+          .toIso8601String(),
     if (_metadata != _notSet) 'metadata': _metadata,
   };
 
@@ -123,15 +159,17 @@ class UpdateUserProfileRequest {
   UpdateUserProfileRequest copyWith({
     Object? externalId = unsetCopyWithValue,
     Object? name = unsetCopyWithValue,
-    Object? relationship = unsetCopyWithValue,
+    Object? accessType = unsetCopyWithValue,
+    Object? externalUserOnboardedAt = unsetCopyWithValue,
     Object? metadata = unsetCopyWithValue,
   }) {
     return UpdateUserProfileRequest(
       externalId: externalId == unsetCopyWithValue ? _externalId : externalId,
       name: name == unsetCopyWithValue ? _name : name,
-      relationship: relationship == unsetCopyWithValue
-          ? _relationship
-          : relationship,
+      accessType: accessType == unsetCopyWithValue ? _accessType : accessType,
+      externalUserOnboardedAt: externalUserOnboardedAt == unsetCopyWithValue
+          ? _externalUserOnboardedAt
+          : externalUserOnboardedAt,
       metadata: metadata == unsetCopyWithValue ? _metadata : metadata,
     );
   }
@@ -143,14 +181,16 @@ class UpdateUserProfileRequest {
           runtimeType == other.runtimeType &&
           _externalId == other._externalId &&
           _name == other._name &&
-          _relationship == other._relationship &&
+          _accessType == other._accessType &&
+          _externalUserOnboardedAt == other._externalUserOnboardedAt &&
           _mapsEqualOrBothSentinel(_metadata, other._metadata);
 
   @override
   int get hashCode => Object.hash(
     _externalId,
     _name,
-    _relationship,
+    _accessType,
+    _externalUserOnboardedAt,
     _metadata == _notSet ? _notSet : mapHash(metadata),
   );
 
@@ -159,7 +199,8 @@ class UpdateUserProfileRequest {
       'UpdateUserProfileRequest('
       'externalId: $externalId, '
       'name: $name, '
-      'relationship: $relationship, '
+      'accessType: $accessType, '
+      'externalUserOnboardedAt: $externalUserOnboardedAt, '
       'metadata: $metadata)';
 }
 

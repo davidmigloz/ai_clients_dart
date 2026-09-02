@@ -5,19 +5,21 @@ import 'package:http/http.dart' as http;
 
 import '../auth/auth_provider.dart';
 import '../errors/exceptions.dart';
+import '../models/skills/deleted_skill.dart';
 import '../models/skills/skill.dart';
+import '../models/skills/skill_file.dart';
 import '../models/skills/skill_list_response.dart';
 import '../models/skills/skill_source.dart';
 import '../models/skills/skill_version.dart';
 import 'base_resource.dart';
-
-/// Beta header for the Skills API.
-const _betaHeader = 'skills-2025-10-02';
+import 'media_type.dart';
 
 /// Resource for the Skills API.
 ///
 /// Skills are reusable components that extend Claude's capabilities.
-/// This is a beta feature and requires the `anthropic-beta` header.
+///
+/// This is a generally-available (GA) API; no `anthropic-beta` header is
+/// required.
 class SkillsResource extends ResourceBase {
   /// Creates a [SkillsResource].
   SkillsResource({
@@ -30,42 +32,47 @@ class SkillsResource extends ResourceBase {
 
   /// Creates a new skill.
   ///
-  /// The [skillBytes] is the skill content as a ZIP archive.
-  /// The [displayTitle] is an optional human-readable title for the skill.
+  /// The [files] must all share one top-level directory that contains a
+  /// `SKILL.md` file at its root (e.g. `my-skill/SKILL.md`). Each file is
+  /// sent as a separate multipart part under the repeated field name
+  /// `files[]`.
+  /// The [displayName] is an optional human-readable label for the skill;
+  /// when omitted, it's derived from the `SKILL.md` frontmatter `name`.
   ///
   /// Returns a [Skill] with information about the created skill.
   ///
   /// Example:
   /// ```dart
-  /// final bytes = await File('my-skill.zip').readAsBytes();
+  /// final skillMd = await File('my-skill/SKILL.md').readAsBytes();
   /// final skill = await client.skills.create(
-  ///   skillBytes: bytes,
-  ///   displayTitle: 'My Custom Skill',
+  ///   files: [SkillFile(path: 'my-skill/SKILL.md', bytes: skillMd)],
+  ///   displayName: 'My Custom Skill',
   /// );
   /// print('Created skill: ${skill.id}');
   /// ```
   Future<Skill> create({
-    required Uint8List skillBytes,
-    String? displayTitle,
+    required List<SkillFile> files,
+    String? displayName,
   }) async {
     final uri = requestBuilder.buildUrl('/v1/skills');
     // Remove content-type as multipart will set its own
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'anthropic-beta': _betaHeader},
-    )..remove('content-type');
+    final headers = requestBuilder.buildHeaders()..remove('content-type');
 
-    final request = http.MultipartRequest('POST', uri)
-      ..headers.addAll(headers)
-      ..files.add(
+    final request = http.MultipartRequest('POST', uri)..headers.addAll(headers);
+    for (final file in files) {
+      request.files.add(
         http.MultipartFile.fromBytes(
-          'skill',
-          skillBytes,
-          filename: 'skill.zip',
-          contentType: http.MediaType('application', 'zip'),
+          'files[]',
+          file.bytes,
+          filename: file.path,
+          contentType: file.mimeType != null
+              ? parseMediaTypeOrOctetStream(file.mimeType!)
+              : null,
         ),
       );
-    if (displayTitle != null) {
-      request.fields['display_title'] = displayTitle;
+    }
+    if (displayName != null) {
+      request.fields['display_name'] = displayName;
     }
 
     // Add authentication header
@@ -86,8 +93,7 @@ class SkillsResource extends ResourceBase {
   ///
   /// The [limit] specifies the maximum number of skills to return (default 20).
   /// The [page] is an optional pagination token from a previous response.
-  /// The [source] filters by source ([SkillSource.custom] or
-  /// [SkillSource.anthropic]).
+  /// The [source] filters by source.
   ///
   /// Returns a [SkillListResponse] with the list of skills and pagination info.
   ///
@@ -95,13 +101,13 @@ class SkillsResource extends ResourceBase {
   /// ```dart
   /// final response = await client.skills.list(limit: 10);
   /// for (final skill in response.data) {
-  ///   print('${skill.id}: ${skill.displayTitle}');
+  ///   print('${skill.id}: ${skill.displayName}');
   /// }
   /// ```
   Future<SkillListResponse> list({
     int? limit,
     String? page,
-    SkillSource? source,
+    SkillSourceType? source,
   }) async {
     ensureNotClosed?.call();
     final queryParams = <String, dynamic>{
@@ -114,9 +120,7 @@ class SkillsResource extends ResourceBase {
       '/v1/skills',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'anthropic-beta': _betaHeader},
-    );
+    final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
@@ -135,14 +139,12 @@ class SkillsResource extends ResourceBase {
   /// Example:
   /// ```dart
   /// final skill = await client.skills.retrieve(skillId: 'skill_abc123');
-  /// print('Skill: ${skill.displayTitle}');
+  /// print('Skill: ${skill.displayName}');
   /// ```
   Future<Skill> retrieve({required String skillId}) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/skills/$skillId');
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'anthropic-beta': _betaHeader},
-    );
+    final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
@@ -154,58 +156,66 @@ class SkillsResource extends ResourceBase {
   ///
   /// The [skillId] is the unique identifier of the skill to delete.
   ///
+  /// Returns a [DeletedSkill] confirming the deletion.
+  ///
   /// Example:
   /// ```dart
-  /// await client.skills.deleteSkill(skillId: 'skill_abc123');
-  /// print('Skill deleted');
+  /// final deleted = await client.skills.deleteSkill(skillId: 'skill_abc123');
+  /// print('Skill deleted: ${deleted.id}');
   /// ```
-  Future<void> deleteSkill({required String skillId}) async {
+  Future<DeletedSkill> deleteSkill({required String skillId}) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/skills/$skillId');
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'anthropic-beta': _betaHeader},
-    );
+    final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
 
-    await interceptorChain.execute(httpRequest);
+    final response = await interceptorChain.execute(httpRequest);
+
+    return DeletedSkill.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Creates a new version of a skill.
   ///
   /// The [skillId] is the unique identifier of the skill.
-  /// The [versionBytes] is the new version content as a ZIP archive.
+  /// The [files] must all share one top-level directory that contains a
+  /// `SKILL.md` file at its root (e.g. `my-skill/SKILL.md`). Each file is
+  /// sent as a separate multipart part under the repeated field name
+  /// `files[]`.
   ///
   /// Returns a [SkillVersion] with information about the created version.
   ///
   /// Example:
   /// ```dart
-  /// final bytes = await File('my-skill-v2.zip').readAsBytes();
+  /// final skillMd = await File('my-skill/SKILL.md').readAsBytes();
   /// final version = await client.skills.createVersion(
   ///   skillId: 'skill_abc123',
-  ///   versionBytes: bytes,
+  ///   files: [SkillFile(path: 'my-skill/SKILL.md', bytes: skillMd)],
   /// );
-  /// print('Created version: ${version.version}');
+  /// print('Created version: ${version.id}');
   /// ```
   Future<SkillVersion> createVersion({
     required String skillId,
-    required Uint8List versionBytes,
+    required List<SkillFile> files,
   }) async {
     final uri = requestBuilder.buildUrl('/v1/skills/$skillId/versions');
     // Remove content-type as multipart will set its own
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'anthropic-beta': _betaHeader},
-    )..remove('content-type');
+    final headers = requestBuilder.buildHeaders()..remove('content-type');
 
-    final request = http.MultipartRequest('POST', uri)
-      ..headers.addAll(headers)
-      ..files.add(
+    final request = http.MultipartRequest('POST', uri)..headers.addAll(headers);
+    for (final file in files) {
+      request.files.add(
         http.MultipartFile.fromBytes(
-          'skill',
-          versionBytes,
-          filename: 'skill.zip',
-          contentType: http.MediaType('application', 'zip'),
+          'files[]',
+          file.bytes,
+          filename: file.path,
+          contentType: file.mimeType != null
+              ? parseMediaTypeOrOctetStream(file.mimeType!)
+              : null,
         ),
       );
+    }
 
     // Add authentication header
     await _applyAuthentication(request);
@@ -235,7 +245,7 @@ class SkillsResource extends ResourceBase {
   ///   skillId: 'skill_abc123',
   /// );
   /// for (final version in response.data) {
-  ///   print('${version.version}: ${version.description}');
+  ///   print('${version.id}: ${version.description}');
   /// }
   /// ```
   Future<SkillVersionListResponse> listVersions({
@@ -253,9 +263,7 @@ class SkillsResource extends ResourceBase {
       '/v1/skills/$skillId/versions',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'anthropic-beta': _betaHeader},
-    );
+    final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
@@ -276,7 +284,7 @@ class SkillsResource extends ResourceBase {
   /// ```dart
   /// final version = await client.skills.retrieveVersion(
   ///   skillId: 'skill_abc123',
-  ///   version: '1759178010641129',
+  ///   version: 'skillver_abc123',
   /// );
   /// print('Version: ${version.name}');
   /// ```
@@ -288,9 +296,7 @@ class SkillsResource extends ResourceBase {
     final url = requestBuilder.buildUrl(
       '/v1/skills/$skillId/versions/$version',
     );
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'anthropic-beta': _betaHeader},
-    );
+    final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
@@ -307,14 +313,16 @@ class SkillsResource extends ResourceBase {
   ///
   /// Returns the version's content as a ZIP archive (raw bytes).
   ///
-  /// This is a beta feature and requires the `anthropic-beta:
-  /// skills-2025-10-02` header (sent automatically).
+  /// This endpoint is header-less like the rest of this resource. Note that
+  /// the spec only documents it under the beta namespace (with an optional
+  /// `anthropic-beta` header) and it isn't exposed by the official Python
+  /// SDK; it is included here for completeness.
   ///
   /// Example:
   /// ```dart
   /// final bytes = await client.skills.downloadVersion(
   ///   skillId: 'skill_abc123',
-  ///   version: '1759178010641129',
+  ///   version: 'skillver_abc123',
   /// );
   /// await File('skill.zip').writeAsBytes(bytes);
   /// ```
@@ -336,9 +344,7 @@ class SkillsResource extends ResourceBase {
     // The response is a binary ZIP archive. Widen Accept and drop the default
     // JSON content-type (this GET has no request body), matching the binary
     // download convention used by FilesResource.download.
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'anthropic-beta': _betaHeader},
-    );
+    final headers = requestBuilder.buildHeaders();
     headers['accept'] = '*/*';
     headers.remove('content-type');
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
@@ -353,15 +359,17 @@ class SkillsResource extends ResourceBase {
   /// The [skillId] is the unique identifier of the skill.
   /// The [version] is the version identifier to delete.
   ///
+  /// Returns a [DeletedSkillVersion] confirming the deletion.
+  ///
   /// Example:
   /// ```dart
-  /// await client.skills.deleteVersion(
+  /// final deleted = await client.skills.deleteVersion(
   ///   skillId: 'skill_abc123',
-  ///   version: '1759178010641129',
+  ///   version: 'skillver_abc123',
   /// );
-  /// print('Version deleted');
+  /// print('Version deleted: ${deleted.id}');
   /// ```
-  Future<void> deleteVersion({
+  Future<DeletedSkillVersion> deleteVersion({
     required String skillId,
     required String version,
   }) async {
@@ -369,12 +377,14 @@ class SkillsResource extends ResourceBase {
     final url = requestBuilder.buildUrl(
       '/v1/skills/$skillId/versions/$version',
     );
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'anthropic-beta': _betaHeader},
-    );
+    final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
 
-    await interceptorChain.execute(httpRequest);
+    final response = await interceptorChain.execute(httpRequest);
+
+    return DeletedSkillVersion.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Throws an appropriate error from an HTTP response.

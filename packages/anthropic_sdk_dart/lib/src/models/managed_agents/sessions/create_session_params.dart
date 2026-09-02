@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import '../common/budget.dart';
 import '../config/agent_skill.dart';
 import '../config/agent_tool.dart';
 import '../config/mcp_server.dart';
@@ -309,6 +310,12 @@ class CreateSessionParams {
   /// Events sent to the session immediately after it is created.
   final List<SessionInitialEventParams>? initialEvents;
 
+  /// Enforced spend ceiling for the session. Omit to create an uncapped
+  /// session. Every model the session can run — the agent's model and each
+  /// callable agent's model — must have a public list price, or the request
+  /// is rejected with reason `model_not_budgetable`.
+  final Budget? budget;
+
   /// Creates a [CreateSessionParams].
   const CreateSessionParams({
     required this.agent,
@@ -318,6 +325,7 @@ class CreateSessionParams {
     this.vaultIds,
     this.resources,
     this.initialEvents,
+    this.budget,
   });
 
   /// Creates a [CreateSessionParams] from JSON.
@@ -341,6 +349,9 @@ class CreateSessionParams {
                 SessionInitialEventParams.fromJson(e as Map<String, dynamic>),
           )
           .toList(),
+      budget: json['budget'] != null
+          ? Budget.fromJson(json['budget'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -355,6 +366,7 @@ class CreateSessionParams {
       'resources': resources!.map((e) => e.toJson()).toList(),
     if (initialEvents != null)
       'initial_events': initialEvents!.map((e) => e.toJson()).toList(),
+    if (budget != null) 'budget': budget!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -366,6 +378,7 @@ class CreateSessionParams {
     Object? vaultIds = unsetCopyWithValue,
     Object? resources = unsetCopyWithValue,
     Object? initialEvents = unsetCopyWithValue,
+    Object? budget = unsetCopyWithValue,
   }) {
     return CreateSessionParams(
       agent: agent ?? this.agent,
@@ -383,6 +396,7 @@ class CreateSessionParams {
       initialEvents: initialEvents == unsetCopyWithValue
           ? this.initialEvents
           : initialEvents as List<SessionInitialEventParams>?,
+      budget: budget == unsetCopyWithValue ? this.budget : budget as Budget?,
     );
   }
 
@@ -397,7 +411,8 @@ class CreateSessionParams {
           mapsEqual(metadata, other.metadata) &&
           listsEqual(vaultIds, other.vaultIds) &&
           listsEqual(resources, other.resources) &&
-          listsEqual(initialEvents, other.initialEvents);
+          listsEqual(initialEvents, other.initialEvents) &&
+          budget == other.budget;
 
   @override
   int get hashCode => Object.hash(
@@ -408,6 +423,7 @@ class CreateSessionParams {
     listHash(vaultIds),
     listHash(resources),
     listHash(initialEvents),
+    budget,
   );
 
   @override
@@ -419,5 +435,6 @@ class CreateSessionParams {
       'metadata: $metadata, '
       'vaultIds: $vaultIds, '
       'resources: $resources, '
-      'initialEvents: $initialEvents)';
+      'initialEvents: $initialEvents, '
+      'budget: $budget)';
 }

@@ -1,18 +1,21 @@
 // ignore_for_file: avoid_print
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 
-/// Skills API example (Beta).
+/// Skills API example.
 ///
 /// This example demonstrates:
-/// - Creating a skill from a ZIP archive
+/// - Creating a skill from a set of files (a `SKILL.md` at minimum)
 /// - Listing skills
 /// - Retrieving skill details
 /// - Managing skill versions
-/// - Deleting skills
+/// - Deleting skills and versions
 ///
-/// Note: The Skills API is a beta feature and requires the anthropic-beta header.
+/// Note: The Skills API is generally available and does not require an
+/// anthropic-beta header.
 void main() async {
   final client = AnthropicClient(
     config: const AnthropicConfig(
@@ -21,124 +24,128 @@ void main() async {
   );
 
   try {
-    // Example 1: Create a skill
+    // Example 1: Create a skill from an in-memory SKILL.md.
+    //
+    // All files must share one top-level directory that contains a
+    // `SKILL.md` file at its root (e.g. `my-skill/SKILL.md`).
     print('=== Create Skill ===');
 
-    // In a real scenario, you would load a ZIP file containing your skill
-    const skillPath = 'example/sample_skill.zip';
-    final skillFile = File(skillPath);
+    const skillMdContent = '''
+---
+name: my-custom-skill
+description: A demo skill created from the Dart SDK.
+---
 
-    if (skillFile.existsSync()) {
-      final skillBytes = await skillFile.readAsBytes();
-      final skill = await client.skills.create(
-        skillBytes: skillBytes,
-        displayTitle: 'My Custom Skill',
-      );
+# My Custom Skill
 
-      print('Skill created:');
-      print('  ID: ${skill.id}');
-      print('  Display title: ${skill.displayTitle}');
-      print('  Source: ${skill.source}');
-      print('  Latest version: ${skill.latestVersion}');
+This skill demonstrates the Skills API.
+''';
 
-      // Example 2: List skills
-      print('\n=== List Skills ===');
-      final skillList = await client.skills.list(limit: 10);
+    final skill = await client.skills.create(
+      files: [
+        SkillFile(
+          path: 'my-custom-skill/SKILL.md',
+          bytes: Uint8List.fromList(utf8.encode(skillMdContent)),
+          mimeType: 'text/markdown',
+        ),
+      ],
+      displayName: 'My Custom Skill',
+    );
 
-      print('Skills (${skillList.data.length} total):');
-      for (final s in skillList.data) {
-        print('  - ${s.id}: ${s.displayTitle ?? "untitled"}');
-      }
-      print('Has more: ${skillList.hasMore}');
+    print('Skill created:');
+    print('  ID: ${skill.id}');
+    print('  Display name: ${skill.displayName}');
+    print('  Source: ${skill.source.type}');
+    print('  Latest version: ${skill.latestVersionId}');
 
-      // Example 3: Retrieve skill details
-      print('\n=== Retrieve Skill ===');
-      final retrievedSkill = await client.skills.retrieve(skillId: skill.id);
+    // Example 2: List skills
+    print('\n=== List Skills ===');
+    final skillList = await client.skills.list(limit: 10);
 
-      print('Skill details:');
-      print('  ID: ${retrievedSkill.id}');
-      print('  Display title: ${retrievedSkill.displayTitle}');
-      print('  Latest version: ${retrievedSkill.latestVersion}');
+    print('Skills (${skillList.data.length} total):');
+    for (final s in skillList.data) {
+      print('  - ${s.id}: ${s.displayName}');
+    }
+    print('Next page: ${skillList.nextPage}');
 
-      // Example 4: Create a new version
-      print('\n=== Create Version ===');
-      final newVersionBytes = await skillFile
-          .readAsBytes(); // In practice, different content
-      final version = await client.skills.createVersion(
-        skillId: skill.id,
-        versionBytes: newVersionBytes,
-      );
+    // Example 3: Retrieve skill details
+    print('\n=== Retrieve Skill ===');
+    final retrievedSkill = await client.skills.retrieve(skillId: skill.id);
 
-      print('Version created:');
-      print('  Version: ${version.version}');
-      print('  Description: ${version.description}');
+    print('Skill details:');
+    print('  ID: ${retrievedSkill.id}');
+    print('  Display name: ${retrievedSkill.displayName}');
+    print('  Latest version: ${retrievedSkill.latestVersionId}');
 
-      // Example 5: List versions
-      print('\n=== List Versions ===');
-      final versions = await client.skills.listVersions(skillId: skill.id);
+    // Example 4: Create a new version
+    print('\n=== Create Version ===');
+    const updatedSkillMdContent = '''
+---
+name: my-custom-skill
+description: A demo skill created from the Dart SDK (v2).
+---
 
-      print('Versions:');
-      for (final v in versions.data) {
-        print('  - ${v.version}: ${v.description}');
-      }
+# My Custom Skill (v2)
+''';
+    final version = await client.skills.createVersion(
+      skillId: skill.id,
+      files: [
+        SkillFile(
+          path: 'my-custom-skill/SKILL.md',
+          bytes: Uint8List.fromList(utf8.encode(updatedSkillMdContent)),
+        ),
+      ],
+    );
 
-      // Example 6: Download a version's content (zip archive)
-      print('\n=== Download Version Content ===');
-      final contentBytes = await client.skills.downloadVersion(
-        skillId: skill.id,
-        version: version.version,
-      );
-      print('Downloaded ${contentBytes.length} bytes');
-      await File('downloaded_skill.zip').writeAsBytes(contentBytes);
+    print('Version created:');
+    print('  ID: ${version.id}');
+    print('  Name: ${version.name}');
+    print('  Description: ${version.description}');
 
-      // Example 7: Delete version
-      print('\n=== Delete Version ===');
-      await client.skills.deleteVersion(
-        skillId: skill.id,
-        version: version.version,
-      );
-      print('Version deleted');
+    // Example 5: List versions
+    print('\n=== List Versions ===');
+    final versions = await client.skills.listVersions(skillId: skill.id);
 
-      // Example 8: Delete skill
-      print('\n=== Delete Skill ===');
-      await client.skills.deleteSkill(skillId: skill.id);
-      print('Skill deleted');
+    print('Versions:');
+    for (final v in versions.data) {
+      print('  - ${v.id}: ${v.description}');
+    }
+
+    // Example 6: Download a version's content (zip archive)
+    print('\n=== Download Version Content ===');
+    final contentBytes = await client.skills.downloadVersion(
+      skillId: skill.id,
+      version: version.id,
+    );
+    print('Downloaded ${contentBytes.length} bytes');
+    await File('downloaded_skill.zip').writeAsBytes(contentBytes);
+
+    // Example 7: Delete version
+    print('\n=== Delete Version ===');
+    final deletedVersion = await client.skills.deleteVersion(
+      skillId: skill.id,
+      version: version.id,
+    );
+    print('Version deleted: ${deletedVersion.id}');
+
+    // Example 8: Delete skill
+    print('\n=== Delete Skill ===');
+    final deletedSkill = await client.skills.deleteSkill(skillId: skill.id);
+    print('Skill deleted: ${deletedSkill.id}');
+
+    // Example 9: List Anthropic-provided skills
+    print('\n=== Anthropic Skills ===');
+    final anthropicSkills = await client.skills.list(
+      source: SkillSourceType.anthropic,
+      limit: 10,
+    );
+
+    if (anthropicSkills.data.isEmpty) {
+      print('No Anthropic skills available');
     } else {
-      print('No sample skill file found at $skillPath');
-      print('To test skill creation:');
-      print('1. Create a ZIP archive containing your skill files');
-      print('2. Place it at $skillPath');
-      print('3. Run this example again');
-
-      print('\nDemonstrating list operation instead...');
-
-      // List existing skills
-      print('\n=== List Skills ===');
-      final skillList = await client.skills.list(limit: 10);
-
-      if (skillList.data.isEmpty) {
-        print('No skills found');
-      } else {
-        print('Skills:');
-        for (final s in skillList.data) {
-          print('  - ${s.id}: ${s.displayTitle ?? "untitled"}');
-        }
-      }
-
-      // List Anthropic-provided skills
-      print('\n=== Anthropic Skills ===');
-      final anthropicSkills = await client.skills.list(
-        source: SkillSource.anthropic,
-        limit: 10,
-      );
-
-      if (anthropicSkills.data.isEmpty) {
-        print('No Anthropic skills available');
-      } else {
-        print('Anthropic-provided skills:');
-        for (final s in anthropicSkills.data) {
-          print('  - ${s.id}: ${s.displayTitle ?? "untitled"}');
-        }
+      print('Anthropic-provided skills:');
+      for (final s in anthropicSkills.data) {
+        print('  - ${s.id}: ${s.displayName}');
       }
     }
   } finally {
