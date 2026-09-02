@@ -38,10 +38,17 @@ void main() async {
           DreamSessionsInput(sessionIds: ['session_a', 'session_b']),
         ],
         instructions: 'Consolidate notes about user preferences.',
-        model: DreamModelParamsId(id: 'claude-opus-4-7'),
+        model: DreamModelParamsId(id: 'claude-sonnet-5'),
+        // Defaults to creating a new output memory store; pass
+        // `OutputBehavior.updateExisting(memoryStoreId)` to consolidate an
+        // existing store in place instead.
+        outputBehavior: OutputBehaviorCreateNew(),
       ),
     );
-    print('Created dream: ${dream.id} (status: ${dream.status})');
+    print(
+      'Created dream: ${dream.id} (status: ${dream.status}, '
+      'outputBehavior: ${dream.outputBehavior.runtimeType})',
+    );
 
     // 2. Poll until the dream finishes.
     print('\n=== Poll Dream ===');

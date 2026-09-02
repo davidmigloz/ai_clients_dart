@@ -20,10 +20,10 @@ void main() async {
     print('=== Basic Advisor Tool ===');
     final response = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-5',
         maxTokens: 4096,
         tools: [
-          ToolDefinition.builtIn(const AdvisorTool(model: 'claude-opus-4-8')),
+          ToolDefinition.builtIn(const AdvisorTool(model: 'claude-opus-5')),
         ],
         messages: [
           InputMessage.user(
@@ -80,7 +80,7 @@ For long agent loops, enable advisor-side caching to reduce costs:
 final tools = [
   ToolDefinition.builtIn(
     AdvisorTool(
-      model: 'claude-opus-4-8',
+      model: 'claude-opus-5',
       maxUses: 3,
       caching: CacheControlEphemeral(ttl: CacheTtl.ttl5m),
     ),
@@ -110,9 +110,9 @@ final messages = [
 // The advisor sees the full conversation history
 final response2 = await client.messages.create(
   MessageCreateRequest(
-    model: 'claude-sonnet-4-6',
+    model: 'claude-sonnet-5',
     maxTokens: 4096,
-    tools: [ToolDefinition.builtIn(AdvisorTool(model: 'claude-opus-4-8'))],
+    tools: [ToolDefinition.builtIn(AdvisorTool(model: 'claude-opus-5'))],
     messages: messages,
   ),
   betas: ['advisor-tool-2026-03-01'],

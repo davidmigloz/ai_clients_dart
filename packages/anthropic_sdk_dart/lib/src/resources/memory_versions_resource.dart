@@ -33,6 +33,8 @@ class MemoryVersionsResource extends ResourceBase {
   /// - [memoryId]: Filter to versions of a specific memory.
   /// - [sessionId]: Filter to versions created by a specific session.
   /// - [apiKeyId]: Filter to versions created by a specific API key.
+  /// - [serviceAccountId]: Filter to versions created by a specific service
+  ///   account.
   /// - [operation]: Filter by operation (created/modified/deleted).
   /// - [createdAtGte]: Lower bound (inclusive) ISO 8601 timestamp.
   /// - [createdAtLte]: Upper bound (inclusive) ISO 8601 timestamp.
@@ -44,6 +46,7 @@ class MemoryVersionsResource extends ResourceBase {
     String? memoryId,
     String? sessionId,
     String? apiKeyId,
+    String? serviceAccountId,
     MemoryVersionOperation? operation,
     String? createdAtGte,
     String? createdAtLte,
@@ -57,6 +60,7 @@ class MemoryVersionsResource extends ResourceBase {
       'memory_id': ?memoryId,
       'session_id': ?sessionId,
       'api_key_id': ?apiKeyId,
+      'service_account_id': ?serviceAccountId,
       'operation': ?operation?.toJson(),
       'created_at[gte]': ?createdAtGte,
       'created_at[lte]': ?createdAtLte,

@@ -41,7 +41,7 @@ final tools = [
 
 final response = await client.messages.create(
   MessageCreateRequest(
-    model: 'claude-sonnet-4-6',
+    model: 'claude-sonnet-5',
     maxTokens: 4096,
     tools: tools,
     messages: [

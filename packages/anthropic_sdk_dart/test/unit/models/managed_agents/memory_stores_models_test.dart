@@ -42,8 +42,14 @@ void main() {
         {'type': 'session_actor', 'session_id': 'sess_1'},
         {'type': 'api_actor', 'api_key_id': 'apikey_1'},
         {'type': 'user_actor', 'user_id': 'usr_1'},
+        {'type': 'service_account_actor', 'service_account_id': 'svac_1'},
       ];
-      final expectedTypes = [SessionActor, ApiActor, UserActor];
+      final expectedTypes = [
+        SessionActor,
+        ApiActor,
+        UserActor,
+        ServiceAccountActor,
+      ];
       for (var i = 0; i < cases.length; i++) {
         final actor = ManagedAgentActor.fromJson(cases[i]);
         expect(actor.runtimeType, expectedTypes[i]);
@@ -66,6 +72,14 @@ void main() {
       expect(a, b);
       expect(a.hashCode, b.hashCode);
       expect(a == c, isFalse);
+    });
+
+    test('ServiceAccountActor copyWith and equality', () {
+      const actor = ServiceAccountActor(serviceAccountId: 'svac_1');
+      final updated = actor.copyWith(serviceAccountId: 'svac_2');
+      expect(updated.serviceAccountId, 'svac_2');
+      expect(actor, const ServiceAccountActor(serviceAccountId: 'svac_1'));
+      expect(actor, isNot(updated));
     });
   });
 

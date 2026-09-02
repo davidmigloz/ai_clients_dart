@@ -8,6 +8,7 @@ import '../../common/equality_helpers.dart';
 /// - [SessionActor] — A managed agent session (type: `session_actor`)
 /// - [ApiActor] — An API key (type: `api_actor`)
 /// - [UserActor] — An end user (type: `user_actor`)
+/// - [ServiceAccountActor] — A service account (type: `service_account_actor`)
 /// - [UnknownManagedAgentActor] — Unrecognized actor type (preserves raw JSON)
 sealed class ManagedAgentActor {
   const ManagedAgentActor();
@@ -19,6 +20,7 @@ sealed class ManagedAgentActor {
       'session_actor' => SessionActor.fromJson(json),
       'api_actor' => ApiActor.fromJson(json),
       'user_actor' => UserActor.fromJson(json),
+      'service_account_actor' => ServiceAccountActor.fromJson(json),
       _ => UnknownManagedAgentActor.fromJson(json),
     };
   }
@@ -160,6 +162,60 @@ class UserActor extends ManagedAgentActor {
 
   @override
   String toString() => 'UserActor(type: $type, userId: $userId)';
+}
+
+/// A service account actor — a workload authenticated as a service account
+/// (for example via Workload Identity Federation) that performed the action.
+@immutable
+class ServiceAccountActor extends ManagedAgentActor {
+  /// The type discriminator. Always `service_account_actor`.
+  final String type;
+
+  /// ID of the service account that performed the write (a `svac_...` value).
+  final String serviceAccountId;
+
+  /// Creates a [ServiceAccountActor].
+  const ServiceAccountActor({
+    this.type = 'service_account_actor',
+    required this.serviceAccountId,
+  });
+
+  /// Creates a [ServiceAccountActor] from JSON.
+  factory ServiceAccountActor.fromJson(Map<String, dynamic> json) {
+    return ServiceAccountActor(
+      type: json['type'] as String? ?? 'service_account_actor',
+      serviceAccountId: json['service_account_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'service_account_id': serviceAccountId,
+  };
+
+  /// Creates a copy with replaced values.
+  ServiceAccountActor copyWith({String? type, String? serviceAccountId}) {
+    return ServiceAccountActor(
+      type: type ?? this.type,
+      serviceAccountId: serviceAccountId ?? this.serviceAccountId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ServiceAccountActor &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          serviceAccountId == other.serviceAccountId;
+
+  @override
+  int get hashCode => Object.hash(type, serviceAccountId);
+
+  @override
+  String toString() =>
+      'ServiceAccountActor(type: $type, serviceAccountId: $serviceAccountId)';
 }
 
 /// Unrecognized [ManagedAgentActor] type — preserves raw JSON for forward

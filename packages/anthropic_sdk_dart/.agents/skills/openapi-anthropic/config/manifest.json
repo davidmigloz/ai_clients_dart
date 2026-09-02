@@ -76,6 +76,7 @@
     "excluded_resources": [
       "complete",
       "environments",
+      "organizations",
       "tunnels"
     ]
   },
@@ -961,17 +962,6 @@
         "content"
       ]
     },
-    "TextBlock": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "file": null,
-      "schema": "BetaManagedAgentsTextBlock",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Content block / API wrapper - used as Map<String, dynamic>"
-    },
     "ThinkingBlock": {
       "spec": "main",
       "kind": "sealed_variant",
@@ -997,7 +987,8 @@
       "parent": "ContentBlock",
       "excluded_properties": [
         "caller"
-      ]
+      ],
+      "note": "caller is required in the spec but kept nullable in Dart: Anthropic-compatible third-party servers and older payloads omit it."
     },
     "ServerToolUseBlock": {
       "spec": "main",
@@ -1128,7 +1119,6 @@
           "RequestCompactionBlockParam": "compaction",
           "RequestToolReferenceBlockParam": "tool_reference",
           "RequestAdvisorToolResultBlockParam": "advisor_tool_result",
-          "MidConvSystemBlockParam": "mid_conv_system",
           "BetaRequestAdvisorToolResultBlock": "advisor_tool_result",
           "BetaRequestBashCodeExecutionToolResultBlock": "bash_code_execution_tool_result",
           "BetaRequestCodeExecutionToolResultBlock": "code_execution_tool_result",
@@ -1139,7 +1129,6 @@
           "BetaRequestImageBlock": "image",
           "BetaRequestMCPToolResultBlock": "mcp_tool_result",
           "BetaRequestMCPToolUseBlock": "mcp_tool_use",
-          "BetaRequestMidConvSystemBlock": "mid_conv_system",
           "BetaRequestRedactedThinkingBlock": "redacted_thinking",
           "BetaRequestSearchResultBlock": "search_result",
           "BetaRequestServerToolUseBlock": "server_tool_use",
@@ -1173,26 +1162,6 @@
         "acknowledged"
       ],
       "note": "Beta union maps to same Dart sealed type as GA InputContentBlock."
-    },
-    "MidConvSystemBlockParam": {
-      "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "MidConversationSystemInputBlock",
-      "file": "lib/src/models/content/input_content_block.dart",
-      "schema": "RequestMidConvSystemBlock",
-      "parent": "InputContentBlock"
-    },
-    "BetaRequestMidConvSystemBlock": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": "MidConversationSystemInputBlock",
-      "file": "lib/src/models/content/input_content_block.dart",
-      "schema": "BetaRequestMidConvSystemBlock",
-      "parent": "InputContentBlock",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Beta variant maps to same Dart class as GA RequestMidConvSystemBlock."
     },
     "TextBlockParam": {
       "spec": "main",
@@ -1361,45 +1330,6 @@
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "RequestToolReferenceBlock",
       "parent": "InputContentBlock"
-    },
-    "ToolResultContent": {
-      "spec": "main",
-      "kind": "sealed_parent",
-      "dart_class": "ToolResultContent",
-      "file": "lib/src/models/content/input_content_block.dart",
-      "schema": null,
-      "discriminator": {
-        "field": "type",
-        "mapping": {
-          "ToolResultBlockParamContentVariant0": "text",
-          "ToolResultBlockParamContentVariant1": "image"
-        }
-      },
-      "note": null
-    },
-    "ToolResultBlockParamContentVariant0": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": "ToolResultTextContent",
-      "file": "lib/src/models/content/input_content_block.dart",
-      "schema": "ToolResultBlockParamContentVariant0",
-      "parent": "ToolResultContent",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Anonymous spec variant \u2014 not a named schema, represents text content within tool results."
-    },
-    "ToolResultBlockParamContentVariant1": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": "ToolResultImageContent",
-      "file": "lib/src/models/content/input_content_block.dart",
-      "schema": "ToolResultBlockParamContentVariant1",
-      "parent": "ToolResultContent",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Anonymous spec variant \u2014 not a named schema, represents image/document content within tool results."
     },
     "Citation": {
       "spec": "main",
@@ -2058,7 +1988,10 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Parent sealed class not a named schema in spec \u2014 built-in tools use versioned type strings as discriminators."
+      "note": "Parent sealed class not a named schema in spec — built-in tools use versioned type strings as discriminators. `configs` intentionally differs per toolset variant (ComputerToolsetConfigs vs BrowserToolsetConfigs).",
+      "excluded_properties": [
+        "configs"
+      ]
     },
     "BashTool20250124": {
       "spec": "main",
@@ -2586,17 +2519,19 @@
     },
     "AgentToolConfig": {
       "spec": "main",
-      "kind": "object",
+      "kind": "sealed_parent",
       "dart_class": "AgentToolConfig",
       "file": "lib/src/models/managed_agents/config/agent_tool.dart",
-      "schema": "BetaManagedAgentsAgentToolConfig"
+      "schema": "BetaManagedAgentsAgentToolConfigUnion",
+      "note": "Replaces the prior flat AgentToolConfig object entry (which pointed at a stale schema name, BetaManagedAgentsAgentToolConfig, no longer present in the spec) with a sealed union of the 8 per-tool config schemas."
     },
     "AgentToolConfigParams": {
       "spec": "main",
-      "kind": "object",
+      "kind": "sealed_parent",
       "dart_class": "AgentToolConfigParams",
       "file": "lib/src/models/managed_agents/config/agent_tool.dart",
-      "schema": "BetaManagedAgentsAgentToolConfigParams"
+      "schema": "BetaManagedAgentsAgentToolConfigUnionParams",
+      "note": "Replaces the prior flat AgentToolConfigParams object entry (stale schema BetaManagedAgentsAgentToolConfigParams, no longer present) with a sealed union of the 8 per-tool config-params schemas."
     },
     "AgentToolName": {
       "spec": "main",
@@ -3468,8 +3403,10 @@
         "content",
         "processed_at",
         "result",
-        "session_thread_id"
-      ]
+        "session_thread_id",
+        "usage"
+      ],
+      "note": "`usage` intentionally differs per event type in the spec (SessionUsageSnapshot on session.usage vs SpanModelUsage on span events)."
     },
     "Struct": {
       "spec": "main",
@@ -3644,13 +3581,6 @@
       "dart_class": "UserProfileListOrder",
       "file": "lib/src/models/user_profiles/user_profile_list_order.dart",
       "schema": "BetaUserProfileListOrder"
-    },
-    "BetaUserProfileRelationship": {
-      "spec": "main",
-      "kind": "enum",
-      "dart_class": "BetaUserProfileRelationship",
-      "file": "lib/src/models/user_profiles/user_profile_relationship.dart",
-      "schema": "BetaUserProfileRelationship"
     },
     "EnrollmentUrl": {
       "spec": "main",
@@ -4331,10 +4261,12 @@
     },
     "AgentReference": {
       "spec": "main",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "AgentReference",
       "file": "lib/src/models/managed_agents/agents/multiagent.dart",
-      "schema": "BetaManagedAgentsAgentReference"
+      "schema": "BetaManagedAgentsAgentReference",
+      "parent": "MultiagentRosterEntry",
+      "note": "Was kind:object (standalone) before this sync; now also a MultiagentRosterEntry variant. Still reused standalone for Deployment.agent / DeploymentRun.agent."
     },
     "MultiagentParams": {
       "spec": "main",
@@ -5942,6 +5874,1439 @@
       "dart_class": "ListDreamsResponse",
       "file": "lib/src/models/dreams/list_dreams_response.dart",
       "schema": "BetaListDreamsResponse"
+    },
+    "BetaThinkingBlockBinding": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ThinkingBlockBinding",
+      "file": "lib/src/models/messages/thinking_config.dart",
+      "schema": "BetaThinkingBlockBinding",
+      "note": "block_binding field on ThinkingConfigEnabled/ThinkingConfigAdaptive (Dart: ThinkingEnabled/ThinkingAdaptive). Beta-only schema (no non-beta counterpart); requires anthropic-beta: thinking-binding-controls-2026-08-01."
+    },
+    "BetaThinkingPrefixMismatchBehavior": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ThinkingPrefixMismatchBehavior",
+      "file": "lib/src/models/messages/thinking_config.dart",
+      "schema": "BetaThinkingPrefixMismatchBehavior",
+      "note": "Request-only enum: throws on unknown values instead of carrying an unknown member.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "BetaThinkingDisplayMode": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ThinkingDisplayMode",
+      "file": "lib/src/models/messages/thinking_config.dart",
+      "schema": "BetaThinkingDisplayMode",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Beta variant of ThinkingDisplayMode adds a third value, 'updates' (requires anthropic-beta: thinking-display-updates-2026-08-18). The existing unified Dart enum ThinkingDisplayMode (already tracked under schema 'ThinkingDisplayMode' for the non-beta surface) now covers both: added an 'updates' member with fromJson/toJson support. Mirrors the ContentBlock unified-union pattern (register both Response*/Beta* schema names)."
+    },
+    "InputTransformation": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "InputTransformation",
+      "file": "lib/src/models/messages/input_transformation.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "ThinkingDroppedInputTransformation": "thinking_dropped"
+        }
+      },
+      "note": "Client-side sealed wrapper for Message.input_transformations / MessageDeltaEvent.input_transformations array items. The spec does not define a named discriminated-union schema for this array (BetaMessage.input_transformations is typed as items: $ref BetaThinkingDroppedInputTransformation only) but its description explicitly says 'more entry types may be added over time; ignore types you do not recognize' -- so we model it as an open union with an Unknown* fallback for forward compatibility, same rationale as CacheMissReason/UnknownCacheMissReason."
+    },
+    "ThinkingDroppedInputTransformation": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ThinkingDroppedInputTransformation",
+      "file": "lib/src/models/messages/input_transformation.dart",
+      "schema": "BetaThinkingDroppedInputTransformation",
+      "parent": "InputTransformation"
+    },
+    "UnknownInputTransformation": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownInputTransformation",
+      "file": "lib/src/models/messages/input_transformation.dart",
+      "schema": null,
+      "parent": "InputTransformation",
+      "note": "Forward-compatible fallback for unrecognized input_transformations entry types; preserves raw JSON (deep-unmodifiable), same pattern as UnknownCacheMissReason / UnknownInputContentBlock."
+    },
+    "InputTransformationReason": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "InputTransformationReason",
+      "file": "lib/src/models/messages/input_transformation.dart",
+      "schema": null,
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Inline enum on BetaThinkingDroppedInputTransformation.reason; carries an unknown fallback."
+    },
+    "BetaSystemMessageOutputConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SystemMessageOutputConfig",
+      "file": "lib/src/models/messages/input_message.dart",
+      "schema": "BetaSystemMessageOutputConfig",
+      "note": "output_config field on BetaInputMessage (role: system only). Beta-only schema; requires anthropic-beta: mid-conversation-output-config-2026-07-01. format stays top-level-only per spec description, so it is intentionally not modeled here."
+    },
+    "SystemMessageClearAt": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "SystemMessageClearAt",
+      "file": "lib/src/models/messages/input_message.dart",
+      "schema": null,
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Inline enum on BetaInputMessage.clear_at (next_user_message | never); request-only, throws on unknown."
+    },
+    "RequestImageTransformations": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ImageTransformations",
+      "file": "lib/src/models/content/image_transformations.dart",
+      "schema": "RequestImageTransformations",
+      "note": "oversized_image is an inline enum (downsize/error), represented by the OversizedImageBehavior Dart enum in the same file; not separately tracked since it has no named component schema."
+    },
+    "ToolResultContent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ToolResultContent",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "ToolResultTextContent": "text",
+          "ToolResultImageContent": "image",
+          "ToolResultDocumentContent": "document",
+          "ToolResultSearchResultContent": "search_result",
+          "ToolResultToolReferenceContent": "tool_reference",
+          "ToolResultBrowserStateContent": "browser_state"
+        }
+      },
+      "note": "Inline anyOf on RequestToolResultBlock.content (text | image | search_result | document | tool_reference | browser_state). Mapping keys are manifest keys on purpose: keying by the Request* schema names makes the union-coverage heuristic treat this parent as covering InputContentBlock."
+    },
+    "ToolResultTextContent": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolResultTextContent",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": null,
+      "parent": "ToolResultContent",
+      "note": "Minimal text wrapper (text only; no cache_control/citations) for tool_result content. Spec schema: RequestTextBlock. Schema left null so the sealed-parent coverage heuristic does not match InputContentBlock.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ToolResultImageContent": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolResultImageContent",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": null,
+      "parent": "ToolResultContent",
+      "note": "Image wrapper (source + transformations; no cache_control) for tool_result content. Spec schema: RequestImageBlock. Schema left null so the sealed-parent coverage heuristic does not match InputContentBlock.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ToolResultDocumentContent": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolResultDocumentContent",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": null,
+      "parent": "ToolResultContent",
+      "note": "Delegating wrapper around DocumentInputBlock (which tracks the schema). Spec schema: RequestDocumentBlock. Schema left null so the sealed-parent coverage heuristic does not match InputContentBlock.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ToolResultSearchResultContent": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolResultSearchResultContent",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": null,
+      "parent": "ToolResultContent",
+      "note": "Delegating wrapper around SearchResultInputBlock (which tracks the schema). Spec schema: RequestSearchResultBlock. Schema left null so the sealed-parent coverage heuristic does not match InputContentBlock.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ToolResultToolReferenceContent": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolResultToolReferenceContent",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": null,
+      "parent": "ToolResultContent",
+      "note": "Delegating wrapper around ToolReferenceInputBlock (which tracks the schema). Spec schema: RequestToolReferenceBlock. Schema left null so the sealed-parent coverage heuristic does not match InputContentBlock.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ToolResultBrowserStateContent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolResultBrowserStateContent",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": "RequestBrowserStateBlock",
+      "parent": "ToolResultContent"
+    },
+    "UnknownToolResultContent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownToolResultContent",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": null,
+      "parent": "ToolResultContent",
+      "note": "Forward-compatible fallback for unrecognized tool-result content types; preserves raw JSON. Replaces the prior behavior of throwing FormatException on any type other than text/image."
+    },
+    "BrowserStateTabEntry": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "BrowserStateTabEntry",
+      "file": "lib/src/models/content/browser_state.dart",
+      "schema": "BrowserStateTabEntry"
+    },
+    "BrowserStateChange": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "BrowserStateChange",
+      "file": "lib/src/models/content/browser_state.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "BrowserStateChangeTabOpened": "tab_opened",
+          "BrowserStateChangeDownloadStarted": "download_started",
+          "BrowserStateChangeDownloadCompleted": "download_completed",
+          "BrowserStateChangeDownloadFailed": "download_failed"
+        }
+      },
+      "note": "Inline discriminated union (RequestBrowserStateBlock.state_changes items); no named parent schema, but each variant is a real named component schema."
+    },
+    "BrowserStateChangeTabOpened": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "BrowserStateChangeTabOpened",
+      "file": "lib/src/models/content/browser_state.dart",
+      "schema": "BrowserStateChangeTabOpened",
+      "parent": "BrowserStateChange"
+    },
+    "BrowserStateChangeDownloadStarted": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "BrowserStateChangeDownloadStarted",
+      "file": "lib/src/models/content/browser_state.dart",
+      "schema": "BrowserStateChangeDownloadStarted",
+      "parent": "BrowserStateChange"
+    },
+    "BrowserStateChangeDownloadCompleted": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "BrowserStateChangeDownloadCompleted",
+      "file": "lib/src/models/content/browser_state.dart",
+      "schema": "BrowserStateChangeDownloadCompleted",
+      "parent": "BrowserStateChange"
+    },
+    "BrowserStateChangeDownloadFailed": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "BrowserStateChangeDownloadFailed",
+      "file": "lib/src/models/content/browser_state.dart",
+      "schema": "BrowserStateChangeDownloadFailed",
+      "parent": "BrowserStateChange"
+    },
+    "UnknownBrowserStateChange": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownBrowserStateChange",
+      "file": "lib/src/models/content/browser_state.dart",
+      "schema": null,
+      "parent": "BrowserStateChange",
+      "note": "Forward-compatible fallback for unrecognized browser_state state_changes types; preserves raw JSON."
+    },
+    "ComputerToolsetConfigs": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ComputerToolsetConfigs",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "ComputerToolsetConfigs",
+      "excluded_properties": [
+        "type"
+      ],
+      "note": "The `type` member config is exposed as the Dart field `typeAction` (wire key `type`); excluded here because the toolkit matches fields by name."
+    },
+    "BrowserToolsetConfigs": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "BrowserToolsetConfigs",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserToolsetConfigs",
+      "excluded_properties": [
+        "type"
+      ],
+      "note": "The `type` member config is exposed as the Dart field `typeAction` (wire key `type`); excluded here because the toolkit matches fields by name."
+    },
+    "ComputerToolset": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ComputerToolset",
+      "file": "lib/src/models/tools/built_in_tools.dart",
+      "schema": "ComputerToolset_20260801",
+      "parent": "BuiltInTool"
+    },
+    "BrowserToolset": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "BrowserToolset",
+      "file": "lib/src/models/tools/built_in_tools.dart",
+      "schema": "BrowserToolset_20260801",
+      "parent": "BuiltInTool"
+    },
+    "BrowserCloseTabConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserCloseTabConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserDoubleClickConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserDoubleClickConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserFileUploadConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserFileUploadConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserFindConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserFindConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserFormInputConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserFormInputConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserGetPageTextConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserGetPageTextConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserHoldKeyConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserHoldKeyConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserHoverConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserHoverConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserJavascriptExecConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserJavascriptExecConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserKeyConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserKeyConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserLeftClickConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserLeftClickConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserLeftClickDragConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserLeftClickDragConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserLeftMouseDownConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserLeftMouseDownConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserLeftMouseUpConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserLeftMouseUpConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserListTabsConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserListTabsConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserMiddleClickConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserMiddleClickConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserMouseMoveConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserMouseMoveConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserNavigateConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserNavigateConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserNewTabConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserNewTabConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserReadConsoleConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserReadConsoleConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserReadNetworkConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserReadNetworkConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserReadPageConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserReadPageConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserRightClickConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserRightClickConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserScreenshotConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserScreenshotConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserScrollConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserScrollConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserScrollToConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserScrollToConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserSwitchTabConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserSwitchTabConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserTripleClickConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserTripleClickConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserTypeConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserTypeConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserWaitConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserWaitConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "BrowserZoomConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "BrowserZoomConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "ComputerCursorPositionConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "ComputerCursorPositionConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "ComputerDoubleClickConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "ComputerDoubleClickConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "ComputerHoldKeyConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "ComputerHoldKeyConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "ComputerKeyConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "ComputerKeyConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "ComputerLeftClickConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "ComputerLeftClickConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "ComputerLeftClickDragConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "ComputerLeftClickDragConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "ComputerLeftMouseDownConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "ComputerLeftMouseDownConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "ComputerLeftMouseUpConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "ComputerLeftMouseUpConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "ComputerMiddleClickConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "ComputerMiddleClickConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "ComputerMouseMoveConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "ComputerMouseMoveConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "ComputerRightClickConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "ComputerRightClickConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "ComputerScreenshotConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "ComputerScreenshotConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "ComputerScrollConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "ComputerScrollConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "ComputerTripleClickConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "ComputerTripleClickConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "ComputerTypeConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "ComputerTypeConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "ComputerWaitConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "ComputerWaitConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "One of 48 per-member config schemas across the computer and browser toolsets, all sharing the identical {enabled, defer_loading} shape; consolidated into the single shared ToolsetMemberConfig class rather than 48 near-duplicate Dart classes."
+    },
+    "ComputerZoomConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ToolsetMemberConfig",
+      "file": "lib/src/models/tools/toolsets.dart",
+      "schema": "ComputerZoomConfig",
+      "note": "Canonical schema for ToolsetMemberConfig {enabled, defer_loading}; all 96 Computer*/Browser* member config schemas (GA + beta) share this exact shape and map to the same Dart class."
+    },
+    "Container": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Container",
+      "file": "lib/src/models/beta/config/container.dart",
+      "schema": "Container",
+      "note": "Previously untracked; now registered with the new `skills` field (required-but-nullable in spec)."
+    },
+    "ContainerSkill": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ContainerSkill",
+      "file": "lib/src/models/beta/config/container.dart",
+      "schema": "ContainerSkill"
+    },
+    "ContainerSkillParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ContainerSkillParams",
+      "file": "lib/src/models/beta/config/container.dart",
+      "schema": "SkillParams",
+      "note": "Request-side skill spec for a container; named ContainerSkillParams in Dart (not SkillParams) to avoid confusion with the unrelated top-level Skills API resource."
+    },
+    "ContainerParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ContainerParams",
+      "file": "lib/src/models/beta/config/container.dart",
+      "schema": "ContainerParams",
+      "note": "Previously untracked and had a fictional {memoryMb, timeoutSeconds} shape with no spec basis; replaced with the real {id, skills} shape."
+    },
+    "ContainerParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ContainerParam",
+      "file": "lib/src/models/beta/config/container.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "runtime_type",
+        "mapping": {}
+      },
+      "note": "fromJson accepts dynamic: String -> ContainerParamId, Map -> ContainerParamConfig (anyOf[ContainerParams, string, null] on CreateMessageParams.container). Mirrors the FallbackCreditTokenParam pattern."
+    },
+    "ContainerParamId": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ContainerParamId",
+      "file": "lib/src/models/beta/config/container.dart",
+      "schema": null,
+      "parent": "ContainerParam",
+      "note": "Bare-string wire form of the container field; no dedicated spec schema."
+    },
+    "ContainerParamConfig": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ContainerParamConfig",
+      "file": "lib/src/models/beta/config/container.dart",
+      "schema": null,
+      "parent": "ContainerParam",
+      "note": "Object arm of the string-or-object container param; wraps ContainerParams (which tracks the schema)."
+    },
+    "FileMetadataSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "FileMetadata",
+      "file": "lib/src/models/files/file_metadata.dart",
+      "schema": "FileMetadataSchema",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "GA Files API metadata; unified with prior beta FileMetadata. Added expiresAt (expires_at, nullable)."
+    },
+    "FileListResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FileListResponse",
+      "file": "lib/src/models/files/file_list_response.dart",
+      "schema": "FileListResponse",
+      "note": "GA shape: {data, next_page} cursor pages. Removed has_more/first_id/last_id."
+    },
+    "FileDeleteResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FileDeleteResponse",
+      "file": "lib/src/models/files/file_delete_response.dart",
+      "schema": "FileDeleteResponse"
+    },
+    "SkillsApiSkill": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Skill",
+      "file": "lib/src/models/skills/skill.dart",
+      "schema": "Skill",
+      "note": "Skills API GA object (distinct from managed-agents Skill/AgentSkill, which owns the 'Skill' manifest key). All fields required per spec: id, display_name, latest_version_id, source, created_at, updated_at, type."
+    },
+    "SkillsApiSkillVersion": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SkillVersion",
+      "file": "lib/src/models/skills/skill_version.dart",
+      "schema": "SkillVersion",
+      "note": "Removed 'version' and 'directory' fields (not in GA spec). Added required 'name' (kebab-case slug) already present; description/skill_id/created_at/id/type required."
+    },
+    "SkillSource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SkillSource",
+      "file": "lib/src/models/skills/skill_source.dart",
+      "schema": "SkillSource",
+      "note": "Changed from a bare enum to an object {type: SkillSourceType} per GA spec."
+    },
+    "SkillSourceType": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "SkillSourceType",
+      "file": "lib/src/models/skills/skill_source.dart",
+      "schema": null,
+      "note": "Inline enum on SkillSource.type (custom | anthropic | anthropic_example | plugin); carries an unknown fallback.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ListSkillsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SkillListResponse",
+      "file": "lib/src/models/skills/skill_list_response.dart",
+      "schema": "ListSkillsResponse",
+      "note": "Removed has_more (not in GA spec; next_page is the sole pagination signal)."
+    },
+    "ListSkillVersionsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SkillVersionListResponse",
+      "file": "lib/src/models/skills/skill_list_response.dart",
+      "schema": "ListSkillVersionsResponse",
+      "note": "Removed has_more (not in GA spec)."
+    },
+    "DeletedSkill": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeletedSkill",
+      "file": "lib/src/models/skills/deleted_skill.dart",
+      "schema": "DeletedSkill"
+    },
+    "DeletedSkillVersion": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeletedSkillVersion",
+      "file": "lib/src/models/skills/deleted_skill.dart",
+      "schema": "DeletedSkillVersion"
+    },
+    "Body_create_skill_v1_skills_post": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "SkillFile (List<SkillFile> files param)",
+      "file": "lib/src/resources/skills_resource.dart",
+      "schema": "Body_create_skill_v1_skills_post",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Multipart request body modeled as SkillsResource.create({required List<SkillFile> files, String? displayName}); one 'files' multipart part per SkillFile, plus optional display_name text field."
+    },
+    "Body_create_skill_version_v1_skills__skill_id__versions_post": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "SkillFile (List<SkillFile> files param)",
+      "file": "lib/src/resources/skills_resource.dart",
+      "schema": "Body_create_skill_version_v1_skills__skill_id__versions_post",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Multipart request body modeled as SkillsResource.createVersion({required String skillId, required List<SkillFile> files})."
+    },
+    "BetaUserProfile": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UserProfile",
+      "file": "lib/src/models/user_profiles/user_profile.dart",
+      "schema": "BetaUserProfile",
+      "note": "Removed 'relationship'; added accessType (UserProfileAccessType?, from access_type) and externalUserOnboardedAt (BetaTimestamp?, from external_user_onboarded_at). Header bumped to user-profiles-2026-08-18."
+    },
+    "BetaCreateUserProfileRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateUserProfileRequest",
+      "file": "lib/src/models/user_profiles/create_user_profile_request.dart",
+      "schema": "BetaCreateUserProfileRequest",
+      "note": "Removed 'relationship'; added accessType + externalUserOnboardedAt (both optional per spec, no required list)."
+    },
+    "BetaUpdateUserProfileRequestBody": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateUserProfileRequest",
+      "file": "lib/src/models/user_profiles/update_user_profile_request.dart",
+      "schema": "BetaUpdateUserProfileRequestBody",
+      "note": "Replaced _relationship/hasRelationship sentinel with _accessType/hasAccessType (nullable, clearable) and _externalUserOnboardedAt/hasExternalUserOnboardedAt (settable but not clearable — API rejects explicit null per spec description)."
+    },
+    "BetaUserProfileAccessType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "UserProfileAccessType",
+      "file": "lib/src/models/user_profiles/user_profile_access_type.dart",
+      "schema": "BetaUserProfileAccessType"
+    },
+    "BetaUserProfileListOrderBy": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "UserProfileListOrderBy",
+      "file": "lib/src/models/user_profiles/user_profile_list_order_by.dart",
+      "schema": "BetaUserProfileListOrderBy"
+    },
+    "FallbacksParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "FallbacksParam",
+      "file": "lib/src/models/messages/fallback_config.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "runtime_type",
+        "mapping": {}
+      },
+      "note": "fromJson accepts dynamic: List -> FallbacksList, 'default' -> FallbacksDefault (anyOf[array of BetaFallbackConfigV2 (1-3 items), const \"default\", null] on BetaCreateMessageParams.fallbacks). Mirrors the FallbackCreditTokenParam pattern. Requires the server-side-fallback-2026-07-01 beta header for the \"default\" form."
+    },
+    "FallbacksList": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "FallbacksList",
+      "file": "lib/src/models/messages/fallback_config.dart",
+      "schema": null,
+      "parent": "FallbacksParam",
+      "note": "Wraps the pre-existing List<FallbackConfigV2> form; no dedicated spec schema of its own (the array-of-BetaFallbackConfigV2 anyOf branch)."
+    },
+    "FallbacksDefault": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "FallbacksDefault",
+      "file": "lib/src/models/messages/fallback_config.dart",
+      "schema": null,
+      "parent": "FallbacksParam",
+      "note": "Bare-string 'default' wire form of fallbacks; no dedicated spec schema (the const \"default\" anyOf branch)."
+    },
+    "Budget": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "Budget",
+      "file": "lib/src/models/managed_agents/common/budget.dart",
+      "schema": "BetaManagedAgentsBudget"
+    },
+    "BudgetLimit": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "BudgetLimit",
+      "file": "lib/src/models/managed_agents/common/budget.dart",
+      "schema": "BetaManagedAgentsBudgetLimit",
+      "parent": "Budget"
+    },
+    "MonetaryAmount": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MonetaryAmount",
+      "file": "lib/src/models/managed_agents/common/budget.dart",
+      "schema": "BetaMonetaryAmount"
+    },
+    "BetaCurrency": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "BetaCurrency",
+      "file": "lib/src/models/managed_agents/common/budget.dart",
+      "schema": "BetaCurrency",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Single-value enum (USD only, accepted set explicitly closed per spec description). Modeled as a plain String on MonetaryAmount.currency instead of a Dart enum; revisit if a second currency is ever priced."
+    },
+    "ManagedAgentsServerToolUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedAgentsServerToolUsage",
+      "file": "lib/src/models/managed_agents/events/telemetry.dart",
+      "schema": "BetaManagedAgentsServerToolUsage",
+      "note": "Named with a ManagedAgents prefix - the package already has an unrelated ServerToolUsage class for the Messages API (lib/src/models/metadata/usage.dart)."
+    },
+    "ServiceAccountActor": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ServiceAccountActor",
+      "file": "lib/src/models/managed_agents/common/managed_agent_actor.dart",
+      "schema": "BetaManagedAgentsServiceAccountActor",
+      "parent": "ManagedAgentActor"
+    },
+    "BashToolConfig": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "BashToolConfig",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsBashToolConfig",
+      "parent": "AgentToolConfig"
+    },
+    "EditToolConfig": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "EditToolConfig",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsEditToolConfig",
+      "parent": "AgentToolConfig"
+    },
+    "ReadToolConfig": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ReadToolConfig",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsReadToolConfig",
+      "parent": "AgentToolConfig"
+    },
+    "WriteToolConfig": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WriteToolConfig",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsWriteToolConfig",
+      "parent": "AgentToolConfig"
+    },
+    "GlobToolConfig": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "GlobToolConfig",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsGlobToolConfig",
+      "parent": "AgentToolConfig"
+    },
+    "GrepToolConfig": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "GrepToolConfig",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsGrepToolConfig",
+      "parent": "AgentToolConfig"
+    },
+    "WebFetchToolConfig": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebFetchToolConfig",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsWebFetchToolConfig",
+      "parent": "AgentToolConfig"
+    },
+    "WebSearchToolConfig": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchToolConfig",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsWebSearchToolConfig",
+      "parent": "AgentToolConfig"
+    },
+    "BashToolConfigParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "BashToolConfigParams",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsBashToolConfigParams",
+      "parent": "AgentToolConfigParams",
+      "excluded_properties": [
+        "name",
+        "type"
+      ],
+      "note": "`name` and `type` are const discriminators emitted by toJson (name is also a typed AgentToolName field); excluded because the toolkit expects them as free fields."
+    },
+    "EditToolConfigParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "EditToolConfigParams",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsEditToolConfigParams",
+      "parent": "AgentToolConfigParams",
+      "excluded_properties": [
+        "name",
+        "type"
+      ],
+      "note": "`name` and `type` are const discriminators emitted by toJson (name is also a typed AgentToolName field); excluded because the toolkit expects them as free fields."
+    },
+    "ReadToolConfigParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ReadToolConfigParams",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsReadToolConfigParams",
+      "parent": "AgentToolConfigParams",
+      "excluded_properties": [
+        "name",
+        "type"
+      ],
+      "note": "`name` and `type` are const discriminators emitted by toJson (name is also a typed AgentToolName field); excluded because the toolkit expects them as free fields."
+    },
+    "WriteToolConfigParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WriteToolConfigParams",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsWriteToolConfigParams",
+      "parent": "AgentToolConfigParams",
+      "excluded_properties": [
+        "name",
+        "type"
+      ],
+      "note": "`name` and `type` are const discriminators emitted by toJson (name is also a typed AgentToolName field); excluded because the toolkit expects them as free fields."
+    },
+    "GlobToolConfigParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "GlobToolConfigParams",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsGlobToolConfigParams",
+      "parent": "AgentToolConfigParams",
+      "excluded_properties": [
+        "name",
+        "type"
+      ],
+      "note": "`name` and `type` are const discriminators emitted by toJson (name is also a typed AgentToolName field); excluded because the toolkit expects them as free fields."
+    },
+    "GrepToolConfigParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "GrepToolConfigParams",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsGrepToolConfigParams",
+      "parent": "AgentToolConfigParams",
+      "excluded_properties": [
+        "name",
+        "type"
+      ],
+      "note": "`name` and `type` are const discriminators emitted by toJson (name is also a typed AgentToolName field); excluded because the toolkit expects them as free fields."
+    },
+    "WebFetchToolConfigParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebFetchToolConfigParams",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsWebFetchToolConfigParams",
+      "parent": "AgentToolConfigParams",
+      "excluded_properties": [
+        "name",
+        "type"
+      ],
+      "note": "`name` and `type` are const discriminators emitted by toJson (name is also a typed AgentToolName field); excluded because the toolkit expects them as free fields."
+    },
+    "WebSearchToolConfigParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchToolConfigParams",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsWebSearchToolConfigParams",
+      "parent": "AgentToolConfigParams",
+      "excluded_properties": [
+        "name",
+        "type"
+      ],
+      "note": "`name` and `type` are const discriminators emitted by toJson (name is also a typed AgentToolName field); excluded because the toolkit expects them as free fields."
+    },
+    "ManagedAgentsUserLocation": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedAgentsUserLocation",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsUserLocation",
+      "note": "Distinct from the unrelated Messages-API UserLocation in lib/src/models/tools/built_in_tools.dart (different schema)."
+    },
+    "MultiagentRosterEntry": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "MultiagentRosterEntry",
+      "file": "lib/src/models/managed_agents/agents/multiagent.dart",
+      "schema": "BetaManagedAgentsMultiagentRosterEntry"
+    },
+    "Advisor": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "Advisor",
+      "file": "lib/src/models/managed_agents/agents/multiagent.dart",
+      "schema": "BetaManagedAgentsAdvisor",
+      "parent": "MultiagentRosterEntry",
+      "note": "Also implements SessionRosterEntry (sessions/session.dart) for the session-resolved roster unions - see SessionRosterEntry's discriminator mapping and its class doc comment for why that union is a plain abstract class rather than sealed."
+    },
+    "MultiagentRosterEntryAdvisor": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "MultiagentRosterEntryAdvisor",
+      "file": "lib/src/models/managed_agents/agents/multiagent_params.dart",
+      "schema": "BetaManagedAgentsAdvisorParams",
+      "parent": "MultiagentRosterEntryParams"
+    },
+    "SessionRosterEntry": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "SessionRosterEntry",
+      "file": "lib/src/models/managed_agents/sessions/session.dart",
+      "schema": null,
+      "note": "Unifies BetaManagedAgentsSessionRosterEntry (SessionMultiagentCoordinator.agents) and BetaManagedAgentsSessionThreadAgentEntry (SessionThread.agent): agent -> SessionThreadAgent, advisor -> Advisor (shared with MultiagentRosterEntry). Tracked as skip rather than sealed_parent because the shared Advisor member makes the union-overlap coverage heuristic report MultiagentRosterEntry members as missing here; coverage is checked manually (fromJson switch vs spec union).",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "BetaManagedAgentsSessionRosterEntry": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "SessionRosterEntry",
+      "file": "lib/src/models/managed_agents/sessions/session.dart",
+      "schema": "BetaManagedAgentsSessionRosterEntry",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Covered by unified SessionRosterEntry."
+    },
+    "BetaManagedAgentsSessionThreadAgentEntry": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "SessionRosterEntry",
+      "file": "lib/src/models/managed_agents/sessions/session.dart",
+      "schema": "BetaManagedAgentsSessionThreadAgentEntry",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Covered by unified SessionRosterEntry."
+    },
+    "SessionThreadAgent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionThreadAgent",
+      "file": "lib/src/models/managed_agents/sessions/session.dart",
+      "schema": "BetaManagedAgentsSessionThreadAgent",
+      "parent": "SessionRosterEntry"
+    },
+    "SessionBudgetReached": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionBudgetReached",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSessionBudgetReached",
+      "parent": "SessionStopReason"
+    },
+    "SessionUsageEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionUsageEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSessionUsageEvent",
+      "parent": "SessionEvent"
+    },
+    "SessionUsageSnapshot": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SessionUsageSnapshot",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSessionUsageSnapshot"
+    },
+    "AgentMessageContentBlock": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentMessageContentBlock",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsAgentMessageContentBlock"
+    },
+    "ManagedAgentsTextBlock": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ManagedAgentsTextBlock",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsTextBlock",
+      "parent": "AgentMessageContentBlock",
+      "note": "Replaces the stale kind:skip 'TextBlock' entry (dart_class: null, noted as 'used as Map<String, dynamic>') now that AgentMessageEvent.content is typed."
+    },
+    "ManagedAgentsRedactedBlock": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ManagedAgentsRedactedBlock",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsRedactedBlock",
+      "parent": "AgentMessageContentBlock"
+    },
+    "WebhookSessionBudgetReachedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookSessionBudgetReachedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookSessionBudgetReachedEventData",
+      "parent": "WebhookEventData"
+    },
+    "OutputBehavior": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "OutputBehavior",
+      "file": "lib/src/models/dreams/output_behavior.dart",
+      "schema": "BetaOutputBehavior"
+    },
+    "OutputBehaviorCreateNew": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OutputBehaviorCreateNew",
+      "file": "lib/src/models/dreams/output_behavior.dart",
+      "schema": "BetaOutputBehaviorCreateNew",
+      "parent": "OutputBehavior"
+    },
+    "OutputBehaviorUpdateExisting": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OutputBehaviorUpdateExisting",
+      "file": "lib/src/models/dreams/output_behavior.dart",
+      "schema": "BetaOutputBehaviorUpdateExisting",
+      "parent": "OutputBehavior"
     }
   }
 }

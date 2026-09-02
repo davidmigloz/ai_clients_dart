@@ -8,6 +8,7 @@ Map<String, dynamic> _dreamJson({
   Map<String, dynamic>? error,
   String? instructions = 'Consolidate notes.',
   String? sessionId,
+  Map<String, dynamic> outputBehavior = const {'type': 'create_new'},
 }) {
   return {
     'type': 'dream',
@@ -32,6 +33,7 @@ Map<String, dynamic> _dreamJson({
       'cache_read_input_tokens': 10,
       'cache_creation_input_tokens': 5,
     },
+    'output_behavior': outputBehavior,
   };
 }
 
@@ -55,8 +57,26 @@ void main() {
       expect(dream.instructions, 'Consolidate notes.');
       expect(dream.sessionId, isNull);
       expect(dream.usage.inputTokens, 100);
+      expect(dream.outputBehavior, isA<OutputBehaviorCreateNew>());
 
       expect(dream.toJson(), json);
+    });
+
+    test('parses an update_existing output behavior', () {
+      final dream = Dream.fromJson(
+        _dreamJson(
+          outputBehavior: const {
+            'type': 'update_existing',
+            'memory_store_id': 'memstore_out',
+          },
+        ),
+      );
+      final behavior = dream.outputBehavior as OutputBehaviorUpdateExisting;
+      expect(behavior.memoryStoreId, 'memstore_out');
+      expect(dream.toJson()['output_behavior'], {
+        'type': 'update_existing',
+        'memory_store_id': 'memstore_out',
+      });
     });
 
     test('required-nullable fields always emit the key even when null', () {

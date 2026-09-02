@@ -78,10 +78,8 @@ void main() {
       final agent = SessionAgent.fromJson(sessionAgentJson(multiagent: json));
       final multiagent = agent.multiagent;
       expect(multiagent, isA<SessionMultiagentCoordinator>());
-      expect(
-        (multiagent! as SessionMultiagentCoordinator).agents.single.id,
-        'agent_test123',
-      );
+      final roster = (multiagent! as SessionMultiagentCoordinator).agents;
+      expect((roster.single as SessionThreadAgent).id, 'agent_test123');
       // Round-trips stably through serialization.
       expect(SessionAgent.fromJson(agent.toJson()), agent);
     });

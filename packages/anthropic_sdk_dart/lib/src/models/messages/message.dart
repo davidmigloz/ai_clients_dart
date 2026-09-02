@@ -7,6 +7,7 @@ import '../content/content_block.dart';
 import '../metadata/stop_reason.dart';
 import '../metadata/usage.dart';
 import 'diagnostics.dart';
+import 'input_transformation.dart';
 import 'message_role.dart';
 
 /// A message response from the API.
@@ -49,6 +50,15 @@ class Message {
   /// divergence was detected.
   final Diagnostics? diagnostics;
 
+  /// Changes the API made to the request's input before showing it to the
+  /// model, one entry per change, in request order.
+  ///
+  /// Present only with `anthropic-beta: thinking-binding-controls-2026-08-01`,
+  /// as `[]` when nothing was dropped. Each entry is a thinking or
+  /// redacted-thinking block the API removed before the model saw it
+  /// because it failed a binding check; dropped blocks are not billed.
+  final List<InputTransformation>? inputTransformations;
+
   /// Creates a [Message].
   const Message({
     required this.id,
@@ -62,6 +72,7 @@ class Message {
     required this.usage,
     this.container,
     this.diagnostics,
+    this.inputTransformations,
   });
 
   /// Creates a [Message] from JSON.
@@ -92,6 +103,9 @@ class Message {
       diagnostics: json['diagnostics'] != null
           ? Diagnostics.fromJson(json['diagnostics'] as Map<String, dynamic>)
           : null,
+      inputTransformations: (json['input_transformations'] as List?)
+          ?.map((e) => InputTransformation.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 
@@ -108,6 +122,10 @@ class Message {
     'usage': usage.toJson(),
     if (container != null) 'container': container!.toJson(),
     if (diagnostics != null) 'diagnostics': diagnostics!.toJson(),
+    if (inputTransformations != null)
+      'input_transformations': inputTransformations!
+          .map((e) => e.toJson())
+          .toList(),
   };
 
   /// Creates a copy with replaced values.
@@ -123,6 +141,7 @@ class Message {
     Usage? usage,
     Object? container = unsetCopyWithValue,
     Object? diagnostics = unsetCopyWithValue,
+    Object? inputTransformations = unsetCopyWithValue,
   }) {
     return Message(
       id: id ?? this.id,
@@ -146,6 +165,9 @@ class Message {
       diagnostics: diagnostics == unsetCopyWithValue
           ? this.diagnostics
           : diagnostics as Diagnostics?,
+      inputTransformations: inputTransformations == unsetCopyWithValue
+          ? this.inputTransformations
+          : inputTransformations as List<InputTransformation>?,
     );
   }
 
@@ -164,7 +186,8 @@ class Message {
           stopSequence == other.stopSequence &&
           usage == other.usage &&
           container == other.container &&
-          diagnostics == other.diagnostics;
+          diagnostics == other.diagnostics &&
+          listsEqual(inputTransformations, other.inputTransformations);
 
   @override
   int get hashCode => Object.hash(
@@ -179,6 +202,7 @@ class Message {
     usage,
     container,
     diagnostics,
+    listHash(inputTransformations),
   );
 
   @override
@@ -186,5 +210,6 @@ class Message {
       'Message(id: $id, type: $type, role: $role, '
       'content: $content, model: $model, stopReason: $stopReason, '
       'stopDetails: $stopDetails, stopSequence: $stopSequence, '
-      'usage: $usage, container: $container, diagnostics: $diagnostics)';
+      'usage: $usage, container: $container, diagnostics: $diagnostics, '
+      'inputTransformations: $inputTransformations)';
 }

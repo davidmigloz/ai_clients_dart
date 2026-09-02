@@ -19,8 +19,9 @@ void main() {
       expect(m, isA<MultiagentCoordinator>());
       final coord = m as MultiagentCoordinator;
       expect(coord.agents, hasLength(2));
-      expect(coord.agents.first.id, 'agent_011CZkYqphY8vELVzwCUpqiQ');
-      expect(coord.agents.first.version, 1);
+      final first = coord.agents.first as AgentReference;
+      expect(first.id, 'agent_011CZkYqphY8vELVzwCUpqiQ');
+      expect(first.version, 1);
       expect(m.toJson(), json);
     });
 
@@ -39,7 +40,7 @@ void main() {
       final updated = coord.copyWith(
         agents: const [AgentReference(id: 'b', version: 2)],
       );
-      expect(updated.agents.single.id, 'b');
+      expect((updated.agents.single as AgentReference).id, 'b');
       expect(updated, isNot(coord));
     });
 
@@ -48,6 +49,28 @@ void main() {
       final m = Multiagent.fromJson(json);
       expect(m, isA<UnknownMultiagent>());
       expect(m.toJson(), json);
+    });
+
+    test('advisor roster entry round-trips', () {
+      final json = {
+        'type': 'coordinator',
+        'agents': [
+          {'type': 'agent', 'id': 'agent_x', 'version': 1},
+          {'type': 'advisor', 'model': 'claude-fable-5-1'},
+        ],
+      };
+      final m = Multiagent.fromJson(json) as MultiagentCoordinator;
+      expect(m.agents[0], isA<AgentReference>());
+      expect(m.agents[1], isA<Advisor>());
+      expect((m.agents[1] as Advisor).model, 'claude-fable-5-1');
+      expect(m.toJson(), json);
+    });
+
+    test('unknown roster entry falls back to UnknownMultiagentRosterEntry', () {
+      final json = {'type': 'mystery', 'foo': 'bar'};
+      final entry = MultiagentRosterEntry.fromJson(json);
+      expect(entry, isA<UnknownMultiagentRosterEntry>());
+      expect(entry.toJson(), json);
     });
   });
 
@@ -129,10 +152,26 @@ void main() {
       expect(entry, isA<UnknownMultiagentRosterEntryParams>());
       expect(entry.toJson(), {'type': 'mystery'});
     });
+
+    test('an advisor object parses to MultiagentRosterEntryAdvisor', () {
+      final entry = MultiagentRosterEntryParams.fromJson({
+        'type': 'advisor',
+        'model': 'claude-fable-5-1',
+      });
+      expect(entry, isA<MultiagentRosterEntryAdvisor>());
+      expect((entry as MultiagentRosterEntryAdvisor).model, 'claude-fable-5-1');
+      expect(entry.toJson(), {'type': 'advisor', 'model': 'claude-fable-5-1'});
+    });
+
+    test('MultiagentRosterEntryParams.advisor factory builds an advisor', () {
+      final entry = MultiagentRosterEntryParams.advisor('claude-fable-5-1');
+      expect(entry, isA<MultiagentRosterEntryAdvisor>());
+      expect((entry as MultiagentRosterEntryAdvisor).model, 'claude-fable-5-1');
+    });
   });
 
   group('SessionMultiagent', () {
-    Map<String, dynamic> sessionAgentJson(String id) => {
+    Map<String, dynamic> sessionThreadAgentJson(String id) => {
       'id': id,
       'type': 'agent',
       'version': 1,
@@ -148,14 +187,29 @@ void main() {
     test('SessionMultiagentCoordinator round-trips with full agents', () {
       final json = {
         'type': 'coordinator',
-        'agents': [sessionAgentJson('agent_worker')],
+        'agents': [sessionThreadAgentJson('agent_worker')],
       };
       final m = SessionMultiagent.fromJson(json);
       expect(m, isA<SessionMultiagentCoordinator>());
       final coord = m as SessionMultiagentCoordinator;
-      expect(coord.agents.single.id, 'agent_worker');
-      expect(coord.agents.single.multiagent, isNull);
+      final agent = coord.agents.single as SessionThreadAgent;
+      expect(agent.id, 'agent_worker');
       expect(m.toJson(), json);
+    });
+
+    test('SessionMultiagentCoordinator resolves an advisor roster entry', () {
+      final json = {
+        'type': 'coordinator',
+        'agents': [
+          sessionThreadAgentJson('agent_worker'),
+          {'type': 'advisor', 'model': 'claude-fable-5-1'},
+        ],
+      };
+      final coord =
+          SessionMultiagent.fromJson(json) as SessionMultiagentCoordinator;
+      expect(coord.agents[0], isA<SessionThreadAgent>());
+      expect(coord.agents[1], isA<Advisor>());
+      expect(coord.toJson(), json);
     });
 
     test('unknown topology falls back to UnknownSessionMultiagent', () {

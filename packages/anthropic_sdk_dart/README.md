@@ -32,30 +32,30 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 ### Generation and streaming
 
 - Messages with typed inputs, system prompts, and multi-turn history
-- Mid-conversation system messages: update instructions inside the messages array, no user turn required (Opus 4.8)
+- Mid-conversation system messages (`InputMessage.system`), turn-scoped reminders (`clearAt`), and per-message effort (`InputMessage.systemEffort`) inside the messages array, no user turn required
 - SSE streaming with cancelation and token counting
-- Extended thinking and adaptive thinking controls, with `outputTokensDetails` reasoning-token breakdown, typed `thinking`/`redacted_thinking` input blocks, and `Message.toInputMessage()` for multi-turn replay
+- Adaptive and extended thinking controls, with `outputTokensDetails` reasoning-token breakdown, typed `thinking`/`redacted_thinking` input blocks, `Message.toInputMessage()` for multi-turn replay, `display: updates` progress updates, and preserved-thinking block-binding controls with `inputTransformations` reporting (beta)
 - Prompt-cache diagnostics: report why the cache prefix diverged between turns (beta)
-- Server-side fallback: automatically re-run refused requests on another model via the `fallbacks` chain, or retry manually with the refusal `fallback_credit_token` — including best-effort redemption mode and per-response `fallback_credit` usage outcomes (beta)
+- Server-side fallback: automatically re-run refused requests on another model via the `fallbacks` chain (or Anthropic's `FallbacksParam.defaultMode()` recommendations), or retry manually with the refusal `fallback_credit_token` — including best-effort redemption mode and per-response `fallback_credit` usage outcomes (beta)
 
 ### Tools and multimodal
 
 - Custom tool calling with strict schemas and tool choice controls
 - Mid-conversation tool changes: add or remove tools between turns with `tool_addition`/`tool_removal` blocks while preserving the prompt cache (beta)
-- Computer use, web search, code execution, advisor, and MCP tool integration
-- Vision and document inputs with citations, plus your own cited `search_result` blocks (RAG)
+- Computer-use and browser-use toolsets (`computer_toolset_20260801` / `browser_toolset_20260801` with per-member configs and `browser_state` results), web search, code execution, advisor, and MCP tool integration
+- Vision and document inputs with citations, an oversized-image policy via `transformations`, plus your own cited `search_result` blocks (RAG)
 
 ### Operational APIs
 
 - Message batches for large-scale offline processing
-- Model discovery, files (beta), and skills (beta)
+- Model discovery, files (expiration, cursor pagination), and skills (multi-file uploads, container skills)
 - Managed agents with sessions, threads, vaults, and streaming events (beta)
 - Scheduled deployments: run agent sessions on a cron schedule, with deployment runs, pause/resume, and run-now (beta)
-- Multiagent coordinator orchestration and outcome evaluations with grading rubrics (beta)
+- Multiagent coordinator orchestration (agent and advisor roster entries), per-tool agent toolset configs (incl. web-search/web-fetch domain filters), session budgets, and outcome evaluations with grading rubrics (beta)
 - Typed webhook event parsing and MCP-OAuth / static-bearer / environment-variable credential validation (beta)
 - Memory stores for persistent agent memories with versioning and redaction (beta)
-- Dreams: asynchronous memory-consolidation jobs over memory stores and session transcripts (beta, research preview)
-- User profiles with relationship classification (`external`/`resold`/`internal`), trust-grant tracking, and enrollment URLs (beta)
+- Dreams: asynchronous memory-consolidation jobs over memory stores and session transcripts, with `create_new`/`update_existing` output behavior (beta, research preview)
+- User profiles with access-type classification (`application`/`passthrough`), onboarding timestamps, trust-grant tracking, and enrollment URLs (beta)
 
 ## Why choose this client?
 
@@ -81,7 +81,7 @@ Future<void> main() async {
   try {
     final response = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-5',
         maxTokens: 1024,
         messages: [InputMessage.user('What is the capital of France?')],
       ),
@@ -148,7 +148,7 @@ Future<void> main() async {
   try {
     final response = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-5',
         maxTokens: 512,
         messages: [InputMessage.user('Summarize why Flutter is useful.')],
       ),
@@ -183,7 +183,7 @@ Future<void> main() async {
   try {
     final stream = client.messages.createStream(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-5',
         maxTokens: 256,
         messages: [InputMessage.user('Count from 1 to 5 slowly.')],
       ),
@@ -220,7 +220,7 @@ Future<void> main() async {
   try {
     final response = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-5',
         maxTokens: 512,
         messages: [InputMessage.user('What is the weather in Madrid?')],
         tools: [
@@ -253,7 +253,7 @@ Built-in tools like computer use, web search, code execution, and MCP are also a
 ```dart
 final response = await client.messages.create(
   MessageCreateRequest(
-    model: 'claude-sonnet-4-6',
+    model: 'claude-sonnet-5',
     maxTokens: 1024,
     messages: [InputMessage.user('Find the latest Dart release notes')],
     tools: [ToolDefinition.builtIn(BuiltInTool.webSearch())],
@@ -270,7 +270,7 @@ final response = await client.messages.create(
 <details>
 <summary><b>Show example</b></summary>
 
-Extended thinking is configured on the request, not through a separate client. That makes it easy to mix regular and higher-reasoning calls in the same Dart application.
+Thinking is configured on the request, not through a separate client. Current-generation models (Claude Sonnet 5, Opus 5, Fable 5.1) run adaptive thinking by default and reject `thinking: enabled`/`disabled`; use `ThinkingConfig.adaptive(...)` to control display and steer depth with `effort`. `ThinkingEnabled(budgetTokens:)` is only accepted by older models.
 
 ```dart
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
@@ -281,9 +281,9 @@ Future<void> main() async {
   try {
     final response = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-5',
         maxTokens: 1024,
-        thinking: const ThinkingEnabled(budgetTokens: 512),
+        thinking: const ThinkingAdaptive(display: ThinkingDisplayMode.summarized),
         messages: [InputMessage.user('Explain the tradeoffs of isolates in Dart.')],
       ),
     );
@@ -295,7 +295,7 @@ Future<void> main() async {
 }
 ```
 
-For a multi-turn conversation (e.g. tool use) that keeps thinking enabled, replay the assistant turn with `response.toInputMessage()` instead of hand-picking blocks — thinking blocks must be passed back unmodified and in their original order, or the API returns a 400 error.
+For a multi-turn conversation (e.g. tool use), replay the assistant turn with `response.toInputMessage()` instead of hand-picking blocks — thinking blocks must be passed back unmodified and in their original order, or the API returns a 400 error. On Claude Fable 5.1 they are also bound to the conversation prefix: keep the history append-only (don't edit earlier turns, `system`, or `tools`), or opt into dropping invalidated blocks with `ThinkingBlockBinding(prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.dropBlock)` under the `thinking-binding-controls-2026-08-01` beta and inspect `response.inputTransformations`.
 
 ```dart
 final messages = [
@@ -332,7 +332,7 @@ Future<void> main() async {
   try {
     final response = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-5',
         maxTokens: 512,
         messages: [
           InputMessage.userBlocks([
@@ -371,7 +371,7 @@ Future<void> main() async {
     final count = await client.messages.countTokens(
       TokenCountRequest.fromMessageCreateRequest(
         MessageCreateRequest(
-          model: 'claude-sonnet-4-6',
+          model: 'claude-sonnet-5',
           maxTokens: 256,
           messages: [InputMessage.user('How many tokens is this message?')],
         ),
@@ -409,7 +409,7 @@ Future<void> main() async {
           BatchRequestItem(
             customId: 'greeting-1',
             params: MessageCreateRequest(
-              model: 'claude-sonnet-4-6',
+              model: 'claude-sonnet-5',
               maxTokens: 50,
               messages: [InputMessage.user('Say hello!')],
             ),
@@ -513,7 +513,7 @@ Future<void> main() async {
     final response = await client.skills.list(limit: 10);
 
     for (final skill in response.data) {
-      print('${skill.id}: ${skill.displayTitle ?? "untitled"}');
+      print('${skill.id}: ${skill.displayName}');
     }
   } finally {
     client.close();
@@ -543,7 +543,7 @@ Future<void> main() async {
     final agent = await client.agents.create(
       const CreateAgentParams(
         name: 'My Agent',
-        model: ModelParamsId(id: 'claude-sonnet-4-6'),
+        model: ModelParamsId(id: 'claude-sonnet-5'),
       ),
     );
 
@@ -654,7 +654,7 @@ Future<void> main() async {
   try {
     await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-5',
         maxTokens: 64,
         messages: [InputMessage.user('Ping')],
       ),
@@ -682,13 +682,14 @@ See the [example/](example/) directory for complete examples:
 | Example | Description |
 |---------|-------------|
 | [`messages_example.dart`](example/messages_example.dart) | Basic message creation |
-| [`mid_conversation_system_example.dart`](example/mid_conversation_system_example.dart) | Mid-conversation system messages (Opus 4.8) |
+| [`mid_conversation_system_example.dart`](example/mid_conversation_system_example.dart) | Mid-conversation, turn-scoped, and effort-only system messages |
 | [`streaming_example.dart`](example/streaming_example.dart) | Streaming responses |
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Tool calling with schemas |
 | [`web_search_example.dart`](example/web_search_example.dart) | Web search tool |
 | [`advisor_example.dart`](example/advisor_example.dart) | Advisor tool (beta) |
-| [`computer_use_example.dart`](example/computer_use_example.dart) | Computer use tool |
-| [`thinking_example.dart`](example/thinking_example.dart) | Extended thinking and multi-turn thinking replay |
+| [`computer_use_example.dart`](example/computer_use_example.dart) | Computer-use toolset (`computer_toolset_20260801`) |
+| [`browser_use_example.dart`](example/browser_use_example.dart) | Browser-use toolset with `browser_state` tool results |
+| [`thinking_example.dart`](example/thinking_example.dart) | Adaptive thinking, progress updates, block binding, and multi-turn replay |
 | [`diagnostics_example.dart`](example/diagnostics_example.dart) | Prompt-cache diagnostics: why the cache prefix diverged (beta) |
 | [`fallback_example.dart`](example/fallback_example.dart) | Server-side fallback chain and refusal credit-token retry (beta) |
 | [`vision_example.dart`](example/vision_example.dart) | Image and document inputs |
@@ -696,8 +697,8 @@ See the [example/](example/) directory for complete examples:
 | [`search_result_example.dart`](example/search_result_example.dart) | Supplying your own cited `search_result` blocks (RAG) |
 | [`token_counting_example.dart`](example/token_counting_example.dart) | Token counting |
 | [`message_batches_example.dart`](example/message_batches_example.dart) | Batch processing |
-| [`files_example.dart`](example/files_example.dart) | File management (beta) |
-| [`skills_example.dart`](example/skills_example.dart) | Skills management (beta) |
+| [`files_example.dart`](example/files_example.dart) | File management |
+| [`skills_example.dart`](example/skills_example.dart) | Skills management |
 | [`mcp_example.dart`](example/mcp_example.dart) | MCP tool integration |
 | [`managed_agents_example.dart`](example/managed_agents_example.dart) | Managed agents: agents, sessions, vaults, multiagent rosters, outcomes, webhooks, credential validation (beta) |
 | [`session_threads_example.dart`](example/session_threads_example.dart) | Session threads: list, retrieve, stream events, archive (beta) |
@@ -716,8 +717,8 @@ See the [example/](example/) directory for complete examples:
 | Messages | ✅ Full |
 | Message Batches | ✅ Full |
 | Models | ✅ Full |
-| Files (Beta) | ✅ Full |
-| Skills (Beta) | ✅ Full |
+| Files | ✅ Full |
+| Skills | ✅ Full |
 | Agents (Beta) | ✅ Full |
 | Sessions (Beta) | ✅ Full |
 | Vaults (Beta) | ✅ Full |

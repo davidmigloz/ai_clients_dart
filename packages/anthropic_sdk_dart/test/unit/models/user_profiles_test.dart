@@ -22,22 +22,21 @@ void main() {
     });
   });
 
-  group('BetaUserProfileRelationship', () {
+  group('UserProfileAccessType', () {
     test('round-trips known values', () {
       for (final value in const [
-        BetaUserProfileRelationship.external,
-        BetaUserProfileRelationship.resold,
-        BetaUserProfileRelationship.internal,
+        UserProfileAccessType.application,
+        UserProfileAccessType.passthrough,
       ]) {
-        final parsed = BetaUserProfileRelationship.fromJson(value.toJson());
+        final parsed = UserProfileAccessType.fromJson(value.toJson());
         expect(parsed, value);
       }
     });
 
     test('falls back to unknown for unrecognized values', () {
       expect(
-        BetaUserProfileRelationship.fromJson('partner'),
-        BetaUserProfileRelationship.unknown,
+        UserProfileAccessType.fromJson('reseller'),
+        UserProfileAccessType.unknown,
       );
     });
   });
@@ -58,6 +57,24 @@ void main() {
       expect(
         UserProfileListOrder.fromJson('random_order'),
         UserProfileListOrder.unknown,
+      );
+    });
+  });
+
+  group('UserProfileListOrderBy', () {
+    test('round-trips known values', () {
+      for (final value in const [
+        UserProfileListOrderBy.createdAt,
+        UserProfileListOrderBy.name,
+      ]) {
+        expect(UserProfileListOrderBy.fromJson(value.toJson()), value);
+      }
+    });
+
+    test('falls back to unknown for unrecognized values', () {
+      expect(
+        UserProfileListOrderBy.fromJson('random_field'),
+        UserProfileListOrderBy.unknown,
       );
     });
   });
@@ -104,13 +121,15 @@ void main() {
       String? externalId = 'user_12345',
       Map<String, String>? metadata,
       Map<String, dynamic>? trustGrants,
-      String relationship = 'external',
+      String? accessType,
+      String? externalUserOnboardedAt,
     }) {
       return {
         'id': 'uprof_011CZkZCu8hGbp5mYRQgUmz9',
         'type': 'user_profile',
         'external_id': externalId,
-        'relationship': relationship,
+        'access_type': ?accessType,
+        'external_user_onboarded_at': ?externalUserOnboardedAt,
         'metadata': metadata ?? <String, String>{},
         'trust_grants':
             trustGrants ??
@@ -129,6 +148,8 @@ void main() {
           'cyber': {'status': 'active'},
           'legal': {'status': 'pending'},
         },
+        accessType: 'application',
+        externalUserOnboardedAt: '2024-11-02T08:15:00Z',
       );
       final parsed = UserProfile.fromJson(json);
 
@@ -138,6 +159,8 @@ void main() {
       expect(parsed.metadata, {'tier': 'pro', 'region': 'eu'});
       expect(parsed.trustGrants['cyber']?.status, TrustGrantStatus.active);
       expect(parsed.trustGrants['legal']?.status, TrustGrantStatus.pending);
+      expect(parsed.accessType, UserProfileAccessType.application);
+      expect(parsed.externalUserOnboardedAt, DateTime.utc(2024, 11, 2, 8, 15));
 
       // Round-trip check: re-serialize and compare structurally.
       final reparsed = UserProfile.fromJson(parsed.toJson());
@@ -168,6 +191,17 @@ void main() {
       expect(json['trust_grants'], <String, dynamic>{});
     });
 
+    test('accessType and externalUserOnboardedAt default to null', () {
+      final parsed = UserProfile.fromJson(profileJson());
+      expect(parsed.accessType, isNull);
+      expect(parsed.externalUserOnboardedAt, isNull);
+      expect(parsed.toJson().containsKey('access_type'), isFalse);
+      expect(
+        parsed.toJson().containsKey('external_user_onboarded_at'),
+        isFalse,
+      );
+    });
+
     test('equality uses content-based comparison for maps', () {
       final a = UserProfile.fromJson(profileJson(metadata: {'k': 'v'}));
       final b = UserProfile.fromJson(profileJson(metadata: {'k': 'v'}));
@@ -193,30 +227,29 @@ void main() {
       expect(copy.externalId, 'user_12345');
     });
 
-    test('round-trips name and resold relationship when present', () {
-      final json = profileJson(relationship: 'resold');
+    test('round-trips name and passthrough accessType when present', () {
+      final json = profileJson(accessType: 'passthrough');
       json['name'] = 'Acme Corp';
 
       final parsed = UserProfile.fromJson(json);
       expect(parsed.name, 'Acme Corp');
-      expect(parsed.relationship, BetaUserProfileRelationship.resold);
+      expect(parsed.accessType, UserProfileAccessType.passthrough);
 
       final reparsed = UserProfile.fromJson(parsed.toJson());
       expect(reparsed, equals(parsed));
     });
 
-    test('treats missing name as null and defaults relationship', () {
+    test('treats missing name as null', () {
       final parsed = UserProfile.fromJson(profileJson());
       expect(parsed.name, isNull);
-      expect(parsed.relationship, BetaUserProfileRelationship.external);
     });
 
-    test('copyWith updates relationship', () {
+    test('copyWith updates accessType', () {
       final original = UserProfile.fromJson(profileJson());
       final updated = original.copyWith(
-        relationship: BetaUserProfileRelationship.internal,
+        accessType: UserProfileAccessType.passthrough,
       );
-      expect(updated.relationship, BetaUserProfileRelationship.internal);
+      expect(updated.accessType, UserProfileAccessType.passthrough);
     });
   });
 
@@ -249,17 +282,25 @@ void main() {
       expect(cleared.externalId, isNull);
     });
 
-    test('serializes name and relationship when set', () {
-      const request = CreateUserProfileRequest(
-        name: 'Acme Corp',
-        relationship: BetaUserProfileRelationship.resold,
-      );
+    test(
+      'serializes name, accessType and externalUserOnboardedAt when set',
+      () {
+        final request = CreateUserProfileRequest(
+          name: 'Acme Corp',
+          accessType: UserProfileAccessType.passthrough,
+          externalUserOnboardedAt: DateTime.utc(2024, 11, 2, 8, 15),
+        );
 
-      expect(request.toJson(), {'name': 'Acme Corp', 'relationship': 'resold'});
+        expect(request.toJson(), {
+          'name': 'Acme Corp',
+          'access_type': 'passthrough',
+          'external_user_onboarded_at': '2024-11-02T08:15:00.000Z',
+        });
 
-      final parsed = CreateUserProfileRequest.fromJson(request.toJson());
-      expect(parsed, equals(request));
-    });
+        final parsed = CreateUserProfileRequest.fromJson(request.toJson());
+        expect(parsed, equals(request));
+      },
+    );
   });
 
   group('UpdateUserProfileRequest', () {
@@ -312,21 +353,35 @@ void main() {
       );
     });
 
-    test('serializes name and relationship updates', () {
-      const request = UpdateUserProfileRequest(
+    test(
+      'rejects explicit null externalUserOnboardedAt (cannot be cleared)',
+      () {
+        expect(
+          () => UpdateUserProfileRequest(externalUserOnboardedAt: null),
+          throwsA(isA<AssertionError>()),
+        );
+      },
+    );
+
+    test('serializes name, accessType and externalUserOnboardedAt updates', () {
+      final request = UpdateUserProfileRequest(
         name: 'Acme Corp',
-        relationship: BetaUserProfileRelationship.internal,
+        accessType: UserProfileAccessType.application,
+        externalUserOnboardedAt: DateTime.utc(2024, 11, 2, 8, 15),
       );
 
       final json = request.toJson();
       expect(json['name'], 'Acme Corp');
-      expect(json['relationship'], 'internal');
+      expect(json['access_type'], 'application');
+      expect(json['external_user_onboarded_at'], '2024-11-02T08:15:00.000Z');
 
       final parsed = UpdateUserProfileRequest.fromJson(json);
       expect(parsed.name, 'Acme Corp');
-      expect(parsed.relationship, BetaUserProfileRelationship.internal);
+      expect(parsed.accessType, UserProfileAccessType.application);
+      expect(parsed.externalUserOnboardedAt, DateTime.utc(2024, 11, 2, 8, 15));
       expect(parsed.hasName, isTrue);
-      expect(parsed.hasRelationship, isTrue);
+      expect(parsed.hasAccessType, isTrue);
+      expect(parsed.hasExternalUserOnboardedAt, isTrue);
     });
 
     test('clears name with explicit null', () {
@@ -337,12 +392,25 @@ void main() {
       expect(request.hasName, isTrue);
     });
 
-    test('omits name and relationship when unset', () {
+    test('clears accessType with explicit null', () {
+      const request = UpdateUserProfileRequest(accessType: null);
+      final json = request.toJson();
+      expect(json.containsKey('access_type'), isTrue);
+      expect(json['access_type'], isNull);
+      expect(request.hasAccessType, isTrue);
+    });
+
+    test('omits name and accessType when unset', () {
       const request = UpdateUserProfileRequest();
       expect(request.hasName, isFalse);
-      expect(request.hasRelationship, isFalse);
+      expect(request.hasAccessType, isFalse);
+      expect(request.hasExternalUserOnboardedAt, isFalse);
       expect(request.toJson().containsKey('name'), isFalse);
-      expect(request.toJson().containsKey('relationship'), isFalse);
+      expect(request.toJson().containsKey('access_type'), isFalse);
+      expect(
+        request.toJson().containsKey('external_user_onboarded_at'),
+        isFalse,
+      );
     });
   });
 
@@ -354,7 +422,6 @@ void main() {
             'id': 'uprof_1',
             'type': 'user_profile',
             'external_id': null,
-            'relationship': 'external',
             'trust_grants': <String, dynamic>{},
             'created_at': '2026-03-15T10:00:00Z',
             'updated_at': '2026-03-15T10:00:00Z',

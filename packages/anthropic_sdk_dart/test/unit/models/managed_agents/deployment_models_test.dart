@@ -306,6 +306,118 @@ void main() {
     });
   });
 
+  group('Deployment.budget', () {
+    test('round-trips when present', () {
+      final json = deploymentJson();
+      json['budget'] = {
+        'type': 'limit',
+        'max_list_cost': {'amount': '2500', 'currency': 'USD'},
+      };
+      final deployment = Deployment.fromJson(json);
+      expect(deployment.budget, isA<BudgetLimit>());
+      expect(deployment.toJson()['budget'], json['budget']);
+    });
+
+    test('is null and omitted from toJson when absent', () {
+      final deployment = Deployment.fromJson(deploymentJson());
+      expect(deployment.budget, isNull);
+      expect(deployment.toJson().containsKey('budget'), isFalse);
+    });
+
+    test('copyWith replaces and clears budget', () {
+      final json = deploymentJson();
+      json['budget'] = {
+        'type': 'limit',
+        'max_list_cost': {'amount': '2500', 'currency': 'USD'},
+      };
+      final deployment = Deployment.fromJson(json);
+      expect(deployment.copyWith(budget: null).budget, isNull);
+      expect(deployment.copyWith().budget, isA<BudgetLimit>());
+    });
+  });
+
+  group('CreateDeploymentParams.budget', () {
+    test('round-trips when present', () {
+      final params = CreateDeploymentParams(
+        agent: const AgentParamsId(id: 'agent_test123'),
+        environmentId: 'env_test123',
+        name: 'My Deployment',
+        initialEvents: const [
+          DeploymentUserMessageEventParams(
+            UserMessageEventParams(
+              content: [
+                {'type': 'text', 'text': 'Hello'},
+              ],
+            ),
+          ),
+        ],
+        budget: Budget.limit(
+          maxListCost: const MonetaryAmount(amount: '2500', currency: 'USD'),
+        ),
+      );
+      expect(params.toJson()['budget'], {
+        'type': 'limit',
+        'max_list_cost': {'amount': '2500', 'currency': 'USD'},
+      });
+      final reparsed = CreateDeploymentParams.fromJson(params.toJson());
+      expect(reparsed, params);
+    });
+
+    test('is omitted from toJson when absent', () {
+      const params = CreateDeploymentParams(
+        agent: AgentParamsId(id: 'agent_test123'),
+        environmentId: 'env_test123',
+        name: 'My Deployment',
+        initialEvents: [
+          DeploymentUserMessageEventParams(
+            UserMessageEventParams(
+              content: [
+                {'type': 'text', 'text': 'Hello'},
+              ],
+            ),
+          ),
+        ],
+      );
+      expect(params.toJson().containsKey('budget'), isFalse);
+    });
+  });
+
+  group('UpdateDeploymentParams.budget', () {
+    test('omitted: no budget key in toJson', () {
+      const params = UpdateDeploymentParams();
+      expect(params.budget, isNull);
+      expect(params.toJson().containsKey('budget'), isFalse);
+    });
+
+    test('explicit null: emits budget: null to clear it', () {
+      const params = UpdateDeploymentParams(budget: null);
+      expect(params.toJson().containsKey('budget'), isTrue);
+      expect(params.toJson()['budget'], isNull);
+    });
+
+    test('value: emits the serialized budget', () {
+      final params = UpdateDeploymentParams(
+        budget: Budget.limit(
+          maxListCost: const MonetaryAmount(amount: '2500', currency: 'USD'),
+        ),
+      );
+      expect(params.toJson()['budget'], {
+        'type': 'limit',
+        'max_list_cost': {'amount': '2500', 'currency': 'USD'},
+      });
+    });
+
+    test('copyWith replaces and clears budget', () {
+      final params = UpdateDeploymentParams(
+        budget: Budget.limit(
+          maxListCost: const MonetaryAmount(amount: '2500', currency: 'USD'),
+        ),
+      );
+      expect(params.copyWith(budget: null).budget, isNull);
+      expect(params.copyWith().budget, isA<BudgetLimit>());
+    });
+  });
+
   group('GitHubRepositoryResourceParams', () {
     test('toString redacts the authorization token', () {
       const token = 'ghp_SUPER_SECRET_TOKEN';

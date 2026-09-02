@@ -241,7 +241,6 @@ void main() {
         );
 
         expect(tool.type, 'code_execution_20260521');
-        expect(tool.container, isNull);
 
         final json = tool.toJson();
         expect(json['type'], 'code_execution_20260521');

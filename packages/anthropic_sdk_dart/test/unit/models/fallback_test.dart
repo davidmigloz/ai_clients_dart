@@ -356,16 +356,77 @@ void main() {
     });
   });
 
+  group('FallbacksParam', () {
+    test('fromJson parses a list as FallbacksList', () {
+      final json = [
+        {'model': 'claude-sonnet-4-6'},
+        {'model': 'claude-haiku-4-5-20251001'},
+      ];
+
+      final param = FallbacksParam.fromJson(json);
+
+      expect(param, isA<FallbacksList>());
+      final list = (param as FallbacksList).fallbacks;
+      expect(list, hasLength(2));
+      expect(list.first.model, 'claude-sonnet-4-6');
+      expect(param.toJson(), json);
+    });
+
+    test('fromJson parses "default" as FallbacksDefault', () {
+      final param = FallbacksParam.fromJson('default');
+
+      expect(param, isA<FallbacksDefault>());
+      expect(param.toJson(), 'default');
+    });
+
+    test('fromJson throws FormatException for anything else', () {
+      expect(() => FallbacksParam.fromJson(42), throwsFormatException);
+      expect(
+        () => FallbacksParam.fromJson('not-default'),
+        throwsFormatException,
+      );
+      expect(() => FallbacksParam.fromJson(null), throwsFormatException);
+    });
+
+    test('FallbacksParam.list and .defaultMode factories', () {
+      const list = FallbacksParam.list([
+        FallbackConfigV2(model: 'claude-sonnet-4-6'),
+      ]);
+      expect(list, isA<FallbacksList>());
+      expect(list.toJson(), [
+        {'model': 'claude-sonnet-4-6'},
+      ]);
+
+      const defaultMode = FallbacksParam.defaultMode();
+      expect(defaultMode, isA<FallbacksDefault>());
+      expect(defaultMode.toJson(), 'default');
+    });
+
+    test('equality and hashCode', () {
+      const a = FallbacksParam.list([FallbackConfigV2(model: 'm')]);
+      const b = FallbacksParam.list([FallbackConfigV2(model: 'm')]);
+      const c = FallbacksParam.list([FallbackConfigV2(model: 'other')]);
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(a, isNot(equals(c)));
+      expect(
+        const FallbacksParam.defaultMode(),
+        equals(const FallbacksParam.defaultMode()),
+      );
+      expect(a, isNot(equals(const FallbacksParam.defaultMode())));
+    });
+  });
+
   group('MessageCreateRequest fallback fields', () {
     test('toJson includes fallbacks and fallback_credit_token', () {
       const request = MessageCreateRequest(
         model: 'claude-opus-4-8',
         maxTokens: 1024,
         messages: [],
-        fallbacks: [
+        fallbacks: FallbacksParam.list([
           FallbackConfigV2(model: 'claude-sonnet-4-6', maxTokens: 512),
           FallbackConfigV2(model: 'claude-haiku-4-5-20251001'),
-        ],
+        ]),
         fallbackCreditToken: FallbackCreditTokenParam.token(
           'tok_secret_abc123',
         ),
@@ -390,9 +451,11 @@ void main() {
         'fallback_credit_token': 'tok_secret_abc123',
       });
 
-      expect(request.fallbacks, hasLength(1));
-      expect(request.fallbacks!.first.model, 'claude-sonnet-4-6');
-      expect(request.fallbacks!.first.maxTokens, 512);
+      expect(request.fallbacks, isA<FallbacksList>());
+      final fallbacks = (request.fallbacks! as FallbacksList).fallbacks;
+      expect(fallbacks, hasLength(1));
+      expect(fallbacks.first.model, 'claude-sonnet-4-6');
+      expect(fallbacks.first.maxTokens, 512);
       expect(
         request.fallbackCreditToken,
         const FallbackCreditTokenParam.token('tok_secret_abc123'),
@@ -409,6 +472,40 @@ void main() {
       final json = request.toJson();
       expect(json.containsKey('fallbacks'), isFalse);
       expect(json.containsKey('fallback_credit_token'), isFalse);
+    });
+
+    test('round-trips fallbacks: FallbacksParam.list(...)', () {
+      const request = MessageCreateRequest(
+        model: 'claude-opus-4-8',
+        maxTokens: 1024,
+        messages: [],
+        fallbacks: FallbacksParam.list([
+          FallbackConfigV2(model: 'claude-sonnet-4-6'),
+        ]),
+      );
+
+      final json = request.toJson();
+      expect(json['fallbacks'], [
+        {'model': 'claude-sonnet-4-6'},
+      ]);
+
+      final parsed = MessageCreateRequest.fromJson(json);
+      expect(parsed.fallbacks, isA<FallbacksList>());
+    });
+
+    test('round-trips fallbacks: FallbacksParam.defaultMode()', () {
+      const request = MessageCreateRequest(
+        model: 'claude-opus-4-8',
+        maxTokens: 1024,
+        messages: [],
+        fallbacks: FallbacksParam.defaultMode(),
+      );
+
+      final json = request.toJson();
+      expect(json['fallbacks'], 'default');
+
+      final parsed = MessageCreateRequest.fromJson(json);
+      expect(parsed.fallbacks, isA<FallbacksDefault>());
     });
   });
 
@@ -440,7 +537,9 @@ void main() {
           model: 'claude-opus-4-8',
           maxTokens: 1024,
           messages: [InputMessage.user('Hi')],
-          fallbacks: const [FallbackConfigV2(model: 'claude-sonnet-4-6')],
+          fallbacks: const FallbacksParam.list([
+            FallbackConfigV2(model: 'claude-sonnet-4-6'),
+          ]),
           fallbackCreditToken: const FallbackCreditTokenParam.token(
             'tok_secret_abc123',
           ),

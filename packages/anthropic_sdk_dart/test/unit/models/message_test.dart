@@ -254,6 +254,176 @@ void main() {
       expect(modified.role, MessageRole.assistant); // Unchanged
       expect(modified.model, 'claude-sonnet-4-6'); // Unchanged
     });
+
+    test('fromJson parses inputTransformations', () {
+      final json = {
+        'id': 'msg_it',
+        'type': 'message',
+        'role': 'assistant',
+        'model': 'claude-sonnet-4-6',
+        'content': [
+          {'type': 'text', 'text': 'Hi'},
+        ],
+        'usage': {'input_tokens': 10, 'output_tokens': 5},
+        'input_transformations': [
+          {
+            'type': 'thinking_dropped',
+            'path': 'messages.0.content.0',
+            'reason': 'prefix_binding_mismatch',
+          },
+        ],
+      };
+
+      final message = Message.fromJson(json);
+
+      expect(message.inputTransformations, hasLength(1));
+      final transformation =
+          message.inputTransformations!.first
+              as ThinkingDroppedInputTransformation;
+      expect(transformation.path, 'messages.0.content.0');
+      expect(
+        transformation.reason,
+        InputTransformationReason.prefixBindingMismatch,
+      );
+    });
+
+    test('fromJson leaves inputTransformations null when absent', () {
+      final json = {
+        'id': 'msg_no_it',
+        'type': 'message',
+        'role': 'assistant',
+        'model': 'claude-sonnet-4-6',
+        'content': [
+          {'type': 'text', 'text': 'Hi'},
+        ],
+        'usage': {'input_tokens': 10, 'output_tokens': 5},
+      };
+
+      final message = Message.fromJson(json);
+
+      expect(message.inputTransformations, isNull);
+    });
+
+    test('fromJson handles empty inputTransformations array', () {
+      final json = {
+        'id': 'msg_empty_it',
+        'type': 'message',
+        'role': 'assistant',
+        'model': 'claude-sonnet-4-6',
+        'content': [
+          {'type': 'text', 'text': 'Hi'},
+        ],
+        'usage': {'input_tokens': 10, 'output_tokens': 5},
+        'input_transformations': <dynamic>[],
+      };
+
+      final message = Message.fromJson(json);
+
+      expect(message.inputTransformations, isEmpty);
+    });
+
+    test('toJson omits inputTransformations when null', () {
+      const message = Message(
+        id: 'msg_test',
+        role: MessageRole.assistant,
+        content: [TextBlock(text: 'Test')],
+        model: 'claude-sonnet-4-6',
+        usage: Usage(inputTokens: 5, outputTokens: 3),
+      );
+
+      final json = message.toJson();
+
+      expect(json.containsKey('input_transformations'), isFalse);
+    });
+
+    test('toJson serializes inputTransformations', () {
+      const message = Message(
+        id: 'msg_test',
+        role: MessageRole.assistant,
+        content: [TextBlock(text: 'Test')],
+        model: 'claude-sonnet-4-6',
+        usage: Usage(inputTokens: 5, outputTokens: 3),
+        inputTransformations: [
+          ThinkingDroppedInputTransformation(
+            path: 'messages.0.content.0',
+            reason: InputTransformationReason.modelBindingMismatch,
+          ),
+        ],
+      );
+
+      final json = message.toJson();
+
+      expect(json['input_transformations'], [
+        {
+          'type': 'thinking_dropped',
+          'path': 'messages.0.content.0',
+          'reason': 'model_binding_mismatch',
+        },
+      ]);
+    });
+
+    test('copyWith can set and clear inputTransformations', () {
+      const original = Message(
+        id: 'msg_test',
+        role: MessageRole.assistant,
+        content: [TextBlock(text: 'Test')],
+        model: 'claude-sonnet-4-6',
+        usage: Usage(inputTokens: 5, outputTokens: 3),
+      );
+
+      final withTransformations = original.copyWith(
+        inputTransformations: const [
+          ThinkingDroppedInputTransformation(
+            path: 'messages.0.content.0',
+            reason: InputTransformationReason.modelBindingMismatch,
+          ),
+        ],
+      );
+      expect(withTransformations.inputTransformations, hasLength(1));
+
+      final cleared = withTransformations.copyWith(inputTransformations: null);
+      expect(cleared.inputTransformations, isNull);
+    });
+
+    test('equality and hashCode consider inputTransformations', () {
+      const m1 = Message(
+        id: 'msg_test',
+        role: MessageRole.assistant,
+        content: [TextBlock(text: 'Test')],
+        model: 'claude-sonnet-4-6',
+        usage: Usage(inputTokens: 5, outputTokens: 3),
+        inputTransformations: [
+          ThinkingDroppedInputTransformation(
+            path: 'messages.0.content.0',
+            reason: InputTransformationReason.modelBindingMismatch,
+          ),
+        ],
+      );
+      const m2 = Message(
+        id: 'msg_test',
+        role: MessageRole.assistant,
+        content: [TextBlock(text: 'Test')],
+        model: 'claude-sonnet-4-6',
+        usage: Usage(inputTokens: 5, outputTokens: 3),
+        inputTransformations: [
+          ThinkingDroppedInputTransformation(
+            path: 'messages.0.content.0',
+            reason: InputTransformationReason.modelBindingMismatch,
+          ),
+        ],
+      );
+      const m3 = Message(
+        id: 'msg_test',
+        role: MessageRole.assistant,
+        content: [TextBlock(text: 'Test')],
+        model: 'claude-sonnet-4-6',
+        usage: Usage(inputTokens: 5, outputTokens: 3),
+      );
+
+      expect(m1, equals(m2));
+      expect(m1.hashCode, m2.hashCode);
+      expect(m1, isNot(equals(m3)));
+    });
   });
 
   group('MessageExtensions', () {

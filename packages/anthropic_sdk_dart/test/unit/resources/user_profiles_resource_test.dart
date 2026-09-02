@@ -19,7 +19,7 @@ class UserProfilesFixtures {
       'id': id,
       'type': 'user_profile',
       'external_id': externalId,
-      'relationship': 'external',
+      'access_type': 'application',
       'metadata': metadata ?? <String, String>{},
       'trust_grants':
           trustGrants ??
@@ -80,7 +80,7 @@ void main() {
       final request = mockHttpClient.lastRequest!;
       expect(request.url.path, '/v1/user_profiles');
       expect(request.method, 'POST');
-      expect(request.headers['anthropic-beta'], 'user-profiles-2026-03-24');
+      expect(request.headers['anthropic-beta'], 'user-profiles-2026-08-18');
       expect(request.headers['x-api-key'], 'test-api-key');
 
       final body =
@@ -113,6 +113,7 @@ void main() {
         limit: 10,
         page: 'cursor_xyz',
         order: UserProfileListOrder.desc,
+        orderBy: UserProfileListOrderBy.name,
       );
 
       expect(response.data, hasLength(1));
@@ -125,7 +126,8 @@ void main() {
       expect(request.url.queryParameters['limit'], '10');
       expect(request.url.queryParameters['page'], 'cursor_xyz');
       expect(request.url.queryParameters['order'], 'desc');
-      expect(request.headers['anthropic-beta'], 'user-profiles-2026-03-24');
+      expect(request.url.queryParameters['order_by'], 'name');
+      expect(request.headers['anthropic-beta'], 'user-profiles-2026-08-18');
     });
 
     test('list without params sends no query string', () async {
@@ -158,7 +160,7 @@ void main() {
         '/v1/user_profiles/uprof_011CZkZCu8hGbp5mYRQgUmz9',
       );
       expect(request.method, 'GET');
-      expect(request.headers['anthropic-beta'], 'user-profiles-2026-03-24');
+      expect(request.headers['anthropic-beta'], 'user-profiles-2026-08-18');
     });
 
     test('update sends correct request and parses response', () async {
@@ -179,7 +181,7 @@ void main() {
         '/v1/user_profiles/uprof_011CZkZCu8hGbp5mYRQgUmz9',
       );
       expect(request.method, 'POST');
-      expect(request.headers['anthropic-beta'], 'user-profiles-2026-03-24');
+      expect(request.headers['anthropic-beta'], 'user-profiles-2026-08-18');
 
       final body =
           jsonDecode((request as dynamic).body) as Map<String, dynamic>;
@@ -237,7 +239,7 @@ void main() {
           '/v1/user_profiles/uprof_011CZkZCu8hGbp5mYRQgUmz9/enrollment_url',
         );
         expect(request.method, 'POST');
-        expect(request.headers['anthropic-beta'], 'user-profiles-2026-03-24');
+        expect(request.headers['anthropic-beta'], 'user-profiles-2026-08-18');
       },
     );
 

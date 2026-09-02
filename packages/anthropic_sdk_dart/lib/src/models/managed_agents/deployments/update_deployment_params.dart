@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import '../common/budget.dart';
 import '../resources/session_resource_params.dart';
 import '../sessions/create_session_params.dart' show AgentParams;
 import 'deployment_initial_event_params.dart';
@@ -69,6 +70,14 @@ class UpdateDeploymentParams {
       _vaultIds == _notSet ? null : (_vaultIds as List?)?.cast<String>();
   final Object? _vaultIds;
 
+  /// Spend ceiling for future sessions. Full replacement. Omit to preserve;
+  /// send null to clear (sessions created afterwards are uncapped). The
+  /// deployment agent's model must have a public list price, or the request
+  /// is rejected; a multiagent roster is re-validated in full when each fire
+  /// copies the cap, which fails closed the same way.
+  Budget? get budget => _budget == _notSet ? null : _budget as Budget?;
+  final Object? _budget;
+
   /// Creates an [UpdateDeploymentParams].
   ///
   /// Omit a field to preserve its current value on the server.
@@ -83,11 +92,13 @@ class UpdateDeploymentParams {
     Object? resources = _notSet,
     Object? schedule = _notSet,
     Object? vaultIds = _notSet,
+    Object? budget = _notSet,
   }) : _description = description,
        _metadata = metadata,
        _resources = resources,
        _schedule = schedule,
-       _vaultIds = vaultIds;
+       _vaultIds = vaultIds,
+       _budget = budget;
 
   /// Creates an [UpdateDeploymentParams] from JSON.
   factory UpdateDeploymentParams.fromJson(Map<String, dynamic> json) {
@@ -130,6 +141,11 @@ class UpdateDeploymentParams {
       vaultIds: json.containsKey('vault_ids')
           ? (json['vault_ids'] as List?)?.map((e) => e as String).toList()
           : _notSet,
+      budget: json.containsKey('budget')
+          ? (json['budget'] != null
+                ? Budget.fromJson(json['budget'] as Map<String, dynamic>)
+                : null)
+          : _notSet,
     );
   }
 
@@ -151,6 +167,7 @@ class UpdateDeploymentParams {
     if (_schedule != _notSet)
       'schedule': (_schedule as ScheduleParams?)?.toJson(),
     if (_vaultIds != _notSet) 'vault_ids': _vaultIds,
+    if (_budget != _notSet) 'budget': (_budget as Budget?)?.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -164,6 +181,7 @@ class UpdateDeploymentParams {
     Object? resources = unsetCopyWithValue,
     Object? schedule = unsetCopyWithValue,
     Object? vaultIds = unsetCopyWithValue,
+    Object? budget = unsetCopyWithValue,
   }) {
     return UpdateDeploymentParams(
       agent: agent == unsetCopyWithValue ? this.agent : agent as AgentParams?,
@@ -181,6 +199,7 @@ class UpdateDeploymentParams {
       resources: resources == unsetCopyWithValue ? _resources : resources,
       schedule: schedule == unsetCopyWithValue ? _schedule : schedule,
       vaultIds: vaultIds == unsetCopyWithValue ? _vaultIds : vaultIds,
+      budget: budget == unsetCopyWithValue ? _budget : budget,
     );
   }
 
@@ -197,7 +216,8 @@ class UpdateDeploymentParams {
           _mapsEqualOrBothSentinel(_metadata, other._metadata) &&
           _listsEqualOrBothSentinel(_resources, other._resources) &&
           _schedule == other._schedule &&
-          _listsEqualOrBothSentinel(_vaultIds, other._vaultIds);
+          _listsEqualOrBothSentinel(_vaultIds, other._vaultIds) &&
+          _budget == other._budget;
 
   @override
   int get hashCode => Object.hash(
@@ -209,7 +229,7 @@ class UpdateDeploymentParams {
     _metadata == _notSet ? _notSet : mapHash(metadata),
     _resources == _notSet ? _notSet : listHash(resources),
     _schedule,
-    _vaultIds == _notSet ? _notSet : listHash(vaultIds),
+    Object.hash(_vaultIds == _notSet ? _notSet : listHash(vaultIds), _budget),
   );
 
   @override
@@ -223,7 +243,8 @@ class UpdateDeploymentParams {
       'metadata: $metadata, '
       'resources: ${resources == null ? null : '${resources!.length} items'}, '
       'schedule: $schedule, '
-      'vaultIds: $vaultIds)';
+      'vaultIds: $vaultIds, '
+      'budget: $budget)';
 }
 
 bool _listsEqualOrBothSentinel(Object? a, Object? b) {

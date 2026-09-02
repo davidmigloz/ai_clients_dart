@@ -43,8 +43,17 @@ class ModelConfig {
   /// Response effort level for model generation, e.g. `{"type": "high"}`.
   final EffortLevel? effort;
 
+  /// Geographic region for model inference. When unset, requests fall through
+  /// to the workspace's `default_inference_geo`.
+  final String? inferenceGeo;
+
   /// Creates a [ModelConfig].
-  const ModelConfig({required this.id, this.speed, this.effort});
+  const ModelConfig({
+    required this.id,
+    this.speed,
+    this.effort,
+    this.inferenceGeo,
+  });
 
   /// Creates a [ModelConfig] from JSON.
   factory ModelConfig.fromJson(Map<String, dynamic> json) {
@@ -58,6 +67,7 @@ class ModelConfig {
               (json['effort'] as Map<String, dynamic>)['type'] as String,
             )
           : null,
+      inferenceGeo: json['inference_geo'] as String?,
     );
   }
 
@@ -66,6 +76,7 @@ class ModelConfig {
     'id': id,
     if (speed != null) 'speed': speed!.toJson(),
     if (effort != null) 'effort': {'type': effort!.toJson()},
+    if (inferenceGeo != null) 'inference_geo': inferenceGeo,
   };
 
   /// Creates a copy with replaced values.
@@ -73,6 +84,7 @@ class ModelConfig {
     String? id,
     Object? speed = unsetCopyWithValue,
     Object? effort = unsetCopyWithValue,
+    Object? inferenceGeo = unsetCopyWithValue,
   }) {
     return ModelConfig(
       id: id ?? this.id,
@@ -80,6 +92,9 @@ class ModelConfig {
       effort: effort == unsetCopyWithValue
           ? this.effort
           : effort as EffortLevel?,
+      inferenceGeo: inferenceGeo == unsetCopyWithValue
+          ? this.inferenceGeo
+          : inferenceGeo as String?,
     );
   }
 
@@ -90,13 +105,16 @@ class ModelConfig {
           runtimeType == other.runtimeType &&
           id == other.id &&
           speed == other.speed &&
-          effort == other.effort;
+          effort == other.effort &&
+          inferenceGeo == other.inferenceGeo;
 
   @override
-  int get hashCode => Object.hash(id, speed, effort);
+  int get hashCode => Object.hash(id, speed, effort, inferenceGeo);
 
   @override
-  String toString() => 'ModelConfig(id: $id, speed: $speed, effort: $effort)';
+  String toString() =>
+      'ModelConfig(id: $id, speed: $speed, effort: $effort, '
+      'inferenceGeo: $inferenceGeo)';
 }
 
 /// Model parameter — either a simple model ID string or a [ModelConfig].
@@ -178,6 +196,13 @@ class ModelParamsConfig extends ModelParams {
   /// normalized to `false`.
   final bool clearEffort;
 
+  /// Geographic region for model inference. When unset, requests fall through
+  /// to the workspace's `default_inference_geo`.
+  ///
+  /// On update, `model` is whole-object replacement — omitting this clears
+  /// it.
+  final String? inferenceGeo;
+
   /// Creates a [ModelParamsConfig].
   ///
   /// A non-null [effort] takes precedence over [clearEffort]; passing both
@@ -187,6 +212,7 @@ class ModelParamsConfig extends ModelParams {
     this.speed,
     this.effort,
     bool clearEffort = false,
+    this.inferenceGeo,
   }) : clearEffort = effort == null && clearEffort;
 
   /// Creates a [ModelParamsConfig] from JSON.
@@ -200,6 +226,7 @@ class ModelParamsConfig extends ModelParams {
           ? EffortParams.fromJson(json['effort'] as Object)
           : null,
       clearEffort: json.containsKey('effort') && json['effort'] == null,
+      inferenceGeo: json['inference_geo'] as String?,
     );
   }
 
@@ -211,6 +238,7 @@ class ModelParamsConfig extends ModelParams {
       'effort': effort!.toJson()
     else if (clearEffort)
       'effort': null,
+    if (inferenceGeo != null) 'inference_geo': inferenceGeo,
   };
 
   /// Creates a copy with replaced values.
@@ -227,6 +255,7 @@ class ModelParamsConfig extends ModelParams {
     Object? speed = unsetCopyWithValue,
     Object? effort = unsetCopyWithValue,
     bool? clearEffort,
+    Object? inferenceGeo = unsetCopyWithValue,
   }) {
     final effortSet = effort != unsetCopyWithValue;
     return ModelParamsConfig(
@@ -237,6 +266,9 @@ class ModelParamsConfig extends ModelParams {
           : ((clearEffort ?? false) ? null : this.effort),
       clearEffort:
           clearEffort ?? (effortSet ? effort == null : this.clearEffort),
+      inferenceGeo: inferenceGeo == unsetCopyWithValue
+          ? this.inferenceGeo
+          : inferenceGeo as String?,
     );
   }
 
@@ -248,13 +280,14 @@ class ModelParamsConfig extends ModelParams {
           id == other.id &&
           speed == other.speed &&
           effort == other.effort &&
-          clearEffort == other.clearEffort;
+          clearEffort == other.clearEffort &&
+          inferenceGeo == other.inferenceGeo;
 
   @override
-  int get hashCode => Object.hash(id, speed, effort, clearEffort);
+  int get hashCode => Object.hash(id, speed, effort, clearEffort, inferenceGeo);
 
   @override
   String toString() =>
       'ModelParamsConfig(id: $id, speed: $speed, effort: $effort, '
-      'clearEffort: $clearEffort)';
+      'clearEffort: $clearEffort, inferenceGeo: $inferenceGeo)';
 }

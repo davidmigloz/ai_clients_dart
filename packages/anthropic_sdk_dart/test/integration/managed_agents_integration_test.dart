@@ -270,7 +270,10 @@ void main() {
           final retrieved = await client!.agents.retrieve(coordinator.id);
           expect(retrieved.multiagent, isA<MultiagentCoordinator>());
           final coord = retrieved.multiagent! as MultiagentCoordinator;
-          expect(coord.agents.map((a) => a.id), contains(worker.id));
+          expect(
+            coord.agents.whereType<AgentReference>().map((a) => a.id),
+            contains(worker.id),
+          );
 
           // 4. Update an unrelated field; omitting `multiagent` preserves it.
           final updated = await client!.agents.update(

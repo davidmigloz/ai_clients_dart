@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import '../common/budget.dart';
 import '../resources/session_resource_params.dart';
 import '../sessions/create_session_params.dart' show AgentParams;
 import 'deployment_initial_event_params.dart';
@@ -45,6 +46,13 @@ class CreateDeploymentParams {
   /// from this deployment. Maximum 50.
   final List<String>? vaultIds;
 
+  /// Enforced spend ceiling stamped onto each session created from this
+  /// deployment, copied at session-creation time. Omit to leave sessions
+  /// uncapped. The deployment agent's model must have a public list price,
+  /// or the request is rejected; a multiagent roster is re-validated in full
+  /// when each fire copies the cap, which fails closed the same way.
+  final Budget? budget;
+
   /// Creates a [CreateDeploymentParams].
   const CreateDeploymentParams({
     required this.agent,
@@ -56,6 +64,7 @@ class CreateDeploymentParams {
     this.resources,
     this.schedule,
     this.vaultIds,
+    this.budget,
   });
 
   /// Creates a [CreateDeploymentParams] from JSON.
@@ -84,6 +93,9 @@ class CreateDeploymentParams {
           ? ScheduleParams.fromJson(json['schedule'] as Map<String, dynamic>)
           : null,
       vaultIds: (json['vault_ids'] as List?)?.map((e) => e as String).toList(),
+      budget: json['budget'] != null
+          ? Budget.fromJson(json['budget'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -99,6 +111,7 @@ class CreateDeploymentParams {
       'resources': resources!.map((e) => e.toJson()).toList(),
     if (schedule != null) 'schedule': schedule!.toJson(),
     if (vaultIds != null) 'vault_ids': vaultIds,
+    if (budget != null) 'budget': budget!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -112,6 +125,7 @@ class CreateDeploymentParams {
     Object? resources = unsetCopyWithValue,
     Object? schedule = unsetCopyWithValue,
     Object? vaultIds = unsetCopyWithValue,
+    Object? budget = unsetCopyWithValue,
   }) {
     return CreateDeploymentParams(
       agent: agent ?? this.agent,
@@ -133,6 +147,7 @@ class CreateDeploymentParams {
       vaultIds: vaultIds == unsetCopyWithValue
           ? this.vaultIds
           : vaultIds as List<String>?,
+      budget: budget == unsetCopyWithValue ? this.budget : budget as Budget?,
     );
   }
 
@@ -149,7 +164,8 @@ class CreateDeploymentParams {
           mapsEqual(metadata, other.metadata) &&
           listsEqual(resources, other.resources) &&
           schedule == other.schedule &&
-          listsEqual(vaultIds, other.vaultIds);
+          listsEqual(vaultIds, other.vaultIds) &&
+          budget == other.budget;
 
   @override
   int get hashCode => Object.hash(
@@ -162,6 +178,7 @@ class CreateDeploymentParams {
     listHash(resources),
     schedule,
     listHash(vaultIds),
+    budget,
   );
 
   @override
@@ -175,5 +192,6 @@ class CreateDeploymentParams {
       'metadata: $metadata, '
       'resources: ${resources == null ? null : '${resources!.length} items'}, '
       'schedule: $schedule, '
-      'vaultIds: $vaultIds)';
+      'vaultIds: $vaultIds, '
+      'budget: $budget)';
 }

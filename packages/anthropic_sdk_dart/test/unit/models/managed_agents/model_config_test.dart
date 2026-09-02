@@ -63,6 +63,55 @@ void main() {
     });
   });
 
+  group('ModelConfig.inferenceGeo', () {
+    test('round-trips through fromJson/toJson', () {
+      const json = {'id': 'claude-opus-4-8', 'inference_geo': 'us'};
+      final config = ModelConfig.fromJson(json);
+      expect(config.inferenceGeo, 'us');
+      expect(config.toJson(), json);
+    });
+
+    test('is null and omitted from toJson when absent', () {
+      final config = ModelConfig.fromJson(const {'id': 'claude-opus-4-8'});
+      expect(config.inferenceGeo, isNull);
+      expect(config.toJson().containsKey('inference_geo'), isFalse);
+    });
+
+    test('copyWith replaces and clears inferenceGeo', () {
+      const config = ModelConfig(id: 'claude-opus-4-8', inferenceGeo: 'us');
+      expect(config.copyWith(inferenceGeo: 'eu').inferenceGeo, 'eu');
+      expect(config.copyWith(inferenceGeo: null).inferenceGeo, isNull);
+      expect(config.copyWith().inferenceGeo, 'us');
+    });
+  });
+
+  group('ModelParamsConfig.inferenceGeo', () {
+    test('round-trips through fromJson/toJson', () {
+      const json = {'id': 'claude-opus-4-8', 'inference_geo': 'us'};
+      final config = ModelParamsConfig.fromJson(json);
+      expect(config.inferenceGeo, 'us');
+      expect(config.toJson(), json);
+    });
+
+    test('is null and omitted from toJson when absent', () {
+      final config = ModelParamsConfig.fromJson(const {
+        'id': 'claude-opus-4-8',
+      });
+      expect(config.inferenceGeo, isNull);
+      expect(config.toJson().containsKey('inference_geo'), isFalse);
+    });
+
+    test('copyWith replaces and clears inferenceGeo', () {
+      const config = ModelParamsConfig(
+        id: 'claude-opus-4-8',
+        inferenceGeo: 'us',
+      );
+      expect(config.copyWith(inferenceGeo: 'eu').inferenceGeo, 'eu');
+      expect(config.copyWith(inferenceGeo: null).inferenceGeo, isNull);
+      expect(config.copyWith().inferenceGeo, 'us');
+    });
+  });
+
   group('ModelParamsConfig.effort', () {
     test('fromJson parses a bare level string via EffortParams', () {
       final config = ModelParamsConfig.fromJson(const {

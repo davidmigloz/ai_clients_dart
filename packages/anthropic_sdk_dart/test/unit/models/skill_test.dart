@@ -1,94 +1,111 @@
+import 'dart:typed_data';
+
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('SkillSourceType', () {
+    test('round-trips known values', () {
+      for (final value in SkillSourceType.values.where(
+        (v) => v != SkillSourceType.unknown,
+      )) {
+        expect(SkillSourceType.fromJson(value.toJson()), value);
+      }
+    });
+
+    test('falls back to unknown for unrecognized values', () {
+      expect(
+        SkillSourceType.fromJson('future_source'),
+        SkillSourceType.unknown,
+      );
+    });
+  });
+
+  group('SkillSource', () {
+    test('round-trips JSON', () {
+      const source = SkillSource(type: SkillSourceType.custom);
+      final json = source.toJson();
+      expect(json, {'type': 'custom'});
+      expect(SkillSource.fromJson(json), source);
+    });
+
+    test('equality and hashCode', () {
+      const a = SkillSource(type: SkillSourceType.anthropic);
+      const b = SkillSource(type: SkillSourceType.anthropic);
+      const c = SkillSource(type: SkillSourceType.plugin);
+
+      expect(a, equals(b));
+      expect(a.hashCode, b.hashCode);
+      expect(a, isNot(equals(c)));
+    });
+  });
+
   group('Skill', () {
-    test('fromJson parses skill correctly', () {
-      final json = {
+    Map<String, dynamic> skillJson({
+      String source = 'custom',
+      String displayName = 'Custom PDF Processor',
+    }) {
+      return {
         'id': 'skill_abc123',
         'type': 'skill',
-        'display_title': 'Custom PDF Processor',
+        'display_name': displayName,
         'created_at': '2025-01-15T10:00:00Z',
         'updated_at': '2025-01-20T15:30:00Z',
-        'latest_version': '1234567890123',
-        'source': 'custom',
+        'latest_version_id': 'skillver_123',
+        'source': {'type': source},
       };
+    }
 
-      final skill = Skill.fromJson(json);
+    test('fromJson parses skill correctly', () {
+      final skill = Skill.fromJson(skillJson());
 
       expect(skill.id, 'skill_abc123');
       expect(skill.type, 'skill');
-      expect(skill.displayTitle, 'Custom PDF Processor');
+      expect(skill.displayName, 'Custom PDF Processor');
       expect(skill.createdAt, DateTime.utc(2025, 1, 15, 10, 0, 0));
       expect(skill.updatedAt, DateTime.utc(2025, 1, 20, 15, 30, 0));
-      expect(skill.latestVersion, '1234567890123');
-      expect(skill.source, SkillSource.custom);
+      expect(skill.latestVersionId, 'skillver_123');
+      expect(skill.source, const SkillSource(type: SkillSourceType.custom));
     });
 
     test('fromJson handles anthropic source', () {
-      final json = {
-        'id': 'skill_anthropic',
-        'type': 'skill',
-        'display_title': 'Built-in Skill',
-        'created_at': '2025-01-01T00:00:00Z',
-        'updated_at': '2025-01-01T00:00:00Z',
-        'latest_version': '1',
-        'source': 'anthropic',
-      };
-
-      final skill = Skill.fromJson(json);
-
-      expect(skill.source, SkillSource.anthropic);
+      final skill = Skill.fromJson(skillJson(source: 'anthropic'));
+      expect(skill.source, const SkillSource(type: SkillSourceType.anthropic));
     });
+
+    test(
+      'fromJson throws FormatException when a required field is missing',
+      () {
+        final json = skillJson()..remove('display_name');
+        expect(() => Skill.fromJson(json), throwsFormatException);
+      },
+    );
 
     test('toJson produces valid JSON', () {
       final skill = Skill(
         id: 'skill_test',
-        displayTitle: 'Test Skill',
+        displayName: 'Test Skill',
+        latestVersionId: 'skillver_987',
+        source: const SkillSource(type: SkillSourceType.custom),
         createdAt: DateTime.utc(2025, 3, 1, 12, 0, 0),
         updatedAt: DateTime.utc(2025, 3, 5, 18, 0, 0),
-        latestVersion: '9876543210987',
-        source: SkillSource.custom,
       );
 
       final json = skill.toJson();
 
       expect(json['id'], 'skill_test');
       expect(json['type'], 'skill');
-      expect(json['display_title'], 'Test Skill');
+      expect(json['display_name'], 'Test Skill');
       expect(json['created_at'], '2025-03-01T12:00:00.000Z');
       expect(json['updated_at'], '2025-03-05T18:00:00.000Z');
-      expect(json['latest_version'], '9876543210987');
-      expect(json['source'], 'custom');
+      expect(json['latest_version_id'], 'skillver_987');
+      expect(json['source'], {'type': 'custom'});
     });
 
     test('equality works correctly', () {
-      final skill1 = Skill(
-        id: 'skill_1',
-        displayTitle: 'Skill One',
-        createdAt: DateTime.utc(2025, 1, 1),
-        updatedAt: DateTime.utc(2025, 1, 1),
-        latestVersion: '1',
-        source: SkillSource.custom,
-      );
-
-      final skill2 = Skill(
-        id: 'skill_1',
-        displayTitle: 'Skill One',
-        createdAt: DateTime.utc(2025, 1, 1),
-        updatedAt: DateTime.utc(2025, 1, 1),
-        latestVersion: '1',
-        source: SkillSource.custom,
-      );
-
-      final skill3 = Skill(
-        id: 'skill_2',
-        displayTitle: 'Skill Two',
-        createdAt: DateTime.utc(2025, 1, 2),
-        updatedAt: DateTime.utc(2025, 1, 2),
-        latestVersion: '2',
-        source: SkillSource.anthropic,
-      );
+      final skill1 = Skill.fromJson(skillJson());
+      final skill2 = Skill.fromJson(skillJson());
+      final skill3 = Skill.fromJson(skillJson(displayName: 'Other'));
 
       expect(skill1, equals(skill2));
       expect(skill1, isNot(equals(skill3)));
@@ -96,106 +113,74 @@ void main() {
   });
 
   group('SkillVersion', () {
-    test('fromJson parses skill version correctly', () {
-      final json = {
-        'id': 'skillversion_abc123',
+    Map<String, dynamic> versionJson() {
+      return {
+        'id': 'skillver_abc123',
         'type': 'skill_version',
         'skill_id': 'skill_parent',
-        'version': '1759178010641129',
         'name': 'pdf-processor',
         'description': 'Processes PDF files',
-        'directory': '/skills/pdf-processor',
         'created_at': '2025-01-01T00:00:00Z',
       };
+    }
 
-      final version = SkillVersion.fromJson(json);
+    test('fromJson parses skill version correctly', () {
+      final version = SkillVersion.fromJson(versionJson());
 
-      expect(version.id, 'skillversion_abc123');
+      expect(version.id, 'skillver_abc123');
       expect(version.type, 'skill_version');
       expect(version.skillId, 'skill_parent');
-      expect(version.version, '1759178010641129');
       expect(version.name, 'pdf-processor');
       expect(version.description, 'Processes PDF files');
-      expect(version.directory, '/skills/pdf-processor');
       expect(version.createdAt, DateTime.utc(2025, 1, 1));
     });
 
+    test(
+      'fromJson throws FormatException when a required field is missing',
+      () {
+        final json = versionJson()..remove('description');
+        expect(() => SkillVersion.fromJson(json), throwsFormatException);
+      },
+    );
+
     test('toJson produces valid JSON', () {
       final version = SkillVersion(
-        id: 'skillversion_test',
+        id: 'skillver_test',
         skillId: 'skill_test',
-        version: '123456',
         name: 'test-skill',
         description: 'A test skill',
-        directory: '/test',
         createdAt: DateTime.utc(2025, 5, 15, 10, 30, 0),
       );
 
       final json = version.toJson();
 
-      expect(json['id'], 'skillversion_test');
+      expect(json['id'], 'skillver_test');
       expect(json['type'], 'skill_version');
       expect(json['skill_id'], 'skill_test');
-      expect(json['version'], '123456');
       expect(json['name'], 'test-skill');
       expect(json['description'], 'A test skill');
-      expect(json['directory'], '/test');
       expect(json['created_at'], '2025-05-15T10:30:00.000Z');
     });
 
     test('equality works correctly', () {
-      final version1 = SkillVersion(
-        id: 'v1',
-        skillId: 's1',
-        version: '1',
-        name: 'version-one',
-        description: 'First version',
-        directory: '/v1',
-        createdAt: DateTime.utc(2025, 1, 1),
-      );
-
-      final version2 = SkillVersion(
-        id: 'v1',
-        skillId: 's1',
-        version: '1',
-        name: 'version-one',
-        description: 'First version',
-        directory: '/v1',
-        createdAt: DateTime.utc(2025, 1, 1),
-      );
-
-      final version3 = SkillVersion(
-        id: 'v2',
-        skillId: 's1',
-        version: '2',
-        name: 'version-two',
-        description: 'Second version',
-        directory: '/v2',
-        createdAt: DateTime.utc(2025, 1, 2),
-      );
+      final version1 = SkillVersion.fromJson(versionJson());
+      final version2 = SkillVersion.fromJson(versionJson());
+      final version3 = SkillVersion.fromJson(
+        versionJson(),
+      ).copyWith(id: 'other');
 
       expect(version1, equals(version2));
       expect(version1, isNot(equals(version3)));
     });
 
     test('copyWith creates modified copy', () {
-      final original = SkillVersion(
-        id: 'v_orig',
-        skillId: 's_orig',
-        version: '100',
-        name: 'original',
-        description: 'Original description',
-        directory: '/original',
-        createdAt: DateTime.utc(2025, 1, 1),
-      );
+      final original = SkillVersion.fromJson(versionJson());
+      final modified = original.copyWith(name: 'modified');
 
-      final modified = original.copyWith(version: '101', name: 'modified');
-
-      expect(modified.version, '101');
       expect(modified.name, 'modified');
-      expect(modified.id, 'v_orig'); // Unchanged
-      expect(modified.skillId, 's_orig'); // Unchanged
-      expect(modified.description, 'Original description'); // Unchanged
+      expect(modified.id, original.id); // Unchanged
+      expect(modified.skillId, original.skillId); // Unchanged
+      expect(modified.description, original.description); // Unchanged
     });
   });
 
@@ -206,23 +191,22 @@ void main() {
           {
             'id': 'skill_1',
             'type': 'skill',
-            'display_title': 'Skill One',
+            'display_name': 'Skill One',
             'created_at': '2025-01-01T00:00:00Z',
             'updated_at': '2025-01-01T00:00:00Z',
-            'latest_version': '1',
-            'source': 'custom',
+            'latest_version_id': 'skillver_1',
+            'source': {'type': 'custom'},
           },
           {
             'id': 'skill_2',
             'type': 'skill',
-            'display_title': 'Skill Two',
+            'display_name': 'Skill Two',
             'created_at': '2025-01-02T00:00:00Z',
             'updated_at': '2025-01-02T00:00:00Z',
-            'latest_version': '2',
-            'source': 'anthropic',
+            'latest_version_id': 'skillver_2',
+            'source': {'type': 'anthropic'},
           },
         ],
-        'has_more': true,
         'next_page': 'page_token_abc123',
       };
 
@@ -231,21 +215,15 @@ void main() {
       expect(response.data, hasLength(2));
       expect(response.data[0].id, 'skill_1');
       expect(response.data[1].id, 'skill_2');
-      expect(response.hasMore, isTrue);
       expect(response.nextPage, 'page_token_abc123');
     });
 
     test('fromJson handles empty list', () {
-      final json = {
-        'data': <Map<String, dynamic>>[],
-        'has_more': false,
-        'next_page': null,
-      };
+      final json = {'data': <Map<String, dynamic>>[], 'next_page': null};
 
       final response = SkillListResponse.fromJson(json);
 
       expect(response.data, isEmpty);
-      expect(response.hasMore, isFalse);
       expect(response.nextPage, isNull);
     });
 
@@ -254,20 +232,19 @@ void main() {
         data: [
           Skill(
             id: 'skill_test',
-            displayTitle: 'Test Skill',
+            displayName: 'Test Skill',
+            latestVersionId: 'skillver_1',
+            source: const SkillSource(type: SkillSourceType.custom),
             createdAt: DateTime.utc(2025, 1, 1),
             updatedAt: DateTime.utc(2025, 1, 1),
-            latestVersion: '1',
-            source: SkillSource.custom,
           ),
         ],
-        hasMore: false,
       );
 
       final json = response.toJson();
 
       expect(json['data'], hasLength(1));
-      expect(json['has_more'], isFalse);
+      expect(json['next_page'], isNull);
     });
   });
 
@@ -279,33 +256,27 @@ void main() {
             'id': 'v1',
             'type': 'skill_version',
             'skill_id': 's1',
-            'version': '1',
             'name': 'version-one',
             'description': 'First version',
-            'directory': '/v1',
             'created_at': '2025-01-01T00:00:00Z',
           },
           {
             'id': 'v2',
             'type': 'skill_version',
             'skill_id': 's1',
-            'version': '2',
             'name': 'version-two',
             'description': 'Second version',
-            'directory': '/v2',
             'created_at': '2025-01-02T00:00:00Z',
           },
         ],
-        'has_more': false,
         'next_page': null,
       };
 
       final response = SkillVersionListResponse.fromJson(json);
 
       expect(response.data, hasLength(2));
-      expect(response.data[0].version, '1');
-      expect(response.data[1].version, '2');
-      expect(response.hasMore, isFalse);
+      expect(response.data[0].name, 'version-one');
+      expect(response.data[1].name, 'version-two');
       expect(response.nextPage, isNull);
     });
 
@@ -315,21 +286,17 @@ void main() {
           SkillVersion(
             id: 'v_test',
             skillId: 's_test',
-            version: '123',
             name: 'test-version',
             description: 'Test description',
-            directory: '/test',
             createdAt: DateTime.utc(2025, 1, 1),
           ),
         ],
-        hasMore: true,
         nextPage: 'next_page_token',
       );
 
       final json = response.toJson();
 
       expect(json['data'], hasLength(1));
-      expect(json['has_more'], isTrue);
       expect(json['next_page'], 'next_page_token');
     });
 
@@ -339,18 +306,14 @@ void main() {
           SkillVersion(
             id: 'v1',
             skillId: 's1',
-            version: '1',
             name: 'v1',
             description: 'd1',
-            directory: '/v1',
             createdAt: DateTime.utc(2025, 1, 1),
           ),
         ],
-        hasMore: true,
         nextPage: 'page_2',
       );
 
-      expect(firstPage.hasMore, isTrue);
       expect(firstPage.nextPage, 'page_2');
 
       final secondPage = SkillVersionListResponse(
@@ -358,40 +321,66 @@ void main() {
           SkillVersion(
             id: 'v2',
             skillId: 's1',
-            version: '2',
             name: 'v2',
             description: 'd2',
-            directory: '/v2',
             createdAt: DateTime.utc(2025, 1, 2),
           ),
         ],
-        hasMore: false,
       );
 
-      expect(secondPage.hasMore, isFalse);
       expect(secondPage.nextPage, isNull);
     });
   });
 
-  group('SkillSource', () {
-    test('fromJson converts known values', () {
-      expect(SkillSource.fromJson('custom'), SkillSource.custom);
-      expect(SkillSource.fromJson('anthropic'), SkillSource.anthropic);
+  group('DeletedSkill', () {
+    test('round-trips JSON', () {
+      final json = {'id': 'skill_abc123', 'type': 'skill_deleted'};
+      final deleted = DeletedSkill.fromJson(json);
+
+      expect(deleted.id, 'skill_abc123');
+      expect(deleted.type, 'skill_deleted');
+      expect(deleted.toJson(), json);
     });
 
-    test('fromJson throws for unknown values', () {
-      expect(() => SkillSource.fromJson('invalid'), throwsFormatException);
-    });
+    test('equality works correctly', () {
+      const a = DeletedSkill(id: 'skill_1');
+      const b = DeletedSkill(id: 'skill_1');
+      const c = DeletedSkill(id: 'skill_2');
 
-    test('toJson returns correct values', () {
-      expect(SkillSource.custom.toJson(), 'custom');
-      expect(SkillSource.anthropic.toJson(), 'anthropic');
+      expect(a, equals(b));
+      expect(a, isNot(equals(c)));
     });
+  });
 
-    test('round-trip preserves value', () {
-      for (final value in SkillSource.values) {
-        expect(SkillSource.fromJson(value.toJson()), value);
-      }
+  group('DeletedSkillVersion', () {
+    test('round-trips JSON', () {
+      final json = {'id': 'skillver_abc123', 'type': 'skill_version_deleted'};
+      final deleted = DeletedSkillVersion.fromJson(json);
+
+      expect(deleted.id, 'skillver_abc123');
+      expect(deleted.type, 'skill_version_deleted');
+      expect(deleted.toJson(), json);
+    });
+  });
+
+  group('SkillFile', () {
+    test('equality is content-based on bytes', () {
+      final a = SkillFile(
+        path: 'my-skill/SKILL.md',
+        bytes: Uint8List.fromList([1, 2, 3]),
+      );
+      final b = SkillFile(
+        path: 'my-skill/SKILL.md',
+        bytes: Uint8List.fromList([1, 2, 3]),
+      );
+      final c = SkillFile(
+        path: 'my-skill/other.md',
+        bytes: Uint8List.fromList([1, 2, 3]),
+      );
+
+      expect(a, equals(b));
+      expect(a.hashCode, b.hashCode);
+      expect(a, isNot(equals(c)));
     });
   });
 }

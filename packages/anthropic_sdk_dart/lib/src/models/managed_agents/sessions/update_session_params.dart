@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import '../common/budget.dart';
 import 'session_agent_update.dart';
 
 /// Private sentinel to distinguish "not provided" from explicit `null`.
@@ -36,6 +37,18 @@ class UpdateSessionParams {
   /// MCP servers, pass empty arrays inside the [SessionAgentUpdate].
   final SessionAgentUpdate? agent;
 
+  /// Enforced spend ceiling for the session. Set an object to replace the
+  /// budget of a session that was created with one, or `null` to remove it;
+  /// omit to preserve. A budget cannot be added to a session created without
+  /// one (rejected with reason `budget_create_only`), and a removed budget
+  /// cannot be re-added. Allowed in any non-terminated status. Lowering
+  /// `maxListCost` to at or below the session's consumed list cost is
+  /// rejected with reason `budget_not_raised`, and every model the session
+  /// can run must have a public list price or the request is rejected with
+  /// reason `model_not_budgetable`.
+  Budget? get budget => _budget == _notSet ? null : _budget as Budget?;
+  final Object? _budget;
+
   /// Creates an [UpdateSessionParams].
   ///
   /// Omit a field to preserve its current value on the server.
@@ -45,9 +58,11 @@ class UpdateSessionParams {
     Object? metadata = _notSet,
     Object? vaultIds = _notSet,
     this.agent,
+    Object? budget = _notSet,
   }) : _title = title,
        _metadata = metadata,
-       _vaultIds = vaultIds;
+       _vaultIds = vaultIds,
+       _budget = budget;
 
   /// Creates an [UpdateSessionParams] from JSON.
   factory UpdateSessionParams.fromJson(Map<String, dynamic> json) {
@@ -64,20 +79,26 @@ class UpdateSessionParams {
       agent: json['agent'] != null
           ? SessionAgentUpdate.fromJson(json['agent'] as Map<String, dynamic>)
           : null,
+      budget: json.containsKey('budget')
+          ? (json['budget'] != null
+                ? Budget.fromJson(json['budget'] as Map<String, dynamic>)
+                : null)
+          : _notSet,
     );
   }
 
   /// Converts to JSON.
   ///
-  /// Clearable fields ([title], [metadata], [vaultIds]) that were not set are
-  /// omitted; when explicitly set to `null` they are included as `null` to
-  /// clear the value on the server. [agent] is not nullable in the API, so it
-  /// is emitted only when a value is provided.
+  /// Clearable fields ([title], [metadata], [vaultIds], [budget]) that were
+  /// not set are omitted; when explicitly set to `null` they are included as
+  /// `null` to clear the value on the server. [agent] is not nullable in the
+  /// API, so it is emitted only when a value is provided.
   Map<String, dynamic> toJson() => {
     if (_title != _notSet) 'title': _title,
     if (_metadata != _notSet) 'metadata': _metadata,
     if (_vaultIds != _notSet) 'vault_ids': _vaultIds,
     if (agent != null) 'agent': agent!.toJson(),
+    if (_budget != _notSet) 'budget': (_budget as Budget?)?.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -86,6 +107,7 @@ class UpdateSessionParams {
     Object? metadata = unsetCopyWithValue,
     Object? vaultIds = unsetCopyWithValue,
     Object? agent = unsetCopyWithValue,
+    Object? budget = unsetCopyWithValue,
   }) {
     return UpdateSessionParams(
       title: title == unsetCopyWithValue ? _title : title,
@@ -94,6 +116,7 @@ class UpdateSessionParams {
       agent: agent == unsetCopyWithValue
           ? this.agent
           : agent as SessionAgentUpdate?,
+      budget: budget == unsetCopyWithValue ? _budget : budget,
     );
   }
 
@@ -105,7 +128,8 @@ class UpdateSessionParams {
           _title == other._title &&
           _mapsEqualOrBothSentinel(_metadata, other._metadata) &&
           _listsEqualOrBothSentinel(_vaultIds, other._vaultIds) &&
-          agent == other.agent;
+          agent == other.agent &&
+          _budget == other._budget;
 
   @override
   int get hashCode => Object.hash(
@@ -113,6 +137,7 @@ class UpdateSessionParams {
     _metadata == _notSet ? _notSet : mapHash(metadata),
     _vaultIds == _notSet ? _notSet : listHash(vaultIds),
     agent,
+    _budget,
   );
 
   @override
@@ -121,7 +146,8 @@ class UpdateSessionParams {
       'title: $title, '
       'metadata: $metadata, '
       'vaultIds: $vaultIds, '
-      'agent: $agent)';
+      'agent: $agent, '
+      'budget: $budget)';
 }
 
 bool _listsEqualOrBothSentinel(Object? a, Object? b) {

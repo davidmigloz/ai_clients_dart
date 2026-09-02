@@ -8,6 +8,7 @@ import 'dream_model_config.dart';
 import 'dream_output.dart';
 import 'dream_status.dart';
 import 'dream_usage.dart';
+import 'output_behavior.dart';
 
 /// An asynchronous memory-consolidation job that reads a memory store plus a
 /// set of session transcripts and writes consolidated memories into a new
@@ -65,6 +66,9 @@ class Dream {
   /// Cumulative token usage for the dream across every pipeline stage.
   final DreamUsage usage;
 
+  /// Where the job writes its consolidated memories.
+  final OutputBehavior outputBehavior;
+
   /// Creates a [Dream].
   const Dream({
     this.type = 'dream',
@@ -80,6 +84,7 @@ class Dream {
     this.instructions,
     this.sessionId,
     required this.usage,
+    required this.outputBehavior,
   });
 
   /// Creates a [Dream] from JSON.
@@ -124,6 +129,9 @@ class Dream {
       instructions: json['instructions'] as String?,
       sessionId: json['session_id'] as String?,
       usage: DreamUsage.fromJson(json['usage'] as Map<String, dynamic>),
+      outputBehavior: OutputBehavior.fromJson(
+        json['output_behavior'] as Map<String, dynamic>,
+      ),
     );
   }
 
@@ -142,6 +150,7 @@ class Dream {
     'instructions': instructions,
     'session_id': sessionId,
     'usage': usage.toJson(),
+    'output_behavior': outputBehavior.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -164,6 +173,7 @@ class Dream {
     Object? instructions = unsetCopyWithValue,
     Object? sessionId = unsetCopyWithValue,
     DreamUsage? usage,
+    OutputBehavior? outputBehavior,
   }) {
     return Dream(
       type: type ?? this.type,
@@ -187,6 +197,7 @@ class Dream {
           ? this.sessionId
           : sessionId as String?,
       usage: usage ?? this.usage,
+      outputBehavior: outputBehavior ?? this.outputBehavior,
     );
   }
 
@@ -207,7 +218,8 @@ class Dream {
           model == other.model &&
           instructions == other.instructions &&
           sessionId == other.sessionId &&
-          usage == other.usage;
+          usage == other.usage &&
+          outputBehavior == other.outputBehavior;
 
   @override
   int get hashCode => Object.hash(
@@ -224,6 +236,7 @@ class Dream {
     instructions,
     sessionId,
     usage,
+    outputBehavior,
   );
 
   @override
@@ -241,5 +254,6 @@ class Dream {
       'model: $model, '
       'instructions: $instructions, '
       'sessionId: $sessionId, '
-      'usage: $usage)';
+      'usage: $usage, '
+      'outputBehavior: $outputBehavior)';
 }

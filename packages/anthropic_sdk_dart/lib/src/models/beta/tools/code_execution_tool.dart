@@ -3,7 +3,6 @@ import 'package:meta/meta.dart';
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../../metadata/cache_control.dart';
-import '../config/container.dart';
 
 /// Code execution tool for running code in a sandboxed environment.
 @immutable
@@ -13,9 +12,6 @@ class CodeExecutionTool {
 
   /// Cache control for this tool definition.
   final CacheControlEphemeral? cacheControl;
-
-  /// Container configuration.
-  final ContainerParams? container;
 
   /// Allowed caller types.
   final List<String>? allowedCallers;
@@ -30,7 +26,6 @@ class CodeExecutionTool {
   const CodeExecutionTool({
     this.type = 'code_execution_20260521',
     this.cacheControl,
-    this.container,
     this.allowedCallers,
     this.deferLoading,
     this.strict,
@@ -39,7 +34,6 @@ class CodeExecutionTool {
   /// Creates a [CodeExecutionTool] with version 2025-05-22.
   factory CodeExecutionTool.v20250522({
     CacheControlEphemeral? cacheControl,
-    ContainerParams? container,
     List<String>? allowedCallers,
     bool? deferLoading,
     bool? strict,
@@ -47,7 +41,6 @@ class CodeExecutionTool {
     return CodeExecutionTool(
       type: 'code_execution_20250522',
       cacheControl: cacheControl,
-      container: container,
       allowedCallers: allowedCallers,
       deferLoading: deferLoading,
       strict: strict,
@@ -95,9 +88,6 @@ class CodeExecutionTool {
               json['cache_control'] as Map<String, dynamic>,
             )
           : null,
-      container: json['container'] != null
-          ? ContainerParams.fromJson(json['container'] as Map<String, dynamic>)
-          : null,
       allowedCallers: (json['allowed_callers'] as List?)?.cast<String>(),
       deferLoading: json['defer_loading'] as bool?,
       strict: json['strict'] as bool?,
@@ -109,7 +99,6 @@ class CodeExecutionTool {
     'type': type,
     'name': 'code_execution',
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
-    if (container != null) 'container': container!.toJson(),
     if (allowedCallers != null) 'allowed_callers': allowedCallers,
     if (deferLoading != null) 'defer_loading': deferLoading,
     if (strict != null) 'strict': strict,
@@ -119,7 +108,6 @@ class CodeExecutionTool {
   CodeExecutionTool copyWith({
     String? type,
     Object? cacheControl = unsetCopyWithValue,
-    Object? container = unsetCopyWithValue,
     Object? allowedCallers = unsetCopyWithValue,
     Object? deferLoading = unsetCopyWithValue,
     Object? strict = unsetCopyWithValue,
@@ -129,9 +117,6 @@ class CodeExecutionTool {
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
           : cacheControl as CacheControlEphemeral?,
-      container: container == unsetCopyWithValue
-          ? this.container
-          : container as ContainerParams?,
       allowedCallers: allowedCallers == unsetCopyWithValue
           ? this.allowedCallers
           : allowedCallers as List<String>?,
@@ -149,7 +134,6 @@ class CodeExecutionTool {
           runtimeType == other.runtimeType &&
           type == other.type &&
           cacheControl == other.cacheControl &&
-          container == other.container &&
           listsEqual(allowedCallers, other.allowedCallers) &&
           deferLoading == other.deferLoading &&
           strict == other.strict;
@@ -158,7 +142,6 @@ class CodeExecutionTool {
   int get hashCode => Object.hash(
     type,
     cacheControl,
-    container,
     listHash(allowedCallers),
     deferLoading,
     strict,
@@ -167,6 +150,6 @@ class CodeExecutionTool {
   @override
   String toString() =>
       'CodeExecutionTool(type: $type, cacheControl: $cacheControl, '
-      'container: $container, allowedCallers: $allowedCallers, '
-      'deferLoading: $deferLoading, strict: $strict)';
+      'allowedCallers: $allowedCallers, deferLoading: $deferLoading, '
+      'strict: $strict)';
 }

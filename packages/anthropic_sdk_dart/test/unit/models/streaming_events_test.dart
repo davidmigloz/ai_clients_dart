@@ -207,6 +207,69 @@ void main() {
       expect(deltaEvent.delta.stopDetails!.explanation, 'Refused.');
     });
 
+    test('parses message_delta event with input_transformations', () {
+      final json = {
+        'type': 'message_delta',
+        'delta': {'stop_reason': 'end_turn', 'stop_sequence': null},
+        'usage': {'output_tokens': 25},
+        'input_transformations': [
+          {
+            'type': 'thinking_dropped',
+            'path': 'messages.0.content.0',
+            'reason': 'model_binding_mismatch',
+          },
+        ],
+      };
+
+      final event = MessageStreamEvent.fromJson(json);
+
+      expect(event, isA<MessageDeltaEvent>());
+      final deltaEvent = event as MessageDeltaEvent;
+      expect(deltaEvent.inputTransformations, hasLength(1));
+      final transformation =
+          deltaEvent.inputTransformations!.first
+              as ThinkingDroppedInputTransformation;
+      expect(transformation.path, 'messages.0.content.0');
+    });
+
+    test(
+      'message_delta event without input_transformations leaves it null',
+      () {
+        final json = {
+          'type': 'message_delta',
+          'delta': {'stop_reason': 'end_turn', 'stop_sequence': null},
+          'usage': {'output_tokens': 25},
+        };
+
+        final event = MessageStreamEvent.fromJson(json);
+
+        expect((event as MessageDeltaEvent).inputTransformations, isNull);
+      },
+    );
+
+    test('message_delta round-trips input_transformations in toJson', () {
+      const event = MessageDeltaEvent(
+        delta: MessageDelta(stopReason: StopReason.endTurn),
+        usage: MessageDeltaUsage(outputTokens: 10),
+        inputTransformations: [
+          ThinkingDroppedInputTransformation(
+            path: 'messages.0.content.0',
+            reason: InputTransformationReason.modelBindingMismatch,
+          ),
+        ],
+      );
+
+      final json = event.toJson();
+
+      expect(json['input_transformations'], [
+        {
+          'type': 'thinking_dropped',
+          'path': 'messages.0.content.0',
+          'reason': 'model_binding_mismatch',
+        },
+      ]);
+    });
+
     test('parses message_stop event', () {
       final json = {'type': 'message_stop'};
 

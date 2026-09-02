@@ -11,16 +11,14 @@ import '../models/files/file_list_response.dart';
 import '../models/files/file_metadata.dart';
 import 'base_resource.dart';
 
-/// Beta header for the Files API.
-const _betaHeader = 'files-api-2025-04-14';
-
 /// Resource for the Files API (IO implementation).
 ///
-/// Provides access to file upload, listing, and management operations.
-/// This is a beta feature and requires the `anthropic-beta` header.
+/// Provides access to file upload, listing, and management operations. Files
+/// can be used as part of message content (e.g., for vision or document
+/// understanding).
 ///
-/// Files can be used as part of message content (e.g., for vision or
-/// document understanding).
+/// This is a generally-available (GA) API; no `anthropic-beta` header is
+/// required.
 class FilesResource extends ResourceBase {
   /// Creates a [FilesResource].
   FilesResource({
@@ -36,6 +34,9 @@ class FilesResource extends ResourceBase {
   /// The [filePath] is the path to the file to upload.
   /// The [mimeType] is optional; if not provided, it will be inferred
   /// from the file extension.
+  /// The [expiresInSeconds] sets the file's expiration, in seconds from
+  /// upload time. Must be between 3600 (one hour) and 7776000 (ninety days).
+  /// Omit to use the platform default (the file never expires).
   ///
   /// Returns a [FileMetadata] with information about the uploaded file.
   ///
@@ -44,12 +45,14 @@ class FilesResource extends ResourceBase {
   /// final file = await client.files.upload(
   ///   filePath: '/path/to/image.jpg',
   ///   mimeType: 'image/jpeg',
+  ///   expiresInSeconds: 86400,
   /// );
-  /// print('Uploaded file: ${file.id}');
+  /// print('Uploaded file: ${file.id}, expires at: ${file.expiresAt}');
   /// ```
   Future<FileMetadata> upload({
     required String filePath,
     String? mimeType,
+    int? expiresInSeconds,
   }) async {
     final file = io.File(filePath);
     if (!file.existsSync()) {
@@ -64,6 +67,7 @@ class FilesResource extends ResourceBase {
       bytes: bytes,
       fileName: fileName,
       mimeType: inferredMimeType,
+      expiresInSeconds: expiresInSeconds,
     );
   }
 
@@ -73,6 +77,9 @@ class FilesResource extends ResourceBase {
   /// The [fileName] is the name to use for the file.
   /// The [mimeType] is optional; if not provided, it will be inferred
   /// from the file extension.
+  /// The [expiresInSeconds] sets the file's expiration, in seconds from
+  /// upload time. Must be between 3600 (one hour) and 7776000 (ninety days).
+  /// Omit to use the platform default (the file never expires).
   ///
   /// Returns a [FileMetadata] with information about the uploaded file.
   ///
@@ -83,20 +90,29 @@ class FilesResource extends ResourceBase {
   ///   bytes: bytes,
   ///   fileName: 'document.pdf',
   ///   mimeType: 'application/pdf',
+  ///   expiresInSeconds: 3600,
   /// );
   /// ```
   Future<FileMetadata> uploadBytes({
     required Uint8List bytes,
     required String fileName,
     String? mimeType,
+    int? expiresInSeconds,
   }) async {
+    if (expiresInSeconds != null &&
+        (expiresInSeconds < 3600 || expiresInSeconds > 7776000)) {
+      throw ArgumentError.value(
+        expiresInSeconds,
+        'expiresInSeconds',
+        'must be between 3600 (one hour) and 7776000 (ninety days)',
+      );
+    }
+
     final inferredMimeType = mimeType ?? _inferMimeType(fileName);
 
     final uri = requestBuilder.buildUrl('/v1/files');
     // Remove content-type as multipart will set its own
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'anthropic-beta': _betaHeader},
-    )..remove('content-type');
+    final headers = requestBuilder.buildHeaders()..remove('content-type');
 
     final request = http.MultipartRequest('POST', uri)
       ..headers.addAll(headers)
@@ -108,6 +124,9 @@ class FilesResource extends ResourceBase {
           contentType: _parseMediaType(inferredMimeType),
         ),
       );
+    if (expiresInSeconds != null) {
+      request.fields['expires_in_seconds'] = expiresInSeconds.toString();
+    }
 
     // Add authentication header
     await _applyAuthentication(request);
@@ -127,8 +146,12 @@ class FilesResource extends ResourceBase {
   ///
   /// The [limit] specifies the maximum number of files to return (1-1000,
   /// default 20).
-  /// The [beforeId] returns files before this ID (for pagination).
-  /// The [afterId] returns files after this ID (for pagination).
+  /// The [page] is the opaque, `page_`-prefixed cursor from a previous
+  /// response's [FileListResponse.nextPage]. Mutually exclusive with [ids].
+  /// The [ids] restricts the result set to files whose id is in this list
+  /// (at most 100 entries). When supplied, the response is always a single
+  /// page ([FileListResponse.nextPage] is `null`) and is mutually exclusive
+  /// with [page] and [limit].
   /// The [scopeId] filters by scope ID, returning only files associated with
   /// that scope (e.g., a session ID).
   ///
@@ -143,15 +166,15 @@ class FilesResource extends ResourceBase {
   /// ```
   Future<FileListResponse> list({
     int? limit,
-    String? beforeId,
-    String? afterId,
+    String? page,
+    List<String>? ids,
     String? scopeId,
   }) async {
     ensureNotClosed?.call();
     final queryParams = <String, dynamic>{
       'limit': ?limit?.toString(),
-      'before_id': ?beforeId,
-      'after_id': ?afterId,
+      'page': ?page,
+      'ids[]': ?ids,
       'scope_id': ?scopeId,
     };
 
@@ -159,9 +182,7 @@ class FilesResource extends ResourceBase {
       '/v1/files',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'anthropic-beta': _betaHeader},
-    );
+    final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
@@ -185,9 +206,7 @@ class FilesResource extends ResourceBase {
   Future<FileMetadata> retrieve({required String fileId}) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/files/$fileId');
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'anthropic-beta': _betaHeader},
-    );
+    final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
@@ -211,9 +230,7 @@ class FilesResource extends ResourceBase {
   Future<FileDeleteResponse> deleteFile({required String fileId}) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/files/$fileId');
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'anthropic-beta': _betaHeader},
-    );
+    final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
@@ -236,9 +253,7 @@ class FilesResource extends ResourceBase {
   /// ```
   Future<Uint8List> download({required String fileId}) async {
     final uri = requestBuilder.buildUrl('/v1/files/$fileId/content');
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'anthropic-beta': _betaHeader},
-    );
+    final headers = requestBuilder.buildHeaders();
     // We want binary, not JSON
     headers['accept'] = '*/*';
     headers.remove('content-type');

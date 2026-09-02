@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 
 import 'file_metadata.dart';
@@ -10,22 +11,14 @@ class FileListResponse {
   /// List of file metadata objects.
   final List<FileMetadata> data;
 
-  /// Whether there are more results available.
-  final bool hasMore;
-
-  /// ID of the first file in this page of results.
-  final String? firstId;
-
-  /// ID of the last file in this page of results.
-  final String? lastId;
+  /// Opaque cursor for the next page.
+  ///
+  /// Supply as the `page` parameter to [FilesResource.list] to fetch the
+  /// next page; `null` when there are no more results.
+  final String? nextPage;
 
   /// Creates a [FileListResponse].
-  const FileListResponse({
-    required this.data,
-    this.hasMore = false,
-    this.firstId,
-    this.lastId,
-  });
+  const FileListResponse({required this.data, this.nextPage});
 
   /// Creates a [FileListResponse] from JSON.
   factory FileListResponse.fromJson(Map<String, dynamic> json) {
@@ -33,32 +26,26 @@ class FileListResponse {
       data: (json['data'] as List)
           .map((e) => FileMetadata.fromJson(e as Map<String, dynamic>))
           .toList(),
-      hasMore: json['has_more'] as bool? ?? false,
-      firstId: json['first_id'] as String?,
-      lastId: json['last_id'] as String?,
+      nextPage: json['next_page'] as String?,
     );
   }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'data': data.map((e) => e.toJson()).toList(),
-    'has_more': hasMore,
-    if (firstId != null) 'first_id': firstId,
-    if (lastId != null) 'last_id': lastId,
+    if (nextPage != null) 'next_page': nextPage,
   };
 
   /// Creates a copy with replaced values.
   FileListResponse copyWith({
     List<FileMetadata>? data,
-    bool? hasMore,
-    String? firstId,
-    String? lastId,
+    Object? nextPage = unsetCopyWithValue,
   }) {
     return FileListResponse(
       data: data ?? this.data,
-      hasMore: hasMore ?? this.hasMore,
-      firstId: firstId ?? this.firstId,
-      lastId: lastId ?? this.lastId,
+      nextPage: nextPage == unsetCopyWithValue
+          ? this.nextPage
+          : nextPage as String?,
     );
   }
 
@@ -68,18 +55,11 @@ class FileListResponse {
       other is FileListResponse &&
           runtimeType == other.runtimeType &&
           listsEqual(data, other.data) &&
-          hasMore == other.hasMore &&
-          firstId == other.firstId &&
-          lastId == other.lastId;
+          nextPage == other.nextPage;
 
   @override
-  int get hashCode => Object.hash(listHash(data), hasMore, firstId, lastId);
+  int get hashCode => Object.hash(listHash(data), nextPage);
 
   @override
-  String toString() =>
-      'FileListResponse('
-      'data: $data, '
-      'hasMore: $hasMore, '
-      'firstId: $firstId, '
-      'lastId: $lastId)';
+  String toString() => 'FileListResponse(data: $data, nextPage: $nextPage)';
 }

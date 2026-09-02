@@ -75,5 +75,54 @@ void main() {
       );
       expect(request.toString(), contains('inputs: 1 items'));
     });
+
+    test('outputBehavior is omitted from toJson when absent', () {
+      const request = CreateDreamRequest(
+        inputs: [DreamMemoryStoreInput(memoryStoreId: 'm1')],
+        model: DreamModelParamsId(id: 'claude-opus-4-7'),
+      );
+      expect(request.outputBehavior, isNull);
+      expect(request.toJson().containsKey('output_behavior'), isFalse);
+    });
+
+    test('outputBehavior round-trips create_new', () {
+      const json = {
+        'inputs': [
+          {'type': 'memory_store', 'memory_store_id': 'memstore_in'},
+        ],
+        'model': 'claude-opus-4-7',
+        'output_behavior': {'type': 'create_new'},
+      };
+      final request = CreateDreamRequest.fromJson(json);
+      expect(request.outputBehavior, isA<OutputBehaviorCreateNew>());
+      expect(request.toJson(), json);
+    });
+
+    test('outputBehavior round-trips update_existing', () {
+      const json = {
+        'inputs': [
+          {'type': 'memory_store', 'memory_store_id': 'memstore_in'},
+        ],
+        'model': 'claude-opus-4-7',
+        'output_behavior': {
+          'type': 'update_existing',
+          'memory_store_id': 'memstore_out',
+        },
+      };
+      final request = CreateDreamRequest.fromJson(json);
+      final behavior = request.outputBehavior! as OutputBehaviorUpdateExisting;
+      expect(behavior.memoryStoreId, 'memstore_out');
+      expect(request.toJson(), json);
+    });
+
+    test('copyWith replaces and clears outputBehavior', () {
+      const request = CreateDreamRequest(
+        inputs: [DreamMemoryStoreInput(memoryStoreId: 'm1')],
+        model: DreamModelParamsId(id: 'claude-opus-4-7'),
+        outputBehavior: OutputBehaviorCreateNew(),
+      );
+      expect(request.copyWith(outputBehavior: null).outputBehavior, isNull);
+      expect(request.copyWith().outputBehavior, isA<OutputBehaviorCreateNew>());
+    });
   });
 }

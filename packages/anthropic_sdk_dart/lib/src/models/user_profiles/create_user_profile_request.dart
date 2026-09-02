@@ -1,8 +1,9 @@
 import 'package:meta/meta.dart';
 
+import '../beta_timestamp.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
-import 'user_profile_relationship.dart';
+import 'user_profile_access_type.dart';
 
 /// Request parameters for creating a user profile.
 @immutable
@@ -11,17 +12,25 @@ class CreateUserProfileRequest {
   /// Maximum 255 characters.
   final String? externalId;
 
-  /// Display name of the entity this profile represents.
-  ///
-  /// Required when [relationship] is `resold` (the resold-to company's name);
-  /// optional otherwise. Maximum 255 characters.
+  /// Real-world name of the entity this profile represents (company or
+  /// individual); for a company the platform resells Claude access to
+  /// ([UserProfileAccessType.passthrough]), that company's name where known.
+  /// Maximum 255 characters.
   final String? name;
 
-  /// How the entity relates to the platform.
+  /// How the platform uses the API for this entity.
   ///
-  /// `external` (default): an individual end-user. `resold`: a company the
-  /// platform resells Claude access to. `internal`: the platform's own usage.
-  final BetaUserProfileRelationship? relationship;
+  /// `application` (default): the profile represents an individual end-user
+  /// of the platform's product. `passthrough`: the profile identifies a
+  /// company the platform resells Claude access to.
+  final UserProfileAccessType? accessType;
+
+  /// When the entity this profile represents opened its account with the
+  /// platform: for an `application` profile, when the end-user signed up;
+  /// for a `passthrough` profile, when the company became the platform's
+  /// customer. Must be a complete timestamp no more than 1 minute in the
+  /// future.
+  final BetaTimestamp? externalUserOnboardedAt;
 
   /// Free-form key-value metadata to attach to this user profile.
   ///
@@ -33,7 +42,8 @@ class CreateUserProfileRequest {
   const CreateUserProfileRequest({
     this.externalId,
     this.name,
-    this.relationship,
+    this.accessType,
+    this.externalUserOnboardedAt,
     this.metadata,
   });
 
@@ -42,8 +52,11 @@ class CreateUserProfileRequest {
     return CreateUserProfileRequest(
       externalId: json['external_id'] as String?,
       name: json['name'] as String?,
-      relationship: json['relationship'] != null
-          ? BetaUserProfileRelationship.fromJson(json['relationship'] as String)
+      accessType: json['access_type'] != null
+          ? UserProfileAccessType.fromJson(json['access_type'] as String)
+          : null,
+      externalUserOnboardedAt: json['external_user_onboarded_at'] != null
+          ? DateTime.parse(json['external_user_onboarded_at'] as String)
           : null,
       metadata: (json['metadata'] as Map<String, dynamic>?)?.map(
         (k, v) => MapEntry(k, v as String),
@@ -55,19 +68,25 @@ class CreateUserProfileRequest {
   Map<String, dynamic> toJson() => {
     if (externalId != null) 'external_id': externalId,
     if (name != null) 'name': name,
-    if (relationship != null) 'relationship': relationship!.toJson(),
+    if (accessType != null) 'access_type': accessType!.toJson(),
+    if (externalUserOnboardedAt != null)
+      'external_user_onboarded_at': externalUserOnboardedAt!
+          .toUtc()
+          .toIso8601String(),
     if (metadata != null) 'metadata': metadata,
   };
 
   /// Creates a copy with replaced values.
   ///
-  /// For nullable fields ([externalId], [name], [relationship], [metadata]),
-  /// pass the sentinel value [unsetCopyWithValue] (or omit) to keep the
-  /// original value, or pass `null` explicitly to set the field to null.
+  /// For nullable fields ([externalId], [name], [accessType],
+  /// [externalUserOnboardedAt], [metadata]), pass the sentinel value
+  /// [unsetCopyWithValue] (or omit) to keep the original value, or pass
+  /// `null` explicitly to set the field to null.
   CreateUserProfileRequest copyWith({
     Object? externalId = unsetCopyWithValue,
     Object? name = unsetCopyWithValue,
-    Object? relationship = unsetCopyWithValue,
+    Object? accessType = unsetCopyWithValue,
+    Object? externalUserOnboardedAt = unsetCopyWithValue,
     Object? metadata = unsetCopyWithValue,
   }) {
     return CreateUserProfileRequest(
@@ -75,9 +94,12 @@ class CreateUserProfileRequest {
           ? this.externalId
           : externalId as String?,
       name: name == unsetCopyWithValue ? this.name : name as String?,
-      relationship: relationship == unsetCopyWithValue
-          ? this.relationship
-          : relationship as BetaUserProfileRelationship?,
+      accessType: accessType == unsetCopyWithValue
+          ? this.accessType
+          : accessType as UserProfileAccessType?,
+      externalUserOnboardedAt: externalUserOnboardedAt == unsetCopyWithValue
+          ? this.externalUserOnboardedAt
+          : externalUserOnboardedAt as BetaTimestamp?,
       metadata: metadata == unsetCopyWithValue
           ? this.metadata
           : metadata as Map<String, String>?,
@@ -91,18 +113,25 @@ class CreateUserProfileRequest {
           runtimeType == other.runtimeType &&
           externalId == other.externalId &&
           name == other.name &&
-          relationship == other.relationship &&
+          accessType == other.accessType &&
+          externalUserOnboardedAt == other.externalUserOnboardedAt &&
           mapsEqual(metadata, other.metadata);
 
   @override
-  int get hashCode =>
-      Object.hash(externalId, name, relationship, mapHash(metadata));
+  int get hashCode => Object.hash(
+    externalId,
+    name,
+    accessType,
+    externalUserOnboardedAt,
+    mapHash(metadata),
+  );
 
   @override
   String toString() =>
       'CreateUserProfileRequest('
       'externalId: $externalId, '
       'name: $name, '
-      'relationship: $relationship, '
+      'accessType: $accessType, '
+      'externalUserOnboardedAt: $externalUserOnboardedAt, '
       'metadata: $metadata)';
 }

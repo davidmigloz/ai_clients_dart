@@ -1,17 +1,29 @@
 // ignore_for_file: avoid_print
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 
-/// Computer Use tool example (Beta).
+/// A 1x1 transparent PNG, used as a stand-in for a real screenshot.
+const _stubScreenshotBase64 =
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42'
+    'YAAAAASUVORK5CYII=';
+
+/// Computer toolset example.
 ///
-/// This example demonstrates how to configure the Computer Use tool.
-/// Note: This is a beta feature and actual computer control requires
-/// a compatible execution environment.
+/// This example demonstrates the GA computer toolset
+/// ([BuiltInTool.computerToolset]), which supersedes the versioned
+/// single-tool [ComputerUseTool] (`computer_20251124` and earlier). The
+/// toolset serves the whole computer-use family as one `tools[]` entry, with
+/// members enabled by default (including `zoom`), and lets you disable
+/// individual members via `configs`.
 ///
-/// Computer Use allows Claude to:
+/// Computer use lets Claude:
 /// - View screenshots of a computer screen
 /// - Control mouse and keyboard
 /// - Navigate applications
-void main() {
+///
+/// Your application is responsible for executing each member action against
+/// a real (or virtual) display and returning the result — this example uses
+/// a stub handler that fabricates results instead.
+void main() async {
   final client = AnthropicClient(
     config: const AnthropicConfig(
       authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
@@ -19,124 +31,87 @@ void main() {
   );
 
   try {
-    // Example 1: Configure Computer Use tool
-    print('=== Computer Use Tool Configuration ===');
-    print('''
-The Computer Use tool is configured as part of the tools array:
-
-final tools = [
-  ToolDefinition.builtIn(
-    ComputerUseTool(
-      displayWidthPx: 1920,
-      displayHeightPx: 1080,
-      displayNumber: 1,
-    ),
-  ),
-];
-
-final response = await client.messages.create(
-  MessageCreateRequest(
-    model: 'claude-sonnet-4-6',
-    maxTokens: 4096,
-    tools: tools,
-    messages: [
-      InputMessage.user('Take a screenshot of the current screen'),
-    ],
-  ),
-);
-
-The model will respond with a ToolUseBlock containing:
-- action: 'screenshot', 'click', 'type', etc.
-- coordinates: For click actions
-- text: For type actions
-
-Your application should:
-1. Execute the action on the actual computer
-2. Take a screenshot
-3. Send the result back as a tool_result with the screenshot
-''');
-
-    // Example 2: Computer Use 2025-01 version
-    print('\n=== Computer Use 2025-01 ===');
-    print('''
-The 2025-01 version adds more capabilities:
-
-final tools = [
-  ToolDefinition.builtIn(
-    ComputerUseTool.v20250124(
-      displayWidthPx: 1920,
-      displayHeightPx: 1080,
-      displayNumber: 1,
-    ),
-  ),
-];
-
-Available actions in 2025-01:
-- screenshot: Capture the screen
-- mouse_move: Move the mouse to coordinates
-- left_click: Click the left mouse button
-- right_click: Click the right mouse button
-- double_click: Double-click
-- left_click_drag: Click and drag
-- type: Type text
-- key: Press special keys (Enter, Tab, etc.)
-- scroll: Scroll the screen
-''');
-
-    // Example 3: Simulated interaction flow
-    print('\n=== Simulated Interaction Flow ===');
-    print('''
-A typical computer use interaction:
-
-1. User request:
-   InputMessage.user('Open the browser and go to google.com')
-
-2. Claude responds with tool_use:
-   ToolUseBlock(
-     id: 'toolu_xxx',
-     name: 'computer',
-     input: {'action': 'screenshot'},
-   )
-
-3. Your app takes screenshot, sends result:
-   InputMessage.userBlocks([
-     InputContentBlock.toolResult(
-       toolUseId: 'toolu_xxx',
-       content: [
-         ToolResultContent.image(
-           ImageSource.base64(
-             data: base64Screenshot,
-             mediaType: ImageMediaType.png,
-           ),
-         ),
-       ],
-     ),
-   ])
-
-4. Claude analyzes and sends next action:
-   ToolUseBlock(
-     id: 'toolu_yyy',
-     name: 'computer',
-     input: {
-       'action': 'left_click',
-       'coordinate': [100, 200],
-     },
-   )
-
-5. Repeat until task is complete
-''');
-
-    // Example 4: Display the tool JSON structure
-    print('\n=== Tool JSON Structure ===');
-    final tool = ToolDefinition.builtIn(
-      const ComputerUseTool(
-        displayWidthPx: 1920,
-        displayHeightPx: 1080,
-        displayNumber: 1,
+    // The computer toolset carries no `name` — it's a single `tools[]` entry
+    // declaring the whole family. Disable `zoom` (enabled by default) via
+    // `configs`; every other member stays enabled.
+    final tools = [
+      ToolDefinition.builtIn(
+        BuiltInTool.computerToolset(
+          configs: const ComputerToolsetConfigs(
+            zoom: ToolsetMemberConfig(enabled: false),
+          ),
+        ),
       ),
-    );
-    print('ComputerUseTool JSON:');
-    print(tool.toJson());
+    ];
+
+    var messages = <InputMessage>[
+      InputMessage.user('Take a screenshot, then tell me what you see.'),
+    ];
+
+    while (true) {
+      final response = await client.messages.create(
+        MessageCreateRequest(
+          model: 'claude-sonnet-5',
+          maxTokens: 4096,
+          tools: tools,
+          messages: messages,
+        ),
+      );
+
+      if (!response.isToolUse) {
+        print('Claude: ${response.text}');
+        break;
+      }
+
+      messages = [...messages, response.toInputMessage()];
+
+      // Each toolset member tool_use carries `toolsetName` identifying the
+      // family it belongs to (here, `computer_toolset_20260801`).
+      final results = <ToolResultInputBlock>[];
+      for (final toolUse in response.toolUseBlocks) {
+        print(
+          'Computer toolset action: ${toolUse.name} '
+          '(toolset: ${toolUse.toolsetName}), input: ${toolUse.input}',
+        );
+
+        // Execute the action against a real display, then report the
+        // result. A `tool_result` answering a toolset member echoes the
+        // paired tool_use's `toolsetName`.
+        final content = switch (toolUse.name) {
+          'screenshot' => [
+            ToolResultContent.image(
+              ImageSource.base64(
+                data: _stubScreenshotBase64,
+                mediaType: ImageMediaType.png,
+              ),
+            ),
+          ],
+          _ => [ToolResultContent.text('ok')],
+        };
+
+        results.add(
+          ToolResultInputBlock(
+            toolUseId: toolUse.id,
+            content: content,
+            toolsetName: toolUse.toolsetName,
+          ),
+        );
+      }
+
+      messages = [...messages, InputMessage.userBlocks(results)];
+    }
+
+    // Migrating from the versioned single-tool computer use? The legacy
+    // form still works, but lacks batched member actions and per-member
+    // enable/disable control:
+    //
+    // ToolDefinition.builtIn(
+    //   const ComputerUseTool(
+    //     displayWidthPx: 1920,
+    //     displayHeightPx: 1080,
+    //     displayNumber: 1,
+    //   ),
+    // )
   } finally {
     client.close();
   }

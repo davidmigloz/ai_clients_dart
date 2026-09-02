@@ -17,9 +17,157 @@ void main() {
       );
     });
 
+    test('fromJson parses updates', () {
+      expect(
+        ThinkingDisplayMode.fromJson('updates'),
+        ThinkingDisplayMode.updates,
+      );
+    });
+
+    test('fromJson throws on unknown value', () {
+      expect(
+        () => ThinkingDisplayMode.fromJson('bogus'),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
     test('toJson serializes correctly', () {
       expect(ThinkingDisplayMode.summarized.toJson(), 'summarized');
       expect(ThinkingDisplayMode.omitted.toJson(), 'omitted');
+      expect(ThinkingDisplayMode.updates.toJson(), 'updates');
+    });
+  });
+
+  group('ThinkingPrefixMismatchBehavior', () {
+    test('fromJson parses error', () {
+      expect(
+        ThinkingPrefixMismatchBehavior.fromJson('error'),
+        ThinkingPrefixMismatchBehavior.error,
+      );
+    });
+
+    test('fromJson parses drop_block', () {
+      expect(
+        ThinkingPrefixMismatchBehavior.fromJson('drop_block'),
+        ThinkingPrefixMismatchBehavior.dropBlock,
+      );
+    });
+
+    test('fromJson throws on unknown value', () {
+      expect(
+        () => ThinkingPrefixMismatchBehavior.fromJson('bogus'),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
+    test('toJson serializes correctly', () {
+      expect(ThinkingPrefixMismatchBehavior.error.toJson(), 'error');
+      expect(ThinkingPrefixMismatchBehavior.dropBlock.toJson(), 'drop_block');
+    });
+  });
+
+  group('ThinkingBlockBinding', () {
+    test('can be created empty', () {
+      const binding = ThinkingBlockBinding();
+
+      expect(binding.prefixMismatchBehavior, isNull);
+    });
+
+    test('can be created with prefixMismatchBehavior', () {
+      const binding = ThinkingBlockBinding(
+        prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.dropBlock,
+      );
+
+      expect(
+        binding.prefixMismatchBehavior,
+        ThinkingPrefixMismatchBehavior.dropBlock,
+      );
+    });
+
+    test('fromJson parses empty object', () {
+      final binding = ThinkingBlockBinding.fromJson(const {});
+
+      expect(binding.prefixMismatchBehavior, isNull);
+    });
+
+    test('fromJson parses prefix_mismatch_behavior', () {
+      final binding = ThinkingBlockBinding.fromJson(const {
+        'prefix_mismatch_behavior': 'drop_block',
+      });
+
+      expect(
+        binding.prefixMismatchBehavior,
+        ThinkingPrefixMismatchBehavior.dropBlock,
+      );
+    });
+
+    test('toJson omits null field', () {
+      const binding = ThinkingBlockBinding();
+
+      expect(binding.toJson(), isEmpty);
+    });
+
+    test('toJson serializes prefix_mismatch_behavior', () {
+      const binding = ThinkingBlockBinding(
+        prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.error,
+      );
+
+      expect(binding.toJson(), {'prefix_mismatch_behavior': 'error'});
+    });
+
+    test('copyWith replaces value', () {
+      const original = ThinkingBlockBinding();
+
+      final modified = original.copyWith(
+        prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.dropBlock,
+      );
+
+      expect(
+        modified.prefixMismatchBehavior,
+        ThinkingPrefixMismatchBehavior.dropBlock,
+      );
+    });
+
+    test('copyWith with no args keeps original', () {
+      const original = ThinkingBlockBinding(
+        prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.dropBlock,
+      );
+
+      final copy = original.copyWith();
+
+      expect(copy.prefixMismatchBehavior, original.prefixMismatchBehavior);
+    });
+
+    test('copyWith can clear value', () {
+      const original = ThinkingBlockBinding(
+        prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.dropBlock,
+      );
+
+      final modified = original.copyWith(prefixMismatchBehavior: null);
+
+      expect(modified.prefixMismatchBehavior, isNull);
+    });
+
+    test('equality and hashCode', () {
+      const b1 = ThinkingBlockBinding(
+        prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.dropBlock,
+      );
+      const b2 = ThinkingBlockBinding(
+        prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.dropBlock,
+      );
+      const b3 = ThinkingBlockBinding();
+
+      expect(b1, equals(b2));
+      expect(b1.hashCode, b2.hashCode);
+      expect(b1, isNot(equals(b3)));
+    });
+
+    test('toString includes prefixMismatchBehavior', () {
+      const binding = ThinkingBlockBinding(
+        prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.dropBlock,
+      );
+
+      expect(binding.toString(), contains('dropBlock'));
     });
   });
 
@@ -257,6 +405,89 @@ void main() {
 
       expect(enabled.toString(), contains('5000'));
     });
+
+    test('can be created with blockBinding', () {
+      const enabled = ThinkingEnabled(
+        budgetTokens: 5000,
+        blockBinding: ThinkingBlockBinding(
+          prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.dropBlock,
+        ),
+      );
+
+      expect(enabled.blockBinding, isNotNull);
+      expect(
+        enabled.blockBinding!.prefixMismatchBehavior,
+        ThinkingPrefixMismatchBehavior.dropBlock,
+      );
+    });
+
+    test('fromJson parses block_binding', () {
+      final json = {
+        'type': 'enabled',
+        'budget_tokens': 8000,
+        'block_binding': {'prefix_mismatch_behavior': 'drop_block'},
+      };
+
+      final enabled = ThinkingEnabled.fromJson(json);
+
+      expect(
+        enabled.blockBinding?.prefixMismatchBehavior,
+        ThinkingPrefixMismatchBehavior.dropBlock,
+      );
+    });
+
+    test('toJson omits null blockBinding', () {
+      const enabled = ThinkingEnabled(budgetTokens: 4000);
+
+      expect(enabled.toJson().containsKey('block_binding'), isFalse);
+    });
+
+    test('toJson serializes blockBinding', () {
+      const enabled = ThinkingEnabled(
+        budgetTokens: 4000,
+        blockBinding: ThinkingBlockBinding(
+          prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.dropBlock,
+        ),
+      );
+
+      final json = enabled.toJson();
+
+      expect(json['block_binding'], {'prefix_mismatch_behavior': 'drop_block'});
+    });
+
+    test('copyWith can set and clear blockBinding', () {
+      const original = ThinkingEnabled(budgetTokens: 5000);
+
+      final withBinding = original.copyWith(
+        blockBinding: const ThinkingBlockBinding(
+          prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.error,
+        ),
+      );
+      expect(withBinding.blockBinding, isNotNull);
+
+      final cleared = withBinding.copyWith(blockBinding: null);
+      expect(cleared.blockBinding, isNull);
+    });
+
+    test('equality considers blockBinding', () {
+      const e1 = ThinkingEnabled(
+        budgetTokens: 5000,
+        blockBinding: ThinkingBlockBinding(
+          prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.dropBlock,
+        ),
+      );
+      const e2 = ThinkingEnabled(
+        budgetTokens: 5000,
+        blockBinding: ThinkingBlockBinding(
+          prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.dropBlock,
+        ),
+      );
+      const e3 = ThinkingEnabled(budgetTokens: 5000);
+
+      expect(e1, equals(e2));
+      expect(e1.hashCode, e2.hashCode);
+      expect(e1, isNot(equals(e3)));
+    });
   });
 
   group('ThinkingDisabled', () {
@@ -376,6 +607,102 @@ void main() {
       final modified = original.copyWith(display: null);
 
       expect(modified.display, isNull);
+    });
+
+    test('can be created with blockBinding', () {
+      const adaptive = ThinkingAdaptive(
+        blockBinding: ThinkingBlockBinding(
+          prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.dropBlock,
+        ),
+      );
+
+      expect(
+        adaptive.blockBinding?.prefixMismatchBehavior,
+        ThinkingPrefixMismatchBehavior.dropBlock,
+      );
+    });
+
+    test('fromJson parses block_binding', () {
+      final json = {
+        'type': 'adaptive',
+        'block_binding': {'prefix_mismatch_behavior': 'error'},
+      };
+
+      final adaptive = ThinkingAdaptive.fromJson(json);
+
+      expect(
+        adaptive.blockBinding?.prefixMismatchBehavior,
+        ThinkingPrefixMismatchBehavior.error,
+      );
+    });
+
+    test('toJson serializes blockBinding', () {
+      const adaptive = ThinkingAdaptive(
+        blockBinding: ThinkingBlockBinding(
+          prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.dropBlock,
+        ),
+      );
+
+      final json = adaptive.toJson();
+
+      expect(json['block_binding'], {'prefix_mismatch_behavior': 'drop_block'});
+    });
+
+    test('copyWith can set and clear blockBinding', () {
+      const original = ThinkingAdaptive();
+
+      final withBinding = original.copyWith(
+        blockBinding: const ThinkingBlockBinding(
+          prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.error,
+        ),
+      );
+      expect(withBinding.blockBinding, isNotNull);
+
+      final cleared = withBinding.copyWith(blockBinding: null);
+      expect(cleared.blockBinding, isNull);
+    });
+
+    test('equality considers blockBinding', () {
+      const a1 = ThinkingAdaptive(
+        blockBinding: ThinkingBlockBinding(
+          prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.dropBlock,
+        ),
+      );
+      const a2 = ThinkingAdaptive(
+        blockBinding: ThinkingBlockBinding(
+          prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.dropBlock,
+        ),
+      );
+      const a3 = ThinkingAdaptive();
+
+      expect(a1, equals(a2));
+      expect(a1.hashCode, a2.hashCode);
+      expect(a1, isNot(equals(a3)));
+    });
+  });
+
+  group('ThinkingConfig factories with blockBinding', () {
+    test('enabled factory accepts blockBinding', () {
+      final config = ThinkingConfig.enabled(
+        budgetTokens: 5000,
+        blockBinding: const ThinkingBlockBinding(
+          prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.dropBlock,
+        ),
+      );
+
+      expect(config, isA<ThinkingEnabled>());
+      expect((config as ThinkingEnabled).blockBinding, isNotNull);
+    });
+
+    test('adaptive factory accepts blockBinding', () {
+      final config = ThinkingConfig.adaptive(
+        blockBinding: const ThinkingBlockBinding(
+          prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.error,
+        ),
+      );
+
+      expect(config, isA<ThinkingAdaptive>());
+      expect((config as ThinkingAdaptive).blockBinding, isNotNull);
     });
   });
 }

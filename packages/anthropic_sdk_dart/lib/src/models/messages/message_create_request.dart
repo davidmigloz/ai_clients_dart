@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../beta/config/container.dart';
 import '../beta/config/output_config.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
@@ -203,8 +204,11 @@ class MessageCreateRequest {
   /// Output behavior configuration (effort, structured output).
   final OutputConfig? outputConfig;
 
-  /// Optional reusable container identifier for code execution.
-  final String? container;
+  /// Container identifier for reuse across requests
+  /// ([ContainerParam.id]), or a [ContainerParams] object specifying skills
+  /// to load into a new container
+  /// (`ContainerParam.config(ContainerParams(skills: [...]))`).
+  final ContainerParam? container;
 
   /// Inference speed mode.
   final Speed? speed;
@@ -223,8 +227,11 @@ class MessageCreateRequest {
   final DiagnosticsParam? diagnostics;
 
   /// Ordered chain of fallback models to attempt if the primary [model]
-  /// declines.
-  final List<FallbackConfigV2>? fallbacks;
+  /// declines ([FallbacksParam.list]), or a request for the model's
+  /// server-defined default fallback configuration ([FallbacksParam
+  /// .defaultMode], requires the `server-side-fallback-2026-07-01` beta
+  /// header).
+  final FallbacksParam? fallbacks;
 
   /// Opaque credit token to redeem on a fallback retry.
   ///
@@ -299,7 +306,9 @@ class MessageCreateRequest {
       outputConfig: json['output_config'] != null
           ? OutputConfig.fromJson(json['output_config'] as Map<String, dynamic>)
           : null,
-      container: json['container'] as String?,
+      container: json['container'] != null
+          ? ContainerParam.fromJson(json['container'])
+          : null,
       speed: json['speed'] != null
           ? Speed.fromJson(json['speed'] as String)
           : null,
@@ -313,9 +322,9 @@ class MessageCreateRequest {
               json['diagnostics'] as Map<String, dynamic>,
             )
           : null,
-      fallbacks: (json['fallbacks'] as List?)
-          ?.map((e) => FallbackConfigV2.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      fallbacks: json['fallbacks'] != null
+          ? FallbacksParam.fromJson(json['fallbacks'])
+          : null,
       fallbackCreditToken: json['fallback_credit_token'] != null
           ? FallbackCreditTokenParam.fromJson(json['fallback_credit_token'])
           : null,
@@ -340,12 +349,11 @@ class MessageCreateRequest {
     if (topK != null) 'top_k': topK,
     if (inferenceGeo != null) 'inference_geo': inferenceGeo,
     if (outputConfig != null) 'output_config': outputConfig!.toJson(),
-    if (container != null) 'container': container,
+    if (container != null) 'container': container!.toJson(),
     if (speed != null) 'speed': speed!.toJson(),
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
     if (diagnostics != null) 'diagnostics': diagnostics!.toJson(),
-    if (fallbacks != null)
-      'fallbacks': fallbacks!.map((e) => e.toJson()).toList(),
+    if (fallbacks != null) 'fallbacks': fallbacks!.toJson(),
     if (fallbackCreditToken != null)
       'fallback_credit_token': fallbackCreditToken!.toJson(),
   };
@@ -414,7 +422,7 @@ class MessageCreateRequest {
           : outputConfig as OutputConfig?,
       container: container == unsetCopyWithValue
           ? this.container
-          : container as String?,
+          : container as ContainerParam?,
       speed: speed == unsetCopyWithValue ? this.speed : speed as Speed?,
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
@@ -424,7 +432,7 @@ class MessageCreateRequest {
           : diagnostics as DiagnosticsParam?,
       fallbacks: fallbacks == unsetCopyWithValue
           ? this.fallbacks
-          : fallbacks as List<FallbackConfigV2>?,
+          : fallbacks as FallbacksParam?,
       fallbackCreditToken: fallbackCreditToken == unsetCopyWithValue
           ? this.fallbackCreditToken
           : fallbackCreditToken as FallbackCreditTokenParam?,
@@ -456,7 +464,7 @@ class MessageCreateRequest {
           speed == other.speed &&
           cacheControl == other.cacheControl &&
           diagnostics == other.diagnostics &&
-          listsEqual(fallbacks, other.fallbacks) &&
+          fallbacks == other.fallbacks &&
           fallbackCreditToken == other.fallbackCreditToken;
 
   @override
@@ -481,7 +489,7 @@ class MessageCreateRequest {
     speed,
     cacheControl,
     diagnostics,
-    listHash(fallbacks),
+    fallbacks,
     fallbackCreditToken,
   ]);
 
@@ -495,7 +503,7 @@ class MessageCreateRequest {
       'inferenceGeo: $inferenceGeo, outputConfig: $outputConfig, '
       'container: $container, speed: $speed, cacheControl: $cacheControl, '
       'diagnostics: $diagnostics, '
-      'fallbacks: ${fallbacks == null ? null : '${fallbacks!.length} items'}, '
+      'fallbacks: $fallbacks, '
       'fallbackCreditToken: '
       '${fallbackCreditToken == null ? null : '[redacted]'})';
 }

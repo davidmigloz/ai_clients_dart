@@ -23,6 +23,39 @@ void main() {
       expect(file.sizeBytes, 1024);
       expect(file.createdAt, DateTime.utc(2025, 1, 1));
       expect(file.downloadable, isTrue);
+      expect(file.expiresAt, isNull);
+    });
+
+    test('fromJson parses expires_at when present', () {
+      final json = {
+        'id': 'file_exp123',
+        'type': 'file',
+        'filename': 'temp.txt',
+        'mime_type': 'text/plain',
+        'size_bytes': 10,
+        'created_at': '2025-01-01T00:00:00Z',
+        'expires_at': '2025-01-01T01:00:00Z',
+      };
+
+      final file = FileMetadata.fromJson(json);
+
+      expect(file.expiresAt, DateTime.utc(2025, 1, 1, 1, 0, 0));
+    });
+
+    test('fromJson treats null expires_at as never-expiring', () {
+      final json = {
+        'id': 'file_noexp',
+        'type': 'file',
+        'filename': 'permanent.txt',
+        'mime_type': 'text/plain',
+        'size_bytes': 10,
+        'created_at': '2025-01-01T00:00:00Z',
+        'expires_at': null,
+      };
+
+      final file = FileMetadata.fromJson(json);
+
+      expect(file.expiresAt, isNull);
     });
 
     test('fromJson handles image files', () {
@@ -79,6 +112,33 @@ void main() {
       expect(json['size_bytes'], 100);
       expect(json['created_at'], '2025-05-01T12:00:00.000Z');
       expect(json['downloadable'], isTrue);
+    });
+
+    test('toJson includes expires_at when present', () {
+      final file = FileMetadata(
+        id: 'file_test',
+        filename: 'test.txt',
+        mimeType: 'text/plain',
+        sizeBytes: 100,
+        createdAt: DateTime.utc(2025, 1, 1),
+        expiresAt: DateTime.utc(2025, 1, 2),
+      );
+
+      final json = file.toJson();
+      expect(json['expires_at'], '2025-01-02T00:00:00.000Z');
+    });
+
+    test('toJson omits expires_at when null', () {
+      final file = FileMetadata(
+        id: 'file_test',
+        filename: 'test.txt',
+        mimeType: 'text/plain',
+        sizeBytes: 100,
+        createdAt: DateTime.utc(2025, 1, 1),
+      );
+
+      final json = file.toJson();
+      expect(json.containsKey('expires_at'), isFalse);
     });
 
     test('fromJson parses file with scope', () {
@@ -210,9 +270,7 @@ void main() {
             'downloadable': true,
           },
         ],
-        'has_more': true,
-        'first_id': 'file_1',
-        'last_id': 'file_2',
+        'next_page': 'page_xyz',
       };
 
       final response = FileListResponse.fromJson(json);
@@ -220,25 +278,16 @@ void main() {
       expect(response.data, hasLength(2));
       expect(response.data[0].id, 'file_1');
       expect(response.data[1].id, 'file_2');
-      expect(response.hasMore, isTrue);
-      expect(response.firstId, 'file_1');
-      expect(response.lastId, 'file_2');
+      expect(response.nextPage, 'page_xyz');
     });
 
     test('fromJson handles empty list', () {
-      final json = {
-        'data': <Map<String, dynamic>>[],
-        'has_more': false,
-        'first_id': null,
-        'last_id': null,
-      };
+      final json = {'data': <Map<String, dynamic>>[], 'next_page': null};
 
       final response = FileListResponse.fromJson(json);
 
       expect(response.data, isEmpty);
-      expect(response.hasMore, isFalse);
-      expect(response.firstId, isNull);
-      expect(response.lastId, isNull);
+      expect(response.nextPage, isNull);
     });
 
     test('toJson produces valid JSON', () {
@@ -253,17 +302,30 @@ void main() {
             downloadable: true,
           ),
         ],
-        hasMore: false,
-        firstId: 'file_test',
-        lastId: 'file_test',
+        nextPage: 'page_next',
       );
 
       final json = response.toJson();
 
       expect(json['data'], hasLength(1));
-      expect(json['has_more'], isFalse);
-      expect(json['first_id'], 'file_test');
-      expect(json['last_id'], 'file_test');
+      expect(json['next_page'], 'page_next');
+    });
+
+    test('toJson omits next_page when null', () {
+      final response = FileListResponse(
+        data: [
+          FileMetadata(
+            id: 'file_test',
+            filename: 'test.txt',
+            mimeType: 'text/plain',
+            sizeBytes: 100,
+            createdAt: DateTime.utc(2025, 1, 1),
+          ),
+        ],
+      );
+
+      final json = response.toJson();
+      expect(json.containsKey('next_page'), isFalse);
     });
   });
 

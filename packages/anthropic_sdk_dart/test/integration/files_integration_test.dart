@@ -237,10 +237,10 @@ void main() {
           expect(firstPage.data, hasLength(lessThanOrEqualTo(2)));
 
           // If there are more, get next page
-          if (firstPage.hasMore && firstPage.lastId != null) {
+          if (firstPage.nextPage != null) {
             final secondPage = await client!.files.list(
               limit: 2,
-              afterId: firstPage.lastId,
+              page: firstPage.nextPage,
             );
 
             expect(secondPage.data, isNotEmpty);

@@ -4,6 +4,7 @@ import '../../beta_timestamp.dart';
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../agents/multiagent.dart' show AgentReference;
+import '../common/budget.dart';
 import 'deployment_initial_event.dart';
 import 'deployment_paused_reason.dart';
 import 'deployment_status.dart';
@@ -70,6 +71,10 @@ class Deployment {
   /// Time the deployment was archived. Null if not archived.
   final BetaTimestamp? archivedAt;
 
+  /// Spend ceiling stamped onto each session created from this deployment.
+  /// Absent when no budget is set.
+  final Budget? budget;
+
   /// Creates a [Deployment].
   const Deployment({
     this.type = 'deployment',
@@ -88,6 +93,7 @@ class Deployment {
     required this.createdAt,
     required this.updatedAt,
     required this.archivedAt,
+    this.budget,
   });
 
   /// Creates a [Deployment] from JSON.
@@ -125,6 +131,9 @@ class Deployment {
       archivedAt: json['archived_at'] != null
           ? DateTime.parse(json['archived_at'] as String)
           : null,
+      budget: json['budget'] != null
+          ? Budget.fromJson(json['budget'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -146,6 +155,7 @@ class Deployment {
     'created_at': createdAt.toUtc().toIso8601String(),
     'updated_at': updatedAt.toUtc().toIso8601String(),
     'archived_at': archivedAt?.toUtc().toIso8601String(),
+    if (budget != null) 'budget': budget!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -166,6 +176,7 @@ class Deployment {
     BetaTimestamp? createdAt,
     BetaTimestamp? updatedAt,
     Object? archivedAt = unsetCopyWithValue,
+    Object? budget = unsetCopyWithValue,
   }) {
     return Deployment(
       type: type ?? this.type,
@@ -192,6 +203,7 @@ class Deployment {
       archivedAt: archivedAt == unsetCopyWithValue
           ? this.archivedAt
           : archivedAt as BetaTimestamp?,
+      budget: budget == unsetCopyWithValue ? this.budget : budget as Budget?,
     );
   }
 
@@ -215,7 +227,8 @@ class Deployment {
           pausedReason == other.pausedReason &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt &&
-          archivedAt == other.archivedAt;
+          archivedAt == other.archivedAt &&
+          budget == other.budget;
 
   @override
   int get hashCode => Object.hash(
@@ -233,8 +246,7 @@ class Deployment {
     status,
     pausedReason,
     createdAt,
-    updatedAt,
-    archivedAt,
+    Object.hash(updatedAt, archivedAt, budget),
   );
 
   @override
@@ -255,5 +267,6 @@ class Deployment {
       'pausedReason: $pausedReason, '
       'createdAt: $createdAt, '
       'updatedAt: $updatedAt, '
-      'archivedAt: $archivedAt)';
+      'archivedAt: $archivedAt, '
+      'budget: $budget)';
 }
