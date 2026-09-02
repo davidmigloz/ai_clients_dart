@@ -6,6 +6,142 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v7.x to v8.0.0
+
+v8.0.0 syncs the client to the Anthropic OpenAPI spec of September 2026 (Claude Fable 5.1). Most of the release is additive, but the spec removed the `mid_conv_system` block, promoted the Files and Skills APIs to GA with new shapes, replaced the user-profile `relationship` field, and turned several loosely-typed request fields and Managed Agents structures into typed unions. New request variants also make exhaustive `switch` statements over a few exported sealed unions non-exhaustive.
+
+### 1) `mid_conv_system` content block removed
+
+The spec dropped `RequestMidConvSystemBlock`; system instructions inside `messages` are now plain `role: "system"` messages, which the client already supported. `MidConversationSystemInputBlock` and `InputContentBlock.midConversationSystem` are gone, and `{"type": "mid_conv_system"}` parses as `UnknownInputContentBlock`.
+
+```dart
+// Before
+InputMessage.userBlocks([
+  InputContentBlock.midConversationSystem(content: [TextInputBlock('Answer in French.')]),
+])
+
+// After — a system message in the messages array
+InputMessage.system('Answer in French.')
+
+// New: turn-scoped reminder (beta `mid-conversation-system-clear-at-2026-08-21`)
+InputMessage.system('Check your inbox first.', clearAt: SystemMessageClearAt.nextUserMessage)
+
+// New: per-message effort (beta `mid-conversation-output-config-2026-07-01`)
+InputMessage.systemEffort(EffortLevel.low)
+```
+
+### 2) `MessageCreateRequest.fallbacks` and `container` are typed unions
+
+`fallbacks` changed from `List<FallbackConfigV2>?` to `FallbacksParam?` so the server-recommended `"default"` chain can be requested, and `container` changed from `String?` to `ContainerParam?` so skills can be loaded into a container. `ContainerParams` now models the real spec shape (`id`, `skills`); its former `memoryMb`/`timeoutSeconds` fields and `CodeExecutionTool.container` never existed in the API and were removed.
+
+```dart
+// Before
+MessageCreateRequest(
+  container: 'container_123',
+  fallbacks: [FallbackConfigV2(model: 'claude-opus-5')],
+)
+
+// After
+MessageCreateRequest(
+  container: ContainerParam.id('container_123'),
+  fallbacks: FallbacksParam.list([FallbackConfigV2(model: 'claude-opus-5')]),
+)
+
+// New options
+MessageCreateRequest(
+  fallbacks: FallbacksParam.defaultMode(),
+  container: ContainerParam.config(
+    ContainerParams(
+      skills: [ContainerSkillParams(type: ContainerSkillType.anthropic, skillId: 'pdf')],
+    ),
+  ),
+)
+```
+
+### 3) Files API is GA: cursor pagination and expiration
+
+`client.files` no longer sends the `files-api-2025-04-14` beta header. `list()` takes `page` (the opaque cursor from `FileListResponse.nextPage`) and `ids` instead of `beforeId`/`afterId`, and `FileListResponse` is `{data, nextPage}` (no `hasMore`/`firstId`/`lastId`). Uploads accept `expiresInSeconds`, and `FileMetadata` gained `expiresAt`.
+
+```dart
+// Before
+var page = await client.files.list(limit: 50);
+while (page.hasMore && page.lastId != null) {
+  page = await client.files.list(limit: 50, afterId: page.lastId);
+}
+
+// After
+var page = await client.files.list(limit: 50);
+while (page.nextPage != null) {
+  page = await client.files.list(limit: 50, page: page.nextPage);
+}
+```
+
+### 4) Skills API is GA: new model shapes and multi-file uploads
+
+`client.skills` no longer sends the `skills-2025-10-02` beta header. `Skill` now has `displayName`, `latestVersionId` and an object `source` (`SkillSource.type` is a `SkillSourceType`, which also gained `anthropicExample` and `plugin`) instead of `displayTitle`/`latestVersion`/an enum source; `SkillVersion` lost `version` and `directory` (use `id`); list responses lost `hasMore`; `list(source:)` takes a `SkillSourceType`; `deleteSkill`/`deleteVersion` return `DeletedSkill`/`DeletedSkillVersion`; and `create`/`createVersion` upload the skill's files individually instead of a zip.
+
+```dart
+// Before
+final skill = await client.skills.create(skillBytes: zipBytes, displayTitle: 'My Skill');
+print(skill.displayTitle);
+
+// After — one SkillFile per file, all under the same top-level directory
+final skill = await client.skills.create(
+  files: [SkillFile(path: 'my-skill/SKILL.md', bytes: skillMd)],
+  displayName: 'My Skill',
+);
+print('${skill.displayName} (${skill.source.type}) latest=${skill.latestVersionId}');
+final deleted = await client.skills.deleteSkill(skillId: skill.id); // DeletedSkill
+```
+
+### 5) User profiles: `relationship` replaced by `accessType`
+
+The spec removed the `relationship` concept. `UserProfile`, `CreateUserProfileRequest` and `UpdateUserProfileRequest` now carry `accessType` (`UserProfileAccessType.application` / `.passthrough`) and `externalUserOnboardedAt` instead; the `BetaUserProfileRelationship` enum is gone. `list()` gained `orderBy`, and the resource sends the `user-profiles-2026-08-18` beta header.
+
+```dart
+// Before
+CreateUserProfileRequest(externalId: 'user-1', relationship: BetaUserProfileRelationship.external)
+
+// After
+CreateUserProfileRequest(
+  externalId: 'user-1',
+  accessType: UserProfileAccessType.application,
+  externalUserOnboardedAt: DateTime.utc(2024, 11, 2, 8, 15),
+)
+```
+
+### 6) Managed Agents: per-tool configs, roster entries and typed message content
+
+- `AgentToolConfig` / `AgentToolConfigParams` are sealed unions with one variant per tool (`bash`, `edit`, `read`, `write`, `glob`, `grep`, `web_fetch`, `web_search`); the web variants add `allowedDomains`/`blockedDomains`, `maxContentTokens` (web_fetch) and `userLocation` (web_search).
+- `MultiagentCoordinator.agents` is `List<MultiagentRosterEntry>` (`AgentReference` or the new `Advisor`), `MultiagentRosterEntryParams` gained `.advisor(model)`, `SessionMultiagentCoordinator.agents` is `List<SessionRosterEntry>`, and `SessionThread.agent` is a `SessionRosterEntry` (`SessionThreadAgent`, which never carried `multiagent`).
+- `AgentMessageEvent.content` is `List<AgentMessageContentBlock>` (`ManagedAgentsTextBlock` / `ManagedAgentsRedactedBlock`) instead of raw maps, and `Dream.outputBehavior` is a required field.
+
+```dart
+// Before
+AgentToolset20260401Params(
+  configs: [AgentToolConfigParams(name: AgentToolName.webSearch, enabled: true)],
+)
+for (final ref in coordinator.agents) { print(ref.id); }
+
+// After
+AgentToolset20260401Params(
+  configs: [AgentToolConfigParams.webSearch(enabled: true, allowedDomains: ['docs.example.com'])],
+)
+for (final entry in coordinator.agents) {
+  switch (entry) {
+    case AgentReference(:final id): print(id);
+    case Advisor(:final model): print('advisor: $model');
+    case UnknownMultiagentRosterEntry(): break;
+  }
+}
+```
+
+### 7) New variants on exported sealed unions
+
+Exhaustive `switch` statements without a wildcard or `Unknown*` branch need new cases. `InputContentBlock` gained `ThinkingInputBlock` and `RedactedThinkingInputBlock` (and `InputContentBlock.fromJson` now returns them for `thinking`/`redacted_thinking` JSON instead of `UnknownInputContentBlock`); `ToolResultContent` gained `document`, `search_result`, `tool_reference` and `browser_state` variants plus `UnknownToolResultContent` (it no longer throws on unknown types); `BuiltInTool` gained `ComputerToolset`/`BrowserToolset`; and `SessionEvent`, `SessionStopReason`, `WebhookEventData` and `ManagedAgentActor` gained budget/service-account variants. Pure-deserialization consumers are unaffected. To replay an assistant turn that contains thinking, prefer `response.toInputMessage()` over hand-picking blocks.
+
+---
+
 ## Migrating from v6.x to v7.0.0
 
 v7.0.0's breaking surface is limited to one field: fallback credit tokens now support a redemption `mode`, so the plain `String?` field became a typed union. Everything else in this release (the Dreams API, mid-conversation tool changes, managed-agent effort levels, and the `agent-memory-2026-07-22` beta header switch) is additive.

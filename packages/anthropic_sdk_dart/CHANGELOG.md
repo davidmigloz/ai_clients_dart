@@ -1,3 +1,13 @@
+## 8.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Syncs to the Anthropic OpenAPI spec shipped with python SDK 1.3.0, covering the [Claude Fable 5.1 / Mythos 5.1](https://www.anthropic.com/claude-fable-and-mythos-5-1) launch and the July–September [release notes](https://platform.claude.com/docs/en/release-notes/overview): [preserved-thinking](https://platform.claude.com/docs/en/build-with-claude/thinking) controls (`ThinkingBlockBinding`, `Message.inputTransformations`, `ThinkingDisplayMode.updates` progress updates), turn-scoped and effort-only [mid-conversation system messages](https://platform.claude.com/docs/en/build-with-claude/mid-conversation-system-messages) (`InputMessage.system(clearAt:)`, `InputMessage.systemEffort`), the GA computer-use and [browser-use](https://platform.claude.com/docs/en/agents-and-tools/tool-use/browser-use-tool) toolsets with `browser_state` tool results, image `transformations`, container skills, `FallbacksParam.defaultMode()`, the now-GA Files and Skills APIs (cursor pagination, file expiration, multi-file `SkillFile` uploads), user-profile access types, and Managed Agents budgets, advisor roster entries and per-tool configs. It also adds the typed `ThinkingInputBlock`/`RedactedThinkingInputBlock` request variants and `Message.toInputMessage()` for replaying assistant turns with thinking intact (surfaced by [genkit-dart#400](https://github.com/genkit-ai/genkit-dart/pull/400)), and defaults docs and examples to `claude-sonnet-5`. **Breaking:** the `mid_conv_system` block is removed in favour of `InputMessage.system(...)`, the `fallbacks`/`container` request fields became typed unions, the Files, Skills and user-profile models follow the GA shapes, Managed Agents tool configs and rosters are sealed unions, and several exported sealed unions gained variants — see the Migration Guide.
+
+- **BREAKING** **FEAT**: Fable 5.1, toolsets, Files/Skills GA ([#302](https://github.com/davidmigloz/ai_clients_dart/issues/302)). ([7adfe29c](https://github.com/davidmigloz/ai_clients_dart/commit/7adfe29c60c2a0c21b864e41854f265a9a1a350e))
+- **BREAKING** **FEAT**: Thinking input blocks and replay helper ([#300](https://github.com/davidmigloz/ai_clients_dart/issues/300)). ([61a646e2](https://github.com/davidmigloz/ai_clients_dart/commit/61a646e275d67e2549424dfeddc3866aca3e47ad))
+
 ## 7.0.0
 
 > [!CAUTION]

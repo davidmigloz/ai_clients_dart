@@ -1,3 +1,9 @@
+## 2.6.1
+
+Maintenance release with no functional changes: the only commit touching this package since 2.6.0 reformatted its integration tests as part of a cross-package formatter update. No library code, API, or dependency changed.
+
+- **FIX**: Serialize Gemini embedding config ([#298](https://github.com/davidmigloz/ai_clients_dart/issues/298)). ([d5b710b4](https://github.com/davidmigloz/ai_clients_dart/commit/d5b710b488dc8d6a47eda8660dafc7a15e3400a2))
+
 ## 2.6.0
 
 Adds the official `thinking` field to `ChatMessage`, so a model's reasoning trace can be replayed in the follow-up assistant message. Ollama's tool-calling guidance requires accumulated thinking, content, and tool calls to be sent back together, but the thinking trace was previously dropped from chat history. Set it via `ChatMessage.assistant(content, thinking: ...)`; it round-trips through JSON and is covered by `==`, `hashCode`, and `toString`.

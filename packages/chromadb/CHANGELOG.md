@@ -1,3 +1,11 @@
+## 1.4.2
+
+Maintenance release with no functional changes: the only commits touching this package since 1.4.1 reformatted its integration tests as part of cross-package formatter updates (the changes cancel out). No library code, API, or dependency changed.
+
+- **FIX**: Serialize Gemini embedding config ([#298](https://github.com/davidmigloz/ai_clients_dart/issues/298)). ([d5b710b4](https://github.com/davidmigloz/ai_clients_dart/commit/d5b710b488dc8d6a47eda8660dafc7a15e3400a2))
+- **FIX**: Restore Dart 3.13 compatibility ([#293](https://github.com/davidmigloz/ai_clients_dart/issues/293)). ([9def8ac4](https://github.com/davidmigloz/ai_clients_dart/commit/9def8ac415b087b8b2f12a0a2198c1ae94bb32b3))
+- **STYLE**: Format integration tests ([#297](https://github.com/davidmigloz/ai_clients_dart/issues/297)). ([51016edf](https://github.com/davidmigloz/ai_clients_dart/commit/51016edf7cf80aadab3739e108fd4d424b14d1e9))
+
 ## 1.4.1
 
 Fixes `buildUrl` wiping query parameters carried by the base URL (e.g. `?tenant=...` on a proxy/gateway URL) whenever default or per-request query params were merged, collapsing repeated base-URL query keys, and producing a double slash for base URLs with a sub-path and a trailing slash. URL building now matches the normalization used across the monorepo's clients: base path trailing slash stripped, and query params merged base URL → config defaults → per-request. Also repoints the pub.dev `documentation` link to the package's API docs.
