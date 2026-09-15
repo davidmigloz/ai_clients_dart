@@ -11,7 +11,8 @@ import 'package:mistralai_dart/mistralai_dart.dart';
 /// 3. Get word-level and segment-level timing information
 ///
 /// Before running, set the MISTRAL_API_KEY environment variable.
-/// Note: You need to upload an audio file first using the Files API.
+/// The audio can be passed as bytes, as a URL, or as the ID of a file
+/// uploaded with the Files API.
 void main() {
   final apiKey = Platform.environment['MISTRAL_API_KEY'];
   if (apiKey == null) {
@@ -22,8 +23,8 @@ void main() {
   final client = MistralClient.withApiKey(apiKey);
 
   try {
-    // Example 1: Basic transcription (requires a file ID)
-    // Uncomment and replace with actual file ID to test
+    // Example 1: Basic transcription (requires an audio.mp3 file)
+    // Uncomment and point at an actual audio file to test
     // await basicTranscription(client);
 
     // Example 2: Transcription with verbose output
@@ -43,18 +44,13 @@ void main() {
 Future<void> basicTranscription(MistralClient client) async {
   print('=== Basic Audio Transcription ===\n');
 
-  // First, upload the audio file
-  // final file = await client.files.upload(
-  //   file: File('audio.mp3'),
-  //   purpose: FilePurpose.audio,
-  // );
-
-  // Then transcribe it
-  const fileId = 'your-audio-file-id'; // Replace with actual file ID
+  // The audio is sent inline; no upload to the Files API is needed
+  final bytes = await File('audio.mp3').readAsBytes();
 
   final response = await client.audio.transcriptions.create(
-    request: const TranscriptionRequest(
-      file: fileId,
+    request: TranscriptionRequest(
+      fileBytes: bytes,
+      fileName: 'audio.mp3',
       model: 'mistral-audio-latest',
       language: 'en', // Optional: specify language for better accuracy
     ),
@@ -169,24 +165,32 @@ Future<void> streamingTranscription(MistralClient client) async {
 void demonstrateUsage() {
   print('=== Audio Transcription API Usage ===\n');
 
-  print('1. Upload an audio file:');
+  print('1. Transcribe audio bytes directly:');
   print('''
-   final file = await client.files.upload(
-     file: File('recording.mp3'),
-     purpose: FilePurpose.audio,
-   );
-''');
-
-  print('2. Transcribe the audio:');
-  print('''
+   final bytes = await File('recording.mp3').readAsBytes();
    final response = await client.audio.transcriptions.create(
      request: TranscriptionRequest(
-       file: file.id,
+       fileBytes: bytes,
+       fileName: 'recording.mp3',
        model: 'mistral-audio-latest',
        language: 'en',  // Optional
      ),
    );
    print(response.text);
+''');
+
+  print('2. Or transcribe a file uploaded with the Files API:');
+  print('''
+   final file = await client.files.upload(
+     file: File('recording.mp3'),
+     purpose: FilePurpose.audio,
+   );
+   final response = await client.audio.transcriptions.create(
+     request: TranscriptionRequest(
+       file: file.id,
+       model: 'mistral-audio-latest',
+     ),
+   );
 ''');
 
   print('3. Stream transcription for real-time results:');

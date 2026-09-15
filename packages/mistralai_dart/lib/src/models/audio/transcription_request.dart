@@ -1,13 +1,35 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
+
 /// Request for audio transcription.
+///
+/// The audio source must be provided in exactly one of three ways, matching
+/// the `multipart/form-data` fields of `POST /v1/audio/transcriptions`:
+///
+/// - [fileBytes] together with [fileName]: the raw audio, sent inline as the
+///   `file` part. Nothing is persisted on Mistral's side.
+/// - [fileUrl]: a URL the API downloads the audio from (`file_url`).
+/// - [file]: the ID of a file previously uploaded to `/v1/files` (`file_id`).
 @immutable
 class TranscriptionRequest {
-  /// The audio file to transcribe.
+  /// ID of a file previously uploaded to `/v1/files`, sent as the `file_id`
+  /// form field.
   ///
-  /// This should be the file ID of an uploaded audio file,
-  /// or base64-encoded audio data.
-  final String file;
+  /// Prefer [fileBytes] when the audio is already in memory: it avoids the
+  /// upload round-trip and leaves nothing in the Files store.
+  final String? file;
+
+  /// URL of the audio to transcribe, sent as the `file_url` form field.
+  final String? fileUrl;
+
+  /// Raw audio bytes, sent inline as the `file` multipart part.
+  ///
+  /// Requires [fileName]; its extension lets the server detect the format.
+  final List<int>? fileBytes;
+
+  /// File name attached to [fileBytes] (e.g. `recording.wav`).
+  final String? fileName;
 
   /// The model to use for transcription.
   ///
@@ -36,6 +58,8 @@ class TranscriptionRequest {
   final double? temperature;
 
   /// Whether to include word-level timestamps.
+  ///
+  /// When `true`, both `segment` and `word` granularities are requested.
   final bool? timestampGranularities;
 
   /// Bias towards specific words or phrases during transcription.
@@ -48,7 +72,10 @@ class TranscriptionRequest {
 
   /// Creates a [TranscriptionRequest].
   const TranscriptionRequest({
-    required this.file,
+    this.file,
+    this.fileUrl,
+    this.fileBytes,
+    this.fileName,
     this.model = 'mistral-audio-latest',
     this.language,
     this.responseFormat,
@@ -60,9 +87,13 @@ class TranscriptionRequest {
   });
 
   /// Creates a [TranscriptionRequest] from JSON.
+  ///
+  /// Only the reference-based sources ([file], [fileUrl]) round-trip through
+  /// JSON; [fileBytes] is a transport-level payload and is never serialized.
   factory TranscriptionRequest.fromJson(Map<String, dynamic> json) =>
       TranscriptionRequest(
-        file: json['file'] as String? ?? '',
+        file: json['file'] as String?,
+        fileUrl: json['file_url'] as String?,
         model: json['model'] as String? ?? 'mistral-audio-latest',
         language: json['language'] as String?,
         responseFormat: json['response_format'] as String?,
@@ -73,9 +104,18 @@ class TranscriptionRequest {
         diarize: json['diarize'] as bool?,
       );
 
+  /// Whether exactly one audio source ([file], [fileUrl] or [fileBytes]) is
+  /// set, as required by the API.
+  bool get hasSingleAudioSource =>
+      [file, fileUrl, fileBytes].where((source) => source != null).length == 1;
+
   /// Converts to JSON.
+  ///
+  /// [fileBytes] and [fileName] are omitted: the binary source only exists in
+  /// the multipart request body.
   Map<String, dynamic> toJson() => {
-    'file': file,
+    if (file != null) 'file': file,
+    if (fileUrl != null) 'file_url': fileUrl,
     'model': model,
     if (language != null) 'language': language,
     if (responseFormat != null) 'response_format': responseFormat,
@@ -90,6 +130,9 @@ class TranscriptionRequest {
   /// Creates a copy with the specified fields replaced.
   TranscriptionRequest copyWith({
     String? file,
+    String? fileUrl,
+    List<int>? fileBytes,
+    String? fileName,
     String? model,
     String? language,
     String? responseFormat,
@@ -100,6 +143,9 @@ class TranscriptionRequest {
     bool? diarize,
   }) => TranscriptionRequest(
     file: file ?? this.file,
+    fileUrl: fileUrl ?? this.fileUrl,
+    fileBytes: fileBytes ?? this.fileBytes,
+    fileName: fileName ?? this.fileName,
     model: model ?? this.model,
     language: language ?? this.language,
     responseFormat: responseFormat ?? this.responseFormat,
@@ -117,11 +163,47 @@ class TranscriptionRequest {
       other is TranscriptionRequest &&
           runtimeType == other.runtimeType &&
           file == other.file &&
-          model == other.model;
+          fileUrl == other.fileUrl &&
+          listsEqual(fileBytes, other.fileBytes) &&
+          fileName == other.fileName &&
+          model == other.model &&
+          language == other.language &&
+          responseFormat == other.responseFormat &&
+          prompt == other.prompt &&
+          temperature == other.temperature &&
+          timestampGranularities == other.timestampGranularities &&
+          listsEqual(contextBias, other.contextBias) &&
+          diarize == other.diarize;
 
   @override
-  int get hashCode => Object.hash(file, model);
+  int get hashCode => Object.hash(
+    file,
+    fileUrl,
+    listHash(fileBytes),
+    fileName,
+    model,
+    language,
+    responseFormat,
+    prompt,
+    temperature,
+    timestampGranularities,
+    listHash(contextBias),
+    diarize,
+  );
 
   @override
-  String toString() => 'TranscriptionRequest(file: $file, model: $model)';
+  String toString() =>
+      'TranscriptionRequest('
+      'file: $file, '
+      'fileUrl: $fileUrl, '
+      'fileBytes: ${fileBytes == null ? 'null' : '${fileBytes!.length} bytes'}, '
+      'fileName: $fileName, '
+      'model: $model, '
+      'language: $language, '
+      'responseFormat: $responseFormat, '
+      'prompt: $prompt, '
+      'temperature: $temperature, '
+      'timestampGranularities: $timestampGranularities, '
+      'contextBias: ${contextBias == null ? 'null' : '${contextBias!.length} items'}, '
+      'diarize: $diarize)';
 }

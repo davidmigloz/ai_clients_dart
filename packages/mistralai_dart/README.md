@@ -647,23 +647,40 @@ final result = await client.ocr.process(
 Use `client.audio.transcriptions` for speech-to-text, `client.audio.speech` for text-to-speech, and `client.audio.voices` to manage custom voices. Both transcription and speech support streaming.
 
 ```dart
-// Upload audio file first, then transcribe using file ID
-
-// Basic transcription
+// Transcribe audio bytes directly (nothing is uploaded to the Files store)
+final bytes = await File('recording.wav').readAsBytes();
 final result = await client.audio.transcriptions.create(
   request: TranscriptionRequest(
-    model: 'mistral-stt-latest',
-    file: audioFileId, // ID from client.files.upload()
+    model: 'voxtral-mini-latest',
+    fileBytes: bytes,
+    fileName: 'recording.wav',
+    language: 'en',
+    contextBias: ['Mistral', 'Voxtral'],
   ),
 );
 
 print('Transcription: ${result.text}');
 
+// Or point at a URL, or at a file uploaded with client.files.upload()
+await client.audio.transcriptions.create(
+  request: TranscriptionRequest(
+    model: 'voxtral-mini-latest',
+    fileUrl: 'https://example.com/audio.mp3',
+  ),
+);
+await client.audio.transcriptions.create(
+  request: TranscriptionRequest(
+    model: 'voxtral-mini-latest',
+    file: uploadedFile.id,
+  ),
+);
+
 // Streaming transcription
 final stream = client.audio.transcriptions.createStream(
   request: TranscriptionRequest(
-    model: 'mistral-stt-latest',
-    file: audioFileId,
+    model: 'voxtral-mini-latest',
+    fileBytes: bytes,
+    fileName: 'recording.wav',
   ),
 );
 
