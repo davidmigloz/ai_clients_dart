@@ -229,9 +229,7 @@ class LiveClient {
         );
 
       case ApiMode.vertexAI:
-        // Vertex AI endpoint
-        // wss://{location}-aiplatform.googleapis.com/ws/...
-        // ('global' uses aiplatform.googleapis.com without location prefix)
+        // Use the shared global, multi-region, or regional Vertex AI hostname.
         final location = config.location ?? 'us-central1';
         final projectId = config.projectId;
 
