@@ -1,3 +1,9 @@
+## 12.0.2
+
+Fixes Vertex AI requests for the `us` and `eu` multi-regions by selecting their [dedicated regional endpoints](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/locations#multi-region-endpoints), matching Google's official clients. The selected location is preserved in REST paths and Live API query parameters; `global`, regional locations, and explicit REST endpoint overrides retain their existing behavior.
+
+- **FIX**: Use dedicated Vertex AI multi-region endpoints ([#306](https://github.com/davidmigloz/ai_clients_dart/issues/306)). ([bdf428b5](https://github.com/davidmigloz/ai_clients_dart/commit/bdf428b5588a7d75219044e9955f7e9cca1394e7))
+
 ## 12.0.1
 
 Fixes embeddings on the Gemini Developer API, where a typed `EmbedContentConfig` was serialized as a nested object the API ignores — task type, title, and output dimensionality were silently dropped for callers using the canonical config API. Both `embedContent` and `batchEmbedContents` now flatten the config into the [top-level request fields](https://ai.google.dev/api/embeddings#method:-models.embedContent) the endpoint expects, matching Google's official clients, and raise an `ArgumentError` for `autoTruncate`, `documentOcr`, and `audioTrackExtraction`, which Google documents as unavailable outside Vertex AI. This is the Gemini Developer API counterpart to the Vertex AI embedding fix shipped in 12.0.0.

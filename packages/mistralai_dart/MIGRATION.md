@@ -6,6 +6,72 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v6.x to v7.0.0
+
+v7.0.0 adds audio transcription from bytes and URLs alongside uploaded file IDs. The changes affect `TranscriptionRequest` nullability, copying, serialization, equality, and the HTTP body used for transcription.
+
+### 1) `TranscriptionRequest.file` is nullable
+
+`file` is now a `String?` because a request can use `fileUrl` or `fileBytes` instead. Existing `TranscriptionRequest(file: 'uploaded-file-id')` construction still works, but code that reads `file` must handle its absence.
+
+```dart
+// Before
+String uploadedFileId(TranscriptionRequest request) => request.file;
+
+// After — handle requests that use a URL or bytes
+String? uploadedFileId(TranscriptionRequest request) => request.file;
+```
+
+Provide exactly one of `file`, `fileUrl`, or `fileBytes`. When using `fileBytes`, also provide `fileName`. The transcription resource throws `ValidationException` if these requirements are not met.
+
+```dart
+final request = TranscriptionRequest(
+  fileBytes: audioBytes,
+  fileName: 'recording.wav',
+);
+```
+
+`TranscriptionRequest.fromJson` now leaves an absent `file` as `null` instead of replacing it with an empty string. `toJson` omits an absent `file` and includes `file_url` for URL sources. Bytes and their filename are transport-only fields and do not round-trip through JSON.
+
+### 2) Explicit `null` clears nullable fields in `copyWith`
+
+Previously, `copyWith(language: null)` retained the original language. It now clears it. Omit an argument to retain its existing value. If a nullable input means "leave unchanged" in your application, explicitly fall back to the current value:
+
+```dart
+// Before — null preserved request.language
+final updated = request.copyWith(language: incomingLanguage);
+
+// After — preserve that behavior for a nullable input
+final updated = request.copyWith(
+  language: incomingLanguage ?? request.language,
+);
+
+// Explicitly clear the language
+final withoutLanguage = request.copyWith(language: null);
+```
+
+This applies to every nullable field, including `file`, `prompt`, `temperature`, `contextBias`, and `diarize`. When switching sources, clear the old source explicitly:
+
+```dart
+final original = TranscriptionRequest(file: 'uploaded-file-id');
+final fromUrl = original.copyWith(
+  file: null,
+  fileUrl: 'https://example.com/recording.wav',
+);
+```
+
+### 3) Equality and hashing include every request field
+
+Previously, requests with the same `file` and `model` compared equal even when transcription options differed. Equality and `hashCode` now include all fields, with content-based comparison for `fileBytes` and `contextBias`.
+
+If your application intentionally groups requests only by uploaded file ID and model, use an explicit key such as `(request.file, request.model)` instead of the whole request.
+
+### 4) Transcription HTTP requests use multipart bodies
+
+Both `create` and `createStream` now send `multipart/form-data`, matching the API. Uploaded file IDs use the `file_id` form field, URLs use `file_url`, and bytes use the `file` part. Custom HTTP clients, request inspectors, and test doubles must handle multipart requests instead of assuming a JSON body. Repeated `context_bias` and `timestamp_granularities` parts carry array values.
+
+---
+
 ## Migrating from v5.x to v6.0.0
 
 v6.0.0 adds prompt/skill registries, managed workflow deployments, and a redesigned RAG search index API. The breaking changes are: the fine-tuning jobs API is removed (a real upstream deprecation, not a spec regression), the RAG search index surface is replaced with a fully Vespa-typed API, a few connector request fields are removed or retyped to match the spec, and some observability dataset record types are renamed.

@@ -1,3 +1,12 @@
+## 0.3.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Updates the underlying Google API client to `googleapis ^17.0.0`, with its constraint managed centrally through Melos. **Breaking:** applications or other dependencies constrained to `googleapis` 16 must upgrade to a compatible 17.x constraint, or remain on `vertex_ai` 0.2.5. The Dart SDK minimum remains 3.9.
+
+- **BREAKING** **CHORE**: Update googleapis through Melos ([#291](https://github.com/davidmigloz/ai_clients_dart/issues/291)). ([80997fcf](https://github.com/davidmigloz/ai_clients_dart/commit/80997fcf559c930354871213ccbbc8cc8a778373))
+
 ## 0.2.5
 
 Repoints the package's `documentation:` metadata from the retired `langchaindart.dev` domain to its [pub.dev API reference](https://pub.dev/documentation/vertex_ai/latest/), so the documentation link shown on pub.dev resolves again. Metadata-only release — no code or API changes.

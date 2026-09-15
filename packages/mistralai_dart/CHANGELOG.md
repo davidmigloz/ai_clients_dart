@@ -1,3 +1,12 @@
+## 7.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Audio transcription now accepts in-memory bytes with a filename or an audio URL, alongside uploaded file IDs, and sends the multipart requests expected by the [Mistral API](https://docs.mistral.ai/api/). Both regular and streaming transcriptions support these sources, with replayable multipart bodies for retries of regular requests. **Breaking:** `TranscriptionRequest.file` is now nullable, explicit `null` arguments to `copyWith` clear nullable fields, and request equality and hashing include every field.
+
+- **BREAKING** **FEAT**: Accept audio bytes and URLs in transcriptions ([#304](https://github.com/davidmigloz/ai_clients_dart/issues/304)). ([c8d0ad9e](https://github.com/davidmigloz/ai_clients_dart/commit/c8d0ad9ed8b593688e87d9ed31e941fbec04f5f1))
+
 ## 6.1.0
 
 Adds the official `index` field to `ToolCall`, which Mistral sets on streamed tool-call deltas. Without it, deltas from parallel calls to the same tool could not be correlated, so their arguments were conflated while accumulating a stream. The field round-trips through JSON and is included in `==`, `hashCode`, and `toString`.
