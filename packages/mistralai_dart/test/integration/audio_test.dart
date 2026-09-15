@@ -145,6 +145,32 @@ void main() {
     );
   });
 
+  group('STT - Transcription', () {
+    test(
+      'transcribes audio bytes without uploading a file',
+      timeout: const Timeout(Duration(minutes: 2)),
+      () async {
+        if (client == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        final wavBytes = io.File('$samplesDir/harvard.wav').readAsBytesSync();
+
+        final response = await client!.audio.transcriptions.create(
+          request: TranscriptionRequest(
+            model: defaultSttModel,
+            fileBytes: wavBytes,
+            fileName: 'harvard.wav',
+            language: 'en',
+          ),
+        );
+
+        expect(response.text, isNotEmpty);
+      },
+    );
+  });
+
   group('Voices', () {
     test(
       'lists available voices',

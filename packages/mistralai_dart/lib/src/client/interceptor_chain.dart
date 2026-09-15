@@ -30,11 +30,16 @@ class InterceptorChain {
   /// Executes the interceptor chain for a request.
   ///
   /// The optional [abortTrigger] allows canceling the request before completion.
+  /// [requestFactory] enables retries for replayable multipart bodies. It must
+  /// return a fresh, unfinalized request with the same method, URL, and body on
+  /// each call. Headers and connection settings from the intercepted request
+  /// are copied onto each attempt.
   ///
   /// Returns the HTTP response after all interceptors have processed it.
   Future<http.Response> execute(
     http.BaseRequest request, {
     Future<void>? abortTrigger,
+    http.BaseRequest Function()? requestFactory,
   }) {
     ensureNotClosed?.call();
     final context = RequestContext(
@@ -43,11 +48,14 @@ class InterceptorChain {
       abortTrigger: abortTrigger,
     );
 
-    return _buildChain(0)(context);
+    return _buildChain(0, requestFactory)(context);
   }
 
   /// Builds the interceptor chain recursively.
-  InterceptorNext _buildChain(int index) {
+  InterceptorNext _buildChain(
+    int index,
+    http.BaseRequest Function()? requestFactory,
+  ) {
     if (index >= interceptors.length) {
       // Terminal: execute the actual HTTP request
       // Per spec, retry wraps the transport execution
@@ -63,6 +71,14 @@ class InterceptorChain {
 
         // Creates a fresh request for each attempt (required for retries).
         http.BaseRequest createRequest() {
+          if (requestFactory != null) {
+            return requestFactory()
+              ..headers.clear()
+              ..headers.addAll(originalRequest.headers)
+              ..followRedirects = originalRequest.followRedirects
+              ..maxRedirects = originalRequest.maxRedirects
+              ..persistentConnection = originalRequest.persistentConnection;
+          }
           if (originalRequest is http.Request) {
             return http.Request(originalRequest.method, originalRequest.url)
               ..headers.addAll(originalRequest.headers)
@@ -116,7 +132,8 @@ class InterceptorChain {
         }
 
         // Execute with or without retry wrapper
-        if (retryWrapper != null && originalRequest is http.Request) {
+        if (retryWrapper != null &&
+            (originalRequest is http.Request || requestFactory != null)) {
           // Extract correlation ID for retry wrapper tracing
           final correlationId =
               context.metadata['correlationId'] as String? ??
@@ -139,7 +156,7 @@ class InterceptorChain {
     // Recursive: call current interceptor with next in chain
     return (context) {
       final interceptor = interceptors[index];
-      final next = _buildChain(index + 1);
+      final next = _buildChain(index + 1, requestFactory);
 
       return interceptor.intercept(context, next);
     };
