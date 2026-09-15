@@ -86,29 +86,22 @@ class FilesResource extends ResourceBase {
       );
     }
 
-    // Create multipart request
-    final url = requestBuilder.buildUrl('/v1/files');
-    final request = http.MultipartRequest('POST', url);
+    // Build a fresh, unfinalized multipart request per attempt so the
+    // retry wrapper can replay the body.
+    http.MultipartRequest buildRequest() =>
+        http.MultipartRequest('POST', requestBuilder.buildUrl('/v1/files'))
+          ..headers.addAll(requestBuilder.buildHeaders())
+          ..files.add(
+            http.MultipartFile.fromBytes('file', bytes, filename: fileName),
+          )
+          ..fields['purpose'] = filePurposeToString(purpose);
 
-    // Add headers
-    final headers = requestBuilder.buildHeaders();
-    request.headers.addAll(headers);
-
-    // Add file
-    request.files.add(
-      http.MultipartFile.fromBytes('file', bytes, filename: fileName),
+    // Route through the interceptor chain like every other endpoint so
+    // auth, logging and error mapping apply to uploads too.
+    final response = await interceptorChain.execute(
+      buildRequest(),
+      requestFactory: buildRequest,
     );
-
-    // Add purpose
-    request.fields['purpose'] = filePurposeToString(purpose);
-
-    // Send request
-    final streamedResponse = await httpClient.send(request);
-    final response = await http.Response.fromStream(streamedResponse);
-
-    if (response.statusCode >= 400) {
-      throw _mapHttpError(response);
-    }
 
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
     return FileObject.fromJson(responseBody);
@@ -205,30 +198,5 @@ class FilesResource extends ResourceBase {
 
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
     return SignedUrl.fromJson(responseBody);
-  }
-
-  /// Maps HTTP errors to exceptions.
-  MistralException _mapHttpError(http.Response response) {
-    final statusCode = response.statusCode;
-    final body = response.body;
-
-    var message = 'HTTP $statusCode error';
-
-    try {
-      final errorDetails = jsonDecode(body);
-      if (errorDetails is Map<String, dynamic>) {
-        message = errorDetails['message']?.toString() ?? message;
-      }
-    } catch (_) {
-      if (body.length < 200 && body.isNotEmpty) {
-        message = body;
-      }
-    }
-
-    if (statusCode == 429) {
-      return RateLimitException(statusCode: statusCode, message: message);
-    }
-
-    return ApiException(statusCode: statusCode, message: message);
   }
 }
