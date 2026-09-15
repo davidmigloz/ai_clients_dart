@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 
 /// Request for audio transcription.
@@ -8,7 +9,7 @@ import '../common/equality_helpers.dart';
 /// the `multipart/form-data` fields of `POST /v1/audio/transcriptions`:
 ///
 /// - [fileBytes] together with [fileName]: the raw audio, sent inline as the
-///   `file` part. Nothing is persisted on Mistral's side.
+///   `file` part, without creating an entry in the Files store.
 /// - [fileUrl]: a URL the API downloads the audio from (`file_url`).
 /// - [file]: the ID of a file previously uploaded to `/v1/files` (`file_id`).
 @immutable
@@ -128,33 +129,49 @@ class TranscriptionRequest {
   };
 
   /// Creates a copy with the specified fields replaced.
+  ///
+  /// Pass `null` to clear a nullable field. When changing audio sources,
+  /// explicitly clear the previous source so exactly one remains set.
   TranscriptionRequest copyWith({
-    String? file,
-    String? fileUrl,
-    List<int>? fileBytes,
-    String? fileName,
+    Object? file = unsetCopyWithValue,
+    Object? fileUrl = unsetCopyWithValue,
+    Object? fileBytes = unsetCopyWithValue,
+    Object? fileName = unsetCopyWithValue,
     String? model,
-    String? language,
-    String? responseFormat,
-    String? prompt,
-    double? temperature,
-    bool? timestampGranularities,
-    List<String>? contextBias,
-    bool? diarize,
+    Object? language = unsetCopyWithValue,
+    Object? responseFormat = unsetCopyWithValue,
+    Object? prompt = unsetCopyWithValue,
+    Object? temperature = unsetCopyWithValue,
+    Object? timestampGranularities = unsetCopyWithValue,
+    Object? contextBias = unsetCopyWithValue,
+    Object? diarize = unsetCopyWithValue,
   }) => TranscriptionRequest(
-    file: file ?? this.file,
-    fileUrl: fileUrl ?? this.fileUrl,
-    fileBytes: fileBytes ?? this.fileBytes,
-    fileName: fileName ?? this.fileName,
+    file: file == unsetCopyWithValue ? this.file : file as String?,
+    fileUrl: fileUrl == unsetCopyWithValue ? this.fileUrl : fileUrl as String?,
+    fileBytes: fileBytes == unsetCopyWithValue
+        ? this.fileBytes
+        : (fileBytes as List?)?.cast<int>(),
+    fileName: fileName == unsetCopyWithValue
+        ? this.fileName
+        : fileName as String?,
     model: model ?? this.model,
-    language: language ?? this.language,
-    responseFormat: responseFormat ?? this.responseFormat,
-    prompt: prompt ?? this.prompt,
-    temperature: temperature ?? this.temperature,
-    timestampGranularities:
-        timestampGranularities ?? this.timestampGranularities,
-    contextBias: contextBias ?? this.contextBias,
-    diarize: diarize ?? this.diarize,
+    language: language == unsetCopyWithValue
+        ? this.language
+        : language as String?,
+    responseFormat: responseFormat == unsetCopyWithValue
+        ? this.responseFormat
+        : responseFormat as String?,
+    prompt: prompt == unsetCopyWithValue ? this.prompt : prompt as String?,
+    temperature: temperature == unsetCopyWithValue
+        ? this.temperature
+        : (temperature as num?)?.toDouble(),
+    timestampGranularities: timestampGranularities == unsetCopyWithValue
+        ? this.timestampGranularities
+        : timestampGranularities as bool?,
+    contextBias: contextBias == unsetCopyWithValue
+        ? this.contextBias
+        : (contextBias as List?)?.cast<String>(),
+    diarize: diarize == unsetCopyWithValue ? this.diarize : diarize as bool?,
   );
 
   @override

@@ -69,7 +69,10 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
   }) async {
     final httpRequest = _buildRequest(request, stream: false);
 
-    final response = await interceptorChain.execute(httpRequest);
+    final response = await interceptorChain.execute(
+      httpRequest,
+      requestFactory: () => _buildRequest(request, stream: false),
+    );
 
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
     return TranscriptionResponse.fromJson(responseBody);
@@ -126,7 +129,13 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
 
     final httpRequest =
         http.MultipartRequest('POST', requestBuilder.buildUrl(_endpoint))
-          ..headers.addAll(requestBuilder.buildHeaders())
+          ..headers.addAll(
+            requestBuilder.buildHeaders(
+              additionalHeaders: {
+                'Accept': stream ? 'text/event-stream' : 'application/json',
+              },
+            ),
+          )
           ..fields['model'] = request.model;
     final fields = httpRequest.fields;
     final parts = httpRequest.files;

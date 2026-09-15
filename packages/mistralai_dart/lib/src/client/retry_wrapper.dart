@@ -11,8 +11,9 @@ import 'config.dart';
 ///
 /// This implements exponential backoff with jitter for retrying failed requests.
 /// In the Mistral client integration, this wrapper is applied by the interceptor
-/// chain only for regular `http.Request` instances. Multipart and streamed
-/// requests are not retried to avoid issues with request body re-consumption.
+/// chain for regular `http.Request` instances and requests with a factory that
+/// rebuilds their body for each attempt. Other multipart and streamed requests
+/// are not retried to avoid issues with request body re-consumption.
 ///
 /// ## Retry Conditions
 ///

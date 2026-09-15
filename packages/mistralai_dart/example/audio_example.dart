@@ -182,7 +182,7 @@ void demonstrateUsage() {
   print('2. Or transcribe a file uploaded with the Files API:');
   print('''
    final file = await client.files.upload(
-     file: File('recording.mp3'),
+     filePath: 'recording.mp3',
      purpose: FilePurpose.audio,
    );
    final response = await client.audio.transcriptions.create(

@@ -212,6 +212,68 @@ void main() {
     });
 
     group('copyWith', () {
+      test('accepts empty collection literals and integer temperatures', () {
+        const original = TranscriptionRequest(
+          fileBytes: [1, 2, 3],
+          fileName: 'clip.wav',
+          contextBias: ['Mistral'],
+        );
+        final copy = original.copyWith(
+          fileBytes: [],
+          contextBias: [],
+          temperature: 0,
+        );
+        expect(copy.fileBytes, isEmpty);
+        expect(copy.contextBias, isEmpty);
+        expect(copy.temperature, 0.0);
+      });
+
+      test('switches between audio sources by clearing the previous one', () {
+        const original = TranscriptionRequest(file: 'file-123', language: 'en');
+        final bytes = original.copyWith(
+          file: null,
+          fileBytes: [0, 128, 255],
+          fileName: 'clip.wav',
+        );
+        expect(bytes.file, isNull);
+        expect(bytes.fileBytes, [0, 128, 255]);
+        expect(bytes.hasSingleAudioSource, isTrue);
+        expect(bytes.language, 'en');
+
+        final url = bytes.copyWith(
+          fileBytes: null,
+          fileName: null,
+          fileUrl: 'https://example.com/audio.mp3',
+        );
+        expect(url.fileBytes, isNull);
+        expect(url.fileName, isNull);
+        expect(url.hasSingleAudioSource, isTrue);
+        expect(url.copyWith(fileUrl: null, file: 'file-456').fileUrl, isNull);
+      });
+
+      test('clears nullable transcription options', () {
+        const original = TranscriptionRequest(
+          file: 'file-123',
+          language: 'en',
+          responseFormat: 'json',
+          prompt: 'Hello',
+          temperature: 0.2,
+          timestampGranularities: true,
+          contextBias: ['Mistral'],
+          diarize: true,
+        );
+        final copy = original.copyWith(
+          language: null,
+          responseFormat: null,
+          prompt: null,
+          temperature: null,
+          timestampGranularities: null,
+          contextBias: null,
+          diarize: null,
+        );
+        expect(copy, const TranscriptionRequest(file: 'file-123'));
+      });
+
       test('copies with no changes', () {
         const original = TranscriptionRequest(file: 'file-123', language: 'en');
         final copy = original.copyWith();
