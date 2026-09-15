@@ -183,9 +183,11 @@ class GoogleAIConfig {
   /// Authentication must use OAuth 2.0 with service account credentials.
   ///
   /// The [location] determines the API endpoint:
-  /// - `'global'` → `https://aiplatform.googleapis.com`
-  /// - Other values (e.g. `'us-central1'`) →
+  /// - Regional locations (e.g. `'us-central1'`, `'europe-west3'`) →
   ///   `https://{location}-aiplatform.googleapis.com`
+  /// - `'global'` and multi-region locations (e.g. `'us'`, `'eu'`) →
+  ///   `https://aiplatform.googleapis.com`, with the location kept in the
+  ///   request path (`projects/{project}/locations/eu/...`)
   ///
   /// Example:
   /// ```dart
@@ -263,19 +265,26 @@ class GoogleAIConfig {
 
   /// Returns the Vertex AI hostname for the given [location].
   ///
-  /// - `'global'` → `aiplatform.googleapis.com`
-  /// - Other values → `{location}-aiplatform.googleapis.com`
+  /// - Regional locations (`us-central1`, `europe-west3`, …) →
+  ///   `{location}-aiplatform.googleapis.com`
+  /// - `'global'` and multi-region locations (`us`, `eu`, …) →
+  ///   `aiplatform.googleapis.com`
+  ///
+  /// Multi-regions have no regional endpoint: Vertex AI rejects
+  /// `eu-aiplatform.googleapis.com` with `400 Invalid hostname` and serves
+  /// them from the global host, with the location in the request path.
+  /// Regional IDs always contain a hyphen, multi-region IDs never do.
   static String vertexAIHost(String location) {
-    if (location == 'global') {
-      return 'aiplatform.googleapis.com';
+    if (location.contains('-')) {
+      return '$location-aiplatform.googleapis.com';
     }
-    return '$location-aiplatform.googleapis.com';
+    return 'aiplatform.googleapis.com';
   }
 
   /// Returns the Vertex AI base URL for the given [location].
   ///
-  /// - `'global'` → `https://aiplatform.googleapis.com`
-  /// - Other values → `https://{location}-aiplatform.googleapis.com`
+  /// - Regional locations → `https://{location}-aiplatform.googleapis.com`
+  /// - `'global'` and multi-regions → `https://aiplatform.googleapis.com`
   static String vertexAIBaseUrl(String location) {
     return 'https://${vertexAIHost(location)}';
   }

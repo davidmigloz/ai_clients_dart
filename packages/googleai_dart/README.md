@@ -97,7 +97,7 @@ Future<void> main() async {
 <details>
 <summary><b>Configure Google AI, Vertex AI, auth providers, and retries</b></summary>
 
-Use `GoogleAIClient.fromEnvironment()` for the default `GOOGLE_GENAI_API_KEY` workflow. Switch to `GoogleAIConfig.googleAI(...)` or `GoogleAIConfig.vertexAI(...)` when you need alternate auth placement, custom headers, or Vertex-specific project routing.
+Use `GoogleAIClient.fromEnvironment()` for the default `GOOGLE_GENAI_API_KEY` workflow. Switch to `GoogleAIConfig.googleAI(...)` or `GoogleAIConfig.vertexAI(...)` when you need alternate auth placement, custom headers, or Vertex-specific project routing. `location` accepts a region (`us-central1`), a multi-region (`us`, `eu`) or `global`; multi-regions and `global` are served from `aiplatform.googleapis.com` with the location kept in the request path.
 
 ```dart
 import 'package:googleai_dart/googleai_dart.dart';
