@@ -64,7 +64,15 @@ void main() {
         expect(updated.baseUrl, 'https://aiplatform.googleapis.com');
         expect(updated.location, 'global');
 
-        final regional = original.copyWith(location: 'europe-west1');
+        final eu = updated.copyWith(location: 'eu');
+        expect(eu.baseUrl, 'https://aiplatform.eu.rep.googleapis.com');
+        expect(eu.location, 'eu');
+
+        final us = eu.copyWith(location: 'us');
+        expect(us.baseUrl, 'https://aiplatform.us.rep.googleapis.com');
+        expect(us.location, 'us');
+
+        final regional = us.copyWith(location: 'europe-west1');
         expect(
           regional.baseUrl,
           'https://europe-west1-aiplatform.googleapis.com',
@@ -79,12 +87,14 @@ void main() {
         authProvider: const ApiKeyProvider('test-key'),
       );
 
-      final updated = original.copyWith(
-        baseUrl: 'https://custom.endpoint.com',
-        location: 'global',
-      );
-      expect(updated.baseUrl, 'https://custom.endpoint.com');
-      expect(updated.location, 'global');
+      for (final location in ['global', 'us', 'eu']) {
+        final updated = original.copyWith(
+          baseUrl: 'https://custom.endpoint.com',
+          location: location,
+        );
+        expect(updated.baseUrl, 'https://custom.endpoint.com');
+        expect(updated.location, location);
+      }
     });
   });
 
@@ -116,6 +126,21 @@ void main() {
       );
       expect(config.baseUrl, 'https://europe-west1-aiplatform.googleapis.com');
     });
+
+    for (final location in ['us', 'eu']) {
+      test('$location uses its multi-region endpoint', () {
+        final config = GoogleAIConfig.vertexAI(
+          projectId: 'test-project',
+          location: location,
+          authProvider: const ApiKeyProvider('test-key'),
+        );
+        expect(
+          config.baseUrl,
+          'https://aiplatform.$location.rep.googleapis.com',
+        );
+        expect(config.location, location);
+      });
+    }
   });
 
   group('GoogleAIConfig.vertexAIHost', () {
@@ -131,6 +156,30 @@ void main() {
         GoogleAIConfig.vertexAIHost('us-central1'),
         'us-central1-aiplatform.googleapis.com',
       );
+      expect(
+        GoogleAIConfig.vertexAIHost('europe-west3'),
+        'europe-west3-aiplatform.googleapis.com',
+      );
+    });
+
+    test('multi-region location returns its dedicated host', () {
+      expect(
+        GoogleAIConfig.vertexAIHost('eu'),
+        'aiplatform.eu.rep.googleapis.com',
+      );
+      expect(
+        GoogleAIConfig.vertexAIHost('us'),
+        'aiplatform.us.rep.googleapis.com',
+      );
+    });
+
+    test('other non-hyphenated locations retain the location prefix', () {
+      for (final location in ['asia', 'europe', 'custom']) {
+        expect(
+          GoogleAIConfig.vertexAIHost(location),
+          '$location-aiplatform.googleapis.com',
+        );
+      }
     });
   });
 
@@ -146,6 +195,17 @@ void main() {
       expect(
         GoogleAIConfig.vertexAIBaseUrl('us-central1'),
         'https://us-central1-aiplatform.googleapis.com',
+      );
+    });
+
+    test('multi-region location returns its dedicated URL', () {
+      expect(
+        GoogleAIConfig.vertexAIBaseUrl('eu'),
+        'https://aiplatform.eu.rep.googleapis.com',
+      );
+      expect(
+        GoogleAIConfig.vertexAIBaseUrl('us'),
+        'https://aiplatform.us.rep.googleapis.com',
       );
     });
   });

@@ -22,8 +22,9 @@ enum ApiMode {
   /// Google AI (Gemini Developer API) - Uses generativelanguage.googleapis.com
   googleAI,
 
-  /// Vertex AI - Uses {location}-aiplatform.googleapis.com with GCP project
-  /// (`aiplatform.googleapis.com` for the `global` location).
+  /// Vertex AI - Uses a GCP project and a location-specific endpoint.
+  ///
+  /// See [GoogleAIConfig.vertexAIHost] for hostname selection.
   vertexAI,
 }
 
@@ -67,7 +68,8 @@ class GoogleAIConfig {
   /// GCP project ID (required for Vertex AI).
   final String? projectId;
 
-  /// GCP location/region (required for Vertex AI, e.g., 'us-central1', 'global').
+  /// GCP location (required for Vertex AI, e.g., 'us-central1', 'us', 'eu',
+  /// 'global').
   final String? location;
 
   /// Authentication provider for dynamic credential retrieval.
@@ -184,8 +186,14 @@ class GoogleAIConfig {
   ///
   /// The [location] determines the API endpoint:
   /// - `'global'` → `https://aiplatform.googleapis.com`
-  /// - Other values (e.g. `'us-central1'`) →
+  /// - Multi-region locations (`'us'`, `'eu'`) →
+  ///   `https://aiplatform.{location}.rep.googleapis.com`
+  /// - Regional locations (e.g. `'us-central1'`, `'europe-west3'`) →
   ///   `https://{location}-aiplatform.googleapis.com`
+  ///
+  /// The location is also kept in the request path
+  /// (`projects/{project}/locations/{location}/...`). Model and feature
+  /// availability depends on the selected location.
   ///
   /// Example:
   /// ```dart
@@ -264,18 +272,27 @@ class GoogleAIConfig {
   /// Returns the Vertex AI hostname for the given [location].
   ///
   /// - `'global'` → `aiplatform.googleapis.com`
-  /// - Other values → `{location}-aiplatform.googleapis.com`
+  /// - Multi-region locations (`'us'`, `'eu'`) →
+  ///   `aiplatform.{location}.rep.googleapis.com`
+  /// - Other locations (e.g. `'us-central1'`, `'europe-west3'`) →
+  ///   `{location}-aiplatform.googleapis.com`
+  ///
+  /// Matches the Google Gen AI SDK's endpoint selection. Only `'us'` and
+  /// `'eu'` receive the multi-region hostname; other values retain the
+  /// location-prefixed hostname without validating location availability.
   static String vertexAIHost(String location) {
     if (location == 'global') {
       return 'aiplatform.googleapis.com';
+    }
+    if (location == 'us' || location == 'eu') {
+      return 'aiplatform.$location.rep.googleapis.com';
     }
     return '$location-aiplatform.googleapis.com';
   }
 
   /// Returns the Vertex AI base URL for the given [location].
   ///
-  /// - `'global'` → `https://aiplatform.googleapis.com`
-  /// - Other values → `https://{location}-aiplatform.googleapis.com`
+  /// Uses HTTPS with the hostname returned by [vertexAIHost].
   static String vertexAIBaseUrl(String location) {
     return 'https://${vertexAIHost(location)}';
   }

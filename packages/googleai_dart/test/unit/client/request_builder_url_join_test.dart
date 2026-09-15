@@ -1,3 +1,4 @@
+import 'package:googleai_dart/src/auth/auth_provider.dart';
 import 'package:googleai_dart/src/client/config.dart';
 import 'package:googleai_dart/src/client/endpoint_config.dart';
 import 'package:googleai_dart/src/client/request_builder.dart';
@@ -5,6 +6,30 @@ import 'package:test/test.dart';
 
 void main() {
   group('RequestBuilder.buildUrl - URL joining', () {
+    for (final location in ['us', 'eu']) {
+      test(
+        'Vertex $location uses its endpoint and keeps the path location',
+        () {
+          final builder = RequestBuilder(
+            config: GoogleAIConfig.vertexAI(
+              projectId: 'test-project',
+              location: location,
+              authProvider: const ApiKeyProvider('test-key'),
+            ),
+          );
+
+          final url = builder.buildUrl('/{version}/models/m:generateContent');
+
+          expect(
+            url.toString(),
+            'https://aiplatform.$location.rep.googleapis.com/v1/'
+            'projects/test-project/locations/$location/'
+            'publishers/google/models/m:generateContent',
+          );
+        },
+      );
+    }
+
     test('normalizes a trailing slash in the base URL (no double slash)', () {
       const builder = RequestBuilder(
         config: GoogleAIConfig(baseUrl: 'https://api.example.com/'),

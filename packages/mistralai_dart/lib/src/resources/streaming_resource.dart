@@ -62,12 +62,41 @@ mixin StreamingResource on ResourceBase {
     return req;
   }
 
+  /// Prepares a streaming multipart request by applying auth and logging.
+  ///
+  /// Unlike [prepareStreamingRequest], the headers are set on [request]
+  /// itself: an [http.MultipartRequest] cannot be cloned once its parts
+  /// have been added, and it has not been finalized at this point.
+  Future<http.MultipartRequest> prepareStreamingMultipartRequest(
+    http.MultipartRequest request,
+  ) async {
+    final credentials = config.authProvider != null
+        ? await config.authProvider!.getCredentials()
+        : null;
+    if (credentials is BearerTokenCredentials &&
+        !request.headers.containsKey('Authorization')) {
+      request.headers['Authorization'] = 'Bearer ${credentials.token}';
+    }
+
+    if (!request.headers.containsKey('X-Request-ID')) {
+      final requestId = generateRequestId();
+      request.headers['X-Request-ID'] = requestId;
+      if (config.logLevel.value <= Level.INFO.value) {
+        Logger(
+          'Mistral.HTTP',
+        ).info('REQUEST [$requestId] ${request.method} ${request.url}');
+      }
+    }
+
+    return request;
+  }
+
   /// Sends a streaming request with error handling.
   ///
   /// Returns the [StreamedResponse] if successful, or throws a
   /// [MistralException] if the response indicates an error.
   Future<http.StreamedResponse> sendStreamingRequest(
-    http.Request request,
+    http.BaseRequest request,
   ) async {
     ensureNotClosed?.call();
     http.StreamedResponse streamedResponse;

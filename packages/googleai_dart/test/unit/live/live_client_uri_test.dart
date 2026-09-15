@@ -1,3 +1,4 @@
+import 'package:googleai_dart/src/auth/auth_provider.dart';
 import 'package:googleai_dart/src/client/config.dart';
 import 'package:googleai_dart/src/errors/exceptions.dart';
 import 'package:googleai_dart/src/live/live_client.dart';
@@ -109,6 +110,33 @@ void main() {
   });
 
   group('LiveClient.buildWebSocketUri - Vertex AI mode', () {
+    const locationHosts = {
+      'global': 'aiplatform.googleapis.com',
+      'us': 'aiplatform.us.rep.googleapis.com',
+      'eu': 'aiplatform.eu.rep.googleapis.com',
+    };
+
+    for (final entry in locationHosts.entries) {
+      test('${entry.key} uses its endpoint and keeps the location parameter', () {
+        final config = GoogleAIConfig.vertexAI(
+          projectId: 'test-project',
+          location: entry.key,
+          authProvider: const ApiKeyProvider('test-key'),
+        );
+
+        final uri = LiveClient.buildWebSocketUri(config, {});
+
+        expect(uri.scheme, 'wss');
+        expect(uri.host, entry.value);
+        expect(
+          uri.path,
+          '/ws/google.cloud.aiplatform.v1.PredictionService.BidiGenerateContent',
+        );
+        expect(uri.queryParameters['project'], 'test-project');
+        expect(uri.queryParameters['location'], entry.key);
+      });
+    }
+
     test('builds the vertex wss URI with project/location params', () {
       const config = GoogleAIConfig(
         apiMode: ApiMode.vertexAI,

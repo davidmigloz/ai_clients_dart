@@ -129,7 +129,151 @@ void main() {
       });
     });
 
+    group('audio sources', () {
+      test('accepts audio bytes with a file name', () {
+        const request = TranscriptionRequest(
+          fileBytes: [1, 2, 3],
+          fileName: 'clip.wav',
+        );
+        expect(request.file, isNull);
+        expect(request.fileUrl, isNull);
+        expect(request.fileBytes, [1, 2, 3]);
+        expect(request.fileName, 'clip.wav');
+        expect(request.hasSingleAudioSource, isTrue);
+      });
+
+      test('accepts a file URL', () {
+        const request = TranscriptionRequest(
+          fileUrl: 'https://example.com/audio.mp3',
+        );
+        expect(request.fileUrl, 'https://example.com/audio.mp3');
+        expect(request.hasSingleAudioSource, isTrue);
+      });
+
+      test('reports missing or ambiguous sources', () {
+        expect(const TranscriptionRequest().hasSingleAudioSource, isFalse);
+        expect(
+          const TranscriptionRequest(
+            file: 'file-123',
+            fileBytes: [1],
+            fileName: 'clip.wav',
+          ).hasSingleAudioSource,
+          isFalse,
+        );
+      });
+
+      test('serializes file_url and never the bytes', () {
+        const request = TranscriptionRequest(
+          fileUrl: 'https://example.com/audio.mp3',
+          fileBytes: [1, 2, 3],
+          fileName: 'clip.wav',
+        );
+        final json = request.toJson();
+        expect(json['file_url'], 'https://example.com/audio.mp3');
+        expect(json.containsKey('file'), isFalse);
+        expect(json.containsKey('file_bytes'), isFalse);
+        expect(json.containsKey('file_name'), isFalse);
+      });
+
+      test('deserializes file_url', () {
+        final request = TranscriptionRequest.fromJson(const <String, dynamic>{
+          'file_url': 'https://example.com/audio.mp3',
+          'model': 'custom-model',
+        });
+        expect(request.fileUrl, 'https://example.com/audio.mp3');
+        expect(request.file, isNull);
+      });
+
+      test('compares all fields for equality', () {
+        const a = TranscriptionRequest(
+          fileBytes: [1, 2, 3],
+          fileName: 'clip.wav',
+          contextBias: ['Mistral'],
+        );
+        const b = TranscriptionRequest(
+          fileBytes: [1, 2, 3],
+          fileName: 'clip.wav',
+          contextBias: ['Mistral'],
+        );
+        expect(a, equals(b));
+        expect(a.hashCode, b.hashCode);
+        expect(a, isNot(equals(b.copyWith(fileName: 'other.wav'))));
+        expect(a, isNot(equals(b.copyWith(contextBias: ['Voxtral']))));
+      });
+
+      test('summarizes the bytes in toString', () {
+        const request = TranscriptionRequest(
+          fileBytes: [1, 2, 3],
+          fileName: 'clip.wav',
+        );
+        expect(request.toString(), contains('fileBytes: 3 bytes'));
+        expect(request.toString(), contains('fileName: clip.wav'));
+      });
+    });
+
     group('copyWith', () {
+      test('accepts empty collection literals and integer temperatures', () {
+        const original = TranscriptionRequest(
+          fileBytes: [1, 2, 3],
+          fileName: 'clip.wav',
+          contextBias: ['Mistral'],
+        );
+        final copy = original.copyWith(
+          fileBytes: [],
+          contextBias: [],
+          temperature: 0,
+        );
+        expect(copy.fileBytes, isEmpty);
+        expect(copy.contextBias, isEmpty);
+        expect(copy.temperature, 0.0);
+      });
+
+      test('switches between audio sources by clearing the previous one', () {
+        const original = TranscriptionRequest(file: 'file-123', language: 'en');
+        final bytes = original.copyWith(
+          file: null,
+          fileBytes: [0, 128, 255],
+          fileName: 'clip.wav',
+        );
+        expect(bytes.file, isNull);
+        expect(bytes.fileBytes, [0, 128, 255]);
+        expect(bytes.hasSingleAudioSource, isTrue);
+        expect(bytes.language, 'en');
+
+        final url = bytes.copyWith(
+          fileBytes: null,
+          fileName: null,
+          fileUrl: 'https://example.com/audio.mp3',
+        );
+        expect(url.fileBytes, isNull);
+        expect(url.fileName, isNull);
+        expect(url.hasSingleAudioSource, isTrue);
+        expect(url.copyWith(fileUrl: null, file: 'file-456').fileUrl, isNull);
+      });
+
+      test('clears nullable transcription options', () {
+        const original = TranscriptionRequest(
+          file: 'file-123',
+          language: 'en',
+          responseFormat: 'json',
+          prompt: 'Hello',
+          temperature: 0.2,
+          timestampGranularities: true,
+          contextBias: ['Mistral'],
+          diarize: true,
+        );
+        final copy = original.copyWith(
+          language: null,
+          responseFormat: null,
+          prompt: null,
+          temperature: null,
+          timestampGranularities: null,
+          contextBias: null,
+          diarize: null,
+        );
+        expect(copy, const TranscriptionRequest(file: 'file-123'));
+      });
+
       test('copies with no changes', () {
         const original = TranscriptionRequest(file: 'file-123', language: 'en');
         final copy = original.copyWith();
@@ -214,10 +358,11 @@ void main() {
           file: 'file-123',
           model: 'mistral-audio-latest',
         );
-        expect(
-          request.toString(),
-          'TranscriptionRequest(file: file-123, model: mistral-audio-latest)',
-        );
+        final description = request.toString();
+        expect(description, startsWith('TranscriptionRequest('));
+        expect(description, contains('file: file-123'));
+        expect(description, contains('model: mistral-audio-latest'));
+        expect(description, contains('fileBytes: null'));
       });
     });
 

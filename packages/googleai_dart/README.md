@@ -99,6 +99,16 @@ Future<void> main() async {
 
 Use `GoogleAIClient.fromEnvironment()` for the default `GOOGLE_GENAI_API_KEY` workflow. Switch to `GoogleAIConfig.googleAI(...)` or `GoogleAIConfig.vertexAI(...)` when you need alternate auth placement, custom headers, or Vertex-specific project routing.
 
+For Vertex AI, `location` selects the endpoint:
+
+| Location | Endpoint |
+| --- | --- |
+| `global` | `https://aiplatform.googleapis.com` |
+| `us`, `eu` | `https://aiplatform.{location}.rep.googleapis.com` |
+| A region such as `us-central1` | `https://{location}-aiplatform.googleapis.com` |
+
+The location is also kept in the request path. Model and feature availability depends on the selected location; see Google's [endpoint documentation](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/locations#multi-region-endpoints). Use `copyWith(baseUrl: ...)` to override the REST endpoint.
+
 ```dart
 import 'package:googleai_dart/googleai_dart.dart';
 
