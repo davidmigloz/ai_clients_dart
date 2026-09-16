@@ -1,3 +1,12 @@
+## 13.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Requires Dart 3.12 or later; upgrade your Dart SDK or the Dart SDK bundled with Flutter before updating this package.
+
+- **BREAKING** **CHORE**: Require Dart >=3.12.0 and align compatible development tooling ([#309](https://github.com/davidmigloz/ai_clients_dart/issues/309)). ([804bf19b](https://github.com/davidmigloz/ai_clients_dart/commit/804bf19b499665aebfd40344def09a74a07a814b))
+
 ## 12.0.2
 
 Fixes Vertex AI requests for the `us` and `eu` multi-regions by selecting their [dedicated regional endpoints](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/locations#multi-region-endpoints), matching Google's official clients. The selected location is preserved in REST paths and Live API query parameters; `global`, regional locations, and explicit REST endpoint overrides retain their existing behavior.

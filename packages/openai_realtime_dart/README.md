@@ -32,6 +32,13 @@ Strongly-typed Dart client for the [OpenAI Realtime API](https://platform.openai
 
 ## Quickstart
 
+Requires Dart 3.12 or later. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+```yaml
+dependencies:
+  openai_realtime_dart: ^0.2.0
+```
+
 This library is built to be used both server-side and client-side (e.g. Flutter apps).
 
 ```dart

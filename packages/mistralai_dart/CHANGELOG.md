@@ -1,3 +1,13 @@
+## 8.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Requires Dart 3.12 or later; upgrade your Dart SDK or the Dart SDK bundled with Flutter before updating this package. File uploads now include authentication and request IDs, use the shared error mapping, and retry with a fresh multipart body.
+
+- **BREAKING** **CHORE**: Require Dart >=3.12.0 and align compatible development tooling ([#309](https://github.com/davidmigloz/ai_clients_dart/issues/309)). ([804bf19b](https://github.com/davidmigloz/ai_clients_dart/commit/804bf19b499665aebfd40344def09a74a07a814b))
+- **FIX**: send files.upload through the interceptor chain ([#308](https://github.com/davidmigloz/ai_clients_dart/issues/308)). ([7d53cf91](https://github.com/davidmigloz/ai_clients_dart/commit/7d53cf916df43e46b759daec9c9411215d04fb90))
+
 ## 7.0.0
 
 > [!CAUTION]

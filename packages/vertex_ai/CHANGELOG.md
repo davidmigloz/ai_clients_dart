@@ -1,3 +1,12 @@
+## 0.4.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Requires Dart 3.12 or later; upgrade your Dart SDK or the Dart SDK bundled with Flutter before updating this package.
+
+- **BREAKING** **CHORE**: Require Dart >=3.12.0 and align compatible development tooling ([#309](https://github.com/davidmigloz/ai_clients_dart/issues/309)). ([804bf19b](https://github.com/davidmigloz/ai_clients_dart/commit/804bf19b499665aebfd40344def09a74a07a814b))
+
 ## 0.3.0
 
 > [!CAUTION]

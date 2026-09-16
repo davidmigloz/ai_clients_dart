@@ -6,6 +6,40 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v12.x to v13.0.0
+
+v13.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.
+
+### 1) Upgrade the Dart or Flutter SDK
+
+Use Dart 3.12 or later. For Flutter projects, use a Flutter SDK that bundles Dart 3.12 or later; check the bundled version with `flutter --version`.
+
+### 2) Update your pubspec
+
+Before:
+
+```yaml
+environment:
+  sdk: ">=3.9.0 <4.0.0"
+
+dependencies:
+  googleai_dart: ^12.0.2
+```
+
+After:
+
+```yaml
+environment:
+  sdk: ">=3.12.0 <4.0.0"
+
+dependencies:
+  googleai_dart: ^13.0.0
+```
+
+Run `dart pub get` and your tests after updating. Flutter projects should use `flutter pub get` and `flutter test`.
+
+---
+
 ## Migrating from v11.x to v12.0.0
 
 v12.0.0 reworks how `Part` represents Gemini content. The API models `thought`, `thoughtSignature`, `partMetadata`, `mediaResolution`, and `videoMetadata` as siblings of the data discriminator (`text`, `functionCall`, `inlineData`, and so on), but the previous Dart hierarchy attached only selected metadata to selected subclasses and modeled the rest as standalone parts — which lost valid combinations. Every typed part now accepts all of the common metadata, two new variants (`MetadataPart`, `UnknownPart`) join the sealed hierarchy, and unrecognized payloads are retained instead of throwing. Code that constructs typed parts and reads their data fields needs no changes; exhaustive `switch` statements over `Part` and code that catches `FormatException` from `Part.fromJson` do.

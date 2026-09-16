@@ -6,6 +6,40 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v8.x to v9.0.0
+
+v9.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.
+
+### 1) Upgrade the Dart or Flutter SDK
+
+Use Dart 3.12 or later. For Flutter projects, use a Flutter SDK that bundles Dart 3.12 or later; check the bundled version with `flutter --version`.
+
+### 2) Update your pubspec
+
+Before:
+
+```yaml
+environment:
+  sdk: ">=3.9.0 <4.0.0"
+
+dependencies:
+  openai_dart: ^8.1.0
+```
+
+After:
+
+```yaml
+environment:
+  sdk: ">=3.12.0 <4.0.0"
+
+dependencies:
+  openai_dart: ^9.0.0
+```
+
+Run `dart pub get` and your tests after updating. Flutter projects should use `flutter pub get` and `flutter test`.
+
+---
+
 ## Migrating from v7.x to v8.0.0
 
 v8.0.0 modernizes the transcription surface for the GPT-Transcribe generation. **Most users will not need to make any changes** — the primary rename ships with a deprecated typedef, and the other changes only affect code that reads specific response/event fields.

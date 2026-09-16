@@ -1,3 +1,12 @@
+## 0.5.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Requires Dart 3.12 or later; upgrade your Dart SDK or the Dart SDK bundled with Flutter before updating this package.
+
+- **BREAKING** **CHORE**: Require Dart >=3.12.0 and align compatible development tooling ([#309](https://github.com/davidmigloz/ai_clients_dart/issues/309)). ([804bf19b](https://github.com/davidmigloz/ai_clients_dart/commit/804bf19b499665aebfd40344def09a74a07a814b))
+
 ## 0.4.3
 
 Fixes `buildUrl` producing a double slash (`/v1//responses`) when `OpenResponsesConfig.baseUrl` (or `OPENAI_BASE_URL`) has a trailing slash — especially likely here since the default base URL carries a `/v1` sub-path and alternate backends (Ollama, vLLM, proxies) are common. Also preserves query parameters carried by the base URL (including repeated keys), which were previously dropped or mangled into the path.

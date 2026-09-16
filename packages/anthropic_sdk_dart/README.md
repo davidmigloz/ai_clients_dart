@@ -67,9 +67,11 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 
 ## Quickstart
 
+Requires Dart 3.12 or later. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
 ```yaml
 dependencies:
-  anthropic_sdk_dart: ^8.0.0
+  anthropic_sdk_dart: ^9.0.0
 ```
 
 ```dart

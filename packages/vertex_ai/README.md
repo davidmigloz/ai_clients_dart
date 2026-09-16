@@ -13,6 +13,15 @@ Deprecated Dart client for the [Vertex AI](https://cloud.google.com/vertex-ai) A
 > [!TIP]
 > Coding agents: start with [llms.txt](./llms.txt). It links to the package docs, examples, and optional references in a compact format.
 
+## Quickstart
+
+Requires Dart 3.12 or later. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+```yaml
+dependencies:
+  vertex_ai: ^0.4.0
+```
+
 ## Features
 
 - [Generative AI](https://cloud.google.com/vertex-ai/docs/generative-ai/learn/overview)

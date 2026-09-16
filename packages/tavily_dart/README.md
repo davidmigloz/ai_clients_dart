@@ -22,6 +22,7 @@ Dart client for the [Tavily](https://tavily.com) API, a search engine optimized 
 
 ## Table of contents
 
+- [Quickstart](#quickstart)
 - [Usage](#usage)
     * [Authentication](#authentication)
     * [Search](#search)
@@ -32,6 +33,15 @@ Dart client for the [Tavily](https://tavily.com) API, a search engine optimized 
         + [SOCKS5 proxy](#socks5-proxy)
 - [Acknowledgements](#acknowledgements)
 - [License](#license)
+
+## Quickstart
+
+Requires Dart 3.12 or later. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+```yaml
+dependencies:
+  tavily_dart: ^0.3.0
+```
 
 ## Usage
 

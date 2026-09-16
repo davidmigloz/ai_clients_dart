@@ -51,9 +51,11 @@ Dart client for **[ChromaDB](https://www.trychroma.com/)** with collections, vec
 
 ## Quickstart
 
+Requires Dart 3.12 or later. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
 ```yaml
 dependencies:
-  chromadb: ^1.4.2
+  chromadb: ^2.0.0
 ```
 
 ```dart

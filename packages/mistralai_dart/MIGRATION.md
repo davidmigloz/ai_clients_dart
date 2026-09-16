@@ -6,6 +6,40 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v7.x to v8.0.0
+
+v8.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.
+
+### 1) Upgrade the Dart or Flutter SDK
+
+Use Dart 3.12 or later. For Flutter projects, use a Flutter SDK that bundles Dart 3.12 or later; check the bundled version with `flutter --version`.
+
+### 2) Update your pubspec
+
+Before:
+
+```yaml
+environment:
+  sdk: ">=3.9.0 <4.0.0"
+
+dependencies:
+  mistralai_dart: ^7.0.0
+```
+
+After:
+
+```yaml
+environment:
+  sdk: ">=3.12.0 <4.0.0"
+
+dependencies:
+  mistralai_dart: ^8.0.0
+```
+
+Run `dart pub get` and your tests after updating. Flutter projects should use `flutter pub get` and `flutter test`.
+
+---
+
 ## Migrating from v6.x to v7.0.0
 
 v7.0.0 adds audio transcription from bytes and URLs alongside uploaded file IDs. The changes affect `TranscriptionRequest` nullability, copying, serialization, equality, and the HTTP body used for transcription.

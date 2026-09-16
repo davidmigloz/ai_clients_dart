@@ -6,6 +6,40 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v8.x to v9.0.0
+
+v9.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.
+
+### 1) Upgrade the Dart or Flutter SDK
+
+Use Dart 3.12 or later. For Flutter projects, use a Flutter SDK that bundles Dart 3.12 or later; check the bundled version with `flutter --version`.
+
+### 2) Update your pubspec
+
+Before:
+
+```yaml
+environment:
+  sdk: ">=3.9.0 <4.0.0"
+
+dependencies:
+  anthropic_sdk_dart: ^8.0.0
+```
+
+After:
+
+```yaml
+environment:
+  sdk: ">=3.12.0 <4.0.0"
+
+dependencies:
+  anthropic_sdk_dart: ^9.0.0
+```
+
+Run `dart pub get` and your tests after updating. Flutter projects should use `flutter pub get` and `flutter test`.
+
+---
+
 ## Migrating from v7.x to v8.0.0
 
 v8.0.0 syncs the client to the Anthropic OpenAPI spec of September 2026 (Claude Fable 5.1). Most of the release is additive, but the spec removed the `mid_conv_system` block, promoted the Files and Skills APIs to GA with new shapes, replaced the user-profile `relationship` field, and turned several loosely-typed request fields and Managed Agents structures into typed unions. New request variants also make exhaustive `switch` statements over a few exported sealed unions non-exhaustive.

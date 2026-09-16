@@ -67,9 +67,11 @@ Dart client for the **[OpenResponses specification](https://www.openresponses.or
 
 ## Quickstart
 
+Requires Dart 3.12 or later. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
 ```yaml
 dependencies:
-  open_responses: ^0.4.3
+  open_responses: ^0.5.0
 ```
 
 ```dart

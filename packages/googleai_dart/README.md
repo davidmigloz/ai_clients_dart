@@ -66,9 +66,11 @@ Dart client for the **[Google AI Gemini Developer API](https://ai.google.dev/gem
 
 ## Quickstart
 
+Requires Dart 3.12 or later. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
 ```yaml
 dependencies:
-  googleai_dart: ^12.0.2
+  googleai_dart: ^13.0.0
 ```
 
 ```dart

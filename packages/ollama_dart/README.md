@@ -53,9 +53,11 @@ Dart client for the **[Ollama API](https://ollama.com/)** to run local and self-
 
 ## Quickstart
 
+Requires Dart 3.12 or later. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
 ```yaml
 dependencies:
-  ollama_dart: ^2.6.1
+  ollama_dart: ^3.0.0
 ```
 
 ```dart

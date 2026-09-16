@@ -6,6 +6,40 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v1.x to v2.0.0
+
+v2.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.
+
+### 1) Upgrade the Dart or Flutter SDK
+
+Use Dart 3.12 or later. For Flutter projects, use a Flutter SDK that bundles Dart 3.12 or later; check the bundled version with `flutter --version`.
+
+### 2) Update your pubspec
+
+Before:
+
+```yaml
+environment:
+  sdk: ">=3.9.0 <4.0.0"
+
+dependencies:
+  chromadb: ^1.4.2
+```
+
+After:
+
+```yaml
+environment:
+  sdk: ">=3.12.0 <4.0.0"
+
+dependencies:
+  chromadb: ^2.0.0
+```
+
+Run `dart pub get` and your tests after updating. Flutter projects should use `flutter pub get` and `flutter test`.
+
+---
+
 ## Migrating from v0.x to v1.0.0
 
 This guide helps you migrate from the old `chromadb` client (v0.x) to the new **v1.0.0** (complete rewrite with resource-based organization and comprehensive API coverage).

@@ -61,9 +61,11 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 
 ## Quickstart
 
+Requires Dart 3.12 or later. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
 ```yaml
 dependencies:
-  mistralai_dart: ^7.0.0
+  mistralai_dart: ^8.0.0
 ```
 
 ```dart

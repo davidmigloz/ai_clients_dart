@@ -60,9 +60,11 @@ See [API Coverage](#api-coverage) for the full coverage table.
 
 ## Quickstart
 
+Requires Dart 3.12 or later. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
 ```yaml
 dependencies:
-  openai_dart: ^8.1.0
+  openai_dart: ^9.0.0
 ```
 
 ```dart
