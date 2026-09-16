@@ -52,9 +52,8 @@ class LiveSession {
   /// Whether the session can be resumed.
   bool? resumable;
 
-  LiveSession._({required WebSocket socket})
-    : _socket = socket,
-      _messageController = StreamController.broadcast();
+  LiveSession._({required this._socket})
+    : _messageController = StreamController.broadcast();
 
   /// Creates a new [LiveSession] from an established WebSocket connection.
   factory LiveSession.fromWebSocket(WebSocket socket) {

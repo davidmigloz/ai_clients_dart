@@ -54,15 +54,12 @@ class UpdateSessionParams {
   /// Omit a field to preserve its current value on the server.
   /// Pass `null` explicitly to clear a clearable field.
   const UpdateSessionParams({
-    Object? title = _notSet,
-    Object? metadata = _notSet,
-    Object? vaultIds = _notSet,
+    this._title = _notSet,
+    this._metadata = _notSet,
+    this._vaultIds = _notSet,
     this.agent,
-    Object? budget = _notSet,
-  }) : _title = title,
-       _metadata = metadata,
-       _vaultIds = vaultIds,
-       _budget = budget;
+    this._budget = _notSet,
+  });
 
   /// Creates an [UpdateSessionParams] from JSON.
   factory UpdateSessionParams.fromJson(Map<String, dynamic> json) {

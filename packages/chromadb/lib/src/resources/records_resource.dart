@@ -50,15 +50,14 @@ class RecordsResource extends ResourceBase {
   /// Creates a records resource for a specific collection.
   RecordsResource({
     required this.collectionId,
-    String? tenant,
-    String? database,
+    this._tenant,
+    this._database,
     required super.config,
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
     super.ensureNotClosed,
-  }) : _tenant = tenant,
-       _database = database;
+  });
 
   /// Builds the base path for this collection's endpoints.
   String get _basePath {

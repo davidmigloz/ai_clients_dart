@@ -87,18 +87,13 @@ class UpdateDeploymentParams {
     this.environmentId,
     this.name,
     this.initialEvents,
-    Object? description = _notSet,
-    Object? metadata = _notSet,
-    Object? resources = _notSet,
-    Object? schedule = _notSet,
-    Object? vaultIds = _notSet,
-    Object? budget = _notSet,
-  }) : _description = description,
-       _metadata = metadata,
-       _resources = resources,
-       _schedule = schedule,
-       _vaultIds = vaultIds,
-       _budget = budget;
+    this._description = _notSet,
+    this._metadata = _notSet,
+    this._resources = _notSet,
+    this._schedule = _notSet,
+    this._vaultIds = _notSet,
+    this._budget = _notSet,
+  });
 
   /// Creates an [UpdateDeploymentParams] from JSON.
   factory UpdateDeploymentParams.fromJson(Map<String, dynamic> json) {

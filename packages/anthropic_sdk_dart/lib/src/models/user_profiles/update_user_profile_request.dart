@@ -79,16 +79,16 @@ class UpdateUserProfileRequest {
   /// Creates an [UpdateUserProfileRequest].
   ///
   /// Omit a field to leave its stored value unchanged. Pass `null`
-  /// explicitly for [externalId], [name], or [accessType] to clear them.
+  /// explicitly for `externalId`, `name`, or `accessType` to clear them.
   /// [externalUserOnboardedAt] cannot be cleared once set — the API rejects
   /// an explicit `null` for it — so only omit it or pass a timestamp.
   /// [metadata] is not nullable per the spec — to delete a stored key,
   /// include it in [metadata] with an empty-string value; to leave metadata
   /// entirely unchanged, omit the parameter.
   const UpdateUserProfileRequest({
-    Object? externalId = _notSet,
-    Object? name = _notSet,
-    Object? accessType = _notSet,
+    this._externalId = _notSet,
+    this._name = _notSet,
+    this._accessType = _notSet,
     Object? externalUserOnboardedAt = _notSet,
     Object? metadata = _notSet,
   }) : assert(
@@ -101,9 +101,6 @@ class UpdateUserProfileRequest {
          'externalUserOnboardedAt cannot be cleared with null once set; omit '
          'it to leave it unchanged, or pass a DateTime',
        ),
-       _externalId = externalId,
-       _name = name,
-       _accessType = accessType,
        _externalUserOnboardedAt = externalUserOnboardedAt,
        _metadata = metadata;
 

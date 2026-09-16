@@ -22,8 +22,8 @@ Map<String, dynamic> _$ToolDefinitionToJson(_ToolDefinition instance) =>
     <String, dynamic>{
       'type': _$ToolTypeEnumMap[instance.type]!,
       'name': instance.name,
-      if (instance.description case final value?) 'description': value,
-      if (instance.parameters case final value?) 'parameters': value,
+      'description': ?instance.description,
+      'parameters': ?instance.parameters,
     };
 
 const _$ToolTypeEnumMap = {ToolType.function: 'function'};
@@ -55,7 +55,7 @@ Map<String, dynamic> _$ContentPartItemReferenceToJson(
   _ContentPartItemReference instance,
 ) => <String, dynamic>{
   'type': _$ContentTypeEnumMap[instance.type]!,
-  if (instance.id case final value?) 'id': value,
+  'id': ?instance.id,
 };
 
 const _$ContentTypeEnumMap = {
@@ -77,9 +77,9 @@ _InputAudioTranscriptionConfig _$InputAudioTranscriptionConfigFromJson(
 Map<String, dynamic> _$InputAudioTranscriptionConfigToJson(
   _InputAudioTranscriptionConfig instance,
 ) => <String, dynamic>{
-  if (instance.model case final value?) 'model': value,
-  if (instance.language case final value?) 'language': value,
-  if (instance.prompt case final value?) 'prompt': value,
+  'model': ?instance.model,
+  'language': ?instance.language,
+  'prompt': ?instance.prompt,
 };
 
 _TurnDetection _$TurnDetectionFromJson(Map<String, dynamic> json) =>
@@ -91,16 +91,14 @@ _TurnDetection _$TurnDetectionFromJson(Map<String, dynamic> json) =>
       createResponse: json['create_response'] as bool? ?? true,
     );
 
-Map<String, dynamic> _$TurnDetectionToJson(
-  _TurnDetection instance,
-) => <String, dynamic>{
-  'type': _$TurnDetectionTypeEnumMap[instance.type]!,
-  if (instance.threshold case final value?) 'threshold': value,
-  if (instance.prefixPaddingMs case final value?) 'prefix_padding_ms': value,
-  if (instance.silenceDurationMs case final value?)
-    'silence_duration_ms': value,
-  'create_response': instance.createResponse,
-};
+Map<String, dynamic> _$TurnDetectionToJson(_TurnDetection instance) =>
+    <String, dynamic>{
+      'type': _$TurnDetectionTypeEnumMap[instance.type]!,
+      'threshold': ?instance.threshold,
+      'prefix_padding_ms': ?instance.prefixPaddingMs,
+      'silence_duration_ms': ?instance.silenceDurationMs,
+      'create_response': instance.createResponse,
+    };
 
 const _$TurnDetectionTypeEnumMap = {TurnDetectionType.serverVad: 'server_vad'};
 
@@ -150,11 +148,10 @@ Map<String, dynamic> _$ResponseToJson(_Response instance) => <String, dynamic>{
   'id': instance.id,
   'object': _$ObjectTypeEnumMap[instance.object]!,
   'status': _$ResponseStatusEnumMap[instance.status]!,
-  if (instance.statusDetails?.toJson() case final value?)
-    'status_details': value,
+  'status_details': ?instance.statusDetails?.toJson(),
   'output': instance.output.map((e) => e.toJson()).toList(),
-  if (instance.metadata case final value?) 'metadata': value,
-  if (instance.usage?.toJson() case final value?) 'usage': value,
+  'metadata': ?instance.metadata,
+  'usage': ?instance.usage?.toJson(),
 };
 
 const _$ObjectTypeEnumMap = {
@@ -208,34 +205,29 @@ _ResponseConfig _$ResponseConfigFromJson(Map<String, dynamic> json) =>
           .toList(),
     );
 
-Map<String, dynamic> _$ResponseConfigToJson(
-  _ResponseConfig instance,
-) => <String, dynamic>{
-  if (instance.modalities?.map((e) => _$ModalityEnumMap[e]!).toList()
-      case final value?)
-    'modalities': value,
-  if (instance.instructions case final value?) 'instructions': value,
-  if (_$VoiceEnumMap[instance.voice] case final value?) 'voice': value,
-  if (_$AudioFormatEnumMap[instance.outputAudioFormat] case final value?)
-    'output_audio_format': value,
-  if (instance.tools?.map((e) => e.toJson()).toList() case final value?)
-    'tools': value,
-  if (const _ResponseConfigToolChoiceConverter().toJson(instance.toolChoice)
-      case final value?)
-    'tool_choice': value,
-  if (instance.temperature case final value?) 'temperature': value,
-  if (const _ResponseConfigMaxResponseOutputTokensConverter().toJson(
-        instance.maxResponseOutputTokens,
-      )
-      case final value?)
-    'max_response_output_tokens': value,
-  if (const _ResponseConfigConversationConverter().toJson(instance.conversation)
-      case final value?)
-    'conversation': value,
-  if (instance.metadata case final value?) 'metadata': value,
-  if (instance.input?.map((e) => e.toJson()).toList() case final value?)
-    'input': value,
-};
+Map<String, dynamic> _$ResponseConfigToJson(_ResponseConfig instance) =>
+    <String, dynamic>{
+      'modalities': ?instance.modalities
+          ?.map((e) => _$ModalityEnumMap[e]!)
+          .toList(),
+      'instructions': ?instance.instructions,
+      'voice': ?_$VoiceEnumMap[instance.voice],
+      'output_audio_format': ?_$AudioFormatEnumMap[instance.outputAudioFormat],
+      'tools': ?instance.tools?.map((e) => e.toJson()).toList(),
+      'tool_choice': ?const _ResponseConfigToolChoiceConverter().toJson(
+        instance.toolChoice,
+      ),
+      'temperature': ?instance.temperature,
+      'max_response_output_tokens':
+          ?const _ResponseConfigMaxResponseOutputTokensConverter().toJson(
+            instance.maxResponseOutputTokens,
+          ),
+      'conversation': ?const _ResponseConfigConversationConverter().toJson(
+        instance.conversation,
+      ),
+      'metadata': ?instance.metadata,
+      'input': ?instance.input?.map((e) => e.toJson()).toList(),
+    };
 
 const _$ModalityEnumMap = {Modality.text: 'text', Modality.audio: 'audio'};
 
@@ -360,13 +352,11 @@ _Usage _$UsageFromJson(Map<String, dynamic> json) => _Usage(
 );
 
 Map<String, dynamic> _$UsageToJson(_Usage instance) => <String, dynamic>{
-  if (instance.totalTokens case final value?) 'total_tokens': value,
-  if (instance.inputTokens case final value?) 'input_tokens': value,
-  if (instance.outputTokens case final value?) 'output_tokens': value,
-  if (instance.inputTokenDetails?.toJson() case final value?)
-    'input_token_details': value,
-  if (instance.outputTokenDetails?.toJson() case final value?)
-    'output_token_details': value,
+  'total_tokens': ?instance.totalTokens,
+  'input_tokens': ?instance.inputTokens,
+  'output_tokens': ?instance.outputTokens,
+  'input_token_details': ?instance.inputTokenDetails?.toJson(),
+  'output_token_details': ?instance.outputTokenDetails?.toJson(),
 };
 
 _UsageInputTokenDetails _$UsageInputTokenDetailsFromJson(
@@ -380,9 +370,9 @@ _UsageInputTokenDetails _$UsageInputTokenDetailsFromJson(
 Map<String, dynamic> _$UsageInputTokenDetailsToJson(
   _UsageInputTokenDetails instance,
 ) => <String, dynamic>{
-  if (instance.cachedTokens case final value?) 'cached_tokens': value,
-  if (instance.textTokens case final value?) 'text_tokens': value,
-  if (instance.audioTokens case final value?) 'audio_tokens': value,
+  'cached_tokens': ?instance.cachedTokens,
+  'text_tokens': ?instance.textTokens,
+  'audio_tokens': ?instance.audioTokens,
 };
 
 _UsageOutputTokenDetails _$UsageOutputTokenDetailsFromJson(
@@ -395,8 +385,8 @@ _UsageOutputTokenDetails _$UsageOutputTokenDetailsFromJson(
 Map<String, dynamic> _$UsageOutputTokenDetailsToJson(
   _UsageOutputTokenDetails instance,
 ) => <String, dynamic>{
-  if (instance.textTokens case final value?) 'text_tokens': value,
-  if (instance.audioTokens case final value?) 'audio_tokens': value,
+  'text_tokens': ?instance.textTokens,
+  'audio_tokens': ?instance.audioTokens,
 };
 
 _Session _$SessionFromJson(Map<String, dynamic> json) => _Session(
@@ -443,34 +433,28 @@ _Session _$SessionFromJson(Map<String, dynamic> json) => _Session(
 );
 
 Map<String, dynamic> _$SessionToJson(_Session instance) => <String, dynamic>{
-  if (instance.id case final value?) 'id': value,
+  'id': ?instance.id,
   'object': _$ObjectTypeEnumMap[instance.object]!,
-  if (instance.model case final value?) 'model': value,
-  if (instance.expiresAt case final value?) 'expires_at': value,
-  if (instance.modalities?.map((e) => _$ModalityEnumMap[e]!).toList()
-      case final value?)
-    'modalities': value,
-  if (instance.instructions case final value?) 'instructions': value,
-  if (_$VoiceEnumMap[instance.voice] case final value?) 'voice': value,
-  if (_$AudioFormatEnumMap[instance.inputAudioFormat] case final value?)
-    'input_audio_format': value,
-  if (_$AudioFormatEnumMap[instance.outputAudioFormat] case final value?)
-    'output_audio_format': value,
-  if (instance.inputAudioTranscription?.toJson() case final value?)
-    'input_audio_transcription': value,
-  if (instance.turnDetection?.toJson() case final value?)
-    'turn_detection': value,
-  if (instance.tools?.map((e) => e.toJson()).toList() case final value?)
-    'tools': value,
-  if (const _SessionToolChoiceConverter().toJson(instance.toolChoice)
-      case final value?)
-    'tool_choice': value,
-  if (instance.temperature case final value?) 'temperature': value,
-  if (const _SessionMaxResponseOutputTokensConverter().toJson(
+  'model': ?instance.model,
+  'expires_at': ?instance.expiresAt,
+  'modalities': ?instance.modalities
+      ?.map((e) => _$ModalityEnumMap[e]!)
+      .toList(),
+  'instructions': ?instance.instructions,
+  'voice': ?_$VoiceEnumMap[instance.voice],
+  'input_audio_format': ?_$AudioFormatEnumMap[instance.inputAudioFormat],
+  'output_audio_format': ?_$AudioFormatEnumMap[instance.outputAudioFormat],
+  'input_audio_transcription': ?instance.inputAudioTranscription?.toJson(),
+  'turn_detection': ?instance.turnDetection?.toJson(),
+  'tools': ?instance.tools?.map((e) => e.toJson()).toList(),
+  'tool_choice': ?const _SessionToolChoiceConverter().toJson(
+    instance.toolChoice,
+  ),
+  'temperature': ?instance.temperature,
+  'max_response_output_tokens':
+      ?const _SessionMaxResponseOutputTokensConverter().toJson(
         instance.maxResponseOutputTokens,
-      )
-      case final value?)
-    'max_response_output_tokens': value,
+      ),
 };
 
 SessionToolChoiceEnumeration _$SessionToolChoiceEnumerationFromJson(
@@ -578,34 +562,28 @@ _SessionConfig _$SessionConfigFromJson(Map<String, dynamic> json) =>
           ),
     );
 
-Map<String, dynamic> _$SessionConfigToJson(
-  _SessionConfig instance,
-) => <String, dynamic>{
-  if (instance.clientSecret?.toJson() case final value?) 'client_secret': value,
-  if (instance.modalities?.map((e) => _$ModalityEnumMap[e]!).toList()
-      case final value?)
-    'modalities': value,
-  if (instance.instructions case final value?) 'instructions': value,
-  if (_$VoiceEnumMap[instance.voice] case final value?) 'voice': value,
-  if (_$AudioFormatEnumMap[instance.inputAudioFormat] case final value?)
-    'input_audio_format': value,
-  if (_$AudioFormatEnumMap[instance.outputAudioFormat] case final value?)
-    'output_audio_format': value,
-  if (instance.inputAudioTranscription?.toJson() case final value?)
-    'input_audio_transcription': value,
-  'turn_detection': instance.turnDetection?.toJson(),
-  if (instance.tools?.map((e) => e.toJson()).toList() case final value?)
-    'tools': value,
-  if (const _SessionConfigToolChoiceConverter().toJson(instance.toolChoice)
-      case final value?)
-    'tool_choice': value,
-  if (instance.temperature case final value?) 'temperature': value,
-  if (const _SessionConfigMaxResponseOutputTokensConverter().toJson(
-        instance.maxResponseOutputTokens,
-      )
-      case final value?)
-    'max_response_output_tokens': value,
-};
+Map<String, dynamic> _$SessionConfigToJson(_SessionConfig instance) =>
+    <String, dynamic>{
+      'client_secret': ?instance.clientSecret?.toJson(),
+      'modalities': ?instance.modalities
+          ?.map((e) => _$ModalityEnumMap[e]!)
+          .toList(),
+      'instructions': ?instance.instructions,
+      'voice': ?_$VoiceEnumMap[instance.voice],
+      'input_audio_format': ?_$AudioFormatEnumMap[instance.inputAudioFormat],
+      'output_audio_format': ?_$AudioFormatEnumMap[instance.outputAudioFormat],
+      'input_audio_transcription': ?instance.inputAudioTranscription?.toJson(),
+      'turn_detection': instance.turnDetection?.toJson(),
+      'tools': ?instance.tools?.map((e) => e.toJson()).toList(),
+      'tool_choice': ?const _SessionConfigToolChoiceConverter().toJson(
+        instance.toolChoice,
+      ),
+      'temperature': ?instance.temperature,
+      'max_response_output_tokens':
+          ?const _SessionConfigMaxResponseOutputTokensConverter().toJson(
+            instance.maxResponseOutputTokens,
+          ),
+    };
 
 _SessionConfigClientSecret _$SessionConfigClientSecretFromJson(
   Map<String, dynamic> json,
@@ -617,8 +595,8 @@ _SessionConfigClientSecret _$SessionConfigClientSecretFromJson(
 Map<String, dynamic> _$SessionConfigClientSecretToJson(
   _SessionConfigClientSecret instance,
 ) => <String, dynamic>{
-  if (instance.value case final value?) 'value': value,
-  if (instance.expiresAt case final value?) 'expires_at': value,
+  'value': ?instance.value,
+  'expires_at': ?instance.expiresAt,
 };
 
 SessionConfigToolChoiceEnumeration _$SessionConfigToolChoiceEnumerationFromJson(
@@ -703,15 +681,13 @@ _Delta _$DeltaFromJson(Map<String, dynamic> json) => _Delta(
 );
 
 Map<String, dynamic> _$DeltaToJson(_Delta instance) => <String, dynamic>{
-  if (instance.transcript case final value?) 'transcript': value,
-  if (_$JsonConverterToJson<List<int>, Uint8List>(
-        instance.audio,
-        const Uint8ListConverter().toJson,
-      )
-      case final value?)
-    'audio': value,
-  if (instance.text case final value?) 'text': value,
-  if (instance.arguments case final value?) 'arguments': value,
+  'transcript': ?instance.transcript,
+  'audio': ?_$JsonConverterToJson<List<int>, Uint8List>(
+    instance.audio,
+    const Uint8ListConverter().toJson,
+  ),
+  'text': ?instance.text,
+  'arguments': ?instance.arguments,
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(
@@ -758,8 +734,8 @@ Map<String, dynamic> _$FormattedPropertyToJson(_FormattedProperty instance) =>
       'audio': const Uint8ListConverter().toJson(instance.audio),
       'text': instance.text,
       'transcript': instance.transcript,
-      if (instance.tool?.toJson() case final value?) 'tool': value,
-      if (instance.output case final value?) 'output': value,
+      'tool': ?instance.tool?.toJson(),
+      'output': ?instance.output,
     };
 
 _FormattedItem _$FormattedItemFromJson(Map<String, dynamic> json) =>
@@ -790,13 +766,11 @@ _ItemSpeech _$ItemSpeechFromJson(Map<String, dynamic> json) => _ItemSpeech(
 Map<String, dynamic> _$ItemSpeechToJson(_ItemSpeech instance) =>
     <String, dynamic>{
       'audioStartMs': instance.audioStartMs,
-      if (instance.audioEndMs case final value?) 'audioEndMs': value,
-      if (_$JsonConverterToJson<List<int>, Uint8List>(
-            instance.audio,
-            const Uint8ListConverter().toJson,
-          )
-          case final value?)
-        'audio': value,
+      'audioEndMs': ?instance.audioEndMs,
+      'audio': ?_$JsonConverterToJson<List<int>, Uint8List>(
+        instance.audio,
+        const Uint8ListConverter().toJson,
+      ),
     };
 
 _ItemTranscript _$ItemTranscriptFromJson(Map<String, dynamic> json) =>
@@ -820,9 +794,9 @@ _EventHandlerResult _$EventHandlerResultFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$EventHandlerResultToJson(_EventHandlerResult instance) =>
     <String, dynamic>{
-      if (instance.item?.toJson() case final value?) 'item': value,
-      if (instance.delta?.toJson() case final value?) 'delta': value,
-      if (instance.response?.toJson() case final value?) 'response': value,
+      'item': ?instance.item?.toJson(),
+      'delta': ?instance.delta?.toJson(),
+      'response': ?instance.response?.toJson(),
     };
 
 _TranscriptionError _$TranscriptionErrorFromJson(Map<String, dynamic> json) =>
@@ -835,10 +809,10 @@ _TranscriptionError _$TranscriptionErrorFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$TranscriptionErrorToJson(_TranscriptionError instance) =>
     <String, dynamic>{
-      if (instance.type case final value?) 'type': value,
-      if (instance.code case final value?) 'code': value,
-      if (instance.message case final value?) 'message': value,
-      if (instance.param case final value?) 'param': value,
+      'type': ?instance.type,
+      'code': ?instance.code,
+      'message': ?instance.message,
+      'param': ?instance.param,
     };
 
 _APIError _$APIErrorFromJson(Map<String, dynamic> json) => _APIError(
@@ -850,11 +824,11 @@ _APIError _$APIErrorFromJson(Map<String, dynamic> json) => _APIError(
 );
 
 Map<String, dynamic> _$APIErrorToJson(_APIError instance) => <String, dynamic>{
-  if (instance.type case final value?) 'type': value,
-  if (instance.code case final value?) 'code': value,
-  if (instance.message case final value?) 'message': value,
-  if (instance.param case final value?) 'param': value,
-  if (instance.eventId case final value?) 'event_id': value,
+  'type': ?instance.type,
+  'code': ?instance.code,
+  'message': ?instance.message,
+  'param': ?instance.param,
+  'event_id': ?instance.eventId,
 };
 
 ContentPartInputText _$ContentPartInputTextFromJson(
@@ -887,8 +861,8 @@ Map<String, dynamic> _$ContentPartInputAudioToJson(
   ContentPartInputAudio instance,
 ) => <String, dynamic>{
   'type': _$ContentTypeEnumMap[instance.type]!,
-  if (instance.audio case final value?) 'audio': value,
-  if (instance.transcript case final value?) 'transcript': value,
+  'audio': ?instance.audio,
+  'transcript': ?instance.transcript,
 };
 
 ContentPartText _$ContentPartTextFromJson(Map<String, dynamic> json) =>
@@ -917,8 +891,8 @@ ContentPartAudio _$ContentPartAudioFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$ContentPartAudioToJson(ContentPartAudio instance) =>
     <String, dynamic>{
       'type': _$ContentTypeEnumMap[instance.type]!,
-      if (instance.audio case final value?) 'audio': value,
-      if (instance.transcript case final value?) 'transcript': value,
+      'audio': ?instance.audio,
+      'transcript': ?instance.transcript,
     };
 
 ItemMessage _$ItemMessageFromJson(Map<String, dynamic> json) => ItemMessage(
@@ -941,16 +915,15 @@ ItemMessage _$ItemMessageFromJson(Map<String, dynamic> json) => ItemMessage(
       .toList(),
 );
 
-Map<String, dynamic> _$ItemMessageToJson(
-  ItemMessage instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  if (_$ObjectTypeEnumMap[instance.object] case final value?) 'object': value,
-  'type': _$ItemTypeEnumMap[instance.type]!,
-  if (_$ItemStatusEnumMap[instance.status] case final value?) 'status': value,
-  'role': _$ItemRoleEnumMap[instance.role]!,
-  'content': instance.content.map((e) => e.toJson()).toList(),
-};
+Map<String, dynamic> _$ItemMessageToJson(ItemMessage instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'object': ?_$ObjectTypeEnumMap[instance.object],
+      'type': _$ItemTypeEnumMap[instance.type]!,
+      'status': ?_$ItemStatusEnumMap[instance.status],
+      'role': _$ItemRoleEnumMap[instance.role]!,
+      'content': instance.content.map((e) => e.toJson()).toList(),
+    };
 
 const _$ItemTypeEnumMap = {
   ItemType.message: 'message',
@@ -989,17 +962,16 @@ ItemFunctionCall _$ItemFunctionCallFromJson(Map<String, dynamic> json) =>
       arguments: json['arguments'] as String,
     );
 
-Map<String, dynamic> _$ItemFunctionCallToJson(
-  ItemFunctionCall instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'object': _$ObjectTypeEnumMap[instance.object]!,
-  'type': _$ItemTypeEnumMap[instance.type]!,
-  if (_$ItemStatusEnumMap[instance.status] case final value?) 'status': value,
-  'call_id': instance.callId,
-  'name': instance.name,
-  'arguments': instance.arguments,
-};
+Map<String, dynamic> _$ItemFunctionCallToJson(ItemFunctionCall instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'object': _$ObjectTypeEnumMap[instance.object]!,
+      'type': _$ItemTypeEnumMap[instance.type]!,
+      'status': ?_$ItemStatusEnumMap[instance.status],
+      'call_id': instance.callId,
+      'name': instance.name,
+      'arguments': instance.arguments,
+    };
 
 ItemFunctionCallOutput _$ItemFunctionCallOutputFromJson(
   Map<String, dynamic> json,
@@ -1026,9 +998,9 @@ Map<String, dynamic> _$ItemFunctionCallOutputToJson(
   ItemFunctionCallOutput instance,
 ) => <String, dynamic>{
   'id': instance.id,
-  if (_$ObjectTypeEnumMap[instance.object] case final value?) 'object': value,
+  'object': ?_$ObjectTypeEnumMap[instance.object],
   'type': _$ItemTypeEnumMap[instance.type]!,
-  if (_$ItemStatusEnumMap[instance.status] case final value?) 'status': value,
+  'status': ?_$ItemStatusEnumMap[instance.status],
   'call_id': instance.callId,
   'output': instance.output,
 };
@@ -1050,8 +1022,7 @@ Map<String, dynamic> _$ResponseStatusDetailsCompletedToJson(
   ResponseStatusDetailsCompleted instance,
 ) => <String, dynamic>{
   'type': _$ResponseStatusTypeEnumMap[instance.type]!,
-  if (_$ResponseStatusReasonEnumMap[instance.reason] case final value?)
-    'reason': value,
+  'reason': ?_$ResponseStatusReasonEnumMap[instance.reason],
 };
 
 const _$ResponseStatusTypeEnumMap = {
@@ -1086,8 +1057,7 @@ Map<String, dynamic> _$ResponseStatusDetailsCancelledToJson(
   ResponseStatusDetailsCancelled instance,
 ) => <String, dynamic>{
   'type': _$ResponseStatusTypeEnumMap[instance.type]!,
-  if (_$ResponseStatusReasonEnumMap[instance.reason] case final value?)
-    'reason': value,
+  'reason': ?_$ResponseStatusReasonEnumMap[instance.reason],
 };
 
 ResponseStatusDetailsIncomplete _$ResponseStatusDetailsIncompleteFromJson(
@@ -1107,8 +1077,7 @@ Map<String, dynamic> _$ResponseStatusDetailsIncompleteToJson(
   ResponseStatusDetailsIncomplete instance,
 ) => <String, dynamic>{
   'type': _$ResponseStatusTypeEnumMap[instance.type]!,
-  if (_$ResponseStatusReasonEnumMap[instance.reason] case final value?)
-    'reason': value,
+  'reason': ?_$ResponseStatusReasonEnumMap[instance.reason],
 };
 
 ResponseStatusDetailsFailed _$ResponseStatusDetailsFailedFromJson(
@@ -1126,7 +1095,7 @@ Map<String, dynamic> _$ResponseStatusDetailsFailedToJson(
   ResponseStatusDetailsFailed instance,
 ) => <String, dynamic>{
   'type': _$ResponseStatusTypeEnumMap[instance.type]!,
-  if (instance.error?.toJson() case final value?) 'error': value,
+  'error': ?instance.error?.toJson(),
 };
 
 RealtimeEventConversationItemCreate
@@ -1145,7 +1114,7 @@ Map<String, dynamic> _$RealtimeEventConversationItemCreateToJson(
 ) => <String, dynamic>{
   'event_id': instance.eventId,
   'type': _$RealtimeEventTypeEnumMap[instance.type]!,
-  if (instance.previousItemId case final value?) 'previous_item_id': value,
+  'previous_item_id': ?instance.previousItemId,
   'item': instance.item.toJson(),
 };
 
@@ -1313,7 +1282,7 @@ Map<String, dynamic> _$RealtimeEventResponseCancelToJson(
 ) => <String, dynamic>{
   'event_id': instance.eventId,
   'type': _$RealtimeEventTypeEnumMap[instance.type]!,
-  if (instance.responseId case final value?) 'response_id': value,
+  'response_id': ?instance.responseId,
 };
 
 RealtimeEventResponseCreate _$RealtimeEventResponseCreateFromJson(
@@ -1333,7 +1302,7 @@ Map<String, dynamic> _$RealtimeEventResponseCreateToJson(
 ) => <String, dynamic>{
   'event_id': instance.eventId,
   'type': _$RealtimeEventTypeEnumMap[instance.type]!,
-  if (instance.response?.toJson() case final value?) 'response': value,
+  'response': ?instance.response?.toJson(),
 };
 
 RealtimeEventSessionUpdate _$RealtimeEventSessionUpdateFromJson(
@@ -1349,7 +1318,7 @@ RealtimeEventSessionUpdate _$RealtimeEventSessionUpdateFromJson(
 Map<String, dynamic> _$RealtimeEventSessionUpdateToJson(
   RealtimeEventSessionUpdate instance,
 ) => <String, dynamic>{
-  if (instance.eventId case final value?) 'event_id': value,
+  'event_id': ?instance.eventId,
   'type': _$RealtimeEventTypeEnumMap[instance.type]!,
   'session': instance.session.toJson(),
 };
@@ -1390,7 +1359,7 @@ Map<String, dynamic> _$RealtimeEventConversationItemCreatedToJson(
 ) => <String, dynamic>{
   'event_id': instance.eventId,
   'type': _$RealtimeEventTypeEnumMap[instance.type]!,
-  if (instance.previousItemId case final value?) 'previous_item_id': value,
+  'previous_item_id': ?instance.previousItemId,
   'item': instance.item.toJson(),
 };
 
@@ -1480,8 +1449,8 @@ _$RealtimeEventConversationItemInputAudioTranscriptionDeltaToJson(
   'event_id': instance.eventId,
   'type': _$RealtimeEventTypeEnumMap[instance.type]!,
   'item_id': instance.itemId,
-  if (instance.contentIndex case final value?) 'content_index': value,
-  if (instance.delta case final value?) 'delta': value,
+  'content_index': ?instance.contentIndex,
+  'delta': ?instance.delta,
 };
 
 RealtimeEventConversationItemTruncated
@@ -1554,7 +1523,7 @@ Map<String, dynamic> _$RealtimeEventInputAudioBufferCommittedToJson(
 ) => <String, dynamic>{
   'event_id': instance.eventId,
   'type': _$RealtimeEventTypeEnumMap[instance.type]!,
-  if (instance.previousItemId case final value?) 'previous_item_id': value,
+  'previous_item_id': ?instance.previousItemId,
   'item_id': instance.itemId,
 };
 

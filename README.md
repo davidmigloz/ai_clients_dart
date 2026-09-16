@@ -21,6 +21,8 @@ Type-safe Dart clients for OpenAI, Anthropic, Google Gemini, Mistral, Ollama, an
 
 ## Quickstart
 
+Requires Dart 3.12 or later.
+
 The AI provider clients share a consistent shape — pick one and start with a few lines:
 
 <details open>

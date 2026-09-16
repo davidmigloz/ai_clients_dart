@@ -30,10 +30,9 @@ class UpdateVaultParams {
   /// Omit a field to preserve its current value on the server.
   /// Pass `null` explicitly to clear a clearable field.
   const UpdateVaultParams({
-    Object? displayName = _notSet,
-    Object? metadata = _notSet,
-  }) : _displayName = displayName,
-       _metadata = metadata;
+    this._displayName = _notSet,
+    this._metadata = _notSet,
+  });
 
   /// Creates an [UpdateVaultParams] from JSON.
   factory UpdateVaultParams.fromJson(Map<String, dynamic> json) {

@@ -188,18 +188,16 @@ class FallbackCreditNotApplied extends FallbackCreditStatus {
 
   /// Creates a [FallbackCreditNotApplied].
   const FallbackCreditNotApplied({
-    required FallbackCreditNotAppliedReason reason,
+    required FallbackCreditNotAppliedReason this._reason,
     this.removeToRedeem,
-  }) : _reason = reason,
-       _rawReason = null;
+  }) : _rawReason = null;
 
-  /// Creates a [FallbackCreditNotApplied], preserving [rawReason] verbatim
+  /// Creates a [FallbackCreditNotApplied], preserving `rawReason` verbatim
   /// even when it does not match a known [FallbackCreditNotAppliedReason].
   const FallbackCreditNotApplied.raw({
-    required String rawReason,
+    required String this._rawReason,
     this.removeToRedeem,
-  }) : _rawReason = rawReason,
-       _reason = null;
+  }) : _reason = null;
 
   /// Creates a [FallbackCreditNotApplied] from JSON.
   factory FallbackCreditNotApplied.fromJson(Map<String, dynamic> json) {

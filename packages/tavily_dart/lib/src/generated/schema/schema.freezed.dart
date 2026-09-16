@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'schema.dart';
@@ -9,7 +9,7 @@ part of 'schema.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
+// GENERATED CODE - DO NOT MODIFY BY HAND
 T _$identity<T>(T value) => value;
 
 /// @nodoc
@@ -55,72 +55,88 @@ mixin _$SearchRequest {
   @pragma('vm:prefer-inline')
   $SearchRequestCopyWith<SearchRequest> get copyWith =>
       _$SearchRequestCopyWithImpl<SearchRequest>(
-          this as SearchRequest, _$identity);
+        this as SearchRequest,
+        _$identity,
+      );
 
   /// Serializes this SearchRequest to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as SearchRequest;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is SearchRequest &&
-            (identical(other.apiKey, apiKey) || other.apiKey == apiKey) &&
-            (identical(other.query, query) || other.query == query) &&
-            (identical(other.searchDepth, searchDepth) ||
-                other.searchDepth == searchDepth) &&
-            (identical(other.includeImages, includeImages) ||
-                other.includeImages == includeImages) &&
-            (identical(other.includeAnswer, includeAnswer) ||
-                other.includeAnswer == includeAnswer) &&
-            (identical(other.includeRawContent, includeRawContent) ||
-                other.includeRawContent == includeRawContent) &&
-            (identical(other.maxResults, maxResults) ||
-                other.maxResults == maxResults) &&
-            const DeepCollectionEquality()
-                .equals(other.includeDomains, includeDomains) &&
-            const DeepCollectionEquality()
-                .equals(other.excludeDomains, excludeDomains));
+            (identical(other.apiKey, _this.apiKey) ||
+                other.apiKey == _this.apiKey) &&
+            (identical(other.query, _this.query) ||
+                other.query == _this.query) &&
+            (identical(other.searchDepth, _this.searchDepth) ||
+                other.searchDepth == _this.searchDepth) &&
+            (identical(other.includeImages, _this.includeImages) ||
+                other.includeImages == _this.includeImages) &&
+            (identical(other.includeAnswer, _this.includeAnswer) ||
+                other.includeAnswer == _this.includeAnswer) &&
+            (identical(other.includeRawContent, _this.includeRawContent) ||
+                other.includeRawContent == _this.includeRawContent) &&
+            (identical(other.maxResults, _this.maxResults) ||
+                other.maxResults == _this.maxResults) &&
+            const DeepCollectionEquality().equals(
+              other.includeDomains,
+              _this.includeDomains,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other.excludeDomains,
+              _this.excludeDomains,
+            ));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode {
+    final _this = this as SearchRequest;
+    return Object.hash(
       runtimeType,
-      apiKey,
-      query,
-      searchDepth,
-      includeImages,
-      includeAnswer,
-      includeRawContent,
-      maxResults,
-      const DeepCollectionEquality().hash(includeDomains),
-      const DeepCollectionEquality().hash(excludeDomains));
+      _this.apiKey,
+      _this.query,
+      _this.searchDepth,
+      _this.includeImages,
+      _this.includeAnswer,
+      _this.includeRawContent,
+      _this.maxResults,
+      const DeepCollectionEquality().hash(_this.includeDomains),
+      const DeepCollectionEquality().hash(_this.excludeDomains),
+    );
+  }
 
   @override
   String toString() {
-    return 'SearchRequest(apiKey: $apiKey, query: $query, searchDepth: $searchDepth, includeImages: $includeImages, includeAnswer: $includeAnswer, includeRawContent: $includeRawContent, maxResults: $maxResults, includeDomains: $includeDomains, excludeDomains: $excludeDomains)';
+    final _this = this as SearchRequest;
+    return 'SearchRequest(apiKey: ${_this.apiKey}, query: ${_this.query}, searchDepth: ${_this.searchDepth}, includeImages: ${_this.includeImages}, includeAnswer: ${_this.includeAnswer}, includeRawContent: ${_this.includeRawContent}, maxResults: ${_this.maxResults}, includeDomains: ${_this.includeDomains}, excludeDomains: ${_this.excludeDomains})';
   }
 }
 
 /// @nodoc
 abstract mixin class $SearchRequestCopyWith<$Res> {
   factory $SearchRequestCopyWith(
-          SearchRequest value, $Res Function(SearchRequest) _then) =
-      _$SearchRequestCopyWithImpl;
+    SearchRequest value,
+    $Res Function(SearchRequest) _then,
+  ) = _$SearchRequestCopyWithImpl;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'api_key', includeIfNull: false) String? apiKey,
-      String query,
-      @JsonKey(name: 'search_depth') SearchRequestSearchDepth searchDepth,
-      @JsonKey(name: 'include_images') bool includeImages,
-      @JsonKey(name: 'include_answer') bool includeAnswer,
-      @JsonKey(name: 'include_raw_content') bool includeRawContent,
-      @JsonKey(name: 'max_results') int maxResults,
-      @JsonKey(name: 'include_domains', includeIfNull: false)
-      List<String>? includeDomains,
-      @JsonKey(name: 'exclude_domains', includeIfNull: false)
-      List<String>? excludeDomains});
+  $Res call({
+    @JsonKey(name: 'api_key', includeIfNull: false) String? apiKey,
+    String query,
+    @JsonKey(name: 'search_depth') SearchRequestSearchDepth searchDepth,
+    @JsonKey(name: 'include_images') bool includeImages,
+    @JsonKey(name: 'include_answer') bool includeAnswer,
+    @JsonKey(name: 'include_raw_content') bool includeRawContent,
+    @JsonKey(name: 'max_results') int maxResults,
+    @JsonKey(name: 'include_domains', includeIfNull: false)
+    List<String>? includeDomains,
+    @JsonKey(name: 'exclude_domains', includeIfNull: false)
+    List<String>? excludeDomains,
+  });
 }
 
 /// @nodoc
@@ -146,44 +162,46 @@ class _$SearchRequestCopyWithImpl<$Res>
     Object? includeDomains = freezed,
     Object? excludeDomains = freezed,
   }) {
-    return _then(_self.copyWith(
-      apiKey: freezed == apiKey
-          ? _self.apiKey
-          : apiKey // ignore: cast_nullable_to_non_nullable
-              as String?,
-      query: null == query
-          ? _self.query
-          : query // ignore: cast_nullable_to_non_nullable
-              as String,
-      searchDepth: null == searchDepth
-          ? _self.searchDepth
-          : searchDepth // ignore: cast_nullable_to_non_nullable
-              as SearchRequestSearchDepth,
-      includeImages: null == includeImages
-          ? _self.includeImages
-          : includeImages // ignore: cast_nullable_to_non_nullable
-              as bool,
-      includeAnswer: null == includeAnswer
-          ? _self.includeAnswer
-          : includeAnswer // ignore: cast_nullable_to_non_nullable
-              as bool,
-      includeRawContent: null == includeRawContent
-          ? _self.includeRawContent
-          : includeRawContent // ignore: cast_nullable_to_non_nullable
-              as bool,
-      maxResults: null == maxResults
-          ? _self.maxResults
-          : maxResults // ignore: cast_nullable_to_non_nullable
-              as int,
-      includeDomains: freezed == includeDomains
-          ? _self.includeDomains
-          : includeDomains // ignore: cast_nullable_to_non_nullable
-              as List<String>?,
-      excludeDomains: freezed == excludeDomains
-          ? _self.excludeDomains
-          : excludeDomains // ignore: cast_nullable_to_non_nullable
-              as List<String>?,
-    ));
+    return _then(
+      SearchRequest(
+        apiKey: freezed == apiKey
+            ? _self.apiKey
+            : apiKey // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        query: null == query
+            ? _self.query
+            : query // ignore: cast_nullable_to_non_nullable
+                  as String,
+        searchDepth: null == searchDepth
+            ? _self.searchDepth
+            : searchDepth // ignore: cast_nullable_to_non_nullable
+                  as SearchRequestSearchDepth,
+        includeImages: null == includeImages
+            ? _self.includeImages
+            : includeImages // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        includeAnswer: null == includeAnswer
+            ? _self.includeAnswer
+            : includeAnswer // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        includeRawContent: null == includeRawContent
+            ? _self.includeRawContent
+            : includeRawContent // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        maxResults: null == maxResults
+            ? _self.maxResults
+            : maxResults // ignore: cast_nullable_to_non_nullable
+                  as int,
+        includeDomains: freezed == includeDomains
+            ? _self.includeDomains
+            : includeDomains // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
+        excludeDomains: freezed == excludeDomains
+            ? _self.excludeDomains
+            : excludeDomains // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
+      ),
+    );
   }
 }
 
@@ -281,33 +299,35 @@ extension SearchRequestPatterns on SearchRequest {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            @JsonKey(name: 'api_key', includeIfNull: false) String? apiKey,
-            String query,
-            @JsonKey(name: 'search_depth') SearchRequestSearchDepth searchDepth,
-            @JsonKey(name: 'include_images') bool includeImages,
-            @JsonKey(name: 'include_answer') bool includeAnswer,
-            @JsonKey(name: 'include_raw_content') bool includeRawContent,
-            @JsonKey(name: 'max_results') int maxResults,
-            @JsonKey(name: 'include_domains', includeIfNull: false)
-            List<String>? includeDomains,
-            @JsonKey(name: 'exclude_domains', includeIfNull: false)
-            List<String>? excludeDomains)?
-        $default, {
+      @JsonKey(name: 'api_key', includeIfNull: false) String? apiKey,
+      String query,
+      @JsonKey(name: 'search_depth') SearchRequestSearchDepth searchDepth,
+      @JsonKey(name: 'include_images') bool includeImages,
+      @JsonKey(name: 'include_answer') bool includeAnswer,
+      @JsonKey(name: 'include_raw_content') bool includeRawContent,
+      @JsonKey(name: 'max_results') int maxResults,
+      @JsonKey(name: 'include_domains', includeIfNull: false)
+      List<String>? includeDomains,
+      @JsonKey(name: 'exclude_domains', includeIfNull: false)
+      List<String>? excludeDomains,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _SearchRequest() when $default != null:
         return $default(
-            _that.apiKey,
-            _that.query,
-            _that.searchDepth,
-            _that.includeImages,
-            _that.includeAnswer,
-            _that.includeRawContent,
-            _that.maxResults,
-            _that.includeDomains,
-            _that.excludeDomains);
+          _that.apiKey,
+          _that.query,
+          _that.searchDepth,
+          _that.includeImages,
+          _that.includeAnswer,
+          _that.includeRawContent,
+          _that.maxResults,
+          _that.includeDomains,
+          _that.excludeDomains,
+        );
       case _:
         return orElse();
     }
@@ -329,32 +349,34 @@ extension SearchRequestPatterns on SearchRequest {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            @JsonKey(name: 'api_key', includeIfNull: false) String? apiKey,
-            String query,
-            @JsonKey(name: 'search_depth') SearchRequestSearchDepth searchDepth,
-            @JsonKey(name: 'include_images') bool includeImages,
-            @JsonKey(name: 'include_answer') bool includeAnswer,
-            @JsonKey(name: 'include_raw_content') bool includeRawContent,
-            @JsonKey(name: 'max_results') int maxResults,
-            @JsonKey(name: 'include_domains', includeIfNull: false)
-            List<String>? includeDomains,
-            @JsonKey(name: 'exclude_domains', includeIfNull: false)
-            List<String>? excludeDomains)
-        $default,
+      @JsonKey(name: 'api_key', includeIfNull: false) String? apiKey,
+      String query,
+      @JsonKey(name: 'search_depth') SearchRequestSearchDepth searchDepth,
+      @JsonKey(name: 'include_images') bool includeImages,
+      @JsonKey(name: 'include_answer') bool includeAnswer,
+      @JsonKey(name: 'include_raw_content') bool includeRawContent,
+      @JsonKey(name: 'max_results') int maxResults,
+      @JsonKey(name: 'include_domains', includeIfNull: false)
+      List<String>? includeDomains,
+      @JsonKey(name: 'exclude_domains', includeIfNull: false)
+      List<String>? excludeDomains,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _SearchRequest():
         return $default(
-            _that.apiKey,
-            _that.query,
-            _that.searchDepth,
-            _that.includeImages,
-            _that.includeAnswer,
-            _that.includeRawContent,
-            _that.maxResults,
-            _that.includeDomains,
-            _that.excludeDomains);
+          _that.apiKey,
+          _that.query,
+          _that.searchDepth,
+          _that.includeImages,
+          _that.includeAnswer,
+          _that.includeRawContent,
+          _that.maxResults,
+          _that.includeDomains,
+          _that.excludeDomains,
+        );
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -375,32 +397,34 @@ extension SearchRequestPatterns on SearchRequest {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            @JsonKey(name: 'api_key', includeIfNull: false) String? apiKey,
-            String query,
-            @JsonKey(name: 'search_depth') SearchRequestSearchDepth searchDepth,
-            @JsonKey(name: 'include_images') bool includeImages,
-            @JsonKey(name: 'include_answer') bool includeAnswer,
-            @JsonKey(name: 'include_raw_content') bool includeRawContent,
-            @JsonKey(name: 'max_results') int maxResults,
-            @JsonKey(name: 'include_domains', includeIfNull: false)
-            List<String>? includeDomains,
-            @JsonKey(name: 'exclude_domains', includeIfNull: false)
-            List<String>? excludeDomains)?
-        $default,
+      @JsonKey(name: 'api_key', includeIfNull: false) String? apiKey,
+      String query,
+      @JsonKey(name: 'search_depth') SearchRequestSearchDepth searchDepth,
+      @JsonKey(name: 'include_images') bool includeImages,
+      @JsonKey(name: 'include_answer') bool includeAnswer,
+      @JsonKey(name: 'include_raw_content') bool includeRawContent,
+      @JsonKey(name: 'max_results') int maxResults,
+      @JsonKey(name: 'include_domains', includeIfNull: false)
+      List<String>? includeDomains,
+      @JsonKey(name: 'exclude_domains', includeIfNull: false)
+      List<String>? excludeDomains,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _SearchRequest() when $default != null:
         return $default(
-            _that.apiKey,
-            _that.query,
-            _that.searchDepth,
-            _that.includeImages,
-            _that.includeAnswer,
-            _that.includeRawContent,
-            _that.maxResults,
-            _that.includeDomains,
-            _that.excludeDomains);
+          _that.apiKey,
+          _that.query,
+          _that.searchDepth,
+          _that.includeImages,
+          _that.includeAnswer,
+          _that.includeRawContent,
+          _that.maxResults,
+          _that.includeDomains,
+          _that.excludeDomains,
+        );
       case _:
         return null;
     }
@@ -410,22 +434,22 @@ extension SearchRequestPatterns on SearchRequest {
 /// @nodoc
 @JsonSerializable()
 class _SearchRequest extends SearchRequest {
-  const _SearchRequest(
-      {@JsonKey(name: 'api_key', includeIfNull: false) this.apiKey,
-      required this.query,
-      @JsonKey(name: 'search_depth')
-      this.searchDepth = SearchRequestSearchDepth.basic,
-      @JsonKey(name: 'include_images') this.includeImages = false,
-      @JsonKey(name: 'include_answer') this.includeAnswer = false,
-      @JsonKey(name: 'include_raw_content') this.includeRawContent = false,
-      @JsonKey(name: 'max_results') this.maxResults = 5,
-      @JsonKey(name: 'include_domains', includeIfNull: false)
-      final List<String>? includeDomains,
-      @JsonKey(name: 'exclude_domains', includeIfNull: false)
-      final List<String>? excludeDomains})
-      : _includeDomains = includeDomains,
-        _excludeDomains = excludeDomains,
-        super._();
+  const _SearchRequest({
+    @JsonKey(name: 'api_key', includeIfNull: false) this.apiKey,
+    required this.query,
+    @JsonKey(name: 'search_depth')
+    this.searchDepth = SearchRequestSearchDepth.basic,
+    @JsonKey(name: 'include_images') this.includeImages = false,
+    @JsonKey(name: 'include_answer') this.includeAnswer = false,
+    @JsonKey(name: 'include_raw_content') this.includeRawContent = false,
+    @JsonKey(name: 'max_results') this.maxResults = 5,
+    @JsonKey(name: 'include_domains', includeIfNull: false)
+    List<String>? includeDomains,
+    @JsonKey(name: 'exclude_domains', includeIfNull: false)
+    List<String>? excludeDomains,
+  }) : _includeDomains = includeDomains,
+       _excludeDomains = excludeDomains,
+       super._();
   factory _SearchRequest.fromJson(Map<String, dynamic> json) =>
       _$SearchRequestFromJson(json);
 
@@ -501,9 +525,7 @@ class _SearchRequest extends SearchRequest {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$SearchRequestToJson(
-      this,
-    );
+    return _$SearchRequestToJson(this);
   }
 
   @override
@@ -523,15 +545,20 @@ class _SearchRequest extends SearchRequest {
                 other.includeRawContent == includeRawContent) &&
             (identical(other.maxResults, maxResults) ||
                 other.maxResults == maxResults) &&
-            const DeepCollectionEquality()
-                .equals(other._includeDomains, _includeDomains) &&
-            const DeepCollectionEquality()
-                .equals(other._excludeDomains, _excludeDomains));
+            const DeepCollectionEquality().equals(
+              other.includeDomains,
+              _includeDomains,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other.excludeDomains,
+              _excludeDomains,
+            ));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode {
+    return Object.hash(
       runtimeType,
       apiKey,
       query,
@@ -541,7 +568,9 @@ class _SearchRequest extends SearchRequest {
       includeRawContent,
       maxResults,
       const DeepCollectionEquality().hash(_includeDomains),
-      const DeepCollectionEquality().hash(_excludeDomains));
+      const DeepCollectionEquality().hash(_excludeDomains),
+    );
+  }
 
   @override
   String toString() {
@@ -553,22 +582,24 @@ class _SearchRequest extends SearchRequest {
 abstract mixin class _$SearchRequestCopyWith<$Res>
     implements $SearchRequestCopyWith<$Res> {
   factory _$SearchRequestCopyWith(
-          _SearchRequest value, $Res Function(_SearchRequest) _then) =
-      __$SearchRequestCopyWithImpl;
+    _SearchRequest value,
+    $Res Function(_SearchRequest) _then,
+  ) = __$SearchRequestCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'api_key', includeIfNull: false) String? apiKey,
-      String query,
-      @JsonKey(name: 'search_depth') SearchRequestSearchDepth searchDepth,
-      @JsonKey(name: 'include_images') bool includeImages,
-      @JsonKey(name: 'include_answer') bool includeAnswer,
-      @JsonKey(name: 'include_raw_content') bool includeRawContent,
-      @JsonKey(name: 'max_results') int maxResults,
-      @JsonKey(name: 'include_domains', includeIfNull: false)
-      List<String>? includeDomains,
-      @JsonKey(name: 'exclude_domains', includeIfNull: false)
-      List<String>? excludeDomains});
+  $Res call({
+    @JsonKey(name: 'api_key', includeIfNull: false) String? apiKey,
+    String query,
+    @JsonKey(name: 'search_depth') SearchRequestSearchDepth searchDepth,
+    @JsonKey(name: 'include_images') bool includeImages,
+    @JsonKey(name: 'include_answer') bool includeAnswer,
+    @JsonKey(name: 'include_raw_content') bool includeRawContent,
+    @JsonKey(name: 'max_results') int maxResults,
+    @JsonKey(name: 'include_domains', includeIfNull: false)
+    List<String>? includeDomains,
+    @JsonKey(name: 'exclude_domains', includeIfNull: false)
+    List<String>? excludeDomains,
+  });
 }
 
 /// @nodoc
@@ -594,44 +625,46 @@ class __$SearchRequestCopyWithImpl<$Res>
     Object? includeDomains = freezed,
     Object? excludeDomains = freezed,
   }) {
-    return _then(_SearchRequest(
-      apiKey: freezed == apiKey
-          ? _self.apiKey
-          : apiKey // ignore: cast_nullable_to_non_nullable
-              as String?,
-      query: null == query
-          ? _self.query
-          : query // ignore: cast_nullable_to_non_nullable
-              as String,
-      searchDepth: null == searchDepth
-          ? _self.searchDepth
-          : searchDepth // ignore: cast_nullable_to_non_nullable
-              as SearchRequestSearchDepth,
-      includeImages: null == includeImages
-          ? _self.includeImages
-          : includeImages // ignore: cast_nullable_to_non_nullable
-              as bool,
-      includeAnswer: null == includeAnswer
-          ? _self.includeAnswer
-          : includeAnswer // ignore: cast_nullable_to_non_nullable
-              as bool,
-      includeRawContent: null == includeRawContent
-          ? _self.includeRawContent
-          : includeRawContent // ignore: cast_nullable_to_non_nullable
-              as bool,
-      maxResults: null == maxResults
-          ? _self.maxResults
-          : maxResults // ignore: cast_nullable_to_non_nullable
-              as int,
-      includeDomains: freezed == includeDomains
-          ? _self._includeDomains
-          : includeDomains // ignore: cast_nullable_to_non_nullable
-              as List<String>?,
-      excludeDomains: freezed == excludeDomains
-          ? _self._excludeDomains
-          : excludeDomains // ignore: cast_nullable_to_non_nullable
-              as List<String>?,
-    ));
+    return _then(
+      _SearchRequest(
+        apiKey: freezed == apiKey
+            ? _self.apiKey
+            : apiKey // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        query: null == query
+            ? _self.query
+            : query // ignore: cast_nullable_to_non_nullable
+                  as String,
+        searchDepth: null == searchDepth
+            ? _self.searchDepth
+            : searchDepth // ignore: cast_nullable_to_non_nullable
+                  as SearchRequestSearchDepth,
+        includeImages: null == includeImages
+            ? _self.includeImages
+            : includeImages // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        includeAnswer: null == includeAnswer
+            ? _self.includeAnswer
+            : includeAnswer // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        includeRawContent: null == includeRawContent
+            ? _self.includeRawContent
+            : includeRawContent // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        maxResults: null == maxResults
+            ? _self.maxResults
+            : maxResults // ignore: cast_nullable_to_non_nullable
+                  as int,
+        includeDomains: freezed == includeDomains
+            ? _self._includeDomains
+            : includeDomains // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
+        excludeDomains: freezed == excludeDomains
+            ? _self._excludeDomains
+            : excludeDomains // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
+      ),
+    );
   }
 }
 
@@ -665,57 +698,74 @@ mixin _$SearchResponse {
   @pragma('vm:prefer-inline')
   $SearchResponseCopyWith<SearchResponse> get copyWith =>
       _$SearchResponseCopyWithImpl<SearchResponse>(
-          this as SearchResponse, _$identity);
+        this as SearchResponse,
+        _$identity,
+      );
 
   /// Serializes this SearchResponse to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as SearchResponse;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is SearchResponse &&
-            (identical(other.answer, answer) || other.answer == answer) &&
-            (identical(other.query, query) || other.query == query) &&
-            (identical(other.responseTime, responseTime) ||
-                other.responseTime == responseTime) &&
-            const DeepCollectionEquality().equals(other.images, images) &&
-            const DeepCollectionEquality()
-                .equals(other.followUpQuestions, followUpQuestions) &&
-            const DeepCollectionEquality().equals(other.results, results));
+            (identical(other.answer, _this.answer) ||
+                other.answer == _this.answer) &&
+            (identical(other.query, _this.query) ||
+                other.query == _this.query) &&
+            (identical(other.responseTime, _this.responseTime) ||
+                other.responseTime == _this.responseTime) &&
+            const DeepCollectionEquality().equals(other.images, _this.images) &&
+            const DeepCollectionEquality().equals(
+              other.followUpQuestions,
+              _this.followUpQuestions,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other.results,
+              _this.results,
+            ));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode {
+    final _this = this as SearchResponse;
+    return Object.hash(
       runtimeType,
-      answer,
-      query,
-      responseTime,
-      const DeepCollectionEquality().hash(images),
-      const DeepCollectionEquality().hash(followUpQuestions),
-      const DeepCollectionEquality().hash(results));
+      _this.answer,
+      _this.query,
+      _this.responseTime,
+      const DeepCollectionEquality().hash(_this.images),
+      const DeepCollectionEquality().hash(_this.followUpQuestions),
+      const DeepCollectionEquality().hash(_this.results),
+    );
+  }
 
   @override
   String toString() {
-    return 'SearchResponse(answer: $answer, query: $query, responseTime: $responseTime, images: $images, followUpQuestions: $followUpQuestions, results: $results)';
+    final _this = this as SearchResponse;
+    return 'SearchResponse(answer: ${_this.answer}, query: ${_this.query}, responseTime: ${_this.responseTime}, images: ${_this.images}, followUpQuestions: ${_this.followUpQuestions}, results: ${_this.results})';
   }
 }
 
 /// @nodoc
 abstract mixin class $SearchResponseCopyWith<$Res> {
   factory $SearchResponseCopyWith(
-          SearchResponse value, $Res Function(SearchResponse) _then) =
-      _$SearchResponseCopyWithImpl;
+    SearchResponse value,
+    $Res Function(SearchResponse) _then,
+  ) = _$SearchResponseCopyWithImpl;
   @useResult
-  $Res call(
-      {@JsonKey(includeIfNull: false) String? answer,
-      String query,
-      @JsonKey(name: 'response_time') double responseTime,
-      @JsonKey(includeIfNull: false) List<String>? images,
-      @JsonKey(name: 'follow_up_questions', includeIfNull: false)
-      List<String>? followUpQuestions,
-      List<SearchResult> results});
+  $Res call({
+    @JsonKey(includeIfNull: false) String? answer,
+    String query,
+    @JsonKey(name: 'response_time') double responseTime,
+    @JsonKey(includeIfNull: false) List<String>? images,
+    @JsonKey(name: 'follow_up_questions', includeIfNull: false)
+    List<String>? followUpQuestions,
+    List<SearchResult> results,
+  });
 }
 
 /// @nodoc
@@ -738,32 +788,34 @@ class _$SearchResponseCopyWithImpl<$Res>
     Object? followUpQuestions = freezed,
     Object? results = null,
   }) {
-    return _then(_self.copyWith(
-      answer: freezed == answer
-          ? _self.answer
-          : answer // ignore: cast_nullable_to_non_nullable
-              as String?,
-      query: null == query
-          ? _self.query
-          : query // ignore: cast_nullable_to_non_nullable
-              as String,
-      responseTime: null == responseTime
-          ? _self.responseTime
-          : responseTime // ignore: cast_nullable_to_non_nullable
-              as double,
-      images: freezed == images
-          ? _self.images
-          : images // ignore: cast_nullable_to_non_nullable
-              as List<String>?,
-      followUpQuestions: freezed == followUpQuestions
-          ? _self.followUpQuestions
-          : followUpQuestions // ignore: cast_nullable_to_non_nullable
-              as List<String>?,
-      results: null == results
-          ? _self.results
-          : results // ignore: cast_nullable_to_non_nullable
-              as List<SearchResult>,
-    ));
+    return _then(
+      SearchResponse(
+        answer: freezed == answer
+            ? _self.answer
+            : answer // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        query: null == query
+            ? _self.query
+            : query // ignore: cast_nullable_to_non_nullable
+                  as String,
+        responseTime: null == responseTime
+            ? _self.responseTime
+            : responseTime // ignore: cast_nullable_to_non_nullable
+                  as double,
+        images: freezed == images
+            ? _self.images
+            : images // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
+        followUpQuestions: freezed == followUpQuestions
+            ? _self.followUpQuestions
+            : followUpQuestions // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
+        results: null == results
+            ? _self.results
+            : results // ignore: cast_nullable_to_non_nullable
+                  as List<SearchResult>,
+      ),
+    );
   }
 }
 
@@ -861,21 +913,28 @@ extension SearchResponsePatterns on SearchResponse {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            @JsonKey(includeIfNull: false) String? answer,
-            String query,
-            @JsonKey(name: 'response_time') double responseTime,
-            @JsonKey(includeIfNull: false) List<String>? images,
-            @JsonKey(name: 'follow_up_questions', includeIfNull: false)
-            List<String>? followUpQuestions,
-            List<SearchResult> results)?
-        $default, {
+      @JsonKey(includeIfNull: false) String? answer,
+      String query,
+      @JsonKey(name: 'response_time') double responseTime,
+      @JsonKey(includeIfNull: false) List<String>? images,
+      @JsonKey(name: 'follow_up_questions', includeIfNull: false)
+      List<String>? followUpQuestions,
+      List<SearchResult> results,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _SearchResponse() when $default != null:
-        return $default(_that.answer, _that.query, _that.responseTime,
-            _that.images, _that.followUpQuestions, _that.results);
+        return $default(
+          _that.answer,
+          _that.query,
+          _that.responseTime,
+          _that.images,
+          _that.followUpQuestions,
+          _that.results,
+        );
       case _:
         return orElse();
     }
@@ -897,20 +956,27 @@ extension SearchResponsePatterns on SearchResponse {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            @JsonKey(includeIfNull: false) String? answer,
-            String query,
-            @JsonKey(name: 'response_time') double responseTime,
-            @JsonKey(includeIfNull: false) List<String>? images,
-            @JsonKey(name: 'follow_up_questions', includeIfNull: false)
-            List<String>? followUpQuestions,
-            List<SearchResult> results)
-        $default,
+      @JsonKey(includeIfNull: false) String? answer,
+      String query,
+      @JsonKey(name: 'response_time') double responseTime,
+      @JsonKey(includeIfNull: false) List<String>? images,
+      @JsonKey(name: 'follow_up_questions', includeIfNull: false)
+      List<String>? followUpQuestions,
+      List<SearchResult> results,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _SearchResponse():
-        return $default(_that.answer, _that.query, _that.responseTime,
-            _that.images, _that.followUpQuestions, _that.results);
+        return $default(
+          _that.answer,
+          _that.query,
+          _that.responseTime,
+          _that.images,
+          _that.followUpQuestions,
+          _that.results,
+        );
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -931,20 +997,27 @@ extension SearchResponsePatterns on SearchResponse {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            @JsonKey(includeIfNull: false) String? answer,
-            String query,
-            @JsonKey(name: 'response_time') double responseTime,
-            @JsonKey(includeIfNull: false) List<String>? images,
-            @JsonKey(name: 'follow_up_questions', includeIfNull: false)
-            List<String>? followUpQuestions,
-            List<SearchResult> results)?
-        $default,
+      @JsonKey(includeIfNull: false) String? answer,
+      String query,
+      @JsonKey(name: 'response_time') double responseTime,
+      @JsonKey(includeIfNull: false) List<String>? images,
+      @JsonKey(name: 'follow_up_questions', includeIfNull: false)
+      List<String>? followUpQuestions,
+      List<SearchResult> results,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _SearchResponse() when $default != null:
-        return $default(_that.answer, _that.query, _that.responseTime,
-            _that.images, _that.followUpQuestions, _that.results);
+        return $default(
+          _that.answer,
+          _that.query,
+          _that.responseTime,
+          _that.images,
+          _that.followUpQuestions,
+          _that.results,
+        );
       case _:
         return null;
     }
@@ -954,18 +1027,18 @@ extension SearchResponsePatterns on SearchResponse {
 /// @nodoc
 @JsonSerializable()
 class _SearchResponse extends SearchResponse {
-  const _SearchResponse(
-      {@JsonKey(includeIfNull: false) this.answer,
-      required this.query,
-      @JsonKey(name: 'response_time') required this.responseTime,
-      @JsonKey(includeIfNull: false) final List<String>? images,
-      @JsonKey(name: 'follow_up_questions', includeIfNull: false)
-      final List<String>? followUpQuestions,
-      required final List<SearchResult> results})
-      : _images = images,
-        _followUpQuestions = followUpQuestions,
-        _results = results,
-        super._();
+  const _SearchResponse({
+    @JsonKey(includeIfNull: false) this.answer,
+    required this.query,
+    @JsonKey(name: 'response_time') required this.responseTime,
+    @JsonKey(includeIfNull: false) List<String>? images,
+    @JsonKey(name: 'follow_up_questions', includeIfNull: false)
+    List<String>? followUpQuestions,
+    required List<SearchResult> results,
+  }) : _images = images,
+       _followUpQuestions = followUpQuestions,
+       _results = results,
+       super._();
   factory _SearchResponse.fromJson(Map<String, dynamic> json) =>
       _$SearchResponseFromJson(json);
 
@@ -1033,9 +1106,7 @@ class _SearchResponse extends SearchResponse {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$SearchResponseToJson(
-      this,
-    );
+    return _$SearchResponseToJson(this);
   }
 
   @override
@@ -1047,22 +1118,27 @@ class _SearchResponse extends SearchResponse {
             (identical(other.query, query) || other.query == query) &&
             (identical(other.responseTime, responseTime) ||
                 other.responseTime == responseTime) &&
-            const DeepCollectionEquality().equals(other._images, _images) &&
-            const DeepCollectionEquality()
-                .equals(other._followUpQuestions, _followUpQuestions) &&
-            const DeepCollectionEquality().equals(other._results, _results));
+            const DeepCollectionEquality().equals(other.images, _images) &&
+            const DeepCollectionEquality().equals(
+              other.followUpQuestions,
+              _followUpQuestions,
+            ) &&
+            const DeepCollectionEquality().equals(other.results, _results));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode {
+    return Object.hash(
       runtimeType,
       answer,
       query,
       responseTime,
       const DeepCollectionEquality().hash(_images),
       const DeepCollectionEquality().hash(_followUpQuestions),
-      const DeepCollectionEquality().hash(_results));
+      const DeepCollectionEquality().hash(_results),
+    );
+  }
 
   @override
   String toString() {
@@ -1074,18 +1150,20 @@ class _SearchResponse extends SearchResponse {
 abstract mixin class _$SearchResponseCopyWith<$Res>
     implements $SearchResponseCopyWith<$Res> {
   factory _$SearchResponseCopyWith(
-          _SearchResponse value, $Res Function(_SearchResponse) _then) =
-      __$SearchResponseCopyWithImpl;
+    _SearchResponse value,
+    $Res Function(_SearchResponse) _then,
+  ) = __$SearchResponseCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(includeIfNull: false) String? answer,
-      String query,
-      @JsonKey(name: 'response_time') double responseTime,
-      @JsonKey(includeIfNull: false) List<String>? images,
-      @JsonKey(name: 'follow_up_questions', includeIfNull: false)
-      List<String>? followUpQuestions,
-      List<SearchResult> results});
+  $Res call({
+    @JsonKey(includeIfNull: false) String? answer,
+    String query,
+    @JsonKey(name: 'response_time') double responseTime,
+    @JsonKey(includeIfNull: false) List<String>? images,
+    @JsonKey(name: 'follow_up_questions', includeIfNull: false)
+    List<String>? followUpQuestions,
+    List<SearchResult> results,
+  });
 }
 
 /// @nodoc
@@ -1108,32 +1186,34 @@ class __$SearchResponseCopyWithImpl<$Res>
     Object? followUpQuestions = freezed,
     Object? results = null,
   }) {
-    return _then(_SearchResponse(
-      answer: freezed == answer
-          ? _self.answer
-          : answer // ignore: cast_nullable_to_non_nullable
-              as String?,
-      query: null == query
-          ? _self.query
-          : query // ignore: cast_nullable_to_non_nullable
-              as String,
-      responseTime: null == responseTime
-          ? _self.responseTime
-          : responseTime // ignore: cast_nullable_to_non_nullable
-              as double,
-      images: freezed == images
-          ? _self._images
-          : images // ignore: cast_nullable_to_non_nullable
-              as List<String>?,
-      followUpQuestions: freezed == followUpQuestions
-          ? _self._followUpQuestions
-          : followUpQuestions // ignore: cast_nullable_to_non_nullable
-              as List<String>?,
-      results: null == results
-          ? _self._results
-          : results // ignore: cast_nullable_to_non_nullable
-              as List<SearchResult>,
-    ));
+    return _then(
+      _SearchResponse(
+        answer: freezed == answer
+            ? _self.answer
+            : answer // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        query: null == query
+            ? _self.query
+            : query // ignore: cast_nullable_to_non_nullable
+                  as String,
+        responseTime: null == responseTime
+            ? _self.responseTime
+            : responseTime // ignore: cast_nullable_to_non_nullable
+                  as double,
+        images: freezed == images
+            ? _self._images
+            : images // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
+        followUpQuestions: freezed == followUpQuestions
+            ? _self._followUpQuestions
+            : followUpQuestions // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
+        results: null == results
+            ? _self._results
+            : results // ignore: cast_nullable_to_non_nullable
+                  as List<SearchResult>,
+      ),
+    );
   }
 }
 
@@ -1161,47 +1241,65 @@ mixin _$SearchResult {
   @pragma('vm:prefer-inline')
   $SearchResultCopyWith<SearchResult> get copyWith =>
       _$SearchResultCopyWithImpl<SearchResult>(
-          this as SearchResult, _$identity);
+        this as SearchResult,
+        _$identity,
+      );
 
   /// Serializes this SearchResult to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as SearchResult;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is SearchResult &&
-            (identical(other.title, title) || other.title == title) &&
-            (identical(other.url, url) || other.url == url) &&
-            (identical(other.content, content) || other.content == content) &&
-            (identical(other.rawContent, rawContent) ||
-                other.rawContent == rawContent) &&
-            (identical(other.score, score) || other.score == score));
+            (identical(other.title, _this.title) ||
+                other.title == _this.title) &&
+            (identical(other.url, _this.url) || other.url == _this.url) &&
+            (identical(other.content, _this.content) ||
+                other.content == _this.content) &&
+            (identical(other.rawContent, _this.rawContent) ||
+                other.rawContent == _this.rawContent) &&
+            (identical(other.score, _this.score) ||
+                other.score == _this.score));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, title, url, content, rawContent, score);
+  int get hashCode {
+    final _this = this as SearchResult;
+    return Object.hash(
+      runtimeType,
+      _this.title,
+      _this.url,
+      _this.content,
+      _this.rawContent,
+      _this.score,
+    );
+  }
 
   @override
   String toString() {
-    return 'SearchResult(title: $title, url: $url, content: $content, rawContent: $rawContent, score: $score)';
+    final _this = this as SearchResult;
+    return 'SearchResult(title: ${_this.title}, url: ${_this.url}, content: ${_this.content}, rawContent: ${_this.rawContent}, score: ${_this.score})';
   }
 }
 
 /// @nodoc
 abstract mixin class $SearchResultCopyWith<$Res> {
   factory $SearchResultCopyWith(
-          SearchResult value, $Res Function(SearchResult) _then) =
-      _$SearchResultCopyWithImpl;
+    SearchResult value,
+    $Res Function(SearchResult) _then,
+  ) = _$SearchResultCopyWithImpl;
   @useResult
-  $Res call(
-      {String title,
-      String url,
-      String content,
-      @JsonKey(name: 'raw_content', includeIfNull: false) String? rawContent,
-      double score});
+  $Res call({
+    String title,
+    String url,
+    String content,
+    @JsonKey(name: 'raw_content', includeIfNull: false) String? rawContent,
+    double score,
+  });
 }
 
 /// @nodoc
@@ -1222,28 +1320,30 @@ class _$SearchResultCopyWithImpl<$Res> implements $SearchResultCopyWith<$Res> {
     Object? rawContent = freezed,
     Object? score = null,
   }) {
-    return _then(_self.copyWith(
-      title: null == title
-          ? _self.title
-          : title // ignore: cast_nullable_to_non_nullable
-              as String,
-      url: null == url
-          ? _self.url
-          : url // ignore: cast_nullable_to_non_nullable
-              as String,
-      content: null == content
-          ? _self.content
-          : content // ignore: cast_nullable_to_non_nullable
-              as String,
-      rawContent: freezed == rawContent
-          ? _self.rawContent
-          : rawContent // ignore: cast_nullable_to_non_nullable
-              as String?,
-      score: null == score
-          ? _self.score
-          : score // ignore: cast_nullable_to_non_nullable
-              as double,
-    ));
+    return _then(
+      SearchResult(
+        title: null == title
+            ? _self.title
+            : title // ignore: cast_nullable_to_non_nullable
+                  as String,
+        url: null == url
+            ? _self.url
+            : url // ignore: cast_nullable_to_non_nullable
+                  as String,
+        content: null == content
+            ? _self.content
+            : content // ignore: cast_nullable_to_non_nullable
+                  as String,
+        rawContent: freezed == rawContent
+            ? _self.rawContent
+            : rawContent // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        score: null == score
+            ? _self.score
+            : score // ignore: cast_nullable_to_non_nullable
+                  as double,
+      ),
+    );
   }
 }
 
@@ -1341,20 +1441,25 @@ extension SearchResultPatterns on SearchResult {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            String title,
-            String url,
-            String content,
-            @JsonKey(name: 'raw_content', includeIfNull: false)
-            String? rawContent,
-            double score)?
-        $default, {
+      String title,
+      String url,
+      String content,
+      @JsonKey(name: 'raw_content', includeIfNull: false) String? rawContent,
+      double score,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _SearchResult() when $default != null:
-        return $default(_that.title, _that.url, _that.content, _that.rawContent,
-            _that.score);
+        return $default(
+          _that.title,
+          _that.url,
+          _that.content,
+          _that.rawContent,
+          _that.score,
+        );
       case _:
         return orElse();
     }
@@ -1376,19 +1481,24 @@ extension SearchResultPatterns on SearchResult {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            String title,
-            String url,
-            String content,
-            @JsonKey(name: 'raw_content', includeIfNull: false)
-            String? rawContent,
-            double score)
-        $default,
+      String title,
+      String url,
+      String content,
+      @JsonKey(name: 'raw_content', includeIfNull: false) String? rawContent,
+      double score,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _SearchResult():
-        return $default(_that.title, _that.url, _that.content, _that.rawContent,
-            _that.score);
+        return $default(
+          _that.title,
+          _that.url,
+          _that.content,
+          _that.rawContent,
+          _that.score,
+        );
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -1409,19 +1519,24 @@ extension SearchResultPatterns on SearchResult {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            String title,
-            String url,
-            String content,
-            @JsonKey(name: 'raw_content', includeIfNull: false)
-            String? rawContent,
-            double score)?
-        $default,
+      String title,
+      String url,
+      String content,
+      @JsonKey(name: 'raw_content', includeIfNull: false) String? rawContent,
+      double score,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _SearchResult() when $default != null:
-        return $default(_that.title, _that.url, _that.content, _that.rawContent,
-            _that.score);
+        return $default(
+          _that.title,
+          _that.url,
+          _that.content,
+          _that.rawContent,
+          _that.score,
+        );
       case _:
         return null;
     }
@@ -1431,13 +1546,13 @@ extension SearchResultPatterns on SearchResult {
 /// @nodoc
 @JsonSerializable()
 class _SearchResult extends SearchResult {
-  const _SearchResult(
-      {required this.title,
-      required this.url,
-      required this.content,
-      @JsonKey(name: 'raw_content', includeIfNull: false) this.rawContent,
-      required this.score})
-      : super._();
+  const _SearchResult({
+    required this.title,
+    required this.url,
+    required this.content,
+    @JsonKey(name: 'raw_content', includeIfNull: false) this.rawContent,
+    required this.score,
+  }) : super._();
   factory _SearchResult.fromJson(Map<String, dynamic> json) =>
       _$SearchResultFromJson(json);
 
@@ -1472,9 +1587,7 @@ class _SearchResult extends SearchResult {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$SearchResultToJson(
-      this,
-    );
+    return _$SearchResultToJson(this);
   }
 
   @override
@@ -1492,8 +1605,9 @@ class _SearchResult extends SearchResult {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, title, url, content, rawContent, score);
+  int get hashCode {
+    return Object.hash(runtimeType, title, url, content, rawContent, score);
+  }
 
   @override
   String toString() {
@@ -1505,16 +1619,18 @@ class _SearchResult extends SearchResult {
 abstract mixin class _$SearchResultCopyWith<$Res>
     implements $SearchResultCopyWith<$Res> {
   factory _$SearchResultCopyWith(
-          _SearchResult value, $Res Function(_SearchResult) _then) =
-      __$SearchResultCopyWithImpl;
+    _SearchResult value,
+    $Res Function(_SearchResult) _then,
+  ) = __$SearchResultCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {String title,
-      String url,
-      String content,
-      @JsonKey(name: 'raw_content', includeIfNull: false) String? rawContent,
-      double score});
+  $Res call({
+    String title,
+    String url,
+    String content,
+    @JsonKey(name: 'raw_content', includeIfNull: false) String? rawContent,
+    double score,
+  });
 }
 
 /// @nodoc
@@ -1536,29 +1652,29 @@ class __$SearchResultCopyWithImpl<$Res>
     Object? rawContent = freezed,
     Object? score = null,
   }) {
-    return _then(_SearchResult(
-      title: null == title
-          ? _self.title
-          : title // ignore: cast_nullable_to_non_nullable
-              as String,
-      url: null == url
-          ? _self.url
-          : url // ignore: cast_nullable_to_non_nullable
-              as String,
-      content: null == content
-          ? _self.content
-          : content // ignore: cast_nullable_to_non_nullable
-              as String,
-      rawContent: freezed == rawContent
-          ? _self.rawContent
-          : rawContent // ignore: cast_nullable_to_non_nullable
-              as String?,
-      score: null == score
-          ? _self.score
-          : score // ignore: cast_nullable_to_non_nullable
-              as double,
-    ));
+    return _then(
+      _SearchResult(
+        title: null == title
+            ? _self.title
+            : title // ignore: cast_nullable_to_non_nullable
+                  as String,
+        url: null == url
+            ? _self.url
+            : url // ignore: cast_nullable_to_non_nullable
+                  as String,
+        content: null == content
+            ? _self.content
+            : content // ignore: cast_nullable_to_non_nullable
+                  as String,
+        rawContent: freezed == rawContent
+            ? _self.rawContent
+            : rawContent // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        score: null == score
+            ? _self.score
+            : score // ignore: cast_nullable_to_non_nullable
+                  as double,
+      ),
+    );
   }
 }
-
-// dart format on

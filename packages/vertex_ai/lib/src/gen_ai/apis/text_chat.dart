@@ -27,10 +27,10 @@ import '../models/models.dart';
 class VertexAITextChatModelApi {
   /// {@macro vertex_ai_text_chat_model_api}
   VertexAITextChatModelApi({
-    required final ProjectsLocationsPublishersModelsResource modelsApi,
+    required this._modelsApi,
     required this.project,
     required this.location,
-  }) : _modelsApi = modelsApi;
+  });
 
   /// The Google Cloud project to use for interacting with Vertex AI.
   final String project;

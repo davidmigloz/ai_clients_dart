@@ -60,10 +60,9 @@ class ReasoningDetail {
     required this.text,
     required this.data,
     required this.signature,
-    required Map<String, dynamic> additionalProperties,
-    required Map<String, dynamic>? rawJson,
-  }) : _additionalProperties = additionalProperties,
-       _rawJson = rawJson;
+    required this._additionalProperties,
+    required this._rawJson,
+  });
 
   /// Creates a programmatic [ReasoningDetail] with future provider fields.
   ///

@@ -38,12 +38,10 @@ class UpdateCredentialParams {
   /// Omit a field to preserve its current value on the server.
   /// Pass `null` explicitly to clear a clearable field.
   const UpdateCredentialParams({
-    Object? auth = _notSet,
-    Object? displayName = _notSet,
-    Object? metadata = _notSet,
-  }) : _auth = auth,
-       _displayName = displayName,
-       _metadata = metadata;
+    this._auth = _notSet,
+    this._displayName = _notSet,
+    this._metadata = _notSet,
+  });
 
   /// Creates an [UpdateCredentialParams] from JSON.
   factory UpdateCredentialParams.fromJson(Map<String, dynamic> json) {

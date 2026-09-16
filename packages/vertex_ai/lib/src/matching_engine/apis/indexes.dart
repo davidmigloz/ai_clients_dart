@@ -13,10 +13,10 @@ import 'indexes_operations.dart';
 class VertexAIIndexesApi {
   /// {@macro vertex_ai_indexes_api}
   VertexAIIndexesApi({
-    required final ProjectsLocationsIndexesResource indexesApi,
+    required this._indexesApi,
     required this.project,
     required this.location,
-  }) : _indexesApi = indexesApi;
+  });
 
   /// The Google Cloud project to use for interacting with Vertex AI.
   final String project;

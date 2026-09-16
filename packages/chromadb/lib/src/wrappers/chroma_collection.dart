@@ -63,15 +63,13 @@ class ChromaCollection {
 
   /// Creates a ChromaCollection wrapper.
   ChromaCollection({
-    required RecordsResource records,
-    required CollectionsResource collections,
-    FunctionsResource? functions,
+    required this._records,
+    required this._collections,
+    this._functions,
     required this.metadata,
     this.embeddingFunction,
     this.dataLoader,
-  }) : _records = records,
-       _collections = collections,
-       _functions = functions;
+  });
 
   /// The collection's unique identifier.
   String get id => metadata.id;
