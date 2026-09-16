@@ -1,6 +1,3 @@
-@TestOn('vm')
-library;
-
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -14,7 +11,8 @@ void main() {
 
     const fileJson =
         '{"id":"file-123","object":"file","bytes":3,"created_at":1,'
-        '"filename":"clip.wav","purpose":"audio"}';
+        '"filename":"clip.wav","purpose":"audio",'
+        '"sample_type":null,"source":"upload"}';
 
     MistralClient clientReturning(String body, {int status = 200}) {
       final mockClient = MockClient((request) async {
@@ -25,6 +23,7 @@ void main() {
           headers: {'content-type': 'application/json'},
         );
       });
+      addTearDown(mockClient.close);
       return MistralClient(
         config: const MistralConfig(authProvider: ApiKeyProvider('test-key')),
         httpClient: mockClient,
@@ -36,7 +35,7 @@ void main() {
       addTearDown(client.close);
 
       final file = await client.files.upload(
-        bytes: [1, 2, 3],
+        bytes: [0, 128, 255],
         fileName: 'clip.wav',
         purpose: FilePurpose.audio,
       );
@@ -51,9 +50,81 @@ void main() {
         startsWith('multipart/form-data; boundary='),
       );
 
-      final body = utf8.decode(captured.bodyBytes);
+      final body = latin1.decode(captured.bodyBytes);
       expect(body, contains('name="file"; filename="clip.wav"'));
-      expect(body, contains('name="purpose"\r\n\r\naudio'));
+      expect(body, contains(latin1.decode([0, 128, 255])));
+      expect(body, contains('name="purpose"\r\n\r\naudio\r\n'));
+    });
+
+    test('upload replays binary data after a rate limit', () async {
+      final attempts = <http.Request>[];
+      final mockClient = MockClient((request) async {
+        attempts.add(request);
+        return attempts.length == 1
+            ? http.Response('{"message":"rate limited"}', 429)
+            : http.Response(fileJson, 200);
+      });
+      addTearDown(mockClient.close);
+      final client = MistralClient(
+        config: const MistralConfig(
+          authProvider: ApiKeyProvider('test-key'),
+          retryPolicy: RetryPolicy(
+            maxRetries: 1,
+            initialDelay: Duration.zero,
+            maxDelay: Duration.zero,
+            jitter: 0,
+          ),
+        ),
+        httpClient: mockClient,
+      );
+      addTearDown(client.close);
+
+      final file = await client.files.upload(
+        bytes: [0, 128, 255],
+        fileName: 'clip.wav',
+        purpose: FilePurpose.audio,
+      );
+
+      expect(file.id, 'file-123');
+      expect(attempts, hasLength(2));
+      for (final attempt in attempts) {
+        expect(attempt.headers['authorization'], 'Bearer test-key');
+        expect(attempt.headers['x-request-id'], isNotEmpty);
+        expect(
+          attempt.headers['x-request-id'],
+          attempts.first.headers['x-request-id'],
+        );
+        final boundary = attempt.headers['content-type']!.split('boundary=')[1];
+        final body = latin1.decode(attempt.bodyBytes);
+        expect(body, startsWith('--$boundary\r\n'));
+        expect(body, endsWith('--$boundary--\r\n'));
+        expect(body, contains('name="file"; filename="clip.wav"'));
+        expect(body, contains(latin1.decode([0, 128, 255])));
+        expect(body, contains('name="purpose"\r\n\r\naudio\r\n'));
+      }
+    });
+
+    test('upload preserves an explicit authorization header', () async {
+      final mockClient = MockClient((request) async {
+        expect(request.headers['authorization'], 'Bearer override-key');
+        return http.Response(fileJson, 200);
+      });
+      addTearDown(mockClient.close);
+      final client = MistralClient(
+        config: const MistralConfig(
+          authProvider: ApiKeyProvider('test-key'),
+          defaultHeaders: {'authorization': 'Bearer override-key'},
+        ),
+        httpClient: mockClient,
+      );
+      addTearDown(client.close);
+
+      final file = await client.files.upload(
+        bytes: [0, 128, 255],
+        fileName: 'clip.wav',
+        purpose: FilePurpose.audio,
+      );
+      expect(file.id, 'file-123');
     });
 
     test('upload maps a 401 response to AuthenticationException', () async {

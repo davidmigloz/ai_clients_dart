@@ -63,9 +63,8 @@ void main() {
           fileName: 'harvard.wav',
           purpose: FilePurpose.audio,
         );
-        expect(uploaded.id, isNotEmpty);
-
         try {
+          expect(uploaded.id, isNotEmpty);
           final retrieved = await client!.files.retrieve(fileId: uploaded.id);
           expect(retrieved.id, uploaded.id);
         } finally {
