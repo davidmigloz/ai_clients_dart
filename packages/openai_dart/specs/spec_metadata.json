@@ -2,8 +2,8 @@
   "specs": {
     "main": {
       "current_version": "2.3.0",
-      "last_fetched": "2026-07-31T22:12:09.651705Z",
-      "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai/openai-31fcc3c97e5c432754bf0b72c5d5abbe1493573f0ca888af914baf81188b453e.yml",
+      "last_fetched": "2026-09-16T12:18:13.253574Z",
+      "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/main/openapi.json",
       "title": "OpenAI API",
       "version_history": [
         {
@@ -40,6 +40,12 @@
           "fetched_at": "2026-07-11T09:28:29.337787Z",
           "note": "356010b… replaced by 31fcc3c… on 2026-07-31 to pick up the July 2026 API surface: Fast mode service tier (service_tier: fast, replacing Priority Processing), the gpt-transcribe/gpt-live-transcribe transcription features (keywords, multi-language input, TranscriptionLanguage detection results), and the content provenance checks endpoint (POST /content_provenance_checks, C2PA/SynthID detection). Spend limits, service-account API keys, project API key owner_project_access, tenant.* audit-log events, and usage token detail fields are admin-only and excluded from coverage; the webhook schema swap (WebhookSafetyIdentifierBlocked removed, WebhookLiveCallIncoming added) is out of scope (no webhook support).",
           "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai/openai-356010b9b9fd6228b457b8fcfa376cf4928a8f3bd4728e7ba5e4b6b5ef4f5843.yml",
+          "version": "2.3.0"
+        },
+        {
+          "fetched_at": "2026-07-31T22:12:09.651705Z",
+          "note": "Replaced with the public OpenAI OpenAPI repository on 2026-09-16. Image generation/edit changes reviewed against the September 8 GPT Image 2.5 release and the official Python SDK. Other new API surfaces are outside this image update.",
+          "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai/openai-31fcc3c97e5c432754bf0b72c5d5abbe1493573f0ca888af914baf81188b453e.yml",
           "version": "2.3.0"
         }
       ]

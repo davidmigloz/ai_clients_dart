@@ -1,5 +1,5 @@
 // ignore_for_file: avoid_print
-/// Example demonstrating GPT Image 2 generation and editing.
+/// Example demonstrating GPT Image 2.5 generation and editing.
 ///
 /// Run with: dart run example/images_example.dart
 library;
@@ -13,12 +13,12 @@ Future<void> main() async {
   final client = OpenAIClient.fromEnvironment();
 
   try {
-    // Basic GPT Image 2 generation.
-    print('=== GPT Image 2 — Basic Generation ===\n');
+    // Basic GPT Image 2.5 generation.
+    print('=== GPT Image 2.5 — Basic Generation ===\n');
 
     final basic = await client.images.generate(
       const ImageGenerationRequest(
-        model: ImageModels.gptImage2,
+        model: ImageModels.gptImage25Flare,
         prompt: 'A white Siamese cat wearing a top hat, digital art',
         size: ImageSize.size1024x1024,
       ),
@@ -28,14 +28,14 @@ Future<void> main() async {
     _printUsage(basic);
 
     // Flagship: transparent background + flexible size + webp output.
-    print('\n=== GPT Image 2 — Flagship Features ===\n');
+    print('\n=== GPT Image 2.5 — Flagship Features ===\n');
 
     final flagship = await client.images.generate(
       const ImageGenerationRequest(
-        model: ImageModels.gptImage2,
+        model: ImageModels.gptImage25Flare,
         prompt: 'A cute robot holding a single flower on a white card',
-        size: ImageSize.size1536x1024, // Flexible landscape size.
-        quality: ImageQuality.high, // GPT image quality tiers.
+        size: ImageSize.custom('1536x864'), // Custom landscape size.
+        quality: ImageQuality.xhigh, // GPT Image 2.5 quality tier.
         background: ImageBackground.transparent, // Transparent PNG/WebP only.
         outputFormat: ImageOutputFormat.webp,
         outputCompression: 80,
@@ -46,8 +46,8 @@ Future<void> main() async {
     _saveFirstImage(flagship, path: 'robot.webp');
     _printUsage(flagship);
 
-    // Image edit with high input fidelity (GPT Image 2 edit surface).
-    print('\n=== GPT Image 2 — Edit with High Input Fidelity ===\n');
+    // Precise editing with Sunburst.
+    print('\n=== GPT Image 2.5 — Precise Editing ===\n');
 
     final sourceFile = File('cat.png');
     if (sourceFile.existsSync()) {
@@ -56,10 +56,9 @@ Future<void> main() async {
           image: sourceFile.readAsBytesSync(),
           imageFilename: 'cat.png',
           prompt: 'Make the cat wear a tiny monocle too',
-          model: ImageModels.gptImage2,
-          inputFidelity: ImageInputFidelity.high,
+          model: ImageModels.gptImage25Sunburst,
           size: ImageSize.size1024x1024,
-          quality: ImageQuality.high,
+          quality: ImageQuality.max,
         ),
       );
 
@@ -70,11 +69,11 @@ Future<void> main() async {
     }
 
     // Streaming generation with partial images.
-    print('\n=== GPT Image 2 — Streaming (partial + final) ===\n');
+    print('\n=== GPT Image 2.5 — Streaming (partial + final) ===\n');
 
     final stream = client.images.generateStream(
       const ImageGenerationRequest(
-        model: ImageModels.gptImage2,
+        model: ImageModels.gptImage25Flare,
         prompt: 'A simple orange circle on a white card',
         size: ImageSize.size1024x1024,
         partialImages: 2,
@@ -109,11 +108,11 @@ Future<void> main() async {
     }
 
     // Multiple images in one call.
-    print('\n=== GPT Image 2 — Multiple Images ===\n');
+    print('\n=== GPT Image 2.5 — Multiple Images ===\n');
 
     final multi = await client.images.generate(
       const ImageGenerationRequest(
-        model: ImageModels.gptImage2,
+        model: ImageModels.gptImage25Flare,
         prompt: 'A minimalist logo for a coffee shop',
         n: 2,
         size: ImageSize.size1024x1024,
@@ -138,7 +137,7 @@ void _saveFirstImage(ImageResponse response, {required String path}) {
     File(path).writeAsBytesSync(base64Decode(b64));
     print('Saved $path (${b64.length} base64 chars)');
   } else if (image.url case final url?) {
-    // DALL-E URL path — GPT Image 2 always returns base64.
+    // DALL-E URL path — GPT Image 2.5 always returns base64.
     print('URL: $url');
   }
   if (image.revisedPrompt case final revised?) {

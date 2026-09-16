@@ -71,19 +71,19 @@ class ImageEditJsonRequest {
   /// Optional mask reference.
   final ImageReference? mask;
 
-  /// Optional model to use (e.g. `gpt-image-2`).
+  /// Optional model (e.g. `gpt-image-2.5-sunburst` or `gpt-image-2.5-flare`).
   final String? model;
 
   /// Number of images to generate.
   final int? n;
 
-  /// Output quality.
+  /// Output quality. GPT Image 2.5 also supports `xhigh` and `max`.
   final ImageQuality? quality;
 
   /// Input fidelity.
   final ImageInputFidelity? inputFidelity;
 
-  /// Requested output size.
+  /// Requested output size. Use [ImageSize.custom] for custom resolutions.
   final ImageSize? size;
 
   /// End-user identifier.

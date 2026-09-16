@@ -13,17 +13,17 @@ import 'streaming_resource.dart';
 /// Resource for image operations.
 ///
 /// Provides image generation, editing, and variation capabilities using
-/// GPT image models (e.g. `gpt-image-2`) and DALL-E.
+/// GPT image models (e.g. `gpt-image-2.5-flare`) and DALL-E.
 ///
 /// Access this resource through [OpenAIClient.images].
 ///
 /// ## Example
 ///
 /// ```dart
-/// // Generate an image with GPT Image 2
+/// // Generate an image with GPT Image 2.5
 /// final response = await client.images.generate(
 ///   ImageGenerationRequest(
-///     model: ImageModels.gptImage2,
+///     model: ImageModels.gptImage25Flare,
 ///     prompt: 'A white cat sitting on a windowsill',
 ///     size: ImageSize.size1024x1024,
 ///     background: ImageBackground.transparent,
@@ -70,7 +70,7 @@ class ImagesResource extends ResourceBase with StreamingResource {
   /// ```dart
   /// final response = await client.images.generate(
   ///   ImageGenerationRequest(
-  ///     model: ImageModels.gptImage2,
+  ///     model: ImageModels.gptImage25Flare,
   ///     prompt: 'A beautiful sunset over mountains',
   ///     size: ImageSize.size1536x1024,
   ///     quality: ImageQuality.high,
@@ -113,7 +113,7 @@ class ImagesResource extends ResourceBase with StreamingResource {
   /// ```dart
   /// final stream = client.images.generateStream(
   ///   ImageGenerationRequest(
-  ///     model: ImageModels.gptImage2,
+  ///     model: ImageModels.gptImage25Flare,
   ///     prompt: 'A white cat wearing a top hat',
   ///     partialImages: 2,
   ///   ),
@@ -187,8 +187,8 @@ class ImagesResource extends ResourceBase with StreamingResource {
   ///     image: imageBytes,
   ///     imageFilename: 'original.png',
   ///     prompt: 'Add a rainbow in the sky',
-  ///     model: ImageModels.gptImage2,
-  ///     inputFidelity: ImageInputFidelity.high,
+  ///     model: ImageModels.gptImage25Flare,
+  ///     quality: ImageQuality.max,
   ///   ),
   /// );
   /// ```

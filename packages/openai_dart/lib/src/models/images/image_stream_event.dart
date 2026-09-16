@@ -12,11 +12,10 @@ import 'image_response.dart';
 /// [ImagesResource.generateStream].
 ///
 /// Unknown event types are surfaced as [ImageGenUnknownEvent] with the raw
-/// JSON preserved. Typed fields ([ImageSize], [ImageQuality],
-/// [ImageBackground], [ImageOutputFormat]) fall back to their `.unknown`
-/// variant when the server emits a value outside the current spec — for
-/// example, partial-image events sometimes carry transient sizes like
-/// `1254x1254`.
+/// JSON preserved. [ImageSize] preserves custom and transient dimensions,
+/// such as `1254x1254`. Enum fields ([ImageQuality], [ImageBackground],
+/// [ImageOutputFormat]) fall back to their `.unknown` variant for values
+/// outside the current spec.
 @immutable
 sealed class ImageGenStreamEvent {
   const ImageGenStreamEvent();
@@ -78,7 +77,7 @@ class ImageGenPartialImageEvent extends ImageGenStreamEvent {
   /// Unix timestamp when the event was created.
   final int createdAt;
 
-  /// Image size. May be [ImageSize.unknown] for out-of-spec values.
+  /// Image size, preserving custom or transient dimensions.
   final ImageSize size;
 
   /// Image quality. May be [ImageQuality.unknown] for out-of-spec values.
@@ -176,7 +175,7 @@ class ImageGenCompletedEvent extends ImageGenStreamEvent {
   /// Unix timestamp when the event was created.
   final int createdAt;
 
-  /// Final image size. May be [ImageSize.unknown] for out-of-spec values.
+  /// Final image size, preserving custom dimensions.
   final ImageSize size;
 
   /// Final image quality.
@@ -342,7 +341,7 @@ class ImageEditPartialImageEvent extends ImageEditStreamEvent {
   /// Unix timestamp when the event was created.
   final int createdAt;
 
-  /// Image size. May be [ImageSize.unknown] for out-of-spec values.
+  /// Image size, preserving custom or transient dimensions.
   final ImageSize size;
 
   /// Image quality.

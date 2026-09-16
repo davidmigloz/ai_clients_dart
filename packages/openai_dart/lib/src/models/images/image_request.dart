@@ -7,14 +7,14 @@ import 'image_common.dart';
 
 /// A request to generate images from a text prompt.
 ///
-/// Supports DALL-E and GPT image models (including `gpt-image-2`).
+/// Supports DALL-E and GPT image models (including GPT Image 2.5).
 ///
 /// ## Example
 ///
 /// ```dart
 /// final request = ImageGenerationRequest(
 ///   prompt: 'A white cat wearing a top hat',
-///   model: 'gpt-image-2',
+///   model: 'gpt-image-2.5-flare',
 ///   size: ImageSize.size1024x1024,
 ///   quality: ImageQuality.high,
 ///   background: ImageBackground.transparent,
@@ -85,8 +85,10 @@ class ImageGenerationRequest {
   /// The model to use for generation.
   ///
   /// Examples:
-  /// - `gpt-image-2` — flagship GPT image model (token-based pricing,
-  ///   flexible sizes, high-fidelity inputs, Batch API support)
+  /// - `gpt-image-2.5-flare` — fast generation and editing
+  /// - `gpt-image-2.5-sunburst` — precise editing and detailed creative work
+  /// - Their `2026-09-08` snapshots
+  /// - `gpt-image-2` and its `2026-04-21` snapshot
   /// - `gpt-image-1.5`, `gpt-image-1`, `gpt-image-1-mini`
   /// - `dall-e-3`, `dall-e-2`
   final String? model;
@@ -100,7 +102,7 @@ class ImageGenerationRequest {
   /// The quality of the generated images.
   ///
   /// `standard`/`hd` apply to DALL-E 3. `low`/`medium`/`high`/`auto` apply to
-  /// GPT image models.
+  /// GPT image models. GPT Image 2.5 also supports `xhigh` and `max`.
   final ImageQuality? quality;
 
   /// The format for the generated images.
@@ -124,7 +126,8 @@ class ImageGenerationRequest {
 
   /// Transparency of the background.
   ///
-  /// Only supported for GPT image models.
+  /// Only supported for GPT image models. Transparent backgrounds require
+  /// PNG or WebP output; see [ImageBackground].
   final ImageBackground? background;
 
   /// Content-moderation level.
@@ -262,14 +265,17 @@ class ImageGenerationRequest {
   @override
   String toString() =>
       'ImageGenerationRequest(prompt: ${prompt.length} chars, model: $model, '
-      'size: $size, quality: $quality, background: $background, '
-      'outputFormat: $outputFormat)';
+      'n: $n, size: $size, quality: $quality, responseFormat: $responseFormat, '
+      'style: $style, user: $user, background: $background, '
+      'moderation: $moderation, outputFormat: $outputFormat, '
+      'outputCompression: $outputCompression, stream: $stream, '
+      'partialImages: $partialImages)';
 }
 
 /// A request to edit an existing image via multipart upload.
 ///
 /// Creates edits or extensions of an existing image using a prompt. For
-/// GPT image models (e.g. `gpt-image-2`), supports high-fidelity inputs,
+/// GPT image models (e.g. `gpt-image-2.5-sunburst`), supports image inputs,
 /// custom backgrounds, output format, and token-based pricing.
 ///
 /// ## Example
@@ -279,8 +285,8 @@ class ImageGenerationRequest {
 ///   image: originalImageBytes,
 ///   imageFilename: 'original.png',
 ///   prompt: 'Add a rainbow in the sky',
-///   model: 'gpt-image-2',
-///   inputFidelity: ImageInputFidelity.high,
+///   model: 'gpt-image-2.5-sunburst',
+///   quality: ImageQuality.max,
 /// );
 /// ```
 @immutable
@@ -331,14 +337,15 @@ class ImageEditRequest {
 
   /// The model to use.
   ///
-  /// Examples: `gpt-image-2`, `gpt-image-1.5`, `gpt-image-1-mini`,
-  /// `chatgpt-image-latest`, `dall-e-2`.
+  /// Examples: `gpt-image-2.5-sunburst`, `gpt-image-2.5-flare`, their
+  /// `2026-09-08` snapshots, and `gpt-image-2`.
   final String? model;
 
   /// The number of images to generate.
   final int? n;
 
-  /// The size of the generated images.
+  /// The size of the generated images. Use [ImageSize.custom] for custom
+  /// resolutions on GPT Image 2 and 2.5.
   final ImageSize? size;
 
   /// The format for the generated images.
@@ -355,7 +362,7 @@ class ImageEditRequest {
   /// How closely the edit follows the input image. GPT image models only.
   final ImageInputFidelity? inputFidelity;
 
-  /// Output quality. GPT image models only.
+  /// Output quality. GPT Image 2.5 also supports `xhigh` and `max`.
   final ImageQuality? quality;
 
   /// Output format. GPT image models only.

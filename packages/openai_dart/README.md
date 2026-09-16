@@ -353,41 +353,53 @@ print('Embedding dimensions: ${vector.length}');
 
 </details>
 
-### How do I generate images with GPT Image 2?
+### How do I generate and edit images with GPT Image 2.5?
 
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.images.generate(...)` with `ImageModels.gptImage2` to create images.
-GPT Image 2 brings:
-
-- **Flexible image sizes** — `1024x1024`, `1536x1024`, `1024x1536`, plus `auto`
-- **High-fidelity inputs** — see `client.images.edit(...)` with `ImageInputFidelity.high`
-- **Token-based pricing** — exposed via `response.usage` (total / input / output tokens, plus per-modality breakdowns)
-- **Batch API with 50% discount** — submit jobs via `client.batches` with `BatchEndpoint.imagesGenerations` / `BatchEndpoint.imagesEdits`
+Use `ImageModels.gptImage25Flare` for fast generation and editing, or
+`ImageModels.gptImage25Sunburst` for precise edits and detailed creative work.
+Both models support `low`, `medium`, `high`, `xhigh`, `max`, and `auto` quality,
+custom sizes, and transparent backgrounds with PNG or WebP output.
 
 ```dart
 import 'dart:convert';
 import 'dart:io';
-import 'package:openai_dart/openai_dart.dart';
 
 final response = await client.images.generate(
   const ImageGenerationRequest(
-    model: ImageModels.gptImage2,
-    prompt: 'A white cat wearing a top hat',
-    size: ImageSize.size1536x1024,
-    quality: ImageQuality.high,
+    model: ImageModels.gptImage25Flare,
+    prompt: 'A cute robot holding a flower',
+    size: ImageSize.custom('1536x864'),
+    quality: ImageQuality.xhigh,
     background: ImageBackground.transparent,
     outputFormat: ImageOutputFormat.webp,
   ),
 );
 
-// GPT Image 2 always returns base64 — decode and save.
-final bytes = base64Decode(response.data.first.b64Json!);
-File('cat.webp').writeAsBytesSync(bytes);
+// GPT image models return base64 image data.
+final b64 = response.data.first.b64Json;
+if (b64 != null) {
+  File('robot.webp').writeAsBytesSync(base64Decode(b64));
+}
 
-print('Tokens used: ${response.usage?.totalTokens}');
+final edited = await client.images.editJson(
+  const ImageEditJsonRequest(
+    model: ImageModels.gptImage25Sunburst,
+    images: [ImageReference.url('https://example.com/source.png')],
+    prompt: 'Change only the flower to a sunflower',
+    quality: ImageQuality.max,
+    size: ImageSize.custom('1536x864'),
+  ),
+);
 ```
+
+Use `client.images.edit(...)` to upload image bytes, or `editJson(...)` for
+up to 16 image references (URLs, data URLs, or uploaded file IDs). The streaming
+variants are `generateStream`, `editStream`, and `editJsonStream`.
+Snapshot constants are also available: `gptImage25Sunburst20260908` and
+`gptImage25Flare20260908`.
 
 → [Full example](example/images_example.dart)
 
