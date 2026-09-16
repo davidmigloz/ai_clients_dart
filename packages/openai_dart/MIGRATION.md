@@ -6,6 +6,18 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Unreleased: image sizes and quality
+
+`ImageSize` is now an immutable value class so it can represent the API's custom
+resolutions. Existing constants such as `ImageSize.size1024x1024`, `ImageSize.auto`,
+and the preset list `ImageSize.values` remain available. Use
+`const ImageSize.custom('1536x864')` for other sizes and `toJson()` for the wire value.
+
+Code using enum-only features (`index`, `name`, `values.byName`, `Enum` constraints,
+or exhaustive switches) must be updated. Add a fallback to size switches;
+`fromJson` now preserves unrecognized sizes instead of returning `ImageSize.unknown`.
+`ImageQuality` adds `xhigh` and `max`; handle these in exhaustive quality switches.
+
 ## Migrating from v8.x to v9.0.0
 
 v9.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.

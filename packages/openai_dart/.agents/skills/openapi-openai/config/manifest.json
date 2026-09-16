@@ -575,14 +575,10 @@
     },
     "CreateImageRequest": {
       "spec": "main",
-      "kind": "skip",
-      "dart_class": "ImageGenerateRequest",
+      "kind": "object",
+      "dart_class": "ImageGenerationRequest",
       "file": "lib/src/models/images/image_request.dart",
-      "schema": "CreateImageRequest",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Missing copyWith. Spec has many new fields (output_format, stream, moderation, background) not yet in Dart."
+      "schema": "CreateImageRequest"
     },
     "CreateSpeechRequest": {
       "spec": "main",
