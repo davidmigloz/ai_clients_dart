@@ -27,17 +27,49 @@ jobs:
         run: dart format --output=none --set-exit-if-changed .
 
   analyze:
-    name: Analyze
+    name: Analyze (${{ matrix.sdk }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        sdk: ['3.12', stable]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
         with:
-          sdk: stable
+          sdk: ${{ matrix.sdk }}
       - run: dart pub get
       - name: Analyze project
         run: dart analyze --fatal-infos
+
+  codegen:
+    name: Code generation (${{ matrix.sdk }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        sdk: ['3.12', stable]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
+        with:
+          sdk: ${{ matrix.sdk }}
+      - run: dart pub get
+      - name: Resolve tooling lower bounds
+        if: matrix.sdk == '3.12'
+        run: dart pub add --dev "build_runner:2.15.1" "freezed:3.2.5" "test:1.31.1"
+      - name: Generate and verify models
+        run: |
+          for pkg in openai_realtime_dart tavily_dart; do
+            (
+              cd "packages/$pkg"
+              dart run build_runner build
+              dart analyze --fatal-infos
+              dart test test/unit --reporter failures-only
+            )
+          done
 
   # ---------------------------------------------------------------------------
   # PR: detect which packages changed and test only those (parallel matrix)
@@ -99,7 +131,7 @@ jobs:
           echo "Changed packages: $JSON"
 
   test:
-    name: Test (${{ matrix.package }})
+    name: Test (${{ matrix.package }}, ${{ matrix.sdk }})
     if: github.event_name == 'pull_request' && needs.detect-changes.outputs.packages != '[]'
     needs: detect-changes
     runs-on: ubuntu-latest
@@ -107,13 +139,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        sdk: ['3.12', stable]
         package: ${{ fromJson(needs.detect-changes.outputs.packages) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
         with:
-          sdk: stable
+          sdk: ${{ matrix.sdk }}
       - run: dart pub get
+      - name: Resolve tooling lower bounds
+        if: matrix.sdk == '3.12'
+        run: dart pub add --dev "build_runner:2.15.1" "freezed:3.2.5" "test:1.31.1"
       - name: Run unit tests
         run: |
           echo "Testing packages/${{ matrix.package }}"
@@ -131,14 +167,14 @@ jobs:
   test-result:
     name: Test result
     if: always() && github.event_name == 'pull_request'
-    needs: [detect-changes, test]
+    needs: [format, analyze, codegen, detect-changes, test]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Aggregate test results
         run: |
-          if [ "${{ needs.test.result }}" = "failure" ] || [ "${{ needs.test.result }}" = "cancelled" ] || [ "${{ needs.detect-changes.result }}" = "failure" ] || [ "${{ needs.detect-changes.result }}" = "cancelled" ]; then
-            echo "::error::Tests failed"
+          if ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}; then
+            echo "::error::Validation failed"
             exit 1
           fi
           echo "Tests passed (result: ${{ needs.test.result }}, detect-changes: ${{ needs.detect-changes.result }})"

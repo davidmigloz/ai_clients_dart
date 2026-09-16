@@ -32,15 +32,15 @@ _SearchRequest _$SearchRequestFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$SearchRequestToJson(_SearchRequest instance) =>
     <String, dynamic>{
-      if (instance.apiKey case final value?) 'api_key': value,
+      'api_key': ?instance.apiKey,
       'query': instance.query,
       'search_depth': _$SearchRequestSearchDepthEnumMap[instance.searchDepth]!,
       'include_images': instance.includeImages,
       'include_answer': instance.includeAnswer,
       'include_raw_content': instance.includeRawContent,
       'max_results': instance.maxResults,
-      if (instance.includeDomains case final value?) 'include_domains': value,
-      if (instance.excludeDomains case final value?) 'exclude_domains': value,
+      'include_domains': ?instance.includeDomains,
+      'exclude_domains': ?instance.excludeDomains,
     };
 
 const _$SearchRequestSearchDepthEnumMap = {
@@ -66,12 +66,11 @@ _SearchResponse _$SearchResponseFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$SearchResponseToJson(_SearchResponse instance) =>
     <String, dynamic>{
-      if (instance.answer case final value?) 'answer': value,
+      'answer': ?instance.answer,
       'query': instance.query,
       'response_time': instance.responseTime,
-      if (instance.images case final value?) 'images': value,
-      if (instance.followUpQuestions case final value?)
-        'follow_up_questions': value,
+      'images': ?instance.images,
+      'follow_up_questions': ?instance.followUpQuestions,
       'results': instance.results.map((e) => e.toJson()).toList(),
     };
 
@@ -89,6 +88,6 @@ Map<String, dynamic> _$SearchResultToJson(_SearchResult instance) =>
       'title': instance.title,
       'url': instance.url,
       'content': instance.content,
-      if (instance.rawContent case final value?) 'raw_content': value,
+      'raw_content': ?instance.rawContent,
       'score': instance.score,
     };

@@ -12,11 +12,10 @@ import '../models/models.dart';
 class VertexAIIndexesOperationsApi {
   /// {@macro vertex_ai_indexes_operations_api}
   VertexAIIndexesOperationsApi({
-    required final ProjectsLocationsIndexesOperationsResource
-    indexesOperationsApi,
+    required this._indexesOperationsApi,
     required this.project,
     required this.location,
-  }) : _indexesOperationsApi = indexesOperationsApi;
+  });
 
   /// The Google Cloud project to use for interacting with Vertex AI.
   final String project;

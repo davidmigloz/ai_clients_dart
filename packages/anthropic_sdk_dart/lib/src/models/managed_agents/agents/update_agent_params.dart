@@ -76,24 +76,16 @@ class UpdateAgentParams {
   /// Pass `null` explicitly to clear a clearable field.
   const UpdateAgentParams({
     this.version,
-    Object? name = _notSet,
-    Object? description = _notSet,
-    Object? system = _notSet,
-    Object? model = _notSet,
-    Object? tools = _notSet,
-    Object? mcpServers = _notSet,
-    Object? skills = _notSet,
-    Object? metadata = _notSet,
-    Object? multiagent = _notSet,
-  }) : _name = name,
-       _description = description,
-       _system = system,
-       _model = model,
-       _tools = tools,
-       _mcpServers = mcpServers,
-       _skills = skills,
-       _metadata = metadata,
-       _multiagent = multiagent;
+    this._name = _notSet,
+    this._description = _notSet,
+    this._system = _notSet,
+    this._model = _notSet,
+    this._tools = _notSet,
+    this._mcpServers = _notSet,
+    this._skills = _notSet,
+    this._metadata = _notSet,
+    this._multiagent = _notSet,
+  });
 
   /// Creates an [UpdateAgentParams] from JSON.
   factory UpdateAgentParams.fromJson(Map<String, dynamic> json) {

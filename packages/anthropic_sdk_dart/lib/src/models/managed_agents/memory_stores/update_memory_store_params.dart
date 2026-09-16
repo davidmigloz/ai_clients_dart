@@ -33,12 +33,10 @@ class UpdateMemoryStoreParams {
   /// Omit a field to preserve its current value on the server.
   /// Pass `null` explicitly to clear a clearable field.
   const UpdateMemoryStoreParams({
-    Object? name = _notSet,
-    Object? description = _notSet,
-    Object? metadata = _notSet,
-  }) : _name = name,
-       _description = description,
-       _metadata = metadata;
+    this._name = _notSet,
+    this._description = _notSet,
+    this._metadata = _notSet,
+  });
 
   /// Creates an [UpdateMemoryStoreParams] from JSON.
   factory UpdateMemoryStoreParams.fromJson(Map<String, dynamic> json) {

@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'schema.dart';
@@ -9,7 +9,7 @@ part of 'schema.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
+// GENERATED CODE - DO NOT MODIFY BY HAND
 T _$identity<T>(T value) => value;
 
 /// @nodoc
@@ -36,46 +36,62 @@ mixin _$ToolDefinition {
   @pragma('vm:prefer-inline')
   $ToolDefinitionCopyWith<ToolDefinition> get copyWith =>
       _$ToolDefinitionCopyWithImpl<ToolDefinition>(
-          this as ToolDefinition, _$identity);
+        this as ToolDefinition,
+        _$identity,
+      );
 
   /// Serializes this ToolDefinition to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as ToolDefinition;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ToolDefinition &&
-            (identical(other.type, type) || other.type == type) &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
-            const DeepCollectionEquality()
-                .equals(other.parameters, parameters));
+            (identical(other.type, _this.type) || other.type == _this.type) &&
+            (identical(other.name, _this.name) || other.name == _this.name) &&
+            (identical(other.description, _this.description) ||
+                other.description == _this.description) &&
+            const DeepCollectionEquality().equals(
+              other.parameters,
+              _this.parameters,
+            ));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, name, description,
-      const DeepCollectionEquality().hash(parameters));
+  int get hashCode {
+    final _this = this as ToolDefinition;
+    return Object.hash(
+      runtimeType,
+      _this.type,
+      _this.name,
+      _this.description,
+      const DeepCollectionEquality().hash(_this.parameters),
+    );
+  }
 
   @override
   String toString() {
-    return 'ToolDefinition(type: $type, name: $name, description: $description, parameters: $parameters)';
+    final _this = this as ToolDefinition;
+    return 'ToolDefinition(type: ${_this.type}, name: ${_this.name}, description: ${_this.description}, parameters: ${_this.parameters})';
   }
 }
 
 /// @nodoc
 abstract mixin class $ToolDefinitionCopyWith<$Res> {
   factory $ToolDefinitionCopyWith(
-          ToolDefinition value, $Res Function(ToolDefinition) _then) =
-      _$ToolDefinitionCopyWithImpl;
+    ToolDefinition value,
+    $Res Function(ToolDefinition) _then,
+  ) = _$ToolDefinitionCopyWithImpl;
   @useResult
-  $Res call(
-      {ToolType type,
-      String name,
-      @JsonKey(includeIfNull: false) String? description,
-      @JsonKey(includeIfNull: false) dynamic parameters});
+  $Res call({
+    ToolType type,
+    String name,
+    @JsonKey(includeIfNull: false) String? description,
+    @JsonKey(includeIfNull: false) dynamic parameters,
+  });
 }
 
 /// @nodoc
@@ -96,24 +112,26 @@ class _$ToolDefinitionCopyWithImpl<$Res>
     Object? description = freezed,
     Object? parameters = freezed,
   }) {
-    return _then(_self.copyWith(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ToolType,
-      name: null == name
-          ? _self.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      description: freezed == description
-          ? _self.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String?,
-      parameters: freezed == parameters
-          ? _self.parameters
-          : parameters // ignore: cast_nullable_to_non_nullable
-              as dynamic,
-    ));
+    return _then(
+      ToolDefinition(
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ToolType,
+        name: null == name
+            ? _self.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+        description: freezed == description
+            ? _self.description
+            : description // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        parameters: freezed == parameters
+            ? _self.parameters
+            : parameters // ignore: cast_nullable_to_non_nullable
+                  as dynamic,
+      ),
+    );
   }
 }
 
@@ -211,18 +229,23 @@ extension ToolDefinitionPatterns on ToolDefinition {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            ToolType type,
-            String name,
-            @JsonKey(includeIfNull: false) String? description,
-            @JsonKey(includeIfNull: false) dynamic parameters)?
-        $default, {
+      ToolType type,
+      String name,
+      @JsonKey(includeIfNull: false) String? description,
+      @JsonKey(includeIfNull: false) dynamic parameters,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _ToolDefinition() when $default != null:
         return $default(
-            _that.type, _that.name, _that.description, _that.parameters);
+          _that.type,
+          _that.name,
+          _that.description,
+          _that.parameters,
+        );
       case _:
         return orElse();
     }
@@ -244,17 +267,22 @@ extension ToolDefinitionPatterns on ToolDefinition {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            ToolType type,
-            String name,
-            @JsonKey(includeIfNull: false) String? description,
-            @JsonKey(includeIfNull: false) dynamic parameters)
-        $default,
+      ToolType type,
+      String name,
+      @JsonKey(includeIfNull: false) String? description,
+      @JsonKey(includeIfNull: false) dynamic parameters,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _ToolDefinition():
         return $default(
-            _that.type, _that.name, _that.description, _that.parameters);
+          _that.type,
+          _that.name,
+          _that.description,
+          _that.parameters,
+        );
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -275,17 +303,22 @@ extension ToolDefinitionPatterns on ToolDefinition {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            ToolType type,
-            String name,
-            @JsonKey(includeIfNull: false) String? description,
-            @JsonKey(includeIfNull: false) dynamic parameters)?
-        $default,
+      ToolType type,
+      String name,
+      @JsonKey(includeIfNull: false) String? description,
+      @JsonKey(includeIfNull: false) dynamic parameters,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _ToolDefinition() when $default != null:
         return $default(
-            _that.type, _that.name, _that.description, _that.parameters);
+          _that.type,
+          _that.name,
+          _that.description,
+          _that.parameters,
+        );
       case _:
         return null;
     }
@@ -295,12 +328,12 @@ extension ToolDefinitionPatterns on ToolDefinition {
 /// @nodoc
 @JsonSerializable()
 class _ToolDefinition extends ToolDefinition {
-  const _ToolDefinition(
-      {this.type = ToolType.function,
-      required this.name,
-      @JsonKey(includeIfNull: false) this.description,
-      @JsonKey(includeIfNull: false) this.parameters})
-      : super._();
+  const _ToolDefinition({
+    this.type = ToolType.function,
+    required this.name,
+    @JsonKey(includeIfNull: false) this.description,
+    @JsonKey(includeIfNull: false) this.parameters,
+  }) : super._();
   factory _ToolDefinition.fromJson(Map<String, dynamic> json) =>
       _$ToolDefinitionFromJson(json);
 
@@ -335,9 +368,7 @@ class _ToolDefinition extends ToolDefinition {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ToolDefinitionToJson(
-      this,
-    );
+    return _$ToolDefinitionToJson(this);
   }
 
   @override
@@ -349,14 +380,23 @@ class _ToolDefinition extends ToolDefinition {
             (identical(other.name, name) || other.name == name) &&
             (identical(other.description, description) ||
                 other.description == description) &&
-            const DeepCollectionEquality()
-                .equals(other.parameters, parameters));
+            const DeepCollectionEquality().equals(
+              other.parameters,
+              parameters,
+            ));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, name, description,
-      const DeepCollectionEquality().hash(parameters));
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      type,
+      name,
+      description,
+      const DeepCollectionEquality().hash(parameters),
+    );
+  }
 
   @override
   String toString() {
@@ -368,15 +408,17 @@ class _ToolDefinition extends ToolDefinition {
 abstract mixin class _$ToolDefinitionCopyWith<$Res>
     implements $ToolDefinitionCopyWith<$Res> {
   factory _$ToolDefinitionCopyWith(
-          _ToolDefinition value, $Res Function(_ToolDefinition) _then) =
-      __$ToolDefinitionCopyWithImpl;
+    _ToolDefinition value,
+    $Res Function(_ToolDefinition) _then,
+  ) = __$ToolDefinitionCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {ToolType type,
-      String name,
-      @JsonKey(includeIfNull: false) String? description,
-      @JsonKey(includeIfNull: false) dynamic parameters});
+  $Res call({
+    ToolType type,
+    String name,
+    @JsonKey(includeIfNull: false) String? description,
+    @JsonKey(includeIfNull: false) dynamic parameters,
+  });
 }
 
 /// @nodoc
@@ -397,24 +439,26 @@ class __$ToolDefinitionCopyWithImpl<$Res>
     Object? description = freezed,
     Object? parameters = freezed,
   }) {
-    return _then(_ToolDefinition(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ToolType,
-      name: null == name
-          ? _self.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      description: freezed == description
-          ? _self.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String?,
-      parameters: freezed == parameters
-          ? _self.parameters
-          : parameters // ignore: cast_nullable_to_non_nullable
-              as dynamic,
-    ));
+    return _then(
+      _ToolDefinition(
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ToolType,
+        name: null == name
+            ? _self.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+        description: freezed == description
+            ? _self.description
+            : description // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        parameters: freezed == parameters
+            ? _self.parameters
+            : parameters // ignore: cast_nullable_to_non_nullable
+                  as dynamic,
+      ),
+    );
   }
 }
 
@@ -432,35 +476,43 @@ mixin _$ToolChoiceForced {
   @pragma('vm:prefer-inline')
   $ToolChoiceForcedCopyWith<ToolChoiceForced> get copyWith =>
       _$ToolChoiceForcedCopyWithImpl<ToolChoiceForced>(
-          this as ToolChoiceForced, _$identity);
+        this as ToolChoiceForced,
+        _$identity,
+      );
 
   /// Serializes this ToolChoiceForced to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as ToolChoiceForced;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ToolChoiceForced &&
-            (identical(other.type, type) || other.type == type) &&
-            (identical(other.name, name) || other.name == name));
+            (identical(other.type, _this.type) || other.type == _this.type) &&
+            (identical(other.name, _this.name) || other.name == _this.name));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, name);
+  int get hashCode {
+    final _this = this as ToolChoiceForced;
+    return Object.hash(runtimeType, _this.type, _this.name);
+  }
 
   @override
   String toString() {
-    return 'ToolChoiceForced(type: $type, name: $name)';
+    final _this = this as ToolChoiceForced;
+    return 'ToolChoiceForced(type: ${_this.type}, name: ${_this.name})';
   }
 }
 
 /// @nodoc
 abstract mixin class $ToolChoiceForcedCopyWith<$Res> {
   factory $ToolChoiceForcedCopyWith(
-          ToolChoiceForced value, $Res Function(ToolChoiceForced) _then) =
-      _$ToolChoiceForcedCopyWithImpl;
+    ToolChoiceForced value,
+    $Res Function(ToolChoiceForced) _then,
+  ) = _$ToolChoiceForcedCopyWithImpl;
   @useResult
   $Res call({ToolType type, String name});
 }
@@ -477,20 +529,19 @@ class _$ToolChoiceForcedCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? type = null,
-    Object? name = null,
-  }) {
-    return _then(_self.copyWith(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ToolType,
-      name: null == name
-          ? _self.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+  $Res call({Object? type = null, Object? name = null}) {
+    return _then(
+      ToolChoiceForced(
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ToolType,
+        name: null == name
+            ? _self.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
@@ -655,7 +706,7 @@ extension ToolChoiceForcedPatterns on ToolChoiceForced {
 @JsonSerializable()
 class _ToolChoiceForced extends ToolChoiceForced {
   const _ToolChoiceForced({this.type = ToolType.function, required this.name})
-      : super._();
+    : super._();
   factory _ToolChoiceForced.fromJson(Map<String, dynamic> json) =>
       _$ToolChoiceForcedFromJson(json);
 
@@ -678,9 +729,7 @@ class _ToolChoiceForced extends ToolChoiceForced {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ToolChoiceForcedToJson(
-      this,
-    );
+    return _$ToolChoiceForcedToJson(this);
   }
 
   @override
@@ -694,7 +743,9 @@ class _ToolChoiceForced extends ToolChoiceForced {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, name);
+  int get hashCode {
+    return Object.hash(runtimeType, type, name);
+  }
 
   @override
   String toString() {
@@ -706,8 +757,9 @@ class _ToolChoiceForced extends ToolChoiceForced {
 abstract mixin class _$ToolChoiceForcedCopyWith<$Res>
     implements $ToolChoiceForcedCopyWith<$Res> {
   factory _$ToolChoiceForcedCopyWith(
-          _ToolChoiceForced value, $Res Function(_ToolChoiceForced) _then) =
-      __$ToolChoiceForcedCopyWithImpl;
+    _ToolChoiceForced value,
+    $Res Function(_ToolChoiceForced) _then,
+  ) = __$ToolChoiceForcedCopyWithImpl;
   @override
   @useResult
   $Res call({ToolType type, String name});
@@ -725,20 +777,19 @@ class __$ToolChoiceForcedCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? type = null,
-    Object? name = null,
-  }) {
-    return _then(_ToolChoiceForced(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ToolType,
-      name: null == name
-          ? _self.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+  $Res call({Object? type = null, Object? name = null}) {
+    return _then(
+      _ToolChoiceForced(
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ToolType,
+        name: null == name
+            ? _self.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
@@ -759,35 +810,43 @@ mixin _$ContentPartItemReference {
   @pragma('vm:prefer-inline')
   $ContentPartItemReferenceCopyWith<ContentPartItemReference> get copyWith =>
       _$ContentPartItemReferenceCopyWithImpl<ContentPartItemReference>(
-          this as ContentPartItemReference, _$identity);
+        this as ContentPartItemReference,
+        _$identity,
+      );
 
   /// Serializes this ContentPartItemReference to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as ContentPartItemReference;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ContentPartItemReference &&
-            (identical(other.type, type) || other.type == type) &&
-            (identical(other.id, id) || other.id == id));
+            (identical(other.type, _this.type) || other.type == _this.type) &&
+            (identical(other.id, _this.id) || other.id == _this.id));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, id);
+  int get hashCode {
+    final _this = this as ContentPartItemReference;
+    return Object.hash(runtimeType, _this.type, _this.id);
+  }
 
   @override
   String toString() {
-    return 'ContentPartItemReference(type: $type, id: $id)';
+    final _this = this as ContentPartItemReference;
+    return 'ContentPartItemReference(type: ${_this.type}, id: ${_this.id})';
   }
 }
 
 /// @nodoc
 abstract mixin class $ContentPartItemReferenceCopyWith<$Res> {
-  factory $ContentPartItemReferenceCopyWith(ContentPartItemReference value,
-          $Res Function(ContentPartItemReference) _then) =
-      _$ContentPartItemReferenceCopyWithImpl;
+  factory $ContentPartItemReferenceCopyWith(
+    ContentPartItemReference value,
+    $Res Function(ContentPartItemReference) _then,
+  ) = _$ContentPartItemReferenceCopyWithImpl;
   @useResult
   $Res call({ContentType type, @JsonKey(includeIfNull: false) String? id});
 }
@@ -804,20 +863,19 @@ class _$ContentPartItemReferenceCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? type = null,
-    Object? id = freezed,
-  }) {
-    return _then(_self.copyWith(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ContentType,
-      id: freezed == id
-          ? _self.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+  $Res call({Object? type = null, Object? id = freezed}) {
+    return _then(
+      ContentPartItemReference(
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ContentType,
+        id: freezed == id
+            ? _self.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
@@ -915,8 +973,10 @@ extension ContentPartItemReferencePatterns on ContentPartItemReference {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            ContentType type, @JsonKey(includeIfNull: false) String? id)?
-        $default, {
+      ContentType type,
+      @JsonKey(includeIfNull: false) String? id,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
@@ -944,8 +1004,10 @@ extension ContentPartItemReferencePatterns on ContentPartItemReference {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            ContentType type, @JsonKey(includeIfNull: false) String? id)
-        $default,
+      ContentType type,
+      @JsonKey(includeIfNull: false) String? id,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
@@ -971,8 +1033,10 @@ extension ContentPartItemReferencePatterns on ContentPartItemReference {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            ContentType type, @JsonKey(includeIfNull: false) String? id)?
-        $default,
+      ContentType type,
+      @JsonKey(includeIfNull: false) String? id,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
@@ -987,10 +1051,10 @@ extension ContentPartItemReferencePatterns on ContentPartItemReference {
 /// @nodoc
 @JsonSerializable()
 class _ContentPartItemReference extends ContentPartItemReference {
-  const _ContentPartItemReference(
-      {this.type = ContentType.itemReference,
-      @JsonKey(includeIfNull: false) this.id})
-      : super._();
+  const _ContentPartItemReference({
+    this.type = ContentType.itemReference,
+    @JsonKey(includeIfNull: false) this.id,
+  }) : super._();
   factory _ContentPartItemReference.fromJson(Map<String, dynamic> json) =>
       _$ContentPartItemReferenceFromJson(json);
 
@@ -1013,13 +1077,13 @@ class _ContentPartItemReference extends ContentPartItemReference {
   @pragma('vm:prefer-inline')
   _$ContentPartItemReferenceCopyWith<_ContentPartItemReference> get copyWith =>
       __$ContentPartItemReferenceCopyWithImpl<_ContentPartItemReference>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ContentPartItemReferenceToJson(
-      this,
-    );
+    return _$ContentPartItemReferenceToJson(this);
   }
 
   @override
@@ -1033,7 +1097,9 @@ class _ContentPartItemReference extends ContentPartItemReference {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, id);
+  int get hashCode {
+    return Object.hash(runtimeType, type, id);
+  }
 
   @override
   String toString() {
@@ -1044,9 +1110,10 @@ class _ContentPartItemReference extends ContentPartItemReference {
 /// @nodoc
 abstract mixin class _$ContentPartItemReferenceCopyWith<$Res>
     implements $ContentPartItemReferenceCopyWith<$Res> {
-  factory _$ContentPartItemReferenceCopyWith(_ContentPartItemReference value,
-          $Res Function(_ContentPartItemReference) _then) =
-      __$ContentPartItemReferenceCopyWithImpl;
+  factory _$ContentPartItemReferenceCopyWith(
+    _ContentPartItemReference value,
+    $Res Function(_ContentPartItemReference) _then,
+  ) = __$ContentPartItemReferenceCopyWithImpl;
   @override
   @useResult
   $Res call({ContentType type, @JsonKey(includeIfNull: false) String? id});
@@ -1064,20 +1131,19 @@ class __$ContentPartItemReferenceCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? type = null,
-    Object? id = freezed,
-  }) {
-    return _then(_ContentPartItemReference(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ContentType,
-      id: freezed == id
-          ? _self.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+  $Res call({Object? type = null, Object? id = freezed}) {
+    return _then(
+      _ContentPartItemReference(
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ContentType,
+        id: freezed == id
+            ? _self.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
@@ -1105,45 +1171,54 @@ mixin _$InputAudioTranscriptionConfig {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $InputAudioTranscriptionConfigCopyWith<InputAudioTranscriptionConfig>
-      get copyWith => _$InputAudioTranscriptionConfigCopyWithImpl<
-              InputAudioTranscriptionConfig>(
-          this as InputAudioTranscriptionConfig, _$identity);
+  get copyWith =>
+      _$InputAudioTranscriptionConfigCopyWithImpl<
+        InputAudioTranscriptionConfig
+      >(this as InputAudioTranscriptionConfig, _$identity);
 
   /// Serializes this InputAudioTranscriptionConfig to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as InputAudioTranscriptionConfig;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is InputAudioTranscriptionConfig &&
-            (identical(other.model, model) || other.model == model) &&
-            (identical(other.language, language) ||
-                other.language == language) &&
-            (identical(other.prompt, prompt) || other.prompt == prompt));
+            (identical(other.model, _this.model) ||
+                other.model == _this.model) &&
+            (identical(other.language, _this.language) ||
+                other.language == _this.language) &&
+            (identical(other.prompt, _this.prompt) ||
+                other.prompt == _this.prompt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, model, language, prompt);
+  int get hashCode {
+    final _this = this as InputAudioTranscriptionConfig;
+    return Object.hash(runtimeType, _this.model, _this.language, _this.prompt);
+  }
 
   @override
   String toString() {
-    return 'InputAudioTranscriptionConfig(model: $model, language: $language, prompt: $prompt)';
+    final _this = this as InputAudioTranscriptionConfig;
+    return 'InputAudioTranscriptionConfig(model: ${_this.model}, language: ${_this.language}, prompt: ${_this.prompt})';
   }
 }
 
 /// @nodoc
 abstract mixin class $InputAudioTranscriptionConfigCopyWith<$Res> {
   factory $InputAudioTranscriptionConfigCopyWith(
-          InputAudioTranscriptionConfig value,
-          $Res Function(InputAudioTranscriptionConfig) _then) =
-      _$InputAudioTranscriptionConfigCopyWithImpl;
+    InputAudioTranscriptionConfig value,
+    $Res Function(InputAudioTranscriptionConfig) _then,
+  ) = _$InputAudioTranscriptionConfigCopyWithImpl;
   @useResult
-  $Res call(
-      {@JsonKey(includeIfNull: false) String? model,
-      @JsonKey(includeIfNull: false) String? language,
-      @JsonKey(includeIfNull: false) String? prompt});
+  $Res call({
+    @JsonKey(includeIfNull: false) String? model,
+    @JsonKey(includeIfNull: false) String? language,
+    @JsonKey(includeIfNull: false) String? prompt,
+  });
 }
 
 /// @nodoc
@@ -1163,20 +1238,22 @@ class _$InputAudioTranscriptionConfigCopyWithImpl<$Res>
     Object? language = freezed,
     Object? prompt = freezed,
   }) {
-    return _then(_self.copyWith(
-      model: freezed == model
-          ? _self.model
-          : model // ignore: cast_nullable_to_non_nullable
-              as String?,
-      language: freezed == language
-          ? _self.language
-          : language // ignore: cast_nullable_to_non_nullable
-              as String?,
-      prompt: freezed == prompt
-          ? _self.prompt
-          : prompt // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      InputAudioTranscriptionConfig(
+        model: freezed == model
+            ? _self.model
+            : model // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        language: freezed == language
+            ? _self.language
+            : language // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        prompt: freezed == prompt
+            ? _self.prompt
+            : prompt // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
@@ -1275,10 +1352,11 @@ extension InputAudioTranscriptionConfigPatterns
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            @JsonKey(includeIfNull: false) String? model,
-            @JsonKey(includeIfNull: false) String? language,
-            @JsonKey(includeIfNull: false) String? prompt)?
-        $default, {
+      @JsonKey(includeIfNull: false) String? model,
+      @JsonKey(includeIfNull: false) String? language,
+      @JsonKey(includeIfNull: false) String? prompt,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
@@ -1306,10 +1384,11 @@ extension InputAudioTranscriptionConfigPatterns
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            @JsonKey(includeIfNull: false) String? model,
-            @JsonKey(includeIfNull: false) String? language,
-            @JsonKey(includeIfNull: false) String? prompt)
-        $default,
+      @JsonKey(includeIfNull: false) String? model,
+      @JsonKey(includeIfNull: false) String? language,
+      @JsonKey(includeIfNull: false) String? prompt,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
@@ -1335,10 +1414,11 @@ extension InputAudioTranscriptionConfigPatterns
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            @JsonKey(includeIfNull: false) String? model,
-            @JsonKey(includeIfNull: false) String? language,
-            @JsonKey(includeIfNull: false) String? prompt)?
-        $default,
+      @JsonKey(includeIfNull: false) String? model,
+      @JsonKey(includeIfNull: false) String? language,
+      @JsonKey(includeIfNull: false) String? prompt,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
@@ -1353,11 +1433,11 @@ extension InputAudioTranscriptionConfigPatterns
 /// @nodoc
 @JsonSerializable()
 class _InputAudioTranscriptionConfig extends InputAudioTranscriptionConfig {
-  const _InputAudioTranscriptionConfig(
-      {@JsonKey(includeIfNull: false) this.model,
-      @JsonKey(includeIfNull: false) this.language,
-      @JsonKey(includeIfNull: false) this.prompt})
-      : super._();
+  const _InputAudioTranscriptionConfig({
+    @JsonKey(includeIfNull: false) this.model,
+    @JsonKey(includeIfNull: false) this.language,
+    @JsonKey(includeIfNull: false) this.prompt,
+  }) : super._();
   factory _InputAudioTranscriptionConfig.fromJson(Map<String, dynamic> json) =>
       _$InputAudioTranscriptionConfigFromJson(json);
 
@@ -1387,14 +1467,14 @@ class _InputAudioTranscriptionConfig extends InputAudioTranscriptionConfig {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   _$InputAudioTranscriptionConfigCopyWith<_InputAudioTranscriptionConfig>
-      get copyWith => __$InputAudioTranscriptionConfigCopyWithImpl<
-          _InputAudioTranscriptionConfig>(this, _$identity);
+  get copyWith =>
+      __$InputAudioTranscriptionConfigCopyWithImpl<
+        _InputAudioTranscriptionConfig
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$InputAudioTranscriptionConfigToJson(
-      this,
-    );
+    return _$InputAudioTranscriptionConfigToJson(this);
   }
 
   @override
@@ -1410,7 +1490,9 @@ class _InputAudioTranscriptionConfig extends InputAudioTranscriptionConfig {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, model, language, prompt);
+  int get hashCode {
+    return Object.hash(runtimeType, model, language, prompt);
+  }
 
   @override
   String toString() {
@@ -1422,15 +1504,16 @@ class _InputAudioTranscriptionConfig extends InputAudioTranscriptionConfig {
 abstract mixin class _$InputAudioTranscriptionConfigCopyWith<$Res>
     implements $InputAudioTranscriptionConfigCopyWith<$Res> {
   factory _$InputAudioTranscriptionConfigCopyWith(
-          _InputAudioTranscriptionConfig value,
-          $Res Function(_InputAudioTranscriptionConfig) _then) =
-      __$InputAudioTranscriptionConfigCopyWithImpl;
+    _InputAudioTranscriptionConfig value,
+    $Res Function(_InputAudioTranscriptionConfig) _then,
+  ) = __$InputAudioTranscriptionConfigCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(includeIfNull: false) String? model,
-      @JsonKey(includeIfNull: false) String? language,
-      @JsonKey(includeIfNull: false) String? prompt});
+  $Res call({
+    @JsonKey(includeIfNull: false) String? model,
+    @JsonKey(includeIfNull: false) String? language,
+    @JsonKey(includeIfNull: false) String? prompt,
+  });
 }
 
 /// @nodoc
@@ -1450,20 +1533,22 @@ class __$InputAudioTranscriptionConfigCopyWithImpl<$Res>
     Object? language = freezed,
     Object? prompt = freezed,
   }) {
-    return _then(_InputAudioTranscriptionConfig(
-      model: freezed == model
-          ? _self.model
-          : model // ignore: cast_nullable_to_non_nullable
-              as String?,
-      language: freezed == language
-          ? _self.language
-          : language // ignore: cast_nullable_to_non_nullable
-              as String?,
-      prompt: freezed == prompt
-          ? _self.prompt
-          : prompt // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      _InputAudioTranscriptionConfig(
+        model: freezed == model
+            ? _self.model
+            : model // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        language: freezed == language
+            ? _self.language
+            : language // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        prompt: freezed == prompt
+            ? _self.prompt
+            : prompt // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
@@ -1500,52 +1585,67 @@ mixin _$TurnDetection {
   @pragma('vm:prefer-inline')
   $TurnDetectionCopyWith<TurnDetection> get copyWith =>
       _$TurnDetectionCopyWithImpl<TurnDetection>(
-          this as TurnDetection, _$identity);
+        this as TurnDetection,
+        _$identity,
+      );
 
   /// Serializes this TurnDetection to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as TurnDetection;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is TurnDetection &&
-            (identical(other.type, type) || other.type == type) &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold) &&
-            (identical(other.prefixPaddingMs, prefixPaddingMs) ||
-                other.prefixPaddingMs == prefixPaddingMs) &&
-            (identical(other.silenceDurationMs, silenceDurationMs) ||
-                other.silenceDurationMs == silenceDurationMs) &&
-            (identical(other.createResponse, createResponse) ||
-                other.createResponse == createResponse));
+            (identical(other.type, _this.type) || other.type == _this.type) &&
+            (identical(other.threshold, _this.threshold) ||
+                other.threshold == _this.threshold) &&
+            (identical(other.prefixPaddingMs, _this.prefixPaddingMs) ||
+                other.prefixPaddingMs == _this.prefixPaddingMs) &&
+            (identical(other.silenceDurationMs, _this.silenceDurationMs) ||
+                other.silenceDurationMs == _this.silenceDurationMs) &&
+            (identical(other.createResponse, _this.createResponse) ||
+                other.createResponse == _this.createResponse));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, threshold, prefixPaddingMs,
-      silenceDurationMs, createResponse);
+  int get hashCode {
+    final _this = this as TurnDetection;
+    return Object.hash(
+      runtimeType,
+      _this.type,
+      _this.threshold,
+      _this.prefixPaddingMs,
+      _this.silenceDurationMs,
+      _this.createResponse,
+    );
+  }
 
   @override
   String toString() {
-    return 'TurnDetection(type: $type, threshold: $threshold, prefixPaddingMs: $prefixPaddingMs, silenceDurationMs: $silenceDurationMs, createResponse: $createResponse)';
+    final _this = this as TurnDetection;
+    return 'TurnDetection(type: ${_this.type}, threshold: ${_this.threshold}, prefixPaddingMs: ${_this.prefixPaddingMs}, silenceDurationMs: ${_this.silenceDurationMs}, createResponse: ${_this.createResponse})';
   }
 }
 
 /// @nodoc
 abstract mixin class $TurnDetectionCopyWith<$Res> {
   factory $TurnDetectionCopyWith(
-          TurnDetection value, $Res Function(TurnDetection) _then) =
-      _$TurnDetectionCopyWithImpl;
+    TurnDetection value,
+    $Res Function(TurnDetection) _then,
+  ) = _$TurnDetectionCopyWithImpl;
   @useResult
-  $Res call(
-      {TurnDetectionType type,
-      @JsonKey(includeIfNull: false) double? threshold,
-      @JsonKey(name: 'prefix_padding_ms', includeIfNull: false)
-      int? prefixPaddingMs,
-      @JsonKey(name: 'silence_duration_ms', includeIfNull: false)
-      int? silenceDurationMs,
-      @JsonKey(name: 'create_response') bool createResponse});
+  $Res call({
+    TurnDetectionType type,
+    @JsonKey(includeIfNull: false) double? threshold,
+    @JsonKey(name: 'prefix_padding_ms', includeIfNull: false)
+    int? prefixPaddingMs,
+    @JsonKey(name: 'silence_duration_ms', includeIfNull: false)
+    int? silenceDurationMs,
+    @JsonKey(name: 'create_response') bool createResponse,
+  });
 }
 
 /// @nodoc
@@ -1567,28 +1667,30 @@ class _$TurnDetectionCopyWithImpl<$Res>
     Object? silenceDurationMs = freezed,
     Object? createResponse = null,
   }) {
-    return _then(_self.copyWith(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as TurnDetectionType,
-      threshold: freezed == threshold
-          ? _self.threshold
-          : threshold // ignore: cast_nullable_to_non_nullable
-              as double?,
-      prefixPaddingMs: freezed == prefixPaddingMs
-          ? _self.prefixPaddingMs
-          : prefixPaddingMs // ignore: cast_nullable_to_non_nullable
-              as int?,
-      silenceDurationMs: freezed == silenceDurationMs
-          ? _self.silenceDurationMs
-          : silenceDurationMs // ignore: cast_nullable_to_non_nullable
-              as int?,
-      createResponse: null == createResponse
-          ? _self.createResponse
-          : createResponse // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
+    return _then(
+      TurnDetection(
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as TurnDetectionType,
+        threshold: freezed == threshold
+            ? _self.threshold
+            : threshold // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        prefixPaddingMs: freezed == prefixPaddingMs
+            ? _self.prefixPaddingMs
+            : prefixPaddingMs // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        silenceDurationMs: freezed == silenceDurationMs
+            ? _self.silenceDurationMs
+            : silenceDurationMs // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        createResponse: null == createResponse
+            ? _self.createResponse
+            : createResponse // ignore: cast_nullable_to_non_nullable
+                  as bool,
+      ),
+    );
   }
 }
 
@@ -1686,21 +1788,27 @@ extension TurnDetectionPatterns on TurnDetection {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            TurnDetectionType type,
-            @JsonKey(includeIfNull: false) double? threshold,
-            @JsonKey(name: 'prefix_padding_ms', includeIfNull: false)
-            int? prefixPaddingMs,
-            @JsonKey(name: 'silence_duration_ms', includeIfNull: false)
-            int? silenceDurationMs,
-            @JsonKey(name: 'create_response') bool createResponse)?
-        $default, {
+      TurnDetectionType type,
+      @JsonKey(includeIfNull: false) double? threshold,
+      @JsonKey(name: 'prefix_padding_ms', includeIfNull: false)
+      int? prefixPaddingMs,
+      @JsonKey(name: 'silence_duration_ms', includeIfNull: false)
+      int? silenceDurationMs,
+      @JsonKey(name: 'create_response') bool createResponse,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _TurnDetection() when $default != null:
-        return $default(_that.type, _that.threshold, _that.prefixPaddingMs,
-            _that.silenceDurationMs, _that.createResponse);
+        return $default(
+          _that.type,
+          _that.threshold,
+          _that.prefixPaddingMs,
+          _that.silenceDurationMs,
+          _that.createResponse,
+        );
       case _:
         return orElse();
     }
@@ -1722,20 +1830,26 @@ extension TurnDetectionPatterns on TurnDetection {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            TurnDetectionType type,
-            @JsonKey(includeIfNull: false) double? threshold,
-            @JsonKey(name: 'prefix_padding_ms', includeIfNull: false)
-            int? prefixPaddingMs,
-            @JsonKey(name: 'silence_duration_ms', includeIfNull: false)
-            int? silenceDurationMs,
-            @JsonKey(name: 'create_response') bool createResponse)
-        $default,
+      TurnDetectionType type,
+      @JsonKey(includeIfNull: false) double? threshold,
+      @JsonKey(name: 'prefix_padding_ms', includeIfNull: false)
+      int? prefixPaddingMs,
+      @JsonKey(name: 'silence_duration_ms', includeIfNull: false)
+      int? silenceDurationMs,
+      @JsonKey(name: 'create_response') bool createResponse,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _TurnDetection():
-        return $default(_that.type, _that.threshold, _that.prefixPaddingMs,
-            _that.silenceDurationMs, _that.createResponse);
+        return $default(
+          _that.type,
+          _that.threshold,
+          _that.prefixPaddingMs,
+          _that.silenceDurationMs,
+          _that.createResponse,
+        );
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -1756,20 +1870,26 @@ extension TurnDetectionPatterns on TurnDetection {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            TurnDetectionType type,
-            @JsonKey(includeIfNull: false) double? threshold,
-            @JsonKey(name: 'prefix_padding_ms', includeIfNull: false)
-            int? prefixPaddingMs,
-            @JsonKey(name: 'silence_duration_ms', includeIfNull: false)
-            int? silenceDurationMs,
-            @JsonKey(name: 'create_response') bool createResponse)?
-        $default,
+      TurnDetectionType type,
+      @JsonKey(includeIfNull: false) double? threshold,
+      @JsonKey(name: 'prefix_padding_ms', includeIfNull: false)
+      int? prefixPaddingMs,
+      @JsonKey(name: 'silence_duration_ms', includeIfNull: false)
+      int? silenceDurationMs,
+      @JsonKey(name: 'create_response') bool createResponse,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _TurnDetection() when $default != null:
-        return $default(_that.type, _that.threshold, _that.prefixPaddingMs,
-            _that.silenceDurationMs, _that.createResponse);
+        return $default(
+          _that.type,
+          _that.threshold,
+          _that.prefixPaddingMs,
+          _that.silenceDurationMs,
+          _that.createResponse,
+        );
       case _:
         return null;
     }
@@ -1779,15 +1899,15 @@ extension TurnDetectionPatterns on TurnDetection {
 /// @nodoc
 @JsonSerializable()
 class _TurnDetection extends TurnDetection {
-  const _TurnDetection(
-      {required this.type,
-      @JsonKey(includeIfNull: false) this.threshold,
-      @JsonKey(name: 'prefix_padding_ms', includeIfNull: false)
-      this.prefixPaddingMs,
-      @JsonKey(name: 'silence_duration_ms', includeIfNull: false)
-      this.silenceDurationMs,
-      @JsonKey(name: 'create_response') this.createResponse = true})
-      : super._();
+  const _TurnDetection({
+    required this.type,
+    @JsonKey(includeIfNull: false) this.threshold,
+    @JsonKey(name: 'prefix_padding_ms', includeIfNull: false)
+    this.prefixPaddingMs,
+    @JsonKey(name: 'silence_duration_ms', includeIfNull: false)
+    this.silenceDurationMs,
+    @JsonKey(name: 'create_response') this.createResponse = true,
+  }) : super._();
   factory _TurnDetection.fromJson(Map<String, dynamic> json) =>
       _$TurnDetectionFromJson(json);
 
@@ -1831,9 +1951,7 @@ class _TurnDetection extends TurnDetection {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$TurnDetectionToJson(
-      this,
-    );
+    return _$TurnDetectionToJson(this);
   }
 
   @override
@@ -1854,8 +1972,16 @@ class _TurnDetection extends TurnDetection {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, threshold, prefixPaddingMs,
-      silenceDurationMs, createResponse);
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      type,
+      threshold,
+      prefixPaddingMs,
+      silenceDurationMs,
+      createResponse,
+    );
+  }
 
   @override
   String toString() {
@@ -1867,18 +1993,20 @@ class _TurnDetection extends TurnDetection {
 abstract mixin class _$TurnDetectionCopyWith<$Res>
     implements $TurnDetectionCopyWith<$Res> {
   factory _$TurnDetectionCopyWith(
-          _TurnDetection value, $Res Function(_TurnDetection) _then) =
-      __$TurnDetectionCopyWithImpl;
+    _TurnDetection value,
+    $Res Function(_TurnDetection) _then,
+  ) = __$TurnDetectionCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {TurnDetectionType type,
-      @JsonKey(includeIfNull: false) double? threshold,
-      @JsonKey(name: 'prefix_padding_ms', includeIfNull: false)
-      int? prefixPaddingMs,
-      @JsonKey(name: 'silence_duration_ms', includeIfNull: false)
-      int? silenceDurationMs,
-      @JsonKey(name: 'create_response') bool createResponse});
+  $Res call({
+    TurnDetectionType type,
+    @JsonKey(includeIfNull: false) double? threshold,
+    @JsonKey(name: 'prefix_padding_ms', includeIfNull: false)
+    int? prefixPaddingMs,
+    @JsonKey(name: 'silence_duration_ms', includeIfNull: false)
+    int? silenceDurationMs,
+    @JsonKey(name: 'create_response') bool createResponse,
+  });
 }
 
 /// @nodoc
@@ -1900,28 +2028,30 @@ class __$TurnDetectionCopyWithImpl<$Res>
     Object? silenceDurationMs = freezed,
     Object? createResponse = null,
   }) {
-    return _then(_TurnDetection(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as TurnDetectionType,
-      threshold: freezed == threshold
-          ? _self.threshold
-          : threshold // ignore: cast_nullable_to_non_nullable
-              as double?,
-      prefixPaddingMs: freezed == prefixPaddingMs
-          ? _self.prefixPaddingMs
-          : prefixPaddingMs // ignore: cast_nullable_to_non_nullable
-              as int?,
-      silenceDurationMs: freezed == silenceDurationMs
-          ? _self.silenceDurationMs
-          : silenceDurationMs // ignore: cast_nullable_to_non_nullable
-              as int?,
-      createResponse: null == createResponse
-          ? _self.createResponse
-          : createResponse // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
+    return _then(
+      _TurnDetection(
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as TurnDetectionType,
+        threshold: freezed == threshold
+            ? _self.threshold
+            : threshold // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        prefixPaddingMs: freezed == prefixPaddingMs
+            ? _self.prefixPaddingMs
+            : prefixPaddingMs // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        silenceDurationMs: freezed == silenceDurationMs
+            ? _self.silenceDurationMs
+            : silenceDurationMs // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        createResponse: null == createResponse
+            ? _self.createResponse
+            : createResponse // ignore: cast_nullable_to_non_nullable
+                  as bool,
+      ),
+    );
   }
 }
 
@@ -1952,25 +2082,36 @@ mixin _$RateLimit {
 
   @override
   bool operator ==(Object other) {
+    final _this = this as RateLimit;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is RateLimit &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.limit, limit) || other.limit == limit) &&
-            (identical(other.remaining, remaining) ||
-                other.remaining == remaining) &&
-            (identical(other.resetSeconds, resetSeconds) ||
-                other.resetSeconds == resetSeconds));
+            (identical(other.name, _this.name) || other.name == _this.name) &&
+            (identical(other.limit, _this.limit) ||
+                other.limit == _this.limit) &&
+            (identical(other.remaining, _this.remaining) ||
+                other.remaining == _this.remaining) &&
+            (identical(other.resetSeconds, _this.resetSeconds) ||
+                other.resetSeconds == _this.resetSeconds));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, name, limit, remaining, resetSeconds);
+  int get hashCode {
+    final _this = this as RateLimit;
+    return Object.hash(
+      runtimeType,
+      _this.name,
+      _this.limit,
+      _this.remaining,
+      _this.resetSeconds,
+    );
+  }
 
   @override
   String toString() {
-    return 'RateLimit(name: $name, limit: $limit, remaining: $remaining, resetSeconds: $resetSeconds)';
+    final _this = this as RateLimit;
+    return 'RateLimit(name: ${_this.name}, limit: ${_this.limit}, remaining: ${_this.remaining}, resetSeconds: ${_this.resetSeconds})';
   }
 }
 
@@ -1979,11 +2120,12 @@ abstract mixin class $RateLimitCopyWith<$Res> {
   factory $RateLimitCopyWith(RateLimit value, $Res Function(RateLimit) _then) =
       _$RateLimitCopyWithImpl;
   @useResult
-  $Res call(
-      {RateLimitName name,
-      int limit,
-      int remaining,
-      @JsonKey(name: 'reset_seconds') double resetSeconds});
+  $Res call({
+    RateLimitName name,
+    int limit,
+    int remaining,
+    @JsonKey(name: 'reset_seconds') double resetSeconds,
+  });
 }
 
 /// @nodoc
@@ -2003,24 +2145,26 @@ class _$RateLimitCopyWithImpl<$Res> implements $RateLimitCopyWith<$Res> {
     Object? remaining = null,
     Object? resetSeconds = null,
   }) {
-    return _then(_self.copyWith(
-      name: null == name
-          ? _self.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as RateLimitName,
-      limit: null == limit
-          ? _self.limit
-          : limit // ignore: cast_nullable_to_non_nullable
-              as int,
-      remaining: null == remaining
-          ? _self.remaining
-          : remaining // ignore: cast_nullable_to_non_nullable
-              as int,
-      resetSeconds: null == resetSeconds
-          ? _self.resetSeconds
-          : resetSeconds // ignore: cast_nullable_to_non_nullable
-              as double,
-    ));
+    return _then(
+      RateLimit(
+        name: null == name
+            ? _self.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as RateLimitName,
+        limit: null == limit
+            ? _self.limit
+            : limit // ignore: cast_nullable_to_non_nullable
+                  as int,
+        remaining: null == remaining
+            ? _self.remaining
+            : remaining // ignore: cast_nullable_to_non_nullable
+                  as int,
+        resetSeconds: null == resetSeconds
+            ? _self.resetSeconds
+            : resetSeconds // ignore: cast_nullable_to_non_nullable
+                  as double,
+      ),
+    );
   }
 }
 
@@ -2117,16 +2261,24 @@ extension RateLimitPatterns on RateLimit {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(RateLimitName name, int limit, int remaining,
-            @JsonKey(name: 'reset_seconds') double resetSeconds)?
-        $default, {
+    TResult Function(
+      RateLimitName name,
+      int limit,
+      int remaining,
+      @JsonKey(name: 'reset_seconds') double resetSeconds,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _RateLimit() when $default != null:
         return $default(
-            _that.name, _that.limit, _that.remaining, _that.resetSeconds);
+          _that.name,
+          _that.limit,
+          _that.remaining,
+          _that.resetSeconds,
+        );
       case _:
         return orElse();
     }
@@ -2147,15 +2299,23 @@ extension RateLimitPatterns on RateLimit {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(RateLimitName name, int limit, int remaining,
-            @JsonKey(name: 'reset_seconds') double resetSeconds)
-        $default,
+    TResult Function(
+      RateLimitName name,
+      int limit,
+      int remaining,
+      @JsonKey(name: 'reset_seconds') double resetSeconds,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _RateLimit():
         return $default(
-            _that.name, _that.limit, _that.remaining, _that.resetSeconds);
+          _that.name,
+          _that.limit,
+          _that.remaining,
+          _that.resetSeconds,
+        );
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -2175,15 +2335,23 @@ extension RateLimitPatterns on RateLimit {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(RateLimitName name, int limit, int remaining,
-            @JsonKey(name: 'reset_seconds') double resetSeconds)?
-        $default,
+    TResult? Function(
+      RateLimitName name,
+      int limit,
+      int remaining,
+      @JsonKey(name: 'reset_seconds') double resetSeconds,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _RateLimit() when $default != null:
         return $default(
-            _that.name, _that.limit, _that.remaining, _that.resetSeconds);
+          _that.name,
+          _that.limit,
+          _that.remaining,
+          _that.resetSeconds,
+        );
       case _:
         return null;
     }
@@ -2193,12 +2361,12 @@ extension RateLimitPatterns on RateLimit {
 /// @nodoc
 @JsonSerializable()
 class _RateLimit extends RateLimit {
-  const _RateLimit(
-      {required this.name,
-      required this.limit,
-      required this.remaining,
-      @JsonKey(name: 'reset_seconds') required this.resetSeconds})
-      : super._();
+  const _RateLimit({
+    required this.name,
+    required this.limit,
+    required this.remaining,
+    @JsonKey(name: 'reset_seconds') required this.resetSeconds,
+  }) : super._();
   factory _RateLimit.fromJson(Map<String, dynamic> json) =>
       _$RateLimitFromJson(json);
 
@@ -2229,9 +2397,7 @@ class _RateLimit extends RateLimit {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RateLimitToJson(
-      this,
-    );
+    return _$RateLimitToJson(this);
   }
 
   @override
@@ -2249,8 +2415,9 @@ class _RateLimit extends RateLimit {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, name, limit, remaining, resetSeconds);
+  int get hashCode {
+    return Object.hash(runtimeType, name, limit, remaining, resetSeconds);
+  }
 
   @override
   String toString() {
@@ -2262,15 +2429,17 @@ class _RateLimit extends RateLimit {
 abstract mixin class _$RateLimitCopyWith<$Res>
     implements $RateLimitCopyWith<$Res> {
   factory _$RateLimitCopyWith(
-          _RateLimit value, $Res Function(_RateLimit) _then) =
-      __$RateLimitCopyWithImpl;
+    _RateLimit value,
+    $Res Function(_RateLimit) _then,
+  ) = __$RateLimitCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {RateLimitName name,
-      int limit,
-      int remaining,
-      @JsonKey(name: 'reset_seconds') double resetSeconds});
+  $Res call({
+    RateLimitName name,
+    int limit,
+    int remaining,
+    @JsonKey(name: 'reset_seconds') double resetSeconds,
+  });
 }
 
 /// @nodoc
@@ -2290,24 +2459,26 @@ class __$RateLimitCopyWithImpl<$Res> implements _$RateLimitCopyWith<$Res> {
     Object? remaining = null,
     Object? resetSeconds = null,
   }) {
-    return _then(_RateLimit(
-      name: null == name
-          ? _self.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as RateLimitName,
-      limit: null == limit
-          ? _self.limit
-          : limit // ignore: cast_nullable_to_non_nullable
-              as int,
-      remaining: null == remaining
-          ? _self.remaining
-          : remaining // ignore: cast_nullable_to_non_nullable
-              as int,
-      resetSeconds: null == resetSeconds
-          ? _self.resetSeconds
-          : resetSeconds // ignore: cast_nullable_to_non_nullable
-              as double,
-    ));
+    return _then(
+      _RateLimit(
+        name: null == name
+            ? _self.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as RateLimitName,
+        limit: null == limit
+            ? _self.limit
+            : limit // ignore: cast_nullable_to_non_nullable
+                  as int,
+        remaining: null == remaining
+            ? _self.remaining
+            : remaining // ignore: cast_nullable_to_non_nullable
+                  as int,
+        resetSeconds: null == resetSeconds
+            ? _self.resetSeconds
+            : resetSeconds // ignore: cast_nullable_to_non_nullable
+                  as double,
+      ),
+    );
   }
 }
 
@@ -2352,34 +2523,46 @@ mixin _$Response {
 
   @override
   bool operator ==(Object other) {
+    final _this = this as Response;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Response &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.object, object) || other.object == object) &&
-            (identical(other.status, status) || other.status == status) &&
-            (identical(other.statusDetails, statusDetails) ||
-                other.statusDetails == statusDetails) &&
-            const DeepCollectionEquality().equals(other.output, output) &&
-            const DeepCollectionEquality().equals(other.metadata, metadata) &&
-            (identical(other.usage, usage) || other.usage == usage));
+            (identical(other.id, _this.id) || other.id == _this.id) &&
+            (identical(other.object, _this.object) ||
+                other.object == _this.object) &&
+            (identical(other.status, _this.status) ||
+                other.status == _this.status) &&
+            (identical(other.statusDetails, _this.statusDetails) ||
+                other.statusDetails == _this.statusDetails) &&
+            const DeepCollectionEquality().equals(other.output, _this.output) &&
+            const DeepCollectionEquality().equals(
+              other.metadata,
+              _this.metadata,
+            ) &&
+            (identical(other.usage, _this.usage) ||
+                other.usage == _this.usage));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode {
+    final _this = this as Response;
+    return Object.hash(
       runtimeType,
-      id,
-      object,
-      status,
-      statusDetails,
-      const DeepCollectionEquality().hash(output),
-      const DeepCollectionEquality().hash(metadata),
-      usage);
+      _this.id,
+      _this.object,
+      _this.status,
+      _this.statusDetails,
+      const DeepCollectionEquality().hash(_this.output),
+      const DeepCollectionEquality().hash(_this.metadata),
+      _this.usage,
+    );
+  }
 
   @override
   String toString() {
-    return 'Response(id: $id, object: $object, status: $status, statusDetails: $statusDetails, output: $output, metadata: $metadata, usage: $usage)';
+    final _this = this as Response;
+    return 'Response(id: ${_this.id}, object: ${_this.object}, status: ${_this.status}, statusDetails: ${_this.statusDetails}, output: ${_this.output}, metadata: ${_this.metadata}, usage: ${_this.usage})';
   }
 }
 
@@ -2388,15 +2571,16 @@ abstract mixin class $ResponseCopyWith<$Res> {
   factory $ResponseCopyWith(Response value, $Res Function(Response) _then) =
       _$ResponseCopyWithImpl;
   @useResult
-  $Res call(
-      {String id,
-      ObjectType object,
-      ResponseStatus status,
-      @JsonKey(name: 'status_details', includeIfNull: false)
-      ResponseStatusDetails? statusDetails,
-      List<Item> output,
-      @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
-      @JsonKey(includeIfNull: false) Usage? usage});
+  $Res call({
+    String id,
+    ObjectType object,
+    ResponseStatus status,
+    @JsonKey(name: 'status_details', includeIfNull: false)
+    ResponseStatusDetails? statusDetails,
+    List<Item> output,
+    @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
+    @JsonKey(includeIfNull: false) Usage? usage,
+  });
 
   $ResponseStatusDetailsCopyWith<$Res>? get statusDetails;
   $UsageCopyWith<$Res>? get usage;
@@ -2422,36 +2606,38 @@ class _$ResponseCopyWithImpl<$Res> implements $ResponseCopyWith<$Res> {
     Object? metadata = freezed,
     Object? usage = freezed,
   }) {
-    return _then(_self.copyWith(
-      id: null == id
-          ? _self.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      object: null == object
-          ? _self.object
-          : object // ignore: cast_nullable_to_non_nullable
-              as ObjectType,
-      status: null == status
-          ? _self.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as ResponseStatus,
-      statusDetails: freezed == statusDetails
-          ? _self.statusDetails
-          : statusDetails // ignore: cast_nullable_to_non_nullable
-              as ResponseStatusDetails?,
-      output: null == output
-          ? _self.output
-          : output // ignore: cast_nullable_to_non_nullable
-              as List<Item>,
-      metadata: freezed == metadata
-          ? _self.metadata
-          : metadata // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>?,
-      usage: freezed == usage
-          ? _self.usage
-          : usage // ignore: cast_nullable_to_non_nullable
-              as Usage?,
-    ));
+    return _then(
+      Response(
+        id: null == id
+            ? _self.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        object: null == object
+            ? _self.object
+            : object // ignore: cast_nullable_to_non_nullable
+                  as ObjectType,
+        status: null == status
+            ? _self.status
+            : status // ignore: cast_nullable_to_non_nullable
+                  as ResponseStatus,
+        statusDetails: freezed == statusDetails
+            ? _self.statusDetails
+            : statusDetails // ignore: cast_nullable_to_non_nullable
+                  as ResponseStatusDetails?,
+        output: null == output
+            ? _self.output
+            : output // ignore: cast_nullable_to_non_nullable
+                  as List<Item>,
+        metadata: freezed == metadata
+            ? _self.metadata
+            : metadata // ignore: cast_nullable_to_non_nullable
+                  as Map<String, dynamic>?,
+        usage: freezed == usage
+            ? _self.usage
+            : usage // ignore: cast_nullable_to_non_nullable
+                  as Usage?,
+      ),
+    );
   }
 
   /// Create a copy of Response
@@ -2577,22 +2763,30 @@ extension ResponsePatterns on Response {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            String id,
-            ObjectType object,
-            ResponseStatus status,
-            @JsonKey(name: 'status_details', includeIfNull: false)
-            ResponseStatusDetails? statusDetails,
-            List<Item> output,
-            @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
-            @JsonKey(includeIfNull: false) Usage? usage)?
-        $default, {
+      String id,
+      ObjectType object,
+      ResponseStatus status,
+      @JsonKey(name: 'status_details', includeIfNull: false)
+      ResponseStatusDetails? statusDetails,
+      List<Item> output,
+      @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
+      @JsonKey(includeIfNull: false) Usage? usage,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _Response() when $default != null:
-        return $default(_that.id, _that.object, _that.status,
-            _that.statusDetails, _that.output, _that.metadata, _that.usage);
+        return $default(
+          _that.id,
+          _that.object,
+          _that.status,
+          _that.statusDetails,
+          _that.output,
+          _that.metadata,
+          _that.usage,
+        );
       case _:
         return orElse();
     }
@@ -2614,21 +2808,29 @@ extension ResponsePatterns on Response {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            String id,
-            ObjectType object,
-            ResponseStatus status,
-            @JsonKey(name: 'status_details', includeIfNull: false)
-            ResponseStatusDetails? statusDetails,
-            List<Item> output,
-            @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
-            @JsonKey(includeIfNull: false) Usage? usage)
-        $default,
+      String id,
+      ObjectType object,
+      ResponseStatus status,
+      @JsonKey(name: 'status_details', includeIfNull: false)
+      ResponseStatusDetails? statusDetails,
+      List<Item> output,
+      @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
+      @JsonKey(includeIfNull: false) Usage? usage,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _Response():
-        return $default(_that.id, _that.object, _that.status,
-            _that.statusDetails, _that.output, _that.metadata, _that.usage);
+        return $default(
+          _that.id,
+          _that.object,
+          _that.status,
+          _that.statusDetails,
+          _that.output,
+          _that.metadata,
+          _that.usage,
+        );
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -2649,21 +2851,29 @@ extension ResponsePatterns on Response {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            String id,
-            ObjectType object,
-            ResponseStatus status,
-            @JsonKey(name: 'status_details', includeIfNull: false)
-            ResponseStatusDetails? statusDetails,
-            List<Item> output,
-            @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
-            @JsonKey(includeIfNull: false) Usage? usage)?
-        $default,
+      String id,
+      ObjectType object,
+      ResponseStatus status,
+      @JsonKey(name: 'status_details', includeIfNull: false)
+      ResponseStatusDetails? statusDetails,
+      List<Item> output,
+      @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
+      @JsonKey(includeIfNull: false) Usage? usage,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _Response() when $default != null:
-        return $default(_that.id, _that.object, _that.status,
-            _that.statusDetails, _that.output, _that.metadata, _that.usage);
+        return $default(
+          _that.id,
+          _that.object,
+          _that.status,
+          _that.statusDetails,
+          _that.output,
+          _that.metadata,
+          _that.usage,
+        );
       case _:
         return null;
     }
@@ -2673,17 +2883,17 @@ extension ResponsePatterns on Response {
 /// @nodoc
 @JsonSerializable()
 class _Response extends Response {
-  const _Response(
-      {required this.id,
-      this.object = ObjectType.realtimeResponse,
-      required this.status,
-      @JsonKey(name: 'status_details', includeIfNull: false) this.statusDetails,
-      required final List<Item> output,
-      @JsonKey(includeIfNull: false) final Map<String, dynamic>? metadata,
-      @JsonKey(includeIfNull: false) this.usage})
-      : _output = output,
-        _metadata = metadata,
-        super._();
+  const _Response({
+    required this.id,
+    this.object = ObjectType.realtimeResponse,
+    required this.status,
+    @JsonKey(name: 'status_details', includeIfNull: false) this.statusDetails,
+    required List<Item> output,
+    @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
+    @JsonKey(includeIfNull: false) this.usage,
+  }) : _output = output,
+       _metadata = metadata,
+       super._();
   factory _Response.fromJson(Map<String, dynamic> json) =>
       _$ResponseFromJson(json);
 
@@ -2748,9 +2958,7 @@ class _Response extends Response {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ResponseToJson(
-      this,
-    );
+    return _$ResponseToJson(this);
   }
 
   @override
@@ -2763,14 +2971,15 @@ class _Response extends Response {
             (identical(other.status, status) || other.status == status) &&
             (identical(other.statusDetails, statusDetails) ||
                 other.statusDetails == statusDetails) &&
-            const DeepCollectionEquality().equals(other._output, _output) &&
-            const DeepCollectionEquality().equals(other._metadata, _metadata) &&
+            const DeepCollectionEquality().equals(other.output, _output) &&
+            const DeepCollectionEquality().equals(other.metadata, _metadata) &&
             (identical(other.usage, usage) || other.usage == usage));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode {
+    return Object.hash(
       runtimeType,
       id,
       object,
@@ -2778,7 +2987,9 @@ class _Response extends Response {
       statusDetails,
       const DeepCollectionEquality().hash(_output),
       const DeepCollectionEquality().hash(_metadata),
-      usage);
+      usage,
+    );
+  }
 
   @override
   String toString() {
@@ -2793,15 +3004,16 @@ abstract mixin class _$ResponseCopyWith<$Res>
       __$ResponseCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {String id,
-      ObjectType object,
-      ResponseStatus status,
-      @JsonKey(name: 'status_details', includeIfNull: false)
-      ResponseStatusDetails? statusDetails,
-      List<Item> output,
-      @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
-      @JsonKey(includeIfNull: false) Usage? usage});
+  $Res call({
+    String id,
+    ObjectType object,
+    ResponseStatus status,
+    @JsonKey(name: 'status_details', includeIfNull: false)
+    ResponseStatusDetails? statusDetails,
+    List<Item> output,
+    @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
+    @JsonKey(includeIfNull: false) Usage? usage,
+  });
 
   @override
   $ResponseStatusDetailsCopyWith<$Res>? get statusDetails;
@@ -2829,36 +3041,38 @@ class __$ResponseCopyWithImpl<$Res> implements _$ResponseCopyWith<$Res> {
     Object? metadata = freezed,
     Object? usage = freezed,
   }) {
-    return _then(_Response(
-      id: null == id
-          ? _self.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      object: null == object
-          ? _self.object
-          : object // ignore: cast_nullable_to_non_nullable
-              as ObjectType,
-      status: null == status
-          ? _self.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as ResponseStatus,
-      statusDetails: freezed == statusDetails
-          ? _self.statusDetails
-          : statusDetails // ignore: cast_nullable_to_non_nullable
-              as ResponseStatusDetails?,
-      output: null == output
-          ? _self._output
-          : output // ignore: cast_nullable_to_non_nullable
-              as List<Item>,
-      metadata: freezed == metadata
-          ? _self._metadata
-          : metadata // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>?,
-      usage: freezed == usage
-          ? _self.usage
-          : usage // ignore: cast_nullable_to_non_nullable
-              as Usage?,
-    ));
+    return _then(
+      _Response(
+        id: null == id
+            ? _self.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        object: null == object
+            ? _self.object
+            : object // ignore: cast_nullable_to_non_nullable
+                  as ObjectType,
+        status: null == status
+            ? _self.status
+            : status // ignore: cast_nullable_to_non_nullable
+                  as ResponseStatus,
+        statusDetails: freezed == statusDetails
+            ? _self.statusDetails
+            : statusDetails // ignore: cast_nullable_to_non_nullable
+                  as ResponseStatusDetails?,
+        output: null == output
+            ? _self._output
+            : output // ignore: cast_nullable_to_non_nullable
+                  as List<Item>,
+        metadata: freezed == metadata
+            ? _self._metadata
+            : metadata // ignore: cast_nullable_to_non_nullable
+                  as Map<String, dynamic>?,
+        usage: freezed == usage
+            ? _self.usage
+            : usage // ignore: cast_nullable_to_non_nullable
+                  as Usage?,
+      ),
+    );
   }
 
   /// Create a copy of Response
@@ -2902,14 +3116,17 @@ mixin _$ResponseConfig {
 
   /// The voice the model uses to respond - one of `alloy`, `echo`, or `shimmer`.
   @JsonKey(
-      includeIfNull: false, unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   Voice? get voice;
 
   /// The format of output audio.
   @JsonKey(
-      name: 'output_audio_format',
-      includeIfNull: false,
-      unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    name: 'output_audio_format',
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   AudioFormat? get outputAudioFormat;
 
   /// Tools (functions) available to the model.
@@ -2958,94 +3175,115 @@ mixin _$ResponseConfig {
   @pragma('vm:prefer-inline')
   $ResponseConfigCopyWith<ResponseConfig> get copyWith =>
       _$ResponseConfigCopyWithImpl<ResponseConfig>(
-          this as ResponseConfig, _$identity);
+        this as ResponseConfig,
+        _$identity,
+      );
 
   /// Serializes this ResponseConfig to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as ResponseConfig;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ResponseConfig &&
-            const DeepCollectionEquality()
-                .equals(other.modalities, modalities) &&
-            (identical(other.instructions, instructions) ||
-                other.instructions == instructions) &&
-            (identical(other.voice, voice) || other.voice == voice) &&
-            (identical(other.outputAudioFormat, outputAudioFormat) ||
-                other.outputAudioFormat == outputAudioFormat) &&
-            const DeepCollectionEquality().equals(other.tools, tools) &&
-            (identical(other.toolChoice, toolChoice) ||
-                other.toolChoice == toolChoice) &&
-            (identical(other.temperature, temperature) ||
-                other.temperature == temperature) &&
+            const DeepCollectionEquality().equals(
+              other.modalities,
+              _this.modalities,
+            ) &&
+            (identical(other.instructions, _this.instructions) ||
+                other.instructions == _this.instructions) &&
+            (identical(other.voice, _this.voice) ||
+                other.voice == _this.voice) &&
+            (identical(other.outputAudioFormat, _this.outputAudioFormat) ||
+                other.outputAudioFormat == _this.outputAudioFormat) &&
+            const DeepCollectionEquality().equals(other.tools, _this.tools) &&
+            (identical(other.toolChoice, _this.toolChoice) ||
+                other.toolChoice == _this.toolChoice) &&
+            (identical(other.temperature, _this.temperature) ||
+                other.temperature == _this.temperature) &&
             (identical(
-                    other.maxResponseOutputTokens, maxResponseOutputTokens) ||
-                other.maxResponseOutputTokens == maxResponseOutputTokens) &&
-            (identical(other.conversation, conversation) ||
-                other.conversation == conversation) &&
-            const DeepCollectionEquality().equals(other.metadata, metadata) &&
-            const DeepCollectionEquality().equals(other.input, input));
+                  other.maxResponseOutputTokens,
+                  _this.maxResponseOutputTokens,
+                ) ||
+                other.maxResponseOutputTokens ==
+                    _this.maxResponseOutputTokens) &&
+            (identical(other.conversation, _this.conversation) ||
+                other.conversation == _this.conversation) &&
+            const DeepCollectionEquality().equals(
+              other.metadata,
+              _this.metadata,
+            ) &&
+            const DeepCollectionEquality().equals(other.input, _this.input));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode {
+    final _this = this as ResponseConfig;
+    return Object.hash(
       runtimeType,
-      const DeepCollectionEquality().hash(modalities),
-      instructions,
-      voice,
-      outputAudioFormat,
-      const DeepCollectionEquality().hash(tools),
-      toolChoice,
-      temperature,
-      maxResponseOutputTokens,
-      conversation,
-      const DeepCollectionEquality().hash(metadata),
-      const DeepCollectionEquality().hash(input));
+      const DeepCollectionEquality().hash(_this.modalities),
+      _this.instructions,
+      _this.voice,
+      _this.outputAudioFormat,
+      const DeepCollectionEquality().hash(_this.tools),
+      _this.toolChoice,
+      _this.temperature,
+      _this.maxResponseOutputTokens,
+      _this.conversation,
+      const DeepCollectionEquality().hash(_this.metadata),
+      const DeepCollectionEquality().hash(_this.input),
+    );
+  }
 
   @override
   String toString() {
-    return 'ResponseConfig(modalities: $modalities, instructions: $instructions, voice: $voice, outputAudioFormat: $outputAudioFormat, tools: $tools, toolChoice: $toolChoice, temperature: $temperature, maxResponseOutputTokens: $maxResponseOutputTokens, conversation: $conversation, metadata: $metadata, input: $input)';
+    final _this = this as ResponseConfig;
+    return 'ResponseConfig(modalities: ${_this.modalities}, instructions: ${_this.instructions}, voice: ${_this.voice}, outputAudioFormat: ${_this.outputAudioFormat}, tools: ${_this.tools}, toolChoice: ${_this.toolChoice}, temperature: ${_this.temperature}, maxResponseOutputTokens: ${_this.maxResponseOutputTokens}, conversation: ${_this.conversation}, metadata: ${_this.metadata}, input: ${_this.input})';
   }
 }
 
 /// @nodoc
 abstract mixin class $ResponseConfigCopyWith<$Res> {
   factory $ResponseConfigCopyWith(
-          ResponseConfig value, $Res Function(ResponseConfig) _then) =
-      _$ResponseConfigCopyWithImpl;
+    ResponseConfig value,
+    $Res Function(ResponseConfig) _then,
+  ) = _$ResponseConfigCopyWithImpl;
   @useResult
-  $Res call(
-      {@JsonKey(includeIfNull: false) List<Modality>? modalities,
-      @JsonKey(includeIfNull: false) String? instructions,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      Voice? voice,
-      @JsonKey(
-          name: 'output_audio_format',
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      AudioFormat? outputAudioFormat,
-      @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
-      @_ResponseConfigToolChoiceConverter()
-      @JsonKey(name: 'tool_choice', includeIfNull: false)
-      ResponseConfigToolChoice? toolChoice,
-      @JsonKey(includeIfNull: false) double? temperature,
-      @_ResponseConfigMaxResponseOutputTokensConverter()
-      @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
-      ResponseConfigMaxResponseOutputTokens? maxResponseOutputTokens,
-      @_ResponseConfigConversationConverter()
-      @JsonKey(includeIfNull: false)
-      ResponseConfigConversation? conversation,
-      @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
-      @JsonKey(includeIfNull: false) List<Item>? input});
+  $Res call({
+    @JsonKey(includeIfNull: false) List<Modality>? modalities,
+    @JsonKey(includeIfNull: false) String? instructions,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    Voice? voice,
+    @JsonKey(
+      name: 'output_audio_format',
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    AudioFormat? outputAudioFormat,
+    @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
+    @_ResponseConfigToolChoiceConverter()
+    @JsonKey(name: 'tool_choice', includeIfNull: false)
+    ResponseConfigToolChoice? toolChoice,
+    @JsonKey(includeIfNull: false) double? temperature,
+    @_ResponseConfigMaxResponseOutputTokensConverter()
+    @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
+    ResponseConfigMaxResponseOutputTokens? maxResponseOutputTokens,
+    @_ResponseConfigConversationConverter()
+    @JsonKey(includeIfNull: false)
+    ResponseConfigConversation? conversation,
+    @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
+    @JsonKey(includeIfNull: false) List<Item>? input,
+  });
 
   $ResponseConfigToolChoiceCopyWith<$Res>? get toolChoice;
   $ResponseConfigMaxResponseOutputTokensCopyWith<$Res>?
-      get maxResponseOutputTokens;
+  get maxResponseOutputTokens;
   $ResponseConfigConversationCopyWith<$Res>? get conversation;
 }
 
@@ -3074,52 +3312,54 @@ class _$ResponseConfigCopyWithImpl<$Res>
     Object? metadata = freezed,
     Object? input = freezed,
   }) {
-    return _then(_self.copyWith(
-      modalities: freezed == modalities
-          ? _self.modalities
-          : modalities // ignore: cast_nullable_to_non_nullable
-              as List<Modality>?,
-      instructions: freezed == instructions
-          ? _self.instructions
-          : instructions // ignore: cast_nullable_to_non_nullable
-              as String?,
-      voice: freezed == voice
-          ? _self.voice
-          : voice // ignore: cast_nullable_to_non_nullable
-              as Voice?,
-      outputAudioFormat: freezed == outputAudioFormat
-          ? _self.outputAudioFormat
-          : outputAudioFormat // ignore: cast_nullable_to_non_nullable
-              as AudioFormat?,
-      tools: freezed == tools
-          ? _self.tools
-          : tools // ignore: cast_nullable_to_non_nullable
-              as List<ToolDefinition>?,
-      toolChoice: freezed == toolChoice
-          ? _self.toolChoice
-          : toolChoice // ignore: cast_nullable_to_non_nullable
-              as ResponseConfigToolChoice?,
-      temperature: freezed == temperature
-          ? _self.temperature
-          : temperature // ignore: cast_nullable_to_non_nullable
-              as double?,
-      maxResponseOutputTokens: freezed == maxResponseOutputTokens
-          ? _self.maxResponseOutputTokens
-          : maxResponseOutputTokens // ignore: cast_nullable_to_non_nullable
-              as ResponseConfigMaxResponseOutputTokens?,
-      conversation: freezed == conversation
-          ? _self.conversation
-          : conversation // ignore: cast_nullable_to_non_nullable
-              as ResponseConfigConversation?,
-      metadata: freezed == metadata
-          ? _self.metadata
-          : metadata // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>?,
-      input: freezed == input
-          ? _self.input
-          : input // ignore: cast_nullable_to_non_nullable
-              as List<Item>?,
-    ));
+    return _then(
+      ResponseConfig(
+        modalities: freezed == modalities
+            ? _self.modalities
+            : modalities // ignore: cast_nullable_to_non_nullable
+                  as List<Modality>?,
+        instructions: freezed == instructions
+            ? _self.instructions
+            : instructions // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        voice: freezed == voice
+            ? _self.voice
+            : voice // ignore: cast_nullable_to_non_nullable
+                  as Voice?,
+        outputAudioFormat: freezed == outputAudioFormat
+            ? _self.outputAudioFormat
+            : outputAudioFormat // ignore: cast_nullable_to_non_nullable
+                  as AudioFormat?,
+        tools: freezed == tools
+            ? _self.tools
+            : tools // ignore: cast_nullable_to_non_nullable
+                  as List<ToolDefinition>?,
+        toolChoice: freezed == toolChoice
+            ? _self.toolChoice
+            : toolChoice // ignore: cast_nullable_to_non_nullable
+                  as ResponseConfigToolChoice?,
+        temperature: freezed == temperature
+            ? _self.temperature
+            : temperature // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        maxResponseOutputTokens: freezed == maxResponseOutputTokens
+            ? _self.maxResponseOutputTokens
+            : maxResponseOutputTokens // ignore: cast_nullable_to_non_nullable
+                  as ResponseConfigMaxResponseOutputTokens?,
+        conversation: freezed == conversation
+            ? _self.conversation
+            : conversation // ignore: cast_nullable_to_non_nullable
+                  as ResponseConfigConversation?,
+        metadata: freezed == metadata
+            ? _self.metadata
+            : metadata // ignore: cast_nullable_to_non_nullable
+                  as Map<String, dynamic>?,
+        input: freezed == input
+            ? _self.input
+            : input // ignore: cast_nullable_to_non_nullable
+                  as List<Item>?,
+      ),
+    );
   }
 
   /// Create a copy of ResponseConfig
@@ -3141,15 +3381,17 @@ class _$ResponseConfigCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $ResponseConfigMaxResponseOutputTokensCopyWith<$Res>?
-      get maxResponseOutputTokens {
+  get maxResponseOutputTokens {
     if (_self.maxResponseOutputTokens == null) {
       return null;
     }
 
     return $ResponseConfigMaxResponseOutputTokensCopyWith<$Res>(
-        _self.maxResponseOutputTokens!, (value) {
-      return _then(_self.copyWith(maxResponseOutputTokens: value));
-    });
+      _self.maxResponseOutputTokens!,
+      (value) {
+        return _then(_self.copyWith(maxResponseOutputTokens: value));
+      },
+    );
   }
 
   /// Create a copy of ResponseConfig
@@ -3161,8 +3403,9 @@ class _$ResponseConfigCopyWithImpl<$Res>
       return null;
     }
 
-    return $ResponseConfigConversationCopyWith<$Res>(_self.conversation!,
-        (value) {
+    return $ResponseConfigConversationCopyWith<$Res>(_self.conversation!, (
+      value,
+    ) {
       return _then(_self.copyWith(conversation: value));
     });
   }
@@ -3262,48 +3505,52 @@ extension ResponseConfigPatterns on ResponseConfig {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            @JsonKey(includeIfNull: false) List<Modality>? modalities,
-            @JsonKey(includeIfNull: false) String? instructions,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            Voice? voice,
-            @JsonKey(
-                name: 'output_audio_format',
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            AudioFormat? outputAudioFormat,
-            @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
-            @_ResponseConfigToolChoiceConverter()
-            @JsonKey(name: 'tool_choice', includeIfNull: false)
-            ResponseConfigToolChoice? toolChoice,
-            @JsonKey(includeIfNull: false) double? temperature,
-            @_ResponseConfigMaxResponseOutputTokensConverter()
-            @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
-            ResponseConfigMaxResponseOutputTokens? maxResponseOutputTokens,
-            @_ResponseConfigConversationConverter()
-            @JsonKey(includeIfNull: false)
-            ResponseConfigConversation? conversation,
-            @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
-            @JsonKey(includeIfNull: false) List<Item>? input)?
-        $default, {
+      @JsonKey(includeIfNull: false) List<Modality>? modalities,
+      @JsonKey(includeIfNull: false) String? instructions,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      Voice? voice,
+      @JsonKey(
+        name: 'output_audio_format',
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      AudioFormat? outputAudioFormat,
+      @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
+      @_ResponseConfigToolChoiceConverter()
+      @JsonKey(name: 'tool_choice', includeIfNull: false)
+      ResponseConfigToolChoice? toolChoice,
+      @JsonKey(includeIfNull: false) double? temperature,
+      @_ResponseConfigMaxResponseOutputTokensConverter()
+      @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
+      ResponseConfigMaxResponseOutputTokens? maxResponseOutputTokens,
+      @_ResponseConfigConversationConverter()
+      @JsonKey(includeIfNull: false)
+      ResponseConfigConversation? conversation,
+      @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
+      @JsonKey(includeIfNull: false) List<Item>? input,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _ResponseConfig() when $default != null:
         return $default(
-            _that.modalities,
-            _that.instructions,
-            _that.voice,
-            _that.outputAudioFormat,
-            _that.tools,
-            _that.toolChoice,
-            _that.temperature,
-            _that.maxResponseOutputTokens,
-            _that.conversation,
-            _that.metadata,
-            _that.input);
+          _that.modalities,
+          _that.instructions,
+          _that.voice,
+          _that.outputAudioFormat,
+          _that.tools,
+          _that.toolChoice,
+          _that.temperature,
+          _that.maxResponseOutputTokens,
+          _that.conversation,
+          _that.metadata,
+          _that.input,
+        );
       case _:
         return orElse();
     }
@@ -3325,47 +3572,51 @@ extension ResponseConfigPatterns on ResponseConfig {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            @JsonKey(includeIfNull: false) List<Modality>? modalities,
-            @JsonKey(includeIfNull: false) String? instructions,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            Voice? voice,
-            @JsonKey(
-                name: 'output_audio_format',
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            AudioFormat? outputAudioFormat,
-            @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
-            @_ResponseConfigToolChoiceConverter()
-            @JsonKey(name: 'tool_choice', includeIfNull: false)
-            ResponseConfigToolChoice? toolChoice,
-            @JsonKey(includeIfNull: false) double? temperature,
-            @_ResponseConfigMaxResponseOutputTokensConverter()
-            @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
-            ResponseConfigMaxResponseOutputTokens? maxResponseOutputTokens,
-            @_ResponseConfigConversationConverter()
-            @JsonKey(includeIfNull: false)
-            ResponseConfigConversation? conversation,
-            @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
-            @JsonKey(includeIfNull: false) List<Item>? input)
-        $default,
+      @JsonKey(includeIfNull: false) List<Modality>? modalities,
+      @JsonKey(includeIfNull: false) String? instructions,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      Voice? voice,
+      @JsonKey(
+        name: 'output_audio_format',
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      AudioFormat? outputAudioFormat,
+      @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
+      @_ResponseConfigToolChoiceConverter()
+      @JsonKey(name: 'tool_choice', includeIfNull: false)
+      ResponseConfigToolChoice? toolChoice,
+      @JsonKey(includeIfNull: false) double? temperature,
+      @_ResponseConfigMaxResponseOutputTokensConverter()
+      @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
+      ResponseConfigMaxResponseOutputTokens? maxResponseOutputTokens,
+      @_ResponseConfigConversationConverter()
+      @JsonKey(includeIfNull: false)
+      ResponseConfigConversation? conversation,
+      @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
+      @JsonKey(includeIfNull: false) List<Item>? input,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _ResponseConfig():
         return $default(
-            _that.modalities,
-            _that.instructions,
-            _that.voice,
-            _that.outputAudioFormat,
-            _that.tools,
-            _that.toolChoice,
-            _that.temperature,
-            _that.maxResponseOutputTokens,
-            _that.conversation,
-            _that.metadata,
-            _that.input);
+          _that.modalities,
+          _that.instructions,
+          _that.voice,
+          _that.outputAudioFormat,
+          _that.tools,
+          _that.toolChoice,
+          _that.temperature,
+          _that.maxResponseOutputTokens,
+          _that.conversation,
+          _that.metadata,
+          _that.input,
+        );
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -3386,47 +3637,51 @@ extension ResponseConfigPatterns on ResponseConfig {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            @JsonKey(includeIfNull: false) List<Modality>? modalities,
-            @JsonKey(includeIfNull: false) String? instructions,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            Voice? voice,
-            @JsonKey(
-                name: 'output_audio_format',
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            AudioFormat? outputAudioFormat,
-            @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
-            @_ResponseConfigToolChoiceConverter()
-            @JsonKey(name: 'tool_choice', includeIfNull: false)
-            ResponseConfigToolChoice? toolChoice,
-            @JsonKey(includeIfNull: false) double? temperature,
-            @_ResponseConfigMaxResponseOutputTokensConverter()
-            @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
-            ResponseConfigMaxResponseOutputTokens? maxResponseOutputTokens,
-            @_ResponseConfigConversationConverter()
-            @JsonKey(includeIfNull: false)
-            ResponseConfigConversation? conversation,
-            @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
-            @JsonKey(includeIfNull: false) List<Item>? input)?
-        $default,
+      @JsonKey(includeIfNull: false) List<Modality>? modalities,
+      @JsonKey(includeIfNull: false) String? instructions,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      Voice? voice,
+      @JsonKey(
+        name: 'output_audio_format',
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      AudioFormat? outputAudioFormat,
+      @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
+      @_ResponseConfigToolChoiceConverter()
+      @JsonKey(name: 'tool_choice', includeIfNull: false)
+      ResponseConfigToolChoice? toolChoice,
+      @JsonKey(includeIfNull: false) double? temperature,
+      @_ResponseConfigMaxResponseOutputTokensConverter()
+      @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
+      ResponseConfigMaxResponseOutputTokens? maxResponseOutputTokens,
+      @_ResponseConfigConversationConverter()
+      @JsonKey(includeIfNull: false)
+      ResponseConfigConversation? conversation,
+      @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
+      @JsonKey(includeIfNull: false) List<Item>? input,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _ResponseConfig() when $default != null:
         return $default(
-            _that.modalities,
-            _that.instructions,
-            _that.voice,
-            _that.outputAudioFormat,
-            _that.tools,
-            _that.toolChoice,
-            _that.temperature,
-            _that.maxResponseOutputTokens,
-            _that.conversation,
-            _that.metadata,
-            _that.input);
+          _that.modalities,
+          _that.instructions,
+          _that.voice,
+          _that.outputAudioFormat,
+          _that.tools,
+          _that.toolChoice,
+          _that.temperature,
+          _that.maxResponseOutputTokens,
+          _that.conversation,
+          _that.metadata,
+          _that.input,
+        );
       case _:
         return null;
     }
@@ -3436,36 +3691,38 @@ extension ResponseConfigPatterns on ResponseConfig {
 /// @nodoc
 @JsonSerializable()
 class _ResponseConfig extends ResponseConfig {
-  const _ResponseConfig(
-      {@JsonKey(includeIfNull: false) final List<Modality>? modalities,
-      @JsonKey(includeIfNull: false) this.instructions,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      this.voice,
-      @JsonKey(
-          name: 'output_audio_format',
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      this.outputAudioFormat,
-      @JsonKey(includeIfNull: false) final List<ToolDefinition>? tools,
-      @_ResponseConfigToolChoiceConverter()
-      @JsonKey(name: 'tool_choice', includeIfNull: false)
-      this.toolChoice,
-      @JsonKey(includeIfNull: false) this.temperature,
-      @_ResponseConfigMaxResponseOutputTokensConverter()
-      @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
-      this.maxResponseOutputTokens,
-      @_ResponseConfigConversationConverter()
-      @JsonKey(includeIfNull: false)
-      this.conversation,
-      @JsonKey(includeIfNull: false) final Map<String, dynamic>? metadata,
-      @JsonKey(includeIfNull: false) final List<Item>? input})
-      : _modalities = modalities,
-        _tools = tools,
-        _metadata = metadata,
-        _input = input,
-        super._();
+  const _ResponseConfig({
+    @JsonKey(includeIfNull: false) List<Modality>? modalities,
+    @JsonKey(includeIfNull: false) this.instructions,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    this.voice,
+    @JsonKey(
+      name: 'output_audio_format',
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    this.outputAudioFormat,
+    @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
+    @_ResponseConfigToolChoiceConverter()
+    @JsonKey(name: 'tool_choice', includeIfNull: false)
+    this.toolChoice,
+    @JsonKey(includeIfNull: false) this.temperature,
+    @_ResponseConfigMaxResponseOutputTokensConverter()
+    @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
+    this.maxResponseOutputTokens,
+    @_ResponseConfigConversationConverter()
+    @JsonKey(includeIfNull: false)
+    this.conversation,
+    @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
+    @JsonKey(includeIfNull: false) List<Item>? input,
+  }) : _modalities = modalities,
+       _tools = tools,
+       _metadata = metadata,
+       _input = input,
+       super._();
   factory _ResponseConfig.fromJson(Map<String, dynamic> json) =>
       _$ResponseConfigFromJson(json);
 
@@ -3491,15 +3748,18 @@ class _ResponseConfig extends ResponseConfig {
   /// The voice the model uses to respond - one of `alloy`, `echo`, or `shimmer`.
   @override
   @JsonKey(
-      includeIfNull: false, unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   final Voice? voice;
 
   /// The format of output audio.
   @override
   @JsonKey(
-      name: 'output_audio_format',
-      includeIfNull: false,
-      unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    name: 'output_audio_format',
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   final AudioFormat? outputAudioFormat;
 
   /// Tools (functions) available to the model.
@@ -3591,9 +3851,7 @@ class _ResponseConfig extends ResponseConfig {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ResponseConfigToJson(
-      this,
-    );
+    return _$ResponseConfigToJson(this);
   }
 
   @override
@@ -3601,30 +3859,35 @@ class _ResponseConfig extends ResponseConfig {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _ResponseConfig &&
-            const DeepCollectionEquality()
-                .equals(other._modalities, _modalities) &&
+            const DeepCollectionEquality().equals(
+              other.modalities,
+              _modalities,
+            ) &&
             (identical(other.instructions, instructions) ||
                 other.instructions == instructions) &&
             (identical(other.voice, voice) || other.voice == voice) &&
             (identical(other.outputAudioFormat, outputAudioFormat) ||
                 other.outputAudioFormat == outputAudioFormat) &&
-            const DeepCollectionEquality().equals(other._tools, _tools) &&
+            const DeepCollectionEquality().equals(other.tools, _tools) &&
             (identical(other.toolChoice, toolChoice) ||
                 other.toolChoice == toolChoice) &&
             (identical(other.temperature, temperature) ||
                 other.temperature == temperature) &&
             (identical(
-                    other.maxResponseOutputTokens, maxResponseOutputTokens) ||
+                  other.maxResponseOutputTokens,
+                  maxResponseOutputTokens,
+                ) ||
                 other.maxResponseOutputTokens == maxResponseOutputTokens) &&
             (identical(other.conversation, conversation) ||
                 other.conversation == conversation) &&
-            const DeepCollectionEquality().equals(other._metadata, _metadata) &&
-            const DeepCollectionEquality().equals(other._input, _input));
+            const DeepCollectionEquality().equals(other.metadata, _metadata) &&
+            const DeepCollectionEquality().equals(other.input, _input));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode {
+    return Object.hash(
       runtimeType,
       const DeepCollectionEquality().hash(_modalities),
       instructions,
@@ -3636,7 +3899,9 @@ class _ResponseConfig extends ResponseConfig {
       maxResponseOutputTokens,
       conversation,
       const DeepCollectionEquality().hash(_metadata),
-      const DeepCollectionEquality().hash(_input));
+      const DeepCollectionEquality().hash(_input),
+    );
+  }
 
   @override
   String toString() {
@@ -3648,41 +3913,45 @@ class _ResponseConfig extends ResponseConfig {
 abstract mixin class _$ResponseConfigCopyWith<$Res>
     implements $ResponseConfigCopyWith<$Res> {
   factory _$ResponseConfigCopyWith(
-          _ResponseConfig value, $Res Function(_ResponseConfig) _then) =
-      __$ResponseConfigCopyWithImpl;
+    _ResponseConfig value,
+    $Res Function(_ResponseConfig) _then,
+  ) = __$ResponseConfigCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(includeIfNull: false) List<Modality>? modalities,
-      @JsonKey(includeIfNull: false) String? instructions,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      Voice? voice,
-      @JsonKey(
-          name: 'output_audio_format',
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      AudioFormat? outputAudioFormat,
-      @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
-      @_ResponseConfigToolChoiceConverter()
-      @JsonKey(name: 'tool_choice', includeIfNull: false)
-      ResponseConfigToolChoice? toolChoice,
-      @JsonKey(includeIfNull: false) double? temperature,
-      @_ResponseConfigMaxResponseOutputTokensConverter()
-      @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
-      ResponseConfigMaxResponseOutputTokens? maxResponseOutputTokens,
-      @_ResponseConfigConversationConverter()
-      @JsonKey(includeIfNull: false)
-      ResponseConfigConversation? conversation,
-      @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
-      @JsonKey(includeIfNull: false) List<Item>? input});
+  $Res call({
+    @JsonKey(includeIfNull: false) List<Modality>? modalities,
+    @JsonKey(includeIfNull: false) String? instructions,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    Voice? voice,
+    @JsonKey(
+      name: 'output_audio_format',
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    AudioFormat? outputAudioFormat,
+    @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
+    @_ResponseConfigToolChoiceConverter()
+    @JsonKey(name: 'tool_choice', includeIfNull: false)
+    ResponseConfigToolChoice? toolChoice,
+    @JsonKey(includeIfNull: false) double? temperature,
+    @_ResponseConfigMaxResponseOutputTokensConverter()
+    @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
+    ResponseConfigMaxResponseOutputTokens? maxResponseOutputTokens,
+    @_ResponseConfigConversationConverter()
+    @JsonKey(includeIfNull: false)
+    ResponseConfigConversation? conversation,
+    @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata,
+    @JsonKey(includeIfNull: false) List<Item>? input,
+  });
 
   @override
   $ResponseConfigToolChoiceCopyWith<$Res>? get toolChoice;
   @override
   $ResponseConfigMaxResponseOutputTokensCopyWith<$Res>?
-      get maxResponseOutputTokens;
+  get maxResponseOutputTokens;
   @override
   $ResponseConfigConversationCopyWith<$Res>? get conversation;
 }
@@ -3712,52 +3981,54 @@ class __$ResponseConfigCopyWithImpl<$Res>
     Object? metadata = freezed,
     Object? input = freezed,
   }) {
-    return _then(_ResponseConfig(
-      modalities: freezed == modalities
-          ? _self._modalities
-          : modalities // ignore: cast_nullable_to_non_nullable
-              as List<Modality>?,
-      instructions: freezed == instructions
-          ? _self.instructions
-          : instructions // ignore: cast_nullable_to_non_nullable
-              as String?,
-      voice: freezed == voice
-          ? _self.voice
-          : voice // ignore: cast_nullable_to_non_nullable
-              as Voice?,
-      outputAudioFormat: freezed == outputAudioFormat
-          ? _self.outputAudioFormat
-          : outputAudioFormat // ignore: cast_nullable_to_non_nullable
-              as AudioFormat?,
-      tools: freezed == tools
-          ? _self._tools
-          : tools // ignore: cast_nullable_to_non_nullable
-              as List<ToolDefinition>?,
-      toolChoice: freezed == toolChoice
-          ? _self.toolChoice
-          : toolChoice // ignore: cast_nullable_to_non_nullable
-              as ResponseConfigToolChoice?,
-      temperature: freezed == temperature
-          ? _self.temperature
-          : temperature // ignore: cast_nullable_to_non_nullable
-              as double?,
-      maxResponseOutputTokens: freezed == maxResponseOutputTokens
-          ? _self.maxResponseOutputTokens
-          : maxResponseOutputTokens // ignore: cast_nullable_to_non_nullable
-              as ResponseConfigMaxResponseOutputTokens?,
-      conversation: freezed == conversation
-          ? _self.conversation
-          : conversation // ignore: cast_nullable_to_non_nullable
-              as ResponseConfigConversation?,
-      metadata: freezed == metadata
-          ? _self._metadata
-          : metadata // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>?,
-      input: freezed == input
-          ? _self._input
-          : input // ignore: cast_nullable_to_non_nullable
-              as List<Item>?,
-    ));
+    return _then(
+      _ResponseConfig(
+        modalities: freezed == modalities
+            ? _self._modalities
+            : modalities // ignore: cast_nullable_to_non_nullable
+                  as List<Modality>?,
+        instructions: freezed == instructions
+            ? _self.instructions
+            : instructions // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        voice: freezed == voice
+            ? _self.voice
+            : voice // ignore: cast_nullable_to_non_nullable
+                  as Voice?,
+        outputAudioFormat: freezed == outputAudioFormat
+            ? _self.outputAudioFormat
+            : outputAudioFormat // ignore: cast_nullable_to_non_nullable
+                  as AudioFormat?,
+        tools: freezed == tools
+            ? _self._tools
+            : tools // ignore: cast_nullable_to_non_nullable
+                  as List<ToolDefinition>?,
+        toolChoice: freezed == toolChoice
+            ? _self.toolChoice
+            : toolChoice // ignore: cast_nullable_to_non_nullable
+                  as ResponseConfigToolChoice?,
+        temperature: freezed == temperature
+            ? _self.temperature
+            : temperature // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        maxResponseOutputTokens: freezed == maxResponseOutputTokens
+            ? _self.maxResponseOutputTokens
+            : maxResponseOutputTokens // ignore: cast_nullable_to_non_nullable
+                  as ResponseConfigMaxResponseOutputTokens?,
+        conversation: freezed == conversation
+            ? _self.conversation
+            : conversation // ignore: cast_nullable_to_non_nullable
+                  as ResponseConfigConversation?,
+        metadata: freezed == metadata
+            ? _self._metadata
+            : metadata // ignore: cast_nullable_to_non_nullable
+                  as Map<String, dynamic>?,
+        input: freezed == input
+            ? _self._input
+            : input // ignore: cast_nullable_to_non_nullable
+                  as List<Item>?,
+      ),
+    );
   }
 
   /// Create a copy of ResponseConfig
@@ -3779,15 +4050,17 @@ class __$ResponseConfigCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $ResponseConfigMaxResponseOutputTokensCopyWith<$Res>?
-      get maxResponseOutputTokens {
+  get maxResponseOutputTokens {
     if (_self.maxResponseOutputTokens == null) {
       return null;
     }
 
     return $ResponseConfigMaxResponseOutputTokensCopyWith<$Res>(
-        _self.maxResponseOutputTokens!, (value) {
-      return _then(_self.copyWith(maxResponseOutputTokens: value));
-    });
+      _self.maxResponseOutputTokens!,
+      (value) {
+        return _then(_self.copyWith(maxResponseOutputTokens: value));
+      },
+    );
   }
 
   /// Create a copy of ResponseConfig
@@ -3799,15 +4072,17 @@ class __$ResponseConfigCopyWithImpl<$Res>
       return null;
     }
 
-    return $ResponseConfigConversationCopyWith<$Res>(_self.conversation!,
-        (value) {
+    return $ResponseConfigConversationCopyWith<$Res>(_self.conversation!, (
+      value,
+    ) {
       return _then(_self.copyWith(conversation: value));
     });
   }
 }
 
 ResponseConfigToolChoice _$ResponseConfigToolChoiceFromJson(
-    Map<String, dynamic> json) {
+  Map<String, dynamic> json,
+) {
   switch (json['runtimeType']) {
     case 'mode':
       return ResponseConfigToolChoiceEnumeration.fromJson(json);
@@ -3816,10 +4091,11 @@ ResponseConfigToolChoice _$ResponseConfigToolChoiceFromJson(
 
     default:
       throw CheckedFromJsonException(
-          json,
-          'runtimeType',
-          'ResponseConfigToolChoice',
-          'Invalid union type "${json['runtimeType']}"!');
+        json,
+        'runtimeType',
+        'ResponseConfigToolChoice',
+        'Invalid union type "${json['runtimeType']}"!',
+      );
   }
 }
 
@@ -3832,27 +4108,36 @@ mixin _$ResponseConfigToolChoice {
 
   @override
   bool operator ==(Object other) {
+    final _this = this as ResponseConfigToolChoice;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ResponseConfigToolChoice &&
-            const DeepCollectionEquality().equals(other.value, value));
+            const DeepCollectionEquality().equals(other.value, _this.value));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(value));
+  int get hashCode {
+    final _this = this as ResponseConfigToolChoice;
+    return Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(_this.value),
+    );
+  }
 
   @override
   String toString() {
-    return 'ResponseConfigToolChoice(value: $value)';
+    final _this = this as ResponseConfigToolChoice;
+    return 'ResponseConfigToolChoice(value: ${_this.value})';
   }
 }
 
 /// @nodoc
 class $ResponseConfigToolChoiceCopyWith<$Res> {
   $ResponseConfigToolChoiceCopyWith(
-      ResponseConfigToolChoice _, $Res Function(ResponseConfigToolChoice) __);
+    ResponseConfigToolChoice _,
+    $Res Function(ResponseConfigToolChoice) __,
+  );
 }
 
 /// Adds pattern-matching-related methods to [ResponseConfigToolChoice].
@@ -3873,7 +4158,7 @@ extension ResponseConfigToolChoicePatterns on ResponseConfigToolChoice {
   TResult maybeMap<TResult extends Object?>({
     TResult Function(ResponseConfigToolChoiceEnumeration value)? mode,
     TResult Function(ResponseConfigToolChoiceToolChoiceForced value)?
-        toolChoiceForced,
+    toolChoiceForced,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -3905,7 +4190,7 @@ extension ResponseConfigToolChoicePatterns on ResponseConfigToolChoice {
   TResult map<TResult extends Object?>({
     required TResult Function(ResponseConfigToolChoiceEnumeration value) mode,
     required TResult Function(ResponseConfigToolChoiceToolChoiceForced value)
-        toolChoiceForced,
+    toolChoiceForced,
   }) {
     final _that = this;
     switch (_that) {
@@ -3932,7 +4217,7 @@ extension ResponseConfigToolChoicePatterns on ResponseConfigToolChoice {
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(ResponseConfigToolChoiceEnumeration value)? mode,
     TResult? Function(ResponseConfigToolChoiceToolChoiceForced value)?
-        toolChoiceForced,
+    toolChoiceForced,
   }) {
     final _that = this;
     switch (_that) {
@@ -4036,12 +4321,12 @@ extension ResponseConfigToolChoicePatterns on ResponseConfigToolChoice {
 /// @nodoc
 @JsonSerializable()
 class ResponseConfigToolChoiceEnumeration extends ResponseConfigToolChoice {
-  const ResponseConfigToolChoiceEnumeration(this.value, {final String? $type})
-      : $type = $type ?? 'mode',
-        super._();
+  const ResponseConfigToolChoiceEnumeration(this.value, {String? $type})
+    : $type = $type ?? 'mode',
+      super._();
   factory ResponseConfigToolChoiceEnumeration.fromJson(
-          Map<String, dynamic> json) =>
-      _$ResponseConfigToolChoiceEnumerationFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$ResponseConfigToolChoiceEnumerationFromJson(json);
 
   @override
   final ResponseConfigToolChoiceMode value;
@@ -4054,15 +4339,16 @@ class ResponseConfigToolChoiceEnumeration extends ResponseConfigToolChoice {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $ResponseConfigToolChoiceEnumerationCopyWith<
-          ResponseConfigToolChoiceEnumeration>
-      get copyWith => _$ResponseConfigToolChoiceEnumerationCopyWithImpl<
-          ResponseConfigToolChoiceEnumeration>(this, _$identity);
+    ResponseConfigToolChoiceEnumeration
+  >
+  get copyWith =>
+      _$ResponseConfigToolChoiceEnumerationCopyWithImpl<
+        ResponseConfigToolChoiceEnumeration
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ResponseConfigToolChoiceEnumerationToJson(
-      this,
-    );
+    return _$ResponseConfigToolChoiceEnumerationToJson(this);
   }
 
   @override
@@ -4075,7 +4361,9 @@ class ResponseConfigToolChoiceEnumeration extends ResponseConfigToolChoice {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, value);
+  int get hashCode {
+    return Object.hash(runtimeType, value);
+  }
 
   @override
   String toString() {
@@ -4087,9 +4375,9 @@ class ResponseConfigToolChoiceEnumeration extends ResponseConfigToolChoice {
 abstract mixin class $ResponseConfigToolChoiceEnumerationCopyWith<$Res>
     implements $ResponseConfigToolChoiceCopyWith<$Res> {
   factory $ResponseConfigToolChoiceEnumerationCopyWith(
-          ResponseConfigToolChoiceEnumeration value,
-          $Res Function(ResponseConfigToolChoiceEnumeration) _then) =
-      _$ResponseConfigToolChoiceEnumerationCopyWithImpl;
+    ResponseConfigToolChoiceEnumeration value,
+    $Res Function(ResponseConfigToolChoiceEnumeration) _then,
+  ) = _$ResponseConfigToolChoiceEnumerationCopyWithImpl;
   @useResult
   $Res call({ResponseConfigToolChoiceMode value});
 }
@@ -4105,15 +4393,15 @@ class _$ResponseConfigToolChoiceEnumerationCopyWithImpl<$Res>
   /// Create a copy of ResponseConfigToolChoice
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? value = null,
-  }) {
-    return _then(ResponseConfigToolChoiceEnumeration(
-      null == value
-          ? _self.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as ResponseConfigToolChoiceMode,
-    ));
+  $Res call({Object? value = null}) {
+    return _then(
+      ResponseConfigToolChoiceEnumeration(
+        null == value
+            ? _self.value
+            : value // ignore: cast_nullable_to_non_nullable
+                  as ResponseConfigToolChoiceMode,
+      ),
+    );
   }
 }
 
@@ -4121,13 +4409,12 @@ class _$ResponseConfigToolChoiceEnumerationCopyWithImpl<$Res>
 @JsonSerializable()
 class ResponseConfigToolChoiceToolChoiceForced
     extends ResponseConfigToolChoice {
-  const ResponseConfigToolChoiceToolChoiceForced(this.value,
-      {final String? $type})
-      : $type = $type ?? 'toolChoiceForced',
-        super._();
+  const ResponseConfigToolChoiceToolChoiceForced(this.value, {String? $type})
+    : $type = $type ?? 'toolChoiceForced',
+      super._();
   factory ResponseConfigToolChoiceToolChoiceForced.fromJson(
-          Map<String, dynamic> json) =>
-      _$ResponseConfigToolChoiceToolChoiceForcedFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$ResponseConfigToolChoiceToolChoiceForcedFromJson(json);
 
   @override
   final ToolChoiceForced value;
@@ -4140,15 +4427,16 @@ class ResponseConfigToolChoiceToolChoiceForced
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $ResponseConfigToolChoiceToolChoiceForcedCopyWith<
-          ResponseConfigToolChoiceToolChoiceForced>
-      get copyWith => _$ResponseConfigToolChoiceToolChoiceForcedCopyWithImpl<
-          ResponseConfigToolChoiceToolChoiceForced>(this, _$identity);
+    ResponseConfigToolChoiceToolChoiceForced
+  >
+  get copyWith =>
+      _$ResponseConfigToolChoiceToolChoiceForcedCopyWithImpl<
+        ResponseConfigToolChoiceToolChoiceForced
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ResponseConfigToolChoiceToolChoiceForcedToJson(
-      this,
-    );
+    return _$ResponseConfigToolChoiceToolChoiceForcedToJson(this);
   }
 
   @override
@@ -4161,7 +4449,9 @@ class ResponseConfigToolChoiceToolChoiceForced
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, value);
+  int get hashCode {
+    return Object.hash(runtimeType, value);
+  }
 
   @override
   String toString() {
@@ -4173,9 +4463,9 @@ class ResponseConfigToolChoiceToolChoiceForced
 abstract mixin class $ResponseConfigToolChoiceToolChoiceForcedCopyWith<$Res>
     implements $ResponseConfigToolChoiceCopyWith<$Res> {
   factory $ResponseConfigToolChoiceToolChoiceForcedCopyWith(
-          ResponseConfigToolChoiceToolChoiceForced value,
-          $Res Function(ResponseConfigToolChoiceToolChoiceForced) _then) =
-      _$ResponseConfigToolChoiceToolChoiceForcedCopyWithImpl;
+    ResponseConfigToolChoiceToolChoiceForced value,
+    $Res Function(ResponseConfigToolChoiceToolChoiceForced) _then,
+  ) = _$ResponseConfigToolChoiceToolChoiceForcedCopyWithImpl;
   @useResult
   $Res call({ToolChoiceForced value});
 
@@ -4186,7 +4476,9 @@ abstract mixin class $ResponseConfigToolChoiceToolChoiceForcedCopyWith<$Res>
 class _$ResponseConfigToolChoiceToolChoiceForcedCopyWithImpl<$Res>
     implements $ResponseConfigToolChoiceToolChoiceForcedCopyWith<$Res> {
   _$ResponseConfigToolChoiceToolChoiceForcedCopyWithImpl(
-      this._self, this._then);
+    this._self,
+    this._then,
+  );
 
   final ResponseConfigToolChoiceToolChoiceForced _self;
   final $Res Function(ResponseConfigToolChoiceToolChoiceForced) _then;
@@ -4194,15 +4486,15 @@ class _$ResponseConfigToolChoiceToolChoiceForcedCopyWithImpl<$Res>
   /// Create a copy of ResponseConfigToolChoice
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? value = null,
-  }) {
-    return _then(ResponseConfigToolChoiceToolChoiceForced(
-      null == value
-          ? _self.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as ToolChoiceForced,
-    ));
+  $Res call({Object? value = null}) {
+    return _then(
+      ResponseConfigToolChoiceToolChoiceForced(
+        null == value
+            ? _self.value
+            : value // ignore: cast_nullable_to_non_nullable
+                  as ToolChoiceForced,
+      ),
+    );
   }
 
   /// Create a copy of ResponseConfigToolChoice
@@ -4217,7 +4509,7 @@ class _$ResponseConfigToolChoiceToolChoiceForcedCopyWithImpl<$Res>
 }
 
 ResponseConfigMaxResponseOutputTokens
-    _$ResponseConfigMaxResponseOutputTokensFromJson(Map<String, dynamic> json) {
+_$ResponseConfigMaxResponseOutputTokensFromJson(Map<String, dynamic> json) {
   switch (json['runtimeType']) {
     case 'int':
       return ResponseConfigMaxResponseOutputTokensInt.fromJson(json);
@@ -4226,10 +4518,11 @@ ResponseConfigMaxResponseOutputTokens
 
     default:
       throw CheckedFromJsonException(
-          json,
-          'runtimeType',
-          'ResponseConfigMaxResponseOutputTokens',
-          'Invalid union type "${json['runtimeType']}"!');
+        json,
+        'runtimeType',
+        'ResponseConfigMaxResponseOutputTokens',
+        'Invalid union type "${json['runtimeType']}"!',
+      );
   }
 }
 
@@ -4242,28 +4535,36 @@ mixin _$ResponseConfigMaxResponseOutputTokens {
 
   @override
   bool operator ==(Object other) {
+    final _this = this as ResponseConfigMaxResponseOutputTokens;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ResponseConfigMaxResponseOutputTokens &&
-            const DeepCollectionEquality().equals(other.value, value));
+            const DeepCollectionEquality().equals(other.value, _this.value));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(value));
+  int get hashCode {
+    final _this = this as ResponseConfigMaxResponseOutputTokens;
+    return Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(_this.value),
+    );
+  }
 
   @override
   String toString() {
-    return 'ResponseConfigMaxResponseOutputTokens(value: $value)';
+    final _this = this as ResponseConfigMaxResponseOutputTokens;
+    return 'ResponseConfigMaxResponseOutputTokens(value: ${_this.value})';
   }
 }
 
 /// @nodoc
 class $ResponseConfigMaxResponseOutputTokensCopyWith<$Res> {
   $ResponseConfigMaxResponseOutputTokensCopyWith(
-      ResponseConfigMaxResponseOutputTokens _,
-      $Res Function(ResponseConfigMaxResponseOutputTokens) __);
+    ResponseConfigMaxResponseOutputTokens _,
+    $Res Function(ResponseConfigMaxResponseOutputTokens) __,
+  );
 }
 
 /// Adds pattern-matching-related methods to [ResponseConfigMaxResponseOutputTokens].
@@ -4314,9 +4615,9 @@ extension ResponseConfigMaxResponseOutputTokensPatterns
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(ResponseConfigMaxResponseOutputTokensInt value)
-        int,
+    int,
     required TResult Function(ResponseConfigMaxResponseOutputTokensString value)
-        string,
+    string,
   }) {
     final _that = this;
     switch (_that) {
@@ -4343,7 +4644,7 @@ extension ResponseConfigMaxResponseOutputTokensPatterns
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(ResponseConfigMaxResponseOutputTokensInt value)? int,
     TResult? Function(ResponseConfigMaxResponseOutputTokensString value)?
-        string,
+    string,
   }) {
     final _that = this;
     switch (_that) {
@@ -4445,13 +4746,12 @@ extension ResponseConfigMaxResponseOutputTokensPatterns
 @JsonSerializable()
 class ResponseConfigMaxResponseOutputTokensInt
     extends ResponseConfigMaxResponseOutputTokens {
-  const ResponseConfigMaxResponseOutputTokensInt(this.value,
-      {final String? $type})
-      : $type = $type ?? 'int',
-        super._();
+  const ResponseConfigMaxResponseOutputTokensInt(this.value, {String? $type})
+    : $type = $type ?? 'int',
+      super._();
   factory ResponseConfigMaxResponseOutputTokensInt.fromJson(
-          Map<String, dynamic> json) =>
-      _$ResponseConfigMaxResponseOutputTokensIntFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$ResponseConfigMaxResponseOutputTokensIntFromJson(json);
 
   @override
   final int value;
@@ -4464,15 +4764,16 @@ class ResponseConfigMaxResponseOutputTokensInt
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $ResponseConfigMaxResponseOutputTokensIntCopyWith<
-          ResponseConfigMaxResponseOutputTokensInt>
-      get copyWith => _$ResponseConfigMaxResponseOutputTokensIntCopyWithImpl<
-          ResponseConfigMaxResponseOutputTokensInt>(this, _$identity);
+    ResponseConfigMaxResponseOutputTokensInt
+  >
+  get copyWith =>
+      _$ResponseConfigMaxResponseOutputTokensIntCopyWithImpl<
+        ResponseConfigMaxResponseOutputTokensInt
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ResponseConfigMaxResponseOutputTokensIntToJson(
-      this,
-    );
+    return _$ResponseConfigMaxResponseOutputTokensIntToJson(this);
   }
 
   @override
@@ -4485,7 +4786,9 @@ class ResponseConfigMaxResponseOutputTokensInt
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, value);
+  int get hashCode {
+    return Object.hash(runtimeType, value);
+  }
 
   @override
   String toString() {
@@ -4497,9 +4800,9 @@ class ResponseConfigMaxResponseOutputTokensInt
 abstract mixin class $ResponseConfigMaxResponseOutputTokensIntCopyWith<$Res>
     implements $ResponseConfigMaxResponseOutputTokensCopyWith<$Res> {
   factory $ResponseConfigMaxResponseOutputTokensIntCopyWith(
-          ResponseConfigMaxResponseOutputTokensInt value,
-          $Res Function(ResponseConfigMaxResponseOutputTokensInt) _then) =
-      _$ResponseConfigMaxResponseOutputTokensIntCopyWithImpl;
+    ResponseConfigMaxResponseOutputTokensInt value,
+    $Res Function(ResponseConfigMaxResponseOutputTokensInt) _then,
+  ) = _$ResponseConfigMaxResponseOutputTokensIntCopyWithImpl;
   @useResult
   $Res call({int value});
 }
@@ -4508,7 +4811,9 @@ abstract mixin class $ResponseConfigMaxResponseOutputTokensIntCopyWith<$Res>
 class _$ResponseConfigMaxResponseOutputTokensIntCopyWithImpl<$Res>
     implements $ResponseConfigMaxResponseOutputTokensIntCopyWith<$Res> {
   _$ResponseConfigMaxResponseOutputTokensIntCopyWithImpl(
-      this._self, this._then);
+    this._self,
+    this._then,
+  );
 
   final ResponseConfigMaxResponseOutputTokensInt _self;
   final $Res Function(ResponseConfigMaxResponseOutputTokensInt) _then;
@@ -4516,15 +4821,15 @@ class _$ResponseConfigMaxResponseOutputTokensIntCopyWithImpl<$Res>
   /// Create a copy of ResponseConfigMaxResponseOutputTokens
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? value = null,
-  }) {
-    return _then(ResponseConfigMaxResponseOutputTokensInt(
-      null == value
-          ? _self.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as int,
-    ));
+  $Res call({Object? value = null}) {
+    return _then(
+      ResponseConfigMaxResponseOutputTokensInt(
+        null == value
+            ? _self.value
+            : value // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
   }
 }
 
@@ -4532,13 +4837,12 @@ class _$ResponseConfigMaxResponseOutputTokensIntCopyWithImpl<$Res>
 @JsonSerializable()
 class ResponseConfigMaxResponseOutputTokensString
     extends ResponseConfigMaxResponseOutputTokens {
-  const ResponseConfigMaxResponseOutputTokensString(this.value,
-      {final String? $type})
-      : $type = $type ?? 'string',
-        super._();
+  const ResponseConfigMaxResponseOutputTokensString(this.value, {String? $type})
+    : $type = $type ?? 'string',
+      super._();
   factory ResponseConfigMaxResponseOutputTokensString.fromJson(
-          Map<String, dynamic> json) =>
-      _$ResponseConfigMaxResponseOutputTokensStringFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$ResponseConfigMaxResponseOutputTokensStringFromJson(json);
 
   @override
   final String value;
@@ -4551,15 +4855,16 @@ class ResponseConfigMaxResponseOutputTokensString
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $ResponseConfigMaxResponseOutputTokensStringCopyWith<
-          ResponseConfigMaxResponseOutputTokensString>
-      get copyWith => _$ResponseConfigMaxResponseOutputTokensStringCopyWithImpl<
-          ResponseConfigMaxResponseOutputTokensString>(this, _$identity);
+    ResponseConfigMaxResponseOutputTokensString
+  >
+  get copyWith =>
+      _$ResponseConfigMaxResponseOutputTokensStringCopyWithImpl<
+        ResponseConfigMaxResponseOutputTokensString
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ResponseConfigMaxResponseOutputTokensStringToJson(
-      this,
-    );
+    return _$ResponseConfigMaxResponseOutputTokensStringToJson(this);
   }
 
   @override
@@ -4572,7 +4877,9 @@ class ResponseConfigMaxResponseOutputTokensString
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, value);
+  int get hashCode {
+    return Object.hash(runtimeType, value);
+  }
 
   @override
   String toString() {
@@ -4584,9 +4891,9 @@ class ResponseConfigMaxResponseOutputTokensString
 abstract mixin class $ResponseConfigMaxResponseOutputTokensStringCopyWith<$Res>
     implements $ResponseConfigMaxResponseOutputTokensCopyWith<$Res> {
   factory $ResponseConfigMaxResponseOutputTokensStringCopyWith(
-          ResponseConfigMaxResponseOutputTokensString value,
-          $Res Function(ResponseConfigMaxResponseOutputTokensString) _then) =
-      _$ResponseConfigMaxResponseOutputTokensStringCopyWithImpl;
+    ResponseConfigMaxResponseOutputTokensString value,
+    $Res Function(ResponseConfigMaxResponseOutputTokensString) _then,
+  ) = _$ResponseConfigMaxResponseOutputTokensStringCopyWithImpl;
   @useResult
   $Res call({String value});
 }
@@ -4595,7 +4902,9 @@ abstract mixin class $ResponseConfigMaxResponseOutputTokensStringCopyWith<$Res>
 class _$ResponseConfigMaxResponseOutputTokensStringCopyWithImpl<$Res>
     implements $ResponseConfigMaxResponseOutputTokensStringCopyWith<$Res> {
   _$ResponseConfigMaxResponseOutputTokensStringCopyWithImpl(
-      this._self, this._then);
+    this._self,
+    this._then,
+  );
 
   final ResponseConfigMaxResponseOutputTokensString _self;
   final $Res Function(ResponseConfigMaxResponseOutputTokensString) _then;
@@ -4603,20 +4912,21 @@ class _$ResponseConfigMaxResponseOutputTokensStringCopyWithImpl<$Res>
   /// Create a copy of ResponseConfigMaxResponseOutputTokens
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? value = null,
-  }) {
-    return _then(ResponseConfigMaxResponseOutputTokensString(
-      null == value
-          ? _self.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+  $Res call({Object? value = null}) {
+    return _then(
+      ResponseConfigMaxResponseOutputTokensString(
+        null == value
+            ? _self.value
+            : value // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
 ResponseConfigConversation _$ResponseConfigConversationFromJson(
-    Map<String, dynamic> json) {
+  Map<String, dynamic> json,
+) {
   switch (json['runtimeType']) {
     case 'enumeration':
       return ResponseConfigConversationEnumeration.fromJson(json);
@@ -4625,10 +4935,11 @@ ResponseConfigConversation _$ResponseConfigConversationFromJson(
 
     default:
       throw CheckedFromJsonException(
-          json,
-          'runtimeType',
-          'ResponseConfigConversation',
-          'Invalid union type "${json['runtimeType']}"!');
+        json,
+        'runtimeType',
+        'ResponseConfigConversation',
+        'Invalid union type "${json['runtimeType']}"!',
+      );
   }
 }
 
@@ -4641,27 +4952,36 @@ mixin _$ResponseConfigConversation {
 
   @override
   bool operator ==(Object other) {
+    final _this = this as ResponseConfigConversation;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ResponseConfigConversation &&
-            const DeepCollectionEquality().equals(other.value, value));
+            const DeepCollectionEquality().equals(other.value, _this.value));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(value));
+  int get hashCode {
+    final _this = this as ResponseConfigConversation;
+    return Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(_this.value),
+    );
+  }
 
   @override
   String toString() {
-    return 'ResponseConfigConversation(value: $value)';
+    final _this = this as ResponseConfigConversation;
+    return 'ResponseConfigConversation(value: ${_this.value})';
   }
 }
 
 /// @nodoc
 class $ResponseConfigConversationCopyWith<$Res> {
-  $ResponseConfigConversationCopyWith(ResponseConfigConversation _,
-      $Res Function(ResponseConfigConversation) __);
+  $ResponseConfigConversationCopyWith(
+    ResponseConfigConversation _,
+    $Res Function(ResponseConfigConversation) __,
+  );
 }
 
 /// Adds pattern-matching-related methods to [ResponseConfigConversation].
@@ -4711,7 +5031,7 @@ extension ResponseConfigConversationPatterns on ResponseConfigConversation {
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(ResponseConfigConversationEnumeration value)
-        enumeration,
+    enumeration,
     required TResult Function(ResponseConfigConversationString value) string,
   }) {
     final _that = this;
@@ -4839,12 +5159,12 @@ extension ResponseConfigConversationPatterns on ResponseConfigConversation {
 /// @nodoc
 @JsonSerializable()
 class ResponseConfigConversationEnumeration extends ResponseConfigConversation {
-  const ResponseConfigConversationEnumeration(this.value, {final String? $type})
-      : $type = $type ?? 'enumeration',
-        super._();
+  const ResponseConfigConversationEnumeration(this.value, {String? $type})
+    : $type = $type ?? 'enumeration',
+      super._();
   factory ResponseConfigConversationEnumeration.fromJson(
-          Map<String, dynamic> json) =>
-      _$ResponseConfigConversationEnumerationFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$ResponseConfigConversationEnumerationFromJson(json);
 
   @override
   final ResponseConfigConversationEnum value;
@@ -4857,15 +5177,16 @@ class ResponseConfigConversationEnumeration extends ResponseConfigConversation {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $ResponseConfigConversationEnumerationCopyWith<
-          ResponseConfigConversationEnumeration>
-      get copyWith => _$ResponseConfigConversationEnumerationCopyWithImpl<
-          ResponseConfigConversationEnumeration>(this, _$identity);
+    ResponseConfigConversationEnumeration
+  >
+  get copyWith =>
+      _$ResponseConfigConversationEnumerationCopyWithImpl<
+        ResponseConfigConversationEnumeration
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ResponseConfigConversationEnumerationToJson(
-      this,
-    );
+    return _$ResponseConfigConversationEnumerationToJson(this);
   }
 
   @override
@@ -4878,7 +5199,9 @@ class ResponseConfigConversationEnumeration extends ResponseConfigConversation {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, value);
+  int get hashCode {
+    return Object.hash(runtimeType, value);
+  }
 
   @override
   String toString() {
@@ -4890,9 +5213,9 @@ class ResponseConfigConversationEnumeration extends ResponseConfigConversation {
 abstract mixin class $ResponseConfigConversationEnumerationCopyWith<$Res>
     implements $ResponseConfigConversationCopyWith<$Res> {
   factory $ResponseConfigConversationEnumerationCopyWith(
-          ResponseConfigConversationEnumeration value,
-          $Res Function(ResponseConfigConversationEnumeration) _then) =
-      _$ResponseConfigConversationEnumerationCopyWithImpl;
+    ResponseConfigConversationEnumeration value,
+    $Res Function(ResponseConfigConversationEnumeration) _then,
+  ) = _$ResponseConfigConversationEnumerationCopyWithImpl;
   @useResult
   $Res call({ResponseConfigConversationEnum value});
 }
@@ -4908,27 +5231,27 @@ class _$ResponseConfigConversationEnumerationCopyWithImpl<$Res>
   /// Create a copy of ResponseConfigConversation
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? value = null,
-  }) {
-    return _then(ResponseConfigConversationEnumeration(
-      null == value
-          ? _self.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as ResponseConfigConversationEnum,
-    ));
+  $Res call({Object? value = null}) {
+    return _then(
+      ResponseConfigConversationEnumeration(
+        null == value
+            ? _self.value
+            : value // ignore: cast_nullable_to_non_nullable
+                  as ResponseConfigConversationEnum,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class ResponseConfigConversationString extends ResponseConfigConversation {
-  const ResponseConfigConversationString(this.value, {final String? $type})
-      : $type = $type ?? 'string',
-        super._();
+  const ResponseConfigConversationString(this.value, {String? $type})
+    : $type = $type ?? 'string',
+      super._();
   factory ResponseConfigConversationString.fromJson(
-          Map<String, dynamic> json) =>
-      _$ResponseConfigConversationStringFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$ResponseConfigConversationStringFromJson(json);
 
   @override
   final String value;
@@ -4941,14 +5264,14 @@ class ResponseConfigConversationString extends ResponseConfigConversation {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $ResponseConfigConversationStringCopyWith<ResponseConfigConversationString>
-      get copyWith => _$ResponseConfigConversationStringCopyWithImpl<
-          ResponseConfigConversationString>(this, _$identity);
+  get copyWith =>
+      _$ResponseConfigConversationStringCopyWithImpl<
+        ResponseConfigConversationString
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ResponseConfigConversationStringToJson(
-      this,
-    );
+    return _$ResponseConfigConversationStringToJson(this);
   }
 
   @override
@@ -4961,7 +5284,9 @@ class ResponseConfigConversationString extends ResponseConfigConversation {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, value);
+  int get hashCode {
+    return Object.hash(runtimeType, value);
+  }
 
   @override
   String toString() {
@@ -4973,9 +5298,9 @@ class ResponseConfigConversationString extends ResponseConfigConversation {
 abstract mixin class $ResponseConfigConversationStringCopyWith<$Res>
     implements $ResponseConfigConversationCopyWith<$Res> {
   factory $ResponseConfigConversationStringCopyWith(
-          ResponseConfigConversationString value,
-          $Res Function(ResponseConfigConversationString) _then) =
-      _$ResponseConfigConversationStringCopyWithImpl;
+    ResponseConfigConversationString value,
+    $Res Function(ResponseConfigConversationString) _then,
+  ) = _$ResponseConfigConversationStringCopyWithImpl;
   @useResult
   $Res call({String value});
 }
@@ -4991,15 +5316,15 @@ class _$ResponseConfigConversationStringCopyWithImpl<$Res>
   /// Create a copy of ResponseConfigConversation
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? value = null,
-  }) {
-    return _then(ResponseConfigConversationString(
-      null == value
-          ? _self.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+  $Res call({Object? value = null}) {
+    return _then(
+      ResponseConfigConversationString(
+        null == value
+            ? _self.value
+            : value // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
@@ -5037,29 +5362,40 @@ mixin _$Usage {
 
   @override
   bool operator ==(Object other) {
+    final _this = this as Usage;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Usage &&
-            (identical(other.totalTokens, totalTokens) ||
-                other.totalTokens == totalTokens) &&
-            (identical(other.inputTokens, inputTokens) ||
-                other.inputTokens == inputTokens) &&
-            (identical(other.outputTokens, outputTokens) ||
-                other.outputTokens == outputTokens) &&
-            (identical(other.inputTokenDetails, inputTokenDetails) ||
-                other.inputTokenDetails == inputTokenDetails) &&
-            (identical(other.outputTokenDetails, outputTokenDetails) ||
-                other.outputTokenDetails == outputTokenDetails));
+            (identical(other.totalTokens, _this.totalTokens) ||
+                other.totalTokens == _this.totalTokens) &&
+            (identical(other.inputTokens, _this.inputTokens) ||
+                other.inputTokens == _this.inputTokens) &&
+            (identical(other.outputTokens, _this.outputTokens) ||
+                other.outputTokens == _this.outputTokens) &&
+            (identical(other.inputTokenDetails, _this.inputTokenDetails) ||
+                other.inputTokenDetails == _this.inputTokenDetails) &&
+            (identical(other.outputTokenDetails, _this.outputTokenDetails) ||
+                other.outputTokenDetails == _this.outputTokenDetails));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, totalTokens, inputTokens,
-      outputTokens, inputTokenDetails, outputTokenDetails);
+  int get hashCode {
+    final _this = this as Usage;
+    return Object.hash(
+      runtimeType,
+      _this.totalTokens,
+      _this.inputTokens,
+      _this.outputTokens,
+      _this.inputTokenDetails,
+      _this.outputTokenDetails,
+    );
+  }
 
   @override
   String toString() {
-    return 'Usage(totalTokens: $totalTokens, inputTokens: $inputTokens, outputTokens: $outputTokens, inputTokenDetails: $inputTokenDetails, outputTokenDetails: $outputTokenDetails)';
+    final _this = this as Usage;
+    return 'Usage(totalTokens: ${_this.totalTokens}, inputTokens: ${_this.inputTokens}, outputTokens: ${_this.outputTokens}, inputTokenDetails: ${_this.inputTokenDetails}, outputTokenDetails: ${_this.outputTokenDetails})';
   }
 }
 
@@ -5068,14 +5404,15 @@ abstract mixin class $UsageCopyWith<$Res> {
   factory $UsageCopyWith(Usage value, $Res Function(Usage) _then) =
       _$UsageCopyWithImpl;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'total_tokens', includeIfNull: false) int? totalTokens,
-      @JsonKey(name: 'input_tokens', includeIfNull: false) int? inputTokens,
-      @JsonKey(name: 'output_tokens', includeIfNull: false) int? outputTokens,
-      @JsonKey(name: 'input_token_details', includeIfNull: false)
-      UsageInputTokenDetails? inputTokenDetails,
-      @JsonKey(name: 'output_token_details', includeIfNull: false)
-      UsageOutputTokenDetails? outputTokenDetails});
+  $Res call({
+    @JsonKey(name: 'total_tokens', includeIfNull: false) int? totalTokens,
+    @JsonKey(name: 'input_tokens', includeIfNull: false) int? inputTokens,
+    @JsonKey(name: 'output_tokens', includeIfNull: false) int? outputTokens,
+    @JsonKey(name: 'input_token_details', includeIfNull: false)
+    UsageInputTokenDetails? inputTokenDetails,
+    @JsonKey(name: 'output_token_details', includeIfNull: false)
+    UsageOutputTokenDetails? outputTokenDetails,
+  });
 
   $UsageInputTokenDetailsCopyWith<$Res>? get inputTokenDetails;
   $UsageOutputTokenDetailsCopyWith<$Res>? get outputTokenDetails;
@@ -5099,28 +5436,30 @@ class _$UsageCopyWithImpl<$Res> implements $UsageCopyWith<$Res> {
     Object? inputTokenDetails = freezed,
     Object? outputTokenDetails = freezed,
   }) {
-    return _then(_self.copyWith(
-      totalTokens: freezed == totalTokens
-          ? _self.totalTokens
-          : totalTokens // ignore: cast_nullable_to_non_nullable
-              as int?,
-      inputTokens: freezed == inputTokens
-          ? _self.inputTokens
-          : inputTokens // ignore: cast_nullable_to_non_nullable
-              as int?,
-      outputTokens: freezed == outputTokens
-          ? _self.outputTokens
-          : outputTokens // ignore: cast_nullable_to_non_nullable
-              as int?,
-      inputTokenDetails: freezed == inputTokenDetails
-          ? _self.inputTokenDetails
-          : inputTokenDetails // ignore: cast_nullable_to_non_nullable
-              as UsageInputTokenDetails?,
-      outputTokenDetails: freezed == outputTokenDetails
-          ? _self.outputTokenDetails
-          : outputTokenDetails // ignore: cast_nullable_to_non_nullable
-              as UsageOutputTokenDetails?,
-    ));
+    return _then(
+      Usage(
+        totalTokens: freezed == totalTokens
+            ? _self.totalTokens
+            : totalTokens // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        inputTokens: freezed == inputTokens
+            ? _self.inputTokens
+            : inputTokens // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        outputTokens: freezed == outputTokens
+            ? _self.outputTokens
+            : outputTokens // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        inputTokenDetails: freezed == inputTokenDetails
+            ? _self.inputTokenDetails
+            : inputTokenDetails // ignore: cast_nullable_to_non_nullable
+                  as UsageInputTokenDetails?,
+        outputTokenDetails: freezed == outputTokenDetails
+            ? _self.outputTokenDetails
+            : outputTokenDetails // ignore: cast_nullable_to_non_nullable
+                  as UsageOutputTokenDetails?,
+      ),
+    );
   }
 
   /// Create a copy of Usage
@@ -5132,8 +5471,9 @@ class _$UsageCopyWithImpl<$Res> implements $UsageCopyWith<$Res> {
       return null;
     }
 
-    return $UsageInputTokenDetailsCopyWith<$Res>(_self.inputTokenDetails!,
-        (value) {
+    return $UsageInputTokenDetailsCopyWith<$Res>(_self.inputTokenDetails!, (
+      value,
+    ) {
       return _then(_self.copyWith(inputTokenDetails: value));
     });
   }
@@ -5147,8 +5487,9 @@ class _$UsageCopyWithImpl<$Res> implements $UsageCopyWith<$Res> {
       return null;
     }
 
-    return $UsageOutputTokenDetailsCopyWith<$Res>(_self.outputTokenDetails!,
-        (value) {
+    return $UsageOutputTokenDetailsCopyWith<$Res>(_self.outputTokenDetails!, (
+      value,
+    ) {
       return _then(_self.copyWith(outputTokenDetails: value));
     });
   }
@@ -5248,28 +5589,27 @@ extension UsagePatterns on Usage {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            @JsonKey(name: 'total_tokens', includeIfNull: false)
-            int? totalTokens,
-            @JsonKey(name: 'input_tokens', includeIfNull: false)
-            int? inputTokens,
-            @JsonKey(name: 'output_tokens', includeIfNull: false)
-            int? outputTokens,
-            @JsonKey(name: 'input_token_details', includeIfNull: false)
-            UsageInputTokenDetails? inputTokenDetails,
-            @JsonKey(name: 'output_token_details', includeIfNull: false)
-            UsageOutputTokenDetails? outputTokenDetails)?
-        $default, {
+      @JsonKey(name: 'total_tokens', includeIfNull: false) int? totalTokens,
+      @JsonKey(name: 'input_tokens', includeIfNull: false) int? inputTokens,
+      @JsonKey(name: 'output_tokens', includeIfNull: false) int? outputTokens,
+      @JsonKey(name: 'input_token_details', includeIfNull: false)
+      UsageInputTokenDetails? inputTokenDetails,
+      @JsonKey(name: 'output_token_details', includeIfNull: false)
+      UsageOutputTokenDetails? outputTokenDetails,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _Usage() when $default != null:
         return $default(
-            _that.totalTokens,
-            _that.inputTokens,
-            _that.outputTokens,
-            _that.inputTokenDetails,
-            _that.outputTokenDetails);
+          _that.totalTokens,
+          _that.inputTokens,
+          _that.outputTokens,
+          _that.inputTokenDetails,
+          _that.outputTokenDetails,
+        );
       case _:
         return orElse();
     }
@@ -5291,27 +5631,26 @@ extension UsagePatterns on Usage {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            @JsonKey(name: 'total_tokens', includeIfNull: false)
-            int? totalTokens,
-            @JsonKey(name: 'input_tokens', includeIfNull: false)
-            int? inputTokens,
-            @JsonKey(name: 'output_tokens', includeIfNull: false)
-            int? outputTokens,
-            @JsonKey(name: 'input_token_details', includeIfNull: false)
-            UsageInputTokenDetails? inputTokenDetails,
-            @JsonKey(name: 'output_token_details', includeIfNull: false)
-            UsageOutputTokenDetails? outputTokenDetails)
-        $default,
+      @JsonKey(name: 'total_tokens', includeIfNull: false) int? totalTokens,
+      @JsonKey(name: 'input_tokens', includeIfNull: false) int? inputTokens,
+      @JsonKey(name: 'output_tokens', includeIfNull: false) int? outputTokens,
+      @JsonKey(name: 'input_token_details', includeIfNull: false)
+      UsageInputTokenDetails? inputTokenDetails,
+      @JsonKey(name: 'output_token_details', includeIfNull: false)
+      UsageOutputTokenDetails? outputTokenDetails,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _Usage():
         return $default(
-            _that.totalTokens,
-            _that.inputTokens,
-            _that.outputTokens,
-            _that.inputTokenDetails,
-            _that.outputTokenDetails);
+          _that.totalTokens,
+          _that.inputTokens,
+          _that.outputTokens,
+          _that.inputTokenDetails,
+          _that.outputTokenDetails,
+        );
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -5332,27 +5671,26 @@ extension UsagePatterns on Usage {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            @JsonKey(name: 'total_tokens', includeIfNull: false)
-            int? totalTokens,
-            @JsonKey(name: 'input_tokens', includeIfNull: false)
-            int? inputTokens,
-            @JsonKey(name: 'output_tokens', includeIfNull: false)
-            int? outputTokens,
-            @JsonKey(name: 'input_token_details', includeIfNull: false)
-            UsageInputTokenDetails? inputTokenDetails,
-            @JsonKey(name: 'output_token_details', includeIfNull: false)
-            UsageOutputTokenDetails? outputTokenDetails)?
-        $default,
+      @JsonKey(name: 'total_tokens', includeIfNull: false) int? totalTokens,
+      @JsonKey(name: 'input_tokens', includeIfNull: false) int? inputTokens,
+      @JsonKey(name: 'output_tokens', includeIfNull: false) int? outputTokens,
+      @JsonKey(name: 'input_token_details', includeIfNull: false)
+      UsageInputTokenDetails? inputTokenDetails,
+      @JsonKey(name: 'output_token_details', includeIfNull: false)
+      UsageOutputTokenDetails? outputTokenDetails,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _Usage() when $default != null:
         return $default(
-            _that.totalTokens,
-            _that.inputTokens,
-            _that.outputTokens,
-            _that.inputTokenDetails,
-            _that.outputTokenDetails);
+          _that.totalTokens,
+          _that.inputTokens,
+          _that.outputTokens,
+          _that.inputTokenDetails,
+          _that.outputTokenDetails,
+        );
       case _:
         return null;
     }
@@ -5362,15 +5700,15 @@ extension UsagePatterns on Usage {
 /// @nodoc
 @JsonSerializable()
 class _Usage extends Usage {
-  const _Usage(
-      {@JsonKey(name: 'total_tokens', includeIfNull: false) this.totalTokens,
-      @JsonKey(name: 'input_tokens', includeIfNull: false) this.inputTokens,
-      @JsonKey(name: 'output_tokens', includeIfNull: false) this.outputTokens,
-      @JsonKey(name: 'input_token_details', includeIfNull: false)
-      this.inputTokenDetails,
-      @JsonKey(name: 'output_token_details', includeIfNull: false)
-      this.outputTokenDetails})
-      : super._();
+  const _Usage({
+    @JsonKey(name: 'total_tokens', includeIfNull: false) this.totalTokens,
+    @JsonKey(name: 'input_tokens', includeIfNull: false) this.inputTokens,
+    @JsonKey(name: 'output_tokens', includeIfNull: false) this.outputTokens,
+    @JsonKey(name: 'input_token_details', includeIfNull: false)
+    this.inputTokenDetails,
+    @JsonKey(name: 'output_token_details', includeIfNull: false)
+    this.outputTokenDetails,
+  }) : super._();
   factory _Usage.fromJson(Map<String, dynamic> json) => _$UsageFromJson(json);
 
   /// The total number of tokens in the Response including input and output text and audio tokens.
@@ -5408,9 +5746,7 @@ class _Usage extends Usage {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$UsageToJson(
-      this,
-    );
+    return _$UsageToJson(this);
   }
 
   @override
@@ -5432,8 +5768,16 @@ class _Usage extends Usage {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, totalTokens, inputTokens,
-      outputTokens, inputTokenDetails, outputTokenDetails);
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      totalTokens,
+      inputTokens,
+      outputTokens,
+      inputTokenDetails,
+      outputTokenDetails,
+    );
+  }
 
   @override
   String toString() {
@@ -5447,14 +5791,15 @@ abstract mixin class _$UsageCopyWith<$Res> implements $UsageCopyWith<$Res> {
       __$UsageCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'total_tokens', includeIfNull: false) int? totalTokens,
-      @JsonKey(name: 'input_tokens', includeIfNull: false) int? inputTokens,
-      @JsonKey(name: 'output_tokens', includeIfNull: false) int? outputTokens,
-      @JsonKey(name: 'input_token_details', includeIfNull: false)
-      UsageInputTokenDetails? inputTokenDetails,
-      @JsonKey(name: 'output_token_details', includeIfNull: false)
-      UsageOutputTokenDetails? outputTokenDetails});
+  $Res call({
+    @JsonKey(name: 'total_tokens', includeIfNull: false) int? totalTokens,
+    @JsonKey(name: 'input_tokens', includeIfNull: false) int? inputTokens,
+    @JsonKey(name: 'output_tokens', includeIfNull: false) int? outputTokens,
+    @JsonKey(name: 'input_token_details', includeIfNull: false)
+    UsageInputTokenDetails? inputTokenDetails,
+    @JsonKey(name: 'output_token_details', includeIfNull: false)
+    UsageOutputTokenDetails? outputTokenDetails,
+  });
 
   @override
   $UsageInputTokenDetailsCopyWith<$Res>? get inputTokenDetails;
@@ -5480,28 +5825,30 @@ class __$UsageCopyWithImpl<$Res> implements _$UsageCopyWith<$Res> {
     Object? inputTokenDetails = freezed,
     Object? outputTokenDetails = freezed,
   }) {
-    return _then(_Usage(
-      totalTokens: freezed == totalTokens
-          ? _self.totalTokens
-          : totalTokens // ignore: cast_nullable_to_non_nullable
-              as int?,
-      inputTokens: freezed == inputTokens
-          ? _self.inputTokens
-          : inputTokens // ignore: cast_nullable_to_non_nullable
-              as int?,
-      outputTokens: freezed == outputTokens
-          ? _self.outputTokens
-          : outputTokens // ignore: cast_nullable_to_non_nullable
-              as int?,
-      inputTokenDetails: freezed == inputTokenDetails
-          ? _self.inputTokenDetails
-          : inputTokenDetails // ignore: cast_nullable_to_non_nullable
-              as UsageInputTokenDetails?,
-      outputTokenDetails: freezed == outputTokenDetails
-          ? _self.outputTokenDetails
-          : outputTokenDetails // ignore: cast_nullable_to_non_nullable
-              as UsageOutputTokenDetails?,
-    ));
+    return _then(
+      _Usage(
+        totalTokens: freezed == totalTokens
+            ? _self.totalTokens
+            : totalTokens // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        inputTokens: freezed == inputTokens
+            ? _self.inputTokens
+            : inputTokens // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        outputTokens: freezed == outputTokens
+            ? _self.outputTokens
+            : outputTokens // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        inputTokenDetails: freezed == inputTokenDetails
+            ? _self.inputTokenDetails
+            : inputTokenDetails // ignore: cast_nullable_to_non_nullable
+                  as UsageInputTokenDetails?,
+        outputTokenDetails: freezed == outputTokenDetails
+            ? _self.outputTokenDetails
+            : outputTokenDetails // ignore: cast_nullable_to_non_nullable
+                  as UsageOutputTokenDetails?,
+      ),
+    );
   }
 
   /// Create a copy of Usage
@@ -5513,8 +5860,9 @@ class __$UsageCopyWithImpl<$Res> implements _$UsageCopyWith<$Res> {
       return null;
     }
 
-    return $UsageInputTokenDetailsCopyWith<$Res>(_self.inputTokenDetails!,
-        (value) {
+    return $UsageInputTokenDetailsCopyWith<$Res>(_self.inputTokenDetails!, (
+      value,
+    ) {
       return _then(_self.copyWith(inputTokenDetails: value));
     });
   }
@@ -5528,8 +5876,9 @@ class __$UsageCopyWithImpl<$Res> implements _$UsageCopyWith<$Res> {
       return null;
     }
 
-    return $UsageOutputTokenDetailsCopyWith<$Res>(_self.outputTokenDetails!,
-        (value) {
+    return $UsageOutputTokenDetailsCopyWith<$Res>(_self.outputTokenDetails!, (
+      value,
+    ) {
       return _then(_self.copyWith(outputTokenDetails: value));
     });
   }
@@ -5555,45 +5904,58 @@ mixin _$UsageInputTokenDetails {
   @pragma('vm:prefer-inline')
   $UsageInputTokenDetailsCopyWith<UsageInputTokenDetails> get copyWith =>
       _$UsageInputTokenDetailsCopyWithImpl<UsageInputTokenDetails>(
-          this as UsageInputTokenDetails, _$identity);
+        this as UsageInputTokenDetails,
+        _$identity,
+      );
 
   /// Serializes this UsageInputTokenDetails to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as UsageInputTokenDetails;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UsageInputTokenDetails &&
-            (identical(other.cachedTokens, cachedTokens) ||
-                other.cachedTokens == cachedTokens) &&
-            (identical(other.textTokens, textTokens) ||
-                other.textTokens == textTokens) &&
-            (identical(other.audioTokens, audioTokens) ||
-                other.audioTokens == audioTokens));
+            (identical(other.cachedTokens, _this.cachedTokens) ||
+                other.cachedTokens == _this.cachedTokens) &&
+            (identical(other.textTokens, _this.textTokens) ||
+                other.textTokens == _this.textTokens) &&
+            (identical(other.audioTokens, _this.audioTokens) ||
+                other.audioTokens == _this.audioTokens));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, cachedTokens, textTokens, audioTokens);
+  int get hashCode {
+    final _this = this as UsageInputTokenDetails;
+    return Object.hash(
+      runtimeType,
+      _this.cachedTokens,
+      _this.textTokens,
+      _this.audioTokens,
+    );
+  }
 
   @override
   String toString() {
-    return 'UsageInputTokenDetails(cachedTokens: $cachedTokens, textTokens: $textTokens, audioTokens: $audioTokens)';
+    final _this = this as UsageInputTokenDetails;
+    return 'UsageInputTokenDetails(cachedTokens: ${_this.cachedTokens}, textTokens: ${_this.textTokens}, audioTokens: ${_this.audioTokens})';
   }
 }
 
 /// @nodoc
 abstract mixin class $UsageInputTokenDetailsCopyWith<$Res> {
-  factory $UsageInputTokenDetailsCopyWith(UsageInputTokenDetails value,
-          $Res Function(UsageInputTokenDetails) _then) =
-      _$UsageInputTokenDetailsCopyWithImpl;
+  factory $UsageInputTokenDetailsCopyWith(
+    UsageInputTokenDetails value,
+    $Res Function(UsageInputTokenDetails) _then,
+  ) = _$UsageInputTokenDetailsCopyWithImpl;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'cached_tokens', includeIfNull: false) int? cachedTokens,
-      @JsonKey(name: 'text_tokens', includeIfNull: false) int? textTokens,
-      @JsonKey(name: 'audio_tokens', includeIfNull: false) int? audioTokens});
+  $Res call({
+    @JsonKey(name: 'cached_tokens', includeIfNull: false) int? cachedTokens,
+    @JsonKey(name: 'text_tokens', includeIfNull: false) int? textTokens,
+    @JsonKey(name: 'audio_tokens', includeIfNull: false) int? audioTokens,
+  });
 }
 
 /// @nodoc
@@ -5613,20 +5975,22 @@ class _$UsageInputTokenDetailsCopyWithImpl<$Res>
     Object? textTokens = freezed,
     Object? audioTokens = freezed,
   }) {
-    return _then(_self.copyWith(
-      cachedTokens: freezed == cachedTokens
-          ? _self.cachedTokens
-          : cachedTokens // ignore: cast_nullable_to_non_nullable
-              as int?,
-      textTokens: freezed == textTokens
-          ? _self.textTokens
-          : textTokens // ignore: cast_nullable_to_non_nullable
-              as int?,
-      audioTokens: freezed == audioTokens
-          ? _self.audioTokens
-          : audioTokens // ignore: cast_nullable_to_non_nullable
-              as int?,
-    ));
+    return _then(
+      UsageInputTokenDetails(
+        cachedTokens: freezed == cachedTokens
+            ? _self.cachedTokens
+            : cachedTokens // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        textTokens: freezed == textTokens
+            ? _self.textTokens
+            : textTokens // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        audioTokens: freezed == audioTokens
+            ? _self.audioTokens
+            : audioTokens // ignore: cast_nullable_to_non_nullable
+                  as int?,
+      ),
+    );
   }
 }
 
@@ -5724,19 +6088,21 @@ extension UsageInputTokenDetailsPatterns on UsageInputTokenDetails {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            @JsonKey(name: 'cached_tokens', includeIfNull: false)
-            int? cachedTokens,
-            @JsonKey(name: 'text_tokens', includeIfNull: false) int? textTokens,
-            @JsonKey(name: 'audio_tokens', includeIfNull: false)
-            int? audioTokens)?
-        $default, {
+      @JsonKey(name: 'cached_tokens', includeIfNull: false) int? cachedTokens,
+      @JsonKey(name: 'text_tokens', includeIfNull: false) int? textTokens,
+      @JsonKey(name: 'audio_tokens', includeIfNull: false) int? audioTokens,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _UsageInputTokenDetails() when $default != null:
         return $default(
-            _that.cachedTokens, _that.textTokens, _that.audioTokens);
+          _that.cachedTokens,
+          _that.textTokens,
+          _that.audioTokens,
+        );
       case _:
         return orElse();
     }
@@ -5758,18 +6124,20 @@ extension UsageInputTokenDetailsPatterns on UsageInputTokenDetails {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            @JsonKey(name: 'cached_tokens', includeIfNull: false)
-            int? cachedTokens,
-            @JsonKey(name: 'text_tokens', includeIfNull: false) int? textTokens,
-            @JsonKey(name: 'audio_tokens', includeIfNull: false)
-            int? audioTokens)
-        $default,
+      @JsonKey(name: 'cached_tokens', includeIfNull: false) int? cachedTokens,
+      @JsonKey(name: 'text_tokens', includeIfNull: false) int? textTokens,
+      @JsonKey(name: 'audio_tokens', includeIfNull: false) int? audioTokens,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _UsageInputTokenDetails():
         return $default(
-            _that.cachedTokens, _that.textTokens, _that.audioTokens);
+          _that.cachedTokens,
+          _that.textTokens,
+          _that.audioTokens,
+        );
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -5790,18 +6158,20 @@ extension UsageInputTokenDetailsPatterns on UsageInputTokenDetails {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            @JsonKey(name: 'cached_tokens', includeIfNull: false)
-            int? cachedTokens,
-            @JsonKey(name: 'text_tokens', includeIfNull: false) int? textTokens,
-            @JsonKey(name: 'audio_tokens', includeIfNull: false)
-            int? audioTokens)?
-        $default,
+      @JsonKey(name: 'cached_tokens', includeIfNull: false) int? cachedTokens,
+      @JsonKey(name: 'text_tokens', includeIfNull: false) int? textTokens,
+      @JsonKey(name: 'audio_tokens', includeIfNull: false) int? audioTokens,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _UsageInputTokenDetails() when $default != null:
         return $default(
-            _that.cachedTokens, _that.textTokens, _that.audioTokens);
+          _that.cachedTokens,
+          _that.textTokens,
+          _that.audioTokens,
+        );
       case _:
         return null;
     }
@@ -5811,11 +6181,11 @@ extension UsageInputTokenDetailsPatterns on UsageInputTokenDetails {
 /// @nodoc
 @JsonSerializable()
 class _UsageInputTokenDetails extends UsageInputTokenDetails {
-  const _UsageInputTokenDetails(
-      {@JsonKey(name: 'cached_tokens', includeIfNull: false) this.cachedTokens,
-      @JsonKey(name: 'text_tokens', includeIfNull: false) this.textTokens,
-      @JsonKey(name: 'audio_tokens', includeIfNull: false) this.audioTokens})
-      : super._();
+  const _UsageInputTokenDetails({
+    @JsonKey(name: 'cached_tokens', includeIfNull: false) this.cachedTokens,
+    @JsonKey(name: 'text_tokens', includeIfNull: false) this.textTokens,
+    @JsonKey(name: 'audio_tokens', includeIfNull: false) this.audioTokens,
+  }) : super._();
   factory _UsageInputTokenDetails.fromJson(Map<String, dynamic> json) =>
       _$UsageInputTokenDetailsFromJson(json);
 
@@ -5841,13 +6211,13 @@ class _UsageInputTokenDetails extends UsageInputTokenDetails {
   @pragma('vm:prefer-inline')
   _$UsageInputTokenDetailsCopyWith<_UsageInputTokenDetails> get copyWith =>
       __$UsageInputTokenDetailsCopyWithImpl<_UsageInputTokenDetails>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$UsageInputTokenDetailsToJson(
-      this,
-    );
+    return _$UsageInputTokenDetailsToJson(this);
   }
 
   @override
@@ -5865,8 +6235,9 @@ class _UsageInputTokenDetails extends UsageInputTokenDetails {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, cachedTokens, textTokens, audioTokens);
+  int get hashCode {
+    return Object.hash(runtimeType, cachedTokens, textTokens, audioTokens);
+  }
 
   @override
   String toString() {
@@ -5877,15 +6248,17 @@ class _UsageInputTokenDetails extends UsageInputTokenDetails {
 /// @nodoc
 abstract mixin class _$UsageInputTokenDetailsCopyWith<$Res>
     implements $UsageInputTokenDetailsCopyWith<$Res> {
-  factory _$UsageInputTokenDetailsCopyWith(_UsageInputTokenDetails value,
-          $Res Function(_UsageInputTokenDetails) _then) =
-      __$UsageInputTokenDetailsCopyWithImpl;
+  factory _$UsageInputTokenDetailsCopyWith(
+    _UsageInputTokenDetails value,
+    $Res Function(_UsageInputTokenDetails) _then,
+  ) = __$UsageInputTokenDetailsCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'cached_tokens', includeIfNull: false) int? cachedTokens,
-      @JsonKey(name: 'text_tokens', includeIfNull: false) int? textTokens,
-      @JsonKey(name: 'audio_tokens', includeIfNull: false) int? audioTokens});
+  $Res call({
+    @JsonKey(name: 'cached_tokens', includeIfNull: false) int? cachedTokens,
+    @JsonKey(name: 'text_tokens', includeIfNull: false) int? textTokens,
+    @JsonKey(name: 'audio_tokens', includeIfNull: false) int? audioTokens,
+  });
 }
 
 /// @nodoc
@@ -5905,20 +6278,22 @@ class __$UsageInputTokenDetailsCopyWithImpl<$Res>
     Object? textTokens = freezed,
     Object? audioTokens = freezed,
   }) {
-    return _then(_UsageInputTokenDetails(
-      cachedTokens: freezed == cachedTokens
-          ? _self.cachedTokens
-          : cachedTokens // ignore: cast_nullable_to_non_nullable
-              as int?,
-      textTokens: freezed == textTokens
-          ? _self.textTokens
-          : textTokens // ignore: cast_nullable_to_non_nullable
-              as int?,
-      audioTokens: freezed == audioTokens
-          ? _self.audioTokens
-          : audioTokens // ignore: cast_nullable_to_non_nullable
-              as int?,
-    ));
+    return _then(
+      _UsageInputTokenDetails(
+        cachedTokens: freezed == cachedTokens
+            ? _self.cachedTokens
+            : cachedTokens // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        textTokens: freezed == textTokens
+            ? _self.textTokens
+            : textTokens // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        audioTokens: freezed == audioTokens
+            ? _self.audioTokens
+            : audioTokens // ignore: cast_nullable_to_non_nullable
+                  as int?,
+      ),
+    );
   }
 }
 
@@ -5938,41 +6313,50 @@ mixin _$UsageOutputTokenDetails {
   @pragma('vm:prefer-inline')
   $UsageOutputTokenDetailsCopyWith<UsageOutputTokenDetails> get copyWith =>
       _$UsageOutputTokenDetailsCopyWithImpl<UsageOutputTokenDetails>(
-          this as UsageOutputTokenDetails, _$identity);
+        this as UsageOutputTokenDetails,
+        _$identity,
+      );
 
   /// Serializes this UsageOutputTokenDetails to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as UsageOutputTokenDetails;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UsageOutputTokenDetails &&
-            (identical(other.textTokens, textTokens) ||
-                other.textTokens == textTokens) &&
-            (identical(other.audioTokens, audioTokens) ||
-                other.audioTokens == audioTokens));
+            (identical(other.textTokens, _this.textTokens) ||
+                other.textTokens == _this.textTokens) &&
+            (identical(other.audioTokens, _this.audioTokens) ||
+                other.audioTokens == _this.audioTokens));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, textTokens, audioTokens);
+  int get hashCode {
+    final _this = this as UsageOutputTokenDetails;
+    return Object.hash(runtimeType, _this.textTokens, _this.audioTokens);
+  }
 
   @override
   String toString() {
-    return 'UsageOutputTokenDetails(textTokens: $textTokens, audioTokens: $audioTokens)';
+    final _this = this as UsageOutputTokenDetails;
+    return 'UsageOutputTokenDetails(textTokens: ${_this.textTokens}, audioTokens: ${_this.audioTokens})';
   }
 }
 
 /// @nodoc
 abstract mixin class $UsageOutputTokenDetailsCopyWith<$Res> {
-  factory $UsageOutputTokenDetailsCopyWith(UsageOutputTokenDetails value,
-          $Res Function(UsageOutputTokenDetails) _then) =
-      _$UsageOutputTokenDetailsCopyWithImpl;
+  factory $UsageOutputTokenDetailsCopyWith(
+    UsageOutputTokenDetails value,
+    $Res Function(UsageOutputTokenDetails) _then,
+  ) = _$UsageOutputTokenDetailsCopyWithImpl;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'text_tokens', includeIfNull: false) int? textTokens,
-      @JsonKey(name: 'audio_tokens', includeIfNull: false) int? audioTokens});
+  $Res call({
+    @JsonKey(name: 'text_tokens', includeIfNull: false) int? textTokens,
+    @JsonKey(name: 'audio_tokens', includeIfNull: false) int? audioTokens,
+  });
 }
 
 /// @nodoc
@@ -5987,20 +6371,19 @@ class _$UsageOutputTokenDetailsCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? textTokens = freezed,
-    Object? audioTokens = freezed,
-  }) {
-    return _then(_self.copyWith(
-      textTokens: freezed == textTokens
-          ? _self.textTokens
-          : textTokens // ignore: cast_nullable_to_non_nullable
-              as int?,
-      audioTokens: freezed == audioTokens
-          ? _self.audioTokens
-          : audioTokens // ignore: cast_nullable_to_non_nullable
-              as int?,
-    ));
+  $Res call({Object? textTokens = freezed, Object? audioTokens = freezed}) {
+    return _then(
+      UsageOutputTokenDetails(
+        textTokens: freezed == textTokens
+            ? _self.textTokens
+            : textTokens // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        audioTokens: freezed == audioTokens
+            ? _self.audioTokens
+            : audioTokens // ignore: cast_nullable_to_non_nullable
+                  as int?,
+      ),
+    );
   }
 }
 
@@ -6098,10 +6481,10 @@ extension UsageOutputTokenDetailsPatterns on UsageOutputTokenDetails {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            @JsonKey(name: 'text_tokens', includeIfNull: false) int? textTokens,
-            @JsonKey(name: 'audio_tokens', includeIfNull: false)
-            int? audioTokens)?
-        $default, {
+      @JsonKey(name: 'text_tokens', includeIfNull: false) int? textTokens,
+      @JsonKey(name: 'audio_tokens', includeIfNull: false) int? audioTokens,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
@@ -6129,10 +6512,10 @@ extension UsageOutputTokenDetailsPatterns on UsageOutputTokenDetails {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            @JsonKey(name: 'text_tokens', includeIfNull: false) int? textTokens,
-            @JsonKey(name: 'audio_tokens', includeIfNull: false)
-            int? audioTokens)
-        $default,
+      @JsonKey(name: 'text_tokens', includeIfNull: false) int? textTokens,
+      @JsonKey(name: 'audio_tokens', includeIfNull: false) int? audioTokens,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
@@ -6158,10 +6541,10 @@ extension UsageOutputTokenDetailsPatterns on UsageOutputTokenDetails {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            @JsonKey(name: 'text_tokens', includeIfNull: false) int? textTokens,
-            @JsonKey(name: 'audio_tokens', includeIfNull: false)
-            int? audioTokens)?
-        $default,
+      @JsonKey(name: 'text_tokens', includeIfNull: false) int? textTokens,
+      @JsonKey(name: 'audio_tokens', includeIfNull: false) int? audioTokens,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
@@ -6176,10 +6559,10 @@ extension UsageOutputTokenDetailsPatterns on UsageOutputTokenDetails {
 /// @nodoc
 @JsonSerializable()
 class _UsageOutputTokenDetails extends UsageOutputTokenDetails {
-  const _UsageOutputTokenDetails(
-      {@JsonKey(name: 'text_tokens', includeIfNull: false) this.textTokens,
-      @JsonKey(name: 'audio_tokens', includeIfNull: false) this.audioTokens})
-      : super._();
+  const _UsageOutputTokenDetails({
+    @JsonKey(name: 'text_tokens', includeIfNull: false) this.textTokens,
+    @JsonKey(name: 'audio_tokens', includeIfNull: false) this.audioTokens,
+  }) : super._();
   factory _UsageOutputTokenDetails.fromJson(Map<String, dynamic> json) =>
       _$UsageOutputTokenDetailsFromJson(json);
 
@@ -6200,13 +6583,13 @@ class _UsageOutputTokenDetails extends UsageOutputTokenDetails {
   @pragma('vm:prefer-inline')
   _$UsageOutputTokenDetailsCopyWith<_UsageOutputTokenDetails> get copyWith =>
       __$UsageOutputTokenDetailsCopyWithImpl<_UsageOutputTokenDetails>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$UsageOutputTokenDetailsToJson(
-      this,
-    );
+    return _$UsageOutputTokenDetailsToJson(this);
   }
 
   @override
@@ -6222,7 +6605,9 @@ class _UsageOutputTokenDetails extends UsageOutputTokenDetails {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, textTokens, audioTokens);
+  int get hashCode {
+    return Object.hash(runtimeType, textTokens, audioTokens);
+  }
 
   @override
   String toString() {
@@ -6233,14 +6618,16 @@ class _UsageOutputTokenDetails extends UsageOutputTokenDetails {
 /// @nodoc
 abstract mixin class _$UsageOutputTokenDetailsCopyWith<$Res>
     implements $UsageOutputTokenDetailsCopyWith<$Res> {
-  factory _$UsageOutputTokenDetailsCopyWith(_UsageOutputTokenDetails value,
-          $Res Function(_UsageOutputTokenDetails) _then) =
-      __$UsageOutputTokenDetailsCopyWithImpl;
+  factory _$UsageOutputTokenDetailsCopyWith(
+    _UsageOutputTokenDetails value,
+    $Res Function(_UsageOutputTokenDetails) _then,
+  ) = __$UsageOutputTokenDetailsCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'text_tokens', includeIfNull: false) int? textTokens,
-      @JsonKey(name: 'audio_tokens', includeIfNull: false) int? audioTokens});
+  $Res call({
+    @JsonKey(name: 'text_tokens', includeIfNull: false) int? textTokens,
+    @JsonKey(name: 'audio_tokens', includeIfNull: false) int? audioTokens,
+  });
 }
 
 /// @nodoc
@@ -6255,20 +6642,19 @@ class __$UsageOutputTokenDetailsCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? textTokens = freezed,
-    Object? audioTokens = freezed,
-  }) {
-    return _then(_UsageOutputTokenDetails(
-      textTokens: freezed == textTokens
-          ? _self.textTokens
-          : textTokens // ignore: cast_nullable_to_non_nullable
-              as int?,
-      audioTokens: freezed == audioTokens
-          ? _self.audioTokens
-          : audioTokens // ignore: cast_nullable_to_non_nullable
-              as int?,
-    ));
+  $Res call({Object? textTokens = freezed, Object? audioTokens = freezed}) {
+    return _then(
+      _UsageOutputTokenDetails(
+        textTokens: freezed == textTokens
+            ? _self.textTokens
+            : textTokens // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        audioTokens: freezed == audioTokens
+            ? _self.audioTokens
+            : audioTokens // ignore: cast_nullable_to_non_nullable
+                  as int?,
+      ),
+    );
   }
 }
 
@@ -6302,21 +6688,25 @@ mixin _$Session {
   /// voice options are `alloy`, `ash`, `ballad`, `coral`, `echo` `sage`,
   /// `shimmer` and `verse`.
   @JsonKey(
-      includeIfNull: false, unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   Voice? get voice;
 
   /// The format of input audio.
   @JsonKey(
-      name: 'input_audio_format',
-      includeIfNull: false,
-      unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    name: 'input_audio_format',
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   AudioFormat? get inputAudioFormat;
 
   /// The format of output audio.
   @JsonKey(
-      name: 'output_audio_format',
-      includeIfNull: false,
-      unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    name: 'output_audio_format',
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   AudioFormat? get outputAudioFormat;
 
   /// Configuration for input audio transcription, defaults to off and can be  set to `null` to turn off
@@ -6368,61 +6758,78 @@ mixin _$Session {
 
   @override
   bool operator ==(Object other) {
+    final _this = this as Session;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Session &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.object, object) || other.object == object) &&
-            (identical(other.model, model) || other.model == model) &&
-            (identical(other.expiresAt, expiresAt) ||
-                other.expiresAt == expiresAt) &&
-            const DeepCollectionEquality()
-                .equals(other.modalities, modalities) &&
-            (identical(other.instructions, instructions) ||
-                other.instructions == instructions) &&
-            (identical(other.voice, voice) || other.voice == voice) &&
-            (identical(other.inputAudioFormat, inputAudioFormat) ||
-                other.inputAudioFormat == inputAudioFormat) &&
-            (identical(other.outputAudioFormat, outputAudioFormat) ||
-                other.outputAudioFormat == outputAudioFormat) &&
+            (identical(other.id, _this.id) || other.id == _this.id) &&
+            (identical(other.object, _this.object) ||
+                other.object == _this.object) &&
+            (identical(other.model, _this.model) ||
+                other.model == _this.model) &&
+            (identical(other.expiresAt, _this.expiresAt) ||
+                other.expiresAt == _this.expiresAt) &&
+            const DeepCollectionEquality().equals(
+              other.modalities,
+              _this.modalities,
+            ) &&
+            (identical(other.instructions, _this.instructions) ||
+                other.instructions == _this.instructions) &&
+            (identical(other.voice, _this.voice) ||
+                other.voice == _this.voice) &&
+            (identical(other.inputAudioFormat, _this.inputAudioFormat) ||
+                other.inputAudioFormat == _this.inputAudioFormat) &&
+            (identical(other.outputAudioFormat, _this.outputAudioFormat) ||
+                other.outputAudioFormat == _this.outputAudioFormat) &&
             (identical(
-                    other.inputAudioTranscription, inputAudioTranscription) ||
-                other.inputAudioTranscription == inputAudioTranscription) &&
-            (identical(other.turnDetection, turnDetection) ||
-                other.turnDetection == turnDetection) &&
-            const DeepCollectionEquality().equals(other.tools, tools) &&
-            (identical(other.toolChoice, toolChoice) ||
-                other.toolChoice == toolChoice) &&
-            (identical(other.temperature, temperature) ||
-                other.temperature == temperature) &&
+                  other.inputAudioTranscription,
+                  _this.inputAudioTranscription,
+                ) ||
+                other.inputAudioTranscription ==
+                    _this.inputAudioTranscription) &&
+            (identical(other.turnDetection, _this.turnDetection) ||
+                other.turnDetection == _this.turnDetection) &&
+            const DeepCollectionEquality().equals(other.tools, _this.tools) &&
+            (identical(other.toolChoice, _this.toolChoice) ||
+                other.toolChoice == _this.toolChoice) &&
+            (identical(other.temperature, _this.temperature) ||
+                other.temperature == _this.temperature) &&
             (identical(
-                    other.maxResponseOutputTokens, maxResponseOutputTokens) ||
-                other.maxResponseOutputTokens == maxResponseOutputTokens));
+                  other.maxResponseOutputTokens,
+                  _this.maxResponseOutputTokens,
+                ) ||
+                other.maxResponseOutputTokens ==
+                    _this.maxResponseOutputTokens));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode {
+    final _this = this as Session;
+    return Object.hash(
       runtimeType,
-      id,
-      object,
-      model,
-      expiresAt,
-      const DeepCollectionEquality().hash(modalities),
-      instructions,
-      voice,
-      inputAudioFormat,
-      outputAudioFormat,
-      inputAudioTranscription,
-      turnDetection,
-      const DeepCollectionEquality().hash(tools),
-      toolChoice,
-      temperature,
-      maxResponseOutputTokens);
+      _this.id,
+      _this.object,
+      _this.model,
+      _this.expiresAt,
+      const DeepCollectionEquality().hash(_this.modalities),
+      _this.instructions,
+      _this.voice,
+      _this.inputAudioFormat,
+      _this.outputAudioFormat,
+      _this.inputAudioTranscription,
+      _this.turnDetection,
+      const DeepCollectionEquality().hash(_this.tools),
+      _this.toolChoice,
+      _this.temperature,
+      _this.maxResponseOutputTokens,
+    );
+  }
 
   @override
   String toString() {
-    return 'Session(id: $id, object: $object, model: $model, expiresAt: $expiresAt, modalities: $modalities, instructions: $instructions, voice: $voice, inputAudioFormat: $inputAudioFormat, outputAudioFormat: $outputAudioFormat, inputAudioTranscription: $inputAudioTranscription, turnDetection: $turnDetection, tools: $tools, toolChoice: $toolChoice, temperature: $temperature, maxResponseOutputTokens: $maxResponseOutputTokens)';
+    final _this = this as Session;
+    return 'Session(id: ${_this.id}, object: ${_this.object}, model: ${_this.model}, expiresAt: ${_this.expiresAt}, modalities: ${_this.modalities}, instructions: ${_this.instructions}, voice: ${_this.voice}, inputAudioFormat: ${_this.inputAudioFormat}, outputAudioFormat: ${_this.outputAudioFormat}, inputAudioTranscription: ${_this.inputAudioTranscription}, turnDetection: ${_this.turnDetection}, tools: ${_this.tools}, toolChoice: ${_this.toolChoice}, temperature: ${_this.temperature}, maxResponseOutputTokens: ${_this.maxResponseOutputTokens})';
   }
 }
 
@@ -6431,39 +6838,43 @@ abstract mixin class $SessionCopyWith<$Res> {
   factory $SessionCopyWith(Session value, $Res Function(Session) _then) =
       _$SessionCopyWithImpl;
   @useResult
-  $Res call(
-      {@JsonKey(includeIfNull: false) String? id,
-      ObjectType object,
-      @JsonKey(includeIfNull: false) String? model,
-      @JsonKey(name: 'expires_at', includeIfNull: false) int? expiresAt,
-      @JsonKey(includeIfNull: false) List<Modality>? modalities,
-      @JsonKey(includeIfNull: false) String? instructions,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      Voice? voice,
-      @JsonKey(
-          name: 'input_audio_format',
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      AudioFormat? inputAudioFormat,
-      @JsonKey(
-          name: 'output_audio_format',
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      AudioFormat? outputAudioFormat,
-      @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
-      InputAudioTranscriptionConfig? inputAudioTranscription,
-      @JsonKey(name: 'turn_detection', includeIfNull: false)
-      TurnDetection? turnDetection,
-      @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
-      @_SessionToolChoiceConverter()
-      @JsonKey(name: 'tool_choice', includeIfNull: false)
-      SessionToolChoice? toolChoice,
-      @JsonKey(includeIfNull: false) double? temperature,
-      @_SessionMaxResponseOutputTokensConverter()
-      @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
-      SessionMaxResponseOutputTokens? maxResponseOutputTokens});
+  $Res call({
+    @JsonKey(includeIfNull: false) String? id,
+    ObjectType object,
+    @JsonKey(includeIfNull: false) String? model,
+    @JsonKey(name: 'expires_at', includeIfNull: false) int? expiresAt,
+    @JsonKey(includeIfNull: false) List<Modality>? modalities,
+    @JsonKey(includeIfNull: false) String? instructions,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    Voice? voice,
+    @JsonKey(
+      name: 'input_audio_format',
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    AudioFormat? inputAudioFormat,
+    @JsonKey(
+      name: 'output_audio_format',
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    AudioFormat? outputAudioFormat,
+    @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
+    InputAudioTranscriptionConfig? inputAudioTranscription,
+    @JsonKey(name: 'turn_detection', includeIfNull: false)
+    TurnDetection? turnDetection,
+    @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
+    @_SessionToolChoiceConverter()
+    @JsonKey(name: 'tool_choice', includeIfNull: false)
+    SessionToolChoice? toolChoice,
+    @JsonKey(includeIfNull: false) double? temperature,
+    @_SessionMaxResponseOutputTokensConverter()
+    @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
+    SessionMaxResponseOutputTokens? maxResponseOutputTokens,
+  });
 
   $InputAudioTranscriptionConfigCopyWith<$Res>? get inputAudioTranscription;
   $TurnDetectionCopyWith<$Res>? get turnDetection;
@@ -6499,68 +6910,70 @@ class _$SessionCopyWithImpl<$Res> implements $SessionCopyWith<$Res> {
     Object? temperature = freezed,
     Object? maxResponseOutputTokens = freezed,
   }) {
-    return _then(_self.copyWith(
-      id: freezed == id
-          ? _self.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String?,
-      object: null == object
-          ? _self.object
-          : object // ignore: cast_nullable_to_non_nullable
-              as ObjectType,
-      model: freezed == model
-          ? _self.model
-          : model // ignore: cast_nullable_to_non_nullable
-              as String?,
-      expiresAt: freezed == expiresAt
-          ? _self.expiresAt
-          : expiresAt // ignore: cast_nullable_to_non_nullable
-              as int?,
-      modalities: freezed == modalities
-          ? _self.modalities
-          : modalities // ignore: cast_nullable_to_non_nullable
-              as List<Modality>?,
-      instructions: freezed == instructions
-          ? _self.instructions
-          : instructions // ignore: cast_nullable_to_non_nullable
-              as String?,
-      voice: freezed == voice
-          ? _self.voice
-          : voice // ignore: cast_nullable_to_non_nullable
-              as Voice?,
-      inputAudioFormat: freezed == inputAudioFormat
-          ? _self.inputAudioFormat
-          : inputAudioFormat // ignore: cast_nullable_to_non_nullable
-              as AudioFormat?,
-      outputAudioFormat: freezed == outputAudioFormat
-          ? _self.outputAudioFormat
-          : outputAudioFormat // ignore: cast_nullable_to_non_nullable
-              as AudioFormat?,
-      inputAudioTranscription: freezed == inputAudioTranscription
-          ? _self.inputAudioTranscription
-          : inputAudioTranscription // ignore: cast_nullable_to_non_nullable
-              as InputAudioTranscriptionConfig?,
-      turnDetection: freezed == turnDetection
-          ? _self.turnDetection
-          : turnDetection // ignore: cast_nullable_to_non_nullable
-              as TurnDetection?,
-      tools: freezed == tools
-          ? _self.tools
-          : tools // ignore: cast_nullable_to_non_nullable
-              as List<ToolDefinition>?,
-      toolChoice: freezed == toolChoice
-          ? _self.toolChoice
-          : toolChoice // ignore: cast_nullable_to_non_nullable
-              as SessionToolChoice?,
-      temperature: freezed == temperature
-          ? _self.temperature
-          : temperature // ignore: cast_nullable_to_non_nullable
-              as double?,
-      maxResponseOutputTokens: freezed == maxResponseOutputTokens
-          ? _self.maxResponseOutputTokens
-          : maxResponseOutputTokens // ignore: cast_nullable_to_non_nullable
-              as SessionMaxResponseOutputTokens?,
-    ));
+    return _then(
+      Session(
+        id: freezed == id
+            ? _self.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        object: null == object
+            ? _self.object
+            : object // ignore: cast_nullable_to_non_nullable
+                  as ObjectType,
+        model: freezed == model
+            ? _self.model
+            : model // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        expiresAt: freezed == expiresAt
+            ? _self.expiresAt
+            : expiresAt // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        modalities: freezed == modalities
+            ? _self.modalities
+            : modalities // ignore: cast_nullable_to_non_nullable
+                  as List<Modality>?,
+        instructions: freezed == instructions
+            ? _self.instructions
+            : instructions // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        voice: freezed == voice
+            ? _self.voice
+            : voice // ignore: cast_nullable_to_non_nullable
+                  as Voice?,
+        inputAudioFormat: freezed == inputAudioFormat
+            ? _self.inputAudioFormat
+            : inputAudioFormat // ignore: cast_nullable_to_non_nullable
+                  as AudioFormat?,
+        outputAudioFormat: freezed == outputAudioFormat
+            ? _self.outputAudioFormat
+            : outputAudioFormat // ignore: cast_nullable_to_non_nullable
+                  as AudioFormat?,
+        inputAudioTranscription: freezed == inputAudioTranscription
+            ? _self.inputAudioTranscription
+            : inputAudioTranscription // ignore: cast_nullable_to_non_nullable
+                  as InputAudioTranscriptionConfig?,
+        turnDetection: freezed == turnDetection
+            ? _self.turnDetection
+            : turnDetection // ignore: cast_nullable_to_non_nullable
+                  as TurnDetection?,
+        tools: freezed == tools
+            ? _self.tools
+            : tools // ignore: cast_nullable_to_non_nullable
+                  as List<ToolDefinition>?,
+        toolChoice: freezed == toolChoice
+            ? _self.toolChoice
+            : toolChoice // ignore: cast_nullable_to_non_nullable
+                  as SessionToolChoice?,
+        temperature: freezed == temperature
+            ? _self.temperature
+            : temperature // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        maxResponseOutputTokens: freezed == maxResponseOutputTokens
+            ? _self.maxResponseOutputTokens
+            : maxResponseOutputTokens // ignore: cast_nullable_to_non_nullable
+                  as SessionMaxResponseOutputTokens?,
+      ),
+    );
   }
 
   /// Create a copy of Session
@@ -6573,9 +6986,11 @@ class _$SessionCopyWithImpl<$Res> implements $SessionCopyWith<$Res> {
     }
 
     return $InputAudioTranscriptionConfigCopyWith<$Res>(
-        _self.inputAudioTranscription!, (value) {
-      return _then(_self.copyWith(inputAudioTranscription: value));
-    });
+      _self.inputAudioTranscription!,
+      (value) {
+        return _then(_self.copyWith(inputAudioTranscription: value));
+      },
+    );
   }
 
   /// Create a copy of Session
@@ -6616,9 +7031,11 @@ class _$SessionCopyWithImpl<$Res> implements $SessionCopyWith<$Res> {
     }
 
     return $SessionMaxResponseOutputTokensCopyWith<$Res>(
-        _self.maxResponseOutputTokens!, (value) {
-      return _then(_self.copyWith(maxResponseOutputTokens: value));
-    });
+      _self.maxResponseOutputTokens!,
+      (value) {
+        return _then(_self.copyWith(maxResponseOutputTokens: value));
+      },
+    );
   }
 }
 
@@ -6716,60 +7133,65 @@ extension SessionPatterns on Session {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            @JsonKey(includeIfNull: false) String? id,
-            ObjectType object,
-            @JsonKey(includeIfNull: false) String? model,
-            @JsonKey(name: 'expires_at', includeIfNull: false) int? expiresAt,
-            @JsonKey(includeIfNull: false) List<Modality>? modalities,
-            @JsonKey(includeIfNull: false) String? instructions,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            Voice? voice,
-            @JsonKey(
-                name: 'input_audio_format',
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            AudioFormat? inputAudioFormat,
-            @JsonKey(
-                name: 'output_audio_format',
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            AudioFormat? outputAudioFormat,
-            @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
-            InputAudioTranscriptionConfig? inputAudioTranscription,
-            @JsonKey(name: 'turn_detection', includeIfNull: false)
-            TurnDetection? turnDetection,
-            @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
-            @_SessionToolChoiceConverter()
-            @JsonKey(name: 'tool_choice', includeIfNull: false)
-            SessionToolChoice? toolChoice,
-            @JsonKey(includeIfNull: false) double? temperature,
-            @_SessionMaxResponseOutputTokensConverter()
-            @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
-            SessionMaxResponseOutputTokens? maxResponseOutputTokens)?
-        $default, {
+      @JsonKey(includeIfNull: false) String? id,
+      ObjectType object,
+      @JsonKey(includeIfNull: false) String? model,
+      @JsonKey(name: 'expires_at', includeIfNull: false) int? expiresAt,
+      @JsonKey(includeIfNull: false) List<Modality>? modalities,
+      @JsonKey(includeIfNull: false) String? instructions,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      Voice? voice,
+      @JsonKey(
+        name: 'input_audio_format',
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      AudioFormat? inputAudioFormat,
+      @JsonKey(
+        name: 'output_audio_format',
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      AudioFormat? outputAudioFormat,
+      @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
+      InputAudioTranscriptionConfig? inputAudioTranscription,
+      @JsonKey(name: 'turn_detection', includeIfNull: false)
+      TurnDetection? turnDetection,
+      @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
+      @_SessionToolChoiceConverter()
+      @JsonKey(name: 'tool_choice', includeIfNull: false)
+      SessionToolChoice? toolChoice,
+      @JsonKey(includeIfNull: false) double? temperature,
+      @_SessionMaxResponseOutputTokensConverter()
+      @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
+      SessionMaxResponseOutputTokens? maxResponseOutputTokens,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _Session() when $default != null:
         return $default(
-            _that.id,
-            _that.object,
-            _that.model,
-            _that.expiresAt,
-            _that.modalities,
-            _that.instructions,
-            _that.voice,
-            _that.inputAudioFormat,
-            _that.outputAudioFormat,
-            _that.inputAudioTranscription,
-            _that.turnDetection,
-            _that.tools,
-            _that.toolChoice,
-            _that.temperature,
-            _that.maxResponseOutputTokens);
+          _that.id,
+          _that.object,
+          _that.model,
+          _that.expiresAt,
+          _that.modalities,
+          _that.instructions,
+          _that.voice,
+          _that.inputAudioFormat,
+          _that.outputAudioFormat,
+          _that.inputAudioTranscription,
+          _that.turnDetection,
+          _that.tools,
+          _that.toolChoice,
+          _that.temperature,
+          _that.maxResponseOutputTokens,
+        );
       case _:
         return orElse();
     }
@@ -6791,59 +7213,64 @@ extension SessionPatterns on Session {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            @JsonKey(includeIfNull: false) String? id,
-            ObjectType object,
-            @JsonKey(includeIfNull: false) String? model,
-            @JsonKey(name: 'expires_at', includeIfNull: false) int? expiresAt,
-            @JsonKey(includeIfNull: false) List<Modality>? modalities,
-            @JsonKey(includeIfNull: false) String? instructions,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            Voice? voice,
-            @JsonKey(
-                name: 'input_audio_format',
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            AudioFormat? inputAudioFormat,
-            @JsonKey(
-                name: 'output_audio_format',
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            AudioFormat? outputAudioFormat,
-            @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
-            InputAudioTranscriptionConfig? inputAudioTranscription,
-            @JsonKey(name: 'turn_detection', includeIfNull: false)
-            TurnDetection? turnDetection,
-            @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
-            @_SessionToolChoiceConverter()
-            @JsonKey(name: 'tool_choice', includeIfNull: false)
-            SessionToolChoice? toolChoice,
-            @JsonKey(includeIfNull: false) double? temperature,
-            @_SessionMaxResponseOutputTokensConverter()
-            @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
-            SessionMaxResponseOutputTokens? maxResponseOutputTokens)
-        $default,
+      @JsonKey(includeIfNull: false) String? id,
+      ObjectType object,
+      @JsonKey(includeIfNull: false) String? model,
+      @JsonKey(name: 'expires_at', includeIfNull: false) int? expiresAt,
+      @JsonKey(includeIfNull: false) List<Modality>? modalities,
+      @JsonKey(includeIfNull: false) String? instructions,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      Voice? voice,
+      @JsonKey(
+        name: 'input_audio_format',
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      AudioFormat? inputAudioFormat,
+      @JsonKey(
+        name: 'output_audio_format',
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      AudioFormat? outputAudioFormat,
+      @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
+      InputAudioTranscriptionConfig? inputAudioTranscription,
+      @JsonKey(name: 'turn_detection', includeIfNull: false)
+      TurnDetection? turnDetection,
+      @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
+      @_SessionToolChoiceConverter()
+      @JsonKey(name: 'tool_choice', includeIfNull: false)
+      SessionToolChoice? toolChoice,
+      @JsonKey(includeIfNull: false) double? temperature,
+      @_SessionMaxResponseOutputTokensConverter()
+      @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
+      SessionMaxResponseOutputTokens? maxResponseOutputTokens,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _Session():
         return $default(
-            _that.id,
-            _that.object,
-            _that.model,
-            _that.expiresAt,
-            _that.modalities,
-            _that.instructions,
-            _that.voice,
-            _that.inputAudioFormat,
-            _that.outputAudioFormat,
-            _that.inputAudioTranscription,
-            _that.turnDetection,
-            _that.tools,
-            _that.toolChoice,
-            _that.temperature,
-            _that.maxResponseOutputTokens);
+          _that.id,
+          _that.object,
+          _that.model,
+          _that.expiresAt,
+          _that.modalities,
+          _that.instructions,
+          _that.voice,
+          _that.inputAudioFormat,
+          _that.outputAudioFormat,
+          _that.inputAudioTranscription,
+          _that.turnDetection,
+          _that.tools,
+          _that.toolChoice,
+          _that.temperature,
+          _that.maxResponseOutputTokens,
+        );
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -6864,59 +7291,64 @@ extension SessionPatterns on Session {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            @JsonKey(includeIfNull: false) String? id,
-            ObjectType object,
-            @JsonKey(includeIfNull: false) String? model,
-            @JsonKey(name: 'expires_at', includeIfNull: false) int? expiresAt,
-            @JsonKey(includeIfNull: false) List<Modality>? modalities,
-            @JsonKey(includeIfNull: false) String? instructions,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            Voice? voice,
-            @JsonKey(
-                name: 'input_audio_format',
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            AudioFormat? inputAudioFormat,
-            @JsonKey(
-                name: 'output_audio_format',
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            AudioFormat? outputAudioFormat,
-            @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
-            InputAudioTranscriptionConfig? inputAudioTranscription,
-            @JsonKey(name: 'turn_detection', includeIfNull: false)
-            TurnDetection? turnDetection,
-            @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
-            @_SessionToolChoiceConverter()
-            @JsonKey(name: 'tool_choice', includeIfNull: false)
-            SessionToolChoice? toolChoice,
-            @JsonKey(includeIfNull: false) double? temperature,
-            @_SessionMaxResponseOutputTokensConverter()
-            @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
-            SessionMaxResponseOutputTokens? maxResponseOutputTokens)?
-        $default,
+      @JsonKey(includeIfNull: false) String? id,
+      ObjectType object,
+      @JsonKey(includeIfNull: false) String? model,
+      @JsonKey(name: 'expires_at', includeIfNull: false) int? expiresAt,
+      @JsonKey(includeIfNull: false) List<Modality>? modalities,
+      @JsonKey(includeIfNull: false) String? instructions,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      Voice? voice,
+      @JsonKey(
+        name: 'input_audio_format',
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      AudioFormat? inputAudioFormat,
+      @JsonKey(
+        name: 'output_audio_format',
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      AudioFormat? outputAudioFormat,
+      @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
+      InputAudioTranscriptionConfig? inputAudioTranscription,
+      @JsonKey(name: 'turn_detection', includeIfNull: false)
+      TurnDetection? turnDetection,
+      @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
+      @_SessionToolChoiceConverter()
+      @JsonKey(name: 'tool_choice', includeIfNull: false)
+      SessionToolChoice? toolChoice,
+      @JsonKey(includeIfNull: false) double? temperature,
+      @_SessionMaxResponseOutputTokensConverter()
+      @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
+      SessionMaxResponseOutputTokens? maxResponseOutputTokens,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _Session() when $default != null:
         return $default(
-            _that.id,
-            _that.object,
-            _that.model,
-            _that.expiresAt,
-            _that.modalities,
-            _that.instructions,
-            _that.voice,
-            _that.inputAudioFormat,
-            _that.outputAudioFormat,
-            _that.inputAudioTranscription,
-            _that.turnDetection,
-            _that.tools,
-            _that.toolChoice,
-            _that.temperature,
-            _that.maxResponseOutputTokens);
+          _that.id,
+          _that.object,
+          _that.model,
+          _that.expiresAt,
+          _that.modalities,
+          _that.instructions,
+          _that.voice,
+          _that.inputAudioFormat,
+          _that.outputAudioFormat,
+          _that.inputAudioTranscription,
+          _that.turnDetection,
+          _that.tools,
+          _that.toolChoice,
+          _that.temperature,
+          _that.maxResponseOutputTokens,
+        );
       case _:
         return null;
     }
@@ -6926,41 +7358,44 @@ extension SessionPatterns on Session {
 /// @nodoc
 @JsonSerializable()
 class _Session extends Session {
-  const _Session(
-      {@JsonKey(includeIfNull: false) this.id,
-      this.object = ObjectType.realtimeSession,
-      @JsonKey(includeIfNull: false) this.model,
-      @JsonKey(name: 'expires_at', includeIfNull: false) this.expiresAt,
-      @JsonKey(includeIfNull: false) final List<Modality>? modalities,
-      @JsonKey(includeIfNull: false) this.instructions,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      this.voice,
-      @JsonKey(
-          name: 'input_audio_format',
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      this.inputAudioFormat,
-      @JsonKey(
-          name: 'output_audio_format',
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      this.outputAudioFormat,
-      @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
-      this.inputAudioTranscription,
-      @JsonKey(name: 'turn_detection', includeIfNull: false) this.turnDetection,
-      @JsonKey(includeIfNull: false) final List<ToolDefinition>? tools,
-      @_SessionToolChoiceConverter()
-      @JsonKey(name: 'tool_choice', includeIfNull: false)
-      this.toolChoice,
-      @JsonKey(includeIfNull: false) this.temperature,
-      @_SessionMaxResponseOutputTokensConverter()
-      @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
-      this.maxResponseOutputTokens})
-      : _modalities = modalities,
-        _tools = tools,
-        super._();
+  const _Session({
+    @JsonKey(includeIfNull: false) this.id,
+    this.object = ObjectType.realtimeSession,
+    @JsonKey(includeIfNull: false) this.model,
+    @JsonKey(name: 'expires_at', includeIfNull: false) this.expiresAt,
+    @JsonKey(includeIfNull: false) List<Modality>? modalities,
+    @JsonKey(includeIfNull: false) this.instructions,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    this.voice,
+    @JsonKey(
+      name: 'input_audio_format',
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    this.inputAudioFormat,
+    @JsonKey(
+      name: 'output_audio_format',
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    this.outputAudioFormat,
+    @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
+    this.inputAudioTranscription,
+    @JsonKey(name: 'turn_detection', includeIfNull: false) this.turnDetection,
+    @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
+    @_SessionToolChoiceConverter()
+    @JsonKey(name: 'tool_choice', includeIfNull: false)
+    this.toolChoice,
+    @JsonKey(includeIfNull: false) this.temperature,
+    @_SessionMaxResponseOutputTokensConverter()
+    @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
+    this.maxResponseOutputTokens,
+  }) : _modalities = modalities,
+       _tools = tools,
+       super._();
   factory _Session.fromJson(Map<String, dynamic> json) =>
       _$SessionFromJson(json);
 
@@ -7009,23 +7444,27 @@ class _Session extends Session {
   /// `shimmer` and `verse`.
   @override
   @JsonKey(
-      includeIfNull: false, unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   final Voice? voice;
 
   /// The format of input audio.
   @override
   @JsonKey(
-      name: 'input_audio_format',
-      includeIfNull: false,
-      unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    name: 'input_audio_format',
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   final AudioFormat? inputAudioFormat;
 
   /// The format of output audio.
   @override
   @JsonKey(
-      name: 'output_audio_format',
-      includeIfNull: false,
-      unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    name: 'output_audio_format',
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   final AudioFormat? outputAudioFormat;
 
   /// Configuration for input audio transcription, defaults to off and can be  set to `null` to turn off
@@ -7090,9 +7529,7 @@ class _Session extends Session {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$SessionToJson(
-      this,
-    );
+    return _$SessionToJson(this);
   }
 
   @override
@@ -7105,8 +7542,10 @@ class _Session extends Session {
             (identical(other.model, model) || other.model == model) &&
             (identical(other.expiresAt, expiresAt) ||
                 other.expiresAt == expiresAt) &&
-            const DeepCollectionEquality()
-                .equals(other._modalities, _modalities) &&
+            const DeepCollectionEquality().equals(
+              other.modalities,
+              _modalities,
+            ) &&
             (identical(other.instructions, instructions) ||
                 other.instructions == instructions) &&
             (identical(other.voice, voice) || other.voice == voice) &&
@@ -7115,23 +7554,28 @@ class _Session extends Session {
             (identical(other.outputAudioFormat, outputAudioFormat) ||
                 other.outputAudioFormat == outputAudioFormat) &&
             (identical(
-                    other.inputAudioTranscription, inputAudioTranscription) ||
+                  other.inputAudioTranscription,
+                  inputAudioTranscription,
+                ) ||
                 other.inputAudioTranscription == inputAudioTranscription) &&
             (identical(other.turnDetection, turnDetection) ||
                 other.turnDetection == turnDetection) &&
-            const DeepCollectionEquality().equals(other._tools, _tools) &&
+            const DeepCollectionEquality().equals(other.tools, _tools) &&
             (identical(other.toolChoice, toolChoice) ||
                 other.toolChoice == toolChoice) &&
             (identical(other.temperature, temperature) ||
                 other.temperature == temperature) &&
             (identical(
-                    other.maxResponseOutputTokens, maxResponseOutputTokens) ||
+                  other.maxResponseOutputTokens,
+                  maxResponseOutputTokens,
+                ) ||
                 other.maxResponseOutputTokens == maxResponseOutputTokens));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode {
+    return Object.hash(
       runtimeType,
       id,
       object,
@@ -7147,7 +7591,9 @@ class _Session extends Session {
       const DeepCollectionEquality().hash(_tools),
       toolChoice,
       temperature,
-      maxResponseOutputTokens);
+      maxResponseOutputTokens,
+    );
+  }
 
   @override
   String toString() {
@@ -7161,39 +7607,43 @@ abstract mixin class _$SessionCopyWith<$Res> implements $SessionCopyWith<$Res> {
       __$SessionCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(includeIfNull: false) String? id,
-      ObjectType object,
-      @JsonKey(includeIfNull: false) String? model,
-      @JsonKey(name: 'expires_at', includeIfNull: false) int? expiresAt,
-      @JsonKey(includeIfNull: false) List<Modality>? modalities,
-      @JsonKey(includeIfNull: false) String? instructions,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      Voice? voice,
-      @JsonKey(
-          name: 'input_audio_format',
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      AudioFormat? inputAudioFormat,
-      @JsonKey(
-          name: 'output_audio_format',
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      AudioFormat? outputAudioFormat,
-      @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
-      InputAudioTranscriptionConfig? inputAudioTranscription,
-      @JsonKey(name: 'turn_detection', includeIfNull: false)
-      TurnDetection? turnDetection,
-      @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
-      @_SessionToolChoiceConverter()
-      @JsonKey(name: 'tool_choice', includeIfNull: false)
-      SessionToolChoice? toolChoice,
-      @JsonKey(includeIfNull: false) double? temperature,
-      @_SessionMaxResponseOutputTokensConverter()
-      @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
-      SessionMaxResponseOutputTokens? maxResponseOutputTokens});
+  $Res call({
+    @JsonKey(includeIfNull: false) String? id,
+    ObjectType object,
+    @JsonKey(includeIfNull: false) String? model,
+    @JsonKey(name: 'expires_at', includeIfNull: false) int? expiresAt,
+    @JsonKey(includeIfNull: false) List<Modality>? modalities,
+    @JsonKey(includeIfNull: false) String? instructions,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    Voice? voice,
+    @JsonKey(
+      name: 'input_audio_format',
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    AudioFormat? inputAudioFormat,
+    @JsonKey(
+      name: 'output_audio_format',
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    AudioFormat? outputAudioFormat,
+    @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
+    InputAudioTranscriptionConfig? inputAudioTranscription,
+    @JsonKey(name: 'turn_detection', includeIfNull: false)
+    TurnDetection? turnDetection,
+    @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
+    @_SessionToolChoiceConverter()
+    @JsonKey(name: 'tool_choice', includeIfNull: false)
+    SessionToolChoice? toolChoice,
+    @JsonKey(includeIfNull: false) double? temperature,
+    @_SessionMaxResponseOutputTokensConverter()
+    @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
+    SessionMaxResponseOutputTokens? maxResponseOutputTokens,
+  });
 
   @override
   $InputAudioTranscriptionConfigCopyWith<$Res>? get inputAudioTranscription;
@@ -7233,68 +7683,70 @@ class __$SessionCopyWithImpl<$Res> implements _$SessionCopyWith<$Res> {
     Object? temperature = freezed,
     Object? maxResponseOutputTokens = freezed,
   }) {
-    return _then(_Session(
-      id: freezed == id
-          ? _self.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String?,
-      object: null == object
-          ? _self.object
-          : object // ignore: cast_nullable_to_non_nullable
-              as ObjectType,
-      model: freezed == model
-          ? _self.model
-          : model // ignore: cast_nullable_to_non_nullable
-              as String?,
-      expiresAt: freezed == expiresAt
-          ? _self.expiresAt
-          : expiresAt // ignore: cast_nullable_to_non_nullable
-              as int?,
-      modalities: freezed == modalities
-          ? _self._modalities
-          : modalities // ignore: cast_nullable_to_non_nullable
-              as List<Modality>?,
-      instructions: freezed == instructions
-          ? _self.instructions
-          : instructions // ignore: cast_nullable_to_non_nullable
-              as String?,
-      voice: freezed == voice
-          ? _self.voice
-          : voice // ignore: cast_nullable_to_non_nullable
-              as Voice?,
-      inputAudioFormat: freezed == inputAudioFormat
-          ? _self.inputAudioFormat
-          : inputAudioFormat // ignore: cast_nullable_to_non_nullable
-              as AudioFormat?,
-      outputAudioFormat: freezed == outputAudioFormat
-          ? _self.outputAudioFormat
-          : outputAudioFormat // ignore: cast_nullable_to_non_nullable
-              as AudioFormat?,
-      inputAudioTranscription: freezed == inputAudioTranscription
-          ? _self.inputAudioTranscription
-          : inputAudioTranscription // ignore: cast_nullable_to_non_nullable
-              as InputAudioTranscriptionConfig?,
-      turnDetection: freezed == turnDetection
-          ? _self.turnDetection
-          : turnDetection // ignore: cast_nullable_to_non_nullable
-              as TurnDetection?,
-      tools: freezed == tools
-          ? _self._tools
-          : tools // ignore: cast_nullable_to_non_nullable
-              as List<ToolDefinition>?,
-      toolChoice: freezed == toolChoice
-          ? _self.toolChoice
-          : toolChoice // ignore: cast_nullable_to_non_nullable
-              as SessionToolChoice?,
-      temperature: freezed == temperature
-          ? _self.temperature
-          : temperature // ignore: cast_nullable_to_non_nullable
-              as double?,
-      maxResponseOutputTokens: freezed == maxResponseOutputTokens
-          ? _self.maxResponseOutputTokens
-          : maxResponseOutputTokens // ignore: cast_nullable_to_non_nullable
-              as SessionMaxResponseOutputTokens?,
-    ));
+    return _then(
+      _Session(
+        id: freezed == id
+            ? _self.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        object: null == object
+            ? _self.object
+            : object // ignore: cast_nullable_to_non_nullable
+                  as ObjectType,
+        model: freezed == model
+            ? _self.model
+            : model // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        expiresAt: freezed == expiresAt
+            ? _self.expiresAt
+            : expiresAt // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        modalities: freezed == modalities
+            ? _self._modalities
+            : modalities // ignore: cast_nullable_to_non_nullable
+                  as List<Modality>?,
+        instructions: freezed == instructions
+            ? _self.instructions
+            : instructions // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        voice: freezed == voice
+            ? _self.voice
+            : voice // ignore: cast_nullable_to_non_nullable
+                  as Voice?,
+        inputAudioFormat: freezed == inputAudioFormat
+            ? _self.inputAudioFormat
+            : inputAudioFormat // ignore: cast_nullable_to_non_nullable
+                  as AudioFormat?,
+        outputAudioFormat: freezed == outputAudioFormat
+            ? _self.outputAudioFormat
+            : outputAudioFormat // ignore: cast_nullable_to_non_nullable
+                  as AudioFormat?,
+        inputAudioTranscription: freezed == inputAudioTranscription
+            ? _self.inputAudioTranscription
+            : inputAudioTranscription // ignore: cast_nullable_to_non_nullable
+                  as InputAudioTranscriptionConfig?,
+        turnDetection: freezed == turnDetection
+            ? _self.turnDetection
+            : turnDetection // ignore: cast_nullable_to_non_nullable
+                  as TurnDetection?,
+        tools: freezed == tools
+            ? _self._tools
+            : tools // ignore: cast_nullable_to_non_nullable
+                  as List<ToolDefinition>?,
+        toolChoice: freezed == toolChoice
+            ? _self.toolChoice
+            : toolChoice // ignore: cast_nullable_to_non_nullable
+                  as SessionToolChoice?,
+        temperature: freezed == temperature
+            ? _self.temperature
+            : temperature // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        maxResponseOutputTokens: freezed == maxResponseOutputTokens
+            ? _self.maxResponseOutputTokens
+            : maxResponseOutputTokens // ignore: cast_nullable_to_non_nullable
+                  as SessionMaxResponseOutputTokens?,
+      ),
+    );
   }
 
   /// Create a copy of Session
@@ -7307,9 +7759,11 @@ class __$SessionCopyWithImpl<$Res> implements _$SessionCopyWith<$Res> {
     }
 
     return $InputAudioTranscriptionConfigCopyWith<$Res>(
-        _self.inputAudioTranscription!, (value) {
-      return _then(_self.copyWith(inputAudioTranscription: value));
-    });
+      _self.inputAudioTranscription!,
+      (value) {
+        return _then(_self.copyWith(inputAudioTranscription: value));
+      },
+    );
   }
 
   /// Create a copy of Session
@@ -7350,9 +7804,11 @@ class __$SessionCopyWithImpl<$Res> implements _$SessionCopyWith<$Res> {
     }
 
     return $SessionMaxResponseOutputTokensCopyWith<$Res>(
-        _self.maxResponseOutputTokens!, (value) {
-      return _then(_self.copyWith(maxResponseOutputTokens: value));
-    });
+      _self.maxResponseOutputTokens!,
+      (value) {
+        return _then(_self.copyWith(maxResponseOutputTokens: value));
+      },
+    );
   }
 }
 
@@ -7364,8 +7820,12 @@ SessionToolChoice _$SessionToolChoiceFromJson(Map<String, dynamic> json) {
       return SessionToolChoiceToolChoiceForced.fromJson(json);
 
     default:
-      throw CheckedFromJsonException(json, 'runtimeType', 'SessionToolChoice',
-          'Invalid union type "${json['runtimeType']}"!');
+      throw CheckedFromJsonException(
+        json,
+        'runtimeType',
+        'SessionToolChoice',
+        'Invalid union type "${json['runtimeType']}"!',
+      );
   }
 }
 
@@ -7378,27 +7838,36 @@ mixin _$SessionToolChoice {
 
   @override
   bool operator ==(Object other) {
+    final _this = this as SessionToolChoice;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is SessionToolChoice &&
-            const DeepCollectionEquality().equals(other.value, value));
+            const DeepCollectionEquality().equals(other.value, _this.value));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(value));
+  int get hashCode {
+    final _this = this as SessionToolChoice;
+    return Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(_this.value),
+    );
+  }
 
   @override
   String toString() {
-    return 'SessionToolChoice(value: $value)';
+    final _this = this as SessionToolChoice;
+    return 'SessionToolChoice(value: ${_this.value})';
   }
 }
 
 /// @nodoc
 class $SessionToolChoiceCopyWith<$Res> {
   $SessionToolChoiceCopyWith(
-      SessionToolChoice _, $Res Function(SessionToolChoice) __);
+    SessionToolChoice _,
+    $Res Function(SessionToolChoice) __,
+  );
 }
 
 /// Adds pattern-matching-related methods to [SessionToolChoice].
@@ -7449,7 +7918,7 @@ extension SessionToolChoicePatterns on SessionToolChoice {
   TResult map<TResult extends Object?>({
     required TResult Function(SessionToolChoiceEnumeration value) mode,
     required TResult Function(SessionToolChoiceToolChoiceForced value)
-        toolChoiceForced,
+    toolChoiceForced,
   }) {
     final _that = this;
     switch (_that) {
@@ -7476,7 +7945,7 @@ extension SessionToolChoicePatterns on SessionToolChoice {
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(SessionToolChoiceEnumeration value)? mode,
     TResult? Function(SessionToolChoiceToolChoiceForced value)?
-        toolChoiceForced,
+    toolChoiceForced,
   }) {
     final _that = this;
     switch (_that) {
@@ -7577,9 +8046,9 @@ extension SessionToolChoicePatterns on SessionToolChoice {
 /// @nodoc
 @JsonSerializable()
 class SessionToolChoiceEnumeration extends SessionToolChoice {
-  const SessionToolChoiceEnumeration(this.value, {final String? $type})
-      : $type = $type ?? 'mode',
-        super._();
+  const SessionToolChoiceEnumeration(this.value, {String? $type})
+    : $type = $type ?? 'mode',
+      super._();
   factory SessionToolChoiceEnumeration.fromJson(Map<String, dynamic> json) =>
       _$SessionToolChoiceEnumerationFromJson(json);
 
@@ -7594,14 +8063,15 @@ class SessionToolChoiceEnumeration extends SessionToolChoice {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $SessionToolChoiceEnumerationCopyWith<SessionToolChoiceEnumeration>
-      get copyWith => _$SessionToolChoiceEnumerationCopyWithImpl<
-          SessionToolChoiceEnumeration>(this, _$identity);
+  get copyWith =>
+      _$SessionToolChoiceEnumerationCopyWithImpl<SessionToolChoiceEnumeration>(
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$SessionToolChoiceEnumerationToJson(
-      this,
-    );
+    return _$SessionToolChoiceEnumerationToJson(this);
   }
 
   @override
@@ -7614,7 +8084,9 @@ class SessionToolChoiceEnumeration extends SessionToolChoice {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, value);
+  int get hashCode {
+    return Object.hash(runtimeType, value);
+  }
 
   @override
   String toString() {
@@ -7626,9 +8098,9 @@ class SessionToolChoiceEnumeration extends SessionToolChoice {
 abstract mixin class $SessionToolChoiceEnumerationCopyWith<$Res>
     implements $SessionToolChoiceCopyWith<$Res> {
   factory $SessionToolChoiceEnumerationCopyWith(
-          SessionToolChoiceEnumeration value,
-          $Res Function(SessionToolChoiceEnumeration) _then) =
-      _$SessionToolChoiceEnumerationCopyWithImpl;
+    SessionToolChoiceEnumeration value,
+    $Res Function(SessionToolChoiceEnumeration) _then,
+  ) = _$SessionToolChoiceEnumerationCopyWithImpl;
   @useResult
   $Res call({SessionToolChoiceMode value});
 }
@@ -7644,27 +8116,27 @@ class _$SessionToolChoiceEnumerationCopyWithImpl<$Res>
   /// Create a copy of SessionToolChoice
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? value = null,
-  }) {
-    return _then(SessionToolChoiceEnumeration(
-      null == value
-          ? _self.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as SessionToolChoiceMode,
-    ));
+  $Res call({Object? value = null}) {
+    return _then(
+      SessionToolChoiceEnumeration(
+        null == value
+            ? _self.value
+            : value // ignore: cast_nullable_to_non_nullable
+                  as SessionToolChoiceMode,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class SessionToolChoiceToolChoiceForced extends SessionToolChoice {
-  const SessionToolChoiceToolChoiceForced(this.value, {final String? $type})
-      : $type = $type ?? 'toolChoiceForced',
-        super._();
+  const SessionToolChoiceToolChoiceForced(this.value, {String? $type})
+    : $type = $type ?? 'toolChoiceForced',
+      super._();
   factory SessionToolChoiceToolChoiceForced.fromJson(
-          Map<String, dynamic> json) =>
-      _$SessionToolChoiceToolChoiceForcedFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$SessionToolChoiceToolChoiceForcedFromJson(json);
 
   @override
   final ToolChoiceForced value;
@@ -7677,14 +8149,14 @@ class SessionToolChoiceToolChoiceForced extends SessionToolChoice {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $SessionToolChoiceToolChoiceForcedCopyWith<SessionToolChoiceToolChoiceForced>
-      get copyWith => _$SessionToolChoiceToolChoiceForcedCopyWithImpl<
-          SessionToolChoiceToolChoiceForced>(this, _$identity);
+  get copyWith =>
+      _$SessionToolChoiceToolChoiceForcedCopyWithImpl<
+        SessionToolChoiceToolChoiceForced
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$SessionToolChoiceToolChoiceForcedToJson(
-      this,
-    );
+    return _$SessionToolChoiceToolChoiceForcedToJson(this);
   }
 
   @override
@@ -7697,7 +8169,9 @@ class SessionToolChoiceToolChoiceForced extends SessionToolChoice {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, value);
+  int get hashCode {
+    return Object.hash(runtimeType, value);
+  }
 
   @override
   String toString() {
@@ -7709,9 +8183,9 @@ class SessionToolChoiceToolChoiceForced extends SessionToolChoice {
 abstract mixin class $SessionToolChoiceToolChoiceForcedCopyWith<$Res>
     implements $SessionToolChoiceCopyWith<$Res> {
   factory $SessionToolChoiceToolChoiceForcedCopyWith(
-          SessionToolChoiceToolChoiceForced value,
-          $Res Function(SessionToolChoiceToolChoiceForced) _then) =
-      _$SessionToolChoiceToolChoiceForcedCopyWithImpl;
+    SessionToolChoiceToolChoiceForced value,
+    $Res Function(SessionToolChoiceToolChoiceForced) _then,
+  ) = _$SessionToolChoiceToolChoiceForcedCopyWithImpl;
   @useResult
   $Res call({ToolChoiceForced value});
 
@@ -7729,15 +8203,15 @@ class _$SessionToolChoiceToolChoiceForcedCopyWithImpl<$Res>
   /// Create a copy of SessionToolChoice
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? value = null,
-  }) {
-    return _then(SessionToolChoiceToolChoiceForced(
-      null == value
-          ? _self.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as ToolChoiceForced,
-    ));
+  $Res call({Object? value = null}) {
+    return _then(
+      SessionToolChoiceToolChoiceForced(
+        null == value
+            ? _self.value
+            : value // ignore: cast_nullable_to_non_nullable
+                  as ToolChoiceForced,
+      ),
+    );
   }
 
   /// Create a copy of SessionToolChoice
@@ -7752,7 +8226,8 @@ class _$SessionToolChoiceToolChoiceForcedCopyWithImpl<$Res>
 }
 
 SessionMaxResponseOutputTokens _$SessionMaxResponseOutputTokensFromJson(
-    Map<String, dynamic> json) {
+  Map<String, dynamic> json,
+) {
   switch (json['runtimeType']) {
     case 'int':
       return SessionMaxResponseOutputTokensInt.fromJson(json);
@@ -7761,10 +8236,11 @@ SessionMaxResponseOutputTokens _$SessionMaxResponseOutputTokensFromJson(
 
     default:
       throw CheckedFromJsonException(
-          json,
-          'runtimeType',
-          'SessionMaxResponseOutputTokens',
-          'Invalid union type "${json['runtimeType']}"!');
+        json,
+        'runtimeType',
+        'SessionMaxResponseOutputTokens',
+        'Invalid union type "${json['runtimeType']}"!',
+      );
   }
 }
 
@@ -7777,27 +8253,36 @@ mixin _$SessionMaxResponseOutputTokens {
 
   @override
   bool operator ==(Object other) {
+    final _this = this as SessionMaxResponseOutputTokens;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is SessionMaxResponseOutputTokens &&
-            const DeepCollectionEquality().equals(other.value, value));
+            const DeepCollectionEquality().equals(other.value, _this.value));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(value));
+  int get hashCode {
+    final _this = this as SessionMaxResponseOutputTokens;
+    return Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(_this.value),
+    );
+  }
 
   @override
   String toString() {
-    return 'SessionMaxResponseOutputTokens(value: $value)';
+    final _this = this as SessionMaxResponseOutputTokens;
+    return 'SessionMaxResponseOutputTokens(value: ${_this.value})';
   }
 }
 
 /// @nodoc
 class $SessionMaxResponseOutputTokensCopyWith<$Res> {
-  $SessionMaxResponseOutputTokensCopyWith(SessionMaxResponseOutputTokens _,
-      $Res Function(SessionMaxResponseOutputTokens) __);
+  $SessionMaxResponseOutputTokensCopyWith(
+    SessionMaxResponseOutputTokens _,
+    $Res Function(SessionMaxResponseOutputTokens) __,
+  );
 }
 
 /// Adds pattern-matching-related methods to [SessionMaxResponseOutputTokens].
@@ -7849,7 +8334,7 @@ extension SessionMaxResponseOutputTokensPatterns
   TResult map<TResult extends Object?>({
     required TResult Function(SessionMaxResponseOutputTokensInt value) int,
     required TResult Function(SessionMaxResponseOutputTokensString value)
-        string,
+    string,
   }) {
     final _that = this;
     switch (_that) {
@@ -7976,12 +8461,12 @@ extension SessionMaxResponseOutputTokensPatterns
 /// @nodoc
 @JsonSerializable()
 class SessionMaxResponseOutputTokensInt extends SessionMaxResponseOutputTokens {
-  const SessionMaxResponseOutputTokensInt(this.value, {final String? $type})
-      : $type = $type ?? 'int',
-        super._();
+  const SessionMaxResponseOutputTokensInt(this.value, {String? $type})
+    : $type = $type ?? 'int',
+      super._();
   factory SessionMaxResponseOutputTokensInt.fromJson(
-          Map<String, dynamic> json) =>
-      _$SessionMaxResponseOutputTokensIntFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$SessionMaxResponseOutputTokensIntFromJson(json);
 
   @override
   final int value;
@@ -7994,14 +8479,14 @@ class SessionMaxResponseOutputTokensInt extends SessionMaxResponseOutputTokens {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $SessionMaxResponseOutputTokensIntCopyWith<SessionMaxResponseOutputTokensInt>
-      get copyWith => _$SessionMaxResponseOutputTokensIntCopyWithImpl<
-          SessionMaxResponseOutputTokensInt>(this, _$identity);
+  get copyWith =>
+      _$SessionMaxResponseOutputTokensIntCopyWithImpl<
+        SessionMaxResponseOutputTokensInt
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$SessionMaxResponseOutputTokensIntToJson(
-      this,
-    );
+    return _$SessionMaxResponseOutputTokensIntToJson(this);
   }
 
   @override
@@ -8014,7 +8499,9 @@ class SessionMaxResponseOutputTokensInt extends SessionMaxResponseOutputTokens {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, value);
+  int get hashCode {
+    return Object.hash(runtimeType, value);
+  }
 
   @override
   String toString() {
@@ -8026,9 +8513,9 @@ class SessionMaxResponseOutputTokensInt extends SessionMaxResponseOutputTokens {
 abstract mixin class $SessionMaxResponseOutputTokensIntCopyWith<$Res>
     implements $SessionMaxResponseOutputTokensCopyWith<$Res> {
   factory $SessionMaxResponseOutputTokensIntCopyWith(
-          SessionMaxResponseOutputTokensInt value,
-          $Res Function(SessionMaxResponseOutputTokensInt) _then) =
-      _$SessionMaxResponseOutputTokensIntCopyWithImpl;
+    SessionMaxResponseOutputTokensInt value,
+    $Res Function(SessionMaxResponseOutputTokensInt) _then,
+  ) = _$SessionMaxResponseOutputTokensIntCopyWithImpl;
   @useResult
   $Res call({int value});
 }
@@ -8044,15 +8531,15 @@ class _$SessionMaxResponseOutputTokensIntCopyWithImpl<$Res>
   /// Create a copy of SessionMaxResponseOutputTokens
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? value = null,
-  }) {
-    return _then(SessionMaxResponseOutputTokensInt(
-      null == value
-          ? _self.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as int,
-    ));
+  $Res call({Object? value = null}) {
+    return _then(
+      SessionMaxResponseOutputTokensInt(
+        null == value
+            ? _self.value
+            : value // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
   }
 }
 
@@ -8060,12 +8547,12 @@ class _$SessionMaxResponseOutputTokensIntCopyWithImpl<$Res>
 @JsonSerializable()
 class SessionMaxResponseOutputTokensString
     extends SessionMaxResponseOutputTokens {
-  const SessionMaxResponseOutputTokensString(this.value, {final String? $type})
-      : $type = $type ?? 'string',
-        super._();
+  const SessionMaxResponseOutputTokensString(this.value, {String? $type})
+    : $type = $type ?? 'string',
+      super._();
   factory SessionMaxResponseOutputTokensString.fromJson(
-          Map<String, dynamic> json) =>
-      _$SessionMaxResponseOutputTokensStringFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$SessionMaxResponseOutputTokensStringFromJson(json);
 
   @override
   final String value;
@@ -8078,15 +8565,16 @@ class SessionMaxResponseOutputTokensString
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $SessionMaxResponseOutputTokensStringCopyWith<
-          SessionMaxResponseOutputTokensString>
-      get copyWith => _$SessionMaxResponseOutputTokensStringCopyWithImpl<
-          SessionMaxResponseOutputTokensString>(this, _$identity);
+    SessionMaxResponseOutputTokensString
+  >
+  get copyWith =>
+      _$SessionMaxResponseOutputTokensStringCopyWithImpl<
+        SessionMaxResponseOutputTokensString
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$SessionMaxResponseOutputTokensStringToJson(
-      this,
-    );
+    return _$SessionMaxResponseOutputTokensStringToJson(this);
   }
 
   @override
@@ -8099,7 +8587,9 @@ class SessionMaxResponseOutputTokensString
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, value);
+  int get hashCode {
+    return Object.hash(runtimeType, value);
+  }
 
   @override
   String toString() {
@@ -8111,9 +8601,9 @@ class SessionMaxResponseOutputTokensString
 abstract mixin class $SessionMaxResponseOutputTokensStringCopyWith<$Res>
     implements $SessionMaxResponseOutputTokensCopyWith<$Res> {
   factory $SessionMaxResponseOutputTokensStringCopyWith(
-          SessionMaxResponseOutputTokensString value,
-          $Res Function(SessionMaxResponseOutputTokensString) _then) =
-      _$SessionMaxResponseOutputTokensStringCopyWithImpl;
+    SessionMaxResponseOutputTokensString value,
+    $Res Function(SessionMaxResponseOutputTokensString) _then,
+  ) = _$SessionMaxResponseOutputTokensStringCopyWithImpl;
   @useResult
   $Res call({String value});
 }
@@ -8129,15 +8619,15 @@ class _$SessionMaxResponseOutputTokensStringCopyWithImpl<$Res>
   /// Create a copy of SessionMaxResponseOutputTokens
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? value = null,
-  }) {
-    return _then(SessionMaxResponseOutputTokensString(
-      null == value
-          ? _self.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+  $Res call({Object? value = null}) {
+    return _then(
+      SessionMaxResponseOutputTokensString(
+        null == value
+            ? _self.value
+            : value // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
@@ -8171,21 +8661,25 @@ mixin _$SessionConfig {
   /// voice options are `alloy`, `ash`, `ballad`, `coral`, `echo` `sage`,
   /// `shimmer` and `verse`.
   @JsonKey(
-      includeIfNull: false, unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   Voice? get voice;
 
   /// The format of input audio. Options are `pcm16`, `g711_ulaw`, or `g711_alaw`.
   @JsonKey(
-      name: 'input_audio_format',
-      includeIfNull: false,
-      unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    name: 'input_audio_format',
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   AudioFormat? get inputAudioFormat;
 
   /// The format of output audio. Options are `pcm16`, `g711_ulaw`, or `g711_alaw`.
   @JsonKey(
-      name: 'output_audio_format',
-      includeIfNull: false,
-      unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    name: 'output_audio_format',
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   AudioFormat? get outputAudioFormat;
 
   /// Configuration for input audio transcription, defaults to off and can be  set to `null` to turn off
@@ -8232,108 +8726,130 @@ mixin _$SessionConfig {
   @pragma('vm:prefer-inline')
   $SessionConfigCopyWith<SessionConfig> get copyWith =>
       _$SessionConfigCopyWithImpl<SessionConfig>(
-          this as SessionConfig, _$identity);
+        this as SessionConfig,
+        _$identity,
+      );
 
   /// Serializes this SessionConfig to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as SessionConfig;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is SessionConfig &&
-            (identical(other.clientSecret, clientSecret) ||
-                other.clientSecret == clientSecret) &&
-            const DeepCollectionEquality()
-                .equals(other.modalities, modalities) &&
-            (identical(other.instructions, instructions) ||
-                other.instructions == instructions) &&
-            (identical(other.voice, voice) || other.voice == voice) &&
-            (identical(other.inputAudioFormat, inputAudioFormat) ||
-                other.inputAudioFormat == inputAudioFormat) &&
-            (identical(other.outputAudioFormat, outputAudioFormat) ||
-                other.outputAudioFormat == outputAudioFormat) &&
+            (identical(other.clientSecret, _this.clientSecret) ||
+                other.clientSecret == _this.clientSecret) &&
+            const DeepCollectionEquality().equals(
+              other.modalities,
+              _this.modalities,
+            ) &&
+            (identical(other.instructions, _this.instructions) ||
+                other.instructions == _this.instructions) &&
+            (identical(other.voice, _this.voice) ||
+                other.voice == _this.voice) &&
+            (identical(other.inputAudioFormat, _this.inputAudioFormat) ||
+                other.inputAudioFormat == _this.inputAudioFormat) &&
+            (identical(other.outputAudioFormat, _this.outputAudioFormat) ||
+                other.outputAudioFormat == _this.outputAudioFormat) &&
             (identical(
-                    other.inputAudioTranscription, inputAudioTranscription) ||
-                other.inputAudioTranscription == inputAudioTranscription) &&
-            (identical(other.turnDetection, turnDetection) ||
-                other.turnDetection == turnDetection) &&
-            const DeepCollectionEquality().equals(other.tools, tools) &&
-            (identical(other.toolChoice, toolChoice) ||
-                other.toolChoice == toolChoice) &&
-            (identical(other.temperature, temperature) ||
-                other.temperature == temperature) &&
+                  other.inputAudioTranscription,
+                  _this.inputAudioTranscription,
+                ) ||
+                other.inputAudioTranscription ==
+                    _this.inputAudioTranscription) &&
+            (identical(other.turnDetection, _this.turnDetection) ||
+                other.turnDetection == _this.turnDetection) &&
+            const DeepCollectionEquality().equals(other.tools, _this.tools) &&
+            (identical(other.toolChoice, _this.toolChoice) ||
+                other.toolChoice == _this.toolChoice) &&
+            (identical(other.temperature, _this.temperature) ||
+                other.temperature == _this.temperature) &&
             (identical(
-                    other.maxResponseOutputTokens, maxResponseOutputTokens) ||
-                other.maxResponseOutputTokens == maxResponseOutputTokens));
+                  other.maxResponseOutputTokens,
+                  _this.maxResponseOutputTokens,
+                ) ||
+                other.maxResponseOutputTokens ==
+                    _this.maxResponseOutputTokens));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode {
+    final _this = this as SessionConfig;
+    return Object.hash(
       runtimeType,
-      clientSecret,
-      const DeepCollectionEquality().hash(modalities),
-      instructions,
-      voice,
-      inputAudioFormat,
-      outputAudioFormat,
-      inputAudioTranscription,
-      turnDetection,
-      const DeepCollectionEquality().hash(tools),
-      toolChoice,
-      temperature,
-      maxResponseOutputTokens);
+      _this.clientSecret,
+      const DeepCollectionEquality().hash(_this.modalities),
+      _this.instructions,
+      _this.voice,
+      _this.inputAudioFormat,
+      _this.outputAudioFormat,
+      _this.inputAudioTranscription,
+      _this.turnDetection,
+      const DeepCollectionEquality().hash(_this.tools),
+      _this.toolChoice,
+      _this.temperature,
+      _this.maxResponseOutputTokens,
+    );
+  }
 
   @override
   String toString() {
-    return 'SessionConfig(clientSecret: $clientSecret, modalities: $modalities, instructions: $instructions, voice: $voice, inputAudioFormat: $inputAudioFormat, outputAudioFormat: $outputAudioFormat, inputAudioTranscription: $inputAudioTranscription, turnDetection: $turnDetection, tools: $tools, toolChoice: $toolChoice, temperature: $temperature, maxResponseOutputTokens: $maxResponseOutputTokens)';
+    final _this = this as SessionConfig;
+    return 'SessionConfig(clientSecret: ${_this.clientSecret}, modalities: ${_this.modalities}, instructions: ${_this.instructions}, voice: ${_this.voice}, inputAudioFormat: ${_this.inputAudioFormat}, outputAudioFormat: ${_this.outputAudioFormat}, inputAudioTranscription: ${_this.inputAudioTranscription}, turnDetection: ${_this.turnDetection}, tools: ${_this.tools}, toolChoice: ${_this.toolChoice}, temperature: ${_this.temperature}, maxResponseOutputTokens: ${_this.maxResponseOutputTokens})';
   }
 }
 
 /// @nodoc
 abstract mixin class $SessionConfigCopyWith<$Res> {
   factory $SessionConfigCopyWith(
-          SessionConfig value, $Res Function(SessionConfig) _then) =
-      _$SessionConfigCopyWithImpl;
+    SessionConfig value,
+    $Res Function(SessionConfig) _then,
+  ) = _$SessionConfigCopyWithImpl;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'client_secret', includeIfNull: false)
-      SessionConfigClientSecret? clientSecret,
-      @JsonKey(includeIfNull: false) List<Modality>? modalities,
-      @JsonKey(includeIfNull: false) String? instructions,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      Voice? voice,
-      @JsonKey(
-          name: 'input_audio_format',
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      AudioFormat? inputAudioFormat,
-      @JsonKey(
-          name: 'output_audio_format',
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      AudioFormat? outputAudioFormat,
-      @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
-      InputAudioTranscriptionConfig? inputAudioTranscription,
-      @JsonKey(name: 'turn_detection') TurnDetection? turnDetection,
-      @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
-      @_SessionConfigToolChoiceConverter()
-      @JsonKey(name: 'tool_choice', includeIfNull: false)
-      SessionConfigToolChoice? toolChoice,
-      @JsonKey(includeIfNull: false) double? temperature,
-      @_SessionConfigMaxResponseOutputTokensConverter()
-      @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
-      SessionConfigMaxResponseOutputTokens? maxResponseOutputTokens});
+  $Res call({
+    @JsonKey(name: 'client_secret', includeIfNull: false)
+    SessionConfigClientSecret? clientSecret,
+    @JsonKey(includeIfNull: false) List<Modality>? modalities,
+    @JsonKey(includeIfNull: false) String? instructions,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    Voice? voice,
+    @JsonKey(
+      name: 'input_audio_format',
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    AudioFormat? inputAudioFormat,
+    @JsonKey(
+      name: 'output_audio_format',
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    AudioFormat? outputAudioFormat,
+    @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
+    InputAudioTranscriptionConfig? inputAudioTranscription,
+    @JsonKey(name: 'turn_detection') TurnDetection? turnDetection,
+    @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
+    @_SessionConfigToolChoiceConverter()
+    @JsonKey(name: 'tool_choice', includeIfNull: false)
+    SessionConfigToolChoice? toolChoice,
+    @JsonKey(includeIfNull: false) double? temperature,
+    @_SessionConfigMaxResponseOutputTokensConverter()
+    @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
+    SessionConfigMaxResponseOutputTokens? maxResponseOutputTokens,
+  });
 
   $SessionConfigClientSecretCopyWith<$Res>? get clientSecret;
   $InputAudioTranscriptionConfigCopyWith<$Res>? get inputAudioTranscription;
   $TurnDetectionCopyWith<$Res>? get turnDetection;
   $SessionConfigToolChoiceCopyWith<$Res>? get toolChoice;
   $SessionConfigMaxResponseOutputTokensCopyWith<$Res>?
-      get maxResponseOutputTokens;
+  get maxResponseOutputTokens;
 }
 
 /// @nodoc
@@ -8362,56 +8878,58 @@ class _$SessionConfigCopyWithImpl<$Res>
     Object? temperature = freezed,
     Object? maxResponseOutputTokens = freezed,
   }) {
-    return _then(_self.copyWith(
-      clientSecret: freezed == clientSecret
-          ? _self.clientSecret
-          : clientSecret // ignore: cast_nullable_to_non_nullable
-              as SessionConfigClientSecret?,
-      modalities: freezed == modalities
-          ? _self.modalities
-          : modalities // ignore: cast_nullable_to_non_nullable
-              as List<Modality>?,
-      instructions: freezed == instructions
-          ? _self.instructions
-          : instructions // ignore: cast_nullable_to_non_nullable
-              as String?,
-      voice: freezed == voice
-          ? _self.voice
-          : voice // ignore: cast_nullable_to_non_nullable
-              as Voice?,
-      inputAudioFormat: freezed == inputAudioFormat
-          ? _self.inputAudioFormat
-          : inputAudioFormat // ignore: cast_nullable_to_non_nullable
-              as AudioFormat?,
-      outputAudioFormat: freezed == outputAudioFormat
-          ? _self.outputAudioFormat
-          : outputAudioFormat // ignore: cast_nullable_to_non_nullable
-              as AudioFormat?,
-      inputAudioTranscription: freezed == inputAudioTranscription
-          ? _self.inputAudioTranscription
-          : inputAudioTranscription // ignore: cast_nullable_to_non_nullable
-              as InputAudioTranscriptionConfig?,
-      turnDetection: freezed == turnDetection
-          ? _self.turnDetection
-          : turnDetection // ignore: cast_nullable_to_non_nullable
-              as TurnDetection?,
-      tools: freezed == tools
-          ? _self.tools
-          : tools // ignore: cast_nullable_to_non_nullable
-              as List<ToolDefinition>?,
-      toolChoice: freezed == toolChoice
-          ? _self.toolChoice
-          : toolChoice // ignore: cast_nullable_to_non_nullable
-              as SessionConfigToolChoice?,
-      temperature: freezed == temperature
-          ? _self.temperature
-          : temperature // ignore: cast_nullable_to_non_nullable
-              as double?,
-      maxResponseOutputTokens: freezed == maxResponseOutputTokens
-          ? _self.maxResponseOutputTokens
-          : maxResponseOutputTokens // ignore: cast_nullable_to_non_nullable
-              as SessionConfigMaxResponseOutputTokens?,
-    ));
+    return _then(
+      SessionConfig(
+        clientSecret: freezed == clientSecret
+            ? _self.clientSecret
+            : clientSecret // ignore: cast_nullable_to_non_nullable
+                  as SessionConfigClientSecret?,
+        modalities: freezed == modalities
+            ? _self.modalities
+            : modalities // ignore: cast_nullable_to_non_nullable
+                  as List<Modality>?,
+        instructions: freezed == instructions
+            ? _self.instructions
+            : instructions // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        voice: freezed == voice
+            ? _self.voice
+            : voice // ignore: cast_nullable_to_non_nullable
+                  as Voice?,
+        inputAudioFormat: freezed == inputAudioFormat
+            ? _self.inputAudioFormat
+            : inputAudioFormat // ignore: cast_nullable_to_non_nullable
+                  as AudioFormat?,
+        outputAudioFormat: freezed == outputAudioFormat
+            ? _self.outputAudioFormat
+            : outputAudioFormat // ignore: cast_nullable_to_non_nullable
+                  as AudioFormat?,
+        inputAudioTranscription: freezed == inputAudioTranscription
+            ? _self.inputAudioTranscription
+            : inputAudioTranscription // ignore: cast_nullable_to_non_nullable
+                  as InputAudioTranscriptionConfig?,
+        turnDetection: freezed == turnDetection
+            ? _self.turnDetection
+            : turnDetection // ignore: cast_nullable_to_non_nullable
+                  as TurnDetection?,
+        tools: freezed == tools
+            ? _self.tools
+            : tools // ignore: cast_nullable_to_non_nullable
+                  as List<ToolDefinition>?,
+        toolChoice: freezed == toolChoice
+            ? _self.toolChoice
+            : toolChoice // ignore: cast_nullable_to_non_nullable
+                  as SessionConfigToolChoice?,
+        temperature: freezed == temperature
+            ? _self.temperature
+            : temperature // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        maxResponseOutputTokens: freezed == maxResponseOutputTokens
+            ? _self.maxResponseOutputTokens
+            : maxResponseOutputTokens // ignore: cast_nullable_to_non_nullable
+                  as SessionConfigMaxResponseOutputTokens?,
+      ),
+    );
   }
 
   /// Create a copy of SessionConfig
@@ -8423,8 +8941,9 @@ class _$SessionConfigCopyWithImpl<$Res>
       return null;
     }
 
-    return $SessionConfigClientSecretCopyWith<$Res>(_self.clientSecret!,
-        (value) {
+    return $SessionConfigClientSecretCopyWith<$Res>(_self.clientSecret!, (
+      value,
+    ) {
       return _then(_self.copyWith(clientSecret: value));
     });
   }
@@ -8439,9 +8958,11 @@ class _$SessionConfigCopyWithImpl<$Res>
     }
 
     return $InputAudioTranscriptionConfigCopyWith<$Res>(
-        _self.inputAudioTranscription!, (value) {
-      return _then(_self.copyWith(inputAudioTranscription: value));
-    });
+      _self.inputAudioTranscription!,
+      (value) {
+        return _then(_self.copyWith(inputAudioTranscription: value));
+      },
+    );
   }
 
   /// Create a copy of SessionConfig
@@ -8477,15 +8998,17 @@ class _$SessionConfigCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $SessionConfigMaxResponseOutputTokensCopyWith<$Res>?
-      get maxResponseOutputTokens {
+  get maxResponseOutputTokens {
     if (_self.maxResponseOutputTokens == null) {
       return null;
     }
 
     return $SessionConfigMaxResponseOutputTokensCopyWith<$Res>(
-        _self.maxResponseOutputTokens!, (value) {
-      return _then(_self.copyWith(maxResponseOutputTokens: value));
-    });
+      _self.maxResponseOutputTokens!,
+      (value) {
+        return _then(_self.copyWith(maxResponseOutputTokens: value));
+      },
+    );
   }
 }
 
@@ -8583,54 +9106,59 @@ extension SessionConfigPatterns on SessionConfig {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            @JsonKey(name: 'client_secret', includeIfNull: false)
-            SessionConfigClientSecret? clientSecret,
-            @JsonKey(includeIfNull: false) List<Modality>? modalities,
-            @JsonKey(includeIfNull: false) String? instructions,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            Voice? voice,
-            @JsonKey(
-                name: 'input_audio_format',
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            AudioFormat? inputAudioFormat,
-            @JsonKey(
-                name: 'output_audio_format',
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            AudioFormat? outputAudioFormat,
-            @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
-            InputAudioTranscriptionConfig? inputAudioTranscription,
-            @JsonKey(name: 'turn_detection') TurnDetection? turnDetection,
-            @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
-            @_SessionConfigToolChoiceConverter()
-            @JsonKey(name: 'tool_choice', includeIfNull: false)
-            SessionConfigToolChoice? toolChoice,
-            @JsonKey(includeIfNull: false) double? temperature,
-            @_SessionConfigMaxResponseOutputTokensConverter()
-            @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
-            SessionConfigMaxResponseOutputTokens? maxResponseOutputTokens)?
-        $default, {
+      @JsonKey(name: 'client_secret', includeIfNull: false)
+      SessionConfigClientSecret? clientSecret,
+      @JsonKey(includeIfNull: false) List<Modality>? modalities,
+      @JsonKey(includeIfNull: false) String? instructions,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      Voice? voice,
+      @JsonKey(
+        name: 'input_audio_format',
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      AudioFormat? inputAudioFormat,
+      @JsonKey(
+        name: 'output_audio_format',
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      AudioFormat? outputAudioFormat,
+      @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
+      InputAudioTranscriptionConfig? inputAudioTranscription,
+      @JsonKey(name: 'turn_detection') TurnDetection? turnDetection,
+      @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
+      @_SessionConfigToolChoiceConverter()
+      @JsonKey(name: 'tool_choice', includeIfNull: false)
+      SessionConfigToolChoice? toolChoice,
+      @JsonKey(includeIfNull: false) double? temperature,
+      @_SessionConfigMaxResponseOutputTokensConverter()
+      @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
+      SessionConfigMaxResponseOutputTokens? maxResponseOutputTokens,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _SessionConfig() when $default != null:
         return $default(
-            _that.clientSecret,
-            _that.modalities,
-            _that.instructions,
-            _that.voice,
-            _that.inputAudioFormat,
-            _that.outputAudioFormat,
-            _that.inputAudioTranscription,
-            _that.turnDetection,
-            _that.tools,
-            _that.toolChoice,
-            _that.temperature,
-            _that.maxResponseOutputTokens);
+          _that.clientSecret,
+          _that.modalities,
+          _that.instructions,
+          _that.voice,
+          _that.inputAudioFormat,
+          _that.outputAudioFormat,
+          _that.inputAudioTranscription,
+          _that.turnDetection,
+          _that.tools,
+          _that.toolChoice,
+          _that.temperature,
+          _that.maxResponseOutputTokens,
+        );
       case _:
         return orElse();
     }
@@ -8652,53 +9180,58 @@ extension SessionConfigPatterns on SessionConfig {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            @JsonKey(name: 'client_secret', includeIfNull: false)
-            SessionConfigClientSecret? clientSecret,
-            @JsonKey(includeIfNull: false) List<Modality>? modalities,
-            @JsonKey(includeIfNull: false) String? instructions,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            Voice? voice,
-            @JsonKey(
-                name: 'input_audio_format',
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            AudioFormat? inputAudioFormat,
-            @JsonKey(
-                name: 'output_audio_format',
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            AudioFormat? outputAudioFormat,
-            @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
-            InputAudioTranscriptionConfig? inputAudioTranscription,
-            @JsonKey(name: 'turn_detection') TurnDetection? turnDetection,
-            @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
-            @_SessionConfigToolChoiceConverter()
-            @JsonKey(name: 'tool_choice', includeIfNull: false)
-            SessionConfigToolChoice? toolChoice,
-            @JsonKey(includeIfNull: false) double? temperature,
-            @_SessionConfigMaxResponseOutputTokensConverter()
-            @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
-            SessionConfigMaxResponseOutputTokens? maxResponseOutputTokens)
-        $default,
+      @JsonKey(name: 'client_secret', includeIfNull: false)
+      SessionConfigClientSecret? clientSecret,
+      @JsonKey(includeIfNull: false) List<Modality>? modalities,
+      @JsonKey(includeIfNull: false) String? instructions,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      Voice? voice,
+      @JsonKey(
+        name: 'input_audio_format',
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      AudioFormat? inputAudioFormat,
+      @JsonKey(
+        name: 'output_audio_format',
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      AudioFormat? outputAudioFormat,
+      @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
+      InputAudioTranscriptionConfig? inputAudioTranscription,
+      @JsonKey(name: 'turn_detection') TurnDetection? turnDetection,
+      @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
+      @_SessionConfigToolChoiceConverter()
+      @JsonKey(name: 'tool_choice', includeIfNull: false)
+      SessionConfigToolChoice? toolChoice,
+      @JsonKey(includeIfNull: false) double? temperature,
+      @_SessionConfigMaxResponseOutputTokensConverter()
+      @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
+      SessionConfigMaxResponseOutputTokens? maxResponseOutputTokens,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _SessionConfig():
         return $default(
-            _that.clientSecret,
-            _that.modalities,
-            _that.instructions,
-            _that.voice,
-            _that.inputAudioFormat,
-            _that.outputAudioFormat,
-            _that.inputAudioTranscription,
-            _that.turnDetection,
-            _that.tools,
-            _that.toolChoice,
-            _that.temperature,
-            _that.maxResponseOutputTokens);
+          _that.clientSecret,
+          _that.modalities,
+          _that.instructions,
+          _that.voice,
+          _that.inputAudioFormat,
+          _that.outputAudioFormat,
+          _that.inputAudioTranscription,
+          _that.turnDetection,
+          _that.tools,
+          _that.toolChoice,
+          _that.temperature,
+          _that.maxResponseOutputTokens,
+        );
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -8719,53 +9252,58 @@ extension SessionConfigPatterns on SessionConfig {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            @JsonKey(name: 'client_secret', includeIfNull: false)
-            SessionConfigClientSecret? clientSecret,
-            @JsonKey(includeIfNull: false) List<Modality>? modalities,
-            @JsonKey(includeIfNull: false) String? instructions,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            Voice? voice,
-            @JsonKey(
-                name: 'input_audio_format',
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            AudioFormat? inputAudioFormat,
-            @JsonKey(
-                name: 'output_audio_format',
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            AudioFormat? outputAudioFormat,
-            @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
-            InputAudioTranscriptionConfig? inputAudioTranscription,
-            @JsonKey(name: 'turn_detection') TurnDetection? turnDetection,
-            @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
-            @_SessionConfigToolChoiceConverter()
-            @JsonKey(name: 'tool_choice', includeIfNull: false)
-            SessionConfigToolChoice? toolChoice,
-            @JsonKey(includeIfNull: false) double? temperature,
-            @_SessionConfigMaxResponseOutputTokensConverter()
-            @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
-            SessionConfigMaxResponseOutputTokens? maxResponseOutputTokens)?
-        $default,
+      @JsonKey(name: 'client_secret', includeIfNull: false)
+      SessionConfigClientSecret? clientSecret,
+      @JsonKey(includeIfNull: false) List<Modality>? modalities,
+      @JsonKey(includeIfNull: false) String? instructions,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      Voice? voice,
+      @JsonKey(
+        name: 'input_audio_format',
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      AudioFormat? inputAudioFormat,
+      @JsonKey(
+        name: 'output_audio_format',
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      AudioFormat? outputAudioFormat,
+      @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
+      InputAudioTranscriptionConfig? inputAudioTranscription,
+      @JsonKey(name: 'turn_detection') TurnDetection? turnDetection,
+      @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
+      @_SessionConfigToolChoiceConverter()
+      @JsonKey(name: 'tool_choice', includeIfNull: false)
+      SessionConfigToolChoice? toolChoice,
+      @JsonKey(includeIfNull: false) double? temperature,
+      @_SessionConfigMaxResponseOutputTokensConverter()
+      @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
+      SessionConfigMaxResponseOutputTokens? maxResponseOutputTokens,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _SessionConfig() when $default != null:
         return $default(
-            _that.clientSecret,
-            _that.modalities,
-            _that.instructions,
-            _that.voice,
-            _that.inputAudioFormat,
-            _that.outputAudioFormat,
-            _that.inputAudioTranscription,
-            _that.turnDetection,
-            _that.tools,
-            _that.toolChoice,
-            _that.temperature,
-            _that.maxResponseOutputTokens);
+          _that.clientSecret,
+          _that.modalities,
+          _that.instructions,
+          _that.voice,
+          _that.inputAudioFormat,
+          _that.outputAudioFormat,
+          _that.inputAudioTranscription,
+          _that.turnDetection,
+          _that.tools,
+          _that.toolChoice,
+          _that.temperature,
+          _that.maxResponseOutputTokens,
+        );
       case _:
         return null;
     }
@@ -8775,38 +9313,41 @@ extension SessionConfigPatterns on SessionConfig {
 /// @nodoc
 @JsonSerializable()
 class _SessionConfig extends SessionConfig {
-  const _SessionConfig(
-      {@JsonKey(name: 'client_secret', includeIfNull: false) this.clientSecret,
-      @JsonKey(includeIfNull: false) final List<Modality>? modalities,
-      @JsonKey(includeIfNull: false) this.instructions,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      this.voice,
-      @JsonKey(
-          name: 'input_audio_format',
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      this.inputAudioFormat,
-      @JsonKey(
-          name: 'output_audio_format',
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      this.outputAudioFormat,
-      @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
-      this.inputAudioTranscription,
-      @JsonKey(name: 'turn_detection') required this.turnDetection,
-      @JsonKey(includeIfNull: false) final List<ToolDefinition>? tools,
-      @_SessionConfigToolChoiceConverter()
-      @JsonKey(name: 'tool_choice', includeIfNull: false)
-      this.toolChoice,
-      @JsonKey(includeIfNull: false) this.temperature,
-      @_SessionConfigMaxResponseOutputTokensConverter()
-      @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
-      this.maxResponseOutputTokens})
-      : _modalities = modalities,
-        _tools = tools,
-        super._();
+  const _SessionConfig({
+    @JsonKey(name: 'client_secret', includeIfNull: false) this.clientSecret,
+    @JsonKey(includeIfNull: false) List<Modality>? modalities,
+    @JsonKey(includeIfNull: false) this.instructions,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    this.voice,
+    @JsonKey(
+      name: 'input_audio_format',
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    this.inputAudioFormat,
+    @JsonKey(
+      name: 'output_audio_format',
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    this.outputAudioFormat,
+    @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
+    this.inputAudioTranscription,
+    @JsonKey(name: 'turn_detection') required this.turnDetection,
+    @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
+    @_SessionConfigToolChoiceConverter()
+    @JsonKey(name: 'tool_choice', includeIfNull: false)
+    this.toolChoice,
+    @JsonKey(includeIfNull: false) this.temperature,
+    @_SessionConfigMaxResponseOutputTokensConverter()
+    @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
+    this.maxResponseOutputTokens,
+  }) : _modalities = modalities,
+       _tools = tools,
+       super._();
   factory _SessionConfig.fromJson(Map<String, dynamic> json) =>
       _$SessionConfigFromJson(json);
 
@@ -8851,23 +9392,27 @@ class _SessionConfig extends SessionConfig {
   /// `shimmer` and `verse`.
   @override
   @JsonKey(
-      includeIfNull: false, unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   final Voice? voice;
 
   /// The format of input audio. Options are `pcm16`, `g711_ulaw`, or `g711_alaw`.
   @override
   @JsonKey(
-      name: 'input_audio_format',
-      includeIfNull: false,
-      unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    name: 'input_audio_format',
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   final AudioFormat? inputAudioFormat;
 
   /// The format of output audio. Options are `pcm16`, `g711_ulaw`, or `g711_alaw`.
   @override
   @JsonKey(
-      name: 'output_audio_format',
-      includeIfNull: false,
-      unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    name: 'output_audio_format',
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   final AudioFormat? outputAudioFormat;
 
   /// Configuration for input audio transcription, defaults to off and can be  set to `null` to turn off
@@ -8933,9 +9478,7 @@ class _SessionConfig extends SessionConfig {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$SessionConfigToJson(
-      this,
-    );
+    return _$SessionConfigToJson(this);
   }
 
   @override
@@ -8945,8 +9488,10 @@ class _SessionConfig extends SessionConfig {
             other is _SessionConfig &&
             (identical(other.clientSecret, clientSecret) ||
                 other.clientSecret == clientSecret) &&
-            const DeepCollectionEquality()
-                .equals(other._modalities, _modalities) &&
+            const DeepCollectionEquality().equals(
+              other.modalities,
+              _modalities,
+            ) &&
             (identical(other.instructions, instructions) ||
                 other.instructions == instructions) &&
             (identical(other.voice, voice) || other.voice == voice) &&
@@ -8955,23 +9500,28 @@ class _SessionConfig extends SessionConfig {
             (identical(other.outputAudioFormat, outputAudioFormat) ||
                 other.outputAudioFormat == outputAudioFormat) &&
             (identical(
-                    other.inputAudioTranscription, inputAudioTranscription) ||
+                  other.inputAudioTranscription,
+                  inputAudioTranscription,
+                ) ||
                 other.inputAudioTranscription == inputAudioTranscription) &&
             (identical(other.turnDetection, turnDetection) ||
                 other.turnDetection == turnDetection) &&
-            const DeepCollectionEquality().equals(other._tools, _tools) &&
+            const DeepCollectionEquality().equals(other.tools, _tools) &&
             (identical(other.toolChoice, toolChoice) ||
                 other.toolChoice == toolChoice) &&
             (identical(other.temperature, temperature) ||
                 other.temperature == temperature) &&
             (identical(
-                    other.maxResponseOutputTokens, maxResponseOutputTokens) ||
+                  other.maxResponseOutputTokens,
+                  maxResponseOutputTokens,
+                ) ||
                 other.maxResponseOutputTokens == maxResponseOutputTokens));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode {
+    return Object.hash(
       runtimeType,
       clientSecret,
       const DeepCollectionEquality().hash(_modalities),
@@ -8984,7 +9534,9 @@ class _SessionConfig extends SessionConfig {
       const DeepCollectionEquality().hash(_tools),
       toolChoice,
       temperature,
-      maxResponseOutputTokens);
+      maxResponseOutputTokens,
+    );
+  }
 
   @override
   String toString() {
@@ -8996,40 +9548,45 @@ class _SessionConfig extends SessionConfig {
 abstract mixin class _$SessionConfigCopyWith<$Res>
     implements $SessionConfigCopyWith<$Res> {
   factory _$SessionConfigCopyWith(
-          _SessionConfig value, $Res Function(_SessionConfig) _then) =
-      __$SessionConfigCopyWithImpl;
+    _SessionConfig value,
+    $Res Function(_SessionConfig) _then,
+  ) = __$SessionConfigCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'client_secret', includeIfNull: false)
-      SessionConfigClientSecret? clientSecret,
-      @JsonKey(includeIfNull: false) List<Modality>? modalities,
-      @JsonKey(includeIfNull: false) String? instructions,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      Voice? voice,
-      @JsonKey(
-          name: 'input_audio_format',
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      AudioFormat? inputAudioFormat,
-      @JsonKey(
-          name: 'output_audio_format',
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      AudioFormat? outputAudioFormat,
-      @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
-      InputAudioTranscriptionConfig? inputAudioTranscription,
-      @JsonKey(name: 'turn_detection') TurnDetection? turnDetection,
-      @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
-      @_SessionConfigToolChoiceConverter()
-      @JsonKey(name: 'tool_choice', includeIfNull: false)
-      SessionConfigToolChoice? toolChoice,
-      @JsonKey(includeIfNull: false) double? temperature,
-      @_SessionConfigMaxResponseOutputTokensConverter()
-      @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
-      SessionConfigMaxResponseOutputTokens? maxResponseOutputTokens});
+  $Res call({
+    @JsonKey(name: 'client_secret', includeIfNull: false)
+    SessionConfigClientSecret? clientSecret,
+    @JsonKey(includeIfNull: false) List<Modality>? modalities,
+    @JsonKey(includeIfNull: false) String? instructions,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    Voice? voice,
+    @JsonKey(
+      name: 'input_audio_format',
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    AudioFormat? inputAudioFormat,
+    @JsonKey(
+      name: 'output_audio_format',
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    AudioFormat? outputAudioFormat,
+    @JsonKey(name: 'input_audio_transcription', includeIfNull: false)
+    InputAudioTranscriptionConfig? inputAudioTranscription,
+    @JsonKey(name: 'turn_detection') TurnDetection? turnDetection,
+    @JsonKey(includeIfNull: false) List<ToolDefinition>? tools,
+    @_SessionConfigToolChoiceConverter()
+    @JsonKey(name: 'tool_choice', includeIfNull: false)
+    SessionConfigToolChoice? toolChoice,
+    @JsonKey(includeIfNull: false) double? temperature,
+    @_SessionConfigMaxResponseOutputTokensConverter()
+    @JsonKey(name: 'max_response_output_tokens', includeIfNull: false)
+    SessionConfigMaxResponseOutputTokens? maxResponseOutputTokens,
+  });
 
   @override
   $SessionConfigClientSecretCopyWith<$Res>? get clientSecret;
@@ -9041,7 +9598,7 @@ abstract mixin class _$SessionConfigCopyWith<$Res>
   $SessionConfigToolChoiceCopyWith<$Res>? get toolChoice;
   @override
   $SessionConfigMaxResponseOutputTokensCopyWith<$Res>?
-      get maxResponseOutputTokens;
+  get maxResponseOutputTokens;
 }
 
 /// @nodoc
@@ -9070,56 +9627,58 @@ class __$SessionConfigCopyWithImpl<$Res>
     Object? temperature = freezed,
     Object? maxResponseOutputTokens = freezed,
   }) {
-    return _then(_SessionConfig(
-      clientSecret: freezed == clientSecret
-          ? _self.clientSecret
-          : clientSecret // ignore: cast_nullable_to_non_nullable
-              as SessionConfigClientSecret?,
-      modalities: freezed == modalities
-          ? _self._modalities
-          : modalities // ignore: cast_nullable_to_non_nullable
-              as List<Modality>?,
-      instructions: freezed == instructions
-          ? _self.instructions
-          : instructions // ignore: cast_nullable_to_non_nullable
-              as String?,
-      voice: freezed == voice
-          ? _self.voice
-          : voice // ignore: cast_nullable_to_non_nullable
-              as Voice?,
-      inputAudioFormat: freezed == inputAudioFormat
-          ? _self.inputAudioFormat
-          : inputAudioFormat // ignore: cast_nullable_to_non_nullable
-              as AudioFormat?,
-      outputAudioFormat: freezed == outputAudioFormat
-          ? _self.outputAudioFormat
-          : outputAudioFormat // ignore: cast_nullable_to_non_nullable
-              as AudioFormat?,
-      inputAudioTranscription: freezed == inputAudioTranscription
-          ? _self.inputAudioTranscription
-          : inputAudioTranscription // ignore: cast_nullable_to_non_nullable
-              as InputAudioTranscriptionConfig?,
-      turnDetection: freezed == turnDetection
-          ? _self.turnDetection
-          : turnDetection // ignore: cast_nullable_to_non_nullable
-              as TurnDetection?,
-      tools: freezed == tools
-          ? _self._tools
-          : tools // ignore: cast_nullable_to_non_nullable
-              as List<ToolDefinition>?,
-      toolChoice: freezed == toolChoice
-          ? _self.toolChoice
-          : toolChoice // ignore: cast_nullable_to_non_nullable
-              as SessionConfigToolChoice?,
-      temperature: freezed == temperature
-          ? _self.temperature
-          : temperature // ignore: cast_nullable_to_non_nullable
-              as double?,
-      maxResponseOutputTokens: freezed == maxResponseOutputTokens
-          ? _self.maxResponseOutputTokens
-          : maxResponseOutputTokens // ignore: cast_nullable_to_non_nullable
-              as SessionConfigMaxResponseOutputTokens?,
-    ));
+    return _then(
+      _SessionConfig(
+        clientSecret: freezed == clientSecret
+            ? _self.clientSecret
+            : clientSecret // ignore: cast_nullable_to_non_nullable
+                  as SessionConfigClientSecret?,
+        modalities: freezed == modalities
+            ? _self._modalities
+            : modalities // ignore: cast_nullable_to_non_nullable
+                  as List<Modality>?,
+        instructions: freezed == instructions
+            ? _self.instructions
+            : instructions // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        voice: freezed == voice
+            ? _self.voice
+            : voice // ignore: cast_nullable_to_non_nullable
+                  as Voice?,
+        inputAudioFormat: freezed == inputAudioFormat
+            ? _self.inputAudioFormat
+            : inputAudioFormat // ignore: cast_nullable_to_non_nullable
+                  as AudioFormat?,
+        outputAudioFormat: freezed == outputAudioFormat
+            ? _self.outputAudioFormat
+            : outputAudioFormat // ignore: cast_nullable_to_non_nullable
+                  as AudioFormat?,
+        inputAudioTranscription: freezed == inputAudioTranscription
+            ? _self.inputAudioTranscription
+            : inputAudioTranscription // ignore: cast_nullable_to_non_nullable
+                  as InputAudioTranscriptionConfig?,
+        turnDetection: freezed == turnDetection
+            ? _self.turnDetection
+            : turnDetection // ignore: cast_nullable_to_non_nullable
+                  as TurnDetection?,
+        tools: freezed == tools
+            ? _self._tools
+            : tools // ignore: cast_nullable_to_non_nullable
+                  as List<ToolDefinition>?,
+        toolChoice: freezed == toolChoice
+            ? _self.toolChoice
+            : toolChoice // ignore: cast_nullable_to_non_nullable
+                  as SessionConfigToolChoice?,
+        temperature: freezed == temperature
+            ? _self.temperature
+            : temperature // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        maxResponseOutputTokens: freezed == maxResponseOutputTokens
+            ? _self.maxResponseOutputTokens
+            : maxResponseOutputTokens // ignore: cast_nullable_to_non_nullable
+                  as SessionConfigMaxResponseOutputTokens?,
+      ),
+    );
   }
 
   /// Create a copy of SessionConfig
@@ -9131,8 +9690,9 @@ class __$SessionConfigCopyWithImpl<$Res>
       return null;
     }
 
-    return $SessionConfigClientSecretCopyWith<$Res>(_self.clientSecret!,
-        (value) {
+    return $SessionConfigClientSecretCopyWith<$Res>(_self.clientSecret!, (
+      value,
+    ) {
       return _then(_self.copyWith(clientSecret: value));
     });
   }
@@ -9147,9 +9707,11 @@ class __$SessionConfigCopyWithImpl<$Res>
     }
 
     return $InputAudioTranscriptionConfigCopyWith<$Res>(
-        _self.inputAudioTranscription!, (value) {
-      return _then(_self.copyWith(inputAudioTranscription: value));
-    });
+      _self.inputAudioTranscription!,
+      (value) {
+        return _then(_self.copyWith(inputAudioTranscription: value));
+      },
+    );
   }
 
   /// Create a copy of SessionConfig
@@ -9185,15 +9747,17 @@ class __$SessionConfigCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $SessionConfigMaxResponseOutputTokensCopyWith<$Res>?
-      get maxResponseOutputTokens {
+  get maxResponseOutputTokens {
     if (_self.maxResponseOutputTokens == null) {
       return null;
     }
 
     return $SessionConfigMaxResponseOutputTokensCopyWith<$Res>(
-        _self.maxResponseOutputTokens!, (value) {
-      return _then(_self.copyWith(maxResponseOutputTokens: value));
-    });
+      _self.maxResponseOutputTokens!,
+      (value) {
+        return _then(_self.copyWith(maxResponseOutputTokens: value));
+      },
+    );
   }
 }
 
@@ -9216,40 +9780,50 @@ mixin _$SessionConfigClientSecret {
   @pragma('vm:prefer-inline')
   $SessionConfigClientSecretCopyWith<SessionConfigClientSecret> get copyWith =>
       _$SessionConfigClientSecretCopyWithImpl<SessionConfigClientSecret>(
-          this as SessionConfigClientSecret, _$identity);
+        this as SessionConfigClientSecret,
+        _$identity,
+      );
 
   /// Serializes this SessionConfigClientSecret to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as SessionConfigClientSecret;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is SessionConfigClientSecret &&
-            (identical(other.value, value) || other.value == value) &&
-            (identical(other.expiresAt, expiresAt) ||
-                other.expiresAt == expiresAt));
+            (identical(other.value, _this.value) ||
+                other.value == _this.value) &&
+            (identical(other.expiresAt, _this.expiresAt) ||
+                other.expiresAt == _this.expiresAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, value, expiresAt);
+  int get hashCode {
+    final _this = this as SessionConfigClientSecret;
+    return Object.hash(runtimeType, _this.value, _this.expiresAt);
+  }
 
   @override
   String toString() {
-    return 'SessionConfigClientSecret(value: $value, expiresAt: $expiresAt)';
+    final _this = this as SessionConfigClientSecret;
+    return 'SessionConfigClientSecret(value: ${_this.value}, expiresAt: ${_this.expiresAt})';
   }
 }
 
 /// @nodoc
 abstract mixin class $SessionConfigClientSecretCopyWith<$Res> {
-  factory $SessionConfigClientSecretCopyWith(SessionConfigClientSecret value,
-          $Res Function(SessionConfigClientSecret) _then) =
-      _$SessionConfigClientSecretCopyWithImpl;
+  factory $SessionConfigClientSecretCopyWith(
+    SessionConfigClientSecret value,
+    $Res Function(SessionConfigClientSecret) _then,
+  ) = _$SessionConfigClientSecretCopyWithImpl;
   @useResult
-  $Res call(
-      {@JsonKey(includeIfNull: false) String? value,
-      @JsonKey(name: 'expires_at', includeIfNull: false) int? expiresAt});
+  $Res call({
+    @JsonKey(includeIfNull: false) String? value,
+    @JsonKey(name: 'expires_at', includeIfNull: false) int? expiresAt,
+  });
 }
 
 /// @nodoc
@@ -9264,20 +9838,19 @@ class _$SessionConfigClientSecretCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? value = freezed,
-    Object? expiresAt = freezed,
-  }) {
-    return _then(_self.copyWith(
-      value: freezed == value
-          ? _self.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as String?,
-      expiresAt: freezed == expiresAt
-          ? _self.expiresAt
-          : expiresAt // ignore: cast_nullable_to_non_nullable
-              as int?,
-    ));
+  $Res call({Object? value = freezed, Object? expiresAt = freezed}) {
+    return _then(
+      SessionConfigClientSecret(
+        value: freezed == value
+            ? _self.value
+            : value // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        expiresAt: freezed == expiresAt
+            ? _self.expiresAt
+            : expiresAt // ignore: cast_nullable_to_non_nullable
+                  as int?,
+      ),
+    );
   }
 }
 
@@ -9374,9 +9947,11 @@ extension SessionConfigClientSecretPatterns on SessionConfigClientSecret {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(@JsonKey(includeIfNull: false) String? value,
-            @JsonKey(name: 'expires_at', includeIfNull: false) int? expiresAt)?
-        $default, {
+    TResult Function(
+      @JsonKey(includeIfNull: false) String? value,
+      @JsonKey(name: 'expires_at', includeIfNull: false) int? expiresAt,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
@@ -9403,9 +9978,11 @@ extension SessionConfigClientSecretPatterns on SessionConfigClientSecret {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(@JsonKey(includeIfNull: false) String? value,
-            @JsonKey(name: 'expires_at', includeIfNull: false) int? expiresAt)
-        $default,
+    TResult Function(
+      @JsonKey(includeIfNull: false) String? value,
+      @JsonKey(name: 'expires_at', includeIfNull: false) int? expiresAt,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
@@ -9430,9 +10007,11 @@ extension SessionConfigClientSecretPatterns on SessionConfigClientSecret {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(@JsonKey(includeIfNull: false) String? value,
-            @JsonKey(name: 'expires_at', includeIfNull: false) int? expiresAt)?
-        $default,
+    TResult? Function(
+      @JsonKey(includeIfNull: false) String? value,
+      @JsonKey(name: 'expires_at', includeIfNull: false) int? expiresAt,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
@@ -9447,10 +10026,10 @@ extension SessionConfigClientSecretPatterns on SessionConfigClientSecret {
 /// @nodoc
 @JsonSerializable()
 class _SessionConfigClientSecret extends SessionConfigClientSecret {
-  const _SessionConfigClientSecret(
-      {@JsonKey(includeIfNull: false) this.value,
-      @JsonKey(name: 'expires_at', includeIfNull: false) this.expiresAt})
-      : super._();
+  const _SessionConfigClientSecret({
+    @JsonKey(includeIfNull: false) this.value,
+    @JsonKey(name: 'expires_at', includeIfNull: false) this.expiresAt,
+  }) : super._();
   factory _SessionConfigClientSecret.fromJson(Map<String, dynamic> json) =>
       _$SessionConfigClientSecretFromJson(json);
 
@@ -9473,15 +10052,15 @@ class _SessionConfigClientSecret extends SessionConfigClientSecret {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   _$SessionConfigClientSecretCopyWith<_SessionConfigClientSecret>
-      get copyWith =>
-          __$SessionConfigClientSecretCopyWithImpl<_SessionConfigClientSecret>(
-              this, _$identity);
+  get copyWith =>
+      __$SessionConfigClientSecretCopyWithImpl<_SessionConfigClientSecret>(
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$SessionConfigClientSecretToJson(
-      this,
-    );
+    return _$SessionConfigClientSecretToJson(this);
   }
 
   @override
@@ -9496,7 +10075,9 @@ class _SessionConfigClientSecret extends SessionConfigClientSecret {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, value, expiresAt);
+  int get hashCode {
+    return Object.hash(runtimeType, value, expiresAt);
+  }
 
   @override
   String toString() {
@@ -9507,14 +10088,16 @@ class _SessionConfigClientSecret extends SessionConfigClientSecret {
 /// @nodoc
 abstract mixin class _$SessionConfigClientSecretCopyWith<$Res>
     implements $SessionConfigClientSecretCopyWith<$Res> {
-  factory _$SessionConfigClientSecretCopyWith(_SessionConfigClientSecret value,
-          $Res Function(_SessionConfigClientSecret) _then) =
-      __$SessionConfigClientSecretCopyWithImpl;
+  factory _$SessionConfigClientSecretCopyWith(
+    _SessionConfigClientSecret value,
+    $Res Function(_SessionConfigClientSecret) _then,
+  ) = __$SessionConfigClientSecretCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(includeIfNull: false) String? value,
-      @JsonKey(name: 'expires_at', includeIfNull: false) int? expiresAt});
+  $Res call({
+    @JsonKey(includeIfNull: false) String? value,
+    @JsonKey(name: 'expires_at', includeIfNull: false) int? expiresAt,
+  });
 }
 
 /// @nodoc
@@ -9529,25 +10112,25 @@ class __$SessionConfigClientSecretCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? value = freezed,
-    Object? expiresAt = freezed,
-  }) {
-    return _then(_SessionConfigClientSecret(
-      value: freezed == value
-          ? _self.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as String?,
-      expiresAt: freezed == expiresAt
-          ? _self.expiresAt
-          : expiresAt // ignore: cast_nullable_to_non_nullable
-              as int?,
-    ));
+  $Res call({Object? value = freezed, Object? expiresAt = freezed}) {
+    return _then(
+      _SessionConfigClientSecret(
+        value: freezed == value
+            ? _self.value
+            : value // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        expiresAt: freezed == expiresAt
+            ? _self.expiresAt
+            : expiresAt // ignore: cast_nullable_to_non_nullable
+                  as int?,
+      ),
+    );
   }
 }
 
 SessionConfigToolChoice _$SessionConfigToolChoiceFromJson(
-    Map<String, dynamic> json) {
+  Map<String, dynamic> json,
+) {
   switch (json['runtimeType']) {
     case 'mode':
       return SessionConfigToolChoiceEnumeration.fromJson(json);
@@ -9556,10 +10139,11 @@ SessionConfigToolChoice _$SessionConfigToolChoiceFromJson(
 
     default:
       throw CheckedFromJsonException(
-          json,
-          'runtimeType',
-          'SessionConfigToolChoice',
-          'Invalid union type "${json['runtimeType']}"!');
+        json,
+        'runtimeType',
+        'SessionConfigToolChoice',
+        'Invalid union type "${json['runtimeType']}"!',
+      );
   }
 }
 
@@ -9572,27 +10156,36 @@ mixin _$SessionConfigToolChoice {
 
   @override
   bool operator ==(Object other) {
+    final _this = this as SessionConfigToolChoice;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is SessionConfigToolChoice &&
-            const DeepCollectionEquality().equals(other.value, value));
+            const DeepCollectionEquality().equals(other.value, _this.value));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(value));
+  int get hashCode {
+    final _this = this as SessionConfigToolChoice;
+    return Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(_this.value),
+    );
+  }
 
   @override
   String toString() {
-    return 'SessionConfigToolChoice(value: $value)';
+    final _this = this as SessionConfigToolChoice;
+    return 'SessionConfigToolChoice(value: ${_this.value})';
   }
 }
 
 /// @nodoc
 class $SessionConfigToolChoiceCopyWith<$Res> {
   $SessionConfigToolChoiceCopyWith(
-      SessionConfigToolChoice _, $Res Function(SessionConfigToolChoice) __);
+    SessionConfigToolChoice _,
+    $Res Function(SessionConfigToolChoice) __,
+  );
 }
 
 /// Adds pattern-matching-related methods to [SessionConfigToolChoice].
@@ -9613,7 +10206,7 @@ extension SessionConfigToolChoicePatterns on SessionConfigToolChoice {
   TResult maybeMap<TResult extends Object?>({
     TResult Function(SessionConfigToolChoiceEnumeration value)? mode,
     TResult Function(SessionConfigToolChoiceToolChoiceForced value)?
-        toolChoiceForced,
+    toolChoiceForced,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -9645,7 +10238,7 @@ extension SessionConfigToolChoicePatterns on SessionConfigToolChoice {
   TResult map<TResult extends Object?>({
     required TResult Function(SessionConfigToolChoiceEnumeration value) mode,
     required TResult Function(SessionConfigToolChoiceToolChoiceForced value)
-        toolChoiceForced,
+    toolChoiceForced,
   }) {
     final _that = this;
     switch (_that) {
@@ -9672,7 +10265,7 @@ extension SessionConfigToolChoicePatterns on SessionConfigToolChoice {
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(SessionConfigToolChoiceEnumeration value)? mode,
     TResult? Function(SessionConfigToolChoiceToolChoiceForced value)?
-        toolChoiceForced,
+    toolChoiceForced,
   }) {
     final _that = this;
     switch (_that) {
@@ -9776,12 +10369,12 @@ extension SessionConfigToolChoicePatterns on SessionConfigToolChoice {
 /// @nodoc
 @JsonSerializable()
 class SessionConfigToolChoiceEnumeration extends SessionConfigToolChoice {
-  const SessionConfigToolChoiceEnumeration(this.value, {final String? $type})
-      : $type = $type ?? 'mode',
-        super._();
+  const SessionConfigToolChoiceEnumeration(this.value, {String? $type})
+    : $type = $type ?? 'mode',
+      super._();
   factory SessionConfigToolChoiceEnumeration.fromJson(
-          Map<String, dynamic> json) =>
-      _$SessionConfigToolChoiceEnumerationFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$SessionConfigToolChoiceEnumerationFromJson(json);
 
   @override
   final SessionConfigToolChoiceMode value;
@@ -9794,15 +10387,16 @@ class SessionConfigToolChoiceEnumeration extends SessionConfigToolChoice {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $SessionConfigToolChoiceEnumerationCopyWith<
-          SessionConfigToolChoiceEnumeration>
-      get copyWith => _$SessionConfigToolChoiceEnumerationCopyWithImpl<
-          SessionConfigToolChoiceEnumeration>(this, _$identity);
+    SessionConfigToolChoiceEnumeration
+  >
+  get copyWith =>
+      _$SessionConfigToolChoiceEnumerationCopyWithImpl<
+        SessionConfigToolChoiceEnumeration
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$SessionConfigToolChoiceEnumerationToJson(
-      this,
-    );
+    return _$SessionConfigToolChoiceEnumerationToJson(this);
   }
 
   @override
@@ -9815,7 +10409,9 @@ class SessionConfigToolChoiceEnumeration extends SessionConfigToolChoice {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, value);
+  int get hashCode {
+    return Object.hash(runtimeType, value);
+  }
 
   @override
   String toString() {
@@ -9827,9 +10423,9 @@ class SessionConfigToolChoiceEnumeration extends SessionConfigToolChoice {
 abstract mixin class $SessionConfigToolChoiceEnumerationCopyWith<$Res>
     implements $SessionConfigToolChoiceCopyWith<$Res> {
   factory $SessionConfigToolChoiceEnumerationCopyWith(
-          SessionConfigToolChoiceEnumeration value,
-          $Res Function(SessionConfigToolChoiceEnumeration) _then) =
-      _$SessionConfigToolChoiceEnumerationCopyWithImpl;
+    SessionConfigToolChoiceEnumeration value,
+    $Res Function(SessionConfigToolChoiceEnumeration) _then,
+  ) = _$SessionConfigToolChoiceEnumerationCopyWithImpl;
   @useResult
   $Res call({SessionConfigToolChoiceMode value});
 }
@@ -9845,28 +10441,27 @@ class _$SessionConfigToolChoiceEnumerationCopyWithImpl<$Res>
   /// Create a copy of SessionConfigToolChoice
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? value = null,
-  }) {
-    return _then(SessionConfigToolChoiceEnumeration(
-      null == value
-          ? _self.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as SessionConfigToolChoiceMode,
-    ));
+  $Res call({Object? value = null}) {
+    return _then(
+      SessionConfigToolChoiceEnumeration(
+        null == value
+            ? _self.value
+            : value // ignore: cast_nullable_to_non_nullable
+                  as SessionConfigToolChoiceMode,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class SessionConfigToolChoiceToolChoiceForced extends SessionConfigToolChoice {
-  const SessionConfigToolChoiceToolChoiceForced(this.value,
-      {final String? $type})
-      : $type = $type ?? 'toolChoiceForced',
-        super._();
+  const SessionConfigToolChoiceToolChoiceForced(this.value, {String? $type})
+    : $type = $type ?? 'toolChoiceForced',
+      super._();
   factory SessionConfigToolChoiceToolChoiceForced.fromJson(
-          Map<String, dynamic> json) =>
-      _$SessionConfigToolChoiceToolChoiceForcedFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$SessionConfigToolChoiceToolChoiceForcedFromJson(json);
 
   @override
   final ToolChoiceForced value;
@@ -9879,15 +10474,16 @@ class SessionConfigToolChoiceToolChoiceForced extends SessionConfigToolChoice {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $SessionConfigToolChoiceToolChoiceForcedCopyWith<
-          SessionConfigToolChoiceToolChoiceForced>
-      get copyWith => _$SessionConfigToolChoiceToolChoiceForcedCopyWithImpl<
-          SessionConfigToolChoiceToolChoiceForced>(this, _$identity);
+    SessionConfigToolChoiceToolChoiceForced
+  >
+  get copyWith =>
+      _$SessionConfigToolChoiceToolChoiceForcedCopyWithImpl<
+        SessionConfigToolChoiceToolChoiceForced
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$SessionConfigToolChoiceToolChoiceForcedToJson(
-      this,
-    );
+    return _$SessionConfigToolChoiceToolChoiceForcedToJson(this);
   }
 
   @override
@@ -9900,7 +10496,9 @@ class SessionConfigToolChoiceToolChoiceForced extends SessionConfigToolChoice {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, value);
+  int get hashCode {
+    return Object.hash(runtimeType, value);
+  }
 
   @override
   String toString() {
@@ -9912,9 +10510,9 @@ class SessionConfigToolChoiceToolChoiceForced extends SessionConfigToolChoice {
 abstract mixin class $SessionConfigToolChoiceToolChoiceForcedCopyWith<$Res>
     implements $SessionConfigToolChoiceCopyWith<$Res> {
   factory $SessionConfigToolChoiceToolChoiceForcedCopyWith(
-          SessionConfigToolChoiceToolChoiceForced value,
-          $Res Function(SessionConfigToolChoiceToolChoiceForced) _then) =
-      _$SessionConfigToolChoiceToolChoiceForcedCopyWithImpl;
+    SessionConfigToolChoiceToolChoiceForced value,
+    $Res Function(SessionConfigToolChoiceToolChoiceForced) _then,
+  ) = _$SessionConfigToolChoiceToolChoiceForcedCopyWithImpl;
   @useResult
   $Res call({ToolChoiceForced value});
 
@@ -9932,15 +10530,15 @@ class _$SessionConfigToolChoiceToolChoiceForcedCopyWithImpl<$Res>
   /// Create a copy of SessionConfigToolChoice
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? value = null,
-  }) {
-    return _then(SessionConfigToolChoiceToolChoiceForced(
-      null == value
-          ? _self.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as ToolChoiceForced,
-    ));
+  $Res call({Object? value = null}) {
+    return _then(
+      SessionConfigToolChoiceToolChoiceForced(
+        null == value
+            ? _self.value
+            : value // ignore: cast_nullable_to_non_nullable
+                  as ToolChoiceForced,
+      ),
+    );
   }
 
   /// Create a copy of SessionConfigToolChoice
@@ -9955,7 +10553,7 @@ class _$SessionConfigToolChoiceToolChoiceForcedCopyWithImpl<$Res>
 }
 
 SessionConfigMaxResponseOutputTokens
-    _$SessionConfigMaxResponseOutputTokensFromJson(Map<String, dynamic> json) {
+_$SessionConfigMaxResponseOutputTokensFromJson(Map<String, dynamic> json) {
   switch (json['runtimeType']) {
     case 'int':
       return SessionConfigMaxResponseOutputTokensInt.fromJson(json);
@@ -9964,10 +10562,11 @@ SessionConfigMaxResponseOutputTokens
 
     default:
       throw CheckedFromJsonException(
-          json,
-          'runtimeType',
-          'SessionConfigMaxResponseOutputTokens',
-          'Invalid union type "${json['runtimeType']}"!');
+        json,
+        'runtimeType',
+        'SessionConfigMaxResponseOutputTokens',
+        'Invalid union type "${json['runtimeType']}"!',
+      );
   }
 }
 
@@ -9980,28 +10579,36 @@ mixin _$SessionConfigMaxResponseOutputTokens {
 
   @override
   bool operator ==(Object other) {
+    final _this = this as SessionConfigMaxResponseOutputTokens;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is SessionConfigMaxResponseOutputTokens &&
-            const DeepCollectionEquality().equals(other.value, value));
+            const DeepCollectionEquality().equals(other.value, _this.value));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(value));
+  int get hashCode {
+    final _this = this as SessionConfigMaxResponseOutputTokens;
+    return Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(_this.value),
+    );
+  }
 
   @override
   String toString() {
-    return 'SessionConfigMaxResponseOutputTokens(value: $value)';
+    final _this = this as SessionConfigMaxResponseOutputTokens;
+    return 'SessionConfigMaxResponseOutputTokens(value: ${_this.value})';
   }
 }
 
 /// @nodoc
 class $SessionConfigMaxResponseOutputTokensCopyWith<$Res> {
   $SessionConfigMaxResponseOutputTokensCopyWith(
-      SessionConfigMaxResponseOutputTokens _,
-      $Res Function(SessionConfigMaxResponseOutputTokens) __);
+    SessionConfigMaxResponseOutputTokens _,
+    $Res Function(SessionConfigMaxResponseOutputTokens) __,
+  );
 }
 
 /// Adds pattern-matching-related methods to [SessionConfigMaxResponseOutputTokens].
@@ -10052,9 +10659,9 @@ extension SessionConfigMaxResponseOutputTokensPatterns
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(SessionConfigMaxResponseOutputTokensInt value)
-        int,
+    int,
     required TResult Function(SessionConfigMaxResponseOutputTokensString value)
-        string,
+    string,
   }) {
     final _that = this;
     switch (_that) {
@@ -10182,13 +10789,12 @@ extension SessionConfigMaxResponseOutputTokensPatterns
 @JsonSerializable()
 class SessionConfigMaxResponseOutputTokensInt
     extends SessionConfigMaxResponseOutputTokens {
-  const SessionConfigMaxResponseOutputTokensInt(this.value,
-      {final String? $type})
-      : $type = $type ?? 'int',
-        super._();
+  const SessionConfigMaxResponseOutputTokensInt(this.value, {String? $type})
+    : $type = $type ?? 'int',
+      super._();
   factory SessionConfigMaxResponseOutputTokensInt.fromJson(
-          Map<String, dynamic> json) =>
-      _$SessionConfigMaxResponseOutputTokensIntFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$SessionConfigMaxResponseOutputTokensIntFromJson(json);
 
   @override
   final int value;
@@ -10201,15 +10807,16 @@ class SessionConfigMaxResponseOutputTokensInt
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $SessionConfigMaxResponseOutputTokensIntCopyWith<
-          SessionConfigMaxResponseOutputTokensInt>
-      get copyWith => _$SessionConfigMaxResponseOutputTokensIntCopyWithImpl<
-          SessionConfigMaxResponseOutputTokensInt>(this, _$identity);
+    SessionConfigMaxResponseOutputTokensInt
+  >
+  get copyWith =>
+      _$SessionConfigMaxResponseOutputTokensIntCopyWithImpl<
+        SessionConfigMaxResponseOutputTokensInt
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$SessionConfigMaxResponseOutputTokensIntToJson(
-      this,
-    );
+    return _$SessionConfigMaxResponseOutputTokensIntToJson(this);
   }
 
   @override
@@ -10222,7 +10829,9 @@ class SessionConfigMaxResponseOutputTokensInt
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, value);
+  int get hashCode {
+    return Object.hash(runtimeType, value);
+  }
 
   @override
   String toString() {
@@ -10234,9 +10843,9 @@ class SessionConfigMaxResponseOutputTokensInt
 abstract mixin class $SessionConfigMaxResponseOutputTokensIntCopyWith<$Res>
     implements $SessionConfigMaxResponseOutputTokensCopyWith<$Res> {
   factory $SessionConfigMaxResponseOutputTokensIntCopyWith(
-          SessionConfigMaxResponseOutputTokensInt value,
-          $Res Function(SessionConfigMaxResponseOutputTokensInt) _then) =
-      _$SessionConfigMaxResponseOutputTokensIntCopyWithImpl;
+    SessionConfigMaxResponseOutputTokensInt value,
+    $Res Function(SessionConfigMaxResponseOutputTokensInt) _then,
+  ) = _$SessionConfigMaxResponseOutputTokensIntCopyWithImpl;
   @useResult
   $Res call({int value});
 }
@@ -10252,15 +10861,15 @@ class _$SessionConfigMaxResponseOutputTokensIntCopyWithImpl<$Res>
   /// Create a copy of SessionConfigMaxResponseOutputTokens
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? value = null,
-  }) {
-    return _then(SessionConfigMaxResponseOutputTokensInt(
-      null == value
-          ? _self.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as int,
-    ));
+  $Res call({Object? value = null}) {
+    return _then(
+      SessionConfigMaxResponseOutputTokensInt(
+        null == value
+            ? _self.value
+            : value // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
   }
 }
 
@@ -10268,13 +10877,12 @@ class _$SessionConfigMaxResponseOutputTokensIntCopyWithImpl<$Res>
 @JsonSerializable()
 class SessionConfigMaxResponseOutputTokensString
     extends SessionConfigMaxResponseOutputTokens {
-  const SessionConfigMaxResponseOutputTokensString(this.value,
-      {final String? $type})
-      : $type = $type ?? 'string',
-        super._();
+  const SessionConfigMaxResponseOutputTokensString(this.value, {String? $type})
+    : $type = $type ?? 'string',
+      super._();
   factory SessionConfigMaxResponseOutputTokensString.fromJson(
-          Map<String, dynamic> json) =>
-      _$SessionConfigMaxResponseOutputTokensStringFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$SessionConfigMaxResponseOutputTokensStringFromJson(json);
 
   @override
   final String value;
@@ -10287,15 +10895,16 @@ class SessionConfigMaxResponseOutputTokensString
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $SessionConfigMaxResponseOutputTokensStringCopyWith<
-          SessionConfigMaxResponseOutputTokensString>
-      get copyWith => _$SessionConfigMaxResponseOutputTokensStringCopyWithImpl<
-          SessionConfigMaxResponseOutputTokensString>(this, _$identity);
+    SessionConfigMaxResponseOutputTokensString
+  >
+  get copyWith =>
+      _$SessionConfigMaxResponseOutputTokensStringCopyWithImpl<
+        SessionConfigMaxResponseOutputTokensString
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$SessionConfigMaxResponseOutputTokensStringToJson(
-      this,
-    );
+    return _$SessionConfigMaxResponseOutputTokensStringToJson(this);
   }
 
   @override
@@ -10308,7 +10917,9 @@ class SessionConfigMaxResponseOutputTokensString
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, value);
+  int get hashCode {
+    return Object.hash(runtimeType, value);
+  }
 
   @override
   String toString() {
@@ -10320,9 +10931,9 @@ class SessionConfigMaxResponseOutputTokensString
 abstract mixin class $SessionConfigMaxResponseOutputTokensStringCopyWith<$Res>
     implements $SessionConfigMaxResponseOutputTokensCopyWith<$Res> {
   factory $SessionConfigMaxResponseOutputTokensStringCopyWith(
-          SessionConfigMaxResponseOutputTokensString value,
-          $Res Function(SessionConfigMaxResponseOutputTokensString) _then) =
-      _$SessionConfigMaxResponseOutputTokensStringCopyWithImpl;
+    SessionConfigMaxResponseOutputTokensString value,
+    $Res Function(SessionConfigMaxResponseOutputTokensString) _then,
+  ) = _$SessionConfigMaxResponseOutputTokensStringCopyWithImpl;
   @useResult
   $Res call({String value});
 }
@@ -10331,7 +10942,9 @@ abstract mixin class $SessionConfigMaxResponseOutputTokensStringCopyWith<$Res>
 class _$SessionConfigMaxResponseOutputTokensStringCopyWithImpl<$Res>
     implements $SessionConfigMaxResponseOutputTokensStringCopyWith<$Res> {
   _$SessionConfigMaxResponseOutputTokensStringCopyWithImpl(
-      this._self, this._then);
+    this._self,
+    this._then,
+  );
 
   final SessionConfigMaxResponseOutputTokensString _self;
   final $Res Function(SessionConfigMaxResponseOutputTokensString) _then;
@@ -10339,15 +10952,15 @@ class _$SessionConfigMaxResponseOutputTokensStringCopyWithImpl<$Res>
   /// Create a copy of SessionConfigMaxResponseOutputTokens
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? value = null,
-  }) {
-    return _then(SessionConfigMaxResponseOutputTokensString(
-      null == value
-          ? _self.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+  $Res call({Object? value = null}) {
+    return _then(
+      SessionConfigMaxResponseOutputTokensString(
+        null == value
+            ? _self.value
+            : value // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
@@ -10365,35 +10978,44 @@ mixin _$Conversation {
   @pragma('vm:prefer-inline')
   $ConversationCopyWith<Conversation> get copyWith =>
       _$ConversationCopyWithImpl<Conversation>(
-          this as Conversation, _$identity);
+        this as Conversation,
+        _$identity,
+      );
 
   /// Serializes this Conversation to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as Conversation;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Conversation &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.object, object) || other.object == object));
+            (identical(other.id, _this.id) || other.id == _this.id) &&
+            (identical(other.object, _this.object) ||
+                other.object == _this.object));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, object);
+  int get hashCode {
+    final _this = this as Conversation;
+    return Object.hash(runtimeType, _this.id, _this.object);
+  }
 
   @override
   String toString() {
-    return 'Conversation(id: $id, object: $object)';
+    final _this = this as Conversation;
+    return 'Conversation(id: ${_this.id}, object: ${_this.object})';
   }
 }
 
 /// @nodoc
 abstract mixin class $ConversationCopyWith<$Res> {
   factory $ConversationCopyWith(
-          Conversation value, $Res Function(Conversation) _then) =
-      _$ConversationCopyWithImpl;
+    Conversation value,
+    $Res Function(Conversation) _then,
+  ) = _$ConversationCopyWithImpl;
   @useResult
   $Res call({String id, ObjectType object});
 }
@@ -10409,20 +11031,19 @@ class _$ConversationCopyWithImpl<$Res> implements $ConversationCopyWith<$Res> {
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? id = null,
-    Object? object = null,
-  }) {
-    return _then(_self.copyWith(
-      id: null == id
-          ? _self.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      object: null == object
-          ? _self.object
-          : object // ignore: cast_nullable_to_non_nullable
-              as ObjectType,
-    ));
+  $Res call({Object? id = null, Object? object = null}) {
+    return _then(
+      Conversation(
+        id: null == id
+            ? _self.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        object: null == object
+            ? _self.object
+            : object // ignore: cast_nullable_to_non_nullable
+                  as ObjectType,
+      ),
+    );
   }
 }
 
@@ -10586,9 +11207,10 @@ extension ConversationPatterns on Conversation {
 /// @nodoc
 @JsonSerializable()
 class _Conversation extends Conversation {
-  const _Conversation(
-      {required this.id, this.object = ObjectType.realtimeConversation})
-      : super._();
+  const _Conversation({
+    required this.id,
+    this.object = ObjectType.realtimeConversation,
+  }) : super._();
   factory _Conversation.fromJson(Map<String, dynamic> json) =>
       _$ConversationFromJson(json);
 
@@ -10611,9 +11233,7 @@ class _Conversation extends Conversation {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ConversationToJson(
-      this,
-    );
+    return _$ConversationToJson(this);
   }
 
   @override
@@ -10627,7 +11247,9 @@ class _Conversation extends Conversation {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, object);
+  int get hashCode {
+    return Object.hash(runtimeType, id, object);
+  }
 
   @override
   String toString() {
@@ -10639,8 +11261,9 @@ class _Conversation extends Conversation {
 abstract mixin class _$ConversationCopyWith<$Res>
     implements $ConversationCopyWith<$Res> {
   factory _$ConversationCopyWith(
-          _Conversation value, $Res Function(_Conversation) _then) =
-      __$ConversationCopyWithImpl;
+    _Conversation value,
+    $Res Function(_Conversation) _then,
+  ) = __$ConversationCopyWithImpl;
   @override
   @useResult
   $Res call({String id, ObjectType object});
@@ -10658,20 +11281,19 @@ class __$ConversationCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? id = null,
-    Object? object = null,
-  }) {
-    return _then(_Conversation(
-      id: null == id
-          ? _self.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      object: null == object
-          ? _self.object
-          : object // ignore: cast_nullable_to_non_nullable
-              as ObjectType,
-    ));
+  $Res call({Object? id = null, Object? object = null}) {
+    return _then(
+      _Conversation(
+        id: null == id
+            ? _self.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        object: null == object
+            ? _self.object
+            : object // ignore: cast_nullable_to_non_nullable
+                  as ObjectType,
+      ),
+    );
   }
 }
 
@@ -10706,25 +11328,35 @@ mixin _$Delta {
 
   @override
   bool operator ==(Object other) {
+    final _this = this as Delta;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Delta &&
-            (identical(other.transcript, transcript) ||
-                other.transcript == transcript) &&
-            const DeepCollectionEquality().equals(other.audio, audio) &&
-            (identical(other.text, text) || other.text == text) &&
-            (identical(other.arguments, arguments) ||
-                other.arguments == arguments));
+            (identical(other.transcript, _this.transcript) ||
+                other.transcript == _this.transcript) &&
+            const DeepCollectionEquality().equals(other.audio, _this.audio) &&
+            (identical(other.text, _this.text) || other.text == _this.text) &&
+            (identical(other.arguments, _this.arguments) ||
+                other.arguments == _this.arguments));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, transcript,
-      const DeepCollectionEquality().hash(audio), text, arguments);
+  int get hashCode {
+    final _this = this as Delta;
+    return Object.hash(
+      runtimeType,
+      _this.transcript,
+      const DeepCollectionEquality().hash(_this.audio),
+      _this.text,
+      _this.arguments,
+    );
+  }
 
   @override
   String toString() {
-    return 'Delta(transcript: $transcript, audio: $audio, text: $text, arguments: $arguments)';
+    final _this = this as Delta;
+    return 'Delta(transcript: ${_this.transcript}, audio: ${_this.audio}, text: ${_this.text}, arguments: ${_this.arguments})';
   }
 }
 
@@ -10733,11 +11365,12 @@ abstract mixin class $DeltaCopyWith<$Res> {
   factory $DeltaCopyWith(Delta value, $Res Function(Delta) _then) =
       _$DeltaCopyWithImpl;
   @useResult
-  $Res call(
-      {@JsonKey(includeIfNull: false) String? transcript,
-      @Uint8ListConverter() @JsonKey(includeIfNull: false) Uint8List? audio,
-      @JsonKey(includeIfNull: false) String? text,
-      @JsonKey(includeIfNull: false) String? arguments});
+  $Res call({
+    @JsonKey(includeIfNull: false) String? transcript,
+    @Uint8ListConverter() @JsonKey(includeIfNull: false) Uint8List? audio,
+    @JsonKey(includeIfNull: false) String? text,
+    @JsonKey(includeIfNull: false) String? arguments,
+  });
 }
 
 /// @nodoc
@@ -10757,24 +11390,26 @@ class _$DeltaCopyWithImpl<$Res> implements $DeltaCopyWith<$Res> {
     Object? text = freezed,
     Object? arguments = freezed,
   }) {
-    return _then(_self.copyWith(
-      transcript: freezed == transcript
-          ? _self.transcript
-          : transcript // ignore: cast_nullable_to_non_nullable
-              as String?,
-      audio: freezed == audio
-          ? _self.audio
-          : audio // ignore: cast_nullable_to_non_nullable
-              as Uint8List?,
-      text: freezed == text
-          ? _self.text
-          : text // ignore: cast_nullable_to_non_nullable
-              as String?,
-      arguments: freezed == arguments
-          ? _self.arguments
-          : arguments // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      Delta(
+        transcript: freezed == transcript
+            ? _self.transcript
+            : transcript // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        audio: freezed == audio
+            ? _self.audio
+            : audio // ignore: cast_nullable_to_non_nullable
+                  as Uint8List?,
+        text: freezed == text
+            ? _self.text
+            : text // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        arguments: freezed == arguments
+            ? _self.arguments
+            : arguments // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
@@ -10872,20 +11507,23 @@ extension DeltaPatterns on Delta {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            @JsonKey(includeIfNull: false) String? transcript,
-            @Uint8ListConverter()
-            @JsonKey(includeIfNull: false)
-            Uint8List? audio,
-            @JsonKey(includeIfNull: false) String? text,
-            @JsonKey(includeIfNull: false) String? arguments)?
-        $default, {
+      @JsonKey(includeIfNull: false) String? transcript,
+      @Uint8ListConverter() @JsonKey(includeIfNull: false) Uint8List? audio,
+      @JsonKey(includeIfNull: false) String? text,
+      @JsonKey(includeIfNull: false) String? arguments,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _Delta() when $default != null:
         return $default(
-            _that.transcript, _that.audio, _that.text, _that.arguments);
+          _that.transcript,
+          _that.audio,
+          _that.text,
+          _that.arguments,
+        );
       case _:
         return orElse();
     }
@@ -10907,19 +11545,22 @@ extension DeltaPatterns on Delta {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            @JsonKey(includeIfNull: false) String? transcript,
-            @Uint8ListConverter()
-            @JsonKey(includeIfNull: false)
-            Uint8List? audio,
-            @JsonKey(includeIfNull: false) String? text,
-            @JsonKey(includeIfNull: false) String? arguments)
-        $default,
+      @JsonKey(includeIfNull: false) String? transcript,
+      @Uint8ListConverter() @JsonKey(includeIfNull: false) Uint8List? audio,
+      @JsonKey(includeIfNull: false) String? text,
+      @JsonKey(includeIfNull: false) String? arguments,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _Delta():
         return $default(
-            _that.transcript, _that.audio, _that.text, _that.arguments);
+          _that.transcript,
+          _that.audio,
+          _that.text,
+          _that.arguments,
+        );
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -10940,19 +11581,22 @@ extension DeltaPatterns on Delta {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            @JsonKey(includeIfNull: false) String? transcript,
-            @Uint8ListConverter()
-            @JsonKey(includeIfNull: false)
-            Uint8List? audio,
-            @JsonKey(includeIfNull: false) String? text,
-            @JsonKey(includeIfNull: false) String? arguments)?
-        $default,
+      @JsonKey(includeIfNull: false) String? transcript,
+      @Uint8ListConverter() @JsonKey(includeIfNull: false) Uint8List? audio,
+      @JsonKey(includeIfNull: false) String? text,
+      @JsonKey(includeIfNull: false) String? arguments,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _Delta() when $default != null:
         return $default(
-            _that.transcript, _that.audio, _that.text, _that.arguments);
+          _that.transcript,
+          _that.audio,
+          _that.text,
+          _that.arguments,
+        );
       case _:
         return null;
     }
@@ -10962,12 +11606,12 @@ extension DeltaPatterns on Delta {
 /// @nodoc
 @JsonSerializable()
 class _Delta extends Delta {
-  const _Delta(
-      {@JsonKey(includeIfNull: false) this.transcript,
-      @Uint8ListConverter() @JsonKey(includeIfNull: false) this.audio,
-      @JsonKey(includeIfNull: false) this.text,
-      @JsonKey(includeIfNull: false) this.arguments})
-      : super._();
+  const _Delta({
+    @JsonKey(includeIfNull: false) this.transcript,
+    @Uint8ListConverter() @JsonKey(includeIfNull: false) this.audio,
+    @JsonKey(includeIfNull: false) this.text,
+    @JsonKey(includeIfNull: false) this.arguments,
+  }) : super._();
   factory _Delta.fromJson(Map<String, dynamic> json) => _$DeltaFromJson(json);
 
   /// The transcript of the audio.
@@ -11001,9 +11645,7 @@ class _Delta extends Delta {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$DeltaToJson(
-      this,
-    );
+    return _$DeltaToJson(this);
   }
 
   @override
@@ -11021,8 +11663,15 @@ class _Delta extends Delta {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, transcript,
-      const DeepCollectionEquality().hash(audio), text, arguments);
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      transcript,
+      const DeepCollectionEquality().hash(audio),
+      text,
+      arguments,
+    );
+  }
 
   @override
   String toString() {
@@ -11036,11 +11685,12 @@ abstract mixin class _$DeltaCopyWith<$Res> implements $DeltaCopyWith<$Res> {
       __$DeltaCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(includeIfNull: false) String? transcript,
-      @Uint8ListConverter() @JsonKey(includeIfNull: false) Uint8List? audio,
-      @JsonKey(includeIfNull: false) String? text,
-      @JsonKey(includeIfNull: false) String? arguments});
+  $Res call({
+    @JsonKey(includeIfNull: false) String? transcript,
+    @Uint8ListConverter() @JsonKey(includeIfNull: false) Uint8List? audio,
+    @JsonKey(includeIfNull: false) String? text,
+    @JsonKey(includeIfNull: false) String? arguments,
+  });
 }
 
 /// @nodoc
@@ -11060,24 +11710,26 @@ class __$DeltaCopyWithImpl<$Res> implements _$DeltaCopyWith<$Res> {
     Object? text = freezed,
     Object? arguments = freezed,
   }) {
-    return _then(_Delta(
-      transcript: freezed == transcript
-          ? _self.transcript
-          : transcript // ignore: cast_nullable_to_non_nullable
-              as String?,
-      audio: freezed == audio
-          ? _self.audio
-          : audio // ignore: cast_nullable_to_non_nullable
-              as Uint8List?,
-      text: freezed == text
-          ? _self.text
-          : text // ignore: cast_nullable_to_non_nullable
-              as String?,
-      arguments: freezed == arguments
-          ? _self.arguments
-          : arguments // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      _Delta(
+        transcript: freezed == transcript
+            ? _self.transcript
+            : transcript // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        audio: freezed == audio
+            ? _self.audio
+            : audio // ignore: cast_nullable_to_non_nullable
+                  as Uint8List?,
+        text: freezed == text
+            ? _self.text
+            : text // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        arguments: freezed == arguments
+            ? _self.arguments
+            : arguments // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
@@ -11102,44 +11754,60 @@ mixin _$FormattedTool {
   @pragma('vm:prefer-inline')
   $FormattedToolCopyWith<FormattedTool> get copyWith =>
       _$FormattedToolCopyWithImpl<FormattedTool>(
-          this as FormattedTool, _$identity);
+        this as FormattedTool,
+        _$identity,
+      );
 
   /// Serializes this FormattedTool to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as FormattedTool;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is FormattedTool &&
-            (identical(other.type, type) || other.type == type) &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.callId, callId) || other.callId == callId) &&
-            (identical(other.arguments, arguments) ||
-                other.arguments == arguments));
+            (identical(other.type, _this.type) || other.type == _this.type) &&
+            (identical(other.name, _this.name) || other.name == _this.name) &&
+            (identical(other.callId, _this.callId) ||
+                other.callId == _this.callId) &&
+            (identical(other.arguments, _this.arguments) ||
+                other.arguments == _this.arguments));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, name, callId, arguments);
+  int get hashCode {
+    final _this = this as FormattedTool;
+    return Object.hash(
+      runtimeType,
+      _this.type,
+      _this.name,
+      _this.callId,
+      _this.arguments,
+    );
+  }
 
   @override
   String toString() {
-    return 'FormattedTool(type: $type, name: $name, callId: $callId, arguments: $arguments)';
+    final _this = this as FormattedTool;
+    return 'FormattedTool(type: ${_this.type}, name: ${_this.name}, callId: ${_this.callId}, arguments: ${_this.arguments})';
   }
 }
 
 /// @nodoc
 abstract mixin class $FormattedToolCopyWith<$Res> {
   factory $FormattedToolCopyWith(
-          FormattedTool value, $Res Function(FormattedTool) _then) =
-      _$FormattedToolCopyWithImpl;
+    FormattedTool value,
+    $Res Function(FormattedTool) _then,
+  ) = _$FormattedToolCopyWithImpl;
   @useResult
-  $Res call(
-      {ToolType type,
-      String name,
-      @JsonKey(name: 'call_id') String callId,
-      String arguments});
+  $Res call({
+    ToolType type,
+    String name,
+    @JsonKey(name: 'call_id') String callId,
+    String arguments,
+  });
 }
 
 /// @nodoc
@@ -11160,24 +11828,26 @@ class _$FormattedToolCopyWithImpl<$Res>
     Object? callId = null,
     Object? arguments = null,
   }) {
-    return _then(_self.copyWith(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ToolType,
-      name: null == name
-          ? _self.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      callId: null == callId
-          ? _self.callId
-          : callId // ignore: cast_nullable_to_non_nullable
-              as String,
-      arguments: null == arguments
-          ? _self.arguments
-          : arguments // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      FormattedTool(
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ToolType,
+        name: null == name
+            ? _self.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+        callId: null == callId
+            ? _self.callId
+            : callId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        arguments: null == arguments
+            ? _self.arguments
+            : arguments // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
@@ -11274,9 +11944,13 @@ extension FormattedToolPatterns on FormattedTool {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(ToolType type, String name,
-            @JsonKey(name: 'call_id') String callId, String arguments)?
-        $default, {
+    TResult Function(
+      ToolType type,
+      String name,
+      @JsonKey(name: 'call_id') String callId,
+      String arguments,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
@@ -11303,9 +11977,13 @@ extension FormattedToolPatterns on FormattedTool {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(ToolType type, String name,
-            @JsonKey(name: 'call_id') String callId, String arguments)
-        $default,
+    TResult Function(
+      ToolType type,
+      String name,
+      @JsonKey(name: 'call_id') String callId,
+      String arguments,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
@@ -11330,9 +12008,13 @@ extension FormattedToolPatterns on FormattedTool {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(ToolType type, String name,
-            @JsonKey(name: 'call_id') String callId, String arguments)?
-        $default,
+    TResult? Function(
+      ToolType type,
+      String name,
+      @JsonKey(name: 'call_id') String callId,
+      String arguments,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
@@ -11347,12 +12029,12 @@ extension FormattedToolPatterns on FormattedTool {
 /// @nodoc
 @JsonSerializable()
 class _FormattedTool extends FormattedTool {
-  const _FormattedTool(
-      {this.type = ToolType.function,
-      required this.name,
-      @JsonKey(name: 'call_id') required this.callId,
-      required this.arguments})
-      : super._();
+  const _FormattedTool({
+    this.type = ToolType.function,
+    required this.name,
+    @JsonKey(name: 'call_id') required this.callId,
+    required this.arguments,
+  }) : super._();
   factory _FormattedTool.fromJson(Map<String, dynamic> json) =>
       _$FormattedToolFromJson(json);
 
@@ -11384,9 +12066,7 @@ class _FormattedTool extends FormattedTool {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$FormattedToolToJson(
-      this,
-    );
+    return _$FormattedToolToJson(this);
   }
 
   @override
@@ -11403,7 +12083,9 @@ class _FormattedTool extends FormattedTool {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, name, callId, arguments);
+  int get hashCode {
+    return Object.hash(runtimeType, type, name, callId, arguments);
+  }
 
   @override
   String toString() {
@@ -11415,15 +12097,17 @@ class _FormattedTool extends FormattedTool {
 abstract mixin class _$FormattedToolCopyWith<$Res>
     implements $FormattedToolCopyWith<$Res> {
   factory _$FormattedToolCopyWith(
-          _FormattedTool value, $Res Function(_FormattedTool) _then) =
-      __$FormattedToolCopyWithImpl;
+    _FormattedTool value,
+    $Res Function(_FormattedTool) _then,
+  ) = __$FormattedToolCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {ToolType type,
-      String name,
-      @JsonKey(name: 'call_id') String callId,
-      String arguments});
+  $Res call({
+    ToolType type,
+    String name,
+    @JsonKey(name: 'call_id') String callId,
+    String arguments,
+  });
 }
 
 /// @nodoc
@@ -11444,24 +12128,26 @@ class __$FormattedToolCopyWithImpl<$Res>
     Object? callId = null,
     Object? arguments = null,
   }) {
-    return _then(_FormattedTool(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ToolType,
-      name: null == name
-          ? _self.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      callId: null == callId
-          ? _self.callId
-          : callId // ignore: cast_nullable_to_non_nullable
-              as String,
-      arguments: null == arguments
-          ? _self.arguments
-          : arguments // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      _FormattedTool(
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ToolType,
+        name: null == name
+            ? _self.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+        callId: null == callId
+            ? _self.callId
+            : callId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        arguments: null == arguments
+            ? _self.arguments
+            : arguments // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
@@ -11491,52 +12177,63 @@ mixin _$FormattedProperty {
   @pragma('vm:prefer-inline')
   $FormattedPropertyCopyWith<FormattedProperty> get copyWith =>
       _$FormattedPropertyCopyWithImpl<FormattedProperty>(
-          this as FormattedProperty, _$identity);
+        this as FormattedProperty,
+        _$identity,
+      );
 
   /// Serializes this FormattedProperty to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as FormattedProperty;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is FormattedProperty &&
-            const DeepCollectionEquality().equals(other.audio, audio) &&
-            (identical(other.text, text) || other.text == text) &&
-            (identical(other.transcript, transcript) ||
-                other.transcript == transcript) &&
-            (identical(other.tool, tool) || other.tool == tool) &&
-            (identical(other.output, output) || other.output == output));
+            const DeepCollectionEquality().equals(other.audio, _this.audio) &&
+            (identical(other.text, _this.text) || other.text == _this.text) &&
+            (identical(other.transcript, _this.transcript) ||
+                other.transcript == _this.transcript) &&
+            (identical(other.tool, _this.tool) || other.tool == _this.tool) &&
+            (identical(other.output, _this.output) ||
+                other.output == _this.output));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode {
+    final _this = this as FormattedProperty;
+    return Object.hash(
       runtimeType,
-      const DeepCollectionEquality().hash(audio),
-      text,
-      transcript,
-      tool,
-      output);
+      const DeepCollectionEquality().hash(_this.audio),
+      _this.text,
+      _this.transcript,
+      _this.tool,
+      _this.output,
+    );
+  }
 
   @override
   String toString() {
-    return 'FormattedProperty(audio: $audio, text: $text, transcript: $transcript, tool: $tool, output: $output)';
+    final _this = this as FormattedProperty;
+    return 'FormattedProperty(audio: ${_this.audio}, text: ${_this.text}, transcript: ${_this.transcript}, tool: ${_this.tool}, output: ${_this.output})';
   }
 }
 
 /// @nodoc
 abstract mixin class $FormattedPropertyCopyWith<$Res> {
   factory $FormattedPropertyCopyWith(
-          FormattedProperty value, $Res Function(FormattedProperty) _then) =
-      _$FormattedPropertyCopyWithImpl;
+    FormattedProperty value,
+    $Res Function(FormattedProperty) _then,
+  ) = _$FormattedPropertyCopyWithImpl;
   @useResult
-  $Res call(
-      {@Uint8ListConverter() Uint8List audio,
-      String text,
-      String transcript,
-      @JsonKey(includeIfNull: false) FormattedTool? tool,
-      @JsonKey(includeIfNull: false) String? output});
+  $Res call({
+    @Uint8ListConverter() Uint8List audio,
+    String text,
+    String transcript,
+    @JsonKey(includeIfNull: false) FormattedTool? tool,
+    @JsonKey(includeIfNull: false) String? output,
+  });
 
   $FormattedToolCopyWith<$Res>? get tool;
 }
@@ -11560,28 +12257,30 @@ class _$FormattedPropertyCopyWithImpl<$Res>
     Object? tool = freezed,
     Object? output = freezed,
   }) {
-    return _then(_self.copyWith(
-      audio: null == audio
-          ? _self.audio
-          : audio // ignore: cast_nullable_to_non_nullable
-              as Uint8List,
-      text: null == text
-          ? _self.text
-          : text // ignore: cast_nullable_to_non_nullable
-              as String,
-      transcript: null == transcript
-          ? _self.transcript
-          : transcript // ignore: cast_nullable_to_non_nullable
-              as String,
-      tool: freezed == tool
-          ? _self.tool
-          : tool // ignore: cast_nullable_to_non_nullable
-              as FormattedTool?,
-      output: freezed == output
-          ? _self.output
-          : output // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      FormattedProperty(
+        audio: null == audio
+            ? _self.audio
+            : audio // ignore: cast_nullable_to_non_nullable
+                  as Uint8List,
+        text: null == text
+            ? _self.text
+            : text // ignore: cast_nullable_to_non_nullable
+                  as String,
+        transcript: null == transcript
+            ? _self.transcript
+            : transcript // ignore: cast_nullable_to_non_nullable
+                  as String,
+        tool: freezed == tool
+            ? _self.tool
+            : tool // ignore: cast_nullable_to_non_nullable
+                  as FormattedTool?,
+        output: freezed == output
+            ? _self.output
+            : output // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 
   /// Create a copy of FormattedProperty
@@ -11693,19 +12392,25 @@ extension FormattedPropertyPatterns on FormattedProperty {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            @Uint8ListConverter() Uint8List audio,
-            String text,
-            String transcript,
-            @JsonKey(includeIfNull: false) FormattedTool? tool,
-            @JsonKey(includeIfNull: false) String? output)?
-        $default, {
+      @Uint8ListConverter() Uint8List audio,
+      String text,
+      String transcript,
+      @JsonKey(includeIfNull: false) FormattedTool? tool,
+      @JsonKey(includeIfNull: false) String? output,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _FormattedProperty() when $default != null:
-        return $default(_that.audio, _that.text, _that.transcript, _that.tool,
-            _that.output);
+        return $default(
+          _that.audio,
+          _that.text,
+          _that.transcript,
+          _that.tool,
+          _that.output,
+        );
       case _:
         return orElse();
     }
@@ -11727,18 +12432,24 @@ extension FormattedPropertyPatterns on FormattedProperty {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            @Uint8ListConverter() Uint8List audio,
-            String text,
-            String transcript,
-            @JsonKey(includeIfNull: false) FormattedTool? tool,
-            @JsonKey(includeIfNull: false) String? output)
-        $default,
+      @Uint8ListConverter() Uint8List audio,
+      String text,
+      String transcript,
+      @JsonKey(includeIfNull: false) FormattedTool? tool,
+      @JsonKey(includeIfNull: false) String? output,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _FormattedProperty():
-        return $default(_that.audio, _that.text, _that.transcript, _that.tool,
-            _that.output);
+        return $default(
+          _that.audio,
+          _that.text,
+          _that.transcript,
+          _that.tool,
+          _that.output,
+        );
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -11759,18 +12470,24 @@ extension FormattedPropertyPatterns on FormattedProperty {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            @Uint8ListConverter() Uint8List audio,
-            String text,
-            String transcript,
-            @JsonKey(includeIfNull: false) FormattedTool? tool,
-            @JsonKey(includeIfNull: false) String? output)?
-        $default,
+      @Uint8ListConverter() Uint8List audio,
+      String text,
+      String transcript,
+      @JsonKey(includeIfNull: false) FormattedTool? tool,
+      @JsonKey(includeIfNull: false) String? output,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _FormattedProperty() when $default != null:
-        return $default(_that.audio, _that.text, _that.transcript, _that.tool,
-            _that.output);
+        return $default(
+          _that.audio,
+          _that.text,
+          _that.transcript,
+          _that.tool,
+          _that.output,
+        );
       case _:
         return null;
     }
@@ -11780,13 +12497,13 @@ extension FormattedPropertyPatterns on FormattedProperty {
 /// @nodoc
 @JsonSerializable()
 class _FormattedProperty extends FormattedProperty {
-  const _FormattedProperty(
-      {@Uint8ListConverter() required this.audio,
-      required this.text,
-      required this.transcript,
-      @JsonKey(includeIfNull: false) this.tool,
-      @JsonKey(includeIfNull: false) this.output})
-      : super._();
+  const _FormattedProperty({
+    @Uint8ListConverter() required this.audio,
+    required this.text,
+    required this.transcript,
+    @JsonKey(includeIfNull: false) this.tool,
+    @JsonKey(includeIfNull: false) this.output,
+  }) : super._();
   factory _FormattedProperty.fromJson(Map<String, dynamic> json) =>
       _$FormattedPropertyFromJson(json);
 
@@ -11823,9 +12540,7 @@ class _FormattedProperty extends FormattedProperty {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$FormattedPropertyToJson(
-      this,
-    );
+    return _$FormattedPropertyToJson(this);
   }
 
   @override
@@ -11843,13 +12558,16 @@ class _FormattedProperty extends FormattedProperty {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode {
+    return Object.hash(
       runtimeType,
       const DeepCollectionEquality().hash(audio),
       text,
       transcript,
       tool,
-      output);
+      output,
+    );
+  }
 
   @override
   String toString() {
@@ -11861,16 +12579,18 @@ class _FormattedProperty extends FormattedProperty {
 abstract mixin class _$FormattedPropertyCopyWith<$Res>
     implements $FormattedPropertyCopyWith<$Res> {
   factory _$FormattedPropertyCopyWith(
-          _FormattedProperty value, $Res Function(_FormattedProperty) _then) =
-      __$FormattedPropertyCopyWithImpl;
+    _FormattedProperty value,
+    $Res Function(_FormattedProperty) _then,
+  ) = __$FormattedPropertyCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@Uint8ListConverter() Uint8List audio,
-      String text,
-      String transcript,
-      @JsonKey(includeIfNull: false) FormattedTool? tool,
-      @JsonKey(includeIfNull: false) String? output});
+  $Res call({
+    @Uint8ListConverter() Uint8List audio,
+    String text,
+    String transcript,
+    @JsonKey(includeIfNull: false) FormattedTool? tool,
+    @JsonKey(includeIfNull: false) String? output,
+  });
 
   @override
   $FormattedToolCopyWith<$Res>? get tool;
@@ -11895,28 +12615,30 @@ class __$FormattedPropertyCopyWithImpl<$Res>
     Object? tool = freezed,
     Object? output = freezed,
   }) {
-    return _then(_FormattedProperty(
-      audio: null == audio
-          ? _self.audio
-          : audio // ignore: cast_nullable_to_non_nullable
-              as Uint8List,
-      text: null == text
-          ? _self.text
-          : text // ignore: cast_nullable_to_non_nullable
-              as String,
-      transcript: null == transcript
-          ? _self.transcript
-          : transcript // ignore: cast_nullable_to_non_nullable
-              as String,
-      tool: freezed == tool
-          ? _self.tool
-          : tool // ignore: cast_nullable_to_non_nullable
-              as FormattedTool?,
-      output: freezed == output
-          ? _self.output
-          : output // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      _FormattedProperty(
+        audio: null == audio
+            ? _self.audio
+            : audio // ignore: cast_nullable_to_non_nullable
+                  as Uint8List,
+        text: null == text
+            ? _self.text
+            : text // ignore: cast_nullable_to_non_nullable
+                  as String,
+        transcript: null == transcript
+            ? _self.transcript
+            : transcript // ignore: cast_nullable_to_non_nullable
+                  as String,
+        tool: freezed == tool
+            ? _self.tool
+            : tool // ignore: cast_nullable_to_non_nullable
+                  as FormattedTool?,
+        output: freezed == output
+            ? _self.output
+            : output // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 
   /// Create a copy of FormattedProperty
@@ -11949,36 +12671,44 @@ mixin _$FormattedItem {
   @pragma('vm:prefer-inline')
   $FormattedItemCopyWith<FormattedItem> get copyWith =>
       _$FormattedItemCopyWithImpl<FormattedItem>(
-          this as FormattedItem, _$identity);
+        this as FormattedItem,
+        _$identity,
+      );
 
   /// Serializes this FormattedItem to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as FormattedItem;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is FormattedItem &&
-            (identical(other.item, item) || other.item == item) &&
-            (identical(other.formatted, formatted) ||
-                other.formatted == formatted));
+            (identical(other.item, _this.item) || other.item == _this.item) &&
+            (identical(other.formatted, _this.formatted) ||
+                other.formatted == _this.formatted));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, item, formatted);
+  int get hashCode {
+    final _this = this as FormattedItem;
+    return Object.hash(runtimeType, _this.item, _this.formatted);
+  }
 
   @override
   String toString() {
-    return 'FormattedItem(item: $item, formatted: $formatted)';
+    final _this = this as FormattedItem;
+    return 'FormattedItem(item: ${_this.item}, formatted: ${_this.formatted})';
   }
 }
 
 /// @nodoc
 abstract mixin class $FormattedItemCopyWith<$Res> {
   factory $FormattedItemCopyWith(
-          FormattedItem value, $Res Function(FormattedItem) _then) =
-      _$FormattedItemCopyWithImpl;
+    FormattedItem value,
+    $Res Function(FormattedItem) _then,
+  ) = _$FormattedItemCopyWithImpl;
   @useResult
   $Res call({Item item, FormattedProperty? formatted});
 
@@ -11998,20 +12728,19 @@ class _$FormattedItemCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? item = null,
-    Object? formatted = freezed,
-  }) {
-    return _then(_self.copyWith(
-      item: null == item
-          ? _self.item
-          : item // ignore: cast_nullable_to_non_nullable
-              as Item,
-      formatted: freezed == formatted
-          ? _self.formatted
-          : formatted // ignore: cast_nullable_to_non_nullable
-              as FormattedProperty?,
-    ));
+  $Res call({Object? item = null, Object? formatted = freezed}) {
+    return _then(
+      FormattedItem(
+        item: null == item
+            ? _self.item
+            : item // ignore: cast_nullable_to_non_nullable
+                  as Item,
+        formatted: freezed == formatted
+            ? _self.formatted
+            : formatted // ignore: cast_nullable_to_non_nullable
+                  as FormattedProperty?,
+      ),
+    );
   }
 
   /// Create a copy of FormattedItem
@@ -12200,7 +12929,7 @@ extension FormattedItemPatterns on FormattedItem {
 @JsonSerializable()
 class _FormattedItem extends FormattedItem {
   const _FormattedItem({required this.item, required this.formatted})
-      : super._();
+    : super._();
   factory _FormattedItem.fromJson(Map<String, dynamic> json) =>
       _$FormattedItemFromJson(json);
 
@@ -12223,9 +12952,7 @@ class _FormattedItem extends FormattedItem {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$FormattedItemToJson(
-      this,
-    );
+    return _$FormattedItemToJson(this);
   }
 
   @override
@@ -12240,7 +12967,9 @@ class _FormattedItem extends FormattedItem {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, item, formatted);
+  int get hashCode {
+    return Object.hash(runtimeType, item, formatted);
+  }
 
   @override
   String toString() {
@@ -12252,8 +12981,9 @@ class _FormattedItem extends FormattedItem {
 abstract mixin class _$FormattedItemCopyWith<$Res>
     implements $FormattedItemCopyWith<$Res> {
   factory _$FormattedItemCopyWith(
-          _FormattedItem value, $Res Function(_FormattedItem) _then) =
-      __$FormattedItemCopyWithImpl;
+    _FormattedItem value,
+    $Res Function(_FormattedItem) _then,
+  ) = __$FormattedItemCopyWithImpl;
   @override
   @useResult
   $Res call({Item item, FormattedProperty? formatted});
@@ -12276,20 +13006,19 @@ class __$FormattedItemCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? item = null,
-    Object? formatted = freezed,
-  }) {
-    return _then(_FormattedItem(
-      item: null == item
-          ? _self.item
-          : item // ignore: cast_nullable_to_non_nullable
-              as Item,
-      formatted: freezed == formatted
-          ? _self.formatted
-          : formatted // ignore: cast_nullable_to_non_nullable
-              as FormattedProperty?,
-    ));
+  $Res call({Object? item = null, Object? formatted = freezed}) {
+    return _then(
+      _FormattedItem(
+        item: null == item
+            ? _self.item
+            : item // ignore: cast_nullable_to_non_nullable
+                  as Item,
+        formatted: freezed == formatted
+            ? _self.formatted
+            : formatted // ignore: cast_nullable_to_non_nullable
+                  as FormattedProperty?,
+      ),
+    );
   }
 
   /// Create a copy of FormattedItem
@@ -12343,37 +13072,48 @@ mixin _$ItemSpeech {
 
   @override
   bool operator ==(Object other) {
+    final _this = this as ItemSpeech;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ItemSpeech &&
-            (identical(other.audioStartMs, audioStartMs) ||
-                other.audioStartMs == audioStartMs) &&
-            (identical(other.audioEndMs, audioEndMs) ||
-                other.audioEndMs == audioEndMs) &&
-            const DeepCollectionEquality().equals(other.audio, audio));
+            (identical(other.audioStartMs, _this.audioStartMs) ||
+                other.audioStartMs == _this.audioStartMs) &&
+            (identical(other.audioEndMs, _this.audioEndMs) ||
+                other.audioEndMs == _this.audioEndMs) &&
+            const DeepCollectionEquality().equals(other.audio, _this.audio));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, audioStartMs, audioEndMs,
-      const DeepCollectionEquality().hash(audio));
+  int get hashCode {
+    final _this = this as ItemSpeech;
+    return Object.hash(
+      runtimeType,
+      _this.audioStartMs,
+      _this.audioEndMs,
+      const DeepCollectionEquality().hash(_this.audio),
+    );
+  }
 
   @override
   String toString() {
-    return 'ItemSpeech(audioStartMs: $audioStartMs, audioEndMs: $audioEndMs, audio: $audio)';
+    final _this = this as ItemSpeech;
+    return 'ItemSpeech(audioStartMs: ${_this.audioStartMs}, audioEndMs: ${_this.audioEndMs}, audio: ${_this.audio})';
   }
 }
 
 /// @nodoc
 abstract mixin class $ItemSpeechCopyWith<$Res> {
   factory $ItemSpeechCopyWith(
-          ItemSpeech value, $Res Function(ItemSpeech) _then) =
-      _$ItemSpeechCopyWithImpl;
+    ItemSpeech value,
+    $Res Function(ItemSpeech) _then,
+  ) = _$ItemSpeechCopyWithImpl;
   @useResult
-  $Res call(
-      {int audioStartMs,
-      @JsonKey(includeIfNull: false) int? audioEndMs,
-      @Uint8ListConverter() @JsonKey(includeIfNull: false) Uint8List? audio});
+  $Res call({
+    int audioStartMs,
+    @JsonKey(includeIfNull: false) int? audioEndMs,
+    @Uint8ListConverter() @JsonKey(includeIfNull: false) Uint8List? audio,
+  });
 }
 
 /// @nodoc
@@ -12392,20 +13132,22 @@ class _$ItemSpeechCopyWithImpl<$Res> implements $ItemSpeechCopyWith<$Res> {
     Object? audioEndMs = freezed,
     Object? audio = freezed,
   }) {
-    return _then(_self.copyWith(
-      audioStartMs: null == audioStartMs
-          ? _self.audioStartMs
-          : audioStartMs // ignore: cast_nullable_to_non_nullable
-              as int,
-      audioEndMs: freezed == audioEndMs
-          ? _self.audioEndMs
-          : audioEndMs // ignore: cast_nullable_to_non_nullable
-              as int?,
-      audio: freezed == audio
-          ? _self.audio
-          : audio // ignore: cast_nullable_to_non_nullable
-              as Uint8List?,
-    ));
+    return _then(
+      ItemSpeech(
+        audioStartMs: null == audioStartMs
+            ? _self.audioStartMs
+            : audioStartMs // ignore: cast_nullable_to_non_nullable
+                  as int,
+        audioEndMs: freezed == audioEndMs
+            ? _self.audioEndMs
+            : audioEndMs // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        audio: freezed == audio
+            ? _self.audio
+            : audio // ignore: cast_nullable_to_non_nullable
+                  as Uint8List?,
+      ),
+    );
   }
 }
 
@@ -12503,12 +13245,11 @@ extension ItemSpeechPatterns on ItemSpeech {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            int audioStartMs,
-            @JsonKey(includeIfNull: false) int? audioEndMs,
-            @Uint8ListConverter()
-            @JsonKey(includeIfNull: false)
-            Uint8List? audio)?
-        $default, {
+      int audioStartMs,
+      @JsonKey(includeIfNull: false) int? audioEndMs,
+      @Uint8ListConverter() @JsonKey(includeIfNull: false) Uint8List? audio,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
@@ -12536,12 +13277,11 @@ extension ItemSpeechPatterns on ItemSpeech {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            int audioStartMs,
-            @JsonKey(includeIfNull: false) int? audioEndMs,
-            @Uint8ListConverter()
-            @JsonKey(includeIfNull: false)
-            Uint8List? audio)
-        $default,
+      int audioStartMs,
+      @JsonKey(includeIfNull: false) int? audioEndMs,
+      @Uint8ListConverter() @JsonKey(includeIfNull: false) Uint8List? audio,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
@@ -12567,12 +13307,11 @@ extension ItemSpeechPatterns on ItemSpeech {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            int audioStartMs,
-            @JsonKey(includeIfNull: false) int? audioEndMs,
-            @Uint8ListConverter()
-            @JsonKey(includeIfNull: false)
-            Uint8List? audio)?
-        $default,
+      int audioStartMs,
+      @JsonKey(includeIfNull: false) int? audioEndMs,
+      @Uint8ListConverter() @JsonKey(includeIfNull: false) Uint8List? audio,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
@@ -12587,11 +13326,11 @@ extension ItemSpeechPatterns on ItemSpeech {
 /// @nodoc
 @JsonSerializable()
 class _ItemSpeech extends ItemSpeech {
-  const _ItemSpeech(
-      {required this.audioStartMs,
-      @JsonKey(includeIfNull: false) this.audioEndMs,
-      @Uint8ListConverter() @JsonKey(includeIfNull: false) this.audio})
-      : super._();
+  const _ItemSpeech({
+    required this.audioStartMs,
+    @JsonKey(includeIfNull: false) this.audioEndMs,
+    @Uint8ListConverter() @JsonKey(includeIfNull: false) this.audio,
+  }) : super._();
   factory _ItemSpeech.fromJson(Map<String, dynamic> json) =>
       _$ItemSpeechFromJson(json);
 
@@ -12620,9 +13359,7 @@ class _ItemSpeech extends ItemSpeech {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ItemSpeechToJson(
-      this,
-    );
+    return _$ItemSpeechToJson(this);
   }
 
   @override
@@ -12639,8 +13376,14 @@ class _ItemSpeech extends ItemSpeech {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, audioStartMs, audioEndMs,
-      const DeepCollectionEquality().hash(audio));
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      audioStartMs,
+      audioEndMs,
+      const DeepCollectionEquality().hash(audio),
+    );
+  }
 
   @override
   String toString() {
@@ -12652,14 +13395,16 @@ class _ItemSpeech extends ItemSpeech {
 abstract mixin class _$ItemSpeechCopyWith<$Res>
     implements $ItemSpeechCopyWith<$Res> {
   factory _$ItemSpeechCopyWith(
-          _ItemSpeech value, $Res Function(_ItemSpeech) _then) =
-      __$ItemSpeechCopyWithImpl;
+    _ItemSpeech value,
+    $Res Function(_ItemSpeech) _then,
+  ) = __$ItemSpeechCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {int audioStartMs,
-      @JsonKey(includeIfNull: false) int? audioEndMs,
-      @Uint8ListConverter() @JsonKey(includeIfNull: false) Uint8List? audio});
+  $Res call({
+    int audioStartMs,
+    @JsonKey(includeIfNull: false) int? audioEndMs,
+    @Uint8ListConverter() @JsonKey(includeIfNull: false) Uint8List? audio,
+  });
 }
 
 /// @nodoc
@@ -12678,20 +13423,22 @@ class __$ItemSpeechCopyWithImpl<$Res> implements _$ItemSpeechCopyWith<$Res> {
     Object? audioEndMs = freezed,
     Object? audio = freezed,
   }) {
-    return _then(_ItemSpeech(
-      audioStartMs: null == audioStartMs
-          ? _self.audioStartMs
-          : audioStartMs // ignore: cast_nullable_to_non_nullable
-              as int,
-      audioEndMs: freezed == audioEndMs
-          ? _self.audioEndMs
-          : audioEndMs // ignore: cast_nullable_to_non_nullable
-              as int?,
-      audio: freezed == audio
-          ? _self.audio
-          : audio // ignore: cast_nullable_to_non_nullable
-              as Uint8List?,
-    ));
+    return _then(
+      _ItemSpeech(
+        audioStartMs: null == audioStartMs
+            ? _self.audioStartMs
+            : audioStartMs // ignore: cast_nullable_to_non_nullable
+                  as int,
+        audioEndMs: freezed == audioEndMs
+            ? _self.audioEndMs
+            : audioEndMs // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        audio: freezed == audio
+            ? _self.audio
+            : audio // ignore: cast_nullable_to_non_nullable
+                  as Uint8List?,
+      ),
+    );
   }
 }
 
@@ -12706,35 +13453,43 @@ mixin _$ItemTranscript {
   @pragma('vm:prefer-inline')
   $ItemTranscriptCopyWith<ItemTranscript> get copyWith =>
       _$ItemTranscriptCopyWithImpl<ItemTranscript>(
-          this as ItemTranscript, _$identity);
+        this as ItemTranscript,
+        _$identity,
+      );
 
   /// Serializes this ItemTranscript to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as ItemTranscript;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ItemTranscript &&
-            (identical(other.transcript, transcript) ||
-                other.transcript == transcript));
+            (identical(other.transcript, _this.transcript) ||
+                other.transcript == _this.transcript));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, transcript);
+  int get hashCode {
+    final _this = this as ItemTranscript;
+    return Object.hash(runtimeType, _this.transcript);
+  }
 
   @override
   String toString() {
-    return 'ItemTranscript(transcript: $transcript)';
+    final _this = this as ItemTranscript;
+    return 'ItemTranscript(transcript: ${_this.transcript})';
   }
 }
 
 /// @nodoc
 abstract mixin class $ItemTranscriptCopyWith<$Res> {
   factory $ItemTranscriptCopyWith(
-          ItemTranscript value, $Res Function(ItemTranscript) _then) =
-      _$ItemTranscriptCopyWithImpl;
+    ItemTranscript value,
+    $Res Function(ItemTranscript) _then,
+  ) = _$ItemTranscriptCopyWithImpl;
   @useResult
   $Res call({String transcript});
 }
@@ -12751,15 +13506,15 @@ class _$ItemTranscriptCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? transcript = null,
-  }) {
-    return _then(_self.copyWith(
-      transcript: null == transcript
-          ? _self.transcript
-          : transcript // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+  $Res call({Object? transcript = null}) {
+    return _then(
+      ItemTranscript(
+        transcript: null == transcript
+            ? _self.transcript
+            : transcript // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
@@ -12941,9 +13696,7 @@ class _ItemTranscript extends ItemTranscript {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ItemTranscriptToJson(
-      this,
-    );
+    return _$ItemTranscriptToJson(this);
   }
 
   @override
@@ -12957,7 +13710,9 @@ class _ItemTranscript extends ItemTranscript {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, transcript);
+  int get hashCode {
+    return Object.hash(runtimeType, transcript);
+  }
 
   @override
   String toString() {
@@ -12969,8 +13724,9 @@ class _ItemTranscript extends ItemTranscript {
 abstract mixin class _$ItemTranscriptCopyWith<$Res>
     implements $ItemTranscriptCopyWith<$Res> {
   factory _$ItemTranscriptCopyWith(
-          _ItemTranscript value, $Res Function(_ItemTranscript) _then) =
-      __$ItemTranscriptCopyWithImpl;
+    _ItemTranscript value,
+    $Res Function(_ItemTranscript) _then,
+  ) = __$ItemTranscriptCopyWithImpl;
   @override
   @useResult
   $Res call({String transcript});
@@ -12988,15 +13744,15 @@ class __$ItemTranscriptCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? transcript = null,
-  }) {
-    return _then(_ItemTranscript(
-      transcript: null == transcript
-          ? _self.transcript
-          : transcript // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+  $Res call({Object? transcript = null}) {
+    return _then(
+      _ItemTranscript(
+        transcript: null == transcript
+            ? _self.transcript
+            : transcript // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
@@ -13020,42 +13776,52 @@ mixin _$EventHandlerResult {
   @pragma('vm:prefer-inline')
   $EventHandlerResultCopyWith<EventHandlerResult> get copyWith =>
       _$EventHandlerResultCopyWithImpl<EventHandlerResult>(
-          this as EventHandlerResult, _$identity);
+        this as EventHandlerResult,
+        _$identity,
+      );
 
   /// Serializes this EventHandlerResult to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as EventHandlerResult;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is EventHandlerResult &&
-            (identical(other.item, item) || other.item == item) &&
-            (identical(other.delta, delta) || other.delta == delta) &&
-            (identical(other.response, response) ||
-                other.response == response));
+            (identical(other.item, _this.item) || other.item == _this.item) &&
+            (identical(other.delta, _this.delta) ||
+                other.delta == _this.delta) &&
+            (identical(other.response, _this.response) ||
+                other.response == _this.response));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, item, delta, response);
+  int get hashCode {
+    final _this = this as EventHandlerResult;
+    return Object.hash(runtimeType, _this.item, _this.delta, _this.response);
+  }
 
   @override
   String toString() {
-    return 'EventHandlerResult(item: $item, delta: $delta, response: $response)';
+    final _this = this as EventHandlerResult;
+    return 'EventHandlerResult(item: ${_this.item}, delta: ${_this.delta}, response: ${_this.response})';
   }
 }
 
 /// @nodoc
 abstract mixin class $EventHandlerResultCopyWith<$Res> {
   factory $EventHandlerResultCopyWith(
-          EventHandlerResult value, $Res Function(EventHandlerResult) _then) =
-      _$EventHandlerResultCopyWithImpl;
+    EventHandlerResult value,
+    $Res Function(EventHandlerResult) _then,
+  ) = _$EventHandlerResultCopyWithImpl;
   @useResult
-  $Res call(
-      {@JsonKey(includeIfNull: false) FormattedItem? item,
-      @JsonKey(includeIfNull: false) Delta? delta,
-      @JsonKey(includeIfNull: false) Response? response});
+  $Res call({
+    @JsonKey(includeIfNull: false) FormattedItem? item,
+    @JsonKey(includeIfNull: false) Delta? delta,
+    @JsonKey(includeIfNull: false) Response? response,
+  });
 
   $FormattedItemCopyWith<$Res>? get item;
   $DeltaCopyWith<$Res>? get delta;
@@ -13079,20 +13845,22 @@ class _$EventHandlerResultCopyWithImpl<$Res>
     Object? delta = freezed,
     Object? response = freezed,
   }) {
-    return _then(_self.copyWith(
-      item: freezed == item
-          ? _self.item
-          : item // ignore: cast_nullable_to_non_nullable
-              as FormattedItem?,
-      delta: freezed == delta
-          ? _self.delta
-          : delta // ignore: cast_nullable_to_non_nullable
-              as Delta?,
-      response: freezed == response
-          ? _self.response
-          : response // ignore: cast_nullable_to_non_nullable
-              as Response?,
-    ));
+    return _then(
+      EventHandlerResult(
+        item: freezed == item
+            ? _self.item
+            : item // ignore: cast_nullable_to_non_nullable
+                  as FormattedItem?,
+        delta: freezed == delta
+            ? _self.delta
+            : delta // ignore: cast_nullable_to_non_nullable
+                  as Delta?,
+        response: freezed == response
+            ? _self.response
+            : response // ignore: cast_nullable_to_non_nullable
+                  as Response?,
+      ),
+    );
   }
 
   /// Create a copy of EventHandlerResult
@@ -13232,10 +14000,11 @@ extension EventHandlerResultPatterns on EventHandlerResult {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            @JsonKey(includeIfNull: false) FormattedItem? item,
-            @JsonKey(includeIfNull: false) Delta? delta,
-            @JsonKey(includeIfNull: false) Response? response)?
-        $default, {
+      @JsonKey(includeIfNull: false) FormattedItem? item,
+      @JsonKey(includeIfNull: false) Delta? delta,
+      @JsonKey(includeIfNull: false) Response? response,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
@@ -13263,10 +14032,11 @@ extension EventHandlerResultPatterns on EventHandlerResult {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            @JsonKey(includeIfNull: false) FormattedItem? item,
-            @JsonKey(includeIfNull: false) Delta? delta,
-            @JsonKey(includeIfNull: false) Response? response)
-        $default,
+      @JsonKey(includeIfNull: false) FormattedItem? item,
+      @JsonKey(includeIfNull: false) Delta? delta,
+      @JsonKey(includeIfNull: false) Response? response,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
@@ -13292,10 +14062,11 @@ extension EventHandlerResultPatterns on EventHandlerResult {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            @JsonKey(includeIfNull: false) FormattedItem? item,
-            @JsonKey(includeIfNull: false) Delta? delta,
-            @JsonKey(includeIfNull: false) Response? response)?
-        $default,
+      @JsonKey(includeIfNull: false) FormattedItem? item,
+      @JsonKey(includeIfNull: false) Delta? delta,
+      @JsonKey(includeIfNull: false) Response? response,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
@@ -13310,11 +14081,11 @@ extension EventHandlerResultPatterns on EventHandlerResult {
 /// @nodoc
 @JsonSerializable()
 class _EventHandlerResult extends EventHandlerResult {
-  const _EventHandlerResult(
-      {@JsonKey(includeIfNull: false) this.item,
-      @JsonKey(includeIfNull: false) this.delta,
-      @JsonKey(includeIfNull: false) this.response})
-      : super._();
+  const _EventHandlerResult({
+    @JsonKey(includeIfNull: false) this.item,
+    @JsonKey(includeIfNull: false) this.delta,
+    @JsonKey(includeIfNull: false) this.response,
+  }) : super._();
   factory _EventHandlerResult.fromJson(Map<String, dynamic> json) =>
       _$EventHandlerResultFromJson(json);
 
@@ -13343,9 +14114,7 @@ class _EventHandlerResult extends EventHandlerResult {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$EventHandlerResultToJson(
-      this,
-    );
+    return _$EventHandlerResultToJson(this);
   }
 
   @override
@@ -13361,7 +14130,9 @@ class _EventHandlerResult extends EventHandlerResult {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, item, delta, response);
+  int get hashCode {
+    return Object.hash(runtimeType, item, delta, response);
+  }
 
   @override
   String toString() {
@@ -13373,14 +14144,16 @@ class _EventHandlerResult extends EventHandlerResult {
 abstract mixin class _$EventHandlerResultCopyWith<$Res>
     implements $EventHandlerResultCopyWith<$Res> {
   factory _$EventHandlerResultCopyWith(
-          _EventHandlerResult value, $Res Function(_EventHandlerResult) _then) =
-      __$EventHandlerResultCopyWithImpl;
+    _EventHandlerResult value,
+    $Res Function(_EventHandlerResult) _then,
+  ) = __$EventHandlerResultCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(includeIfNull: false) FormattedItem? item,
-      @JsonKey(includeIfNull: false) Delta? delta,
-      @JsonKey(includeIfNull: false) Response? response});
+  $Res call({
+    @JsonKey(includeIfNull: false) FormattedItem? item,
+    @JsonKey(includeIfNull: false) Delta? delta,
+    @JsonKey(includeIfNull: false) Response? response,
+  });
 
   @override
   $FormattedItemCopyWith<$Res>? get item;
@@ -13407,20 +14180,22 @@ class __$EventHandlerResultCopyWithImpl<$Res>
     Object? delta = freezed,
     Object? response = freezed,
   }) {
-    return _then(_EventHandlerResult(
-      item: freezed == item
-          ? _self.item
-          : item // ignore: cast_nullable_to_non_nullable
-              as FormattedItem?,
-      delta: freezed == delta
-          ? _self.delta
-          : delta // ignore: cast_nullable_to_non_nullable
-              as Delta?,
-      response: freezed == response
-          ? _self.response
-          : response // ignore: cast_nullable_to_non_nullable
-              as Response?,
-    ));
+    return _then(
+      _EventHandlerResult(
+        item: freezed == item
+            ? _self.item
+            : item // ignore: cast_nullable_to_non_nullable
+                  as FormattedItem?,
+        delta: freezed == delta
+            ? _self.delta
+            : delta // ignore: cast_nullable_to_non_nullable
+                  as Delta?,
+        response: freezed == response
+            ? _self.response
+            : response // ignore: cast_nullable_to_non_nullable
+                  as Response?,
+      ),
+    );
   }
 
   /// Create a copy of EventHandlerResult
@@ -13490,43 +14265,60 @@ mixin _$TranscriptionError {
   @pragma('vm:prefer-inline')
   $TranscriptionErrorCopyWith<TranscriptionError> get copyWith =>
       _$TranscriptionErrorCopyWithImpl<TranscriptionError>(
-          this as TranscriptionError, _$identity);
+        this as TranscriptionError,
+        _$identity,
+      );
 
   /// Serializes this TranscriptionError to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as TranscriptionError;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is TranscriptionError &&
-            (identical(other.type, type) || other.type == type) &&
-            (identical(other.code, code) || other.code == code) &&
-            (identical(other.message, message) || other.message == message) &&
-            (identical(other.param, param) || other.param == param));
+            (identical(other.type, _this.type) || other.type == _this.type) &&
+            (identical(other.code, _this.code) || other.code == _this.code) &&
+            (identical(other.message, _this.message) ||
+                other.message == _this.message) &&
+            (identical(other.param, _this.param) ||
+                other.param == _this.param));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, code, message, param);
+  int get hashCode {
+    final _this = this as TranscriptionError;
+    return Object.hash(
+      runtimeType,
+      _this.type,
+      _this.code,
+      _this.message,
+      _this.param,
+    );
+  }
 
   @override
   String toString() {
-    return 'TranscriptionError(type: $type, code: $code, message: $message, param: $param)';
+    final _this = this as TranscriptionError;
+    return 'TranscriptionError(type: ${_this.type}, code: ${_this.code}, message: ${_this.message}, param: ${_this.param})';
   }
 }
 
 /// @nodoc
 abstract mixin class $TranscriptionErrorCopyWith<$Res> {
   factory $TranscriptionErrorCopyWith(
-          TranscriptionError value, $Res Function(TranscriptionError) _then) =
-      _$TranscriptionErrorCopyWithImpl;
+    TranscriptionError value,
+    $Res Function(TranscriptionError) _then,
+  ) = _$TranscriptionErrorCopyWithImpl;
   @useResult
-  $Res call(
-      {@JsonKey(includeIfNull: false) String? type,
-      @JsonKey(includeIfNull: false) String? code,
-      @JsonKey(includeIfNull: false) String? message,
-      @JsonKey(includeIfNull: false) String? param});
+  $Res call({
+    @JsonKey(includeIfNull: false) String? type,
+    @JsonKey(includeIfNull: false) String? code,
+    @JsonKey(includeIfNull: false) String? message,
+    @JsonKey(includeIfNull: false) String? param,
+  });
 }
 
 /// @nodoc
@@ -13547,24 +14339,26 @@ class _$TranscriptionErrorCopyWithImpl<$Res>
     Object? message = freezed,
     Object? param = freezed,
   }) {
-    return _then(_self.copyWith(
-      type: freezed == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as String?,
-      code: freezed == code
-          ? _self.code
-          : code // ignore: cast_nullable_to_non_nullable
-              as String?,
-      message: freezed == message
-          ? _self.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String?,
-      param: freezed == param
-          ? _self.param
-          : param // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      TranscriptionError(
+        type: freezed == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        code: freezed == code
+            ? _self.code
+            : code // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        message: freezed == message
+            ? _self.message
+            : message // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        param: freezed == param
+            ? _self.param
+            : param // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
@@ -13662,11 +14456,12 @@ extension TranscriptionErrorPatterns on TranscriptionError {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            @JsonKey(includeIfNull: false) String? type,
-            @JsonKey(includeIfNull: false) String? code,
-            @JsonKey(includeIfNull: false) String? message,
-            @JsonKey(includeIfNull: false) String? param)?
-        $default, {
+      @JsonKey(includeIfNull: false) String? type,
+      @JsonKey(includeIfNull: false) String? code,
+      @JsonKey(includeIfNull: false) String? message,
+      @JsonKey(includeIfNull: false) String? param,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
@@ -13694,11 +14489,12 @@ extension TranscriptionErrorPatterns on TranscriptionError {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            @JsonKey(includeIfNull: false) String? type,
-            @JsonKey(includeIfNull: false) String? code,
-            @JsonKey(includeIfNull: false) String? message,
-            @JsonKey(includeIfNull: false) String? param)
-        $default,
+      @JsonKey(includeIfNull: false) String? type,
+      @JsonKey(includeIfNull: false) String? code,
+      @JsonKey(includeIfNull: false) String? message,
+      @JsonKey(includeIfNull: false) String? param,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
@@ -13724,11 +14520,12 @@ extension TranscriptionErrorPatterns on TranscriptionError {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            @JsonKey(includeIfNull: false) String? type,
-            @JsonKey(includeIfNull: false) String? code,
-            @JsonKey(includeIfNull: false) String? message,
-            @JsonKey(includeIfNull: false) String? param)?
-        $default,
+      @JsonKey(includeIfNull: false) String? type,
+      @JsonKey(includeIfNull: false) String? code,
+      @JsonKey(includeIfNull: false) String? message,
+      @JsonKey(includeIfNull: false) String? param,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
@@ -13743,12 +14540,12 @@ extension TranscriptionErrorPatterns on TranscriptionError {
 /// @nodoc
 @JsonSerializable()
 class _TranscriptionError extends TranscriptionError {
-  const _TranscriptionError(
-      {@JsonKey(includeIfNull: false) this.type,
-      @JsonKey(includeIfNull: false) this.code,
-      @JsonKey(includeIfNull: false) this.message,
-      @JsonKey(includeIfNull: false) this.param})
-      : super._();
+  const _TranscriptionError({
+    @JsonKey(includeIfNull: false) this.type,
+    @JsonKey(includeIfNull: false) this.code,
+    @JsonKey(includeIfNull: false) this.message,
+    @JsonKey(includeIfNull: false) this.param,
+  }) : super._();
   factory _TranscriptionError.fromJson(Map<String, dynamic> json) =>
       _$TranscriptionErrorFromJson(json);
 
@@ -13782,9 +14579,7 @@ class _TranscriptionError extends TranscriptionError {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$TranscriptionErrorToJson(
-      this,
-    );
+    return _$TranscriptionErrorToJson(this);
   }
 
   @override
@@ -13800,7 +14595,9 @@ class _TranscriptionError extends TranscriptionError {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, code, message, param);
+  int get hashCode {
+    return Object.hash(runtimeType, type, code, message, param);
+  }
 
   @override
   String toString() {
@@ -13812,15 +14609,17 @@ class _TranscriptionError extends TranscriptionError {
 abstract mixin class _$TranscriptionErrorCopyWith<$Res>
     implements $TranscriptionErrorCopyWith<$Res> {
   factory _$TranscriptionErrorCopyWith(
-          _TranscriptionError value, $Res Function(_TranscriptionError) _then) =
-      __$TranscriptionErrorCopyWithImpl;
+    _TranscriptionError value,
+    $Res Function(_TranscriptionError) _then,
+  ) = __$TranscriptionErrorCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(includeIfNull: false) String? type,
-      @JsonKey(includeIfNull: false) String? code,
-      @JsonKey(includeIfNull: false) String? message,
-      @JsonKey(includeIfNull: false) String? param});
+  $Res call({
+    @JsonKey(includeIfNull: false) String? type,
+    @JsonKey(includeIfNull: false) String? code,
+    @JsonKey(includeIfNull: false) String? message,
+    @JsonKey(includeIfNull: false) String? param,
+  });
 }
 
 /// @nodoc
@@ -13841,24 +14640,26 @@ class __$TranscriptionErrorCopyWithImpl<$Res>
     Object? message = freezed,
     Object? param = freezed,
   }) {
-    return _then(_TranscriptionError(
-      type: freezed == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as String?,
-      code: freezed == code
-          ? _self.code
-          : code // ignore: cast_nullable_to_non_nullable
-              as String?,
-      message: freezed == message
-          ? _self.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String?,
-      param: freezed == param
-          ? _self.param
-          : param // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      _TranscriptionError(
+        type: freezed == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        code: freezed == code
+            ? _self.code
+            : code // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        message: freezed == message
+            ? _self.message
+            : message // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        param: freezed == param
+            ? _self.param
+            : param // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
@@ -13896,24 +14697,38 @@ mixin _$APIError {
 
   @override
   bool operator ==(Object other) {
+    final _this = this as APIError;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is APIError &&
-            (identical(other.type, type) || other.type == type) &&
-            (identical(other.code, code) || other.code == code) &&
-            (identical(other.message, message) || other.message == message) &&
-            (identical(other.param, param) || other.param == param) &&
-            (identical(other.eventId, eventId) || other.eventId == eventId));
+            (identical(other.type, _this.type) || other.type == _this.type) &&
+            (identical(other.code, _this.code) || other.code == _this.code) &&
+            (identical(other.message, _this.message) ||
+                other.message == _this.message) &&
+            (identical(other.param, _this.param) ||
+                other.param == _this.param) &&
+            (identical(other.eventId, _this.eventId) ||
+                other.eventId == _this.eventId));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, type, code, message, param, eventId);
+  int get hashCode {
+    final _this = this as APIError;
+    return Object.hash(
+      runtimeType,
+      _this.type,
+      _this.code,
+      _this.message,
+      _this.param,
+      _this.eventId,
+    );
+  }
 
   @override
   String toString() {
-    return 'APIError(type: $type, code: $code, message: $message, param: $param, eventId: $eventId)';
+    final _this = this as APIError;
+    return 'APIError(type: ${_this.type}, code: ${_this.code}, message: ${_this.message}, param: ${_this.param}, eventId: ${_this.eventId})';
   }
 }
 
@@ -13922,12 +14737,13 @@ abstract mixin class $APIErrorCopyWith<$Res> {
   factory $APIErrorCopyWith(APIError value, $Res Function(APIError) _then) =
       _$APIErrorCopyWithImpl;
   @useResult
-  $Res call(
-      {@JsonKey(includeIfNull: false) String? type,
-      @JsonKey(includeIfNull: false) String? code,
-      @JsonKey(includeIfNull: false) String? message,
-      @JsonKey(includeIfNull: false) String? param,
-      @JsonKey(name: 'event_id', includeIfNull: false) String? eventId});
+  $Res call({
+    @JsonKey(includeIfNull: false) String? type,
+    @JsonKey(includeIfNull: false) String? code,
+    @JsonKey(includeIfNull: false) String? message,
+    @JsonKey(includeIfNull: false) String? param,
+    @JsonKey(name: 'event_id', includeIfNull: false) String? eventId,
+  });
 }
 
 /// @nodoc
@@ -13948,28 +14764,30 @@ class _$APIErrorCopyWithImpl<$Res> implements $APIErrorCopyWith<$Res> {
     Object? param = freezed,
     Object? eventId = freezed,
   }) {
-    return _then(_self.copyWith(
-      type: freezed == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as String?,
-      code: freezed == code
-          ? _self.code
-          : code // ignore: cast_nullable_to_non_nullable
-              as String?,
-      message: freezed == message
-          ? _self.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String?,
-      param: freezed == param
-          ? _self.param
-          : param // ignore: cast_nullable_to_non_nullable
-              as String?,
-      eventId: freezed == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      APIError(
+        type: freezed == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        code: freezed == code
+            ? _self.code
+            : code // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        message: freezed == message
+            ? _self.message
+            : message // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        param: freezed == param
+            ? _self.param
+            : param // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        eventId: freezed == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
@@ -14067,19 +14885,25 @@ extension APIErrorPatterns on APIError {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            @JsonKey(includeIfNull: false) String? type,
-            @JsonKey(includeIfNull: false) String? code,
-            @JsonKey(includeIfNull: false) String? message,
-            @JsonKey(includeIfNull: false) String? param,
-            @JsonKey(name: 'event_id', includeIfNull: false) String? eventId)?
-        $default, {
+      @JsonKey(includeIfNull: false) String? type,
+      @JsonKey(includeIfNull: false) String? code,
+      @JsonKey(includeIfNull: false) String? message,
+      @JsonKey(includeIfNull: false) String? param,
+      @JsonKey(name: 'event_id', includeIfNull: false) String? eventId,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _APIError() when $default != null:
         return $default(
-            _that.type, _that.code, _that.message, _that.param, _that.eventId);
+          _that.type,
+          _that.code,
+          _that.message,
+          _that.param,
+          _that.eventId,
+        );
       case _:
         return orElse();
     }
@@ -14101,18 +14925,24 @@ extension APIErrorPatterns on APIError {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            @JsonKey(includeIfNull: false) String? type,
-            @JsonKey(includeIfNull: false) String? code,
-            @JsonKey(includeIfNull: false) String? message,
-            @JsonKey(includeIfNull: false) String? param,
-            @JsonKey(name: 'event_id', includeIfNull: false) String? eventId)
-        $default,
+      @JsonKey(includeIfNull: false) String? type,
+      @JsonKey(includeIfNull: false) String? code,
+      @JsonKey(includeIfNull: false) String? message,
+      @JsonKey(includeIfNull: false) String? param,
+      @JsonKey(name: 'event_id', includeIfNull: false) String? eventId,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _APIError():
         return $default(
-            _that.type, _that.code, _that.message, _that.param, _that.eventId);
+          _that.type,
+          _that.code,
+          _that.message,
+          _that.param,
+          _that.eventId,
+        );
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -14133,18 +14963,24 @@ extension APIErrorPatterns on APIError {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            @JsonKey(includeIfNull: false) String? type,
-            @JsonKey(includeIfNull: false) String? code,
-            @JsonKey(includeIfNull: false) String? message,
-            @JsonKey(includeIfNull: false) String? param,
-            @JsonKey(name: 'event_id', includeIfNull: false) String? eventId)?
-        $default,
+      @JsonKey(includeIfNull: false) String? type,
+      @JsonKey(includeIfNull: false) String? code,
+      @JsonKey(includeIfNull: false) String? message,
+      @JsonKey(includeIfNull: false) String? param,
+      @JsonKey(name: 'event_id', includeIfNull: false) String? eventId,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _APIError() when $default != null:
         return $default(
-            _that.type, _that.code, _that.message, _that.param, _that.eventId);
+          _that.type,
+          _that.code,
+          _that.message,
+          _that.param,
+          _that.eventId,
+        );
       case _:
         return null;
     }
@@ -14154,13 +14990,13 @@ extension APIErrorPatterns on APIError {
 /// @nodoc
 @JsonSerializable()
 class _APIError extends APIError {
-  const _APIError(
-      {@JsonKey(includeIfNull: false) this.type,
-      @JsonKey(includeIfNull: false) this.code,
-      @JsonKey(includeIfNull: false) this.message,
-      @JsonKey(includeIfNull: false) this.param,
-      @JsonKey(name: 'event_id', includeIfNull: false) this.eventId})
-      : super._();
+  const _APIError({
+    @JsonKey(includeIfNull: false) this.type,
+    @JsonKey(includeIfNull: false) this.code,
+    @JsonKey(includeIfNull: false) this.message,
+    @JsonKey(includeIfNull: false) this.param,
+    @JsonKey(name: 'event_id', includeIfNull: false) this.eventId,
+  }) : super._();
   factory _APIError.fromJson(Map<String, dynamic> json) =>
       _$APIErrorFromJson(json);
 
@@ -14199,9 +15035,7 @@ class _APIError extends APIError {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$APIErrorToJson(
-      this,
-    );
+    return _$APIErrorToJson(this);
   }
 
   @override
@@ -14218,8 +15052,9 @@ class _APIError extends APIError {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, type, code, message, param, eventId);
+  int get hashCode {
+    return Object.hash(runtimeType, type, code, message, param, eventId);
+  }
 
   @override
   String toString() {
@@ -14234,12 +15069,13 @@ abstract mixin class _$APIErrorCopyWith<$Res>
       __$APIErrorCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(includeIfNull: false) String? type,
-      @JsonKey(includeIfNull: false) String? code,
-      @JsonKey(includeIfNull: false) String? message,
-      @JsonKey(includeIfNull: false) String? param,
-      @JsonKey(name: 'event_id', includeIfNull: false) String? eventId});
+  $Res call({
+    @JsonKey(includeIfNull: false) String? type,
+    @JsonKey(includeIfNull: false) String? code,
+    @JsonKey(includeIfNull: false) String? message,
+    @JsonKey(includeIfNull: false) String? param,
+    @JsonKey(name: 'event_id', includeIfNull: false) String? eventId,
+  });
 }
 
 /// @nodoc
@@ -14260,28 +15096,30 @@ class __$APIErrorCopyWithImpl<$Res> implements _$APIErrorCopyWith<$Res> {
     Object? param = freezed,
     Object? eventId = freezed,
   }) {
-    return _then(_APIError(
-      type: freezed == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as String?,
-      code: freezed == code
-          ? _self.code
-          : code // ignore: cast_nullable_to_non_nullable
-              as String?,
-      message: freezed == message
-          ? _self.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String?,
-      param: freezed == param
-          ? _self.param
-          : param // ignore: cast_nullable_to_non_nullable
-              as String?,
-      eventId: freezed == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      _APIError(
+        type: freezed == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        code: freezed == code
+            ? _self.code
+            : code // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        message: freezed == message
+            ? _self.message
+            : message // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        param: freezed == param
+            ? _self.param
+            : param // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        eventId: freezed == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
@@ -14298,7 +15136,11 @@ ContentPart _$ContentPartFromJson(Map<String, dynamic> json) {
 
     default:
       throw CheckedFromJsonException(
-          json, 'type', 'ContentPart', 'Invalid union type "${json['type']}"!');
+        json,
+        'type',
+        'ContentPart',
+        'Invalid union type "${json['type']}"!',
+      );
   }
 }
 
@@ -14319,27 +15161,33 @@ mixin _$ContentPart {
 
   @override
   bool operator ==(Object other) {
+    final _this = this as ContentPart;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ContentPart &&
-            (identical(other.type, type) || other.type == type));
+            (identical(other.type, _this.type) || other.type == _this.type));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type);
+  int get hashCode {
+    final _this = this as ContentPart;
+    return Object.hash(runtimeType, _this.type);
+  }
 
   @override
   String toString() {
-    return 'ContentPart(type: $type)';
+    final _this = this as ContentPart;
+    return 'ContentPart(type: ${_this.type})';
   }
 }
 
 /// @nodoc
 abstract mixin class $ContentPartCopyWith<$Res> {
   factory $ContentPartCopyWith(
-          ContentPart value, $Res Function(ContentPart) _then) =
-      _$ContentPartCopyWithImpl;
+    ContentPart value,
+    $Res Function(ContentPart) _then,
+  ) = _$ContentPartCopyWithImpl;
   @useResult
   $Res call({ContentType type});
 }
@@ -14355,15 +15203,15 @@ class _$ContentPartCopyWithImpl<$Res> implements $ContentPartCopyWith<$Res> {
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? type = null,
-  }) {
-    return _then(_self.copyWith(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ContentType,
-    ));
+  $Res call({Object? type = null}) {
+    return _then(
+      _self.copyWith(
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ContentType,
+      ),
+    );
   }
 }
 
@@ -14487,16 +15335,18 @@ extension ContentPartPatterns on ContentPart {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(ContentType type, String text)? inputText,
     TResult Function(
-            ContentType type,
-            @JsonKey(includeIfNull: false) String? audio,
-            @JsonKey(includeIfNull: false) String? transcript)?
-        inputAudio,
+      ContentType type,
+      @JsonKey(includeIfNull: false) String? audio,
+      @JsonKey(includeIfNull: false) String? transcript,
+    )?
+    inputAudio,
     TResult Function(ContentType type, String text)? text,
     TResult Function(
-            ContentType type,
-            @JsonKey(includeIfNull: false) String? audio,
-            @JsonKey(includeIfNull: false) String? transcript)?
-        audio,
+      ContentType type,
+      @JsonKey(includeIfNull: false) String? audio,
+      @JsonKey(includeIfNull: false) String? transcript,
+    )?
+    audio,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -14531,16 +15381,18 @@ extension ContentPartPatterns on ContentPart {
   TResult when<TResult extends Object?>({
     required TResult Function(ContentType type, String text) inputText,
     required TResult Function(
-            ContentType type,
-            @JsonKey(includeIfNull: false) String? audio,
-            @JsonKey(includeIfNull: false) String? transcript)
-        inputAudio,
+      ContentType type,
+      @JsonKey(includeIfNull: false) String? audio,
+      @JsonKey(includeIfNull: false) String? transcript,
+    )
+    inputAudio,
     required TResult Function(ContentType type, String text) text,
     required TResult Function(
-            ContentType type,
-            @JsonKey(includeIfNull: false) String? audio,
-            @JsonKey(includeIfNull: false) String? transcript)
-        audio,
+      ContentType type,
+      @JsonKey(includeIfNull: false) String? audio,
+      @JsonKey(includeIfNull: false) String? transcript,
+    )
+    audio,
   }) {
     final _that = this;
     switch (_that) {
@@ -14571,16 +15423,18 @@ extension ContentPartPatterns on ContentPart {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(ContentType type, String text)? inputText,
     TResult? Function(
-            ContentType type,
-            @JsonKey(includeIfNull: false) String? audio,
-            @JsonKey(includeIfNull: false) String? transcript)?
-        inputAudio,
+      ContentType type,
+      @JsonKey(includeIfNull: false) String? audio,
+      @JsonKey(includeIfNull: false) String? transcript,
+    )?
+    inputAudio,
     TResult? Function(ContentType type, String text)? text,
     TResult? Function(
-            ContentType type,
-            @JsonKey(includeIfNull: false) String? audio,
-            @JsonKey(includeIfNull: false) String? transcript)?
-        audio,
+      ContentType type,
+      @JsonKey(includeIfNull: false) String? audio,
+      @JsonKey(includeIfNull: false) String? transcript,
+    )?
+    audio,
   }) {
     final _that = this;
     switch (_that) {
@@ -14601,9 +15455,10 @@ extension ContentPartPatterns on ContentPart {
 /// @nodoc
 @JsonSerializable()
 class ContentPartInputText extends ContentPart {
-  const ContentPartInputText(
-      {this.type = ContentType.inputText, required this.text})
-      : super._();
+  const ContentPartInputText({
+    this.type = ContentType.inputText,
+    required this.text,
+  }) : super._();
   factory ContentPartInputText.fromJson(Map<String, dynamic> json) =>
       _$ContentPartInputTextFromJson(json);
 
@@ -14622,13 +15477,13 @@ class ContentPartInputText extends ContentPart {
   @pragma('vm:prefer-inline')
   $ContentPartInputTextCopyWith<ContentPartInputText> get copyWith =>
       _$ContentPartInputTextCopyWithImpl<ContentPartInputText>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ContentPartInputTextToJson(
-      this,
-    );
+    return _$ContentPartInputTextToJson(this);
   }
 
   @override
@@ -14642,7 +15497,9 @@ class ContentPartInputText extends ContentPart {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, text);
+  int get hashCode {
+    return Object.hash(runtimeType, type, text);
+  }
 
   @override
   String toString() {
@@ -14653,9 +15510,10 @@ class ContentPartInputText extends ContentPart {
 /// @nodoc
 abstract mixin class $ContentPartInputTextCopyWith<$Res>
     implements $ContentPartCopyWith<$Res> {
-  factory $ContentPartInputTextCopyWith(ContentPartInputText value,
-          $Res Function(ContentPartInputText) _then) =
-      _$ContentPartInputTextCopyWithImpl;
+  factory $ContentPartInputTextCopyWith(
+    ContentPartInputText value,
+    $Res Function(ContentPartInputText) _then,
+  ) = _$ContentPartInputTextCopyWithImpl;
   @override
   @useResult
   $Res call({ContentType type, String text});
@@ -14673,31 +15531,30 @@ class _$ContentPartInputTextCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? type = null,
-    Object? text = null,
-  }) {
-    return _then(ContentPartInputText(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ContentType,
-      text: null == text
-          ? _self.text
-          : text // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+  $Res call({Object? type = null, Object? text = null}) {
+    return _then(
+      ContentPartInputText(
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ContentType,
+        text: null == text
+            ? _self.text
+            : text // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class ContentPartInputAudio extends ContentPart {
-  const ContentPartInputAudio(
-      {this.type = ContentType.inputAudio,
-      @JsonKey(includeIfNull: false) this.audio,
-      @JsonKey(includeIfNull: false) this.transcript})
-      : super._();
+  const ContentPartInputAudio({
+    this.type = ContentType.inputAudio,
+    @JsonKey(includeIfNull: false) this.audio,
+    @JsonKey(includeIfNull: false) this.transcript,
+  }) : super._();
   factory ContentPartInputAudio.fromJson(Map<String, dynamic> json) =>
       _$ContentPartInputAudioFromJson(json);
 
@@ -14721,13 +15578,13 @@ class ContentPartInputAudio extends ContentPart {
   @pragma('vm:prefer-inline')
   $ContentPartInputAudioCopyWith<ContentPartInputAudio> get copyWith =>
       _$ContentPartInputAudioCopyWithImpl<ContentPartInputAudio>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ContentPartInputAudioToJson(
-      this,
-    );
+    return _$ContentPartInputAudioToJson(this);
   }
 
   @override
@@ -14743,7 +15600,9 @@ class ContentPartInputAudio extends ContentPart {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, audio, transcript);
+  int get hashCode {
+    return Object.hash(runtimeType, type, audio, transcript);
+  }
 
   @override
   String toString() {
@@ -14754,15 +15613,17 @@ class ContentPartInputAudio extends ContentPart {
 /// @nodoc
 abstract mixin class $ContentPartInputAudioCopyWith<$Res>
     implements $ContentPartCopyWith<$Res> {
-  factory $ContentPartInputAudioCopyWith(ContentPartInputAudio value,
-          $Res Function(ContentPartInputAudio) _then) =
-      _$ContentPartInputAudioCopyWithImpl;
+  factory $ContentPartInputAudioCopyWith(
+    ContentPartInputAudio value,
+    $Res Function(ContentPartInputAudio) _then,
+  ) = _$ContentPartInputAudioCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {ContentType type,
-      @JsonKey(includeIfNull: false) String? audio,
-      @JsonKey(includeIfNull: false) String? transcript});
+  $Res call({
+    ContentType type,
+    @JsonKey(includeIfNull: false) String? audio,
+    @JsonKey(includeIfNull: false) String? transcript,
+  });
 }
 
 /// @nodoc
@@ -14782,20 +15643,22 @@ class _$ContentPartInputAudioCopyWithImpl<$Res>
     Object? audio = freezed,
     Object? transcript = freezed,
   }) {
-    return _then(ContentPartInputAudio(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ContentType,
-      audio: freezed == audio
-          ? _self.audio
-          : audio // ignore: cast_nullable_to_non_nullable
-              as String?,
-      transcript: freezed == transcript
-          ? _self.transcript
-          : transcript // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      ContentPartInputAudio(
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ContentType,
+        audio: freezed == audio
+            ? _self.audio
+            : audio // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        transcript: freezed == transcript
+            ? _self.transcript
+            : transcript // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
@@ -14803,7 +15666,7 @@ class _$ContentPartInputAudioCopyWithImpl<$Res>
 @JsonSerializable()
 class ContentPartText extends ContentPart {
   const ContentPartText({this.type = ContentType.text, required this.text})
-      : super._();
+    : super._();
   factory ContentPartText.fromJson(Map<String, dynamic> json) =>
       _$ContentPartTextFromJson(json);
 
@@ -14825,9 +15688,7 @@ class ContentPartText extends ContentPart {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ContentPartTextToJson(
-      this,
-    );
+    return _$ContentPartTextToJson(this);
   }
 
   @override
@@ -14841,7 +15702,9 @@ class ContentPartText extends ContentPart {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, text);
+  int get hashCode {
+    return Object.hash(runtimeType, type, text);
+  }
 
   @override
   String toString() {
@@ -14853,8 +15716,9 @@ class ContentPartText extends ContentPart {
 abstract mixin class $ContentPartTextCopyWith<$Res>
     implements $ContentPartCopyWith<$Res> {
   factory $ContentPartTextCopyWith(
-          ContentPartText value, $Res Function(ContentPartText) _then) =
-      _$ContentPartTextCopyWithImpl;
+    ContentPartText value,
+    $Res Function(ContentPartText) _then,
+  ) = _$ContentPartTextCopyWithImpl;
   @override
   @useResult
   $Res call({ContentType type, String text});
@@ -14872,31 +15736,30 @@ class _$ContentPartTextCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? type = null,
-    Object? text = null,
-  }) {
-    return _then(ContentPartText(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ContentType,
-      text: null == text
-          ? _self.text
-          : text // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+  $Res call({Object? type = null, Object? text = null}) {
+    return _then(
+      ContentPartText(
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ContentType,
+        text: null == text
+            ? _self.text
+            : text // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class ContentPartAudio extends ContentPart {
-  const ContentPartAudio(
-      {this.type = ContentType.audio,
-      @JsonKey(includeIfNull: false) this.audio,
-      @JsonKey(includeIfNull: false) this.transcript})
-      : super._();
+  const ContentPartAudio({
+    this.type = ContentType.audio,
+    @JsonKey(includeIfNull: false) this.audio,
+    @JsonKey(includeIfNull: false) this.transcript,
+  }) : super._();
   factory ContentPartAudio.fromJson(Map<String, dynamic> json) =>
       _$ContentPartAudioFromJson(json);
 
@@ -14923,9 +15786,7 @@ class ContentPartAudio extends ContentPart {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ContentPartAudioToJson(
-      this,
-    );
+    return _$ContentPartAudioToJson(this);
   }
 
   @override
@@ -14941,7 +15802,9 @@ class ContentPartAudio extends ContentPart {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, audio, transcript);
+  int get hashCode {
+    return Object.hash(runtimeType, type, audio, transcript);
+  }
 
   @override
   String toString() {
@@ -14953,14 +15816,16 @@ class ContentPartAudio extends ContentPart {
 abstract mixin class $ContentPartAudioCopyWith<$Res>
     implements $ContentPartCopyWith<$Res> {
   factory $ContentPartAudioCopyWith(
-          ContentPartAudio value, $Res Function(ContentPartAudio) _then) =
-      _$ContentPartAudioCopyWithImpl;
+    ContentPartAudio value,
+    $Res Function(ContentPartAudio) _then,
+  ) = _$ContentPartAudioCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {ContentType type,
-      @JsonKey(includeIfNull: false) String? audio,
-      @JsonKey(includeIfNull: false) String? transcript});
+  $Res call({
+    ContentType type,
+    @JsonKey(includeIfNull: false) String? audio,
+    @JsonKey(includeIfNull: false) String? transcript,
+  });
 }
 
 /// @nodoc
@@ -14980,20 +15845,22 @@ class _$ContentPartAudioCopyWithImpl<$Res>
     Object? audio = freezed,
     Object? transcript = freezed,
   }) {
-    return _then(ContentPartAudio(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ContentType,
-      audio: freezed == audio
-          ? _self.audio
-          : audio // ignore: cast_nullable_to_non_nullable
-              as String?,
-      transcript: freezed == transcript
-          ? _self.transcript
-          : transcript // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      ContentPartAudio(
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ContentType,
+        audio: freezed == audio
+            ? _self.audio
+            : audio // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        transcript: freezed == transcript
+            ? _self.transcript
+            : transcript // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
@@ -15008,7 +15875,11 @@ Item _$ItemFromJson(Map<String, dynamic> json) {
 
     default:
       throw CheckedFromJsonException(
-          json, 'type', 'Item', 'Invalid union type "${json['type']}"!');
+        json,
+        'type',
+        'Item',
+        'Invalid union type "${json['type']}"!',
+      );
   }
 }
 
@@ -15020,7 +15891,9 @@ mixin _$Item {
 
   /// The object type, must be "realtime.item".
   @JsonKey(
-      includeIfNull: false, unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   ObjectType? get object;
 
   /// The type of the item.
@@ -15029,7 +15902,9 @@ mixin _$Item {
   /// The status of the item. These have no effect on the conversation, but are accepted for consistency
   /// with the `conversation.item.created` event.
   @JsonKey(
-      includeIfNull: false, unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   ItemStatus? get status;
 
   /// Create a copy of Item
@@ -15044,22 +15919,35 @@ mixin _$Item {
 
   @override
   bool operator ==(Object other) {
+    final _this = this as Item;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Item &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.object, object) || other.object == object) &&
-            (identical(other.type, type) || other.type == type) &&
-            (identical(other.status, status) || other.status == status));
+            (identical(other.id, _this.id) || other.id == _this.id) &&
+            (identical(other.object, _this.object) ||
+                other.object == _this.object) &&
+            (identical(other.type, _this.type) || other.type == _this.type) &&
+            (identical(other.status, _this.status) ||
+                other.status == _this.status));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, object, type, status);
+  int get hashCode {
+    final _this = this as Item;
+    return Object.hash(
+      runtimeType,
+      _this.id,
+      _this.object,
+      _this.type,
+      _this.status,
+    );
+  }
 
   @override
   String toString() {
-    return 'Item(id: $id, object: $object, type: $type, status: $status)';
+    final _this = this as Item;
+    return 'Item(id: ${_this.id}, object: ${_this.object}, type: ${_this.type}, status: ${_this.status})';
   }
 }
 
@@ -15068,17 +15956,20 @@ abstract mixin class $ItemCopyWith<$Res> {
   factory $ItemCopyWith(Item value, $Res Function(Item) _then) =
       _$ItemCopyWithImpl;
   @useResult
-  $Res call(
-      {String id,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      ObjectType object,
-      ItemType type,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      ItemStatus? status});
+  $Res call({
+    String id,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    ObjectType object,
+    ItemType type,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    ItemStatus? status,
+  });
 }
 
 /// @nodoc
@@ -15098,24 +15989,26 @@ class _$ItemCopyWithImpl<$Res> implements $ItemCopyWith<$Res> {
     Object? type = null,
     Object? status = freezed,
   }) {
-    return _then(_self.copyWith(
-      id: null == id
-          ? _self.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      object: null == object
-          ? _self.object!
-          : object // ignore: cast_nullable_to_non_nullable
-              as ObjectType,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ItemType,
-      status: freezed == status
-          ? _self.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as ItemStatus?,
-    ));
+    return _then(
+      _self.copyWith(
+        id: null == id
+            ? _self.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        object: null == object
+            ? _self.object!
+            : object // ignore: cast_nullable_to_non_nullable
+                  as ObjectType,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ItemType,
+        status: freezed == status
+            ? _self.status
+            : status // ignore: cast_nullable_to_non_nullable
+                  as ItemStatus?,
+      ),
+    );
   }
 }
 
@@ -15229,58 +16122,85 @@ extension ItemPatterns on Item {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(
-            String id,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ObjectType? object,
-            ItemType type,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ItemStatus? status,
-            ItemRole role,
-            List<ContentPart> content)?
-        message,
+      String id,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ObjectType? object,
+      ItemType type,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ItemStatus? status,
+      ItemRole role,
+      List<ContentPart> content,
+    )?
+    message,
     TResult Function(
-            String id,
-            ObjectType object,
-            ItemType type,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ItemStatus? status,
-            @JsonKey(name: 'call_id') String callId,
-            String name,
-            String arguments)?
-        functionCall,
+      String id,
+      ObjectType object,
+      ItemType type,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ItemStatus? status,
+      @JsonKey(name: 'call_id') String callId,
+      String name,
+      String arguments,
+    )?
+    functionCall,
     TResult Function(
-            String id,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ObjectType? object,
-            ItemType type,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ItemStatus? status,
-            @JsonKey(name: 'call_id') String callId,
-            String output)?
-        functionCallOutput,
+      String id,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ObjectType? object,
+      ItemType type,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ItemStatus? status,
+      @JsonKey(name: 'call_id') String callId,
+      String output,
+    )?
+    functionCallOutput,
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case ItemMessage() when message != null:
-        return message(_that.id, _that.object, _that.type, _that.status,
-            _that.role, _that.content);
+        return message(
+          _that.id,
+          _that.object,
+          _that.type,
+          _that.status,
+          _that.role,
+          _that.content,
+        );
       case ItemFunctionCall() when functionCall != null:
-        return functionCall(_that.id, _that.object, _that.type, _that.status,
-            _that.callId, _that.name, _that.arguments);
+        return functionCall(
+          _that.id,
+          _that.object,
+          _that.type,
+          _that.status,
+          _that.callId,
+          _that.name,
+          _that.arguments,
+        );
       case ItemFunctionCallOutput() when functionCallOutput != null:
-        return functionCallOutput(_that.id, _that.object, _that.type,
-            _that.status, _that.callId, _that.output);
+        return functionCallOutput(
+          _that.id,
+          _that.object,
+          _that.type,
+          _that.status,
+          _that.callId,
+          _that.output,
+        );
       case _:
         return orElse();
     }
@@ -15302,57 +16222,84 @@ extension ItemPatterns on Item {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(
-            String id,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ObjectType? object,
-            ItemType type,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ItemStatus? status,
-            ItemRole role,
-            List<ContentPart> content)
-        message,
+      String id,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ObjectType? object,
+      ItemType type,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ItemStatus? status,
+      ItemRole role,
+      List<ContentPart> content,
+    )
+    message,
     required TResult Function(
-            String id,
-            ObjectType object,
-            ItemType type,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ItemStatus? status,
-            @JsonKey(name: 'call_id') String callId,
-            String name,
-            String arguments)
-        functionCall,
+      String id,
+      ObjectType object,
+      ItemType type,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ItemStatus? status,
+      @JsonKey(name: 'call_id') String callId,
+      String name,
+      String arguments,
+    )
+    functionCall,
     required TResult Function(
-            String id,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ObjectType? object,
-            ItemType type,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ItemStatus? status,
-            @JsonKey(name: 'call_id') String callId,
-            String output)
-        functionCallOutput,
+      String id,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ObjectType? object,
+      ItemType type,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ItemStatus? status,
+      @JsonKey(name: 'call_id') String callId,
+      String output,
+    )
+    functionCallOutput,
   }) {
     final _that = this;
     switch (_that) {
       case ItemMessage():
-        return message(_that.id, _that.object, _that.type, _that.status,
-            _that.role, _that.content);
+        return message(
+          _that.id,
+          _that.object,
+          _that.type,
+          _that.status,
+          _that.role,
+          _that.content,
+        );
       case ItemFunctionCall():
-        return functionCall(_that.id, _that.object, _that.type, _that.status,
-            _that.callId, _that.name, _that.arguments);
+        return functionCall(
+          _that.id,
+          _that.object,
+          _that.type,
+          _that.status,
+          _that.callId,
+          _that.name,
+          _that.arguments,
+        );
       case ItemFunctionCallOutput():
-        return functionCallOutput(_that.id, _that.object, _that.type,
-            _that.status, _that.callId, _that.output);
+        return functionCallOutput(
+          _that.id,
+          _that.object,
+          _that.type,
+          _that.status,
+          _that.callId,
+          _that.output,
+        );
     }
   }
 
@@ -15371,57 +16318,84 @@ extension ItemPatterns on Item {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(
-            String id,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ObjectType? object,
-            ItemType type,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ItemStatus? status,
-            ItemRole role,
-            List<ContentPart> content)?
-        message,
+      String id,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ObjectType? object,
+      ItemType type,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ItemStatus? status,
+      ItemRole role,
+      List<ContentPart> content,
+    )?
+    message,
     TResult? Function(
-            String id,
-            ObjectType object,
-            ItemType type,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ItemStatus? status,
-            @JsonKey(name: 'call_id') String callId,
-            String name,
-            String arguments)?
-        functionCall,
+      String id,
+      ObjectType object,
+      ItemType type,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ItemStatus? status,
+      @JsonKey(name: 'call_id') String callId,
+      String name,
+      String arguments,
+    )?
+    functionCall,
     TResult? Function(
-            String id,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ObjectType? object,
-            ItemType type,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ItemStatus? status,
-            @JsonKey(name: 'call_id') String callId,
-            String output)?
-        functionCallOutput,
+      String id,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ObjectType? object,
+      ItemType type,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ItemStatus? status,
+      @JsonKey(name: 'call_id') String callId,
+      String output,
+    )?
+    functionCallOutput,
   }) {
     final _that = this;
     switch (_that) {
       case ItemMessage() when message != null:
-        return message(_that.id, _that.object, _that.type, _that.status,
-            _that.role, _that.content);
+        return message(
+          _that.id,
+          _that.object,
+          _that.type,
+          _that.status,
+          _that.role,
+          _that.content,
+        );
       case ItemFunctionCall() when functionCall != null:
-        return functionCall(_that.id, _that.object, _that.type, _that.status,
-            _that.callId, _that.name, _that.arguments);
+        return functionCall(
+          _that.id,
+          _that.object,
+          _that.type,
+          _that.status,
+          _that.callId,
+          _that.name,
+          _that.arguments,
+        );
       case ItemFunctionCallOutput() when functionCallOutput != null:
-        return functionCallOutput(_that.id, _that.object, _that.type,
-            _that.status, _that.callId, _that.output);
+        return functionCallOutput(
+          _that.id,
+          _that.object,
+          _that.type,
+          _that.status,
+          _that.callId,
+          _that.output,
+        );
       case _:
         return null;
     }
@@ -15431,21 +16405,23 @@ extension ItemPatterns on Item {
 /// @nodoc
 @JsonSerializable()
 class ItemMessage extends Item {
-  const ItemMessage(
-      {required this.id,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      this.object,
-      this.type = ItemType.message,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      this.status,
-      required this.role,
-      required final List<ContentPart> content})
-      : _content = content,
-        super._();
+  const ItemMessage({
+    required this.id,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    this.object,
+    this.type = ItemType.message,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    this.status,
+    required this.role,
+    required List<ContentPart> content,
+  }) : _content = content,
+       super._();
   factory ItemMessage.fromJson(Map<String, dynamic> json) =>
       _$ItemMessageFromJson(json);
 
@@ -15457,7 +16433,9 @@ class ItemMessage extends Item {
   /// The object type, must be "realtime.item".
   @override
   @JsonKey(
-      includeIfNull: false, unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   final ObjectType? object;
 
   /// The type of the item.
@@ -15469,7 +16447,9 @@ class ItemMessage extends Item {
   /// with the `conversation.item.created` event.
   @override
   @JsonKey(
-      includeIfNull: false, unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   final ItemStatus? status;
 
   /// The role of the message sender.
@@ -15499,9 +16479,7 @@ class ItemMessage extends Item {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ItemMessageToJson(
-      this,
-    );
+    return _$ItemMessageToJson(this);
   }
 
   @override
@@ -15514,13 +16492,22 @@ class ItemMessage extends Item {
             (identical(other.type, type) || other.type == type) &&
             (identical(other.status, status) || other.status == status) &&
             (identical(other.role, role) || other.role == role) &&
-            const DeepCollectionEquality().equals(other._content, _content));
+            const DeepCollectionEquality().equals(other.content, _content));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, object, type, status, role,
-      const DeepCollectionEquality().hash(_content));
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      id,
+      object,
+      type,
+      status,
+      role,
+      const DeepCollectionEquality().hash(_content),
+    );
+  }
 
   @override
   String toString() {
@@ -15531,23 +16518,27 @@ class ItemMessage extends Item {
 /// @nodoc
 abstract mixin class $ItemMessageCopyWith<$Res> implements $ItemCopyWith<$Res> {
   factory $ItemMessageCopyWith(
-          ItemMessage value, $Res Function(ItemMessage) _then) =
-      _$ItemMessageCopyWithImpl;
+    ItemMessage value,
+    $Res Function(ItemMessage) _then,
+  ) = _$ItemMessageCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {String id,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      ObjectType? object,
-      ItemType type,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      ItemStatus? status,
-      ItemRole role,
-      List<ContentPart> content});
+  $Res call({
+    String id,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    ObjectType? object,
+    ItemType type,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    ItemStatus? status,
+    ItemRole role,
+    List<ContentPart> content,
+  });
 }
 
 /// @nodoc
@@ -15569,50 +16560,53 @@ class _$ItemMessageCopyWithImpl<$Res> implements $ItemMessageCopyWith<$Res> {
     Object? role = null,
     Object? content = null,
   }) {
-    return _then(ItemMessage(
-      id: null == id
-          ? _self.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      object: freezed == object
-          ? _self.object
-          : object // ignore: cast_nullable_to_non_nullable
-              as ObjectType?,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ItemType,
-      status: freezed == status
-          ? _self.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as ItemStatus?,
-      role: null == role
-          ? _self.role
-          : role // ignore: cast_nullable_to_non_nullable
-              as ItemRole,
-      content: null == content
-          ? _self._content
-          : content // ignore: cast_nullable_to_non_nullable
-              as List<ContentPart>,
-    ));
+    return _then(
+      ItemMessage(
+        id: null == id
+            ? _self.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        object: freezed == object
+            ? _self.object
+            : object // ignore: cast_nullable_to_non_nullable
+                  as ObjectType?,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ItemType,
+        status: freezed == status
+            ? _self.status
+            : status // ignore: cast_nullable_to_non_nullable
+                  as ItemStatus?,
+        role: null == role
+            ? _self.role
+            : role // ignore: cast_nullable_to_non_nullable
+                  as ItemRole,
+        content: null == content
+            ? _self._content
+            : content // ignore: cast_nullable_to_non_nullable
+                  as List<ContentPart>,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class ItemFunctionCall extends Item {
-  const ItemFunctionCall(
-      {required this.id,
-      this.object = ObjectType.realtimeItem,
-      this.type = ItemType.functionCall,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      this.status,
-      @JsonKey(name: 'call_id') required this.callId,
-      required this.name,
-      required this.arguments})
-      : super._();
+  const ItemFunctionCall({
+    required this.id,
+    this.object = ObjectType.realtimeItem,
+    this.type = ItemType.functionCall,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    this.status,
+    @JsonKey(name: 'call_id') required this.callId,
+    required this.name,
+    required this.arguments,
+  }) : super._();
   factory ItemFunctionCall.fromJson(Map<String, dynamic> json) =>
       _$ItemFunctionCallFromJson(json);
 
@@ -15635,7 +16629,9 @@ class ItemFunctionCall extends Item {
   /// with the `conversation.item.created` event.
   @override
   @JsonKey(
-      includeIfNull: false, unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   final ItemStatus? status;
 
   /// The ID of the function call (for `function_call` and `function_call_output` items). If passed on a
@@ -15660,9 +16656,7 @@ class ItemFunctionCall extends Item {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ItemFunctionCallToJson(
-      this,
-    );
+    return _$ItemFunctionCallToJson(this);
   }
 
   @override
@@ -15682,8 +16676,18 @@ class ItemFunctionCall extends Item {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, id, object, type, status, callId, name, arguments);
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      id,
+      object,
+      type,
+      status,
+      callId,
+      name,
+      arguments,
+    );
+  }
 
   @override
   String toString() {
@@ -15695,21 +16699,24 @@ class ItemFunctionCall extends Item {
 abstract mixin class $ItemFunctionCallCopyWith<$Res>
     implements $ItemCopyWith<$Res> {
   factory $ItemFunctionCallCopyWith(
-          ItemFunctionCall value, $Res Function(ItemFunctionCall) _then) =
-      _$ItemFunctionCallCopyWithImpl;
+    ItemFunctionCall value,
+    $Res Function(ItemFunctionCall) _then,
+  ) = _$ItemFunctionCallCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {String id,
-      ObjectType object,
-      ItemType type,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      ItemStatus? status,
-      @JsonKey(name: 'call_id') String callId,
-      String name,
-      String arguments});
+  $Res call({
+    String id,
+    ObjectType object,
+    ItemType type,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    ItemStatus? status,
+    @JsonKey(name: 'call_id') String callId,
+    String name,
+    String arguments,
+  });
 }
 
 /// @nodoc
@@ -15733,56 +16740,60 @@ class _$ItemFunctionCallCopyWithImpl<$Res>
     Object? name = null,
     Object? arguments = null,
   }) {
-    return _then(ItemFunctionCall(
-      id: null == id
-          ? _self.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      object: null == object
-          ? _self.object
-          : object // ignore: cast_nullable_to_non_nullable
-              as ObjectType,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ItemType,
-      status: freezed == status
-          ? _self.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as ItemStatus?,
-      callId: null == callId
-          ? _self.callId
-          : callId // ignore: cast_nullable_to_non_nullable
-              as String,
-      name: null == name
-          ? _self.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      arguments: null == arguments
-          ? _self.arguments
-          : arguments // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      ItemFunctionCall(
+        id: null == id
+            ? _self.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        object: null == object
+            ? _self.object
+            : object // ignore: cast_nullable_to_non_nullable
+                  as ObjectType,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ItemType,
+        status: freezed == status
+            ? _self.status
+            : status // ignore: cast_nullable_to_non_nullable
+                  as ItemStatus?,
+        callId: null == callId
+            ? _self.callId
+            : callId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        name: null == name
+            ? _self.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+        arguments: null == arguments
+            ? _self.arguments
+            : arguments // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class ItemFunctionCallOutput extends Item {
-  const ItemFunctionCallOutput(
-      {required this.id,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      this.object,
-      this.type = ItemType.functionCallOutput,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      this.status,
-      @JsonKey(name: 'call_id') required this.callId,
-      required this.output})
-      : super._();
+  const ItemFunctionCallOutput({
+    required this.id,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    this.object,
+    this.type = ItemType.functionCallOutput,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    this.status,
+    @JsonKey(name: 'call_id') required this.callId,
+    required this.output,
+  }) : super._();
   factory ItemFunctionCallOutput.fromJson(Map<String, dynamic> json) =>
       _$ItemFunctionCallOutputFromJson(json);
 
@@ -15794,7 +16805,9 @@ class ItemFunctionCallOutput extends Item {
   /// The object type. Always "realtime.item".
   @override
   @JsonKey(
-      includeIfNull: false, unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   final ObjectType? object;
 
   /// The type of the item.
@@ -15806,7 +16819,9 @@ class ItemFunctionCallOutput extends Item {
   /// with the `conversation.item.created` event.
   @override
   @JsonKey(
-      includeIfNull: false, unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   final ItemStatus? status;
 
   /// The ID of the function call.
@@ -15823,13 +16838,13 @@ class ItemFunctionCallOutput extends Item {
   @pragma('vm:prefer-inline')
   $ItemFunctionCallOutputCopyWith<ItemFunctionCallOutput> get copyWith =>
       _$ItemFunctionCallOutputCopyWithImpl<ItemFunctionCallOutput>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ItemFunctionCallOutputToJson(
-      this,
-    );
+    return _$ItemFunctionCallOutputToJson(this);
   }
 
   @override
@@ -15847,8 +16862,9 @@ class ItemFunctionCallOutput extends Item {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, object, type, status, callId, output);
+  int get hashCode {
+    return Object.hash(runtimeType, id, object, type, status, callId, output);
+  }
 
   @override
   String toString() {
@@ -15859,24 +16875,28 @@ class ItemFunctionCallOutput extends Item {
 /// @nodoc
 abstract mixin class $ItemFunctionCallOutputCopyWith<$Res>
     implements $ItemCopyWith<$Res> {
-  factory $ItemFunctionCallOutputCopyWith(ItemFunctionCallOutput value,
-          $Res Function(ItemFunctionCallOutput) _then) =
-      _$ItemFunctionCallOutputCopyWithImpl;
+  factory $ItemFunctionCallOutputCopyWith(
+    ItemFunctionCallOutput value,
+    $Res Function(ItemFunctionCallOutput) _then,
+  ) = _$ItemFunctionCallOutputCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {String id,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      ObjectType? object,
-      ItemType type,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      ItemStatus? status,
-      @JsonKey(name: 'call_id') String callId,
-      String output});
+  $Res call({
+    String id,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    ObjectType? object,
+    ItemType type,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    ItemStatus? status,
+    @JsonKey(name: 'call_id') String callId,
+    String output,
+  });
 }
 
 /// @nodoc
@@ -15899,37 +16919,40 @@ class _$ItemFunctionCallOutputCopyWithImpl<$Res>
     Object? callId = null,
     Object? output = null,
   }) {
-    return _then(ItemFunctionCallOutput(
-      id: null == id
-          ? _self.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      object: freezed == object
-          ? _self.object
-          : object // ignore: cast_nullable_to_non_nullable
-              as ObjectType?,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ItemType,
-      status: freezed == status
-          ? _self.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as ItemStatus?,
-      callId: null == callId
-          ? _self.callId
-          : callId // ignore: cast_nullable_to_non_nullable
-              as String,
-      output: null == output
-          ? _self.output
-          : output // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      ItemFunctionCallOutput(
+        id: null == id
+            ? _self.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        object: freezed == object
+            ? _self.object
+            : object // ignore: cast_nullable_to_non_nullable
+                  as ObjectType?,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ItemType,
+        status: freezed == status
+            ? _self.status
+            : status // ignore: cast_nullable_to_non_nullable
+                  as ItemStatus?,
+        callId: null == callId
+            ? _self.callId
+            : callId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        output: null == output
+            ? _self.output
+            : output // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
 ResponseStatusDetails _$ResponseStatusDetailsFromJson(
-    Map<String, dynamic> json) {
+  Map<String, dynamic> json,
+) {
   switch (json['type']) {
     case 'completed':
       return ResponseStatusDetailsCompleted.fromJson(json);
@@ -15941,8 +16964,12 @@ ResponseStatusDetails _$ResponseStatusDetailsFromJson(
       return ResponseStatusDetailsFailed.fromJson(json);
 
     default:
-      throw CheckedFromJsonException(json, 'type', 'ResponseStatusDetails',
-          'Invalid union type "${json['type']}"!');
+      throw CheckedFromJsonException(
+        json,
+        'type',
+        'ResponseStatusDetails',
+        'Invalid union type "${json['type']}"!',
+      );
   }
 }
 
@@ -15957,34 +16984,42 @@ mixin _$ResponseStatusDetails {
   @pragma('vm:prefer-inline')
   $ResponseStatusDetailsCopyWith<ResponseStatusDetails> get copyWith =>
       _$ResponseStatusDetailsCopyWithImpl<ResponseStatusDetails>(
-          this as ResponseStatusDetails, _$identity);
+        this as ResponseStatusDetails,
+        _$identity,
+      );
 
   /// Serializes this ResponseStatusDetails to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as ResponseStatusDetails;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ResponseStatusDetails &&
-            (identical(other.type, type) || other.type == type));
+            (identical(other.type, _this.type) || other.type == _this.type));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type);
+  int get hashCode {
+    final _this = this as ResponseStatusDetails;
+    return Object.hash(runtimeType, _this.type);
+  }
 
   @override
   String toString() {
-    return 'ResponseStatusDetails(type: $type)';
+    final _this = this as ResponseStatusDetails;
+    return 'ResponseStatusDetails(type: ${_this.type})';
   }
 }
 
 /// @nodoc
 abstract mixin class $ResponseStatusDetailsCopyWith<$Res> {
-  factory $ResponseStatusDetailsCopyWith(ResponseStatusDetails value,
-          $Res Function(ResponseStatusDetails) _then) =
-      _$ResponseStatusDetailsCopyWithImpl;
+  factory $ResponseStatusDetailsCopyWith(
+    ResponseStatusDetails value,
+    $Res Function(ResponseStatusDetails) _then,
+  ) = _$ResponseStatusDetailsCopyWithImpl;
   @useResult
   $Res call({ResponseStatusType type});
 }
@@ -16001,15 +17036,15 @@ class _$ResponseStatusDetailsCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? type = null,
-  }) {
-    return _then(_self.copyWith(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ResponseStatusType,
-    ));
+  $Res call({Object? type = null}) {
+    return _then(
+      _self.copyWith(
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ResponseStatusType,
+      ),
+    );
   }
 }
 
@@ -16132,29 +17167,37 @@ extension ResponseStatusDetailsPatterns on ResponseStatusDetails {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(
-            ResponseStatusType type,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ResponseStatusReason? reason)?
-        completed,
+      ResponseStatusType type,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ResponseStatusReason? reason,
+    )?
+    completed,
     TResult Function(
-            ResponseStatusType type,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ResponseStatusReason? reason)?
-        cancelled,
+      ResponseStatusType type,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ResponseStatusReason? reason,
+    )?
+    cancelled,
     TResult Function(
-            ResponseStatusType type,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ResponseStatusReason? reason)?
-        incomplete,
-    TResult Function(ResponseStatusType type,
-            @JsonKey(includeIfNull: false) APIError? error)?
-        failed,
+      ResponseStatusType type,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ResponseStatusReason? reason,
+    )?
+    incomplete,
+    TResult Function(
+      ResponseStatusType type,
+      @JsonKey(includeIfNull: false) APIError? error,
+    )?
+    failed,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -16188,29 +17231,37 @@ extension ResponseStatusDetailsPatterns on ResponseStatusDetails {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(
-            ResponseStatusType type,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ResponseStatusReason? reason)
-        completed,
+      ResponseStatusType type,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ResponseStatusReason? reason,
+    )
+    completed,
     required TResult Function(
-            ResponseStatusType type,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ResponseStatusReason? reason)
-        cancelled,
+      ResponseStatusType type,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ResponseStatusReason? reason,
+    )
+    cancelled,
     required TResult Function(
-            ResponseStatusType type,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ResponseStatusReason? reason)
-        incomplete,
-    required TResult Function(ResponseStatusType type,
-            @JsonKey(includeIfNull: false) APIError? error)
-        failed,
+      ResponseStatusType type,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ResponseStatusReason? reason,
+    )
+    incomplete,
+    required TResult Function(
+      ResponseStatusType type,
+      @JsonKey(includeIfNull: false) APIError? error,
+    )
+    failed,
   }) {
     final _that = this;
     switch (_that) {
@@ -16240,29 +17291,37 @@ extension ResponseStatusDetailsPatterns on ResponseStatusDetails {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(
-            ResponseStatusType type,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ResponseStatusReason? reason)?
-        completed,
+      ResponseStatusType type,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ResponseStatusReason? reason,
+    )?
+    completed,
     TResult? Function(
-            ResponseStatusType type,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ResponseStatusReason? reason)?
-        cancelled,
+      ResponseStatusType type,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ResponseStatusReason? reason,
+    )?
+    cancelled,
     TResult? Function(
-            ResponseStatusType type,
-            @JsonKey(
-                includeIfNull: false,
-                unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-            ResponseStatusReason? reason)?
-        incomplete,
-    TResult? Function(ResponseStatusType type,
-            @JsonKey(includeIfNull: false) APIError? error)?
-        failed,
+      ResponseStatusType type,
+      @JsonKey(
+        includeIfNull: false,
+        unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+      )
+      ResponseStatusReason? reason,
+    )?
+    incomplete,
+    TResult? Function(
+      ResponseStatusType type,
+      @JsonKey(includeIfNull: false) APIError? error,
+    )?
+    failed,
   }) {
     final _that = this;
     switch (_that) {
@@ -16283,13 +17342,14 @@ extension ResponseStatusDetailsPatterns on ResponseStatusDetails {
 /// @nodoc
 @JsonSerializable()
 class ResponseStatusDetailsCompleted extends ResponseStatusDetails {
-  const ResponseStatusDetailsCompleted(
-      {this.type = ResponseStatusType.completed,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      this.reason})
-      : super._();
+  const ResponseStatusDetailsCompleted({
+    this.type = ResponseStatusType.completed,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    this.reason,
+  }) : super._();
   factory ResponseStatusDetailsCompleted.fromJson(Map<String, dynamic> json) =>
       _$ResponseStatusDetailsCompletedFromJson(json);
 
@@ -16303,7 +17363,9 @@ class ResponseStatusDetailsCompleted extends ResponseStatusDetails {
   /// cancel event). For an `incomplete` Response, one of `max_output_tokens` or `content_filter`
   /// (the server-side safety filter activated and cut off the response).
   @JsonKey(
-      includeIfNull: false, unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   final ResponseStatusReason? reason;
 
   /// Create a copy of ResponseStatusDetails
@@ -16312,14 +17374,14 @@ class ResponseStatusDetailsCompleted extends ResponseStatusDetails {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $ResponseStatusDetailsCompletedCopyWith<ResponseStatusDetailsCompleted>
-      get copyWith => _$ResponseStatusDetailsCompletedCopyWithImpl<
-          ResponseStatusDetailsCompleted>(this, _$identity);
+  get copyWith =>
+      _$ResponseStatusDetailsCompletedCopyWithImpl<
+        ResponseStatusDetailsCompleted
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ResponseStatusDetailsCompletedToJson(
-      this,
-    );
+    return _$ResponseStatusDetailsCompletedToJson(this);
   }
 
   @override
@@ -16333,7 +17395,9 @@ class ResponseStatusDetailsCompleted extends ResponseStatusDetails {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, reason);
+  int get hashCode {
+    return Object.hash(runtimeType, type, reason);
+  }
 
   @override
   String toString() {
@@ -16345,17 +17409,19 @@ class ResponseStatusDetailsCompleted extends ResponseStatusDetails {
 abstract mixin class $ResponseStatusDetailsCompletedCopyWith<$Res>
     implements $ResponseStatusDetailsCopyWith<$Res> {
   factory $ResponseStatusDetailsCompletedCopyWith(
-          ResponseStatusDetailsCompleted value,
-          $Res Function(ResponseStatusDetailsCompleted) _then) =
-      _$ResponseStatusDetailsCompletedCopyWithImpl;
+    ResponseStatusDetailsCompleted value,
+    $Res Function(ResponseStatusDetailsCompleted) _then,
+  ) = _$ResponseStatusDetailsCompletedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {ResponseStatusType type,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      ResponseStatusReason? reason});
+  $Res call({
+    ResponseStatusType type,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    ResponseStatusReason? reason,
+  });
 }
 
 /// @nodoc
@@ -16370,33 +17436,33 @@ class _$ResponseStatusDetailsCompletedCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? type = null,
-    Object? reason = freezed,
-  }) {
-    return _then(ResponseStatusDetailsCompleted(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ResponseStatusType,
-      reason: freezed == reason
-          ? _self.reason
-          : reason // ignore: cast_nullable_to_non_nullable
-              as ResponseStatusReason?,
-    ));
+  $Res call({Object? type = null, Object? reason = freezed}) {
+    return _then(
+      ResponseStatusDetailsCompleted(
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ResponseStatusType,
+        reason: freezed == reason
+            ? _self.reason
+            : reason // ignore: cast_nullable_to_non_nullable
+                  as ResponseStatusReason?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class ResponseStatusDetailsCancelled extends ResponseStatusDetails {
-  const ResponseStatusDetailsCancelled(
-      {this.type = ResponseStatusType.cancelled,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      this.reason})
-      : super._();
+  const ResponseStatusDetailsCancelled({
+    this.type = ResponseStatusType.cancelled,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    this.reason,
+  }) : super._();
   factory ResponseStatusDetailsCancelled.fromJson(Map<String, dynamic> json) =>
       _$ResponseStatusDetailsCancelledFromJson(json);
 
@@ -16410,7 +17476,9 @@ class ResponseStatusDetailsCancelled extends ResponseStatusDetails {
   /// cancel event). For an `incomplete` Response, one of `max_output_tokens` or `content_filter`
   /// (the server-side safety filter activated and cut off the response).
   @JsonKey(
-      includeIfNull: false, unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   final ResponseStatusReason? reason;
 
   /// Create a copy of ResponseStatusDetails
@@ -16419,14 +17487,14 @@ class ResponseStatusDetailsCancelled extends ResponseStatusDetails {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $ResponseStatusDetailsCancelledCopyWith<ResponseStatusDetailsCancelled>
-      get copyWith => _$ResponseStatusDetailsCancelledCopyWithImpl<
-          ResponseStatusDetailsCancelled>(this, _$identity);
+  get copyWith =>
+      _$ResponseStatusDetailsCancelledCopyWithImpl<
+        ResponseStatusDetailsCancelled
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ResponseStatusDetailsCancelledToJson(
-      this,
-    );
+    return _$ResponseStatusDetailsCancelledToJson(this);
   }
 
   @override
@@ -16440,7 +17508,9 @@ class ResponseStatusDetailsCancelled extends ResponseStatusDetails {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, reason);
+  int get hashCode {
+    return Object.hash(runtimeType, type, reason);
+  }
 
   @override
   String toString() {
@@ -16452,17 +17522,19 @@ class ResponseStatusDetailsCancelled extends ResponseStatusDetails {
 abstract mixin class $ResponseStatusDetailsCancelledCopyWith<$Res>
     implements $ResponseStatusDetailsCopyWith<$Res> {
   factory $ResponseStatusDetailsCancelledCopyWith(
-          ResponseStatusDetailsCancelled value,
-          $Res Function(ResponseStatusDetailsCancelled) _then) =
-      _$ResponseStatusDetailsCancelledCopyWithImpl;
+    ResponseStatusDetailsCancelled value,
+    $Res Function(ResponseStatusDetailsCancelled) _then,
+  ) = _$ResponseStatusDetailsCancelledCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {ResponseStatusType type,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      ResponseStatusReason? reason});
+  $Res call({
+    ResponseStatusType type,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    ResponseStatusReason? reason,
+  });
 }
 
 /// @nodoc
@@ -16477,33 +17549,33 @@ class _$ResponseStatusDetailsCancelledCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? type = null,
-    Object? reason = freezed,
-  }) {
-    return _then(ResponseStatusDetailsCancelled(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ResponseStatusType,
-      reason: freezed == reason
-          ? _self.reason
-          : reason // ignore: cast_nullable_to_non_nullable
-              as ResponseStatusReason?,
-    ));
+  $Res call({Object? type = null, Object? reason = freezed}) {
+    return _then(
+      ResponseStatusDetailsCancelled(
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ResponseStatusType,
+        reason: freezed == reason
+            ? _self.reason
+            : reason // ignore: cast_nullable_to_non_nullable
+                  as ResponseStatusReason?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class ResponseStatusDetailsIncomplete extends ResponseStatusDetails {
-  const ResponseStatusDetailsIncomplete(
-      {this.type = ResponseStatusType.incomplete,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      this.reason})
-      : super._();
+  const ResponseStatusDetailsIncomplete({
+    this.type = ResponseStatusType.incomplete,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    this.reason,
+  }) : super._();
   factory ResponseStatusDetailsIncomplete.fromJson(Map<String, dynamic> json) =>
       _$ResponseStatusDetailsIncompleteFromJson(json);
 
@@ -16517,7 +17589,9 @@ class ResponseStatusDetailsIncomplete extends ResponseStatusDetails {
   /// cancel event). For an `incomplete` Response, one of `max_output_tokens` or `content_filter`
   /// (the server-side safety filter activated and cut off the response).
   @JsonKey(
-      includeIfNull: false, unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    includeIfNull: false,
+    unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+  )
   final ResponseStatusReason? reason;
 
   /// Create a copy of ResponseStatusDetails
@@ -16526,14 +17600,14 @@ class ResponseStatusDetailsIncomplete extends ResponseStatusDetails {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $ResponseStatusDetailsIncompleteCopyWith<ResponseStatusDetailsIncomplete>
-      get copyWith => _$ResponseStatusDetailsIncompleteCopyWithImpl<
-          ResponseStatusDetailsIncomplete>(this, _$identity);
+  get copyWith =>
+      _$ResponseStatusDetailsIncompleteCopyWithImpl<
+        ResponseStatusDetailsIncomplete
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ResponseStatusDetailsIncompleteToJson(
-      this,
-    );
+    return _$ResponseStatusDetailsIncompleteToJson(this);
   }
 
   @override
@@ -16547,7 +17621,9 @@ class ResponseStatusDetailsIncomplete extends ResponseStatusDetails {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, reason);
+  int get hashCode {
+    return Object.hash(runtimeType, type, reason);
+  }
 
   @override
   String toString() {
@@ -16559,17 +17635,19 @@ class ResponseStatusDetailsIncomplete extends ResponseStatusDetails {
 abstract mixin class $ResponseStatusDetailsIncompleteCopyWith<$Res>
     implements $ResponseStatusDetailsCopyWith<$Res> {
   factory $ResponseStatusDetailsIncompleteCopyWith(
-          ResponseStatusDetailsIncomplete value,
-          $Res Function(ResponseStatusDetailsIncomplete) _then) =
-      _$ResponseStatusDetailsIncompleteCopyWithImpl;
+    ResponseStatusDetailsIncomplete value,
+    $Res Function(ResponseStatusDetailsIncomplete) _then,
+  ) = _$ResponseStatusDetailsIncompleteCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {ResponseStatusType type,
-      @JsonKey(
-          includeIfNull: false,
-          unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-      ResponseStatusReason? reason});
+  $Res call({
+    ResponseStatusType type,
+    @JsonKey(
+      includeIfNull: false,
+      unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
+    )
+    ResponseStatusReason? reason,
+  });
 }
 
 /// @nodoc
@@ -16584,30 +17662,29 @@ class _$ResponseStatusDetailsIncompleteCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? type = null,
-    Object? reason = freezed,
-  }) {
-    return _then(ResponseStatusDetailsIncomplete(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ResponseStatusType,
-      reason: freezed == reason
-          ? _self.reason
-          : reason // ignore: cast_nullable_to_non_nullable
-              as ResponseStatusReason?,
-    ));
+  $Res call({Object? type = null, Object? reason = freezed}) {
+    return _then(
+      ResponseStatusDetailsIncomplete(
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ResponseStatusType,
+        reason: freezed == reason
+            ? _self.reason
+            : reason // ignore: cast_nullable_to_non_nullable
+                  as ResponseStatusReason?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class ResponseStatusDetailsFailed extends ResponseStatusDetails {
-  const ResponseStatusDetailsFailed(
-      {this.type = ResponseStatusType.failed,
-      @JsonKey(includeIfNull: false) this.error})
-      : super._();
+  const ResponseStatusDetailsFailed({
+    this.type = ResponseStatusType.failed,
+    @JsonKey(includeIfNull: false) this.error,
+  }) : super._();
   factory ResponseStatusDetailsFailed.fromJson(Map<String, dynamic> json) =>
       _$ResponseStatusDetailsFailedFromJson(json);
 
@@ -16626,14 +17703,15 @@ class ResponseStatusDetailsFailed extends ResponseStatusDetails {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $ResponseStatusDetailsFailedCopyWith<ResponseStatusDetailsFailed>
-      get copyWith => _$ResponseStatusDetailsFailedCopyWithImpl<
-          ResponseStatusDetailsFailed>(this, _$identity);
+  get copyWith =>
+      _$ResponseStatusDetailsFailedCopyWithImpl<ResponseStatusDetailsFailed>(
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$ResponseStatusDetailsFailedToJson(
-      this,
-    );
+    return _$ResponseStatusDetailsFailedToJson(this);
   }
 
   @override
@@ -16647,7 +17725,9 @@ class ResponseStatusDetailsFailed extends ResponseStatusDetails {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, error);
+  int get hashCode {
+    return Object.hash(runtimeType, type, error);
+  }
 
   @override
   String toString() {
@@ -16659,14 +17739,15 @@ class ResponseStatusDetailsFailed extends ResponseStatusDetails {
 abstract mixin class $ResponseStatusDetailsFailedCopyWith<$Res>
     implements $ResponseStatusDetailsCopyWith<$Res> {
   factory $ResponseStatusDetailsFailedCopyWith(
-          ResponseStatusDetailsFailed value,
-          $Res Function(ResponseStatusDetailsFailed) _then) =
-      _$ResponseStatusDetailsFailedCopyWithImpl;
+    ResponseStatusDetailsFailed value,
+    $Res Function(ResponseStatusDetailsFailed) _then,
+  ) = _$ResponseStatusDetailsFailedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {ResponseStatusType type,
-      @JsonKey(includeIfNull: false) APIError? error});
+  $Res call({
+    ResponseStatusType type,
+    @JsonKey(includeIfNull: false) APIError? error,
+  });
 
   $APIErrorCopyWith<$Res>? get error;
 }
@@ -16683,20 +17764,19 @@ class _$ResponseStatusDetailsFailedCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? type = null,
-    Object? error = freezed,
-  }) {
-    return _then(ResponseStatusDetailsFailed(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ResponseStatusType,
-      error: freezed == error
-          ? _self.error
-          : error // ignore: cast_nullable_to_non_nullable
-              as APIError?,
-    ));
+  $Res call({Object? type = null, Object? error = freezed}) {
+    return _then(
+      ResponseStatusDetailsFailed(
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as ResponseStatusType,
+        error: freezed == error
+            ? _self.error
+            : error // ignore: cast_nullable_to_non_nullable
+                  as APIError?,
+      ),
+    );
   }
 
   /// Create a copy of ResponseStatusDetails
@@ -16741,14 +17821,17 @@ RealtimeEvent _$RealtimeEventFromJson(Map<String, dynamic> json) {
     case 'conversation.item.deleted':
       return RealtimeEventConversationItemDeleted.fromJson(json);
     case 'conversation.item.input_audio_transcription.completed':
-      return RealtimeEventConversationItemInputAudioTranscriptionCompleted
-          .fromJson(json);
+      return RealtimeEventConversationItemInputAudioTranscriptionCompleted.fromJson(
+        json,
+      );
     case 'conversation.item.input_audio_transcription.failed':
-      return RealtimeEventConversationItemInputAudioTranscriptionFailed
-          .fromJson(json);
+      return RealtimeEventConversationItemInputAudioTranscriptionFailed.fromJson(
+        json,
+      );
     case 'conversation.item.input_audio_transcription.delta':
       return RealtimeEventConversationItemInputAudioTranscriptionDelta.fromJson(
-          json);
+        json,
+      );
     case 'conversation.item.truncated':
       return RealtimeEventConversationItemTruncated.fromJson(json);
     case 'error':
@@ -16809,8 +17892,12 @@ RealtimeEvent _$RealtimeEventFromJson(Map<String, dynamic> json) {
       return RealtimeEventGeneric.fromJson(json);
 
     default:
-      throw CheckedFromJsonException(json, 'type', 'RealtimeEvent',
-          'Invalid union type "${json['type']}"!');
+      throw CheckedFromJsonException(
+        json,
+        'type',
+        'RealtimeEvent',
+        'Invalid union type "${json['type']}"!',
+      );
   }
 }
 
@@ -16830,38 +17917,49 @@ mixin _$RealtimeEvent {
   @pragma('vm:prefer-inline')
   $RealtimeEventCopyWith<RealtimeEvent> get copyWith =>
       _$RealtimeEventCopyWithImpl<RealtimeEvent>(
-          this as RealtimeEvent, _$identity);
+        this as RealtimeEvent,
+        _$identity,
+      );
 
   /// Serializes this RealtimeEvent to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
+    final _this = this as RealtimeEvent;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is RealtimeEvent &&
-            (identical(other.eventId, eventId) || other.eventId == eventId) &&
-            (identical(other.type, type) || other.type == type));
+            (identical(other.eventId, _this.eventId) ||
+                other.eventId == _this.eventId) &&
+            (identical(other.type, _this.type) || other.type == _this.type));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type);
+  int get hashCode {
+    final _this = this as RealtimeEvent;
+    return Object.hash(runtimeType, _this.eventId, _this.type);
+  }
 
   @override
   String toString() {
-    return 'RealtimeEvent(eventId: $eventId, type: $type)';
+    final _this = this as RealtimeEvent;
+    return 'RealtimeEvent(eventId: ${_this.eventId}, type: ${_this.type})';
   }
 }
 
 /// @nodoc
 abstract mixin class $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventCopyWith(
-          RealtimeEvent value, $Res Function(RealtimeEvent) _then) =
-      _$RealtimeEventCopyWithImpl;
+    RealtimeEvent value,
+    $Res Function(RealtimeEvent) _then,
+  ) = _$RealtimeEventCopyWithImpl;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId, RealtimeEventType type});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+  });
 }
 
 /// @nodoc
@@ -16876,20 +17974,19 @@ class _$RealtimeEventCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? eventId = null,
-    Object? type = null,
-  }) {
-    return _then(_self.copyWith(
-      eventId: null == eventId
-          ? _self.eventId!
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-    ));
+  $Res call({Object? eventId = null, Object? type = null}) {
+    return _then(
+      _self.copyWith(
+        eventId: null == eventId
+            ? _self.eventId!
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+      ),
+    );
   }
 }
 
@@ -16910,81 +18007,83 @@ extension RealtimeEventPatterns on RealtimeEvent {
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(RealtimeEventConversationItemCreate value)?
-        conversationItemCreate,
+    conversationItemCreate,
     TResult Function(RealtimeEventConversationItemDelete value)?
-        conversationItemDelete,
+    conversationItemDelete,
     TResult Function(RealtimeEventConversationItemTruncate value)?
-        conversationItemTruncate,
+    conversationItemTruncate,
     TResult Function(RealtimeEventInputAudioBufferAppend value)?
-        inputAudioBufferAppend,
+    inputAudioBufferAppend,
     TResult Function(RealtimeEventInputAudioBufferClear value)?
-        inputAudioBufferClear,
+    inputAudioBufferClear,
     TResult Function(RealtimeEventInputAudioBufferCommit value)?
-        inputAudioBufferCommit,
+    inputAudioBufferCommit,
     TResult Function(RealtimeEventResponseCancel value)? responseCancel,
     TResult Function(RealtimeEventResponseCreate value)? responseCreate,
     TResult Function(RealtimeEventSessionUpdate value)? sessionUpdate,
     TResult Function(RealtimeEventConversationCreated value)?
-        conversationCreated,
+    conversationCreated,
     TResult Function(RealtimeEventConversationItemCreated value)?
-        conversationItemCreated,
+    conversationItemCreated,
     TResult Function(RealtimeEventConversationItemDeleted value)?
-        conversationItemDeleted,
+    conversationItemDeleted,
     TResult Function(
-            RealtimeEventConversationItemInputAudioTranscriptionCompleted
-                value)?
-        conversationItemInputAudioTranscriptionCompleted,
+      RealtimeEventConversationItemInputAudioTranscriptionCompleted value,
+    )?
+    conversationItemInputAudioTranscriptionCompleted,
     TResult Function(
-            RealtimeEventConversationItemInputAudioTranscriptionFailed value)?
-        conversationItemInputAudioTranscriptionFailed,
+      RealtimeEventConversationItemInputAudioTranscriptionFailed value,
+    )?
+    conversationItemInputAudioTranscriptionFailed,
     TResult Function(
-            RealtimeEventConversationItemInputAudioTranscriptionDelta value)?
-        conversationItemInputAudioTranscriptionDelta,
+      RealtimeEventConversationItemInputAudioTranscriptionDelta value,
+    )?
+    conversationItemInputAudioTranscriptionDelta,
     TResult Function(RealtimeEventConversationItemTruncated value)?
-        conversationItemTruncated,
+    conversationItemTruncated,
     TResult Function(RealtimeEventError value)? error,
     TResult Function(RealtimeEventInputAudioBufferCleared value)?
-        inputAudioBufferCleared,
+    inputAudioBufferCleared,
     TResult Function(RealtimeEventInputAudioBufferCommitted value)?
-        inputAudioBufferCommitted,
+    inputAudioBufferCommitted,
     TResult Function(RealtimeEventInputAudioBufferSpeechStarted value)?
-        inputAudioBufferSpeechStarted,
+    inputAudioBufferSpeechStarted,
     TResult Function(RealtimeEventInputAudioBufferSpeechStopped value)?
-        inputAudioBufferSpeechStopped,
+    inputAudioBufferSpeechStopped,
     TResult Function(RealtimeEventRateLimitsUpdated value)? rateLimitsUpdated,
     TResult Function(RealtimeEventResponseAudioDelta value)? responseAudioDelta,
     TResult Function(RealtimeEventResponseAudioDone value)? responseAudioDone,
     TResult Function(RealtimeEventResponseAudioTranscriptDelta value)?
-        responseAudioTranscriptDelta,
+    responseAudioTranscriptDelta,
     TResult Function(RealtimeEventResponseAudioTranscriptDone value)?
-        responseAudioTranscriptDone,
+    responseAudioTranscriptDone,
     TResult Function(RealtimeEventResponseContentPartAdded value)?
-        responseContentPartAdded,
+    responseContentPartAdded,
     TResult Function(RealtimeEventResponseContentPartDone value)?
-        responseContentPartDone,
+    responseContentPartDone,
     TResult Function(RealtimeEventResponseCreated value)? responseCreated,
     TResult Function(RealtimeEventResponseDone value)? responseDone,
     TResult Function(RealtimeEventResponseFunctionCallArgumentsDelta value)?
-        responseFunctionCallArgumentsDelta,
+    responseFunctionCallArgumentsDelta,
     TResult Function(RealtimeEventResponseFunctionCallArgumentsDone value)?
-        responseFunctionCallArgumentsDone,
+    responseFunctionCallArgumentsDone,
     TResult Function(RealtimeEventResponseOutputItemAdded value)?
-        responseOutputItemAdded,
+    responseOutputItemAdded,
     TResult Function(RealtimeEventResponseOutputItemDone value)?
-        responseOutputItemDone,
+    responseOutputItemDone,
     TResult Function(RealtimeEventResponseTextDelta value)? responseTextDelta,
     TResult Function(RealtimeEventResponseTextDone value)? responseTextDone,
     TResult Function(RealtimeEventSessionCreated value)? sessionCreated,
     TResult Function(RealtimeEventSessionUpdated value)? sessionUpdated,
     TResult Function(RealtimeEventClose value)? close,
     TResult Function(RealtimeEventConversationInterrupted value)?
-        conversationInterrupted,
+    conversationInterrupted,
     TResult Function(RealtimeEventConversationUpdated value)?
-        conversationUpdated,
+    conversationUpdated,
     TResult Function(RealtimeEventConversationItemAppended value)?
-        conversationItemAppended,
+    conversationItemAppended,
     TResult Function(RealtimeEventConversationItemCompleted value)?
-        conversationItemCompleted,
+    conversationItemCompleted,
     TResult Function(RealtimeEventGeneric value)? generic,
     required TResult orElse(),
   }) {
@@ -17126,88 +18225,93 @@ extension RealtimeEventPatterns on RealtimeEvent {
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(RealtimeEventConversationItemCreate value)
-        conversationItemCreate,
+    conversationItemCreate,
     required TResult Function(RealtimeEventConversationItemDelete value)
-        conversationItemDelete,
+    conversationItemDelete,
     required TResult Function(RealtimeEventConversationItemTruncate value)
-        conversationItemTruncate,
+    conversationItemTruncate,
     required TResult Function(RealtimeEventInputAudioBufferAppend value)
-        inputAudioBufferAppend,
+    inputAudioBufferAppend,
     required TResult Function(RealtimeEventInputAudioBufferClear value)
-        inputAudioBufferClear,
+    inputAudioBufferClear,
     required TResult Function(RealtimeEventInputAudioBufferCommit value)
-        inputAudioBufferCommit,
+    inputAudioBufferCommit,
     required TResult Function(RealtimeEventResponseCancel value) responseCancel,
     required TResult Function(RealtimeEventResponseCreate value) responseCreate,
     required TResult Function(RealtimeEventSessionUpdate value) sessionUpdate,
     required TResult Function(RealtimeEventConversationCreated value)
-        conversationCreated,
+    conversationCreated,
     required TResult Function(RealtimeEventConversationItemCreated value)
-        conversationItemCreated,
+    conversationItemCreated,
     required TResult Function(RealtimeEventConversationItemDeleted value)
-        conversationItemDeleted,
+    conversationItemDeleted,
     required TResult Function(
-            RealtimeEventConversationItemInputAudioTranscriptionCompleted value)
-        conversationItemInputAudioTranscriptionCompleted,
+      RealtimeEventConversationItemInputAudioTranscriptionCompleted value,
+    )
+    conversationItemInputAudioTranscriptionCompleted,
     required TResult Function(
-            RealtimeEventConversationItemInputAudioTranscriptionFailed value)
-        conversationItemInputAudioTranscriptionFailed,
+      RealtimeEventConversationItemInputAudioTranscriptionFailed value,
+    )
+    conversationItemInputAudioTranscriptionFailed,
     required TResult Function(
-            RealtimeEventConversationItemInputAudioTranscriptionDelta value)
-        conversationItemInputAudioTranscriptionDelta,
+      RealtimeEventConversationItemInputAudioTranscriptionDelta value,
+    )
+    conversationItemInputAudioTranscriptionDelta,
     required TResult Function(RealtimeEventConversationItemTruncated value)
-        conversationItemTruncated,
+    conversationItemTruncated,
     required TResult Function(RealtimeEventError value) error,
     required TResult Function(RealtimeEventInputAudioBufferCleared value)
-        inputAudioBufferCleared,
+    inputAudioBufferCleared,
     required TResult Function(RealtimeEventInputAudioBufferCommitted value)
-        inputAudioBufferCommitted,
+    inputAudioBufferCommitted,
     required TResult Function(RealtimeEventInputAudioBufferSpeechStarted value)
-        inputAudioBufferSpeechStarted,
+    inputAudioBufferSpeechStarted,
     required TResult Function(RealtimeEventInputAudioBufferSpeechStopped value)
-        inputAudioBufferSpeechStopped,
+    inputAudioBufferSpeechStopped,
     required TResult Function(RealtimeEventRateLimitsUpdated value)
-        rateLimitsUpdated,
+    rateLimitsUpdated,
     required TResult Function(RealtimeEventResponseAudioDelta value)
-        responseAudioDelta,
+    responseAudioDelta,
     required TResult Function(RealtimeEventResponseAudioDone value)
-        responseAudioDone,
+    responseAudioDone,
     required TResult Function(RealtimeEventResponseAudioTranscriptDelta value)
-        responseAudioTranscriptDelta,
+    responseAudioTranscriptDelta,
     required TResult Function(RealtimeEventResponseAudioTranscriptDone value)
-        responseAudioTranscriptDone,
+    responseAudioTranscriptDone,
     required TResult Function(RealtimeEventResponseContentPartAdded value)
-        responseContentPartAdded,
+    responseContentPartAdded,
     required TResult Function(RealtimeEventResponseContentPartDone value)
-        responseContentPartDone,
+    responseContentPartDone,
     required TResult Function(RealtimeEventResponseCreated value)
-        responseCreated,
+    responseCreated,
     required TResult Function(RealtimeEventResponseDone value) responseDone,
     required TResult Function(
-            RealtimeEventResponseFunctionCallArgumentsDelta value)
-        responseFunctionCallArgumentsDelta,
+      RealtimeEventResponseFunctionCallArgumentsDelta value,
+    )
+    responseFunctionCallArgumentsDelta,
     required TResult Function(
-            RealtimeEventResponseFunctionCallArgumentsDone value)
-        responseFunctionCallArgumentsDone,
+      RealtimeEventResponseFunctionCallArgumentsDone value,
+    )
+    responseFunctionCallArgumentsDone,
     required TResult Function(RealtimeEventResponseOutputItemAdded value)
-        responseOutputItemAdded,
+    responseOutputItemAdded,
     required TResult Function(RealtimeEventResponseOutputItemDone value)
-        responseOutputItemDone,
+    responseOutputItemDone,
     required TResult Function(RealtimeEventResponseTextDelta value)
-        responseTextDelta,
+    responseTextDelta,
     required TResult Function(RealtimeEventResponseTextDone value)
-        responseTextDone,
+    responseTextDone,
     required TResult Function(RealtimeEventSessionCreated value) sessionCreated,
     required TResult Function(RealtimeEventSessionUpdated value) sessionUpdated,
     required TResult Function(RealtimeEventClose value) close,
     required TResult Function(RealtimeEventConversationInterrupted value)
-        conversationInterrupted,
+    conversationInterrupted,
     required TResult Function(RealtimeEventConversationUpdated value)
-        conversationUpdated,
+    conversationUpdated,
     required TResult Function(RealtimeEventConversationItemAppended value)
-        conversationItemAppended,
+    conversationItemAppended,
     required TResult Function(RealtimeEventConversationItemCompleted value)
-        conversationItemCompleted,
+    conversationItemCompleted,
     required TResult Function(RealtimeEventGeneric value) generic,
   }) {
     final _that = this;
@@ -17318,82 +18422,84 @@ extension RealtimeEventPatterns on RealtimeEvent {
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(RealtimeEventConversationItemCreate value)?
-        conversationItemCreate,
+    conversationItemCreate,
     TResult? Function(RealtimeEventConversationItemDelete value)?
-        conversationItemDelete,
+    conversationItemDelete,
     TResult? Function(RealtimeEventConversationItemTruncate value)?
-        conversationItemTruncate,
+    conversationItemTruncate,
     TResult? Function(RealtimeEventInputAudioBufferAppend value)?
-        inputAudioBufferAppend,
+    inputAudioBufferAppend,
     TResult? Function(RealtimeEventInputAudioBufferClear value)?
-        inputAudioBufferClear,
+    inputAudioBufferClear,
     TResult? Function(RealtimeEventInputAudioBufferCommit value)?
-        inputAudioBufferCommit,
+    inputAudioBufferCommit,
     TResult? Function(RealtimeEventResponseCancel value)? responseCancel,
     TResult? Function(RealtimeEventResponseCreate value)? responseCreate,
     TResult? Function(RealtimeEventSessionUpdate value)? sessionUpdate,
     TResult? Function(RealtimeEventConversationCreated value)?
-        conversationCreated,
+    conversationCreated,
     TResult? Function(RealtimeEventConversationItemCreated value)?
-        conversationItemCreated,
+    conversationItemCreated,
     TResult? Function(RealtimeEventConversationItemDeleted value)?
-        conversationItemDeleted,
+    conversationItemDeleted,
     TResult? Function(
-            RealtimeEventConversationItemInputAudioTranscriptionCompleted
-                value)?
-        conversationItemInputAudioTranscriptionCompleted,
+      RealtimeEventConversationItemInputAudioTranscriptionCompleted value,
+    )?
+    conversationItemInputAudioTranscriptionCompleted,
     TResult? Function(
-            RealtimeEventConversationItemInputAudioTranscriptionFailed value)?
-        conversationItemInputAudioTranscriptionFailed,
+      RealtimeEventConversationItemInputAudioTranscriptionFailed value,
+    )?
+    conversationItemInputAudioTranscriptionFailed,
     TResult? Function(
-            RealtimeEventConversationItemInputAudioTranscriptionDelta value)?
-        conversationItemInputAudioTranscriptionDelta,
+      RealtimeEventConversationItemInputAudioTranscriptionDelta value,
+    )?
+    conversationItemInputAudioTranscriptionDelta,
     TResult? Function(RealtimeEventConversationItemTruncated value)?
-        conversationItemTruncated,
+    conversationItemTruncated,
     TResult? Function(RealtimeEventError value)? error,
     TResult? Function(RealtimeEventInputAudioBufferCleared value)?
-        inputAudioBufferCleared,
+    inputAudioBufferCleared,
     TResult? Function(RealtimeEventInputAudioBufferCommitted value)?
-        inputAudioBufferCommitted,
+    inputAudioBufferCommitted,
     TResult? Function(RealtimeEventInputAudioBufferSpeechStarted value)?
-        inputAudioBufferSpeechStarted,
+    inputAudioBufferSpeechStarted,
     TResult? Function(RealtimeEventInputAudioBufferSpeechStopped value)?
-        inputAudioBufferSpeechStopped,
+    inputAudioBufferSpeechStopped,
     TResult? Function(RealtimeEventRateLimitsUpdated value)? rateLimitsUpdated,
     TResult? Function(RealtimeEventResponseAudioDelta value)?
-        responseAudioDelta,
+    responseAudioDelta,
     TResult? Function(RealtimeEventResponseAudioDone value)? responseAudioDone,
     TResult? Function(RealtimeEventResponseAudioTranscriptDelta value)?
-        responseAudioTranscriptDelta,
+    responseAudioTranscriptDelta,
     TResult? Function(RealtimeEventResponseAudioTranscriptDone value)?
-        responseAudioTranscriptDone,
+    responseAudioTranscriptDone,
     TResult? Function(RealtimeEventResponseContentPartAdded value)?
-        responseContentPartAdded,
+    responseContentPartAdded,
     TResult? Function(RealtimeEventResponseContentPartDone value)?
-        responseContentPartDone,
+    responseContentPartDone,
     TResult? Function(RealtimeEventResponseCreated value)? responseCreated,
     TResult? Function(RealtimeEventResponseDone value)? responseDone,
     TResult? Function(RealtimeEventResponseFunctionCallArgumentsDelta value)?
-        responseFunctionCallArgumentsDelta,
+    responseFunctionCallArgumentsDelta,
     TResult? Function(RealtimeEventResponseFunctionCallArgumentsDone value)?
-        responseFunctionCallArgumentsDone,
+    responseFunctionCallArgumentsDone,
     TResult? Function(RealtimeEventResponseOutputItemAdded value)?
-        responseOutputItemAdded,
+    responseOutputItemAdded,
     TResult? Function(RealtimeEventResponseOutputItemDone value)?
-        responseOutputItemDone,
+    responseOutputItemDone,
     TResult? Function(RealtimeEventResponseTextDelta value)? responseTextDelta,
     TResult? Function(RealtimeEventResponseTextDone value)? responseTextDone,
     TResult? Function(RealtimeEventSessionCreated value)? sessionCreated,
     TResult? Function(RealtimeEventSessionUpdated value)? sessionUpdated,
     TResult? Function(RealtimeEventClose value)? close,
     TResult? Function(RealtimeEventConversationInterrupted value)?
-        conversationInterrupted,
+    conversationInterrupted,
     TResult? Function(RealtimeEventConversationUpdated value)?
-        conversationUpdated,
+    conversationUpdated,
     TResult? Function(RealtimeEventConversationItemAppended value)?
-        conversationItemAppended,
+    conversationItemAppended,
     TResult? Function(RealtimeEventConversationItemCompleted value)?
-        conversationItemCompleted,
+    conversationItemCompleted,
     TResult? Function(RealtimeEventGeneric value)? generic,
   }) {
     final _that = this;
@@ -17533,252 +18639,326 @@ extension RealtimeEventPatterns on RealtimeEvent {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'previous_item_id', includeIfNull: false)
-            String? previousItemId,
-            Item item)?
-        conversationItemCreate,
-    TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, @JsonKey(name: 'item_id') String itemId)?
-        conversationItemDelete,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'previous_item_id', includeIfNull: false)
+      String? previousItemId,
+      Item item,
+    )?
+    conversationItemCreate,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'content_index') int contentIndex,
-            @JsonKey(name: 'audio_end_ms') int audioEndMs)?
-        conversationItemTruncate,
-    TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, String audio)?
-        inputAudioBufferAppend,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+    )?
+    conversationItemDelete,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId, RealtimeEventType type)?
-        inputAudioBufferClear,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'content_index') int contentIndex,
+      @JsonKey(name: 'audio_end_ms') int audioEndMs,
+    )?
+    conversationItemTruncate,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId, RealtimeEventType type)?
-        inputAudioBufferCommit,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      String audio,
+    )?
+    inputAudioBufferAppend,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id', includeIfNull: false)
-            String? responseId)?
-        responseCancel,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+    )?
+    inputAudioBufferClear,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(includeIfNull: false) ResponseConfig? response)?
-        responseCreate,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+    )?
+    inputAudioBufferCommit,
     TResult Function(
-            @JsonKey(name: 'event_id', includeIfNull: false) String? eventId,
-            RealtimeEventType type,
-            SessionConfig session)?
-        sessionUpdate,
-    TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, Conversation conversation)?
-        conversationCreated,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id', includeIfNull: false) String? responseId,
+    )?
+    responseCancel,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'previous_item_id', includeIfNull: false)
-            String? previousItemId,
-            Item item)?
-        conversationItemCreated,
-    TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, @JsonKey(name: 'item_id') String itemId)?
-        conversationItemDeleted,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(includeIfNull: false) ResponseConfig? response,
+    )?
+    responseCreate,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'content_index') int contentIndex,
-            String transcript)?
-        conversationItemInputAudioTranscriptionCompleted,
+      @JsonKey(name: 'event_id', includeIfNull: false) String? eventId,
+      RealtimeEventType type,
+      SessionConfig session,
+    )?
+    sessionUpdate,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'content_index') int contentIndex,
-            TranscriptionError error)?
-        conversationItemInputAudioTranscriptionFailed,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      Conversation conversation,
+    )?
+    conversationCreated,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'content_index', includeIfNull: false)
-            int? contentIndex,
-            @JsonKey(includeIfNull: false) String? delta)?
-        conversationItemInputAudioTranscriptionDelta,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'previous_item_id', includeIfNull: false)
+      String? previousItemId,
+      Item item,
+    )?
+    conversationItemCreated,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'content_index') int contentIndex,
-            @JsonKey(name: 'audio_end_ms') int audioEndMs)?
-        conversationItemTruncated,
-    TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, APIError error)?
-        error,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+    )?
+    conversationItemDeleted,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId, RealtimeEventType type)?
-        inputAudioBufferCleared,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'content_index') int contentIndex,
+      String transcript,
+    )?
+    conversationItemInputAudioTranscriptionCompleted,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'previous_item_id', includeIfNull: false)
-            String? previousItemId,
-            @JsonKey(name: 'item_id') String itemId)?
-        inputAudioBufferCommitted,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'content_index') int contentIndex,
+      TranscriptionError error,
+    )?
+    conversationItemInputAudioTranscriptionFailed,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'audio_start_ms') int audioStartMs,
-            @JsonKey(name: 'item_id') String itemId)?
-        inputAudioBufferSpeechStarted,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'content_index', includeIfNull: false) int? contentIndex,
+      @JsonKey(includeIfNull: false) String? delta,
+    )?
+    conversationItemInputAudioTranscriptionDelta,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'audio_end_ms') int audioEndMs,
-            @JsonKey(name: 'item_id') String itemId)?
-        inputAudioBufferSpeechStopped,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'content_index') int contentIndex,
+      @JsonKey(name: 'audio_end_ms') int audioEndMs,
+    )?
+    conversationItemTruncated,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'rate_limits') List<RateLimit> rateLimits)?
-        rateLimitsUpdated,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      APIError error,
+    )?
+    error,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            String delta)?
-        responseAudioDelta,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+    )?
+    inputAudioBufferCleared,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex)?
-        responseAudioDone,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'previous_item_id', includeIfNull: false)
+      String? previousItemId,
+      @JsonKey(name: 'item_id') String itemId,
+    )?
+    inputAudioBufferCommitted,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            String delta)?
-        responseAudioTranscriptDelta,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'audio_start_ms') int audioStartMs,
+      @JsonKey(name: 'item_id') String itemId,
+    )?
+    inputAudioBufferSpeechStarted,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            String transcript)?
-        responseAudioTranscriptDone,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'audio_end_ms') int audioEndMs,
+      @JsonKey(name: 'item_id') String itemId,
+    )?
+    inputAudioBufferSpeechStopped,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            ContentPart part)?
-        responseContentPartAdded,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'rate_limits') List<RateLimit> rateLimits,
+    )?
+    rateLimitsUpdated,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            ContentPart part)?
-        responseContentPartDone,
-    TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, Response response)?
-        responseCreated,
-    TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, Response response)?
-        responseDone,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      String delta,
+    )?
+    responseAudioDelta,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'call_id') String callId,
-            String delta)?
-        responseFunctionCallArgumentsDelta,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+    )?
+    responseAudioDone,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'call_id') String callId,
-            String arguments)?
-        responseFunctionCallArgumentsDone,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      String delta,
+    )?
+    responseAudioTranscriptDelta,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            Item item)?
-        responseOutputItemAdded,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      String transcript,
+    )?
+    responseAudioTranscriptDone,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            Item item)?
-        responseOutputItemDone,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      ContentPart part,
+    )?
+    responseContentPartAdded,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            String delta)?
-        responseTextDelta,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      ContentPart part,
+    )?
+    responseContentPartDone,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            String text)?
-        responseTextDone,
-    TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, Session session)?
-        sessionCreated,
-    TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, Session session)?
-        sessionUpdated,
-    TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, bool error)?
-        close,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      Response response,
+    )?
+    responseCreated,
     TResult Function(
-            @JsonKey(name: 'event_id') String eventId, RealtimeEventType type)?
-        conversationInterrupted,
-    TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, EventHandlerResult result)?
-        conversationUpdated,
-    TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, FormattedItem item)?
-        conversationItemAppended,
-    TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, FormattedItem item)?
-        conversationItemCompleted,
-    TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, RealtimeEvent event)?
-        generic,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      Response response,
+    )?
+    responseDone,
+    TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'call_id') String callId,
+      String delta,
+    )?
+    responseFunctionCallArgumentsDelta,
+    TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'call_id') String callId,
+      String arguments,
+    )?
+    responseFunctionCallArgumentsDone,
+    TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      Item item,
+    )?
+    responseOutputItemAdded,
+    TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      Item item,
+    )?
+    responseOutputItemDone,
+    TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      String delta,
+    )?
+    responseTextDelta,
+    TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      String text,
+    )?
+    responseTextDone,
+    TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      Session session,
+    )?
+    sessionCreated,
+    TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      Session session,
+    )?
+    sessionUpdated,
+    TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      bool error,
+    )?
+    close,
+    TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+    )?
+    conversationInterrupted,
+    TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      EventHandlerResult result,
+    )?
+    conversationUpdated,
+    TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      FormattedItem item,
+    )?
+    conversationItemAppended,
+    TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      FormattedItem item,
+    )?
+    conversationItemCompleted,
+    TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      RealtimeEvent event,
+    )?
+    generic,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -17786,14 +18966,23 @@ extension RealtimeEventPatterns on RealtimeEvent {
       case RealtimeEventConversationItemCreate()
           when conversationItemCreate != null:
         return conversationItemCreate(
-            _that.eventId, _that.type, _that.previousItemId, _that.item);
+          _that.eventId,
+          _that.type,
+          _that.previousItemId,
+          _that.item,
+        );
       case RealtimeEventConversationItemDelete()
           when conversationItemDelete != null:
         return conversationItemDelete(_that.eventId, _that.type, _that.itemId);
       case RealtimeEventConversationItemTruncate()
           when conversationItemTruncate != null:
-        return conversationItemTruncate(_that.eventId, _that.type, _that.itemId,
-            _that.contentIndex, _that.audioEndMs);
+        return conversationItemTruncate(
+          _that.eventId,
+          _that.type,
+          _that.itemId,
+          _that.contentIndex,
+          _that.audioEndMs,
+        );
       case RealtimeEventInputAudioBufferAppend()
           when inputAudioBufferAppend != null:
         return inputAudioBufferAppend(_that.eventId, _that.type, _that.audio);
@@ -17811,30 +19000,57 @@ extension RealtimeEventPatterns on RealtimeEvent {
         return sessionUpdate(_that.eventId, _that.type, _that.session);
       case RealtimeEventConversationCreated() when conversationCreated != null:
         return conversationCreated(
-            _that.eventId, _that.type, _that.conversation);
+          _that.eventId,
+          _that.type,
+          _that.conversation,
+        );
       case RealtimeEventConversationItemCreated()
           when conversationItemCreated != null:
         return conversationItemCreated(
-            _that.eventId, _that.type, _that.previousItemId, _that.item);
+          _that.eventId,
+          _that.type,
+          _that.previousItemId,
+          _that.item,
+        );
       case RealtimeEventConversationItemDeleted()
           when conversationItemDeleted != null:
         return conversationItemDeleted(_that.eventId, _that.type, _that.itemId);
       case RealtimeEventConversationItemInputAudioTranscriptionCompleted()
           when conversationItemInputAudioTranscriptionCompleted != null:
-        return conversationItemInputAudioTranscriptionCompleted(_that.eventId,
-            _that.type, _that.itemId, _that.contentIndex, _that.transcript);
+        return conversationItemInputAudioTranscriptionCompleted(
+          _that.eventId,
+          _that.type,
+          _that.itemId,
+          _that.contentIndex,
+          _that.transcript,
+        );
       case RealtimeEventConversationItemInputAudioTranscriptionFailed()
           when conversationItemInputAudioTranscriptionFailed != null:
-        return conversationItemInputAudioTranscriptionFailed(_that.eventId,
-            _that.type, _that.itemId, _that.contentIndex, _that.error);
+        return conversationItemInputAudioTranscriptionFailed(
+          _that.eventId,
+          _that.type,
+          _that.itemId,
+          _that.contentIndex,
+          _that.error,
+        );
       case RealtimeEventConversationItemInputAudioTranscriptionDelta()
           when conversationItemInputAudioTranscriptionDelta != null:
-        return conversationItemInputAudioTranscriptionDelta(_that.eventId,
-            _that.type, _that.itemId, _that.contentIndex, _that.delta);
+        return conversationItemInputAudioTranscriptionDelta(
+          _that.eventId,
+          _that.type,
+          _that.itemId,
+          _that.contentIndex,
+          _that.delta,
+        );
       case RealtimeEventConversationItemTruncated()
           when conversationItemTruncated != null:
-        return conversationItemTruncated(_that.eventId, _that.type,
-            _that.itemId, _that.contentIndex, _that.audioEndMs);
+        return conversationItemTruncated(
+          _that.eventId,
+          _that.type,
+          _that.itemId,
+          _that.contentIndex,
+          _that.audioEndMs,
+        );
       case RealtimeEventError() when error != null:
         return error(_that.eventId, _that.type, _that.error);
       case RealtimeEventInputAudioBufferCleared()
@@ -17843,63 +19059,92 @@ extension RealtimeEventPatterns on RealtimeEvent {
       case RealtimeEventInputAudioBufferCommitted()
           when inputAudioBufferCommitted != null:
         return inputAudioBufferCommitted(
-            _that.eventId, _that.type, _that.previousItemId, _that.itemId);
+          _that.eventId,
+          _that.type,
+          _that.previousItemId,
+          _that.itemId,
+        );
       case RealtimeEventInputAudioBufferSpeechStarted()
           when inputAudioBufferSpeechStarted != null:
         return inputAudioBufferSpeechStarted(
-            _that.eventId, _that.type, _that.audioStartMs, _that.itemId);
+          _that.eventId,
+          _that.type,
+          _that.audioStartMs,
+          _that.itemId,
+        );
       case RealtimeEventInputAudioBufferSpeechStopped()
           when inputAudioBufferSpeechStopped != null:
         return inputAudioBufferSpeechStopped(
-            _that.eventId, _that.type, _that.audioEndMs, _that.itemId);
+          _that.eventId,
+          _that.type,
+          _that.audioEndMs,
+          _that.itemId,
+        );
       case RealtimeEventRateLimitsUpdated() when rateLimitsUpdated != null:
         return rateLimitsUpdated(_that.eventId, _that.type, _that.rateLimits);
       case RealtimeEventResponseAudioDelta() when responseAudioDelta != null:
-        return responseAudioDelta(_that.eventId, _that.type, _that.responseId,
-            _that.itemId, _that.outputIndex, _that.contentIndex, _that.delta);
+        return responseAudioDelta(
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.delta,
+        );
       case RealtimeEventResponseAudioDone() when responseAudioDone != null:
-        return responseAudioDone(_that.eventId, _that.type, _that.responseId,
-            _that.itemId, _that.outputIndex, _that.contentIndex);
+        return responseAudioDone(
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+        );
       case RealtimeEventResponseAudioTranscriptDelta()
           when responseAudioTranscriptDelta != null:
         return responseAudioTranscriptDelta(
-            _that.eventId,
-            _that.type,
-            _that.responseId,
-            _that.itemId,
-            _that.outputIndex,
-            _that.contentIndex,
-            _that.delta);
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.delta,
+        );
       case RealtimeEventResponseAudioTranscriptDone()
           when responseAudioTranscriptDone != null:
         return responseAudioTranscriptDone(
-            _that.eventId,
-            _that.type,
-            _that.responseId,
-            _that.itemId,
-            _that.outputIndex,
-            _that.contentIndex,
-            _that.transcript);
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.transcript,
+        );
       case RealtimeEventResponseContentPartAdded()
           when responseContentPartAdded != null:
         return responseContentPartAdded(
-            _that.eventId,
-            _that.type,
-            _that.responseId,
-            _that.itemId,
-            _that.outputIndex,
-            _that.contentIndex,
-            _that.part);
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.part,
+        );
       case RealtimeEventResponseContentPartDone()
           when responseContentPartDone != null:
         return responseContentPartDone(
-            _that.eventId,
-            _that.type,
-            _that.responseId,
-            _that.itemId,
-            _that.outputIndex,
-            _that.contentIndex,
-            _that.part);
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.part,
+        );
       case RealtimeEventResponseCreated() when responseCreated != null:
         return responseCreated(_that.eventId, _that.type, _that.response);
       case RealtimeEventResponseDone() when responseDone != null:
@@ -17907,37 +19152,63 @@ extension RealtimeEventPatterns on RealtimeEvent {
       case RealtimeEventResponseFunctionCallArgumentsDelta()
           when responseFunctionCallArgumentsDelta != null:
         return responseFunctionCallArgumentsDelta(
-            _that.eventId,
-            _that.type,
-            _that.responseId,
-            _that.itemId,
-            _that.outputIndex,
-            _that.callId,
-            _that.delta);
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.callId,
+          _that.delta,
+        );
       case RealtimeEventResponseFunctionCallArgumentsDone()
           when responseFunctionCallArgumentsDone != null:
         return responseFunctionCallArgumentsDone(
-            _that.eventId,
-            _that.type,
-            _that.responseId,
-            _that.itemId,
-            _that.outputIndex,
-            _that.callId,
-            _that.arguments);
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.callId,
+          _that.arguments,
+        );
       case RealtimeEventResponseOutputItemAdded()
           when responseOutputItemAdded != null:
-        return responseOutputItemAdded(_that.eventId, _that.type,
-            _that.responseId, _that.outputIndex, _that.item);
+        return responseOutputItemAdded(
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.outputIndex,
+          _that.item,
+        );
       case RealtimeEventResponseOutputItemDone()
           when responseOutputItemDone != null:
-        return responseOutputItemDone(_that.eventId, _that.type,
-            _that.responseId, _that.outputIndex, _that.item);
+        return responseOutputItemDone(
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.outputIndex,
+          _that.item,
+        );
       case RealtimeEventResponseTextDelta() when responseTextDelta != null:
-        return responseTextDelta(_that.eventId, _that.type, _that.responseId,
-            _that.itemId, _that.outputIndex, _that.contentIndex, _that.delta);
+        return responseTextDelta(
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.delta,
+        );
       case RealtimeEventResponseTextDone() when responseTextDone != null:
-        return responseTextDone(_that.eventId, _that.type, _that.responseId,
-            _that.itemId, _that.outputIndex, _that.contentIndex, _that.text);
+        return responseTextDone(
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.text,
+        );
       case RealtimeEventSessionCreated() when sessionCreated != null:
         return sessionCreated(_that.eventId, _that.type, _that.session);
       case RealtimeEventSessionUpdated() when sessionUpdated != null:
@@ -17978,263 +19249,346 @@ extension RealtimeEventPatterns on RealtimeEvent {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'previous_item_id', includeIfNull: false)
-            String? previousItemId,
-            Item item)
-        conversationItemCreate,
-    required TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, @JsonKey(name: 'item_id') String itemId)
-        conversationItemDelete,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'previous_item_id', includeIfNull: false)
+      String? previousItemId,
+      Item item,
+    )
+    conversationItemCreate,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'content_index') int contentIndex,
-            @JsonKey(name: 'audio_end_ms') int audioEndMs)
-        conversationItemTruncate,
-    required TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, String audio)
-        inputAudioBufferAppend,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+    )
+    conversationItemDelete,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId, RealtimeEventType type)
-        inputAudioBufferClear,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'content_index') int contentIndex,
+      @JsonKey(name: 'audio_end_ms') int audioEndMs,
+    )
+    conversationItemTruncate,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId, RealtimeEventType type)
-        inputAudioBufferCommit,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      String audio,
+    )
+    inputAudioBufferAppend,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id', includeIfNull: false)
-            String? responseId)
-        responseCancel,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+    )
+    inputAudioBufferClear,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(includeIfNull: false) ResponseConfig? response)
-        responseCreate,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+    )
+    inputAudioBufferCommit,
     required TResult Function(
-            @JsonKey(name: 'event_id', includeIfNull: false) String? eventId,
-            RealtimeEventType type,
-            SessionConfig session)
-        sessionUpdate,
-    required TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, Conversation conversation)
-        conversationCreated,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id', includeIfNull: false) String? responseId,
+    )
+    responseCancel,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'previous_item_id', includeIfNull: false)
-            String? previousItemId,
-            Item item)
-        conversationItemCreated,
-    required TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, @JsonKey(name: 'item_id') String itemId)
-        conversationItemDeleted,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(includeIfNull: false) ResponseConfig? response,
+    )
+    responseCreate,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'content_index') int contentIndex,
-            String transcript)
-        conversationItemInputAudioTranscriptionCompleted,
+      @JsonKey(name: 'event_id', includeIfNull: false) String? eventId,
+      RealtimeEventType type,
+      SessionConfig session,
+    )
+    sessionUpdate,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'content_index') int contentIndex,
-            TranscriptionError error)
-        conversationItemInputAudioTranscriptionFailed,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      Conversation conversation,
+    )
+    conversationCreated,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'content_index', includeIfNull: false)
-            int? contentIndex,
-            @JsonKey(includeIfNull: false) String? delta)
-        conversationItemInputAudioTranscriptionDelta,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'previous_item_id', includeIfNull: false)
+      String? previousItemId,
+      Item item,
+    )
+    conversationItemCreated,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'content_index') int contentIndex,
-            @JsonKey(name: 'audio_end_ms') int audioEndMs)
-        conversationItemTruncated,
-    required TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, APIError error)
-        error,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+    )
+    conversationItemDeleted,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId, RealtimeEventType type)
-        inputAudioBufferCleared,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'content_index') int contentIndex,
+      String transcript,
+    )
+    conversationItemInputAudioTranscriptionCompleted,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'previous_item_id', includeIfNull: false)
-            String? previousItemId,
-            @JsonKey(name: 'item_id') String itemId)
-        inputAudioBufferCommitted,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'content_index') int contentIndex,
+      TranscriptionError error,
+    )
+    conversationItemInputAudioTranscriptionFailed,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'audio_start_ms') int audioStartMs,
-            @JsonKey(name: 'item_id') String itemId)
-        inputAudioBufferSpeechStarted,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'content_index', includeIfNull: false) int? contentIndex,
+      @JsonKey(includeIfNull: false) String? delta,
+    )
+    conversationItemInputAudioTranscriptionDelta,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'audio_end_ms') int audioEndMs,
-            @JsonKey(name: 'item_id') String itemId)
-        inputAudioBufferSpeechStopped,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'content_index') int contentIndex,
+      @JsonKey(name: 'audio_end_ms') int audioEndMs,
+    )
+    conversationItemTruncated,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'rate_limits') List<RateLimit> rateLimits)
-        rateLimitsUpdated,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      APIError error,
+    )
+    error,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            String delta)
-        responseAudioDelta,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+    )
+    inputAudioBufferCleared,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex)
-        responseAudioDone,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'previous_item_id', includeIfNull: false)
+      String? previousItemId,
+      @JsonKey(name: 'item_id') String itemId,
+    )
+    inputAudioBufferCommitted,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            String delta)
-        responseAudioTranscriptDelta,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'audio_start_ms') int audioStartMs,
+      @JsonKey(name: 'item_id') String itemId,
+    )
+    inputAudioBufferSpeechStarted,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            String transcript)
-        responseAudioTranscriptDone,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'audio_end_ms') int audioEndMs,
+      @JsonKey(name: 'item_id') String itemId,
+    )
+    inputAudioBufferSpeechStopped,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            ContentPart part)
-        responseContentPartAdded,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'rate_limits') List<RateLimit> rateLimits,
+    )
+    rateLimitsUpdated,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            ContentPart part)
-        responseContentPartDone,
-    required TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, Response response)
-        responseCreated,
-    required TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, Response response)
-        responseDone,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      String delta,
+    )
+    responseAudioDelta,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'call_id') String callId,
-            String delta)
-        responseFunctionCallArgumentsDelta,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+    )
+    responseAudioDone,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'call_id') String callId,
-            String arguments)
-        responseFunctionCallArgumentsDone,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      String delta,
+    )
+    responseAudioTranscriptDelta,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            Item item)
-        responseOutputItemAdded,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      String transcript,
+    )
+    responseAudioTranscriptDone,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            Item item)
-        responseOutputItemDone,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      ContentPart part,
+    )
+    responseContentPartAdded,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            String delta)
-        responseTextDelta,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      ContentPart part,
+    )
+    responseContentPartDone,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            String text)
-        responseTextDone,
-    required TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, Session session)
-        sessionCreated,
-    required TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, Session session)
-        sessionUpdated,
-    required TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, bool error)
-        close,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      Response response,
+    )
+    responseCreated,
     required TResult Function(
-            @JsonKey(name: 'event_id') String eventId, RealtimeEventType type)
-        conversationInterrupted,
-    required TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, EventHandlerResult result)
-        conversationUpdated,
-    required TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, FormattedItem item)
-        conversationItemAppended,
-    required TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, FormattedItem item)
-        conversationItemCompleted,
-    required TResult Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, RealtimeEvent event)
-        generic,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      Response response,
+    )
+    responseDone,
+    required TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'call_id') String callId,
+      String delta,
+    )
+    responseFunctionCallArgumentsDelta,
+    required TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'call_id') String callId,
+      String arguments,
+    )
+    responseFunctionCallArgumentsDone,
+    required TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      Item item,
+    )
+    responseOutputItemAdded,
+    required TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      Item item,
+    )
+    responseOutputItemDone,
+    required TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      String delta,
+    )
+    responseTextDelta,
+    required TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      String text,
+    )
+    responseTextDone,
+    required TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      Session session,
+    )
+    sessionCreated,
+    required TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      Session session,
+    )
+    sessionUpdated,
+    required TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      bool error,
+    )
+    close,
+    required TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+    )
+    conversationInterrupted,
+    required TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      EventHandlerResult result,
+    )
+    conversationUpdated,
+    required TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      FormattedItem item,
+    )
+    conversationItemAppended,
+    required TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      FormattedItem item,
+    )
+    conversationItemCompleted,
+    required TResult Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      RealtimeEvent event,
+    )
+    generic,
   }) {
     final _that = this;
     switch (_that) {
       case RealtimeEventConversationItemCreate():
         return conversationItemCreate(
-            _that.eventId, _that.type, _that.previousItemId, _that.item);
+          _that.eventId,
+          _that.type,
+          _that.previousItemId,
+          _that.item,
+        );
       case RealtimeEventConversationItemDelete():
         return conversationItemDelete(_that.eventId, _that.type, _that.itemId);
       case RealtimeEventConversationItemTruncate():
-        return conversationItemTruncate(_that.eventId, _that.type, _that.itemId,
-            _that.contentIndex, _that.audioEndMs);
+        return conversationItemTruncate(
+          _that.eventId,
+          _that.type,
+          _that.itemId,
+          _that.contentIndex,
+          _that.audioEndMs,
+        );
       case RealtimeEventInputAudioBufferAppend():
         return inputAudioBufferAppend(_that.eventId, _that.type, _that.audio);
       case RealtimeEventInputAudioBufferClear():
@@ -18249,115 +19603,197 @@ extension RealtimeEventPatterns on RealtimeEvent {
         return sessionUpdate(_that.eventId, _that.type, _that.session);
       case RealtimeEventConversationCreated():
         return conversationCreated(
-            _that.eventId, _that.type, _that.conversation);
+          _that.eventId,
+          _that.type,
+          _that.conversation,
+        );
       case RealtimeEventConversationItemCreated():
         return conversationItemCreated(
-            _that.eventId, _that.type, _that.previousItemId, _that.item);
+          _that.eventId,
+          _that.type,
+          _that.previousItemId,
+          _that.item,
+        );
       case RealtimeEventConversationItemDeleted():
         return conversationItemDeleted(_that.eventId, _that.type, _that.itemId);
       case RealtimeEventConversationItemInputAudioTranscriptionCompleted():
-        return conversationItemInputAudioTranscriptionCompleted(_that.eventId,
-            _that.type, _that.itemId, _that.contentIndex, _that.transcript);
+        return conversationItemInputAudioTranscriptionCompleted(
+          _that.eventId,
+          _that.type,
+          _that.itemId,
+          _that.contentIndex,
+          _that.transcript,
+        );
       case RealtimeEventConversationItemInputAudioTranscriptionFailed():
-        return conversationItemInputAudioTranscriptionFailed(_that.eventId,
-            _that.type, _that.itemId, _that.contentIndex, _that.error);
+        return conversationItemInputAudioTranscriptionFailed(
+          _that.eventId,
+          _that.type,
+          _that.itemId,
+          _that.contentIndex,
+          _that.error,
+        );
       case RealtimeEventConversationItemInputAudioTranscriptionDelta():
-        return conversationItemInputAudioTranscriptionDelta(_that.eventId,
-            _that.type, _that.itemId, _that.contentIndex, _that.delta);
+        return conversationItemInputAudioTranscriptionDelta(
+          _that.eventId,
+          _that.type,
+          _that.itemId,
+          _that.contentIndex,
+          _that.delta,
+        );
       case RealtimeEventConversationItemTruncated():
-        return conversationItemTruncated(_that.eventId, _that.type,
-            _that.itemId, _that.contentIndex, _that.audioEndMs);
+        return conversationItemTruncated(
+          _that.eventId,
+          _that.type,
+          _that.itemId,
+          _that.contentIndex,
+          _that.audioEndMs,
+        );
       case RealtimeEventError():
         return error(_that.eventId, _that.type, _that.error);
       case RealtimeEventInputAudioBufferCleared():
         return inputAudioBufferCleared(_that.eventId, _that.type);
       case RealtimeEventInputAudioBufferCommitted():
         return inputAudioBufferCommitted(
-            _that.eventId, _that.type, _that.previousItemId, _that.itemId);
+          _that.eventId,
+          _that.type,
+          _that.previousItemId,
+          _that.itemId,
+        );
       case RealtimeEventInputAudioBufferSpeechStarted():
         return inputAudioBufferSpeechStarted(
-            _that.eventId, _that.type, _that.audioStartMs, _that.itemId);
+          _that.eventId,
+          _that.type,
+          _that.audioStartMs,
+          _that.itemId,
+        );
       case RealtimeEventInputAudioBufferSpeechStopped():
         return inputAudioBufferSpeechStopped(
-            _that.eventId, _that.type, _that.audioEndMs, _that.itemId);
+          _that.eventId,
+          _that.type,
+          _that.audioEndMs,
+          _that.itemId,
+        );
       case RealtimeEventRateLimitsUpdated():
         return rateLimitsUpdated(_that.eventId, _that.type, _that.rateLimits);
       case RealtimeEventResponseAudioDelta():
-        return responseAudioDelta(_that.eventId, _that.type, _that.responseId,
-            _that.itemId, _that.outputIndex, _that.contentIndex, _that.delta);
+        return responseAudioDelta(
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.delta,
+        );
       case RealtimeEventResponseAudioDone():
-        return responseAudioDone(_that.eventId, _that.type, _that.responseId,
-            _that.itemId, _that.outputIndex, _that.contentIndex);
+        return responseAudioDone(
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+        );
       case RealtimeEventResponseAudioTranscriptDelta():
         return responseAudioTranscriptDelta(
-            _that.eventId,
-            _that.type,
-            _that.responseId,
-            _that.itemId,
-            _that.outputIndex,
-            _that.contentIndex,
-            _that.delta);
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.delta,
+        );
       case RealtimeEventResponseAudioTranscriptDone():
         return responseAudioTranscriptDone(
-            _that.eventId,
-            _that.type,
-            _that.responseId,
-            _that.itemId,
-            _that.outputIndex,
-            _that.contentIndex,
-            _that.transcript);
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.transcript,
+        );
       case RealtimeEventResponseContentPartAdded():
         return responseContentPartAdded(
-            _that.eventId,
-            _that.type,
-            _that.responseId,
-            _that.itemId,
-            _that.outputIndex,
-            _that.contentIndex,
-            _that.part);
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.part,
+        );
       case RealtimeEventResponseContentPartDone():
         return responseContentPartDone(
-            _that.eventId,
-            _that.type,
-            _that.responseId,
-            _that.itemId,
-            _that.outputIndex,
-            _that.contentIndex,
-            _that.part);
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.part,
+        );
       case RealtimeEventResponseCreated():
         return responseCreated(_that.eventId, _that.type, _that.response);
       case RealtimeEventResponseDone():
         return responseDone(_that.eventId, _that.type, _that.response);
       case RealtimeEventResponseFunctionCallArgumentsDelta():
         return responseFunctionCallArgumentsDelta(
-            _that.eventId,
-            _that.type,
-            _that.responseId,
-            _that.itemId,
-            _that.outputIndex,
-            _that.callId,
-            _that.delta);
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.callId,
+          _that.delta,
+        );
       case RealtimeEventResponseFunctionCallArgumentsDone():
         return responseFunctionCallArgumentsDone(
-            _that.eventId,
-            _that.type,
-            _that.responseId,
-            _that.itemId,
-            _that.outputIndex,
-            _that.callId,
-            _that.arguments);
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.callId,
+          _that.arguments,
+        );
       case RealtimeEventResponseOutputItemAdded():
-        return responseOutputItemAdded(_that.eventId, _that.type,
-            _that.responseId, _that.outputIndex, _that.item);
+        return responseOutputItemAdded(
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.outputIndex,
+          _that.item,
+        );
       case RealtimeEventResponseOutputItemDone():
-        return responseOutputItemDone(_that.eventId, _that.type,
-            _that.responseId, _that.outputIndex, _that.item);
+        return responseOutputItemDone(
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.outputIndex,
+          _that.item,
+        );
       case RealtimeEventResponseTextDelta():
-        return responseTextDelta(_that.eventId, _that.type, _that.responseId,
-            _that.itemId, _that.outputIndex, _that.contentIndex, _that.delta);
+        return responseTextDelta(
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.delta,
+        );
       case RealtimeEventResponseTextDone():
-        return responseTextDone(_that.eventId, _that.type, _that.responseId,
-            _that.itemId, _that.outputIndex, _that.contentIndex, _that.text);
+        return responseTextDone(
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.text,
+        );
       case RealtimeEventSessionCreated():
         return sessionCreated(_that.eventId, _that.type, _that.session);
       case RealtimeEventSessionUpdated():
@@ -18392,266 +19828,349 @@ extension RealtimeEventPatterns on RealtimeEvent {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'previous_item_id', includeIfNull: false)
-            String? previousItemId,
-            Item item)?
-        conversationItemCreate,
-    TResult? Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, @JsonKey(name: 'item_id') String itemId)?
-        conversationItemDelete,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'previous_item_id', includeIfNull: false)
+      String? previousItemId,
+      Item item,
+    )?
+    conversationItemCreate,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'content_index') int contentIndex,
-            @JsonKey(name: 'audio_end_ms') int audioEndMs)?
-        conversationItemTruncate,
-    TResult? Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, String audio)?
-        inputAudioBufferAppend,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+    )?
+    conversationItemDelete,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId, RealtimeEventType type)?
-        inputAudioBufferClear,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'content_index') int contentIndex,
+      @JsonKey(name: 'audio_end_ms') int audioEndMs,
+    )?
+    conversationItemTruncate,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId, RealtimeEventType type)?
-        inputAudioBufferCommit,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      String audio,
+    )?
+    inputAudioBufferAppend,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id', includeIfNull: false)
-            String? responseId)?
-        responseCancel,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+    )?
+    inputAudioBufferClear,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(includeIfNull: false) ResponseConfig? response)?
-        responseCreate,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+    )?
+    inputAudioBufferCommit,
     TResult? Function(
-            @JsonKey(name: 'event_id', includeIfNull: false) String? eventId,
-            RealtimeEventType type,
-            SessionConfig session)?
-        sessionUpdate,
-    TResult? Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, Conversation conversation)?
-        conversationCreated,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id', includeIfNull: false) String? responseId,
+    )?
+    responseCancel,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'previous_item_id', includeIfNull: false)
-            String? previousItemId,
-            Item item)?
-        conversationItemCreated,
-    TResult? Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, @JsonKey(name: 'item_id') String itemId)?
-        conversationItemDeleted,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(includeIfNull: false) ResponseConfig? response,
+    )?
+    responseCreate,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'content_index') int contentIndex,
-            String transcript)?
-        conversationItemInputAudioTranscriptionCompleted,
+      @JsonKey(name: 'event_id', includeIfNull: false) String? eventId,
+      RealtimeEventType type,
+      SessionConfig session,
+    )?
+    sessionUpdate,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'content_index') int contentIndex,
-            TranscriptionError error)?
-        conversationItemInputAudioTranscriptionFailed,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      Conversation conversation,
+    )?
+    conversationCreated,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'content_index', includeIfNull: false)
-            int? contentIndex,
-            @JsonKey(includeIfNull: false) String? delta)?
-        conversationItemInputAudioTranscriptionDelta,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'previous_item_id', includeIfNull: false)
+      String? previousItemId,
+      Item item,
+    )?
+    conversationItemCreated,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'content_index') int contentIndex,
-            @JsonKey(name: 'audio_end_ms') int audioEndMs)?
-        conversationItemTruncated,
-    TResult? Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, APIError error)?
-        error,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+    )?
+    conversationItemDeleted,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId, RealtimeEventType type)?
-        inputAudioBufferCleared,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'content_index') int contentIndex,
+      String transcript,
+    )?
+    conversationItemInputAudioTranscriptionCompleted,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'previous_item_id', includeIfNull: false)
-            String? previousItemId,
-            @JsonKey(name: 'item_id') String itemId)?
-        inputAudioBufferCommitted,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'content_index') int contentIndex,
+      TranscriptionError error,
+    )?
+    conversationItemInputAudioTranscriptionFailed,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'audio_start_ms') int audioStartMs,
-            @JsonKey(name: 'item_id') String itemId)?
-        inputAudioBufferSpeechStarted,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'content_index', includeIfNull: false) int? contentIndex,
+      @JsonKey(includeIfNull: false) String? delta,
+    )?
+    conversationItemInputAudioTranscriptionDelta,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'audio_end_ms') int audioEndMs,
-            @JsonKey(name: 'item_id') String itemId)?
-        inputAudioBufferSpeechStopped,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'content_index') int contentIndex,
+      @JsonKey(name: 'audio_end_ms') int audioEndMs,
+    )?
+    conversationItemTruncated,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'rate_limits') List<RateLimit> rateLimits)?
-        rateLimitsUpdated,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      APIError error,
+    )?
+    error,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            String delta)?
-        responseAudioDelta,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+    )?
+    inputAudioBufferCleared,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex)?
-        responseAudioDone,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'previous_item_id', includeIfNull: false)
+      String? previousItemId,
+      @JsonKey(name: 'item_id') String itemId,
+    )?
+    inputAudioBufferCommitted,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            String delta)?
-        responseAudioTranscriptDelta,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'audio_start_ms') int audioStartMs,
+      @JsonKey(name: 'item_id') String itemId,
+    )?
+    inputAudioBufferSpeechStarted,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            String transcript)?
-        responseAudioTranscriptDone,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'audio_end_ms') int audioEndMs,
+      @JsonKey(name: 'item_id') String itemId,
+    )?
+    inputAudioBufferSpeechStopped,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            ContentPart part)?
-        responseContentPartAdded,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'rate_limits') List<RateLimit> rateLimits,
+    )?
+    rateLimitsUpdated,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            ContentPart part)?
-        responseContentPartDone,
-    TResult? Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, Response response)?
-        responseCreated,
-    TResult? Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, Response response)?
-        responseDone,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      String delta,
+    )?
+    responseAudioDelta,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'call_id') String callId,
-            String delta)?
-        responseFunctionCallArgumentsDelta,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+    )?
+    responseAudioDone,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'call_id') String callId,
-            String arguments)?
-        responseFunctionCallArgumentsDone,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      String delta,
+    )?
+    responseAudioTranscriptDelta,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            Item item)?
-        responseOutputItemAdded,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      String transcript,
+    )?
+    responseAudioTranscriptDone,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            Item item)?
-        responseOutputItemDone,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      ContentPart part,
+    )?
+    responseContentPartAdded,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            String delta)?
-        responseTextDelta,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      ContentPart part,
+    )?
+    responseContentPartDone,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type,
-            @JsonKey(name: 'response_id') String responseId,
-            @JsonKey(name: 'item_id') String itemId,
-            @JsonKey(name: 'output_index') int outputIndex,
-            @JsonKey(name: 'content_index') int contentIndex,
-            String text)?
-        responseTextDone,
-    TResult? Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, Session session)?
-        sessionCreated,
-    TResult? Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, Session session)?
-        sessionUpdated,
-    TResult? Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, bool error)?
-        close,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      Response response,
+    )?
+    responseCreated,
     TResult? Function(
-            @JsonKey(name: 'event_id') String eventId, RealtimeEventType type)?
-        conversationInterrupted,
-    TResult? Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, EventHandlerResult result)?
-        conversationUpdated,
-    TResult? Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, FormattedItem item)?
-        conversationItemAppended,
-    TResult? Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, FormattedItem item)?
-        conversationItemCompleted,
-    TResult? Function(@JsonKey(name: 'event_id') String eventId,
-            RealtimeEventType type, RealtimeEvent event)?
-        generic,
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      Response response,
+    )?
+    responseDone,
+    TResult? Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'call_id') String callId,
+      String delta,
+    )?
+    responseFunctionCallArgumentsDelta,
+    TResult? Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'call_id') String callId,
+      String arguments,
+    )?
+    responseFunctionCallArgumentsDone,
+    TResult? Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      Item item,
+    )?
+    responseOutputItemAdded,
+    TResult? Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      Item item,
+    )?
+    responseOutputItemDone,
+    TResult? Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      String delta,
+    )?
+    responseTextDelta,
+    TResult? Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      @JsonKey(name: 'response_id') String responseId,
+      @JsonKey(name: 'item_id') String itemId,
+      @JsonKey(name: 'output_index') int outputIndex,
+      @JsonKey(name: 'content_index') int contentIndex,
+      String text,
+    )?
+    responseTextDone,
+    TResult? Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      Session session,
+    )?
+    sessionCreated,
+    TResult? Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      Session session,
+    )?
+    sessionUpdated,
+    TResult? Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      bool error,
+    )?
+    close,
+    TResult? Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+    )?
+    conversationInterrupted,
+    TResult? Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      EventHandlerResult result,
+    )?
+    conversationUpdated,
+    TResult? Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      FormattedItem item,
+    )?
+    conversationItemAppended,
+    TResult? Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      FormattedItem item,
+    )?
+    conversationItemCompleted,
+    TResult? Function(
+      @JsonKey(name: 'event_id') String eventId,
+      RealtimeEventType type,
+      RealtimeEvent event,
+    )?
+    generic,
   }) {
     final _that = this;
     switch (_that) {
       case RealtimeEventConversationItemCreate()
           when conversationItemCreate != null:
         return conversationItemCreate(
-            _that.eventId, _that.type, _that.previousItemId, _that.item);
+          _that.eventId,
+          _that.type,
+          _that.previousItemId,
+          _that.item,
+        );
       case RealtimeEventConversationItemDelete()
           when conversationItemDelete != null:
         return conversationItemDelete(_that.eventId, _that.type, _that.itemId);
       case RealtimeEventConversationItemTruncate()
           when conversationItemTruncate != null:
-        return conversationItemTruncate(_that.eventId, _that.type, _that.itemId,
-            _that.contentIndex, _that.audioEndMs);
+        return conversationItemTruncate(
+          _that.eventId,
+          _that.type,
+          _that.itemId,
+          _that.contentIndex,
+          _that.audioEndMs,
+        );
       case RealtimeEventInputAudioBufferAppend()
           when inputAudioBufferAppend != null:
         return inputAudioBufferAppend(_that.eventId, _that.type, _that.audio);
@@ -18669,30 +20188,57 @@ extension RealtimeEventPatterns on RealtimeEvent {
         return sessionUpdate(_that.eventId, _that.type, _that.session);
       case RealtimeEventConversationCreated() when conversationCreated != null:
         return conversationCreated(
-            _that.eventId, _that.type, _that.conversation);
+          _that.eventId,
+          _that.type,
+          _that.conversation,
+        );
       case RealtimeEventConversationItemCreated()
           when conversationItemCreated != null:
         return conversationItemCreated(
-            _that.eventId, _that.type, _that.previousItemId, _that.item);
+          _that.eventId,
+          _that.type,
+          _that.previousItemId,
+          _that.item,
+        );
       case RealtimeEventConversationItemDeleted()
           when conversationItemDeleted != null:
         return conversationItemDeleted(_that.eventId, _that.type, _that.itemId);
       case RealtimeEventConversationItemInputAudioTranscriptionCompleted()
           when conversationItemInputAudioTranscriptionCompleted != null:
-        return conversationItemInputAudioTranscriptionCompleted(_that.eventId,
-            _that.type, _that.itemId, _that.contentIndex, _that.transcript);
+        return conversationItemInputAudioTranscriptionCompleted(
+          _that.eventId,
+          _that.type,
+          _that.itemId,
+          _that.contentIndex,
+          _that.transcript,
+        );
       case RealtimeEventConversationItemInputAudioTranscriptionFailed()
           when conversationItemInputAudioTranscriptionFailed != null:
-        return conversationItemInputAudioTranscriptionFailed(_that.eventId,
-            _that.type, _that.itemId, _that.contentIndex, _that.error);
+        return conversationItemInputAudioTranscriptionFailed(
+          _that.eventId,
+          _that.type,
+          _that.itemId,
+          _that.contentIndex,
+          _that.error,
+        );
       case RealtimeEventConversationItemInputAudioTranscriptionDelta()
           when conversationItemInputAudioTranscriptionDelta != null:
-        return conversationItemInputAudioTranscriptionDelta(_that.eventId,
-            _that.type, _that.itemId, _that.contentIndex, _that.delta);
+        return conversationItemInputAudioTranscriptionDelta(
+          _that.eventId,
+          _that.type,
+          _that.itemId,
+          _that.contentIndex,
+          _that.delta,
+        );
       case RealtimeEventConversationItemTruncated()
           when conversationItemTruncated != null:
-        return conversationItemTruncated(_that.eventId, _that.type,
-            _that.itemId, _that.contentIndex, _that.audioEndMs);
+        return conversationItemTruncated(
+          _that.eventId,
+          _that.type,
+          _that.itemId,
+          _that.contentIndex,
+          _that.audioEndMs,
+        );
       case RealtimeEventError() when error != null:
         return error(_that.eventId, _that.type, _that.error);
       case RealtimeEventInputAudioBufferCleared()
@@ -18701,63 +20247,92 @@ extension RealtimeEventPatterns on RealtimeEvent {
       case RealtimeEventInputAudioBufferCommitted()
           when inputAudioBufferCommitted != null:
         return inputAudioBufferCommitted(
-            _that.eventId, _that.type, _that.previousItemId, _that.itemId);
+          _that.eventId,
+          _that.type,
+          _that.previousItemId,
+          _that.itemId,
+        );
       case RealtimeEventInputAudioBufferSpeechStarted()
           when inputAudioBufferSpeechStarted != null:
         return inputAudioBufferSpeechStarted(
-            _that.eventId, _that.type, _that.audioStartMs, _that.itemId);
+          _that.eventId,
+          _that.type,
+          _that.audioStartMs,
+          _that.itemId,
+        );
       case RealtimeEventInputAudioBufferSpeechStopped()
           when inputAudioBufferSpeechStopped != null:
         return inputAudioBufferSpeechStopped(
-            _that.eventId, _that.type, _that.audioEndMs, _that.itemId);
+          _that.eventId,
+          _that.type,
+          _that.audioEndMs,
+          _that.itemId,
+        );
       case RealtimeEventRateLimitsUpdated() when rateLimitsUpdated != null:
         return rateLimitsUpdated(_that.eventId, _that.type, _that.rateLimits);
       case RealtimeEventResponseAudioDelta() when responseAudioDelta != null:
-        return responseAudioDelta(_that.eventId, _that.type, _that.responseId,
-            _that.itemId, _that.outputIndex, _that.contentIndex, _that.delta);
+        return responseAudioDelta(
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.delta,
+        );
       case RealtimeEventResponseAudioDone() when responseAudioDone != null:
-        return responseAudioDone(_that.eventId, _that.type, _that.responseId,
-            _that.itemId, _that.outputIndex, _that.contentIndex);
+        return responseAudioDone(
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+        );
       case RealtimeEventResponseAudioTranscriptDelta()
           when responseAudioTranscriptDelta != null:
         return responseAudioTranscriptDelta(
-            _that.eventId,
-            _that.type,
-            _that.responseId,
-            _that.itemId,
-            _that.outputIndex,
-            _that.contentIndex,
-            _that.delta);
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.delta,
+        );
       case RealtimeEventResponseAudioTranscriptDone()
           when responseAudioTranscriptDone != null:
         return responseAudioTranscriptDone(
-            _that.eventId,
-            _that.type,
-            _that.responseId,
-            _that.itemId,
-            _that.outputIndex,
-            _that.contentIndex,
-            _that.transcript);
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.transcript,
+        );
       case RealtimeEventResponseContentPartAdded()
           when responseContentPartAdded != null:
         return responseContentPartAdded(
-            _that.eventId,
-            _that.type,
-            _that.responseId,
-            _that.itemId,
-            _that.outputIndex,
-            _that.contentIndex,
-            _that.part);
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.part,
+        );
       case RealtimeEventResponseContentPartDone()
           when responseContentPartDone != null:
         return responseContentPartDone(
-            _that.eventId,
-            _that.type,
-            _that.responseId,
-            _that.itemId,
-            _that.outputIndex,
-            _that.contentIndex,
-            _that.part);
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.part,
+        );
       case RealtimeEventResponseCreated() when responseCreated != null:
         return responseCreated(_that.eventId, _that.type, _that.response);
       case RealtimeEventResponseDone() when responseDone != null:
@@ -18765,37 +20340,63 @@ extension RealtimeEventPatterns on RealtimeEvent {
       case RealtimeEventResponseFunctionCallArgumentsDelta()
           when responseFunctionCallArgumentsDelta != null:
         return responseFunctionCallArgumentsDelta(
-            _that.eventId,
-            _that.type,
-            _that.responseId,
-            _that.itemId,
-            _that.outputIndex,
-            _that.callId,
-            _that.delta);
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.callId,
+          _that.delta,
+        );
       case RealtimeEventResponseFunctionCallArgumentsDone()
           when responseFunctionCallArgumentsDone != null:
         return responseFunctionCallArgumentsDone(
-            _that.eventId,
-            _that.type,
-            _that.responseId,
-            _that.itemId,
-            _that.outputIndex,
-            _that.callId,
-            _that.arguments);
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.callId,
+          _that.arguments,
+        );
       case RealtimeEventResponseOutputItemAdded()
           when responseOutputItemAdded != null:
-        return responseOutputItemAdded(_that.eventId, _that.type,
-            _that.responseId, _that.outputIndex, _that.item);
+        return responseOutputItemAdded(
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.outputIndex,
+          _that.item,
+        );
       case RealtimeEventResponseOutputItemDone()
           when responseOutputItemDone != null:
-        return responseOutputItemDone(_that.eventId, _that.type,
-            _that.responseId, _that.outputIndex, _that.item);
+        return responseOutputItemDone(
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.outputIndex,
+          _that.item,
+        );
       case RealtimeEventResponseTextDelta() when responseTextDelta != null:
-        return responseTextDelta(_that.eventId, _that.type, _that.responseId,
-            _that.itemId, _that.outputIndex, _that.contentIndex, _that.delta);
+        return responseTextDelta(
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.delta,
+        );
       case RealtimeEventResponseTextDone() when responseTextDone != null:
-        return responseTextDone(_that.eventId, _that.type, _that.responseId,
-            _that.itemId, _that.outputIndex, _that.contentIndex, _that.text);
+        return responseTextDone(
+          _that.eventId,
+          _that.type,
+          _that.responseId,
+          _that.itemId,
+          _that.outputIndex,
+          _that.contentIndex,
+          _that.text,
+        );
       case RealtimeEventSessionCreated() when sessionCreated != null:
         return sessionCreated(_that.eventId, _that.type, _that.session);
       case RealtimeEventSessionUpdated() when sessionUpdated != null:
@@ -18824,16 +20425,16 @@ extension RealtimeEventPatterns on RealtimeEvent {
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventConversationItemCreate extends RealtimeEvent {
-  const RealtimeEventConversationItemCreate(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.conversationItemCreate,
-      @JsonKey(name: 'previous_item_id', includeIfNull: false)
-      this.previousItemId,
-      required this.item})
-      : super._();
+  const RealtimeEventConversationItemCreate({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.conversationItemCreate,
+    @JsonKey(name: 'previous_item_id', includeIfNull: false)
+    this.previousItemId,
+    required this.item,
+  }) : super._();
   factory RealtimeEventConversationItemCreate.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventConversationItemCreateFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventConversationItemCreateFromJson(json);
 
   /// Optional client-generated ID used to identify this event.
   @override
@@ -18862,15 +20463,16 @@ class RealtimeEventConversationItemCreate extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventConversationItemCreateCopyWith<
-          RealtimeEventConversationItemCreate>
-      get copyWith => _$RealtimeEventConversationItemCreateCopyWithImpl<
-          RealtimeEventConversationItemCreate>(this, _$identity);
+    RealtimeEventConversationItemCreate
+  >
+  get copyWith =>
+      _$RealtimeEventConversationItemCreateCopyWithImpl<
+        RealtimeEventConversationItemCreate
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventConversationItemCreateToJson(
-      this,
-    );
+    return _$RealtimeEventConversationItemCreateToJson(this);
   }
 
   @override
@@ -18887,8 +20489,9 @@ class RealtimeEventConversationItemCreate extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, eventId, type, previousItemId, item);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, previousItemId, item);
+  }
 
   @override
   String toString() {
@@ -18900,17 +20503,18 @@ class RealtimeEventConversationItemCreate extends RealtimeEvent {
 abstract mixin class $RealtimeEventConversationItemCreateCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventConversationItemCreateCopyWith(
-          RealtimeEventConversationItemCreate value,
-          $Res Function(RealtimeEventConversationItemCreate) _then) =
-      _$RealtimeEventConversationItemCreateCopyWithImpl;
+    RealtimeEventConversationItemCreate value,
+    $Res Function(RealtimeEventConversationItemCreate) _then,
+  ) = _$RealtimeEventConversationItemCreateCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'previous_item_id', includeIfNull: false)
-      String? previousItemId,
-      Item item});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'previous_item_id', includeIfNull: false)
+    String? previousItemId,
+    Item item,
+  });
 
   $ItemCopyWith<$Res> get item;
 }
@@ -18933,24 +20537,26 @@ class _$RealtimeEventConversationItemCreateCopyWithImpl<$Res>
     Object? previousItemId = freezed,
     Object? item = null,
   }) {
-    return _then(RealtimeEventConversationItemCreate(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      previousItemId: freezed == previousItemId
-          ? _self.previousItemId
-          : previousItemId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      item: null == item
-          ? _self.item
-          : item // ignore: cast_nullable_to_non_nullable
-              as Item,
-    ));
+    return _then(
+      RealtimeEventConversationItemCreate(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        previousItemId: freezed == previousItemId
+            ? _self.previousItemId
+            : previousItemId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        item: null == item
+            ? _self.item
+            : item // ignore: cast_nullable_to_non_nullable
+                  as Item,
+      ),
+    );
   }
 
   /// Create a copy of RealtimeEvent
@@ -18967,14 +20573,14 @@ class _$RealtimeEventConversationItemCreateCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventConversationItemDelete extends RealtimeEvent {
-  const RealtimeEventConversationItemDelete(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.conversationItemDelete,
-      @JsonKey(name: 'item_id') required this.itemId})
-      : super._();
+  const RealtimeEventConversationItemDelete({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.conversationItemDelete,
+    @JsonKey(name: 'item_id') required this.itemId,
+  }) : super._();
   factory RealtimeEventConversationItemDelete.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventConversationItemDeleteFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventConversationItemDeleteFromJson(json);
 
   /// Optional client-generated ID used to identify this event.
   @override
@@ -18996,15 +20602,16 @@ class RealtimeEventConversationItemDelete extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventConversationItemDeleteCopyWith<
-          RealtimeEventConversationItemDelete>
-      get copyWith => _$RealtimeEventConversationItemDeleteCopyWithImpl<
-          RealtimeEventConversationItemDelete>(this, _$identity);
+    RealtimeEventConversationItemDelete
+  >
+  get copyWith =>
+      _$RealtimeEventConversationItemDeleteCopyWithImpl<
+        RealtimeEventConversationItemDelete
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventConversationItemDeleteToJson(
-      this,
-    );
+    return _$RealtimeEventConversationItemDeleteToJson(this);
   }
 
   @override
@@ -19019,7 +20626,9 @@ class RealtimeEventConversationItemDelete extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, itemId);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, itemId);
+  }
 
   @override
   String toString() {
@@ -19031,15 +20640,16 @@ class RealtimeEventConversationItemDelete extends RealtimeEvent {
 abstract mixin class $RealtimeEventConversationItemDeleteCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventConversationItemDeleteCopyWith(
-          RealtimeEventConversationItemDelete value,
-          $Res Function(RealtimeEventConversationItemDelete) _then) =
-      _$RealtimeEventConversationItemDeleteCopyWithImpl;
+    RealtimeEventConversationItemDelete value,
+    $Res Function(RealtimeEventConversationItemDelete) _then,
+  ) = _$RealtimeEventConversationItemDeleteCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'item_id') String itemId});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'item_id') String itemId,
+  });
 }
 
 /// @nodoc
@@ -19059,36 +20669,38 @@ class _$RealtimeEventConversationItemDeleteCopyWithImpl<$Res>
     Object? type = null,
     Object? itemId = null,
   }) {
-    return _then(RealtimeEventConversationItemDelete(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      itemId: null == itemId
-          ? _self.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      RealtimeEventConversationItemDelete(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        itemId: null == itemId
+            ? _self.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventConversationItemTruncate extends RealtimeEvent {
-  const RealtimeEventConversationItemTruncate(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.conversationItemTruncate,
-      @JsonKey(name: 'item_id') required this.itemId,
-      @JsonKey(name: 'content_index') required this.contentIndex,
-      @JsonKey(name: 'audio_end_ms') required this.audioEndMs})
-      : super._();
+  const RealtimeEventConversationItemTruncate({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.conversationItemTruncate,
+    @JsonKey(name: 'item_id') required this.itemId,
+    @JsonKey(name: 'content_index') required this.contentIndex,
+    @JsonKey(name: 'audio_end_ms') required this.audioEndMs,
+  }) : super._();
   factory RealtimeEventConversationItemTruncate.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventConversationItemTruncateFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventConversationItemTruncateFromJson(json);
 
   /// Optional client-generated ID used to identify this event.
   @override
@@ -19119,15 +20731,16 @@ class RealtimeEventConversationItemTruncate extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventConversationItemTruncateCopyWith<
-          RealtimeEventConversationItemTruncate>
-      get copyWith => _$RealtimeEventConversationItemTruncateCopyWithImpl<
-          RealtimeEventConversationItemTruncate>(this, _$identity);
+    RealtimeEventConversationItemTruncate
+  >
+  get copyWith =>
+      _$RealtimeEventConversationItemTruncateCopyWithImpl<
+        RealtimeEventConversationItemTruncate
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventConversationItemTruncateToJson(
-      this,
-    );
+    return _$RealtimeEventConversationItemTruncateToJson(this);
   }
 
   @override
@@ -19146,8 +20759,16 @@ class RealtimeEventConversationItemTruncate extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, eventId, type, itemId, contentIndex, audioEndMs);
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      eventId,
+      type,
+      itemId,
+      contentIndex,
+      audioEndMs,
+    );
+  }
 
   @override
   String toString() {
@@ -19159,17 +20780,18 @@ class RealtimeEventConversationItemTruncate extends RealtimeEvent {
 abstract mixin class $RealtimeEventConversationItemTruncateCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventConversationItemTruncateCopyWith(
-          RealtimeEventConversationItemTruncate value,
-          $Res Function(RealtimeEventConversationItemTruncate) _then) =
-      _$RealtimeEventConversationItemTruncateCopyWithImpl;
+    RealtimeEventConversationItemTruncate value,
+    $Res Function(RealtimeEventConversationItemTruncate) _then,
+  ) = _$RealtimeEventConversationItemTruncateCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'item_id') String itemId,
-      @JsonKey(name: 'content_index') int contentIndex,
-      @JsonKey(name: 'audio_end_ms') int audioEndMs});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'item_id') String itemId,
+    @JsonKey(name: 'content_index') int contentIndex,
+    @JsonKey(name: 'audio_end_ms') int audioEndMs,
+  });
 }
 
 /// @nodoc
@@ -19191,42 +20813,44 @@ class _$RealtimeEventConversationItemTruncateCopyWithImpl<$Res>
     Object? contentIndex = null,
     Object? audioEndMs = null,
   }) {
-    return _then(RealtimeEventConversationItemTruncate(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      itemId: null == itemId
-          ? _self.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-      contentIndex: null == contentIndex
-          ? _self.contentIndex
-          : contentIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      audioEndMs: null == audioEndMs
-          ? _self.audioEndMs
-          : audioEndMs // ignore: cast_nullable_to_non_nullable
-              as int,
-    ));
+    return _then(
+      RealtimeEventConversationItemTruncate(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        itemId: null == itemId
+            ? _self.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        contentIndex: null == contentIndex
+            ? _self.contentIndex
+            : contentIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        audioEndMs: null == audioEndMs
+            ? _self.audioEndMs
+            : audioEndMs // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventInputAudioBufferAppend extends RealtimeEvent {
-  const RealtimeEventInputAudioBufferAppend(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.inputAudioBufferAppend,
-      required this.audio})
-      : super._();
+  const RealtimeEventInputAudioBufferAppend({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.inputAudioBufferAppend,
+    required this.audio,
+  }) : super._();
   factory RealtimeEventInputAudioBufferAppend.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventInputAudioBufferAppendFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventInputAudioBufferAppendFromJson(json);
 
   /// Optional client-generated ID used to identify this event.
   @override
@@ -19248,15 +20872,16 @@ class RealtimeEventInputAudioBufferAppend extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventInputAudioBufferAppendCopyWith<
-          RealtimeEventInputAudioBufferAppend>
-      get copyWith => _$RealtimeEventInputAudioBufferAppendCopyWithImpl<
-          RealtimeEventInputAudioBufferAppend>(this, _$identity);
+    RealtimeEventInputAudioBufferAppend
+  >
+  get copyWith =>
+      _$RealtimeEventInputAudioBufferAppendCopyWithImpl<
+        RealtimeEventInputAudioBufferAppend
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventInputAudioBufferAppendToJson(
-      this,
-    );
+    return _$RealtimeEventInputAudioBufferAppendToJson(this);
   }
 
   @override
@@ -19271,7 +20896,9 @@ class RealtimeEventInputAudioBufferAppend extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, audio);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, audio);
+  }
 
   @override
   String toString() {
@@ -19283,15 +20910,16 @@ class RealtimeEventInputAudioBufferAppend extends RealtimeEvent {
 abstract mixin class $RealtimeEventInputAudioBufferAppendCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventInputAudioBufferAppendCopyWith(
-          RealtimeEventInputAudioBufferAppend value,
-          $Res Function(RealtimeEventInputAudioBufferAppend) _then) =
-      _$RealtimeEventInputAudioBufferAppendCopyWithImpl;
+    RealtimeEventInputAudioBufferAppend value,
+    $Res Function(RealtimeEventInputAudioBufferAppend) _then,
+  ) = _$RealtimeEventInputAudioBufferAppendCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      String audio});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    String audio,
+  });
 }
 
 /// @nodoc
@@ -19311,33 +20939,35 @@ class _$RealtimeEventInputAudioBufferAppendCopyWithImpl<$Res>
     Object? type = null,
     Object? audio = null,
   }) {
-    return _then(RealtimeEventInputAudioBufferAppend(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      audio: null == audio
-          ? _self.audio
-          : audio // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      RealtimeEventInputAudioBufferAppend(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        audio: null == audio
+            ? _self.audio
+            : audio // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventInputAudioBufferClear extends RealtimeEvent {
-  const RealtimeEventInputAudioBufferClear(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.inputAudioBufferClear})
-      : super._();
+  const RealtimeEventInputAudioBufferClear({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.inputAudioBufferClear,
+  }) : super._();
   factory RealtimeEventInputAudioBufferClear.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventInputAudioBufferClearFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventInputAudioBufferClearFromJson(json);
 
   /// Optional client-generated ID used to identify this event.
   @override
@@ -19355,15 +20985,16 @@ class RealtimeEventInputAudioBufferClear extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventInputAudioBufferClearCopyWith<
-          RealtimeEventInputAudioBufferClear>
-      get copyWith => _$RealtimeEventInputAudioBufferClearCopyWithImpl<
-          RealtimeEventInputAudioBufferClear>(this, _$identity);
+    RealtimeEventInputAudioBufferClear
+  >
+  get copyWith =>
+      _$RealtimeEventInputAudioBufferClearCopyWithImpl<
+        RealtimeEventInputAudioBufferClear
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventInputAudioBufferClearToJson(
-      this,
-    );
+    return _$RealtimeEventInputAudioBufferClearToJson(this);
   }
 
   @override
@@ -19377,7 +21008,9 @@ class RealtimeEventInputAudioBufferClear extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type);
+  }
 
   @override
   String toString() {
@@ -19389,13 +21022,15 @@ class RealtimeEventInputAudioBufferClear extends RealtimeEvent {
 abstract mixin class $RealtimeEventInputAudioBufferClearCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventInputAudioBufferClearCopyWith(
-          RealtimeEventInputAudioBufferClear value,
-          $Res Function(RealtimeEventInputAudioBufferClear) _then) =
-      _$RealtimeEventInputAudioBufferClearCopyWithImpl;
+    RealtimeEventInputAudioBufferClear value,
+    $Res Function(RealtimeEventInputAudioBufferClear) _then,
+  ) = _$RealtimeEventInputAudioBufferClearCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId, RealtimeEventType type});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+  });
 }
 
 /// @nodoc
@@ -19410,33 +21045,32 @@ class _$RealtimeEventInputAudioBufferClearCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? eventId = null,
-    Object? type = null,
-  }) {
-    return _then(RealtimeEventInputAudioBufferClear(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-    ));
+  $Res call({Object? eventId = null, Object? type = null}) {
+    return _then(
+      RealtimeEventInputAudioBufferClear(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventInputAudioBufferCommit extends RealtimeEvent {
-  const RealtimeEventInputAudioBufferCommit(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.inputAudioBufferCommit})
-      : super._();
+  const RealtimeEventInputAudioBufferCommit({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.inputAudioBufferCommit,
+  }) : super._();
   factory RealtimeEventInputAudioBufferCommit.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventInputAudioBufferCommitFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventInputAudioBufferCommitFromJson(json);
 
   /// Optional client-generated ID used to identify this event.
   @override
@@ -19454,15 +21088,16 @@ class RealtimeEventInputAudioBufferCommit extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventInputAudioBufferCommitCopyWith<
-          RealtimeEventInputAudioBufferCommit>
-      get copyWith => _$RealtimeEventInputAudioBufferCommitCopyWithImpl<
-          RealtimeEventInputAudioBufferCommit>(this, _$identity);
+    RealtimeEventInputAudioBufferCommit
+  >
+  get copyWith =>
+      _$RealtimeEventInputAudioBufferCommitCopyWithImpl<
+        RealtimeEventInputAudioBufferCommit
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventInputAudioBufferCommitToJson(
-      this,
-    );
+    return _$RealtimeEventInputAudioBufferCommitToJson(this);
   }
 
   @override
@@ -19476,7 +21111,9 @@ class RealtimeEventInputAudioBufferCommit extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type);
+  }
 
   @override
   String toString() {
@@ -19488,13 +21125,15 @@ class RealtimeEventInputAudioBufferCommit extends RealtimeEvent {
 abstract mixin class $RealtimeEventInputAudioBufferCommitCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventInputAudioBufferCommitCopyWith(
-          RealtimeEventInputAudioBufferCommit value,
-          $Res Function(RealtimeEventInputAudioBufferCommit) _then) =
-      _$RealtimeEventInputAudioBufferCommitCopyWithImpl;
+    RealtimeEventInputAudioBufferCommit value,
+    $Res Function(RealtimeEventInputAudioBufferCommit) _then,
+  ) = _$RealtimeEventInputAudioBufferCommitCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId, RealtimeEventType type});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+  });
 }
 
 /// @nodoc
@@ -19509,31 +21148,30 @@ class _$RealtimeEventInputAudioBufferCommitCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? eventId = null,
-    Object? type = null,
-  }) {
-    return _then(RealtimeEventInputAudioBufferCommit(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-    ));
+  $Res call({Object? eventId = null, Object? type = null}) {
+    return _then(
+      RealtimeEventInputAudioBufferCommit(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventResponseCancel extends RealtimeEvent {
-  const RealtimeEventResponseCancel(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.responseCancel,
-      @JsonKey(name: 'response_id', includeIfNull: false) this.responseId})
-      : super._();
+  const RealtimeEventResponseCancel({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.responseCancel,
+    @JsonKey(name: 'response_id', includeIfNull: false) this.responseId,
+  }) : super._();
   factory RealtimeEventResponseCancel.fromJson(Map<String, dynamic> json) =>
       _$RealtimeEventResponseCancelFromJson(json);
 
@@ -19558,14 +21196,15 @@ class RealtimeEventResponseCancel extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventResponseCancelCopyWith<RealtimeEventResponseCancel>
-      get copyWith => _$RealtimeEventResponseCancelCopyWithImpl<
-          RealtimeEventResponseCancel>(this, _$identity);
+  get copyWith =>
+      _$RealtimeEventResponseCancelCopyWithImpl<RealtimeEventResponseCancel>(
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventResponseCancelToJson(
-      this,
-    );
+    return _$RealtimeEventResponseCancelToJson(this);
   }
 
   @override
@@ -19581,7 +21220,9 @@ class RealtimeEventResponseCancel extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, responseId);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, responseId);
+  }
 
   @override
   String toString() {
@@ -19593,15 +21234,16 @@ class RealtimeEventResponseCancel extends RealtimeEvent {
 abstract mixin class $RealtimeEventResponseCancelCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventResponseCancelCopyWith(
-          RealtimeEventResponseCancel value,
-          $Res Function(RealtimeEventResponseCancel) _then) =
-      _$RealtimeEventResponseCancelCopyWithImpl;
+    RealtimeEventResponseCancel value,
+    $Res Function(RealtimeEventResponseCancel) _then,
+  ) = _$RealtimeEventResponseCancelCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'response_id', includeIfNull: false) String? responseId});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'response_id', includeIfNull: false) String? responseId,
+  });
 }
 
 /// @nodoc
@@ -19621,31 +21263,33 @@ class _$RealtimeEventResponseCancelCopyWithImpl<$Res>
     Object? type = null,
     Object? responseId = freezed,
   }) {
-    return _then(RealtimeEventResponseCancel(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      responseId: freezed == responseId
-          ? _self.responseId
-          : responseId // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      RealtimeEventResponseCancel(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        responseId: freezed == responseId
+            ? _self.responseId
+            : responseId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventResponseCreate extends RealtimeEvent {
-  const RealtimeEventResponseCreate(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.responseCreate,
-      @JsonKey(includeIfNull: false) this.response})
-      : super._();
+  const RealtimeEventResponseCreate({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.responseCreate,
+    @JsonKey(includeIfNull: false) this.response,
+  }) : super._();
   factory RealtimeEventResponseCreate.fromJson(Map<String, dynamic> json) =>
       _$RealtimeEventResponseCreateFromJson(json);
 
@@ -19669,14 +21313,15 @@ class RealtimeEventResponseCreate extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventResponseCreateCopyWith<RealtimeEventResponseCreate>
-      get copyWith => _$RealtimeEventResponseCreateCopyWithImpl<
-          RealtimeEventResponseCreate>(this, _$identity);
+  get copyWith =>
+      _$RealtimeEventResponseCreateCopyWithImpl<RealtimeEventResponseCreate>(
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventResponseCreateToJson(
-      this,
-    );
+    return _$RealtimeEventResponseCreateToJson(this);
   }
 
   @override
@@ -19692,7 +21337,9 @@ class RealtimeEventResponseCreate extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, response);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, response);
+  }
 
   @override
   String toString() {
@@ -19704,15 +21351,16 @@ class RealtimeEventResponseCreate extends RealtimeEvent {
 abstract mixin class $RealtimeEventResponseCreateCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventResponseCreateCopyWith(
-          RealtimeEventResponseCreate value,
-          $Res Function(RealtimeEventResponseCreate) _then) =
-      _$RealtimeEventResponseCreateCopyWithImpl;
+    RealtimeEventResponseCreate value,
+    $Res Function(RealtimeEventResponseCreate) _then,
+  ) = _$RealtimeEventResponseCreateCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(includeIfNull: false) ResponseConfig? response});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(includeIfNull: false) ResponseConfig? response,
+  });
 
   $ResponseConfigCopyWith<$Res>? get response;
 }
@@ -19734,20 +21382,22 @@ class _$RealtimeEventResponseCreateCopyWithImpl<$Res>
     Object? type = null,
     Object? response = freezed,
   }) {
-    return _then(RealtimeEventResponseCreate(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      response: freezed == response
-          ? _self.response
-          : response // ignore: cast_nullable_to_non_nullable
-              as ResponseConfig?,
-    ));
+    return _then(
+      RealtimeEventResponseCreate(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        response: freezed == response
+            ? _self.response
+            : response // ignore: cast_nullable_to_non_nullable
+                  as ResponseConfig?,
+      ),
+    );
   }
 
   /// Create a copy of RealtimeEvent
@@ -19768,11 +21418,11 @@ class _$RealtimeEventResponseCreateCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventSessionUpdate extends RealtimeEvent {
-  const RealtimeEventSessionUpdate(
-      {@JsonKey(name: 'event_id', includeIfNull: false) this.eventId,
-      this.type = RealtimeEventType.sessionUpdate,
-      required this.session})
-      : super._();
+  const RealtimeEventSessionUpdate({
+    @JsonKey(name: 'event_id', includeIfNull: false) this.eventId,
+    this.type = RealtimeEventType.sessionUpdate,
+    required this.session,
+  }) : super._();
   factory RealtimeEventSessionUpdate.fromJson(Map<String, dynamic> json) =>
       _$RealtimeEventSessionUpdateFromJson(json);
 
@@ -19795,15 +21445,15 @@ class RealtimeEventSessionUpdate extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventSessionUpdateCopyWith<RealtimeEventSessionUpdate>
-      get copyWith =>
-          _$RealtimeEventSessionUpdateCopyWithImpl<RealtimeEventSessionUpdate>(
-              this, _$identity);
+  get copyWith =>
+      _$RealtimeEventSessionUpdateCopyWithImpl<RealtimeEventSessionUpdate>(
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventSessionUpdateToJson(
-      this,
-    );
+    return _$RealtimeEventSessionUpdateToJson(this);
   }
 
   @override
@@ -19818,7 +21468,9 @@ class RealtimeEventSessionUpdate extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, session);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, session);
+  }
 
   @override
   String toString() {
@@ -19829,15 +21481,17 @@ class RealtimeEventSessionUpdate extends RealtimeEvent {
 /// @nodoc
 abstract mixin class $RealtimeEventSessionUpdateCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
-  factory $RealtimeEventSessionUpdateCopyWith(RealtimeEventSessionUpdate value,
-          $Res Function(RealtimeEventSessionUpdate) _then) =
-      _$RealtimeEventSessionUpdateCopyWithImpl;
+  factory $RealtimeEventSessionUpdateCopyWith(
+    RealtimeEventSessionUpdate value,
+    $Res Function(RealtimeEventSessionUpdate) _then,
+  ) = _$RealtimeEventSessionUpdateCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id', includeIfNull: false) String? eventId,
-      RealtimeEventType type,
-      SessionConfig session});
+  $Res call({
+    @JsonKey(name: 'event_id', includeIfNull: false) String? eventId,
+    RealtimeEventType type,
+    SessionConfig session,
+  });
 
   $SessionConfigCopyWith<$Res> get session;
 }
@@ -19859,20 +21513,22 @@ class _$RealtimeEventSessionUpdateCopyWithImpl<$Res>
     Object? type = null,
     Object? session = null,
   }) {
-    return _then(RealtimeEventSessionUpdate(
-      eventId: freezed == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      session: null == session
-          ? _self.session
-          : session // ignore: cast_nullable_to_non_nullable
-              as SessionConfig,
-    ));
+    return _then(
+      RealtimeEventSessionUpdate(
+        eventId: freezed == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        session: null == session
+            ? _self.session
+            : session // ignore: cast_nullable_to_non_nullable
+                  as SessionConfig,
+      ),
+    );
   }
 
   /// Create a copy of RealtimeEvent
@@ -19889,14 +21545,14 @@ class _$RealtimeEventSessionUpdateCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventConversationCreated extends RealtimeEvent {
-  const RealtimeEventConversationCreated(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.conversationCreated,
-      required this.conversation})
-      : super._();
+  const RealtimeEventConversationCreated({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.conversationCreated,
+    required this.conversation,
+  }) : super._();
   factory RealtimeEventConversationCreated.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventConversationCreatedFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventConversationCreatedFromJson(json);
 
   /// The unique ID of the server event.
   @override
@@ -19917,14 +21573,14 @@ class RealtimeEventConversationCreated extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventConversationCreatedCopyWith<RealtimeEventConversationCreated>
-      get copyWith => _$RealtimeEventConversationCreatedCopyWithImpl<
-          RealtimeEventConversationCreated>(this, _$identity);
+  get copyWith =>
+      _$RealtimeEventConversationCreatedCopyWithImpl<
+        RealtimeEventConversationCreated
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventConversationCreatedToJson(
-      this,
-    );
+    return _$RealtimeEventConversationCreatedToJson(this);
   }
 
   @override
@@ -19940,7 +21596,9 @@ class RealtimeEventConversationCreated extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, conversation);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, conversation);
+  }
 
   @override
   String toString() {
@@ -19952,15 +21610,16 @@ class RealtimeEventConversationCreated extends RealtimeEvent {
 abstract mixin class $RealtimeEventConversationCreatedCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventConversationCreatedCopyWith(
-          RealtimeEventConversationCreated value,
-          $Res Function(RealtimeEventConversationCreated) _then) =
-      _$RealtimeEventConversationCreatedCopyWithImpl;
+    RealtimeEventConversationCreated value,
+    $Res Function(RealtimeEventConversationCreated) _then,
+  ) = _$RealtimeEventConversationCreatedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      Conversation conversation});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    Conversation conversation,
+  });
 
   $ConversationCopyWith<$Res> get conversation;
 }
@@ -19982,20 +21641,22 @@ class _$RealtimeEventConversationCreatedCopyWithImpl<$Res>
     Object? type = null,
     Object? conversation = null,
   }) {
-    return _then(RealtimeEventConversationCreated(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      conversation: null == conversation
-          ? _self.conversation
-          : conversation // ignore: cast_nullable_to_non_nullable
-              as Conversation,
-    ));
+    return _then(
+      RealtimeEventConversationCreated(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        conversation: null == conversation
+            ? _self.conversation
+            : conversation // ignore: cast_nullable_to_non_nullable
+                  as Conversation,
+      ),
+    );
   }
 
   /// Create a copy of RealtimeEvent
@@ -20012,16 +21673,16 @@ class _$RealtimeEventConversationCreatedCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventConversationItemCreated extends RealtimeEvent {
-  const RealtimeEventConversationItemCreated(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.conversationItemCreated,
-      @JsonKey(name: 'previous_item_id', includeIfNull: false)
-      this.previousItemId,
-      required this.item})
-      : super._();
+  const RealtimeEventConversationItemCreated({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.conversationItemCreated,
+    @JsonKey(name: 'previous_item_id', includeIfNull: false)
+    this.previousItemId,
+    required this.item,
+  }) : super._();
   factory RealtimeEventConversationItemCreated.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventConversationItemCreatedFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventConversationItemCreatedFromJson(json);
 
   /// The unique ID of the server event.
   @override
@@ -20048,15 +21709,16 @@ class RealtimeEventConversationItemCreated extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventConversationItemCreatedCopyWith<
-          RealtimeEventConversationItemCreated>
-      get copyWith => _$RealtimeEventConversationItemCreatedCopyWithImpl<
-          RealtimeEventConversationItemCreated>(this, _$identity);
+    RealtimeEventConversationItemCreated
+  >
+  get copyWith =>
+      _$RealtimeEventConversationItemCreatedCopyWithImpl<
+        RealtimeEventConversationItemCreated
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventConversationItemCreatedToJson(
-      this,
-    );
+    return _$RealtimeEventConversationItemCreatedToJson(this);
   }
 
   @override
@@ -20073,8 +21735,9 @@ class RealtimeEventConversationItemCreated extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, eventId, type, previousItemId, item);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, previousItemId, item);
+  }
 
   @override
   String toString() {
@@ -20086,17 +21749,18 @@ class RealtimeEventConversationItemCreated extends RealtimeEvent {
 abstract mixin class $RealtimeEventConversationItemCreatedCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventConversationItemCreatedCopyWith(
-          RealtimeEventConversationItemCreated value,
-          $Res Function(RealtimeEventConversationItemCreated) _then) =
-      _$RealtimeEventConversationItemCreatedCopyWithImpl;
+    RealtimeEventConversationItemCreated value,
+    $Res Function(RealtimeEventConversationItemCreated) _then,
+  ) = _$RealtimeEventConversationItemCreatedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'previous_item_id', includeIfNull: false)
-      String? previousItemId,
-      Item item});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'previous_item_id', includeIfNull: false)
+    String? previousItemId,
+    Item item,
+  });
 
   $ItemCopyWith<$Res> get item;
 }
@@ -20119,24 +21783,26 @@ class _$RealtimeEventConversationItemCreatedCopyWithImpl<$Res>
     Object? previousItemId = freezed,
     Object? item = null,
   }) {
-    return _then(RealtimeEventConversationItemCreated(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      previousItemId: freezed == previousItemId
-          ? _self.previousItemId
-          : previousItemId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      item: null == item
-          ? _self.item
-          : item // ignore: cast_nullable_to_non_nullable
-              as Item,
-    ));
+    return _then(
+      RealtimeEventConversationItemCreated(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        previousItemId: freezed == previousItemId
+            ? _self.previousItemId
+            : previousItemId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        item: null == item
+            ? _self.item
+            : item // ignore: cast_nullable_to_non_nullable
+                  as Item,
+      ),
+    );
   }
 
   /// Create a copy of RealtimeEvent
@@ -20153,14 +21819,14 @@ class _$RealtimeEventConversationItemCreatedCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventConversationItemDeleted extends RealtimeEvent {
-  const RealtimeEventConversationItemDeleted(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.conversationItemDeleted,
-      @JsonKey(name: 'item_id') required this.itemId})
-      : super._();
+  const RealtimeEventConversationItemDeleted({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.conversationItemDeleted,
+    @JsonKey(name: 'item_id') required this.itemId,
+  }) : super._();
   factory RealtimeEventConversationItemDeleted.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventConversationItemDeletedFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventConversationItemDeletedFromJson(json);
 
   /// The unique ID of the server event.
   @override
@@ -20182,15 +21848,16 @@ class RealtimeEventConversationItemDeleted extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventConversationItemDeletedCopyWith<
-          RealtimeEventConversationItemDeleted>
-      get copyWith => _$RealtimeEventConversationItemDeletedCopyWithImpl<
-          RealtimeEventConversationItemDeleted>(this, _$identity);
+    RealtimeEventConversationItemDeleted
+  >
+  get copyWith =>
+      _$RealtimeEventConversationItemDeletedCopyWithImpl<
+        RealtimeEventConversationItemDeleted
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventConversationItemDeletedToJson(
-      this,
-    );
+    return _$RealtimeEventConversationItemDeletedToJson(this);
   }
 
   @override
@@ -20205,7 +21872,9 @@ class RealtimeEventConversationItemDeleted extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, itemId);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, itemId);
+  }
 
   @override
   String toString() {
@@ -20217,15 +21886,16 @@ class RealtimeEventConversationItemDeleted extends RealtimeEvent {
 abstract mixin class $RealtimeEventConversationItemDeletedCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventConversationItemDeletedCopyWith(
-          RealtimeEventConversationItemDeleted value,
-          $Res Function(RealtimeEventConversationItemDeleted) _then) =
-      _$RealtimeEventConversationItemDeletedCopyWithImpl;
+    RealtimeEventConversationItemDeleted value,
+    $Res Function(RealtimeEventConversationItemDeleted) _then,
+  ) = _$RealtimeEventConversationItemDeletedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'item_id') String itemId});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'item_id') String itemId,
+  });
 }
 
 /// @nodoc
@@ -20245,20 +21915,22 @@ class _$RealtimeEventConversationItemDeletedCopyWithImpl<$Res>
     Object? type = null,
     Object? itemId = null,
   }) {
-    return _then(RealtimeEventConversationItemDeleted(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      itemId: null == itemId
-          ? _self.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      RealtimeEventConversationItemDeleted(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        itemId: null == itemId
+            ? _self.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
@@ -20266,18 +21938,19 @@ class _$RealtimeEventConversationItemDeletedCopyWithImpl<$Res>
 @JsonSerializable()
 class RealtimeEventConversationItemInputAudioTranscriptionCompleted
     extends RealtimeEvent {
-  const RealtimeEventConversationItemInputAudioTranscriptionCompleted(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type =
-          RealtimeEventType.conversationItemInputAudioTranscriptionCompleted,
-      @JsonKey(name: 'item_id') required this.itemId,
-      @JsonKey(name: 'content_index') required this.contentIndex,
-      required this.transcript})
-      : super._();
+  const RealtimeEventConversationItemInputAudioTranscriptionCompleted({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type =
+        RealtimeEventType.conversationItemInputAudioTranscriptionCompleted,
+    @JsonKey(name: 'item_id') required this.itemId,
+    @JsonKey(name: 'content_index') required this.contentIndex,
+    required this.transcript,
+  }) : super._();
   factory RealtimeEventConversationItemInputAudioTranscriptionCompleted.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventConversationItemInputAudioTranscriptionCompletedFromJson(
-          json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventConversationItemInputAudioTranscriptionCompletedFromJson(
+    json,
+  );
 
   /// The unique ID of the server event.
   @override
@@ -20306,11 +21979,12 @@ class RealtimeEventConversationItemInputAudioTranscriptionCompleted
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventConversationItemInputAudioTranscriptionCompletedCopyWith<
-          RealtimeEventConversationItemInputAudioTranscriptionCompleted>
-      get copyWith =>
-          _$RealtimeEventConversationItemInputAudioTranscriptionCompletedCopyWithImpl<
-                  RealtimeEventConversationItemInputAudioTranscriptionCompleted>(
-              this, _$identity);
+    RealtimeEventConversationItemInputAudioTranscriptionCompleted
+  >
+  get copyWith =>
+      _$RealtimeEventConversationItemInputAudioTranscriptionCompletedCopyWithImpl<
+        RealtimeEventConversationItemInputAudioTranscriptionCompleted
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
@@ -20336,8 +22010,16 @@ class RealtimeEventConversationItemInputAudioTranscriptionCompleted
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, eventId, type, itemId, contentIndex, transcript);
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      eventId,
+      type,
+      itemId,
+      contentIndex,
+      transcript,
+    );
+  }
 
   @override
   String toString() {
@@ -20347,35 +22029,43 @@ class RealtimeEventConversationItemInputAudioTranscriptionCompleted
 
 /// @nodoc
 abstract mixin class $RealtimeEventConversationItemInputAudioTranscriptionCompletedCopyWith<
-    $Res> implements $RealtimeEventCopyWith<$Res> {
+  $Res
+>
+    implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventConversationItemInputAudioTranscriptionCompletedCopyWith(
-          RealtimeEventConversationItemInputAudioTranscriptionCompleted value,
-          $Res Function(
-                  RealtimeEventConversationItemInputAudioTranscriptionCompleted)
-              _then) =
-      _$RealtimeEventConversationItemInputAudioTranscriptionCompletedCopyWithImpl;
+    RealtimeEventConversationItemInputAudioTranscriptionCompleted value,
+    $Res Function(RealtimeEventConversationItemInputAudioTranscriptionCompleted)
+    _then,
+  ) = _$RealtimeEventConversationItemInputAudioTranscriptionCompletedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'item_id') String itemId,
-      @JsonKey(name: 'content_index') int contentIndex,
-      String transcript});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'item_id') String itemId,
+    @JsonKey(name: 'content_index') int contentIndex,
+    String transcript,
+  });
 }
 
 /// @nodoc
 class _$RealtimeEventConversationItemInputAudioTranscriptionCompletedCopyWithImpl<
-        $Res>
+  $Res
+>
     implements
         $RealtimeEventConversationItemInputAudioTranscriptionCompletedCopyWith<
-            $Res> {
+          $Res
+        > {
   _$RealtimeEventConversationItemInputAudioTranscriptionCompletedCopyWithImpl(
-      this._self, this._then);
+    this._self,
+    this._then,
+  );
 
   final RealtimeEventConversationItemInputAudioTranscriptionCompleted _self;
   final $Res Function(
-      RealtimeEventConversationItemInputAudioTranscriptionCompleted) _then;
+    RealtimeEventConversationItemInputAudioTranscriptionCompleted,
+  )
+  _then;
 
   /// Create a copy of RealtimeEvent
   /// with the given fields replaced by the non-null parameter values.
@@ -20388,28 +22078,30 @@ class _$RealtimeEventConversationItemInputAudioTranscriptionCompletedCopyWithImp
     Object? contentIndex = null,
     Object? transcript = null,
   }) {
-    return _then(RealtimeEventConversationItemInputAudioTranscriptionCompleted(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      itemId: null == itemId
-          ? _self.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-      contentIndex: null == contentIndex
-          ? _self.contentIndex
-          : contentIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      transcript: null == transcript
-          ? _self.transcript
-          : transcript // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      RealtimeEventConversationItemInputAudioTranscriptionCompleted(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        itemId: null == itemId
+            ? _self.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        contentIndex: null == contentIndex
+            ? _self.contentIndex
+            : contentIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        transcript: null == transcript
+            ? _self.transcript
+            : transcript // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
@@ -20417,18 +22109,18 @@ class _$RealtimeEventConversationItemInputAudioTranscriptionCompletedCopyWithImp
 @JsonSerializable()
 class RealtimeEventConversationItemInputAudioTranscriptionFailed
     extends RealtimeEvent {
-  const RealtimeEventConversationItemInputAudioTranscriptionFailed(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type =
-          RealtimeEventType.conversationItemInputAudioTranscriptionFailed,
-      @JsonKey(name: 'item_id') required this.itemId,
-      @JsonKey(name: 'content_index') required this.contentIndex,
-      required this.error})
-      : super._();
+  const RealtimeEventConversationItemInputAudioTranscriptionFailed({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.conversationItemInputAudioTranscriptionFailed,
+    @JsonKey(name: 'item_id') required this.itemId,
+    @JsonKey(name: 'content_index') required this.contentIndex,
+    required this.error,
+  }) : super._();
   factory RealtimeEventConversationItemInputAudioTranscriptionFailed.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventConversationItemInputAudioTranscriptionFailedFromJson(
-          json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventConversationItemInputAudioTranscriptionFailedFromJson(
+    json,
+  );
 
   /// The unique ID of the server event.
   @override
@@ -20457,11 +22149,12 @@ class RealtimeEventConversationItemInputAudioTranscriptionFailed
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventConversationItemInputAudioTranscriptionFailedCopyWith<
-          RealtimeEventConversationItemInputAudioTranscriptionFailed>
-      get copyWith =>
-          _$RealtimeEventConversationItemInputAudioTranscriptionFailedCopyWithImpl<
-                  RealtimeEventConversationItemInputAudioTranscriptionFailed>(
-              this, _$identity);
+    RealtimeEventConversationItemInputAudioTranscriptionFailed
+  >
+  get copyWith =>
+      _$RealtimeEventConversationItemInputAudioTranscriptionFailedCopyWithImpl<
+        RealtimeEventConversationItemInputAudioTranscriptionFailed
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
@@ -20486,8 +22179,9 @@ class RealtimeEventConversationItemInputAudioTranscriptionFailed
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, eventId, type, itemId, contentIndex, error);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, itemId, contentIndex, error);
+  }
 
   @override
   String toString() {
@@ -20497,37 +22191,45 @@ class RealtimeEventConversationItemInputAudioTranscriptionFailed
 
 /// @nodoc
 abstract mixin class $RealtimeEventConversationItemInputAudioTranscriptionFailedCopyWith<
-    $Res> implements $RealtimeEventCopyWith<$Res> {
+  $Res
+>
+    implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventConversationItemInputAudioTranscriptionFailedCopyWith(
-          RealtimeEventConversationItemInputAudioTranscriptionFailed value,
-          $Res Function(
-                  RealtimeEventConversationItemInputAudioTranscriptionFailed)
-              _then) =
-      _$RealtimeEventConversationItemInputAudioTranscriptionFailedCopyWithImpl;
+    RealtimeEventConversationItemInputAudioTranscriptionFailed value,
+    $Res Function(RealtimeEventConversationItemInputAudioTranscriptionFailed)
+    _then,
+  ) = _$RealtimeEventConversationItemInputAudioTranscriptionFailedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'item_id') String itemId,
-      @JsonKey(name: 'content_index') int contentIndex,
-      TranscriptionError error});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'item_id') String itemId,
+    @JsonKey(name: 'content_index') int contentIndex,
+    TranscriptionError error,
+  });
 
   $TranscriptionErrorCopyWith<$Res> get error;
 }
 
 /// @nodoc
 class _$RealtimeEventConversationItemInputAudioTranscriptionFailedCopyWithImpl<
-        $Res>
+  $Res
+>
     implements
         $RealtimeEventConversationItemInputAudioTranscriptionFailedCopyWith<
-            $Res> {
+          $Res
+        > {
   _$RealtimeEventConversationItemInputAudioTranscriptionFailedCopyWithImpl(
-      this._self, this._then);
+    this._self,
+    this._then,
+  );
 
   final RealtimeEventConversationItemInputAudioTranscriptionFailed _self;
   final $Res Function(
-      RealtimeEventConversationItemInputAudioTranscriptionFailed) _then;
+    RealtimeEventConversationItemInputAudioTranscriptionFailed,
+  )
+  _then;
 
   /// Create a copy of RealtimeEvent
   /// with the given fields replaced by the non-null parameter values.
@@ -20540,28 +22242,30 @@ class _$RealtimeEventConversationItemInputAudioTranscriptionFailedCopyWithImpl<
     Object? contentIndex = null,
     Object? error = null,
   }) {
-    return _then(RealtimeEventConversationItemInputAudioTranscriptionFailed(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      itemId: null == itemId
-          ? _self.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-      contentIndex: null == contentIndex
-          ? _self.contentIndex
-          : contentIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      error: null == error
-          ? _self.error
-          : error // ignore: cast_nullable_to_non_nullable
-              as TranscriptionError,
-    ));
+    return _then(
+      RealtimeEventConversationItemInputAudioTranscriptionFailed(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        itemId: null == itemId
+            ? _self.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        contentIndex: null == contentIndex
+            ? _self.contentIndex
+            : contentIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        error: null == error
+            ? _self.error
+            : error // ignore: cast_nullable_to_non_nullable
+                  as TranscriptionError,
+      ),
+    );
   }
 
   /// Create a copy of RealtimeEvent
@@ -20579,16 +22283,16 @@ class _$RealtimeEventConversationItemInputAudioTranscriptionFailedCopyWithImpl<
 @JsonSerializable()
 class RealtimeEventConversationItemInputAudioTranscriptionDelta
     extends RealtimeEvent {
-  const RealtimeEventConversationItemInputAudioTranscriptionDelta(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type =
-          RealtimeEventType.conversationItemInputAudioTranscriptionDelta,
-      @JsonKey(name: 'item_id') required this.itemId,
-      @JsonKey(name: 'content_index', includeIfNull: false) this.contentIndex,
-      @JsonKey(includeIfNull: false) this.delta})
-      : super._();
+  const RealtimeEventConversationItemInputAudioTranscriptionDelta({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.conversationItemInputAudioTranscriptionDelta,
+    @JsonKey(name: 'item_id') required this.itemId,
+    @JsonKey(name: 'content_index', includeIfNull: false) this.contentIndex,
+    @JsonKey(includeIfNull: false) this.delta,
+  }) : super._();
   factory RealtimeEventConversationItemInputAudioTranscriptionDelta.fromJson(
-          Map<String, dynamic> json) =>
+    Map<String, dynamic> json,
+  ) =>
       _$RealtimeEventConversationItemInputAudioTranscriptionDeltaFromJson(json);
 
   /// The unique ID of the server event.
@@ -20619,11 +22323,12 @@ class RealtimeEventConversationItemInputAudioTranscriptionDelta
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventConversationItemInputAudioTranscriptionDeltaCopyWith<
-          RealtimeEventConversationItemInputAudioTranscriptionDelta>
-      get copyWith =>
-          _$RealtimeEventConversationItemInputAudioTranscriptionDeltaCopyWithImpl<
-                  RealtimeEventConversationItemInputAudioTranscriptionDelta>(
-              this, _$identity);
+    RealtimeEventConversationItemInputAudioTranscriptionDelta
+  >
+  get copyWith =>
+      _$RealtimeEventConversationItemInputAudioTranscriptionDeltaCopyWithImpl<
+        RealtimeEventConversationItemInputAudioTranscriptionDelta
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
@@ -20648,8 +22353,9 @@ class RealtimeEventConversationItemInputAudioTranscriptionDelta
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, eventId, type, itemId, contentIndex, delta);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, itemId, contentIndex, delta);
+  }
 
   @override
   String toString() {
@@ -20659,35 +22365,41 @@ class RealtimeEventConversationItemInputAudioTranscriptionDelta
 
 /// @nodoc
 abstract mixin class $RealtimeEventConversationItemInputAudioTranscriptionDeltaCopyWith<
-    $Res> implements $RealtimeEventCopyWith<$Res> {
+  $Res
+>
+    implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventConversationItemInputAudioTranscriptionDeltaCopyWith(
-          RealtimeEventConversationItemInputAudioTranscriptionDelta value,
-          $Res Function(
-                  RealtimeEventConversationItemInputAudioTranscriptionDelta)
-              _then) =
-      _$RealtimeEventConversationItemInputAudioTranscriptionDeltaCopyWithImpl;
+    RealtimeEventConversationItemInputAudioTranscriptionDelta value,
+    $Res Function(RealtimeEventConversationItemInputAudioTranscriptionDelta)
+    _then,
+  ) = _$RealtimeEventConversationItemInputAudioTranscriptionDeltaCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'item_id') String itemId,
-      @JsonKey(name: 'content_index', includeIfNull: false) int? contentIndex,
-      @JsonKey(includeIfNull: false) String? delta});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'item_id') String itemId,
+    @JsonKey(name: 'content_index', includeIfNull: false) int? contentIndex,
+    @JsonKey(includeIfNull: false) String? delta,
+  });
 }
 
 /// @nodoc
 class _$RealtimeEventConversationItemInputAudioTranscriptionDeltaCopyWithImpl<
-        $Res>
+  $Res
+>
     implements
         $RealtimeEventConversationItemInputAudioTranscriptionDeltaCopyWith<
-            $Res> {
+          $Res
+        > {
   _$RealtimeEventConversationItemInputAudioTranscriptionDeltaCopyWithImpl(
-      this._self, this._then);
+    this._self,
+    this._then,
+  );
 
   final RealtimeEventConversationItemInputAudioTranscriptionDelta _self;
   final $Res Function(RealtimeEventConversationItemInputAudioTranscriptionDelta)
-      _then;
+  _then;
 
   /// Create a copy of RealtimeEvent
   /// with the given fields replaced by the non-null parameter values.
@@ -20700,44 +22412,46 @@ class _$RealtimeEventConversationItemInputAudioTranscriptionDeltaCopyWithImpl<
     Object? contentIndex = freezed,
     Object? delta = freezed,
   }) {
-    return _then(RealtimeEventConversationItemInputAudioTranscriptionDelta(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      itemId: null == itemId
-          ? _self.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-      contentIndex: freezed == contentIndex
-          ? _self.contentIndex
-          : contentIndex // ignore: cast_nullable_to_non_nullable
-              as int?,
-      delta: freezed == delta
-          ? _self.delta
-          : delta // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      RealtimeEventConversationItemInputAudioTranscriptionDelta(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        itemId: null == itemId
+            ? _self.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        contentIndex: freezed == contentIndex
+            ? _self.contentIndex
+            : contentIndex // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        delta: freezed == delta
+            ? _self.delta
+            : delta // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventConversationItemTruncated extends RealtimeEvent {
-  const RealtimeEventConversationItemTruncated(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.conversationItemTruncated,
-      @JsonKey(name: 'item_id') required this.itemId,
-      @JsonKey(name: 'content_index') required this.contentIndex,
-      @JsonKey(name: 'audio_end_ms') required this.audioEndMs})
-      : super._();
+  const RealtimeEventConversationItemTruncated({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.conversationItemTruncated,
+    @JsonKey(name: 'item_id') required this.itemId,
+    @JsonKey(name: 'content_index') required this.contentIndex,
+    @JsonKey(name: 'audio_end_ms') required this.audioEndMs,
+  }) : super._();
   factory RealtimeEventConversationItemTruncated.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventConversationItemTruncatedFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventConversationItemTruncatedFromJson(json);
 
   /// The unique ID of the server event.
   @override
@@ -20767,15 +22481,16 @@ class RealtimeEventConversationItemTruncated extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventConversationItemTruncatedCopyWith<
-          RealtimeEventConversationItemTruncated>
-      get copyWith => _$RealtimeEventConversationItemTruncatedCopyWithImpl<
-          RealtimeEventConversationItemTruncated>(this, _$identity);
+    RealtimeEventConversationItemTruncated
+  >
+  get copyWith =>
+      _$RealtimeEventConversationItemTruncatedCopyWithImpl<
+        RealtimeEventConversationItemTruncated
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventConversationItemTruncatedToJson(
-      this,
-    );
+    return _$RealtimeEventConversationItemTruncatedToJson(this);
   }
 
   @override
@@ -20794,8 +22509,16 @@ class RealtimeEventConversationItemTruncated extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, eventId, type, itemId, contentIndex, audioEndMs);
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      eventId,
+      type,
+      itemId,
+      contentIndex,
+      audioEndMs,
+    );
+  }
 
   @override
   String toString() {
@@ -20807,17 +22530,18 @@ class RealtimeEventConversationItemTruncated extends RealtimeEvent {
 abstract mixin class $RealtimeEventConversationItemTruncatedCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventConversationItemTruncatedCopyWith(
-          RealtimeEventConversationItemTruncated value,
-          $Res Function(RealtimeEventConversationItemTruncated) _then) =
-      _$RealtimeEventConversationItemTruncatedCopyWithImpl;
+    RealtimeEventConversationItemTruncated value,
+    $Res Function(RealtimeEventConversationItemTruncated) _then,
+  ) = _$RealtimeEventConversationItemTruncatedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'item_id') String itemId,
-      @JsonKey(name: 'content_index') int contentIndex,
-      @JsonKey(name: 'audio_end_ms') int audioEndMs});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'item_id') String itemId,
+    @JsonKey(name: 'content_index') int contentIndex,
+    @JsonKey(name: 'audio_end_ms') int audioEndMs,
+  });
 }
 
 /// @nodoc
@@ -20839,39 +22563,41 @@ class _$RealtimeEventConversationItemTruncatedCopyWithImpl<$Res>
     Object? contentIndex = null,
     Object? audioEndMs = null,
   }) {
-    return _then(RealtimeEventConversationItemTruncated(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      itemId: null == itemId
-          ? _self.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-      contentIndex: null == contentIndex
-          ? _self.contentIndex
-          : contentIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      audioEndMs: null == audioEndMs
-          ? _self.audioEndMs
-          : audioEndMs // ignore: cast_nullable_to_non_nullable
-              as int,
-    ));
+    return _then(
+      RealtimeEventConversationItemTruncated(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        itemId: null == itemId
+            ? _self.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        contentIndex: null == contentIndex
+            ? _self.contentIndex
+            : contentIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        audioEndMs: null == audioEndMs
+            ? _self.audioEndMs
+            : audioEndMs // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventError extends RealtimeEvent {
-  const RealtimeEventError(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.error,
-      required this.error})
-      : super._();
+  const RealtimeEventError({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.error,
+    required this.error,
+  }) : super._();
   factory RealtimeEventError.fromJson(Map<String, dynamic> json) =>
       _$RealtimeEventErrorFromJson(json);
 
@@ -20898,9 +22624,7 @@ class RealtimeEventError extends RealtimeEvent {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventErrorToJson(
-      this,
-    );
+    return _$RealtimeEventErrorToJson(this);
   }
 
   @override
@@ -20915,7 +22639,9 @@ class RealtimeEventError extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, error);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, error);
+  }
 
   @override
   String toString() {
@@ -20927,14 +22653,16 @@ class RealtimeEventError extends RealtimeEvent {
 abstract mixin class $RealtimeEventErrorCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventErrorCopyWith(
-          RealtimeEventError value, $Res Function(RealtimeEventError) _then) =
-      _$RealtimeEventErrorCopyWithImpl;
+    RealtimeEventError value,
+    $Res Function(RealtimeEventError) _then,
+  ) = _$RealtimeEventErrorCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      APIError error});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    APIError error,
+  });
 
   $APIErrorCopyWith<$Res> get error;
 }
@@ -20956,20 +22684,22 @@ class _$RealtimeEventErrorCopyWithImpl<$Res>
     Object? type = null,
     Object? error = null,
   }) {
-    return _then(RealtimeEventError(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      error: null == error
-          ? _self.error
-          : error // ignore: cast_nullable_to_non_nullable
-              as APIError,
-    ));
+    return _then(
+      RealtimeEventError(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        error: null == error
+            ? _self.error
+            : error // ignore: cast_nullable_to_non_nullable
+                  as APIError,
+      ),
+    );
   }
 
   /// Create a copy of RealtimeEvent
@@ -20986,13 +22716,13 @@ class _$RealtimeEventErrorCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventInputAudioBufferCleared extends RealtimeEvent {
-  const RealtimeEventInputAudioBufferCleared(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.inputAudioBufferCleared})
-      : super._();
+  const RealtimeEventInputAudioBufferCleared({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.inputAudioBufferCleared,
+  }) : super._();
   factory RealtimeEventInputAudioBufferCleared.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventInputAudioBufferClearedFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventInputAudioBufferClearedFromJson(json);
 
   /// The unique ID of the server event.
   @override
@@ -21010,15 +22740,16 @@ class RealtimeEventInputAudioBufferCleared extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventInputAudioBufferClearedCopyWith<
-          RealtimeEventInputAudioBufferCleared>
-      get copyWith => _$RealtimeEventInputAudioBufferClearedCopyWithImpl<
-          RealtimeEventInputAudioBufferCleared>(this, _$identity);
+    RealtimeEventInputAudioBufferCleared
+  >
+  get copyWith =>
+      _$RealtimeEventInputAudioBufferClearedCopyWithImpl<
+        RealtimeEventInputAudioBufferCleared
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventInputAudioBufferClearedToJson(
-      this,
-    );
+    return _$RealtimeEventInputAudioBufferClearedToJson(this);
   }
 
   @override
@@ -21032,7 +22763,9 @@ class RealtimeEventInputAudioBufferCleared extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type);
+  }
 
   @override
   String toString() {
@@ -21044,13 +22777,15 @@ class RealtimeEventInputAudioBufferCleared extends RealtimeEvent {
 abstract mixin class $RealtimeEventInputAudioBufferClearedCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventInputAudioBufferClearedCopyWith(
-          RealtimeEventInputAudioBufferCleared value,
-          $Res Function(RealtimeEventInputAudioBufferCleared) _then) =
-      _$RealtimeEventInputAudioBufferClearedCopyWithImpl;
+    RealtimeEventInputAudioBufferCleared value,
+    $Res Function(RealtimeEventInputAudioBufferCleared) _then,
+  ) = _$RealtimeEventInputAudioBufferClearedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId, RealtimeEventType type});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+  });
 }
 
 /// @nodoc
@@ -21065,36 +22800,35 @@ class _$RealtimeEventInputAudioBufferClearedCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? eventId = null,
-    Object? type = null,
-  }) {
-    return _then(RealtimeEventInputAudioBufferCleared(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-    ));
+  $Res call({Object? eventId = null, Object? type = null}) {
+    return _then(
+      RealtimeEventInputAudioBufferCleared(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventInputAudioBufferCommitted extends RealtimeEvent {
-  const RealtimeEventInputAudioBufferCommitted(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.inputAudioBufferCommitted,
-      @JsonKey(name: 'previous_item_id', includeIfNull: false)
-      this.previousItemId,
-      @JsonKey(name: 'item_id') required this.itemId})
-      : super._();
+  const RealtimeEventInputAudioBufferCommitted({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.inputAudioBufferCommitted,
+    @JsonKey(name: 'previous_item_id', includeIfNull: false)
+    this.previousItemId,
+    @JsonKey(name: 'item_id') required this.itemId,
+  }) : super._();
   factory RealtimeEventInputAudioBufferCommitted.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventInputAudioBufferCommittedFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventInputAudioBufferCommittedFromJson(json);
 
   /// The unique ID of the server event.
   @override
@@ -21120,15 +22854,16 @@ class RealtimeEventInputAudioBufferCommitted extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventInputAudioBufferCommittedCopyWith<
-          RealtimeEventInputAudioBufferCommitted>
-      get copyWith => _$RealtimeEventInputAudioBufferCommittedCopyWithImpl<
-          RealtimeEventInputAudioBufferCommitted>(this, _$identity);
+    RealtimeEventInputAudioBufferCommitted
+  >
+  get copyWith =>
+      _$RealtimeEventInputAudioBufferCommittedCopyWithImpl<
+        RealtimeEventInputAudioBufferCommitted
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventInputAudioBufferCommittedToJson(
-      this,
-    );
+    return _$RealtimeEventInputAudioBufferCommittedToJson(this);
   }
 
   @override
@@ -21145,8 +22880,9 @@ class RealtimeEventInputAudioBufferCommitted extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, eventId, type, previousItemId, itemId);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, previousItemId, itemId);
+  }
 
   @override
   String toString() {
@@ -21158,17 +22894,18 @@ class RealtimeEventInputAudioBufferCommitted extends RealtimeEvent {
 abstract mixin class $RealtimeEventInputAudioBufferCommittedCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventInputAudioBufferCommittedCopyWith(
-          RealtimeEventInputAudioBufferCommitted value,
-          $Res Function(RealtimeEventInputAudioBufferCommitted) _then) =
-      _$RealtimeEventInputAudioBufferCommittedCopyWithImpl;
+    RealtimeEventInputAudioBufferCommitted value,
+    $Res Function(RealtimeEventInputAudioBufferCommitted) _then,
+  ) = _$RealtimeEventInputAudioBufferCommittedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'previous_item_id', includeIfNull: false)
-      String? previousItemId,
-      @JsonKey(name: 'item_id') String itemId});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'previous_item_id', includeIfNull: false)
+    String? previousItemId,
+    @JsonKey(name: 'item_id') String itemId,
+  });
 }
 
 /// @nodoc
@@ -21189,39 +22926,41 @@ class _$RealtimeEventInputAudioBufferCommittedCopyWithImpl<$Res>
     Object? previousItemId = freezed,
     Object? itemId = null,
   }) {
-    return _then(RealtimeEventInputAudioBufferCommitted(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      previousItemId: freezed == previousItemId
-          ? _self.previousItemId
-          : previousItemId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      itemId: null == itemId
-          ? _self.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      RealtimeEventInputAudioBufferCommitted(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        previousItemId: freezed == previousItemId
+            ? _self.previousItemId
+            : previousItemId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        itemId: null == itemId
+            ? _self.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventInputAudioBufferSpeechStarted extends RealtimeEvent {
-  const RealtimeEventInputAudioBufferSpeechStarted(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.inputAudioBufferSpeechStarted,
-      @JsonKey(name: 'audio_start_ms') required this.audioStartMs,
-      @JsonKey(name: 'item_id') required this.itemId})
-      : super._();
+  const RealtimeEventInputAudioBufferSpeechStarted({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.inputAudioBufferSpeechStarted,
+    @JsonKey(name: 'audio_start_ms') required this.audioStartMs,
+    @JsonKey(name: 'item_id') required this.itemId,
+  }) : super._();
   factory RealtimeEventInputAudioBufferSpeechStarted.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventInputAudioBufferSpeechStartedFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventInputAudioBufferSpeechStartedFromJson(json);
 
   /// The unique ID of the server event.
   @override
@@ -21249,15 +22988,16 @@ class RealtimeEventInputAudioBufferSpeechStarted extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventInputAudioBufferSpeechStartedCopyWith<
-          RealtimeEventInputAudioBufferSpeechStarted>
-      get copyWith => _$RealtimeEventInputAudioBufferSpeechStartedCopyWithImpl<
-          RealtimeEventInputAudioBufferSpeechStarted>(this, _$identity);
+    RealtimeEventInputAudioBufferSpeechStarted
+  >
+  get copyWith =>
+      _$RealtimeEventInputAudioBufferSpeechStartedCopyWithImpl<
+        RealtimeEventInputAudioBufferSpeechStarted
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventInputAudioBufferSpeechStartedToJson(
-      this,
-    );
+    return _$RealtimeEventInputAudioBufferSpeechStartedToJson(this);
   }
 
   @override
@@ -21274,8 +23014,9 @@ class RealtimeEventInputAudioBufferSpeechStarted extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, eventId, type, audioStartMs, itemId);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, audioStartMs, itemId);
+  }
 
   @override
   String toString() {
@@ -21287,23 +23028,26 @@ class RealtimeEventInputAudioBufferSpeechStarted extends RealtimeEvent {
 abstract mixin class $RealtimeEventInputAudioBufferSpeechStartedCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventInputAudioBufferSpeechStartedCopyWith(
-          RealtimeEventInputAudioBufferSpeechStarted value,
-          $Res Function(RealtimeEventInputAudioBufferSpeechStarted) _then) =
-      _$RealtimeEventInputAudioBufferSpeechStartedCopyWithImpl;
+    RealtimeEventInputAudioBufferSpeechStarted value,
+    $Res Function(RealtimeEventInputAudioBufferSpeechStarted) _then,
+  ) = _$RealtimeEventInputAudioBufferSpeechStartedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'audio_start_ms') int audioStartMs,
-      @JsonKey(name: 'item_id') String itemId});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'audio_start_ms') int audioStartMs,
+    @JsonKey(name: 'item_id') String itemId,
+  });
 }
 
 /// @nodoc
 class _$RealtimeEventInputAudioBufferSpeechStartedCopyWithImpl<$Res>
     implements $RealtimeEventInputAudioBufferSpeechStartedCopyWith<$Res> {
   _$RealtimeEventInputAudioBufferSpeechStartedCopyWithImpl(
-      this._self, this._then);
+    this._self,
+    this._then,
+  );
 
   final RealtimeEventInputAudioBufferSpeechStarted _self;
   final $Res Function(RealtimeEventInputAudioBufferSpeechStarted) _then;
@@ -21318,39 +23062,41 @@ class _$RealtimeEventInputAudioBufferSpeechStartedCopyWithImpl<$Res>
     Object? audioStartMs = null,
     Object? itemId = null,
   }) {
-    return _then(RealtimeEventInputAudioBufferSpeechStarted(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      audioStartMs: null == audioStartMs
-          ? _self.audioStartMs
-          : audioStartMs // ignore: cast_nullable_to_non_nullable
-              as int,
-      itemId: null == itemId
-          ? _self.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      RealtimeEventInputAudioBufferSpeechStarted(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        audioStartMs: null == audioStartMs
+            ? _self.audioStartMs
+            : audioStartMs // ignore: cast_nullable_to_non_nullable
+                  as int,
+        itemId: null == itemId
+            ? _self.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventInputAudioBufferSpeechStopped extends RealtimeEvent {
-  const RealtimeEventInputAudioBufferSpeechStopped(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.inputAudioBufferSpeechStopped,
-      @JsonKey(name: 'audio_end_ms') required this.audioEndMs,
-      @JsonKey(name: 'item_id') required this.itemId})
-      : super._();
+  const RealtimeEventInputAudioBufferSpeechStopped({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.inputAudioBufferSpeechStopped,
+    @JsonKey(name: 'audio_end_ms') required this.audioEndMs,
+    @JsonKey(name: 'item_id') required this.itemId,
+  }) : super._();
   factory RealtimeEventInputAudioBufferSpeechStopped.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventInputAudioBufferSpeechStoppedFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventInputAudioBufferSpeechStoppedFromJson(json);
 
   /// The unique ID of the server event.
   @override
@@ -21378,15 +23124,16 @@ class RealtimeEventInputAudioBufferSpeechStopped extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventInputAudioBufferSpeechStoppedCopyWith<
-          RealtimeEventInputAudioBufferSpeechStopped>
-      get copyWith => _$RealtimeEventInputAudioBufferSpeechStoppedCopyWithImpl<
-          RealtimeEventInputAudioBufferSpeechStopped>(this, _$identity);
+    RealtimeEventInputAudioBufferSpeechStopped
+  >
+  get copyWith =>
+      _$RealtimeEventInputAudioBufferSpeechStoppedCopyWithImpl<
+        RealtimeEventInputAudioBufferSpeechStopped
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventInputAudioBufferSpeechStoppedToJson(
-      this,
-    );
+    return _$RealtimeEventInputAudioBufferSpeechStoppedToJson(this);
   }
 
   @override
@@ -21403,8 +23150,9 @@ class RealtimeEventInputAudioBufferSpeechStopped extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, eventId, type, audioEndMs, itemId);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, audioEndMs, itemId);
+  }
 
   @override
   String toString() {
@@ -21416,23 +23164,26 @@ class RealtimeEventInputAudioBufferSpeechStopped extends RealtimeEvent {
 abstract mixin class $RealtimeEventInputAudioBufferSpeechStoppedCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventInputAudioBufferSpeechStoppedCopyWith(
-          RealtimeEventInputAudioBufferSpeechStopped value,
-          $Res Function(RealtimeEventInputAudioBufferSpeechStopped) _then) =
-      _$RealtimeEventInputAudioBufferSpeechStoppedCopyWithImpl;
+    RealtimeEventInputAudioBufferSpeechStopped value,
+    $Res Function(RealtimeEventInputAudioBufferSpeechStopped) _then,
+  ) = _$RealtimeEventInputAudioBufferSpeechStoppedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'audio_end_ms') int audioEndMs,
-      @JsonKey(name: 'item_id') String itemId});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'audio_end_ms') int audioEndMs,
+    @JsonKey(name: 'item_id') String itemId,
+  });
 }
 
 /// @nodoc
 class _$RealtimeEventInputAudioBufferSpeechStoppedCopyWithImpl<$Res>
     implements $RealtimeEventInputAudioBufferSpeechStoppedCopyWith<$Res> {
   _$RealtimeEventInputAudioBufferSpeechStoppedCopyWithImpl(
-      this._self, this._then);
+    this._self,
+    this._then,
+  );
 
   final RealtimeEventInputAudioBufferSpeechStopped _self;
   final $Res Function(RealtimeEventInputAudioBufferSpeechStopped) _then;
@@ -21447,36 +23198,38 @@ class _$RealtimeEventInputAudioBufferSpeechStoppedCopyWithImpl<$Res>
     Object? audioEndMs = null,
     Object? itemId = null,
   }) {
-    return _then(RealtimeEventInputAudioBufferSpeechStopped(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      audioEndMs: null == audioEndMs
-          ? _self.audioEndMs
-          : audioEndMs // ignore: cast_nullable_to_non_nullable
-              as int,
-      itemId: null == itemId
-          ? _self.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      RealtimeEventInputAudioBufferSpeechStopped(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        audioEndMs: null == audioEndMs
+            ? _self.audioEndMs
+            : audioEndMs // ignore: cast_nullable_to_non_nullable
+                  as int,
+        itemId: null == itemId
+            ? _self.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventRateLimitsUpdated extends RealtimeEvent {
-  const RealtimeEventRateLimitsUpdated(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.rateLimitsUpdated,
-      @JsonKey(name: 'rate_limits') required final List<RateLimit> rateLimits})
-      : _rateLimits = rateLimits,
-        super._();
+  const RealtimeEventRateLimitsUpdated({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.rateLimitsUpdated,
+    @JsonKey(name: 'rate_limits') required List<RateLimit> rateLimits,
+  }) : _rateLimits = rateLimits,
+       super._();
   factory RealtimeEventRateLimitsUpdated.fromJson(Map<String, dynamic> json) =>
       _$RealtimeEventRateLimitsUpdatedFromJson(json);
 
@@ -21507,14 +23260,14 @@ class RealtimeEventRateLimitsUpdated extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventRateLimitsUpdatedCopyWith<RealtimeEventRateLimitsUpdated>
-      get copyWith => _$RealtimeEventRateLimitsUpdatedCopyWithImpl<
-          RealtimeEventRateLimitsUpdated>(this, _$identity);
+  get copyWith =>
+      _$RealtimeEventRateLimitsUpdatedCopyWithImpl<
+        RealtimeEventRateLimitsUpdated
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventRateLimitsUpdatedToJson(
-      this,
-    );
+    return _$RealtimeEventRateLimitsUpdatedToJson(this);
   }
 
   @override
@@ -21524,14 +23277,22 @@ class RealtimeEventRateLimitsUpdated extends RealtimeEvent {
             other is RealtimeEventRateLimitsUpdated &&
             (identical(other.eventId, eventId) || other.eventId == eventId) &&
             (identical(other.type, type) || other.type == type) &&
-            const DeepCollectionEquality()
-                .equals(other._rateLimits, _rateLimits));
+            const DeepCollectionEquality().equals(
+              other.rateLimits,
+              _rateLimits,
+            ));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type,
-      const DeepCollectionEquality().hash(_rateLimits));
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      eventId,
+      type,
+      const DeepCollectionEquality().hash(_rateLimits),
+    );
+  }
 
   @override
   String toString() {
@@ -21543,15 +23304,16 @@ class RealtimeEventRateLimitsUpdated extends RealtimeEvent {
 abstract mixin class $RealtimeEventRateLimitsUpdatedCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventRateLimitsUpdatedCopyWith(
-          RealtimeEventRateLimitsUpdated value,
-          $Res Function(RealtimeEventRateLimitsUpdated) _then) =
-      _$RealtimeEventRateLimitsUpdatedCopyWithImpl;
+    RealtimeEventRateLimitsUpdated value,
+    $Res Function(RealtimeEventRateLimitsUpdated) _then,
+  ) = _$RealtimeEventRateLimitsUpdatedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'rate_limits') List<RateLimit> rateLimits});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'rate_limits') List<RateLimit> rateLimits,
+  });
 }
 
 /// @nodoc
@@ -21571,35 +23333,37 @@ class _$RealtimeEventRateLimitsUpdatedCopyWithImpl<$Res>
     Object? type = null,
     Object? rateLimits = null,
   }) {
-    return _then(RealtimeEventRateLimitsUpdated(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      rateLimits: null == rateLimits
-          ? _self._rateLimits
-          : rateLimits // ignore: cast_nullable_to_non_nullable
-              as List<RateLimit>,
-    ));
+    return _then(
+      RealtimeEventRateLimitsUpdated(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        rateLimits: null == rateLimits
+            ? _self._rateLimits
+            : rateLimits // ignore: cast_nullable_to_non_nullable
+                  as List<RateLimit>,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventResponseAudioDelta extends RealtimeEvent {
-  const RealtimeEventResponseAudioDelta(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.responseAudioDelta,
-      @JsonKey(name: 'response_id') required this.responseId,
-      @JsonKey(name: 'item_id') required this.itemId,
-      @JsonKey(name: 'output_index') required this.outputIndex,
-      @JsonKey(name: 'content_index') required this.contentIndex,
-      required this.delta})
-      : super._();
+  const RealtimeEventResponseAudioDelta({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.responseAudioDelta,
+    @JsonKey(name: 'response_id') required this.responseId,
+    @JsonKey(name: 'item_id') required this.itemId,
+    @JsonKey(name: 'output_index') required this.outputIndex,
+    @JsonKey(name: 'content_index') required this.contentIndex,
+    required this.delta,
+  }) : super._();
   factory RealtimeEventResponseAudioDelta.fromJson(Map<String, dynamic> json) =>
       _$RealtimeEventResponseAudioDeltaFromJson(json);
 
@@ -21638,14 +23402,14 @@ class RealtimeEventResponseAudioDelta extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventResponseAudioDeltaCopyWith<RealtimeEventResponseAudioDelta>
-      get copyWith => _$RealtimeEventResponseAudioDeltaCopyWithImpl<
-          RealtimeEventResponseAudioDelta>(this, _$identity);
+  get copyWith =>
+      _$RealtimeEventResponseAudioDeltaCopyWithImpl<
+        RealtimeEventResponseAudioDelta
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventResponseAudioDeltaToJson(
-      this,
-    );
+    return _$RealtimeEventResponseAudioDeltaToJson(this);
   }
 
   @override
@@ -21667,8 +23431,18 @@ class RealtimeEventResponseAudioDelta extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, responseId,
-      itemId, outputIndex, contentIndex, delta);
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      eventId,
+      type,
+      responseId,
+      itemId,
+      outputIndex,
+      contentIndex,
+      delta,
+    );
+  }
 
   @override
   String toString() {
@@ -21680,19 +23454,20 @@ class RealtimeEventResponseAudioDelta extends RealtimeEvent {
 abstract mixin class $RealtimeEventResponseAudioDeltaCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventResponseAudioDeltaCopyWith(
-          RealtimeEventResponseAudioDelta value,
-          $Res Function(RealtimeEventResponseAudioDelta) _then) =
-      _$RealtimeEventResponseAudioDeltaCopyWithImpl;
+    RealtimeEventResponseAudioDelta value,
+    $Res Function(RealtimeEventResponseAudioDelta) _then,
+  ) = _$RealtimeEventResponseAudioDeltaCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'response_id') String responseId,
-      @JsonKey(name: 'item_id') String itemId,
-      @JsonKey(name: 'output_index') int outputIndex,
-      @JsonKey(name: 'content_index') int contentIndex,
-      String delta});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'response_id') String responseId,
+    @JsonKey(name: 'item_id') String itemId,
+    @JsonKey(name: 'output_index') int outputIndex,
+    @JsonKey(name: 'content_index') int contentIndex,
+    String delta,
+  });
 }
 
 /// @nodoc
@@ -21716,50 +23491,52 @@ class _$RealtimeEventResponseAudioDeltaCopyWithImpl<$Res>
     Object? contentIndex = null,
     Object? delta = null,
   }) {
-    return _then(RealtimeEventResponseAudioDelta(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      responseId: null == responseId
-          ? _self.responseId
-          : responseId // ignore: cast_nullable_to_non_nullable
-              as String,
-      itemId: null == itemId
-          ? _self.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-      outputIndex: null == outputIndex
-          ? _self.outputIndex
-          : outputIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      contentIndex: null == contentIndex
-          ? _self.contentIndex
-          : contentIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      delta: null == delta
-          ? _self.delta
-          : delta // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      RealtimeEventResponseAudioDelta(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        responseId: null == responseId
+            ? _self.responseId
+            : responseId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        itemId: null == itemId
+            ? _self.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        outputIndex: null == outputIndex
+            ? _self.outputIndex
+            : outputIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        contentIndex: null == contentIndex
+            ? _self.contentIndex
+            : contentIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        delta: null == delta
+            ? _self.delta
+            : delta // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventResponseAudioDone extends RealtimeEvent {
-  const RealtimeEventResponseAudioDone(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.responseAudioDone,
-      @JsonKey(name: 'response_id') required this.responseId,
-      @JsonKey(name: 'item_id') required this.itemId,
-      @JsonKey(name: 'output_index') required this.outputIndex,
-      @JsonKey(name: 'content_index') required this.contentIndex})
-      : super._();
+  const RealtimeEventResponseAudioDone({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.responseAudioDone,
+    @JsonKey(name: 'response_id') required this.responseId,
+    @JsonKey(name: 'item_id') required this.itemId,
+    @JsonKey(name: 'output_index') required this.outputIndex,
+    @JsonKey(name: 'content_index') required this.contentIndex,
+  }) : super._();
   factory RealtimeEventResponseAudioDone.fromJson(Map<String, dynamic> json) =>
       _$RealtimeEventResponseAudioDoneFromJson(json);
 
@@ -21795,14 +23572,14 @@ class RealtimeEventResponseAudioDone extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventResponseAudioDoneCopyWith<RealtimeEventResponseAudioDone>
-      get copyWith => _$RealtimeEventResponseAudioDoneCopyWithImpl<
-          RealtimeEventResponseAudioDone>(this, _$identity);
+  get copyWith =>
+      _$RealtimeEventResponseAudioDoneCopyWithImpl<
+        RealtimeEventResponseAudioDone
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventResponseAudioDoneToJson(
-      this,
-    );
+    return _$RealtimeEventResponseAudioDoneToJson(this);
   }
 
   @override
@@ -21823,8 +23600,17 @@ class RealtimeEventResponseAudioDone extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, responseId,
-      itemId, outputIndex, contentIndex);
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      eventId,
+      type,
+      responseId,
+      itemId,
+      outputIndex,
+      contentIndex,
+    );
+  }
 
   @override
   String toString() {
@@ -21836,18 +23622,19 @@ class RealtimeEventResponseAudioDone extends RealtimeEvent {
 abstract mixin class $RealtimeEventResponseAudioDoneCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventResponseAudioDoneCopyWith(
-          RealtimeEventResponseAudioDone value,
-          $Res Function(RealtimeEventResponseAudioDone) _then) =
-      _$RealtimeEventResponseAudioDoneCopyWithImpl;
+    RealtimeEventResponseAudioDone value,
+    $Res Function(RealtimeEventResponseAudioDone) _then,
+  ) = _$RealtimeEventResponseAudioDoneCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'response_id') String responseId,
-      @JsonKey(name: 'item_id') String itemId,
-      @JsonKey(name: 'output_index') int outputIndex,
-      @JsonKey(name: 'content_index') int contentIndex});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'response_id') String responseId,
+    @JsonKey(name: 'item_id') String itemId,
+    @JsonKey(name: 'output_index') int outputIndex,
+    @JsonKey(name: 'content_index') int contentIndex,
+  });
 }
 
 /// @nodoc
@@ -21870,50 +23657,52 @@ class _$RealtimeEventResponseAudioDoneCopyWithImpl<$Res>
     Object? outputIndex = null,
     Object? contentIndex = null,
   }) {
-    return _then(RealtimeEventResponseAudioDone(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      responseId: null == responseId
-          ? _self.responseId
-          : responseId // ignore: cast_nullable_to_non_nullable
-              as String,
-      itemId: null == itemId
-          ? _self.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-      outputIndex: null == outputIndex
-          ? _self.outputIndex
-          : outputIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      contentIndex: null == contentIndex
-          ? _self.contentIndex
-          : contentIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-    ));
+    return _then(
+      RealtimeEventResponseAudioDone(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        responseId: null == responseId
+            ? _self.responseId
+            : responseId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        itemId: null == itemId
+            ? _self.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        outputIndex: null == outputIndex
+            ? _self.outputIndex
+            : outputIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        contentIndex: null == contentIndex
+            ? _self.contentIndex
+            : contentIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventResponseAudioTranscriptDelta extends RealtimeEvent {
-  const RealtimeEventResponseAudioTranscriptDelta(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.responseAudioTranscriptDelta,
-      @JsonKey(name: 'response_id') required this.responseId,
-      @JsonKey(name: 'item_id') required this.itemId,
-      @JsonKey(name: 'output_index') required this.outputIndex,
-      @JsonKey(name: 'content_index') required this.contentIndex,
-      required this.delta})
-      : super._();
+  const RealtimeEventResponseAudioTranscriptDelta({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.responseAudioTranscriptDelta,
+    @JsonKey(name: 'response_id') required this.responseId,
+    @JsonKey(name: 'item_id') required this.itemId,
+    @JsonKey(name: 'output_index') required this.outputIndex,
+    @JsonKey(name: 'content_index') required this.contentIndex,
+    required this.delta,
+  }) : super._();
   factory RealtimeEventResponseAudioTranscriptDelta.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventResponseAudioTranscriptDeltaFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventResponseAudioTranscriptDeltaFromJson(json);
 
   /// The unique ID of the server event.
   @override
@@ -21950,15 +23739,16 @@ class RealtimeEventResponseAudioTranscriptDelta extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventResponseAudioTranscriptDeltaCopyWith<
-          RealtimeEventResponseAudioTranscriptDelta>
-      get copyWith => _$RealtimeEventResponseAudioTranscriptDeltaCopyWithImpl<
-          RealtimeEventResponseAudioTranscriptDelta>(this, _$identity);
+    RealtimeEventResponseAudioTranscriptDelta
+  >
+  get copyWith =>
+      _$RealtimeEventResponseAudioTranscriptDeltaCopyWithImpl<
+        RealtimeEventResponseAudioTranscriptDelta
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventResponseAudioTranscriptDeltaToJson(
-      this,
-    );
+    return _$RealtimeEventResponseAudioTranscriptDeltaToJson(this);
   }
 
   @override
@@ -21980,8 +23770,18 @@ class RealtimeEventResponseAudioTranscriptDelta extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, responseId,
-      itemId, outputIndex, contentIndex, delta);
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      eventId,
+      type,
+      responseId,
+      itemId,
+      outputIndex,
+      contentIndex,
+      delta,
+    );
+  }
 
   @override
   String toString() {
@@ -21993,26 +23793,29 @@ class RealtimeEventResponseAudioTranscriptDelta extends RealtimeEvent {
 abstract mixin class $RealtimeEventResponseAudioTranscriptDeltaCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventResponseAudioTranscriptDeltaCopyWith(
-          RealtimeEventResponseAudioTranscriptDelta value,
-          $Res Function(RealtimeEventResponseAudioTranscriptDelta) _then) =
-      _$RealtimeEventResponseAudioTranscriptDeltaCopyWithImpl;
+    RealtimeEventResponseAudioTranscriptDelta value,
+    $Res Function(RealtimeEventResponseAudioTranscriptDelta) _then,
+  ) = _$RealtimeEventResponseAudioTranscriptDeltaCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'response_id') String responseId,
-      @JsonKey(name: 'item_id') String itemId,
-      @JsonKey(name: 'output_index') int outputIndex,
-      @JsonKey(name: 'content_index') int contentIndex,
-      String delta});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'response_id') String responseId,
+    @JsonKey(name: 'item_id') String itemId,
+    @JsonKey(name: 'output_index') int outputIndex,
+    @JsonKey(name: 'content_index') int contentIndex,
+    String delta,
+  });
 }
 
 /// @nodoc
 class _$RealtimeEventResponseAudioTranscriptDeltaCopyWithImpl<$Res>
     implements $RealtimeEventResponseAudioTranscriptDeltaCopyWith<$Res> {
   _$RealtimeEventResponseAudioTranscriptDeltaCopyWithImpl(
-      this._self, this._then);
+    this._self,
+    this._then,
+  );
 
   final RealtimeEventResponseAudioTranscriptDelta _self;
   final $Res Function(RealtimeEventResponseAudioTranscriptDelta) _then;
@@ -22030,54 +23833,56 @@ class _$RealtimeEventResponseAudioTranscriptDeltaCopyWithImpl<$Res>
     Object? contentIndex = null,
     Object? delta = null,
   }) {
-    return _then(RealtimeEventResponseAudioTranscriptDelta(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      responseId: null == responseId
-          ? _self.responseId
-          : responseId // ignore: cast_nullable_to_non_nullable
-              as String,
-      itemId: null == itemId
-          ? _self.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-      outputIndex: null == outputIndex
-          ? _self.outputIndex
-          : outputIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      contentIndex: null == contentIndex
-          ? _self.contentIndex
-          : contentIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      delta: null == delta
-          ? _self.delta
-          : delta // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      RealtimeEventResponseAudioTranscriptDelta(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        responseId: null == responseId
+            ? _self.responseId
+            : responseId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        itemId: null == itemId
+            ? _self.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        outputIndex: null == outputIndex
+            ? _self.outputIndex
+            : outputIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        contentIndex: null == contentIndex
+            ? _self.contentIndex
+            : contentIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        delta: null == delta
+            ? _self.delta
+            : delta // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventResponseAudioTranscriptDone extends RealtimeEvent {
-  const RealtimeEventResponseAudioTranscriptDone(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.responseAudioTranscriptDone,
-      @JsonKey(name: 'response_id') required this.responseId,
-      @JsonKey(name: 'item_id') required this.itemId,
-      @JsonKey(name: 'output_index') required this.outputIndex,
-      @JsonKey(name: 'content_index') required this.contentIndex,
-      required this.transcript})
-      : super._();
+  const RealtimeEventResponseAudioTranscriptDone({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.responseAudioTranscriptDone,
+    @JsonKey(name: 'response_id') required this.responseId,
+    @JsonKey(name: 'item_id') required this.itemId,
+    @JsonKey(name: 'output_index') required this.outputIndex,
+    @JsonKey(name: 'content_index') required this.contentIndex,
+    required this.transcript,
+  }) : super._();
   factory RealtimeEventResponseAudioTranscriptDone.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventResponseAudioTranscriptDoneFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventResponseAudioTranscriptDoneFromJson(json);
 
   /// The unique ID of the server event.
   @override
@@ -22114,15 +23919,16 @@ class RealtimeEventResponseAudioTranscriptDone extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventResponseAudioTranscriptDoneCopyWith<
-          RealtimeEventResponseAudioTranscriptDone>
-      get copyWith => _$RealtimeEventResponseAudioTranscriptDoneCopyWithImpl<
-          RealtimeEventResponseAudioTranscriptDone>(this, _$identity);
+    RealtimeEventResponseAudioTranscriptDone
+  >
+  get copyWith =>
+      _$RealtimeEventResponseAudioTranscriptDoneCopyWithImpl<
+        RealtimeEventResponseAudioTranscriptDone
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventResponseAudioTranscriptDoneToJson(
-      this,
-    );
+    return _$RealtimeEventResponseAudioTranscriptDoneToJson(this);
   }
 
   @override
@@ -22145,8 +23951,18 @@ class RealtimeEventResponseAudioTranscriptDone extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, responseId,
-      itemId, outputIndex, contentIndex, transcript);
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      eventId,
+      type,
+      responseId,
+      itemId,
+      outputIndex,
+      contentIndex,
+      transcript,
+    );
+  }
 
   @override
   String toString() {
@@ -22158,26 +23974,29 @@ class RealtimeEventResponseAudioTranscriptDone extends RealtimeEvent {
 abstract mixin class $RealtimeEventResponseAudioTranscriptDoneCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventResponseAudioTranscriptDoneCopyWith(
-          RealtimeEventResponseAudioTranscriptDone value,
-          $Res Function(RealtimeEventResponseAudioTranscriptDone) _then) =
-      _$RealtimeEventResponseAudioTranscriptDoneCopyWithImpl;
+    RealtimeEventResponseAudioTranscriptDone value,
+    $Res Function(RealtimeEventResponseAudioTranscriptDone) _then,
+  ) = _$RealtimeEventResponseAudioTranscriptDoneCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'response_id') String responseId,
-      @JsonKey(name: 'item_id') String itemId,
-      @JsonKey(name: 'output_index') int outputIndex,
-      @JsonKey(name: 'content_index') int contentIndex,
-      String transcript});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'response_id') String responseId,
+    @JsonKey(name: 'item_id') String itemId,
+    @JsonKey(name: 'output_index') int outputIndex,
+    @JsonKey(name: 'content_index') int contentIndex,
+    String transcript,
+  });
 }
 
 /// @nodoc
 class _$RealtimeEventResponseAudioTranscriptDoneCopyWithImpl<$Res>
     implements $RealtimeEventResponseAudioTranscriptDoneCopyWith<$Res> {
   _$RealtimeEventResponseAudioTranscriptDoneCopyWithImpl(
-      this._self, this._then);
+    this._self,
+    this._then,
+  );
 
   final RealtimeEventResponseAudioTranscriptDone _self;
   final $Res Function(RealtimeEventResponseAudioTranscriptDone) _then;
@@ -22195,54 +24014,56 @@ class _$RealtimeEventResponseAudioTranscriptDoneCopyWithImpl<$Res>
     Object? contentIndex = null,
     Object? transcript = null,
   }) {
-    return _then(RealtimeEventResponseAudioTranscriptDone(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      responseId: null == responseId
-          ? _self.responseId
-          : responseId // ignore: cast_nullable_to_non_nullable
-              as String,
-      itemId: null == itemId
-          ? _self.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-      outputIndex: null == outputIndex
-          ? _self.outputIndex
-          : outputIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      contentIndex: null == contentIndex
-          ? _self.contentIndex
-          : contentIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      transcript: null == transcript
-          ? _self.transcript
-          : transcript // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      RealtimeEventResponseAudioTranscriptDone(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        responseId: null == responseId
+            ? _self.responseId
+            : responseId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        itemId: null == itemId
+            ? _self.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        outputIndex: null == outputIndex
+            ? _self.outputIndex
+            : outputIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        contentIndex: null == contentIndex
+            ? _self.contentIndex
+            : contentIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        transcript: null == transcript
+            ? _self.transcript
+            : transcript // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventResponseContentPartAdded extends RealtimeEvent {
-  const RealtimeEventResponseContentPartAdded(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.responseContentPartAdded,
-      @JsonKey(name: 'response_id') required this.responseId,
-      @JsonKey(name: 'item_id') required this.itemId,
-      @JsonKey(name: 'output_index') required this.outputIndex,
-      @JsonKey(name: 'content_index') required this.contentIndex,
-      required this.part})
-      : super._();
+  const RealtimeEventResponseContentPartAdded({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.responseContentPartAdded,
+    @JsonKey(name: 'response_id') required this.responseId,
+    @JsonKey(name: 'item_id') required this.itemId,
+    @JsonKey(name: 'output_index') required this.outputIndex,
+    @JsonKey(name: 'content_index') required this.contentIndex,
+    required this.part,
+  }) : super._();
   factory RealtimeEventResponseContentPartAdded.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventResponseContentPartAddedFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventResponseContentPartAddedFromJson(json);
 
   /// The unique ID of the server event.
   @override
@@ -22280,15 +24101,16 @@ class RealtimeEventResponseContentPartAdded extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventResponseContentPartAddedCopyWith<
-          RealtimeEventResponseContentPartAdded>
-      get copyWith => _$RealtimeEventResponseContentPartAddedCopyWithImpl<
-          RealtimeEventResponseContentPartAdded>(this, _$identity);
+    RealtimeEventResponseContentPartAdded
+  >
+  get copyWith =>
+      _$RealtimeEventResponseContentPartAddedCopyWithImpl<
+        RealtimeEventResponseContentPartAdded
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventResponseContentPartAddedToJson(
-      this,
-    );
+    return _$RealtimeEventResponseContentPartAddedToJson(this);
   }
 
   @override
@@ -22310,8 +24132,18 @@ class RealtimeEventResponseContentPartAdded extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, responseId,
-      itemId, outputIndex, contentIndex, part);
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      eventId,
+      type,
+      responseId,
+      itemId,
+      outputIndex,
+      contentIndex,
+      part,
+    );
+  }
 
   @override
   String toString() {
@@ -22323,19 +24155,20 @@ class RealtimeEventResponseContentPartAdded extends RealtimeEvent {
 abstract mixin class $RealtimeEventResponseContentPartAddedCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventResponseContentPartAddedCopyWith(
-          RealtimeEventResponseContentPartAdded value,
-          $Res Function(RealtimeEventResponseContentPartAdded) _then) =
-      _$RealtimeEventResponseContentPartAddedCopyWithImpl;
+    RealtimeEventResponseContentPartAdded value,
+    $Res Function(RealtimeEventResponseContentPartAdded) _then,
+  ) = _$RealtimeEventResponseContentPartAddedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'response_id') String responseId,
-      @JsonKey(name: 'item_id') String itemId,
-      @JsonKey(name: 'output_index') int outputIndex,
-      @JsonKey(name: 'content_index') int contentIndex,
-      ContentPart part});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'response_id') String responseId,
+    @JsonKey(name: 'item_id') String itemId,
+    @JsonKey(name: 'output_index') int outputIndex,
+    @JsonKey(name: 'content_index') int contentIndex,
+    ContentPart part,
+  });
 
   $ContentPartCopyWith<$Res> get part;
 }
@@ -22361,36 +24194,38 @@ class _$RealtimeEventResponseContentPartAddedCopyWithImpl<$Res>
     Object? contentIndex = null,
     Object? part = null,
   }) {
-    return _then(RealtimeEventResponseContentPartAdded(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      responseId: null == responseId
-          ? _self.responseId
-          : responseId // ignore: cast_nullable_to_non_nullable
-              as String,
-      itemId: null == itemId
-          ? _self.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-      outputIndex: null == outputIndex
-          ? _self.outputIndex
-          : outputIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      contentIndex: null == contentIndex
-          ? _self.contentIndex
-          : contentIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      part: null == part
-          ? _self.part
-          : part // ignore: cast_nullable_to_non_nullable
-              as ContentPart,
-    ));
+    return _then(
+      RealtimeEventResponseContentPartAdded(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        responseId: null == responseId
+            ? _self.responseId
+            : responseId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        itemId: null == itemId
+            ? _self.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        outputIndex: null == outputIndex
+            ? _self.outputIndex
+            : outputIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        contentIndex: null == contentIndex
+            ? _self.contentIndex
+            : contentIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        part: null == part
+            ? _self.part
+            : part // ignore: cast_nullable_to_non_nullable
+                  as ContentPart,
+      ),
+    );
   }
 
   /// Create a copy of RealtimeEvent
@@ -22407,18 +24242,18 @@ class _$RealtimeEventResponseContentPartAddedCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventResponseContentPartDone extends RealtimeEvent {
-  const RealtimeEventResponseContentPartDone(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.responseContentPartDone,
-      @JsonKey(name: 'response_id') required this.responseId,
-      @JsonKey(name: 'item_id') required this.itemId,
-      @JsonKey(name: 'output_index') required this.outputIndex,
-      @JsonKey(name: 'content_index') required this.contentIndex,
-      required this.part})
-      : super._();
+  const RealtimeEventResponseContentPartDone({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.responseContentPartDone,
+    @JsonKey(name: 'response_id') required this.responseId,
+    @JsonKey(name: 'item_id') required this.itemId,
+    @JsonKey(name: 'output_index') required this.outputIndex,
+    @JsonKey(name: 'content_index') required this.contentIndex,
+    required this.part,
+  }) : super._();
   factory RealtimeEventResponseContentPartDone.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventResponseContentPartDoneFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventResponseContentPartDoneFromJson(json);
 
   /// The unique ID of the server event.
   @override
@@ -22456,15 +24291,16 @@ class RealtimeEventResponseContentPartDone extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventResponseContentPartDoneCopyWith<
-          RealtimeEventResponseContentPartDone>
-      get copyWith => _$RealtimeEventResponseContentPartDoneCopyWithImpl<
-          RealtimeEventResponseContentPartDone>(this, _$identity);
+    RealtimeEventResponseContentPartDone
+  >
+  get copyWith =>
+      _$RealtimeEventResponseContentPartDoneCopyWithImpl<
+        RealtimeEventResponseContentPartDone
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventResponseContentPartDoneToJson(
-      this,
-    );
+    return _$RealtimeEventResponseContentPartDoneToJson(this);
   }
 
   @override
@@ -22486,8 +24322,18 @@ class RealtimeEventResponseContentPartDone extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, responseId,
-      itemId, outputIndex, contentIndex, part);
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      eventId,
+      type,
+      responseId,
+      itemId,
+      outputIndex,
+      contentIndex,
+      part,
+    );
+  }
 
   @override
   String toString() {
@@ -22499,19 +24345,20 @@ class RealtimeEventResponseContentPartDone extends RealtimeEvent {
 abstract mixin class $RealtimeEventResponseContentPartDoneCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventResponseContentPartDoneCopyWith(
-          RealtimeEventResponseContentPartDone value,
-          $Res Function(RealtimeEventResponseContentPartDone) _then) =
-      _$RealtimeEventResponseContentPartDoneCopyWithImpl;
+    RealtimeEventResponseContentPartDone value,
+    $Res Function(RealtimeEventResponseContentPartDone) _then,
+  ) = _$RealtimeEventResponseContentPartDoneCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'response_id') String responseId,
-      @JsonKey(name: 'item_id') String itemId,
-      @JsonKey(name: 'output_index') int outputIndex,
-      @JsonKey(name: 'content_index') int contentIndex,
-      ContentPart part});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'response_id') String responseId,
+    @JsonKey(name: 'item_id') String itemId,
+    @JsonKey(name: 'output_index') int outputIndex,
+    @JsonKey(name: 'content_index') int contentIndex,
+    ContentPart part,
+  });
 
   $ContentPartCopyWith<$Res> get part;
 }
@@ -22537,36 +24384,38 @@ class _$RealtimeEventResponseContentPartDoneCopyWithImpl<$Res>
     Object? contentIndex = null,
     Object? part = null,
   }) {
-    return _then(RealtimeEventResponseContentPartDone(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      responseId: null == responseId
-          ? _self.responseId
-          : responseId // ignore: cast_nullable_to_non_nullable
-              as String,
-      itemId: null == itemId
-          ? _self.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-      outputIndex: null == outputIndex
-          ? _self.outputIndex
-          : outputIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      contentIndex: null == contentIndex
-          ? _self.contentIndex
-          : contentIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      part: null == part
-          ? _self.part
-          : part // ignore: cast_nullable_to_non_nullable
-              as ContentPart,
-    ));
+    return _then(
+      RealtimeEventResponseContentPartDone(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        responseId: null == responseId
+            ? _self.responseId
+            : responseId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        itemId: null == itemId
+            ? _self.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        outputIndex: null == outputIndex
+            ? _self.outputIndex
+            : outputIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        contentIndex: null == contentIndex
+            ? _self.contentIndex
+            : contentIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        part: null == part
+            ? _self.part
+            : part // ignore: cast_nullable_to_non_nullable
+                  as ContentPart,
+      ),
+    );
   }
 
   /// Create a copy of RealtimeEvent
@@ -22583,11 +24432,11 @@ class _$RealtimeEventResponseContentPartDoneCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventResponseCreated extends RealtimeEvent {
-  const RealtimeEventResponseCreated(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.responseCreated,
-      required this.response})
-      : super._();
+  const RealtimeEventResponseCreated({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.responseCreated,
+    required this.response,
+  }) : super._();
   factory RealtimeEventResponseCreated.fromJson(Map<String, dynamic> json) =>
       _$RealtimeEventResponseCreatedFromJson(json);
 
@@ -22610,14 +24459,15 @@ class RealtimeEventResponseCreated extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventResponseCreatedCopyWith<RealtimeEventResponseCreated>
-      get copyWith => _$RealtimeEventResponseCreatedCopyWithImpl<
-          RealtimeEventResponseCreated>(this, _$identity);
+  get copyWith =>
+      _$RealtimeEventResponseCreatedCopyWithImpl<RealtimeEventResponseCreated>(
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventResponseCreatedToJson(
-      this,
-    );
+    return _$RealtimeEventResponseCreatedToJson(this);
   }
 
   @override
@@ -22633,7 +24483,9 @@ class RealtimeEventResponseCreated extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, response);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, response);
+  }
 
   @override
   String toString() {
@@ -22645,15 +24497,16 @@ class RealtimeEventResponseCreated extends RealtimeEvent {
 abstract mixin class $RealtimeEventResponseCreatedCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventResponseCreatedCopyWith(
-          RealtimeEventResponseCreated value,
-          $Res Function(RealtimeEventResponseCreated) _then) =
-      _$RealtimeEventResponseCreatedCopyWithImpl;
+    RealtimeEventResponseCreated value,
+    $Res Function(RealtimeEventResponseCreated) _then,
+  ) = _$RealtimeEventResponseCreatedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      Response response});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    Response response,
+  });
 
   $ResponseCopyWith<$Res> get response;
 }
@@ -22675,20 +24528,22 @@ class _$RealtimeEventResponseCreatedCopyWithImpl<$Res>
     Object? type = null,
     Object? response = null,
   }) {
-    return _then(RealtimeEventResponseCreated(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      response: null == response
-          ? _self.response
-          : response // ignore: cast_nullable_to_non_nullable
-              as Response,
-    ));
+    return _then(
+      RealtimeEventResponseCreated(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        response: null == response
+            ? _self.response
+            : response // ignore: cast_nullable_to_non_nullable
+                  as Response,
+      ),
+    );
   }
 
   /// Create a copy of RealtimeEvent
@@ -22705,11 +24560,11 @@ class _$RealtimeEventResponseCreatedCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventResponseDone extends RealtimeEvent {
-  const RealtimeEventResponseDone(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.responseDone,
-      required this.response})
-      : super._();
+  const RealtimeEventResponseDone({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.responseDone,
+    required this.response,
+  }) : super._();
   factory RealtimeEventResponseDone.fromJson(Map<String, dynamic> json) =>
       _$RealtimeEventResponseDoneFromJson(json);
 
@@ -22733,13 +24588,13 @@ class RealtimeEventResponseDone extends RealtimeEvent {
   @pragma('vm:prefer-inline')
   $RealtimeEventResponseDoneCopyWith<RealtimeEventResponseDone> get copyWith =>
       _$RealtimeEventResponseDoneCopyWithImpl<RealtimeEventResponseDone>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventResponseDoneToJson(
-      this,
-    );
+    return _$RealtimeEventResponseDoneToJson(this);
   }
 
   @override
@@ -22755,7 +24610,9 @@ class RealtimeEventResponseDone extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, response);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, response);
+  }
 
   @override
   String toString() {
@@ -22766,15 +24623,17 @@ class RealtimeEventResponseDone extends RealtimeEvent {
 /// @nodoc
 abstract mixin class $RealtimeEventResponseDoneCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
-  factory $RealtimeEventResponseDoneCopyWith(RealtimeEventResponseDone value,
-          $Res Function(RealtimeEventResponseDone) _then) =
-      _$RealtimeEventResponseDoneCopyWithImpl;
+  factory $RealtimeEventResponseDoneCopyWith(
+    RealtimeEventResponseDone value,
+    $Res Function(RealtimeEventResponseDone) _then,
+  ) = _$RealtimeEventResponseDoneCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      Response response});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    Response response,
+  });
 
   $ResponseCopyWith<$Res> get response;
 }
@@ -22796,20 +24655,22 @@ class _$RealtimeEventResponseDoneCopyWithImpl<$Res>
     Object? type = null,
     Object? response = null,
   }) {
-    return _then(RealtimeEventResponseDone(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      response: null == response
-          ? _self.response
-          : response // ignore: cast_nullable_to_non_nullable
-              as Response,
-    ));
+    return _then(
+      RealtimeEventResponseDone(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        response: null == response
+            ? _self.response
+            : response // ignore: cast_nullable_to_non_nullable
+                  as Response,
+      ),
+    );
   }
 
   /// Create a copy of RealtimeEvent
@@ -22826,18 +24687,18 @@ class _$RealtimeEventResponseDoneCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventResponseFunctionCallArgumentsDelta extends RealtimeEvent {
-  const RealtimeEventResponseFunctionCallArgumentsDelta(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.responseFunctionCallArgumentsDelta,
-      @JsonKey(name: 'response_id') required this.responseId,
-      @JsonKey(name: 'item_id') required this.itemId,
-      @JsonKey(name: 'output_index') required this.outputIndex,
-      @JsonKey(name: 'call_id') required this.callId,
-      required this.delta})
-      : super._();
+  const RealtimeEventResponseFunctionCallArgumentsDelta({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.responseFunctionCallArgumentsDelta,
+    @JsonKey(name: 'response_id') required this.responseId,
+    @JsonKey(name: 'item_id') required this.itemId,
+    @JsonKey(name: 'output_index') required this.outputIndex,
+    @JsonKey(name: 'call_id') required this.callId,
+    required this.delta,
+  }) : super._();
   factory RealtimeEventResponseFunctionCallArgumentsDelta.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventResponseFunctionCallArgumentsDeltaFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventResponseFunctionCallArgumentsDeltaFromJson(json);
 
   /// The unique ID of the server event.
   @override
@@ -22874,17 +24735,16 @@ class RealtimeEventResponseFunctionCallArgumentsDelta extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventResponseFunctionCallArgumentsDeltaCopyWith<
-          RealtimeEventResponseFunctionCallArgumentsDelta>
-      get copyWith =>
-          _$RealtimeEventResponseFunctionCallArgumentsDeltaCopyWithImpl<
-                  RealtimeEventResponseFunctionCallArgumentsDelta>(
-              this, _$identity);
+    RealtimeEventResponseFunctionCallArgumentsDelta
+  >
+  get copyWith =>
+      _$RealtimeEventResponseFunctionCallArgumentsDeltaCopyWithImpl<
+        RealtimeEventResponseFunctionCallArgumentsDelta
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventResponseFunctionCallArgumentsDeltaToJson(
-      this,
-    );
+    return _$RealtimeEventResponseFunctionCallArgumentsDeltaToJson(this);
   }
 
   @override
@@ -22905,8 +24765,18 @@ class RealtimeEventResponseFunctionCallArgumentsDelta extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, responseId,
-      itemId, outputIndex, callId, delta);
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      eventId,
+      type,
+      responseId,
+      itemId,
+      outputIndex,
+      callId,
+      delta,
+    );
+  }
 
   @override
   String toString() {
@@ -22916,29 +24786,33 @@ class RealtimeEventResponseFunctionCallArgumentsDelta extends RealtimeEvent {
 
 /// @nodoc
 abstract mixin class $RealtimeEventResponseFunctionCallArgumentsDeltaCopyWith<
-    $Res> implements $RealtimeEventCopyWith<$Res> {
+  $Res
+>
+    implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventResponseFunctionCallArgumentsDeltaCopyWith(
-          RealtimeEventResponseFunctionCallArgumentsDelta value,
-          $Res Function(RealtimeEventResponseFunctionCallArgumentsDelta)
-              _then) =
-      _$RealtimeEventResponseFunctionCallArgumentsDeltaCopyWithImpl;
+    RealtimeEventResponseFunctionCallArgumentsDelta value,
+    $Res Function(RealtimeEventResponseFunctionCallArgumentsDelta) _then,
+  ) = _$RealtimeEventResponseFunctionCallArgumentsDeltaCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'response_id') String responseId,
-      @JsonKey(name: 'item_id') String itemId,
-      @JsonKey(name: 'output_index') int outputIndex,
-      @JsonKey(name: 'call_id') String callId,
-      String delta});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'response_id') String responseId,
+    @JsonKey(name: 'item_id') String itemId,
+    @JsonKey(name: 'output_index') int outputIndex,
+    @JsonKey(name: 'call_id') String callId,
+    String delta,
+  });
 }
 
 /// @nodoc
 class _$RealtimeEventResponseFunctionCallArgumentsDeltaCopyWithImpl<$Res>
     implements $RealtimeEventResponseFunctionCallArgumentsDeltaCopyWith<$Res> {
   _$RealtimeEventResponseFunctionCallArgumentsDeltaCopyWithImpl(
-      this._self, this._then);
+    this._self,
+    this._then,
+  );
 
   final RealtimeEventResponseFunctionCallArgumentsDelta _self;
   final $Res Function(RealtimeEventResponseFunctionCallArgumentsDelta) _then;
@@ -22956,54 +24830,56 @@ class _$RealtimeEventResponseFunctionCallArgumentsDeltaCopyWithImpl<$Res>
     Object? callId = null,
     Object? delta = null,
   }) {
-    return _then(RealtimeEventResponseFunctionCallArgumentsDelta(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      responseId: null == responseId
-          ? _self.responseId
-          : responseId // ignore: cast_nullable_to_non_nullable
-              as String,
-      itemId: null == itemId
-          ? _self.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-      outputIndex: null == outputIndex
-          ? _self.outputIndex
-          : outputIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      callId: null == callId
-          ? _self.callId
-          : callId // ignore: cast_nullable_to_non_nullable
-              as String,
-      delta: null == delta
-          ? _self.delta
-          : delta // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      RealtimeEventResponseFunctionCallArgumentsDelta(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        responseId: null == responseId
+            ? _self.responseId
+            : responseId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        itemId: null == itemId
+            ? _self.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        outputIndex: null == outputIndex
+            ? _self.outputIndex
+            : outputIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        callId: null == callId
+            ? _self.callId
+            : callId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        delta: null == delta
+            ? _self.delta
+            : delta // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventResponseFunctionCallArgumentsDone extends RealtimeEvent {
-  const RealtimeEventResponseFunctionCallArgumentsDone(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.responseFunctionCallArgumentsDone,
-      @JsonKey(name: 'response_id') required this.responseId,
-      @JsonKey(name: 'item_id') required this.itemId,
-      @JsonKey(name: 'output_index') required this.outputIndex,
-      @JsonKey(name: 'call_id') required this.callId,
-      required this.arguments})
-      : super._();
+  const RealtimeEventResponseFunctionCallArgumentsDone({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.responseFunctionCallArgumentsDone,
+    @JsonKey(name: 'response_id') required this.responseId,
+    @JsonKey(name: 'item_id') required this.itemId,
+    @JsonKey(name: 'output_index') required this.outputIndex,
+    @JsonKey(name: 'call_id') required this.callId,
+    required this.arguments,
+  }) : super._();
   factory RealtimeEventResponseFunctionCallArgumentsDone.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventResponseFunctionCallArgumentsDoneFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventResponseFunctionCallArgumentsDoneFromJson(json);
 
   /// The unique ID of the server event.
   @override
@@ -23040,16 +24916,16 @@ class RealtimeEventResponseFunctionCallArgumentsDone extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventResponseFunctionCallArgumentsDoneCopyWith<
-          RealtimeEventResponseFunctionCallArgumentsDone>
-      get copyWith =>
-          _$RealtimeEventResponseFunctionCallArgumentsDoneCopyWithImpl<
-              RealtimeEventResponseFunctionCallArgumentsDone>(this, _$identity);
+    RealtimeEventResponseFunctionCallArgumentsDone
+  >
+  get copyWith =>
+      _$RealtimeEventResponseFunctionCallArgumentsDoneCopyWithImpl<
+        RealtimeEventResponseFunctionCallArgumentsDone
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventResponseFunctionCallArgumentsDoneToJson(
-      this,
-    );
+    return _$RealtimeEventResponseFunctionCallArgumentsDoneToJson(this);
   }
 
   @override
@@ -23071,8 +24947,18 @@ class RealtimeEventResponseFunctionCallArgumentsDone extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, responseId,
-      itemId, outputIndex, callId, arguments);
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      eventId,
+      type,
+      responseId,
+      itemId,
+      outputIndex,
+      callId,
+      arguments,
+    );
+  }
 
   @override
   String toString() {
@@ -23082,28 +24968,33 @@ class RealtimeEventResponseFunctionCallArgumentsDone extends RealtimeEvent {
 
 /// @nodoc
 abstract mixin class $RealtimeEventResponseFunctionCallArgumentsDoneCopyWith<
-    $Res> implements $RealtimeEventCopyWith<$Res> {
+  $Res
+>
+    implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventResponseFunctionCallArgumentsDoneCopyWith(
-          RealtimeEventResponseFunctionCallArgumentsDone value,
-          $Res Function(RealtimeEventResponseFunctionCallArgumentsDone) _then) =
-      _$RealtimeEventResponseFunctionCallArgumentsDoneCopyWithImpl;
+    RealtimeEventResponseFunctionCallArgumentsDone value,
+    $Res Function(RealtimeEventResponseFunctionCallArgumentsDone) _then,
+  ) = _$RealtimeEventResponseFunctionCallArgumentsDoneCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'response_id') String responseId,
-      @JsonKey(name: 'item_id') String itemId,
-      @JsonKey(name: 'output_index') int outputIndex,
-      @JsonKey(name: 'call_id') String callId,
-      String arguments});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'response_id') String responseId,
+    @JsonKey(name: 'item_id') String itemId,
+    @JsonKey(name: 'output_index') int outputIndex,
+    @JsonKey(name: 'call_id') String callId,
+    String arguments,
+  });
 }
 
 /// @nodoc
 class _$RealtimeEventResponseFunctionCallArgumentsDoneCopyWithImpl<$Res>
     implements $RealtimeEventResponseFunctionCallArgumentsDoneCopyWith<$Res> {
   _$RealtimeEventResponseFunctionCallArgumentsDoneCopyWithImpl(
-      this._self, this._then);
+    this._self,
+    this._then,
+  );
 
   final RealtimeEventResponseFunctionCallArgumentsDone _self;
   final $Res Function(RealtimeEventResponseFunctionCallArgumentsDone) _then;
@@ -23121,52 +25012,54 @@ class _$RealtimeEventResponseFunctionCallArgumentsDoneCopyWithImpl<$Res>
     Object? callId = null,
     Object? arguments = null,
   }) {
-    return _then(RealtimeEventResponseFunctionCallArgumentsDone(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      responseId: null == responseId
-          ? _self.responseId
-          : responseId // ignore: cast_nullable_to_non_nullable
-              as String,
-      itemId: null == itemId
-          ? _self.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-      outputIndex: null == outputIndex
-          ? _self.outputIndex
-          : outputIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      callId: null == callId
-          ? _self.callId
-          : callId // ignore: cast_nullable_to_non_nullable
-              as String,
-      arguments: null == arguments
-          ? _self.arguments
-          : arguments // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      RealtimeEventResponseFunctionCallArgumentsDone(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        responseId: null == responseId
+            ? _self.responseId
+            : responseId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        itemId: null == itemId
+            ? _self.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        outputIndex: null == outputIndex
+            ? _self.outputIndex
+            : outputIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        callId: null == callId
+            ? _self.callId
+            : callId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        arguments: null == arguments
+            ? _self.arguments
+            : arguments // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventResponseOutputItemAdded extends RealtimeEvent {
-  const RealtimeEventResponseOutputItemAdded(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.responseOutputItemAdded,
-      @JsonKey(name: 'response_id') required this.responseId,
-      @JsonKey(name: 'output_index') required this.outputIndex,
-      required this.item})
-      : super._();
+  const RealtimeEventResponseOutputItemAdded({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.responseOutputItemAdded,
+    @JsonKey(name: 'response_id') required this.responseId,
+    @JsonKey(name: 'output_index') required this.outputIndex,
+    required this.item,
+  }) : super._();
   factory RealtimeEventResponseOutputItemAdded.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventResponseOutputItemAddedFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventResponseOutputItemAddedFromJson(json);
 
   /// The unique ID of the server event.
   @override
@@ -23196,15 +25089,16 @@ class RealtimeEventResponseOutputItemAdded extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventResponseOutputItemAddedCopyWith<
-          RealtimeEventResponseOutputItemAdded>
-      get copyWith => _$RealtimeEventResponseOutputItemAddedCopyWithImpl<
-          RealtimeEventResponseOutputItemAdded>(this, _$identity);
+    RealtimeEventResponseOutputItemAdded
+  >
+  get copyWith =>
+      _$RealtimeEventResponseOutputItemAddedCopyWithImpl<
+        RealtimeEventResponseOutputItemAdded
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventResponseOutputItemAddedToJson(
-      this,
-    );
+    return _$RealtimeEventResponseOutputItemAddedToJson(this);
   }
 
   @override
@@ -23223,8 +25117,16 @@ class RealtimeEventResponseOutputItemAdded extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, eventId, type, responseId, outputIndex, item);
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      eventId,
+      type,
+      responseId,
+      outputIndex,
+      item,
+    );
+  }
 
   @override
   String toString() {
@@ -23236,17 +25138,18 @@ class RealtimeEventResponseOutputItemAdded extends RealtimeEvent {
 abstract mixin class $RealtimeEventResponseOutputItemAddedCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventResponseOutputItemAddedCopyWith(
-          RealtimeEventResponseOutputItemAdded value,
-          $Res Function(RealtimeEventResponseOutputItemAdded) _then) =
-      _$RealtimeEventResponseOutputItemAddedCopyWithImpl;
+    RealtimeEventResponseOutputItemAdded value,
+    $Res Function(RealtimeEventResponseOutputItemAdded) _then,
+  ) = _$RealtimeEventResponseOutputItemAddedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'response_id') String responseId,
-      @JsonKey(name: 'output_index') int outputIndex,
-      Item item});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'response_id') String responseId,
+    @JsonKey(name: 'output_index') int outputIndex,
+    Item item,
+  });
 
   $ItemCopyWith<$Res> get item;
 }
@@ -23270,28 +25173,30 @@ class _$RealtimeEventResponseOutputItemAddedCopyWithImpl<$Res>
     Object? outputIndex = null,
     Object? item = null,
   }) {
-    return _then(RealtimeEventResponseOutputItemAdded(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      responseId: null == responseId
-          ? _self.responseId
-          : responseId // ignore: cast_nullable_to_non_nullable
-              as String,
-      outputIndex: null == outputIndex
-          ? _self.outputIndex
-          : outputIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      item: null == item
-          ? _self.item
-          : item // ignore: cast_nullable_to_non_nullable
-              as Item,
-    ));
+    return _then(
+      RealtimeEventResponseOutputItemAdded(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        responseId: null == responseId
+            ? _self.responseId
+            : responseId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        outputIndex: null == outputIndex
+            ? _self.outputIndex
+            : outputIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        item: null == item
+            ? _self.item
+            : item // ignore: cast_nullable_to_non_nullable
+                  as Item,
+      ),
+    );
   }
 
   /// Create a copy of RealtimeEvent
@@ -23308,16 +25213,16 @@ class _$RealtimeEventResponseOutputItemAddedCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventResponseOutputItemDone extends RealtimeEvent {
-  const RealtimeEventResponseOutputItemDone(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.responseOutputItemDone,
-      @JsonKey(name: 'response_id') required this.responseId,
-      @JsonKey(name: 'output_index') required this.outputIndex,
-      required this.item})
-      : super._();
+  const RealtimeEventResponseOutputItemDone({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.responseOutputItemDone,
+    @JsonKey(name: 'response_id') required this.responseId,
+    @JsonKey(name: 'output_index') required this.outputIndex,
+    required this.item,
+  }) : super._();
   factory RealtimeEventResponseOutputItemDone.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventResponseOutputItemDoneFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventResponseOutputItemDoneFromJson(json);
 
   /// The unique ID of the server event.
   @override
@@ -23347,15 +25252,16 @@ class RealtimeEventResponseOutputItemDone extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventResponseOutputItemDoneCopyWith<
-          RealtimeEventResponseOutputItemDone>
-      get copyWith => _$RealtimeEventResponseOutputItemDoneCopyWithImpl<
-          RealtimeEventResponseOutputItemDone>(this, _$identity);
+    RealtimeEventResponseOutputItemDone
+  >
+  get copyWith =>
+      _$RealtimeEventResponseOutputItemDoneCopyWithImpl<
+        RealtimeEventResponseOutputItemDone
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventResponseOutputItemDoneToJson(
-      this,
-    );
+    return _$RealtimeEventResponseOutputItemDoneToJson(this);
   }
 
   @override
@@ -23374,8 +25280,16 @@ class RealtimeEventResponseOutputItemDone extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, eventId, type, responseId, outputIndex, item);
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      eventId,
+      type,
+      responseId,
+      outputIndex,
+      item,
+    );
+  }
 
   @override
   String toString() {
@@ -23387,17 +25301,18 @@ class RealtimeEventResponseOutputItemDone extends RealtimeEvent {
 abstract mixin class $RealtimeEventResponseOutputItemDoneCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventResponseOutputItemDoneCopyWith(
-          RealtimeEventResponseOutputItemDone value,
-          $Res Function(RealtimeEventResponseOutputItemDone) _then) =
-      _$RealtimeEventResponseOutputItemDoneCopyWithImpl;
+    RealtimeEventResponseOutputItemDone value,
+    $Res Function(RealtimeEventResponseOutputItemDone) _then,
+  ) = _$RealtimeEventResponseOutputItemDoneCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'response_id') String responseId,
-      @JsonKey(name: 'output_index') int outputIndex,
-      Item item});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'response_id') String responseId,
+    @JsonKey(name: 'output_index') int outputIndex,
+    Item item,
+  });
 
   $ItemCopyWith<$Res> get item;
 }
@@ -23421,28 +25336,30 @@ class _$RealtimeEventResponseOutputItemDoneCopyWithImpl<$Res>
     Object? outputIndex = null,
     Object? item = null,
   }) {
-    return _then(RealtimeEventResponseOutputItemDone(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      responseId: null == responseId
-          ? _self.responseId
-          : responseId // ignore: cast_nullable_to_non_nullable
-              as String,
-      outputIndex: null == outputIndex
-          ? _self.outputIndex
-          : outputIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      item: null == item
-          ? _self.item
-          : item // ignore: cast_nullable_to_non_nullable
-              as Item,
-    ));
+    return _then(
+      RealtimeEventResponseOutputItemDone(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        responseId: null == responseId
+            ? _self.responseId
+            : responseId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        outputIndex: null == outputIndex
+            ? _self.outputIndex
+            : outputIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        item: null == item
+            ? _self.item
+            : item // ignore: cast_nullable_to_non_nullable
+                  as Item,
+      ),
+    );
   }
 
   /// Create a copy of RealtimeEvent
@@ -23459,15 +25376,15 @@ class _$RealtimeEventResponseOutputItemDoneCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventResponseTextDelta extends RealtimeEvent {
-  const RealtimeEventResponseTextDelta(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.responseTextDelta,
-      @JsonKey(name: 'response_id') required this.responseId,
-      @JsonKey(name: 'item_id') required this.itemId,
-      @JsonKey(name: 'output_index') required this.outputIndex,
-      @JsonKey(name: 'content_index') required this.contentIndex,
-      required this.delta})
-      : super._();
+  const RealtimeEventResponseTextDelta({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.responseTextDelta,
+    @JsonKey(name: 'response_id') required this.responseId,
+    @JsonKey(name: 'item_id') required this.itemId,
+    @JsonKey(name: 'output_index') required this.outputIndex,
+    @JsonKey(name: 'content_index') required this.contentIndex,
+    required this.delta,
+  }) : super._();
   factory RealtimeEventResponseTextDelta.fromJson(Map<String, dynamic> json) =>
       _$RealtimeEventResponseTextDeltaFromJson(json);
 
@@ -23506,14 +25423,14 @@ class RealtimeEventResponseTextDelta extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventResponseTextDeltaCopyWith<RealtimeEventResponseTextDelta>
-      get copyWith => _$RealtimeEventResponseTextDeltaCopyWithImpl<
-          RealtimeEventResponseTextDelta>(this, _$identity);
+  get copyWith =>
+      _$RealtimeEventResponseTextDeltaCopyWithImpl<
+        RealtimeEventResponseTextDelta
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventResponseTextDeltaToJson(
-      this,
-    );
+    return _$RealtimeEventResponseTextDeltaToJson(this);
   }
 
   @override
@@ -23535,8 +25452,18 @@ class RealtimeEventResponseTextDelta extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, responseId,
-      itemId, outputIndex, contentIndex, delta);
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      eventId,
+      type,
+      responseId,
+      itemId,
+      outputIndex,
+      contentIndex,
+      delta,
+    );
+  }
 
   @override
   String toString() {
@@ -23548,19 +25475,20 @@ class RealtimeEventResponseTextDelta extends RealtimeEvent {
 abstract mixin class $RealtimeEventResponseTextDeltaCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventResponseTextDeltaCopyWith(
-          RealtimeEventResponseTextDelta value,
-          $Res Function(RealtimeEventResponseTextDelta) _then) =
-      _$RealtimeEventResponseTextDeltaCopyWithImpl;
+    RealtimeEventResponseTextDelta value,
+    $Res Function(RealtimeEventResponseTextDelta) _then,
+  ) = _$RealtimeEventResponseTextDeltaCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'response_id') String responseId,
-      @JsonKey(name: 'item_id') String itemId,
-      @JsonKey(name: 'output_index') int outputIndex,
-      @JsonKey(name: 'content_index') int contentIndex,
-      String delta});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'response_id') String responseId,
+    @JsonKey(name: 'item_id') String itemId,
+    @JsonKey(name: 'output_index') int outputIndex,
+    @JsonKey(name: 'content_index') int contentIndex,
+    String delta,
+  });
 }
 
 /// @nodoc
@@ -23584,51 +25512,53 @@ class _$RealtimeEventResponseTextDeltaCopyWithImpl<$Res>
     Object? contentIndex = null,
     Object? delta = null,
   }) {
-    return _then(RealtimeEventResponseTextDelta(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      responseId: null == responseId
-          ? _self.responseId
-          : responseId // ignore: cast_nullable_to_non_nullable
-              as String,
-      itemId: null == itemId
-          ? _self.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-      outputIndex: null == outputIndex
-          ? _self.outputIndex
-          : outputIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      contentIndex: null == contentIndex
-          ? _self.contentIndex
-          : contentIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      delta: null == delta
-          ? _self.delta
-          : delta // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      RealtimeEventResponseTextDelta(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        responseId: null == responseId
+            ? _self.responseId
+            : responseId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        itemId: null == itemId
+            ? _self.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        outputIndex: null == outputIndex
+            ? _self.outputIndex
+            : outputIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        contentIndex: null == contentIndex
+            ? _self.contentIndex
+            : contentIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        delta: null == delta
+            ? _self.delta
+            : delta // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventResponseTextDone extends RealtimeEvent {
-  const RealtimeEventResponseTextDone(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.responseTextDone,
-      @JsonKey(name: 'response_id') required this.responseId,
-      @JsonKey(name: 'item_id') required this.itemId,
-      @JsonKey(name: 'output_index') required this.outputIndex,
-      @JsonKey(name: 'content_index') required this.contentIndex,
-      required this.text})
-      : super._();
+  const RealtimeEventResponseTextDone({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.responseTextDone,
+    @JsonKey(name: 'response_id') required this.responseId,
+    @JsonKey(name: 'item_id') required this.itemId,
+    @JsonKey(name: 'output_index') required this.outputIndex,
+    @JsonKey(name: 'content_index') required this.contentIndex,
+    required this.text,
+  }) : super._();
   factory RealtimeEventResponseTextDone.fromJson(Map<String, dynamic> json) =>
       _$RealtimeEventResponseTextDoneFromJson(json);
 
@@ -23667,14 +25597,14 @@ class RealtimeEventResponseTextDone extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventResponseTextDoneCopyWith<RealtimeEventResponseTextDone>
-      get copyWith => _$RealtimeEventResponseTextDoneCopyWithImpl<
-          RealtimeEventResponseTextDone>(this, _$identity);
+  get copyWith =>
+      _$RealtimeEventResponseTextDoneCopyWithImpl<
+        RealtimeEventResponseTextDone
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventResponseTextDoneToJson(
-      this,
-    );
+    return _$RealtimeEventResponseTextDoneToJson(this);
   }
 
   @override
@@ -23696,8 +25626,18 @@ class RealtimeEventResponseTextDone extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, responseId,
-      itemId, outputIndex, contentIndex, text);
+  int get hashCode {
+    return Object.hash(
+      runtimeType,
+      eventId,
+      type,
+      responseId,
+      itemId,
+      outputIndex,
+      contentIndex,
+      text,
+    );
+  }
 
   @override
   String toString() {
@@ -23709,19 +25649,20 @@ class RealtimeEventResponseTextDone extends RealtimeEvent {
 abstract mixin class $RealtimeEventResponseTextDoneCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventResponseTextDoneCopyWith(
-          RealtimeEventResponseTextDone value,
-          $Res Function(RealtimeEventResponseTextDone) _then) =
-      _$RealtimeEventResponseTextDoneCopyWithImpl;
+    RealtimeEventResponseTextDone value,
+    $Res Function(RealtimeEventResponseTextDone) _then,
+  ) = _$RealtimeEventResponseTextDoneCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      @JsonKey(name: 'response_id') String responseId,
-      @JsonKey(name: 'item_id') String itemId,
-      @JsonKey(name: 'output_index') int outputIndex,
-      @JsonKey(name: 'content_index') int contentIndex,
-      String text});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    @JsonKey(name: 'response_id') String responseId,
+    @JsonKey(name: 'item_id') String itemId,
+    @JsonKey(name: 'output_index') int outputIndex,
+    @JsonKey(name: 'content_index') int contentIndex,
+    String text,
+  });
 }
 
 /// @nodoc
@@ -23745,47 +25686,49 @@ class _$RealtimeEventResponseTextDoneCopyWithImpl<$Res>
     Object? contentIndex = null,
     Object? text = null,
   }) {
-    return _then(RealtimeEventResponseTextDone(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      responseId: null == responseId
-          ? _self.responseId
-          : responseId // ignore: cast_nullable_to_non_nullable
-              as String,
-      itemId: null == itemId
-          ? _self.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-      outputIndex: null == outputIndex
-          ? _self.outputIndex
-          : outputIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      contentIndex: null == contentIndex
-          ? _self.contentIndex
-          : contentIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      text: null == text
-          ? _self.text
-          : text // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      RealtimeEventResponseTextDone(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        responseId: null == responseId
+            ? _self.responseId
+            : responseId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        itemId: null == itemId
+            ? _self.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        outputIndex: null == outputIndex
+            ? _self.outputIndex
+            : outputIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        contentIndex: null == contentIndex
+            ? _self.contentIndex
+            : contentIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        text: null == text
+            ? _self.text
+            : text // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventSessionCreated extends RealtimeEvent {
-  const RealtimeEventSessionCreated(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.sessionCreated,
-      required this.session})
-      : super._();
+  const RealtimeEventSessionCreated({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.sessionCreated,
+    required this.session,
+  }) : super._();
   factory RealtimeEventSessionCreated.fromJson(Map<String, dynamic> json) =>
       _$RealtimeEventSessionCreatedFromJson(json);
 
@@ -23808,14 +25751,15 @@ class RealtimeEventSessionCreated extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventSessionCreatedCopyWith<RealtimeEventSessionCreated>
-      get copyWith => _$RealtimeEventSessionCreatedCopyWithImpl<
-          RealtimeEventSessionCreated>(this, _$identity);
+  get copyWith =>
+      _$RealtimeEventSessionCreatedCopyWithImpl<RealtimeEventSessionCreated>(
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventSessionCreatedToJson(
-      this,
-    );
+    return _$RealtimeEventSessionCreatedToJson(this);
   }
 
   @override
@@ -23830,7 +25774,9 @@ class RealtimeEventSessionCreated extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, session);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, session);
+  }
 
   @override
   String toString() {
@@ -23842,15 +25788,16 @@ class RealtimeEventSessionCreated extends RealtimeEvent {
 abstract mixin class $RealtimeEventSessionCreatedCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventSessionCreatedCopyWith(
-          RealtimeEventSessionCreated value,
-          $Res Function(RealtimeEventSessionCreated) _then) =
-      _$RealtimeEventSessionCreatedCopyWithImpl;
+    RealtimeEventSessionCreated value,
+    $Res Function(RealtimeEventSessionCreated) _then,
+  ) = _$RealtimeEventSessionCreatedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      Session session});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    Session session,
+  });
 
   $SessionCopyWith<$Res> get session;
 }
@@ -23872,20 +25819,22 @@ class _$RealtimeEventSessionCreatedCopyWithImpl<$Res>
     Object? type = null,
     Object? session = null,
   }) {
-    return _then(RealtimeEventSessionCreated(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      session: null == session
-          ? _self.session
-          : session // ignore: cast_nullable_to_non_nullable
-              as Session,
-    ));
+    return _then(
+      RealtimeEventSessionCreated(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        session: null == session
+            ? _self.session
+            : session // ignore: cast_nullable_to_non_nullable
+                  as Session,
+      ),
+    );
   }
 
   /// Create a copy of RealtimeEvent
@@ -23902,11 +25851,11 @@ class _$RealtimeEventSessionCreatedCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventSessionUpdated extends RealtimeEvent {
-  const RealtimeEventSessionUpdated(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.sessionUpdated,
-      required this.session})
-      : super._();
+  const RealtimeEventSessionUpdated({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.sessionUpdated,
+    required this.session,
+  }) : super._();
   factory RealtimeEventSessionUpdated.fromJson(Map<String, dynamic> json) =>
       _$RealtimeEventSessionUpdatedFromJson(json);
 
@@ -23929,14 +25878,15 @@ class RealtimeEventSessionUpdated extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventSessionUpdatedCopyWith<RealtimeEventSessionUpdated>
-      get copyWith => _$RealtimeEventSessionUpdatedCopyWithImpl<
-          RealtimeEventSessionUpdated>(this, _$identity);
+  get copyWith =>
+      _$RealtimeEventSessionUpdatedCopyWithImpl<RealtimeEventSessionUpdated>(
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventSessionUpdatedToJson(
-      this,
-    );
+    return _$RealtimeEventSessionUpdatedToJson(this);
   }
 
   @override
@@ -23951,7 +25901,9 @@ class RealtimeEventSessionUpdated extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, session);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, session);
+  }
 
   @override
   String toString() {
@@ -23963,15 +25915,16 @@ class RealtimeEventSessionUpdated extends RealtimeEvent {
 abstract mixin class $RealtimeEventSessionUpdatedCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventSessionUpdatedCopyWith(
-          RealtimeEventSessionUpdated value,
-          $Res Function(RealtimeEventSessionUpdated) _then) =
-      _$RealtimeEventSessionUpdatedCopyWithImpl;
+    RealtimeEventSessionUpdated value,
+    $Res Function(RealtimeEventSessionUpdated) _then,
+  ) = _$RealtimeEventSessionUpdatedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      Session session});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    Session session,
+  });
 
   $SessionCopyWith<$Res> get session;
 }
@@ -23993,20 +25946,22 @@ class _$RealtimeEventSessionUpdatedCopyWithImpl<$Res>
     Object? type = null,
     Object? session = null,
   }) {
-    return _then(RealtimeEventSessionUpdated(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      session: null == session
-          ? _self.session
-          : session // ignore: cast_nullable_to_non_nullable
-              as Session,
-    ));
+    return _then(
+      RealtimeEventSessionUpdated(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        session: null == session
+            ? _self.session
+            : session // ignore: cast_nullable_to_non_nullable
+                  as Session,
+      ),
+    );
   }
 
   /// Create a copy of RealtimeEvent
@@ -24023,11 +25978,11 @@ class _$RealtimeEventSessionUpdatedCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventClose extends RealtimeEvent {
-  const RealtimeEventClose(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.close,
-      required this.error})
-      : super._();
+  const RealtimeEventClose({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.close,
+    required this.error,
+  }) : super._();
   factory RealtimeEventClose.fromJson(Map<String, dynamic> json) =>
       _$RealtimeEventCloseFromJson(json);
 
@@ -24054,9 +26009,7 @@ class RealtimeEventClose extends RealtimeEvent {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventCloseToJson(
-      this,
-    );
+    return _$RealtimeEventCloseToJson(this);
   }
 
   @override
@@ -24071,7 +26024,9 @@ class RealtimeEventClose extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, error);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, error);
+  }
 
   @override
   String toString() {
@@ -24083,14 +26038,16 @@ class RealtimeEventClose extends RealtimeEvent {
 abstract mixin class $RealtimeEventCloseCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventCloseCopyWith(
-          RealtimeEventClose value, $Res Function(RealtimeEventClose) _then) =
-      _$RealtimeEventCloseCopyWithImpl;
+    RealtimeEventClose value,
+    $Res Function(RealtimeEventClose) _then,
+  ) = _$RealtimeEventCloseCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      bool error});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    bool error,
+  });
 }
 
 /// @nodoc
@@ -24110,33 +26067,35 @@ class _$RealtimeEventCloseCopyWithImpl<$Res>
     Object? type = null,
     Object? error = null,
   }) {
-    return _then(RealtimeEventClose(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      error: null == error
-          ? _self.error
-          : error // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
+    return _then(
+      RealtimeEventClose(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        error: null == error
+            ? _self.error
+            : error // ignore: cast_nullable_to_non_nullable
+                  as bool,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventConversationInterrupted extends RealtimeEvent {
-  const RealtimeEventConversationInterrupted(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.conversationInterrupted})
-      : super._();
+  const RealtimeEventConversationInterrupted({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.conversationInterrupted,
+  }) : super._();
   factory RealtimeEventConversationInterrupted.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventConversationInterruptedFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventConversationInterruptedFromJson(json);
 
   /// The unique ID of the event.
   @override
@@ -24154,15 +26113,16 @@ class RealtimeEventConversationInterrupted extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventConversationInterruptedCopyWith<
-          RealtimeEventConversationInterrupted>
-      get copyWith => _$RealtimeEventConversationInterruptedCopyWithImpl<
-          RealtimeEventConversationInterrupted>(this, _$identity);
+    RealtimeEventConversationInterrupted
+  >
+  get copyWith =>
+      _$RealtimeEventConversationInterruptedCopyWithImpl<
+        RealtimeEventConversationInterrupted
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventConversationInterruptedToJson(
-      this,
-    );
+    return _$RealtimeEventConversationInterruptedToJson(this);
   }
 
   @override
@@ -24176,7 +26136,9 @@ class RealtimeEventConversationInterrupted extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type);
+  }
 
   @override
   String toString() {
@@ -24188,13 +26150,15 @@ class RealtimeEventConversationInterrupted extends RealtimeEvent {
 abstract mixin class $RealtimeEventConversationInterruptedCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventConversationInterruptedCopyWith(
-          RealtimeEventConversationInterrupted value,
-          $Res Function(RealtimeEventConversationInterrupted) _then) =
-      _$RealtimeEventConversationInterruptedCopyWithImpl;
+    RealtimeEventConversationInterrupted value,
+    $Res Function(RealtimeEventConversationInterrupted) _then,
+  ) = _$RealtimeEventConversationInterruptedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId, RealtimeEventType type});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+  });
 }
 
 /// @nodoc
@@ -24209,34 +26173,33 @@ class _$RealtimeEventConversationInterruptedCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? eventId = null,
-    Object? type = null,
-  }) {
-    return _then(RealtimeEventConversationInterrupted(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-    ));
+  $Res call({Object? eventId = null, Object? type = null}) {
+    return _then(
+      RealtimeEventConversationInterrupted(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventConversationUpdated extends RealtimeEvent {
-  const RealtimeEventConversationUpdated(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.conversationUpdated,
-      required this.result})
-      : super._();
+  const RealtimeEventConversationUpdated({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.conversationUpdated,
+    required this.result,
+  }) : super._();
   factory RealtimeEventConversationUpdated.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventConversationUpdatedFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventConversationUpdatedFromJson(json);
 
   /// The unique ID of the event.
   @override
@@ -24257,14 +26220,14 @@ class RealtimeEventConversationUpdated extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventConversationUpdatedCopyWith<RealtimeEventConversationUpdated>
-      get copyWith => _$RealtimeEventConversationUpdatedCopyWithImpl<
-          RealtimeEventConversationUpdated>(this, _$identity);
+  get copyWith =>
+      _$RealtimeEventConversationUpdatedCopyWithImpl<
+        RealtimeEventConversationUpdated
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventConversationUpdatedToJson(
-      this,
-    );
+    return _$RealtimeEventConversationUpdatedToJson(this);
   }
 
   @override
@@ -24279,7 +26242,9 @@ class RealtimeEventConversationUpdated extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, result);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, result);
+  }
 
   @override
   String toString() {
@@ -24291,15 +26256,16 @@ class RealtimeEventConversationUpdated extends RealtimeEvent {
 abstract mixin class $RealtimeEventConversationUpdatedCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventConversationUpdatedCopyWith(
-          RealtimeEventConversationUpdated value,
-          $Res Function(RealtimeEventConversationUpdated) _then) =
-      _$RealtimeEventConversationUpdatedCopyWithImpl;
+    RealtimeEventConversationUpdated value,
+    $Res Function(RealtimeEventConversationUpdated) _then,
+  ) = _$RealtimeEventConversationUpdatedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      EventHandlerResult result});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    EventHandlerResult result,
+  });
 
   $EventHandlerResultCopyWith<$Res> get result;
 }
@@ -24321,20 +26287,22 @@ class _$RealtimeEventConversationUpdatedCopyWithImpl<$Res>
     Object? type = null,
     Object? result = null,
   }) {
-    return _then(RealtimeEventConversationUpdated(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      result: null == result
-          ? _self.result
-          : result // ignore: cast_nullable_to_non_nullable
-              as EventHandlerResult,
-    ));
+    return _then(
+      RealtimeEventConversationUpdated(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        result: null == result
+            ? _self.result
+            : result // ignore: cast_nullable_to_non_nullable
+                  as EventHandlerResult,
+      ),
+    );
   }
 
   /// Create a copy of RealtimeEvent
@@ -24351,14 +26319,14 @@ class _$RealtimeEventConversationUpdatedCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventConversationItemAppended extends RealtimeEvent {
-  const RealtimeEventConversationItemAppended(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.conversationItemAppended,
-      required this.item})
-      : super._();
+  const RealtimeEventConversationItemAppended({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.conversationItemAppended,
+    required this.item,
+  }) : super._();
   factory RealtimeEventConversationItemAppended.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventConversationItemAppendedFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventConversationItemAppendedFromJson(json);
 
   /// The unique ID of the event.
   @override
@@ -24379,15 +26347,16 @@ class RealtimeEventConversationItemAppended extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventConversationItemAppendedCopyWith<
-          RealtimeEventConversationItemAppended>
-      get copyWith => _$RealtimeEventConversationItemAppendedCopyWithImpl<
-          RealtimeEventConversationItemAppended>(this, _$identity);
+    RealtimeEventConversationItemAppended
+  >
+  get copyWith =>
+      _$RealtimeEventConversationItemAppendedCopyWithImpl<
+        RealtimeEventConversationItemAppended
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventConversationItemAppendedToJson(
-      this,
-    );
+    return _$RealtimeEventConversationItemAppendedToJson(this);
   }
 
   @override
@@ -24402,7 +26371,9 @@ class RealtimeEventConversationItemAppended extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, item);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, item);
+  }
 
   @override
   String toString() {
@@ -24414,15 +26385,16 @@ class RealtimeEventConversationItemAppended extends RealtimeEvent {
 abstract mixin class $RealtimeEventConversationItemAppendedCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventConversationItemAppendedCopyWith(
-          RealtimeEventConversationItemAppended value,
-          $Res Function(RealtimeEventConversationItemAppended) _then) =
-      _$RealtimeEventConversationItemAppendedCopyWithImpl;
+    RealtimeEventConversationItemAppended value,
+    $Res Function(RealtimeEventConversationItemAppended) _then,
+  ) = _$RealtimeEventConversationItemAppendedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      FormattedItem item});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    FormattedItem item,
+  });
 
   $FormattedItemCopyWith<$Res> get item;
 }
@@ -24444,20 +26416,22 @@ class _$RealtimeEventConversationItemAppendedCopyWithImpl<$Res>
     Object? type = null,
     Object? item = null,
   }) {
-    return _then(RealtimeEventConversationItemAppended(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      item: null == item
-          ? _self.item
-          : item // ignore: cast_nullable_to_non_nullable
-              as FormattedItem,
-    ));
+    return _then(
+      RealtimeEventConversationItemAppended(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        item: null == item
+            ? _self.item
+            : item // ignore: cast_nullable_to_non_nullable
+                  as FormattedItem,
+      ),
+    );
   }
 
   /// Create a copy of RealtimeEvent
@@ -24474,14 +26448,14 @@ class _$RealtimeEventConversationItemAppendedCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventConversationItemCompleted extends RealtimeEvent {
-  const RealtimeEventConversationItemCompleted(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.conversationItemCompleted,
-      required this.item})
-      : super._();
+  const RealtimeEventConversationItemCompleted({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.conversationItemCompleted,
+    required this.item,
+  }) : super._();
   factory RealtimeEventConversationItemCompleted.fromJson(
-          Map<String, dynamic> json) =>
-      _$RealtimeEventConversationItemCompletedFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$RealtimeEventConversationItemCompletedFromJson(json);
 
   /// The unique ID of the event.
   @override
@@ -24502,15 +26476,16 @@ class RealtimeEventConversationItemCompleted extends RealtimeEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $RealtimeEventConversationItemCompletedCopyWith<
-          RealtimeEventConversationItemCompleted>
-      get copyWith => _$RealtimeEventConversationItemCompletedCopyWithImpl<
-          RealtimeEventConversationItemCompleted>(this, _$identity);
+    RealtimeEventConversationItemCompleted
+  >
+  get copyWith =>
+      _$RealtimeEventConversationItemCompletedCopyWithImpl<
+        RealtimeEventConversationItemCompleted
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventConversationItemCompletedToJson(
-      this,
-    );
+    return _$RealtimeEventConversationItemCompletedToJson(this);
   }
 
   @override
@@ -24525,7 +26500,9 @@ class RealtimeEventConversationItemCompleted extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, item);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, item);
+  }
 
   @override
   String toString() {
@@ -24537,15 +26514,16 @@ class RealtimeEventConversationItemCompleted extends RealtimeEvent {
 abstract mixin class $RealtimeEventConversationItemCompletedCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
   factory $RealtimeEventConversationItemCompletedCopyWith(
-          RealtimeEventConversationItemCompleted value,
-          $Res Function(RealtimeEventConversationItemCompleted) _then) =
-      _$RealtimeEventConversationItemCompletedCopyWithImpl;
+    RealtimeEventConversationItemCompleted value,
+    $Res Function(RealtimeEventConversationItemCompleted) _then,
+  ) = _$RealtimeEventConversationItemCompletedCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      FormattedItem item});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    FormattedItem item,
+  });
 
   $FormattedItemCopyWith<$Res> get item;
 }
@@ -24567,20 +26545,22 @@ class _$RealtimeEventConversationItemCompletedCopyWithImpl<$Res>
     Object? type = null,
     Object? item = null,
   }) {
-    return _then(RealtimeEventConversationItemCompleted(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      item: null == item
-          ? _self.item
-          : item // ignore: cast_nullable_to_non_nullable
-              as FormattedItem,
-    ));
+    return _then(
+      RealtimeEventConversationItemCompleted(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        item: null == item
+            ? _self.item
+            : item // ignore: cast_nullable_to_non_nullable
+                  as FormattedItem,
+      ),
+    );
   }
 
   /// Create a copy of RealtimeEvent
@@ -24597,11 +26577,11 @@ class _$RealtimeEventConversationItemCompletedCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class RealtimeEventGeneric extends RealtimeEvent {
-  const RealtimeEventGeneric(
-      {@JsonKey(name: 'event_id') required this.eventId,
-      this.type = RealtimeEventType.realtimeEvent,
-      required this.event})
-      : super._();
+  const RealtimeEventGeneric({
+    @JsonKey(name: 'event_id') required this.eventId,
+    this.type = RealtimeEventType.realtimeEvent,
+    required this.event,
+  }) : super._();
   factory RealtimeEventGeneric.fromJson(Map<String, dynamic> json) =>
       _$RealtimeEventGenericFromJson(json);
 
@@ -24626,13 +26606,13 @@ class RealtimeEventGeneric extends RealtimeEvent {
   @pragma('vm:prefer-inline')
   $RealtimeEventGenericCopyWith<RealtimeEventGeneric> get copyWith =>
       _$RealtimeEventGenericCopyWithImpl<RealtimeEventGeneric>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$RealtimeEventGenericToJson(
-      this,
-    );
+    return _$RealtimeEventGenericToJson(this);
   }
 
   @override
@@ -24647,7 +26627,9 @@ class RealtimeEventGeneric extends RealtimeEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, eventId, type, event);
+  int get hashCode {
+    return Object.hash(runtimeType, eventId, type, event);
+  }
 
   @override
   String toString() {
@@ -24658,15 +26640,17 @@ class RealtimeEventGeneric extends RealtimeEvent {
 /// @nodoc
 abstract mixin class $RealtimeEventGenericCopyWith<$Res>
     implements $RealtimeEventCopyWith<$Res> {
-  factory $RealtimeEventGenericCopyWith(RealtimeEventGeneric value,
-          $Res Function(RealtimeEventGeneric) _then) =
-      _$RealtimeEventGenericCopyWithImpl;
+  factory $RealtimeEventGenericCopyWith(
+    RealtimeEventGeneric value,
+    $Res Function(RealtimeEventGeneric) _then,
+  ) = _$RealtimeEventGenericCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'event_id') String eventId,
-      RealtimeEventType type,
-      RealtimeEvent event});
+  $Res call({
+    @JsonKey(name: 'event_id') String eventId,
+    RealtimeEventType type,
+    RealtimeEvent event,
+  });
 
   $RealtimeEventCopyWith<$Res> get event;
 }
@@ -24688,20 +26672,22 @@ class _$RealtimeEventGenericCopyWithImpl<$Res>
     Object? type = null,
     Object? event = null,
   }) {
-    return _then(RealtimeEventGeneric(
-      eventId: null == eventId
-          ? _self.eventId
-          : eventId // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as RealtimeEventType,
-      event: null == event
-          ? _self.event
-          : event // ignore: cast_nullable_to_non_nullable
-              as RealtimeEvent,
-    ));
+    return _then(
+      RealtimeEventGeneric(
+        eventId: null == eventId
+            ? _self.eventId
+            : eventId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEventType,
+        event: null == event
+            ? _self.event
+            : event // ignore: cast_nullable_to_non_nullable
+                  as RealtimeEvent,
+      ),
+    );
   }
 
   /// Create a copy of RealtimeEvent
@@ -24714,5 +26700,3 @@ class _$RealtimeEventGenericCopyWithImpl<$Res>
     });
   }
 }
-
-// dart format on

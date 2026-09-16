@@ -137,11 +137,10 @@ class UpdateMemoryParams {
   /// Omit a field to preserve its current value on the server.
   /// Pass `null` explicitly to clear a clearable field.
   const UpdateMemoryParams({
-    Object? path = _notSet,
-    Object? content = _notSet,
+    this._path = _notSet,
+    this._content = _notSet,
     this.precondition,
-  }) : _path = path,
-       _content = content;
+  });
 
   /// Creates an [UpdateMemoryParams] from JSON.
   factory UpdateMemoryParams.fromJson(Map<String, dynamic> json) {

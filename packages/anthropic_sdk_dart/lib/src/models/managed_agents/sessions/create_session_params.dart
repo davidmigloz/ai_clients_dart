@@ -177,11 +177,11 @@ class AgentParamsWithOverrides extends AgentParams {
     this.type = 'agent_with_overrides',
     this.version,
     this.model,
-    Object? system = _notSet,
+    this._system = _notSet,
     this.tools,
     this.mcpServers,
     this.skills,
-  }) : _system = system;
+  });
 
   /// Creates an [AgentParamsWithOverrides] from JSON.
   factory AgentParamsWithOverrides.fromJson(Map<String, dynamic> json) {

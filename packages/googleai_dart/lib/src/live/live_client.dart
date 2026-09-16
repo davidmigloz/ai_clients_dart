@@ -45,7 +45,7 @@ class LiveClient {
   final List<LiveSession> _sessions = [];
 
   /// Creates a [LiveClient].
-  LiveClient({required GoogleAIConfig config}) : _config = config;
+  LiveClient({required this._config});
 
   /// Connects to the Live API and starts a new session.
   ///

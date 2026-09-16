@@ -24,10 +24,10 @@ import '../models/models.dart';
 class VertexAITextEmbeddingsModelApi {
   /// {@macro vertex_ai_text_embeddings_model_api}
   VertexAITextEmbeddingsModelApi({
-    required final ProjectsLocationsPublishersModelsResource modelsApi,
+    required this._modelsApi,
     required this.project,
     required this.location,
-  }) : _modelsApi = modelsApi;
+  });
 
   /// The Google Cloud project to use for interacting with Vertex AI.
   final String project;
