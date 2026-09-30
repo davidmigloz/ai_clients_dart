@@ -1,7 +1,8 @@
 /// Dart client for the Ollama API.
 ///
 /// This library provides a type-safe, well-documented interface to the
-/// [Ollama](https://ollama.com/) API for running large language models locally.
+/// [Ollama](https://ollama.com/) API for local and cloud inference, local
+/// decision models, model management, and hosted web search.
 ///
 /// ## Getting Started
 ///
@@ -32,7 +33,7 @@
 ///       ],
 ///     ),
 ///   )) {
-///     stdout.write(chunk.message?.content ?? '');
+///     print(chunk.message?.content ?? '');
 ///   }
 ///
 ///   client.close();
@@ -47,6 +48,9 @@
 /// - **Model Management**: List, pull, push, create, copy, delete models
 /// - **Thinking Mode**: Extended reasoning for supported models
 /// - **Structured Output**: JSON schema-constrained generation
+/// - **System One**: Local choice, probability, and scoring decisions
+/// - **Blobs**: Binary model-file uploads
+/// - **Web**: Hosted search and page fetching with a cloud-configured client
 library;
 
 // Authentication
@@ -94,7 +98,7 @@ export 'src/models/common/response_format.dart'
 export 'src/models/common/stop_sequence.dart'
     show StopList, StopSequence, StopString;
 export 'src/models/common/think_value.dart'
-    show ThinkEnabled, ThinkLevel, ThinkValue, ThinkWithLevel;
+    show ThinkEnabled, ThinkLevel, ThinkValue, ThinkWithLevel, ThinkWithString;
 // Completions Models
 export 'src/models/completions/generate_request.dart' show GenerateRequest;
 export 'src/models/completions/generate_response.dart' show GenerateResponse;
@@ -117,6 +121,8 @@ export 'src/models/models/delete_request.dart' show DeleteRequest;
 export 'src/models/models/list_response.dart' show ListResponse;
 export 'src/models/models/model_details.dart' show ModelDetails;
 export 'src/models/models/model_summary.dart' show ModelSummary;
+export 'src/models/models/model_tensor.dart' show ModelTensor;
+export 'src/models/models/model_thinking.dart' show ModelThinking;
 export 'src/models/models/ps_response.dart' show PsResponse;
 export 'src/models/models/pull_request.dart' show PullRequest;
 export 'src/models/models/push_request.dart' show PushRequest;
@@ -125,6 +131,14 @@ export 'src/models/models/show_request.dart' show ShowRequest;
 export 'src/models/models/show_response.dart' show ShowResponse;
 export 'src/models/models/status_event.dart' show StatusEvent;
 export 'src/models/models/status_response.dart' show StatusResponse;
+export 'src/models/system_one/system_one_answer.dart';
+// System One Models
+export 'src/models/system_one/system_one_content.dart';
+export 'src/models/system_one/system_one_noul_criteria.dart';
+export 'src/models/system_one/system_one_question.dart';
+export 'src/models/system_one/system_one_request.dart';
+export 'src/models/system_one/system_one_response.dart';
+export 'src/models/system_one/system_one_usage.dart';
 // Tools Models
 export 'src/models/tools/tool_call.dart' show ToolCall, ToolCallFunction;
 export 'src/models/tools/tool_definition.dart'

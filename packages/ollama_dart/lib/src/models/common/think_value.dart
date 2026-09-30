@@ -18,7 +18,10 @@ enum ThinkLevel {
 /// Value for the think parameter.
 ///
 /// Controls whether thinking/reasoning models will think before responding.
-/// Can be either a boolean (enabled/disabled) or a level (high/medium/low/max).
+/// Supports [ThinkEnabled] for a boolean, [ThinkWithLevel] for a known level,
+/// and [ThinkWithString] for a model-defined named level such as `xhigh`.
+/// String variants compare by their serialized level name, so a known level
+/// created with either factory remains equal after a JSON round-trip.
 @immutable
 sealed class ThinkValue {
   const ThinkValue();
@@ -30,9 +33,16 @@ sealed class ThinkValue {
   /// Creates a [ThinkValue] with a specific thinking level.
   const factory ThinkValue.level(ThinkLevel level) = ThinkWithLevel;
 
+  /// Creates a [ThinkValue] with a model-defined named thinking level.
+  ///
+  /// The server resolves supported names for the selected model.
+  const factory ThinkValue.string(String value) = ThinkWithString;
+
   /// Creates a [ThinkValue] from a JSON value.
   ///
-  /// Returns `null` for unknown or null values.
+  /// Known level strings retain their [ThinkWithLevel] representation; other
+  /// strings are preserved as [ThinkWithString]. Returns `null` for null or
+  /// values that are neither booleans nor strings.
   static ThinkValue? fromJson(Object? value) {
     return switch (value) {
       final bool b => ThinkEnabled(b),
@@ -40,6 +50,7 @@ sealed class ThinkValue {
       'medium' => const ThinkWithLevel(ThinkLevel.medium),
       'low' => const ThinkWithLevel(ThinkLevel.low),
       'max' => const ThinkWithLevel(ThinkLevel.max),
+      final String s => ThinkWithString(s),
       _ => null,
     };
   }
@@ -97,13 +108,41 @@ class ThinkWithLevel extends ThinkValue {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ThinkWithLevel &&
-          runtimeType == other.runtimeType &&
-          level == other.level;
+      other is ThinkWithLevel && level == other.level ||
+      other is ThinkWithString && toJson() == other.value;
 
   @override
-  int get hashCode => level.hashCode;
+  int get hashCode => toJson().hashCode;
 
   @override
   String toString() => 'ThinkWithLevel($level)';
+}
+
+/// A model-defined named thinking level.
+@immutable
+class ThinkWithString extends ThinkValue {
+  /// The level name sent to the model without normalization.
+  final String value;
+
+  /// Creates a [ThinkWithString].
+  const ThinkWithString(this.value);
+
+  @override
+  Object toJson() => value;
+
+  /// Creates a copy with a replaced level name.
+  ThinkWithString copyWith({String? value}) =>
+      ThinkWithString(value ?? this.value);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ThinkWithString && value == other.value ||
+      other is ThinkWithLevel && other.toJson() == value;
+
+  @override
+  int get hashCode => value.hashCode;
+
+  @override
+  String toString() => 'ThinkWithString($value)';
 }

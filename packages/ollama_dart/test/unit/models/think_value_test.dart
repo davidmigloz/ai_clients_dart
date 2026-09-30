@@ -33,10 +33,26 @@ void main() {
       );
     });
 
-    test('ThinkValue.fromJson returns null for unknown values', () {
+    test('ThinkValue.fromJson returns null for unsupported JSON types', () {
       expect(ThinkValue.fromJson(null), isNull);
-      expect(ThinkValue.fromJson('unknown'), isNull);
       expect(ThinkValue.fromJson(123), isNull);
+    });
+
+    test('preserves model-defined strings and const string factories', () {
+      const value = ThinkValue.string('xhigh');
+      expect(value, isA<ThinkWithString>());
+      expect(value.toJson(), 'xhigh');
+      expect(ThinkValue.fromJson('xhigh'), value);
+      expect(ThinkValue.fromJson('future-level')?.toJson(), 'future-level');
+      expect(ThinkValue.fromJson(''), const ThinkWithString(''));
+      expect(const ThinkWithString('xhigh').hashCode, value.hashCode);
+      expect(const ThinkWithString('other'), isNot(value));
+      expect(value.toString(), 'ThinkWithString(xhigh)');
+      expect(const ThinkWithString('xhigh').copyWith(), value);
+      expect(
+        const ThinkWithString('xhigh').copyWith(value: 'other'),
+        const ThinkWithString('other'),
+      );
     });
 
     test('ThinkEnabled.toJson returns boolean', () {
@@ -67,6 +83,40 @@ void main() {
       );
     });
 
+    for (final level in ThinkLevel.values) {
+      test('${level.name} has equal string and enum representations', () {
+        final named = ThinkValue.string(level.name);
+        final known = ThinkValue.level(level);
+        final decoded = ThinkValue.fromJson(named.toJson());
+        expect(named == known, isTrue);
+        expect(known == named, isTrue);
+        expect(named.hashCode, known.hashCode);
+        expect(decoded, isA<ThinkWithLevel>());
+        expect(decoded, named);
+        expect(named, decoded);
+        expect(<ThinkValue>{named, known}, hasLength(1));
+      });
+    }
+
+    test('boolean controls remain separate from named levels', () {
+      expect(
+        const ThinkEnabled(true) == const ThinkWithString('true'),
+        isFalse,
+      );
+      expect(
+        const ThinkWithString('true') == const ThinkEnabled(true),
+        isFalse,
+      );
+      expect(
+        const ThinkEnabled(true) == const ThinkWithLevel(ThinkLevel.high),
+        isFalse,
+      );
+      expect(
+        const ThinkWithLevel(ThinkLevel.high) == const ThinkEnabled(true),
+        isFalse,
+      );
+    });
+
     test('ThinkValue hashCode is consistent', () {
       expect(
         const ThinkEnabled(true).hashCode,
@@ -89,6 +139,44 @@ void main() {
   });
 
   group('ThinkValue in requests', () {
+    for (final name in ['high', 'xhigh']) {
+      test(
+        '$name string controls preserve request equality after decoding',
+        () {
+          final chat = ChatRequest(
+            model: 'qwen3.8',
+            messages: const [],
+            think: ThinkValue.string(name),
+          );
+          final generate = GenerateRequest(
+            model: 'qwen3.8',
+            think: ThinkValue.string(name),
+          );
+          final decodedChat = ChatRequest.fromJson(chat.toJson());
+          final decodedGenerate = GenerateRequest.fromJson(generate.toJson());
+          expect(decodedChat == chat, isTrue);
+          expect(chat == decodedChat, isTrue);
+          expect(decodedChat.hashCode, chat.hashCode);
+          expect(decodedGenerate == generate, isTrue);
+          expect(generate == decodedGenerate, isTrue);
+          expect(decodedGenerate.hashCode, generate.hashCode);
+        },
+      );
+    }
+
+    test('named levels survive chat and generate round-trips', () {
+      const chat = ChatRequest(
+        model: 'qwen3.8',
+        messages: [],
+        think: ThinkValue.string('xhigh'),
+      );
+      const generate = GenerateRequest(
+        model: 'qwen3.8',
+        think: ThinkValue.string('future-level'),
+      );
+      expect(ChatRequest.fromJson(chat.toJson()), chat);
+      expect(GenerateRequest.fromJson(generate.toJson()), generate);
+    });
     test('ChatRequest serializes ThinkValue correctly', () {
       const request = ChatRequest(
         model: 'llama3.2',

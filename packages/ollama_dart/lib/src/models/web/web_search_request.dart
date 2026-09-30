@@ -8,7 +8,7 @@ class WebSearchRequest {
   /// Search query string.
   final String query;
 
-  /// Maximum number of results to return (1-10).
+  /// Maximum results (at most ten). Omit to use the server default of five.
   final int? maxResults;
 
   /// Creates a [WebSearchRequest].
@@ -45,11 +45,13 @@ class WebSearchRequest {
       identical(this, other) ||
       other is WebSearchRequest &&
           runtimeType == other.runtimeType &&
-          query == other.query;
+          query == other.query &&
+          maxResults == other.maxResults;
 
   @override
-  int get hashCode => query.hashCode;
+  int get hashCode => Object.hash(query, maxResults);
 
   @override
-  String toString() => 'WebSearchRequest(query: $query)';
+  String toString() =>
+      'WebSearchRequest(query: $query, maxResults: $maxResults)';
 }

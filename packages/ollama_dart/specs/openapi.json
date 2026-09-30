@@ -100,21 +100,7 @@
             "type": "boolean"
           },
           "think": {
-            "description": "When true, returns separate thinking output in addition to content. Can be a boolean (true/false) or a string (\"high\", \"medium\", \"low\", \"max\") for supported models, with \"max\" requesting the highest thinking level.",
-            "oneOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "enum": [
-                  "high",
-                  "medium",
-                  "low",
-                  "max"
-                ],
-                "type": "string"
-              }
-            ]
+            "$ref": "#/components/schemas/ThinkValue"
           },
           "tools": {
             "description": "Optional list of function tools the model may call during the chat",
@@ -206,12 +192,16 @@
             "description": "Model name used to generate this message",
             "type": "string"
           },
+          "prompt_eval_cached_count": {
+            "description": "Number of prompt tokens read from the cache",
+            "type": "integer"
+          },
           "prompt_eval_count": {
             "description": "Number of tokens in the prompt",
             "type": "integer"
           },
           "prompt_eval_duration": {
-            "description": "Time spent evaluating the prompt in nanoseconds",
+            "description": "Time spent evaluating uncached prompt tokens in nanoseconds",
             "type": "integer"
           },
           "total_duration": {
@@ -289,6 +279,31 @@
       },
       "CreateRequest": {
         "properties": {
+          "capabilities": {
+            "description": "Capabilities to add without removing inherited or inferred capabilities (e.g. `decision` for compatible decision models)",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "draft_files": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Draft source file names mapped to their SHA-256 digests",
+            "type": "object"
+          },
+          "draft_quantize": {
+            "description": "Quantization level to apply to draft weights during import",
+            "type": "string"
+          },
+          "files": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Source file names mapped to their SHA-256 digests. Split GGUF models must include each shard under its original split filename.",
+            "type": "object"
+          },
           "from": {
             "description": "Existing model to create from",
             "type": "string"
@@ -327,11 +342,15 @@
             "type": "string"
           },
           "quantize": {
-            "description": "Quantization level to apply (e.g. `q4_K_M`, `q8_0`)",
+            "description": "Quantization level to apply during import (e.g. `nvfp4`)",
             "type": "string"
           },
           "renderer": {
             "description": "Name of the renderer for the model",
+            "type": "string"
+          },
+          "requires": {
+            "description": "Minimum Ollama version required by the model",
             "type": "string"
           },
           "stream": {
@@ -512,21 +531,7 @@
             "type": "string"
           },
           "think": {
-            "description": "When true, returns separate thinking output in addition to content. Can be a boolean (true/false) or a string (\"high\", \"medium\", \"low\", \"max\") for supported models, with \"max\" requesting the highest thinking level.",
-            "oneOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "enum": [
-                  "high",
-                  "medium",
-                  "low",
-                  "max"
-                ],
-                "type": "string"
-              }
-            ]
+            "$ref": "#/components/schemas/ThinkValue"
           },
           "top_logprobs": {
             "description": "Number of most likely tokens to return at each token position when logprobs are enabled",
@@ -575,12 +580,16 @@
             "description": "Model name",
             "type": "string"
           },
+          "prompt_eval_cached_count": {
+            "description": "Number of prompt tokens read from the cache",
+            "type": "integer"
+          },
           "prompt_eval_count": {
             "description": "Number of input tokens in the prompt",
             "type": "integer"
           },
           "prompt_eval_duration": {
-            "description": "Time spent evaluating the prompt in nanoseconds",
+            "description": "Time spent evaluating uncached prompt tokens in nanoseconds",
             "type": "integer"
           },
           "response": {
@@ -628,12 +637,16 @@
             "description": "Model name",
             "type": "string"
           },
+          "prompt_eval_cached_count": {
+            "description": "Number of prompt tokens read from the cache",
+            "type": "integer"
+          },
           "prompt_eval_count": {
             "description": "Number of input tokens in the prompt",
             "type": "integer"
           },
           "prompt_eval_duration": {
-            "description": "Time spent evaluating the prompt in nanoseconds",
+            "description": "Time spent evaluating uncached prompt tokens in nanoseconds",
             "type": "integer"
           },
           "response": {
@@ -944,6 +957,9 @@
           "template": {
             "description": "The template used by the model to render prompts",
             "type": "string"
+          },
+          "thinking": {
+            "$ref": "#/components/schemas/Thinking"
           }
         },
         "type": "object"
@@ -976,6 +992,375 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "SystemOneChoiceAnswer": {
+        "properties": {
+          "choice": {
+            "description": "Option key with the highest probability. Ties select the first option in request order.",
+            "type": "string"
+          },
+          "confidence": {
+            "$ref": "#/components/schemas/SystemOneConfidence"
+          },
+          "probabilities": {
+            "$ref": "#/components/schemas/SystemOneProbabilities"
+          },
+          "type": {
+            "enum": [
+              "choice"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "choice",
+          "probabilities",
+          "confidence"
+        ],
+        "title": "Choice",
+        "type": "object"
+      },
+      "SystemOneChoiceQuestion": {
+        "properties": {
+          "criteria": {
+            "additionalProperties": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "description": "Option keys mapped to descriptions. A null description uses the key itself. Keys must not be blank; ties select the first option in request order.",
+            "maxProperties": 26,
+            "minProperties": 2,
+            "propertyNames": {
+              "pattern": "\\S"
+            },
+            "type": "object"
+          },
+          "instructions": {
+            "$ref": "#/components/schemas/SystemOneContent"
+          },
+          "type": {
+            "enum": [
+              "choice"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "instructions",
+          "criteria"
+        ],
+        "title": "Choice",
+        "type": "object"
+      },
+      "SystemOneConfidence": {
+        "description": "Distribution concentration, calculated as 1 - H(p) / ln(N), where H(p) is entropy and N is the candidate count. Zero means uniform probabilities; values near 1 mean one candidate dominates. Not calibrated correctness.",
+        "maximum": 1,
+        "minimum": 0,
+        "type": "number"
+      },
+      "SystemOneContent": {
+        "description": "A nonempty string, or an object or array serialized as JSON text. Not interpreted as chat messages or multimodal input.",
+        "oneOf": [
+          {
+            "pattern": "\\S",
+            "type": "string"
+          },
+          {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          {
+            "items": {},
+            "type": "array"
+          }
+        ]
+      },
+      "SystemOneNoulAnswer": {
+        "properties": {
+          "noul": {
+            "description": "Probability of true among the false and true candidates. This is a number, not a Boolean.",
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "type": {
+            "enum": [
+              "noul"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "noul"
+        ],
+        "title": "Noul",
+        "type": "object"
+      },
+      "SystemOneNoulQuestion": {
+        "properties": {
+          "criteria": {
+            "additionalProperties": false,
+            "description": "Optional descriptions for the two outcomes. Omitted entries use No and Yes.",
+            "properties": {
+              "false": {
+                "default": "No",
+                "type": "string"
+              },
+              "true": {
+                "default": "Yes",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "instructions": {
+            "$ref": "#/components/schemas/SystemOneContent"
+          },
+          "type": {
+            "enum": [
+              "noul"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "instructions"
+        ],
+        "title": "Noul",
+        "type": "object"
+      },
+      "SystemOneProbabilities": {
+        "additionalProperties": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "description": "Probabilities normalized over the supplied candidates, summing to 1 subject to floating-point precision.",
+        "type": "object"
+      },
+      "SystemOneRequest": {
+        "properties": {
+          "keep_alive": {
+            "description": "How long to keep the model loaded after the request, as a duration string (such as 5m) or seconds. Zero unloads after the request; a negative value keeps it loaded. Defaults to the server's keep-alive setting (5m unless configured otherwise).",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ]
+          },
+          "model": {
+            "description": "Local model trained for System One, such as nimble. Requires compatible GGUF weights and a scoring-capable runner; cloud and MLX/Safetensors models are not supported.",
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "questions": {
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/SystemOneChoiceQuestion"
+                },
+                {
+                  "$ref": "#/components/schemas/SystemOneNoulQuestion"
+                },
+                {
+                  "$ref": "#/components/schemas/SystemOneScoreQuestion"
+                }
+              ]
+            },
+            "description": "Named questions about the shared state. Each is scored separately against the full state and question schema; answers are not passed to later questions.",
+            "maxProperties": 64,
+            "minProperties": 1,
+            "propertyNames": {
+              "pattern": "\\S"
+            },
+            "type": "object"
+          },
+          "state": {
+            "$ref": "#/components/schemas/SystemOneContent"
+          }
+        },
+        "required": [
+          "model",
+          "state",
+          "questions"
+        ],
+        "type": "object"
+      },
+      "SystemOneResponse": {
+        "properties": {
+          "answers": {
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/SystemOneChoiceAnswer"
+                },
+                {
+                  "$ref": "#/components/schemas/SystemOneNoulAnswer"
+                },
+                {
+                  "$ref": "#/components/schemas/SystemOneScoreAnswer"
+                }
+              ]
+            },
+            "description": "Answers keyed by the question names in the request.",
+            "type": "object"
+          },
+          "model": {
+            "description": "Model name from the request.",
+            "type": "string"
+          },
+          "usage": {
+            "properties": {
+              "input_tokens": {
+                "description": "Sum of full rendered prompt lengths across all questions, including repeated shared context even when cached.",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "output_tokens": {
+                "description": "Tokens generated internally for scoring, including prefix preparation and retries. May exceed the question count; not the length of the JSON response.",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "input_tokens",
+              "output_tokens"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "model",
+          "answers",
+          "usage"
+        ],
+        "type": "object"
+      },
+      "SystemOneScoreAnswer": {
+        "properties": {
+          "confidence": {
+            "$ref": "#/components/schemas/SystemOneConfidence"
+          },
+          "legend": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Zero-based indices as string keys mapped to the criterion descriptions.",
+            "type": "object"
+          },
+          "probabilities": {
+            "$ref": "#/components/schemas/SystemOneProbabilities",
+            "description": "Probabilities keyed by zero-based criterion indices as strings."
+          },
+          "score": {
+            "description": "Probability-weighted average of the zero-based criterion indices, from 0 to the number of criteria minus 1. Not rounded to a level or normalized to 0\u20131.",
+            "maximum": 25,
+            "minimum": 0,
+            "type": "number"
+          },
+          "type": {
+            "enum": [
+              "score"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "score",
+          "legend",
+          "probabilities",
+          "confidence"
+        ],
+        "title": "Score",
+        "type": "object"
+      },
+      "SystemOneScoreQuestion": {
+        "properties": {
+          "criteria": {
+            "description": "Descriptions ordered from the lowest score (index 0) to the highest. Defines a scale from 0 to the number of criteria minus 1.",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 26,
+            "minItems": 2,
+            "type": "array"
+          },
+          "instructions": {
+            "$ref": "#/components/schemas/SystemOneContent"
+          },
+          "type": {
+            "enum": [
+              "score"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "instructions",
+          "criteria"
+        ],
+        "title": "Score",
+        "type": "object"
+      },
+      "ThinkValue": {
+        "description": "Controls a model's thinking output. Use `/api/show` to discover the supported values and default for the selected model. `true` requests thinking, `false` requests no thinking output, and `null` uses the model default. String values are model-defined; supported names must match `/api/show` exactly. Numbers are not supported.",
+        "oneOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "Thinking": {
+        "description": "Thinking controls advertised by a model. Models without thinking metadata omit this field.",
+        "properties": {
+          "default": {
+            "description": "Value used when `think` is not set. For models that use this metadata for named thinking levels, unsupported names resolve to this default.",
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "values": {
+            "description": "Values explicitly supported by the model's `think` request field. Booleans represent on/off controls and strings represent model-defined levels. An array containing only `false` identifies a model without thinking support.",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "values",
+          "default"
+        ],
         "type": "object"
       },
       "TokenLogprob": {
@@ -1173,6 +1558,100 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/blobs/{digest}": {
+      "head": {
+        "operationId": "headBlob",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DigestParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blob exists"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid digest"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Blob not found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Failed to inspect blob"
+          }
+        },
+        "summary": "Check if a blob exists"
+      },
+      "post": {
+        "operationId": "createBlob",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DigestParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "format": "binary",
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Blob already exists"
+          },
+          "201": {
+            "description": "Blob created"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid digest or blob content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Failed to write blob"
+          }
+        },
+        "summary": "Push a blob"
+      }
+    },
     "/api/chat": {
       "post": {
         "description": "Generate the next chat message in a conversation between a user and an assistant.",
@@ -1347,9 +1826,9 @@
             "source": "curl http://localhost:11434/api/create -d '{\n  \"model\": \"ollama\",\n  \"from\": \"gemma4\",\n  \"system\": \"You are Ollama the llama.\"\n}'\n"
           },
           {
-            "label": "Quantize",
+            "label": "Create from GGUF",
             "lang": "bash",
-            "source": "curl http://localhost:11434/api/create -d '{\n  \"model\": \"llama3.1:8b-instruct-Q4_K_M\",\n  \"from\": \"llama3.1:8b-instruct-fp16\",\n  \"quantize\": \"q4_K_M\"\n}'\n"
+            "source": "curl http://localhost:11434/api/create -d '{\n  \"model\": \"my-gguf-model\",\n  \"files\": {\n    \"model.gguf\": \"sha256:432f310a77f4650a88d0fd59ecdd7cebed8d684bafea53cbff0473542964f0c3\"\n  }\n}'\n"
           }
         ],
         "x-mint": {
@@ -1528,6 +2007,11 @@
             "label": "Non-streaming",
             "lang": "bash",
             "source": "curl http://localhost:11434/api/generate -d '{\n  \"model\": \"gemma4\",\n  \"prompt\": \"Why is the sky blue?\",\n  \"stream\": false\n}'\n"
+          },
+          {
+            "label": "Thinking",
+            "lang": "bash",
+            "source": "curl http://localhost:11434/api/generate -d '{\n  \"model\": \"gpt-oss\",\n  \"prompt\": \"What is 1+1?\",\n  \"think\": \"low\",\n  \"stream\": false\n}'\n"
           },
           {
             "label": "With options",
@@ -1749,6 +2233,7 @@
                 "example": {
                   "capabilities": [
                     "completion",
+                    "thinking",
                     "vision"
                   ],
                   "details": {
@@ -1822,7 +2307,14 @@
                     "tokenizer.ggml.unknown_token_id": 3
                   },
                   "modified_at": "2025-08-14T15:49:43.634137516-07:00",
-                  "parameters": "temperature 0.7\nnum_ctx 2048"
+                  "parameters": "temperature 0.7\nnum_ctx 2048",
+                  "thinking": {
+                    "default": true,
+                    "values": [
+                      false,
+                      true
+                    ]
+                  }
                 },
                 "schema": {
                   "$ref": "#/components/schemas/ShowResponse"
@@ -1843,6 +2335,16 @@
             "label": "Verbose",
             "lang": "bash",
             "source": "curl http://localhost:11434/api/show -d '{\n  \"model\": \"gemma4\",\n  \"verbose\": true\n}'\n"
+          },
+          {
+            "label": "Thinking controls",
+            "lang": "bash",
+            "source": "curl http://localhost:11434/api/show -d '{\n  \"model\": \"gpt-oss\"\n}'\n"
+          },
+          {
+            "label": "Thinking controls",
+            "lang": "bash",
+            "source": "curl http://localhost:11434/api/show -d '{\n  \"model\": \"gpt-oss\"\n}'\n"
           }
         ]
       }
@@ -1923,6 +2425,127 @@
             "source": "curl http://localhost:11434/api/version\n"
           }
         ]
+      }
+    },
+    "/v1/systemone": {
+      "post": {
+        "description": "Answer choice, yes/no, and scoring questions with a local System One model. Requires Ollama v0.35.0 or later. See the [decision guide](/capabilities/decision) for examples.\n",
+        "operationId": "systemone",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "example": {
+                "model": "nimble",
+                "questions": {
+                  "label": {
+                    "criteria": {
+                      "account": "Login and account access",
+                      "billing": "Payments and refunds",
+                      "bug": "Software errors"
+                    },
+                    "instructions": "Which label fits this ticket?",
+                    "type": "choice"
+                  }
+                },
+                "state": "Our checkout has returned 500 errors since 9am."
+              },
+              "schema": {
+                "$ref": "#/components/schemas/SystemOneRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "answers": {
+                    "label": {
+                      "choice": "bug",
+                      "confidence": 0.8906,
+                      "probabilities": {
+                        "account": 0.0093,
+                        "billing": 0.0125,
+                        "bug": 0.9781
+                      },
+                      "type": "choice"
+                    }
+                  },
+                  "model": "nimble",
+                  "usage": {
+                    "input_tokens": 174,
+                    "output_tokens": 1
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/SystemOneResponse"
+                }
+              }
+            },
+            "description": "Answers and token usage for all questions. Example probabilities and confidence are rounded to four decimal places; results and usage can vary with the model and server configuration."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid request, unsupported model or runner, or a rendered prompt that exceeds the loaded context. Cloud models are rejected."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Local model not found. Download the model before making a request."
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "request body must not exceed 64 KiB"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request body exceeds 64 KiB."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Model loading, rendering, or scoring failed."
+          }
+        },
+        "summary": "Answer typed questions",
+        "x-codeSamples": [
+          {
+            "label": "Choose a label",
+            "lang": "bash",
+            "source": "curl http://localhost:11434/v1/systemone \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n    \"model\": \"nimble\",\n    \"state\": \"Our checkout has returned 500 errors since 9am.\",\n    \"questions\": {\n      \"label\": {\n        \"type\": \"choice\",\n        \"instructions\": \"Which label fits this ticket?\",\n        \"criteria\": {\n          \"billing\": \"Payments and refunds\",\n          \"bug\": \"Software errors\",\n          \"account\": \"Login and account access\"\n        }\n      }\n    }\n  }'\n"
+          }
+        ],
+        "x-mint": {
+          "content": "<Note>\nCurrently available locally in Ollama.\n</Note>\n\n- Returns one JSON response; streaming, images, tools, and generation controls are not supported.\n- Requests must fit within 64 KiB. Each rendered prompt must fit the loaded context window with two token positions left for scoring. Input is never truncated.\n",
+          "href": "/api/systemone",
+          "metadata": {
+            "sidebarTitle": "System One",
+            "title": "System One"
+          }
+        }
       }
     }
   },

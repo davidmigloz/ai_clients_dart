@@ -75,6 +75,12 @@ class ChatMessage {
   /// Tool call requests produced by the model.
   final List<ToolCall>? toolCalls;
 
+  /// Name of the tool whose result this message contains.
+  final String? toolName;
+
+  /// Identifier of the tool call associated with this result message.
+  final String? toolCallId;
+
   /// Creates a [ChatMessage].
   const ChatMessage({
     required this.role,
@@ -82,6 +88,8 @@ class ChatMessage {
     this.thinking,
     this.images,
     this.toolCalls,
+    this.toolName,
+    this.toolCallId,
   });
 
   /// Creates a user message.
@@ -105,11 +113,18 @@ class ChatMessage {
        );
 
   /// Creates a tool result message.
-  const ChatMessage.tool(String content)
-    : this(role: MessageRole.tool, content: content);
+  const ChatMessage.tool(String content, {String? toolName, String? toolCallId})
+    : this(
+        role: MessageRole.tool,
+        content: content,
+        toolName: toolName,
+        toolCallId: toolCallId,
+      );
 
   /// Creates a [ChatMessage] from JSON.
   factory ChatMessage.fromJson(Map<String, dynamic> json) => ChatMessage(
+    toolName: json['tool_name'] as String?,
+    toolCallId: json['tool_call_id'] as String?,
     role: messageRoleFromString(json['role'] as String?),
     content: json['content'] as String? ?? '',
     thinking: json['thinking'] as String?,
@@ -121,6 +136,8 @@ class ChatMessage {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (toolName != null) 'tool_name': toolName,
+    if (toolCallId != null) 'tool_call_id': toolCallId,
     'role': messageRoleToString(role),
     'content': content,
     if (thinking != null) 'thinking': thinking,
@@ -131,6 +148,8 @@ class ChatMessage {
 
   /// Creates a copy with replaced values.
   ChatMessage copyWith({
+    Object? toolName = unsetCopyWithValue,
+    Object? toolCallId = unsetCopyWithValue,
     MessageRole? role,
     String? content,
     Object? thinking = unsetCopyWithValue,
@@ -138,6 +157,12 @@ class ChatMessage {
     Object? toolCalls = unsetCopyWithValue,
   }) {
     return ChatMessage(
+      toolName: identical(toolName, unsetCopyWithValue)
+          ? this.toolName
+          : toolName as String?,
+      toolCallId: identical(toolCallId, unsetCopyWithValue)
+          ? this.toolCallId
+          : toolCallId as String?,
       role: role ?? this.role,
       content: content ?? this.content,
       thinking: thinking == unsetCopyWithValue
@@ -161,16 +186,20 @@ class ChatMessage {
           content == other.content &&
           thinking == other.thinking &&
           listsEqual(images, other.images) &&
-          listsEqual(toolCalls, other.toolCalls);
+          listsEqual(toolCalls, other.toolCalls) &&
+          toolName == other.toolName &&
+          toolCallId == other.toolCallId;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     role,
     content,
     thinking,
     listHash(images),
     listHash(toolCalls),
-  );
+    toolName,
+    toolCallId,
+  ]);
 
   @override
   String toString() =>
@@ -179,5 +208,7 @@ class ChatMessage {
       'content: $content, '
       'thinking: $thinking, '
       'images: $images, '
-      'toolCalls: $toolCalls)';
+      'toolCalls: $toolCalls, '
+      'toolName: $toolName, '
+      'toolCallId: $toolCallId)';
 }

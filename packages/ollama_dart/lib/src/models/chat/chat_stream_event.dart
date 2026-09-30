@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/done_reason.dart';
 import '../common/equality_helpers.dart';
 import '../completions/logprob.dart';
@@ -50,6 +51,9 @@ class ChatStreamEvent {
   /// Log probability information for generated tokens.
   final List<Logprob>? logprobs;
 
+  /// Number of prompt tokens read from the cache, when reported by the server.
+  final int? promptEvalCachedCount;
+
   /// Creates a [ChatStreamEvent].
   const ChatStreamEvent({
     this.model,
@@ -66,11 +70,13 @@ class ChatStreamEvent {
     this.evalCount,
     this.evalDuration,
     this.logprobs,
+    this.promptEvalCachedCount,
   });
 
   /// Creates a [ChatStreamEvent] from JSON.
   factory ChatStreamEvent.fromJson(Map<String, dynamic> json) =>
       ChatStreamEvent(
+        promptEvalCachedCount: json['prompt_eval_cached_count'] as int?,
         model: json['model'] as String?,
         remoteModel: json['remote_model'] as String?,
         remoteHost: json['remote_host'] as String?,
@@ -95,6 +101,8 @@ class ChatStreamEvent {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (promptEvalCachedCount != null)
+      'prompt_eval_cached_count': promptEvalCachedCount,
     if (model != null) 'model': model,
     if (remoteModel != null) 'remote_model': remoteModel,
     if (remoteHost != null) 'remote_host': remoteHost,
@@ -110,6 +118,72 @@ class ChatStreamEvent {
     if (evalDuration != null) 'eval_duration': evalDuration,
     if (logprobs != null) 'logprobs': logprobs!.map((e) => e.toJson()).toList(),
   };
+
+  /// Creates a copy with replaced values.
+  ChatStreamEvent copyWith({
+    Object? model = unsetCopyWithValue,
+    Object? remoteModel = unsetCopyWithValue,
+    Object? remoteHost = unsetCopyWithValue,
+    Object? createdAt = unsetCopyWithValue,
+    Object? message = unsetCopyWithValue,
+    Object? done = unsetCopyWithValue,
+    Object? doneReason = unsetCopyWithValue,
+    Object? totalDuration = unsetCopyWithValue,
+    Object? loadDuration = unsetCopyWithValue,
+    Object? promptEvalCount = unsetCopyWithValue,
+    Object? promptEvalDuration = unsetCopyWithValue,
+    Object? evalCount = unsetCopyWithValue,
+    Object? evalDuration = unsetCopyWithValue,
+    Object? logprobs = unsetCopyWithValue,
+    Object? promptEvalCachedCount = unsetCopyWithValue,
+  }) {
+    return ChatStreamEvent(
+      model: identical(model, unsetCopyWithValue)
+          ? this.model
+          : model as String?,
+      remoteModel: identical(remoteModel, unsetCopyWithValue)
+          ? this.remoteModel
+          : remoteModel as String?,
+      remoteHost: identical(remoteHost, unsetCopyWithValue)
+          ? this.remoteHost
+          : remoteHost as String?,
+      createdAt: identical(createdAt, unsetCopyWithValue)
+          ? this.createdAt
+          : createdAt as String?,
+      message: identical(message, unsetCopyWithValue)
+          ? this.message
+          : message as ChatResponseMessage?,
+      done: identical(done, unsetCopyWithValue) ? this.done : done as bool?,
+      doneReason: identical(doneReason, unsetCopyWithValue)
+          ? this.doneReason
+          : doneReason as DoneReason?,
+      totalDuration: identical(totalDuration, unsetCopyWithValue)
+          ? this.totalDuration
+          : totalDuration as int?,
+      loadDuration: identical(loadDuration, unsetCopyWithValue)
+          ? this.loadDuration
+          : loadDuration as int?,
+      promptEvalCount: identical(promptEvalCount, unsetCopyWithValue)
+          ? this.promptEvalCount
+          : promptEvalCount as int?,
+      promptEvalDuration: identical(promptEvalDuration, unsetCopyWithValue)
+          ? this.promptEvalDuration
+          : promptEvalDuration as int?,
+      evalCount: identical(evalCount, unsetCopyWithValue)
+          ? this.evalCount
+          : evalCount as int?,
+      evalDuration: identical(evalDuration, unsetCopyWithValue)
+          ? this.evalDuration
+          : evalDuration as int?,
+      logprobs: identical(logprobs, unsetCopyWithValue)
+          ? this.logprobs
+          : logprobs as List<Logprob>?,
+      promptEvalCachedCount:
+          identical(promptEvalCachedCount, unsetCopyWithValue)
+          ? this.promptEvalCachedCount
+          : promptEvalCachedCount as int?,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -129,7 +203,8 @@ class ChatStreamEvent {
           promptEvalDuration == other.promptEvalDuration &&
           evalCount == other.evalCount &&
           evalDuration == other.evalDuration &&
-          listsEqual(logprobs, other.logprobs);
+          listsEqual(logprobs, other.logprobs) &&
+          promptEvalCachedCount == other.promptEvalCachedCount;
 
   @override
   int get hashCode => Object.hashAll([
@@ -147,6 +222,7 @@ class ChatStreamEvent {
     evalCount,
     evalDuration,
     listHash(logprobs),
+    promptEvalCachedCount,
   ]);
 
   @override
@@ -165,5 +241,6 @@ class ChatStreamEvent {
       'promptEvalDuration: $promptEvalDuration, '
       'evalCount: $evalCount, '
       'evalDuration: $evalDuration, '
-      'logprobs: $logprobs)';
+      'logprobs: $logprobs, '
+      'promptEvalCachedCount: $promptEvalCachedCount)';
 }

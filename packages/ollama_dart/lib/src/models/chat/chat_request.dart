@@ -23,7 +23,7 @@ class ChatRequest {
 
   /// Format to return a response in.
   ///
-  /// Use [ResponseFormat.json] for JSON mode or [ResponseFormat.schema] for
+  /// Use [JsonFormat] for JSON mode or [SchemaFormat] for
   /// structured output with a specific JSON schema.
   final ResponseFormat? format;
 
@@ -35,7 +35,8 @@ class ChatRequest {
 
   /// Enable thinking mode.
   ///
-  /// Use [ThinkValue.enabled] for boolean or [ThinkValue.level] for levels.
+  /// Use [ThinkValue.enabled] for a boolean, [ThinkValue.level] for a known
+  /// level, or [ThinkValue.string] for a model-defined named level.
   final ThinkValue? think;
 
   /// Model keep-alive duration (e.g., `5m`, `0`).
@@ -46,6 +47,12 @@ class ChatRequest {
 
   /// Number of most likely tokens to return at each position.
   final int? topLogprobs;
+
+  /// Whether to truncate history when the rendered prompt exceeds the context limit.
+  final bool? truncate;
+
+  /// Whether to shift history instead of erroring when the context limit is reached.
+  final bool? shift;
 
   /// Creates a [ChatRequest].
   const ChatRequest({
@@ -59,10 +66,14 @@ class ChatRequest {
     this.keepAlive,
     this.logprobs,
     this.topLogprobs,
+    this.truncate,
+    this.shift,
   });
 
   /// Creates a [ChatRequest] from JSON.
   factory ChatRequest.fromJson(Map<String, dynamic> json) => ChatRequest(
+    truncate: json['truncate'] as bool?,
+    shift: json['shift'] as bool?,
     model: json['model'] as String,
     messages: (json['messages'] as List)
         .map((e) => ChatMessage.fromJson(e as Map<String, dynamic>))
@@ -83,6 +94,8 @@ class ChatRequest {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (truncate != null) 'truncate': truncate,
+    if (shift != null) 'shift': shift,
     'model': model,
     'messages': messages.map((e) => e.toJson()).toList(),
     if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
@@ -97,6 +110,8 @@ class ChatRequest {
 
   /// Creates a copy with replaced values.
   ChatRequest copyWith({
+    Object? truncate = unsetCopyWithValue,
+    Object? shift = unsetCopyWithValue,
     String? model,
     List<ChatMessage>? messages,
     Object? tools = unsetCopyWithValue,
@@ -109,6 +124,10 @@ class ChatRequest {
     Object? topLogprobs = unsetCopyWithValue,
   }) {
     return ChatRequest(
+      truncate: identical(truncate, unsetCopyWithValue)
+          ? this.truncate
+          : truncate as bool?,
+      shift: identical(shift, unsetCopyWithValue) ? this.shift : shift as bool?,
       model: model ?? this.model,
       messages: messages ?? this.messages,
       tools: tools == unsetCopyWithValue
@@ -148,7 +167,9 @@ class ChatRequest {
           think == other.think &&
           keepAlive == other.keepAlive &&
           logprobs == other.logprobs &&
-          topLogprobs == other.topLogprobs;
+          topLogprobs == other.topLogprobs &&
+          truncate == other.truncate &&
+          shift == other.shift;
 
   @override
   int get hashCode => Object.hashAll([
@@ -162,6 +183,8 @@ class ChatRequest {
     keepAlive,
     logprobs,
     topLogprobs,
+    truncate,
+    shift,
   ]);
 
   @override
@@ -176,5 +199,7 @@ class ChatRequest {
       'think: $think, '
       'keepAlive: $keepAlive, '
       'logprobs: $logprobs, '
-      'topLogprobs: $topLogprobs)';
+      'topLogprobs: $topLogprobs, '
+      'truncate: $truncate, '
+      'shift: $shift)';
 }

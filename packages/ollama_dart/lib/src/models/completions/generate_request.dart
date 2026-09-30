@@ -24,7 +24,7 @@ class GenerateRequest {
 
   /// Structured output format.
   ///
-  /// Use [ResponseFormat.json] for JSON mode or [ResponseFormat.schema] for
+  /// Use [JsonFormat] for JSON mode or [SchemaFormat] for
   /// structured output with a specific JSON schema.
   final ResponseFormat? format;
 
@@ -39,8 +39,9 @@ class GenerateRequest {
 
   /// Conversation context from a previous generate response.
   ///
-  /// This enables multi-turn conversations by passing the context
-  /// from a previous response into the next request.
+  /// Deprecated by Ollama's generate API. Prefer `/api/chat` with message
+  /// history for multi-turn conversations. Retained for existing generate
+  /// workflows that pass a previous response's context into the next request.
   final List<int>? context;
 
   /// Whether to stream the response.
@@ -48,7 +49,8 @@ class GenerateRequest {
 
   /// Enable thinking mode.
   ///
-  /// Use [ThinkValue.enabled] for boolean or [ThinkValue.level] for levels.
+  /// Use [ThinkValue.enabled] for a boolean, [ThinkValue.level] for a known
+  /// level, or [ThinkValue.string] for a model-defined named level.
   final ThinkValue? think;
 
   /// Whether to skip prompt templating.
@@ -70,19 +72,28 @@ class GenerateRequest {
   ///
   /// Experimental: only used by image generation models, and may change or be
   /// removed in a future Ollama release.
+  /// Ollama 0.35.0 rejects image generation; retained for compatible servers.
   final int? width;
 
   /// Height of the generated image in pixels.
   ///
   /// Experimental: only used by image generation models, and may change or be
   /// removed in a future Ollama release.
+  /// Ollama 0.35.0 rejects image generation; retained for compatible servers.
   final int? height;
 
   /// Number of diffusion steps for image generation.
   ///
   /// Experimental: only used by image generation models, and may change or be
   /// removed in a future Ollama release.
+  /// Ollama 0.35.0 rejects image generation; retained for compatible servers.
   final int? steps;
+
+  /// Whether to truncate history when the rendered prompt exceeds the context limit.
+  final bool? truncate;
+
+  /// Whether to shift history instead of erroring when the context limit is reached.
+  final bool? shift;
 
   /// Creates a [GenerateRequest].
   const GenerateRequest({
@@ -104,11 +115,15 @@ class GenerateRequest {
     this.width,
     this.height,
     this.steps,
+    this.truncate,
+    this.shift,
   });
 
   /// Creates a [GenerateRequest] from JSON.
   factory GenerateRequest.fromJson(Map<String, dynamic> json) =>
       GenerateRequest(
+        truncate: json['truncate'] as bool?,
+        shift: json['shift'] as bool?,
         model: json['model'] as String,
         prompt: json['prompt'] as String?,
         suffix: json['suffix'] as String?,
@@ -133,6 +148,8 @@ class GenerateRequest {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (truncate != null) 'truncate': truncate,
+    if (shift != null) 'shift': shift,
     'model': model,
     if (prompt != null) 'prompt': prompt,
     if (suffix != null) 'suffix': suffix,
@@ -155,6 +172,8 @@ class GenerateRequest {
 
   /// Creates a copy with replaced values.
   GenerateRequest copyWith({
+    Object? truncate = unsetCopyWithValue,
+    Object? shift = unsetCopyWithValue,
     String? model,
     Object? prompt = unsetCopyWithValue,
     Object? suffix = unsetCopyWithValue,
@@ -175,6 +194,10 @@ class GenerateRequest {
     Object? steps = unsetCopyWithValue,
   }) {
     return GenerateRequest(
+      truncate: identical(truncate, unsetCopyWithValue)
+          ? this.truncate
+          : truncate as bool?,
+      shift: identical(shift, unsetCopyWithValue) ? this.shift : shift as bool?,
       model: model ?? this.model,
       prompt: prompt == unsetCopyWithValue ? this.prompt : prompt as String?,
       suffix: suffix == unsetCopyWithValue ? this.suffix : suffix as String?,
@@ -234,7 +257,9 @@ class GenerateRequest {
           topLogprobs == other.topLogprobs &&
           width == other.width &&
           height == other.height &&
-          steps == other.steps;
+          steps == other.steps &&
+          truncate == other.truncate &&
+          shift == other.shift;
 
   @override
   int get hashCode => Object.hashAll([
@@ -256,6 +281,8 @@ class GenerateRequest {
     width,
     height,
     steps,
+    truncate,
+    shift,
   ]);
 
   @override
@@ -278,5 +305,7 @@ class GenerateRequest {
       'topLogprobs: $topLogprobs, '
       'width: $width, '
       'height: $height, '
-      'steps: $steps)';
+      'steps: $steps, '
+      'truncate: $truncate, '
+      'shift: $shift)';
 }
