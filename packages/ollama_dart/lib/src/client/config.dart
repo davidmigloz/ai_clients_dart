@@ -44,9 +44,9 @@ class OllamaConfig {
   ///
   /// Example:
   /// ```dart
-  /// OllamaConfig(
+  /// final config = OllamaConfig(
   ///   authProvider: BearerTokenProvider('YOUR_TOKEN'),
-  /// )
+  /// );
   /// ```
   final AuthProvider? authProvider;
 

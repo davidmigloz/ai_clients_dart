@@ -56,6 +56,19 @@
           "capability"
         ],
         "directory": "metadata"
+      },
+      "system_one": {
+        "patterns": [
+          "systemone",
+          "system_one"
+        ],
+        "directory": "system_one"
+      },
+      "web": {
+        "patterns": [
+          "web"
+        ],
+        "directory": "web"
       }
     },
     "default_category": "common",
@@ -85,7 +98,9 @@
       "embed",
       "models"
     ],
-    "notes": {},
+    "notes": {
+      "CreateRequest.capabilities": "Deferred until stable Ollama release; stable target v0.35.0."
+    },
     "expected_properties": {
       "ModelOptions": [
         "seed",
@@ -138,7 +153,9 @@
         "top_logprobs",
         "width",
         "height",
-        "steps"
+        "steps",
+        "truncate",
+        "shift"
       ],
       "GenerateResponse": [
         "model",
@@ -157,7 +174,9 @@
         "logprobs",
         "image",
         "completed",
-        "total"
+        "total",
+        "prompt_eval_cached_count",
+        "tool_calls"
       ],
       "ChatRequest": [
         "model",
@@ -169,7 +188,9 @@
         "tools",
         "think",
         "logprobs",
-        "top_logprobs"
+        "top_logprobs",
+        "truncate",
+        "shift"
       ],
       "ChatResponse": [
         "model",
@@ -183,14 +204,16 @@
         "prompt_eval_duration",
         "eval_count",
         "eval_duration",
-        "logprobs"
+        "logprobs",
+        "prompt_eval_cached_count"
       ],
       "EmbedRequest": [
         "model",
         "input",
         "truncate",
         "keep_alive",
-        "options"
+        "options",
+        "dimensions"
       ],
       "EmbedResponse": [
         "model",
@@ -198,6 +221,53 @@
         "total_duration",
         "load_duration",
         "prompt_eval_count"
+      ],
+      "ChatStreamEvent": [
+        "prompt_eval_cached_count"
+      ],
+      "ChatMessage": [
+        "tool_name",
+        "tool_call_id"
+      ],
+      "ChatResponseMessage": [
+        "tool_name",
+        "tool_call_id"
+      ],
+      "ToolCall": [
+        "id"
+      ],
+      "ToolCallFunction": [
+        "index"
+      ],
+      "GenerateStreamEvent": [
+        "prompt_eval_cached_count",
+        "context",
+        "logprobs",
+        "tool_calls"
+      ],
+      "ModelDetails": [
+        "context_length",
+        "embedding_length"
+      ],
+      "ModelSummary": [
+        "capabilities"
+      ],
+      "ShowRequest": [
+        "system",
+        "options"
+      ],
+      "ShowResponse": [
+        "modelfile",
+        "system",
+        "renderer",
+        "parser",
+        "messages",
+        "remote_model",
+        "remote_host",
+        "projector_info",
+        "tensors",
+        "requires",
+        "thinking"
       ]
     },
     "excluded_properties": {
@@ -213,7 +283,8 @@
       "show": "models",
       "tags": "models",
       "generate": "completions",
-      "embed": "embeddings"
+      "embed": "embeddings",
+      "systemone": "system_one"
     },
     "excluded_resources": []
   },
@@ -248,8 +319,11 @@
       "dart_class": "CreateRequest",
       "file": "lib/src/models/models/create_request.dart",
       "schema": "CreateRequest",
-      "note": "Dart class adds client-ahead fields (files, adapters, draft_quantize, draft_files, remote_host, requires, info) sourced from Ollama api/types.go + docs/api.md; upstream docs/openapi.yaml omits them.",
-      "tags": []
+      "note": "Preserves stable v0.35.0 native import fields and legacy adapters. capabilities is deferred: introduced after v0.35.0, currently prerelease-only. files/draft_files/draft_quantize/requires are now in OpenAPI.",
+      "tags": [],
+      "excluded_properties": [
+        "capabilities"
+      ]
     },
     "GenerateRequest": {
       "spec": "main",
@@ -257,7 +331,7 @@
       "dart_class": "GenerateRequest",
       "file": "lib/src/models/completions/generate_request.dart",
       "schema": "GenerateRequest",
-      "note": "Dart class adds experimental image-generation request fields (width, height, steps) sourced from Ollama api/types.go + docs/api.md; intentionally ahead of upstream docs/openapi.yaml, which omits them as experimental.",
+      "note": "Dart class retains experimental image-generation request fields (width, height, steps) sourced from Ollama v0.32.5 api/types.go and docs/api.md for compatible servers. Image generation was temporarily removed in v0.32.6 and remains rejected by v0.35.0; these legacy fields are absent from the reviewed upstream OpenAPI snapshot.",
       "tags": []
     },
     "GenerateResponse": {
@@ -266,7 +340,7 @@
       "dart_class": "GenerateResponse",
       "file": "lib/src/models/completions/generate_response.dart",
       "schema": "GenerateResponse",
-      "note": "Dart class adds experimental image-generation response fields (image, completed, total) sourced from Ollama api/types.go + docs/api.md; intentionally ahead of upstream docs/openapi.yaml, which omits them as experimental.",
+      "note": "Dart class retains experimental image-generation response fields (image, completed, total) sourced from Ollama v0.32.5 api/types.go and docs/api.md for compatible servers. Image generation was temporarily removed in v0.32.6 and remains rejected by v0.35.0; these legacy fields are absent from the reviewed upstream OpenAPI snapshot.",
       "tags": []
     },
     "EmbedRequest": {
@@ -323,8 +397,340 @@
       "dart_class": "ModelOptions",
       "file": "lib/src/models/metadata/model_options.dart",
       "schema": "ModelOptions",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Spec has additionalProperties: true with only 8 fields; Dart class intentionally declares 31 typed fields covering all known Ollama options for type safety, including draft_num_predict (from docs/modelfile.mdx + api/types.go Runner), which is ahead of upstream docs/openapi.yaml"
+    },
+    "GenerateStreamEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GenerateStreamEvent",
+      "file": "lib/src/models/completions/generate_stream_event.dart",
+      "schema": "GenerateStreamEvent",
+      "tags": []
+    },
+    "ChatStreamEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ChatStreamEvent",
+      "file": "lib/src/models/chat/chat_stream_event.dart",
+      "schema": "ChatStreamEvent",
+      "tags": []
+    },
+    "Thinking": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ModelThinking",
+      "file": "lib/src/models/models/model_thinking.dart",
+      "schema": "Thinking",
+      "tags": [],
+      "excluded_properties": [
+        "default"
+      ],
+      "note": "Wire default is Dart defaultValue because default is reserved; codec and requiredness verified in native field tests."
+    },
+    "ThinkValue": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ThinkValue",
+      "file": "lib/src/models/common/think_value.dart",
+      "schema": "ThinkValue",
+      "tags": []
+    },
+    "ThinkEnabled": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ThinkEnabled",
+      "file": "lib/src/models/common/think_value.dart",
+      "schema": null,
+      "tags": [],
+      "parent": "ThinkValue"
+    },
+    "ThinkWithLevel": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ThinkWithLevel",
+      "file": "lib/src/models/common/think_value.dart",
+      "schema": null,
+      "tags": [],
+      "parent": "ThinkValue"
+    },
+    "ThinkWithString": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ThinkWithString",
+      "file": "lib/src/models/common/think_value.dart",
+      "schema": null,
+      "tags": [],
+      "parent": "ThinkValue"
+    },
+    "ModelTensor": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ModelTensor",
+      "file": "lib/src/models/models/model_tensor.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Stable api/types.go Tensor schema absent from OpenAPI."
+    },
+    "ModelDetails": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ModelDetails",
+      "file": "lib/src/models/models/model_details.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Stable api/types.go ModelDetails; OpenAPI inlines details."
+    },
+    "ShowRequest": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ShowRequest",
+      "file": "lib/src/models/models/show_request.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Stable api/types.go request; OpenAPI inlines request."
+    },
+    "SystemOneContent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "SystemOneContent",
+      "file": "lib/src/models/system_one/system_one_content.dart",
+      "schema": "SystemOneContent",
+      "tags": []
+    },
+    "SystemOneQuestion": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "SystemOneQuestion",
+      "file": "lib/src/models/system_one/system_one_question.dart",
+      "schema": null,
+      "tags": [],
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "choice": "SystemOneChoiceQuestion",
+          "noul": "SystemOneNoulQuestion",
+          "score": "SystemOneScoreQuestion"
+        }
+      }
+    },
+    "SystemOneChoiceQuestion": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SystemOneChoiceQuestion",
+      "file": "lib/src/models/system_one/system_one_question.dart",
+      "schema": "SystemOneChoiceQuestion",
+      "tags": [],
+      "parent": "SystemOneQuestion"
+    },
+    "SystemOneNoulQuestion": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SystemOneNoulQuestion",
+      "file": "lib/src/models/system_one/system_one_question.dart",
+      "schema": "SystemOneNoulQuestion",
+      "tags": [],
+      "parent": "SystemOneQuestion"
+    },
+    "SystemOneScoreQuestion": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SystemOneScoreQuestion",
+      "file": "lib/src/models/system_one/system_one_question.dart",
+      "schema": "SystemOneScoreQuestion",
+      "tags": [],
+      "parent": "SystemOneQuestion"
+    },
+    "SystemOneUnknownQuestion": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "SystemOneUnknownQuestion",
+      "file": "lib/src/models/system_one/system_one_question.dart",
+      "schema": null,
+      "tags": [],
+      "parent": "SystemOneQuestion"
+    },
+    "SystemOneAnswer": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "SystemOneAnswer",
+      "file": "lib/src/models/system_one/system_one_answer.dart",
+      "schema": null,
+      "tags": [],
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "choice": "SystemOneChoiceAnswer",
+          "noul": "SystemOneNoulAnswer",
+          "score": "SystemOneScoreAnswer"
+        }
+      }
+    },
+    "SystemOneChoiceAnswer": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SystemOneChoiceAnswer",
+      "file": "lib/src/models/system_one/system_one_answer.dart",
+      "schema": "SystemOneChoiceAnswer",
+      "tags": [],
+      "parent": "SystemOneAnswer"
+    },
+    "SystemOneNoulAnswer": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SystemOneNoulAnswer",
+      "file": "lib/src/models/system_one/system_one_answer.dart",
+      "schema": "SystemOneNoulAnswer",
+      "tags": [],
+      "parent": "SystemOneAnswer"
+    },
+    "SystemOneScoreAnswer": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SystemOneScoreAnswer",
+      "file": "lib/src/models/system_one/system_one_answer.dart",
+      "schema": "SystemOneScoreAnswer",
+      "tags": [],
+      "parent": "SystemOneAnswer"
+    },
+    "SystemOneUnknownAnswer": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "SystemOneUnknownAnswer",
+      "file": "lib/src/models/system_one/system_one_answer.dart",
+      "schema": null,
+      "tags": [],
+      "parent": "SystemOneAnswer"
+    },
+    "SystemOneRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SystemOneRequest",
+      "file": "lib/src/models/system_one/system_one_request.dart",
+      "schema": "SystemOneRequest",
+      "tags": []
+    },
+    "SystemOneResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SystemOneResponse",
+      "file": "lib/src/models/system_one/system_one_response.dart",
+      "schema": "SystemOneResponse",
+      "tags": []
+    },
+    "SystemOneUsage": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "SystemOneUsage",
+      "file": "lib/src/models/system_one/system_one_usage.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Typed inline System One schema, verified by unit tests without altering upstream components."
+    },
+    "SystemOneNoulCriteria": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "SystemOneNoulCriteria",
+      "file": "lib/src/models/system_one/system_one_noul_criteria.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Typed inline System One schema, verified by unit tests without altering upstream components."
+    },
+    "SystemOneConfidence": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "double",
+      "file": "lib/src/models/system_one/system_one_answer.dart",
+      "schema": "SystemOneConfidence",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Primitive alias handled directly in answer fields; numeric map codec verified in tests."
+    },
+    "SystemOneProbabilities": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Map<String, double>",
+      "file": "lib/src/models/system_one/system_one_answer.dart",
+      "schema": "SystemOneProbabilities",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Primitive alias handled directly in answer fields; numeric map codec verified in tests."
+    },
+    "WebSearchRequest": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "WebSearchRequest",
+      "file": "lib/src/models/web/web_search_request.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Hosted stable web API documented outside the native OpenAPI spec."
+    },
+    "WebSearchResult": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "WebSearchResult",
+      "file": "lib/src/models/web/web_search_result.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Hosted stable web API documented outside the native OpenAPI spec."
+    },
+    "WebSearchResponse": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "WebSearchResponse",
+      "file": "lib/src/models/web/web_search_response.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Hosted stable web API documented outside the native OpenAPI spec."
+    },
+    "WebFetchRequest": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "WebFetchRequest",
+      "file": "lib/src/models/web/web_fetch_request.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Hosted stable web API documented outside the native OpenAPI spec."
+    },
+    "WebFetchResponse": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "WebFetchResponse",
+      "file": "lib/src/models/web/web_fetch_response.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Hosted stable web API documented outside the native OpenAPI spec."
+    },
+    "SystemOneStringContent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "SystemOneStringContent",
+      "file": "lib/src/models/system_one/system_one_content.dart",
+      "schema": null,
+      "tags": [],
+      "parent": "SystemOneContent"
+    },
+    "SystemOneObjectContent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "SystemOneObjectContent",
+      "file": "lib/src/models/system_one/system_one_content.dart",
+      "schema": null,
+      "tags": [],
+      "parent": "SystemOneContent"
+    },
+    "SystemOneArrayContent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "SystemOneArrayContent",
+      "file": "lib/src/models/system_one/system_one_content.dart",
+      "schema": null,
+      "tags": [],
+      "parent": "SystemOneContent"
     }
   }
 }

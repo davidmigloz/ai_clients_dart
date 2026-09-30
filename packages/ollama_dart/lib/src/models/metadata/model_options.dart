@@ -4,6 +4,11 @@ import '../common/copy_with_sentinel.dart';
 import '../common/stop_sequence.dart';
 
 /// Runtime options that control text generation.
+///
+/// Matches the supported options in
+/// [Ollama v0.35.0](https://github.com/ollama/ollama/blob/v0.35.0/api/types.go).
+/// Legacy fields remain available for older-server compatibility, with their
+/// current support status noted below.
 @immutable
 class ModelOptions {
   // ===========================================================================
@@ -28,11 +33,14 @@ class ModelOptions {
   /// Tail free sampling parameter.
   ///
   /// Reduces the impact of less probable tokens (1.0 = disabled).
+  /// Retained for older servers; absent from Ollama v0.35.0 runtime options.
   final double? tfsZ;
 
   /// Typical P sampling parameter.
   ///
   /// Selects tokens based on "typicality" rather than probability.
+  /// Deprecated in Ollama v0.35.0: accepted per request with a warning, but
+  /// rejected as a saved model parameter.
   final double? typicalP;
 
   /// Number of tokens to look back for repeat penalty.
@@ -48,15 +56,23 @@ class ModelOptions {
   final double? frequencyPenalty;
 
   /// Mirostat sampling mode (0 = disabled, 1 = mirostat, 2 = mirostat 2.0).
+  ///
+  /// Retained for older servers; absent from Ollama v0.35.0 runtime options.
   final int? mirostat;
 
   /// Mirostat target entropy.
+  ///
+  /// Retained for older servers; absent from Ollama v0.35.0 runtime options.
   final double? mirostatTau;
 
   /// Mirostat learning rate.
+  ///
+  /// Retained for older servers; absent from Ollama v0.35.0 runtime options.
   final double? mirostatEta;
 
   /// Whether to penalize newlines.
+  ///
+  /// Retained for older servers; absent from Ollama v0.35.0 runtime options.
   final bool? penalizeNewline;
 
   /// Stop sequences that will halt generation.
@@ -89,6 +105,8 @@ class ModelOptions {
   // ===========================================================================
 
   /// Enable NUMA (Non-Uniform Memory Access) optimization.
+  ///
+  /// Retained for older servers; absent from Ollama v0.35.0 runtime options.
   final bool? numa;
 
   /// Batch size for prompt processing.
@@ -103,6 +121,8 @@ class ModelOptions {
   final int? mainGpu;
 
   /// Enable low VRAM mode for limited GPU memory.
+  ///
+  /// Retained for older servers; absent from Ollama v0.35.0 runtime options.
   final bool? lowVram;
 
   /// Number of CPU threads to use.
@@ -115,18 +135,26 @@ class ModelOptions {
   // ===========================================================================
 
   /// Use 16-bit floats for KV cache (reduces memory usage).
+  ///
+  /// Retained for older servers; absent from Ollama v0.35.0 runtime options.
   final bool? f16Kv;
 
   /// Return logits for all tokens, not just the last one.
+  ///
+  /// Retained for older servers; absent from Ollama v0.35.0 runtime options.
   final bool? logitsAll;
 
   /// Only load the vocabulary, not the model weights.
+  ///
+  /// Retained for older servers; absent from Ollama v0.35.0 runtime options.
   final bool? vocabOnly;
 
   /// Use memory mapping to load the model.
   final bool? useMmap;
 
   /// Lock the model in memory to prevent swapping.
+  ///
+  /// Retained for older servers; absent from Ollama v0.35.0 runtime options.
   final bool? useMlock;
 
   /// Creates a [ModelOptions].

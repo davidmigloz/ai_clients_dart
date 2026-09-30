@@ -24,10 +24,25 @@ void main() async {
     // Show model details
     print('\n--- Model Details ---');
     final details = await client.models.show(
-      request: const ShowRequest(model: 'gpt-oss'),
+      request: const ShowRequest(model: 'gpt-oss', verbose: true),
     );
-    print('Template: ${details.template?.substring(0, 100)}...');
+    final template = details.template;
+    if (template != null) {
+      final preview = template.length > 100
+          ? '${template.substring(0, 100)}...'
+          : template;
+      print('Template: $preview');
+    }
     print('Capabilities: ${details.capabilities?.join(', ')}');
+    final thinking = details.thinking;
+    if (thinking != null) {
+      print(
+        'Thinking values: ${thinking.values.map((v) => v.toJson()).toList()}',
+      );
+      print('Default thinking: ${thinking.defaultValue.toJson()}');
+    }
+    print('Minimum Ollama version: ${details.requires}');
+    print('Tensor count: ${details.tensors?.length ?? 0}');
 
     // List running models
     print('\n--- Running Models ---');

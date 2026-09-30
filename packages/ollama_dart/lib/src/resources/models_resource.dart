@@ -63,7 +63,8 @@ class ModelsResource extends ResourceBase with StreamingResource {
 
   /// Shows details for a specific model.
   ///
-  /// The [request] contains the model name and optional verbose flag.
+  /// The [request] contains the model name, optional verbose flag, and
+  /// system/options overrides. Verbose responses may include tensor metadata.
   ///
   /// Returns a [ShowResponse] with model details.
   Future<ShowResponse> show({required ShowRequest request}) async {

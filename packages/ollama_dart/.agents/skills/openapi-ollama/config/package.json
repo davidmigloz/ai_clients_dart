@@ -6,8 +6,13 @@
   "resources_dir": "lib/src/resources",
   "tests_dir": "test/unit/models",
   "examples_dir": "example",
-  "skip_files": ["copy_with_sentinel.dart"],
-  "internal_barrel_files": ["equality_helpers.dart"],
+  "skip_files": [
+    "copy_with_sentinel.dart"
+  ],
+  "internal_barrel_files": [
+    "equality_helpers.dart",
+    "_system_one_helpers.dart"
+  ],
   "pr_title_prefix": "feat(ollama_dart)",
   "changelog_title": "Ollama API Changelog"
 }

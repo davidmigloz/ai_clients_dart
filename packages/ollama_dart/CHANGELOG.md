@@ -1,3 +1,15 @@
+## Unreleased
+
+- **BREAKING** **FEAT**: Add `ThinkWithString` to the sealed `ThinkValue` hierarchy for arbitrary model-defined thinking levels. Exhaustive switches need a string branch; this change requires the next major release. Existing factories remain available.
+
+- **FEAT**: Support the local System One decision API with typed state, named choice/noul/score questions, answers, confidence, and usage. Requires Ollama v0.35.0+ and a compatible decision model.
+- **FEAT**: Add binary blob existence checks and uploads for file-based model creation, plus hosted web search/fetch using explicit cloud configuration.
+- **FEAT**: Discover model thinking values/defaults, preserve arbitrary thinking names, and expose cached prompt token counts in chat/generate responses and stream events.
+- **FEAT**: Complete public native fields for context truncation/shifting, tool identities and replay, model metadata/tensors, capabilities, and model creation.
+- **FIX**: Preserve binary request bodies through authentication, request-ID logging, and retries; complete web DTO value equality.
+- **DOCS**: Refresh upstream API references, import/deprecation guidance, migration notes, and examples. Existing constructors and compatibility fields remain available; the package version and dependencies are unchanged.
+- **DOCS**: Clarify that Ollama 0.35.0 rejects image generation following its temporary removal in 0.32.6. Retain experimental image fields for compatible servers.
+
 ## 3.0.0
 
 > [!CAUTION]
@@ -309,4 +321,3 @@ See **[MIGRATION.md](MIGRATION.md)** for step-by-step examples and mapping table
 ## 0.0.1-dev.1
 
 - Bootstrap project.
-
