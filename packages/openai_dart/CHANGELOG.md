@@ -1,3 +1,12 @@
+## 10.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Adds [GPT Image 2.5 Sunburst and Flare](https://openai.com/index/introducing-chatgpt-images-2-5/), including their dated snapshots, plus `xhigh`/`max` quality for image generation and editing. `ImageSize` becomes an immutable value class that accepts custom resolutions and preserves custom, transient, and future sizes in ordinary and streaming responses. Existing size constants remain available, but enum-only APIs and exhaustive size/quality switches require migration; see the [Migration Guide](MIGRATION.md).
+
+- **BREAKING** **FEAT**: Add GPT Image 2.5 and custom image sizes ([#310](https://github.com/davidmigloz/ai_clients_dart/issues/310)). ([98908b76](https://github.com/davidmigloz/ai_clients_dart/commit/98908b76aafedd37d19796e38fc52d89b17d2c22))
+
 ## 9.0.0
 
 > [!CAUTION]

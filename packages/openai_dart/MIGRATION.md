@@ -6,17 +6,43 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
-## Unreleased: image sizes and quality
+## Migrating from v9.x to v10.0.0
 
-`ImageSize` is now an immutable value class so it can represent the API's custom
-resolutions. Existing constants such as `ImageSize.size1024x1024`, `ImageSize.auto`,
-and the preset list `ImageSize.values` remain available. Use
-`const ImageSize.custom('1536x864')` for other sizes and `toJson()` for the wire value.
+v10.0.0 adds GPT Image 2.5 and custom image resolutions. `ImageSize` becomes a value class, and `ImageQuality` gains two variants; code using enum-only size APIs or exhaustive switches needs updating. The minimum Dart SDK remains 3.12.
 
-Code using enum-only features (`index`, `name`, `values.byName`, `Enum` constraints,
-or exhaustive switches) must be updated. Add a fallback to size switches;
-`fromJson` now preserves unrecognized sizes instead of returning `ImageSize.unknown`.
-`ImageQuality` adds `xhigh` and `max`; handle these in exhaustive quality switches.
+### 1) Replace enum-only image-size APIs
+
+`ImageSize` is now an immutable value class so it can represent custom resolutions. Existing constants such as `ImageSize.size1024x1024`, `ImageSize.auto`, and the preset list `ImageSize.values` remain available. Use `const ImageSize.custom('1536x864')` for other sizes and `toJson()` for the API wire value.
+
+Replace enum-name lookups with wire-value parsing or an existing named constant:
+
+```dart
+// Before (v9.x): enum-name lookup.
+final size = ImageSize.values.byName('size1024x1024');
+```
+
+```dart
+// After (v10.0.0): parse the API wire value.
+final size = ImageSize.fromJson('1024x1024');
+const customSize = ImageSize.custom('1536x864');
+```
+
+`index`, `name`, `values.byName`, and generic `Enum` constraints are no longer available. Define application-specific ordering or labels explicitly, and add a fallback to previously exhaustive size switches. `fromJson` now preserves unrecognized sizes instead of returning `ImageSize.unknown`.
+
+### 2) Handle the new image-quality values
+
+`ImageQuality` adds `xhigh` and `max`. Add both branches to exhaustive quality switches, or retain a fallback for values your application does not handle specially.
+
+### 3) Update your pubspec
+
+```yaml
+dependencies:
+  openai_dart: ^10.0.0
+```
+
+Run `dart pub get` and update image-size and quality code as described above. Flutter projects should use `flutter pub get`.
+
+---
 
 ## Migrating from v8.x to v9.0.0
 

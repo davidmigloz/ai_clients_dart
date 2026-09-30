@@ -5,8 +5,8 @@
 ## Docs
 
 - [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/README.md) (~4.9k tokens): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/CHANGELOG.md) (~9.1k tokens): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/MIGRATION.md) (~6k tokens): Upgrade notes and breaking-change guidance.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/CHANGELOG.md) (~9k tokens): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/MIGRATION.md) (~6.2k tokens): Upgrade notes and breaking-change guidance.
 
 ## Examples
 
@@ -28,4 +28,4 @@
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/ollama_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~26.8k tokens**
+**Total: ~26.9k tokens**

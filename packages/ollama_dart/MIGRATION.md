@@ -6,9 +6,9 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
-## Adopting the latest Ollama API support (next major, unreleased)
+## Migrating from v3.x to v4.0.0
 
-Existing resource methods, constructors, thinking enums, and experimental image-generation fields remain available. The minimum Dart SDK stays at 3.12, with no new runtime dependencies.
+v4.0.0 adds `ThinkWithString` to the sealed thinking union. Exhaustive switches must handle this new branch. Existing resource methods, constructors, thinking enums, and experimental image-generation fields remain available. The minimum Dart SDK stays at 3.12, with no new runtime dependencies.
 
 Ollama 0.35.0 rejects image generation with HTTP 400 following its [temporary removal in 0.32.6](https://github.com/ollama/ollama/releases/tag/v0.32.6). The retained image fields and example require a compatible server.
 
@@ -21,11 +21,22 @@ Ollama 0.35.0 rejects image generation with HTTP 400 following its [temporary re
 
 Current Ollama servers no longer support LoRA adapters. The existing `CreateRequest.adapters` field remains available for older-server compatibility. GGUF models must be quantized before import; `quantize` and `draftQuantize` apply to Safetensors imports. Older model options that current servers ignore or reject remain available for compatibility; prefer the options documented by your server version.
 
-### Update exhaustive thinking switches
+### 1) Update exhaustive thinking switches
 
 `ThinkValue.fromJson('xhigh')` now returns `ThinkWithString('xhigh')` instead of discarding an unfamiliar string. Known enum names still decode as `ThinkWithLevel`.
 
-Handle the new subtype when matching every thinking variant:
+Before (v3.x):
+
+```dart
+import 'package:ollama_dart/ollama_dart.dart';
+
+String describeThinking(ThinkValue thinking) => switch (thinking) {
+  ThinkEnabled(:final value) => '$value',
+  ThinkWithLevel(:final level) => level.name,
+};
+```
+
+After (v4.0.0), handle the new subtype:
 
 ```dart
 import 'package:ollama_dart/ollama_dart.dart';
@@ -37,7 +48,14 @@ String describeThinking(ThinkValue thinking) => switch (thinking) {
 };
 ```
 
-The sealed hierarchy addition requires a major package release. Versioning and publishing are handled separately by the release workflow.
+### 2) Update your pubspec
+
+```yaml
+dependencies:
+  ollama_dart: ^4.0.0
+```
+
+Run `dart pub get` and update any exhaustive thinking switches. Flutter projects should use `flutter pub get`.
 
 See the [usage guide](README.md#usage) and runnable [examples](README.md#examples). OpenAI/Anthropic compatibility adapters, experimental server-control endpoints, and internal debug fields remain outside this package's native API coverage.
 

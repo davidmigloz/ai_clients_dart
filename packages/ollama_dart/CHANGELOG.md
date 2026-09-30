@@ -1,14 +1,11 @@
-## Unreleased
+## 4.0.0
 
-- **BREAKING** **FEAT**: Add `ThinkWithString` to the sealed `ThinkValue` hierarchy for arbitrary model-defined thinking levels. Exhaustive switches need a string branch; this change requires the next major release. Existing factories remain available.
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
 
-- **FEAT**: Support the local System One decision API with typed state, named choice/noul/score questions, answers, confidence, and usage. Requires Ollama v0.35.0+ and a compatible decision model.
-- **FEAT**: Add binary blob existence checks and uploads for file-based model creation, plus hosted web search/fetch using explicit cloud configuration.
-- **FEAT**: Discover model thinking values/defaults, preserve arbitrary thinking names, and expose cached prompt token counts in chat/generate responses and stream events.
-- **FEAT**: Complete public native fields for context truncation/shifting, tool identities and replay, model metadata/tensors, capabilities, and model creation.
-- **FIX**: Preserve binary request bodies through authentication, request-ID logging, and retries; complete web DTO value equality.
-- **DOCS**: Refresh upstream API references, import/deprecation guidance, migration notes, and examples. Existing constructors and compatibility fields remain available; the package version and dependencies are unchanged.
-- **DOCS**: Clarify that Ollama 0.35.0 rejects image generation following its temporary removal in 0.32.6. Retain experimental image fields for compatible servers.
+Adds [System One](https://docs.ollama.com/api/systemone) decision models, binary blob operations, and authenticated hosted web search/fetch, with complete thinking discovery, cached-token metrics, tool replay, context controls, and model metadata for Ollama 0.35.0. `ThinkValue` gains `ThinkWithString` for arbitrary model-defined levels, so exhaustive switches must handle the new variant; existing factories remain available. Binary uploads retain their bytes through authentication and logging, and experimental image fields remain available for compatible servers while [Ollama 0.35.0 rejects image generation](https://github.com/ollama/ollama/blob/v0.35.0/server/routes.go#L443-L446).
+
+- **BREAKING** **FEAT**: Add System One, blobs, and web APIs ([#311](https://github.com/davidmigloz/ai_clients_dart/issues/311)). ([d3bd6c1c](https://github.com/davidmigloz/ai_clients_dart/commit/d3bd6c1ce573b3ea2830285d846374e0a6df6cac))
 
 ## 3.0.0
 

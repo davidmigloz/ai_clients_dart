@@ -30,7 +30,7 @@ The AI provider clients share a consistent shape — pick one and start with a f
 
 ```yaml
 dependencies:
-  openai_dart: ^3.0.0
+  openai_dart: ^10.0.0
 ```
 
 ```dart
@@ -124,7 +124,7 @@ Future<void> main() async {
 
 ```yaml
 dependencies:
-  ollama_dart: ^3.0.0
+  ollama_dart: ^4.0.0
 ```
 
 ```dart

@@ -65,7 +65,7 @@ Requires Dart 3.12 or later. See the [Migration Guide](MIGRATION.md) for upgrade
 
 ```yaml
 dependencies:
-  ollama_dart: ^3.0.0
+  ollama_dart: ^4.0.0
 ```
 
 ```dart
