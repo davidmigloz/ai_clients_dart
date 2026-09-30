@@ -55,11 +55,8 @@ class AuthInterceptor implements Interceptor {
         ..headers.addAll(original.headers)
         ..followRedirects = original.followRedirects
         ..maxRedirects = original.maxRedirects
-        ..persistentConnection = original.persistentConnection;
-
-      if (original.body.isNotEmpty) {
-        copy.body = original.body;
-      }
+        ..persistentConnection = original.persistentConnection
+        ..bodyBytes = original.bodyBytes;
 
       return copy;
     }
