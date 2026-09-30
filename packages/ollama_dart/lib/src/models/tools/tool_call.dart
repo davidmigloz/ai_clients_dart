@@ -15,16 +15,21 @@ class ToolCallFunction {
   /// JSON object of arguments to pass to the function.
   final Map<String, dynamic>? arguments;
 
+  /// Index identifying this function call among the model's tool calls.
+  final int? index;
+
   /// Creates a [ToolCallFunction].
   const ToolCallFunction({
     required this.name,
     this.description,
     this.arguments,
+    this.index,
   });
 
   /// Creates a [ToolCallFunction] from JSON.
   factory ToolCallFunction.fromJson(Map<String, dynamic> json) =>
       ToolCallFunction(
+        index: json['index'] as int?,
         name: json['name'] as String,
         description: json['description'] as String?,
         arguments: json['arguments'] as Map<String, dynamic>?,
@@ -32,6 +37,7 @@ class ToolCallFunction {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (index != null) 'index': index,
     'name': name,
     if (description != null) 'description': description,
     if (arguments != null) 'arguments': arguments,
@@ -39,11 +45,13 @@ class ToolCallFunction {
 
   /// Creates a copy with replaced values.
   ToolCallFunction copyWith({
+    Object? index = unsetCopyWithValue,
     String? name,
     Object? description = unsetCopyWithValue,
     Object? arguments = unsetCopyWithValue,
   }) {
     return ToolCallFunction(
+      index: identical(index, unsetCopyWithValue) ? this.index : index as int?,
       name: name ?? this.name,
       description: description == unsetCopyWithValue
           ? this.description
@@ -61,18 +69,20 @@ class ToolCallFunction {
           runtimeType == other.runtimeType &&
           name == other.name &&
           description == other.description &&
-          mapsDeepEqual(arguments, other.arguments);
+          mapsDeepEqual(arguments, other.arguments) &&
+          index == other.index;
 
   @override
   int get hashCode =>
-      Object.hash(name, description, mapDeepHashCode(arguments));
+      Object.hashAll([name, description, mapDeepHashCode(arguments), index]);
 
   @override
   String toString() =>
       'ToolCallFunction('
       'name: $name, '
       'description: $description, '
-      'arguments: $arguments)';
+      'arguments: $arguments, '
+      'index: $index)';
 }
 
 /// A tool call produced by the model.
@@ -81,11 +91,15 @@ class ToolCall {
   /// The function to call.
   final ToolCallFunction? function;
 
+  /// Identifier used to associate this call with a tool result.
+  final String? id;
+
   /// Creates a [ToolCall].
-  const ToolCall({this.function});
+  const ToolCall({this.function, this.id});
 
   /// Creates a [ToolCall] from JSON.
   factory ToolCall.fromJson(Map<String, dynamic> json) => ToolCall(
+    id: json['id'] as String?,
     function: json['function'] != null
         ? ToolCallFunction.fromJson(json['function'] as Map<String, dynamic>)
         : null,
@@ -93,12 +107,17 @@ class ToolCall {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (id != null) 'id': id,
     if (function != null) 'function': function!.toJson(),
   };
 
   /// Creates a copy with replaced values.
-  ToolCall copyWith({Object? function = unsetCopyWithValue}) {
+  ToolCall copyWith({
+    Object? id = unsetCopyWithValue,
+    Object? function = unsetCopyWithValue,
+  }) {
     return ToolCall(
+      id: identical(id, unsetCopyWithValue) ? this.id : id as String?,
       function: function == unsetCopyWithValue
           ? this.function
           : function as ToolCallFunction?,
@@ -110,11 +129,15 @@ class ToolCall {
       identical(this, other) ||
       other is ToolCall &&
           runtimeType == other.runtimeType &&
-          function == other.function;
+          function == other.function &&
+          id == other.id;
 
   @override
-  int get hashCode => function.hashCode;
+  int get hashCode => Object.hashAll([function, id]);
 
   @override
-  String toString() => 'ToolCall(function: $function)';
+  String toString() =>
+      'ToolCall('
+      'function: $function, '
+      'id: $id)';
 }

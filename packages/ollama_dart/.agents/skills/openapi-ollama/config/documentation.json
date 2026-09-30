@@ -19,7 +19,10 @@
     "completions": "completions",
     "embeddings": "embeddings",
     "models": "models",
-    "version": "version"
+    "version": "version",
+    "system_one": "system_one",
+    "blobs": "blobs",
+    "web": "web"
   },
   "excluded_from_examples": [],
   "drift_patterns": [

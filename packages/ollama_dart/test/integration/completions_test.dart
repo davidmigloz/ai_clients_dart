@@ -55,13 +55,16 @@ void main() {
       final response = await client.completions.generate(
         request: GenerateRequest(
           model: model,
-          prompt: 'Describe yourself',
-          system: 'You are a helpful robot named Robo.',
+          prompt: 'What is your test label? Output only the label.',
+          system:
+              'Your test label is Robo. When asked for your test label, '
+              'respond with exactly Robo.',
+          options: const ModelOptions(temperature: 0, seed: 42),
         ),
       );
 
       expect(response.response, isNotNull);
-      expect(response.response!.toLowerCase(), contains('robo'));
+      expect(response.response!.trim(), 'Robo');
     });
 
     test('JSON format works', () async {
@@ -113,14 +116,21 @@ void main() {
               'List the numbers from 1 to 9 in order. '
               'Output ONLY the numbers in one line without any spaces or commas. '
               'NUMBERS:',
-          options: const ModelOptions(stop: StopList(['4'])),
+          options: const ModelOptions(
+            stop: StopList(['4']),
+            temperature: 0,
+            seed: 42,
+          ),
         ),
       );
 
       expect(response.response, isNotNull);
-      final output = response.response!.replaceAll(RegExp(r'[\s\n]'), '');
-      expect(output, contains('123'));
-      expect(output, isNot(contains('456789')));
+      // Reasoning models can encounter the stop token in their thinking before
+      // producing visible text. Check both output channels and the stop reason.
+      final output = '${response.thinking ?? ''}${response.response ?? ''}';
+      expect(response.done, isTrue);
+      expect(response.doneReason, DoneReason.stop);
+      expect(output, isNot(contains('4')));
     });
 
     test('image input works with vision model', () async {

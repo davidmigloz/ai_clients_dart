@@ -30,7 +30,10 @@ class CreateRequest {
   /// Message history to use for the model.
   final List<ChatMessage>? messages;
 
-  /// Quantization level to apply (e.g., `q4_K_M`, `q8_0`).
+  /// Quantization format for Safetensors weights during import (e.g., `nvfp4`).
+  ///
+  /// Ollama v0.35.0 does not quantize GGUF files during import; prepare and
+  /// quantize those files before uploading them.
   final String? quantize;
 
   /// Name of the renderer for the model (e.g., `qwen3.5`). Selects the
@@ -43,27 +46,32 @@ class CreateRequest {
 
   /// Map of file names to SHA256 digests of blobs to create the model from.
   ///
-  /// Sourced from Ollama `api/types.go` + `docs/api.md`; not yet in the
-  /// upstream OpenAPI spec.
+  /// Upload the corresponding file bytes through the client's blobs resource
+  /// before referencing their digests here. Split GGUF models must include
+  /// every shard under its original split filename.
+  ///
+  /// Documented in Ollama v0.35.0's
+  /// [OpenAPI specification](https://github.com/ollama/ollama/blob/v0.35.0/docs/openapi.yaml).
   final Map<String, String>? files;
 
   /// Map of LoRA adapter file names to SHA256 digests of blobs.
+  ///
+  /// Retained for older servers. Ollama 0.35.0 no longer supports LoRA adapters.
   ///
   /// Sourced from Ollama `api/types.go` + `docs/api.md`; not yet in the
   /// upstream OpenAPI spec.
   final Map<String, String>? adapters;
 
-  /// Quantization format for the draft model (speculative decoding).
+  /// Quantization format for Safetensors draft weights during import.
   ///
-  /// Sourced from Ollama `api/types.go` + `docs/api.md`; not yet in the
-  /// upstream OpenAPI spec.
+  /// Used for speculative decoding. Draft GGUF files must be quantized before
+  /// import. Documented in the Ollama v0.35.0 OpenAPI specification.
   final String? draftQuantize;
 
   /// Map of file names to SHA256 digests for the draft model (speculative
   /// decoding).
   ///
-  /// Sourced from Ollama `api/types.go` + `docs/api.md`; not yet in the
-  /// upstream OpenAPI spec.
+  /// Documented in the Ollama v0.35.0 OpenAPI specification.
   final Map<String, String>? draftFiles;
 
   /// URL of the upstream Ollama API for the model, if any.
@@ -74,8 +82,7 @@ class CreateRequest {
 
   /// Minimum version of Ollama required by the model.
   ///
-  /// Sourced from Ollama `api/types.go` + `docs/api.md`; not yet in the
-  /// upstream OpenAPI spec.
+  /// Documented in the Ollama v0.35.0 OpenAPI specification.
   final String? requires;
 
   /// Additional information for the model.

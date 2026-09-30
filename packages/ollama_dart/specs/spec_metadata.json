@@ -2,10 +2,19 @@
   "specs": {
     "main": {
       "current_version": "0.1.0",
-      "last_fetched": "2026-08-02T05:59:42.284937Z",
-      "source_url": "https://raw.githubusercontent.com/ollama/ollama/refs/heads/main/docs/openapi.yaml",
+      "last_fetched": "2026-09-30T10:27:34.541321Z",
+      "source_url": "https://raw.githubusercontent.com/ollama/ollama/1abe35e6e6e777e858bbfbba283667ee8d516801/docs/openapi.yaml",
       "title": "Ollama API",
-      "version_history": []
+      "version_history": [
+        {
+          "version": "0.1.0",
+          "fetched_at": "2026-08-02T05:59:42.284937Z",
+          "source_url": "https://raw.githubusercontent.com/ollama/ollama/refs/heads/main/docs/openapi.yaml"
+        }
+      ],
+      "source_commit": "1abe35e6e6e777e858bbfbba283667ee8d516801",
+      "target_release": "v0.35.0",
+      "target_release_commit": "cc4069396f3ad2c370c53eed2e4a42ac13adab84"
     }
   }
 }

@@ -1,9 +1,14 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import 'model_details.dart';
 
 /// Summary information for a locally available model.
+///
+/// [ModelSummary.fromJson] and [copyWith] copy and freeze [capabilities]. The
+/// const constructor retains the supplied list, which callers should keep
+/// immutable.
 @immutable
 class ModelSummary {
   /// Display name including tag (e.g., `llama3.2:latest`).
@@ -30,6 +35,9 @@ class ModelSummary {
   /// Additional information about the model's format and family.
   final ModelDetails? details;
 
+  /// Supported model capabilities, when returned by the server.
+  final List<String>? capabilities;
+
   /// Creates a [ModelSummary].
   const ModelSummary({
     this.name,
@@ -40,10 +48,12 @@ class ModelSummary {
     this.size,
     this.digest,
     this.details,
+    this.capabilities,
   });
 
   /// Creates a [ModelSummary] from JSON.
   factory ModelSummary.fromJson(Map<String, dynamic> json) => ModelSummary(
+    capabilities: _freezeList((json['capabilities'] as List?)?.cast<String>()),
     name: json['name'] as String?,
     model: json['model'] as String?,
     remoteModel: json['remote_model'] as String?,
@@ -58,6 +68,7 @@ class ModelSummary {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (capabilities != null) 'capabilities': capabilities,
     if (name != null) 'name': name,
     if (model != null) 'model': model,
     if (remoteModel != null) 'remote_model': remoteModel,
@@ -70,6 +81,7 @@ class ModelSummary {
 
   /// Creates a copy with replaced values.
   ModelSummary copyWith({
+    Object? capabilities = unsetCopyWithValue,
     Object? name = unsetCopyWithValue,
     Object? model = unsetCopyWithValue,
     Object? remoteModel = unsetCopyWithValue,
@@ -80,6 +92,11 @@ class ModelSummary {
     Object? details = unsetCopyWithValue,
   }) {
     return ModelSummary(
+      capabilities: _freezeList(
+        identical(capabilities, unsetCopyWithValue)
+            ? this.capabilities
+            : capabilities as List<String>?,
+      ),
       name: name == unsetCopyWithValue ? this.name : name as String?,
       model: model == unsetCopyWithValue ? this.model : model as String?,
       remoteModel: remoteModel == unsetCopyWithValue
@@ -111,10 +128,11 @@ class ModelSummary {
           modifiedAt == other.modifiedAt &&
           size == other.size &&
           digest == other.digest &&
-          details == other.details;
+          details == other.details &&
+          listsEqual(capabilities, other.capabilities);
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     name,
     model,
     remoteModel,
@@ -123,7 +141,8 @@ class ModelSummary {
     size,
     digest,
     details,
-  );
+    listHash(capabilities),
+  ]);
 
   @override
   String toString() =>
@@ -135,5 +154,9 @@ class ModelSummary {
       'modifiedAt: $modifiedAt, '
       'size: $size, '
       'digest: $digest, '
-      'details: $details)';
+      'details: $details, '
+      'capabilities: $capabilities)';
 }
+
+List<T>? _freezeList<T>(Iterable<T>? values) =>
+    values == null ? null : List<T>.unmodifiable(values);

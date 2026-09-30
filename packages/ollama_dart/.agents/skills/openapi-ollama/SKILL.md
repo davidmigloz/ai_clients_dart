@@ -44,7 +44,8 @@ python3 .agents/shared/api-toolkit/scripts/api_toolkit.py verify   --config-dir 
 
 ```bash
 cd packages/ollama_dart
+dart format --show=none --summary=line .
+dart fix --apply
 dart analyze --fatal-infos
-dart format --set-exit-if-changed .
-dart test test/unit/
+dart test --reporter=failures-only test/unit/
 ```

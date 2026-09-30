@@ -6,6 +6,11 @@ import 'package:ollama_dart/ollama_dart.dart';
 
 /// Example demonstrating experimental image generation via `/api/generate`.
 ///
+/// Ollama 0.35.0 rejects image generation with HTTP 400. Support was temporarily
+/// removed in 0.32.6; upstream identifies 0.32.5 as the last supported release:
+/// https://github.com/ollama/ollama/releases/tag/v0.32.6
+/// Run this example only against a server that supports image generation.
+///
 /// Image generation is experimental in Ollama and only works with image
 /// generation models (e.g. `x/z-image-turbo`). The `width`, `height`, and
 /// `steps` request parameters — and the `image`/`completed`/`total` response

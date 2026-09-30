@@ -6,6 +6,43 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Adopting the latest Ollama API support (next major, unreleased)
+
+Existing resource methods, constructors, thinking enums, and experimental image-generation fields remain available. The minimum Dart SDK stays at 3.12, with no new runtime dependencies.
+
+Ollama 0.35.0 rejects image generation with HTTP 400 following its [temporary removal in 0.32.6](https://github.com/ollama/ollama/releases/tag/v0.32.6). The retained image fields and example require a compatible server.
+
+- Use `client.systemOne.create(...)` for typed choice, yes/no probability, and ordered-score questions. This endpoint requires Ollama v0.35.0 or later and a compatible local model such as `nimble`.
+- Use `client.blobs.exists(...)` and `client.blobs.create(...)` before creating a model from `CreateRequest.files`. Supply the real SHA256 digest and preserve original file names, including split-GGUF shard names.
+- Use `client.web.search(...)` and `client.web.fetch(...)` with a cloud client configured as `OllamaClient.withApiKey(key, baseUrl: 'https://ollama.com')`. Methods use that configured host; the default local host does not expose these hosted endpoint paths.
+- Read `ShowResponse.thinking` for supported values and `defaultValue`. `ThinkValue.string(...)` preserves model-defined names; existing boolean and enum factories remain valid. Exhaustive switches over `ThinkValue` must also handle the new `ThinkWithString` variant.
+- `promptEvalCachedCount` is optional on chat/generate responses and stream events. Older servers may omit it. `promptEvalCount` includes cached tokens; `promptEvalDuration` measures evaluation of uncached tokens.
+- Preserve assistant content, thinking, and tool calls when building follow-up history. Attach `toolName` and, when supplied, `toolCallId: call.id` to each tool result. Tool call IDs and function indices now round-trip through the client.
+
+Current Ollama servers no longer support LoRA adapters. The existing `CreateRequest.adapters` field remains available for older-server compatibility. GGUF models must be quantized before import; `quantize` and `draftQuantize` apply to Safetensors imports. Older model options that current servers ignore or reject remain available for compatibility; prefer the options documented by your server version.
+
+### Update exhaustive thinking switches
+
+`ThinkValue.fromJson('xhigh')` now returns `ThinkWithString('xhigh')` instead of discarding an unfamiliar string. Known enum names still decode as `ThinkWithLevel`.
+
+Handle the new subtype when matching every thinking variant:
+
+```dart
+import 'package:ollama_dart/ollama_dart.dart';
+
+String describeThinking(ThinkValue thinking) => switch (thinking) {
+  ThinkEnabled(:final value) => '$value',
+  ThinkWithLevel(:final level) => level.name,
+  ThinkWithString(:final value) => value,
+};
+```
+
+The sealed hierarchy addition requires a major package release. Versioning and publishing are handled separately by the release workflow.
+
+See the [usage guide](README.md#usage) and runnable [examples](README.md#examples). OpenAI/Anthropic compatibility adapters, experimental server-control endpoints, and internal debug fields remain outside this package's native API coverage.
+
+---
+
 ## Migrating from v2.x to v3.0.0
 
 v3.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.

@@ -55,6 +55,7 @@ void main() async {
     print('Total duration: ${metaResponse.totalDuration ?? 0}ns');
     print('Load duration: ${metaResponse.loadDuration ?? 0}ns');
     print('Prompt eval count: ${metaResponse.promptEvalCount ?? 0} tokens');
+    print('Cached prompt tokens: ${metaResponse.promptEvalCachedCount}');
     print('Eval count: ${metaResponse.evalCount ?? 0} tokens');
     print('');
 
@@ -95,14 +96,14 @@ void main() async {
     print('JSON: ${jsonResponse.response}');
     print('');
 
-    // Thinking mode (for models that support it)
+    // Thinking mode: discover supported values and defaults through models.show.
     print('--- Thinking Mode ---');
     final thinkingResponse = await client.completions.generate(
       request: const GenerateRequest(
         model: 'gpt-oss',
         prompt: 'What is 15 * 7?',
         think: ThinkEnabled(true),
-        // Or use a specific level: ThinkWithLevel(ThinkLevel.high)
+        // Or use a model-defined name: ThinkValue.string('high')
       ),
     );
     if (thinkingResponse.thinking != null) {

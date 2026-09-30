@@ -33,17 +33,22 @@ import 'config.dart';
 /// ## Example
 ///
 /// ```dart
-/// final wrapper = RetryWrapper(config: config);
-///
-/// final response = await wrapper.executeWithRetry(
-///   request,
-///   () async {
-///     final streamedResponse = await httpClient.send(request);
-///     return http.Response.fromStream(streamedResponse);
-///   },
-///   null,
-///   'req_123',
-/// );
+/// Future<http.Response> fetchVersion(http.Client httpClient) async {
+///   final wrapper = RetryWrapper(config: const OllamaConfig());
+///   final request = http.Request(
+///     'GET', Uri.parse('http://localhost:11434/api/version'),
+///   );
+///   return wrapper.executeWithRetry(
+///     request,
+///     () async {
+///       // Each attempt needs a fresh request: a request is finalized once.
+///       final attempt = http.Request(request.method, request.url);
+///       return http.Response.fromStream(await httpClient.send(attempt));
+///     },
+///     null,
+///     'req_123',
+///   );
+/// }
 /// ```
 class RetryWrapper {
   /// Creates a [RetryWrapper] with the given configuration.

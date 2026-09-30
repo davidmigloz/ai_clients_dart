@@ -10,7 +10,7 @@ import 'chat_message.dart';
 /// Response message from the assistant.
 @immutable
 class ChatResponseMessage {
-  /// Always `assistant` for model responses.
+  /// Author role, which may be absent in a partial streaming message.
   final MessageRole? role;
 
   /// Assistant message text.
@@ -25,6 +25,12 @@ class ChatResponseMessage {
   /// Optional base64-encoded images in the response.
   final List<String>? images;
 
+  /// Name of the tool whose result this message contains.
+  final String? toolName;
+
+  /// Identifier of the tool call associated with this result message.
+  final String? toolCallId;
+
   /// Creates a [ChatResponseMessage].
   const ChatResponseMessage({
     this.role,
@@ -32,11 +38,15 @@ class ChatResponseMessage {
     this.thinking,
     this.toolCalls,
     this.images,
+    this.toolName,
+    this.toolCallId,
   });
 
   /// Creates a [ChatResponseMessage] from JSON.
   factory ChatResponseMessage.fromJson(Map<String, dynamic> json) =>
       ChatResponseMessage(
+        toolName: json['tool_name'] as String?,
+        toolCallId: json['tool_call_id'] as String?,
         role: messageRoleFromNullableString(json['role'] as String?),
         content: json['content'] as String?,
         thinking: json['thinking'] as String?,
@@ -48,6 +58,8 @@ class ChatResponseMessage {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (toolName != null) 'tool_name': toolName,
+    if (toolCallId != null) 'tool_call_id': toolCallId,
     if (role != null) 'role': messageRoleToString(role!),
     if (content != null) 'content': content,
     if (thinking != null) 'thinking': thinking,
@@ -55,6 +67,41 @@ class ChatResponseMessage {
       'tool_calls': toolCalls!.map((e) => e.toJson()).toList(),
     if (images != null) 'images': images,
   };
+
+  /// Creates a copy with replaced values.
+  ChatResponseMessage copyWith({
+    Object? role = unsetCopyWithValue,
+    Object? content = unsetCopyWithValue,
+    Object? thinking = unsetCopyWithValue,
+    Object? toolCalls = unsetCopyWithValue,
+    Object? images = unsetCopyWithValue,
+    Object? toolName = unsetCopyWithValue,
+    Object? toolCallId = unsetCopyWithValue,
+  }) {
+    return ChatResponseMessage(
+      role: identical(role, unsetCopyWithValue)
+          ? this.role
+          : role as MessageRole?,
+      content: identical(content, unsetCopyWithValue)
+          ? this.content
+          : content as String?,
+      thinking: identical(thinking, unsetCopyWithValue)
+          ? this.thinking
+          : thinking as String?,
+      toolCalls: identical(toolCalls, unsetCopyWithValue)
+          ? this.toolCalls
+          : toolCalls as List<ToolCall>?,
+      images: identical(images, unsetCopyWithValue)
+          ? this.images
+          : images as List<String>?,
+      toolName: identical(toolName, unsetCopyWithValue)
+          ? this.toolName
+          : toolName as String?,
+      toolCallId: identical(toolCallId, unsetCopyWithValue)
+          ? this.toolCallId
+          : toolCallId as String?,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -65,16 +112,20 @@ class ChatResponseMessage {
           content == other.content &&
           thinking == other.thinking &&
           listsEqual(toolCalls, other.toolCalls) &&
-          listsEqual(images, other.images);
+          listsEqual(images, other.images) &&
+          toolName == other.toolName &&
+          toolCallId == other.toolCallId;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     role,
     content,
     thinking,
     listHash(toolCalls),
     listHash(images),
-  );
+    toolName,
+    toolCallId,
+  ]);
 
   @override
   String toString() =>
@@ -83,7 +134,9 @@ class ChatResponseMessage {
       'content: $content, '
       'thinking: $thinking, '
       'toolCalls: $toolCalls, '
-      'images: $images)';
+      'images: $images, '
+      'toolName: $toolName, '
+      'toolCallId: $toolCallId)';
 }
 
 /// Response from chat completion.
@@ -131,6 +184,9 @@ class ChatResponse {
   /// Log probability information for generated tokens.
   final List<Logprob>? logprobs;
 
+  /// Number of prompt tokens read from the cache, when reported by the server.
+  final int? promptEvalCachedCount;
+
   /// Creates a [ChatResponse].
   const ChatResponse({
     this.model,
@@ -147,10 +203,12 @@ class ChatResponse {
     this.evalCount,
     this.evalDuration,
     this.logprobs,
+    this.promptEvalCachedCount,
   });
 
   /// Creates a [ChatResponse] from JSON.
   factory ChatResponse.fromJson(Map<String, dynamic> json) => ChatResponse(
+    promptEvalCachedCount: json['prompt_eval_cached_count'] as int?,
     model: json['model'] as String?,
     remoteModel: json['remote_model'] as String?,
     remoteHost: json['remote_host'] as String?,
@@ -173,6 +231,8 @@ class ChatResponse {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (promptEvalCachedCount != null)
+      'prompt_eval_cached_count': promptEvalCachedCount,
     if (model != null) 'model': model,
     if (remoteModel != null) 'remote_model': remoteModel,
     if (remoteHost != null) 'remote_host': remoteHost,
@@ -191,6 +251,7 @@ class ChatResponse {
 
   /// Creates a copy with replaced values.
   ChatResponse copyWith({
+    Object? promptEvalCachedCount = unsetCopyWithValue,
     Object? model = unsetCopyWithValue,
     Object? remoteModel = unsetCopyWithValue,
     Object? remoteHost = unsetCopyWithValue,
@@ -207,6 +268,10 @@ class ChatResponse {
     Object? logprobs = unsetCopyWithValue,
   }) {
     return ChatResponse(
+      promptEvalCachedCount:
+          identical(promptEvalCachedCount, unsetCopyWithValue)
+          ? this.promptEvalCachedCount
+          : promptEvalCachedCount as int?,
       model: model == unsetCopyWithValue ? this.model : model as String?,
       remoteModel: remoteModel == unsetCopyWithValue
           ? this.remoteModel
@@ -266,7 +331,8 @@ class ChatResponse {
           promptEvalDuration == other.promptEvalDuration &&
           evalCount == other.evalCount &&
           evalDuration == other.evalDuration &&
-          listsEqual(logprobs, other.logprobs);
+          listsEqual(logprobs, other.logprobs) &&
+          promptEvalCachedCount == other.promptEvalCachedCount;
 
   @override
   int get hashCode => Object.hashAll([
@@ -284,6 +350,7 @@ class ChatResponse {
     evalCount,
     evalDuration,
     listHash(logprobs),
+    promptEvalCachedCount,
   ]);
 
   @override
@@ -302,5 +369,6 @@ class ChatResponse {
       'promptEvalDuration: $promptEvalDuration, '
       'evalCount: $evalCount, '
       'evalDuration: $evalDuration, '
-      'logprobs: $logprobs)';
+      'logprobs: $logprobs, '
+      'promptEvalCachedCount: $promptEvalCachedCount)';
 }

@@ -12,7 +12,7 @@ void main() async {
     print('--- Streaming Chat ---');
     stdout.write('Assistant: ');
 
-    var totalTokens = 0;
+    var chunksReceived = 0;
     await for (final chunk in client.chat.createStream(
       request: const ChatRequest(
         model: 'gpt-oss',
@@ -22,15 +22,24 @@ void main() async {
       ),
     )) {
       stdout.write(chunk.message?.content ?? '');
-      totalTokens++;
+      chunksReceived++;
 
       // The last chunk has done=true and includes statistics
       if (chunk.done ?? false) {
         print('\n');
         print('Stream complete!');
+        print('Prompt tokens: ${chunk.promptEvalCount ?? 'not reported'}');
+        print(
+          'Cached prompt tokens: ${chunk.promptEvalCachedCount ?? 'not reported'}',
+        );
+        print('Generated tokens: ${chunk.evalCount ?? 'not reported'}');
+        if (chunk.promptEvalDuration != null) {
+          print('Uncached prompt evaluation: ${chunk.promptEvalDuration}ns');
+        }
       }
     }
-    print('Received $totalTokens chunks');
+    // A streamed chunk can contain multiple tokens; use the final evalCount.
+    print('Received $chunksReceived chunks');
 
     // Streaming text generation
     print('\n--- Streaming Text Generation ---');
@@ -52,6 +61,13 @@ void main() async {
         }
         if (chunk.evalCount != null) {
           print('Tokens generated: ${chunk.evalCount}');
+        }
+        print('Prompt tokens: ${chunk.promptEvalCount ?? 'not reported'}');
+        print(
+          'Cached prompt tokens: ${chunk.promptEvalCachedCount ?? 'not reported'}',
+        );
+        if (chunk.promptEvalDuration != null) {
+          print('Uncached prompt evaluation: ${chunk.promptEvalDuration}ns');
         }
       }
     }

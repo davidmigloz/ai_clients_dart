@@ -124,7 +124,7 @@ Future<void> main() async {
 
 ```yaml
 dependencies:
-  ollama_dart: ^2.0.0
+  ollama_dart: ^3.0.0
 ```
 
 ```dart
@@ -158,7 +158,7 @@ Future<void> main() async {
 | [anthropic_sdk_dart](https://pub.dev/packages/anthropic_sdk_dart) | [Anthropic](https://docs.anthropic.com/en/api) — Claude messages, streaming, tools, extended thinking | [![anthropic_sdk_dart](https://img.shields.io/pub/v/anthropic_sdk_dart.svg)](https://pub.dev/packages/anthropic_sdk_dart) | ![anthropic_sdk_dart monthly downloads](https://img.shields.io/pub/dm/anthropic_sdk_dart) |
 | [googleai_dart](https://pub.dev/packages/googleai_dart) | [Google AI](https://ai.google.dev/) / [Vertex AI](https://cloud.google.com/vertex-ai) (Gemini Enterprise Agent Platform) — Gemini generation, embeddings, Live API | [![googleai_dart](https://img.shields.io/pub/v/googleai_dart.svg)](https://pub.dev/packages/googleai_dart) | ![googleai_dart monthly downloads](https://img.shields.io/pub/dm/googleai_dart) |
 | [mistralai_dart](https://pub.dev/packages/mistralai_dart) | [Mistral AI](https://docs.mistral.ai/api) — chat, embeddings, OCR, TTS, reasoning, agents | [![mistralai_dart](https://img.shields.io/pub/v/mistralai_dart.svg)](https://pub.dev/packages/mistralai_dart) | ![mistralai_dart monthly downloads](https://img.shields.io/pub/dm/mistralai_dart) |
-| [ollama_dart](https://pub.dev/packages/ollama_dart) | [Ollama](https://ollama.com/) — local chat, streaming, embeddings, tool calling | [![ollama_dart](https://img.shields.io/pub/v/ollama_dart.svg)](https://pub.dev/packages/ollama_dart) | ![ollama_dart monthly downloads](https://img.shields.io/pub/dm/ollama_dart) |
+| [ollama_dart](https://pub.dev/packages/ollama_dart) | [Ollama](https://ollama.com/) — chat, streaming, embeddings, tools, System One decisions, model management, and cloud web search | [![ollama_dart](https://img.shields.io/pub/v/ollama_dart.svg)](https://pub.dev/packages/ollama_dart) | ![ollama_dart monthly downloads](https://img.shields.io/pub/dm/ollama_dart) |
 | [open_responses](https://pub.dev/packages/open_responses) | [OpenResponses](https://www.openresponses.org/) — one typed interface, multiple providers | [![open_responses](https://img.shields.io/pub/v/open_responses.svg)](https://pub.dev/packages/open_responses) | ![open_responses monthly downloads](https://img.shields.io/pub/dm/open_responses) |
 | [chromadb](https://pub.dev/packages/chromadb) | [ChromaDB](https://www.trychroma.com/) — vector search, collections, multi-tenant RAG | [![chromadb](https://img.shields.io/pub/v/chromadb.svg)](https://pub.dev/packages/chromadb) | ![chromadb monthly downloads](https://img.shields.io/pub/dm/chromadb) |
 | [openai_realtime_dart](https://pub.dev/packages/openai_realtime_dart) | [OpenAI Realtime](https://platform.openai.com/docs/guides/realtime) — lower-level WebSocket sessions | [![openai_realtime_dart](https://img.shields.io/pub/v/openai_realtime_dart.svg)](https://pub.dev/packages/openai_realtime_dart) | ![openai_realtime_dart monthly downloads](https://img.shields.io/pub/dm/openai_realtime_dart) |

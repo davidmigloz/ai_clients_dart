@@ -5,11 +5,14 @@ import '../interceptors/auth_interceptor.dart';
 import '../interceptors/error_interceptor.dart';
 import '../interceptors/interceptor.dart';
 import '../interceptors/logging_interceptor.dart';
+import '../resources/blobs_resource.dart';
 import '../resources/chat_resource.dart';
 import '../resources/completions_resource.dart';
 import '../resources/embeddings_resource.dart';
 import '../resources/models_resource.dart';
+import '../resources/system_one_resource.dart';
 import '../resources/version_resource.dart';
+import '../resources/web_resource.dart';
 import 'config.dart';
 import 'interceptor_chain.dart';
 import 'request_builder.dart';
@@ -28,6 +31,9 @@ import 'retry_wrapper.dart';
 /// - [embeddings] - Text embeddings (embed endpoint)
 /// - [models] - Model management (list, show, create, copy, delete, pull, push)
 /// - [version] - Server version information
+/// - [systemOne] - Local decision models (choice, probability, score)
+/// - [blobs] - Local binary model-file storage
+/// - [web] - Hosted web search/fetch, using an authenticated cloud client
 ///
 /// ## Example Usage
 ///
@@ -59,7 +65,7 @@ import 'retry_wrapper.dart';
 ///
 /// // List models
 /// final models = await client.models.list();
-/// for (final model in models.models ?? []) {
+/// for (final model in models.models ?? const <ModelSummary>[]) {
 ///   print(model.name);
 /// }
 ///
@@ -106,6 +112,15 @@ class OllamaClient {
 
   /// Resource for server version information.
   late final VersionResource version;
+
+  /// Resource for local System One decision models (Ollama 0.35.0 or later).
+  late final SystemOneResource systemOne;
+
+  /// Resource for local model-file blob storage.
+  late final BlobsResource blobs;
+
+  /// Hosted web APIs; configure `https://ollama.com` and bearer authentication.
+  late final WebResource web;
 
   /// Creates an [OllamaClient].
   ///
@@ -176,6 +191,30 @@ class OllamaClient {
       ensureNotClosed: _ensureNotClosed,
     );
 
+    systemOne = SystemOneResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    blobs = BlobsResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    web = WebResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
     version = VersionResource(
       config: this.config,
       httpClient: _httpClient,
@@ -196,6 +235,8 @@ class OllamaClient {
   ///
   /// This is a convenience constructor for remote Ollama servers
   /// that require authentication (e.g., behind a reverse proxy).
+  /// For Ollama Cloud inference and web APIs, set [baseUrl] to
+  /// `https://ollama.com`. The default remains the local server.
   ///
   /// Optionally accepts a [baseUrl] to override the default
   /// `http://localhost:11434`.

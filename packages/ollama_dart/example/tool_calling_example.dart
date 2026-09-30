@@ -70,18 +70,31 @@ void main() async {
       }
 
       // Simulate tool execution
-      final toolResults = <String>[];
+      final toolResults = <ChatMessage>[];
       for (final call in toolCalls) {
-        if (call.function?.name == 'get_weather') {
-          // Simulate weather API response
-          final result = jsonEncode({
+        final function = call.function;
+        if (function == null) continue;
+        // Demonstration fixtures only; no external tool services are called.
+        final result = switch (function.name) {
+          'get_weather' => jsonEncode({
             'temperature': 15,
             'unit': 'celsius',
             'condition': 'cloudy',
-            'location': call.function?.arguments?['location'],
-          });
-          toolResults.add(result);
-        }
+            'location': function.arguments?['location'],
+          }),
+          'search_web' => jsonEncode({
+            'query': function.arguments?['query'],
+            'results': ['This is a simulated search result.'],
+          }),
+          _ => jsonEncode({'error': 'Unknown tool: ${function.name}'}),
+        };
+        toolResults.add(
+          ChatMessage.tool(
+            result,
+            toolName: function.name,
+            toolCallId: call.id,
+          ),
+        );
       }
 
       // Send tool results back to the model
@@ -91,12 +104,12 @@ void main() async {
           model: 'gpt-oss',
           messages: [
             const ChatMessage.user('What is the weather in London?'),
-            ChatMessage(
-              role: MessageRole.assistant,
-              content: '',
+            ChatMessage.assistant(
+              response.message?.content ?? '',
+              thinking: response.message?.thinking,
               toolCalls: toolCalls,
             ),
-            for (final result in toolResults) ChatMessage.tool(result),
+            ...toolResults,
           ],
           tools: tools,
         ),

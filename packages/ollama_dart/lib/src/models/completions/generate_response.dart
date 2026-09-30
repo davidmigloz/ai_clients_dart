@@ -3,9 +3,15 @@ import 'package:meta/meta.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/done_reason.dart';
 import '../common/equality_helpers.dart';
+import '../tools/tool_call.dart';
 import 'logprob.dart';
 
 /// Response from text generation.
+///
+/// [GenerateResponse.fromJson] and [copyWith] copy and freeze [toolCalls].
+/// Existing collections within tool calls retain their historical behavior.
+/// The const constructor retains the supplied list, which callers should keep
+/// immutable.
 @immutable
 class GenerateResponse {
   /// Model name.
@@ -34,8 +40,9 @@ class GenerateResponse {
 
   /// Conversation context for use in the next request.
   ///
-  /// Pass this value to [GenerateRequest.context] to enable
-  /// multi-turn conversations.
+  /// Ollama deprecates context-based conversational memory. Prefer `/api/chat`
+  /// with message history. Retained for existing generate workflows that pass
+  /// this value to [GenerateRequest.context].
   final List<int>? context;
 
   /// Time spent generating the response in nanoseconds.
@@ -64,6 +71,7 @@ class GenerateResponse {
   /// Experimental: only present for image generation models. Decode with
   /// `base64Decode` before use. May change or be removed in a future Ollama
   /// release.
+  /// Ollama 0.35.0 rejects image generation; retained for compatible servers.
   final String? image;
 
   /// Number of completed diffusion steps for image generation.
@@ -72,6 +80,7 @@ class GenerateResponse {
   /// streamed progress events carry intermediate values, while a non-streaming
   /// response carries the final counts. May change or be removed in a future
   /// Ollama release.
+  /// Ollama 0.35.0 rejects image generation; retained for compatible servers.
   final int? completed;
 
   /// Total number of diffusion steps for image generation.
@@ -80,7 +89,14 @@ class GenerateResponse {
   /// streamed progress events carry intermediate values, while a non-streaming
   /// response carries the final counts. May change or be removed in a future
   /// Ollama release.
+  /// Ollama 0.35.0 rejects image generation; retained for compatible servers.
   final int? total;
+
+  /// Number of prompt tokens read from the cache, when reported by the server.
+  final int? promptEvalCachedCount;
+
+  /// Tool calls parsed from the generated output, when present.
+  final List<ToolCall>? toolCalls;
 
   /// Creates a [GenerateResponse].
   const GenerateResponse({
@@ -103,11 +119,19 @@ class GenerateResponse {
     this.image,
     this.completed,
     this.total,
+    this.promptEvalCachedCount,
+    this.toolCalls,
   });
 
   /// Creates a [GenerateResponse] from JSON.
   factory GenerateResponse.fromJson(Map<String, dynamic> json) =>
       GenerateResponse(
+        toolCalls: _freezeList(
+          (json['tool_calls'] as List?)?.map(
+            (e) => ToolCall.fromJson(e as Map<String, dynamic>),
+          ),
+        ),
+        promptEvalCachedCount: json['prompt_eval_cached_count'] as int?,
         model: json['model'] as String?,
         remoteModel: json['remote_model'] as String?,
         remoteHost: json['remote_host'] as String?,
@@ -133,6 +157,10 @@ class GenerateResponse {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (toolCalls != null)
+      'tool_calls': toolCalls!.map((e) => e.toJson()).toList(),
+    if (promptEvalCachedCount != null)
+      'prompt_eval_cached_count': promptEvalCachedCount,
     if (model != null) 'model': model,
     if (remoteModel != null) 'remote_model': remoteModel,
     if (remoteHost != null) 'remote_host': remoteHost,
@@ -156,6 +184,8 @@ class GenerateResponse {
 
   /// Creates a copy with replaced values.
   GenerateResponse copyWith({
+    Object? toolCalls = unsetCopyWithValue,
+    Object? promptEvalCachedCount = unsetCopyWithValue,
     Object? model = unsetCopyWithValue,
     Object? remoteModel = unsetCopyWithValue,
     Object? remoteHost = unsetCopyWithValue,
@@ -177,6 +207,15 @@ class GenerateResponse {
     Object? total = unsetCopyWithValue,
   }) {
     return GenerateResponse(
+      toolCalls: _freezeList(
+        identical(toolCalls, unsetCopyWithValue)
+            ? this.toolCalls
+            : toolCalls as List<ToolCall>?,
+      ),
+      promptEvalCachedCount:
+          identical(promptEvalCachedCount, unsetCopyWithValue)
+          ? this.promptEvalCachedCount
+          : promptEvalCachedCount as int?,
       model: model == unsetCopyWithValue ? this.model : model as String?,
       remoteModel: remoteModel == unsetCopyWithValue
           ? this.remoteModel
@@ -252,7 +291,9 @@ class GenerateResponse {
           listsEqual(logprobs, other.logprobs) &&
           image == other.image &&
           completed == other.completed &&
-          total == other.total;
+          total == other.total &&
+          promptEvalCachedCount == other.promptEvalCachedCount &&
+          listsEqual(toolCalls, other.toolCalls);
 
   @override
   int get hashCode => Object.hashAll([
@@ -275,6 +316,8 @@ class GenerateResponse {
     image,
     completed,
     total,
+    promptEvalCachedCount,
+    listHash(toolCalls),
   ]);
 
   @override
@@ -298,5 +341,10 @@ class GenerateResponse {
       'logprobs: $logprobs, '
       'image: ${image == null ? null : '[${image!.length} chars]'}, '
       'completed: $completed, '
-      'total: $total)';
+      'total: $total, '
+      'promptEvalCachedCount: $promptEvalCachedCount, '
+      'toolCalls: $toolCalls)';
 }
+
+List<T>? _freezeList<T>(Iterable<T>? values) =>
+    values == null ? null : List<T>.unmodifiable(values);

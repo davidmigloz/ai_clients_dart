@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 
 /// Response from fetching a web page.
 @immutable
@@ -52,11 +53,14 @@ class WebFetchResponse {
       identical(this, other) ||
       other is WebFetchResponse &&
           runtimeType == other.runtimeType &&
-          title == other.title;
+          title == other.title &&
+          content == other.content &&
+          listsEqual(links, other.links);
 
   @override
-  int get hashCode => title.hashCode;
+  int get hashCode => Object.hash(title, content, listHash(links));
 
   @override
-  String toString() => 'WebFetchResponse(title: $title)';
+  String toString() =>
+      'WebFetchResponse(title: $title, content: $content, links: $links)';
 }

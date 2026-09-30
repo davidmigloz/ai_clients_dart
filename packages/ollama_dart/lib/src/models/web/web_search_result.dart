@@ -52,11 +52,14 @@ class WebSearchResult {
       identical(this, other) ||
       other is WebSearchResult &&
           runtimeType == other.runtimeType &&
-          url == other.url;
+          url == other.url &&
+          title == other.title &&
+          content == other.content;
 
   @override
-  int get hashCode => url.hashCode;
+  int get hashCode => Object.hash(title, url, content);
 
   @override
-  String toString() => 'WebSearchResult(title: $title, url: $url)';
+  String toString() =>
+      'WebSearchResult(title: $title, url: $url, content: $content)';
 }

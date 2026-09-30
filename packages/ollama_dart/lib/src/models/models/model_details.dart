@@ -24,6 +24,12 @@ class ModelDetails {
   /// Parent model name, if applicable.
   final String? parentModel;
 
+  /// Maximum context length advertised by the model, when available.
+  final int? contextLength;
+
+  /// Embedding vector length advertised by the model, when available.
+  final int? embeddingLength;
+
   /// Creates a [ModelDetails].
   const ModelDetails({
     this.format,
@@ -32,10 +38,14 @@ class ModelDetails {
     this.parameterSize,
     this.quantizationLevel,
     this.parentModel,
+    this.contextLength,
+    this.embeddingLength,
   });
 
   /// Creates a [ModelDetails] from JSON.
   factory ModelDetails.fromJson(Map<String, dynamic> json) => ModelDetails(
+    contextLength: json['context_length'] as int?,
+    embeddingLength: json['embedding_length'] as int?,
     format: json['format'] as String?,
     family: json['family'] as String?,
     families: (json['families'] as List?)?.cast<String>(),
@@ -46,6 +56,8 @@ class ModelDetails {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (contextLength != null) 'context_length': contextLength,
+    if (embeddingLength != null) 'embedding_length': embeddingLength,
     if (format != null) 'format': format,
     if (family != null) 'family': family,
     if (families != null) 'families': families,
@@ -56,6 +68,8 @@ class ModelDetails {
 
   /// Creates a copy with replaced values.
   ModelDetails copyWith({
+    Object? contextLength = unsetCopyWithValue,
+    Object? embeddingLength = unsetCopyWithValue,
     Object? format = unsetCopyWithValue,
     Object? family = unsetCopyWithValue,
     Object? families = unsetCopyWithValue,
@@ -64,6 +78,12 @@ class ModelDetails {
     Object? parentModel = unsetCopyWithValue,
   }) {
     return ModelDetails(
+      contextLength: identical(contextLength, unsetCopyWithValue)
+          ? this.contextLength
+          : contextLength as int?,
+      embeddingLength: identical(embeddingLength, unsetCopyWithValue)
+          ? this.embeddingLength
+          : embeddingLength as int?,
       format: format == unsetCopyWithValue ? this.format : format as String?,
       family: family == unsetCopyWithValue ? this.family : family as String?,
       families: families == unsetCopyWithValue
@@ -91,17 +111,21 @@ class ModelDetails {
           listsEqual(families, other.families) &&
           parameterSize == other.parameterSize &&
           quantizationLevel == other.quantizationLevel &&
-          parentModel == other.parentModel;
+          parentModel == other.parentModel &&
+          contextLength == other.contextLength &&
+          embeddingLength == other.embeddingLength;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     format,
     family,
     listHash(families),
     parameterSize,
     quantizationLevel,
     parentModel,
-  );
+    contextLength,
+    embeddingLength,
+  ]);
 
   @override
   String toString() =>
@@ -111,5 +135,7 @@ class ModelDetails {
       'families: $families, '
       'parameterSize: $parameterSize, '
       'quantizationLevel: $quantizationLevel, '
-      'parentModel: $parentModel)';
+      'parentModel: $parentModel, '
+      'contextLength: $contextLength, '
+      'embeddingLength: $embeddingLength)';
 }

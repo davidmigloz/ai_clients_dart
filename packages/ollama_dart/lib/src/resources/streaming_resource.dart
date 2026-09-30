@@ -23,23 +23,15 @@ import 'base_resource.dart';
 /// requires unbuffered [http.StreamedResponse] access. Resources with
 /// streaming must:
 /// 1. Apply auth/logging manually to the request
-/// 2. Send via [httpClient.send] to get [StreamedResponse]
+/// 2. Send via [httpClient.send] to get [http.StreamedResponse]
 /// 3. Check status and map errors before consuming stream
 ///
-/// ## Usage
+/// ## Resource implementation
 ///
-/// ```dart
-/// class ChatResource extends ResourceBase with StreamingResource {
-///   Stream<ChatStreamEvent> createStream({required ChatRequest request}) async* {
-///     var httpRequest = http.Request('POST', url)...;
-///     httpRequest = await prepareStreamingRequest(httpRequest);
-///     final response = await sendStreamingRequest(httpRequest);
-///     await for (final json in parseNDJSON(response.stream)) {
-///       yield ChatStreamEvent.fromJson(json);
-///     }
-///   }
-/// }
-/// ```
+/// Call [prepareStreamingRequest] to obtain the request and correlation ID,
+/// then pass both to [sendStreamingRequest]. Consume the unbuffered response
+/// with the NDJSON parser, checking inline error objects before decoding each
+/// event. The public chat and completion resources implement this sequence.
 mixin StreamingResource on ResourceBase {
   /// Prepares a streaming request by applying auth and logging.
   ///
@@ -65,7 +57,7 @@ mixin StreamingResource on ResourceBase {
 
   /// Sends a streaming request with error handling.
   ///
-  /// Returns the [StreamedResponse] if successful, or throws an
+  /// Returns the [http.StreamedResponse] if successful, or throws an
   /// [OllamaException] if the response indicates an error. [requestId] is used
   /// for error-log correlation.
   Future<http.StreamedResponse> sendStreamingRequest(

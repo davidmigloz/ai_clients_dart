@@ -8,9 +8,10 @@ import 'dart:convert';
 ///
 /// Example:
 /// ```dart
-/// final stream = response.stream;
-/// await for (final json in parseNDJSON(stream)) {
-///   print(json); // Each line parsed as Map<String, dynamic>
+/// Future<void> consumeJson(Stream<List<int>> bytes) async {
+///   await for (final json in parseNDJSON(bytes)) {
+///     print(json); // Each line is parsed as Map<String, dynamic>.
+///   }
 /// }
 /// ```
 Stream<Map<String, dynamic>> parseNDJSON(Stream<List<int>> byteStream) async* {
@@ -32,10 +33,8 @@ Stream<Map<String, dynamic>> parseNDJSON(Stream<List<int>> byteStream) async* {
 ///
 /// Example:
 /// ```dart
-/// final events = parseNDJSONAs<ChatStreamEvent>(
-///   response.stream,
-///   ChatStreamEvent.fromJson,
-/// );
+/// Stream<ChatStreamEvent> decodeChat(Stream<List<int>> bytes) =>
+///     parseNDJSONAs<ChatStreamEvent>(bytes, ChatStreamEvent.fromJson);
 /// ```
 Stream<T> parseNDJSONAs<T>(
   Stream<List<int>> byteStream,
