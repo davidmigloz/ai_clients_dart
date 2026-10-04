@@ -92,11 +92,8 @@ class LoggingInterceptor implements Interceptor {
         ..headers['X-Request-ID'] = requestId
         ..followRedirects = original.followRedirects
         ..maxRedirects = original.maxRedirects
-        ..persistentConnection = original.persistentConnection;
-
-      if (original.body.isNotEmpty) {
-        copy.body = original.body;
-      }
+        ..persistentConnection = original.persistentConnection
+        ..bodyBytes = original.bodyBytes;
 
       return copy;
     }

@@ -73,6 +73,33 @@ void main() {
       },
     );
 
+    test('preserves binary request bytes when adding X-Request-ID', () async {
+      final request = http.Request('POST', url)
+        ..headers['content-type'] = 'application/octet-stream'
+        ..bodyBytes = [0, 128, 255]
+        ..followRedirects = false
+        ..maxRedirects = 2
+        ..persistentConnection = false;
+
+      final forwarded = await run(
+        createInterceptor(sendRequestIdHeader: true),
+        request,
+      );
+      final prepared = forwarded.request as http.Request;
+
+      expect(prepared.bodyBytes, request.bodyBytes);
+      expect(prepared.headers['content-type'], 'application/octet-stream');
+      expect(prepared.followRedirects, isFalse);
+      expect(prepared.maxRedirects, 2);
+      expect(prepared.persistentConnection, isFalse);
+      expect(prepared.headers['X-Request-ID'], isNotEmpty);
+      expect(
+        forwarded.metadata['correlationId'],
+        prepared.headers['X-Request-ID'],
+      );
+      expect(request.headers.containsKey('X-Request-ID'), isFalse);
+    });
+
     test(
       'does not send X-Request-ID header on multipart requests by default',
       () async {
