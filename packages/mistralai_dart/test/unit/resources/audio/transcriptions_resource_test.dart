@@ -45,63 +45,77 @@ void main() {
         TranscriptionRequest(fileBytes: [0, 128, 255], fileName: 'clip.wav'),
       ),
     ]) {
-      test('create retries a rate-limited request using $name', () async {
-        final attempts = <http.Request>[];
-        final mockClient = MockClient((request) async {
-          attempts.add(request);
-          if (attempts.length == 1) {
-            return http.Response('{"message":"rate limited"}', 429);
-          }
-          return http.Response(transcription, 200);
-        });
-        addTearDown(mockClient.close);
-        final client = MistralClient(
-          config: const MistralConfig(
-            authProvider: ApiKeyProvider('test-key'),
-            retryPolicy: RetryPolicy(
-              maxRetries: 1,
-              initialDelay: Duration.zero,
-              maxDelay: Duration.zero,
-              jitter: 0,
+      for (final sendRequestIdHeader in [false, true]) {
+        test('create retries a rate-limited request using $name '
+            '(sendRequestIdHeader: $sendRequestIdHeader)', () async {
+          final attempts = <http.Request>[];
+          final mockClient = MockClient((request) async {
+            attempts.add(request);
+            if (attempts.length == 1) {
+              return http.Response('{"message":"rate limited"}', 429);
+            }
+            return http.Response(transcription, 200);
+          });
+          addTearDown(mockClient.close);
+          final client = MistralClient(
+            config: MistralConfig(
+              authProvider: const ApiKeyProvider('test-key'),
+              retryPolicy: const RetryPolicy(
+                maxRetries: 1,
+                initialDelay: Duration.zero,
+                maxDelay: Duration.zero,
+                jitter: 0,
+              ),
+              sendRequestIdHeader: sendRequestIdHeader,
             ),
-          ),
-          httpClient: mockClient,
-        );
-        addTearDown(client.close);
-
-        final response = await client.audio.transcriptions.create(
-          request: source.copyWith(contextBias: ['Mistral', 'Voxtral']),
-        );
-
-        expect(response.text, 'hello world');
-        expect(attempts, hasLength(2));
-        for (final attempt in attempts) {
-          expect(attempt.headers['authorization'], 'Bearer test-key');
-          expect(attempt.headers['x-request-id'], isNotEmpty);
-          expect(
-            attempt.headers['x-request-id'],
-            attempts.first.headers['x-request-id'],
+            httpClient: mockClient,
           );
-          final boundary = attempt.headers['content-type']!.split(
-            'boundary=',
-          )[1];
-          final body = latin1.decode(attempt.bodyBytes);
-          expect(body, startsWith('--$boundary\r\n'));
-          expect(body, endsWith('--$boundary--\r\n'));
-          expect(RegExp('name="context_bias"').allMatches(body), hasLength(2));
-          if (source.fileBytes != null) {
-            expect(body, contains('name="file"; filename="clip.wav"'));
-            expect(body, contains(latin1.decode(source.fileBytes!)));
-          } else if (source.file != null) {
-            expect(body, contains('name="file_id"\r\n\r\n${source.file}\r\n'));
-          } else {
+          addTearDown(client.close);
+
+          final response = await client.audio.transcriptions.create(
+            request: source.copyWith(contextBias: ['Mistral', 'Voxtral']),
+          );
+
+          expect(response.text, 'hello world');
+          expect(attempts, hasLength(2));
+          for (final attempt in attempts) {
+            expect(attempt.headers['authorization'], 'Bearer test-key');
+            if (sendRequestIdHeader) {
+              expect(attempt.headers['x-request-id'], isNotEmpty);
+              expect(
+                attempt.headers['x-request-id'],
+                attempts.first.headers['x-request-id'],
+              );
+            } else {
+              expect(attempt.headers, isNot(contains('x-request-id')));
+            }
+            final boundary = attempt.headers['content-type']!.split(
+              'boundary=',
+            )[1];
+            final body = latin1.decode(attempt.bodyBytes);
+            expect(body, startsWith('--$boundary\r\n'));
+            expect(body, endsWith('--$boundary--\r\n'));
             expect(
-              body,
-              contains('name="file_url"\r\n\r\n${source.fileUrl}\r\n'),
+              RegExp('name="context_bias"').allMatches(body),
+              hasLength(2),
             );
+            if (source.fileBytes != null) {
+              expect(body, contains('name="file"; filename="clip.wav"'));
+              expect(body, contains(latin1.decode(source.fileBytes!)));
+            } else if (source.file != null) {
+              expect(
+                body,
+                contains('name="file_id"\r\n\r\n${source.file}\r\n'),
+              );
+            } else {
+              expect(
+                body,
+                contains('name="file_url"\r\n\r\n${source.fileUrl}\r\n'),
+              );
+            }
           }
-        }
-      });
+        });
+      }
     }
 
     for (final (status, maxRetries, expectedAttempts) in const [
@@ -296,7 +310,7 @@ void main() {
         startsWith('multipart/form-data; boundary='),
       );
       expect(captured.headers['Authorization'], 'Bearer test-key');
-      expect(captured.headers.containsKey('X-Request-ID'), isTrue);
+      expect(captured.headers.containsKey('X-Request-ID'), isFalse);
       expect(captured.headers['accept'], 'text/event-stream');
       expect(capturedBody(), contains('name="stream"\r\n\r\ntrue'));
       expect(capturedBody(), contains('name="file"; filename="clip.wav"'));
