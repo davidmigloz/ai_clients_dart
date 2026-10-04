@@ -2873,6 +2873,91 @@ void main() {
   });
 
   group('ResponseUsage', () {
+    test('parses a response with Agnes-style usage', () {
+      final response = Response.fromJson(const {
+        'id': 'resp_agnes',
+        'object': 'response',
+        'created_at': 1234567890,
+        'model': 'agnes-2.5-flash',
+        'status': 'completed',
+        'output': <dynamic>[],
+        'usage': {
+          'prompt_tokens': 45,
+          'total_tokens': 95,
+          'completion_tokens': 50,
+          'prompt_tokens_details': null,
+          'reasoning_tokens': 0,
+        },
+      });
+
+      expect(response.usage?.inputTokens, 45);
+      expect(response.usage?.outputTokens, 50);
+      expect(response.usage?.totalTokens, 95);
+      expect(response.usage?.inputTokensDetails, isNull);
+      expect(response.usage?.outputTokensDetails?.reasoningTokens, 0);
+    });
+
+    test('accepts Chat Completions token details', () {
+      final usage = ResponseUsage.fromJson(const {
+        'prompt_tokens': 100,
+        'completion_tokens': 50,
+        'total_tokens': 150,
+        'prompt_tokens_details': {'cached_tokens': 20},
+        'completion_tokens_details': {'reasoning_tokens': 10},
+      });
+
+      expect(usage.inputTokensDetails?.cachedTokens, 20);
+      expect(usage.outputTokensDetails?.reasoningTokens, 10);
+      expect(usage.toJson(), {
+        'input_tokens': 100,
+        'output_tokens': 50,
+        'total_tokens': 150,
+        'input_tokens_details': {'cached_tokens': 20},
+        'output_tokens_details': {'reasoning_tokens': 10},
+      });
+    });
+
+    test('prefers Responses fields, including zero and empty details', () {
+      final usage = ResponseUsage.fromJson(const {
+        'input_tokens': 0,
+        'output_tokens': 0,
+        'total_tokens': 0,
+        'input_tokens_details': <String, dynamic>{},
+        'output_tokens_details': <String, dynamic>{},
+        'prompt_tokens': 100,
+        'completion_tokens': 50,
+        'prompt_tokens_details': {'cached_tokens': 20},
+        'completion_tokens_details': {'reasoning_tokens': 10},
+        'reasoning_tokens': 5,
+      });
+
+      expect(usage.inputTokens, 0);
+      expect(usage.outputTokens, 0);
+      expect(usage.totalTokens, 0);
+      expect(usage.inputTokensDetails?.cachedTokens, isNull);
+      expect(usage.outputTokensDetails?.reasoningTokens, isNull);
+    });
+
+    test('falls back to aliases when Responses fields are null', () {
+      final usage = ResponseUsage.fromJson(const {
+        'input_tokens': null,
+        'output_tokens': null,
+        'input_tokens_details': null,
+        'output_tokens_details': null,
+        'prompt_tokens': 45,
+        'completion_tokens': 50,
+        'total_tokens': 95,
+        'prompt_tokens_details': {'cached_tokens': 5},
+        'completion_tokens_details': {'reasoning_tokens': 10},
+        'reasoning_tokens': 20,
+      });
+
+      expect(usage.inputTokens, 45);
+      expect(usage.outputTokens, 50);
+      expect(usage.inputTokensDetails?.cachedTokens, 5);
+      expect(usage.outputTokensDetails?.reasoningTokens, 10);
+    });
+
     test('deserializes from JSON', () {
       final json = {
         'input_tokens': 100,
