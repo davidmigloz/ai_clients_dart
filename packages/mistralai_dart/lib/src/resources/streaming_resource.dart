@@ -33,9 +33,13 @@ import 'base_resource.dart';
 ///   Stream<ChatCompletionStreamResponse> createStream({
 ///     required ChatCompletionRequest request,
 ///   }) async* {
-///     var httpRequest = http.Request('POST', url)...;
-///     httpRequest = await prepareStreamingRequest(httpRequest);
-///     final response = await sendStreamingRequest(httpRequest);
+///     final httpRequest = http.Request('POST', url)...;
+///     final (preparedRequest, requestId) =
+///         await prepareStreamingRequest(httpRequest);
+///     final response = await sendStreamingRequest(
+///       preparedRequest,
+///       requestId: requestId,
+///     );
 ///     await for (final json in parseSSE(response.stream)) {
 ///       yield ChatCompletionStreamResponse.fromJson(json);
 ///     }
@@ -46,8 +50,13 @@ mixin StreamingResource on ResourceBase {
   /// Prepares a streaming request by applying auth and logging.
   ///
   /// This applies the same auth and logging that the interceptor chain would
-  /// apply, but without buffering the response.
-  Future<http.Request> prepareStreamingRequest(http.Request request) async {
+  /// apply, but without buffering the response. Returns the prepared request
+  /// together with its request ID (for log/error correlation); the ID is only
+  /// added to the request as an `X-Request-ID` header when
+  /// [MistralConfig.sendRequestIdHeader] is enabled.
+  Future<(http.Request, String)> prepareStreamingRequest(
+    http.Request request,
+  ) async {
     var req = request;
 
     // Apply auth
@@ -57,17 +66,17 @@ mixin StreamingResource on ResourceBase {
     req = _applyAuthToRequest(req, credentials);
 
     // Apply logging
-    req = _applyLoggingToRequest(req);
-
-    return req;
+    return _applyLoggingToRequest(req);
   }
 
   /// Prepares a streaming multipart request by applying auth and logging.
   ///
   /// Unlike [prepareStreamingRequest], the headers are set on [request]
   /// itself: an [http.MultipartRequest] cannot be cloned once its parts
-  /// have been added, and it has not been finalized at this point.
-  Future<http.MultipartRequest> prepareStreamingMultipartRequest(
+  /// have been added, and it has not been finalized at this point. Returns the
+  /// request together with its request ID, which is only sent as an
+  /// `X-Request-ID` header when [MistralConfig.sendRequestIdHeader] is enabled.
+  Future<(http.MultipartRequest, String)> prepareStreamingMultipartRequest(
     http.MultipartRequest request,
   ) async {
     final credentials = config.authProvider != null
@@ -78,26 +87,26 @@ mixin StreamingResource on ResourceBase {
       request.headers['Authorization'] = 'Bearer ${credentials.token}';
     }
 
-    if (!request.headers.containsKey('X-Request-ID')) {
-      final requestId = generateRequestId();
+    final requestId = request.headers['X-Request-ID'] ?? generateRequestId();
+    _logStreamRequest(request, requestId);
+
+    if (config.sendRequestIdHeader &&
+        !request.headers.containsKey('X-Request-ID')) {
       request.headers['X-Request-ID'] = requestId;
-      if (config.logLevel.value <= Level.INFO.value) {
-        Logger(
-          'Mistral.HTTP',
-        ).info('REQUEST [$requestId] ${request.method} ${request.url}');
-      }
     }
 
-    return request;
+    return (request, requestId);
   }
 
   /// Sends a streaming request with error handling.
   ///
   /// Returns the [StreamedResponse] if successful, or throws a
-  /// [MistralException] if the response indicates an error.
+  /// [MistralException] if the response indicates an error. [requestId] is
+  /// used for error-log correlation.
   Future<http.StreamedResponse> sendStreamingRequest(
-    http.BaseRequest request,
-  ) async {
+    http.BaseRequest request, {
+    required String requestId,
+  }) async {
     ensureNotClosed?.call();
     http.StreamedResponse streamedResponse;
     try {
@@ -108,10 +117,7 @@ mixin StreamingResource on ResourceBase {
         throw mapHttpError(response);
       }
     } catch (e) {
-      _logStreamError(
-        e,
-        request.headers['X-Request-ID'] ?? generateRequestId(),
-      );
+      _logStreamError(e, requestId);
       rethrow;
     }
 
@@ -136,26 +142,37 @@ mixin StreamingResource on ResourceBase {
     };
   }
 
-  /// Applies logging to a request by adding a request ID.
-  http.Request _applyLoggingToRequest(http.Request request) {
-    if (!request.headers.containsKey('X-Request-ID')) {
-      final requestId = generateRequestId();
+  /// Derives a request ID for the request and logs it.
+  ///
+  /// Returns the request together with its ID. The `X-Request-ID` header is
+  /// only added to the outgoing request when
+  /// [MistralConfig.sendRequestIdHeader] is enabled and the caller didn't
+  /// already supply one; otherwise the ID is used for logging only.
+  (http.Request, String) _applyLoggingToRequest(http.Request request) {
+    final requestId = request.headers['X-Request-ID'] ?? generateRequestId();
+    _logStreamRequest(request, requestId);
+
+    if (config.sendRequestIdHeader &&
+        !request.headers.containsKey('X-Request-ID')) {
       final updatedRequest = http.Request(request.method, request.url)
         ..headers.addAll(request.headers)
         ..headers['X-Request-ID'] = requestId
         ..bodyBytes = request.bodyBytes
         ..encoding = request.encoding;
 
-      if (config.logLevel.value <= Level.INFO.value) {
-        Logger(
-          'Mistral.HTTP',
-        ).info('REQUEST [$requestId] ${request.method} ${request.url}');
-      }
-
-      return updatedRequest;
+      return (updatedRequest, requestId);
     }
 
-    return request;
+    return (request, requestId);
+  }
+
+  /// Logs an outgoing streaming request.
+  void _logStreamRequest(http.BaseRequest request, String requestId) {
+    if (config.logLevel.value <= Level.INFO.value) {
+      Logger(
+        'Mistral.HTTP',
+      ).info('REQUEST [$requestId] ${request.method} ${request.url}');
+    }
   }
 
   /// Maps an HTTP error response to a [MistralException].

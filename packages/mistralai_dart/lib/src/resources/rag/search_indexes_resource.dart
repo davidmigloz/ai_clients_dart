@@ -288,9 +288,14 @@ class SearchIndexesResource extends ResourceBase with StreamingResource {
     );
     final headers = requestBuilder.buildHeaders();
 
-    var httpRequest = http.Request('POST', url)..headers.addAll(headers);
-    httpRequest = await prepareStreamingRequest(httpRequest);
-    final streamedResponse = await sendStreamingRequest(httpRequest);
+    final httpRequest = http.Request('POST', url)..headers.addAll(headers);
+    final (preparedRequest, requestId) = await prepareStreamingRequest(
+      httpRequest,
+    );
+    final streamedResponse = await sendStreamingRequest(
+      preparedRequest,
+      requestId: requestId,
+    );
 
     await for (final json in parseNDJSON(streamedResponse.stream)) {
       yield SummaryStreamEvent.fromJson(json);
@@ -372,9 +377,14 @@ class SearchIndexesResource extends ResourceBase with StreamingResource {
     );
     final headers = requestBuilder.buildHeaders();
 
-    var httpRequest = http.Request('POST', url)..headers.addAll(headers);
-    httpRequest = await prepareStreamingRequest(httpRequest);
-    final streamedResponse = await sendStreamingRequest(httpRequest);
+    final httpRequest = http.Request('POST', url)..headers.addAll(headers);
+    final (preparedRequest, requestId) = await prepareStreamingRequest(
+      httpRequest,
+    );
+    final streamedResponse = await sendStreamingRequest(
+      preparedRequest,
+      requestId: requestId,
+    );
 
     await for (final json in parseNDJSON(streamedResponse.stream)) {
       yield SummaryStreamEvent.fromJson(json);

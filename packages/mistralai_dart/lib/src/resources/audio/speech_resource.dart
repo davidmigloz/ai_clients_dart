@@ -90,13 +90,18 @@ class SpeechResource extends ResourceBase with StreamingResource {
     // Add stream: true to the request
     final requestData = <String, dynamic>{...request.toJson(), 'stream': true};
 
-    var httpRequest = http.Request('POST', url)
+    final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(requestData);
 
     // Use mixin methods for streaming request handling
-    httpRequest = await prepareStreamingRequest(httpRequest);
-    final streamedResponse = await sendStreamingRequest(httpRequest);
+    final (preparedRequest, requestId) = await prepareStreamingRequest(
+      httpRequest,
+    );
+    final streamedResponse = await sendStreamingRequest(
+      preparedRequest,
+      requestId: requestId,
+    );
 
     // Parse SSE stream
     await for (final json in parseSSE(streamedResponse.stream)) {

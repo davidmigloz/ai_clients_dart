@@ -104,11 +104,16 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
   Stream<TranscriptionStreamEvent> createStream({
     required TranscriptionRequest request,
   }) async* {
-    var httpRequest = _buildRequest(request, stream: true);
+    final httpRequest = _buildRequest(request, stream: true);
 
     // Use mixin methods for streaming request handling
-    httpRequest = await prepareStreamingMultipartRequest(httpRequest);
-    final streamedResponse = await sendStreamingRequest(httpRequest);
+    final (preparedRequest, requestId) = await prepareStreamingMultipartRequest(
+      httpRequest,
+    );
+    final streamedResponse = await sendStreamingRequest(
+      preparedRequest,
+      requestId: requestId,
+    );
 
     // Parse SSE stream
     await for (final json in parseSSE(streamedResponse.stream)) {

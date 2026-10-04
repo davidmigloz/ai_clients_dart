@@ -116,9 +116,14 @@ class EventsResource extends ResourceBase with StreamingResource {
       additionalHeaders: additionalHeaders,
     );
 
-    var httpRequest = http.Request('GET', url)..headers.addAll(headers);
-    httpRequest = await prepareStreamingRequest(httpRequest);
-    final streamedResponse = await sendStreamingRequest(httpRequest);
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final (preparedRequest, requestId) = await prepareStreamingRequest(
+      httpRequest,
+    );
+    final streamedResponse = await sendStreamingRequest(
+      preparedRequest,
+      requestId: requestId,
+    );
 
     await for (final json in parseSSE(streamedResponse.stream)) {
       final sseEvent = json['_event'] as String?;

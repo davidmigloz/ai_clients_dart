@@ -73,9 +73,14 @@ class ExecutionsResource extends ResourceBase with StreamingResource {
     );
     final headers = requestBuilder.buildHeaders();
 
-    var httpRequest = http.Request('GET', url)..headers.addAll(headers);
-    httpRequest = await prepareStreamingRequest(httpRequest);
-    final streamedResponse = await sendStreamingRequest(httpRequest);
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final (preparedRequest, requestId) = await prepareStreamingRequest(
+      httpRequest,
+    );
+    final streamedResponse = await sendStreamingRequest(
+      preparedRequest,
+      requestId: requestId,
+    );
 
     await for (final json in parseSSE(streamedResponse.stream)) {
       final sseEvent = json['_event'] as String?;
@@ -191,9 +196,14 @@ class ExecutionsResource extends ResourceBase with StreamingResource {
           : null,
     );
 
-    var httpRequest = http.Request('GET', url)..headers.addAll(headers);
-    httpRequest = await prepareStreamingRequest(httpRequest);
-    final streamedResponse = await sendStreamingRequest(httpRequest);
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final (preparedRequest, requestId) = await prepareStreamingRequest(
+      httpRequest,
+    );
+    final streamedResponse = await sendStreamingRequest(
+      preparedRequest,
+      requestId: requestId,
+    );
 
     await for (final json in parseSSE(streamedResponse.stream)) {
       final sseEvent = json['_event'] as String?;

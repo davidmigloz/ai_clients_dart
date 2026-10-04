@@ -67,6 +67,21 @@ class MistralConfig {
   /// Fields to redact in logs (case-insensitive).
   final List<String> redactionList;
 
+  /// Whether to send the `X-Request-ID` header on outgoing requests.
+  ///
+  /// Defaults to `false`. A request ID is always generated internally for
+  /// logging and error correlation; this flag only controls whether that ID is
+  /// added to the outgoing HTTP request.
+  ///
+  /// It defaults to `false` because Mistral's CORS allow-list does not include
+  /// `X-Request-ID`, so sending it triggers a failed preflight in browser
+  /// targets (Flutter Web / dart2wasm). Enable it only when talking to an
+  /// intermediary (e.g. a reverse proxy) that you've configured to accept it.
+  ///
+  /// An `X-Request-ID` set explicitly by the caller (e.g. via [defaultHeaders])
+  /// is always sent, regardless of this flag.
+  final bool sendRequestIdHeader;
+
   /// Creates a [MistralConfig].
   const MistralConfig({
     this.baseUrl = 'https://api.mistral.ai',
@@ -85,6 +100,7 @@ class MistralConfig {
       'api-key',
       'apikey',
     ],
+    this.sendRequestIdHeader = false,
   });
 
   /// Creates a [MistralConfig] using runtime environment variables.
@@ -121,6 +137,7 @@ class MistralConfig {
     RetryPolicy? retryPolicy,
     Level? logLevel,
     List<String>? redactionList,
+    bool? sendRequestIdHeader,
   }) {
     return MistralConfig(
       baseUrl: baseUrl ?? this.baseUrl,
@@ -131,6 +148,7 @@ class MistralConfig {
       retryPolicy: retryPolicy ?? this.retryPolicy,
       logLevel: logLevel ?? this.logLevel,
       redactionList: redactionList ?? this.redactionList,
+      sendRequestIdHeader: sendRequestIdHeader ?? this.sendRequestIdHeader,
     );
   }
 }
