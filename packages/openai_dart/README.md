@@ -64,7 +64,7 @@ Requires Dart 3.12 or later. See the [Migration Guide](MIGRATION.md) for upgrade
 
 ```yaml
 dependencies:
-  openai_dart: ^10.0.0
+  openai_dart: ^10.0.1
 ```
 
 ```dart

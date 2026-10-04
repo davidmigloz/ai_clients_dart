@@ -1,3 +1,9 @@
+## 8.1.0
+
+Fixes Flutter Web and dart2wasm requests blocked by Mistral CORS by omitting the `X-Request-ID` header by default. Request IDs remain available for logging and error correlation; enable `MistralConfig.sendRequestIdHeader` when using a proxy that accepts the header. Explicit caller-supplied headers are preserved.
+
+- **FIX**: Make X-Request-ID header opt-in for browser CORS ([#314](https://github.com/davidmigloz/ai_clients_dart/issues/314)). ([74926842](https://github.com/davidmigloz/ai_clients_dart/commit/74926842fbc2fe71131447572328292552e607ef))
+
 ## 8.0.0
 
 > [!CAUTION]

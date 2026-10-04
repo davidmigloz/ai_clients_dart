@@ -1,3 +1,9 @@
+## 10.0.1
+
+Fixes Responses parsing for compatible providers such as Agnes that return `prompt_tokens` and `completion_tokens`, preserving their reported counts and cached/reasoning token details. Standard Responses fields take precedence when present, and serialization continues to use standard Responses field names.
+
+- **FIX**: Accept compatible Responses usage fields ([#315](https://github.com/davidmigloz/ai_clients_dart/issues/315)). ([62fd6bed](https://github.com/davidmigloz/ai_clients_dart/commit/62fd6bed36017e32506ca220c7caef6eed0d786f))
+
 ## 10.0.0
 
 > [!CAUTION]
