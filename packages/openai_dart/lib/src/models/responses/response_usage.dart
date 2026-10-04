@@ -28,20 +28,28 @@ class ResponseUsage {
   });
 
   /// Creates a [ResponseUsage] from JSON.
+  ///
+  /// Also accepts Chat Completions usage field names returned by some
+  /// OpenAI-compatible providers. Non-null Responses fields take precedence.
   factory ResponseUsage.fromJson(Map<String, dynamic> json) {
+    final inputDetails =
+        json['input_tokens_details'] ?? json['prompt_tokens_details'];
+    final outputDetails =
+        json['output_tokens_details'] ??
+        json['completion_tokens_details'] ??
+        (json['reasoning_tokens'] != null
+            ? {'reasoning_tokens': json['reasoning_tokens']}
+            : null);
+
     return ResponseUsage(
-      inputTokens: json['input_tokens'] as int,
-      outputTokens: json['output_tokens'] as int,
+      inputTokens: (json['input_tokens'] ?? json['prompt_tokens']) as int,
+      outputTokens: (json['output_tokens'] ?? json['completion_tokens']) as int,
       totalTokens: json['total_tokens'] as int,
-      inputTokensDetails: json['input_tokens_details'] != null
-          ? InputTokensDetails.fromJson(
-              json['input_tokens_details'] as Map<String, dynamic>,
-            )
+      inputTokensDetails: inputDetails != null
+          ? InputTokensDetails.fromJson(inputDetails as Map<String, dynamic>)
           : null,
-      outputTokensDetails: json['output_tokens_details'] != null
-          ? OutputTokensDetails.fromJson(
-              json['output_tokens_details'] as Map<String, dynamic>,
-            )
+      outputTokensDetails: outputDetails != null
+          ? OutputTokensDetails.fromJson(outputDetails as Map<String, dynamic>)
           : null,
     );
   }
