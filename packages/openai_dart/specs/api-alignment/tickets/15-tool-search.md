@@ -1,10 +1,10 @@
 # Client-discovered tool definition and call fidelity
 
 Status: specified; implementation pending.
-GitHub: pending issue creation after independent planning review.
+GitHub: [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-SEARCH-01–02.
-Dependencies: Async tools 09 (nested async definitions).
+Dependencies: [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) (nested async definitions).
 
 ## Demonstrable outcome
 

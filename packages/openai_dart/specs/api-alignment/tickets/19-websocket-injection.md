@@ -1,10 +1,10 @@
 # Multi-agent WebSocket tool-output injection
 
 Status: specified; implementation pending.
-GitHub: pending issue creation after independent planning review.
+GitHub: [#344](https://github.com/davidmigloz/ai_clients_dart/issues/344).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-INJECT-01–02.
-Dependencies: Responses WebSocket 16.
+Dependencies: [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341).
 
 ## Demonstrable outcome
 

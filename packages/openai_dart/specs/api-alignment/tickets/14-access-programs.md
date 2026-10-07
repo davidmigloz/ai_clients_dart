@@ -1,7 +1,7 @@
 # Responses access-program selection
 
 Status: specified; implementation pending.
-GitHub: pending issue creation after independent planning review.
+GitHub: [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-ACCESS-01–02.
 Dependencies: None.

@@ -1,7 +1,7 @@
 # Compaction progress events
 
 Status: specified; implementation pending.
-GitHub: pending issue creation after independent planning review.
+GitHub: [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-COMPACT-01.
 Dependencies: None.

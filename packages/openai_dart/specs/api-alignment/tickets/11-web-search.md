@@ -1,7 +1,7 @@
 # GA web-search controls, actions and results
 
 Status: specified; implementation pending.
-GitHub: pending issue creation after independent planning review.
+GitHub: [#336](https://github.com/davidmigloz/ai_clients_dart/issues/336).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-WEB-01–03.
 Dependencies: None.

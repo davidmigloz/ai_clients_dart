@@ -1,7 +1,7 @@
 # Persistent reasoning configuration updates
 
 Status: specified; implementation pending.
-GitHub: pending issue creation after independent planning review.
+GitHub: [#335](https://github.com/davidmigloz/ai_clients_dart/issues/335).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-CONFIG-01–02.
 Dependencies: None.

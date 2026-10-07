@@ -1,7 +1,7 @@
 # Phase 3 Responses planning review
 
 Status: independent planning reviews complete; validated findings resolved.
-Runtime implementation is pending.
+Runtime implementation is pending; tickets #334–#344 are native sub-issues of #317.
 Scope: [specification](../responses.md), repository tickets 09–19 and roadmap.
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 
@@ -75,5 +75,5 @@ not claimed as a new Phase 3 implementation test run.
 
 Wider toolkit implementation diagnostics from #333 remain 41 errors, ten warnings,
 103 infos and one consistency warning. This docs-only plan neither suppresses
-those gaps nor requires repeated unrelated implementation checks. Relevant CI
-checks will be recorded on the final PR head.
+those gaps nor requires repeated unrelated implementation checks. The planning PR reports CI checks on its final head. No runtime tests are
+claimed for the new capabilities.

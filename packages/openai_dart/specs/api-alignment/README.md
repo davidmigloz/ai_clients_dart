@@ -148,23 +148,23 @@ implemented coverage.
 
 | Ticket | Demonstrable outcome | Dependency |
 | --- | --- | --- |
-| [09](tickets/09-async-tools.md) | Async function/custom calls and faithful replay | None; next implementation |
-| [10](tickets/10-configuration-updates.md) | Persistent reasoning effort updates | None |
-| [11](tickets/11-web-search.md) | GA web-search controls/actions/image results | None |
-| [12](tickets/12-hosted-shell.md) | Hosted/local shell configuration, replay and streams | #320, merged |
-| [13](tickets/13-compaction-progress.md) | Typed compaction progress | None |
-| [14](tickets/14-access-programs.md) | Select/inspect effective access program | None |
-| [15](tickets/15-tool-search.md) | Complete client-discovered tools | 09 async definitions |
-| [16](tickets/16-responses-websocket.md) | Persistent WS sessions, envelopes and named lanes | None; shared shell/compaction events follow their tickets |
-| [17](tickets/17-responses-steering.md) | Safe mid-turn steering and continuation | 16 |
-| [18](tickets/18-websocket-recovery.md) | Opt-in reconnect and bounded unsent queue | 16/17 |
-| [19](tickets/19-websocket-injection.md) | Beta multi-agent tool-result injection | 16 |
+| [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) ([09](tickets/09-async-tools.md)) | Async function/custom calls and faithful replay | None; next implementation |
+| [#335](https://github.com/davidmigloz/ai_clients_dart/issues/335) ([10](tickets/10-configuration-updates.md)) | Persistent reasoning effort updates | None |
+| [#336](https://github.com/davidmigloz/ai_clients_dart/issues/336) ([11](tickets/11-web-search.md)) | GA web-search controls/actions/image results | None |
+| [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337) ([12](tickets/12-hosted-shell.md)) | Hosted/local shell configuration, replay and streams | #320, merged |
+| [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) ([13](tickets/13-compaction-progress.md)) | Typed compaction progress | None |
+| [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) ([14](tickets/14-access-programs.md)) | Select/inspect effective access program | None |
+| [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) ([15](tickets/15-tool-search.md)) | Complete client-discovered tools | [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) async definitions |
+| [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) ([16](tickets/16-responses-websocket.md)) | Persistent WS sessions, envelopes and named lanes | None; shared shell/compaction events follow their tickets |
+| [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) ([17](tickets/17-responses-steering.md)) | Safe mid-turn steering and continuation | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
+| [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) ([18](tickets/18-websocket-recovery.md)) | Opt-in reconnect and bounded unsent queue | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341)/[#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) |
+| [#344](https://github.com/davidmigloz/ai_clients_dart/issues/344) ([19](tickets/19-websocket-injection.md)) | Beta multi-agent tool-result injection | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
 
 Implement the small async slice first, then continue through the table. Recovery
 and injection remain explicit follow-ups to basic transport; do not claim full
 WebSocket SDK parity before they are complete. Each ticket includes an offline
-example, public fixtures, documentation and independent review. GitHub issue
-links are added after this plan's review.
+example, public fixtures, documentation and independent review. All eleven tickets are native sub-issues of #317; active blockers are linked
+with GitHub dependencies. Async [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) is next.
 
 ## Remaining roadmap
 

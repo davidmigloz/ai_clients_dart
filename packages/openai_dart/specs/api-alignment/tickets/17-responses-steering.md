@@ -1,10 +1,10 @@
 # Mid-turn Responses steering
 
 Status: specified; implementation pending.
-GitHub: pending issue creation after independent planning review.
+GitHub: [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-STEER-01–03.
-Dependencies: Responses WebSocket 16.
+Dependencies: [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341).
 
 ## Demonstrable outcome
 

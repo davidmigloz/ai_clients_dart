@@ -1,10 +1,10 @@
 # Hosted/local shell configuration, replay and streams
 
 Status: specified; implementation pending.
-GitHub: pending issue creation after independent planning review.
+GitHub: [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-SHELL-01–03.
-Dependencies: Container #320, merged in #327.
+Dependencies: Container [#320](https://github.com/davidmigloz/ai_clients_dart/issues/320), merged in #327.
 
 ## Demonstrable outcome
 

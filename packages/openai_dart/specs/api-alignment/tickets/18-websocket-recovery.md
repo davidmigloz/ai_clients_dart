@@ -1,10 +1,10 @@
 # Opt-in Responses WebSocket reconnection
 
 Status: specified; implementation pending.
-GitHub: pending issue creation after independent planning review.
+GitHub: [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-RECOVER-01–02.
-Dependencies: WebSocket 16; steering 17 for submitted-steer replay regression.
+Dependencies: [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) and [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) (submitted-steer replay regression).
 
 ## Demonstrable outcome
 

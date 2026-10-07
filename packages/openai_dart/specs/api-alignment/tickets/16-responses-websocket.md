@@ -1,10 +1,10 @@
 # Responses WebSocket transport and lane routing
 
 Status: specified; implementation pending.
-GitHub: pending issue creation after independent planning review.
+GitHub: [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-WS-01–04.
-Dependencies: None. Shell 12/compaction 13 typed events join the shared codec when available.
+Dependencies: None. Shell [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337) and compaction [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) typed events join the shared codec when available.
 
 ## Demonstrable outcome
 

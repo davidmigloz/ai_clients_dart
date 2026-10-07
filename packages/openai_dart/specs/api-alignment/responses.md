@@ -71,19 +71,19 @@ and its linked guides. Revalidate affected contracts before each implementation.
 
 | Order | Outcome | Requirements | Blockers |
 | --- | --- | --- | --- |
-| 09 | Async function/custom calls and faithful replay | RESP-ASYNC-01–03 | None |
-| 10 | Persistent reasoning configuration updates | RESP-CONFIG-01–02 | None |
-| 11 | GA web-search controls, actions and results | RESP-WEB-01–03 | None |
-| 12 | Hosted/local shell configuration, replay and streaming | RESP-SHELL-01–03 | Container #320, merged |
-| 13 | Observe compaction progress | RESP-COMPACT-01 | None |
-| 14 | Select and inspect Responses access programs | RESP-ACCESS-01–02 | None |
-| 15 | Return complete client-discovered tools | RESP-SEARCH-01–02 | Async 09 for nested async definitions |
-| 16 | Persistent Responses WebSocket sessions and lane routing | RESP-WS-01–04 | None; use the shared event contracts current at implementation |
-| 17 | Steer a running WebSocket response | RESP-STEER-01–03 | WebSocket 16 |
-| 18 | Opt-in socket reconnection and bounded unsent queue | RESP-RECOVER-01–02 | WebSocket 16; steering 17 for replay regression |
-| 19 | Inject multi-agent tool results over WebSockets | RESP-INJECT-01–02 | WebSocket 16 |
+| [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) (09) | Async function/custom calls and faithful replay | RESP-ASYNC-01–03 | None |
+| [#335](https://github.com/davidmigloz/ai_clients_dart/issues/335) (10) | Persistent reasoning configuration updates | RESP-CONFIG-01–02 | None |
+| [#336](https://github.com/davidmigloz/ai_clients_dart/issues/336) (11) | GA web-search controls, actions and results | RESP-WEB-01–03 | None |
+| [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337) (12) | Hosted/local shell configuration, replay and streaming | RESP-SHELL-01–03 | Container #320, merged |
+| [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) (13) | Observe compaction progress | RESP-COMPACT-01 | None |
+| [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) (14) | Select and inspect Responses access programs | RESP-ACCESS-01–02 | None |
+| [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) (15) | Return complete client-discovered tools | RESP-SEARCH-01–02 | [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) for nested async definitions |
+| [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) (16) | Persistent Responses WebSocket sessions and lane routing | RESP-WS-01–04 | None; use the shared event contracts current at implementation |
+| [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) (17) | Steer a running WebSocket response | RESP-STEER-01–03 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
+| [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) (18) | Opt-in socket reconnection and bounded unsent queue | RESP-RECOVER-01–02 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341)/[#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) for replay regression |
+| [#344](https://github.com/davidmigloz/ai_clients_dart/issues/344) (19) | Inject multi-agent tool results over WebSockets | RESP-INJECT-01–02 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
 
-Numbers are repository ticket sequence, not GitHub issue IDs. Implement in this
+Linked numbers are GitHub issues; parenthetical numbers are repository ticket sequence. Implement in this
 order unless a blocker changes; dependencies are required behavior, not source
 layers. Steering must follow transport. Each slice includes public wiring,
 exports/manifest, exact fixtures, README/llms and an example, migration where

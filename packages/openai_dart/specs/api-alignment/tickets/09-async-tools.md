@@ -1,7 +1,7 @@
 # Async function/custom tools and replay
 
 Status: specified; implementation pending.
-GitHub: pending issue creation after independent planning review.
+GitHub: [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-ASYNC-01–03.
 Dependencies: None.
