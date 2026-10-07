@@ -6,6 +6,26 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming Responses reasoning configuration updates
+
+This addition keeps existing `ReasoningConfig` requests unchanged. Use
+`ConfigurationUpdateItem(reasoning: ConfigurationUpdateReasoning(...))` in the
+input history to change subsequent effort while keeping request-level effort
+stable. The update object supports only effort, so summary, context, and mode
+remain on request-level `ReasoningConfig`.
+
+Responses input listings use `ConfigurationUpdateItemResponse`, and stored
+conversation items use `ConversationConfigurationUpdateItem`. Both require an
+ID; their `toConfigurationUpdateItem()` helpers preserve it for input replay.
+Input IDs and reasoning effort accept null and normalize it to omitted JSON.
+Supplied null reasoning is rejected; use `copyWith(reasoning: null)` to omit it.
+An empty reasoning object remains `{}`.
+
+See the [README](README.md#how-do-i-change-reasoning-effort-during-a-conversation)
+for supported modes and history restrictions, and the
+[local example](example/configuration_updates_example.dart) for successive updates
+without API calls. No existing call-site migration is required.
+
 ## Upcoming Responses async-tool alignment
 
 Function/custom definitions, their calls and conversation call items now support

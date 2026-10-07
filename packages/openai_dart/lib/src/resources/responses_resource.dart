@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 
+import '../models/common/copy_with_sentinel.dart';
+import '../models/common/equality_helpers.dart';
 import '../models/responses/responses.dart';
 import 'base_resource.dart';
 import 'input_tokens_resource.dart';
@@ -606,7 +608,7 @@ class InputItemList {
   factory InputItemList.fromJson(Map<String, dynamic> json) {
     return InputItemList(
       data: (json['data'] as List)
-          .map((e) => Item.fromJson(e as Map<String, dynamic>))
+          .map((e) => Item.fromResourceJson(e as Map<String, dynamic>))
           .toList(),
       object: json['object'] as String,
       hasMore: json['has_more'] as bool,
@@ -624,7 +626,39 @@ class InputItemList {
     if (lastId != null) 'last_id': lastId,
   };
 
+  /// Copies every field; explicit null clears an optional pagination ID.
+  ///
+  /// Lists retain the caller-owned collection behavior of the constructor.
+  InputItemList copyWith({
+    List<Item>? data,
+    String? object,
+    bool? hasMore,
+    Object? firstId = unsetCopyWithValue,
+    Object? lastId = unsetCopyWithValue,
+  }) => InputItemList(
+    data: data ?? this.data,
+    object: object ?? this.object,
+    hasMore: hasMore ?? this.hasMore,
+    firstId: firstId == unsetCopyWithValue ? this.firstId : firstId as String?,
+    lastId: lastId == unsetCopyWithValue ? this.lastId : lastId as String?,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is InputItemList &&
+          runtimeType == other.runtimeType &&
+          listsEqual(data, other.data) &&
+          object == other.object &&
+          hasMore == other.hasMore &&
+          firstId == other.firstId &&
+          lastId == other.lastId;
+
+  @override
+  int get hashCode =>
+      Object.hash(listHash(data), object, hasMore, firstId, lastId);
+
   @override
   String toString() =>
-      'InputItemList(data: ${data.length} items, hasMore: $hasMore)';
+      'InputItemList(data: ${data.length} items, object: $object, hasMore: $hasMore, firstId: $firstId, lastId: $lastId)';
 }

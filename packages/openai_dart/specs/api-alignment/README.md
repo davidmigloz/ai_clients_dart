@@ -146,12 +146,15 @@ boundaries. [Planning review](reviews/09-responses-planning.md) records the
 independent review. Planning PR #345 merged after all CI checks passed. Async
 [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) is implemented and
 independently reviewed with [acceptance evidence](reviews/09-async-tools.md) in
-[PR #346](https://github.com/davidmigloz/ai_clients_dart/pull/346). Other Phase 3 runtime work is pending.
+[PR #346](https://github.com/davidmigloz/ai_clients_dart/pull/346), now merged with
+#334 closed. Configuration updates #335 are implemented and independently
+reviewed with [acceptance evidence](reviews/10-configuration-updates.md) in
+[PR #347](https://github.com/davidmigloz/ai_clients_dart/pull/347); merge remains pending. Other Phase 3 runtime work is pending.
 
 | Ticket | Demonstrable outcome | Dependency |
 | --- | --- | --- |
-| [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) ([09](tickets/09-async-tools.md)) | Async function/custom calls and faithful replay | Implemented and reviewed |
-| [#335](https://github.com/davidmigloz/ai_clients_dart/issues/335) ([10](tickets/10-configuration-updates.md)) | Persistent reasoning effort updates | None |
+| [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) ([09](tickets/09-async-tools.md)) | Async function/custom calls and faithful replay | Merged in #346 |
+| [#335](https://github.com/davidmigloz/ai_clients_dart/issues/335) ([10](tickets/10-configuration-updates.md)) | Persistent reasoning effort updates | Implemented and reviewed; merge pending |
 | [#336](https://github.com/davidmigloz/ai_clients_dart/issues/336) ([11](tickets/11-web-search.md)) | GA web-search controls/actions/image results | None |
 | [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337) ([12](tickets/12-hosted-shell.md)) | Hosted/local shell configuration, replay and streams | #320, merged |
 | [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) ([13](tickets/13-compaction-progress.md)) | Typed compaction progress | None |
@@ -218,9 +221,13 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
   `comparison_response_id`/`prewarm` and typed diagnostics; Chat gains narrow options. Shared Responses
   `cache_write_tokens` usage is implemented with Decisions in #318.
 - Async function/custom definitions/calls, direct custom replay and conversation
-  metadata are implemented and reviewed in #334/PR #346; merge remains pending.
-- Input/list-input/conversation parsers lack `configuration_update`; canonical
-  OutputItem has no such variant and no dedicated streaming event is defined.
+  metadata merged in #334/PR #346.
+- Configuration updates #335 now have typed input/list-input/conversation
+  contracts and an offline demonstration; implementation merge is pending.
+  Canonical OutputItem has no such variant or dedicated streaming event.
+- Real Responses input-list mappings expose existing optional pagination ID
+  tolerance against required upstream `first_id`/`last_id`; this stays in the
+  remaining complete-parity inventory.
 - Responses WebSocket transport/steering and official opt-in reconnect helpers
   are absent; exported beta injection DTOs still need transport integration.
 - Hosted shell environment configuration, item metadata, and stream events

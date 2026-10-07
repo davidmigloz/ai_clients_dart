@@ -1,7 +1,8 @@
 # Async tools implementation acceptance
 
 Status: implementation, validation and independent reviews complete.
-[PR #346](https://github.com/davidmigloz/ai_clients_dart/pull/346) is open for review.
+[PR #346](https://github.com/davidmigloz/ai_clients_dart/pull/346) merged after
+all applicable CI checks passed, closing #334.
 Tracking: [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirements: [RESP-ASYNC-01–03](../responses.md#async-calls).
@@ -88,4 +89,4 @@ must include completed status. The example now includes it and was rerun; existi
 provider omission tolerance and its compatibility fixtures stay intentional.
 Engineering review otherwise approves full model contracts, redaction, exports,
 const ownership, public wiring and assertion quality. No validated findings remain.
-The issue stays open until implementation PR merge.
+The issue closed when implementation PR #346 merged.

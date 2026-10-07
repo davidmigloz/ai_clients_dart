@@ -3,11 +3,13 @@ import 'package:meta/meta.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../common/json_helpers.dart';
+import '../responses/config/configuration_update_reasoning.dart';
 import '../responses/config/function_call_status.dart';
 import '../responses/config/item_status.dart';
 import '../responses/config/message_phase.dart';
 import '../responses/config/tool_search_execution_type.dart';
-import '../responses/items/item.dart' show FunctionCallOutput;
+import '../responses/items/item.dart'
+    show ConfigurationUpdateItem, FunctionCallOutput;
 import '../responses/multi_agent/agent_tag.dart';
 import '../responses/tools/response_tool.dart';
 import '../responses/tools/tool_call_caller.dart';
@@ -19,6 +21,7 @@ import 'conversation_message.dart';
 /// This sealed class hierarchy represents the different types of items
 /// that can be stored in a conversation, including output item types
 /// from the Responses API and conversation-specific types.
+/// [ConversationConfigurationUpdateItem] represents a stored reasoning update.
 sealed class ConversationItem {
   /// Creates a [ConversationItem].
   const ConversationItem();
@@ -63,12 +66,110 @@ sealed class ConversationItem {
       'custom_tool_call_output' =>
         ConversationCustomToolCallOutputItem.fromJson(json),
       'additional_tools' => ConversationAdditionalToolsItem.fromJson(json),
+      'configuration_update' => ConversationConfigurationUpdateItem.fromJson(
+        json,
+      ),
       _ => ConversationUnknownItem(type: type, data: json),
     };
   }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson();
+}
+
+/// A stored reasoning configuration update in a conversation.
+///
+/// Persistence is managed by the server for subsequent responses in a
+/// single-agent conversation.
+@immutable
+class ConversationConfigurationUpdateItem extends ConversationItem {
+  /// The fixed item discriminator.
+  String get type => 'configuration_update';
+
+  /// The identifier of the stored item.
+  final String id;
+
+  /// The reasoning update, when supplied.
+  final ConfigurationUpdateReasoning? reasoning;
+
+  /// Agent metadata on the beta multi-agent protocol.
+  final AgentTag? agent;
+
+  /// Creates a [ConversationConfigurationUpdateItem].
+  const ConversationConfigurationUpdateItem({
+    required this.id,
+    this.reasoning,
+    this.agent,
+  });
+
+  /// Creates a [ConversationConfigurationUpdateItem] from JSON.
+  factory ConversationConfigurationUpdateItem.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    const context = 'ConversationConfigurationUpdateItem';
+    requireJsonType(json, 'configuration_update', context);
+    final agent = json.containsKey('agent')
+        ? requireJsonObject(json['agent'], '$context.agent')
+        : null;
+    return ConversationConfigurationUpdateItem(
+      id: requireJsonString(json['id'], '$context.id'),
+      reasoning: json.containsKey('reasoning')
+          ? ConfigurationUpdateReasoning.fromJson(
+              requireJsonObject(json['reasoning'], '$context.reasoning'),
+              context: '$context.reasoning',
+            )
+          : null,
+      agent: agent == null
+          ? null
+          : AgentTag(
+              agentName: requireJsonString(
+                agent['agent_name'],
+                '$context.agent.agent_name',
+              ),
+            ),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    if (reasoning != null) 'reasoning': reasoning!.toJson(),
+    if (agent != null) 'agent': agent!.toJson(),
+  };
+
+  /// Converts to request input while preserving every input-supported field.
+  ConfigurationUpdateItem toConfigurationUpdateItem() =>
+      ConfigurationUpdateItem(id: id, reasoning: reasoning, agent: agent);
+
+  /// Copies every field; explicit null clears an optional value.
+  ConversationConfigurationUpdateItem copyWith({
+    String? id,
+    Object? reasoning = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
+  }) => ConversationConfigurationUpdateItem(
+    id: id ?? this.id,
+    reasoning: reasoning == unsetCopyWithValue
+        ? this.reasoning
+        : reasoning as ConfigurationUpdateReasoning?,
+    agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ConversationConfigurationUpdateItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          reasoning == other.reasoning &&
+          agent == other.agent;
+
+  @override
+  int get hashCode => Object.hash(id, reasoning, agent);
+
+  @override
+  String toString() =>
+      'ConversationConfigurationUpdateItem(type: $type, id: $id, reasoning: $reasoning, agent: $agent)';
 }
 
 /// A message item in a conversation.
