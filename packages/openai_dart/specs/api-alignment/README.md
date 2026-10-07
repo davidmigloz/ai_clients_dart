@@ -147,15 +147,17 @@ independent review. Planning PR #345 merged after all CI checks passed. Async
 [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) is implemented and
 independently reviewed with [acceptance evidence](reviews/09-async-tools.md) in
 [PR #346](https://github.com/davidmigloz/ai_clients_dart/pull/346), now merged with
-#334 closed. Configuration updates #335 are implemented and independently
-reviewed with [acceptance evidence](reviews/10-configuration-updates.md) in
-[PR #347](https://github.com/davidmigloz/ai_clients_dart/pull/347); merge remains pending. Other Phase 3 runtime work is pending.
+#334 closed. Configuration updates #335 merged in
+[PR #347](https://github.com/davidmigloz/ai_clients_dart/pull/347), closing #335;
+[acceptance evidence](reviews/10-configuration-updates.md) records validation and
+independent reviews. GA web search #336 is implemented and independently reviewed
+with [acceptance evidence](reviews/11-web-search.md); merge remains pending.
 
 | Ticket | Demonstrable outcome | Dependency |
 | --- | --- | --- |
 | [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) ([09](tickets/09-async-tools.md)) | Async function/custom calls and faithful replay | Merged in #346 |
-| [#335](https://github.com/davidmigloz/ai_clients_dart/issues/335) ([10](tickets/10-configuration-updates.md)) | Persistent reasoning effort updates | Implemented and reviewed; merge pending |
-| [#336](https://github.com/davidmigloz/ai_clients_dart/issues/336) ([11](tickets/11-web-search.md)) | GA web-search controls/actions/image results | None |
+| [#335](https://github.com/davidmigloz/ai_clients_dart/issues/335) ([10](tickets/10-configuration-updates.md)) | Persistent reasoning effort updates | Merged in #347 |
+| [#336](https://github.com/davidmigloz/ai_clients_dart/issues/336) ([11](tickets/11-web-search.md)) | GA web-search controls/actions/image results | Implemented and reviewed; merge pending |
 | [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337) ([12](tickets/12-hosted-shell.md)) | Hosted/local shell configuration, replay and streams | #320, merged |
 | [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) ([13](tickets/13-compaction-progress.md)) | Typed compaction progress | None |
 | [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) ([14](tickets/14-access-programs.md)) | Select/inspect effective access program | None |
@@ -165,12 +167,13 @@ reviewed with [acceptance evidence](reviews/10-configuration-updates.md) in
 | [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) ([18](tickets/18-websocket-recovery.md)) | Opt-in reconnect and bounded unsent queue | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341)/[#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) |
 | [#344](https://github.com/davidmigloz/ai_clients_dart/issues/344) ([19](tickets/19-websocket-injection.md)) | Beta multi-agent tool-result injection | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
 
-Implement the small async slice first, then continue through the table. Recovery
+Async tools and configuration updates are merged; continue with web search, then
+the remaining table entries. Recovery
 and injection remain explicit follow-ups to basic transport; do not claim full
 WebSocket SDK parity before they are complete. Each ticket includes an offline
 example, public fixtures, documentation and independent review. All eleven tickets are native sub-issues of #317; active blockers are linked
-with GitHub dependencies. Configuration updates [#335](https://github.com/davidmigloz/ai_clients_dart/issues/335)
-follow async #334 after its PR merges.
+with GitHub dependencies. Hosted/local shell [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337)
+follows web search #336 after its PR merges.
 
 ## Remaining roadmap
 
@@ -222,8 +225,8 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
   `cache_write_tokens` usage is implemented with Decisions in #318.
 - Async function/custom definitions/calls, direct custom replay and conversation
   metadata merged in #334/PR #346.
-- Configuration updates #335 now have typed input/list-input/conversation
-  contracts and an offline demonstration; implementation merge is pending.
+- Configuration updates #335 merged in #347 with typed input/list-input/conversation
+  contracts and an offline demonstration.
   Canonical OutputItem has no such variant or dedicated streaming event.
 - Real Responses input-list mappings expose existing optional pagination ID
   tolerance against required upstream `first_id`/`last_id`; this stays in the
@@ -232,8 +235,9 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
   are absent; exported beta injection DTOs still need transport integration.
 - Hosted shell environment configuration, item metadata, and stream events
   are incomplete; compaction progress also needs alignment.
-- Web search lacks newer filters, access controls, return-token budget, image
-  settings/results, action metadata, and corresponding include values.
+- Web search #336 implements filters, access controls, return-token budget, image
+  settings/results, action metadata and Includes; validation and independent
+  reviews are complete, with implementation merge pending.
 - Responses access-program configuration and tool-search output definitions
   need alignment. [Phase 3](responses.md) specifies these and the above gaps.
 - Chat usage/obfuscation merged in #330/#323; complete/streamed audio is

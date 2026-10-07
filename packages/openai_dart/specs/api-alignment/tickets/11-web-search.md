@@ -1,6 +1,6 @@
 # GA web-search controls, actions and results
 
-Status: specified; implementation pending.
+Status: implemented, verified, and independently reviewed; merge pending.
 GitHub: [#336](https://github.com/davidmigloz/ai_clients_dart/issues/336).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-WEB-01–03.
@@ -12,15 +12,15 @@ Configure GA filtered/image search and inspect sources, action metadata and comp
 
 ## Acceptance criteria
 
-- [ ] All four GA/preview discriminators parse; convenience default is GA with explicit preview compatibility and migration.
-- [ ] Exact request fixtures cover access, context size, nullable filters/location and guide-only block list, budget, content types and image settings without injecting defaults.
-- [ ] All five statuses, three action variants, deprecated query, sources, image/unknown results and beta agent survive response/conversation and completed-stream parsing.
-- [ ] All four missing canonical Includes serialize through create/createStream/retrieve/list-input; existing legacy strings remain unchanged.
-- [ ] Guide/schema/SDK differences and chosen image metadata null policy are explicit; offline example demonstrates filters/images.
-- [ ] Changed models have complete contextual serialization, copy/clear, equality/hash and safe diagnostics across all old/new fields; known malformed variants fail and intended provider tolerance stays compatible.
-- [ ] Public factories/resources/stream parsers, exports and real manifest mappings are verified. README/llms, an offline runnable example and any required migration guide are complete.
-- [ ] Relevant focused unit fixtures, format/fix/analyze, the package unit suite and full toolkit scope have recorded evidence. Unrelated diagnostics remain visible.
-- [ ] Independent requirements and engineering reviews approve the final combined diff after validated findings are resolved.
+- [x] All four GA/preview discriminators parse; convenience default is GA with explicit preview compatibility and migration.
+- [x] Exact request fixtures cover access, context size, nullable filters/location and guide-only block list, budget, content types and image settings without injecting defaults.
+- [x] All five statuses, three action variants, deprecated query, sources, image/unknown results and beta agent survive response/conversation and completed-stream parsing.
+- [x] All four missing canonical Includes serialize through create/createStream/retrieve/list-input; existing legacy strings remain unchanged.
+- [x] Guide/schema/SDK differences and chosen image metadata null policy are explicit; offline example demonstrates filters/images.
+- [x] Changed models have complete contextual serialization, copy/clear, equality/hash and safe diagnostics across all old/new fields; known malformed variants fail and intended provider tolerance stays compatible.
+- [x] Public factories/resources/stream parsers, exports and real manifest mappings are verified. README/llms, an offline runnable example and any required migration guide are complete.
+- [x] Relevant focused unit fixtures, format/fix/analyze, the package unit suite and full toolkit scope have recorded evidence. Unrelated diagnostics remain visible.
+- [x] Independent requirements and engineering reviews approve the final combined diff after validated findings are resolved.
 
 ## Compatibility and boundaries
 
@@ -34,5 +34,7 @@ Package publishing and unrelated API families are outside this ticket.
 
 ## Completion evidence
 
-Pending implementation, verification and independent review. Link the evidence
-record and PR here when complete; close the issue only after merge.
+[Acceptance evidence](../reviews/11-web-search.md) records exact contextual
+contracts, 3,903 passing unit tests, clean analysis, full toolkit diagnostics,
+README/migration guidance, the offline example, and independent reviews. Close
+the issue only after implementation merge.

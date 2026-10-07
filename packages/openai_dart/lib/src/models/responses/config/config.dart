@@ -27,3 +27,5 @@ export 'text_config.dart';
 export 'tool_search_execution_type.dart';
 export 'truncation.dart';
 export 'verbosity.dart';
+export 'web_search_call_status.dart';
+export 'web_search_return_token_budget.dart';

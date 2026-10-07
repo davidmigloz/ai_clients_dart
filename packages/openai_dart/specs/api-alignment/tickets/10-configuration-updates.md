@@ -1,6 +1,6 @@
 # Persistent reasoning configuration updates
 
-Status: implemented, verified, and independently reviewed; merge pending.
+Status: merged and complete.
 GitHub: [#335](https://github.com/davidmigloz/ai_clients_dart/issues/335).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-CONFIG-01–02.
@@ -36,6 +36,7 @@ Package publishing and unrelated API families are outside this ticket.
 [Acceptance evidence](../reviews/10-configuration-updates.md) records complete
 contextual contracts, 3,269 passing unit tests, clean analysis, full toolkit
 diagnostics, README/migration guidance, the offline example, and independent
-requirements/engineering approvals. Close the issue only after implementation merge.
+requirements/engineering approvals.
 
-Implementation [PR #347](https://github.com/davidmigloz/ai_clients_dart/pull/347) is open for review; #335 closes only after merge.
+Implementation [PR #347](https://github.com/davidmigloz/ai_clients_dart/pull/347)
+merged after all CI checks passed, closing #335.

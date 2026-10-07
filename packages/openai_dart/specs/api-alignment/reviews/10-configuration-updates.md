@@ -1,7 +1,8 @@
 # Persistent reasoning configuration update acceptance
 
-Status: implementation, validation, and independent reviews complete; merge pending.
-[PR #347](https://github.com/davidmigloz/ai_clients_dart/pull/347) is open for review.
+Status: merged and complete.
+[PR #347](https://github.com/davidmigloz/ai_clients_dart/pull/347) merged at
+`6b0a66f32d0cc2384d909f4e86f25237fb7cd11a` after all CI checks passed, closing #335.
 Tracking: [#335](https://github.com/davidmigloz/ai_clients_dart/issues/335),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirements: [RESP-CONFIG-01–02](../responses.md#configuration-updates).
@@ -108,4 +109,4 @@ Requirements review identified missing value/copy contracts on the parser-change
 Engineering review identified incomplete public response fixtures; all canonical
 required fields are now included in shared REST/SSE fixtures. Both reviewers
 rechecked the final combined source/tests/docs/mappings and approve with no
-remaining actionable findings. Issue #335 stays open until implementation merge.
+remaining actionable findings. Issue #335 closed after implementation merge.

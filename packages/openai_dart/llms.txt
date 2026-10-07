@@ -40,6 +40,7 @@
 - [assistants_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/assistants_example.dart) (~1.3k tokens): Assistants API (deprecated).
 - [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/models_example.dart) (~780 tokens): Model listing and retrieval.
 - [web_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/web_search_example.dart) (~1.1k tokens): Web search with Responses API.
+- [web_search_controls_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/web_search_controls_example.dart) (~1.2k tokens): Local GA filtered/image search, sources, future results, and REST/SSE parsing without API calls.
 - [completions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/completions_example.dart) (~327 tokens): Legacy completions API.
 - [uploads_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/uploads_example.dart) (~387 tokens): Large file multipart uploads.
 - [skills_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/skills_example.dart) (~346 tokens): Skills management.
