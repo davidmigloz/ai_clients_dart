@@ -1,6 +1,6 @@
 # Preserve chat token details and obfuscation
 
-Status: implemented and independently reviewed; awaiting PR merge.
+Status: implemented and independently reviewed; [PR #330](https://github.com/davidmigloz/ai_clients_dart/pull/330) open for review.
 GitHub: [#323](https://github.com/davidmigloz/ai_clients_dart/issues/323).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 2 correctness](../correctness.md), CHAT-001–002.

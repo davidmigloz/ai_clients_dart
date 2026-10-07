@@ -114,7 +114,7 @@ merged after all CI checks passed, closing #322.
 Chat usage/obfuscation [acceptance evidence](reviews/05-chat-usage-obfuscation.md)
 records 2,199 passing unit tests, clean analysis, independent approvals, updated
 streaming examples/migration, and an authorized one-request unstored live smoke
-(conservative $0.000003375). The implementation is awaiting PR merge.
+(conservative $0.000003375). Implementation [PR #330](https://github.com/davidmigloz/ai_clients_dart/pull/330) is open for review; #323 closes on merge.
 
 ## Proposed roadmap
 

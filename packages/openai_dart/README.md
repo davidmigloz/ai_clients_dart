@@ -963,7 +963,7 @@ See the [example/](example/) directory for complete examples:
 
 | API | Status |
 |-----|--------|
-| Chat Completions | Supported; stored-completion management and some streaming details pending |
+| Chat Completions | Supported; stored-completion management and audio streaming details pending |
 | Responses API | Supported; WebSockets and additional tool/configuration details pending |
 | Decisions API | ✅ Full |
 | Embeddings | ✅ Full |

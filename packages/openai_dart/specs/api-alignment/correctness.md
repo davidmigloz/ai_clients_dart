@@ -8,7 +8,8 @@ closing #321; its
 merged in [PR #329](https://github.com/davidmigloz/ai_clients_dart/pull/329), closing #322;
 [acceptance evidence](reviews/04-cache-controls-diagnostics.md) is recorded. Chat usage/obfuscation
 is implemented and independently reviewed with
-[acceptance evidence](reviews/05-chat-usage-obfuscation.md), awaiting PR merge. Parent
+[acceptance evidence](reviews/05-chat-usage-obfuscation.md) in
+[PR #330](https://github.com/davidmigloz/ai_clients_dart/pull/330), awaiting merge. Parent
 [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Decisions was merged in [#319](https://github.com/davidmigloz/ai_clients_dart/pull/319)
 after all CI checks passed, closing #318.
