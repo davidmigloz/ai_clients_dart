@@ -13,6 +13,7 @@ export 'completions_resource.dart';
 export 'containers_resource.dart';
 export 'content_provenance_checks_resource.dart';
 export 'conversations_resource.dart';
+export 'decisions_resource.dart';
 export 'embeddings_resource.dart';
 export 'evals_resource.dart';
 export 'files_resource.dart';

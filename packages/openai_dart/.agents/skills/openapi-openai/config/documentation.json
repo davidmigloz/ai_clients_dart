@@ -59,7 +59,8 @@
     "audio": "audio_example",
     "images": "images_example",
     "moderations": "moderation_example",
-    "realtimeSessions": "realtime"
+    "realtimeSessions": "realtime",
+    "decisions": "decisions_example"
   },
   "excluded_from_examples": [],
   "drift_patterns": [
