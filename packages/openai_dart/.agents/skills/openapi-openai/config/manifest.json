@@ -345,25 +345,19 @@
     },
     "CreateResponse": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "CreateResponseRequest",
       "file": "lib/src/models/responses/create_response_request.dart",
       "schema": "CreateResponse",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Spec uses allOf. Responses cache controls/diagnostics have exact GA/beta create/stream fixtures; beta multi_agent remains supported."
+      "note": "Real allOf parent mapping. Access programs have complete public GA/beta fixtures; returned outer omission/null tolerance follows Python and existing Dart conventions. Other pre-existing parent gaps stay visible."
     },
     "Response": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "Response",
       "file": "lib/src/models/responses/response.dart",
       "schema": "Response",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Spec uses allOf. Responses cache controls/diagnostics have exact GA/beta create/stream fixtures; beta multi_agent remains supported."
+      "note": "Real allOf parent mapping. Access programs have complete public GA/beta fixtures; returned outer omission/null tolerance follows Python and existing Dart conventions. Other pre-existing parent gaps stay visible."
     },
     "ResponsesClientEventResponseCreate": {
       "spec": "main",
@@ -3814,6 +3808,70 @@
       "schema": "BetaResponseCompactionCompactingStreamingEvent",
       "parent": "ResponseStreamEvent",
       "note": "Nonterminal progress only; required sequence/output/item fields, optional nonnull beta agent, no summary or encrypted content."
+    },
+    "AccessProgramsParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AccessProgramsParam",
+      "file": "lib/src/models/responses/config/access_programs.dart",
+      "schema": "AccessProgramsParam",
+      "note": "Distinct request/returned cyber shapes; no client defaults or eligibility checks. Closed leaf values reject malformed/unknown strings contextually."
+    },
+    "AccessProgramsBody": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AccessProgramsBody",
+      "file": "lib/src/models/responses/config/access_programs.dart",
+      "schema": "AccessProgramsBody",
+      "note": "Distinct request/returned cyber shapes; no client defaults or eligibility checks. Closed leaf values reject malformed/unknown strings contextually."
+    },
+    "CyberAccessProgramEnum": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "CyberAccessProgram",
+      "file": "lib/src/models/responses/config/cyber_access_program.dart",
+      "schema": "CyberAccessProgramEnum",
+      "note": "Distinct request/returned cyber shapes; no client defaults or eligibility checks. Closed leaf values reject malformed/unknown strings contextually."
+    },
+    "BetaAccessProgramsParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AccessProgramsParam",
+      "file": "lib/src/models/responses/config/access_programs.dart",
+      "schema": "BetaAccessProgramsParam",
+      "note": "Distinct request/returned cyber shapes; no client defaults or eligibility checks. Closed leaf values reject malformed/unknown strings contextually."
+    },
+    "BetaAccessProgramsBody": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AccessProgramsBody",
+      "file": "lib/src/models/responses/config/access_programs.dart",
+      "schema": "BetaAccessProgramsBody",
+      "note": "Distinct request/returned cyber shapes; no client defaults or eligibility checks. Closed leaf values reject malformed/unknown strings contextually."
+    },
+    "BetaCyberAccessProgramEnum": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "CyberAccessProgram",
+      "file": "lib/src/models/responses/config/cyber_access_program.dart",
+      "schema": "BetaCyberAccessProgramEnum",
+      "note": "Distinct request/returned cyber shapes; no client defaults or eligibility checks. Closed leaf values reject malformed/unknown strings contextually."
+    },
+    "BetaCreateResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateResponseRequest",
+      "file": "lib/src/models/responses/create_response_request.dart",
+      "schema": "BetaCreateResponse",
+      "note": "Real allOf parent mapping. Access programs have complete public GA/beta fixtures; returned outer omission/null tolerance follows Python and existing Dart conventions. Other pre-existing parent gaps stay visible."
+    },
+    "BetaResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Response",
+      "file": "lib/src/models/responses/response.dart",
+      "schema": "BetaResponse",
+      "note": "Real allOf parent mapping. Access programs have complete public GA/beta fixtures; returned outer omission/null tolerance follows Python and existing Dart conventions. Other pre-existing parent gaps stay visible."
     }
   }
 }

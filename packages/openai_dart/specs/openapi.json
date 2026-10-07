@@ -57757,6 +57757,7 @@
         "description": "Choose from the supplied options based on the input.",
         "properties": {
           "choices": {
+            "description": "Provide between 2 and 255 choices. Each choice must be unique.",
             "items": {
               "$ref": "#/components/schemas/ChoiceOptionParam"
             },

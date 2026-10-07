@@ -2,8 +2,8 @@
   "specs": {
     "main": {
       "current_version": "2.3.0",
-      "last_fetched": "2026-10-07T18:58:57.871878Z",
-      "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/17f9a665031777071b26e63356d78280bf7c128c/openapi.json",
+      "last_fetched": "2026-10-07T19:51:18.524540Z",
+      "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/234829e2b634b8fb159df7fcddbffad204173ffd/openapi.json",
       "title": "OpenAI API",
       "version_history": [
         {
@@ -58,6 +58,12 @@
           "fetched_at": "2026-10-07T05:31:56.851160Z",
           "note": "ee483b4 replaced by 17f9a66 on 2026-10-07; only the createDecision endpoint description changed. Reviewed wire contracts remain unchanged.",
           "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/ee483b4b26b2695fedc5c8af7b187e5986bd0add/openapi.json",
+          "version": "2.3.0"
+        },
+        {
+          "fetched_at": "2026-10-07T18:58:57.871878Z",
+          "note": "17f9a66 replaced by 234829e on 2026-10-07; only the QuestionParamChoice choices description changed. Reviewed access-program and endpoint wire contracts remain unchanged.",
+          "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/17f9a665031777071b26e63356d78280bf7c128c/openapi.json",
           "version": "2.3.0"
         }
       ]

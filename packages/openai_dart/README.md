@@ -247,6 +247,49 @@ client.close();
 
 </details>
 
+### How do I select and inspect an access program?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `AccessProgramsParam` to select a cyber access program and inspect the effective
+returned selection through `AccessProgramsBody`:
+
+```dart
+const request = CreateResponseRequest(
+  model: 'gpt-6-sol',
+  input: ResponseInput.text('Explain how to validate a patch in a test setup.'),
+  accessPrograms: AccessProgramsParam(cyber: CyberAccessProgram.daybreakBlue),
+);
+final response = await client.responses.create(request);
+print(response.accessPrograms?.cyber.toJson() ?? 'Not reported or implicit Standard');
+```
+
+`CyberAccessProgram` supports `standard`, `daybreakBlue` and `daybreakRed` with
+their exact wire values. Omit `accessPrograms` or use `const AccessProgramsParam()`
+to leave selection to the server. No default is inserted by the client. An implicit
+Standard selection is reported as null by the server; explicit Standard retains
+its returned object. Older responses that omit this metadata remain accepted.
+
+Request JSON rejects supplied null, unsupported keys inside the selection object,
+and invalid cyber values. Returned objects require a nonnull known `cyber` value;
+extra returned fields remain tolerated. Clearing a Dart selection with
+`copyWith(accessPrograms: null)` omits the request key. Ordinary, retrieved,
+cancelled and streamed lifecycle responses retain the effective program, including
+through `ResponseStreamAccumulator.response`.
+
+Explicit selection requires compatible model and organization/project access; it
+does not grant approval. Match the program to the model rather than the approval
+level. Follow the current [Daybreak guide](https://developers.openai.com/api/docs/guides/daybreak)
+for model eligibility, project setup, omission defaults and 400/403 errors. Usage
+tiers such as Build, Launch and Grow are separate from access-program selection.
+
+→ [Runnable offline example](example/access_programs_example.dart), demonstrating
+omission, an empty selection and all three explicit values without an API key,
+Daybreak provisioning or API charges.
+
+</details>
+
 ### How do I observe compaction progress?
 
 <details>
@@ -1368,6 +1411,7 @@ See the [example/](example/) directory for complete examples:
 | [`web_search_controls_example.dart`](example/web_search_controls_example.dart) | Local GA filters, image results, sources, and REST/SSE parsing without API calls |
 | [`shell_tools_example.dart`](example/shell_tools_example.dart) | Offline hosted configuration, synthetic local continuation, and typed shell stream events |
 | [`compaction_progress_example.dart`](example/compaction_progress_example.dart) | Offline nonterminal compaction progress and opaque final output preservation |
+| [`access_programs_example.dart`](example/access_programs_example.dart) | Offline access-program selection, server defaults and effective returned metadata |
 | [`realtime_example.dart`](example/realtime_example.dart) | Realtime API (WebSocket and WebRTC) |
 | [`fine_tuning_example.dart`](example/fine_tuning_example.dart) | Fine-tuning job management |
 | [`completions_example.dart`](example/completions_example.dart) | Legacy completions API |
