@@ -2,10 +2,12 @@
 
 Status: independently reviewed specification; async tools, configuration updates,
 web search, hosted/local shell and compaction progress merged in #346–#350.
-Access programs #339 are implemented and validated; independent reviews approve the final combined
-diff in [PR #351](https://github.com/davidmigloz/ai_clients_dart/pull/351);
-merge remains pending. Tool search #340 follows after access programs. Remaining runtime
-slices are tracked below. Parent:
+Access programs #339 merged in
+[PR #351](https://github.com/davidmigloz/ai_clients_dart/pull/351).
+Tool search #340 is implemented, verified and independently reviewed in
+[PR #352](https://github.com/davidmigloz/ai_clients_dart/pull/352); merge is pending.
+Responses WebSocket sessions
+#341 follow. Remaining runtime slices are tracked below. Parent:
 [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 
 ## Objective and decisions
@@ -59,6 +61,11 @@ and [Node 7.30.0 / a4942ba](https://github.com/openai/openai-node/tree/a4942ba48
 Discovery follows the [changelog](https://developers.openai.com/api/docs/changelog)
 and its linked guides. Revalidate affected contracts before each implementation.
 
+The #340 implementation recheck retains
+[OpenAPI 234829e](https://github.com/openai/openai-openapi/blob/234829e2b634b8fb159df7fcddbffad204173ffd/openapi.json)
+and these official-client pins. The candidate is unchanged at 356 operations and
+2,010 schemas; the reviewed source has no new wire changes.
+
 | Difference | Decision and source of truth |
 | --- | --- |
 | Earlier inventory says configuration updates are missing from output parsing | Canonical `Item`, `ItemResource`, and `ConversationItem` include them; `OutputItem` does not. Add request/list-input/conversation parsing, no invented output/SSE variant |
@@ -67,6 +74,8 @@ and its linked guides. Revalidate affected contracts before each implementation.
 | Steering input schema admits function outputs and user id/status, but guide/event description restrict user-message keys | Typed steering accepts only user `type`/`role`/`content`; tool results use `response.create`. Record the narrower documented behavior |
 | Effective response `access_programs` is required nullable in schema, optional in Python/provider payloads | Preserve outer omission/null tolerance; a supplied body requires nonnull `cyber`. Request has a distinct optional nonnull shape |
 | Tool-search request arguments are objects, returned arguments are arbitrary JSON | Separate contextual contracts; returned null is preserved as a required value, not silently omitted |
+| Returned tool-search output references ordinary namespace definitions, while writable discovery and official clients admit dotted minimal functions | Apply discovered contextual parsing to returned namespaces as an explicit compatibility inference; retain ordinary request naming rules |
+| Guide top-level discovered function examples omit strict, while canonical FunctionTool requires nullable parameters and strict keys | Keep the canonical required-nullable top-level contract and supply explicit keys in fixtures/examples; nested discovered functions require only type/name |
 | Failed queue flush differs: Python does not requeue an attempted failed send; Node does | Snapshot UTF-8 frames at enqueue. Failed attempted writes have unknown delivery and never replay; report only never-attempted remainder as unsent |
 | Canonical WS ErrorPayload requires nullable code/param keys; guide connection-limit errors omit param | Preserve outer omission of code/param for compatible WS errors and supplied null distinctly; require type/message. Include the exact guide limit-error fixture |
 | Node reconnect enables only with callback, uses [0.75, 1.0] jitter and admits one oversized frame into an empty queue | Require an explicit reconnect preparation callback and adopt that jitter; enforce the configured queue byte bound with observable rejection, including its first frame (matches Python; differs from Node) |
@@ -80,8 +89,8 @@ and its linked guides. Revalidate affected contracts before each implementation.
 | [#336](https://github.com/davidmigloz/ai_clients_dart/issues/336) (11) | GA web-search controls, actions and results | RESP-WEB-01–03 | Merged in #348 |
 | [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337) (12) | Hosted/local shell configuration, replay and streaming | RESP-SHELL-01–03 | Merged in #349; container #320 merged |
 | [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) (13) | Observe compaction progress | RESP-COMPACT-01 | Merged in #350 |
-| [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) (14) | Select and inspect Responses access programs | RESP-ACCESS-01–02 | Implemented/reviewed; merge pending in #351 |
-| [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) (15) | Return complete client-discovered tools | RESP-SEARCH-01–02 | [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) for nested async definitions |
+| [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) (14) | Select and inspect Responses access programs | RESP-ACCESS-01–02 | Merged in #351 |
+| [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) (15) | Return complete client-discovered tools | RESP-SEARCH-01–02 | Implemented/verified/reviewed in #352; merge pending; #334 merged |
 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) (16) | Persistent Responses WebSocket sessions and lane routing | RESP-WS-01–04 | None; use the shared event contracts current at implementation |
 | [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) (17) | Steer a running WebSocket response | RESP-STEER-01–03 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
 | [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) (18) | Opt-in socket reconnection and bounded unsent queue | RESP-RECOVER-01–02 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341)/[#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) for replay regression |
@@ -309,6 +318,8 @@ necessary contract coverage.
   Returned execution/status/call_id keys are required with nullable call_id;
   request call_id remains optional nullable. Preserve hosted/client execution and
   returned tool lists. Document any correction to permissive current constructors.
+  The input-items resource uses the returned contract through distinct Item
+  variants, rather than coercing returned arbitrary arguments to writable objects.
 - **RESP-SEARCH-02:** Search-discovered namespaces retain dotted function names and
   context-specific definition requiredness. Preserve nested parameters, strict,
   description, allowed callers, defer_loading, output schema and async. Use explicit
@@ -316,6 +327,30 @@ necessary contract coverage.
   validation or top-level requiredness on discovered nested functions. Demonstrate
   returning discovered tools with the original call ID and `execution: client`.
   Existing tool-search endpoints and basic capability are retained.
+
+The targeted correction requires object arguments for writable calls and the
+returned execution/status/call ID/arguments or tools constructor fields. New
+`ToolSearchCallResourceItem`/`ToolSearchOutputResourceItem` variants extend sealed
+`Item` and replace writable parameter variants in input-list results; provide
+migration for exhaustive switches and subtype casts. Returned call IDs and
+arguments keep explicit null. Typed stored-call conversion requires an object;
+raw `ResponseInput.fromOutputItems` history preserves arbitrary returned JSON.
+
+Returned discovered namespace parsing follows the writable discovered schema and
+SDK string typing as an explicit compatibility inference against the canonical
+ordinary namespace reference; the guide establishes loaded-tool continuation.
+This does not impose discovered naming
+rules globally or relax canonical required-nullable top-level function keys.
+The older `apply_patch` ResponseTool union gap remains tracked separately.
+
+Implementation #340 has 376 item-model cases, 133 definition cases and 3,491
+public fixtures (4,000 new tests).
+[Acceptance evidence](reviews/15-tool-search.md) records 10,152 passing package
+unit tests, two existing skips, clean analysis, the two-request offline example
+and classified toolkit diagnostics. Both independent reviews approve the final
+combined diff. Implementation [PR #352](https://github.com/davidmigloz/ai_clients_dart/pull/352)
+is open for review; #340 closes only after merge.
+Responses WebSocket sessions #341 follow this slice after merge.
 
 Sources: [tool search](https://developers.openai.com/api/docs/guides/tools-tool-search),
 [Python discovered namespace](https://github.com/openai/openai-python/blob/4e152cdefe1844c2d5d78653310e9b9c0195c44e/src/openai/types/responses/tool_search_output_namespace_tool.py).

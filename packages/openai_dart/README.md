@@ -247,6 +247,97 @@ client.close();
 
 </details>
 
+### How do I return client-discovered tools?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Configure client-side tool search, then return the complete definitions with the
+original search call ID:
+
+```dart
+final first = await client.responses.create(
+  const CreateResponseRequest(
+    model: 'gpt-6-sol',
+    input: ResponseInput.text('Find the inventory tools.'),
+    tools: [
+      ToolSearchTool(
+        execution: ToolSearchExecutionType.client,
+        description: 'Search a local tool catalog.',
+        parameters: {
+          'type': 'object',
+          'properties': {'goal': {'type': 'string'}},
+          'required': ['goal'],
+          'additionalProperties': false,
+        },
+      ),
+    ],
+    parallelToolCalls: false,
+  ),
+);
+final call = first.output.whereType<ToolSearchCallOutputItem>().single;
+final callId = call.callId;
+if (call.execution != ToolSearchExecutionType.client || callId == null) {
+  throw StateError('Expected a client search call with an ID.');
+}
+// Resolve call.arguments against your catalog; check its JSON type first.
+final next = await client.responses.create(
+  CreateResponseRequest(
+    model: 'gpt-6-sol',
+    previousResponseId: first.id,
+    input: ResponseInput.items([
+      ToolSearchOutputItemParam(
+        callId: callId,
+        execution: ToolSearchExecutionType.client,
+        tools: const [
+          NamespaceTool(
+            name: 'inventory',
+            description: 'Inventory tools from the local catalog.',
+            tools: [
+              FunctionTool(name: 'get.status'),
+              CustomTool(name: 'describe', format: {'type': 'text'}),
+            ],
+          ),
+        ],
+        status: ItemStatus.completed,
+      ),
+    ]),
+  ),
+);
+```
+
+Search outputs preserve complete function/custom definitions, including parameter
+and output schemas, formats, allowed callers, deferred loading and async flags.
+Nested discovered functions support dotted names and may contain only `type` and
+`name`. Top-level discovered functions always serialize the required nullable
+`parameters` and `strict` keys. For standalone discovered-definition JSON, use
+`ResponseTool.fromToolSearchOutputJson` and `toToolSearchOutputJson`; ordinary
+`NamespaceTool.fromJson` uses the narrower request naming rules.
+
+Writable `ToolSearchCallItemParam.arguments` requires a JSON object. Returned
+calls use `Object?` because their arguments may be any JSON value, including null
+or a list. Check the type before indexing. Returned calls/results preserve null
+hosted call IDs and require their execution, status and payload fields. Search
+records from `responses.inputItems.list` use `ToolSearchCallResourceItem` and
+`ToolSearchOutputResourceItem`; their explicit conversion methods create writable
+items, and call conversion rejects non-object arguments. To retain raw output
+history, `ResponseInput.fromOutputItems` accepts raw JSON maps.
+
+The [tool-search guide](https://developers.openai.com/api/docs/guides/tools-tool-search)
+documents hosted search and client continuation. The canonical writable discovered
+namespace schema allows dotted function names, while the returned schema references
+ordinary namespaces with narrower names. Search-result parsing deliberately uses
+the discovered context to retain loaded definitions; this is a compatibility
+interpretation of those sources. The canonical top-level function schema also
+requires nullable keys that some guide examples omit.
+
+→ [Runnable offline example](example/tool_search_example.dart), demonstrating two
+local requests, the original call ID and complete discovered definitions without
+an API key or tool execution. See the [migration guide](MIGRATION.md#upcoming-tool-search-fidelity)
+for required constructor arguments and new `Item` variants.
+
+</details>
+
 ### How do I select and inspect an access program?
 
 <details>
@@ -1412,6 +1503,7 @@ See the [example/](example/) directory for complete examples:
 | [`shell_tools_example.dart`](example/shell_tools_example.dart) | Offline hosted configuration, synthetic local continuation, and typed shell stream events |
 | [`compaction_progress_example.dart`](example/compaction_progress_example.dart) | Offline nonterminal compaction progress and opaque final output preservation |
 | [`access_programs_example.dart`](example/access_programs_example.dart) | Offline access-program selection, server defaults and effective returned metadata |
+| [`tool_search_example.dart`](example/tool_search_example.dart) | Offline client tool-search continuation with the original call ID and complete discovered definitions |
 | [`realtime_example.dart`](example/realtime_example.dart) | Realtime API (WebSocket and WebRTC) |
 | [`fine_tuning_example.dart`](example/fine_tuning_example.dart) | Fine-tuning job management |
 | [`completions_example.dart`](example/completions_example.dart) | Legacy completions API |

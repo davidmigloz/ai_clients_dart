@@ -20,6 +20,7 @@ import '../responses/items/item.dart'
 import '../responses/items/output_item.dart'
     show ShellCallAction, ShellCallOutputContent, ShellEnvironment;
 import '../responses/items/shell_call_helpers.dart';
+import '../responses/items/tool_search_item_helpers.dart';
 import '../responses/items/web_search_action.dart';
 import '../responses/items/web_search_result.dart';
 import '../responses/multi_agent/agent_tag.dart';
@@ -1429,54 +1430,92 @@ class ConversationCodeInterpreterCallItem extends ConversationItem {
 /// A tool search call item in a conversation.
 @immutable
 class ConversationToolSearchCallItem extends ConversationItem {
+  /// The fixed item discriminator.
+  String get type => 'tool_search_call';
+
   /// Unique identifier.
   final String id;
 
-  /// The call ID.
+  /// The search call identifier; returned items always serialize its key.
   final String? callId;
 
-  /// The execution type.
-  final ToolSearchExecutionType? execution;
+  /// The server or client execution type.
+  final ToolSearchExecutionType execution;
 
-  /// The arguments.
-  final Map<String, dynamic>? arguments;
+  /// Search arguments. Returned arguments can be any JSON value.
+  final Object? arguments;
 
-  /// Item status.
-  final ItemStatus? status;
+  /// The item status.
+  final ItemStatus status;
+
+  /// The actor that created this item, when provided.
+  final String? createdBy;
 
   /// Creates a [ConversationToolSearchCallItem].
+  ///
+  /// Const construction retains caller-owned collections. Do not mutate them
+  /// while this value is used as a map key or set member. Parsed collections
+  /// are recursively unmodifiable snapshots.
   const ConversationToolSearchCallItem({
     required this.id,
-    this.callId,
-    this.execution,
-    this.arguments,
-    this.status,
+    required this.callId,
+    required this.execution,
+    required this.arguments,
+    required this.status,
+    this.createdBy,
   });
 
-  /// Creates a [ConversationToolSearchCallItem] from JSON.
+  /// Creates a [ConversationToolSearchCallItem] from contextual tool-search JSON.
   factory ConversationToolSearchCallItem.fromJson(Map<String, dynamic> json) {
+    const context = 'ConversationToolSearchCallItem';
+    requireJsonType(json, 'tool_search_call', context);
     return ConversationToolSearchCallItem(
-      id: json['id'] as String,
-      callId: json['call_id'] as String?,
-      execution: json['execution'] != null
-          ? ToolSearchExecutionType.fromJson(json['execution'] as String)
-          : null,
-      arguments: json['arguments'] as Map<String, dynamic>?,
-      status: json['status'] != null
-          ? ItemStatus.fromJson(json['status'] as String)
-          : null,
+      id: requireJsonString(json['id'], '$context.id'),
+      callId: toolSearchRequiredCallId(json, context),
+      execution: ToolSearchExecutionType.fromJson(
+        requireJsonString(json['execution'], '$context.execution'),
+      ),
+      arguments: toolSearchReturnedArguments(json, context),
+      status: ItemStatus.fromJson(
+        requireJsonString(json['status'], '$context.status'),
+      ),
+      createdBy: optionalJsonString(json, 'created_by', context),
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'tool_search_call',
+    'type': type,
     'id': id,
-    if (callId != null) 'call_id': callId,
-    if (execution != null) 'execution': execution!.toJson(),
-    if (arguments != null) 'arguments': arguments,
-    if (status != null) 'status': status!.toJson(),
+    'call_id': callId,
+    'execution': execution.toJson(),
+    'arguments': arguments,
+    'status': status.toJson(),
+    if (createdBy != null) 'created_by': createdBy,
   };
+
+  /// Creates a copy with nullable fields explicitly clearable.
+  ConversationToolSearchCallItem copyWith({
+    String? id,
+    Object? callId = unsetCopyWithValue,
+    ToolSearchExecutionType? execution,
+    Object? arguments = unsetCopyWithValue,
+    ItemStatus? status,
+    Object? createdBy = unsetCopyWithValue,
+  }) => ConversationToolSearchCallItem(
+    id: id ?? this.id,
+    callId: identical(callId, unsetCopyWithValue)
+        ? this.callId
+        : callId as String?,
+    execution: execution ?? this.execution,
+    arguments: identical(arguments, unsetCopyWithValue)
+        ? this.arguments
+        : arguments,
+    status: status ?? this.status,
+    createdBy: identical(createdBy, unsetCopyWithValue)
+        ? this.createdBy
+        : createdBy as String?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -1486,71 +1525,112 @@ class ConversationToolSearchCallItem extends ConversationItem {
           id == other.id &&
           callId == other.callId &&
           execution == other.execution &&
-          mapsDeepEqual(arguments, other.arguments) &&
-          status == other.status;
+          toolSearchArgumentsEqual(arguments, other.arguments) &&
+          status == other.status &&
+          createdBy == other.createdBy;
 
   @override
-  int get hashCode =>
-      Object.hash(id, callId, execution, mapDeepHashCode(arguments), status);
+  int get hashCode => Object.hash(
+    id,
+    callId,
+    execution,
+    toolSearchArgumentsHash(arguments),
+    status,
+    createdBy,
+  );
 
   @override
   String toString() =>
-      'ConversationToolSearchCallItem(id: $id, callId: $callId, execution: $execution, status: $status)';
+      'ConversationToolSearchCallItem(id: $id, callId: $callId, execution: $execution, arguments: ${toolSearchArgumentsSummary(arguments)}, status: $status, createdBy: ${toolSearchActorSummary(createdBy)})';
 }
 
 /// A tool search output item in a conversation.
 @immutable
 class ConversationToolSearchOutputItem extends ConversationItem {
+  /// The fixed item discriminator.
+  String get type => 'tool_search_output';
+
   /// Unique identifier.
   final String id;
 
-  /// The call ID.
+  /// The search call identifier; returned items always serialize its key.
   final String? callId;
 
-  /// The execution type.
-  final ToolSearchExecutionType? execution;
+  /// The server or client execution type.
+  final ToolSearchExecutionType execution;
 
-  /// The discovered tools.
-  final List<ResponseTool>? tools;
+  /// The complete discovered tool definitions, including empty results.
+  final List<ResponseTool> tools;
 
-  /// Item status.
-  final ItemStatus? status;
+  /// The item status.
+  final ItemStatus status;
+
+  /// The actor that created this item, when provided.
+  final String? createdBy;
 
   /// Creates a [ConversationToolSearchOutputItem].
+  ///
+  /// Const construction retains caller-owned collections. Do not mutate them
+  /// while this value is used as a map key or set member. Parsed collections
+  /// are recursively unmodifiable snapshots.
   const ConversationToolSearchOutputItem({
     required this.id,
-    this.callId,
-    this.execution,
-    this.tools,
-    this.status,
+    required this.callId,
+    required this.execution,
+    required this.tools,
+    required this.status,
+    this.createdBy,
   });
 
-  /// Creates a [ConversationToolSearchOutputItem] from JSON.
+  /// Creates a [ConversationToolSearchOutputItem] from contextual tool-search JSON.
   factory ConversationToolSearchOutputItem.fromJson(Map<String, dynamic> json) {
+    const context = 'ConversationToolSearchOutputItem';
+    requireJsonType(json, 'tool_search_output', context);
     return ConversationToolSearchOutputItem(
-      id: json['id'] as String,
-      callId: json['call_id'] as String?,
-      execution: json['execution'] != null
-          ? ToolSearchExecutionType.fromJson(json['execution'] as String)
-          : null,
-      tools: (json['tools'] as List?)
-          ?.map((e) => ResponseTool.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      status: json['status'] != null
-          ? ItemStatus.fromJson(json['status'] as String)
-          : null,
+      id: requireJsonString(json['id'], '$context.id'),
+      callId: toolSearchRequiredCallId(json, context),
+      execution: ToolSearchExecutionType.fromJson(
+        requireJsonString(json['execution'], '$context.execution'),
+      ),
+      tools: toolSearchJsonTools(json['tools'], '$context.tools'),
+      status: ItemStatus.fromJson(
+        requireJsonString(json['status'], '$context.status'),
+      ),
+      createdBy: optionalJsonString(json, 'created_by', context),
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'tool_search_output',
+    'type': type,
     'id': id,
-    if (callId != null) 'call_id': callId,
-    if (execution != null) 'execution': execution!.toJson(),
-    if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
-    if (status != null) 'status': status!.toJson(),
+    'call_id': callId,
+    'execution': execution.toJson(),
+    'tools': tools.map((tool) => tool.toToolSearchOutputJson()).toList(),
+    'status': status.toJson(),
+    if (createdBy != null) 'created_by': createdBy,
   };
+
+  /// Creates a copy with nullable fields explicitly clearable.
+  ConversationToolSearchOutputItem copyWith({
+    String? id,
+    Object? callId = unsetCopyWithValue,
+    ToolSearchExecutionType? execution,
+    List<ResponseTool>? tools,
+    ItemStatus? status,
+    Object? createdBy = unsetCopyWithValue,
+  }) => ConversationToolSearchOutputItem(
+    id: id ?? this.id,
+    callId: identical(callId, unsetCopyWithValue)
+        ? this.callId
+        : callId as String?,
+    execution: execution ?? this.execution,
+    tools: tools ?? this.tools,
+    status: status ?? this.status,
+    createdBy: identical(createdBy, unsetCopyWithValue)
+        ? this.createdBy
+        : createdBy as String?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -1561,20 +1641,22 @@ class ConversationToolSearchOutputItem extends ConversationItem {
           callId == other.callId &&
           execution == other.execution &&
           listsEqual(tools, other.tools) &&
-          status == other.status;
+          status == other.status &&
+          createdBy == other.createdBy;
 
   @override
   int get hashCode => Object.hash(
     id,
     callId,
     execution,
-    tools != null ? Object.hashAll(tools!) : null,
+    Object.hashAll(tools),
     status,
+    createdBy,
   );
 
   @override
   String toString() =>
-      'ConversationToolSearchOutputItem(id: $id, callId: $callId, execution: $execution, status: $status)';
+      'ConversationToolSearchOutputItem(id: $id, callId: $callId, execution: $execution, tools: ${tools.length} items, status: $status, createdBy: ${toolSearchActorSummary(createdBy)})';
 }
 
 /// A compaction item in a conversation.

@@ -2806,18 +2806,21 @@
     },
     "FunctionTool": {
       "spec": "main",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "FunctionTool",
       "file": "lib/src/models/responses/tools/response_tool.dart",
       "schema": "FunctionTool",
-      "note": "Top-level schema requires nullable parameters/strict; existing constructors and omission/null parsing remain compatible. New async is strict optional nonnull; definition copy/value/diagnostics are complete."
+      "parent": "ResponseTool",
+      "note": "Tool-search contextual contracts are verified through public GA/beta fixtures. Search-output parsing/serialization uses explicit context: top functions retain required nullable keys; discovered nested functions retain minimal requiredness and dotted names."
     },
     "CustomToolParam": {
       "spec": "main",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "CustomTool",
       "file": "lib/src/models/responses/tools/response_tool.dart",
-      "schema": "CustomToolParam"
+      "schema": "CustomToolParam",
+      "parent": "ResponseTool",
+      "note": "Tool-search contextual contracts are verified through public GA/beta fixtures. Search-output parsing/serialization uses explicit context: top functions retain required nullable keys; discovered nested functions retain minimal requiredness and dotted names."
     },
     "FunctionToolCall": {
       "spec": "main",
@@ -3872,6 +3875,247 @@
       "file": "lib/src/models/responses/response.dart",
       "schema": "BetaResponse",
       "note": "Real allOf parent mapping. Access programs have complete public GA/beta fixtures; returned outer omission/null tolerance follows Python and existing Dart conventions. Other pre-existing parent gaps stay visible."
+    },
+    "ToolSearchCallItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolSearchCallItemParam",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "ToolSearchCallItemParam",
+      "parent": "Item",
+      "note": "Tool-search contextual contracts are verified through public GA/beta fixtures. Search-output parsing/serialization uses explicit context: top functions retain required nullable keys; discovered nested functions retain minimal requiredness and dotted names."
+    },
+    "ToolSearchOutputItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolSearchOutputItemParam",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "ToolSearchOutputItemParam",
+      "parent": "Item",
+      "note": "Tool-search contextual contracts are verified through public GA/beta fixtures. Search-output parsing/serialization uses explicit context: top functions retain required nullable keys; discovered nested functions retain minimal requiredness and dotted names."
+    },
+    "ToolSearchCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolSearchCallOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "ToolSearchCall",
+      "parent": "OutputItem",
+      "note": "Tool-search contextual contracts are verified through public GA/beta fixtures. Search-output parsing/serialization uses explicit context: top functions retain required nullable keys; discovered nested functions retain minimal requiredness and dotted names."
+    },
+    "ToolSearchOutput": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolSearchOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "ToolSearchOutput",
+      "parent": "OutputItem",
+      "note": "Tool-search contextual contracts are verified through public GA/beta fixtures. Search-output parsing/serialization uses explicit context: top functions retain required nullable keys; discovered nested functions retain minimal requiredness and dotted names."
+    },
+    "ToolSearchToolParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolSearchTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "ToolSearchToolParam",
+      "parent": "ResponseTool",
+      "note": "Tool-search contextual contracts are verified through public GA/beta fixtures. Search-output parsing/serialization uses explicit context: top functions retain required nullable keys; discovered nested functions retain minimal requiredness and dotted names."
+    },
+    "NamespaceToolParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "NamespaceTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "NamespaceToolParam",
+      "parent": "ResponseTool",
+      "note": "Tool-search contextual contracts are verified through public GA/beta fixtures. Search-output parsing/serialization uses explicit context: top functions retain required nullable keys; discovered nested functions retain minimal requiredness and dotted names."
+    },
+    "ToolSearchOutputNamespaceToolParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "NamespaceTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "ToolSearchOutputNamespaceToolParam",
+      "parent": "ResponseTool",
+      "note": "Tool-search contextual contracts are verified through public GA/beta fixtures. Search-output parsing/serialization uses explicit context: top functions retain required nullable keys; discovered nested functions retain minimal requiredness and dotted names."
+    },
+    "ToolSearchOutputFunctionToolParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FunctionTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "ToolSearchOutputFunctionToolParam",
+      "parent": "ResponseTool",
+      "note": "Tool-search contextual contracts are verified through public GA/beta fixtures. Search-output parsing/serialization uses explicit context: top functions retain required nullable keys; discovered nested functions retain minimal requiredness and dotted names."
+    },
+    "ToolSearchResource:ToolSearchCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolSearchCallResourceItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "ToolSearchCall",
+      "parent": "Item",
+      "note": "Returned input-list record; preserves required nullable call_id, execution/status, arbitrary call arguments or tools, creator and optional nonnull beta agent."
+    },
+    "ToolSearchResource:ToolSearchOutput": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolSearchOutputResourceItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "ToolSearchOutput",
+      "parent": "Item",
+      "note": "Returned input-list record; preserves required nullable call_id, execution/status, arbitrary call arguments or tools, creator and optional nonnull beta agent."
+    },
+    "ToolSearchExecutionType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ToolSearchExecutionType",
+      "file": "lib/src/models/responses/config/tool_search_execution_type.dart",
+      "schema": "ToolSearchExecutionType",
+      "note": "Existing server/client values and unknown-enum fallback remain compatible; no inserted execution default."
+    },
+    "BetaToolSearchCallItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolSearchCallItemParam",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "BetaToolSearchCallItemParam",
+      "parent": "Item",
+      "note": "Tool-search contextual contracts are verified through public GA/beta fixtures. Search-output parsing/serialization uses explicit context: top functions retain required nullable keys; discovered nested functions retain minimal requiredness and dotted names."
+    },
+    "BetaToolSearchOutputItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolSearchOutputItemParam",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "BetaToolSearchOutputItemParam",
+      "parent": "Item",
+      "note": "Tool-search contextual contracts are verified through public GA/beta fixtures. Search-output parsing/serialization uses explicit context: top functions retain required nullable keys; discovered nested functions retain minimal requiredness and dotted names."
+    },
+    "BetaToolSearchCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolSearchCallOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaToolSearchCall",
+      "parent": "OutputItem",
+      "note": "Tool-search contextual contracts are verified through public GA/beta fixtures. Search-output parsing/serialization uses explicit context: top functions retain required nullable keys; discovered nested functions retain minimal requiredness and dotted names."
+    },
+    "BetaToolSearchOutput": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolSearchOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaToolSearchOutput",
+      "parent": "OutputItem",
+      "note": "Tool-search contextual contracts are verified through public GA/beta fixtures. Search-output parsing/serialization uses explicit context: top functions retain required nullable keys; discovered nested functions retain minimal requiredness and dotted names."
+    },
+    "BetaToolSearchToolParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolSearchTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "BetaToolSearchToolParam",
+      "parent": "ResponseTool",
+      "note": "Tool-search contextual contracts are verified through public GA/beta fixtures. Search-output parsing/serialization uses explicit context: top functions retain required nullable keys; discovered nested functions retain minimal requiredness and dotted names."
+    },
+    "BetaNamespaceToolParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "NamespaceTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "BetaNamespaceToolParam",
+      "parent": "ResponseTool",
+      "note": "Tool-search contextual contracts are verified through public GA/beta fixtures. Search-output parsing/serialization uses explicit context: top functions retain required nullable keys; discovered nested functions retain minimal requiredness and dotted names."
+    },
+    "BetaToolSearchOutputNamespaceToolParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "NamespaceTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "BetaToolSearchOutputNamespaceToolParam",
+      "parent": "ResponseTool",
+      "note": "Tool-search contextual contracts are verified through public GA/beta fixtures. Search-output parsing/serialization uses explicit context: top functions retain required nullable keys; discovered nested functions retain minimal requiredness and dotted names."
+    },
+    "BetaToolSearchOutputFunctionToolParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FunctionTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "BetaToolSearchOutputFunctionToolParam",
+      "parent": "ResponseTool",
+      "note": "Tool-search contextual contracts are verified through public GA/beta fixtures. Search-output parsing/serialization uses explicit context: top functions retain required nullable keys; discovered nested functions retain minimal requiredness and dotted names."
+    },
+    "BetaFunctionTool": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FunctionTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "BetaFunctionTool",
+      "parent": "ResponseTool",
+      "note": "Tool-search contextual contracts are verified through public GA/beta fixtures. Search-output parsing/serialization uses explicit context: top functions retain required nullable keys; discovered nested functions retain minimal requiredness and dotted names."
+    },
+    "BetaCustomToolParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CustomTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "BetaCustomToolParam",
+      "parent": "ResponseTool",
+      "note": "Tool-search contextual contracts are verified through public GA/beta fixtures. Search-output parsing/serialization uses explicit context: top functions retain required nullable keys; discovered nested functions retain minimal requiredness and dotted names."
+    },
+    "ToolSearchResource:BetaToolSearchCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolSearchCallResourceItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "BetaToolSearchCall",
+      "parent": "Item",
+      "note": "Returned input-list record; preserves required nullable call_id, execution/status, arbitrary call arguments or tools, creator and optional nonnull beta agent."
+    },
+    "ToolSearchResource:BetaToolSearchOutput": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolSearchOutputResourceItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "BetaToolSearchOutput",
+      "parent": "Item",
+      "note": "Returned input-list record; preserves required nullable call_id, execution/status, arbitrary call arguments or tools, creator and optional nonnull beta agent."
+    },
+    "BetaToolSearchExecutionType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ToolSearchExecutionType",
+      "file": "lib/src/models/responses/config/tool_search_execution_type.dart",
+      "schema": "BetaToolSearchExecutionType",
+      "note": "Existing server/client values and unknown-enum fallback remain compatible; no inserted execution default."
+    },
+    "ToolSearchConversation:ToolSearchCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ConversationToolSearchCallItem",
+      "file": "lib/src/models/conversations/conversation_item.dart",
+      "schema": "ToolSearchCall",
+      "parent": "ConversationItem",
+      "note": "ConversationItem uses the GA returned schema. Required keys/null call_id, arbitrary arguments or complete tools and created_by retained; no speculative beta conversation schema."
+    },
+    "ToolSearchConversation:ToolSearchOutput": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ConversationToolSearchOutputItem",
+      "file": "lib/src/models/conversations/conversation_item.dart",
+      "schema": "ToolSearchOutput",
+      "parent": "ConversationItem",
+      "note": "ConversationItem uses the GA returned schema. Required keys/null call_id, arbitrary arguments or complete tools and created_by retained; no speculative beta conversation schema."
+    },
+    "UnknownNamespaceTool": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownNamespaceTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": null,
+      "parent": "NamespaceAllowedTool",
+      "note": "Future nested tool definitions preserve immutable parsed raw JSON, deep value/hash and safe diagnostics; known malformed function/custom definitions fail contextually."
     }
   }
 }

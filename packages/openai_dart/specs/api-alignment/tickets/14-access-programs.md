@@ -1,6 +1,6 @@
 # Responses access-program selection
 
-Status: implemented, verified and independently reviewed; merge pending.
+Status: merged in PR #351; #339 closed.
 GitHub: [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-ACCESS-01–02.
@@ -39,5 +39,6 @@ two existing skips, clean fatal-info analysis, compiled README usage and the
 five-request offline example. Full toolkit diagnostics expose older parent gaps
 and the nullable-enum scanner limitation without new exclusions. Independent requirements/engineering
 reviews approve the final combined diff. Implementation [PR #351](https://github.com/davidmigloz/ai_clients_dart/pull/351)
-is open for review; close #339 only after merge.
+merged after green CI on October 7, 2026 at 20:34:09 UTC, closing #339.
+Merge commit: `f5b8d0857ddbb765bea8a7b00b5fd7b28a9f8a88`.
 Tool search #340 follows this slice.

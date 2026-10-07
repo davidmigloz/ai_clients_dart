@@ -213,12 +213,13 @@ void main() {
     test('ToolSearchCallItemParam round-trips agent and omits when null', () {
       const withAgent = ToolSearchCallItemParam(
         agent: AgentTag(agentName: 'planner'),
+        arguments: {},
       );
       final json = withAgent.toJson();
       expect(json['agent'], {'agent_name': 'planner'});
       expect(Item.fromJson(json), withAgent);
 
-      const withoutAgent = ToolSearchCallItemParam();
+      const withoutAgent = ToolSearchCallItemParam(arguments: {});
       expect(withoutAgent.toJson().containsKey('agent'), isFalse);
     });
 

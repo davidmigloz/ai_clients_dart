@@ -3810,7 +3810,12 @@ void main() {
         'call_id': 'call_1',
         'execution': 'client',
         'tools': [
-          {'type': 'function', 'name': 'func1'},
+          {
+            'type': 'function',
+            'name': 'func1',
+            'parameters': null,
+            'strict': null,
+          },
         ],
         'status': 'completed',
       };
@@ -4169,7 +4174,12 @@ void main() {
         'type': 'tool_search_output',
         'execution': 'client',
         'tools': [
-          {'type': 'function', 'name': 'func1'},
+          {
+            'type': 'function',
+            'name': 'func1',
+            'parameters': null,
+            'strict': null,
+          },
         ],
       };
 
@@ -4186,7 +4196,12 @@ void main() {
       final json = {
         'type': 'tool_search_output',
         'tools': [
-          {'type': 'function', 'name': 'func1'},
+          {
+            'type': 'function',
+            'name': 'func1',
+            'parameters': null,
+            'strict': null,
+          },
         ],
       };
 
@@ -4443,6 +4458,8 @@ void main() {
             id: 'tsc_1',
             callId: 'call_1',
             execution: ToolSearchExecutionType.server,
+            arguments: {},
+            status: ItemStatus.completed,
           ),
         ],
       );
@@ -4462,6 +4479,7 @@ void main() {
             callId: 'call_1',
             execution: ToolSearchExecutionType.server,
             tools: <ResponseTool>[],
+            status: FunctionCallOutputStatus.completed,
           ),
         ],
       );

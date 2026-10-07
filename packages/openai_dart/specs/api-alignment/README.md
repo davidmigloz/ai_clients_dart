@@ -160,10 +160,24 @@ Compaction progress #338 is implemented, validated and independently reviewed
 with 205 new deterministic tests; [acceptance evidence](reviews/13-compaction-progress.md)
 records the contracts, offline example, migration guidance and retained parity gaps.
 Implementation [PR #350](https://github.com/davidmigloz/ai_clients_dart/pull/350)
-merged after green CI, closing #338. Access programs #339 are implemented and validated; [acceptance evidence](reviews/14-access-programs.md)
-records 784 new tests, the example and retained gaps. Independent requirements and engineering reviews approve the final combined
-diff. Implementation [PR #351](https://github.com/davidmigloz/ai_clients_dart/pull/351)
-is open for review; #339 stays open until merge.
+merged after green CI, closing #338. Access programs #339 merged in
+[PR #351](https://github.com/davidmigloz/ai_clients_dart/pull/351), closing #339;
+[acceptance evidence](reviews/14-access-programs.md) records 784 new tests,
+the example, independent approvals and retained gaps. Tool search #340 is
+implemented with 4,000 new deterministic tests;
+[acceptance evidence](reviews/15-tool-search.md) records directional item and
+discovered-definition fidelity, compatibility decisions and public transport
+coverage. Package validation passes with 10,152 unit tests, two existing skips and
+clean fatal-info analysis; the two-request offline example costs $0. Full toolkit
+diagnostics are classified in the evidence. Independent requirements and
+engineering reviews approve the final combined diff. Implementation
+[PR #352](https://github.com/davidmigloz/ai_clients_dart/pull/352) is open for review;
+#340 closes only after merge.
+
+The #340 source recheck retains
+[OpenAPI 234829e](https://github.com/openai/openai-openapi/blob/234829e2b634b8fb159df7fcddbffad204173ffd/openapi.json),
+Python 3.26.0 and Node 7.30.0. Its 356 operations and 2,010 schemas have no new
+wire changes. Unchanged source does not establish complete implementation parity.
 
 | Ticket | Demonstrable outcome | Status and dependencies |
 | --- | --- | --- |
@@ -172,21 +186,23 @@ is open for review; #339 stays open until merge.
 | [#336](https://github.com/davidmigloz/ai_clients_dart/issues/336) ([11](tickets/11-web-search.md)) | GA web-search controls/actions/image results | Merged in #348 |
 | [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337) ([12](tickets/12-hosted-shell.md)) | Hosted/local shell configuration, replay and streams | Merged in #349 (#320 merged) |
 | [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) ([13](tickets/13-compaction-progress.md)) | Typed compaction progress | Merged in #350 |
-| [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) ([14](tickets/14-access-programs.md)) | Select/inspect effective access program | Implemented/reviewed; merge pending in #351 |
-| [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) ([15](tickets/15-tool-search.md)) | Complete client-discovered tools | [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) async definitions |
+| [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) ([14](tickets/14-access-programs.md)) | Select/inspect effective access program | Merged in #351 |
+| [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) ([15](tickets/15-tool-search.md)) | Complete client-discovered tools | Implemented/verified/reviewed in #352; merge pending; #334 merged |
 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) ([16](tickets/16-responses-websocket.md)) | Persistent WS sessions, envelopes and named lanes | None; shared shell/compaction events follow their tickets |
 | [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) ([17](tickets/17-responses-steering.md)) | Safe mid-turn steering and continuation | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
 | [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) ([18](tickets/18-websocket-recovery.md)) | Opt-in reconnect and bounded unsent queue | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341)/[#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) |
 | [#344](https://github.com/davidmigloz/ai_clients_dart/issues/344) ([19](tickets/19-websocket-injection.md)) | Beta multi-agent tool-result injection | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
 
-Async tools, configuration updates, web search, shell and compaction progress are
-merged. Complete access programs [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339),
-then continue with tool search [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340). Recovery
+Async tools, configuration updates, web search, shell, compaction progress and
+access programs are merged. Complete tool search
+[#340](https://github.com/davidmigloz/ai_clients_dart/issues/340), then continue
+with Responses WebSocket sessions
+[#341](https://github.com/davidmigloz/ai_clients_dart/issues/341). Recovery
 and injection remain explicit follow-ups to basic transport; do not claim full
 WebSocket SDK parity before they are complete. Each ticket includes an offline
 example, public fixtures, documentation and independent review. All eleven tickets are native sub-issues of #317; active blockers are linked
-with GitHub dependencies. Access programs #339 are the current implementation
-slice following merged compaction progress #338.
+with GitHub dependencies. Tool search #340 is the current implementation slice
+following merged access programs #339.
 
 ## Remaining roadmap
 
@@ -255,8 +271,20 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
   inventory; raw history replay preserves provider IDs.
 - Web search #336 merged in #348 with filters, access controls, return-token budget,
   image settings/results, action metadata and Includes.
-- Responses access-program configuration #339 is implemented, validated and independently
-  reviewed in #351; merge is pending. Tool-search output definitions #340 are next.
+- Responses access-program configuration #339 merged in #351 with distinct
+  request/returned contracts and documented provider omission tolerance.
+- Tool-search calls/results, discovered namespace definitions and stored input
+  resource/conversation shapes #340 are implemented, verified and independently
+  reviewed in #352; merge is pending. Writable calls require objects; returned calls
+  retain arbitrary JSON and required nullable call IDs. Contextual definitions
+  preserve dotted names and complete options without changing ordinary parser
+  signatures. Targeted constructor and sealed-Item changes require migration.
+- Returned discovered namespace parsing deliberately follows writable discovery
+  shapes and SDK string typing, with loaded-tool continuation from the guide,
+  despite the canonical ordinary namespace reference. Top-level functions retain
+  canonical required-nullable parameters
+  and strict keys. The older `apply_patch` branch is still missing from the
+  ResponseTool union and remains an explicit complete-parity gap.
 - Real GA/beta Responses parent mappings expose older request `user`, `prompt`
   and `conversation` gaps, plus returned safety identifier, top log probabilities,
   maximum tool calls, prompt/text/tool settings, completed time and conversation.
