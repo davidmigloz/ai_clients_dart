@@ -170,7 +170,9 @@ discovered-definition fidelity, compatibility decisions and public transport
 coverage. Package validation passes with 10,152 unit tests, two existing skips and
 clean fatal-info analysis; the two-request offline example costs $0. Full toolkit
 diagnostics are classified in the evidence. Independent requirements and
-engineering reviews approve the final combined diff; its PR remains pending.
+engineering reviews approve the final combined diff. Implementation
+[PR #352](https://github.com/davidmigloz/ai_clients_dart/pull/352) is open for review;
+#340 closes only after merge.
 
 The #340 source recheck retains
 [OpenAPI 234829e](https://github.com/openai/openai-openapi/blob/234829e2b634b8fb159df7fcddbffad204173ffd/openapi.json),
@@ -185,7 +187,7 @@ wire changes. Unchanged source does not establish complete implementation parity
 | [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337) ([12](tickets/12-hosted-shell.md)) | Hosted/local shell configuration, replay and streams | Merged in #349 (#320 merged) |
 | [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) ([13](tickets/13-compaction-progress.md)) | Typed compaction progress | Merged in #350 |
 | [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) ([14](tickets/14-access-programs.md)) | Select/inspect effective access program | Merged in #351 |
-| [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) ([15](tickets/15-tool-search.md)) | Complete client-discovered tools | Implemented/verified/reviewed; PR pending; #334 merged |
+| [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) ([15](tickets/15-tool-search.md)) | Complete client-discovered tools | Implemented/verified/reviewed in #352; merge pending; #334 merged |
 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) ([16](tickets/16-responses-websocket.md)) | Persistent WS sessions, envelopes and named lanes | None; shared shell/compaction events follow their tickets |
 | [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) ([17](tickets/17-responses-steering.md)) | Safe mid-turn steering and continuation | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
 | [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) ([18](tickets/18-websocket-recovery.md)) | Opt-in reconnect and bounded unsent queue | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341)/[#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) |
@@ -273,7 +275,7 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
   request/returned contracts and documented provider omission tolerance.
 - Tool-search calls/results, discovered namespace definitions and stored input
   resource/conversation shapes #340 are implemented, verified and independently
-  reviewed; PR is pending. Writable calls require objects; returned calls
+  reviewed in #352; merge is pending. Writable calls require objects; returned calls
   retain arbitrary JSON and required nullable call IDs. Contextual definitions
   preserve dotted names and complete options without changing ordinary parser
   signatures. Targeted constructor and sealed-Item changes require migration.

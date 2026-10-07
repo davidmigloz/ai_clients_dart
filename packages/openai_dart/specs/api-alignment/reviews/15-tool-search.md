@@ -1,7 +1,8 @@
 # Tool-search fidelity acceptance
 
 Status: implemented, verified and independently reviewed.
-Implementation PR not yet opened.
+Implementation [PR #352](https://github.com/davidmigloz/ai_clients_dart/pull/352)
+is open for review; #340 closes only after merge.
 Tracking: [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirements: [RESP-SEARCH-01–02](../responses.md#tool-search).
@@ -190,5 +191,7 @@ claim complete Responses or ToolSearchOutputTool union parity.
   clarified source attribution for dotted names. All findings are resolved.
   Reviewers independently reran model/public tests, clean scoped analysis and
   the offline example, and verified the toolkit diagnostic classification.
-- Implementation PR, final CI head/results and merge: pending. Close #340 only
-  after merge; Responses WebSocket sessions #341 follow this slice.
+- Implementation [PR #352](https://github.com/davidmigloz/ai_clients_dart/pull/352)
+  uses the create-pr skill template, with validation/tracking under Details and
+  exactly the five checklist items at the end. Final CI and merge are pending.
+  Close #340 only after merge; Responses WebSocket sessions #341 follow this slice.

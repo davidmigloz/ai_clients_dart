@@ -4,8 +4,9 @@ Status: independently reviewed specification; async tools, configuration updates
 web search, hosted/local shell and compaction progress merged in #346–#350.
 Access programs #339 merged in
 [PR #351](https://github.com/davidmigloz/ai_clients_dart/pull/351).
-Tool search #340 is implemented, verified and independently reviewed; its PR
-remains pending. Responses WebSocket sessions
+Tool search #340 is implemented, verified and independently reviewed in
+[PR #352](https://github.com/davidmigloz/ai_clients_dart/pull/352); merge is pending.
+Responses WebSocket sessions
 #341 follow. Remaining runtime slices are tracked below. Parent:
 [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 
@@ -89,7 +90,7 @@ and these official-client pins. The candidate is unchanged at 356 operations and
 | [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337) (12) | Hosted/local shell configuration, replay and streaming | RESP-SHELL-01–03 | Merged in #349; container #320 merged |
 | [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) (13) | Observe compaction progress | RESP-COMPACT-01 | Merged in #350 |
 | [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) (14) | Select and inspect Responses access programs | RESP-ACCESS-01–02 | Merged in #351 |
-| [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) (15) | Return complete client-discovered tools | RESP-SEARCH-01–02 | Implemented/verified/reviewed; PR pending; #334 merged |
+| [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) (15) | Return complete client-discovered tools | RESP-SEARCH-01–02 | Implemented/verified/reviewed in #352; merge pending; #334 merged |
 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) (16) | Persistent Responses WebSocket sessions and lane routing | RESP-WS-01–04 | None; use the shared event contracts current at implementation |
 | [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) (17) | Steer a running WebSocket response | RESP-STEER-01–03 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
 | [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) (18) | Opt-in socket reconnection and bounded unsent queue | RESP-RECOVER-01–02 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341)/[#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) for replay regression |
@@ -347,7 +348,8 @@ public fixtures (4,000 new tests).
 [Acceptance evidence](reviews/15-tool-search.md) records 10,152 passing package
 unit tests, two existing skips, clean analysis, the two-request offline example
 and classified toolkit diagnostics. Both independent reviews approve the final
-combined diff; its PR remains pending.
+combined diff. Implementation [PR #352](https://github.com/davidmigloz/ai_clients_dart/pull/352)
+is open for review; #340 closes only after merge.
 Responses WebSocket sessions #341 follow this slice after merge.
 
 Sources: [tool search](https://developers.openai.com/api/docs/guides/tools-tool-search),

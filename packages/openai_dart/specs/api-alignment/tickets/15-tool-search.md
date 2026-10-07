@@ -1,6 +1,6 @@
 # Client-discovered tool definition and call fidelity
 
-Status: implemented, verified and independently reviewed; PR pending.
+Status: implemented, verified and independently reviewed; merge pending.
 GitHub: [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-SEARCH-01–02.
@@ -57,6 +57,7 @@ Full package validation passes with 10,152 unit tests and two existing skips;
 example runs for $0. Full toolkit verification remains diagnostic (135 errors,
 22 warnings, 199 infos; consistency 26 warnings); the evidence classifies new
 scanner diagnostics without exclusions. Both independent reviewers approve the
-final combined diff after all findings were resolved. The PR link remains
-pending. Close #340 only after merge; Responses WebSocket
+final combined diff after all findings were resolved. Implementation
+[PR #352](https://github.com/davidmigloz/ai_clients_dart/pull/352) is open for review.
+Close #340 only after merge; Responses WebSocket
 sessions #341 follow this slice.
