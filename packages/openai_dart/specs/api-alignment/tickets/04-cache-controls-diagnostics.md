@@ -1,6 +1,6 @@
 # Align cache controls and diagnostics
 
-Status: implemented and independently reviewed; awaiting PR merge.
+Status: implemented and independently reviewed; [PR #329](https://github.com/davidmigloz/ai_clients_dart/pull/329) open for review.
 GitHub: [#322](https://github.com/davidmigloz/ai_clients_dart/issues/322).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 2 correctness](../correctness.md), CACHE-001–004, CACHE-006.

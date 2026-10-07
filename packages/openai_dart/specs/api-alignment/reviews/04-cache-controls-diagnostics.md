@@ -5,6 +5,7 @@ Reviewed October 7, 2026 against CACHE-001–004 and CACHE-006 in the
 Tracking: [#322](https://github.com/davidmigloz/ai_clients_dart/issues/322),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Implementation branch: `feat/openai-cache-controls-diagnostics`.
+Implementation [PR #329](https://github.com/davidmigloz/ai_clients_dart/pull/329) is open for review; #322 closes on merge.
 
 ## Outcome and contracts
 

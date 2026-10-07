@@ -6,7 +6,8 @@ Cache retention merged in [PR #328](https://github.com/davidmigloz/ai_clients_da
 closing #321; its
 [acceptance evidence](reviews/03-cache-retention.md) is recorded. Cache controls/diagnostics
 are implemented and independently reviewed with
-[acceptance evidence](reviews/04-cache-controls-diagnostics.md), awaiting PR merge. Parent
+[acceptance evidence](reviews/04-cache-controls-diagnostics.md) in
+[PR #329](https://github.com/davidmigloz/ai_clients_dart/pull/329), awaiting merge. Parent
 [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Decisions was merged in [#319](https://github.com/davidmigloz/ai_clients_dart/pull/319)
 after all CI checks passed, closing #318.

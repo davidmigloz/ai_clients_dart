@@ -108,7 +108,7 @@ merged after all CI checks passed, closing #321.
 Cache controls/diagnostics [acceptance evidence](reviews/04-cache-controls-diagnostics.md)
 records 2,121 passing unit tests, clean analysis, independent approvals, modern
 examples/migration, and a two-request live smoke (conservative $0.00040525),
-with both stored responses deleted. The implementation is awaiting PR merge.
+with both stored responses deleted. Implementation [PR #329](https://github.com/davidmigloz/ai_clients_dart/pull/329) is open for review; #322 closes on merge.
 
 ## Proposed roadmap
 
