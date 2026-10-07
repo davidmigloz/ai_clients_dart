@@ -148,8 +148,8 @@ independent review. Planning PR #345 merged after all CI checks passed. Async
 independently reviewed with [acceptance evidence](reviews/09-async-tools.md) in
 [PR #346](https://github.com/davidmigloz/ai_clients_dart/pull/346), now merged with
 #334 closed. Configuration updates #335 are implemented and independently
-reviewed with [acceptance evidence](reviews/10-configuration-updates.md); merge
-remains pending. Other Phase 3 runtime work is pending.
+reviewed with [acceptance evidence](reviews/10-configuration-updates.md) in
+[PR #347](https://github.com/davidmigloz/ai_clients_dart/pull/347); merge remains pending. Other Phase 3 runtime work is pending.
 
 | Ticket | Demonstrable outcome | Dependency |
 | --- | --- | --- |
