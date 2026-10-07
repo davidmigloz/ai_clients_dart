@@ -6,6 +6,62 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming image model selection alignment
+
+`ImageGenerationRequest` and multipart `ImageEditRequest` now require a nonnull
+`model`. Pass an explicit model to generation, multipart editing, and their
+streaming variants. Raw string IDs remain supported; no default or model allowlist
+is introduced. `ImageEditJsonRequest.model` stays optional/nullable, and null is
+omitted so the server can apply its separate `gpt-image-2.5-sunburst` default.
+
+```dart
+// Before: the model could be omitted.
+const request = ImageGenerationRequest(prompt: 'A red circle');
+```
+
+```dart
+// After: select a model explicitly.
+const request = ImageGenerationRequest(
+  model: ImageModels.gptImage25Flare,
+  prompt: 'A red circle',
+);
+
+final edit = ImageEditRequest(
+  model: ImageModels.gptImage25Sunburst,
+  image: imageBytes,
+  imageFilename: 'source.png',
+  prompt: 'Add a blue outline',
+);
+
+// JSON edits retain their distinct omission contract.
+const jsonEdit = ImageEditJsonRequest(
+  images: [ImageReference.file('file-source')],
+  prompt: 'Add a blue outline',
+);
+```
+
+Generation `fromJson` requires string model/prompt and rejects missing, null, or
+wrong types with contextual FormatException. Existing optional-field parsing stays
+compatible. `copyWith(model: null)` now retains the required model, matching other
+required-field copies; use a string to replace it. Optional fields still support
+explicit nullable clearing.
+
+Multipart-edit equality/hash now include source and mask byte contents along with
+all metadata. Equal filenames/prompts/options alone no longer make different
+images equal. Constructor/copy buffer ownership remains unchanged; copy bytes
+before modifying them when an independent buffer is needed. Keep byte contents
+unchanged while requests are used as map/set keys. Diagnostics summarize bytes
+and opaque text instead of dumping them. Multipart serialization continues
+at the resource boundary; no JSON encoding of upload bytes is invented.
+
+Use current GPT image models for OpenAI requests; the official reference marks
+DALL-E 2/3 retired May 12, 2026. Legacy identifiers and variation surfaces remain
+available for compatibility without claiming retired OpenAI service availability.
+See [the local model-selection example](example/image_model_selection_example.dart),
+which runs without a key, network access, or API cost.
+
+---
+
 ## Upcoming retry guidance alignment
 
 Structured HTTP 429 billing, spend, and quota errors now stop automatic retries:

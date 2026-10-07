@@ -225,6 +225,7 @@ void main() {
             image: Uint8List.fromList([1, 2, 3, 4]),
             imageFilename: 'a.png',
             prompt: 'edit',
+            model: 'fixture-model',
           ),
         ),
         throwsStateError,
@@ -242,6 +243,7 @@ void main() {
             image: Uint8List.fromList([1, 2, 3, 4]),
             imageFilename: 'a.png',
             prompt: 'edit',
+            model: 'fixture-model',
           ),
           abortTrigger: Completer<void>().future,
         );

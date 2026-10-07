@@ -5,8 +5,8 @@ Reviewed October 7, 2026 against RETRY-01–06 in the
 Tracking: [#325](https://github.com/davidmigloz/ai_clients_dart/issues/325),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Implementation branch: `fix/openai-retry-guidance`.
-Implementation [PR #332](https://github.com/davidmigloz/ai_clients_dart/pull/332) is open for review.
-Package validation and all independent reviews passed.
+Implementation [PR #332](https://github.com/davidmigloz/ai_clients_dart/pull/332)
+merged at `aa6ebfaaa34192fa18985d5816cd846bd3dfbe95` after all CI checks passed, closing #325.
 
 ## Outcome and contracts
 

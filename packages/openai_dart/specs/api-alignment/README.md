@@ -3,8 +3,8 @@
 Planning started October 7, 2026. Status: Decisions, container configuration,
 cache retention, cache controls/diagnostics, and Chat usage/obfuscation merged.
 Chat audio merged in [PR #331](https://github.com/davidmigloz/ai_clients_dart/pull/331).
-Retry guidance #325 is implemented and reviewed in [PR #332](https://github.com/davidmigloz/ai_clients_dart/pull/332); image model
-requiredness follows.
+Retry guidance merged in [PR #332](https://github.com/davidmigloz/ai_clients_dart/pull/332);
+image model requiredness #326 is implemented and reviewed in [PR #333](https://github.com/davidmigloz/ai_clients_dart/pull/333).
 
 Tracking parent: [GitHub issue #317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 This parent records planning progress; it is not an implementation ticket.
@@ -92,8 +92,8 @@ image model requiredness follow as separate tickets.
 | [#322](https://github.com/davidmigloz/ai_clients_dart/issues/322) | Configure cache controls and inspect diagnostics | #321; merged in #329 |
 | [#323](https://github.com/davidmigloz/ai_clients_dart/issues/323) | Preserve Chat token details and stream obfuscation | None; merged in #330 |
 | [#324](https://github.com/davidmigloz/ai_clients_dart/issues/324) | Preserve complete and streamed Chat audio | Merged in #331 |
-| [#325](https://github.com/davidmigloz/ai_clients_dart/issues/325) | Honor retry hints and stop replaying permanent quota failures | Reviewed; PR #332 open |
-| [#326](https://github.com/davidmigloz/ai_clients_dart/issues/326) | Require explicit model selection where the image API requires it | None |
+| [#325](https://github.com/davidmigloz/ai_clients_dart/issues/325) | Honor retry hints and stop replaying permanent quota failures | Merged in #332 |
+| [#326](https://github.com/davidmigloz/ai_clients_dart/issues/326) | Require explicit model selection where the image API requires it | Reviewed; PR #333 open |
 
 Container [acceptance evidence and independent reviews](reviews/02-container-configuration.md)
 record the 1,841 passing unit tests, clean analysis, bounded live lifecycle, resolved
@@ -123,13 +123,20 @@ Chat audio [acceptance evidence](reviews/06-chat-audio.md) records 2,282 passing
 unit tests, clean analysis, independent approvals, complete output/replay/stream
 examples and migration, and an authorized single-request live smoke (conservative
 $0.008544). Implementation [PR #331](https://github.com/davidmigloz/ai_clients_dart/pull/331) merged
-after all CI checks passed, closing #324. Retry guidance #325 is reviewed in open PR #332.
+after all CI checks passed, closing #324. Retry guidance #325 merged in #332.
 
 Retry guidance [acceptance evidence](reviews/07-retry-guidance.md) records 2,454
 passing unit tests, clean analysis, independent approvals, complete server minima
 and permanent-quota behavior, precise pre-stream metadata, and a runnable local
-example verified without API cost. Implementation [PR #332](https://github.com/davidmigloz/ai_clients_dart/pull/332) is open for review; #326 image model requiredness
-follows.
+example verified without API cost. Implementation [PR #332](https://github.com/davidmigloz/ai_clients_dart/pull/332) merged
+after all CI checks passed, closing #325. Image model requiredness #326 is implemented and reviewed.
+
+Image model selection [acceptance evidence](reviews/08-image-model-selection.md)
+records 2,537 passing unit tests, clean analysis, independent approvals, required
+generation/multipart models with retained JSON-edit omission, complete changed-model
+contracts, migration/current examples and a local demo verified without API cost.
+Implementation [PR #333](https://github.com/davidmigloz/ai_clients_dart/pull/333) is open for review. This is the last specified Phase 2 slice;
+Phase 3 Responses capabilities needs a refreshed specification and tickets next.
 
 ## Proposed roadmap
 
@@ -193,8 +200,11 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
   completion metadata, response annotations, and typed legacy function-call
   fields. These remain in the complete-parity inventory for later specification;
   audio finalization preserves legacy delta fields opaquely.
-- Review the required image-generation model field against the existing nullable
-  client field/default behavior. Shared usage model convenience methods and
+- Image generation/multipart model requiredness is implemented and reviewed in
+  #326. JSON editing retains its distinct optional/nullable model contract.
+- Existing JSON-edit copy/value/diagnostic conveniences remain a parity gap
+  exposed by its real manifest mapping; multipart serialization is tested at the
+  resource boundary rather than through invented JSON byte encodings. Shared usage model convenience methods and
   diagnostics also have existing limitations surfaced by the new manifest entries.
 - Retry decisions treat all 429s as transient, cap server delays, and do not
   expose Retry-After guidance consistently for overload errors. Preserve the

@@ -10,7 +10,9 @@ merged in [PR #329](https://github.com/davidmigloz/ai_clients_dart/pull/329), cl
 merged in [PR #330](https://github.com/davidmigloz/ai_clients_dart/pull/330), closing #323;
 [acceptance evidence](reviews/05-chat-usage-obfuscation.md) is recorded. Chat audio
 merged in [PR #331](https://github.com/davidmigloz/ai_clients_dart/pull/331), closing #324;
-[acceptance evidence](reviews/06-chat-audio.md) is recorded. Parent
+[acceptance evidence](reviews/06-chat-audio.md) is recorded. Retry guidance
+merged in [PR #332](https://github.com/davidmigloz/ai_clients_dart/pull/332), closing #325;
+[acceptance evidence](reviews/07-retry-guidance.md) is recorded. Parent
 [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Decisions was merged in [#319](https://github.com/davidmigloz/ai_clients_dart/pull/319)
 after all CI checks passed, closing #318.
@@ -240,6 +242,16 @@ and [Node 7.30.0](https://github.com/openai/openai-node/blob/v7.30.0/src/resourc
 The user-authorized targeted-breaking policy permits this correction. Fixtures
 assert model JSON/multipart fidelity and preserved JSON-edit omission; no live
 image generation is needed to test required request construction.
+
+Implementation decisions for IMG-01–04: required string model on generation and
+multipart editing, no injected default/allowlist/empty-string restriction; typed
+copy null/omission retains the required model. Validate generation required
+strings contextually. Keep JSON edit optional/null omission and legacy variation
+contracts unchanged. Complete multipart value contracts with image/mask byte
+content while preserving caller buffer ownership/const construction. Serialize
+upload bytes through multipart resources, not invented JSON model methods.
+Public fixtures validate every generation/edit/stream path and full field fidelity.
+Existing integration callsites are analyzed but no paid image request is required.
 
 ## Delivery and verification
 

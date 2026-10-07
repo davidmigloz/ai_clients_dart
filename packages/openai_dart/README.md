@@ -589,13 +589,24 @@ final edited = await client.images.editJson(
 );
 ```
 
+`ImageGenerationRequest` and multipart `ImageEditRequest` require an explicit
+nonnull `model`, including for `generateStream` and `editStream`. String IDs are
+forwarded unchanged; constants are conveniences rather than an allowlist.
+`ImageEditJsonRequest` has a distinct optional/nullable model: omission keeps the
+server's `gpt-image-2.5-sunburst` default, and an explicit ID overrides it.
+
 Use `client.images.edit(...)` to upload image bytes, or `editJson(...)` for
 up to 16 image references (URLs, data URLs, or uploaded file IDs). The streaming
 variants are `generateStream`, `editStream`, and `editJsonStream`.
 Snapshot constants are also available: `gptImage25Sunburst20260908` and
 `gptImage25Flare20260908`.
 
-→ [Full example](example/images_example.dart)
+→ [Full image example](example/images_example.dart) and
+[local model-selection example](example/image_model_selection_example.dart)
+
+See the [generation reference](https://developers.openai.com/api/reference/resources/images/methods/generate),
+[editing reference](https://developers.openai.com/api/reference/resources/images/methods/edit),
+and [migration guide](MIGRATION.md).
 
 </details>
 
@@ -1017,6 +1028,7 @@ See the [example/](example/) directory for complete examples:
 | [`prompt_cache_example.dart`](example/prompt_cache_example.dart) | Responses prewarming, comparison diagnostics, and narrow Chat cache options |
 | [`decisions_example.dart`](example/decisions_example.dart) | Typed Decisions questions, refusals, usage, and inline images |
 | [`embeddings_example.dart`](example/embeddings_example.dart) | Text embeddings with dimension control |
+| [`image_model_selection_example.dart`](example/image_model_selection_example.dart) | Local generation/multipart/JSON-edit model contracts without API calls |
 | [`images_example.dart`](example/images_example.dart) | GPT Image generation |
 | [`videos_example.dart`](example/videos_example.dart) | Sora video generation, editing, and extension |
 | [`audio_example.dart`](example/audio_example.dart) | Text-to-speech and transcription |

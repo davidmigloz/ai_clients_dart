@@ -261,6 +261,7 @@ void main() {
       image: Uint8List(0),
       imageFilename: 'source.png',
       prompt: 'A flower',
+      model: 'fixture-model',
       size: size,
       quality: ImageQuality.max,
     );

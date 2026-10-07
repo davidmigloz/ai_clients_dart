@@ -129,6 +129,7 @@ void main() {
             image: Uint8List.fromList([1, 2, 3, 4]),
             imageFilename: 'a.png',
             prompt: 'edit',
+            model: 'fixture-model',
             stream: true,
           ),
         ),
@@ -152,7 +153,11 @@ void main() {
 
       await expectLater(
         client.images.generate(
-          const ImageGenerationRequest(prompt: 'p', stream: true),
+          const ImageGenerationRequest(
+            model: 'fixture-model',
+            prompt: 'p',
+            stream: true,
+          ),
         ),
         throwsA(
           isA<ArgumentError>().having(
