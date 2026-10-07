@@ -399,32 +399,37 @@ void main() {
     });
 
     group('Retry-After header parsing', () {
-      test('parses integer seconds', () async {
-        var callCount = 0;
-        final request = http.Request(
-          'GET',
-          Uri.parse('https://api.example.com'),
-        );
+      test(
+        'returns the original response when integer hint exceeds wait bound',
+        () async {
+          var callCount = 0;
+          final request = http.Request(
+            'GET',
+            Uri.parse('https://api.example.com'),
+          );
 
-        await wrapper.executeWithRetry(
-          request,
-          () async {
-            callCount++;
-            if (callCount == 1) {
-              return http.Response(
-                'rate limited',
-                429,
-                headers: {'retry-after': '1'},
-              );
-            }
-            return http.Response('{"ok": true}', 200);
-          },
-          null,
-          'req_123',
-        );
+          final original = http.Response(
+            'rate limited',
+            429,
+            headers: {'retry-after': '1'},
+          );
+          final response = await wrapper.executeWithRetry(
+            request,
+            () async {
+              callCount++;
+              if (callCount == 1) {
+                return original;
+              }
+              return http.Response('{"ok": true}', 200);
+            },
+            null,
+            'req_123',
+          );
 
-        expect(callCount, 2);
-      });
+          expect(callCount, 1);
+          expect(response, same(original));
+        },
+      );
 
       test('parses RFC 1123 date format', () async {
         var callCount = 0;

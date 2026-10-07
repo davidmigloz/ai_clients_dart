@@ -292,7 +292,12 @@ class ImagesResource extends ResourceBase with StreamingResource {
 
     if (response.statusCode >= 400) {
       final body = await response.stream.bytesToString();
-      throw parseStreamError(response.statusCode, body, requestId);
+      throw parseStreamError(
+        response.statusCode,
+        body,
+        requestId,
+        headers: response.headers,
+      );
     }
 
     const parser = SseParser();

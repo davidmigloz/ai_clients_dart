@@ -6,6 +6,52 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming retry guidance alignment
+
+Structured HTTP 429 billing, spend, and quota errors now stop automatic retries:
+`credit_balance_exhausted`, `organization_spend_limit_exceeded`,
+`project_spend_limit_exceeded`, `organization_usage_limit_exceeded`, and
+`insufficient_quota`, or error type `insufficient_quota`. Update the relevant
+credits or limits before resending. Classification uses code/type independently
+of message text and other malformed fields. Unknown/malformed provider errors
+retain the existing transient 429 fallback.
+
+Valid server retry hints are minimum delays. A hint above twice
+`RetryPolicy.maxDelay` now returns the original response/error immediately, rather
+than clamping the hint and replaying too early. Hints within that bound keep the
+initial minimum, retry budget, positive jitter, and cancellation behavior. The
+policy still retries regular cloneable requests only; 5xx/timeouts/connections
+remain limited to idempotent methods. POST overload errors and streaming/multipart
+requests are not automatically replayed.
+
+`InternalServerException` gains optional `retryAfter`, including for HTTP 503.
+Rate-limit and internal-server exceptions expose the complete parsed duration on
+JSON and pre-stream HTTP errors, including multipart image streams. No output is
+replayed after a stream has started. Past HTTP dates now expose Duration.zero;
+negative numeric hints are ignored instead of clamped or exposed as negative.
+Malformed or non-JSON pre-stream errors now retain the status-specific exception
+class and any valid structured metadata, rather than falling back to a generic
+ApiException and losing the hint.
+
+All retry/error paths share header parsing. Valid `retry-after-ms` takes
+precedence; invalid values fall back to `Retry-After` seconds or HTTP dates.
+Finite nonnegative fractional values round up to microseconds for metadata;
+scheduled waits round up to milliseconds to avoid timer truncation. Header names
+are case-insensitive. Unrepresentable values above 2^53−1 microseconds are invalid
+on every platform; no shorter clamped delay is invented.
+
+Applications that implement their own retries should disable built-in retries
+with `RetryPolicy(maxRetries: 0)` or account for the attempts already made. Inspect
+quota code/type before retrying, defer long hints without shortening them, and
+check whether a non-idempotent operation already took effect before resubmission.
+No new total deadline or timeout configuration is introduced. Exception identity,
+constructors, existing metadata, and no-hint diagnostics remain compatible.
+
+See [the local retry example](example/retry_guidance_example.dart), which runs
+without API access or cost.
+
+---
+
 ## Upcoming Chat audio alignment
 
 Assistant messages gain optional `audio`, with distinct `ChatAudioReference`

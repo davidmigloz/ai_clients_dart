@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
+import '../client/retry_after.dart';
 import '../errors/exceptions.dart';
 import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
@@ -172,26 +173,43 @@ mixin StreamingResource on ResourceBase {
   }
 
   /// Parses an error response from a streaming request.
-  ApiException parseStreamError(int statusCode, String body, String requestId) {
+  ApiException parseStreamError(
+    int statusCode,
+    String body,
+    String requestId, {
+    Map<String, String> headers = const {},
+  }) {
+    final retryAfter = parseRetryAfter(headers);
+    String message;
+    String? type;
+    String? code;
+    String? param;
+    Map<String, dynamic>? json;
     try {
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      final error = json['error'] as Map<String, dynamic>?;
-      return createApiException(
-        statusCode: statusCode,
-        message: error?['message'] as String? ?? 'Unknown error',
-        type: error?['type'] as String?,
-        code: error?['code'] as String?,
-        param: error?['param'] as String?,
-        requestId: requestId,
-        body: json,
-      );
+      json = jsonDecode(body) as Map<String, dynamic>;
+      if (json['error'] case final Map<String, dynamic> error) {
+        message = error['message'] == null
+            ? 'Unknown error'
+            : _errorString(error['message']) ?? body;
+        type = _errorString(error['type']);
+        code = _errorString(error['code']);
+        param = _errorString(error['param']);
+      } else {
+        message = _errorString(json['message']) ?? body;
+      }
     } catch (_) {
-      return ApiException(
-        message: body.isNotEmpty ? body : 'HTTP $statusCode error',
-        statusCode: statusCode,
-        requestId: requestId,
-      );
+      message = body.isNotEmpty ? body : 'HTTP $statusCode error';
     }
+    return createApiException(
+      statusCode: statusCode,
+      message: message,
+      type: type,
+      code: code,
+      param: param,
+      requestId: requestId,
+      body: json,
+      retryAfter: retryAfter,
+    );
   }
 
   /// Helper to create a streaming POST request with a JSON body.
@@ -266,7 +284,12 @@ mixin StreamingResource on ResourceBase {
     try {
       if (response.statusCode >= 400) {
         final responseBody = await response.stream.bytesToString();
-        throw parseStreamError(response.statusCode, responseBody, requestId);
+        throw parseStreamError(
+          response.statusCode,
+          responseBody,
+          requestId,
+          headers: response.headers,
+        );
       }
 
       const parser = SseParser();
@@ -320,3 +343,5 @@ mixin StreamingResource on ResourceBase {
     throw StreamException(message: message, partialData: jsonEncode(cleanJson));
   }
 }
+
+String? _errorString(Object? value) => value is String ? value : null;

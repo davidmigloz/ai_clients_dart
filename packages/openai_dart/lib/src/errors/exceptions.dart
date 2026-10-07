@@ -192,6 +192,9 @@ class UnprocessableEntityException extends ApiException {
 /// Exception thrown when rate limited (HTTP 429).
 ///
 /// This exception includes retry timing information when available.
+/// Permanent quota or spending-limit codes, or type `insufficient_quota`,
+/// require account/limit changes and are not automatically retried. Inspect
+/// structured [code] and [type] before deciding whether a manual retry is useful.
 ///
 /// ## Example
 ///
@@ -200,10 +203,8 @@ class UnprocessableEntityException extends ApiException {
 ///   await client.chat.completions.create(...);
 /// } on RateLimitException catch (e) {
 ///   print('Rate limited. Retry after: ${e.retryAfter}');
-///   if (e.retryAfter != null) {
-///     await Future.delayed(e.retryAfter!);
-///     // Retry the request
-///   }
+///   print('Type: ${e.type}; code: ${e.code}');
+///   // Retry timing applies to transient failures; quota failures need action.
 /// }
 /// ```
 @immutable
@@ -222,13 +223,13 @@ class RateLimitException extends ApiException {
 
   /// The recommended duration to wait before retrying.
   ///
-  /// Parsed from the `Retry-After` header if present.
+  /// Parsed from `retry-after-ms` or `Retry-After` when valid.
   final Duration? retryAfter;
 
   @override
   String toString() {
     if (retryAfter case final duration?) {
-      return 'RateLimitException: $message (retry after: ${duration.inSeconds}s)';
+      return 'RateLimitException: $message (retry after: ${_formatRetryAfter(duration)})';
     }
     return 'RateLimitException: $message';
   }
@@ -268,13 +269,25 @@ class InternalServerException extends ApiException {
     super.param,
     super.requestId,
     super.body,
+    this.retryAfter,
     super.cause,
   });
 
+  /// Complete server-recommended delay parsed from retry response headers.
+  ///
+  /// A hint does not make a non-idempotent request eligible for automatic retry.
+  final Duration? retryAfter;
+
   @override
   String toString() =>
-      'InternalServerException: $message (status: $statusCode)';
+      'InternalServerException: $message (status: $statusCode'
+      '${retryAfter == null ? '' : ', retry after: ${_formatRetryAfter(retryAfter!)}'})';
 }
+
+String _formatRetryAfter(Duration duration) =>
+    duration.inMicroseconds % Duration.microsecondsPerSecond == 0
+    ? '${duration.inSeconds}s'
+    : '${duration.inMicroseconds}us';
 
 /// Exception thrown when a request times out.
 ///
@@ -542,6 +555,7 @@ ApiException createApiException({
       param: param,
       requestId: requestId,
       body: body,
+      retryAfter: retryAfter,
       cause: cause,
     ),
     _ => ApiException(

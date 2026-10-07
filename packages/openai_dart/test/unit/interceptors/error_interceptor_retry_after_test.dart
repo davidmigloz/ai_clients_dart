@@ -203,7 +203,7 @@ void main() {
       client.close();
     });
 
-    test('returns null retryAfter for past HTTP date', () async {
+    test('returns zero retryAfter for past HTTP date', () async {
       // Use a past date
       final pastDate = DateTime.now().toUtc().subtract(
         const Duration(hours: 1),
@@ -235,8 +235,7 @@ void main() {
         );
         fail('Expected RateLimitException');
       } on RateLimitException catch (e) {
-        // Past dates should return null
-        expect(e.retryAfter, isNull);
+        expect(e.retryAfter, Duration.zero);
       }
 
       client.close();
