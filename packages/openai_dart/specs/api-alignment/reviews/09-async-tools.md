@@ -1,6 +1,7 @@
 # Async tools implementation acceptance
 
-Status: implementation, validation and independent reviews complete; PR pending.
+Status: implementation, validation and independent reviews complete.
+[PR #346](https://github.com/davidmigloz/ai_clients_dart/pull/346) is open for review.
 Tracking: [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirements: [RESP-ASYNC-01–03](../responses.md#async-calls).

@@ -145,7 +145,8 @@ contracts, source discrepancies, compatibility/platform decisions and dependency
 boundaries. [Planning review](reviews/09-responses-planning.md) records the
 independent review. Planning PR #345 merged after all CI checks passed. Async
 [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) is implemented and
-independently reviewed with [acceptance evidence](reviews/09-async-tools.md). Other Phase 3 runtime work is pending.
+independently reviewed with [acceptance evidence](reviews/09-async-tools.md) in
+[PR #346](https://github.com/davidmigloz/ai_clients_dart/pull/346). Other Phase 3 runtime work is pending.
 
 | Ticket | Demonstrable outcome | Dependency |
 | --- | --- | --- |
@@ -217,7 +218,7 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
   `comparison_response_id`/`prewarm` and typed diagnostics; Chat gains narrow options. Shared Responses
   `cache_write_tokens` usage is implemented with Decisions in #318.
 - Async function/custom definitions/calls, direct custom replay and conversation
-  metadata are implemented and reviewed in #334; merge remains pending.
+  metadata are implemented and reviewed in #334/PR #346; merge remains pending.
 - Input/list-input/conversation parsers lack `configuration_update`; canonical
   OutputItem has no such variant and no dedicated streaming event is defined.
 - Responses WebSocket transport/steering and official opt-in reconnect helpers
