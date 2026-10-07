@@ -5,7 +5,8 @@ Reviewed October 7, 2026 against CHAT-003–005 in the
 Tracking: [#324](https://github.com/davidmigloz/ai_clients_dart/issues/324),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Implementation branch: `feat/openai-chat-audio`.
-Implementation PR and final validation evidence will be recorded before handoff.
+Implementation [PR #331](https://github.com/davidmigloz/ai_clients_dart/pull/331) is open for review.
+Final package validation, independent reviews, and bounded live smoke passed.
 
 ## Outcome and contracts
 

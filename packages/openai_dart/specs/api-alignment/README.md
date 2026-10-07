@@ -2,8 +2,8 @@
 
 Planning started October 7, 2026. Status: Decisions, container configuration,
 cache retention, cache controls/diagnostics, and Chat usage/obfuscation merged.
-Chat audio is implemented and reviewed for PR handoff; remaining Phase 2 tickets
-are specified.
+Chat audio is implemented and reviewed in [PR #331](https://github.com/davidmigloz/ai_clients_dart/pull/331); remaining Phase 2
+tickets are specified.
 
 Tracking parent: [GitHub issue #317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 This parent records planning progress; it is not an implementation ticket.
@@ -90,7 +90,7 @@ image model requiredness follow as separate tickets.
 | [#321](https://github.com/davidmigloz/ai_clients_dart/issues/321) | Emit the canonical cache-retention wire value | None; merged in #328 |
 | [#322](https://github.com/davidmigloz/ai_clients_dart/issues/322) | Configure cache controls and inspect diagnostics | #321; merged in #329 |
 | [#323](https://github.com/davidmigloz/ai_clients_dart/issues/323) | Preserve Chat token details and stream obfuscation | None; merged in #330 |
-| [#324](https://github.com/davidmigloz/ai_clients_dart/issues/324) | Preserve complete and streamed Chat audio | In progress in #324 |
+| [#324](https://github.com/davidmigloz/ai_clients_dart/issues/324) | Preserve complete and streamed Chat audio | Reviewed; PR #331 open |
 | [#325](https://github.com/davidmigloz/ai_clients_dart/issues/325) | Honor retry hints and stop replaying permanent quota failures | None |
 | [#326](https://github.com/davidmigloz/ai_clients_dart/issues/326) | Require explicit model selection where the image API requires it | None |
 
@@ -121,7 +121,7 @@ merged after all CI checks passed, closing #323.
 Chat audio [acceptance evidence](reviews/06-chat-audio.md) records 2,282 passing
 unit tests, clean analysis, independent approvals, complete output/replay/stream
 examples and migration, and an authorized single-request live smoke (conservative
-$0.008544). Implementation is ready for PR review; #325 retry guidance follows.
+$0.008544). Implementation [PR #331](https://github.com/davidmigloz/ai_clients_dart/pull/331) is open for review; #325 retry guidance follows.
 
 ## Proposed roadmap
 
@@ -180,7 +180,7 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
 - Responses access-program configuration and tool-search output definitions
   need alignment.
 - Chat usage/obfuscation merged in #330/#323; complete/streamed audio is
-  being implemented in #324.
+  implemented and reviewed in #331/#324.
 - Registering real Chat completion/message/delta mappings exposed older missing
   completion metadata, response annotations, and typed legacy function-call
   fields. These remain in the complete-parity inventory for later specification;
