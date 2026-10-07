@@ -1573,14 +1573,10 @@
     },
     "CustomToolCallResource": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "CustomToolCallItem",
       "file": "lib/src/models/responses/items/output_item.dart",
-      "schema": "CustomToolCallResource",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Spec resource maps to Dart CustomToolCallItem."
+      "schema": "CustomToolCallResource"
     },
     "DoubleClickAction": {
       "spec": "main",
@@ -1639,25 +1635,17 @@
     },
     "FunctionToolCallResource": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "FunctionCallOutputItemResponse",
       "file": "lib/src/models/responses/items/output_item.dart",
-      "schema": "FunctionToolCallResource",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Spec resource maps to existing function call output item. createdBy added."
+      "schema": "FunctionToolCallResource"
     },
     "FunctionToolParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "FunctionTool",
       "file": "lib/src/models/responses/tools/response_tool.dart",
-      "schema": "FunctionToolParam",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "defer_loading already implemented in FunctionTool."
+      "schema": "FunctionToolParam"
     },
     "InputFileContent": {
       "spec": "main",
@@ -2821,6 +2809,80 @@
       "file": "lib/src/models/images/image_edit_json_request.dart",
       "schema": "EditImageBodyJsonParam",
       "note": "Distinct JSON edit contract: optional nullable model is omitted when null, retaining documented server default gpt-image-2.5-sunburst; public editJson/editJsonStream fixtures verify omission and arbitrary explicit IDs. Existing missing copy/value/diagnostic methods remain a separate parity gap; no model behavior changed in this slice."
+    },
+    "FunctionTool": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FunctionTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "FunctionTool",
+      "note": "Top-level schema requires nullable parameters/strict; existing constructors and omission/null parsing remain compatible. New async is strict optional nonnull; definition copy/value/diagnostics are complete."
+    },
+    "CustomToolParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "CustomToolParam"
+    },
+    "FunctionToolCall": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FunctionCallItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "FunctionToolCall"
+    },
+    "CustomToolCall": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomToolCallInputItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "CustomToolCall",
+      "note": "Dedicated narrow input/replay shape. Output-only created_by/status are not invented as input members."
+    },
+    "BetaFunctionToolCall": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FunctionCallItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "BetaFunctionToolCall"
+    },
+    "BetaCustomToolCall": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomToolCallInputItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "BetaCustomToolCall"
+    },
+    "BetaFunctionToolCallResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FunctionCallOutputItemResponse",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaFunctionToolCallResource"
+    },
+    "BetaCustomToolCallResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomToolCallItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaCustomToolCallResource"
+    },
+    "ConversationFunctionToolCallResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConversationFunctionCallItem",
+      "file": "lib/src/models/conversations/conversation_item.dart",
+      "schema": "FunctionToolCallResource",
+      "note": "Contextual conversation mapping. Existing custom optional id/status compatibility remains; async/namespace/caller/creator/beta-agent fidelity covered by public fixtures."
+    },
+    "ConversationCustomToolCallResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConversationCustomToolCallItem",
+      "file": "lib/src/models/conversations/conversation_item.dart",
+      "schema": "CustomToolCallResource",
+      "note": "Contextual conversation mapping. Existing custom optional id/status compatibility remains; async/namespace/caller/creator/beta-agent fidelity covered by public fixtures."
     }
   }
 }

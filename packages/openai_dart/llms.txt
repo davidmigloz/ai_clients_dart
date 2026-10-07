@@ -4,15 +4,16 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~9.2k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~9.8k tokens): Primary package documentation with installation, configuration, and usage examples.
 - [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/CHANGELOG.md) (~21.7k tokens): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/MIGRATION.md) (~15.2k tokens): Upgrade notes and breaking-change guidance.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/MIGRATION.md) (~15.7k tokens): Upgrade notes and breaking-change guidance.
 
 ## Examples
 
 - [decisions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/decisions_example.dart) (~639 tokens): Typed Decisions questions, refusals, usage, and inline images.
 - [containers_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/containers_example.dart) (~1.5k tokens): Container memory/network configuration, Code Interpreter IDs, and files.
 - [responses_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/responses_example.dart) (~870 tokens): Responses API with built-in tools.
+- [async_tools_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/async_tools_example.dart) (~1.3k tokens): Local async function/custom jobs, original call IDs and latest-response continuation.
 - [prompt_cache_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/prompt_cache_example.dart) (~723 tokens): Responses prewarming, comparison diagnostics, and narrow Chat cache options.
 - [chat_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/chat_example.dart) (~461 tokens): Chat completions, multi-turn conversations, and legacy cache retention.
 - [chat_audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/chat_audio_example.dart) (~767 tokens): Chat audio output, ID-only replay, and partial stream accumulation.
@@ -48,4 +49,4 @@
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~79.4k tokens**
+**Total: ~81.7k tokens**

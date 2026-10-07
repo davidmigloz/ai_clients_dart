@@ -1,12 +1,16 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import '../common/json_helpers.dart';
 import '../responses/config/function_call_status.dart';
 import '../responses/config/item_status.dart';
 import '../responses/config/message_phase.dart';
 import '../responses/config/tool_search_execution_type.dart';
 import '../responses/items/item.dart' show FunctionCallOutput;
+import '../responses/multi_agent/agent_tag.dart';
 import '../responses/tools/response_tool.dart';
+import '../responses/tools/tool_call_caller.dart';
 import 'conversation_content.dart';
 import 'conversation_message.dart';
 
@@ -144,20 +148,38 @@ class ConversationMessageItem extends ConversationItem {
 /// A function call item in a conversation.
 @immutable
 class ConversationFunctionCallItem extends ConversationItem {
+  /// The fixed item discriminator.
+  String get type => 'function_call';
+
   /// Unique identifier.
   final String id;
 
-  /// The call ID for this function call.
+  /// The original call ID used when returning the tool result.
   final String callId;
 
-  /// The function name.
+  /// The name of the tool being called.
   final String name;
 
-  /// The function arguments as JSON string.
+  /// Opaque tool arguments.
   final String arguments;
+
+  /// The namespace of the tool, when supplied.
+  final String? namespace;
 
   /// Item status.
   final ItemStatus? status;
+
+  /// The execution context that produced this call.
+  final ToolCallCaller? caller;
+
+  /// The producing agent on the beta multi-agent protocol.
+  final AgentTag? agent;
+
+  /// Whether the call runs asynchronously. Omission preserves the server default.
+  final bool? async;
+
+  /// The identifier of the entity that created this returned item.
+  final String? createdBy;
 
   /// Creates a [ConversationFunctionCallItem].
   const ConversationFunctionCallItem({
@@ -165,19 +187,47 @@ class ConversationFunctionCallItem extends ConversationItem {
     required this.callId,
     required this.name,
     required this.arguments,
+    this.namespace,
     this.status,
+    this.caller,
+    this.agent,
+    this.async,
+    this.createdBy,
   });
 
   /// Creates a [ConversationFunctionCallItem] from JSON.
   factory ConversationFunctionCallItem.fromJson(Map<String, dynamic> json) {
+    requireJsonType(json, 'function_call', 'ConversationFunctionCallItem');
     return ConversationFunctionCallItem(
-      id: json['id'] as String,
-      callId: json['call_id'] as String,
-      name: json['name'] as String,
-      arguments: json['arguments'] as String,
+      id: requireJsonString(json['id'], 'ConversationFunctionCallItem.id'),
+      callId: requireJsonString(
+        json['call_id'],
+        'ConversationFunctionCallItem.call_id',
+      ),
+      name: requireJsonString(
+        json['name'],
+        'ConversationFunctionCallItem.name',
+      ),
+      arguments: requireJsonString(
+        json['arguments'],
+        'ConversationFunctionCallItem.arguments',
+      ),
+      namespace: json['namespace'] as String?,
       status: json['status'] != null
           ? ItemStatus.fromJson(json['status'] as String)
           : null,
+      caller: json['caller'] != null
+          ? ToolCallCaller.fromJson(json['caller'] as Map<String, dynamic>)
+          : null,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
+      async: optionalJsonBool(json, 'async', 'ConversationFunctionCallItem'),
+      createdBy: optionalJsonString(
+        json,
+        'created_by',
+        'ConversationFunctionCallItem',
+      ),
     );
   }
 
@@ -188,8 +238,44 @@ class ConversationFunctionCallItem extends ConversationItem {
     'call_id': callId,
     'name': name,
     'arguments': arguments,
+    if (namespace != null) 'namespace': namespace,
     if (status != null) 'status': status!.toJson(),
+    if (caller != null) 'caller': caller!.toJson(),
+    if (agent != null) 'agent': agent!.toJson(),
+    if (async != null) 'async': async,
+    if (createdBy != null) 'created_by': createdBy,
   };
+
+  /// Copies every field; explicit null clears an optional value.
+  ConversationFunctionCallItem copyWith({
+    String? id,
+    String? callId,
+    String? name,
+    String? arguments,
+    Object? namespace = unsetCopyWithValue,
+    Object? status = unsetCopyWithValue,
+    Object? caller = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
+    Object? async = unsetCopyWithValue,
+    Object? createdBy = unsetCopyWithValue,
+  }) => ConversationFunctionCallItem(
+    id: id ?? this.id,
+    callId: callId ?? this.callId,
+    name: name ?? this.name,
+    arguments: arguments ?? this.arguments,
+    namespace: namespace == unsetCopyWithValue
+        ? this.namespace
+        : namespace as String?,
+    status: status == unsetCopyWithValue ? this.status : status as ItemStatus?,
+    caller: caller == unsetCopyWithValue
+        ? this.caller
+        : caller as ToolCallCaller?,
+    agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
+    async: async == unsetCopyWithValue ? this.async : async as bool?,
+    createdBy: createdBy == unsetCopyWithValue
+        ? this.createdBy
+        : createdBy as String?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -200,14 +286,30 @@ class ConversationFunctionCallItem extends ConversationItem {
           callId == other.callId &&
           name == other.name &&
           arguments == other.arguments &&
-          status == other.status;
+          namespace == other.namespace &&
+          status == other.status &&
+          caller == other.caller &&
+          agent == other.agent &&
+          async == other.async &&
+          createdBy == other.createdBy;
 
   @override
-  int get hashCode => Object.hash(id, callId, name, arguments, status);
+  int get hashCode => Object.hash(
+    id,
+    callId,
+    name,
+    arguments,
+    namespace,
+    status,
+    caller,
+    agent,
+    async,
+    createdBy,
+  );
 
   @override
   String toString() =>
-      'ConversationFunctionCallItem(id: $id, callId: $callId, name: $name, arguments: $arguments, status: $status)';
+      'ConversationFunctionCallItem(id: $id, callId: $callId, name: $name, arguments: [${arguments.length} chars], namespace: $namespace, status: $status, caller: $caller, agent: $agent, async: $async, createdBy: $createdBy)';
 }
 
 /// A function call output item in a conversation.
@@ -1321,23 +1423,38 @@ class ConversationCompactionItem extends ConversationItem {
 /// A custom tool call item in a conversation.
 @immutable
 class ConversationCustomToolCallItem extends ConversationItem {
-  /// Unique identifier.
+  /// The fixed item discriminator.
+  String get type => 'custom_tool_call';
+
+  /// Unique identifier, when supplied.
   final String? id;
 
-  /// The call ID for this custom tool call.
+  /// The original call ID used when returning the tool result.
   final String callId;
 
-  /// The name of the custom tool being called.
+  /// The name of the tool being called.
   final String name;
 
-  /// The input for the custom tool call.
+  /// Opaque tool input.
   final String input;
 
-  /// The namespace of the custom tool.
+  /// The namespace of the tool, when supplied.
   final String? namespace;
 
   /// Item status.
   final ItemStatus? status;
+
+  /// The execution context that produced this call.
+  final ToolCallCaller? caller;
+
+  /// The producing agent on the beta multi-agent protocol.
+  final AgentTag? agent;
+
+  /// Whether the call runs asynchronously. Omission preserves the server default.
+  final bool? async;
+
+  /// The identifier of the entity that created this returned item.
+  final String? createdBy;
 
   /// Creates a [ConversationCustomToolCallItem].
   const ConversationCustomToolCallItem({
@@ -1347,19 +1464,45 @@ class ConversationCustomToolCallItem extends ConversationItem {
     required this.input,
     this.namespace,
     this.status,
+    this.caller,
+    this.agent,
+    this.async,
+    this.createdBy,
   });
 
   /// Creates a [ConversationCustomToolCallItem] from JSON.
   factory ConversationCustomToolCallItem.fromJson(Map<String, dynamic> json) {
+    requireJsonType(json, 'custom_tool_call', 'ConversationCustomToolCallItem');
     return ConversationCustomToolCallItem(
       id: json['id'] as String?,
-      callId: json['call_id'] as String,
-      name: json['name'] as String,
-      input: json['input'] as String,
+      callId: requireJsonString(
+        json['call_id'],
+        'ConversationCustomToolCallItem.call_id',
+      ),
+      name: requireJsonString(
+        json['name'],
+        'ConversationCustomToolCallItem.name',
+      ),
+      input: requireJsonString(
+        json['input'],
+        'ConversationCustomToolCallItem.input',
+      ),
       namespace: json['namespace'] as String?,
       status: json['status'] != null
           ? ItemStatus.fromJson(json['status'] as String)
           : null,
+      caller: json['caller'] != null
+          ? ToolCallCaller.fromJson(json['caller'] as Map<String, dynamic>)
+          : null,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
+      async: optionalJsonBool(json, 'async', 'ConversationCustomToolCallItem'),
+      createdBy: optionalJsonString(
+        json,
+        'created_by',
+        'ConversationCustomToolCallItem',
+      ),
     );
   }
 
@@ -1372,7 +1515,42 @@ class ConversationCustomToolCallItem extends ConversationItem {
     'input': input,
     if (namespace != null) 'namespace': namespace,
     if (status != null) 'status': status!.toJson(),
+    if (caller != null) 'caller': caller!.toJson(),
+    if (agent != null) 'agent': agent!.toJson(),
+    if (async != null) 'async': async,
+    if (createdBy != null) 'created_by': createdBy,
   };
+
+  /// Copies every field; explicit null clears an optional value.
+  ConversationCustomToolCallItem copyWith({
+    Object? id = unsetCopyWithValue,
+    String? callId,
+    String? name,
+    String? input,
+    Object? namespace = unsetCopyWithValue,
+    Object? status = unsetCopyWithValue,
+    Object? caller = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
+    Object? async = unsetCopyWithValue,
+    Object? createdBy = unsetCopyWithValue,
+  }) => ConversationCustomToolCallItem(
+    id: id == unsetCopyWithValue ? this.id : id as String?,
+    callId: callId ?? this.callId,
+    name: name ?? this.name,
+    input: input ?? this.input,
+    namespace: namespace == unsetCopyWithValue
+        ? this.namespace
+        : namespace as String?,
+    status: status == unsetCopyWithValue ? this.status : status as ItemStatus?,
+    caller: caller == unsetCopyWithValue
+        ? this.caller
+        : caller as ToolCallCaller?,
+    agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
+    async: async == unsetCopyWithValue ? this.async : async as bool?,
+    createdBy: createdBy == unsetCopyWithValue
+        ? this.createdBy
+        : createdBy as String?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -1384,14 +1562,29 @@ class ConversationCustomToolCallItem extends ConversationItem {
           name == other.name &&
           input == other.input &&
           namespace == other.namespace &&
-          status == other.status;
+          status == other.status &&
+          caller == other.caller &&
+          agent == other.agent &&
+          async == other.async &&
+          createdBy == other.createdBy;
 
   @override
-  int get hashCode => Object.hash(id, callId, name, input, namespace, status);
+  int get hashCode => Object.hash(
+    id,
+    callId,
+    name,
+    input,
+    namespace,
+    status,
+    caller,
+    agent,
+    async,
+    createdBy,
+  );
 
   @override
   String toString() =>
-      'ConversationCustomToolCallItem(id: $id, callId: $callId, name: $name, status: $status)';
+      'ConversationCustomToolCallItem(id: $id, callId: $callId, name: $name, input: [${input.length} chars], namespace: $namespace, status: $status, caller: $caller, agent: $agent, async: $async, createdBy: $createdBy)';
 }
 
 /// A custom tool call output item in a conversation.

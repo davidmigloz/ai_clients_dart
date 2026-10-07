@@ -143,12 +143,14 @@ after all CI checks passed, closing #326. All Phase 2 tickets are complete.
 The [Responses specification](responses.md) records the next source-backed
 contracts, source discrepancies, compatibility/platform decisions and dependency
 boundaries. [Planning review](reviews/09-responses-planning.md) records the
-independent review. Runtime work is pending; these documents do not establish
-implemented coverage.
+independent review. Planning PR #345 merged after all CI checks passed. Async
+[#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) is implemented and
+independently reviewed with [acceptance evidence](reviews/09-async-tools.md) in
+[PR #346](https://github.com/davidmigloz/ai_clients_dart/pull/346). Other Phase 3 runtime work is pending.
 
 | Ticket | Demonstrable outcome | Dependency |
 | --- | --- | --- |
-| [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) ([09](tickets/09-async-tools.md)) | Async function/custom calls and faithful replay | None; next implementation |
+| [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) ([09](tickets/09-async-tools.md)) | Async function/custom calls and faithful replay | Implemented and reviewed |
 | [#335](https://github.com/davidmigloz/ai_clients_dart/issues/335) ([10](tickets/10-configuration-updates.md)) | Persistent reasoning effort updates | None |
 | [#336](https://github.com/davidmigloz/ai_clients_dart/issues/336) ([11](tickets/11-web-search.md)) | GA web-search controls/actions/image results | None |
 | [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337) ([12](tickets/12-hosted-shell.md)) | Hosted/local shell configuration, replay and streams | #320, merged |
@@ -164,7 +166,8 @@ Implement the small async slice first, then continue through the table. Recovery
 and injection remain explicit follow-ups to basic transport; do not claim full
 WebSocket SDK parity before they are complete. Each ticket includes an offline
 example, public fixtures, documentation and independent review. All eleven tickets are native sub-issues of #317; active blockers are linked
-with GitHub dependencies. Async [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) is next.
+with GitHub dependencies. Configuration updates [#335](https://github.com/davidmigloz/ai_clients_dart/issues/335)
+follow async #334 after its PR merges.
 
 ## Remaining roadmap
 
@@ -214,7 +217,8 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
 - Merged in #329/#322: Responses cache controls gain
   `comparison_response_id`/`prewarm` and typed diagnostics; Chat gains narrow options. Shared Responses
   `cache_write_tokens` usage is implemented with Decisions in #318.
-- Function/custom definitions and call items omit `async`.
+- Async function/custom definitions/calls, direct custom replay and conversation
+  metadata are implemented and reviewed in #334/PR #346; merge remains pending.
 - Input/list-input/conversation parsers lack `configuration_update`; canonical
   OutputItem has no such variant and no dedicated streaming event is defined.
 - Responses WebSocket transport/steering and official opt-in reconnect helpers
