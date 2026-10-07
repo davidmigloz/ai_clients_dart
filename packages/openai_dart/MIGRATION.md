@@ -6,6 +6,79 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming shell alignment
+
+Returned shell DTOs now follow their required nullable keys. `ShellCallAction`
+requires `timeoutMs` and `maxOutputLength` constructor arguments, and serializes
+both even when null. `ShellCallOutputItem` requires a nullable `environment`
+argument and always emits that key. `ShellCallOutputResultItem.status` is now
+required and nonnullable; its required `maxOutputLength` always serializes too.
+Update manually constructed returned items:
+
+```dart
+// Before
+const call = ShellCallOutputItem(
+  id: 'sh_1',
+  callId: 'call_1',
+  action: ShellCallAction(commands: ['pwd']),
+  status: ItemStatus.completed,
+);
+```
+
+```dart
+// After: supply required nullable fields explicitly.
+const call = ShellCallOutputItem(
+  id: 'sh_1',
+  callId: 'call_1',
+  action: ShellCallAction(
+    commands: ['pwd'],
+    timeoutMs: null,
+    maxOutputLength: null,
+  ),
+  status: ItemStatus.completed,
+  environment: null,
+);
+const result = ShellCallOutputResultItem(
+  id: 'sho_1',
+  callId: 'call_1',
+  status: ItemStatus.completed,
+  output: [],
+  maxOutputLength: null,
+);
+```
+
+Direct input uses `ShellCallInputItem`, `ShellCallActionInput`,
+`ShellCallOutputInputItem` and `ShellCallOutputContentInput`. Input IDs, status and
+limits remain optional nullable and normalize null to omission. Definition and
+input environment use `ShellToolEnvironment`; direct input rejects
+`container_auto`, permitting local skills or container reference. Returned
+`ShellEnvironment` stays separate, with a local shape without skills. Returned
+input listings and stored conversation items retain their required IDs, status,
+nullable keys and creator metadata, and expose typed input conversion helpers.
+Those helpers intentionally omit returned-only `created_by`, including creators
+on output content. Returning local results should preserve the original call ID
+and the supplied output limit against the latest response ID.
+
+Known malformed parsers now throw contextual `FormatException`, including missing
+required nullable keys. New optional nonnull `created_by` and stream beta agent,
+obfuscation and stdout/stderr members reject supplied null. Existing output DTO
+agent-null tolerance remains; new returned input-list/conversation agents reject
+null, while writable input agents accept it. Omitted/null nullable environment or
+caller inputs normalize to omission. Future environment/outcome objects retain
+immutable raw JSON; `container_auto` is rejected as a returned environment.
+
+Existing const constructors and caller-owned collections stay compatible where
+the returned model already exposed them; keep those lists stable while used as
+map/set keys. New collection-bearing models and parsed lists take immutable
+snapshots. Safe diagnostics summarize commands, stdout/stderr, creator/agent
+metadata, padding and skill paths/descriptions instead of printing payloads.
+
+`ResponseTool.shell()` still works without configuration; its new environment and
+allowed-caller arguments are optional. `ResponseToolChoice.shell()` adds canonical
+forced choice. See the [README](README.md#how-do-i-configure-hosted-shell-and-return-local-results)
+and [offline example](example/shell_tools_example.dart) for hosted settings, local
+results and all five typed stream events without API calls or command execution.
+
 ## Upcoming GA web-search alignment
 
 `ResponseTool.webSearch()` and `WebSearchTool()` now default to GA

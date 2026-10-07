@@ -1,6 +1,7 @@
 # Responses capabilities: Phase 3 specification
 
-Status: independently reviewed specification; async tools merged in #346.
+Status: independently reviewed specification; async tools, configuration updates
+and web search merged in #346–#348.
 Configuration updates are implemented and independently reviewed; merge pending.
 Remaining runtime slices are tracked below. Parent:
 [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).

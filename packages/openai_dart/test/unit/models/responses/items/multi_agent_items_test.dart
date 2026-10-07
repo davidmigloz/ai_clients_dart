@@ -317,8 +317,13 @@ void main() {
         id: 'sc_1',
         agent: AgentTag(agentName: 'researcher'),
         callId: 'call_1',
-        action: ShellCallAction(commands: ['ls']),
+        action: ShellCallAction(
+          commands: ['ls'],
+          timeoutMs: null,
+          maxOutputLength: null,
+        ),
         status: ItemStatus.completed,
+        environment: null,
       );
       final json = withAgent.toJson();
       expect(json['agent'], {'agent_name': 'researcher'});
@@ -327,8 +332,13 @@ void main() {
       const withoutAgent = ShellCallOutputItem(
         id: 'sc_1',
         callId: 'call_1',
-        action: ShellCallAction(commands: ['ls']),
+        action: ShellCallAction(
+          commands: ['ls'],
+          timeoutMs: null,
+          maxOutputLength: null,
+        ),
         status: ItemStatus.completed,
+        environment: null,
       );
       final jsonWithout = withoutAgent.toJson();
       expect(jsonWithout.containsKey('agent'), isFalse);

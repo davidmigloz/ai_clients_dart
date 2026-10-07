@@ -10,7 +10,16 @@ import '../responses/config/message_phase.dart';
 import '../responses/config/tool_search_execution_type.dart';
 import '../responses/config/web_search_call_status.dart';
 import '../responses/items/item.dart'
-    show ConfigurationUpdateItem, FunctionCallOutput, WebSearchCallItem;
+    show
+        ConfigurationUpdateItem,
+        FunctionCallOutput,
+        ShellCallInputItem,
+        ShellCallOutputContentInput,
+        ShellCallOutputInputItem,
+        WebSearchCallItem;
+import '../responses/items/output_item.dart'
+    show ShellCallAction, ShellCallOutputContent, ShellEnvironment;
+import '../responses/items/shell_call_helpers.dart';
 import '../responses/items/web_search_action.dart';
 import '../responses/items/web_search_result.dart';
 import '../responses/multi_agent/agent_tag.dart';
@@ -25,6 +34,8 @@ import 'conversation_message.dart';
 /// that can be stored in a conversation, including output item types
 /// from the Responses API and conversation-specific types.
 /// [ConversationConfigurationUpdateItem] represents a stored reasoning update.
+/// [ConversationShellCallItem] and [ConversationShellCallOutputItem] retain
+/// returned shell calls and results with writable input conversion helpers.
 sealed class ConversationItem {
   /// Creates a [ConversationItem].
   const ConversationItem();
@@ -42,6 +53,8 @@ sealed class ConversationItem {
       'image_generation_call' => ConversationImageGenerationCallItem.fromJson(
         json,
       ),
+      'shell_call' => ConversationShellCallItem.fromJson(json),
+      'shell_call_output' => ConversationShellCallOutputItem.fromJson(json),
       'local_shell_call' => ConversationLocalShellCallItem.fromJson(json),
       'local_shell_call_output' =>
         ConversationLocalShellCallOutputItem.fromJson(json),
@@ -1933,4 +1946,315 @@ class ConversationUnknownItem extends ConversationItem {
 
   @override
   String toString() => 'ConversationUnknownItem(type: $type)';
+}
+
+/// A returned shell call with the exact resource contract.
+@immutable
+class ConversationShellCallItem extends ConversationItem {
+  /// The fixed item discriminator.
+  String get type => 'shell_call';
+
+  /// Unique identifier.
+  final String id;
+
+  /// Optional beta agent metadata. Explicit JSON null is invalid.
+  final AgentTag? agent;
+
+  /// The shell call identifier.
+  final String callId;
+
+  /// Commands and execution limits returned by the service.
+  final ShellCallAction action;
+
+  /// The status of this shell item.
+  final ItemStatus status;
+
+  /// Returned environment. This required JSON key may be null.
+  final ShellEnvironment? environment;
+
+  /// Optional nullable execution context.
+  final ToolCallCaller? caller;
+
+  /// Optional creator identifier. Explicit JSON null is invalid.
+  final String? createdBy;
+
+  /// Creates a [ConversationShellCallItem].
+  const ConversationShellCallItem({
+    required this.id,
+    this.agent,
+    required this.callId,
+    required this.action,
+    required this.status,
+    required this.environment,
+    this.caller,
+    this.createdBy,
+  });
+
+  /// Creates a [ConversationShellCallItem] from JSON.
+  factory ConversationShellCallItem.fromJson(Map<String, dynamic> json) {
+    const context = 'ConversationShellCallItem';
+    requireJsonType(json, 'shell_call', context);
+    if (!json.containsKey('environment')) {
+      throw const FormatException('$context.environment: required key missing');
+    }
+    return ConversationShellCallItem(
+      id: requireJsonString(json['id'], '$context.id'),
+      agent: shellJsonAgent(json, context, nullable: false),
+      callId: requireJsonString(json['call_id'], '$context.call_id'),
+      action: ShellCallAction.fromJson(
+        requireJsonObject(json['action'], '$context.action'),
+        context: '$context.action',
+      ),
+      status: ItemStatus.fromJson(
+        requireJsonString(json['status'], '$context.status'),
+      ),
+      environment: json['environment'] == null
+          ? null
+          : ShellEnvironment.fromJson(
+              requireJsonObject(json['environment'], '$context.environment'),
+              context: '$context.environment',
+            ),
+      caller: shellJsonCaller(json, context),
+      createdBy: optionalJsonString(json, 'created_by', context),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    if (agent != null) 'agent': agent!.toJson(),
+    'call_id': callId,
+    'action': action.toJson(),
+    'status': status.toJson(),
+    'environment': environment?.toJson(),
+    if (caller != null) 'caller': caller!.toJson(),
+    if (createdBy != null) 'created_by': createdBy,
+  };
+
+  /// Creates a copy; explicit null clears nullable metadata.
+  ConversationShellCallItem copyWith({
+    String? id,
+    Object? agent = unsetCopyWithValue,
+    String? callId,
+    ShellCallAction? action,
+    ItemStatus? status,
+    Object? environment = unsetCopyWithValue,
+    Object? caller = unsetCopyWithValue,
+    Object? createdBy = unsetCopyWithValue,
+  }) => ConversationShellCallItem(
+    id: id ?? this.id,
+    agent: identical(agent, unsetCopyWithValue)
+        ? this.agent
+        : agent as AgentTag?,
+    callId: callId ?? this.callId,
+    action: action ?? this.action,
+    status: status ?? this.status,
+    environment: identical(environment, unsetCopyWithValue)
+        ? this.environment
+        : environment as ShellEnvironment?,
+    caller: identical(caller, unsetCopyWithValue)
+        ? this.caller
+        : caller as ToolCallCaller?,
+    createdBy: identical(createdBy, unsetCopyWithValue)
+        ? this.createdBy
+        : createdBy as String?,
+  );
+
+  /// Converts to writable input, omitting returned-only creator metadata.
+  ShellCallInputItem toShellCallInputItem() => ShellCallInputItem(
+    id: id,
+    agent: agent,
+    callId: callId,
+    action: action.toInput(),
+    status: status,
+    environment: environment?.toInput(),
+    caller: caller,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ConversationShellCallItem &&
+          id == other.id &&
+          agent == other.agent &&
+          callId == other.callId &&
+          action == other.action &&
+          status == other.status &&
+          environment == other.environment &&
+          caller == other.caller &&
+          createdBy == other.createdBy;
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    agent,
+    callId,
+    action,
+    status,
+    environment,
+    caller,
+    createdBy,
+  );
+
+  @override
+  String toString() =>
+      'ConversationShellCallItem(id: $id, agent: ${agent == null ? 'null' : '[${agent!.agentName.length} chars]'}, callId: $callId, action: $action, status: $status, environment: $environment, caller: ${caller == null ? 'null' : caller.runtimeType}, createdBy: ${createdBy == null ? 'null' : '[${createdBy!.length} chars]'})';
+}
+
+/// A returned shell result with the exact resource contract.
+@immutable
+class ConversationShellCallOutputItem extends ConversationItem {
+  /// The fixed item discriminator.
+  String get type => 'shell_call_output';
+
+  /// Unique identifier.
+  final String id;
+
+  /// Optional beta agent metadata. Explicit JSON null is invalid.
+  final AgentTag? agent;
+
+  /// The shell call identifier.
+  final String callId;
+
+  /// The status of this shell item.
+  final ItemStatus status;
+
+  /// Returned output chunks. Constructor lists are caller-owned for const compatibility; parsed lists are unmodifiable.
+  final List<ShellCallOutputContent> output;
+
+  /// Output limit. This required JSON key may be null.
+  final int? maxOutputLength;
+
+  /// Optional nullable execution context.
+  final ToolCallCaller? caller;
+
+  /// Optional creator identifier. Explicit JSON null is invalid.
+  final String? createdBy;
+
+  /// Creates a [ConversationShellCallOutputItem].
+  const ConversationShellCallOutputItem({
+    required this.id,
+    this.agent,
+    required this.callId,
+    required this.status,
+    required this.output,
+    required this.maxOutputLength,
+    this.caller,
+    this.createdBy,
+  });
+
+  /// Creates a [ConversationShellCallOutputItem] from JSON.
+  factory ConversationShellCallOutputItem.fromJson(Map<String, dynamic> json) {
+    const context = 'ConversationShellCallOutputItem';
+    requireJsonType(json, 'shell_call_output', context);
+    return ConversationShellCallOutputItem(
+      id: requireJsonString(json['id'], '$context.id'),
+      agent: shellJsonAgent(json, context, nullable: false),
+      callId: requireJsonString(json['call_id'], '$context.call_id'),
+      status: ItemStatus.fromJson(
+        requireJsonString(json['status'], '$context.status'),
+      ),
+      output: shellJsonList(
+        json['output'],
+        '$context.output',
+        (value, path) => ShellCallOutputContent.fromJson(
+          requireJsonObject(value, path),
+          context: path,
+        ),
+      ),
+      maxOutputLength: shellRequiredNullableInt(
+        json,
+        'max_output_length',
+        context,
+      ),
+      caller: shellJsonCaller(json, context),
+      createdBy: optionalJsonString(json, 'created_by', context),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    if (agent != null) 'agent': agent!.toJson(),
+    'call_id': callId,
+    'status': status.toJson(),
+    'output': output.map((chunk) => chunk.toJson()).toList(),
+    'max_output_length': maxOutputLength,
+    if (caller != null) 'caller': caller!.toJson(),
+    if (createdBy != null) 'created_by': createdBy,
+  };
+
+  /// Creates a copy; explicit null clears nullable metadata.
+  ConversationShellCallOutputItem copyWith({
+    String? id,
+    Object? agent = unsetCopyWithValue,
+    String? callId,
+    ItemStatus? status,
+    List<ShellCallOutputContent>? output,
+    Object? maxOutputLength = unsetCopyWithValue,
+    Object? caller = unsetCopyWithValue,
+    Object? createdBy = unsetCopyWithValue,
+  }) => ConversationShellCallOutputItem(
+    id: id ?? this.id,
+    agent: identical(agent, unsetCopyWithValue)
+        ? this.agent
+        : agent as AgentTag?,
+    callId: callId ?? this.callId,
+    status: status ?? this.status,
+    output: output ?? this.output,
+    maxOutputLength: identical(maxOutputLength, unsetCopyWithValue)
+        ? this.maxOutputLength
+        : maxOutputLength as int?,
+    caller: identical(caller, unsetCopyWithValue)
+        ? this.caller
+        : caller as ToolCallCaller?,
+    createdBy: identical(createdBy, unsetCopyWithValue)
+        ? this.createdBy
+        : createdBy as String?,
+  );
+
+  /// Converts to writable input, omitting returned-only creator metadata.
+  ShellCallOutputInputItem toShellCallOutputInputItem() =>
+      ShellCallOutputInputItem(
+        id: id,
+        agent: agent,
+        callId: callId,
+        status: status,
+        output: List<ShellCallOutputContentInput>.unmodifiable(
+          output.map((chunk) => chunk.toInput()),
+        ),
+        maxOutputLength: maxOutputLength,
+        caller: caller,
+      );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ConversationShellCallOutputItem &&
+          id == other.id &&
+          agent == other.agent &&
+          callId == other.callId &&
+          status == other.status &&
+          listsEqual(output, other.output) &&
+          maxOutputLength == other.maxOutputLength &&
+          caller == other.caller &&
+          createdBy == other.createdBy;
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    agent,
+    callId,
+    status,
+    Object.hashAll(output),
+    maxOutputLength,
+    caller,
+    createdBy,
+  );
+
+  @override
+  String toString() =>
+      'ConversationShellCallOutputItem(id: $id, agent: ${agent == null ? 'null' : '[${agent!.agentName.length} chars]'}, callId: $callId, status: $status, output: ${output.length} chunks, maxOutputLength: $maxOutputLength, caller: ${caller == null ? 'null' : caller.runtimeType}, createdBy: ${createdBy == null ? 'null' : '[${createdBy!.length} chars]'})';
 }

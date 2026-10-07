@@ -247,6 +247,90 @@ client.close();
 
 </details>
 
+### How do I configure hosted shell and return local results?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Configure a hosted container, local runtime, or existing container on the shell
+tool. Hosted configuration reuses container memory, network and skill models:
+
+```dart
+final hostedTool = ResponseTool.shell(
+  environment: ShellToolEnvironment.containerAuto(
+    memoryLimit: ContainerMemoryLimit.gb4,
+    networkPolicy: ContainerNetworkPolicy.disabled,
+    skills: const [ContainerSkill.reference(skillId: 'skill_uploaded')],
+  ),
+);
+final localTool = ResponseTool.shell(
+  environment: ShellToolEnvironment.local(
+    skills: const [
+      ShellLocalSkill(
+        name: 'csv-summary',
+        description: 'Summarize a local CSV dataset.',
+        path: '/workspace/skills/csv-summary',
+      ),
+    ],
+  ),
+);
+final request = CreateResponseRequest(
+  model: 'gpt-6-astra',
+  input: const ResponseInput.text('Summarize the dataset.'),
+  tools: [hostedTool],
+  toolChoice: ResponseToolChoice.shell(),
+);
+```
+
+For a locally executed call, inspect the commands and apply your application's
+execution policy. Return captured output on the original call ID and retain the
+model's output limit. This snippet supplies synthetic output:
+
+```dart
+final continuation = CreateResponseRequest(
+  model: 'gpt-6-astra',
+  previousResponseId: response.id,
+  input: ResponseInput.items([
+    ShellCallOutputInputItem(
+      callId: call.callId,
+      maxOutputLength: call.action.maxOutputLength,
+      output: const [
+        ShellCallOutputContentInput(
+          stdout: 'Synthetic summary: 12 rows.',
+          stderr: '',
+          outcome: ShellCallExitOutcome(exitCode: 0),
+        ),
+      ],
+    ),
+  ]),
+);
+```
+
+Typed command added/delta/done and output-content delta/done events expose
+`commandIndex`, `outputIndex`, sequence and optional agent metadata. Output
+fragments carry independent stdout/stderr fields; empty fragments and obfuscation
+stay intact. Completed lifecycle responses retain full results. There is no
+automatic command runner or generalized shell-output accumulator.
+
+The [shell guide](https://developers.openai.com/api/docs/guides/tools-shell) and
+[skills guide](https://developers.openai.com/api/docs/guides/tools-skills) describe
+hosted bundles versus local name/description/path skills. Hosted network access
+requires organization configuration and an explicit request policy. Server limits
+are 50 uploaded file IDs and 200 skills per environment; the SDK documents these
+limits and leaves enforcement to the service. `container_auto` belongs on a
+definition; direct call history allows only local/reference environments. Returned
+local environments have no skills. `toShellCallInputItem()` and
+`toShellCallOutputInputItem()` bridge output, input listings and conversation
+items while omitting returned-only creator metadata.
+
+→ [Runnable offline example](example/shell_tools_example.dart), with hosted
+configuration, local continuation and typed stream events. It requires no API key,
+creates no containers and executes no proposed commands. See
+[migration guidance](MIGRATION.md#upcoming-shell-alignment) for corrected required
+nullable returned keys and distinct writable DTOs.
+
+</details>
+
 ### How do I filter web search and inspect image results?
 
 <details>
@@ -1235,6 +1319,7 @@ See the [example/](example/) directory for complete examples:
 | [`content_provenance_checks_example.dart`](example/content_provenance_checks_example.dart) | Content provenance (C2PA/SynthID) detection |
 | [`web_search_example.dart`](example/web_search_example.dart) | Web search with Responses API |
 | [`web_search_controls_example.dart`](example/web_search_controls_example.dart) | Local GA filters, image results, sources, and REST/SSE parsing without API calls |
+| [`shell_tools_example.dart`](example/shell_tools_example.dart) | Offline hosted configuration, synthetic local continuation, and typed shell stream events |
 | [`realtime_example.dart`](example/realtime_example.dart) | Realtime API (WebSocket and WebRTC) |
 | [`fine_tuning_example.dart`](example/fine_tuning_example.dart) | Fine-tuning job management |
 | [`completions_example.dart`](example/completions_example.dart) | Legacy completions API |

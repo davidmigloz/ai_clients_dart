@@ -1,6 +1,6 @@
 # GA web-search controls, actions and results
 
-Status: implemented, verified, and independently reviewed; merge pending.
+Status: merged and complete.
 GitHub: [#336](https://github.com/davidmigloz/ai_clients_dart/issues/336).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-WEB-01–03.
@@ -36,8 +36,7 @@ Package publishing and unrelated API families are outside this ticket.
 
 [Acceptance evidence](../reviews/11-web-search.md) records exact contextual
 contracts, 3,903 passing unit tests, clean analysis, full toolkit diagnostics,
-README/migration guidance, the offline example, and independent reviews. Close
-the issue only after implementation merge.
+README/migration guidance, the offline example, and independent reviews.
 
 Implementation [PR #348](https://github.com/davidmigloz/ai_clients_dart/pull/348)
-is open for review; #336 closes only after merge.
+merged after all CI checks passed, closing #336.

@@ -1964,6 +1964,7 @@ void main() {
           'max_output_length': 1000,
         },
         'status': 'in_progress',
+        'environment': null,
       });
 
       expect(item, isA<ShellCallOutputItem>());
@@ -1980,6 +1981,8 @@ void main() {
         'call_id': 'call_shell_2',
         'action': {
           'commands': ['ls'],
+          'timeout_ms': null,
+          'max_output_length': null,
         },
         'status': 'completed',
         'environment': {'type': 'local'},
@@ -2005,6 +2008,8 @@ void main() {
           'call_id': 'call_shell_3',
           'action': {
             'commands': ['echo', 'hello'],
+            'timeout_ms': null,
+            'max_output_length': null,
           },
           'status': 'in_progress',
           'environment': {
@@ -2033,11 +2038,10 @@ void main() {
       },
     );
 
-    test('ShellEnvironment.fromJson throws on unknown type', () {
-      expect(
-        () => ShellEnvironment.fromJson({'type': 'unknown'}),
-        throwsFormatException,
-      );
+    test('ShellEnvironment.fromJson preserves unknown type', () {
+      expect(ShellEnvironment.fromJson({'type': 'unknown'}).toJson(), {
+        'type': 'unknown',
+      });
     });
 
     test('deserializes ShellCallOutputResultItem', () {
@@ -2080,18 +2084,24 @@ void main() {
       expect(localOutput.status, equals(ItemStatus.completed));
     });
 
-    test('ShellCallAction.toJson omits null nullable fields', () {
-      const action = ShellCallAction(commands: ['pwd']);
+    test('ShellCallAction.toJson retains required null fields', () {
+      const action = ShellCallAction(
+        commands: ['pwd'],
+        timeoutMs: null,
+        maxOutputLength: null,
+      );
       final json = action.toJson();
 
       expect(
         json,
         equals({
           'commands': ['pwd'],
+          'timeout_ms': null,
+          'max_output_length': null,
         }),
       );
-      expect(json.containsKey('timeout_ms'), isFalse);
-      expect(json.containsKey('max_output_length'), isFalse);
+      expect(json.containsKey('timeout_ms'), isTrue);
+      expect(json.containsKey('max_output_length'), isTrue);
     });
 
     test('ShellCallAction.toJson includes non-null nullable fields', () {
@@ -2106,16 +2116,18 @@ void main() {
       expect(json['max_output_length'], equals(1000));
     });
 
-    test('ShellCallOutputResultItem.toJson omits null maxOutputLength', () {
+    test('ShellCallOutputResultItem.toJson retains null maxOutputLength', () {
       const item = ShellCallOutputResultItem(
         id: 'sho_1',
         callId: 'call_1',
+        status: ItemStatus.completed,
         output: [],
         maxOutputLength: null,
       );
       final json = item.toJson();
 
-      expect(json.containsKey('max_output_length'), isFalse);
+      expect(json.containsKey('max_output_length'), isTrue);
+      expect(json['max_output_length'], isNull);
     });
 
     test('deserializes McpCallOutputItem', () {
@@ -2237,8 +2249,13 @@ void main() {
           ShellCallOutputItem(
             id: 'sh_1',
             callId: 'call_1',
-            action: ShellCallAction(commands: ['pwd']),
+            action: ShellCallAction(
+              commands: ['pwd'],
+              timeoutMs: null,
+              maxOutputLength: null,
+            ),
             status: ItemStatus.completed,
+            environment: null,
           ),
           CompactionOutputItem(id: 'cmp_1', encryptedContent: 'abc'),
         ],

@@ -2,12 +2,14 @@ import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import '../../common/json_helpers.dart';
 import '../content/annotation.dart';
 import '../content/logprob.dart';
 import '../content/output_content.dart';
 import '../items/output_item.dart';
 import '../multi_agent/agent_tag.dart';
 import '../response.dart';
+import 'shell_call_output_delta.dart';
 
 /// A streaming event from the Responses API.
 ///
@@ -25,6 +27,10 @@ import '../response.dart';
 /// - **Web search events**: in_progress, searching, completed
 /// - **File search events**: in_progress, searching, completed
 /// - **Code interpreter events**: in_progress, interpreting, code delta, code done, completed
+/// - **Shell events**: [ResponseShellCallCommandAddedEvent],
+///   [ResponseShellCallCommandDeltaEvent], [ResponseShellCallCommandDoneEvent],
+///   [ResponseShellCallOutputContentDeltaEvent], and
+///   [ResponseShellCallOutputContentDoneEvent]
 /// - **Image generation events**: in_progress, generating, partial_image, completed
 /// - **MCP events**: call events, list tools events, arguments events
 /// - **Custom tool events**: input delta, input done
@@ -119,6 +125,18 @@ sealed class ResponseStreamEvent {
         ResponseCodeInterpreterCallCodeDoneEvent.fromJson(json),
       'response.code_interpreter_call.completed' =>
         ResponseCodeInterpreterCallCompletedEvent.fromJson(json),
+
+      // Shell events
+      'response.shell_call_command.added' =>
+        ResponseShellCallCommandAddedEvent.fromJson(json),
+      'response.shell_call_command.delta' =>
+        ResponseShellCallCommandDeltaEvent.fromJson(json),
+      'response.shell_call_command.done' =>
+        ResponseShellCallCommandDoneEvent.fromJson(json),
+      'response.shell_call_output_content.delta' =>
+        ResponseShellCallOutputContentDeltaEvent.fromJson(json),
+      'response.shell_call_output_content.done' =>
+        ResponseShellCallOutputContentDoneEvent.fromJson(json),
 
       // Image generation events
       'response.image_generation_call.in_progress' =>
@@ -3833,6 +3851,606 @@ class ResponseCodeInterpreterCallCompletedEvent extends ResponseStreamEvent {
   @override
   String toString() =>
       'ResponseCodeInterpreterCallCompletedEvent(itemId: $itemId, agent: $agent)';
+}
+
+// ============================================================
+// Shell Events
+// ============================================================
+
+AgentTag? _shellEventAgent(Map<String, dynamic> json, String context) {
+  if (!json.containsKey('agent')) return null;
+  final value = requireJsonObject(json['agent'], '$context.agent');
+  return AgentTag(
+    agentName: requireJsonString(
+      value['agent_name'],
+      '$context.agent.agent_name',
+    ),
+  );
+}
+
+/// Event emitted when a shell command is added.
+@immutable
+class ResponseShellCallCommandAddedEvent extends ResponseStreamEvent {
+  @override
+  String get type => 'response.shell_call_command.added';
+
+  /// The sequence number for ordering events.
+  @override
+  final int sequenceNumber;
+
+  /// The index of the shell call output item.
+  final int outputIndex;
+
+  /// The index of the shell command within the call.
+  final int commandIndex;
+
+  /// The generated shell command. This event does not execute it.
+  final String command;
+
+  /// The beta multi-agent owner, when the event includes one.
+  final AgentTag? agent;
+
+  /// Creates a [ResponseShellCallCommandAddedEvent].
+  const ResponseShellCallCommandAddedEvent({
+    required this.sequenceNumber,
+    required this.outputIndex,
+    required this.commandIndex,
+    required this.command,
+    this.agent,
+  });
+
+  /// Creates a [ResponseShellCallCommandAddedEvent] from JSON.
+  factory ResponseShellCallCommandAddedEvent.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    const context = 'ResponseShellCallCommandAddedEvent';
+    requireJsonType(json, 'response.shell_call_command.added', context);
+    return ResponseShellCallCommandAddedEvent(
+      sequenceNumber: requireJsonInt(
+        json['sequence_number'],
+        '$context.sequence_number',
+      ),
+      outputIndex: requireJsonInt(
+        json['output_index'],
+        '$context.output_index',
+      ),
+      commandIndex: requireJsonInt(
+        json['command_index'],
+        '$context.command_index',
+      ),
+      command: requireJsonString(json['command'], '$context.command'),
+      agent: _shellEventAgent(json, context),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'sequence_number': sequenceNumber,
+    'output_index': outputIndex,
+    'command_index': commandIndex,
+    'command': command,
+    if (agent != null) 'agent': agent!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  ///
+  /// Passing `null` for [agent] removes that optional key.
+  ResponseShellCallCommandAddedEvent copyWith({
+    int? sequenceNumber,
+    int? outputIndex,
+    int? commandIndex,
+    String? command,
+    Object? agent = unsetCopyWithValue,
+  }) => ResponseShellCallCommandAddedEvent(
+    sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+    outputIndex: outputIndex ?? this.outputIndex,
+    commandIndex: commandIndex ?? this.commandIndex,
+    command: command ?? this.command,
+    agent: identical(agent, unsetCopyWithValue)
+        ? this.agent
+        : agent as AgentTag?,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ResponseShellCallCommandAddedEvent &&
+          runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
+          outputIndex == other.outputIndex &&
+          commandIndex == other.commandIndex &&
+          command == other.command &&
+          agent == other.agent;
+
+  @override
+  int get hashCode =>
+      Object.hash(sequenceNumber, outputIndex, commandIndex, command, agent);
+
+  @override
+  String toString() =>
+      'ResponseShellCallCommandAddedEvent(sequenceNumber: $sequenceNumber, outputIndex: $outputIndex, commandIndex: $commandIndex, command: [${command.length} chars], agent: ${agent == null ? 'null' : '[${agent!.agentName.length} chars]'})';
+}
+
+/// Event emitted when a shell command receives a text fragment.
+@immutable
+class ResponseShellCallCommandDeltaEvent extends ResponseStreamEvent {
+  @override
+  String get type => 'response.shell_call_command.delta';
+
+  /// The sequence number for ordering events.
+  @override
+  final int sequenceNumber;
+
+  /// The index of the shell call output item.
+  final int outputIndex;
+
+  /// The index of the shell command within the call.
+  final int commandIndex;
+
+  /// The shell command fragment, which may be empty.
+  final String delta;
+
+  /// Opaque padding metadata; it is not part of the shell command.
+  final String? obfuscation;
+
+  /// The beta multi-agent owner, when the event includes one.
+  final AgentTag? agent;
+
+  /// Creates a [ResponseShellCallCommandDeltaEvent].
+  const ResponseShellCallCommandDeltaEvent({
+    required this.sequenceNumber,
+    required this.outputIndex,
+    required this.commandIndex,
+    required this.delta,
+    this.obfuscation,
+    this.agent,
+  });
+
+  /// Creates a [ResponseShellCallCommandDeltaEvent] from JSON.
+  factory ResponseShellCallCommandDeltaEvent.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    const context = 'ResponseShellCallCommandDeltaEvent';
+    requireJsonType(json, 'response.shell_call_command.delta', context);
+    return ResponseShellCallCommandDeltaEvent(
+      sequenceNumber: requireJsonInt(
+        json['sequence_number'],
+        '$context.sequence_number',
+      ),
+      outputIndex: requireJsonInt(
+        json['output_index'],
+        '$context.output_index',
+      ),
+      commandIndex: requireJsonInt(
+        json['command_index'],
+        '$context.command_index',
+      ),
+      delta: requireJsonString(json['delta'], '$context.delta'),
+      obfuscation: optionalJsonString(json, 'obfuscation', context),
+      agent: _shellEventAgent(json, context),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'sequence_number': sequenceNumber,
+    'output_index': outputIndex,
+    'command_index': commandIndex,
+    'delta': delta,
+    if (obfuscation != null) 'obfuscation': obfuscation,
+    if (agent != null) 'agent': agent!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  ///
+  /// Passing `null` for [obfuscation] or [agent] removes that optional key.
+  ResponseShellCallCommandDeltaEvent copyWith({
+    int? sequenceNumber,
+    int? outputIndex,
+    int? commandIndex,
+    String? delta,
+    Object? obfuscation = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
+  }) => ResponseShellCallCommandDeltaEvent(
+    sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+    outputIndex: outputIndex ?? this.outputIndex,
+    commandIndex: commandIndex ?? this.commandIndex,
+    delta: delta ?? this.delta,
+    obfuscation: identical(obfuscation, unsetCopyWithValue)
+        ? this.obfuscation
+        : obfuscation as String?,
+    agent: identical(agent, unsetCopyWithValue)
+        ? this.agent
+        : agent as AgentTag?,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ResponseShellCallCommandDeltaEvent &&
+          runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
+          outputIndex == other.outputIndex &&
+          commandIndex == other.commandIndex &&
+          delta == other.delta &&
+          obfuscation == other.obfuscation &&
+          agent == other.agent;
+
+  @override
+  int get hashCode => Object.hash(
+    sequenceNumber,
+    outputIndex,
+    commandIndex,
+    delta,
+    obfuscation,
+    agent,
+  );
+
+  @override
+  String toString() =>
+      'ResponseShellCallCommandDeltaEvent(sequenceNumber: $sequenceNumber, outputIndex: $outputIndex, commandIndex: $commandIndex, delta: [${delta.length} chars], obfuscation: ${obfuscation == null ? 'null' : '[${obfuscation!.length} chars]'}, agent: ${agent == null ? 'null' : '[${agent!.agentName.length} chars]'})';
+}
+
+/// Event emitted when a shell command has been fully generated.
+@immutable
+class ResponseShellCallCommandDoneEvent extends ResponseStreamEvent {
+  @override
+  String get type => 'response.shell_call_command.done';
+
+  /// The sequence number for ordering events.
+  @override
+  final int sequenceNumber;
+
+  /// The index of the shell call output item.
+  final int outputIndex;
+
+  /// The index of the shell command within the call.
+  final int commandIndex;
+
+  /// The generated shell command. This event does not execute it.
+  final String command;
+
+  /// The beta multi-agent owner, when the event includes one.
+  final AgentTag? agent;
+
+  /// Creates a [ResponseShellCallCommandDoneEvent].
+  const ResponseShellCallCommandDoneEvent({
+    required this.sequenceNumber,
+    required this.outputIndex,
+    required this.commandIndex,
+    required this.command,
+    this.agent,
+  });
+
+  /// Creates a [ResponseShellCallCommandDoneEvent] from JSON.
+  factory ResponseShellCallCommandDoneEvent.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    const context = 'ResponseShellCallCommandDoneEvent';
+    requireJsonType(json, 'response.shell_call_command.done', context);
+    return ResponseShellCallCommandDoneEvent(
+      sequenceNumber: requireJsonInt(
+        json['sequence_number'],
+        '$context.sequence_number',
+      ),
+      outputIndex: requireJsonInt(
+        json['output_index'],
+        '$context.output_index',
+      ),
+      commandIndex: requireJsonInt(
+        json['command_index'],
+        '$context.command_index',
+      ),
+      command: requireJsonString(json['command'], '$context.command'),
+      agent: _shellEventAgent(json, context),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'sequence_number': sequenceNumber,
+    'output_index': outputIndex,
+    'command_index': commandIndex,
+    'command': command,
+    if (agent != null) 'agent': agent!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  ///
+  /// Passing `null` for [agent] removes that optional key.
+  ResponseShellCallCommandDoneEvent copyWith({
+    int? sequenceNumber,
+    int? outputIndex,
+    int? commandIndex,
+    String? command,
+    Object? agent = unsetCopyWithValue,
+  }) => ResponseShellCallCommandDoneEvent(
+    sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+    outputIndex: outputIndex ?? this.outputIndex,
+    commandIndex: commandIndex ?? this.commandIndex,
+    command: command ?? this.command,
+    agent: identical(agent, unsetCopyWithValue)
+        ? this.agent
+        : agent as AgentTag?,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ResponseShellCallCommandDoneEvent &&
+          runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
+          outputIndex == other.outputIndex &&
+          commandIndex == other.commandIndex &&
+          command == other.command &&
+          agent == other.agent;
+
+  @override
+  int get hashCode =>
+      Object.hash(sequenceNumber, outputIndex, commandIndex, command, agent);
+
+  @override
+  String toString() =>
+      'ResponseShellCallCommandDoneEvent(sequenceNumber: $sequenceNumber, outputIndex: $outputIndex, commandIndex: $commandIndex, command: [${command.length} chars], agent: ${agent == null ? 'null' : '[${agent!.agentName.length} chars]'})';
+}
+
+/// Event emitted when stdout or stderr receives a fragment.
+@immutable
+class ResponseShellCallOutputContentDeltaEvent extends ResponseStreamEvent {
+  @override
+  String get type => 'response.shell_call_output_content.delta';
+
+  /// The sequence number for ordering events.
+  @override
+  final int sequenceNumber;
+
+  /// The index of the shell call output item.
+  final int outputIndex;
+
+  /// The index of the shell command within the call.
+  final int commandIndex;
+
+  /// The ID of the shell call output item.
+  final String itemId;
+
+  /// The stdout and stderr fragments, which may both be absent.
+  final ShellCallOutputDelta delta;
+
+  /// The beta multi-agent owner, when the event includes one.
+  final AgentTag? agent;
+
+  /// Creates a [ResponseShellCallOutputContentDeltaEvent].
+  const ResponseShellCallOutputContentDeltaEvent({
+    required this.sequenceNumber,
+    required this.outputIndex,
+    required this.commandIndex,
+    required this.itemId,
+    required this.delta,
+    this.agent,
+  });
+
+  /// Creates a [ResponseShellCallOutputContentDeltaEvent] from JSON.
+  factory ResponseShellCallOutputContentDeltaEvent.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    const context = 'ResponseShellCallOutputContentDeltaEvent';
+    requireJsonType(json, 'response.shell_call_output_content.delta', context);
+    return ResponseShellCallOutputContentDeltaEvent(
+      sequenceNumber: requireJsonInt(
+        json['sequence_number'],
+        '$context.sequence_number',
+      ),
+      outputIndex: requireJsonInt(
+        json['output_index'],
+        '$context.output_index',
+      ),
+      commandIndex: requireJsonInt(
+        json['command_index'],
+        '$context.command_index',
+      ),
+      itemId: requireJsonString(json['item_id'], '$context.item_id'),
+      delta: ShellCallOutputDelta.fromJson(
+        requireJsonObject(json['delta'], '$context.delta'),
+        context: '$context.delta',
+      ),
+      agent: _shellEventAgent(json, context),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'sequence_number': sequenceNumber,
+    'output_index': outputIndex,
+    'command_index': commandIndex,
+    'item_id': itemId,
+    'delta': delta.toJson(),
+    if (agent != null) 'agent': agent!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  ///
+  /// Passing `null` for [agent] removes that optional key.
+  ResponseShellCallOutputContentDeltaEvent copyWith({
+    int? sequenceNumber,
+    int? outputIndex,
+    int? commandIndex,
+    String? itemId,
+    ShellCallOutputDelta? delta,
+    Object? agent = unsetCopyWithValue,
+  }) => ResponseShellCallOutputContentDeltaEvent(
+    sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+    outputIndex: outputIndex ?? this.outputIndex,
+    commandIndex: commandIndex ?? this.commandIndex,
+    itemId: itemId ?? this.itemId,
+    delta: delta ?? this.delta,
+    agent: identical(agent, unsetCopyWithValue)
+        ? this.agent
+        : agent as AgentTag?,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ResponseShellCallOutputContentDeltaEvent &&
+          runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
+          outputIndex == other.outputIndex &&
+          commandIndex == other.commandIndex &&
+          itemId == other.itemId &&
+          delta == other.delta &&
+          agent == other.agent;
+
+  @override
+  int get hashCode => Object.hash(
+    sequenceNumber,
+    outputIndex,
+    commandIndex,
+    itemId,
+    delta,
+    agent,
+  );
+
+  @override
+  String toString() =>
+      'ResponseShellCallOutputContentDeltaEvent(sequenceNumber: $sequenceNumber, outputIndex: $outputIndex, commandIndex: $commandIndex, itemId: $itemId, delta: $delta, agent: ${agent == null ? 'null' : '[${agent!.agentName.length} chars]'})';
+}
+
+/// Event emitted when the output of a shell command is complete.
+@immutable
+class ResponseShellCallOutputContentDoneEvent extends ResponseStreamEvent {
+  @override
+  String get type => 'response.shell_call_output_content.done';
+
+  /// The sequence number for ordering events.
+  @override
+  final int sequenceNumber;
+
+  /// The index of the shell call output item.
+  final int outputIndex;
+
+  /// The index of the shell command within the call.
+  final int commandIndex;
+
+  /// The ID of the shell call output item.
+  final String itemId;
+
+  /// The complete output contents for this command.
+  final List<ShellCallOutputContent> output;
+
+  /// The beta multi-agent owner, when the event includes one.
+  final AgentTag? agent;
+
+  /// Creates a [ResponseShellCallOutputContentDoneEvent].
+  ///
+  /// Takes an unmodifiable snapshot of [output].
+  ResponseShellCallOutputContentDoneEvent({
+    required this.sequenceNumber,
+    required this.outputIndex,
+    required this.commandIndex,
+    required this.itemId,
+    required List<ShellCallOutputContent> output,
+    this.agent,
+  }) : output = List<ShellCallOutputContent>.unmodifiable(output);
+
+  /// Creates a [ResponseShellCallOutputContentDoneEvent] from JSON.
+  factory ResponseShellCallOutputContentDoneEvent.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    const context = 'ResponseShellCallOutputContentDoneEvent';
+    requireJsonType(json, 'response.shell_call_output_content.done', context);
+    final rawOutput = json['output'];
+    if (rawOutput is! List) {
+      throw const FormatException('$context.output: expected an array');
+    }
+    final output = <ShellCallOutputContent>[];
+    for (var i = 0; i < rawOutput.length; i++) {
+      output.add(
+        ShellCallOutputContent.fromJson(
+          requireJsonObject(rawOutput[i], '$context.output[$i]'),
+          context: '$context.output[$i]',
+        ),
+      );
+    }
+    return ResponseShellCallOutputContentDoneEvent(
+      sequenceNumber: requireJsonInt(
+        json['sequence_number'],
+        '$context.sequence_number',
+      ),
+      outputIndex: requireJsonInt(
+        json['output_index'],
+        '$context.output_index',
+      ),
+      commandIndex: requireJsonInt(
+        json['command_index'],
+        '$context.command_index',
+      ),
+      itemId: requireJsonString(json['item_id'], '$context.item_id'),
+      output: output,
+      agent: _shellEventAgent(json, context),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'sequence_number': sequenceNumber,
+    'output_index': outputIndex,
+    'command_index': commandIndex,
+    'item_id': itemId,
+    'output': output.map((content) => content.toJson()).toList(),
+    if (agent != null) 'agent': agent!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  ///
+  /// Passing `null` for [agent] removes that optional key.
+  ResponseShellCallOutputContentDoneEvent copyWith({
+    int? sequenceNumber,
+    int? outputIndex,
+    int? commandIndex,
+    String? itemId,
+    List<ShellCallOutputContent>? output,
+    Object? agent = unsetCopyWithValue,
+  }) => ResponseShellCallOutputContentDoneEvent(
+    sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+    outputIndex: outputIndex ?? this.outputIndex,
+    commandIndex: commandIndex ?? this.commandIndex,
+    itemId: itemId ?? this.itemId,
+    output: output ?? this.output,
+    agent: identical(agent, unsetCopyWithValue)
+        ? this.agent
+        : agent as AgentTag?,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ResponseShellCallOutputContentDoneEvent &&
+          runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
+          outputIndex == other.outputIndex &&
+          commandIndex == other.commandIndex &&
+          itemId == other.itemId &&
+          listsEqual(output, other.output) &&
+          agent == other.agent;
+
+  @override
+  int get hashCode => Object.hash(
+    sequenceNumber,
+    outputIndex,
+    commandIndex,
+    itemId,
+    listHash(output),
+    agent,
+  );
+
+  @override
+  String toString() =>
+      'ResponseShellCallOutputContentDoneEvent(sequenceNumber: $sequenceNumber, outputIndex: $outputIndex, commandIndex: $commandIndex, itemId: $itemId, output: ${output.length} chunks, agent: ${agent == null ? 'null' : '[${agent!.agentName.length} chars]'})';
 }
 
 // ============================================================

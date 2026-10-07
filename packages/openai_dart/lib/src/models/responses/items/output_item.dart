@@ -17,8 +17,10 @@ import '../multi_agent/agent_tag.dart';
 import '../multi_agent/multi_agent_action.dart';
 import '../tools/computer_action.dart';
 import '../tools/response_tool.dart';
+import '../tools/shell_tool_environment.dart';
 import '../tools/tool_call_caller.dart';
 import 'item.dart';
+import 'shell_call_helpers.dart';
 import 'web_search_action.dart';
 import 'web_search_result.dart';
 
@@ -1210,35 +1212,35 @@ class LocalShellExecAction {
       'LocalShellExecAction(command: $command, env: $env, timeoutMs: $timeoutMs, workingDirectory: $workingDirectory, user: $user)';
 }
 
-/// A shell call output item.
+/// A returned shell call with the exact resource contract.
 @immutable
 class ShellCallOutputItem extends OutputItem {
+  /// The fixed item discriminator.
+  String get type => 'shell_call';
+
   /// Unique identifier.
   final String id;
 
-  /// The agent that produced this item.
-  ///
-  /// Only populated on the beta multi-agent protocol
-  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  /// The beta agent that produced this item; provider null normalizes to omission.
   final AgentTag? agent;
 
-  /// The shell call ID.
+  /// The shell call identifier.
   final String callId;
 
-  /// Commands and execution options for this call.
+  /// Commands and execution limits returned by the service.
   final ShellCallAction action;
 
-  /// Item status.
+  /// The status of this shell item.
   final ItemStatus status;
 
-  /// The environment in which the shell call was executed.
-  ///
-  /// Can be a [LocalShellEnvironment], [ContainerReferenceEnvironment],
-  /// or `null`.
+  /// Returned environment. This required JSON key may be null.
   final ShellEnvironment? environment;
 
-  /// The execution context that produced this tool call.
+  /// Optional nullable execution context.
   final ToolCallCaller? caller;
+
+  /// Optional creator identifier. Explicit JSON null is invalid.
+  final String? createdBy;
 
   /// Creates a [ShellCallOutputItem].
   const ShellCallOutputItem({
@@ -1247,42 +1249,92 @@ class ShellCallOutputItem extends OutputItem {
     required this.callId,
     required this.action,
     required this.status,
-    this.environment,
+    required this.environment,
     this.caller,
+    this.createdBy,
   });
 
   /// Creates a [ShellCallOutputItem] from JSON.
   factory ShellCallOutputItem.fromJson(Map<String, dynamic> json) {
+    const context = 'ShellCallOutputItem';
+    requireJsonType(json, 'shell_call', context);
+    if (!json.containsKey('environment')) {
+      throw const FormatException('$context.environment: required key missing');
+    }
     return ShellCallOutputItem(
-      id: json['id'] as String,
-      agent: json['agent'] != null
-          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
-          : null,
-      callId: json['call_id'] as String,
-      action: ShellCallAction.fromJson(json['action'] as Map<String, dynamic>),
-      status: ItemStatus.fromJson(json['status'] as String),
-      environment: json['environment'] != null
-          ? ShellEnvironment.fromJson(
-              json['environment'] as Map<String, dynamic>,
-            )
-          : null,
-      caller: json['caller'] != null
-          ? ToolCallCaller.fromJson(json['caller'] as Map<String, dynamic>)
-          : null,
+      id: requireJsonString(json['id'], '$context.id'),
+      agent: shellJsonAgent(json, context),
+      callId: requireJsonString(json['call_id'], '$context.call_id'),
+      action: ShellCallAction.fromJson(
+        requireJsonObject(json['action'], '$context.action'),
+        context: '$context.action',
+      ),
+      status: ItemStatus.fromJson(
+        requireJsonString(json['status'], '$context.status'),
+      ),
+      environment: json['environment'] == null
+          ? null
+          : ShellEnvironment.fromJson(
+              requireJsonObject(json['environment'], '$context.environment'),
+              context: '$context.environment',
+            ),
+      caller: shellJsonCaller(json, context),
+      createdBy: optionalJsonString(json, 'created_by', context),
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'shell_call',
+    'type': type,
     'id': id,
     if (agent != null) 'agent': agent!.toJson(),
     'call_id': callId,
     'action': action.toJson(),
     'status': status.toJson(),
-    if (environment != null) 'environment': environment!.toJson(),
+    'environment': environment?.toJson(),
     if (caller != null) 'caller': caller!.toJson(),
+    if (createdBy != null) 'created_by': createdBy,
   };
+
+  /// Creates a copy; explicit null clears nullable metadata.
+  ShellCallOutputItem copyWith({
+    String? id,
+    Object? agent = unsetCopyWithValue,
+    String? callId,
+    ShellCallAction? action,
+    ItemStatus? status,
+    Object? environment = unsetCopyWithValue,
+    Object? caller = unsetCopyWithValue,
+    Object? createdBy = unsetCopyWithValue,
+  }) => ShellCallOutputItem(
+    id: id ?? this.id,
+    agent: identical(agent, unsetCopyWithValue)
+        ? this.agent
+        : agent as AgentTag?,
+    callId: callId ?? this.callId,
+    action: action ?? this.action,
+    status: status ?? this.status,
+    environment: identical(environment, unsetCopyWithValue)
+        ? this.environment
+        : environment as ShellEnvironment?,
+    caller: identical(caller, unsetCopyWithValue)
+        ? this.caller
+        : caller as ToolCallCaller?,
+    createdBy: identical(createdBy, unsetCopyWithValue)
+        ? this.createdBy
+        : createdBy as String?,
+  );
+
+  /// Converts to writable input, omitting returned-only creator metadata.
+  ShellCallInputItem toShellCallInputItem() => ShellCallInputItem(
+    id: id,
+    agent: agent,
+    callId: callId,
+    action: action.toInput(),
+    status: status,
+    environment: environment?.toInput(),
+    caller: caller,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -1295,52 +1347,94 @@ class ShellCallOutputItem extends OutputItem {
           action == other.action &&
           status == other.status &&
           environment == other.environment &&
-          caller == other.caller;
+          caller == other.caller &&
+          createdBy == other.createdBy;
 
   @override
-  int get hashCode =>
-      Object.hash(id, agent, callId, action, status, environment, caller);
+  int get hashCode => Object.hash(
+    id,
+    agent,
+    callId,
+    action,
+    status,
+    environment,
+    caller,
+    createdBy,
+  );
 
   @override
   String toString() =>
-      'ShellCallOutputItem(id: $id, agent: $agent, callId: $callId, status: $status, environment: $environment, caller: $caller)';
+      'ShellCallOutputItem(id: $id, agent: ${agent == null ? 'null' : '[${agent!.agentName.length} chars]'}, callId: $callId, action: $action, status: $status, environment: $environment, caller: ${caller == null ? 'null' : caller.runtimeType}, createdBy: ${createdBy == null ? 'null' : '[${createdBy!.length} chars]'})';
 }
 
-/// Shell call action payload.
+/// Commands and limits on a returned shell call.
+///
+/// Constructor lists are caller-owned for const compatibility. Parsed commands
+/// are unmodifiable. Both nullable limits are required JSON keys.
 @immutable
 class ShellCallAction {
-  /// Commands to execute.
+  /// Ordered commands to execute.
   final List<String> commands;
 
-  /// Optional timeout in milliseconds.
+  /// Required nullable wall-clock timeout in milliseconds.
   final int? timeoutMs;
 
-  /// Optional max output length.
+  /// Required nullable maximum output length.
   final int? maxOutputLength;
 
-  /// Creates a [ShellCallAction].
+  /// Creates a [ShellCallAction]. Pass null explicitly for unset limits.
   const ShellCallAction({
     required this.commands,
-    this.timeoutMs,
-    this.maxOutputLength,
+    required this.timeoutMs,
+    required this.maxOutputLength,
   });
 
   /// Creates a [ShellCallAction] from JSON.
-  factory ShellCallAction.fromJson(Map<String, dynamic> json) {
-    return ShellCallAction(
-      commands: (json['commands'] as List<dynamic>).cast<String>(),
-      timeoutMs: json['timeout_ms'] as int?,
-      maxOutputLength: json['max_output_length'] as int?,
-    );
-  }
+  factory ShellCallAction.fromJson(
+    Map<String, dynamic> json, {
+    String context = 'ShellCallAction',
+  }) => ShellCallAction(
+    commands: shellJsonList(
+      json['commands'],
+      '$context.commands',
+      requireJsonString,
+    ),
+    timeoutMs: shellRequiredNullableInt(json, 'timeout_ms', context),
+    maxOutputLength: shellRequiredNullableInt(
+      json,
+      'max_output_length',
+      context,
+    ),
+  );
 
-  /// Converts to JSON.
+  /// Converts to JSON, retaining both required nullable keys.
   Map<String, dynamic> toJson() => {
     'commands': commands,
-    if (timeoutMs != null) 'timeout_ms': timeoutMs,
-    if (maxOutputLength != null) 'max_output_length': maxOutputLength,
+    'timeout_ms': timeoutMs,
+    'max_output_length': maxOutputLength,
   };
 
+  /// Converts to the writable optional-limit action shape.
+  ShellCallActionInput toInput() => ShellCallActionInput(
+    commands: commands,
+    timeoutMs: timeoutMs,
+    maxOutputLength: maxOutputLength,
+  );
+
+  /// Creates a copy; explicit null clears either nullable limit.
+  ShellCallAction copyWith({
+    List<String>? commands,
+    Object? timeoutMs = unsetCopyWithValue,
+    Object? maxOutputLength = unsetCopyWithValue,
+  }) => ShellCallAction(
+    commands: commands ?? this.commands,
+    timeoutMs: identical(timeoutMs, unsetCopyWithValue)
+        ? this.timeoutMs
+        : timeoutMs as int?,
+    maxOutputLength: identical(maxOutputLength, unsetCopyWithValue)
+        ? this.maxOutputLength
+        : maxOutputLength as int?,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1349,31 +1443,290 @@ class ShellCallAction {
           listsEqual(commands, other.commands) &&
           timeoutMs == other.timeoutMs &&
           maxOutputLength == other.maxOutputLength;
-
   @override
   int get hashCode =>
       Object.hash(Object.hashAll(commands), timeoutMs, maxOutputLength);
-
   @override
   String toString() =>
-      'ShellCallAction(commands: $commands, timeoutMs: $timeoutMs, maxOutputLength: $maxOutputLength)';
+      'ShellCallAction(commands: ${commands.length} commands, timeoutMs: $timeoutMs, maxOutputLength: $maxOutputLength)';
 }
 
-/// The execution environment for a shell call.
-///
-/// See [LocalShellEnvironment] and [ContainerReferenceEnvironment].
+/// Returned shell environment: [LocalShellEnvironment],
+/// [ContainerReferenceEnvironment], or [UnknownShellEnvironment].
 sealed class ShellEnvironment {
   /// Creates a [ShellEnvironment].
   const ShellEnvironment();
 
+  /// A local returned environment, which has no skills.
+  const factory ShellEnvironment.local() = LocalShellEnvironment;
+
+  /// An existing container.
+  const factory ShellEnvironment.containerReference({
+    required String containerId,
+  }) = ContainerReferenceEnvironment;
+
   /// Creates a [ShellEnvironment] from JSON.
-  factory ShellEnvironment.fromJson(Map<String, dynamic> json) {
-    return switch (json['type'] as String) {
-      'local' => const LocalShellEnvironment(),
-      'container_reference' => ContainerReferenceEnvironment.fromJson(json),
-      final type => throw FormatException(
-        'Unknown ShellEnvironment type: $type',
+  factory ShellEnvironment.fromJson(
+    Map<String, dynamic> json, {
+    String context = 'ShellEnvironment',
+  }) {
+    final type = requireJsonString(json['type'], '$context.type');
+    return switch (type) {
+      'local' => LocalShellEnvironment.fromJson(json, context: context),
+      'container_reference' => ContainerReferenceEnvironment.fromJson(
+        json,
+        context: context,
       ),
+      'container_auto' => throw FormatException(
+        '$context.type: container_auto is not a returned shell environment',
+      ),
+      _ => UnknownShellEnvironment(type: type, rawJson: json),
+    };
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson();
+
+  /// Converts to the writable local/reference request environment shape.
+  ShellToolEnvironment toInput();
+}
+
+/// A returned local environment; local skills belong only to request shapes.
+@immutable
+class LocalShellEnvironment extends ShellEnvironment {
+  /// The fixed discriminator.
+  String get type => 'local';
+
+  /// Creates a [LocalShellEnvironment].
+  const LocalShellEnvironment();
+
+  /// Creates a [LocalShellEnvironment] from JSON.
+  factory LocalShellEnvironment.fromJson(
+    Map<String, dynamic> json, {
+    String context = 'LocalShellEnvironment',
+  }) {
+    requireJsonType(json, 'local', context);
+    return const LocalShellEnvironment();
+  }
+  @override
+  Map<String, dynamic> toJson() => {'type': type};
+  @override
+  LocalShellToolEnvironment toInput() => LocalShellToolEnvironment();
+
+  /// Creates a copy.
+  LocalShellEnvironment copyWith() => const LocalShellEnvironment();
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LocalShellEnvironment && runtimeType == other.runtimeType;
+  @override
+  int get hashCode => runtimeType.hashCode;
+  @override
+  String toString() => 'LocalShellEnvironment()';
+}
+
+/// A returned reference to an existing container.
+@immutable
+class ContainerReferenceEnvironment extends ShellEnvironment {
+  /// The fixed discriminator.
+  String get type => 'container_reference';
+
+  /// The container identifier.
+  final String containerId;
+
+  /// Creates a [ContainerReferenceEnvironment].
+  const ContainerReferenceEnvironment({required this.containerId});
+
+  /// Creates a [ContainerReferenceEnvironment] from JSON.
+  factory ContainerReferenceEnvironment.fromJson(
+    Map<String, dynamic> json, {
+    String context = 'ContainerReferenceEnvironment',
+  }) {
+    requireJsonType(json, 'container_reference', context);
+    return ContainerReferenceEnvironment(
+      containerId: requireJsonString(
+        json['container_id'],
+        '$context.container_id',
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson() => {'type': type, 'container_id': containerId};
+  @override
+  ContainerReferenceShellToolEnvironment toInput() =>
+      ContainerReferenceShellToolEnvironment(containerId: containerId);
+
+  /// Creates a copy with a replacement container ID.
+  ContainerReferenceEnvironment copyWith({String? containerId}) =>
+      ContainerReferenceEnvironment(
+        containerId: containerId ?? this.containerId,
+      );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ContainerReferenceEnvironment &&
+          runtimeType == other.runtimeType &&
+          containerId == other.containerId;
+  @override
+  int get hashCode => containerId.hashCode;
+  @override
+  String toString() =>
+      'ContainerReferenceEnvironment(containerId: $containerId)';
+}
+
+/// A future returned shell environment with immutable JSON metadata.
+@immutable
+class UnknownShellEnvironment extends ShellEnvironment {
+  /// The future discriminator.
+  final String type;
+
+  /// A recursively unmodifiable snapshot including the current discriminator.
+  final Map<String, dynamic> rawJson;
+
+  /// Creates an [UnknownShellEnvironment].
+  UnknownShellEnvironment({
+    required this.type,
+    required Map<String, dynamic> rawJson,
+  }) : rawJson = freezeJsonObject({...rawJson, 'type': type}) {
+    if (type == 'container_auto') {
+      throw ArgumentError.value(
+        type,
+        'type',
+        'container_auto is not a returned shell environment',
+      );
+    }
+  }
+  @override
+  Map<String, dynamic> toJson() => {...rawJson, 'type': type};
+  @override
+  ShellToolEnvironment toInput() => ShellToolEnvironment.fromJson(toJson());
+
+  /// Creates a copy with replaced metadata or discriminator.
+  UnknownShellEnvironment copyWith({
+    String? type,
+    Map<String, dynamic>? rawJson,
+  }) => UnknownShellEnvironment(
+    type: type ?? this.type,
+    rawJson: rawJson ?? this.rawJson,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownShellEnvironment &&
+          type == other.type &&
+          mapsDeepEqual(rawJson, other.rawJson);
+  @override
+  int get hashCode => Object.hash(type, mapDeepHashCode(rawJson));
+  @override
+  String toString() =>
+      'UnknownShellEnvironment(type: $type, rawJson: ${rawJson.length} keys)';
+}
+
+/// A single returned shell output chunk.
+@immutable
+class ShellCallOutputContent {
+  /// Captured standard output.
+  final String stdout;
+
+  /// Captured standard error.
+  final String stderr;
+
+  /// Exit or timeout outcome.
+  final ShellCallOutcome outcome;
+
+  /// Optional creator identifier; explicit JSON null is invalid.
+  final String? createdBy;
+
+  /// Creates a [ShellCallOutputContent].
+  const ShellCallOutputContent({
+    required this.stdout,
+    required this.stderr,
+    required this.outcome,
+    this.createdBy,
+  });
+
+  /// Creates a [ShellCallOutputContent] from JSON.
+  factory ShellCallOutputContent.fromJson(
+    Map<String, dynamic> json, {
+    String context = 'ShellCallOutputContent',
+  }) => ShellCallOutputContent(
+    stdout: requireJsonString(json['stdout'], '$context.stdout'),
+    stderr: requireJsonString(json['stderr'], '$context.stderr'),
+    outcome: ShellCallOutcome.fromJson(
+      requireJsonObject(json['outcome'], '$context.outcome'),
+      context: '$context.outcome',
+    ),
+    createdBy: optionalJsonString(json, 'created_by', context),
+  );
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    'stdout': stdout,
+    'stderr': stderr,
+    'outcome': outcome.toJson(),
+    if (createdBy != null) 'created_by': createdBy,
+  };
+
+  /// Converts to writable content, omitting returned-only creator metadata.
+  ShellCallOutputContentInput toInput() => ShellCallOutputContentInput(
+    stdout: stdout,
+    stderr: stderr,
+    outcome: outcome,
+  );
+
+  /// Creates a copy; explicit null clears the creator identifier.
+  ShellCallOutputContent copyWith({
+    String? stdout,
+    String? stderr,
+    ShellCallOutcome? outcome,
+    Object? createdBy = unsetCopyWithValue,
+  }) => ShellCallOutputContent(
+    stdout: stdout ?? this.stdout,
+    stderr: stderr ?? this.stderr,
+    outcome: outcome ?? this.outcome,
+    createdBy: identical(createdBy, unsetCopyWithValue)
+        ? this.createdBy
+        : createdBy as String?,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ShellCallOutputContent &&
+          runtimeType == other.runtimeType &&
+          stdout == other.stdout &&
+          stderr == other.stderr &&
+          outcome == other.outcome &&
+          createdBy == other.createdBy;
+  @override
+  int get hashCode => Object.hash(stdout, stderr, outcome, createdBy);
+  @override
+  String toString() =>
+      'ShellCallOutputContent(stdout: ${stdout.length} chars, stderr: ${stderr.length} chars, outcome: $outcome, createdBy: ${createdBy == null ? 'null' : '[${createdBy!.length} chars]'})';
+}
+
+/// Shell outcome: [ShellCallExitOutcome], [ShellCallTimeoutOutcome],
+/// or [UnknownShellCallOutcome].
+sealed class ShellCallOutcome {
+  /// Creates a [ShellCallOutcome].
+  const ShellCallOutcome();
+
+  /// A normal exit with the process code.
+  const factory ShellCallOutcome.exit({required int exitCode}) =
+      ShellCallExitOutcome;
+
+  /// A timeout.
+  const factory ShellCallOutcome.timeout() = ShellCallTimeoutOutcome;
+
+  /// Creates a [ShellCallOutcome] from JSON.
+  factory ShellCallOutcome.fromJson(
+    Map<String, dynamic> json, {
+    String context = 'ShellCallOutcome',
+  }) {
+    final type = requireJsonString(json['type'], '$context.type');
+    return switch (type) {
+      'exit' => ShellCallExitOutcome.fromJson(json, context: context),
+      'timeout' => ShellCallTimeoutOutcome.fromJson(json, context: context),
+      _ => UnknownShellCallOutcome(type: type, rawJson: json),
     };
   }
 
@@ -1381,141 +1734,242 @@ sealed class ShellEnvironment {
   Map<String, dynamic> toJson();
 }
 
-/// A local environment for shell execution.
+/// A completed command with its required exit code.
 @immutable
-class LocalShellEnvironment extends ShellEnvironment {
-  /// Creates a [LocalShellEnvironment].
-  const LocalShellEnvironment();
+class ShellCallExitOutcome extends ShellCallOutcome {
+  /// The fixed discriminator.
+  String get type => 'exit';
 
-  /// Creates a [LocalShellEnvironment] from JSON.
-  // ignore: avoid_unused_constructor_parameters
-  factory LocalShellEnvironment.fromJson(Map<String, dynamic> json) =>
-      const LocalShellEnvironment();
+  /// Process exit code.
+  final int exitCode;
 
-  @override
-  Map<String, dynamic> toJson() => const {'type': 'local'};
+  /// Creates a [ShellCallExitOutcome].
+  const ShellCallExitOutcome({required this.exitCode});
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) || other is LocalShellEnvironment;
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  String toString() => 'LocalShellEnvironment()';
-}
-
-/// A container reference environment for shell execution.
-@immutable
-class ContainerReferenceEnvironment extends ShellEnvironment {
-  /// The container ID.
-  final String containerId;
-
-  /// Creates a [ContainerReferenceEnvironment].
-  const ContainerReferenceEnvironment({required this.containerId});
-
-  /// Creates a [ContainerReferenceEnvironment] from JSON.
-  factory ContainerReferenceEnvironment.fromJson(Map<String, dynamic> json) {
-    return ContainerReferenceEnvironment(
-      containerId: json['container_id'] as String,
+  /// Creates a [ShellCallExitOutcome] from JSON.
+  factory ShellCallExitOutcome.fromJson(
+    Map<String, dynamic> json, {
+    String context = 'ShellCallExitOutcome',
+  }) {
+    requireJsonType(json, 'exit', context);
+    return ShellCallExitOutcome(
+      exitCode: requireJsonInt(json['exit_code'], '$context.exit_code'),
     );
   }
-
   @override
-  Map<String, dynamic> toJson() => {
-    'type': 'container_reference',
-    'container_id': containerId,
-  };
+  Map<String, dynamic> toJson() => {'type': type, 'exit_code': exitCode};
 
+  /// Creates a copy with a replacement exit code.
+  ShellCallExitOutcome copyWith({int? exitCode}) =>
+      ShellCallExitOutcome(exitCode: exitCode ?? this.exitCode);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ContainerReferenceEnvironment &&
+      other is ShellCallExitOutcome &&
           runtimeType == other.runtimeType &&
-          containerId == other.containerId;
-
+          exitCode == other.exitCode;
   @override
-  int get hashCode => containerId.hashCode;
-
+  int get hashCode => exitCode.hashCode;
   @override
-  String toString() =>
-      'ContainerReferenceEnvironment(containerId: $containerId)';
+  String toString() => 'ShellCallExitOutcome(exitCode: $exitCode)';
 }
 
-/// A shell call output result item.
+/// A command exceeding its configured time limit.
+@immutable
+class ShellCallTimeoutOutcome extends ShellCallOutcome {
+  /// The fixed discriminator.
+  String get type => 'timeout';
+
+  /// Creates a [ShellCallTimeoutOutcome].
+  const ShellCallTimeoutOutcome();
+
+  /// Creates a [ShellCallTimeoutOutcome] from JSON.
+  factory ShellCallTimeoutOutcome.fromJson(
+    Map<String, dynamic> json, {
+    String context = 'ShellCallTimeoutOutcome',
+  }) {
+    requireJsonType(json, 'timeout', context);
+    return const ShellCallTimeoutOutcome();
+  }
+  @override
+  Map<String, dynamic> toJson() => {'type': type};
+
+  /// Creates a copy.
+  ShellCallTimeoutOutcome copyWith() => const ShellCallTimeoutOutcome();
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ShellCallTimeoutOutcome && runtimeType == other.runtimeType;
+  @override
+  int get hashCode => runtimeType.hashCode;
+  @override
+  String toString() => 'ShellCallTimeoutOutcome()';
+}
+
+/// A future shell outcome with recursively immutable raw metadata.
+@immutable
+class UnknownShellCallOutcome extends ShellCallOutcome {
+  /// The future discriminator.
+  final String type;
+
+  /// A recursively unmodifiable JSON snapshot including the discriminator.
+  final Map<String, dynamic> rawJson;
+
+  /// Creates an [UnknownShellCallOutcome].
+  UnknownShellCallOutcome({
+    required this.type,
+    required Map<String, dynamic> rawJson,
+  }) : rawJson = freezeJsonObject({...rawJson, 'type': type});
+  @override
+  Map<String, dynamic> toJson() => {...rawJson, 'type': type};
+
+  /// Creates a copy with replaced discriminator or metadata.
+  UnknownShellCallOutcome copyWith({
+    String? type,
+    Map<String, dynamic>? rawJson,
+  }) => UnknownShellCallOutcome(
+    type: type ?? this.type,
+    rawJson: rawJson ?? this.rawJson,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownShellCallOutcome &&
+          type == other.type &&
+          mapsDeepEqual(rawJson, other.rawJson);
+  @override
+  int get hashCode => Object.hash(type, mapDeepHashCode(rawJson));
+  @override
+  String toString() =>
+      'UnknownShellCallOutcome(type: $type, rawJson: ${rawJson.length} keys)';
+}
+
+/// A returned shell result with the exact resource contract.
 @immutable
 class ShellCallOutputResultItem extends OutputItem {
+  /// The fixed item discriminator.
+  String get type => 'shell_call_output';
+
   /// Unique identifier.
   final String id;
 
-  /// The agent that produced this item.
-  ///
-  /// Only populated on the beta multi-agent protocol
-  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  /// The beta agent that produced this item; provider null normalizes to omission.
   final AgentTag? agent;
 
-  /// The shell call ID.
+  /// The shell call identifier.
   final String callId;
 
-  /// The status of the shell call output.
-  final ItemStatus? status;
+  /// The status of this shell item.
+  final ItemStatus status;
 
-  /// Structured output chunks from the call.
+  /// Returned output chunks. Constructor lists are caller-owned for const compatibility; parsed lists are unmodifiable.
   final List<ShellCallOutputContent> output;
 
-  /// The max output length to preserve for follow-up turns.
+  /// Output limit. This required JSON key may be null.
   final int? maxOutputLength;
 
-  /// The execution context that produced the tool call this output responds
-  /// to.
+  /// Optional nullable execution context.
   final ToolCallCaller? caller;
+
+  /// Optional creator identifier. Explicit JSON null is invalid.
+  final String? createdBy;
 
   /// Creates a [ShellCallOutputResultItem].
   const ShellCallOutputResultItem({
     required this.id,
     this.agent,
     required this.callId,
-    this.status,
+    required this.status,
     required this.output,
     required this.maxOutputLength,
     this.caller,
+    this.createdBy,
   });
 
   /// Creates a [ShellCallOutputResultItem] from JSON.
   factory ShellCallOutputResultItem.fromJson(Map<String, dynamic> json) {
+    const context = 'ShellCallOutputResultItem';
+    requireJsonType(json, 'shell_call_output', context);
     return ShellCallOutputResultItem(
-      id: json['id'] as String,
-      agent: json['agent'] != null
-          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
-          : null,
-      callId: json['call_id'] as String,
-      status: json['status'] != null
-          ? ItemStatus.fromJson(json['status'] as String)
-          : null,
-      output: (json['output'] as List<dynamic>)
-          .map(
-            (e) => ShellCallOutputContent.fromJson(e as Map<String, dynamic>),
-          )
-          .toList(),
-      maxOutputLength: json['max_output_length'] as int?,
-      caller: json['caller'] != null
-          ? ToolCallCaller.fromJson(json['caller'] as Map<String, dynamic>)
-          : null,
+      id: requireJsonString(json['id'], '$context.id'),
+      agent: shellJsonAgent(json, context),
+      callId: requireJsonString(json['call_id'], '$context.call_id'),
+      status: ItemStatus.fromJson(
+        requireJsonString(json['status'], '$context.status'),
+      ),
+      output: shellJsonList(
+        json['output'],
+        '$context.output',
+        (value, path) => ShellCallOutputContent.fromJson(
+          requireJsonObject(value, path),
+          context: path,
+        ),
+      ),
+      maxOutputLength: shellRequiredNullableInt(
+        json,
+        'max_output_length',
+        context,
+      ),
+      caller: shellJsonCaller(json, context),
+      createdBy: optionalJsonString(json, 'created_by', context),
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'shell_call_output',
+    'type': type,
     'id': id,
     if (agent != null) 'agent': agent!.toJson(),
     'call_id': callId,
-    if (status != null) 'status': status!.toJson(),
-    'output': output.map((e) => e.toJson()).toList(),
-    if (maxOutputLength != null) 'max_output_length': maxOutputLength,
+    'status': status.toJson(),
+    'output': output.map((chunk) => chunk.toJson()).toList(),
+    'max_output_length': maxOutputLength,
     if (caller != null) 'caller': caller!.toJson(),
+    if (createdBy != null) 'created_by': createdBy,
   };
+
+  /// Creates a copy; explicit null clears nullable metadata.
+  ShellCallOutputResultItem copyWith({
+    String? id,
+    Object? agent = unsetCopyWithValue,
+    String? callId,
+    ItemStatus? status,
+    List<ShellCallOutputContent>? output,
+    Object? maxOutputLength = unsetCopyWithValue,
+    Object? caller = unsetCopyWithValue,
+    Object? createdBy = unsetCopyWithValue,
+  }) => ShellCallOutputResultItem(
+    id: id ?? this.id,
+    agent: identical(agent, unsetCopyWithValue)
+        ? this.agent
+        : agent as AgentTag?,
+    callId: callId ?? this.callId,
+    status: status ?? this.status,
+    output: output ?? this.output,
+    maxOutputLength: identical(maxOutputLength, unsetCopyWithValue)
+        ? this.maxOutputLength
+        : maxOutputLength as int?,
+    caller: identical(caller, unsetCopyWithValue)
+        ? this.caller
+        : caller as ToolCallCaller?,
+    createdBy: identical(createdBy, unsetCopyWithValue)
+        ? this.createdBy
+        : createdBy as String?,
+  );
+
+  /// Converts to writable input, omitting returned-only creator metadata.
+  ShellCallOutputInputItem toShellCallOutputInputItem() =>
+      ShellCallOutputInputItem(
+        id: id,
+        agent: agent,
+        callId: callId,
+        status: status,
+        output: List<ShellCallOutputContentInput>.unmodifiable(
+          output.map((chunk) => chunk.toInput()),
+        ),
+        maxOutputLength: maxOutputLength,
+        caller: caller,
+      );
 
   @override
   bool operator ==(Object other) =>
@@ -1528,7 +1982,8 @@ class ShellCallOutputResultItem extends OutputItem {
           status == other.status &&
           listsEqual(output, other.output) &&
           maxOutputLength == other.maxOutputLength &&
-          caller == other.caller;
+          caller == other.caller &&
+          createdBy == other.createdBy;
 
   @override
   int get hashCode => Object.hash(
@@ -1539,143 +1994,12 @@ class ShellCallOutputResultItem extends OutputItem {
     Object.hashAll(output),
     maxOutputLength,
     caller,
+    createdBy,
   );
 
   @override
   String toString() =>
-      'ShellCallOutputResultItem(id: $id, agent: $agent, callId: $callId, status: $status, output: ${output.length} chunks, caller: $caller)';
-}
-
-/// A single shell output chunk.
-@immutable
-class ShellCallOutputContent {
-  /// Captured stdout.
-  final String stdout;
-
-  /// Captured stderr.
-  final String stderr;
-
-  /// Execution outcome for this chunk.
-  final ShellCallOutcome outcome;
-
-  /// Creates a [ShellCallOutputContent].
-  const ShellCallOutputContent({
-    required this.stdout,
-    required this.stderr,
-    required this.outcome,
-  });
-
-  /// Creates a [ShellCallOutputContent] from JSON.
-  factory ShellCallOutputContent.fromJson(Map<String, dynamic> json) {
-    return ShellCallOutputContent(
-      stdout: json['stdout'] as String,
-      stderr: json['stderr'] as String,
-      outcome: ShellCallOutcome.fromJson(
-        json['outcome'] as Map<String, dynamic>,
-      ),
-    );
-  }
-
-  /// Converts to JSON.
-  Map<String, dynamic> toJson() => {
-    'stdout': stdout,
-    'stderr': stderr,
-    'outcome': outcome.toJson(),
-  };
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ShellCallOutputContent &&
-          runtimeType == other.runtimeType &&
-          stdout == other.stdout &&
-          stderr == other.stderr &&
-          outcome == other.outcome;
-
-  @override
-  int get hashCode => Object.hash(stdout, stderr, outcome);
-
-  @override
-  String toString() =>
-      'ShellCallOutputContent(stdout: ${stdout.length} chars, stderr: ${stderr.length} chars, outcome: $outcome)';
-}
-
-/// Execution outcome for a shell call output chunk.
-sealed class ShellCallOutcome {
-  /// Creates a [ShellCallOutcome].
-  const ShellCallOutcome();
-
-  /// Creates a [ShellCallOutcome] from JSON.
-  factory ShellCallOutcome.fromJson(Map<String, dynamic> json) {
-    final type = json['type'] as String;
-    return switch (type) {
-      'exit' => ShellCallExitOutcome.fromJson(json),
-      'timeout' => ShellCallTimeoutOutcome.fromJson(json),
-      _ => throw FormatException('Unknown ShellCallOutcome type: $type'),
-    };
-  }
-
-  /// Converts to JSON.
-  Map<String, dynamic> toJson();
-}
-
-/// Normal shell call completion with an exit code.
-@immutable
-class ShellCallExitOutcome extends ShellCallOutcome {
-  /// Exit code of the command.
-  final int exitCode;
-
-  /// Creates a [ShellCallExitOutcome].
-  const ShellCallExitOutcome({required this.exitCode});
-
-  /// Creates a [ShellCallExitOutcome] from JSON.
-  factory ShellCallExitOutcome.fromJson(Map<String, dynamic> json) {
-    return ShellCallExitOutcome(exitCode: json['exit_code'] as int);
-  }
-
-  @override
-  Map<String, dynamic> toJson() => {'type': 'exit', 'exit_code': exitCode};
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ShellCallExitOutcome &&
-          runtimeType == other.runtimeType &&
-          exitCode == other.exitCode;
-
-  @override
-  int get hashCode => exitCode.hashCode;
-
-  @override
-  String toString() => 'ShellCallExitOutcome(exitCode: $exitCode)';
-}
-
-/// Shell call timeout outcome.
-@immutable
-class ShellCallTimeoutOutcome extends ShellCallOutcome {
-  /// Creates a [ShellCallTimeoutOutcome].
-  const ShellCallTimeoutOutcome();
-
-  /// Creates a [ShellCallTimeoutOutcome] from JSON.
-  factory ShellCallTimeoutOutcome.fromJson(Map<String, dynamic> json) {
-    if ((json['type'] as String?) != 'timeout') {
-      throw const FormatException('Invalid type for ShellCallTimeoutOutcome');
-    }
-    return const ShellCallTimeoutOutcome();
-  }
-
-  @override
-  Map<String, dynamic> toJson() => const {'type': 'timeout'};
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) || other is ShellCallTimeoutOutcome;
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  String toString() => 'ShellCallTimeoutOutcome()';
+      'ShellCallOutputResultItem(id: $id, agent: ${agent == null ? 'null' : '[${agent!.agentName.length} chars]'}, callId: $callId, status: $status, output: ${output.length} chunks, maxOutputLength: $maxOutputLength, caller: ${caller == null ? 'null' : caller.runtimeType}, createdBy: ${createdBy == null ? 'null' : '[${createdBy!.length} chars]'})';
 }
 
 /// A local shell call output result item.

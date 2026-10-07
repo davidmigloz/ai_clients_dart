@@ -3229,6 +3229,573 @@
       "schema": null,
       "parent": "ResponseToolChoice",
       "note": "Canonical choice enum only includes preview values; GA web_search force choice follows guide. Explicit previews remain exact."
+    },
+    "FunctionShellToolParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "FunctionShellToolParam",
+      "parent": "ResponseTool"
+    },
+    "ShellTool:ContainerAutoParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ContainerAutoShellToolEnvironment",
+      "file": "lib/src/models/responses/tools/shell_tool_environment.dart",
+      "schema": "ContainerAutoParam",
+      "parent": "ShellToolEnvironment"
+    },
+    "ShellTool:LocalEnvironmentParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LocalShellToolEnvironment",
+      "file": "lib/src/models/responses/tools/shell_tool_environment.dart",
+      "schema": "LocalEnvironmentParam",
+      "parent": "ShellToolEnvironment"
+    },
+    "ShellTool:ContainerReferenceParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ContainerReferenceShellToolEnvironment",
+      "file": "lib/src/models/responses/tools/shell_tool_environment.dart",
+      "schema": "ContainerReferenceParam",
+      "parent": "ShellToolEnvironment"
+    },
+    "LocalSkillParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ShellLocalSkill",
+      "file": "lib/src/models/responses/tools/shell_tool_environment.dart",
+      "schema": "LocalSkillParam"
+    },
+    "FunctionShellCallItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellCallInputItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "FunctionShellCallItemParam",
+      "parent": "Item"
+    },
+    "FunctionShellCallOutputItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellCallOutputInputItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "FunctionShellCallOutputItemParam",
+      "parent": "Item"
+    },
+    "FunctionShellCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellCallOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "FunctionShellCall",
+      "parent": "OutputItem"
+    },
+    "FunctionShellCallOutput": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellCallOutputResultItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "FunctionShellCallOutput",
+      "parent": "OutputItem"
+    },
+    "ShellResource:FunctionShellCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellCallResourceItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "FunctionShellCall",
+      "parent": "Item"
+    },
+    "ShellResource:FunctionShellCallOutput": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellCallOutputResourceItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "FunctionShellCallOutput",
+      "parent": "Item"
+    },
+    "ShellConversation:FunctionShellCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ConversationShellCallItem",
+      "file": "lib/src/models/conversations/conversation_item.dart",
+      "schema": "FunctionShellCall",
+      "parent": "ConversationItem"
+    },
+    "ShellConversation:FunctionShellCallOutput": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ConversationShellCallOutputItem",
+      "file": "lib/src/models/conversations/conversation_item.dart",
+      "schema": "FunctionShellCallOutput",
+      "parent": "ConversationItem"
+    },
+    "FunctionShellAction": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ShellCallAction",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "FunctionShellAction"
+    },
+    "FunctionShellActionParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ShellCallActionInput",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "FunctionShellActionParam"
+    },
+    "FunctionShellCallOutputContent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ShellCallOutputContent",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "FunctionShellCallOutputContent"
+    },
+    "FunctionShellCallOutputContentParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ShellCallOutputContentInput",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "FunctionShellCallOutputContentParam"
+    },
+    "ShellReturned:LocalEnvironmentResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LocalShellEnvironment",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "LocalEnvironmentResource",
+      "parent": "ShellEnvironment"
+    },
+    "ShellReturned:ContainerReferenceResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ContainerReferenceEnvironment",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "ContainerReferenceResource",
+      "parent": "ShellEnvironment"
+    },
+    "FunctionShellCallOutputExitOutcome": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellCallExitOutcome",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "FunctionShellCallOutputExitOutcome",
+      "parent": "ShellCallOutcome"
+    },
+    "FunctionShellCallOutputExitOutcomeParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellCallExitOutcome",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "FunctionShellCallOutputExitOutcomeParam",
+      "parent": "ShellCallOutcome"
+    },
+    "FunctionShellCallOutputTimeoutOutcome": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellCallTimeoutOutcome",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "FunctionShellCallOutputTimeoutOutcome",
+      "parent": "ShellCallOutcome"
+    },
+    "FunctionShellCallOutputTimeoutOutcomeParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellCallTimeoutOutcome",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "FunctionShellCallOutputTimeoutOutcomeParam",
+      "parent": "ShellCallOutcome"
+    },
+    "FunctionShellCallItemStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ItemStatus",
+      "file": "lib/src/models/responses/config/item_status.dart",
+      "schema": "FunctionShellCallItemStatus",
+      "note": "Shell wire values match the shared three-state item status; unknown fallback remains."
+    },
+    "FunctionShellCallStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ItemStatus",
+      "file": "lib/src/models/responses/config/item_status.dart",
+      "schema": "FunctionShellCallStatus",
+      "note": "Shell wire values match the shared three-state item status; unknown fallback remains."
+    },
+    "FunctionShellCallOutputStatusEnum": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ItemStatus",
+      "file": "lib/src/models/responses/config/item_status.dart",
+      "schema": "FunctionShellCallOutputStatusEnum",
+      "note": "Shell wire values match the shared three-state item status; unknown fallback remains."
+    },
+    "SpecificFunctionShellParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponseToolChoiceShell",
+      "file": "lib/src/models/responses/tools/response_tool_choice.dart",
+      "schema": "SpecificFunctionShellParam",
+      "parent": "ResponseToolChoice"
+    },
+    "ResponseShellCallCommandAddedStreamingEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponseShellCallCommandAddedEvent",
+      "file": "lib/src/models/responses/streaming/response_stream_event.dart",
+      "schema": "ResponseShellCallCommandAddedStreamingEvent",
+      "parent": "ResponseStreamEvent"
+    },
+    "ResponseShellCallCommandDeltaStreamingEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponseShellCallCommandDeltaEvent",
+      "file": "lib/src/models/responses/streaming/response_stream_event.dart",
+      "schema": "ResponseShellCallCommandDeltaStreamingEvent",
+      "parent": "ResponseStreamEvent"
+    },
+    "ResponseShellCallCommandDoneStreamingEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponseShellCallCommandDoneEvent",
+      "file": "lib/src/models/responses/streaming/response_stream_event.dart",
+      "schema": "ResponseShellCallCommandDoneStreamingEvent",
+      "parent": "ResponseStreamEvent"
+    },
+    "ResponseShellCallOutputContentDeltaStreamingEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponseShellCallOutputContentDeltaEvent",
+      "file": "lib/src/models/responses/streaming/response_stream_event.dart",
+      "schema": "ResponseShellCallOutputContentDeltaStreamingEvent",
+      "parent": "ResponseStreamEvent"
+    },
+    "ResponseShellCallOutputContentDoneStreamingEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponseShellCallOutputContentDoneEvent",
+      "file": "lib/src/models/responses/streaming/response_stream_event.dart",
+      "schema": "ResponseShellCallOutputContentDoneStreamingEvent",
+      "parent": "ResponseStreamEvent"
+    },
+    "ShellCallOutputDelta": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ShellCallOutputDelta",
+      "file": "lib/src/models/responses/streaming/shell_call_output_delta.dart",
+      "schema": "ShellCallOutputDelta"
+    },
+    "BetaFunctionShellToolParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "BetaFunctionShellToolParam",
+      "parent": "ResponseTool"
+    },
+    "ShellTool:BetaContainerAutoParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ContainerAutoShellToolEnvironment",
+      "file": "lib/src/models/responses/tools/shell_tool_environment.dart",
+      "schema": "BetaContainerAutoParam",
+      "parent": "ShellToolEnvironment"
+    },
+    "ShellTool:BetaLocalEnvironmentParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LocalShellToolEnvironment",
+      "file": "lib/src/models/responses/tools/shell_tool_environment.dart",
+      "schema": "BetaLocalEnvironmentParam",
+      "parent": "ShellToolEnvironment"
+    },
+    "ShellTool:BetaContainerReferenceParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ContainerReferenceShellToolEnvironment",
+      "file": "lib/src/models/responses/tools/shell_tool_environment.dart",
+      "schema": "BetaContainerReferenceParam",
+      "parent": "ShellToolEnvironment"
+    },
+    "BetaLocalSkillParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ShellLocalSkill",
+      "file": "lib/src/models/responses/tools/shell_tool_environment.dart",
+      "schema": "BetaLocalSkillParam"
+    },
+    "BetaFunctionShellCallItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellCallInputItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "BetaFunctionShellCallItemParam",
+      "parent": "Item"
+    },
+    "BetaFunctionShellCallOutputItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellCallOutputInputItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "BetaFunctionShellCallOutputItemParam",
+      "parent": "Item"
+    },
+    "BetaFunctionShellCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellCallOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaFunctionShellCall",
+      "parent": "OutputItem"
+    },
+    "BetaFunctionShellCallOutput": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellCallOutputResultItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaFunctionShellCallOutput",
+      "parent": "OutputItem"
+    },
+    "ShellResource:BetaFunctionShellCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellCallResourceItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "BetaFunctionShellCall",
+      "parent": "Item"
+    },
+    "ShellResource:BetaFunctionShellCallOutput": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellCallOutputResourceItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "BetaFunctionShellCallOutput",
+      "parent": "Item"
+    },
+    "ShellConversation:BetaFunctionShellCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ConversationShellCallItem",
+      "file": "lib/src/models/conversations/conversation_item.dart",
+      "schema": "BetaFunctionShellCall",
+      "parent": "ConversationItem"
+    },
+    "ShellConversation:BetaFunctionShellCallOutput": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ConversationShellCallOutputItem",
+      "file": "lib/src/models/conversations/conversation_item.dart",
+      "schema": "BetaFunctionShellCallOutput",
+      "parent": "ConversationItem"
+    },
+    "BetaFunctionShellAction": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ShellCallAction",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaFunctionShellAction"
+    },
+    "BetaFunctionShellActionParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ShellCallActionInput",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "BetaFunctionShellActionParam"
+    },
+    "BetaFunctionShellCallOutputContent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ShellCallOutputContent",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaFunctionShellCallOutputContent"
+    },
+    "BetaFunctionShellCallOutputContentParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ShellCallOutputContentInput",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "BetaFunctionShellCallOutputContentParam"
+    },
+    "ShellReturned:BetaLocalEnvironmentResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LocalShellEnvironment",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaLocalEnvironmentResource",
+      "parent": "ShellEnvironment"
+    },
+    "ShellReturned:BetaContainerReferenceResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ContainerReferenceEnvironment",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaContainerReferenceResource",
+      "parent": "ShellEnvironment"
+    },
+    "BetaFunctionShellCallOutputExitOutcome": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellCallExitOutcome",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaFunctionShellCallOutputExitOutcome",
+      "parent": "ShellCallOutcome"
+    },
+    "BetaFunctionShellCallOutputExitOutcomeParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellCallExitOutcome",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaFunctionShellCallOutputExitOutcomeParam",
+      "parent": "ShellCallOutcome"
+    },
+    "BetaFunctionShellCallOutputTimeoutOutcome": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellCallTimeoutOutcome",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaFunctionShellCallOutputTimeoutOutcome",
+      "parent": "ShellCallOutcome"
+    },
+    "BetaFunctionShellCallOutputTimeoutOutcomeParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ShellCallTimeoutOutcome",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaFunctionShellCallOutputTimeoutOutcomeParam",
+      "parent": "ShellCallOutcome"
+    },
+    "BetaFunctionShellCallItemStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ItemStatus",
+      "file": "lib/src/models/responses/config/item_status.dart",
+      "schema": "BetaFunctionShellCallItemStatus",
+      "note": "Shell wire values match the shared three-state item status; unknown fallback remains."
+    },
+    "BetaFunctionShellCallStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ItemStatus",
+      "file": "lib/src/models/responses/config/item_status.dart",
+      "schema": "BetaFunctionShellCallStatus",
+      "note": "Shell wire values match the shared three-state item status; unknown fallback remains."
+    },
+    "BetaFunctionShellCallOutputStatusEnum": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ItemStatus",
+      "file": "lib/src/models/responses/config/item_status.dart",
+      "schema": "BetaFunctionShellCallOutputStatusEnum",
+      "note": "Shell wire values match the shared three-state item status; unknown fallback remains."
+    },
+    "BetaSpecificFunctionShellParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponseToolChoiceShell",
+      "file": "lib/src/models/responses/tools/response_tool_choice.dart",
+      "schema": "BetaSpecificFunctionShellParam",
+      "parent": "ResponseToolChoice"
+    },
+    "BetaResponseShellCallCommandAddedStreamingEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponseShellCallCommandAddedEvent",
+      "file": "lib/src/models/responses/streaming/response_stream_event.dart",
+      "schema": "BetaResponseShellCallCommandAddedStreamingEvent",
+      "parent": "ResponseStreamEvent"
+    },
+    "BetaResponseShellCallCommandDeltaStreamingEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponseShellCallCommandDeltaEvent",
+      "file": "lib/src/models/responses/streaming/response_stream_event.dart",
+      "schema": "BetaResponseShellCallCommandDeltaStreamingEvent",
+      "parent": "ResponseStreamEvent"
+    },
+    "BetaResponseShellCallCommandDoneStreamingEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponseShellCallCommandDoneEvent",
+      "file": "lib/src/models/responses/streaming/response_stream_event.dart",
+      "schema": "BetaResponseShellCallCommandDoneStreamingEvent",
+      "parent": "ResponseStreamEvent"
+    },
+    "BetaResponseShellCallOutputContentDeltaStreamingEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponseShellCallOutputContentDeltaEvent",
+      "file": "lib/src/models/responses/streaming/response_stream_event.dart",
+      "schema": "BetaResponseShellCallOutputContentDeltaStreamingEvent",
+      "parent": "ResponseStreamEvent"
+    },
+    "BetaResponseShellCallOutputContentDoneStreamingEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponseShellCallOutputContentDoneEvent",
+      "file": "lib/src/models/responses/streaming/response_stream_event.dart",
+      "schema": "BetaResponseShellCallOutputContentDoneStreamingEvent",
+      "parent": "ResponseStreamEvent"
+    },
+    "BetaShellCallOutputDelta": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ShellCallOutputDelta",
+      "file": "lib/src/models/responses/streaming/shell_call_output_delta.dart",
+      "schema": "BetaShellCallOutputDelta"
+    },
+    "ShellToolEnvironment": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ShellToolEnvironment",
+      "file": "lib/src/models/responses/tools/shell_tool_environment.dart",
+      "schema": null,
+      "note": "Inline definition union; concrete environments map to real GA/beta schemas, with recursively immutable future fallback."
+    },
+    "UnknownShellToolEnvironment": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownShellToolEnvironment",
+      "file": "lib/src/models/responses/tools/shell_tool_environment.dart",
+      "schema": null,
+      "parent": "ShellToolEnvironment",
+      "note": "Forward-compatible future environment JSON; never a substitute for known malformed members."
+    },
+    "ShellEnvironment": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ShellEnvironment",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": null,
+      "note": "Inline returned union, local has no request skills; required nullable key is enforced by returned DTOs."
+    },
+    "UnknownShellEnvironment": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownShellEnvironment",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": null,
+      "parent": "ShellEnvironment",
+      "note": "Forward-compatible immutable returned environment JSON."
+    },
+    "ShellCallOutcome": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ShellCallOutcome",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": null,
+      "note": "Shared request/returned outcome union; concrete exit/timeout schemas mapped separately."
+    },
+    "UnknownShellCallOutcome": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownShellCallOutcome",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": null,
+      "parent": "ShellCallOutcome",
+      "note": "Forward-compatible recursively immutable outcome JSON."
     }
   }
 }
