@@ -6,6 +6,23 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming annotation event nullability correction
+
+`OutputTextAnnotationAddedEvent.annotation` is now `Annotation?`, matching the
+published required nullable wire member. Check for null before using it. The
+constructor still requires an explicit `annotation`, and `toJson()` always emits
+the key. Parsing a missing key or a malformed supplied object fails contextually.
+Existing provider defaults for omitted sequence/index fields remain compatible.
+`copyWith(annotation: null)` clears the value while retaining the nullable key.
+
+```dart
+// Before
+final annotationJson = event.annotation.toJson();
+
+// After
+final annotationJson = event.annotation?.toJson();
+```
+
 ## Migrating from v0.4.x to v0.5.0
 
 v0.5.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.

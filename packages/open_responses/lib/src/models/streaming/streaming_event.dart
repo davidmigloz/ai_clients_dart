@@ -1048,8 +1048,10 @@ class OutputTextAnnotationAddedEvent extends StreamingEvent {
   /// providers that don't include this field in their responses.
   final int annotationIndex;
 
-  /// The added annotation.
-  final Annotation annotation;
+  /// The added annotation, or null when no object is supplied.
+  ///
+  /// The JSON key is required even when its value is null.
+  final Annotation? annotation;
 
   /// Creates an [OutputTextAnnotationAddedEvent].
   const OutputTextAnnotationAddedEvent({
@@ -1063,15 +1065,44 @@ class OutputTextAnnotationAddedEvent extends StreamingEvent {
 
   /// Creates an [OutputTextAnnotationAddedEvent] from JSON.
   factory OutputTextAnnotationAddedEvent.fromJson(Map<String, dynamic> json) {
+    const context = 'OutputTextAnnotationAddedEvent';
+    if (json['type'] != 'response.output_text.annotation.added') {
+      throw const FormatException(
+        '$context.type: expected annotation-added event',
+      );
+    }
+    if (!json.containsKey('annotation')) {
+      throw const FormatException(
+        '$context.annotation: required nullable key is missing',
+      );
+    }
+    Annotation? annotation;
+    if (json['annotation'] != null) {
+      try {
+        annotation = Annotation.fromJson(
+          _annotationEventObject(json['annotation'], '$context.annotation'),
+        );
+      } on FormatException {
+        throw const FormatException(
+          '$context.annotation: malformed annotation',
+        );
+      } on TypeError {
+        throw const FormatException(
+          '$context.annotation: malformed annotation',
+        );
+      }
+    }
+    final itemId = json['item_id'];
+    if (itemId is! String) {
+      throw const FormatException('$context.item_id: expected a string');
+    }
     return OutputTextAnnotationAddedEvent(
-      sequenceNumber: json['sequence_number'] as int? ?? 0,
-      itemId: json['item_id'] as String,
-      outputIndex: json['output_index'] as int? ?? 0,
-      contentIndex: json['content_index'] as int? ?? 0,
-      annotationIndex: json['annotation_index'] as int? ?? 0,
-      annotation: Annotation.fromJson(
-        json['annotation'] as Map<String, dynamic>,
-      ),
+      sequenceNumber: _annotationEventInt(json, 'sequence_number'),
+      itemId: itemId,
+      outputIndex: _annotationEventInt(json, 'output_index'),
+      contentIndex: _annotationEventInt(json, 'content_index'),
+      annotationIndex: _annotationEventInt(json, 'annotation_index'),
+      annotation: annotation,
     );
   }
 
@@ -1083,17 +1114,18 @@ class OutputTextAnnotationAddedEvent extends StreamingEvent {
     'output_index': outputIndex,
     'content_index': contentIndex,
     'annotation_index': annotationIndex,
-    'annotation': annotation.toJson(),
+    'annotation': annotation?.toJson(),
   };
 
-  /// Creates a copy with replaced values.
+  /// Creates a copy with replaced values. Explicit null clears [annotation]
+  /// while retaining its required nullable JSON key.
   OutputTextAnnotationAddedEvent copyWith({
     int? sequenceNumber,
     String? itemId,
     int? outputIndex,
     int? contentIndex,
     int? annotationIndex,
-    Annotation? annotation,
+    Object? annotation = unsetCopyWithValue,
   }) {
     return OutputTextAnnotationAddedEvent(
       sequenceNumber: sequenceNumber ?? this.sequenceNumber,
@@ -1101,7 +1133,9 @@ class OutputTextAnnotationAddedEvent extends StreamingEvent {
       outputIndex: outputIndex ?? this.outputIndex,
       contentIndex: contentIndex ?? this.contentIndex,
       annotationIndex: annotationIndex ?? this.annotationIndex,
-      annotation: annotation ?? this.annotation,
+      annotation: identical(annotation, unsetCopyWithValue)
+          ? this.annotation
+          : annotation as Annotation?,
     );
   }
 
@@ -1129,7 +1163,29 @@ class OutputTextAnnotationAddedEvent extends StreamingEvent {
 
   @override
   String toString() =>
-      'OutputTextAnnotationAddedEvent(sequenceNumber: $sequenceNumber, itemId: $itemId, outputIndex: $outputIndex, contentIndex: $contentIndex, annotationIndex: $annotationIndex, annotation: $annotation)';
+      'OutputTextAnnotationAddedEvent(sequenceNumber: $sequenceNumber, '
+      'itemId: [REDACTED], outputIndex: $outputIndex, contentIndex: $contentIndex, '
+      'annotationIndex: $annotationIndex, '
+      'annotation: ${annotation == null ? 'null' : '[REDACTED]'})';
+}
+
+int _annotationEventInt(Map<String, dynamic> json, String key) {
+  final value = json[key];
+  if (value == null) return 0;
+  if (value is! int) {
+    throw FormatException(
+      'OutputTextAnnotationAddedEvent.$key: expected an integer',
+    );
+  }
+  return value;
+}
+
+Map<String, dynamic> _annotationEventObject(Object? value, String context) {
+  if (value is! Map<dynamic, dynamic> ||
+      value.keys.any((key) => key is! String)) {
+    throw FormatException('$context: expected an object with string keys');
+  }
+  return {for (final entry in value.entries) entry.key as String: entry.value};
 }
 
 // ============================================================================
