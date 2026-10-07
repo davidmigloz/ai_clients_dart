@@ -1,7 +1,10 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import '../common/json_helpers.dart';
 import '../moderations/completion_moderation.dart';
+import 'config/prompt_cache_diagnostics.dart';
 import 'config/prompt_cache_options.dart';
 import 'config/prompt_cache_retention.dart';
 import 'config/reasoning_config.dart';
@@ -84,6 +87,12 @@ class Response {
   /// Supported for `gpt-5.6` and later models.
   final PromptCacheOptions? promptCacheOptions;
 
+  /// Cache reuse diagnostics requested through a comparison response ID.
+  ///
+  /// Omitted when the server does not supply diagnostics. Future diagnostic
+  /// variants preserve their raw JSON.
+  final PromptCacheDiagnostics? promptCacheDiagnostics;
+
   /// Moderation results for the response input and output.
   ///
   /// Present only when moderated completions were requested via
@@ -122,6 +131,7 @@ class Response {
     this.promptCacheKey,
     this.promptCacheRetention,
     this.promptCacheOptions,
+    this.promptCacheDiagnostics,
     this.moderation,
     this.reasoning,
     this.truncation,
@@ -129,6 +139,21 @@ class Response {
 
   /// Creates a [Response] from JSON.
   factory Response.fromJson(Map<String, dynamic> json) {
+    PromptCacheDiagnostics? diagnostics;
+    if (json.containsKey('prompt_cache_diagnostics')) {
+      try {
+        diagnostics = PromptCacheDiagnostics.fromJson(
+          requireJsonObject(
+            json['prompt_cache_diagnostics'],
+            'Response.prompt_cache_diagnostics',
+          ),
+        );
+      } on FormatException catch (error) {
+        throw FormatException(
+          'Response.prompt_cache_diagnostics: ${error.message}',
+        );
+      }
+    }
     return Response(
       id: json['id'] as String,
       object: json['object'] as String,
@@ -171,6 +196,7 @@ class Response {
               json['prompt_cache_options'] as Map<String, dynamic>,
             )
           : null,
+      promptCacheDiagnostics: diagnostics,
       moderation: json['moderation'] != null
           ? Moderation.fromJson(json['moderation'] as Map<String, dynamic>)
           : null,
@@ -209,10 +235,103 @@ class Response {
       'prompt_cache_retention': promptCacheRetention!.toJson(),
     if (promptCacheOptions != null)
       'prompt_cache_options': promptCacheOptions!.toJson(),
+    if (promptCacheDiagnostics != null)
+      'prompt_cache_diagnostics': promptCacheDiagnostics!.toJson(),
     if (moderation != null) 'moderation': moderation!.toJson(),
     if (reasoning != null) 'reasoning': reasoning!.toJson(),
     if (truncation != null) 'truncation': truncation!.toJson(),
   };
+
+  /// Creates a copy with replaced values.
+  ///
+  /// Nullable fields can be explicitly set to `null` to clear them.
+  Response copyWith({
+    String? id,
+    String? object,
+    int? createdAt,
+    ResponseStatus? status,
+    List<OutputItem>? output,
+    Object? usage = unsetCopyWithValue,
+    Object? error = unsetCopyWithValue,
+    Object? incompleteDetails = unsetCopyWithValue,
+    Object? model = unsetCopyWithValue,
+    Object? instructions = unsetCopyWithValue,
+    Object? previousResponseId = unsetCopyWithValue,
+    Object? serviceTier = unsetCopyWithValue,
+    Object? metadata = unsetCopyWithValue,
+    Object? maxOutputTokens = unsetCopyWithValue,
+    Object? temperature = unsetCopyWithValue,
+    Object? topP = unsetCopyWithValue,
+    Object? background = unsetCopyWithValue,
+    Object? parallelToolCalls = unsetCopyWithValue,
+    Object? promptCacheKey = unsetCopyWithValue,
+    Object? promptCacheRetention = unsetCopyWithValue,
+    Object? promptCacheOptions = unsetCopyWithValue,
+    Object? promptCacheDiagnostics = unsetCopyWithValue,
+    Object? moderation = unsetCopyWithValue,
+    Object? reasoning = unsetCopyWithValue,
+    Object? truncation = unsetCopyWithValue,
+  }) => Response(
+    id: id ?? this.id,
+    object: object ?? this.object,
+    createdAt: createdAt ?? this.createdAt,
+    status: status ?? this.status,
+    output: output ?? this.output,
+    usage: usage == unsetCopyWithValue ? this.usage : usage as ResponseUsage?,
+    error: error == unsetCopyWithValue ? this.error : error as ResponseError?,
+    incompleteDetails: incompleteDetails == unsetCopyWithValue
+        ? this.incompleteDetails
+        : incompleteDetails as IncompleteDetails?,
+    model: model == unsetCopyWithValue ? this.model : model as String?,
+    instructions: instructions == unsetCopyWithValue
+        ? this.instructions
+        : instructions as String?,
+    previousResponseId: previousResponseId == unsetCopyWithValue
+        ? this.previousResponseId
+        : previousResponseId as String?,
+    serviceTier: serviceTier == unsetCopyWithValue
+        ? this.serviceTier
+        : serviceTier as ServiceTier?,
+    metadata: metadata == unsetCopyWithValue
+        ? this.metadata
+        : metadata == null
+        ? null
+        : Map<String, String>.from(metadata as Map),
+    maxOutputTokens: maxOutputTokens == unsetCopyWithValue
+        ? this.maxOutputTokens
+        : maxOutputTokens as int?,
+    temperature: temperature == unsetCopyWithValue
+        ? this.temperature
+        : temperature as double?,
+    topP: topP == unsetCopyWithValue ? this.topP : topP as double?,
+    background: background == unsetCopyWithValue
+        ? this.background
+        : background as bool?,
+    parallelToolCalls: parallelToolCalls == unsetCopyWithValue
+        ? this.parallelToolCalls
+        : parallelToolCalls as bool?,
+    promptCacheKey: promptCacheKey == unsetCopyWithValue
+        ? this.promptCacheKey
+        : promptCacheKey as String?,
+    promptCacheRetention: promptCacheRetention == unsetCopyWithValue
+        ? this.promptCacheRetention
+        : promptCacheRetention as PromptCacheRetention?,
+    promptCacheOptions: promptCacheOptions == unsetCopyWithValue
+        ? this.promptCacheOptions
+        : promptCacheOptions as PromptCacheOptions?,
+    promptCacheDiagnostics: promptCacheDiagnostics == unsetCopyWithValue
+        ? this.promptCacheDiagnostics
+        : promptCacheDiagnostics as PromptCacheDiagnostics?,
+    moderation: moderation == unsetCopyWithValue
+        ? this.moderation
+        : moderation as Moderation?,
+    reasoning: reasoning == unsetCopyWithValue
+        ? this.reasoning
+        : reasoning as ReasoningConfig?,
+    truncation: truncation == unsetCopyWithValue
+        ? this.truncation
+        : truncation as Truncation?,
+  );
 
   // ============================================================
   // Convenience Getters
@@ -348,6 +467,7 @@ class Response {
           promptCacheKey == other.promptCacheKey &&
           promptCacheRetention == other.promptCacheRetention &&
           promptCacheOptions == other.promptCacheOptions &&
+          promptCacheDiagnostics == other.promptCacheDiagnostics &&
           moderation == other.moderation &&
           reasoning == other.reasoning &&
           truncation == other.truncation;
@@ -375,6 +495,7 @@ class Response {
     promptCacheKey,
     promptCacheRetention,
     promptCacheOptions,
+    promptCacheDiagnostics,
     moderation,
     reasoning,
     truncation,
@@ -382,9 +503,47 @@ class Response {
 
   @override
   String toString() =>
-      'Response(id: $id, status: $status, output: $output, '
-      'reasoning: $reasoning, truncation: $truncation)';
+      'Response(id: $id, object: $object, createdAt: $createdAt, status: $status, '
+      'output: ${output.length} items, usage: $usage, '
+      'error: ${_presenceSummary(error)}, '
+      'incompleteDetails: ${_presenceSummary(incompleteDetails)}, '
+      'model: $model, instructions: ${_textSummary(instructions)}, '
+      'previousResponseId: ${_identifierSummary(previousResponseId)}, '
+      'serviceTier: $serviceTier, '
+      'metadata: ${metadata == null ? 'null' : '${metadata!.length} entries'}, '
+      'maxOutputTokens: $maxOutputTokens, '
+      'temperature: $temperature, topP: $topP, background: $background, '
+      'parallelToolCalls: $parallelToolCalls, '
+      'promptCacheKey: ${_identifierSummary(promptCacheKey)}, '
+      'promptCacheRetention: $promptCacheRetention, '
+      'promptCacheOptions: ${_cacheOptionsSummary(promptCacheOptions)}, '
+      'promptCacheDiagnostics: $promptCacheDiagnostics, '
+      'moderation: ${_presenceSummary(moderation)}, '
+      'reasoning: ${_reasoningSummary(reasoning)}, truncation: $truncation)';
 }
+
+String _textSummary(String? value) =>
+    value == null ? 'null' : '${value.length} chars';
+
+String _presenceSummary(Object? value) => value == null ? 'null' : 'present';
+
+String _identifierSummary(String? value) =>
+    value == null ? 'null' : '[REDACTED]';
+
+String _reasoningSummary(ReasoningConfig? value) => value == null
+    ? 'null'
+    : 'ReasoningConfig(effort: ${value.effort}, summary: ${value.summary}, '
+          'context: ${value.context}, mode: ${switch (value.mode?.value) {
+            null => 'null',
+            'standard' => 'standard',
+            'pro' => 'pro',
+            _ => '[custom]',
+          }})';
+
+String _cacheOptionsSummary(PromptCacheOptions? value) => value == null
+    ? 'null'
+    : 'PromptCacheOptions(mode: ${value.mode}, ttl: ${value.ttl}, '
+          'comparisonResponseId: ${_identifierSummary(value.comparisonResponseId)})';
 
 /// A list of responses with pagination.
 @immutable

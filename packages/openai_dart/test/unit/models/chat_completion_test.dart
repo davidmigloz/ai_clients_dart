@@ -641,6 +641,175 @@ void main() {
       expect(parsedNull.hashCode, cleared.hashCode);
     });
 
+    group('prompt_cache_options', () {
+      const cacheOptions = PromptCacheOptionsParam(
+        mode: PromptCacheMode.explicit,
+        ttl: PromptCacheTtl.minutes30,
+      );
+
+      test('serializes the narrow Chat options and parses them back', () {
+        const request = ChatCompletionCreateRequest(
+          model: 'gpt-5.6',
+          messages: [SystemMessage(content: 'Hello!')],
+          promptCacheOptions: cacheOptions,
+        );
+
+        final json = request.toJson();
+        expect(json['prompt_cache_options'], {
+          'mode': 'explicit',
+          'ttl': '30m',
+        });
+        final parsed = ChatCompletionCreateRequest.fromJson(json);
+        expect(parsed.promptCacheOptions, cacheOptions);
+        expect(parsed, request);
+        expect(parsed.hashCode, request.hashCode);
+      });
+
+      test('normalizes string-keyed generic option maps', () {
+        final json = <String, dynamic>{
+          'model': 'gpt-5.6',
+          'messages': <Object>[],
+          'prompt_cache_options': <dynamic, dynamic>{
+            'mode': 'explicit',
+            'ttl': '30m',
+          },
+        };
+        final request = ChatCompletionCreateRequest.fromJson(json);
+        expect(request.promptCacheOptions, cacheOptions);
+        expect(request.toJson()['prompt_cache_options'], {
+          'mode': 'explicit',
+          'ttl': '30m',
+        });
+      });
+
+      test('omits absent options but preserves an explicitly empty object', () {
+        const request = ChatCompletionCreateRequest(
+          model: 'gpt-5.6',
+          messages: [],
+        );
+        expect(request.promptCacheOptions, isNull);
+        expect(request.toJson().containsKey('prompt_cache_options'), isFalse);
+        expect(
+          ChatCompletionCreateRequest.fromJson(
+            request.toJson(),
+          ).promptCacheOptions,
+          isNull,
+        );
+
+        final empty = request.copyWith(
+          promptCacheOptions: const PromptCacheOptionsParam(),
+        );
+        expect(empty.toJson()['prompt_cache_options'], isEmpty);
+        expect(ChatCompletionCreateRequest.fromJson(empty.toJson()), empty);
+        expect(empty, isNot(request));
+      });
+
+      test('copyWith preserves, replaces, and clears options', () {
+        const request = ChatCompletionCreateRequest(
+          model: 'gpt-5.6',
+          messages: [],
+          promptCacheOptions: cacheOptions,
+        );
+        expect(request.copyWith().promptCacheOptions, cacheOptions);
+        expect(request.copyWith(), request);
+
+        final replaced = request.copyWith(
+          promptCacheOptions: const PromptCacheOptionsParam(
+            mode: PromptCacheMode.implicit,
+          ),
+        );
+        expect(replaced.promptCacheOptions?.mode, PromptCacheMode.implicit);
+        expect(replaced.toJson()['prompt_cache_options'], {'mode': 'implicit'});
+        expect(replaced, isNot(request));
+
+        final cleared = request.copyWith(promptCacheOptions: null);
+        expect(cleared.promptCacheOptions, isNull);
+        expect(cleared.toJson().containsKey('prompt_cache_options'), isFalse);
+        expect(
+          cleared,
+          const ChatCompletionCreateRequest(model: 'gpt-5.6', messages: []),
+        );
+      });
+
+      for (final invalid in <Object?>[
+        null,
+        'explicit',
+        1,
+        true,
+        <Object>[],
+        <dynamic, dynamic>{1: 'invalid key'},
+      ]) {
+        test('rejects a present non-object value: $invalid', () {
+          expect(
+            () => ChatCompletionCreateRequest.fromJson({
+              'model': 'gpt-5.6',
+              'messages': const <Object>[],
+              'prompt_cache_options': invalid,
+            }),
+            throwsA(
+              isA<FormatException>().having(
+                (error) => error.message,
+                'message',
+                contains('ChatCompletionCreateRequest.prompt_cache_options'),
+              ),
+            ),
+          );
+        });
+      }
+
+      test('unknown mode and TTL retain the existing enum fallback', () {
+        final request = ChatCompletionCreateRequest.fromJson(const {
+          'model': 'gpt-5.6',
+          'messages': <Object>[],
+          'prompt_cache_options': {'mode': 'future-mode', 'ttl': 'future-ttl'},
+        });
+
+        expect(request.promptCacheOptions?.mode, PromptCacheMode.unknown);
+        expect(request.promptCacheOptions?.ttl, PromptCacheTtl.unknown);
+        expect(request.toJson()['prompt_cache_options'], {
+          'mode': 'unknown',
+          'ttl': 'unknown',
+        });
+      });
+
+      for (final (name, wire, expected) in [
+        (
+          'mode only',
+          <String, dynamic>{'mode': 'implicit'},
+          const PromptCacheOptionsParam(mode: PromptCacheMode.implicit),
+        ),
+        (
+          'TTL only',
+          <String, dynamic>{'ttl': '30m'},
+          const PromptCacheOptionsParam(ttl: PromptCacheTtl.minutes30),
+        ),
+      ]) {
+        test('parses $name without populating omitted defaults', () {
+          final request = ChatCompletionCreateRequest.fromJson({
+            'model': 'gpt-5.6',
+            'messages': const <Object>[],
+            'prompt_cache_options': wire,
+          });
+
+          expect(request.promptCacheOptions, expected);
+          expect(request.toJson()['prompt_cache_options'], wire);
+        });
+      }
+
+      for (final field in ['mode', 'ttl']) {
+        test('propagates rejection of explicit null for $field', () {
+          expect(
+            () => ChatCompletionCreateRequest.fromJson({
+              'model': 'gpt-5.6',
+              'messages': const <Object>[],
+              'prompt_cache_options': {field: null},
+            }),
+            throwsFormatException,
+          );
+        });
+      }
+    });
+
     test('supports safety_identifier parameter', () {
       final request = ChatCompletionCreateRequest(
         model: 'gpt-4o',

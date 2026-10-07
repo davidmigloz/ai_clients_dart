@@ -11,6 +11,7 @@ export 'message_phase.dart';
 export 'message_role.dart';
 export 'personality.dart';
 export 'program_output_status.dart';
+export 'prompt_cache_diagnostics.dart';
 export 'prompt_cache_options.dart';
 export 'prompt_cache_retention.dart';
 export 'reasoning_config.dart';

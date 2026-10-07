@@ -5,6 +5,8 @@ Reviewed October 7, 2026 against CACHE-005 in the
 Tracking: [#321](https://github.com/davidmigloz/ai_clients_dart/issues/321),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Implementation branch: `fix/openai-cache-retention`.
+Merged in [PR #328](https://github.com/davidmigloz/ai_clients_dart/pull/328)
+at `6d378a0cb46c03b8c3c36fad92d13c6af7fba24c`, closing #321 after all CI checks passed.
 
 ## Outcome and contract
 

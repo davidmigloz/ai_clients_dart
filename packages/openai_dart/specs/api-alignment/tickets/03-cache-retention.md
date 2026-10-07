@@ -1,6 +1,6 @@
 # Use canonical cache retention wire values
 
-Status: implemented and independently reviewed; awaiting PR merge.
+Status: merged in [PR #328](https://github.com/davidmigloz/ai_clients_dart/pull/328); #321 closed.
 GitHub: [#321](https://github.com/davidmigloz/ai_clients_dart/issues/321).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 2 correctness](../correctness.md), CACHE-005.
@@ -46,4 +46,4 @@ fixtures, and both independent reviews. Wider toolkit diagnostics remain visible
 there are no retention errors/warnings or new diagnostics. Two existing
 informational String-versus-enum suggestions are recorded in the evidence.
 No live API calls or package release were made.
-Issue #321 remains open until its implementation PR merges.
+PR #328 merged after all CI checks passed, closing #321.

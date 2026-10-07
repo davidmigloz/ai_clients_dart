@@ -1,8 +1,11 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
+import '../common/json_helpers.dart';
 import '../common/response_format.dart';
 import '../moderations/completion_moderation.dart';
+import '../responses/config/prompt_cache_options.dart';
 import '../responses/config/prompt_cache_retention.dart';
 import '../responses/config/reasoning_effort.dart';
 import '../responses/config/verbosity.dart';
@@ -70,6 +73,7 @@ class ChatCompletionCreateRequest {
     this.moderation,
     this.promptCacheKey,
     this.promptCacheRetention,
+    this.promptCacheOptions,
     this.safetyIdentifier,
     // OpenRouter-specific parameters
     this.topK,
@@ -86,6 +90,20 @@ class ChatCompletionCreateRequest {
 
   /// Creates a [ChatCompletionCreateRequest] from JSON.
   factory ChatCompletionCreateRequest.fromJson(Map<String, dynamic> json) {
+    PromptCacheOptionsParam? promptCacheOptions;
+    if (json.containsKey('prompt_cache_options')) {
+      final optionsJson = requireJsonObject(
+        json['prompt_cache_options'],
+        'ChatCompletionCreateRequest.prompt_cache_options',
+      );
+      try {
+        promptCacheOptions = PromptCacheOptionsParam.fromJson(optionsJson);
+      } on FormatException catch (error) {
+        throw FormatException(
+          'ChatCompletionCreateRequest.prompt_cache_options: ${error.message}',
+        );
+      }
+    }
     return ChatCompletionCreateRequest(
       model: json['model'] as String,
       messages: (json['messages'] as List<dynamic>)
@@ -157,6 +175,7 @@ class ChatCompletionCreateRequest {
               json['prompt_cache_retention'] as String,
             )
           : null,
+      promptCacheOptions: promptCacheOptions,
       safetyIdentifier: json['safety_identifier'] as String?,
       // OpenRouter-specific parameters
       topK: json['top_k'] as int?,
@@ -363,6 +382,13 @@ class ChatCompletionCreateRequest {
   /// which keeps cached prefixes active for up to 24 hours.
   final PromptCacheRetention? promptCacheRetention;
 
+  /// Prompt-caching options for cache breakpoints.
+  ///
+  /// Controls the implicit breakpoint mode and cache lifetime for supported
+  /// models. Chat Completions supports [PromptCacheOptionsParam.mode] and
+  /// [PromptCacheOptionsParam.ttl].
+  final PromptCacheOptionsParam? promptCacheOptions;
+
   /// A stable identifier for detecting usage policy violations.
   ///
   /// Should uniquely identify each user (max 64 characters).
@@ -479,6 +505,8 @@ class ChatCompletionCreateRequest {
     if (promptCacheKey != null) 'prompt_cache_key': promptCacheKey,
     if (promptCacheRetention != null)
       'prompt_cache_retention': promptCacheRetention!.toJson(),
+    if (promptCacheOptions != null)
+      'prompt_cache_options': promptCacheOptions!.toJson(),
     if (safetyIdentifier != null) 'safety_identifier': safetyIdentifier,
     // OpenRouter-specific parameters
     if (topK != null) 'top_k': topK,
@@ -527,6 +555,7 @@ class ChatCompletionCreateRequest {
     Object? moderation = unsetCopyWithValue,
     Object? promptCacheKey = unsetCopyWithValue,
     Object? promptCacheRetention = unsetCopyWithValue,
+    Object? promptCacheOptions = unsetCopyWithValue,
     Object? safetyIdentifier = unsetCopyWithValue,
     // OpenRouter-specific parameters
     Object? topK = unsetCopyWithValue,
@@ -619,6 +648,9 @@ class ChatCompletionCreateRequest {
       promptCacheRetention: promptCacheRetention == unsetCopyWithValue
           ? this.promptCacheRetention
           : promptCacheRetention as PromptCacheRetention?,
+      promptCacheOptions: promptCacheOptions == unsetCopyWithValue
+          ? this.promptCacheOptions
+          : promptCacheOptions as PromptCacheOptionsParam?,
       safetyIdentifier: safetyIdentifier == unsetCopyWithValue
           ? this.safetyIdentifier
           : safetyIdentifier as String?,
@@ -654,22 +686,150 @@ class ChatCompletionCreateRequest {
       other is ChatCompletionCreateRequest &&
           runtimeType == other.runtimeType &&
           model == other.model &&
-          _listEquals(messages, other.messages);
-
-  bool _listEquals<T>(List<T> a, List<T> b) {
-    if (a.length != b.length) return false;
-    for (var i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
-  }
+          listsEqual(messages, other.messages) &&
+          frequencyPenalty == other.frequencyPenalty &&
+          mapsEqual(logitBias, other.logitBias) &&
+          logprobs == other.logprobs &&
+          topLogprobs == other.topLogprobs &&
+          maxTokens == other.maxTokens &&
+          maxCompletionTokens == other.maxCompletionTokens &&
+          n == other.n &&
+          presencePenalty == other.presencePenalty &&
+          responseFormat == other.responseFormat &&
+          seed == other.seed &&
+          serviceTier == other.serviceTier &&
+          listsEqual(stop, other.stop) &&
+          temperature == other.temperature &&
+          topP == other.topP &&
+          listsEqual(tools, other.tools) &&
+          toolChoice == other.toolChoice &&
+          parallelToolCalls == other.parallelToolCalls &&
+          user == other.user &&
+          mapsDeepEqual(metadata, other.metadata) &&
+          store == other.store &&
+          streamOptions == other.streamOptions &&
+          reasoningEffort == other.reasoningEffort &&
+          verbosity == other.verbosity &&
+          prediction == other.prediction &&
+          listsEqual(modalities, other.modalities) &&
+          audio == other.audio &&
+          webSearchOptions == other.webSearchOptions &&
+          moderation == other.moderation &&
+          promptCacheKey == other.promptCacheKey &&
+          promptCacheRetention == other.promptCacheRetention &&
+          promptCacheOptions == other.promptCacheOptions &&
+          safetyIdentifier == other.safetyIdentifier &&
+          topK == other.topK &&
+          minP == other.minP &&
+          topA == other.topA &&
+          repetitionPenalty == other.repetitionPenalty &&
+          openRouterProvider == other.openRouterProvider &&
+          listsEqual(models, other.models) &&
+          route == other.route &&
+          listsEqual(transforms, other.transforms) &&
+          openRouterUsage == other.openRouterUsage &&
+          openRouterReasoning == other.openRouterReasoning;
 
   @override
-  int get hashCode => Object.hash(model, Object.hashAll(messages));
+  int get hashCode => Object.hashAll([
+    model,
+    listHash(messages),
+    frequencyPenalty,
+    mapHash(logitBias),
+    logprobs,
+    topLogprobs,
+    maxTokens,
+    maxCompletionTokens,
+    n,
+    presencePenalty,
+    responseFormat,
+    seed,
+    serviceTier,
+    listHash(stop),
+    temperature,
+    topP,
+    listHash(tools),
+    toolChoice,
+    parallelToolCalls,
+    user,
+    mapDeepHashCode(metadata),
+    store,
+    streamOptions,
+    reasoningEffort,
+    verbosity,
+    prediction,
+    listHash(modalities),
+    audio,
+    webSearchOptions,
+    moderation,
+    promptCacheKey,
+    promptCacheRetention,
+    promptCacheOptions,
+    safetyIdentifier,
+    topK,
+    minP,
+    topA,
+    repetitionPenalty,
+    openRouterProvider,
+    listHash(models),
+    route,
+    listHash(transforms),
+    openRouterUsage,
+    openRouterReasoning,
+  ]);
 
   @override
   String toString() =>
-      'ChatCompletionCreateRequest(model: $model, messages: ${messages.length})';
+      'ChatCompletionCreateRequest(model: $model, '
+      'messages: ${messages.length} items, '
+      'frequencyPenalty: $frequencyPenalty, '
+      'logitBias: ${_collectionSummary(logitBias?.length)}, '
+      'logprobs: $logprobs, topLogprobs: $topLogprobs, '
+      'maxTokens: $maxTokens, maxCompletionTokens: $maxCompletionTokens, '
+      'n: $n, presencePenalty: $presencePenalty, '
+      'responseFormat: $responseFormat, seed: $seed, serviceTier: $serviceTier, '
+      'stop: ${_collectionSummary(stop?.length)}, '
+      'temperature: $temperature, topP: $topP, '
+      'tools: ${_collectionSummary(tools?.length)}, '
+      'toolChoice: $toolChoice, parallelToolCalls: $parallelToolCalls, '
+      'user: ${_redactedIdentifier(user)}, '
+      'metadata: ${_collectionSummary(metadata?.length)}, '
+      'store: $store, streamOptions: $streamOptions, '
+      'reasoningEffort: $reasoningEffort, verbosity: $verbosity, '
+      'prediction: $prediction, '
+      'modalities: ${_collectionSummary(modalities?.length)}, '
+      'audio: $audio, '
+      'webSearchOptions: ${webSearchOptions == null ? 'null' : 'present'}, '
+      'moderation: $moderation, '
+      'promptCacheKey: ${_redactedIdentifier(promptCacheKey)}, '
+      'promptCacheRetention: $promptCacheRetention, '
+      'promptCacheOptions: $promptCacheOptions, '
+      'safetyIdentifier: ${_redactedIdentifier(safetyIdentifier)}, '
+      'topK: $topK, minP: $minP, topA: $topA, '
+      'repetitionPenalty: $repetitionPenalty, '
+      'openRouterProvider: ${_providerSummary(openRouterProvider)}, '
+      'models: ${_collectionSummary(models?.length)}, route: $route, '
+      'transforms: ${_collectionSummary(transforms?.length)}, '
+      'openRouterUsage: $openRouterUsage, '
+      'openRouterReasoning: $openRouterReasoning)';
+
+  static String _collectionSummary(int? length) =>
+      length == null ? 'null' : '$length items';
+
+  static String _redactedIdentifier(String? value) =>
+      value == null ? 'null' : '[REDACTED]';
+
+  static String _providerSummary(OpenRouterProviderPreferences? provider) =>
+      provider == null
+      ? 'null'
+      : 'OpenRouterProviderPreferences('
+            'order: ${_collectionSummary(provider.order?.length)}, '
+            'allowFallbacks: ${provider.allowFallbacks}, '
+            'requireParameters: ${provider.requireParameters}, '
+            'dataCollection: ${provider.dataCollection}, zdr: ${provider.zdr}, '
+            'ignore: ${_collectionSummary(provider.ignore?.length)}, '
+            'quantizations: ${_collectionSummary(provider.quantizations?.length)}, '
+            'sort: ${provider.sort})';
 }
 
 /// Options for streaming responses.

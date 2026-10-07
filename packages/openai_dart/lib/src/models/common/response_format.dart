@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import 'copy_with_sentinel.dart';
+import 'equality_helpers.dart';
 
 /// Specifies the format that the model must output.
 ///
@@ -211,28 +212,13 @@ class JsonSchemaResponseFormat extends ResponseFormat {
           name == other.name &&
           strict == other.strict &&
           description == other.description &&
-          _mapEquals(schema, other.schema);
+          mapsDeepEqual(schema, other.schema);
 
   @override
   int get hashCode =>
-      Object.hash(name, strict, description, Object.hashAll(schema.entries));
+      Object.hash(name, strict, description, mapDeepHashCode(schema));
 
   @override
   String toString() =>
       'ResponseFormat.jsonSchema(name: $name, strict: $strict)';
-
-  bool _mapEquals(Map<String, dynamic> a, Map<String, dynamic> b) {
-    if (a.length != b.length) return false;
-    for (final key in a.keys) {
-      if (!b.containsKey(key)) return false;
-      final aVal = a[key];
-      final bVal = b[key];
-      if (aVal is Map<String, dynamic> && bVal is Map<String, dynamic>) {
-        if (!_mapEquals(aVal, bVal)) return false;
-      } else if (aVal != bVal) {
-        return false;
-      }
-    }
-    return true;
-  }
 }

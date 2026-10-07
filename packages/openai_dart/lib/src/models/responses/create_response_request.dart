@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import '../chat/chat_completion_request.dart' show StreamOptions;
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import '../common/json_helpers.dart';
 import '../moderations/completion_moderation.dart';
 import 'config/config.dart';
 import 'items/item.dart';
@@ -143,9 +144,15 @@ class CreateResponseRequest {
   /// Options for prompt caching.
   ///
   /// Supported for `gpt-5.6` and later models. Lets you disable the implicit
-  /// cache breakpoint and control the cache breakpoint TTL. See
-  /// [PromptCacheOptionsParam] for details.
-  final PromptCacheOptionsParam? promptCacheOptions;
+  /// cache breakpoint, control its minimum TTL, compare a previous response,
+  /// or prewarm the cache. See [ResponsePromptCacheOptionsParam] for details.
+  final ResponsePromptCacheOptionsParam? promptCacheOptions;
+
+  /// Legacy maximum prompt cache retention policy.
+  ///
+  /// The API deprecates this control. Prefer [promptCacheOptions] for modern
+  /// cache configuration. Retention and the options' minimum TTL are independent.
+  final PromptCacheRetention? promptCacheRetention;
 
   /// Number of top log probabilities to return.
   final int? topLogprobs;
@@ -187,6 +194,7 @@ class CreateResponseRequest {
     this.moderation,
     this.promptCacheKey,
     this.promptCacheOptions,
+    this.promptCacheRetention,
     this.topLogprobs,
     this.multiAgent,
   });
@@ -206,6 +214,27 @@ class CreateResponseRequest {
 
   /// Creates a [CreateResponseRequest] from JSON.
   factory CreateResponseRequest.fromJson(Map<String, dynamic> json) {
+    ResponsePromptCacheOptionsParam? options;
+    if (json.containsKey('prompt_cache_options')) {
+      try {
+        options = ResponsePromptCacheOptionsParam.fromJson(
+          requireJsonObject(
+            json['prompt_cache_options'],
+            'CreateResponseRequest.prompt_cache_options',
+          ),
+        );
+      } on FormatException catch (error) {
+        throw FormatException(
+          'CreateResponseRequest.prompt_cache_options: ${error.message}',
+        );
+      }
+    }
+    final retention = json['prompt_cache_retention'];
+    if (retention != null && retention is! String) {
+      throw const FormatException(
+        'CreateResponseRequest.prompt_cache_retention: expected a string or null',
+      );
+    }
     return CreateResponseRequest(
       model: json['model'] as String,
       input: ResponseInput.fromJson(json['input']),
@@ -258,10 +287,9 @@ class CreateResponseRequest {
             )
           : null,
       promptCacheKey: json['prompt_cache_key'] as String?,
-      promptCacheOptions: json['prompt_cache_options'] != null
-          ? PromptCacheOptionsParam.fromJson(
-              json['prompt_cache_options'] as Map<String, dynamic>,
-            )
+      promptCacheOptions: options,
+      promptCacheRetention: retention != null
+          ? PromptCacheRetention.fromJson(retention as String)
           : null,
       topLogprobs: json['top_logprobs'] as int?,
       multiAgent: json['multi_agent'] != null
@@ -313,6 +341,8 @@ class CreateResponseRequest {
       if (promptCacheKey != null) 'prompt_cache_key': promptCacheKey,
       if (promptCacheOptions != null)
         'prompt_cache_options': promptCacheOptions!.toJson(),
+      if (promptCacheRetention != null)
+        'prompt_cache_retention': promptCacheRetention!.toJson(),
       if (topLogprobs != null) 'top_logprobs': topLogprobs,
       if (multiAgent != null) 'multi_agent': multiAgent!.toJson(),
     };
@@ -351,6 +381,7 @@ class CreateResponseRequest {
     Object? moderation = unsetCopyWithValue,
     Object? promptCacheKey = unsetCopyWithValue,
     Object? promptCacheOptions = unsetCopyWithValue,
+    Object? promptCacheRetention = unsetCopyWithValue,
     Object? topLogprobs = unsetCopyWithValue,
     Object? multiAgent = unsetCopyWithValue,
   }) {
@@ -426,7 +457,10 @@ class CreateResponseRequest {
           : promptCacheKey as String?,
       promptCacheOptions: promptCacheOptions == unsetCopyWithValue
           ? this.promptCacheOptions
-          : promptCacheOptions as PromptCacheOptionsParam?,
+          : promptCacheOptions as ResponsePromptCacheOptionsParam?,
+      promptCacheRetention: promptCacheRetention == unsetCopyWithValue
+          ? this.promptCacheRetention
+          : promptCacheRetention as PromptCacheRetention?,
       topLogprobs: topLogprobs == unsetCopyWithValue
           ? this.topLogprobs
           : topLogprobs as int?,
@@ -461,7 +495,7 @@ class CreateResponseRequest {
         listsEqual(contextManagement, other.contextManagement) &&
         parallelToolCalls == other.parallelToolCalls &&
         serviceTier == other.serviceTier &&
-        mapsEqual(metadata, other.metadata) &&
+        mapsDeepEqual(metadata, other.metadata) &&
         listsEqual(include, other.include) &&
         store == other.store &&
         background == other.background &&
@@ -470,6 +504,7 @@ class CreateResponseRequest {
         moderation == other.moderation &&
         promptCacheKey == other.promptCacheKey &&
         promptCacheOptions == other.promptCacheOptions &&
+        promptCacheRetention == other.promptCacheRetention &&
         topLogprobs == other.topLogprobs &&
         multiAgent == other.multiAgent;
   }
@@ -495,7 +530,7 @@ class CreateResponseRequest {
     if (contextManagement != null) Object.hashAll(contextManagement!) else null,
     parallelToolCalls,
     serviceTier,
-    mapHash(metadata),
+    mapDeepHashCode(metadata),
     if (include != null) Object.hashAll(include!) else null,
     store,
     background,
@@ -504,10 +539,61 @@ class CreateResponseRequest {
     moderation,
     promptCacheKey,
     promptCacheOptions,
+    promptCacheRetention,
     topLogprobs,
     multiAgent,
   ]);
 
   @override
-  String toString() => 'CreateResponseRequest(model: $model, input: $input)';
+  String toString() =>
+      'CreateResponseRequest(model: $model, input: present, '
+      'instructions: ${_textSummary(instructions)}, '
+      'tools: ${_collectionSummary(tools)}, '
+      'toolChoice: ${_presenceSummary(toolChoice)}, '
+      'previousResponseId: ${_identifierSummary(previousResponseId)}, '
+      'maxOutputTokens: $maxOutputTokens, '
+      'temperature: $temperature, topP: $topP, presencePenalty: $presencePenalty, '
+      'frequencyPenalty: $frequencyPenalty, stream: $stream, '
+      'streamOptions: ${_presenceSummary(streamOptions)}, '
+      'reasoning: ${_reasoningSummary(reasoning)}, text: ${_presenceSummary(text)}, '
+      'truncation: $truncation, '
+      'contextManagement: ${_collectionSummary(contextManagement)}, '
+      'parallelToolCalls: $parallelToolCalls, serviceTier: $serviceTier, '
+      'metadata: ${metadata == null ? 'null' : '${metadata!.length} entries'}, '
+      'include: ${_collectionSummary(include)}, store: $store, background: $background, '
+      'maxToolCalls: $maxToolCalls, '
+      'safetyIdentifier: ${_identifierSummary(safetyIdentifier)}, '
+      'moderation: ${_presenceSummary(moderation)}, '
+      'promptCacheKey: ${_identifierSummary(promptCacheKey)}, '
+      'promptCacheOptions: ${_cacheOptionsSummary(promptCacheOptions)}, '
+      'promptCacheRetention: $promptCacheRetention, '
+      'topLogprobs: $topLogprobs, multiAgent: ${_presenceSummary(multiAgent)})';
 }
+
+String _textSummary(String? value) =>
+    value == null ? 'null' : '${value.length} chars';
+
+String _collectionSummary(Iterable<Object?>? value) =>
+    value == null ? 'null' : '${value.length} items';
+
+String _presenceSummary(Object? value) => value == null ? 'null' : 'present';
+
+String _identifierSummary(String? value) =>
+    value == null ? 'null' : '[REDACTED]';
+
+String _reasoningSummary(ReasoningConfig? value) => value == null
+    ? 'null'
+    : 'ReasoningConfig(effort: ${value.effort}, summary: ${value.summary}, '
+          'context: ${value.context}, mode: ${switch (value.mode?.value) {
+            null => 'null',
+            'standard' => 'standard',
+            'pro' => 'pro',
+            _ => '[custom]',
+          }})';
+
+String _cacheOptionsSummary(ResponsePromptCacheOptionsParam? value) =>
+    value == null
+    ? 'null'
+    : 'ResponsePromptCacheOptionsParam(mode: ${value.mode}, ttl: ${value.ttl}, '
+          'comparisonResponseId: ${_identifierSummary(value.comparisonResponseId)}, '
+          'prewarm: ${value.prewarm})';

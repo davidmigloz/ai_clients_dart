@@ -2,8 +2,11 @@
 
 Status: source audit complete; containers merged in
 [PR #327](https://github.com/davidmigloz/ai_clients_dart/pull/327), closing #320.
-Cache retention is implemented and independently reviewed; its
-[acceptance evidence](reviews/03-cache-retention.md) is recorded. Parent
+Cache retention merged in [PR #328](https://github.com/davidmigloz/ai_clients_dart/pull/328),
+closing #321; its
+[acceptance evidence](reviews/03-cache-retention.md) is recorded. Cache controls/diagnostics
+are implemented and independently reviewed with
+[acceptance evidence](reviews/04-cache-controls-diagnostics.md), awaiting PR merge. Parent
 [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Decisions was merged in [#319](https://github.com/davidmigloz/ai_clients_dart/pull/319)
 after all CI checks passed, closing #318.
@@ -80,8 +83,21 @@ Sources: [prompt caching](https://developers.openai.com/api/docs/guides/prompt-c
 [Python request types](https://github.com/openai/openai-python/blob/v3.26.0/src/openai/types/responses/response_create_params.py),
 [Python response types](https://github.com/openai/openai-python/blob/v3.26.0/src/openai/types/responses/response.py),
 [Node Chat types](https://github.com/openai/openai-node/blob/v7.30.0/src/resources/chat/completions/completions.ts).
-The guide does not fully explain comparison IDs; canonical schema and pinned
-Python types establish that optional contract.
+The current diagnostics guide documents comparison IDs: use a recent completed
+response from the same organization. The ID requests diagnostics only; it does
+not load history or change cache matching. Missing/expired comparison records
+and inconclusive diagnostics are legitimate outcomes. Streamed diagnostics are
+on the completed event. Diagnostic counts are estimates; usage measures actual
+reuse and billing.
+
+Implementation decisions: Chat/Responses creation options and returned diagnostics
+are optional but reject explicit parsed null or malformed objects. Mode/TTL and
+prewarm reject parsed null; comparison ID accepts it and normalizes to omission.
+Compaction keeps its canonical outer-nullable narrow options. Existing returned
+Response options tolerate outer null for provider compatibility. Const holder
+constructors stay available; only unknown diagnostic JSON is recursively frozen.
+Full Chat equality/hash includes every field, and shared nested JSON schemas and
+Chat and Responses request metadata use deep value equality with consistent hashes.
 
 ## Chat usage, obfuscation, and audio
 

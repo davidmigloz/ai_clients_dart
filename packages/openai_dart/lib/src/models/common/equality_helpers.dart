@@ -46,7 +46,10 @@ bool listOfMapsDeepEqual(
 }
 
 /// Compares two maps for deep equality (handles nested maps and lists).
-bool mapsDeepEqual(Map<String, dynamic>? a, Map<String, dynamic>? b) {
+bool mapsDeepEqual(Map<String, dynamic>? a, Map<String, dynamic>? b) =>
+    _mapsDeepEqual(a, b);
+
+bool _mapsDeepEqual(Map<dynamic, dynamic>? a, Map<dynamic, dynamic>? b) {
   if (identical(a, b)) return true;
   if (a == null || b == null) return false;
   if (a.length != b.length) return false;
@@ -58,8 +61,8 @@ bool mapsDeepEqual(Map<String, dynamic>? a, Map<String, dynamic>? b) {
 }
 
 bool _valuesDeepEqual(dynamic a, dynamic b) {
-  if (a is Map<String, dynamic> && b is Map<String, dynamic>) {
-    return mapsDeepEqual(a, b);
+  if (a is Map<dynamic, dynamic> && b is Map<dynamic, dynamic>) {
+    return _mapsDeepEqual(a, b);
   } else if (a is List && b is List) {
     return _listsDeepEqual(a, b);
   }
@@ -121,6 +124,17 @@ int mapDeepHashCode(Map<String, dynamic>? map) {
 int _valueDeepHashCode(dynamic value) {
   if (value is Map<String, dynamic>) {
     return mapDeepHashCode(value);
+  } else if (value is Map<dynamic, dynamic>) {
+    // Preserve the same hash for string-keyed maps regardless of their
+    // runtime generic arguments. Provider metadata can also use other keys.
+    if (value.keys.every((key) => key is String)) {
+      return mapDeepHashCode(Map<String, dynamic>.from(value));
+    }
+    return Object.hashAllUnordered(
+      value.entries.map(
+        (entry) => Object.hash(entry.key, _valueDeepHashCode(entry.value)),
+      ),
+    );
   } else if (value is List) {
     return Object.hashAll(value.map(_valueDeepHashCode));
   }

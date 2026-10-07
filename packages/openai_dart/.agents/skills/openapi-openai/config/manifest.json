@@ -352,7 +352,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Spec uses allOf — verifier cannot extract top-level properties. GPT-5.6 sync: prompt_cache_options (PromptCacheOptionsParam) and beta multi_agent (BetaMultiAgentParam, from BetaCreateResponse) added."
+      "note": "Spec uses allOf. Responses cache controls/diagnostics have exact GA/beta create/stream fixtures; beta multi_agent remains supported."
     },
     "Response": {
       "spec": "main",
@@ -363,7 +363,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Spec uses allOf — verifier cannot extract top-level properties. GPT-5.6 sync: prompt_cache_options (PromptCacheOptions echo) added."
+      "note": "Spec uses allOf. Responses cache controls/diagnostics have exact GA/beta create/stream fixtures; beta multi_agent remains supported."
     },
     "ResponsesClientEventResponseCreate": {
       "spec": "main",
@@ -541,7 +541,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Spec uses allOf — verifier cannot extract top-level properties. Missing copyWith."
+      "note": "Spec uses allOf. Narrow prompt_cache_options and full request copy/equality/hash contracts have exact public create/stream and field-regression fixtures."
     },
     "CreateChatCompletionResponse": {
       "spec": "main",
@@ -1867,7 +1867,7 @@
       "dart_class": "PromptCacheOptions",
       "file": "lib/src/models/responses/config/prompt_cache_options.dart",
       "schema": "PromptCacheOptions",
-      "note": "Response echo (mode/ttl required). Also covers identical Beta twin."
+      "note": "Response echo: required mode/ttl and optional nullable comparison_response_id. Shares canonical/beta implementation; prewarm is request-only."
     },
     "PromptCacheOptionsParam": {
       "spec": "main",
@@ -1875,7 +1875,7 @@
       "dart_class": "PromptCacheOptionsParam",
       "file": "lib/src/models/responses/config/prompt_cache_options.dart",
       "schema": "PromptCacheOptionsParam",
-      "note": "Request param (mode/ttl optional). Also covers identical Beta twin."
+      "note": "Narrow mode/ttl controls for Chat and compaction; Responses create uses ResponsePromptCacheOptionsParam."
     },
     "PromptCacheBreakpointConfig": {
       "spec": "main",
@@ -2575,6 +2575,179 @@
       "schema": "BetaPromptCacheRetentionEnum",
       "tags": [],
       "note": "Identical canonical/beta contract; shares PromptCacheRetention, including legacy input compatibility and unknown fallback."
+    },
+    "ResponsePromptCacheOptionsParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponsePromptCacheOptionsParam",
+      "file": "lib/src/models/responses/config/prompt_cache_options.dart",
+      "schema": "ResponsePromptCacheOptionsParam"
+    },
+    "PromptCacheDiagnostics": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "PromptCacheDiagnostics",
+      "file": "lib/src/models/responses/config/prompt_cache_diagnostics.dart",
+      "schema": "PromptCacheDiagnostics",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "PromptCacheMissDiagnostics": "cache_miss",
+          "PromptCacheHitDiagnostics": "cache_hit",
+          "PromptCacheComparisonResponseNotFoundDiagnostics": "comparison_response_not_found",
+          "PromptCacheUnavailableDiagnostics": "unavailable"
+        }
+      }
+    },
+    "PromptCacheMissDiagnosticsBody": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "PromptCacheMissDiagnostics",
+      "file": "lib/src/models/responses/config/prompt_cache_diagnostics.dart",
+      "schema": "PromptCacheMissDiagnosticsBody",
+      "parent": "PromptCacheDiagnostics"
+    },
+    "PromptCacheHitDiagnosticsBody": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "PromptCacheHitDiagnostics",
+      "file": "lib/src/models/responses/config/prompt_cache_diagnostics.dart",
+      "schema": "PromptCacheHitDiagnosticsBody",
+      "parent": "PromptCacheDiagnostics"
+    },
+    "PromptCacheComparisonResponseNotFoundDiagnosticsBody": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "PromptCacheComparisonResponseNotFoundDiagnostics",
+      "file": "lib/src/models/responses/config/prompt_cache_diagnostics.dart",
+      "schema": "PromptCacheComparisonResponseNotFoundDiagnosticsBody",
+      "parent": "PromptCacheDiagnostics"
+    },
+    "PromptCacheUnavailableDiagnosticsBody": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "PromptCacheUnavailableDiagnostics",
+      "file": "lib/src/models/responses/config/prompt_cache_diagnostics.dart",
+      "schema": "PromptCacheUnavailableDiagnosticsBody",
+      "parent": "PromptCacheDiagnostics"
+    },
+    "PromptCacheDiagnostics:UnknownPromptCacheDiagnostics": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownPromptCacheDiagnostics",
+      "file": "lib/src/models/responses/config/prompt_cache_diagnostics.dart",
+      "schema": null,
+      "parent": "PromptCacheDiagnostics",
+      "note": "Future diagnostic objects retain recursively immutable raw JSON; known malformed variants fail."
+    },
+    "CacheMissReasonTypeEnum": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "CacheMissReason",
+      "file": "lib/src/models/responses/config/prompt_cache_diagnostics.dart",
+      "schema": null,
+      "note": "Immutable open string wrapper with all nine current presets; preserves future strings exactly. Wire scalar tested directly without fabricating enum fallback."
+    },
+    "BetaResponsePromptCacheOptionsParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponsePromptCacheOptionsParam",
+      "file": "lib/src/models/responses/config/prompt_cache_options.dart",
+      "schema": "BetaResponsePromptCacheOptionsParam",
+      "note": "Identical canonical/beta contract; shares the canonical Dart implementation. "
+    },
+    "BetaPromptCacheOptionsParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PromptCacheOptionsParam",
+      "file": "lib/src/models/responses/config/prompt_cache_options.dart",
+      "schema": "BetaPromptCacheOptionsParam",
+      "note": "Identical canonical/beta contract; shares the canonical Dart implementation. Narrow mode/ttl controls for Chat and compaction; Responses create uses ResponsePromptCacheOptionsParam."
+    },
+    "BetaPromptCacheOptions": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PromptCacheOptions",
+      "file": "lib/src/models/responses/config/prompt_cache_options.dart",
+      "schema": "BetaPromptCacheOptions",
+      "note": "Identical canonical/beta contract; shares the canonical Dart implementation. Response echo: required mode/ttl and optional nullable comparison_response_id. Shares canonical/beta implementation; prewarm is request-only."
+    },
+    "BetaPromptCacheModeEnum": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "PromptCacheMode",
+      "file": "lib/src/models/responses/config/prompt_cache_options.dart",
+      "schema": "BetaPromptCacheModeEnum",
+      "note": "Identical canonical/beta contract; shares the canonical Dart implementation. Also covers identical BetaPromptCacheModeEnum."
+    },
+    "BetaPromptCacheTTLEnum": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "PromptCacheTtl",
+      "file": "lib/src/models/responses/config/prompt_cache_options.dart",
+      "schema": "BetaPromptCacheTTLEnum",
+      "note": "Identical canonical/beta contract; shares the canonical Dart implementation. Wire value '30m' is the minutes30 member. Also covers identical Beta twin."
+    },
+    "BetaPromptCacheDiagnostics": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "PromptCacheDiagnostics",
+      "file": "lib/src/models/responses/config/prompt_cache_diagnostics.dart",
+      "schema": "BetaPromptCacheDiagnostics",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "PromptCacheMissDiagnostics": "cache_miss",
+          "PromptCacheHitDiagnostics": "cache_hit",
+          "PromptCacheComparisonResponseNotFoundDiagnostics": "comparison_response_not_found",
+          "PromptCacheUnavailableDiagnostics": "unavailable"
+        }
+      },
+      "note": "Identical canonical/beta contract; shares the canonical Dart implementation. "
+    },
+    "BetaPromptCacheMissDiagnosticsBody": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "PromptCacheMissDiagnostics",
+      "file": "lib/src/models/responses/config/prompt_cache_diagnostics.dart",
+      "schema": "BetaPromptCacheMissDiagnosticsBody",
+      "parent": "PromptCacheDiagnostics",
+      "note": "Identical canonical/beta contract; shares the canonical Dart implementation. "
+    },
+    "BetaPromptCacheHitDiagnosticsBody": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "PromptCacheHitDiagnostics",
+      "file": "lib/src/models/responses/config/prompt_cache_diagnostics.dart",
+      "schema": "BetaPromptCacheHitDiagnosticsBody",
+      "parent": "PromptCacheDiagnostics",
+      "note": "Identical canonical/beta contract; shares the canonical Dart implementation. "
+    },
+    "BetaPromptCacheComparisonResponseNotFoundDiagnosticsBody": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "PromptCacheComparisonResponseNotFoundDiagnostics",
+      "file": "lib/src/models/responses/config/prompt_cache_diagnostics.dart",
+      "schema": "BetaPromptCacheComparisonResponseNotFoundDiagnosticsBody",
+      "parent": "PromptCacheDiagnostics",
+      "note": "Identical canonical/beta contract; shares the canonical Dart implementation. "
+    },
+    "BetaPromptCacheUnavailableDiagnosticsBody": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "PromptCacheUnavailableDiagnostics",
+      "file": "lib/src/models/responses/config/prompt_cache_diagnostics.dart",
+      "schema": "BetaPromptCacheUnavailableDiagnosticsBody",
+      "parent": "PromptCacheDiagnostics",
+      "note": "Identical canonical/beta contract; shares the canonical Dart implementation. "
+    },
+    "BetaCacheMissReasonTypeEnum": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "CacheMissReason",
+      "file": "lib/src/models/responses/config/prompt_cache_diagnostics.dart",
+      "schema": null,
+      "note": "Identical canonical/beta contract; shares the canonical Dart implementation. Immutable open string wrapper with all nine current presets; preserves future strings exactly. Wire scalar tested directly without fabricating enum fallback."
     }
   }
 }
