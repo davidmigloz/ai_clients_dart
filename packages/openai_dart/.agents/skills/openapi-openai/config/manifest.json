@@ -10,6 +10,19 @@
   },
   "placement": {
     "categories": {
+      "decisions": {
+        "patterns": [
+          "decision",
+          "questionparam",
+          "answerresource",
+          "choicevalue",
+          "choiceoption",
+          "choiceprobability",
+          "scorelevel",
+          "scoreprobability"
+        ],
+        "directory": "decisions"
+      },
       "chat": {
         "patterns": [
           "chat",
@@ -1978,6 +1991,300 @@
       "file": "lib/src/models/responses/multi_agent/response_inject_event.dart",
       "schema": "BetaResponseInjectFailedEvent",
       "note": "Beta multi-agent WebSocket protocol event; data model only. Inline error object modeled as ResponseInjectError + ResponseInjectErrorCode."
+    },
+    "DecisionRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DecisionRequest",
+      "file": "lib/src/models/decisions/decision_request.dart",
+      "schema": "DecisionRequest"
+    },
+    "DecisionResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DecisionResponse",
+      "file": "lib/src/models/decisions/decision_response.dart",
+      "schema": "DecisionResponse"
+    },
+    "DecisionInput": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionInput",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": "DecisionInput",
+      "note": "String-or-user-message-array union dispatched by JSON shape."
+    },
+    "DecisionInput:TextDecisionInput": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "TextDecisionInput",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": null,
+      "parent": "DecisionInput",
+      "note": "Dart wrapper for the string member."
+    },
+    "DecisionInput:MessagesDecisionInput": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "MessagesDecisionInput",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": null,
+      "parent": "DecisionInput",
+      "note": "Dart wrapper for the user-message-array member."
+    },
+    "DecisionInputMessage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DecisionInputMessage",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": "DecisionInputMessage"
+    },
+    "DecisionInputContent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionContent",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": "DecisionInputContent",
+      "note": "String-or-content-array union dispatched by JSON shape."
+    },
+    "DecisionInputContent:TextDecisionContent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "TextDecisionContent",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": null,
+      "parent": "DecisionInputContent",
+      "note": "Dart wrapper for the string member."
+    },
+    "DecisionInputContentParts": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "PartsDecisionContent",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": null,
+      "parent": "DecisionInputContent",
+      "note": "Array schema represented by a Dart wrapper; serializes a bare list of DecisionInputPart objects. Exact shape tested at the public boundary."
+    },
+    "DecisionInputPart": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionInputPart",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "TextDecisionInputPart": "input_text",
+          "ImageDecisionInputPart": "input_image"
+        }
+      },
+      "note": "Synthetic union from DecisionInputContentParts.items; restricted to inline text and data-url images."
+    },
+    "DecisionInputText": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TextDecisionInputPart",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": "DecisionInputText",
+      "parent": "DecisionInputPart"
+    },
+    "DecisionInputImage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ImageDecisionInputPart",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": "DecisionInputImage",
+      "parent": "DecisionInputPart"
+    },
+    "QuestionParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionQuestion",
+      "file": "lib/src/models/decisions/decision_question.dart",
+      "schema": "QuestionParam",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "PredicateDecisionQuestion": "predicate",
+          "ChoiceDecisionQuestion": "choice",
+          "ScoreDecisionQuestion": "score"
+        }
+      }
+    },
+    "QuestionParamPredicate": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "PredicateDecisionQuestion",
+      "file": "lib/src/models/decisions/decision_question.dart",
+      "schema": "QuestionParamPredicate",
+      "parent": "QuestionParam"
+    },
+    "QuestionParamChoice": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ChoiceDecisionQuestion",
+      "file": "lib/src/models/decisions/decision_question.dart",
+      "schema": "QuestionParamChoice",
+      "parent": "QuestionParam"
+    },
+    "QuestionParamScore": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ScoreDecisionQuestion",
+      "file": "lib/src/models/decisions/decision_question.dart",
+      "schema": "QuestionParamScore",
+      "parent": "QuestionParam"
+    },
+    "ChoiceOptionParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DecisionChoiceOption",
+      "file": "lib/src/models/decisions/decision_question.dart",
+      "schema": "ChoiceOptionParam"
+    },
+    "ScoreLevelParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DecisionScoreLevel",
+      "file": "lib/src/models/decisions/decision_question.dart",
+      "schema": "ScoreLevelParam"
+    },
+    "ChoiceValueParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionChoiceValue",
+      "file": "lib/src/models/decisions/decision_choice_value.dart",
+      "schema": "ChoiceValueParam",
+      "note": "String-or-boolean primitive union. Both parameter and resource schemas share the same type without coercion."
+    },
+    "ChoiceValueResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionChoiceValue",
+      "file": "lib/src/models/decisions/decision_choice_value.dart",
+      "schema": "ChoiceValueResource",
+      "note": "String-or-boolean primitive union. Both parameter and resource schemas share the same type without coercion."
+    },
+    "ChoiceValueParam:StringDecisionChoiceValue": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "StringDecisionChoiceValue",
+      "file": "lib/src/models/decisions/decision_choice_value.dart",
+      "schema": null,
+      "parent": "ChoiceValueParam",
+      "note": "Dart wrapper for a primitive JSON union member."
+    },
+    "ChoiceValueParam:BooleanDecisionChoiceValue": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "BooleanDecisionChoiceValue",
+      "file": "lib/src/models/decisions/decision_choice_value.dart",
+      "schema": null,
+      "parent": "ChoiceValueParam",
+      "note": "Dart wrapper for a primitive JSON union member."
+    },
+    "AnswerResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionAnswer",
+      "file": "lib/src/models/decisions/decision_answer.dart",
+      "schema": "AnswerResource",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "PredicateDecisionAnswer": "predicate",
+          "ChoiceDecisionAnswer": "choice",
+          "ScoreDecisionAnswer": "score",
+          "RefusalDecisionAnswer": "refusal"
+        }
+      }
+    },
+    "AnswerResourcePredicate": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "PredicateDecisionAnswer",
+      "file": "lib/src/models/decisions/decision_answer.dart",
+      "schema": "AnswerResourcePredicate",
+      "parent": "AnswerResource"
+    },
+    "AnswerResourceChoice": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ChoiceDecisionAnswer",
+      "file": "lib/src/models/decisions/decision_answer.dart",
+      "schema": "AnswerResourceChoice",
+      "parent": "AnswerResource"
+    },
+    "AnswerResourceScore": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ScoreDecisionAnswer",
+      "file": "lib/src/models/decisions/decision_answer.dart",
+      "schema": "AnswerResourceScore",
+      "parent": "AnswerResource"
+    },
+    "AnswerResourceRefusal": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "RefusalDecisionAnswer",
+      "file": "lib/src/models/decisions/decision_answer.dart",
+      "schema": "AnswerResourceRefusal",
+      "parent": "AnswerResource"
+    },
+    "AnswerResource:UnknownDecisionAnswer": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownDecisionAnswer",
+      "file": "lib/src/models/decisions/decision_answer.dart",
+      "schema": null,
+      "parent": "AnswerResource",
+      "note": "Forward-compatible response fallback preserving a recursively immutable raw JSON snapshot."
+    },
+    "ChoiceProbabilityResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DecisionChoiceProbability",
+      "file": "lib/src/models/decisions/decision_answer.dart",
+      "schema": "ChoiceProbabilityResource"
+    },
+    "ScoreProbabilityResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DecisionScoreProbability",
+      "file": "lib/src/models/decisions/decision_answer.dart",
+      "schema": "ScoreProbabilityResource"
+    },
+    "ResponseUsageResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseUsage",
+      "file": "lib/src/models/responses/response_usage.dart",
+      "schema": "ResponseUsageResource",
+      "note": "Shared Responses/provider-compatible model: optional detail fields intentionally remain nullable. DecisionResponse.fromJson validates every required Decisions usage object/counter before calling the tolerant shared parser; see DEC-08 and Decisions usage fixtures."
+    },
+    "InputTokensDetailsResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "InputTokensDetails",
+      "file": "lib/src/models/responses/response_usage.dart",
+      "schema": "InputTokensDetailsResource",
+      "note": "Shared Responses/provider-compatible model: optional detail fields intentionally remain nullable. DecisionResponse.fromJson validates every required Decisions usage object/counter before calling the tolerant shared parser; see DEC-08 and Decisions usage fixtures."
+    },
+    "OutputTokensDetailsResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OutputTokensDetails",
+      "file": "lib/src/models/responses/response_usage.dart",
+      "schema": "OutputTokensDetailsResource",
+      "note": "Shared Responses/provider-compatible model: optional detail fields intentionally remain nullable. DecisionResponse.fromJson validates every required Decisions usage object/counter before calling the tolerant shared parser; see DEC-08 and Decisions usage fixtures."
+    },
+    "ImageDetailParam": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ImageDetail",
+      "file": "lib/src/models/chat/content_part.dart",
+      "schema": "ImageDetailParam",
+      "note": "Existing shared image detail values, reused by Decisions."
     }
   }
 }

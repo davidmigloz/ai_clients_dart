@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+
 /// Token usage statistics for a response.
 @immutable
 class ResponseUsage {
@@ -96,31 +98,57 @@ class InputTokensDetails {
   /// Tokens from cached content.
   final int? cachedTokens;
 
+  /// Tokens written to the prompt cache.
+  ///
+  /// May be absent on older responses and compatible provider payloads.
+  final int? cacheWriteTokens;
+
   /// Creates an [InputTokensDetails].
-  const InputTokensDetails({this.cachedTokens});
+  const InputTokensDetails({this.cachedTokens, this.cacheWriteTokens});
 
   /// Creates an [InputTokensDetails] from JSON.
   factory InputTokensDetails.fromJson(Map<String, dynamic> json) {
-    return InputTokensDetails(cachedTokens: json['cached_tokens'] as int?);
+    return InputTokensDetails(
+      cachedTokens: json['cached_tokens'] as int?,
+      cacheWriteTokens: json['cache_write_tokens'] as int?,
+    );
   }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (cachedTokens != null) 'cached_tokens': cachedTokens,
+    if (cacheWriteTokens != null) 'cache_write_tokens': cacheWriteTokens,
   };
+
+  /// Creates a copy with replaced values.
+  ///
+  /// Nullable fields can be explicitly set to `null` to clear them.
+  InputTokensDetails copyWith({
+    Object? cachedTokens = unsetCopyWithValue,
+    Object? cacheWriteTokens = unsetCopyWithValue,
+  }) => InputTokensDetails(
+    cachedTokens: cachedTokens == unsetCopyWithValue
+        ? this.cachedTokens
+        : cachedTokens as int?,
+    cacheWriteTokens: cacheWriteTokens == unsetCopyWithValue
+        ? this.cacheWriteTokens
+        : cacheWriteTokens as int?,
+  );
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is InputTokensDetails &&
           runtimeType == other.runtimeType &&
-          cachedTokens == other.cachedTokens;
+          cachedTokens == other.cachedTokens &&
+          cacheWriteTokens == other.cacheWriteTokens;
 
   @override
-  int get hashCode => cachedTokens.hashCode;
+  int get hashCode => Object.hash(cachedTokens, cacheWriteTokens);
 
   @override
-  String toString() => 'InputTokensDetails(cachedTokens: $cachedTokens)';
+  String toString() =>
+      'InputTokensDetails(cachedTokens: $cachedTokens, cacheWriteTokens: $cacheWriteTokens)';
 }
 
 /// Detailed breakdown of output tokens.

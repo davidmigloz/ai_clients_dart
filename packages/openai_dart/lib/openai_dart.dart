@@ -3,6 +3,7 @@
 /// This is the main entry point providing access to modern APIs including:
 /// - Chat Completions (GPT-4, GPT-4o, etc.)
 /// - Responses API (recommended unified API with built-in tools)
+/// - Decisions API (typed classification and scoring from text or images)
 /// - Embeddings, Images, Audio, Files, Batches, Fine-tuning, Moderations
 ///
 /// For deprecated Assistants API, import `package:openai_dart/openai_dart_assistants.dart`.
@@ -60,6 +61,8 @@ export 'src/models/containers/containers.dart';
 export 'src/models/content_provenance_checks/content_provenance_checks.dart';
 // Models - Conversations
 export 'src/models/conversations/conversations.dart';
+// Models - Decisions
+export 'src/models/decisions/decisions.dart';
 // Models - Embeddings
 export 'src/models/embeddings/embeddings.dart';
 // Models - Evals

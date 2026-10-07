@@ -5,7 +5,7 @@
 ![Discord](https://img.shields.io/discord/1123158322812555295?label=discord)
 [![MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://github.com/davidmigloz/ai_clients_dart/blob/main/LICENSE)
 
-Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-reference)** with Responses API, Chat Completions, images, videos, audio, custom tools, embeddings, evals, realtime, and more. It gives Dart and Flutter applications a pure Dart, type-safe client across iOS, Android, macOS, Windows, Linux, Web, and server-side Dart.
+Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-reference)** with Responses API, Decisions API, Chat Completions, images, videos, audio, custom tools, embeddings, evals, realtime, and more. It gives Dart and Flutter applications a pure Dart, type-safe client across iOS, Android, macOS, Windows, Linux, Web, and server-side Dart.
 
 > [!TIP]
 > Coding agents: start with [llms.txt](./llms.txt). It links to the package docs, examples, and optional references in a compact format.
@@ -32,6 +32,7 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 ### Generation and streaming
 
 - Responses API with streaming, multi-turn conversations, structured output, and background mode
+- Decisions API for typed predicate, choice, and score answers from text or inline images
 - Chat Completions with tool calling, vision, structured output, and streaming
 - Images, videos, audio (TTS, transcription, translation), and embeddings
 - Realtime API via WebSocket and WebRTC with audio streaming
@@ -54,7 +55,7 @@ See [API Coverage](#api-coverage) for the full coverage table.
 - Pure Dart with no Flutter dependency — works in mobile apps, backends, and CLIs.
 - Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
 - Streaming, retries, interceptors, and error handling built into the client.
-- Covers the full OpenAI API surface, including Responses, Realtime, and legacy Assistants.
+- Supports OpenAI generation, media, operational, and Realtime APIs; see the coverage table for remaining gaps.
 - Resource-based API design matching official SDKs.
 - Strict [semver](https://semver.org/) versioning so downstream packages can depend on stable, predictable version ranges.
 
@@ -154,6 +155,39 @@ final client = OpenAIClient(
 </details>
 
 ## Usage
+
+### How do I classify or score shared input?
+
+The [Decisions API](https://developers.openai.com/api/docs/guides/decisions) returns ordered typed answers to predicate, choice, and score questions. It currently supports `gpt-6-luna` and accepts text or inline images.
+
+```dart
+final decision = await client.decisions.create(
+  DecisionRequest(
+    model: 'gpt-6-luna',
+    input: DecisionInput.text('The screen arrived broken.'),
+    questions: [
+      DecisionQuestion.predicate(
+        name: 'damaged',
+        instructions: 'Does the customer report a damaged item?',
+      ),
+    ],
+  ),
+);
+
+for (final answer in decision.answers) {
+  if (answer case PredicateDecisionAnswer(:final probability)) {
+    print('Damage probability: $probability');
+  } else if (answer case RefusalDecisionAnswer()) {
+    print('The question was refused.');
+  }
+}
+```
+
+Use `DecisionInput.messages` with `DecisionContent.parts` for mixed text/image input. `DecisionInputPart.image(imageUrl: ...)` accepts a data URL; `DecisionInputPart.imageBytes(bytes, mediaType: 'image/png')` builds the MIME/base64 data URL. Files, external image URLs, other roles, tools, and audio are unsupported. Unset image detail defaults to `auto` on the server.
+
+Requests support 1–200 questions, 2–255 choices per choice question, 2–10 levels per score question, and up to 128 images across all messages. An optional `safetyIdentifier` is limited to 128 characters. Choice values preserve strings and booleans as distinct types; score answers can be fractional. Refusals can occur alongside successful answers. There is no model-event streaming mode.
+
+→ [Full example](example/decisions_example.dart)
 
 ### How do I create a response?
 
@@ -797,6 +831,7 @@ See the [example/](example/) directory for complete examples:
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Function calling with tool definitions |
 | [`vision_example.dart`](example/vision_example.dart) | Image analysis with vision models |
 | [`responses_example.dart`](example/responses_example.dart) | Responses API with built-in tools |
+| [`decisions_example.dart`](example/decisions_example.dart) | Typed Decisions questions, refusals, usage, and inline images |
 | [`embeddings_example.dart`](example/embeddings_example.dart) | Text embeddings with dimension control |
 | [`images_example.dart`](example/images_example.dart) | GPT Image generation |
 | [`videos_example.dart`](example/videos_example.dart) | Sora video generation, editing, and extension |
@@ -825,21 +860,22 @@ See the [example/](example/) directory for complete examples:
 
 | API | Status |
 |-----|--------|
-| Chat Completions | ✅ Full |
-| Responses API | ✅ Full |
+| Chat Completions | Supported; stored-completion management and some streaming details pending |
+| Responses API | Supported; WebSockets and additional tool/configuration details pending |
+| Decisions API | ✅ Full |
 | Embeddings | ✅ Full |
 | Images | ✅ Full |
 | Videos (Sora) | ✅ Full |
-| Audio (Speech, Transcription, Translation) | ✅ Full |
+| Audio (Speech, Transcription, Translation) | Supported; custom voices and some speech options pending |
 | Files | ✅ Full |
 | Uploads | ✅ Full |
 | Batches | ✅ Full |
 | Models | ✅ Full |
 | Moderations | ✅ Full |
-| Fine-tuning | ✅ Full |
+| Fine-tuning | Supported; some job/grader/checkpoint operations pending |
 | Evals | ✅ Full |
 | Conversations | ✅ Full |
-| Containers | ✅ Full |
+| Containers | HTTP operations supported; configuration fields pending |
 | Content Provenance Checks | ✅ Full |
 | ChatKit Beta | ✅ Full |
 | Realtime | ✅ Full (separate import) |
@@ -849,6 +885,8 @@ See the [example/](example/) directory for complete examples:
 | Runs (Deprecated) | ✅ Full (separate import) |
 | Vector Stores (Deprecated) | ✅ Full (separate import) |
 | Completions (Legacy) | ✅ Full |
+
+Agents, Live, safety retrieval, webhook management, vaults, and Administration remain part of the [API alignment roadmap](specs/api-alignment/README.md).
 
 ## Official Documentation
 

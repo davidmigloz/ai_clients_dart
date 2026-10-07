@@ -1,15 +1,16 @@
 # OpenAI Dart Client
 
-> Dart client for the OpenAI API with Responses API, Chat Completions, images, videos, audio, custom tools, embeddings, evals, realtime, and more.
+> Dart client for the OpenAI API with Responses API, Decisions API, Chat Completions, images, videos, audio, custom tools, embeddings, evals, realtime, and more.
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~6.3k tokens): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/CHANGELOG.md) (~21.5k tokens): Release history and version-by-version changes.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~6.8k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/CHANGELOG.md) (~21.7k tokens): Release history and version-by-version changes.
 - [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/MIGRATION.md) (~11.7k tokens): Upgrade notes and breaking-change guidance.
 
 ## Examples
 
+- [decisions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/decisions_example.dart) (~639 tokens): Typed Decisions questions, refusals, usage, and inline images.
 - [responses_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/responses_example.dart) (~870 tokens): Responses API with built-in tools.
 - [chat_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/chat_example.dart) (~432 tokens): Basic chat completions with multi-turn conversations.
 - [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/streaming_example.dart) (~464 tokens): Streaming responses with text deltas.
@@ -43,4 +44,4 @@
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~68.8k tokens**
+**Total: ~70.1k tokens**

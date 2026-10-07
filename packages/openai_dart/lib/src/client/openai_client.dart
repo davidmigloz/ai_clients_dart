@@ -15,6 +15,7 @@ import '../resources/completions_resource.dart';
 import '../resources/containers_resource.dart';
 import '../resources/content_provenance_checks_resource.dart';
 import '../resources/conversations_resource.dart';
+import '../resources/decisions_resource.dart';
 import '../resources/embeddings_resource.dart';
 import '../resources/evals_resource.dart';
 import '../resources/files_resource.dart';
@@ -73,6 +74,7 @@ import 'retry_wrapper.dart';
 /// - [batches] - Batch processing
 /// - [models] - Model information
 /// - [moderations] - Content moderation
+/// - [decisions] - Typed classification and scoring
 /// - [fineTuning] - Fine-tuning jobs
 /// - [skills] - Skills API for skill bundles and versions
 /// - [beta] - Beta features (Assistants, Threads, etc.)
@@ -506,6 +508,20 @@ class OpenAIClient {
   /// print('Flagged: ${result.results.first.flagged}');
   /// ```
   ModerationsResource get moderations => _moderations ??= ModerationsResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+  );
+
+  DecisionsResource? _decisions;
+
+  /// Decisions API resource for typed classification and scoring.
+  ///
+  /// Evaluate predicate, choice, and score questions against shared text or
+  /// inline-image input. Individual answers can also be refusals.
+  DecisionsResource get decisions => _decisions ??= DecisionsResource(
     config: config,
     httpClient: _httpClient,
     interceptorChain: _interceptorChain,

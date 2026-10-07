@@ -2,8 +2,8 @@
   "specs": {
     "main": {
       "current_version": "2.3.0",
-      "last_fetched": "2026-09-16T12:18:13.253574Z",
-      "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/main/openapi.json",
+      "last_fetched": "2026-10-07T05:31:56.851160Z",
+      "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/ee483b4b26b2695fedc5c8af7b187e5986bd0add/openapi.json",
       "title": "OpenAI API",
       "version_history": [
         {
@@ -46,6 +46,12 @@
           "fetched_at": "2026-07-31T22:12:09.651705Z",
           "note": "Replaced with the public OpenAI OpenAPI repository on 2026-09-16. Image generation/edit changes reviewed against the September 8 GPT Image 2.5 release and the official Python SDK. Other new API surfaces are outside this image update.",
           "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai/openai-31fcc3c97e5c432754bf0b72c5d5abbe1493573f0ca888af914baf81188b453e.yml",
+          "version": "2.3.0"
+        },
+        {
+          "fetched_at": "2026-09-16T12:18:13.253574Z",
+          "note": "September 16 snapshot replaced by OpenAPI commit ee483b4b26b2695fedc5c8af7b187e5986bd0add on October 7. Decisions API and shared cache-write token usage implemented; remaining API/SDK gaps tracked in specs/api-alignment and GitHub #317. This promotion does not claim complete parity.",
+          "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/main/openapi.json",
           "version": "2.3.0"
         }
       ]
