@@ -2,6 +2,7 @@
 library;
 
 export 'click_button.dart';
+export 'configuration_update_reasoning.dart';
 export 'context_management.dart';
 export 'function_call_output_status.dart';
 export 'function_call_status.dart';

@@ -2883,6 +2883,84 @@
       "file": "lib/src/models/conversations/conversation_item.dart",
       "schema": "CustomToolCallResource",
       "note": "Contextual conversation mapping. Existing custom optional id/status compatibility remains; async/namespace/caller/creator/beta-agent fidelity covered by public fixtures."
+    },
+    "ResponseConfigurationUpdateItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ConfigurationUpdateItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "ResponseConfigurationUpdateItemParam",
+      "parent": "Item",
+      "note": "Input update: optional nullable id, optional nonnull narrow reasoning. Nullable effort/id normalize null to omission."
+    },
+    "BetaResponseConfigurationUpdateItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ConfigurationUpdateItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "BetaResponseConfigurationUpdateItemParam",
+      "parent": "Item",
+      "note": "Beta input adds optional nullable agent metadata; preservation does not claim multi-agent runtime support."
+    },
+    "ResponseConfigurationUpdate": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ConfigurationUpdateItemResponse",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "ResponseConfigurationUpdate",
+      "parent": "Item",
+      "note": "Returned Responses input-list shape requires id. Item.fromResourceJson selects this contextual parser; not an OutputItem."
+    },
+    "BetaResponseConfigurationUpdate": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ConfigurationUpdateItemResponse",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "BetaResponseConfigurationUpdate",
+      "parent": "Item",
+      "note": "Returned beta shape requires id and validates supplied nonnull agent metadata."
+    },
+    "ConversationResponseConfigurationUpdate": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ConversationConfigurationUpdateItem",
+      "file": "lib/src/models/conversations/conversation_item.dart",
+      "schema": "ResponseConfigurationUpdate",
+      "parent": "ConversationItem",
+      "note": "Stored conversation shape requires id and supports typed input replay."
+    },
+    "ConversationBetaResponseConfigurationUpdate": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ConversationConfigurationUpdateItem",
+      "file": "lib/src/models/conversations/conversation_item.dart",
+      "schema": "BetaResponseConfigurationUpdate",
+      "parent": "ConversationItem",
+      "note": "Contextual beta conversation mapping retains supplied agent metadata without widening reasoning."
+    },
+    "ConfigurationUpdateReasoning": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ConfigurationUpdateReasoning",
+      "file": "lib/src/models/responses/config/configuration_update_reasoning.dart",
+      "schema": null,
+      "note": "Typed inline reasoning object shared by the four real ConfigurationUpdate schemas above. No named upstream schema exists; focused fixtures verify effort-only shape, nullable omission, copies, and value contracts."
+    },
+    "ResponseItemList": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "InputItemList",
+      "file": "lib/src/resources/responses_resource.dart",
+      "schema": "ResponseItemList",
+      "note": "Real returned-input list mapping. Contextual configuration items now require id; pre-existing optional pagination IDs and provider omission/null tolerance remain compatible and visible to verification. Const construction and caller-owned lists are retained."
+    },
+    "BetaResponseItemList": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "InputItemList",
+      "file": "lib/src/resources/responses_resource.dart",
+      "schema": "BetaResponseItemList",
+      "note": "Beta contextual returned-input list shares existing pagination-ID tolerance. Complete copy/value/diagnostic contracts are tested across every field."
     }
   }
 }

@@ -313,6 +313,63 @@ local transport with an intervening turn, no API key and no charges.
 
 </details>
 
+### How do I change reasoning effort during a conversation?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Append a `ConfigurationUpdateItem` before the next user message to change effort
+for subsequent responses. Keep the request-level `ReasoningConfig` and stable
+instructions unchanged so the original prompt prefix remains reusable for caching.
+
+```dart
+const baseline = ReasoningConfig(effort: ReasoningEffort.low);
+final first = await client.responses.create(
+  const CreateResponseRequest(
+    model: 'gpt-6-astra',
+    reasoning: baseline,
+    input: ResponseInput.text('Draft a database migration plan.'),
+  ),
+);
+final next = await client.responses.create(
+  CreateResponseRequest(
+    model: 'gpt-6-astra',
+    reasoning: baseline,
+    previousResponseId: first.id,
+    input: ResponseInput.items([
+      const ConfigurationUpdateItem(
+        reasoning: ConfigurationUpdateReasoning(effort: ReasoningEffort.high),
+      ),
+      MessageItem.userText('Analyze failure modes and rollback steps.'),
+    ]),
+  ),
+);
+print(next.outputText);
+```
+
+The server keeps the selected effort until another update replaces it. Continue
+with `previousResponseId`, or preserve updates in their original positions when
+replaying history. `response.reasoning.effort` still reports request-level effort.
+
+`ConfigurationUpdateReasoning` exposes only `effort`. Omitted reasoning and `{}`
+remain distinct. Nullable input IDs and effort values accept null and serialize
+as omission; supplied null reasoning is invalid. Responses input listings return
+`ConfigurationUpdateItemResponse`; conversation items return
+`ConversationConfigurationUpdateItem`. Both require an ID and provide
+`toConfigurationUpdateItem()` for typed replay.
+
+The [official reasoning guide](https://developers.openai.com/api/docs/guides/reasoning#change-reasoning-mid-conversation)
+documents GPT-6 support in standard, single-agent mode. Avoid adjacent updates,
+automatic compaction, automatic truncation, and standalone `/responses/compact`
+for histories containing updates. After explicit `compaction_trigger` compaction,
+insert a fresh update before the next user message. Normal caching requirements
+still apply.
+
+→ [Runnable local example](example/configuration_updates_example.dart) shows
+low → high → high → low across four turns, without an API key or charges.
+
+</details>
+
 ### How do I prewarm the prompt cache and inspect diagnostics?
 
 <details>

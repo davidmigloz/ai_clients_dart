@@ -1,7 +1,8 @@
 # Responses capabilities: Phase 3 specification
 
-Status: independently reviewed specification; runtime implementation is pending. No Phase 3
-capability is claimed as implemented by this document. Parent:
+Status: independently reviewed specification; async tools merged in #346.
+Configuration updates are implemented and independently reviewed; merge pending.
+Remaining runtime slices are tracked below. Parent:
 [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 
 ## Objective and decisions
@@ -126,6 +127,15 @@ Local entry points: `response_tool.dart`, `items/item.dart`, `items/output_item.
   requests nor synthesizes output items/stream events. Document single-agent
   scope. Omitted reasoning, `{}`, nullable effort/id, malformed supplied objects,
   and required returned id each have contextual fixtures.
+
+Revalidated implementation guidance: the response's `reasoning.effort` reports
+the request-level setting, not effort selected by an update. Preserve updates
+with `previous_response_id` or their original positions in manual history. Avoid
+adjacent updates, automatic compaction/truncation, and standalone
+`/responses/compact` histories containing updates. Explicit `compaction_trigger`
+is supported; add a fresh update after compaction before the next user message.
+These service restrictions are documented, without introducing SDK model
+eligibility checks or automatic history rewriting.
 
 Sources: [reasoning updates](https://developers.openai.com/api/docs/guides/reasoning#change-reasoning-mid-conversation),
 [Python configuration input](https://github.com/openai/openai-python/blob/4e152cdefe1844c2d5d78653310e9b9c0195c44e/src/openai/types/responses/response_configuration_update_item_param_param.py).

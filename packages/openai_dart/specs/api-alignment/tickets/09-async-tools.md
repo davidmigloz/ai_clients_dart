@@ -1,6 +1,6 @@
 # Async function/custom tools and replay
 
-Status: implemented and independently reviewed; [PR #346](https://github.com/davidmigloz/ai_clients_dart/pull/346) open.
+Status: complete; [PR #346](https://github.com/davidmigloz/ai_clients_dart/pull/346) merged.
 GitHub: [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-ASYNC-01–03.
@@ -36,6 +36,6 @@ Package publishing and unrelated API families are outside this ticket.
 [Acceptance evidence](../reviews/09-async-tools.md) records full changed-model
 contracts, 2,903 passing unit tests, clean analysis, real schema mappings and
 the offline runnable example. Independent requirements/engineering reviews approve the final combined change;
-close only after implementation PR merge.
+completed with implementation PR merge.
 
-Implementation [PR #346](https://github.com/davidmigloz/ai_clients_dart/pull/346) is open for review; #334 remains open until merge.
+Implementation [PR #346](https://github.com/davidmigloz/ai_clients_dart/pull/346) merged after applicable CI passed; #334 is closed.

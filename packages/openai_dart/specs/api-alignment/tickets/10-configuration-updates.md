@@ -1,6 +1,6 @@
 # Persistent reasoning configuration updates
 
-Status: specified; implementation pending.
+Status: implemented, verified, and independently reviewed; merge pending.
 GitHub: [#335](https://github.com/davidmigloz/ai_clients_dart/issues/335).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-CONFIG-01–02.
@@ -12,14 +12,14 @@ Change subsequent reasoning effort through a conversation item without changing 
 
 ## Acceptance criteria
 
-- [ ] Input configuration_update supports nullable optional id and optional nonnull reasoning with only nullable optional effort; returned item requires id.
-- [ ] Omitted, empty, nullable effort/id and malformed required/supplied objects have contextual fixtures.
-- [ ] Public Responses create/list-input and conversation create/list/retrieve parse and emit exact shapes. No invented OutputItem or dedicated streaming event.
-- [ ] Offline example reuses stable request-level effort and shows successive configuration updates; single-agent persistence is documented.
-- [ ] Changed models have complete contextual serialization, copy/clear, equality/hash and safe diagnostics across all old/new fields; known malformed variants fail and intended provider tolerance stays compatible.
-- [ ] Public factories/resources/stream parsers, exports and real manifest mappings are verified. README/llms, an offline runnable example and any required migration guide are complete.
-- [ ] Relevant focused unit fixtures, format/fix/analyze, the package unit suite and full toolkit scope have recorded evidence. Unrelated diagnostics remain visible.
-- [ ] Independent requirements and engineering reviews approve the final combined diff after validated findings are resolved.
+- [x] Input configuration_update supports nullable optional id and optional nonnull reasoning with only nullable optional effort; returned item requires id.
+- [x] Omitted, empty, nullable effort/id and malformed required/supplied objects have contextual fixtures.
+- [x] Public Responses create/list-input and conversation create/list/retrieve parse and emit exact shapes. No invented OutputItem or dedicated streaming event.
+- [x] Offline example reuses stable request-level effort and shows successive configuration updates; single-agent persistence is documented.
+- [x] Changed models have complete contextual serialization, copy/clear, equality/hash and safe diagnostics across all old/new fields; known malformed variants fail and intended provider tolerance stays compatible.
+- [x] Public factories/resources/stream parsers, exports and real manifest mappings are verified. README/llms, an offline runnable example and any required migration guide are complete.
+- [x] Relevant focused unit fixtures, format/fix/analyze, the package unit suite and full toolkit scope have recorded evidence. Unrelated diagnostics remain visible.
+- [x] Independent requirements and engineering reviews approve the final combined diff after validated findings are resolved.
 
 ## Compatibility and boundaries
 
@@ -33,5 +33,7 @@ Package publishing and unrelated API families are outside this ticket.
 
 ## Completion evidence
 
-Pending implementation, verification and independent review. Link the evidence
-record and PR here when complete; close the issue only after merge.
+[Acceptance evidence](../reviews/10-configuration-updates.md) records complete
+contextual contracts, 3,269 passing unit tests, clean analysis, full toolkit
+diagnostics, README/migration guidance, the offline example, and independent
+requirements/engineering approvals. Close the issue only after implementation merge.
