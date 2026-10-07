@@ -1,6 +1,8 @@
 import 'package:meta/meta.dart';
 
+import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import '../../common/json_helpers.dart';
 import '../config/search_content_type.dart';
 import '../config/tool_search_execution_type.dart';
 import 'code_interpreter_container.dart';
@@ -67,12 +69,35 @@ sealed class ResponseTool {
     Map<String, dynamic>? parameters,
     bool? strict,
     bool? deferLoading,
+    List<CallableToolAllowedCaller>? allowedCallers,
+    Map<String, dynamic>? outputSchema,
+    bool? async,
   }) => FunctionTool(
     name: name,
     description: description,
     parameters: parameters,
     strict: strict,
     deferLoading: deferLoading,
+    allowedCallers: allowedCallers,
+    outputSchema: outputSchema,
+    async: async,
+  );
+
+  /// Creates a custom tool with an optional input format.
+  static CustomTool custom({
+    required String name,
+    String? description,
+    Map<String, dynamic>? format,
+    bool? deferLoading,
+    List<CallableToolAllowedCaller>? allowedCallers,
+    bool? async,
+  }) => CustomTool(
+    name: name,
+    description: description,
+    format: format,
+    deferLoading: deferLoading,
+    allowedCallers: allowedCallers,
+    async: async,
   );
 
   /// Creates a web search tool.
@@ -201,6 +226,9 @@ sealed class ResponseTool {
 /// A function tool.
 @immutable
 class FunctionTool extends ResponseTool implements NamespaceAllowedTool {
+  /// The fixed tool discriminator.
+  String get type => 'function';
+
   /// The function name.
   final String name;
 
@@ -223,6 +251,12 @@ class FunctionTool extends ResponseTool implements NamespaceAllowedTool {
   /// outputs for this function.
   final Map<String, dynamic>? outputSchema;
 
+  /// Whether the model may continue while this tool call is pending.
+  ///
+  /// The application executes the tool and returns its result. Omission leaves
+  /// the server's behavior unchanged; an explicit false is preserved.
+  final bool? async;
+
   /// Creates a [FunctionTool].
   const FunctionTool({
     required this.name,
@@ -232,12 +266,14 @@ class FunctionTool extends ResponseTool implements NamespaceAllowedTool {
     this.deferLoading,
     this.allowedCallers,
     this.outputSchema,
+    this.async,
   });
 
   /// Creates a [FunctionTool] from JSON.
   factory FunctionTool.fromJson(Map<String, dynamic> json) {
+    requireJsonType(json, 'function', 'FunctionTool');
     return FunctionTool(
-      name: json['name'] as String,
+      name: requireJsonString(json['name'], 'FunctionTool.name'),
       description: json['description'] as String?,
       parameters: json['parameters'] as Map<String, dynamic>?,
       strict: json['strict'] as bool?,
@@ -246,6 +282,7 @@ class FunctionTool extends ResponseTool implements NamespaceAllowedTool {
           ?.map((e) => CallableToolAllowedCaller.fromJson(e as String))
           .toList(),
       outputSchema: json['output_schema'] as Map<String, dynamic>?,
+      async: optionalJsonBool(json, 'async', 'FunctionTool'),
     );
   }
 
@@ -260,7 +297,41 @@ class FunctionTool extends ResponseTool implements NamespaceAllowedTool {
     if (allowedCallers != null)
       'allowed_callers': allowedCallers!.map((e) => e.toJson()).toList(),
     if (outputSchema != null) 'output_schema': outputSchema,
+    if (async != null) 'async': async,
   };
+
+  /// Creates a copy; pass null to clear an optional setting.
+  ///
+  /// Schema maps and caller lists retain their existing ownership semantics.
+  FunctionTool copyWith({
+    String? name,
+    Object? description = unsetCopyWithValue,
+    Object? parameters = unsetCopyWithValue,
+    Object? strict = unsetCopyWithValue,
+    Object? deferLoading = unsetCopyWithValue,
+    Object? allowedCallers = unsetCopyWithValue,
+    Object? outputSchema = unsetCopyWithValue,
+    Object? async = unsetCopyWithValue,
+  }) => FunctionTool(
+    name: name ?? this.name,
+    description: description == unsetCopyWithValue
+        ? this.description
+        : description as String?,
+    parameters: parameters == unsetCopyWithValue
+        ? this.parameters
+        : parameters as Map<String, dynamic>?,
+    strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
+    deferLoading: deferLoading == unsetCopyWithValue
+        ? this.deferLoading
+        : deferLoading as bool?,
+    allowedCallers: allowedCallers == unsetCopyWithValue
+        ? this.allowedCallers
+        : allowedCallers as List<CallableToolAllowedCaller>?,
+    outputSchema: outputSchema == unsetCopyWithValue
+        ? this.outputSchema
+        : outputSchema as Map<String, dynamic>?,
+    async: async == unsetCopyWithValue ? this.async : async as bool?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -269,26 +340,34 @@ class FunctionTool extends ResponseTool implements NamespaceAllowedTool {
           runtimeType == other.runtimeType &&
           name == other.name &&
           description == other.description &&
-          mapsEqual(parameters, other.parameters) &&
+          mapsDeepEqual(parameters, other.parameters) &&
           strict == other.strict &&
           deferLoading == other.deferLoading &&
           listsEqual(allowedCallers, other.allowedCallers) &&
-          mapsEqual(outputSchema, other.outputSchema);
+          mapsDeepEqual(outputSchema, other.outputSchema) &&
+          async == other.async;
 
   @override
   int get hashCode => Object.hash(
     name,
     description,
-    mapHash(parameters),
+    mapDeepHashCode(parameters),
     strict,
     deferLoading,
     listHash(allowedCallers),
-    mapHash(outputSchema),
+    mapDeepHashCode(outputSchema),
+    async,
   );
 
   @override
   String toString() =>
-      'FunctionTool(name: $name, description: $description, parameters: $parameters, strict: $strict, deferLoading: $deferLoading, allowedCallers: $allowedCallers, outputSchema: $outputSchema)';
+      'FunctionTool(name: $name, '
+      'description: ${description == null ? 'null' : '${description!.length} chars'}, '
+      'parameters: ${parameters == null ? 'null' : '${parameters!.length} keys'}, '
+      'strict: $strict, deferLoading: $deferLoading, '
+      'allowedCallers: $allowedCallers, '
+      'outputSchema: ${outputSchema == null ? 'null' : '${outputSchema!.length} keys'}, '
+      'async: $async)';
 }
 
 /// Approximate user location for localized web search results.
@@ -1255,6 +1334,9 @@ class ProgrammaticToolCallingTool extends ResponseTool {
 /// compatibility as it accepts a discriminated union of format types.
 @immutable
 class CustomTool extends ResponseTool implements NamespaceAllowedTool {
+  /// The fixed tool discriminator.
+  String get type => 'custom';
+
   /// The tool name.
   final String name;
 
@@ -1270,6 +1352,12 @@ class CustomTool extends ResponseTool implements NamespaceAllowedTool {
   /// The tool invocation context(s) this tool may be called from.
   final List<CallableToolAllowedCaller>? allowedCallers;
 
+  /// Whether the model may continue while this tool call is pending.
+  ///
+  /// The application executes the tool and returns its result. Omission leaves
+  /// the server's behavior unchanged; an explicit false is preserved.
+  final bool? async;
+
   /// Creates a [CustomTool].
   const CustomTool({
     required this.name,
@@ -1277,18 +1365,21 @@ class CustomTool extends ResponseTool implements NamespaceAllowedTool {
     this.format,
     this.deferLoading,
     this.allowedCallers,
+    this.async,
   });
 
   /// Creates a [CustomTool] from JSON.
   factory CustomTool.fromJson(Map<String, dynamic> json) {
+    requireJsonType(json, 'custom', 'CustomTool');
     return CustomTool(
-      name: json['name'] as String,
+      name: requireJsonString(json['name'], 'CustomTool.name'),
       description: json['description'] as String?,
       format: json['format'] as Map<String, dynamic>?,
       deferLoading: json['defer_loading'] as bool?,
       allowedCallers: (json['allowed_callers'] as List?)
           ?.map((e) => CallableToolAllowedCaller.fromJson(e as String))
           .toList(),
+      async: optionalJsonBool(json, 'async', 'CustomTool'),
     );
   }
 
@@ -1301,7 +1392,35 @@ class CustomTool extends ResponseTool implements NamespaceAllowedTool {
     if (deferLoading != null) 'defer_loading': deferLoading,
     if (allowedCallers != null)
       'allowed_callers': allowedCallers!.map((e) => e.toJson()).toList(),
+    if (async != null) 'async': async,
   };
+
+  /// Creates a copy; pass null to clear an optional setting.
+  ///
+  /// Format maps and caller lists retain their existing ownership semantics.
+  CustomTool copyWith({
+    String? name,
+    Object? description = unsetCopyWithValue,
+    Object? format = unsetCopyWithValue,
+    Object? deferLoading = unsetCopyWithValue,
+    Object? allowedCallers = unsetCopyWithValue,
+    Object? async = unsetCopyWithValue,
+  }) => CustomTool(
+    name: name ?? this.name,
+    description: description == unsetCopyWithValue
+        ? this.description
+        : description as String?,
+    format: format == unsetCopyWithValue
+        ? this.format
+        : format as Map<String, dynamic>?,
+    deferLoading: deferLoading == unsetCopyWithValue
+        ? this.deferLoading
+        : deferLoading as bool?,
+    allowedCallers: allowedCallers == unsetCopyWithValue
+        ? this.allowedCallers
+        : allowedCallers as List<CallableToolAllowedCaller>?,
+    async: async == unsetCopyWithValue ? this.async : async as bool?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -1310,22 +1429,28 @@ class CustomTool extends ResponseTool implements NamespaceAllowedTool {
           runtimeType == other.runtimeType &&
           name == other.name &&
           description == other.description &&
-          mapsEqual(format, other.format) &&
+          mapsDeepEqual(format, other.format) &&
           deferLoading == other.deferLoading &&
-          listsEqual(allowedCallers, other.allowedCallers);
+          listsEqual(allowedCallers, other.allowedCallers) &&
+          async == other.async;
 
   @override
   int get hashCode => Object.hash(
     name,
     description,
-    mapHash(format),
+    mapDeepHashCode(format),
     deferLoading,
     listHash(allowedCallers),
+    async,
   );
 
   @override
   String toString() =>
-      'CustomTool(name: $name, description: $description, format: $format, deferLoading: $deferLoading, allowedCallers: $allowedCallers)';
+      'CustomTool(name: $name, '
+      'description: ${description == null ? 'null' : '${description!.length} chars'}, '
+      'format: ${format == null ? 'null' : '${format!.length} keys'}, '
+      'deferLoading: $deferLoading, allowedCallers: $allowedCallers, '
+      'async: $async)';
 }
 
 /// An unknown namespace tool for forward compatibility.

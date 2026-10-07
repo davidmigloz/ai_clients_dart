@@ -41,6 +41,7 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 ### Tools
 
 - Web search, file search, code interpreter, computer use, and custom tools
+- Async function/custom tools with faithful call replay and conversation metadata
 
 ### Operational APIs
 
@@ -243,6 +244,72 @@ client.close();
 ```
 
 → [Full example](example/responses_example.dart)
+
+</details>
+
+### How do I use async function and custom tools?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Set `async: true` on a Responses function or custom tool to let the model continue
+while your application runs that tool. Both tool definitions and returned calls
+preserve omitted, false and true flags; `copyWith(async: null)` removes the flag.
+The client provides typed contracts; your application owns tool execution and
+returning the result.
+
+```dart
+final tool = ResponseTool.function(
+  name: 'get_weather',
+  async: true,
+  strict: true,
+  parameters: const {
+    'type': 'object',
+    'properties': {'city': {'type': 'string'}},
+    'required': ['city'],
+    'additionalProperties': false,
+  },
+);
+final response = await client.responses.create(
+  CreateResponseRequest(
+    model: 'gpt-6-astra',
+    input: const ResponseInput.text('Look up the weather in Paris.'),
+    tools: [tool],
+  ),
+);
+final call = response.output.whereType<FunctionCallOutputItemResponse>().single;
+// Run your application tool and keep call.callId associated with its result.
+// If other turns happen, replace this with the latest response's ID.
+final latestResponseId = response.id;
+await client.responses.create(
+  CreateResponseRequest(
+    model: 'gpt-6-astra',
+    previousResponseId: latestResponseId,
+    tools: [tool],
+    input: ResponseInput.items([
+      FunctionCallOutputItem.string(
+        callId: call.callId,
+        output: '{"city":"Paris","celsius":24}',
+      ),
+    ]),
+  ),
+);
+```
+
+`ResponseTool.custom(async: true, ...)` uses the same execution flag.
+`CustomToolCallItem.toCustomToolCallInputItem()` supplies typed custom-call replay;
+function replay preserves agent, namespace, caller, status and async metadata.
+Custom replay omits output-only status/creator fields. Ordinary output/result
+items do not gain an async flag.
+
+The [official async guide](https://developers.openai.com/api/docs/guides/async-tool-calling)
+documents support for GPT-6 Astra and later models. Use direct application tools,
+not hosted tools or programmatic calls; in Multi-agent mode, do not combine async
+with parallel tool calls. There is no dedicated async streaming event: existing
+item-added/done and response lifecycle events carry the calls.
+
+→ [Runnable function/custom example](example/async_tools_example.dart), using a
+local transport with an intervening turn, no API key and no charges.
 
 </details>
 
@@ -1025,6 +1092,7 @@ See the [example/](example/) directory for complete examples:
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Function calling with tool definitions |
 | [`vision_example.dart`](example/vision_example.dart) | Image analysis with vision models |
 | [`responses_example.dart`](example/responses_example.dart) | Responses API with built-in tools |
+| [`async_tools_example.dart`](example/async_tools_example.dart) | Local async function/custom jobs, original call IDs and latest-response continuation |
 | [`prompt_cache_example.dart`](example/prompt_cache_example.dart) | Responses prewarming, comparison diagnostics, and narrow Chat cache options |
 | [`decisions_example.dart`](example/decisions_example.dart) | Typed Decisions questions, refusals, usage, and inline images |
 | [`embeddings_example.dart`](example/embeddings_example.dart) | Text embeddings with dimension control |

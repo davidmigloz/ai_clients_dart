@@ -1,7 +1,9 @@
 # Phase 3 Responses planning review
 
 Status: independent planning reviews complete; validated findings resolved.
-Runtime implementation is pending; tickets #334–#344 are native sub-issues of #317.
+Planning PR #345 merged October 7, 2026 after all checks passed, commit
+`4542d04ce2845d646e9401ecfa6d0c7ac2e091f6`. Tickets #334–#344 are native
+sub-issues of #317; their implementation evidence is recorded separately.
 Scope: [specification](../responses.md), repository tickets 09–19 and roadmap.
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 

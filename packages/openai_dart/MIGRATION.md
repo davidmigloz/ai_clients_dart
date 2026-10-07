@@ -6,6 +6,47 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming Responses async-tool alignment
+
+Function/custom definitions, their calls and conversation call items now support
+optional `async`. Existing construction remains valid. Omitting the flag preserves
+server behavior; `false` and `true` serialize explicitly. Newly parsed `async`
+rejects explicit JSON null and non-booleans. Use `copyWith(async: null)` to remove
+it from a Dart model instead of emitting an invalid null wire value.
+
+```dart
+final tool = ResponseTool.function(name: 'get_weather', async: true);
+final synchronous = tool.copyWith(async: false);
+final unspecified = tool.copyWith(async: null);
+```
+
+`ResponseTool.custom(...)` is an additive convenience factory, and
+`CustomToolCallInputItem` provides typed input replay. Existing output
+`CustomToolCallItem` retains its name. Its `toCustomToolCallInputItem()` conversion
+preserves input-supported fields and drops output-only status/createdBy.
+Function-call replay now retains agent and async metadata as well as existing
+call/namespace/caller/status fields. Conversation call models retain caller,
+namespace, creator and beta agent metadata with complete optional-field copies;
+existing custom id/status tolerance stays compatible.
+
+Copies of definitions/calls include every old/new field. Function parameter/output
+schemas and custom format maps now compare/hash by deep JSON contents; independent
+equal nested schemas compare equal. Constructors remain const and retain existing
+caller-owned maps/lists. Keep those collections stable while models are map/set
+keys. Diagnostics summarize opaque arguments/input/descriptions/schema/grammar
+instead of printing payloads. Malformed direct definition/call JSON now reports
+contextual FormatException for missing/invalid required names, strings or types;
+existing optional-field null tolerance remains unchanged.
+
+Application code runs the tools and returns results on their original call IDs
+against the latest response ID. Supported-model/direct-call/parallel restrictions
+are described in the [README](README.md#how-do-i-use-async-function-and-custom-tools).
+No automatic job runner or Responses WebSocket transport is introduced here.
+The [local example](example/async_tools_example.dart) executes without an API key
+or external requests.
+
+---
+
 ## Upcoming image model selection alignment
 
 `ImageGenerationRequest` and multipart `ImageEditRequest` now require a nonnull

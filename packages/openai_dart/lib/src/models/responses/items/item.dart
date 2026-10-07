@@ -4,6 +4,7 @@ import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import '../../common/json_helpers.dart';
 import '../config/function_call_status.dart';
 import '../config/item_status.dart';
 import '../config/message_phase.dart';
@@ -23,6 +24,7 @@ import '../tools/tool_call_caller.dart';
 ///
 /// - [MessageItem] - A message from a user or assistant
 /// - [FunctionCallItem] - A function call from the model
+/// - [CustomToolCallInputItem] - A custom tool call replayed as input
 /// - [FunctionCallOutputItem] - Output from a function call
 /// - [ItemReference] - A reference to another item
 /// - [CustomToolCallOutputInputItem] - Output from a custom tool call
@@ -47,6 +49,7 @@ sealed class Item {
     return switch (type) {
       'message' => MessageItem.fromJson(json),
       'function_call' => FunctionCallItem.fromJson(json),
+      'custom_tool_call' => CustomToolCallInputItem.fromJson(json),
       'function_call_output' => FunctionCallOutputItem.fromJson(json),
       'custom_tool_call_output' => CustomToolCallOutputInputItem.fromJson(json),
       'item_reference' => ItemReference.fromJson(json),
@@ -195,6 +198,9 @@ class MessageItem extends Item {
 /// A function call item.
 @immutable
 class FunctionCallItem extends Item {
+  /// The fixed discriminator for this call item.
+  String get type => 'function_call';
+
   /// Unique identifier.
   final String? id;
 
@@ -236,6 +242,11 @@ class FunctionCallItem extends Item {
   /// The execution context that produced this tool call.
   final ToolCallCaller? caller;
 
+  /// Whether this call may finish after the model continues working.
+  ///
+  /// Omitted for calls whose execution mode was not supplied.
+  final bool? async;
+
   /// Creates a [FunctionCallItem].
   const FunctionCallItem({
     this.id,
@@ -246,18 +257,24 @@ class FunctionCallItem extends Item {
     this.status,
     this.namespace,
     this.caller,
+    this.async,
   });
 
   /// Creates a [FunctionCallItem] from JSON.
   factory FunctionCallItem.fromJson(Map<String, dynamic> json) {
+    requireJsonType(json, 'function_call', 'FunctionCallItem');
     return FunctionCallItem(
+      async: optionalJsonBool(json, 'async', 'FunctionCallItem'),
       id: json['id'] as String?,
       agent: json['agent'] != null
           ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
           : null,
-      callId: json['call_id'] as String,
-      name: json['name'] as String,
-      arguments: json['arguments'] as String,
+      callId: requireJsonString(json['call_id'], 'FunctionCallItem.call_id'),
+      name: requireJsonString(json['name'], 'FunctionCallItem.name'),
+      arguments: requireJsonString(
+        json['arguments'],
+        'FunctionCallItem.arguments',
+      ),
       status: json['status'] != null
           ? ItemStatus.fromJson(json['status'] as String)
           : null,
@@ -279,7 +296,37 @@ class FunctionCallItem extends Item {
     if (status != null) 'status': status!.toJson(),
     if (namespace != null) 'namespace': namespace,
     if (caller != null) 'caller': caller!.toJson(),
+    if (async != null) 'async': async,
   };
+
+  /// Creates a copy with updated fields.
+  ///
+  /// Nullable fields can be explicitly set to `null` to clear them.
+  FunctionCallItem copyWith({
+    Object? id = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
+    String? callId,
+    String? name,
+    String? arguments,
+    Object? status = unsetCopyWithValue,
+    Object? namespace = unsetCopyWithValue,
+    Object? caller = unsetCopyWithValue,
+    Object? async = unsetCopyWithValue,
+  }) => FunctionCallItem(
+    id: id == unsetCopyWithValue ? this.id : id as String?,
+    agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
+    callId: callId ?? this.callId,
+    name: name ?? this.name,
+    arguments: arguments ?? this.arguments,
+    status: status == unsetCopyWithValue ? this.status : status as ItemStatus?,
+    namespace: namespace == unsetCopyWithValue
+        ? this.namespace
+        : namespace as String?,
+    caller: caller == unsetCopyWithValue
+        ? this.caller
+        : caller as ToolCallCaller?,
+    async: async == unsetCopyWithValue ? this.async : async as bool?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -293,7 +340,8 @@ class FunctionCallItem extends Item {
           arguments == other.arguments &&
           status == other.status &&
           namespace == other.namespace &&
-          caller == other.caller;
+          caller == other.caller &&
+          async == other.async;
 
   @override
   int get hashCode => Object.hash(
@@ -305,11 +353,156 @@ class FunctionCallItem extends Item {
     status,
     namespace,
     caller,
+    async,
   );
 
   @override
   String toString() =>
-      'FunctionCallItem(id: $id, agent: $agent, callId: $callId, name: $name, arguments: $arguments, status: $status, namespace: $namespace, caller: $caller)';
+      'FunctionCallItem(id: $id, agent: $agent, callId: $callId, name: $name, arguments: <redacted>, status: $status, namespace: $namespace, caller: $caller, async: $async)';
+}
+
+/// A custom tool call replayed as input to a response.
+///
+/// The application executes the tool and returns its result using the original
+/// [callId]. An [async] call lets the model continue before that result arrives.
+/// Output-only status and creator metadata do not belong to this input shape.
+@immutable
+class CustomToolCallInputItem extends Item {
+  /// The fixed discriminator for this call item.
+  String get type => 'custom_tool_call';
+
+  /// Unique identifier, when this call has already been recorded.
+  final String? id;
+
+  /// The agent that produced this item on the beta multi-agent protocol.
+  final AgentTag? agent;
+
+  /// The identifier used to match this call to its result.
+  final String callId;
+
+  /// The name of the custom tool.
+  final String name;
+
+  /// The tool input. Its format is defined by the application.
+  final String input;
+
+  /// The namespace containing the custom tool.
+  final String? namespace;
+
+  /// The execution context that produced the call.
+  final ToolCallCaller? caller;
+
+  /// Whether this call may finish after the model continues working.
+  final bool? async;
+
+  /// Creates a [CustomToolCallInputItem].
+  const CustomToolCallInputItem({
+    this.id,
+    this.agent,
+    required this.callId,
+    required this.name,
+    required this.input,
+    this.namespace,
+    this.caller,
+    this.async,
+  });
+
+  /// Creates a [CustomToolCallInputItem] from JSON.
+  factory CustomToolCallInputItem.fromJson(Map<String, dynamic> json) {
+    requireJsonType(json, 'custom_tool_call', 'CustomToolCallInputItem');
+    return CustomToolCallInputItem(
+      id: optionalJsonString(json, 'id', 'CustomToolCallInputItem'),
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(
+              requireJsonObject(json['agent'], 'CustomToolCallInputItem.agent'),
+            )
+          : null,
+      callId: requireJsonString(
+        json['call_id'],
+        'CustomToolCallInputItem.call_id',
+      ),
+      name: requireJsonString(json['name'], 'CustomToolCallInputItem.name'),
+      input: requireJsonString(json['input'], 'CustomToolCallInputItem.input'),
+      namespace: optionalJsonString(
+        json,
+        'namespace',
+        'CustomToolCallInputItem',
+      ),
+      caller: json['caller'] != null
+          ? ToolCallCaller.fromJson(
+              requireJsonObject(
+                json['caller'],
+                'CustomToolCallInputItem.caller',
+              ),
+            )
+          : null,
+      async: optionalJsonBool(json, 'async', 'CustomToolCallInputItem'),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'custom_tool_call',
+    if (id != null) 'id': id,
+    if (agent != null) 'agent': agent!.toJson(),
+    'call_id': callId,
+    'name': name,
+    'input': input,
+    if (namespace != null) 'namespace': namespace,
+    if (caller != null) 'caller': caller!.toJson(),
+    if (async != null) 'async': async,
+  };
+
+  /// Creates a copy with updated fields.
+  ///
+  /// Nullable fields can be explicitly set to `null` to clear them.
+  CustomToolCallInputItem copyWith({
+    Object? id = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
+    String? callId,
+    String? name,
+    String? input,
+    Object? namespace = unsetCopyWithValue,
+    Object? caller = unsetCopyWithValue,
+    Object? async = unsetCopyWithValue,
+  }) => CustomToolCallInputItem(
+    id: id == unsetCopyWithValue ? this.id : id as String?,
+    agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
+    callId: callId ?? this.callId,
+    name: name ?? this.name,
+    input: input ?? this.input,
+    namespace: namespace == unsetCopyWithValue
+        ? this.namespace
+        : namespace as String?,
+    caller: caller == unsetCopyWithValue
+        ? this.caller
+        : caller as ToolCallCaller?,
+    async: async == unsetCopyWithValue ? this.async : async as bool?,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CustomToolCallInputItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          agent == other.agent &&
+          callId == other.callId &&
+          name == other.name &&
+          input == other.input &&
+          namespace == other.namespace &&
+          caller == other.caller &&
+          async == other.async;
+
+  @override
+  int get hashCode =>
+      Object.hash(id, agent, callId, name, input, namespace, caller, async);
+
+  @override
+  String toString() =>
+      'CustomToolCallInputItem(id: $id, agent: $agent, callId: $callId, '
+      'name: $name, input: <redacted>, namespace: $namespace, '
+      'caller: $caller, async: $async)';
 }
 
 /// The output of a function call.
