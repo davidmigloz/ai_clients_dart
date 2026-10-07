@@ -31,7 +31,7 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 
 ### Generation and streaming
 
-- Responses API with streaming, multi-turn conversations, structured output, and background mode
+- Responses API with streaming, multi-turn conversations, structured output, background mode, cache prewarming, and typed cache diagnostics
 - Decisions API for typed predicate, choice, and score answers from text or inline images
 - Chat Completions with tool calling, vision, structured output, and streaming
 - Images, videos, audio (TTS, transcription, translation), and embeddings
@@ -243,6 +243,59 @@ client.close();
 ```
 
 → [Full example](example/responses_example.dart)
+
+</details>
+
+### How do I prewarm the prompt cache and inspect diagnostics?
+
+<details>
+<summary><b>Show example</b></summary>
+
+On supported GPT-5.6 and later models, Responses uses
+`ResponsePromptCacheOptionsParam` for mode/TTL, prewarming, and comparison IDs.
+Chat and compaction use the narrower `PromptCacheOptionsParam` with mode/TTL only.
+A reusable prefix must meet the model's minimum cacheable length (1,024 tokens
+for GPT-5.6 and later). Supply your application's stable context as `stablePrefix`;
+keep its content and cache-affecting settings stable.
+
+```dart
+final baseline = await client.responses.create(
+  CreateResponseRequest(
+    model: 'gpt-6-luna',
+    input: ResponseInput.text(stablePrefix),
+    promptCacheOptions: const ResponsePromptCacheOptionsParam(prewarm: true),
+  ),
+);
+final response = await client.responses.create(
+  CreateResponseRequest(
+    model: 'gpt-6-luna',
+    input: ResponseInput.text(stablePrefix),
+    promptCacheOptions: ResponsePromptCacheOptionsParam(
+      ttl: PromptCacheTtl.minutes30,
+      comparisonResponseId: baseline.id,
+      prewarm: false,
+    ),
+  ),
+);
+if (response.promptCacheDiagnostics case PromptCacheMissDiagnostics(:final reason)) {
+  print('Cache miss reason: ${reason.value}');
+}
+print('Cached tokens: ${response.usage?.inputTokensDetails?.cachedTokens}');
+```
+
+Use a recent completed baseline from the same organization. A comparison ID
+requests diagnostics; it does not load conversation history or change caching.
+Diagnostics can be absent, unavailable, or refer to an expired comparison.
+A hit means no miss was detected for the comparison; usage counters measure
+actual reuse and billing. Future diagnostic variants and reason strings are
+preserved. During streaming, inspect `ResponseCompletedEvent.response`.
+
+The existing retention control is deprecated and expresses a maximum policy;
+modern TTL expresses a minimum lifetime. They are independent.
+See the [migration guide](MIGRATION.md) for the Responses options type change and
+[official diagnostics guide](https://developers.openai.com/api/docs/guides/prompt-caching/diagnostics).
+
+→ [Runnable example with bounded output and cleanup](example/prompt_cache_example.dart)
 
 </details>
 
@@ -862,6 +915,7 @@ See the [example/](example/) directory for complete examples:
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Function calling with tool definitions |
 | [`vision_example.dart`](example/vision_example.dart) | Image analysis with vision models |
 | [`responses_example.dart`](example/responses_example.dart) | Responses API with built-in tools |
+| [`prompt_cache_example.dart`](example/prompt_cache_example.dart) | Responses prewarming, comparison diagnostics, and narrow Chat cache options |
 | [`decisions_example.dart`](example/decisions_example.dart) | Typed Decisions questions, refusals, usage, and inline images |
 | [`embeddings_example.dart`](example/embeddings_example.dart) | Text embeddings with dimension control |
 | [`images_example.dart`](example/images_example.dart) | GPT Image generation |

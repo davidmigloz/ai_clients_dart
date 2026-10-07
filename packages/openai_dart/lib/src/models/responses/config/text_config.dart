@@ -159,11 +159,12 @@ class JsonSchemaFormat extends TextFormat {
           runtimeType == other.runtimeType &&
           name == other.name &&
           description == other.description &&
-          mapsEqual(schema, other.schema) &&
+          mapsDeepEqual(schema, other.schema) &&
           strict == other.strict;
 
   @override
-  int get hashCode => Object.hash(name, description, mapHash(schema), strict);
+  int get hashCode =>
+      Object.hash(name, description, mapDeepHashCode(schema), strict);
 
   @override
   String toString() =>

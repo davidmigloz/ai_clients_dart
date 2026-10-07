@@ -354,7 +354,7 @@ void main() {
       const request = CreateResponseRequest(
         model: 'gpt-4o',
         input: ResponseInput.text('Hello!'),
-        promptCacheOptions: PromptCacheOptionsParam(
+        promptCacheOptions: ResponsePromptCacheOptionsParam(
           mode: PromptCacheMode.explicit,
           ttl: PromptCacheTtl.minutes30,
         ),

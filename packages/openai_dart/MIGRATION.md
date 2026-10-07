@@ -6,6 +6,66 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming cache-controls and diagnostics alignment
+
+Responses creation now uses the distinct `ResponsePromptCacheOptionsParam`,
+which adds `comparisonResponseId` and `prewarm` alongside mode/TTL. Replace the
+old constructor in Responses requests:
+
+Before:
+
+```dart
+const request = CreateResponseRequest(
+  model: 'gpt-6-luna',
+  input: ResponseInput.text('Hello'),
+  promptCacheOptions: PromptCacheOptionsParam(ttl: PromptCacheTtl.minutes30),
+);
+```
+
+After:
+
+```dart
+const request = CreateResponseRequest(
+  model: 'gpt-6-luna',
+  input: ResponseInput.text('Hello'),
+  promptCacheOptions: ResponsePromptCacheOptionsParam(
+    ttl: PromptCacheTtl.minutes30,
+  ),
+);
+```
+
+Chat and compaction continue using the narrower `PromptCacheOptionsParam`.
+Returned `PromptCacheOptions` is a separate echo type with required mode/TTL and
+optional comparison ID; `prewarm` is request-only. Responses can now return typed
+`promptCacheDiagnostics`. Read streamed diagnostics from the completed event.
+Unknown diagnostic variants preserve immutable raw JSON; future miss reasons
+retain their exact strings. Diagnostic token estimates differ from usage counts.
+
+Parsing now rejects present-null `mode`/`ttl` in either request-options type,
+present-null `prewarm`, present-null Responses creation options, and present-null
+new Chat options/Response diagnostics. Omit these fields instead; constructors
+and `copyWith(...: null)` omit optional values. `comparison_response_id: null`
+is accepted and normalizes to omission. Compaction options remain nullable,
+and existing returned `Response.promptCacheOptions: null` remains accepted for
+provider compatibility. These are deliberate boundary-specific contracts.
+
+Responses creation also gains optional deprecated `promptCacheRetention`.
+Retention is a maximum policy and modern TTL is a minimum lifetime; do not
+substitute them automatically. Neither is sent by default.
+
+Chat request equality/hash now includes every field, including provider options,
+cache settings, and content-based collections. Requests with different settings
+that previously compared equal can now be distinct map/set keys. Nested JSON
+schemas and metadata compare deeply and hash independently of map insertion
+order. Existing const constructors remain available; caller-owned collections
+remain mutable, so avoid mutating a model used as a map/set key. Only unknown
+cache diagnostic payloads take recursively immutable snapshots.
+
+See [the runnable example](example/prompt_cache_example.dart). The package
+version will be assigned by the release workflow.
+
+---
+
 ## Upcoming cache-retention wire correction
 
 `PromptCacheRetention.inMemory.value` and `toJson()` now return `in_memory`,
@@ -33,13 +93,13 @@ final isInMemory = retention == PromptCacheRetention.inMemory;
 ```
 
 Chat requests, returned Responses, and compaction use the same shared mapping.
-This correction does not add the pending Responses creation-request retention
-field or cache-options controls. Use `h24` for GPT-5.5 and newer models; their
+Responses creation now also accepts this deprecated control; modern cache
+controls and diagnostics are described above. Use `h24` for GPT-5.5 and newer models; their
 documented retention policy does not support `inMemory`. The package version is
 assigned by the release workflow.
 
 The API marks this existing retention control deprecated in favor of
-`prompt_cache_options.ttl`; that alignment is tracked separately in
+`prompt_cache_options.ttl`; modern controls are implemented in
 [#322](https://github.com/davidmigloz/ai_clients_dart/issues/322). Retention expresses
 a maximum policy, while TTL expresses a minimum lifetime, so do not substitute
 one for the other automatically. This correction preserves the existing control.

@@ -1,7 +1,8 @@
 # OpenAI API alignment
 
-Planning started October 7, 2026. Status: Decisions and container configuration
-merged; Phase 2 is specified and ticketed, with cache retention implemented and reviewed.
+Planning started October 7, 2026. Status: Decisions, container configuration,
+and cache retention merged. Cache controls/diagnostics are implemented and
+independently reviewed; remaining Phase 2 tickets are specified.
 
 Tracking parent: [GitHub issue #317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 This parent records planning progress; it is not an implementation ticket.
@@ -85,8 +86,8 @@ image model requiredness follow as separate tickets.
 | Ticket | Independently usable outcome | Dependency |
 | --- | --- | --- |
 | [#320](https://github.com/davidmigloz/ai_clients_dart/issues/320) | Correct container memory/network configuration, secrets, skills, and returned settings | Merged in #327 |
-| [#321](https://github.com/davidmigloz/ai_clients_dart/issues/321) | Emit the canonical cache-retention wire value | None; implemented and reviewed |
-| [#322](https://github.com/davidmigloz/ai_clients_dart/issues/322) | Configure cache controls and inspect diagnostics | #321 |
+| [#321](https://github.com/davidmigloz/ai_clients_dart/issues/321) | Emit the canonical cache-retention wire value | None; merged in #328 |
+| [#322](https://github.com/davidmigloz/ai_clients_dart/issues/322) | Configure cache controls and inspect diagnostics | #321; implemented and reviewed |
 | [#323](https://github.com/davidmigloz/ai_clients_dart/issues/323) | Preserve Chat token details and stream obfuscation | None |
 | [#324](https://github.com/davidmigloz/ai_clients_dart/issues/324) | Preserve complete and streamed Chat audio | None |
 | [#325](https://github.com/davidmigloz/ai_clients_dart/issues/325) | Honor retry hints and stop replaying permanent quota failures | None |
@@ -101,7 +102,13 @@ after all CI checks passed, closing #320.
 Cache-retention [acceptance evidence and independent reviews](reviews/03-cache-retention.md)
 record 1,872 passing unit tests, clean analysis, canonical/legacy compatibility,
 public request/response fixtures, and the separate Chat equality correction
-required by #322.
+required by #322. Cache retention [PR #328](https://github.com/davidmigloz/ai_clients_dart/pull/328)
+merged after all CI checks passed, closing #321.
+
+Cache controls/diagnostics [acceptance evidence](reviews/04-cache-controls-diagnostics.md)
+records 2,121 passing unit tests, clean analysis, independent approvals, modern
+examples/migration, and a two-request live smoke (conservative $0.00040525),
+with both stored responses deleted. Implementation [PR #329](https://github.com/davidmigloz/ai_clients_dart/pull/329) is open for review; #322 closes on merge.
 
 ## Proposed roadmap
 
@@ -147,8 +154,8 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
   `16g`, or `64g`, and allowlists emit `allowed_domains` with typed domain secrets.
 - Merged in #327: standalone creation supports memory/network/
   skills configuration and responses preserve their supported returned settings.
-- Request cache options omit `comparison_response_id` and `prewarm`; response
-  options/diagnostics omit related metadata. Shared Responses
+- Implemented and reviewed in #322: Responses cache controls gain
+  `comparison_response_id`/`prewarm` and typed diagnostics; Chat gains narrow options. Shared Responses
   `cache_write_tokens` usage is implemented with Decisions in #318.
 - Function/custom definitions and call items omit `async`.
 - Input/output parsers do not support `configuration_update`.
