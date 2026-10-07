@@ -159,8 +159,13 @@ void main() {
       const item = ShellCallOutputItem(
         id: 'sc_1',
         callId: 'call_1',
-        action: ShellCallAction(commands: ['ls']),
+        action: ShellCallAction(
+          commands: ['ls'],
+          timeoutMs: null,
+          maxOutputLength: null,
+        ),
         status: ItemStatus.completed,
+        environment: null,
         caller: ProgramToolCallCaller(callerId: 'call_123'),
       );
 
@@ -173,8 +178,13 @@ void main() {
       const item = ShellCallOutputItem(
         id: 'sc_1',
         callId: 'call_1',
-        action: ShellCallAction(commands: ['ls']),
+        action: ShellCallAction(
+          commands: ['ls'],
+          timeoutMs: null,
+          maxOutputLength: null,
+        ),
         status: ItemStatus.completed,
+        environment: null,
       );
 
       final json = item.toJson();
@@ -188,6 +198,7 @@ void main() {
       const item = ShellCallOutputResultItem(
         id: 'sco_1',
         callId: 'call_1',
+        status: ItemStatus.completed,
         output: [],
         maxOutputLength: 1000,
         caller: ProgramToolCallCaller(callerId: 'call_123'),
@@ -202,6 +213,7 @@ void main() {
       const item = ShellCallOutputResultItem(
         id: 'sco_1',
         callId: 'call_1',
+        status: ItemStatus.completed,
         output: [],
         maxOutputLength: 1000,
       );

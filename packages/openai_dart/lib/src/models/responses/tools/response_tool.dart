@@ -7,6 +7,7 @@ import '../config/search_content_type.dart';
 import '../config/tool_search_execution_type.dart';
 import '../config/web_search_return_token_budget.dart';
 import 'code_interpreter_container.dart';
+import 'shell_tool_environment.dart';
 import 'tool_call_caller.dart';
 import 'web_search_filters.dart';
 import 'web_search_image_settings.dart';
@@ -34,7 +35,7 @@ abstract interface class NamespaceAllowedTool {
 /// - [McpTool] - Model Context Protocol tools
 /// - [ToolSearchTool] - Search available tools
 /// - [NamespaceTool] - Group tools under a namespace
-/// - [ShellTool] - Hosted shell tool
+/// - [ShellTool] - Hosted or local shell tool
 /// - [LocalShellTool] - Local shell tool
 /// - [ProgrammaticToolCallingTool] - Programmatic tool calling
 sealed class ResponseTool {
@@ -231,8 +232,14 @@ sealed class ResponseTool {
     );
   }
 
-  /// Creates a hosted shell tool.
-  static ShellTool shell() => const ShellTool();
+  /// Creates a hosted or local shell tool.
+  ///
+  /// Omit [environment] to leave selection to the server. Optional nullable
+  /// settings normalize parsed explicit null to omission.
+  static ShellTool shell({
+    ShellToolEnvironment? environment,
+    List<CallableToolAllowedCaller>? allowedCallers,
+  }) => ShellTool(environment: environment, allowedCallers: allowedCallers);
 
   /// Creates a local shell tool.
   static LocalShellTool localShell() => const LocalShellTool();
@@ -1315,46 +1322,100 @@ class McpTool extends ResponseTool {
       'McpTool(serverLabel: $serverLabel, serverUrl: $serverUrl, connectorId: $connectorId, tunnelId: $tunnelId, allowedTools: $allowedTools, requireApproval: $requireApproval, deferLoading: $deferLoading, allowedCallers: $allowedCallers)';
 }
 
-/// Hosted shell tool for command execution.
+/// Shell tool for command execution in a hosted or local environment.
 @immutable
 class ShellTool extends ResponseTool {
+  /// The fixed tool discriminator.
+  String get type => 'shell';
+
+  /// Optional environment configuration. Parsed null is normalized to omission.
+  final ShellToolEnvironment? environment;
+
   /// The tool invocation context(s) this tool may be called from.
+  ///
+  /// Caller-owned lists must not be mutated after construction. Parsed lists
+  /// are unmodifiable, and parsed null is normalized to omission.
   final List<CallableToolAllowedCaller>? allowedCallers;
 
   /// Creates a [ShellTool].
-  const ShellTool({this.allowedCallers});
+  const ShellTool({this.environment, this.allowedCallers});
 
   /// Creates a [ShellTool] from JSON.
   factory ShellTool.fromJson(Map<String, dynamic> json) {
-    if ((json['type'] as String?) != 'shell') {
-      throw const FormatException('Invalid type for ShellTool');
+    requireJsonType(json, 'shell', 'ShellTool');
+    final environmentJson = json['environment'];
+    ShellToolEnvironment? environment;
+    if (environmentJson != null) {
+      final object = requireJsonObject(
+        environmentJson,
+        'ShellTool.environment',
+      );
+      try {
+        environment = ShellToolEnvironment.fromJson(object);
+      } on FormatException catch (error) {
+        throw FormatException('ShellTool.environment: ${error.message}');
+      }
+    }
+    final allowedCallersJson = json['allowed_callers'];
+    if (allowedCallersJson != null && allowedCallersJson is! List) {
+      throw const FormatException(
+        'ShellTool.allowed_callers: expected an array',
+      );
     }
     return ShellTool(
-      allowedCallers: (json['allowed_callers'] as List?)
-          ?.map((e) => CallableToolAllowedCaller.fromJson(e as String))
-          .toList(),
+      environment: environment,
+      allowedCallers: allowedCallersJson == null
+          ? null
+          : List.unmodifiable([
+              for (var i = 0; i < (allowedCallersJson as List).length; i++)
+                CallableToolAllowedCaller.fromJson(
+                  requireJsonString(
+                    allowedCallersJson[i],
+                    'ShellTool.allowed_callers[$i]',
+                  ),
+                ),
+            ]),
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'shell',
+    'type': type,
+    if (environment != null) 'environment': environment!.toJson(),
     if (allowedCallers != null)
       'allowed_callers': allowedCallers!.map((e) => e.toJson()).toList(),
   };
+
+  /// Creates a copy; explicit null clears either optional setting.
+  ShellTool copyWith({
+    Object? environment = unsetCopyWithValue,
+    Object? allowedCallers = unsetCopyWithValue,
+  }) => ShellTool(
+    environment: identical(environment, unsetCopyWithValue)
+        ? this.environment
+        : environment as ShellToolEnvironment?,
+    allowedCallers: identical(allowedCallers, unsetCopyWithValue)
+        ? this.allowedCallers
+        : allowedCallers == null
+        ? null
+        : List<CallableToolAllowedCaller>.from(allowedCallers as List),
+  );
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ShellTool &&
           runtimeType == other.runtimeType &&
+          environment == other.environment &&
           listsEqual(allowedCallers, other.allowedCallers);
 
   @override
-  int get hashCode => listHash(allowedCallers);
+  int get hashCode => Object.hash(environment, listHash(allowedCallers));
 
   @override
-  String toString() => 'ShellTool(allowedCallers: $allowedCallers)';
+  String toString() =>
+      'ShellTool(environment: $environment, '
+      'allowedCallers: ${allowedCallers == null ? 'null' : '${allowedCallers!.length} items'})';
 }
 
 /// Computer tool (GA) for controlling a computer.

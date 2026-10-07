@@ -85,8 +85,9 @@ class SpecificFunctionChoice extends SpecificToolChoice {
 /// Controls how the model selects which tools to use.
 /// Variants are [ResponseToolChoiceNone], [ResponseToolChoiceAuto],
 /// [ResponseToolChoiceRequired], [ResponseToolChoiceFunction],
-/// [ResponseToolChoiceAllowedTools], [ResponseToolChoiceWebSearch], and
-/// [ResponseToolChoiceProgrammatic]. Web search selects GA or an explicit preview.
+/// [ResponseToolChoiceAllowedTools], [ResponseToolChoiceWebSearch],
+/// [ResponseToolChoiceShell], and [ResponseToolChoiceProgrammatic]. Web search
+/// selects GA or an explicit preview.
 sealed class ResponseToolChoice {
   /// Creates a [ResponseToolChoice].
   const ResponseToolChoice();
@@ -103,10 +104,11 @@ sealed class ResponseToolChoice {
     }
 
     if (json is Map<String, dynamic>) {
-      final type = json['type'] as String;
+      final type = requireJsonString(json['type'], 'ResponseToolChoice.type');
       return switch (type) {
         'function' => ResponseToolChoiceFunction.fromJson(json),
         'allowed_tools' => ResponseToolChoiceAllowedTools.fromJson(json),
+        'shell' => ResponseToolChoiceShell.fromJson(json),
         'web_search' ||
         'web_search_preview' ||
         'web_search_preview_2025_03_11' => ResponseToolChoiceWebSearch.fromJson(
@@ -140,8 +142,54 @@ sealed class ResponseToolChoice {
   static ResponseToolChoiceWebSearch webSearch({String type = 'web_search'}) =>
       ResponseToolChoiceWebSearch(type: type);
 
+  /// Forces a shell tool call when a tool call is required.
+  static ResponseToolChoiceShell shell() => const ResponseToolChoiceShell();
+
   /// Converts to JSON.
   Object toJson();
+}
+
+/// Selects the shell tool, following the canonical specific-shell choice.
+@immutable
+class ResponseToolChoiceShell extends ResponseToolChoice {
+  /// Creates a shell choice.
+  const ResponseToolChoiceShell();
+
+  /// Creates a shell choice from JSON.
+  factory ResponseToolChoiceShell.fromJson(Map<String, dynamic> json) {
+    final type = requireJsonString(
+      json['type'],
+      'ResponseToolChoiceShell.type',
+    );
+    if (type != 'shell') {
+      throw const FormatException(
+        'ResponseToolChoiceShell.type: expected shell',
+      );
+    }
+    return const ResponseToolChoiceShell();
+  }
+
+  /// The fixed tool discriminator.
+  String get type => 'shell';
+
+  /// Creates an identical shell choice.
+  ResponseToolChoiceShell copyWith() => const ResponseToolChoiceShell();
+
+  @override
+  Map<String, dynamic> toJson() => {'type': type};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ResponseToolChoiceShell &&
+          runtimeType == other.runtimeType &&
+          type == other.type;
+
+  @override
+  int get hashCode => Object.hash(runtimeType, type);
+
+  @override
+  String toString() => 'ResponseToolChoiceShell(type: $type)';
 }
 
 /// Selects hosted web search, preserving explicit preview choices.

@@ -1,7 +1,8 @@
 # GA web-search acceptance
 
-Status: implementation, validation, and independent reviews complete; merge pending.
-[PR #348](https://github.com/davidmigloz/ai_clients_dart/pull/348) is open for review.
+Status: merged and complete.
+[PR #348](https://github.com/davidmigloz/ai_clients_dart/pull/348) merged at
+`43b826f31c0629f588861a867ff9b997c63ec58e` after all CI checks passed, closing #336.
 Tracking: [#336](https://github.com/davidmigloz/ai_clients_dart/issues/336),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirements: [RESP-WEB-01–03](../responses.md#web-search).
@@ -133,4 +134,4 @@ mapping. Wider unrelated diagnostics remain visible in the complete-parity backl
   docs. Sealed-parent subtype enumeration was corrected; no actionable findings
   remain. Both reviews approve the final combined diff.
 
-Issue #336 remains open until implementation merge. Hosted/local shell #337 is next.
+Issue #336 closed after implementation merge. Hosted/local shell #337 follows.
