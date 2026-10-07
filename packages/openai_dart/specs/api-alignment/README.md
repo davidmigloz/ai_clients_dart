@@ -4,7 +4,7 @@ Planning started October 7, 2026. Status: Decisions, container configuration,
 cache retention, cache controls/diagnostics, and Chat usage/obfuscation merged.
 Chat audio merged in [PR #331](https://github.com/davidmigloz/ai_clients_dart/pull/331).
 Retry guidance merged in [PR #332](https://github.com/davidmigloz/ai_clients_dart/pull/332);
-image model requiredness #326 is implemented and reviewed for PR handoff.
+image model requiredness #326 is implemented and reviewed in [PR #333](https://github.com/davidmigloz/ai_clients_dart/pull/333).
 
 Tracking parent: [GitHub issue #317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 This parent records planning progress; it is not an implementation ticket.
@@ -93,7 +93,7 @@ image model requiredness follow as separate tickets.
 | [#323](https://github.com/davidmigloz/ai_clients_dart/issues/323) | Preserve Chat token details and stream obfuscation | None; merged in #330 |
 | [#324](https://github.com/davidmigloz/ai_clients_dart/issues/324) | Preserve complete and streamed Chat audio | Merged in #331 |
 | [#325](https://github.com/davidmigloz/ai_clients_dart/issues/325) | Honor retry hints and stop replaying permanent quota failures | Merged in #332 |
-| [#326](https://github.com/davidmigloz/ai_clients_dart/issues/326) | Require explicit model selection where the image API requires it | Implemented and reviewed |
+| [#326](https://github.com/davidmigloz/ai_clients_dart/issues/326) | Require explicit model selection where the image API requires it | Reviewed; PR #333 open |
 
 Container [acceptance evidence and independent reviews](reviews/02-container-configuration.md)
 record the 1,841 passing unit tests, clean analysis, bounded live lifecycle, resolved
@@ -135,7 +135,7 @@ Image model selection [acceptance evidence](reviews/08-image-model-selection.md)
 records 2,537 passing unit tests, clean analysis, independent approvals, required
 generation/multipart models with retained JSON-edit omission, complete changed-model
 contracts, migration/current examples and a local demo verified without API cost.
-Implementation is ready for PR review. This is the last specified Phase 2 slice;
+Implementation [PR #333](https://github.com/davidmigloz/ai_clients_dart/pull/333) is open for review. This is the last specified Phase 2 slice;
 Phase 3 Responses capabilities needs a refreshed specification and tickets next.
 
 ## Proposed roadmap

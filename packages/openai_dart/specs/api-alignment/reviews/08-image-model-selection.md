@@ -5,7 +5,8 @@ Reviewed October 7, 2026 against IMG-01–04 in the
 Tracking: [#326](https://github.com/davidmigloz/ai_clients_dart/issues/326),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Implementation branch: `fix/openai-image-model-required`.
-Final validation counts and PR will be recorded before handoff.
+Implementation [PR #333](https://github.com/davidmigloz/ai_clients_dart/pull/333) is open for review.
+Package validation and independent reviews passed.
 
 ## Outcome and contracts
 

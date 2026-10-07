@@ -1,6 +1,6 @@
 # Require explicit image model selection
 
-Status: implemented and independently reviewed; PR handoff in progress.
+Status: implemented and independently reviewed; PR #333 open for review.
 GitHub: [#326](https://github.com/davidmigloz/ai_clients_dart/issues/326).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 2 correctness](../correctness.md), IMG-01–04.
@@ -29,4 +29,4 @@ Use deterministic public fixtures/MockClient/local servers. Unit tests are the d
 passing unit tests, clean analysis, all public request paths, complete changed-model
 contracts, independent approvals, README/migration/current examples and a runnable
 local demo with no API charges. Wider toolkit findings remain explicit; no
-skips/exclusions were added. PR will be linked before handoff; close only after merge.
+skips/exclusions were added. [PR #333](https://github.com/davidmigloz/ai_clients_dart/pull/333) is open for review; close only after merge.
