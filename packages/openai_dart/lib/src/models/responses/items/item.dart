@@ -12,12 +12,15 @@ import '../config/message_phase.dart';
 import '../config/message_role.dart';
 import '../config/program_output_status.dart';
 import '../config/tool_search_execution_type.dart';
+import '../config/web_search_call_status.dart';
 import '../content/input_content.dart';
 import '../content/output_content.dart';
 import '../multi_agent/agent_tag.dart';
 import '../multi_agent/multi_agent_action.dart';
 import '../tools/response_tool.dart';
 import '../tools/tool_call_caller.dart';
+import 'web_search_action.dart';
+import 'web_search_result.dart';
 
 /// Input item for a response request.
 ///
@@ -26,6 +29,7 @@ import '../tools/tool_call_caller.dart';
 /// - [MessageItem] - A message from a user or assistant
 /// - [FunctionCallItem] - A function call from the model
 /// - [CustomToolCallInputItem] - A custom tool call replayed as input
+/// - [WebSearchCallItem] - Web search actions and results retained in input history
 /// - [FunctionCallOutputItem] - Output from a function call
 /// - [ItemReference] - A reference to another item
 /// - [CustomToolCallOutputInputItem] - Output from a custom tool call
@@ -54,6 +58,7 @@ sealed class Item {
       'message' => MessageItem.fromJson(json),
       'function_call' => FunctionCallItem.fromJson(json),
       'custom_tool_call' => CustomToolCallInputItem.fromJson(json),
+      'web_search_call' => WebSearchCallItem.fromJson(json),
       'function_call_output' => FunctionCallOutputItem.fromJson(json),
       'custom_tool_call_output' => CustomToolCallOutputInputItem.fromJson(json),
       'item_reference' => ItemReference.fromJson(json),
@@ -82,6 +87,140 @@ sealed class Item {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson();
+}
+
+/// A web search call retained in Responses input history.
+///
+/// The canonical input and input-resource unions share this exact call shape.
+@immutable
+class WebSearchCallItem extends Item {
+  /// The fixed item discriminator.
+  String get type => 'web_search_call';
+
+  /// Unique identifier.
+  final String id;
+
+  /// The agent that produced this item.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
+
+  /// Web search status, including searching and failed states.
+  ///
+  /// May be null for legacy or partial responses.
+  final WebSearchCallStatus? status;
+
+  /// The action performed by the web search tool, when supplied.
+  final WebSearchAction? action;
+
+  /// Results included with `web_search_call.results`.
+  ///
+  /// Constructor lists are caller-owned for const compatibility and must not be
+  /// mutated after construction. JSON parsing returns an unmodifiable list.
+  final List<WebSearchResult>? results;
+
+  /// Creates a [WebSearchCallItem].
+  const WebSearchCallItem({
+    required this.id,
+    this.agent,
+    this.status,
+    this.action,
+    this.results,
+  });
+
+  /// Creates a [WebSearchCallItem] from JSON.
+  factory WebSearchCallItem.fromJson(Map<String, dynamic> json) {
+    const context = 'WebSearchCallItem';
+    requireJsonType(json, 'web_search_call', context);
+    final agent = json['agent'] == null
+        ? null
+        : requireJsonObject(json['agent'], '$context.agent');
+    final rawResults = json['results'];
+    if (json.containsKey('results') && rawResults is! List) {
+      throw const FormatException('$context.results: expected an array');
+    }
+    return WebSearchCallItem(
+      id: requireJsonString(json['id'], '$context.id'),
+      agent: agent == null
+          ? null
+          : AgentTag(
+              agentName: requireJsonString(
+                agent['agent_name'],
+                '$context.agent.agent_name',
+              ),
+            ),
+      status: json['status'] != null
+          ? WebSearchCallStatus.fromJson(
+              requireJsonString(json['status'], '$context.status'),
+            )
+          : null,
+      action: json.containsKey('action')
+          ? WebSearchAction.fromJson(
+              requireJsonObject(json['action'], '$context.action'),
+              context: '$context.action',
+            )
+          : null,
+      results: rawResults is List
+          ? List.unmodifiable([
+              for (var i = 0; i < rawResults.length; i++)
+                WebSearchResult.fromJson(
+                  requireJsonObject(rawResults[i], '$context.results[$i]'),
+                  context: '$context.results[$i]',
+                ),
+            ])
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    if (agent != null) 'agent': agent!.toJson(),
+    if (status != null) 'status': status!.toJson(),
+    if (action != null) 'action': action!.toJson(),
+    if (results != null) 'results': results!.map((e) => e.toJson()).toList(),
+  };
+
+  /// Copies every field; explicit null clears an optional value.
+  WebSearchCallItem copyWith({
+    String? id,
+    Object? agent = unsetCopyWithValue,
+    Object? status = unsetCopyWithValue,
+    Object? action = unsetCopyWithValue,
+    Object? results = unsetCopyWithValue,
+  }) => WebSearchCallItem(
+    id: id ?? this.id,
+    agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
+    status: status == unsetCopyWithValue
+        ? this.status
+        : status as WebSearchCallStatus?,
+    action: action == unsetCopyWithValue
+        ? this.action
+        : action as WebSearchAction?,
+    results: results == unsetCopyWithValue
+        ? this.results
+        : results as List<WebSearchResult>?,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebSearchCallItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          agent == other.agent &&
+          status == other.status &&
+          action == other.action &&
+          listsEqual(results, other.results);
+
+  @override
+  int get hashCode => Object.hash(id, agent, status, action, listHash(results));
+
+  @override
+  String toString() =>
+      'WebSearchCallItem(type: $type, id: $id, agent: $agent, status: $status, action: $action, results: ${results == null ? 'null' : '${results!.length} items'})';
 }
 
 /// Changes reasoning configuration for subsequent responses in a conversation.

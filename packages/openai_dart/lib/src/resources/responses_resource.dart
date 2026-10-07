@@ -525,6 +525,7 @@ class ResponseInputItemsResource extends ResourceBase {
   /// - [before] - A cursor for pagination.
   /// - [limit] - Maximum number of items to return (1-100, default 20).
   /// - [order] - Sort order: 'asc' or 'desc' (default 'asc').
+  /// - [include] - Additional item data, encoded as repeated `include[]` values.
   /// - [beta] - Opts into the multi-agent Responses beta
   ///   (`OpenAI-Beta: responses_multi_agent=v1`); required when listing input
   ///   items for a response created with `multiAgent`.
@@ -548,6 +549,7 @@ class ResponseInputItemsResource extends ResourceBase {
     String? before,
     int? limit,
     String? order,
+    List<Include>? include,
     bool beta = false,
     Future<void>? abortTrigger,
   }) async {
@@ -559,9 +561,12 @@ class ResponseInputItemsResource extends ResourceBase {
     if (order != null) queryParameters['order'] = order;
     if (beta) queryParameters['beta'] = 'true';
 
-    final url = requestBuilder.buildUrl(
+    final url = requestBuilder.buildUrlWithQueryAll(
       '/responses/$responseId/input_items',
-      queryParams: queryParameters.isNotEmpty ? queryParameters : null,
+      queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+      queryParametersAll: include == null || include.isEmpty
+          ? null
+          : {'include[]': include.map((e) => e.toJson()).toList()},
     );
     final headers = beta
         ? requestBuilder.buildBetaHeaders(betaFeature: _multiAgentBetaFeature)

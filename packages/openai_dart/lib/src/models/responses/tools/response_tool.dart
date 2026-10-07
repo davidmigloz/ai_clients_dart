@@ -5,8 +5,11 @@ import '../../common/equality_helpers.dart';
 import '../../common/json_helpers.dart';
 import '../config/search_content_type.dart';
 import '../config/tool_search_execution_type.dart';
+import '../config/web_search_return_token_budget.dart';
 import 'code_interpreter_container.dart';
 import 'tool_call_caller.dart';
+import 'web_search_filters.dart';
+import 'web_search_image_settings.dart';
 
 /// Marker interface for tools that may appear inside a [NamespaceTool].
 ///
@@ -45,6 +48,7 @@ sealed class ResponseTool {
       'function' => FunctionTool.fromJson(json),
       'web_search_preview' ||
       'web_search' ||
+      'web_search_2025_08_26' ||
       'web_search_preview_2025_03_11' => WebSearchTool.fromJson(json),
       'file_search' => FileSearchTool.fromJson(json),
       'code_interpreter' => CodeInterpreterTool.fromJson(json),
@@ -100,15 +104,29 @@ sealed class ResponseTool {
     async: async,
   );
 
-  /// Creates a web search tool.
+  /// Creates a GA web search tool.
+  ///
+  /// Pass an explicit preview [type] to retain preview behavior. Preview tools
+  /// do not support [externalWebAccess], [filters], [returnTokenBudget], or
+  /// [imageSettings]; supplying them fails when serialized.
   static WebSearchTool webSearch({
+    String type = 'web_search',
     String? searchContextSize,
     ApproximateLocation? userLocation,
     List<SearchContentType>? searchContentTypes,
+    bool? externalWebAccess,
+    WebSearchFilters? filters,
+    WebSearchReturnTokenBudget? returnTokenBudget,
+    WebSearchImageSettings? imageSettings,
   }) => WebSearchTool(
+    type: type,
     searchContextSize: searchContextSize,
     userLocation: userLocation,
     searchContentTypes: searchContentTypes,
+    externalWebAccess: externalWebAccess,
+    filters: filters,
+    returnTokenBudget: returnTokenBudget,
+    imageSettings: imageSettings,
   );
 
   /// Creates a file search tool.
@@ -373,6 +391,9 @@ class FunctionTool extends ResponseTool implements NamespaceAllowedTool {
 /// Approximate user location for localized web search results.
 @immutable
 class ApproximateLocation {
+  /// The fixed location discriminator, optional when parsing.
+  String get type => 'approximate';
+
   /// The two-letter country code (e.g. 'US').
   final String? country;
 
@@ -395,22 +416,64 @@ class ApproximateLocation {
 
   /// Creates an [ApproximateLocation] from JSON.
   factory ApproximateLocation.fromJson(Map<String, dynamic> json) {
+    if (json.containsKey('type')) {
+      requireJsonType(json, 'approximate', 'ApproximateLocation');
+    }
     return ApproximateLocation(
-      country: json['country'] as String?,
-      region: json['region'] as String?,
-      city: json['city'] as String?,
-      timezone: json['timezone'] as String?,
+      country: optionalJsonString(
+        json,
+        'country',
+        'ApproximateLocation',
+        nullable: true,
+      ),
+      region: optionalJsonString(
+        json,
+        'region',
+        'ApproximateLocation',
+        nullable: true,
+      ),
+      city: optionalJsonString(
+        json,
+        'city',
+        'ApproximateLocation',
+        nullable: true,
+      ),
+      timezone: optionalJsonString(
+        json,
+        'timezone',
+        'ApproximateLocation',
+        nullable: true,
+      ),
     );
   }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    'type': 'approximate',
+    'type': type,
     if (country != null) 'country': country,
     if (region != null) 'region': region,
     if (city != null) 'city': city,
     if (timezone != null) 'timezone': timezone,
   };
+
+  /// Creates a copy, with explicit null clearing an optional location member.
+  ApproximateLocation copyWith({
+    Object? country = unsetCopyWithValue,
+    Object? region = unsetCopyWithValue,
+    Object? city = unsetCopyWithValue,
+    Object? timezone = unsetCopyWithValue,
+  }) => ApproximateLocation(
+    country: identical(country, unsetCopyWithValue)
+        ? this.country
+        : country as String?,
+    region: identical(region, unsetCopyWithValue)
+        ? this.region
+        : region as String?,
+    city: identical(city, unsetCopyWithValue) ? this.city : city as String?,
+    timezone: identical(timezone, unsetCopyWithValue)
+        ? this.timezone
+        : timezone as String?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -427,13 +490,23 @@ class ApproximateLocation {
 
   @override
   String toString() =>
-      'ApproximateLocation(country: $country, region: $region, city: $city, timezone: $timezone)';
+      'ApproximateLocation(type: $type, '
+      'country: ${country == null ? 'null' : '${country!.length} chars'}, '
+      'region: ${region == null ? 'null' : '${region!.length} chars'}, '
+      'city: ${city == null ? 'null' : '${city!.length} chars'}, '
+      'timezone: ${timezone == null ? 'null' : '${timezone!.length} chars'})';
 }
 
 /// Web search tool for searching the web.
+///
+/// Defaults to GA `web_search`. Explicit preview types remain available, but
+/// reject GA-only access, filters, budget and image settings. The original
+/// [searchContentTypes] list remains caller-owned for compatibility and must
+/// not be mutated after construction.
 @immutable
 class WebSearchTool extends ResponseTool {
-  /// The type of the tool.
+  /// One of `web_search`, `web_search_2025_08_26`, `web_search_preview`, or
+  /// `web_search_preview_2025_03_11`.
   final String type;
 
   /// The amount of context to include from web search results.
@@ -447,40 +520,154 @@ class WebSearchTool extends ResponseTool {
   /// The types of content to search for.
   final List<SearchContentType>? searchContentTypes;
 
+  /// Whether GA search may access the live web. Explicit false is preserved.
+  final bool? externalWebAccess;
+
+  /// Optional GA domain filters, including guide-defined blocked domains.
+  final WebSearchFilters? filters;
+
+  /// Guide-defined GA return-token budget. Supported models vary.
+  final WebSearchReturnTokenBudget? returnTokenBudget;
+
+  /// Guide-defined GA image-result settings.
+  final WebSearchImageSettings? imageSettings;
+
   /// Creates a [WebSearchTool].
   const WebSearchTool({
-    this.type = 'web_search_preview',
+    this.type = 'web_search',
     this.searchContextSize,
     this.userLocation,
     this.searchContentTypes,
+    this.externalWebAccess,
+    this.filters,
+    this.returnTokenBudget,
+    this.imageSettings,
   });
 
   /// Creates a [WebSearchTool] from JSON.
   factory WebSearchTool.fromJson(Map<String, dynamic> json) {
-    return WebSearchTool(
-      type: json['type'] as String? ?? 'web_search_preview',
-      searchContextSize: json['search_context_size'] as String?,
+    final contentTypes = json['search_content_types'];
+    if (contentTypes != null && contentTypes is! List) {
+      throw const FormatException(
+        'WebSearchTool.search_content_types: expected an array',
+      );
+    }
+    final rawBudget = optionalJsonString(
+      json,
+      'return_token_budget',
+      'WebSearchTool',
+    );
+    if (rawBudget != null &&
+        rawBudget != 'default' &&
+        rawBudget != 'unlimited') {
+      throw const FormatException(
+        'WebSearchTool.return_token_budget: expected "default" or "unlimited"',
+      );
+    }
+    final tool = WebSearchTool(
+      type: requireJsonString(json['type'], 'WebSearchTool.type'),
+      searchContextSize: optionalJsonString(
+        json,
+        'search_context_size',
+        'WebSearchTool',
+      ),
       userLocation: json['user_location'] != null
           ? ApproximateLocation.fromJson(
-              json['user_location'] as Map<String, dynamic>,
+              requireJsonObject(
+                json['user_location'],
+                'WebSearchTool.user_location',
+              ),
             )
           : null,
-      searchContentTypes: (json['search_content_types'] as List?)
-          ?.map((e) => SearchContentType.fromJson(e as String))
-          .toList(),
-    );
+      searchContentTypes: contentTypes == null
+          ? null
+          : [
+              for (var i = 0; i < (contentTypes as List).length; i++)
+                SearchContentType.fromJson(
+                  requireJsonString(
+                    contentTypes[i],
+                    'WebSearchTool.search_content_types[$i]',
+                  ),
+                ),
+            ],
+      externalWebAccess: optionalJsonBool(
+        json,
+        'external_web_access',
+        'WebSearchTool',
+      ),
+      filters: json['filters'] == null
+          ? null
+          : WebSearchFilters.fromJson(
+              requireJsonObject(json['filters'], 'WebSearchTool.filters'),
+            ),
+      returnTokenBudget: rawBudget == null
+          ? null
+          : WebSearchReturnTokenBudget.fromJson(rawBudget),
+      imageSettings: !json.containsKey('image_settings')
+          ? null
+          : WebSearchImageSettings.fromJson(
+              requireJsonObject(
+                json['image_settings'],
+                'WebSearchTool.image_settings',
+              ),
+            ),
+    ).._validate(parsing: true);
+    return tool;
   }
 
   @override
-  Map<String, dynamic> toJson() => {
-    'type': type,
-    if (searchContextSize != null) 'search_context_size': searchContextSize,
-    if (userLocation != null) 'user_location': userLocation!.toJson(),
-    if (searchContentTypes != null)
-      'search_content_types': searchContentTypes!
-          .map((e) => e.toJson())
-          .toList(),
-  };
+  Map<String, dynamic> toJson() {
+    _validate();
+    return {
+      'type': type,
+      if (searchContextSize != null) 'search_context_size': searchContextSize,
+      if (userLocation != null) 'user_location': userLocation!.toJson(),
+      if (searchContentTypes != null)
+        'search_content_types': searchContentTypes!
+            .map((e) => e.toJson())
+            .toList(),
+      if (externalWebAccess != null) 'external_web_access': externalWebAccess,
+      if (filters != null) 'filters': filters!.toJson(),
+      if (returnTokenBudget != null)
+        'return_token_budget': returnTokenBudget!.toJson(),
+      if (imageSettings != null) 'image_settings': imageSettings!.toJson(),
+    };
+  }
+
+  /// Creates a copy, with explicit null clearing any optional member.
+  WebSearchTool copyWith({
+    String? type,
+    Object? searchContextSize = unsetCopyWithValue,
+    Object? userLocation = unsetCopyWithValue,
+    Object? searchContentTypes = unsetCopyWithValue,
+    Object? externalWebAccess = unsetCopyWithValue,
+    Object? filters = unsetCopyWithValue,
+    Object? returnTokenBudget = unsetCopyWithValue,
+    Object? imageSettings = unsetCopyWithValue,
+  }) => WebSearchTool(
+    type: type ?? this.type,
+    searchContextSize: identical(searchContextSize, unsetCopyWithValue)
+        ? this.searchContextSize
+        : searchContextSize as String?,
+    userLocation: identical(userLocation, unsetCopyWithValue)
+        ? this.userLocation
+        : userLocation as ApproximateLocation?,
+    searchContentTypes: identical(searchContentTypes, unsetCopyWithValue)
+        ? this.searchContentTypes
+        : searchContentTypes as List<SearchContentType>?,
+    externalWebAccess: identical(externalWebAccess, unsetCopyWithValue)
+        ? this.externalWebAccess
+        : externalWebAccess as bool?,
+    filters: identical(filters, unsetCopyWithValue)
+        ? this.filters
+        : filters as WebSearchFilters?,
+    returnTokenBudget: identical(returnTokenBudget, unsetCopyWithValue)
+        ? this.returnTokenBudget
+        : returnTokenBudget as WebSearchReturnTokenBudget?,
+    imageSettings: identical(imageSettings, unsetCopyWithValue)
+        ? this.imageSettings
+        : imageSettings as WebSearchImageSettings?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -490,19 +677,62 @@ class WebSearchTool extends ResponseTool {
           type == other.type &&
           searchContextSize == other.searchContextSize &&
           userLocation == other.userLocation &&
-          listsEqual(searchContentTypes, other.searchContentTypes);
+          listsEqual(searchContentTypes, other.searchContentTypes) &&
+          externalWebAccess == other.externalWebAccess &&
+          filters == other.filters &&
+          returnTokenBudget == other.returnTokenBudget &&
+          imageSettings == other.imageSettings;
 
   @override
   int get hashCode => Object.hash(
     type,
     searchContextSize,
     userLocation,
-    searchContentTypes != null ? Object.hashAll(searchContentTypes!) : null,
+    listHash(searchContentTypes),
+    externalWebAccess,
+    filters,
+    returnTokenBudget,
+    imageSettings,
   );
 
   @override
   String toString() =>
-      'WebSearchTool(type: $type, searchContextSize: $searchContextSize, userLocation: $userLocation, searchContentTypes: $searchContentTypes)';
+      'WebSearchTool(type: $type, searchContextSize: $searchContextSize, '
+      'userLocation: $userLocation, searchContentTypes: $searchContentTypes, '
+      'externalWebAccess: $externalWebAccess, filters: $filters, '
+      'returnTokenBudget: $returnTokenBudget, imageSettings: $imageSettings)';
+
+  void _validate({bool parsing = false}) {
+    void reject(String field, String expected) {
+      final message = 'WebSearchTool.$field: $expected';
+      if (parsing) throw FormatException(message);
+      throw ArgumentError(message);
+    }
+
+    if (type != 'web_search' &&
+        type != 'web_search_2025_08_26' &&
+        type != 'web_search_preview' &&
+        type != 'web_search_preview_2025_03_11') {
+      reject('type', 'expected a GA or preview web-search discriminator');
+    }
+    if (searchContextSize != null &&
+        searchContextSize != 'low' &&
+        searchContextSize != 'medium' &&
+        searchContextSize != 'high') {
+      reject('search_context_size', 'expected "low", "medium", or "high"');
+    }
+    if (type == 'web_search_preview' ||
+        type == 'web_search_preview_2025_03_11') {
+      for (final field in [
+        if (externalWebAccess != null) 'external_web_access',
+        if (filters != null) 'filters',
+        if (returnTokenBudget != null) 'return_token_budget',
+        if (imageSettings != null) 'image_settings',
+      ]) {
+        reject(field, 'requires a GA web-search type');
+      }
+    }
+  }
 }
 
 /// A filter for file search metadata.

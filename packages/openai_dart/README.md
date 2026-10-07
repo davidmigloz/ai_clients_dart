@@ -247,6 +247,69 @@ client.close();
 
 </details>
 
+### How do I filter web search and inspect image results?
+
+<details>
+<summary><b>Show example</b></summary>
+
+`ResponseTool.webSearch()` and `WebSearchTool()` now default to GA `web_search`.
+Use domain filters and image settings, then request results and source metadata:
+
+```dart
+final response = await client.responses.create(
+  CreateResponseRequest(
+    model: 'gpt-6-astra',
+    reasoning: const ReasoningConfig(effort: ReasoningEffort.low),
+    input: const ResponseInput.text('Find images of the Golden Gate Bridge.'),
+    tools: [
+      ResponseTool.webSearch(
+        filters: WebSearchFilters(
+          allowedDomains: const ['nps.gov', 'wikimedia.org'],
+          blockedDomains: const ['spam.example'],
+        ),
+        searchContentTypes: const [SearchContentType.image, SearchContentType.text],
+        imageSettings: WebSearchImageSettings(maxResults: 3, caption: true),
+      ),
+    ],
+    toolChoice: ResponseToolChoice.webSearch(),
+    include: const [Include.webSearchResults, Include.webSearchActionSources],
+  ),
+);
+for (final call in response.output.whereType<WebSearchCallOutputItem>()) {
+  for (final result in call.results ?? <WebSearchResult>[]) {
+    if (result case WebSearchImageResult(:final imageUrl, :final sourceWebsiteUrl)) {
+      print('$imageUrl from $sourceWebsiteUrl');
+    }
+  }
+}
+```
+
+Calls expose `WebSearchCallStatus`, typed search/open-page/find actions, and
+`WebSearchActionSearch.sources`. Image results are separate from assistant text
+and citations. Future action/result objects retain recursively immutable JSON;
+no text-result shape is assumed. Optional null image metadata normalizes to
+absence. Input listings and conversation items retain the same metadata, and
+`toWebSearchCallItem()` supports typed history replay.
+
+The [official guide](https://developers.openai.com/api/docs/guides/tools-web-search)
+documents scheme-free domains (up to 100 in each allow/block list), positive
+image counts, and `returnTokenBudget` for GPT-5+ reasoning web search. Use
+`WebSearchReturnTokenBudget.unlimited` selectively; it can increase latency and
+cost. Omission leaves the server's usual budget unchanged. `externalWebAccess:
+false` selects cached content on the real service.
+
+Explicit preview types remain available with `type: 'web_search_preview'` or
+`'web_search_preview_2025_03_11'`; GA also accepts `'web_search_2025_08_26'`.
+GA-only controls are rejected on preview tools. Block lists, return budgets,
+GA image controls/results, and forced GA choice follow the guide ahead of the
+canonical schema; these differences stay visible in verification evidence.
+
+→ [Runnable local REST/SSE example](example/web_search_controls_example.dart),
+without an API key or charges. See [migration guidance](MIGRATION.md#upcoming-ga-web-search-alignment)
+for the GA default and status type changes.
+
+</details>
+
 ### How do I use async function and custom tools?
 
 <details>
@@ -1171,6 +1234,7 @@ See the [example/](example/) directory for complete examples:
 | [`moderation_example.dart`](example/moderation_example.dart) | Content moderation |
 | [`content_provenance_checks_example.dart`](example/content_provenance_checks_example.dart) | Content provenance (C2PA/SynthID) detection |
 | [`web_search_example.dart`](example/web_search_example.dart) | Web search with Responses API |
+| [`web_search_controls_example.dart`](example/web_search_controls_example.dart) | Local GA filters, image results, sources, and REST/SSE parsing without API calls |
 | [`realtime_example.dart`](example/realtime_example.dart) | Realtime API (WebSocket and WebRTC) |
 | [`fine_tuning_example.dart`](example/fine_tuning_example.dart) | Fine-tuning job management |
 | [`completions_example.dart`](example/completions_example.dart) | Legacy completions API |

@@ -6,6 +6,70 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming GA web-search alignment
+
+`ResponseTool.webSearch()` and `WebSearchTool()` now default to GA
+`web_search`. Existing explicit preview types keep their wire values. Select
+preview explicitly if your application depends on its behavior:
+
+```dart
+// Before: the default selected preview search.
+const preview = WebSearchTool();
+```
+
+```dart
+// After: opt into preview explicitly, or use the new GA default.
+const preview = WebSearchTool(type: 'web_search_preview');
+final ga = ResponseTool.webSearch();
+```
+
+All four definition types remain supported, including dated GA
+`web_search_2025_08_26` and dated preview `web_search_preview_2025_03_11`.
+`ResponseToolChoice.webSearch()` selects GA; its explicit preview choices stay
+preview. GA-only filters, external access, return budgets and image settings are
+rejected on preview definitions rather than implying the service honors them.
+
+`WebSearchCallOutputItem.status` and `ConversationWebSearchCallItem.status` now
+use `WebSearchCallStatus?` instead of `ItemStatus?`. Update constructors and status
+comparisons to the web-search enum, which also represents `searching` and `failed`:
+
+```dart
+// Before
+const call = WebSearchCallOutputItem(
+  id: 'ws_1',
+  status: ItemStatus.completed,
+);
+```
+
+```dart
+// After
+const call = WebSearchCallOutputItem(
+  id: 'ws_1',
+  status: WebSearchCallStatus.completed,
+);
+final completed = call.status == WebSearchCallStatus.completed;
+```
+
+Absent/null status and beta agent metadata remain accepted and normalize to
+omission. Unknown status values use the existing enum fallback convention.
+New `WebSearchCallItem` supports typed input history; output and conversation
+`toWebSearchCallItem()` helpers retain actions, results, IDs, status and agent.
+
+Direct known parsers now report contextual `FormatException` for malformed IDs,
+types, controls and nested actions/results. Omit optional nonnull JSON members
+instead of supplying null; `copyWith(field: null)` removes a nullable Dart field.
+Nullable filters, location and their supported members keep null-to-omission
+normalization. Empty filters remain `{}`; an empty approximate location retains
+the established `{'type': 'approximate'}` normalization.
+
+Block lists, return budgets, GA image controls/results and forced GA choice follow
+the official guide ahead of the canonical schema. Optional image thumbnail and
+caption accept null and normalize to omission as a client compatibility choice.
+Future actions/results retain immutable raw JSON. See the
+[README](README.md#how-do-i-filter-web-search-and-inspect-image-results) for model
+limitations and the [local REST/SSE example](example/web_search_controls_example.dart)
+for a runnable demonstration without API calls.
+
 ## Upcoming Responses reasoning configuration updates
 
 This addition keeps existing `ReasoningConfig` requests unchanged. Use

@@ -8,8 +8,11 @@ import '../responses/config/function_call_status.dart';
 import '../responses/config/item_status.dart';
 import '../responses/config/message_phase.dart';
 import '../responses/config/tool_search_execution_type.dart';
+import '../responses/config/web_search_call_status.dart';
 import '../responses/items/item.dart'
-    show ConfigurationUpdateItem, FunctionCallOutput;
+    show ConfigurationUpdateItem, FunctionCallOutput, WebSearchCallItem;
+import '../responses/items/web_search_action.dart';
+import '../responses/items/web_search_result.dart';
 import '../responses/multi_agent/agent_tag.dart';
 import '../responses/tools/response_tool.dart';
 import '../responses/tools/tool_call_caller.dart';
@@ -1017,31 +1020,121 @@ class ConversationMcpCallItem extends ConversationItem {
 /// A web search call item in a conversation.
 @immutable
 class ConversationWebSearchCallItem extends ConversationItem {
+  /// The fixed item discriminator.
+  String get type => 'web_search_call';
+
   /// Unique identifier.
   final String id;
 
-  /// Item status.
-  final ItemStatus? status;
+  /// The beta multi-agent producer, when provided.
+  final AgentTag? agent;
+
+  /// Web search status, including searching and failed states.
+  ///
+  /// May be null for legacy or partial items.
+  final WebSearchCallStatus? status;
+
+  /// The action performed by the web search tool, when supplied.
+  final WebSearchAction? action;
+
+  /// Results included with `web_search_call.results`.
+  ///
+  /// Constructor lists are caller-owned for const compatibility and must not be
+  /// mutated after construction. JSON parsing returns an unmodifiable list.
+  final List<WebSearchResult>? results;
 
   /// Creates a [ConversationWebSearchCallItem].
-  const ConversationWebSearchCallItem({required this.id, this.status});
+  const ConversationWebSearchCallItem({
+    required this.id,
+    this.agent,
+    this.status,
+    this.action,
+    this.results,
+  });
 
   /// Creates a [ConversationWebSearchCallItem] from JSON.
   factory ConversationWebSearchCallItem.fromJson(Map<String, dynamic> json) {
+    const context = 'ConversationWebSearchCallItem';
+    requireJsonType(json, 'web_search_call', context);
+    final agent = json['agent'] == null
+        ? null
+        : requireJsonObject(json['agent'], '$context.agent');
+    final rawResults = json['results'];
+    if (json.containsKey('results') && rawResults is! List) {
+      throw const FormatException('$context.results: expected an array');
+    }
     return ConversationWebSearchCallItem(
-      id: json['id'] as String,
+      id: requireJsonString(json['id'], '$context.id'),
+      agent: agent == null
+          ? null
+          : AgentTag(
+              agentName: requireJsonString(
+                agent['agent_name'],
+                '$context.agent.agent_name',
+              ),
+            ),
       status: json['status'] != null
-          ? ItemStatus.fromJson(json['status'] as String)
+          ? WebSearchCallStatus.fromJson(
+              requireJsonString(json['status'], '$context.status'),
+            )
+          : null,
+      action: json.containsKey('action')
+          ? WebSearchAction.fromJson(
+              requireJsonObject(json['action'], '$context.action'),
+              context: '$context.action',
+            )
+          : null,
+      results: rawResults is List
+          ? List.unmodifiable([
+              for (var i = 0; i < rawResults.length; i++)
+                WebSearchResult.fromJson(
+                  requireJsonObject(rawResults[i], '$context.results[$i]'),
+                  context: '$context.results[$i]',
+                ),
+            ])
           : null,
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'web_search_call',
+    'type': type,
     'id': id,
+    if (agent != null) 'agent': agent!.toJson(),
     if (status != null) 'status': status!.toJson(),
+    if (action != null) 'action': action!.toJson(),
+    if (results != null) 'results': results!.map((e) => e.toJson()).toList(),
   };
+
+  /// Converts to request input while preserving every web-search call field.
+  WebSearchCallItem toWebSearchCallItem() => WebSearchCallItem(
+    id: id,
+    agent: agent,
+    status: status,
+    action: action,
+    results: results,
+  );
+
+  /// Copies every field; explicit null clears an optional value.
+  ConversationWebSearchCallItem copyWith({
+    String? id,
+    Object? agent = unsetCopyWithValue,
+    Object? status = unsetCopyWithValue,
+    Object? action = unsetCopyWithValue,
+    Object? results = unsetCopyWithValue,
+  }) => ConversationWebSearchCallItem(
+    id: id ?? this.id,
+    agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
+    status: status == unsetCopyWithValue
+        ? this.status
+        : status as WebSearchCallStatus?,
+    action: action == unsetCopyWithValue
+        ? this.action
+        : action as WebSearchAction?,
+    results: results == unsetCopyWithValue
+        ? this.results
+        : results as List<WebSearchResult>?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -1049,14 +1142,17 @@ class ConversationWebSearchCallItem extends ConversationItem {
       other is ConversationWebSearchCallItem &&
           runtimeType == other.runtimeType &&
           id == other.id &&
-          status == other.status;
+          agent == other.agent &&
+          status == other.status &&
+          action == other.action &&
+          listsEqual(results, other.results);
 
   @override
-  int get hashCode => Object.hash(id, status);
+  int get hashCode => Object.hash(id, agent, status, action, listHash(results));
 
   @override
   String toString() =>
-      'ConversationWebSearchCallItem(id: $id, status: $status)';
+      'ConversationWebSearchCallItem(type: $type, id: $id, agent: $agent, status: $status, action: $action, results: ${results == null ? 'null' : '${results!.length} items'})';
 }
 
 /// A file search call item in a conversation.

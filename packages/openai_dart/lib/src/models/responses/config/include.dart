@@ -12,6 +12,18 @@ enum Include {
   /// Include file search results.
   fileSearchResults('file_search_call.results'),
 
+  /// Include web search results, including image results when requested.
+  webSearchResults('web_search_call.results'),
+
+  /// Include the complete sources used by a web search action.
+  webSearchActionSources('web_search_call.action.sources'),
+
+  /// Include image URLs from input messages.
+  messageInputImageImageUrl('message.input_image.image_url'),
+
+  /// Include image URLs from computer call output.
+  computerCallOutputImageUrl('computer_call_output.output.image_url'),
+
   /// Include code interpreter outputs.
   codeInterpreterOutputs('code_interpreter_call.outputs'),
 

@@ -2961,6 +2961,274 @@
       "file": "lib/src/resources/responses_resource.dart",
       "schema": "BetaResponseItemList",
       "note": "Beta contextual returned-input list shares existing pagination-ID tolerance. Complete copy/value/diagnostic contracts are tested across every field."
+    },
+    "WebSearchTool": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "WebSearchTool",
+      "parent": "ResponseTool",
+      "note": "GA/preview contextual mapping. Guide-only blocked domains, return budget, image settings and GA content types remain visible; preview GA-only options reject before sending."
+    },
+    "WebSearchPreviewTool": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "WebSearchPreviewTool",
+      "parent": "ResponseTool",
+      "note": "GA/preview contextual mapping. Guide-only blocked domains, return budget, image settings and GA content types remain visible; preview GA-only options reject before sending."
+    },
+    "WebSearchToolCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchCallOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "WebSearchToolCall",
+      "parent": "OutputItem",
+      "note": "Real contextual web call. Complete action/results/status parsing; existing optional status tolerance retained and guide-only results not excluded."
+    },
+    "WebSearchToolCallInput": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchCallItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "WebSearchToolCall",
+      "parent": "Item",
+      "note": "Real contextual web call. Complete action/results/status parsing; existing optional status tolerance retained and guide-only results not excluded."
+    },
+    "WebSearchToolCallConversation": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ConversationWebSearchCallItem",
+      "file": "lib/src/models/conversations/conversation_item.dart",
+      "schema": "WebSearchToolCall",
+      "parent": "ConversationItem",
+      "note": "Real contextual web call. Complete action/results/status parsing; existing optional status tolerance retained and guide-only results not excluded."
+    },
+    "WebSearchActionSearch": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchActionSearch",
+      "file": "lib/src/models/responses/items/web_search_action.dart",
+      "schema": "WebSearchActionSearch",
+      "parent": "WebSearchAction"
+    },
+    "WebSearchActionOpenPage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchActionOpenPage",
+      "file": "lib/src/models/responses/items/web_search_action.dart",
+      "schema": "WebSearchActionOpenPage",
+      "parent": "WebSearchAction"
+    },
+    "WebSearchActionFind": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchActionFind",
+      "file": "lib/src/models/responses/items/web_search_action.dart",
+      "schema": "WebSearchActionFind",
+      "parent": "WebSearchAction"
+    },
+    "WebSearchCallStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "WebSearchCallStatus",
+      "file": "lib/src/models/responses/config/web_search_call_status.dart",
+      "schema": "WebSearchCallStatus"
+    },
+    "WebSearchApproximateLocation": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ApproximateLocation",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "WebSearchApproximateLocation",
+      "note": "Nullable GA object; optional fixed approximate type normalizes omission to the existing constant getter. Location leaf fields normalize null to absence."
+    },
+    "BetaWebSearchTool": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "BetaWebSearchTool",
+      "parent": "ResponseTool",
+      "note": "GA/preview contextual mapping. Guide-only blocked domains, return budget, image settings and GA content types remain visible; preview GA-only options reject before sending."
+    },
+    "BetaWebSearchPreviewTool": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "BetaWebSearchPreviewTool",
+      "parent": "ResponseTool",
+      "note": "GA/preview contextual mapping. Guide-only blocked domains, return budget, image settings and GA content types remain visible; preview GA-only options reject before sending."
+    },
+    "BetaWebSearchToolCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchCallOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaWebSearchToolCall",
+      "parent": "OutputItem",
+      "note": "Real contextual web call. Complete action/results/status parsing; existing optional status tolerance retained and guide-only results not excluded."
+    },
+    "BetaWebSearchToolCallInput": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchCallItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "BetaWebSearchToolCall",
+      "parent": "Item",
+      "note": "Real contextual web call. Complete action/results/status parsing; existing optional status tolerance retained and guide-only results not excluded."
+    },
+    "BetaWebSearchToolCallConversation": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ConversationWebSearchCallItem",
+      "file": "lib/src/models/conversations/conversation_item.dart",
+      "schema": "BetaWebSearchToolCall",
+      "parent": "ConversationItem",
+      "note": "Real contextual web call. Complete action/results/status parsing; existing optional status tolerance retained and guide-only results not excluded."
+    },
+    "BetaWebSearchActionSearch": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchActionSearch",
+      "file": "lib/src/models/responses/items/web_search_action.dart",
+      "schema": "BetaWebSearchActionSearch",
+      "parent": "WebSearchAction"
+    },
+    "BetaWebSearchActionOpenPage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchActionOpenPage",
+      "file": "lib/src/models/responses/items/web_search_action.dart",
+      "schema": "BetaWebSearchActionOpenPage",
+      "parent": "WebSearchAction"
+    },
+    "BetaWebSearchActionFind": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchActionFind",
+      "file": "lib/src/models/responses/items/web_search_action.dart",
+      "schema": "BetaWebSearchActionFind",
+      "parent": "WebSearchAction"
+    },
+    "BetaWebSearchCallStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "WebSearchCallStatus",
+      "file": "lib/src/models/responses/config/web_search_call_status.dart",
+      "schema": "BetaWebSearchCallStatus"
+    },
+    "BetaWebSearchApproximateLocation": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ApproximateLocation",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "BetaWebSearchApproximateLocation",
+      "note": "Nullable GA object; optional fixed approximate type normalizes omission to the existing constant getter. Location leaf fields normalize null to absence."
+    },
+    "ApproximateLocation": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ApproximateLocation",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "ApproximateLocation",
+      "note": "Preview location shape; complete copies/value/diagnostics and supplied type validation."
+    },
+    "IncludeEnum": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "Include",
+      "file": "lib/src/models/responses/config/include.dart",
+      "schema": "IncludeEnum",
+      "note": "All canonical values included. Two older public strings remain for compatibility and are intentionally visible as extras."
+    },
+    "WebSearchAction": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "WebSearchAction",
+      "file": "lib/src/models/responses/items/web_search_action.dart",
+      "schema": null,
+      "note": "Responses call action union is inline with three real GA/beta branches mapped above."
+    },
+    "WebSearchActionSource": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "WebSearchActionSource",
+      "file": "lib/src/models/responses/items/web_search_action.dart",
+      "schema": null,
+      "note": "Real source object is inline in WebSearchActionSearch.sources; fixed URL discriminator and required URL are fixture-verified."
+    },
+    "UnknownWebSearchAction": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownWebSearchAction",
+      "file": "lib/src/models/responses/items/web_search_action.dart",
+      "schema": null,
+      "parent": "WebSearchAction",
+      "note": "Future action fallback snapshots recursively immutable raw JSON; no named schema."
+    },
+    "WebSearchResult": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "WebSearchResult",
+      "file": "lib/src/models/responses/items/web_search_result.dart",
+      "schema": null,
+      "note": "Guide-defined results union; no canonical named schema and no invented text result."
+    },
+    "WebSearchImageResult": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "WebSearchImageResult",
+      "file": "lib/src/models/responses/items/web_search_result.dart",
+      "schema": null,
+      "parent": "WebSearchResult",
+      "note": "Guide-defined image result with required image/source URL and client optional-null metadata normalization."
+    },
+    "UnknownWebSearchResult": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownWebSearchResult",
+      "file": "lib/src/models/responses/items/web_search_result.dart",
+      "schema": null,
+      "parent": "WebSearchResult",
+      "note": "Future result fallback snapshots recursively immutable raw JSON."
+    },
+    "WebSearchFilters": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "WebSearchFilters",
+      "file": "lib/src/models/responses/tools/web_search_filters.dart",
+      "schema": null,
+      "note": "Inline GA filters with canonical nullable allowed domains and guide-only blocked domains; fixtures verify immutable list snapshots."
+    },
+    "WebSearchImageSettings": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "WebSearchImageSettings",
+      "file": "lib/src/models/responses/tools/web_search_image_settings.dart",
+      "schema": null,
+      "note": "Guide-only image settings; optional nonnull positive max_results and optional nonnull caption, no invented defaults."
+    },
+    "WebSearchReturnTokenBudget": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "WebSearchReturnTokenBudget",
+      "file": "lib/src/models/responses/config/web_search_return_token_budget.dart",
+      "schema": null,
+      "note": "Guide-only closed default/unlimited parameter; no automatic enabling or model allowlist."
+    },
+    "ResponseToolChoiceWebSearch": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponseToolChoiceWebSearch",
+      "file": "lib/src/models/responses/tools/response_tool_choice.dart",
+      "schema": null,
+      "parent": "ResponseToolChoice",
+      "note": "Canonical choice enum only includes preview values; GA web_search force choice follows guide. Explicit previews remain exact."
     }
   }
 }

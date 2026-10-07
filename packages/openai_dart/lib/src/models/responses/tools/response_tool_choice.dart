@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../../common/equality_helpers.dart';
+import '../../common/json_helpers.dart';
 
 /// Tool choice mode for allowed tools.
 enum ToolChoiceMode {
@@ -82,6 +83,10 @@ class SpecificFunctionChoice extends SpecificToolChoice {
 /// Tool choice specification.
 ///
 /// Controls how the model selects which tools to use.
+/// Variants are [ResponseToolChoiceNone], [ResponseToolChoiceAuto],
+/// [ResponseToolChoiceRequired], [ResponseToolChoiceFunction],
+/// [ResponseToolChoiceAllowedTools], [ResponseToolChoiceWebSearch], and
+/// [ResponseToolChoiceProgrammatic]. Web search selects GA or an explicit preview.
 sealed class ResponseToolChoice {
   /// Creates a [ResponseToolChoice].
   const ResponseToolChoice();
@@ -102,6 +107,11 @@ sealed class ResponseToolChoice {
       return switch (type) {
         'function' => ResponseToolChoiceFunction.fromJson(json),
         'allowed_tools' => ResponseToolChoiceAllowedTools.fromJson(json),
+        'web_search' ||
+        'web_search_preview' ||
+        'web_search_preview_2025_03_11' => ResponseToolChoiceWebSearch.fromJson(
+          json,
+        ),
         'programmatic_tool_calling' => ResponseToolChoiceProgrammatic.fromJson(
           json,
         ),
@@ -126,9 +136,72 @@ sealed class ResponseToolChoice {
   static ResponseToolChoiceFunction function({required String name}) =>
       ResponseToolChoiceFunction(name: name);
 
+  /// Selects GA web search, or an explicitly requested preview type.
+  static ResponseToolChoiceWebSearch webSearch({String type = 'web_search'}) =>
+      ResponseToolChoiceWebSearch(type: type);
+
   /// Converts to JSON.
   Object toJson();
 }
+
+/// Selects hosted web search, preserving explicit preview choices.
+///
+/// The GA choice follows the official web-search guide, which leads the
+/// canonical hosted-tool choice enum. Preview choices retain their wire values.
+@immutable
+class ResponseToolChoiceWebSearch extends ResponseToolChoice {
+  /// The chosen type: `web_search`, `web_search_preview`, or
+  /// `web_search_preview_2025_03_11`.
+  final String type;
+
+  /// Creates a web search choice.
+  const ResponseToolChoiceWebSearch({this.type = 'web_search'});
+
+  /// Creates a web search choice from JSON.
+  factory ResponseToolChoiceWebSearch.fromJson(Map<String, dynamic> json) {
+    final type = requireJsonString(
+      json['type'],
+      'ResponseToolChoiceWebSearch.type',
+    );
+    if (!_isWebSearchChoice(type)) {
+      throw const FormatException(
+        'ResponseToolChoiceWebSearch.type: unsupported web search choice',
+      );
+    }
+    return ResponseToolChoiceWebSearch(type: type);
+  }
+
+  @override
+  Object toJson() {
+    if (!_isWebSearchChoice(type)) {
+      throw ArgumentError.value(type, 'type', 'Unsupported web search choice');
+    }
+    return {'type': type};
+  }
+
+  /// Copies the selected type.
+  ResponseToolChoiceWebSearch copyWith({String? type}) =>
+      ResponseToolChoiceWebSearch(type: type ?? this.type);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ResponseToolChoiceWebSearch &&
+          runtimeType == other.runtimeType &&
+          type == other.type;
+
+  @override
+  int get hashCode => type.hashCode;
+
+  @override
+  String toString() => 'ResponseToolChoiceWebSearch(type: $type)';
+}
+
+bool _isWebSearchChoice(String type) => const {
+  'web_search',
+  'web_search_preview',
+  'web_search_preview_2025_03_11',
+}.contains(type);
 
 /// No tool should be called.
 @immutable

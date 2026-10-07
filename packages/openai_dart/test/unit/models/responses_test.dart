@@ -833,7 +833,7 @@ void main() {
       );
 
       final json = tool.toJson();
-      expect(json['type'], equals('web_search_preview'));
+      expect(json['type'], equals('web_search'));
       expect(json['search_context_size'], equals('high'));
       expect(json['user_location'], isA<Map<String, dynamic>>());
       expect(
@@ -1702,13 +1702,13 @@ void main() {
 
       expect(item, isA<WebSearchCallOutputItem>());
       expect((item as WebSearchCallOutputItem).id, equals('ws_123'));
-      expect(item.status, equals(ItemStatus.completed));
+      expect(item.status, equals(WebSearchCallStatus.completed));
     });
 
     test('WebSearchCallOutputItem serializes correctly', () {
       const item = WebSearchCallOutputItem(
         id: 'ws_123',
-        status: ItemStatus.completed,
+        status: WebSearchCallStatus.completed,
       );
 
       final json = item.toJson();
@@ -2192,8 +2192,14 @@ void main() {
             role: MessageRole.assistant,
             content: [OutputContent.text(text: 'Found it!')],
           ),
-          WebSearchCallOutputItem(id: 'ws_1', status: ItemStatus.completed),
-          WebSearchCallOutputItem(id: 'ws_2', status: ItemStatus.completed),
+          WebSearchCallOutputItem(
+            id: 'ws_1',
+            status: WebSearchCallStatus.completed,
+          ),
+          WebSearchCallOutputItem(
+            id: 'ws_2',
+            status: WebSearchCallStatus.completed,
+          ),
         ],
       );
 
