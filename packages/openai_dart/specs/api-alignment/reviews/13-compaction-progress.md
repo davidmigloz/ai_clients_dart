@@ -1,8 +1,9 @@
 # Compaction progress acceptance
 
-Status: implementation, validation and independent reviews complete; merge pending.
+Status: implementation, validation and independent reviews complete; merged.
 Implementation [PR #350](https://github.com/davidmigloz/ai_clients_dart/pull/350)
-is open for review; #338 closes only after merge.
+merged October 7, 2026 at 19:49:04 UTC after green CI, closing #338.
+Merge commit: `4110c174b6b84947cd609f59a0104cacc8b6373c`.
 Tracking: [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirement: [RESP-COMPACT-01](../responses.md#compaction).
@@ -105,4 +106,4 @@ Requirements and engineering reviewers inspected the combined implementation,
 tests, manifest, pinned spec, README, migration guide and example. The README
 replay expression and migration wording findings were resolved. Both reviewers
 approved the final combined diff and this acceptance record with no remaining
-actionable findings. #338 stays open until its implementation PR merges. Access programs #339 follow this slice.
+actionable findings. PR #350 merged, closing #338. Access programs #339 follow this slice.

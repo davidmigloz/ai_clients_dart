@@ -164,6 +164,14 @@ class CreateResponseRequest {
   /// calling the resource method.
   final MultiAgentConfig? multiAgent;
 
+  /// Optional access-program selection for this request.
+  ///
+  /// Omission or an empty selection lets the server choose according to model
+  /// eligibility and organization or project authorization. Explicit selection
+  /// does not grant access. Absent values are omitted from JSON; a supplied
+  /// JSON value must be an object, not `null`.
+  final AccessProgramsParam? accessPrograms;
+
   /// Creates a [CreateResponseRequest].
   const CreateResponseRequest({
     required this.model,
@@ -197,6 +205,7 @@ class CreateResponseRequest {
     this.promptCacheRetention,
     this.topLogprobs,
     this.multiAgent,
+    this.accessPrograms,
   });
 
   /// Creates a simple text request.
@@ -214,6 +223,21 @@ class CreateResponseRequest {
 
   /// Creates a [CreateResponseRequest] from JSON.
   factory CreateResponseRequest.fromJson(Map<String, dynamic> json) {
+    AccessProgramsParam? accessPrograms;
+    if (json.containsKey('access_programs')) {
+      try {
+        accessPrograms = AccessProgramsParam.fromJson(
+          requireJsonObject(
+            json['access_programs'],
+            'CreateResponseRequest.access_programs',
+          ),
+        );
+      } on FormatException catch (error) {
+        throw FormatException(
+          'CreateResponseRequest.access_programs: ${error.message}',
+        );
+      }
+    }
     ResponsePromptCacheOptionsParam? options;
     if (json.containsKey('prompt_cache_options')) {
       try {
@@ -297,6 +321,7 @@ class CreateResponseRequest {
               json['multi_agent'] as Map<String, dynamic>,
             )
           : null,
+      accessPrograms: accessPrograms,
     );
   }
 
@@ -345,6 +370,7 @@ class CreateResponseRequest {
         'prompt_cache_retention': promptCacheRetention!.toJson(),
       if (topLogprobs != null) 'top_logprobs': topLogprobs,
       if (multiAgent != null) 'multi_agent': multiAgent!.toJson(),
+      if (accessPrograms != null) 'access_programs': accessPrograms!.toJson(),
     };
   }
 
@@ -384,6 +410,7 @@ class CreateResponseRequest {
     Object? promptCacheRetention = unsetCopyWithValue,
     Object? topLogprobs = unsetCopyWithValue,
     Object? multiAgent = unsetCopyWithValue,
+    Object? accessPrograms = unsetCopyWithValue,
   }) {
     return CreateResponseRequest(
       model: model ?? this.model,
@@ -467,6 +494,9 @@ class CreateResponseRequest {
       multiAgent: multiAgent == unsetCopyWithValue
           ? this.multiAgent
           : multiAgent as MultiAgentConfig?,
+      accessPrograms: identical(accessPrograms, unsetCopyWithValue)
+          ? this.accessPrograms
+          : accessPrograms as AccessProgramsParam?,
     );
   }
 
@@ -506,7 +536,8 @@ class CreateResponseRequest {
         promptCacheOptions == other.promptCacheOptions &&
         promptCacheRetention == other.promptCacheRetention &&
         topLogprobs == other.topLogprobs &&
-        multiAgent == other.multiAgent;
+        multiAgent == other.multiAgent &&
+        accessPrograms == other.accessPrograms;
   }
 
   @override
@@ -542,6 +573,7 @@ class CreateResponseRequest {
     promptCacheRetention,
     topLogprobs,
     multiAgent,
+    accessPrograms,
   ]);
 
   @override
@@ -567,7 +599,8 @@ class CreateResponseRequest {
       'promptCacheKey: ${_identifierSummary(promptCacheKey)}, '
       'promptCacheOptions: ${_cacheOptionsSummary(promptCacheOptions)}, '
       'promptCacheRetention: $promptCacheRetention, '
-      'topLogprobs: $topLogprobs, multiAgent: ${_presenceSummary(multiAgent)})';
+      'topLogprobs: $topLogprobs, multiAgent: ${_presenceSummary(multiAgent)}, '
+      'accessPrograms: $accessPrograms)';
 }
 
 String _textSummary(String? value) =>

@@ -4,6 +4,7 @@ import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../common/json_helpers.dart';
 import '../moderations/completion_moderation.dart';
+import 'config/access_programs.dart';
 import 'config/prompt_cache_diagnostics.dart';
 import 'config/prompt_cache_options.dart';
 import 'config/prompt_cache_retention.dart';
@@ -108,6 +109,13 @@ class Response {
   /// The truncation strategy applied to the response.
   final Truncation? truncation;
 
+  /// The effective access programs returned by the server.
+  ///
+  /// May be `null` when omitted or returned as `null`, including an implicit
+  /// standard selection. A supplied object requires a recognized, nonnull
+  /// cyber program. Absent values are omitted when serializing this model.
+  final AccessProgramsBody? accessPrograms;
+
   /// Creates a [Response].
   const Response({
     required this.id,
@@ -135,10 +143,24 @@ class Response {
     this.moderation,
     this.reasoning,
     this.truncation,
+    this.accessPrograms,
   });
 
   /// Creates a [Response] from JSON.
   factory Response.fromJson(Map<String, dynamic> json) {
+    AccessProgramsBody? accessPrograms;
+    if (json['access_programs'] != null) {
+      try {
+        accessPrograms = AccessProgramsBody.fromJson(
+          requireJsonObject(
+            json['access_programs'],
+            'Response.access_programs',
+          ),
+        );
+      } on FormatException catch (error) {
+        throw FormatException('Response.access_programs: ${error.message}');
+      }
+    }
     PromptCacheDiagnostics? diagnostics;
     if (json.containsKey('prompt_cache_diagnostics')) {
       try {
@@ -206,6 +228,7 @@ class Response {
       truncation: json['truncation'] != null
           ? Truncation.fromJson(json['truncation'] as String)
           : null,
+      accessPrograms: accessPrograms,
     );
   }
 
@@ -240,6 +263,7 @@ class Response {
     if (moderation != null) 'moderation': moderation!.toJson(),
     if (reasoning != null) 'reasoning': reasoning!.toJson(),
     if (truncation != null) 'truncation': truncation!.toJson(),
+    if (accessPrograms != null) 'access_programs': accessPrograms!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -271,6 +295,7 @@ class Response {
     Object? moderation = unsetCopyWithValue,
     Object? reasoning = unsetCopyWithValue,
     Object? truncation = unsetCopyWithValue,
+    Object? accessPrograms = unsetCopyWithValue,
   }) => Response(
     id: id ?? this.id,
     object: object ?? this.object,
@@ -331,6 +356,9 @@ class Response {
     truncation: truncation == unsetCopyWithValue
         ? this.truncation
         : truncation as Truncation?,
+    accessPrograms: identical(accessPrograms, unsetCopyWithValue)
+        ? this.accessPrograms
+        : accessPrograms as AccessProgramsBody?,
   );
 
   // ============================================================
@@ -470,7 +498,8 @@ class Response {
           promptCacheDiagnostics == other.promptCacheDiagnostics &&
           moderation == other.moderation &&
           reasoning == other.reasoning &&
-          truncation == other.truncation;
+          truncation == other.truncation &&
+          accessPrograms == other.accessPrograms;
 
   @override
   int get hashCode => Object.hashAll([
@@ -499,6 +528,7 @@ class Response {
     moderation,
     reasoning,
     truncation,
+    accessPrograms,
   ]);
 
   @override
@@ -519,7 +549,8 @@ class Response {
       'promptCacheOptions: ${_cacheOptionsSummary(promptCacheOptions)}, '
       'promptCacheDiagnostics: $promptCacheDiagnostics, '
       'moderation: ${_presenceSummary(moderation)}, '
-      'reasoning: ${_reasoningSummary(reasoning)}, truncation: $truncation)';
+      'reasoning: ${_reasoningSummary(reasoning)}, truncation: $truncation, '
+      'accessPrograms: $accessPrograms)';
 }
 
 String _textSummary(String? value) =>

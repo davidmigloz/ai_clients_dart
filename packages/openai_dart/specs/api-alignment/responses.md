@@ -1,10 +1,10 @@
 # Responses capabilities: Phase 3 specification
 
 Status: independently reviewed specification; async tools, configuration updates,
-web search and hosted/local shell merged in #346–#349. Compaction progress #338
-is implemented, validated and independently reviewed in [PR #350](https://github.com/davidmigloz/ai_clients_dart/pull/350);
-merge remains pending. Access programs #339 follow after compaction. Remaining runtime slices
-are tracked below. Parent:
+web search, hosted/local shell and compaction progress merged in #346–#350.
+Access programs #339 are implemented and validated; independent reviews approve the final combined
+diff, and PR creation remains pending. Tool search #340 follows after access programs. Remaining runtime
+slices are tracked below. Parent:
 [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 
 ## Objective and decisions
@@ -78,8 +78,8 @@ and its linked guides. Revalidate affected contracts before each implementation.
 | [#335](https://github.com/davidmigloz/ai_clients_dart/issues/335) (10) | Persistent reasoning configuration updates | RESP-CONFIG-01–02 | Merged in #347 |
 | [#336](https://github.com/davidmigloz/ai_clients_dart/issues/336) (11) | GA web-search controls, actions and results | RESP-WEB-01–03 | Merged in #348 |
 | [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337) (12) | Hosted/local shell configuration, replay and streaming | RESP-SHELL-01–03 | Merged in #349; container #320 merged |
-| [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) (13) | Observe compaction progress | RESP-COMPACT-01 | Implemented; validation/review pending |
-| [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) (14) | Select and inspect Responses access programs | RESP-ACCESS-01–02 | None |
+| [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) (13) | Observe compaction progress | RESP-COMPACT-01 | Merged in #350 |
+| [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) (14) | Select and inspect Responses access programs | RESP-ACCESS-01–02 | Implemented/reviewed; PR pending |
 | [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) (15) | Return complete client-discovered tools | RESP-SEARCH-01–02 | [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) for nested async definitions |
 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) (16) | Persistent Responses WebSocket sessions and lane routing | RESP-WS-01–04 | None; use the shared event contracts current at implementation |
 | [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) (17) | Steer a running WebSocket response | RESP-STEER-01–03 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
@@ -260,7 +260,7 @@ speculative sibling variant is introduced.
 Implementation #338 has 63 model contract tests and 142 public REST/SSE fixtures
 (205 new deterministic tests). [Acceptance evidence](reviews/13-compaction-progress.md)
 records completed documentation, validation and independent approvals. Implementation [PR #350](https://github.com/davidmigloz/ai_clients_dart/pull/350)
-remains open until merge; access programs #339 are next.
+merged after green CI, closing #338; access programs #339 follow this slice.
 
 Sources: [compaction](https://developers.openai.com/api/docs/guides/compaction),
 [canonical progress event](https://github.com/openai/openai-openapi/blob/ee483b4b26b2695fedc5c8af7b187e5986bd0add/openapi.json),
@@ -285,6 +285,17 @@ Local entry points: `ResponseStreamEvent` and existing compaction lifecycle mode
 
 Sources: [Daybreak](https://developers.openai.com/api/docs/guides/daybreak),
 [canonical access-program schemas](https://github.com/openai/openai-openapi/blob/ee483b4b26b2695fedc5c8af7b187e5986bd0add/openapi.json).
+The enum parser returns null for unknown strings; the new request and returned
+leaf parsers reject unsupported cyber values contextually, avoiding a fabricated
+Standard selection. The request leaf rejects unknown keys as its schema is closed;
+returned provider extra fields are tolerated. Canonical/Node require the outer
+returned nullable key, while Python and existing Dart allow omission; this
+intentional compatibility choice is preserved and normalized to omission.
+
+Promoting stale allOf parent skips to real GA/beta mappings also exposes older
+request/response field gaps and type/requiredness/scanner diagnostics. These stay
+visible in the complete-parity inventory without expanding this feature slice.
+
 Local entry points: `create_response_request.dart`, `response.dart` and lifecycle
 stream-event parsing. Acceptance is offline; provisioned Daybreak calls add no
 necessary contract coverage.

@@ -1,6 +1,6 @@
 # Responses access-program selection
 
-Status: specified; implementation pending.
+Status: implemented, verified and independently reviewed; PR creation pending.
 GitHub: [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-ACCESS-01–02.
@@ -12,14 +12,14 @@ Select an access program explicitly and inspect the effective returned program.
 
 ## Acceptance criteria
 
-- [ ] Distinct request shape accepts omitted or empty object and all three cyber values; supplied null/wrong types fail.
-- [ ] Returned outer omission/null remains compatible; supplied response body requires nonnull cyber. Ordinary/SSE lifecycle responses retain it.
-- [ ] Full CreateResponseRequest/Response field contracts preserve existing fields and new selection in copies, equality/hash and safe diagnostics.
-- [ ] Offline example documents server-selected omission defaults and explicit selection/eligibility without model allowlists or Build/Launch/Grow client enums.
-- [ ] Changed models have complete contextual serialization, copy/clear, equality/hash and safe diagnostics across all old/new fields; known malformed variants fail and intended provider tolerance stays compatible.
-- [ ] Public factories/resources/stream parsers, exports and real manifest mappings are verified. README/llms, an offline runnable example and any required migration guide are complete.
-- [ ] Relevant focused unit fixtures, format/fix/analyze, the package unit suite and full toolkit scope have recorded evidence. Unrelated diagnostics remain visible.
-- [ ] Independent requirements and engineering reviews approve the final combined diff after validated findings are resolved.
+- [x] Distinct request shape accepts omitted or empty object and all three cyber values; supplied null/wrong types fail.
+- [x] Returned outer omission/null remains compatible; supplied response body requires nonnull cyber. Ordinary/SSE lifecycle responses retain it.
+- [x] Full CreateResponseRequest/Response field contracts preserve existing fields and new selection in copies, equality/hash and safe diagnostics.
+- [x] Offline example documents server-selected omission defaults and explicit selection/eligibility without model allowlists or Build/Launch/Grow client enums.
+- [x] Changed models have complete contextual serialization, copy/clear, equality/hash and safe diagnostics across all old/new fields; known malformed variants fail and intended provider tolerance stays compatible.
+- [x] Public factories/resources/stream parsers, exports and real manifest mappings are verified. README/llms, an offline runnable example and any required migration guide are complete.
+- [x] Relevant focused unit fixtures, format/fix/analyze, the package unit suite and full toolkit scope have recorded evidence. Unrelated diagnostics remain visible.
+- [x] Independent requirements and engineering reviews approve the final combined diff after validated findings are resolved.
 
 ## Compatibility and boundaries
 
@@ -33,5 +33,10 @@ Package publishing and unrelated API families are outside this ticket.
 
 ## Completion evidence
 
-Pending implementation, verification and independent review. Link the evidence
-record and PR here when complete; close the issue only after merge.
+[Acceptance evidence](../reviews/14-access-programs.md) records 168 model cases,
+616 public HTTP/SSE fixtures (784 new tests), 6,152 passing package unit tests,
+two existing skips, clean fatal-info analysis, compiled README usage and the
+five-request offline example. Full toolkit diagnostics expose older parent gaps
+and the nullable-enum scanner limitation without new exclusions. Independent requirements/engineering
+reviews approve the final combined diff; PR creation remains pending; close #339 only after merge.
+Tool search #340 follows this slice.
