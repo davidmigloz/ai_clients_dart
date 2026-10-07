@@ -1,6 +1,7 @@
 # Hosted/local shell acceptance
 
 Status: implementation, validation and independent reviews complete; merge pending.
+[PR #349](https://github.com/davidmigloz/ai_clients_dart/pull/349) is open for review.
 Tracking: [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirements: [RESP-SHELL-01–03](../responses.md#shell).

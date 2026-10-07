@@ -37,3 +37,6 @@ Package publishing and unrelated API families are outside this ticket.
 contracts, 5,163 passing unit tests, clean analysis, full toolkit diagnostics,
 README/migration guidance, the offline example and independent reviews. Close
 the issue only after implementation merge.
+
+Implementation [PR #349](https://github.com/davidmigloz/ai_clients_dart/pull/349)
+is open for review; #337 closes only after merge.

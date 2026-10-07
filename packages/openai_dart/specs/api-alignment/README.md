@@ -154,7 +154,8 @@ independent reviews. GA web search #336 merged in
 [PR #348](https://github.com/davidmigloz/ai_clients_dart/pull/348), closing #336;
 [acceptance evidence](reviews/11-web-search.md) records validation and reviews.
 Hosted/local shell #337 is implemented and independently reviewed with
-[acceptance evidence](reviews/12-hosted-shell.md); merge remains pending.
+[acceptance evidence](reviews/12-hosted-shell.md) in
+[PR #349](https://github.com/davidmigloz/ai_clients_dart/pull/349); merge remains pending.
 
 | Ticket | Demonstrable outcome | Dependency |
 | --- | --- | --- |
