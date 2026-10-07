@@ -2,6 +2,9 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
+import 'copy_with_sentinel.dart';
+import 'equality_helpers.dart';
+
 /// Log probability information for a token.
 ///
 /// Provides detailed probability information for each token in the response,
@@ -35,32 +38,37 @@ class Logprobs {
     if (refusal != null) 'refusal': refusal!.map((e) => e.toJson()).toList(),
   };
 
+  /// Creates a copy; nullable token lists can be explicitly cleared.
+  Logprobs copyWith({
+    Object? content = unsetCopyWithValue,
+    Object? refusal = unsetCopyWithValue,
+  }) => Logprobs(
+    content: content == unsetCopyWithValue
+        ? this.content
+        : content == null
+        ? null
+        : List<TokenLogprob>.from(content as List<dynamic>),
+    refusal: refusal == unsetCopyWithValue
+        ? this.refusal
+        : refusal == null
+        ? null
+        : List<TokenLogprob>.from(refusal as List<dynamic>),
+  );
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is Logprobs &&
           runtimeType == other.runtimeType &&
-          _listEquals(content, other.content) &&
-          _listEquals(refusal, other.refusal);
+          listsEqual(content, other.content) &&
+          listsEqual(refusal, other.refusal);
 
   @override
-  int get hashCode => Object.hash(
-    content != null ? Object.hashAll(content!) : null,
-    refusal != null ? Object.hashAll(refusal!) : null,
-  );
+  int get hashCode => Object.hash(listHash(content), listHash(refusal));
 
   @override
-  String toString() => 'Logprobs(content: $content, refusal: $refusal)';
-
-  bool _listEquals<T>(List<T>? a, List<T>? b) {
-    if (a == null && b == null) return true;
-    if (a == null || b == null) return false;
-    if (a.length != b.length) return false;
-    for (var i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
-  }
+  String toString() =>
+      'Logprobs(content: ${_listSummary(content)}, refusal: ${_listSummary(refusal)})';
 }
 
 /// Log probability information for a single token.
@@ -116,19 +124,45 @@ class TokenLogprob {
       'top_logprobs': topLogprobs!.map((e) => e.toJson()).toList(),
   };
 
+  /// Creates a copy; nullable bytes and alternatives can be explicitly cleared.
+  TokenLogprob copyWith({
+    String? token,
+    double? logprob,
+    Object? bytes = unsetCopyWithValue,
+    Object? topLogprobs = unsetCopyWithValue,
+  }) => TokenLogprob(
+    token: token ?? this.token,
+    logprob: logprob ?? this.logprob,
+    bytes: bytes == unsetCopyWithValue
+        ? this.bytes
+        : bytes == null
+        ? null
+        : List<int>.from(bytes as List<dynamic>),
+    topLogprobs: topLogprobs == unsetCopyWithValue
+        ? this.topLogprobs
+        : topLogprobs == null
+        ? null
+        : List<TopLogprob>.from(topLogprobs as List<dynamic>),
+  );
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is TokenLogprob &&
           runtimeType == other.runtimeType &&
           token == other.token &&
-          logprob == other.logprob;
+          logprob == other.logprob &&
+          listsEqual(bytes, other.bytes) &&
+          listsEqual(topLogprobs, other.topLogprobs);
 
   @override
-  int get hashCode => Object.hash(token, logprob);
+  int get hashCode =>
+      Object.hash(token, logprob, listHash(bytes), listHash(topLogprobs));
 
   @override
-  String toString() => 'TokenLogprob(token: $token, logprob: $logprob)';
+  String toString() =>
+      'TokenLogprob(token: $token, logprob: $logprob, '
+      'bytes: ${_listSummary(bytes)}, topLogprobs: ${_listSummary(topLogprobs)})';
 }
 
 /// Information about a top log probability token alternative.
@@ -165,19 +199,37 @@ class TopLogprob {
     if (bytes != null) 'bytes': bytes,
   };
 
+  /// Creates a copy; nullable bytes can be explicitly cleared.
+  TopLogprob copyWith({
+    String? token,
+    double? logprob,
+    Object? bytes = unsetCopyWithValue,
+  }) => TopLogprob(
+    token: token ?? this.token,
+    logprob: logprob ?? this.logprob,
+    bytes: bytes == unsetCopyWithValue
+        ? this.bytes
+        : bytes == null
+        ? null
+        : List<int>.from(bytes as List<dynamic>),
+  );
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is TopLogprob &&
           runtimeType == other.runtimeType &&
           token == other.token &&
-          logprob == other.logprob;
+          logprob == other.logprob &&
+          listsEqual(bytes, other.bytes);
 
   @override
-  int get hashCode => Object.hash(token, logprob);
+  int get hashCode => Object.hash(token, logprob, listHash(bytes));
 
   @override
-  String toString() => 'TopLogprob(token: $token, logprob: $logprob)';
+  String toString() =>
+      'TopLogprob(token: $token, logprob: $logprob, '
+      'bytes: ${_listSummary(bytes)})';
 }
 
 /// Converts a log probability to a regular probability.
@@ -187,3 +239,6 @@ double _logprobToProbability(double logprob) {
   if (logprob <= -9998) return 0.0;
   return math.exp(logprob);
 }
+
+String _listSummary(List<dynamic>? list) =>
+    list == null ? 'null' : '${list.length} items';

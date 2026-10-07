@@ -836,11 +836,18 @@ class ChatCompletionCreateRequest {
 @immutable
 class StreamOptions {
   /// Creates [StreamOptions].
-  const StreamOptions({this.includeUsage});
+  const StreamOptions({this.includeUsage, this.includeObfuscation});
 
   /// Creates [StreamOptions] from JSON.
   factory StreamOptions.fromJson(Map<String, dynamic> json) {
-    return StreamOptions(includeUsage: json['include_usage'] as bool?);
+    return StreamOptions(
+      includeUsage: json['include_usage'] as bool?,
+      includeObfuscation: optionalJsonBool(
+        json,
+        'include_obfuscation',
+        'StreamOptions',
+      ),
+    );
   }
 
   /// Whether to include usage statistics in the stream.
@@ -848,23 +855,47 @@ class StreamOptions {
   /// If true, the final chunk will include usage information.
   final bool? includeUsage;
 
+  /// Whether stream events include random padding in an `obfuscation` field.
+  ///
+  /// The API includes this padding by default to normalize payload sizes. Set
+  /// this to false to reduce bandwidth on trusted network links. Leaving it
+  /// unset preserves the server default. Padding is metadata, not model output.
+  final bool? includeObfuscation;
+
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (includeUsage != null) 'include_usage': includeUsage,
+    if (includeObfuscation != null) 'include_obfuscation': includeObfuscation,
   };
+
+  /// Creates a copy, allowing either optional control to be explicitly cleared.
+  StreamOptions copyWith({
+    Object? includeUsage = unsetCopyWithValue,
+    Object? includeObfuscation = unsetCopyWithValue,
+  }) => StreamOptions(
+    includeUsage: includeUsage == unsetCopyWithValue
+        ? this.includeUsage
+        : includeUsage as bool?,
+    includeObfuscation: includeObfuscation == unsetCopyWithValue
+        ? this.includeObfuscation
+        : includeObfuscation as bool?,
+  );
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is StreamOptions &&
           runtimeType == other.runtimeType &&
-          includeUsage == other.includeUsage;
+          includeUsage == other.includeUsage &&
+          includeObfuscation == other.includeObfuscation;
 
   @override
-  int get hashCode => includeUsage.hashCode;
+  int get hashCode => Object.hash(includeUsage, includeObfuscation);
 
   @override
-  String toString() => 'StreamOptions(includeUsage: $includeUsage)';
+  String toString() =>
+      'StreamOptions(includeUsage: $includeUsage, '
+      'includeObfuscation: $includeObfuscation)';
 }
 
 List<String>? _parseStop(Object? stop) {

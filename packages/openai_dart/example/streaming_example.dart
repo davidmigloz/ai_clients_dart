@@ -1,7 +1,8 @@
 // ignore_for_file: avoid_print
 /// Example demonstrating streaming chat completions.
 ///
-/// Run with: dart run example/streaming_example.dart
+/// Run with OPENAI_API_KEY set: dart run example/streaming_example.dart
+/// Makes three paid requests with bounded output and retries disabled.
 library;
 
 import 'dart:io';
@@ -9,7 +10,12 @@ import 'dart:io';
 import 'package:openai_dart/openai_dart.dart';
 
 Future<void> main() async {
-  final client = OpenAIClient.fromEnvironment();
+  final client = OpenAIClient(
+    config: OpenAIConfig.fromEnvironment().copyWith(
+      retryPolicy: const RetryPolicy(maxRetries: 0),
+      timeout: const Duration(seconds: 60),
+    ),
+  );
 
   try {
     // Basic streaming
@@ -17,15 +23,35 @@ Future<void> main() async {
 
     final stream = client.chat.completions.createStream(
       ChatCompletionCreateRequest(
-        model: 'gpt-5.5',
+        model: 'gpt-6-luna',
+        reasoningEffort: ReasoningEffort.none,
+        store: false,
         messages: [ChatMessage.user('Count from 1 to 10 slowly.')],
-        maxTokens: 100,
+        maxCompletionTokens: 100,
+        streamOptions: const StreamOptions(
+          includeUsage: true,
+          includeObfuscation: true,
+        ),
       ),
     );
 
     await for (final event in stream) {
+      // Padding in event.obfuscation is metadata; render content deltas only.
       if (event.textDelta case final delta?) {
         stdout.write(delta);
+      }
+      if (event.usage case final usage?) {
+        // The final usage-only chunk has choices: []. Avoid .choices!.first.
+        print(
+          '\nPrompt text/image/cache writes: '
+          '${usage.promptTokensDetails?.textTokens}/'
+          '${usage.promptTokensDetails?.imageTokens}/'
+          '${usage.promptTokensDetails?.cacheWriteTokens}',
+        );
+        print(
+          'Completion text tokens: '
+          '${usage.completionTokensDetails?.textTokens}',
+        );
       }
     }
     print('\n');
@@ -35,9 +61,11 @@ Future<void> main() async {
 
     final stream2 = client.chat.completions.createStream(
       ChatCompletionCreateRequest(
-        model: 'gpt-5.5',
+        model: 'gpt-6-luna',
+        reasoningEffort: ReasoningEffort.none,
+        store: false,
         messages: [ChatMessage.user('Say hello in 5 different languages.')],
-        maxTokens: 200,
+        maxCompletionTokens: 200,
       ),
     );
 
@@ -47,11 +75,18 @@ Future<void> main() async {
     // Using accumulator
     print('=== Using Accumulator ===\n');
 
+    // Explicit false disables padding; omitted keeps the server default.
     final stream3 = client.chat.completions.createStream(
       ChatCompletionCreateRequest(
-        model: 'gpt-5.5',
+        model: 'gpt-6-luna',
+        reasoningEffort: ReasoningEffort.none,
+        store: false,
         messages: [ChatMessage.user('Write a short haiku about programming.')],
-        maxTokens: 100,
+        maxCompletionTokens: 100,
+        streamOptions: const StreamOptions(
+          includeUsage: true,
+          includeObfuscation: false,
+        ),
       ),
     );
 
@@ -64,6 +99,7 @@ Future<void> main() async {
     print('\n');
     print('Final content: ${accumulator.content}');
     print('Finish reason: ${accumulator.finishReason}');
+    print('Final usage: ${accumulator.usage}');
 
     // Convert accumulated stream to a ChatCompletion object
     final completion = accumulator.toChatCompletion();

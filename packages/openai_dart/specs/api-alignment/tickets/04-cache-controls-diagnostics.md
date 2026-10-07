@@ -1,6 +1,6 @@
 # Align cache controls and diagnostics
 
-Status: implemented and independently reviewed; [PR #329](https://github.com/davidmigloz/ai_clients_dart/pull/329) open for review.
+Status: merged in [PR #329](https://github.com/davidmigloz/ai_clients_dart/pull/329); #322 closed.
 GitHub: [#322](https://github.com/davidmigloz/ai_clients_dart/issues/322).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 2 correctness](../correctness.md), CACHE-001–004, CACHE-006.
@@ -34,4 +34,4 @@ All acceptance criteria are verified: 2,121 unit tests pass with two existing
 skips, analysis is clean, and all independent reviewers approve. Two bounded
 live requests passed, used 3,222 input/five output tokens (conservative
 $0.00040525), and both stored responses were deleted. Wider toolkit diagnostics
-remain visible and recorded. Issue #322 remains open until its PR merges.
+remain visible and recorded. PR #329 merged after all CI checks passed, closing #322.
