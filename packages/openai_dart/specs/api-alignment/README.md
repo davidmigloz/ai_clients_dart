@@ -151,7 +151,8 @@ independently reviewed with [acceptance evidence](reviews/09-async-tools.md) in
 [PR #347](https://github.com/davidmigloz/ai_clients_dart/pull/347), closing #335;
 [acceptance evidence](reviews/10-configuration-updates.md) records validation and
 independent reviews. GA web search #336 is implemented and independently reviewed
-with [acceptance evidence](reviews/11-web-search.md); merge remains pending.
+with [acceptance evidence](reviews/11-web-search.md) in
+[PR #348](https://github.com/davidmigloz/ai_clients_dart/pull/348); merge remains pending.
 
 | Ticket | Demonstrable outcome | Dependency |
 | --- | --- | --- |

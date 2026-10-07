@@ -1,6 +1,7 @@
 # GA web-search acceptance
 
 Status: implementation, validation, and independent reviews complete; merge pending.
+[PR #348](https://github.com/davidmigloz/ai_clients_dart/pull/348) is open for review.
 Tracking: [#336](https://github.com/davidmigloz/ai_clients_dart/issues/336),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirements: [RESP-WEB-01–03](../responses.md#web-search).
