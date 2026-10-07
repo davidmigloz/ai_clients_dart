@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../client/retry_after.dart';
 import '../errors/exceptions.dart';
-import '../platform/http_utils.dart';
 import 'interceptor.dart';
 
 /// Interceptor that handles error responses from the API.
@@ -47,7 +47,7 @@ class ErrorInterceptor implements Interceptor {
   ApiException _parseErrorResponse(http.Response response) {
     final statusCode = response.statusCode;
     final requestId = response.headers['x-request-id'];
-    final retryAfter = _parseRetryAfter(response.headers['retry-after']);
+    final retryAfter = parseRetryAfter(response.headers);
 
     // Try to parse the error body
     String message;
@@ -61,12 +61,14 @@ class ErrorInterceptor implements Interceptor {
       body = json;
 
       if (json['error'] case final Map<String, dynamic> error) {
-        message = error['message'] as String? ?? 'Unknown error';
-        type = error['type'] as String?;
-        code = error['code'] as String?;
-        param = error['param'] as String?;
+        message = error['message'] == null
+            ? 'Unknown error'
+            : _errorString(error['message']) ?? response.body;
+        type = _errorString(error['type']);
+        code = _errorString(error['code']);
+        param = _errorString(error['param']);
       } else {
-        message = json['message'] as String? ?? response.body;
+        message = _errorString(json['message']) ?? response.body;
       }
     } catch (_) {
       // Fallback to raw body if JSON parsing fails
@@ -86,40 +88,6 @@ class ErrorInterceptor implements Interceptor {
       retryAfter: retryAfter,
     );
   }
-
-  /// Parses the Retry-After header value.
-  ///
-  /// Supports both seconds (`"120"`) and HTTP-date formats (RFC 7231).
-  /// Trims whitespace before parsing. Returns null if parsing fails.
-  Duration? _parseRetryAfter(String? value) {
-    if (value == null || value.isEmpty) {
-      return null;
-    }
-
-    // Trim whitespace
-    final trimmed = value.trim();
-    if (trimmed.isEmpty) {
-      return null;
-    }
-
-    // Try parsing as seconds
-    final seconds = int.tryParse(trimmed);
-    if (seconds != null) {
-      return Duration(seconds: seconds);
-    }
-
-    // Try parsing as HTTP-date using platform-specific implementation
-    // which supports IMF-fixdate, RFC 850, and ANSI C formats
-    try {
-      final date = parseHttpDate(trimmed);
-      final now = DateTime.now().toUtc();
-      if (date.isAfter(now)) {
-        return date.difference(now);
-      }
-    } catch (_) {
-      // Ignore parse errors
-    }
-
-    return null;
-  }
 }
+
+String? _errorString(Object? value) => value is String ? value : null;

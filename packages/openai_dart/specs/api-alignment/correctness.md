@@ -8,7 +8,9 @@ closing #321; its
 merged in [PR #329](https://github.com/davidmigloz/ai_clients_dart/pull/329), closing #322;
 [acceptance evidence](reviews/04-cache-controls-diagnostics.md) is recorded. Chat usage/obfuscation
 merged in [PR #330](https://github.com/davidmigloz/ai_clients_dart/pull/330), closing #323;
-[acceptance evidence](reviews/05-chat-usage-obfuscation.md) is recorded. Parent
+[acceptance evidence](reviews/05-chat-usage-obfuscation.md) is recorded. Chat audio
+merged in [PR #331](https://github.com/davidmigloz/ai_clients_dart/pull/331), closing #324;
+[acceptance evidence](reviews/06-chat-audio.md) is recorded. Parent
 [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Decisions was merged in [#319](https://github.com/davidmigloz/ai_clients_dart/pull/319)
 after all CI checks passed, closing #318.
@@ -200,6 +202,19 @@ Sources: [error guide](https://developers.openai.com/api/docs/guides/error-codes
 The SDKs still retry every 429 by status. Python declines hints over 120 seconds,
 while Node falls back to shorter waits above 60 seconds. Follow the documented
 API minimum/action-needed guidance instead of reproducing those discrepancies.
+
+Implementation decisions for RETRY-01–06: one internal case-insensitive header
+parser uses exact decimal arithmetic and ceilings to microseconds. Delays above
+2^53−1 microseconds are unrepresentable/invalid on the common native/web contract;
+invalid millisecond hints fall back to the standard header. Past dates yield zero.
+Final timer waits ceil to milliseconds because Dart timers truncate fractional
+milliseconds; exception metadata retains the precise microsecond duration.
+Keep positive jitter within its actual fractional headroom. Classify permanent
+code/type independently of malformed message/param members. Constructor/factory/
+diagnostic tests retain exception identity and every existing metadata field;
+exceptions do not acquire invented wire serialization or value/copy semantics.
+No live quota/overload trigger is needed: use controlled public fixtures and a
+runnable local example without API charges.
 
 Tests script public MockClient failures/successes for each permanent code/type,
 transient and unknown bodies, GET/POST 503, disabled/exhausted retries, complete

@@ -965,7 +965,11 @@ Future<void> main() async {
       ),
     );
   } on RateLimitException catch (error) {
-    stderr.writeln('Retry after: ${error.retryAfter}');
+    stderr.writeln('Rate/quota error ${error.code ?? error.type}: ${error.message}');
+    stderr.writeln('Server retry hint: ${error.retryAfter}');
+    // Billing/spend/quota errors require action before resending.
+  } on InternalServerException catch (error) {
+    stderr.writeln('Server error ${error.statusCode}; hint: ${error.retryAfter}');
   } on ApiException catch (error) {
     stderr.writeln('OpenAI API error ${error.statusCode}: ${error.message}');
   } on OpenAIException catch (error) {
@@ -976,7 +980,26 @@ Future<void> main() async {
 }
 ```
 
-→ [Full example](example/error_handling_example.dart)
+Regular cloneable requests retry transient 429 responses and retry
+5xx/timeouts/connections only for idempotent methods. Structured billing/spend/quota
+429 codes and `insufficient_quota` type require action and stop automatic retries.
+Unknown provider 429 bodies retain the existing fallback. POST 5xx, multipart
+requests, and streams are not automatically replayed.
+
+`retry-after-ms` takes precedence when valid; otherwise `Retry-After` accepts
+seconds or HTTP dates. Fractional hints remain precise, scheduled waits round
+up, and past dates mean zero. A valid hint above twice `RetryPolicy.maxDelay`
+returns the original error immediately with its full `retryAfter`; shorter
+automatic replay would violate the server minimum. This hint is exposed on
+both `RateLimitException` and `InternalServerException`, including before a
+stream starts. `maxRetries: 0` disables automatic retries for application-owned
+retry loops. Cancellation can interrupt permitted waits.
+
+→ [Error-handling example](example/error_handling_example.dart) and
+[local retry/quota example](example/retry_guidance_example.dart)
+
+See the [official retry guidance](https://developers.openai.com/api/docs/guides/rate-limits)
+and [migration guide](MIGRATION.md) for exact boundaries.
 
 </details>
 
@@ -1004,6 +1027,7 @@ See the [example/](example/) directory for complete examples:
 | [`chatkit_example.dart`](example/chatkit_example.dart) | ChatKit sessions and threads |
 | [`assistants_example.dart`](example/assistants_example.dart) | Assistants API (deprecated) |
 | [`evals_example.dart`](example/evals_example.dart) | Model evaluation and testing |
+| [`retry_guidance_example.dart`](example/retry_guidance_example.dart) | Local transient, permanent-quota, and long-hint scenarios without API calls |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
 | [`models_example.dart`](example/models_example.dart) | Model listing and retrieval |
 | [`batches_example.dart`](example/batches_example.dart) | Batch processing for async jobs |

@@ -135,6 +135,78 @@ void main() {
 
       expect(exception.statusCode, 503);
     });
+
+    test(
+      'optional retry hint preserves const construction and old diagnostics',
+      () {
+        const absent = InternalServerException(
+          message: 'Server error',
+          statusCode: 503,
+        );
+        const zero = InternalServerException(
+          message: 'Server error',
+          statusCode: 503,
+          retryAfter: Duration.zero,
+        );
+        const fractional = InternalServerException(
+          message: 'Server error',
+          statusCode: 503,
+          retryAfter: Duration(microseconds: 1235),
+        );
+        expect(absent.retryAfter, isNull);
+        expect(
+          absent.toString(),
+          'InternalServerException: Server error (status: 503)',
+        );
+        expect(zero.retryAfter, Duration.zero);
+        expect(zero.toString(), contains('retry after: 0s'));
+        expect(fractional.retryAfter, const Duration(microseconds: 1235));
+        expect(fractional.toString(), contains('retry after: 1235us'));
+        const rate = RateLimitException(
+          message: 'Wait',
+          retryAfter: Duration(microseconds: 1235),
+        );
+        expect(rate.toString(), contains('retry after: 1235us'));
+      },
+    );
+
+    for (final status in [500, 502, 503, 599]) {
+      test('factory forwards hint and every existing field for $status', () {
+        final cause = StateError('transport cause');
+        const body = {
+          'error': {'message': 'Failure'},
+        };
+        final result =
+            createApiException(
+                  statusCode: status,
+                  message: 'Failure',
+                  type: 'server_error',
+                  code: 'overloaded',
+                  param: 'model',
+                  requestId: 'req-factory',
+                  body: body,
+                  retryAfter: const Duration(microseconds: 1250001),
+                  cause: cause,
+                )
+                as InternalServerException;
+        expect(result.message, 'Failure');
+        expect(result.statusCode, status);
+        expect(result.type, 'server_error');
+        expect(result.code, 'overloaded');
+        expect(result.param, 'model');
+        expect(result.requestId, 'req-factory');
+        expect(result.body, same(body));
+        expect(result.cause, same(cause));
+        expect(result.retryAfter, const Duration(microseconds: 1250001));
+        expect(result.toString(), contains('retry after: 1250001us'));
+        final other = InternalServerException(
+          message: result.message,
+          statusCode: status,
+          retryAfter: result.retryAfter,
+        );
+        expect(result, isNot(other));
+      });
+    }
   });
 
   group('RequestTimeoutException', () {

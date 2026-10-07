@@ -78,12 +78,12 @@ Future<void> main() async {
       );
       print('Request succeeded (no rate limit hit)\n');
     } on RateLimitException catch (e) {
-      print('Rate limited: ${e.message}');
+      print('Rate/quota error ${e.code ?? e.type}: ${e.message}');
       if (e.retryAfter != null) {
-        print('Retry after: ${e.retryAfter!.inSeconds} seconds');
-        // In production, you would wait and retry:
-        // await Future.delayed(e.retryAfter!);
-        // ... retry the request
+        print('Full server retry hint: ${e.retryAfter}');
+        // Inspect code/type first: billing, spend and quota require action.
+        // For a transient error, defer for the full hint and account for any
+        // automatic attempts already made, or disable built-in retries.
       }
       print('');
     }
@@ -102,7 +102,10 @@ Future<void> main() async {
     } on AuthenticationException catch (e) {
       print('Invalid API key: ${e.message}');
     } on RateLimitException catch (e) {
-      print('Rate limited, retry after: ${e.retryAfter}');
+      print(
+        'Rate/quota error ${e.code ?? e.type}; retry hint: ${e.retryAfter}',
+      );
+      // Fix permanent credit/spend/quota failures before resending.
     } on BadRequestException catch (e) {
       print('Invalid request: ${e.message}');
     } on NotFoundException catch (e) {
@@ -111,7 +114,9 @@ Future<void> main() async {
       print('Permission denied: ${e.message}');
     } on InternalServerException catch (e) {
       print('Server error (${e.statusCode}): ${e.message}');
-      // Server errors are typically transient - retry is appropriate
+      print('Server retry hint: ${e.retryAfter}');
+      // POST is not automatically replayed for 5xx. Check the operation outcome
+      // before resubmission, and defer for the full server hint when present.
     } on RequestTimeoutException catch (e) {
       print('Request timed out: ${e.message}');
       if (e.timeout != null) {

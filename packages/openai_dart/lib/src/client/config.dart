@@ -24,7 +24,11 @@ class RetryPolicy {
   /// Initial delay before first retry.
   final Duration initialDelay;
 
-  /// Maximum delay between retries.
+  /// Maximum exponential-backoff delay.
+  ///
+  /// A server hint up to twice this duration is honored in full. A larger
+  /// valid hint returns the original HTTP error instead of retrying early.
+  /// The parsed hint remains available on rate-limit/server exceptions.
   final Duration maxDelay;
 
   /// Jitter factor (0.0 - 1.0).

@@ -1,6 +1,6 @@
 # Support complete and streamed chat audio
 
-Status: implemented and independently reviewed; PR #331 open for review.
+Status: merged in PR #331; #324 closed.
 GitHub: [#324](https://github.com/davidmigloz/ai_clients_dart/issues/324).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 2 correctness](../correctness.md), CHAT-003–005.
@@ -29,4 +29,5 @@ Use deterministic public fixtures/MockClient/local servers. Unit tests are the d
 tests, clean analysis, full public/model regressions, resolved review findings,
 README/migration/runnable example, and the authorized one-request live smoke
 (conservative $0.008544). Toolkit wider diagnostics remain explicit; no exclusions
-were added. [PR #331](https://github.com/davidmigloz/ai_clients_dart/pull/331) is open for review; close only after merge.
+were added. [PR #331](https://github.com/davidmigloz/ai_clients_dart/pull/331) merged at
+`82232226ec94ba7d37080f8a1b792ff86252e503`, closing #324.
