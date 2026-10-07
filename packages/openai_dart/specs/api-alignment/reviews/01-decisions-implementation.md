@@ -66,6 +66,10 @@ files, rather than relying on author summaries:
   serialization, copy semantics, equality/hashCode, defensive collections, unknown
   JSON, transport/errors/cancellation, shared usage compatibility, and docs/example.
   The reviewer also ran the 388-test focused check above.
+- Final PR packaging review: scope, exports, schema mappings, metadata, examples,
+  integration safeguards, and documentation links are consistent. Two stale
+  roadmap entries describing Decisions and cache-write usage as missing were
+  corrected to show their completed status.
 
 No validated findings remain unresolved for this ticket.
 

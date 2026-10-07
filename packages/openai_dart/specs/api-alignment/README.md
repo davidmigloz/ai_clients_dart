@@ -80,8 +80,8 @@ all audited gaps visible even when they are deferred from a milestone.
 
 | Phase | Demonstrable outcomes | Dependencies and scope notes |
 | --- | --- | --- |
-| 1. Decisions | Create typed decisions from text and inline images; receive predicate, choice, score, and refusal answers with complete usage | First proposed milestone; does not require Agents or Live |
-| 2. Existing API correctness | Correct container wire formats; preserve cache diagnostics, token details, Chat audio chunks, and retry guidance | Mostly independent changes; shared usage work may be included in Decisions if needed |
+| 1. Decisions | Create typed decisions from text and inline images; receive predicate, choice, score, and refusal answers with complete usage | Implemented and reviewed in #318; does not require Agents or Live |
+| 2. Existing API correctness | Correct container wire formats; preserve cache diagnostics, token details, Chat audio chunks, and retry guidance | Mostly independent changes; the shared cache-write counter is already included in Decisions |
 | 3. Responses capabilities | Use async tools, reasoning configuration updates, GA web search controls/results, hosted shell, and Responses WebSocket steering | Establish transport behavior before steering; complete shared container configuration before dependent shell changes |
 | 4. Webhooks and safety | Verify and parse signed events; manage webhook endpoints; retrieve safety alerts/cases and preserve monitoring details | Event parsing/verification is independently useful; supports later Agents and Live workflows |
 | 5. Audio and Live | Generate speech with current voice/options; create custom voices; run a Live session and delegation workflows | Separate ordinary speech from Live; prompt-derived voice usage depends on Live |
@@ -101,7 +101,8 @@ them. Recheck sunset status when drafting their tickets.
 
 ### Decisions
 
-Missing resource, client accessor, public models and exports. Contract includes
+Implemented in [#318](https://github.com/davidmigloz/ai_clients_dart/issues/318):
+resource, client accessor, public models and exports. The contract includes
 restricted user text/inline-image input, predicate/choice/score questions, ordered
 answers including refusal, distinct boolean/string choice values, fractional
 scores, and cache-write usage. No model-event streaming is documented.
@@ -116,7 +117,8 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
   `allowed_domains`, not the current `allowed_hosts`; domain secrets are absent.
 - Container creation/response fields omit memory/network/skills configuration.
 - Request cache options omit `comparison_response_id` and `prewarm`; response
-  options/diagnostics and usage omit related metadata and `cache_write_tokens`.
+  options/diagnostics omit related metadata. Shared Responses
+  `cache_write_tokens` usage is implemented with Decisions in #318.
 - Function/custom definitions and call items omit `async`.
 - Input/output parsers do not support `configuration_update`.
 - Responses WebSocket transport and steering are absent.
