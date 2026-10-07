@@ -1,8 +1,9 @@
 # Tool-search fidelity acceptance
 
-Status: implemented, verified and independently reviewed.
+Status: merged in PR #352; #340 closed.
 Implementation [PR #352](https://github.com/davidmigloz/ai_clients_dart/pull/352)
-is open for review; #340 closes only after merge.
+merged after green CI on October 7, 2026 at 21:06:42 UTC.
+Merge commit: `9944b421e7bad565e0be20bc04e314e4571dd50e`.
 Tracking: [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirements: [RESP-SEARCH-01–02](../responses.md#tool-search).
@@ -193,5 +194,5 @@ claim complete Responses or ToolSearchOutputTool union parity.
   the offline example, and verified the toolkit diagnostic classification.
 - Implementation [PR #352](https://github.com/davidmigloz/ai_clients_dart/pull/352)
   uses the create-pr skill template, with validation/tracking under Details and
-  exactly the five checklist items at the end. Final CI and merge are pending.
-  Close #340 only after merge; Responses WebSocket sessions #341 follow this slice.
+  exactly the five checklist items at the end. The complete final GitHub
+  workflow and all checks passed before PR #352 merged, closing #340; Responses WebSocket sessions #341 follow this slice.

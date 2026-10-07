@@ -171,8 +171,9 @@ coverage. Package validation passes with 10,152 unit tests, two existing skips a
 clean fatal-info analysis; the two-request offline example costs $0. Full toolkit
 diagnostics are classified in the evidence. Independent requirements and
 engineering reviews approve the final combined diff. Implementation
-[PR #352](https://github.com/davidmigloz/ai_clients_dart/pull/352) is open for review;
-#340 closes only after merge.
+[PR #352](https://github.com/davidmigloz/ai_clients_dart/pull/352) merged after green
+CI, closing #340. WebSocket transport #341 is implemented, verified and independently reviewed;
+its PR remains pending.
 
 The #340 source recheck retains
 [OpenAPI 234829e](https://github.com/openai/openai-openapi/blob/234829e2b634b8fb159df7fcddbffad204173ffd/openapi.json),
@@ -187,22 +188,20 @@ wire changes. Unchanged source does not establish complete implementation parity
 | [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337) ([12](tickets/12-hosted-shell.md)) | Hosted/local shell configuration, replay and streams | Merged in #349 (#320 merged) |
 | [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) ([13](tickets/13-compaction-progress.md)) | Typed compaction progress | Merged in #350 |
 | [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) ([14](tickets/14-access-programs.md)) | Select/inspect effective access program | Merged in #351 |
-| [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) ([15](tickets/15-tool-search.md)) | Complete client-discovered tools | Implemented/verified/reviewed in #352; merge pending; #334 merged |
-| [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) ([16](tickets/16-responses-websocket.md)) | Persistent WS sessions, envelopes and named lanes | None; shared shell/compaction events follow their tickets |
+| [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) ([15](tickets/15-tool-search.md)) | Complete client-discovered tools | Merged in #352 |
+| [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) ([16](tickets/16-responses-websocket.md)) | Persistent WS sessions, envelopes and named lanes | Implemented/verified/reviewed; PR pending |
 | [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) ([17](tickets/17-responses-steering.md)) | Safe mid-turn steering and continuation | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
 | [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) ([18](tickets/18-websocket-recovery.md)) | Opt-in reconnect and bounded unsent queue | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341)/[#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) |
 | [#344](https://github.com/davidmigloz/ai_clients_dart/issues/344) ([19](tickets/19-websocket-injection.md)) | Beta multi-agent tool-result injection | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
 
-Async tools, configuration updates, web search, shell, compaction progress and
-access programs are merged. Complete tool search
-[#340](https://github.com/davidmigloz/ai_clients_dart/issues/340), then continue
-with Responses WebSocket sessions
+Async tools, configuration updates, web search, shell, compaction progress,
+access programs and tool search #340 are merged. Responses WebSocket sessions
 [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341). Recovery
 and injection remain explicit follow-ups to basic transport; do not claim full
 WebSocket SDK parity before they are complete. Each ticket includes an offline
 example, public fixtures, documentation and independent review. All eleven tickets are native sub-issues of #317; active blockers are linked
-with GitHub dependencies. Tool search #340 is the current implementation slice
-following merged access programs #339.
+with GitHub dependencies. WebSocket transport #341 is the current implementation slice
+following merged tool search #340.
 
 ## Remaining roadmap
 
@@ -260,8 +259,8 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
 - Real Responses input-list mappings expose existing optional pagination ID
   tolerance against required upstream `first_id`/`last_id`; this stays in the
   remaining complete-parity inventory.
-- Responses WebSocket transport/steering and official opt-in reconnect helpers
-  are absent; exported beta injection DTOs still need transport integration.
+- Responses WebSocket transport #341 is implemented and verified. Typed steering,
+  official opt-in recovery and beta injection integration remain in #342–#344.
 - Hosted/local shell #337 merged in #349 with environment configuration,
   directional calls/results and five stream events.
 - Compaction progress #338 merged in #350 with typed nonterminal decoding,
@@ -275,7 +274,7 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
   request/returned contracts and documented provider omission tolerance.
 - Tool-search calls/results, discovered namespace definitions and stored input
   resource/conversation shapes #340 are implemented, verified and independently
-  reviewed in #352; merge is pending. Writable calls require objects; returned calls
+  merged in #352. Writable calls require objects; returned calls
   retain arbitrary JSON and required nullable call IDs. Contextual definitions
   preserve dotted names and complete options without changing ordinary parser
   signatures. Targeted constructor and sealed-Item changes require migration.
@@ -421,3 +420,12 @@ skills, nor copy their automatic commit/release behavior.
 - [Feature tickets and blockers](https://www.aihero.dev/skills-to-tickets)
 - [Implementation](https://www.aihero.dev/skills-implement)
 - [Independent review](https://www.aihero.dev/skills-code-review)
+
+
+WebSocket #341 [acceptance evidence](reviews/16-responses-websocket.md) records
+persistent caller-owned connections, full lane/error envelopes, native/browser/
+stub connectors, warm-up and continuation. Both client packages correct required
+nullable annotation events with migration guidance. All package checks pass
+(OpenAI 10,676 tests, sibling 506); JS/Wasm browser verification and the offline
+four-frame example pass for $0. Independent requirements and engineering peer reviews approve the final
+combined change; the implementation PR remains pending. Steering #342 follows after merge.

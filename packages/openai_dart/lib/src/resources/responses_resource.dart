@@ -3,13 +3,18 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
+import 'package:web_socket/web_socket.dart';
 
+import '../errors/exceptions.dart';
 import '../models/common/copy_with_sentinel.dart';
 import '../models/common/equality_helpers.dart';
 import '../models/responses/responses.dart';
 import 'base_resource.dart';
 import 'input_tokens_resource.dart';
+import 'responses/responses_connection.dart';
 import 'streaming_resource.dart';
+
+export 'responses/responses_connection.dart';
 
 /// The `OpenAI-Beta` header value for the multi-agent Responses beta.
 const _multiAgentBetaFeature = 'responses_multi_agent=v1';
@@ -84,6 +89,146 @@ class ResponsesResource extends ResourceBase with StreamingResource {
 
   ResponseInputItemsResource? _inputItems;
   InputTokensResource? _inputTokens;
+
+  /// Opens a persistent, caller-owned Responses WebSocket connection.
+  ///
+  /// Native Dart/Flutter supports authentication and custom handshake headers.
+  /// Browsers reject any custom headers; use a headerless authenticated backend
+  /// proxy instead. Realtime WebRTC/ephemeral authentication does not apply.
+  ///
+  /// Header precedence is global defaults, auth provider, configured organization/
+  /// project/version, then [additionalHeaders], ignoring key case. [beta] forces
+  /// `OpenAI-Beta: responses_multi_agent=v1` last. No content or request-ID header
+  /// is inserted, so an unauthenticated config can connect to a headerless proxy.
+  ///
+  /// [connectionTimeout] defaults to `config.connectTimeout`. The injected
+  /// [connector] receives the resolved URL and headers. Timed-out or late-opened
+  /// sockets after client closure are disposed. There is no handshake retry or
+  /// automatic response replay. Existing connections stay caller-owned when the
+  /// client closes: always await `connection.close()` in a finally block.
+  ///
+  /// [maxBufferedEvents] bounds messages/errors received before the first
+  /// listener attaches. Overflow fails the connection explicitly.
+  Future<ResponsesConnection> connect({
+    bool beta = false,
+    ResponsesWebSocketConnector? connector,
+    Map<String, String>? additionalHeaders,
+    Duration? connectionTimeout,
+    int maxBufferedEvents = 1024,
+  }) {
+    ensureNotClosed?.call();
+    final timeout = connectionTimeout ?? config.connectTimeout;
+    if (timeout <= Duration.zero) {
+      throw ArgumentError('connectionTimeout must be positive.');
+    }
+    if (maxBufferedEvents < 1) {
+      throw ArgumentError('maxBufferedEvents must be positive.');
+    }
+    return _connect(
+      beta: beta,
+      connector: connector ?? connectResponsesWebSocket,
+      additionalHeaders: additionalHeaders,
+      timeout: timeout,
+      maxBufferedEvents: maxBufferedEvents,
+    );
+  }
+
+  Future<ResponsesConnection> _connect({
+    required bool beta,
+    required ResponsesWebSocketConnector connector,
+    required Map<String, String>? additionalHeaders,
+    required Duration timeout,
+    required int maxBufferedEvents,
+  }) async {
+    final Uri endpoint;
+    try {
+      endpoint = requestBuilder.buildUrl(_endpoint);
+    } on FormatException {
+      throw ArgumentError('baseUrl must be a valid absolute WebSocket URL.');
+    }
+    final scheme = switch (endpoint.scheme) {
+      'http' || 'ws' => 'ws',
+      'https' || 'wss' => 'wss',
+      _ => throw ArgumentError('baseUrl must use http, https, ws or wss.'),
+    };
+    if (endpoint.host.isEmpty || endpoint.hasFragment) {
+      throw ArgumentError('baseUrl must have a host and no fragment.');
+    }
+    final url = endpoint.replace(scheme: scheme);
+    final headers = <String, String>{};
+    void merge(Map<String, String> values) {
+      for (final entry in values.entries) {
+        headers[entry.key.toLowerCase()] = entry.value;
+      }
+    }
+
+    merge(config.defaultHeaders);
+    if (config.authProvider case final provider?) {
+      merge(provider.getHeaders());
+    }
+    merge({
+      'OpenAI-Organization': ?config.organization,
+      'OpenAI-Project': ?config.project,
+      'OpenAI-Version': ?config.apiVersion,
+    });
+    if (additionalHeaders != null) merge(additionalHeaders);
+    if (beta) headers['openai-beta'] = _multiAgentBetaFeature;
+
+    var abandoned = false;
+    final WebSocket socket;
+    try {
+      final opening = connector(
+        url,
+        headers: Map<String, String>.unmodifiable(headers),
+      );
+      // Consume both outcomes independently of timeout so a late successful
+      // handshake is closed and a late failure never becomes unhandled.
+      unawaited(
+        opening.then<void>((socket) {
+          if (abandoned) unawaited(_disposeLateSocket(socket.close));
+        }, onError: (Object _, StackTrace _) {}),
+      );
+      socket = await opening.timeout(
+        timeout,
+        onTimeout: () {
+          abandoned = true;
+          throw TimeoutException('Responses WebSocket handshake timed out.');
+        },
+      );
+    } on TimeoutException {
+      throw const ConnectionException(
+        message: 'Responses WebSocket handshake timed out.',
+      );
+    } on ResponsesBrowserHeadersException {
+      rethrow;
+    } catch (_) {
+      // Dial failures can include credentials in native exception text or URLs.
+      throw const ConnectionException(
+        message: 'Responses WebSocket handshake failed.',
+      );
+    }
+    try {
+      ensureNotClosed?.call();
+    } catch (_) {
+      await _disposeLateSocket(socket.close);
+      rethrow;
+    }
+    return ResponsesConnection(
+      socket,
+      beta: beta,
+      maxBufferedEvents: maxBufferedEvents,
+    );
+  }
+
+  static Future<void> _disposeLateSocket(
+    Future<void> Function([int? code, String? reason]) close,
+  ) async {
+    try {
+      await close(1000);
+    } catch (_) {
+      // A socket that failed during a late handshake may already be closed.
+    }
+  }
 
   /// Access to response input items operations.
   ResponseInputItemsResource get inputItems =>

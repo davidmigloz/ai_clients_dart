@@ -1439,8 +1439,10 @@ class OutputTextAnnotationAddedEvent extends ResponseStreamEvent {
   /// The index of the annotation.
   final int annotationIndex;
 
-  /// The annotation that was added.
-  final Annotation annotation;
+  /// The annotation that was added, or null when the server supplies no object.
+  ///
+  /// The JSON key is required even when its value is null.
+  final Annotation? annotation;
 
   /// Creates an [OutputTextAnnotationAddedEvent].
   const OutputTextAnnotationAddedEvent({
@@ -1455,18 +1457,58 @@ class OutputTextAnnotationAddedEvent extends ResponseStreamEvent {
 
   /// Creates an [OutputTextAnnotationAddedEvent] from JSON.
   factory OutputTextAnnotationAddedEvent.fromJson(Map<String, dynamic> json) {
+    const context = 'OutputTextAnnotationAddedEvent';
+    requireJsonType(json, 'response.output_text.annotation.added', context);
+    if (!json.containsKey('annotation')) {
+      throw const FormatException(
+        '$context.annotation: required nullable key is missing',
+      );
+    }
+    Annotation? annotation;
+    if (json['annotation'] != null) {
+      try {
+        annotation = Annotation.fromJson(
+          requireJsonObject(json['annotation'], '$context.annotation'),
+        );
+      } on FormatException {
+        throw const FormatException(
+          '$context.annotation: malformed annotation',
+        );
+      } on TypeError {
+        throw const FormatException(
+          '$context.annotation: malformed annotation',
+        );
+      }
+    }
+    AgentTag? agent;
+    if (json['agent'] != null) {
+      final value = requireJsonObject(json['agent'], '$context.agent');
+      agent = AgentTag(
+        agentName: requireJsonString(
+          value['agent_name'],
+          '$context.agent.agent_name',
+        ),
+      );
+    }
     return OutputTextAnnotationAddedEvent(
-      itemId: json['item_id'] as String?,
-      outputIndex: json['output_index'] as int,
-      contentIndex: json['content_index'] as int,
-      annotationIndex: json['annotation_index'] as int,
-      annotation: Annotation.fromJson(
-        json['annotation'] as Map<String, dynamic>,
+      itemId: optionalJsonString(json, 'item_id', context, nullable: true),
+      outputIndex: requireJsonInt(
+        json['output_index'],
+        '$context.output_index',
       ),
-      sequenceNumber: json['sequence_number'] as int?,
-      agent: json['agent'] != null
-          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
-          : null,
+      contentIndex: requireJsonInt(
+        json['content_index'],
+        '$context.content_index',
+      ),
+      annotationIndex: requireJsonInt(
+        json['annotation_index'],
+        '$context.annotation_index',
+      ),
+      annotation: annotation,
+      sequenceNumber: json['sequence_number'] == null
+          ? null
+          : requireJsonInt(json['sequence_number'], '$context.sequence_number'),
+      agent: agent,
     );
   }
 
@@ -1477,7 +1519,7 @@ class OutputTextAnnotationAddedEvent extends ResponseStreamEvent {
     'output_index': outputIndex,
     'content_index': contentIndex,
     'annotation_index': annotationIndex,
-    'annotation': annotation.toJson(),
+    'annotation': annotation?.toJson(),
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
     if (agent != null) 'agent': agent!.toJson(),
   };
@@ -1506,12 +1548,13 @@ class OutputTextAnnotationAddedEvent extends ResponseStreamEvent {
     agent,
   );
 
-  /// Creates a copy with replaced values.
+  /// Creates a copy with replaced values. Explicit null clears nullable fields;
+  /// clearing [annotation] still emits its required nullable JSON key.
   OutputTextAnnotationAddedEvent copyWith({
     int? outputIndex,
     int? contentIndex,
     int? annotationIndex,
-    Annotation? annotation,
+    Object? annotation = unsetCopyWithValue,
     Object? itemId = unsetCopyWithValue,
     Object? sequenceNumber = unsetCopyWithValue,
     Object? agent = unsetCopyWithValue,
@@ -1520,18 +1563,29 @@ class OutputTextAnnotationAddedEvent extends ResponseStreamEvent {
       outputIndex: outputIndex ?? this.outputIndex,
       contentIndex: contentIndex ?? this.contentIndex,
       annotationIndex: annotationIndex ?? this.annotationIndex,
-      annotation: annotation ?? this.annotation,
-      itemId: itemId == unsetCopyWithValue ? this.itemId : itemId as String?,
-      sequenceNumber: sequenceNumber == unsetCopyWithValue
+      annotation: identical(annotation, unsetCopyWithValue)
+          ? this.annotation
+          : annotation as Annotation?,
+      itemId: identical(itemId, unsetCopyWithValue)
+          ? this.itemId
+          : itemId as String?,
+      sequenceNumber: identical(sequenceNumber, unsetCopyWithValue)
           ? this.sequenceNumber
           : sequenceNumber as int?,
-      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
+      agent: identical(agent, unsetCopyWithValue)
+          ? this.agent
+          : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'OutputTextAnnotationAddedEvent(annotationIndex: $annotationIndex, agent: $agent)';
+      'OutputTextAnnotationAddedEvent(sequenceNumber: $sequenceNumber, '
+      'itemId: ${itemId == null ? 'null' : '[REDACTED]'}, '
+      'outputIndex: $outputIndex, contentIndex: $contentIndex, '
+      'annotationIndex: $annotationIndex, '
+      'annotation: ${annotation == null ? 'null' : '[REDACTED]'}, '
+      'agent: ${agent == null ? 'null' : '[REDACTED]'})';
 }
 
 // ============================================================

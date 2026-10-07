@@ -6,6 +6,28 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming nullable streaming annotations
+
+`OutputTextAnnotationAddedEvent.annotation` is now required nullable, matching
+the canonical event schema. A supplied JSON null is valid and remains emitted;
+an absent key or malformed annotation is rejected contextually. Nonnull events
+retain their existing behavior. Guard dereferences of this field:
+
+```dart
+// Before
+final wire = event.annotation.toJson();
+
+// After
+final annotation = event.annotation;
+final wire = annotation?.toJson();
+```
+
+`copyWith(annotation: null)` now explicitly clears the value. This shared codec
+correction applies to Responses SSE and the new WebSocket envelopes. The sibling
+`open_responses` event receives the same correction under its own schema; see its
+migration guide. Persistent WebSocket connections themselves are additive; existing
+HTTP, SSE and Realtime entry points remain available.
+
 ## Upcoming tool-search fidelity
 
 Tool-search request and returned records now enforce their distinct wire
