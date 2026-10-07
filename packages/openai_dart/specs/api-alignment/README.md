@@ -153,17 +153,22 @@ independently reviewed with [acceptance evidence](reviews/09-async-tools.md) in
 independent reviews. GA web search #336 merged in
 [PR #348](https://github.com/davidmigloz/ai_clients_dart/pull/348), closing #336;
 [acceptance evidence](reviews/11-web-search.md) records validation and reviews.
-Hosted/local shell #337 is implemented and independently reviewed with
-[acceptance evidence](reviews/12-hosted-shell.md) in
-[PR #349](https://github.com/davidmigloz/ai_clients_dart/pull/349); merge remains pending.
+Hosted/local shell #337 merged in
+[PR #349](https://github.com/davidmigloz/ai_clients_dart/pull/349), closing #337;
+[acceptance evidence](reviews/12-hosted-shell.md) records validation and reviews.
+Compaction progress #338 is implemented, validated and independently reviewed
+with 205 new deterministic tests; [acceptance evidence](reviews/13-compaction-progress.md)
+records the contracts, offline example, migration guidance and retained parity gaps.
+Implementation [PR #350](https://github.com/davidmigloz/ai_clients_dart/pull/350)
+is open for review; #338 stays open until merge.
 
 | Ticket | Demonstrable outcome | Dependency |
 | --- | --- | --- |
 | [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) ([09](tickets/09-async-tools.md)) | Async function/custom calls and faithful replay | Merged in #346 |
 | [#335](https://github.com/davidmigloz/ai_clients_dart/issues/335) ([10](tickets/10-configuration-updates.md)) | Persistent reasoning effort updates | Merged in #347 |
 | [#336](https://github.com/davidmigloz/ai_clients_dart/issues/336) ([11](tickets/11-web-search.md)) | GA web-search controls/actions/image results | Merged in #348 |
-| [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337) ([12](tickets/12-hosted-shell.md)) | Hosted/local shell configuration, replay and streams | Implemented/reviewed; merge pending (#320 merged) |
-| [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) ([13](tickets/13-compaction-progress.md)) | Typed compaction progress | None |
+| [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337) ([12](tickets/12-hosted-shell.md)) | Hosted/local shell configuration, replay and streams | Merged in #349 (#320 merged) |
+| [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) ([13](tickets/13-compaction-progress.md)) | Typed compaction progress | Implemented/reviewed; merge pending in #350 |
 | [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) ([14](tickets/14-access-programs.md)) | Select/inspect effective access program | None |
 | [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) ([15](tickets/15-tool-search.md)) | Complete client-discovered tools | [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) async definitions |
 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) ([16](tickets/16-responses-websocket.md)) | Persistent WS sessions, envelopes and named lanes | None; shared shell/compaction events follow their tickets |
@@ -171,13 +176,14 @@ Hosted/local shell #337 is implemented and independently reviewed with
 | [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) ([18](tickets/18-websocket-recovery.md)) | Opt-in reconnect and bounded unsent queue | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341)/[#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) |
 | [#344](https://github.com/davidmigloz/ai_clients_dart/issues/344) ([19](tickets/19-websocket-injection.md)) | Beta multi-agent tool-result injection | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
 
-Async tools, configuration updates and web search are merged; continue with shell,
-then the remaining table entries. Recovery
+Async tools, configuration updates, web search and shell are merged. Complete
+compaction progress PR review and merge, then continue with access programs
+[#339](https://github.com/davidmigloz/ai_clients_dart/issues/339). Recovery
 and injection remain explicit follow-ups to basic transport; do not claim full
 WebSocket SDK parity before they are complete. Each ticket includes an offline
 example, public fixtures, documentation and independent review. All eleven tickets are native sub-issues of #317; active blockers are linked
 with GitHub dependencies. Compaction progress [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338)
-follows hosted/local shell #337 after its PR merges.
+is the current implementation slice following merged hosted/local shell #337.
 
 ## Remaining roadmap
 
@@ -237,9 +243,14 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
   remaining complete-parity inventory.
 - Responses WebSocket transport/steering and official opt-in reconnect helpers
   are absent; exported beta injection DTOs still need transport integration.
-- Hosted/local shell #337 implements environment configuration, directional calls/
-  results and five stream events; validation and independent reviews are complete,
-  with merge pending. Compaction progress follows.
+- Hosted/local shell #337 merged in #349 with environment configuration,
+  directional calls/results and five stream events.
+- Compaction progress #338 implements typed `response.compaction.compacting`
+  decoding with required sequence/output/item metadata and optional beta agent;
+  final validation and independent reviews remain pending.
+- Existing `CompactionTriggerItem` still omits the optional canonical trigger
+  `id`. This DTO gap is outside the progress-event slice and stays in the parity
+  inventory; raw history replay preserves provider IDs.
 - Web search #336 merged in #348 with filters, access controls, return-token budget,
   image settings/results, action metadata and Includes.
 - Responses access-program configuration and tool-search output definitions

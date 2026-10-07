@@ -1,7 +1,9 @@
 # Hosted/local shell acceptance
 
-Status: implementation, validation and independent reviews complete; merge pending.
-[PR #349](https://github.com/davidmigloz/ai_clients_dart/pull/349) is open for review.
+Status: implementation, validation and independent reviews complete; merged.
+[PR #349](https://github.com/davidmigloz/ai_clients_dart/pull/349) merged after
+green CI on October 7, 2026 at 18:56:48 UTC, closing #337.
+Merge commit: `9e0b572b823f70056401e4bcdc87a1d716a62d11`.
 Tracking: [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirements: [RESP-SHELL-01–03](../responses.md#shell).
@@ -153,5 +155,5 @@ Wider unrelated errors remain visible in the complete-parity backlog.
   agent names, with five regression cases verifying JSON preservation.
 
 Both reviewers rechecked the final combined diff and acceptance record and approve
-with no remaining actionable findings. Issue #337 stays open until implementation
-merge; compaction progress #338 is next.
+with no remaining actionable findings. Implementation is merged and issue #337
+is closed; compaction progress #338 follows.

@@ -247,6 +247,53 @@ client.close();
 
 </details>
 
+### How do I observe compaction progress?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Enable inline compaction with context management and watch for the typed progress
+event while continuing to consume the stream:
+
+```dart
+const request = CreateResponseRequest(
+  model: 'gpt-6-astra',
+  input: ResponseInput.text('Continue the current task.'),
+  contextManagement: [
+    ContextManagement.compaction(compactThreshold: 200000),
+  ],
+);
+await for (final event in client.responses.createStream(request)) {
+  switch (event) {
+    case ResponseCompactionCompactingEvent(:final itemId, :final outputIndex):
+      print('Compacting $itemId at output index $outputIndex.');
+    case ResponseCompletedEvent():
+      print('Response completed.');
+    default:
+      break;
+  }
+}
+```
+
+`ResponseCompactionCompactingEvent` carries required `sequenceNumber`,
+`outputIndex` and `itemId`, plus optional beta `agent` metadata. It is nonterminal
+and contains no summary or encrypted content. `ResponseStreamAccumulator` exposes
+it through `latestEvent` while preserving response, text, reasoning and status.
+The final response retains the opaque `CompactionOutputItem`.
+
+The [compaction guide](https://developers.openai.com/api/docs/guides/compaction)
+describes automatic threshold-based compaction and standalone `responses.compact`.
+For standalone compaction, replay the complete returned output window with
+`compacted.toInput()`. Existing context management,
+explicit triggers and encrypted replay remain available; future event types still
+use `UnknownEvent`.
+
+→ [Runnable offline example](example/compaction_progress_example.dart), with no API
+key or large context. See the [migration guide](MIGRATION.md#upcoming-compaction-progress)
+when updating exhaustive switches or manual unknown-event handlers.
+
+</details>
+
 ### How do I configure hosted shell and return local results?
 
 <details>
@@ -1320,6 +1367,7 @@ See the [example/](example/) directory for complete examples:
 | [`web_search_example.dart`](example/web_search_example.dart) | Web search with Responses API |
 | [`web_search_controls_example.dart`](example/web_search_controls_example.dart) | Local GA filters, image results, sources, and REST/SSE parsing without API calls |
 | [`shell_tools_example.dart`](example/shell_tools_example.dart) | Offline hosted configuration, synthetic local continuation, and typed shell stream events |
+| [`compaction_progress_example.dart`](example/compaction_progress_example.dart) | Offline nonterminal compaction progress and opaque final output preservation |
 | [`realtime_example.dart`](example/realtime_example.dart) | Realtime API (WebSocket and WebRTC) |
 | [`fine_tuning_example.dart`](example/fine_tuning_example.dart) | Fine-tuning job management |
 | [`completions_example.dart`](example/completions_example.dart) | Legacy completions API |

@@ -3796,6 +3796,24 @@
       "schema": null,
       "parent": "ShellCallOutcome",
       "note": "Forward-compatible recursively immutable outcome JSON."
+    },
+    "ResponseCompactionCompactingStreamingEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponseCompactionCompactingEvent",
+      "file": "lib/src/models/responses/streaming/response_stream_event.dart",
+      "schema": "ResponseCompactionCompactingStreamingEvent",
+      "parent": "ResponseStreamEvent",
+      "note": "Nonterminal progress only; required sequence/output/item fields, optional nonnull beta agent, no summary or encrypted content."
+    },
+    "BetaResponseCompactionCompactingStreamingEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponseCompactionCompactingEvent",
+      "file": "lib/src/models/responses/streaming/response_stream_event.dart",
+      "schema": "BetaResponseCompactionCompactingStreamingEvent",
+      "parent": "ResponseStreamEvent",
+      "note": "Nonterminal progress only; required sequence/output/item fields, optional nonnull beta agent, no summary or encrypted content."
     }
   }
 }

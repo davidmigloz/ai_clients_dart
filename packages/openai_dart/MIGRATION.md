@@ -6,6 +6,40 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming compaction progress
+
+`response.compaction.compacting` now decodes to
+`ResponseCompactionCompactingEvent`. Update handlers that previously identified
+this discriminator through `UnknownEvent`:
+
+```dart
+// Before
+bool isCompacting(ResponseStreamEvent event) =>
+    event is UnknownEvent && event.type == 'response.compaction.compacting';
+```
+
+```dart
+// After
+bool isCompacting(ResponseStreamEvent event) =>
+    event is ResponseCompactionCompactingEvent;
+```
+
+The new subtype extends the public sealed `ResponseStreamEvent` hierarchy.
+Existing exhaustive switch expressions must add a
+`ResponseCompactionCompactingEvent` case or a default case. Existing constructors
+and request serialization stay the same.
+
+The event requires sequence number, output index and item ID; optional beta agent
+metadata rejects explicit null. Malformed known events throw contextual
+`FormatException`, and future unknown event types retain their existing fallback.
+Compaction progress is nonterminal and contains no summary or encrypted content.
+The accumulator exposes it as `latestEvent` without changing accumulated
+response, text, reasoning or status. Continue until a terminal response event.
+
+See the [README](README.md#how-do-i-observe-compaction-progress) and
+[offline example](example/compaction_progress_example.dart). The offline example
+runs without an API key, large context or encrypted payload logs.
+
 ## Upcoming shell alignment
 
 Returned shell DTOs now follow their required nullable keys. `ShellCallAction`
