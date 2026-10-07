@@ -5,7 +5,8 @@ Reviewed October 7, 2026 against RETRY-01–06 in the
 Tracking: [#325](https://github.com/davidmigloz/ai_clients_dart/issues/325),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Implementation branch: `fix/openai-retry-guidance`.
-Final PR, checks, and independent approvals will be recorded before handoff.
+Implementation [PR #332](https://github.com/davidmigloz/ai_clients_dart/pull/332) is open for review.
+Package validation and all independent reviews passed.
 
 ## Outcome and contracts
 
@@ -58,7 +59,7 @@ and [rate-limit guide](https://developers.openai.com/api/docs/guides/rate-limits
 establish action-needed quota errors and full server-delay minima.
 [Python 3.26 retries](https://github.com/openai/openai-python/blob/v3.26.0/src/openai/_base_client.py)
 and [Node 7.30 retries](https://github.com/openai/openai-node/blob/v7.30.0/src/client.ts)
-provide useful millisecond/fractional header handling, but still broadly retry429
+provide useful millisecond/fractional header handling, but still broadly retry 429
 and differ on long hints. This implementation follows the documented API contract
 rather than those fallback discrepancies. The existing Dart timer implementation
 converts via inMilliseconds, motivating final upward timer rounding.
@@ -135,7 +136,7 @@ Older metadata/annotations/typed legacy function-call gaps,
 provider exceptions, and helper limitations remain in the complete-parity inventory.
 
 The required sibling check found corresponding defects in open_responses:
-status-only429 retries, shorter clamped server hints, no millisecond header support,
+status-only 429 retries, shorter clamped server hints, no millisecond header support,
 and an error parser using DateTime.parse for HTTP dates/accepting negative values.
 These separate-package/provider follow-ups are recorded without applying
 OpenAI-specific permanent codes indiscriminately to other providers. No sibling

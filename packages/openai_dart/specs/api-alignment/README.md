@@ -3,7 +3,7 @@
 Planning started October 7, 2026. Status: Decisions, container configuration,
 cache retention, cache controls/diagnostics, and Chat usage/obfuscation merged.
 Chat audio merged in [PR #331](https://github.com/davidmigloz/ai_clients_dart/pull/331).
-Retry guidance #325 is implemented and reviewed for PR handoff; image model
+Retry guidance #325 is implemented and reviewed in [PR #332](https://github.com/davidmigloz/ai_clients_dart/pull/332); image model
 requiredness follows.
 
 Tracking parent: [GitHub issue #317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
@@ -92,7 +92,7 @@ image model requiredness follow as separate tickets.
 | [#322](https://github.com/davidmigloz/ai_clients_dart/issues/322) | Configure cache controls and inspect diagnostics | #321; merged in #329 |
 | [#323](https://github.com/davidmigloz/ai_clients_dart/issues/323) | Preserve Chat token details and stream obfuscation | None; merged in #330 |
 | [#324](https://github.com/davidmigloz/ai_clients_dart/issues/324) | Preserve complete and streamed Chat audio | Merged in #331 |
-| [#325](https://github.com/davidmigloz/ai_clients_dart/issues/325) | Honor retry hints and stop replaying permanent quota failures | Implemented and reviewed |
+| [#325](https://github.com/davidmigloz/ai_clients_dart/issues/325) | Honor retry hints and stop replaying permanent quota failures | Reviewed; PR #332 open |
 | [#326](https://github.com/davidmigloz/ai_clients_dart/issues/326) | Require explicit model selection where the image API requires it | None |
 
 Container [acceptance evidence and independent reviews](reviews/02-container-configuration.md)
@@ -123,13 +123,13 @@ Chat audio [acceptance evidence](reviews/06-chat-audio.md) records 2,282 passing
 unit tests, clean analysis, independent approvals, complete output/replay/stream
 examples and migration, and an authorized single-request live smoke (conservative
 $0.008544). Implementation [PR #331](https://github.com/davidmigloz/ai_clients_dart/pull/331) merged
-after all CI checks passed, closing #324. Retry guidance #325 is in progress.
+after all CI checks passed, closing #324. Retry guidance #325 is reviewed in open PR #332.
 
 Retry guidance [acceptance evidence](reviews/07-retry-guidance.md) records 2,454
 passing unit tests, clean analysis, independent approvals, complete server minima
 and permanent-quota behavior, precise pre-stream metadata, and a runnable local
-example verified without API cost. Implementation is ready for PR review; #326
-image model requiredness follows.
+example verified without API cost. Implementation [PR #332](https://github.com/davidmigloz/ai_clients_dart/pull/332) is open for review; #326 image model requiredness
+follows.
 
 ## Proposed roadmap
 

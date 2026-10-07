@@ -1,6 +1,6 @@
 # Honor quota failures and server retry hints
 
-Status: implemented and independently reviewed; PR handoff in progress.
+Status: implemented and independently reviewed; PR #332 open for review.
 GitHub: [#325](https://github.com/davidmigloz/ai_clients_dart/issues/325).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 2 correctness](../correctness.md), RETRY-01–06.
@@ -29,5 +29,4 @@ Use deterministic public fixtures/MockClient/local servers. Unit tests are the d
 unit tests, clean analysis, controlled public timing/error/stream fixtures,
 independent approvals with all findings resolved, and README/migration/local
 example updates. The example ran without API access or cost. Wider toolkit
-diagnostics are unchanged and explicit; no skips/exclusions were added. PR linkage
-will be recorded before handoff; close only after merge.
+diagnostics are unchanged and explicit; no skips/exclusions were added. [PR #332](https://github.com/davidmigloz/ai_clients_dart/pull/332) is open for review; close only after merge.
