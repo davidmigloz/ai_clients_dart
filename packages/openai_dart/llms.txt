@@ -4,9 +4,9 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~8.1k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~8.7k tokens): Primary package documentation with installation, configuration, and usage examples.
 - [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/CHANGELOG.md) (~21.7k tokens): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/MIGRATION.md) (~13.6k tokens): Upgrade notes and breaking-change guidance.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/MIGRATION.md) (~14.2k tokens): Upgrade notes and breaking-change guidance.
 
 ## Examples
 
@@ -15,6 +15,7 @@
 - [responses_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/responses_example.dart) (~870 tokens): Responses API with built-in tools.
 - [prompt_cache_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/prompt_cache_example.dart) (~723 tokens): Responses prewarming, comparison diagnostics, and narrow Chat cache options.
 - [chat_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/chat_example.dart) (~461 tokens): Chat completions, multi-turn conversations, and legacy cache retention.
+- [chat_audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/chat_audio_example.dart) (~767 tokens): Chat audio output, ID-only replay, and partial stream accumulation.
 - [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/streaming_example.dart) (~760 tokens): Content streaming, detailed final usage, and obfuscation controls.
 - [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/tool_calling_example.dart) (~742 tokens): Function calling with tool definitions.
 - [vision_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/vision_example.dart) (~838 tokens): Image analysis with vision models.
@@ -45,4 +46,4 @@
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~74.4k tokens**
+**Total: ~76.4k tokens**

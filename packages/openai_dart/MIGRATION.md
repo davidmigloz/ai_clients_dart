@@ -6,6 +6,69 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming Chat audio alignment
+
+Assistant messages gain optional `audio`, with distinct `ChatAudioReference`
+(ID-only request reference) and `ChatCompletionAudio` (required ID, base64 data,
+transcript, expiry). `ChatCompletion.audio` returns audio from the first choice.
+Generic assistant parsing accepts either shape; ChatChoice response parsing
+requires complete output when audio is present. Request/response outer audio
+accepts null, but complete members reject missing/null/wrong types.
+
+Actual Chat request serialization sends only the audio ID when replaying a
+returned message. Existing provider reasoning fields keep their previous request
+serialization; `toApiJson()` remains the explicit method that omits them.
+ChatChoice response serialization now emits required `content: null` for
+messages without text; generic/request serialization still omits absent content.
+
+`ChatDelta.audio` uses `ChatAudioDelta`, whose four members are independently
+optional. Empty strings, zero expiry, and an empty object remain supplied values.
+The delta audio object and supplied members reject parsed null/wrong types,
+following the canonical schema; Python generated delta types are more permissive.
+Nullable constructors/copies still clear by omission.
+
+Accumulators preserve audio separately per choice. Existing text-only final
+conversion is unchanged. `toChatCompletion()` now throws `StateError` if any
+choice has seen audio but lacks one of its complete fields. Previously that audio
+was silently dropped. Inspect `accumulator.audio` or per-choice audio snapshots
+and check `isComplete` before conversion:
+
+```dart
+if (accumulator.audio case final audio?) {
+  if (audio.isComplete) {
+    final complete = accumulator.toChatCompletion().audio;
+  } else {
+    // Retain the partial snapshot or report interruption.
+  }
+}
+```
+
+For multiple choices, check each choice's audio. Data/transcript append opaquely
+and independently; supplied ID/expiry replace earlier values. Final conversion
+can infer `stop` for a complete audio output only when the last processed choice
+delta is a pure expiry-only update and no explicit finish reason exists. Later
+nonnull deltas invalidate that marker; null/absent deltas and usage-only chunks
+preserve it. Raw events and partial snapshots retain wire finish metadata.
+
+Parsed missing/null choice deltas and null provider reasoning keys now serialize
+as supplied, preserving this finish-inference behavior through event round trips.
+Future/legacy outer delta keys are retained opaquely and inhibit inference as in
+the official Node client; this does not add legacy function-call accumulation.
+Explicit copy clearing removes known optional fields by omission.
+
+ChatCompletion and ChatChoice equality/hash now include every field, including
+choices, audio, finish reasons, logprobs, usage, and provider metadata. Chunks with
+parsed provenance that affects finalization also compare distinctly. Const
+constructors and existing caller collection ownership remain available.
+Compare IDs explicitly if identifier-only equality is needed. Accumulated choice,
+tool-call, reasoning, and logprob lists are readonly captured snapshots; use
+`copyWith` or copy a list before modifying it.
+
+See [the runnable example](example/chat_audio_example.dart). Package versioning
+and release remain separate.
+
+---
+
 ## Upcoming Chat usage and stream-obfuscation alignment
 
 Chat usage gains optional prompt `cacheWriteTokens`, `imageTokens`, and

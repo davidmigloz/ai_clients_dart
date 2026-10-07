@@ -1,8 +1,9 @@
 # OpenAI API alignment
 
 Planning started October 7, 2026. Status: Decisions, container configuration,
-cache retention, and cache controls/diagnostics merged. Chat usage/obfuscation
-is implemented and independently reviewed; remaining Phase 2 tickets are specified.
+cache retention, cache controls/diagnostics, and Chat usage/obfuscation merged.
+Chat audio is implemented and reviewed for PR handoff; remaining Phase 2 tickets
+are specified.
 
 Tracking parent: [GitHub issue #317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 This parent records planning progress; it is not an implementation ticket.
@@ -88,8 +89,8 @@ image model requiredness follow as separate tickets.
 | [#320](https://github.com/davidmigloz/ai_clients_dart/issues/320) | Correct container memory/network configuration, secrets, skills, and returned settings | Merged in #327 |
 | [#321](https://github.com/davidmigloz/ai_clients_dart/issues/321) | Emit the canonical cache-retention wire value | None; merged in #328 |
 | [#322](https://github.com/davidmigloz/ai_clients_dart/issues/322) | Configure cache controls and inspect diagnostics | #321; merged in #329 |
-| [#323](https://github.com/davidmigloz/ai_clients_dart/issues/323) | Preserve Chat token details and stream obfuscation | None |
-| [#324](https://github.com/davidmigloz/ai_clients_dart/issues/324) | Preserve complete and streamed Chat audio | None |
+| [#323](https://github.com/davidmigloz/ai_clients_dart/issues/323) | Preserve Chat token details and stream obfuscation | None; merged in #330 |
+| [#324](https://github.com/davidmigloz/ai_clients_dart/issues/324) | Preserve complete and streamed Chat audio | In progress in #324 |
 | [#325](https://github.com/davidmigloz/ai_clients_dart/issues/325) | Honor retry hints and stop replaying permanent quota failures | None |
 | [#326](https://github.com/davidmigloz/ai_clients_dart/issues/326) | Require explicit model selection where the image API requires it | None |
 
@@ -114,7 +115,13 @@ merged after all CI checks passed, closing #322.
 Chat usage/obfuscation [acceptance evidence](reviews/05-chat-usage-obfuscation.md)
 records 2,199 passing unit tests, clean analysis, independent approvals, updated
 streaming examples/migration, and an authorized one-request unstored live smoke
-(conservative $0.000003375). Implementation [PR #330](https://github.com/davidmigloz/ai_clients_dart/pull/330) is open for review; #323 closes on merge.
+(conservative $0.000003375). Implementation [PR #330](https://github.com/davidmigloz/ai_clients_dart/pull/330)
+merged after all CI checks passed, closing #323.
+
+Chat audio [acceptance evidence](reviews/06-chat-audio.md) records 2,282 passing
+unit tests, clean analysis, independent approvals, complete output/replay/stream
+examples and migration, and an authorized single-request live smoke (conservative
+$0.008544). Implementation is ready for PR review; #325 retry guidance follows.
 
 ## Proposed roadmap
 
@@ -172,8 +179,12 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
   settings/results, action metadata, and corresponding include values.
 - Responses access-program configuration and tool-search output definitions
   need alignment.
-- Chat usage/obfuscation is implemented and reviewed in #323; Chat audio chunk
-  support remains #324.
+- Chat usage/obfuscation merged in #330/#323; complete/streamed audio is
+  being implemented in #324.
+- Registering real Chat completion/message/delta mappings exposed older missing
+  completion metadata, response annotations, and typed legacy function-call
+  fields. These remain in the complete-parity inventory for later specification;
+  audio finalization preserves legacy delta fields opaquely.
 - Review the required image-generation model field against the existing nullable
   client field/default behavior. Shared usage model convenience methods and
   diagnostics also have existing limitations surfaced by the new manifest entries.

@@ -1,12 +1,13 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import '../common/finish_reason.dart';
 import '../common/logprobs.dart';
 import '../common/usage.dart';
+import 'chat_audio.dart';
 import 'chat_completion_moderation.dart';
 import 'chat_message.dart';
-import 'reasoning_detail.dart';
-import 'tool_call.dart';
 
 /// A chat completion response from the OpenAI API.
 ///
@@ -130,6 +131,13 @@ class ChatCompletion {
   /// Returns null if there are no choices or no content.
   String? get text => choices.firstOrNull?.message.content;
 
+  /// Complete generated audio from the first choice, when present.
+  ChatCompletionAudio? get audio =>
+      switch (choices.firstOrNull?.message.audio) {
+        final ChatCompletionAudio audio => audio,
+        _ => null,
+      };
+
   /// Gets the first choice.
   ChatChoice? get firstChoice => choices.firstOrNull;
 
@@ -152,20 +160,77 @@ class ChatCompletion {
     if (provider != null) 'provider': provider,
   };
 
+  /// Creates a copy; nullable metadata can be explicitly cleared.
+  ChatCompletion copyWith({
+    Object? id = unsetCopyWithValue,
+    String? object,
+    Object? created = unsetCopyWithValue,
+    String? model,
+    List<ChatChoice>? choices,
+    Object? usage = unsetCopyWithValue,
+    Object? systemFingerprint = unsetCopyWithValue,
+    Object? serviceTier = unsetCopyWithValue,
+    Object? moderation = unsetCopyWithValue,
+    Object? provider = unsetCopyWithValue,
+  }) => ChatCompletion(
+    id: id == unsetCopyWithValue ? this.id : id as String?,
+    object: object ?? this.object,
+    created: created == unsetCopyWithValue ? this.created : created as int?,
+    model: model ?? this.model,
+    choices: choices ?? this.choices,
+    usage: usage == unsetCopyWithValue ? this.usage : usage as Usage?,
+    systemFingerprint: systemFingerprint == unsetCopyWithValue
+        ? this.systemFingerprint
+        : systemFingerprint as String?,
+    serviceTier: serviceTier == unsetCopyWithValue
+        ? this.serviceTier
+        : serviceTier as String?,
+    moderation: moderation == unsetCopyWithValue
+        ? this.moderation
+        : moderation as ChatCompletionModeration?,
+    provider: provider == unsetCopyWithValue
+        ? this.provider
+        : provider as String?,
+  );
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ChatCompletion &&
           runtimeType == other.runtimeType &&
           id == other.id &&
-          model == other.model;
+          object == other.object &&
+          created == other.created &&
+          model == other.model &&
+          listsEqual(choices, other.choices) &&
+          usage == other.usage &&
+          systemFingerprint == other.systemFingerprint &&
+          serviceTier == other.serviceTier &&
+          moderation == other.moderation &&
+          provider == other.provider;
 
   @override
-  int get hashCode => Object.hash(id, model);
+  int get hashCode => Object.hash(
+    id,
+    object,
+    created,
+    model,
+    listHash(choices),
+    usage,
+    systemFingerprint,
+    serviceTier,
+    moderation,
+    provider,
+  );
 
   @override
   String toString() =>
-      'ChatCompletion(id: $id, model: $model, choices: ${choices.length})';
+      'ChatCompletion(id: ${id == null ? 'null' : '[REDACTED]'}, '
+      'object: $object, created: $created, model: $model, '
+      'choices: ${choices.length} items, usage: $usage, '
+      'systemFingerprint: ${systemFingerprint == null ? 'null' : '[REDACTED]'}, '
+      'serviceTier: $serviceTier, '
+      'moderation: ${moderation == null ? 'null' : 'present'}, provider: $provider)';
 }
 
 /// A single completion choice.
@@ -183,7 +248,9 @@ class ChatChoice {
   factory ChatChoice.fromJson(Map<String, dynamic> json) {
     return ChatChoice(
       index: json['index'] as int?,
-      message: _parseMessage(json['message'] as Map<String, dynamic>),
+      message: AssistantMessage.fromResponseJson(
+        json['message'] as Map<String, dynamic>,
+      ),
       finishReason: json['finish_reason'] != null
           ? FinishReason.fromJson(json['finish_reason'] as String)
           : null,
@@ -220,10 +287,27 @@ class ChatChoice {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (index != null) 'index': index,
-    'message': message.toJson(),
+    'message': message.toResponseJson(),
     if (finishReason != null) 'finish_reason': finishReason!.toJson(),
     if (logprobs != null) 'logprobs': logprobs!.toJson(),
   };
+
+  /// Creates a copy; optional choice metadata can be explicitly cleared.
+  ChatChoice copyWith({
+    Object? index = unsetCopyWithValue,
+    AssistantMessage? message,
+    Object? finishReason = unsetCopyWithValue,
+    Object? logprobs = unsetCopyWithValue,
+  }) => ChatChoice(
+    index: index == unsetCopyWithValue ? this.index : index as int?,
+    message: message ?? this.message,
+    finishReason: finishReason == unsetCopyWithValue
+        ? this.finishReason
+        : finishReason as FinishReason?,
+    logprobs: logprobs == unsetCopyWithValue
+        ? this.logprobs
+        : logprobs as Logprobs?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -231,28 +315,15 @@ class ChatChoice {
       other is ChatChoice &&
           runtimeType == other.runtimeType &&
           index == other.index &&
-          message == other.message;
+          message == other.message &&
+          finishReason == other.finishReason &&
+          logprobs == other.logprobs;
 
   @override
-  int get hashCode => Object.hash(index, message);
+  int get hashCode => Object.hash(index, message, finishReason, logprobs);
 
   @override
-  String toString() => 'ChatChoice(index: $index, finishReason: $finishReason)';
-}
-
-/// Parses an assistant message from JSON.
-AssistantMessage _parseMessage(Map<String, dynamic> json) {
-  return AssistantMessage(
-    content: json['content'] as String?,
-    refusal: json['refusal'] as String?,
-    toolCalls: (json['tool_calls'] as List<dynamic>?)
-        ?.map((e) => ToolCall.fromJson(e as Map<String, dynamic>))
-        .toList(),
-    // Reasoning fields for OpenRouter/DeepSeek compatibility
-    reasoningContent: json['reasoning_content'] as String?,
-    reasoning: json['reasoning'] as String?,
-    reasoningDetails: (json['reasoning_details'] as List<dynamic>?)
-        ?.map((e) => ReasoningDetail.fromJson(e as Map<String, dynamic>))
-        .toList(),
-  );
+  String toString() =>
+      'ChatChoice(index: $index, message: present, finishReason: $finishReason, '
+      'logprobs: ${logprobs == null ? 'null' : 'present'})';
 }

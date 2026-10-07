@@ -1,6 +1,7 @@
 /// Chat completion models.
 library;
 
+export 'chat_audio.dart';
 export 'chat_audio_config.dart';
 export 'chat_completion.dart';
 export 'chat_completion_moderation.dart';

@@ -545,14 +545,14 @@
     },
     "CreateChatCompletionResponse": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "ChatCompletion",
       "file": "lib/src/models/chat/chat_completion.dart",
       "schema": "CreateChatCompletionResponse",
       "tags": [
         "acknowledged"
       ],
-      "note": "Missing copyWith. Has extra non-spec field (provider) for OpenRouter compat."
+      "note": "Complete ChatCompletion/Choice value and copy contracts, including audio. Nullable id/created and missing object/model fallbacks remain for provider compatibility; canonical/full and provider fixtures verify both. Existing missing metadata is a remaining parity gap, kept visible by object verification."
     },
     "ChatCompletionRequestMessage": {
       "spec": "main",
@@ -921,9 +921,9 @@
       "schema": "ChatCompletionRequestAssistantMessage",
       "parent": "ChatMessage",
       "excluded_properties": [
-        "audio",
         "function_call"
-      ]
+      ],
+      "note": "Shared AssistantMessage with nullable typed audio. Actual request projection sends id-only references and retains old provider reasoning fields; separate response projection emits required-nullable content. Deprecated function_call remains outside typed request surface."
     },
     "ChatCompletionRequestToolMessage": {
       "spec": "main",
@@ -2754,6 +2754,56 @@
       "file": "lib/src/models/common/usage.dart",
       "schema": null,
       "note": "Typed inline CompletionUsage.completion_tokens_details object. Optional known new counters reject malformed supplied values; old null compatibility retained. Exact inline properties and full contracts covered by public/model fixtures."
+    },
+    "ChatCompletionResponseMessage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AssistantMessage",
+      "file": "lib/src/models/chat/chat_message.dart",
+      "schema": "ChatCompletionResponseMessage",
+      "note": "Shared assistant model: strict complete audio on the ChatChoice response path; toResponseJson always emits required nullable content. Existing provider extensions remain. Full audio output and id-only request references are distinct typed variants. Existing annotations and deprecated function_call are remaining gaps. Parsers delegate to a shared helper, which the generic field-reference check does not follow; exact public fixtures verify modeled fields."
+    },
+    "ChatCompletionStreamResponseDelta": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ChatDelta",
+      "file": "lib/src/models/streaming/chat_stream_event.dart",
+      "schema": "ChatCompletionStreamResponseDelta",
+      "note": "Partial audio plus existing text/refusal/tools/provider reasoning. Deprecated function_call and future outer keys are preserved opaquely for exact audio expiry finalization, without adding typed legacy call accumulation."
+    },
+    "ChatAudio": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ChatAudio",
+      "file": "lib/src/models/chat/chat_audio.dart",
+      "schema": null,
+      "note": "Structural request-reference/complete-output union for inline assistant audio objects; no wire discriminator is invented. Generic parsing detects response-only keys, while response boundary always requires all complete fields."
+    },
+    "ChatAudio:ChatAudioReference": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ChatAudioReference",
+      "file": "lib/src/models/chat/chat_audio.dart",
+      "schema": null,
+      "note": "Inline nullable ChatCompletionRequestAssistantMessage.audio object body: required id only.",
+      "parent": "ChatAudio"
+    },
+    "ChatAudio:ChatCompletionAudio": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ChatCompletionAudio",
+      "file": "lib/src/models/chat/chat_audio.dart",
+      "schema": null,
+      "note": "Inline nullable ChatCompletionResponseMessage.audio object body: required nonnull id/data/transcript/expires_at.",
+      "parent": "ChatAudio"
+    },
+    "ChatAudioDelta": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ChatAudioDelta",
+      "file": "lib/src/models/chat/chat_audio.dart",
+      "schema": null,
+      "note": "Inline optional-nonnull ChatCompletionStreamResponseDelta.audio object: all four known members independently optional-nonnull; empty object and empty strings retained. Strict parsing follows canonical, while Python generated Optional typing is more permissive."
     }
   }
 }

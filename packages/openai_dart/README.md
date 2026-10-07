@@ -33,7 +33,7 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 
 - Responses API with streaming, multi-turn conversations, structured output, background mode, cache prewarming, and typed cache diagnostics
 - Decisions API for typed predicate, choice, and score answers from text or inline images
-- Chat Completions with tool calling, vision, structured output, detailed token usage, and stream obfuscation controls
+- Chat Completions with tool calling, vision, structured output, detailed usage, audio completion/streaming, and obfuscation controls
 - Images, videos, audio (TTS, transcription, translation), and embeddings
 - Realtime API via WebSocket and WebRTC with audio streaming
 - Input token counting via `inputTokens` for cost estimation
@@ -339,6 +339,64 @@ client.close();
 ```
 
 → [Full example](example/chat_example.dart)
+
+</details>
+
+### How do I generate, replay, and stream Chat audio?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use an audio-capable Chat model and request audio output. Complete output exposes
+its ID, base64 data, transcript, and replay expiry; text can be null.
+
+```dart
+final completion = await client.chat.completions.create(
+  ChatCompletionCreateRequest(
+    model: 'gpt-audio-1.5',
+    messages: [ChatMessage.user('Say only OK.')],
+    modalities: const [ChatModality.text, ChatModality.audio],
+    audio: const ChatAudioConfig(
+      voice: ChatAudioVoice.alloy,
+      format: ChatAudioFormat.wav,
+    ),
+    maxCompletionTokens: 128,
+    store: false,
+  ),
+);
+if (completion.audio case final audio?) {
+  final bytes = base64Decode(audio.data); // import dart:convert
+  await File('reply.wav').writeAsBytes(bytes); // import dart:io
+  print(audio.transcript);
+  final reference = ChatMessage.assistant(
+    audio: ChatAudio.reference(id: audio.id),
+  );
+  // Add reference to a later request before audio.expiresAt.
+}
+```
+
+`ChatAudioReference` is ID-only; `ChatCompletionAudio` requires all four output
+fields. You can reuse the returned assistant message directly: actual request
+serialization projects its audio to `{id}` without sending data/transcript/expiry.
+Local response serialization retains the complete output and provider extensions.
+
+Stream with PCM16 output and pass events to `ChatStreamAccumulator`. Each
+`ChatDelta.audio` is an independent partial update. `accumulator.audio` and each
+`accumulator.choices[i].audio` expose stable `ChatAudioDelta` snapshots with
+`isComplete`. Data/transcript fragments append separately; ID and expiry update
+when supplied. Decode complete data once after accumulation. Usage-only events
+and padding stay separate from audio.
+
+`toChatCompletion()` retains complete audio and throws `StateError` if any choice
+has incomplete audio, including after interruption; inspect partial snapshots
+instead. Text-only conversion behaves as before. A pure final expiry-only update
+can infer `stop` during final conversion when every audio field is present, while
+raw event and snapshot finish metadata remain unchanged. Reset clears all audio.
+
+→ [Runnable audio, replay, and streaming example](example/chat_audio_example.dart)
+
+See the [official audio guide](https://developers.openai.com/api/docs/guides/audio-chat-completions)
+and [migration guide](MIGRATION.md) for parsing and conversion boundaries.
 
 </details>
 
@@ -939,6 +997,7 @@ See the [example/](example/) directory for complete examples:
 | [`images_example.dart`](example/images_example.dart) | GPT Image generation |
 | [`videos_example.dart`](example/videos_example.dart) | Sora video generation, editing, and extension |
 | [`audio_example.dart`](example/audio_example.dart) | Text-to-speech and transcription |
+| [`chat_audio_example.dart`](example/chat_audio_example.dart) | Chat audio output, ID-only replay, and partial stream accumulation |
 | [`files_example.dart`](example/files_example.dart) | File upload and management |
 | [`conversations_example.dart`](example/conversations_example.dart) | Conversations API for state management |
 | [`containers_example.dart`](example/containers_example.dart) | Container memory/network configuration, Code Interpreter IDs, and files |
@@ -963,7 +1022,7 @@ See the [example/](example/) directory for complete examples:
 
 | API | Status |
 |-----|--------|
-| Chat Completions | Supported; stored-completion management and audio streaming details pending |
+| Chat Completions | Supported; stored-completion management pending |
 | Responses API | Supported; WebSockets and additional tool/configuration details pending |
 | Decisions API | ✅ Full |
 | Embeddings | ✅ Full |

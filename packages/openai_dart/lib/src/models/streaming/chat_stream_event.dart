@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
+import '../chat/chat_audio.dart';
 import '../chat/chat_completion.dart';
 import '../chat/chat_completion_moderation.dart';
 import '../chat/chat_message.dart';
@@ -251,16 +252,32 @@ class ChatStreamChoice {
     required this.delta,
     this.finishReason,
     this.logprobs,
+  }) : _deltaPresence = _DeltaPresence.present;
+
+  const ChatStreamChoice._({
+    this.index,
+    required this.delta,
+    this.finishReason,
+    this.logprobs,
+    required this._deltaPresence,
   });
 
   /// Creates a [ChatStreamChoice] from JSON.
   factory ChatStreamChoice.fromJson(Map<String, dynamic> json) {
-    return ChatStreamChoice(
+    final rawDelta = json['delta'];
+    return ChatStreamChoice._(
       index: json['index'] as int?,
       // Some providers may return null or omit the delta field
-      delta: json['delta'] is Map<String, dynamic>
-          ? ChatDelta.fromJson(json['delta'] as Map<String, dynamic>)
+      delta: rawDelta is Map
+          ? ChatDelta.fromJson(
+              requireJsonObject(rawDelta, 'ChatStreamChoice.delta'),
+            )
           : const ChatDelta(),
+      deltaPresence: !json.containsKey('delta')
+          ? _DeltaPresence.absent
+          : rawDelta == null
+          ? _DeltaPresence.nullValue
+          : _DeltaPresence.present,
       finishReason: json['finish_reason'] != null
           ? FinishReason.fromJson(json['finish_reason'] as String)
           : null,
@@ -281,6 +298,9 @@ class ChatStreamChoice {
   /// which can occur with some OpenAI-compatible providers.
   final ChatDelta delta;
 
+  // Node ignores absent/null deltas when tracking the final audio update.
+  final _DeltaPresence _deltaPresence;
+
   /// The reason the model stopped generating (in the final chunk).
   final FinishReason? finishReason;
 
@@ -293,7 +313,8 @@ class ChatStreamChoice {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (index != null) 'index': index,
-    'delta': delta.toJson(),
+    if (_deltaPresence == _DeltaPresence.present) 'delta': delta.toJson(),
+    if (_deltaPresence == _DeltaPresence.nullValue) 'delta': null,
     if (finishReason != null) 'finish_reason': finishReason!.toJson(),
     if (logprobs != null) 'logprobs': logprobs!.toJson(),
   };
@@ -304,9 +325,10 @@ class ChatStreamChoice {
     ChatDelta? delta,
     Object? finishReason = unsetCopyWithValue,
     Object? logprobs = unsetCopyWithValue,
-  }) => ChatStreamChoice(
+  }) => ChatStreamChoice._(
     index: index == unsetCopyWithValue ? this.index : index as int?,
     delta: delta ?? this.delta,
+    deltaPresence: delta == null ? _deltaPresence : _DeltaPresence.present,
     finishReason: finishReason == unsetCopyWithValue
         ? this.finishReason
         : finishReason as FinishReason?,
@@ -322,17 +344,21 @@ class ChatStreamChoice {
           runtimeType == other.runtimeType &&
           index == other.index &&
           delta == other.delta &&
+          _deltaPresence == other._deltaPresence &&
           finishReason == other.finishReason &&
           logprobs == other.logprobs;
 
   @override
-  int get hashCode => Object.hash(index, delta, finishReason, logprobs);
+  int get hashCode =>
+      Object.hash(index, delta, _deltaPresence, finishReason, logprobs);
 
   @override
   String toString() =>
-      'ChatStreamChoice(index: $index, delta: present, finishReason: $finishReason, '
+      'ChatStreamChoice(index: $index, delta: ${_deltaPresence.name}, finishReason: $finishReason, '
       'logprobs: ${logprobs == null ? 'null' : 'present'})';
 }
+
+enum _DeltaPresence { absent, nullValue, present }
 
 /// The delta content in a streaming chunk.
 ///
@@ -348,11 +374,33 @@ class ChatDelta {
     this.reasoningContent,
     this.reasoning,
     this.reasoningDetails,
+    this.audio,
+  }) : _extraFields = const {};
+
+  const ChatDelta._({
+    this.role,
+    this.content,
+    this.refusal,
+    this.toolCalls,
+    this.reasoningContent,
+    this.reasoning,
+    this.reasoningDetails,
+    this.audio,
+    required this._extraFields,
   });
 
   /// Creates a [ChatDelta] from JSON.
   factory ChatDelta.fromJson(Map<String, dynamic> json) {
-    return ChatDelta(
+    ChatAudioDelta? audio;
+    if (json.containsKey('audio')) {
+      final rawAudio = requireJsonObject(json['audio'], 'ChatDelta.audio');
+      try {
+        audio = ChatAudioDelta.fromJson(rawAudio);
+      } on FormatException catch (error) {
+        throw FormatException('ChatDelta.audio: ${error.message}');
+      }
+    }
+    return ChatDelta._(
       role: json['role'] as String?,
       content: json['content'] as String?,
       refusal: json['refusal'] as String?,
@@ -370,6 +418,14 @@ class ChatDelta {
       reasoningDetails: (json['reasoning_details'] as List<dynamic>?)
           ?.map((e) => ReasoningDetail.fromJson(e as Map<String, dynamic>))
           .toList(),
+      audio: audio,
+      extraFields: freezeJsonObject({
+        for (final entry in json.entries)
+          if (!_knownDeltaKeys.contains(entry.key) ||
+              (_providerReasoningKeys.contains(entry.key) &&
+                  entry.value == null))
+            entry.key: entry.value,
+      }),
     );
   }
 
@@ -400,6 +456,48 @@ class ChatDelta {
   /// Not part of the official OpenAI API.
   final List<ReasoningDetail>? reasoningDetails;
 
+  /// Partial audio output, whose fields arrive independently across chunks.
+  ///
+  /// Empty objects and empty strings are preserved. Present-null audio objects
+  /// or members are invalid wire values. Use the accumulator's audio snapshot
+  /// to inspect progress without requiring a complete output.
+  final ChatAudioDelta? audio;
+
+  // Unknown and provider-reasoning keys affect Node's pure-expiry predicate.
+  // Preserve their parsed presence and JSON, including explicit nulls.
+  final Map<String, dynamic> _extraFields;
+
+  static const _knownDeltaKeys = {
+    'role',
+    'content',
+    'refusal',
+    'tool_calls',
+    'reasoning_content',
+    'reasoning',
+    'reasoning_details',
+    'audio',
+  };
+  static const _providerReasoningKeys = {
+    'reasoning_content',
+    'reasoning',
+    'reasoning_details',
+  };
+
+  bool get _isPureAudioExpiry =>
+      audio?.expiresAt != null &&
+      audio?.id == null &&
+      audio?.data == null &&
+      audio?.transcript == null &&
+      role == null &&
+      content == null &&
+      refusal == null &&
+      toolCalls == null &&
+      reasoningContent == null &&
+      reasoning == null &&
+      reasoningDetails == null &&
+      _extraFields.keys.every((key) => key == 'function_call') &&
+      _extraFields['function_call'] == null;
+
   /// Whether this delta has content.
   bool get hasContent => content != null && content!.isNotEmpty;
 
@@ -412,6 +510,7 @@ class ChatDelta {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    ..._extraFields,
     if (role != null) 'role': role,
     if (content != null) 'content': content,
     if (refusal != null) 'refusal': refusal,
@@ -421,7 +520,60 @@ class ChatDelta {
     if (reasoning != null) 'reasoning': reasoning,
     if (reasoningDetails != null)
       'reasoning_details': reasoningDetails!.map((rd) => rd.toJson()).toList(),
+    if (audio != null) 'audio': audio!.toJson(),
   };
+
+  /// Creates a copy, allowing every optional field to be explicitly cleared.
+  ///
+  /// Clearing provider reasoning also removes its parsed-presence marker.
+  ChatDelta copyWith({
+    Object? role = unsetCopyWithValue,
+    Object? content = unsetCopyWithValue,
+    Object? refusal = unsetCopyWithValue,
+    Object? toolCalls = unsetCopyWithValue,
+    Object? reasoningContent = unsetCopyWithValue,
+    Object? reasoning = unsetCopyWithValue,
+    Object? reasoningDetails = unsetCopyWithValue,
+    Object? audio = unsetCopyWithValue,
+  }) {
+    final extras = Map<String, dynamic>.of(_extraFields);
+    if (reasoningContent != unsetCopyWithValue) {
+      extras.remove('reasoning_content');
+    }
+    if (reasoning != unsetCopyWithValue) extras.remove('reasoning');
+    if (reasoningDetails != unsetCopyWithValue) {
+      extras.remove('reasoning_details');
+    }
+    return ChatDelta._(
+      role: role == unsetCopyWithValue ? this.role : role as String?,
+      content: content == unsetCopyWithValue
+          ? this.content
+          : content as String?,
+      refusal: refusal == unsetCopyWithValue
+          ? this.refusal
+          : refusal as String?,
+      toolCalls: toolCalls == unsetCopyWithValue
+          ? this.toolCalls
+          : toolCalls == null
+          ? null
+          : List<ToolCallDelta>.from(toolCalls as List),
+      reasoningContent: reasoningContent == unsetCopyWithValue
+          ? this.reasoningContent
+          : reasoningContent as String?,
+      reasoning: reasoning == unsetCopyWithValue
+          ? this.reasoning
+          : reasoning as String?,
+      reasoningDetails: reasoningDetails == unsetCopyWithValue
+          ? this.reasoningDetails
+          : reasoningDetails == null
+          ? null
+          : List<ReasoningDetail>.from(reasoningDetails as List),
+      audio: audio == unsetCopyWithValue
+          ? this.audio
+          : audio as ChatAudioDelta?,
+      extraFields: freezeJsonObject(extras),
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -434,7 +586,9 @@ class ChatDelta {
           listsEqual(toolCalls, other.toolCalls) &&
           reasoningContent == other.reasoningContent &&
           reasoning == other.reasoning &&
-          listsEqual(reasoningDetails, other.reasoningDetails);
+          listsEqual(reasoningDetails, other.reasoningDetails) &&
+          audio == other.audio &&
+          mapsDeepEqual(_extraFields, other._extraFields);
 
   @override
   int get hashCode => Object.hash(
@@ -445,17 +599,23 @@ class ChatDelta {
     reasoningContent,
     reasoning,
     reasoningDetails != null ? Object.hashAll(reasoningDetails!) : null,
+    audio,
+    mapDeepHashCode(_extraFields),
   );
 
   @override
-  String toString() {
-    if (hasContent) return 'ChatDelta(content: $content)';
-    if (hasReasoningContent) return 'ChatDelta(reasoning: ...)';
-    if (hasToolCalls) return 'ChatDelta(toolCalls: ${toolCalls!.length})';
-    if (role != null) return 'ChatDelta(role: $role)';
-    return 'ChatDelta()';
-  }
+  String toString() =>
+      'ChatDelta(role: $role, content: ${_textSummary(content)}, '
+      'refusal: ${_textSummary(refusal)}, toolCalls: ${_listSummary(toolCalls)}, '
+      'reasoningContent: ${_textSummary(reasoningContent)}, reasoning: ${_textSummary(reasoning)}, '
+      'reasoningDetails: ${_listSummary(reasoningDetails)}, audio: $audio, '
+      'additionalFields: ${_extraFields.length} entries)';
 }
+
+String _textSummary(String? value) =>
+    value == null ? 'null' : '${value.length} chars';
+String _listSummary(List<dynamic>? value) =>
+    value == null ? 'null' : '${value.length} items';
 
 /// A tool call delta in a streaming chunk.
 @immutable
@@ -610,6 +770,7 @@ class AccumulatedChoice {
     required this.reasoningDetails,
     required this.reasoningDetailsPresent,
     required this.logprobs,
+    required this.audio,
   });
 
   /// The index of this choice.
@@ -647,6 +808,12 @@ class AccumulatedChoice {
   /// Log probability information.
   final Logprobs? logprobs;
 
+  /// An immutable snapshot of the audio fields received for this choice.
+  ///
+  /// Null means no audio object was received; an empty object remains a partial
+  /// snapshot. Its strings are stable when subsequent chunks arrive.
+  final ChatAudioDelta? audio;
+
   /// Whether there are any tool calls.
   bool get hasToolCalls => toolCalls.isNotEmpty;
 
@@ -655,6 +822,84 @@ class AccumulatedChoice {
       reasoningContent.isNotEmpty ||
       reasoning.isNotEmpty ||
       reasoningDetailsPresent;
+
+  /// Creates an immutable copy; nullable metadata can be explicitly cleared.
+  AccumulatedChoice copyWith({
+    int? index,
+    String? content,
+    String? refusal,
+    Object? role = unsetCopyWithValue,
+    Object? finishReason = unsetCopyWithValue,
+    List<ToolCall>? toolCalls,
+    String? reasoningContent,
+    String? reasoning,
+    List<ReasoningDetail>? reasoningDetails,
+    bool? reasoningDetailsPresent,
+    Object? logprobs = unsetCopyWithValue,
+    Object? audio = unsetCopyWithValue,
+  }) => AccumulatedChoice._(
+    index: index ?? this.index,
+    content: content ?? this.content,
+    refusal: refusal ?? this.refusal,
+    role: role == unsetCopyWithValue ? this.role : role as String?,
+    finishReason: finishReason == unsetCopyWithValue
+        ? this.finishReason
+        : finishReason as FinishReason?,
+    toolCalls: List.unmodifiable(toolCalls ?? this.toolCalls),
+    reasoningContent: reasoningContent ?? this.reasoningContent,
+    reasoning: reasoning ?? this.reasoning,
+    reasoningDetails: List.unmodifiable(
+      reasoningDetails ?? this.reasoningDetails,
+    ),
+    reasoningDetailsPresent:
+        reasoningDetailsPresent ?? this.reasoningDetailsPresent,
+    logprobs: logprobs == unsetCopyWithValue
+        ? this.logprobs
+        : logprobs as Logprobs?,
+    audio: audio == unsetCopyWithValue ? this.audio : audio as ChatAudioDelta?,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AccumulatedChoice &&
+          runtimeType == other.runtimeType &&
+          index == other.index &&
+          content == other.content &&
+          refusal == other.refusal &&
+          role == other.role &&
+          finishReason == other.finishReason &&
+          listsEqual(toolCalls, other.toolCalls) &&
+          reasoningContent == other.reasoningContent &&
+          reasoning == other.reasoning &&
+          listsEqual(reasoningDetails, other.reasoningDetails) &&
+          reasoningDetailsPresent == other.reasoningDetailsPresent &&
+          logprobs == other.logprobs &&
+          audio == other.audio;
+
+  @override
+  int get hashCode => Object.hash(
+    index,
+    content,
+    refusal,
+    role,
+    finishReason,
+    listHash(toolCalls),
+    reasoningContent,
+    reasoning,
+    listHash(reasoningDetails),
+    reasoningDetailsPresent,
+    logprobs,
+    audio,
+  );
+
+  @override
+  String toString() =>
+      'AccumulatedChoice(index: $index, content: ${_textSummary(content)}, '
+      'refusal: ${_textSummary(refusal)}, role: $role, finishReason: $finishReason, '
+      'toolCalls: ${_listSummary(toolCalls)}, reasoningContent: ${_textSummary(reasoningContent)}, '
+      'reasoning: ${_textSummary(reasoning)}, reasoningDetails: ${_listSummary(reasoningDetails)}, '
+      'reasoningDetailsPresent: $reasoningDetailsPresent, logprobs: $logprobs, audio: $audio)';
 }
 
 /// Helper class for accumulating streaming chunks into a complete response.
@@ -725,6 +970,31 @@ class ChatStreamAccumulator {
       accumulated.role ??= delta.role;
       accumulated.finishReason ??= choice.finishReason;
 
+      if (choice.logprobs != null) {
+        if (choice.logprobs!.content != null) {
+          accumulated.logprobsContent.addAll(choice.logprobs!.content!);
+        }
+        if (choice.logprobs!.refusal != null) {
+          accumulated.logprobsRefusal.addAll(choice.logprobs!.refusal!);
+        }
+      }
+
+      if (choice._deltaPresence != _DeltaPresence.present) continue;
+      accumulated.audioDone = delta._isPureAudioExpiry;
+      if (delta.audio case final audio?) {
+        accumulated.audioSeen = true;
+        if (audio.id case final id?) accumulated.audioId = id;
+        if (audio.data case final data?) {
+          (accumulated.audioData ??= StringBuffer()).write(data);
+        }
+        if (audio.transcript case final transcript?) {
+          (accumulated.audioTranscript ??= StringBuffer()).write(transcript);
+        }
+        if (audio.expiresAt case final expiry?) {
+          accumulated.audioExpiresAt = expiry;
+        }
+      }
+
       if (delta.content != null) {
         accumulated.content.write(delta.content);
       }
@@ -750,15 +1020,6 @@ class ChatStreamAccumulator {
       if (delta.toolCalls != null) {
         for (final tc in delta.toolCalls!) {
           _accumulateToolCall(accumulated, tc);
-        }
-      }
-
-      if (choice.logprobs != null) {
-        if (choice.logprobs!.content != null) {
-          accumulated.logprobsContent.addAll(choice.logprobs!.content!);
-        }
-        if (choice.logprobs!.refusal != null) {
-          accumulated.logprobsRefusal.addAll(choice.logprobs!.refusal!);
         }
       }
     }
@@ -804,13 +1065,22 @@ class ChatStreamAccumulator {
     }
     return Logprobs(
       content: choice.logprobsContent.isNotEmpty
-          ? choice.logprobsContent
+          ? List.unmodifiable(choice.logprobsContent)
           : null,
       refusal: choice.logprobsRefusal.isNotEmpty
-          ? choice.logprobsRefusal
+          ? List.unmodifiable(choice.logprobsRefusal)
           : null,
     );
   }
+
+  ChatAudioDelta? _buildAudio(_AccumulatedChoice choice) => choice.audioSeen
+      ? ChatAudioDelta(
+          id: choice.audioId,
+          data: choice.audioData?.toString(),
+          transcript: choice.audioTranscript?.toString(),
+          expiresAt: choice.audioExpiresAt,
+        )
+      : null;
 
   /// The completion ID.
   String? get id => _id;
@@ -828,6 +1098,13 @@ class ChatStreamAccumulator {
   ///
   /// For multi-choice streams, returns choice 0's content.
   String get content => _choices.isEmpty ? '' : _choices[0].content.toString();
+
+  /// An immutable snapshot of choice zero's audio fields received so far.
+  ///
+  /// Null means no audio object was received. Partial snapshots can be inspected
+  /// safely before all fields required by a complete audio output arrive.
+  ChatAudioDelta? get audio =>
+      _choices.isEmpty ? null : _buildAudio(_choices[0]);
 
   /// The accumulated refusal content.
   ///
@@ -897,7 +1174,7 @@ class ChatStreamAccumulator {
   /// Note: Each call creates fresh snapshot objects. For hot-path access
   /// during streaming, prefer the flat getters (`content`, `toolCalls`, etc.)
   /// which delegate to choice 0 without allocation.
-  List<AccumulatedChoice> get choices => [
+  List<AccumulatedChoice> get choices => List.unmodifiable([
     for (var i = 0; i < _choices.length; i++)
       AccumulatedChoice._(
         index: i,
@@ -905,14 +1182,15 @@ class ChatStreamAccumulator {
         refusal: _choices[i].refusal.toString(),
         role: _choices[i].role,
         finishReason: _choices[i].finishReason,
-        toolCalls: _buildToolCalls(_choices[i]),
+        toolCalls: List.unmodifiable(_buildToolCalls(_choices[i])),
         reasoningContent: _choices[i].reasoningContent.toString(),
         reasoning: _choices[i].reasoning.toString(),
         reasoningDetails: List.unmodifiable(_choices[i].reasoningDetails),
         reasoningDetailsPresent: _choices[i].reasoningDetailsPresent,
         logprobs: _buildLogprobs(_choices[i]),
+        audio: _buildAudio(_choices[i]),
       ),
-  ];
+  ]);
 
   /// Builds a [ChatCompletion] from the accumulated stream data.
   ///
@@ -922,6 +1200,11 @@ class ChatStreamAccumulator {
   ///
   /// For multi-choice streams, produces one [ChatChoice] per accumulated
   /// choice with independent content, tool calls, and finish reasons.
+  ///
+  /// Throws [StateError] if any choice has received audio without all four
+  /// required fields. Inspect [audio] or [choices] for partial snapshots.
+  /// Final conversion can infer `stop` from a pure expiry-only last delta with
+  /// complete audio; raw events and snapshot finish reasons stay unchanged.
   ChatCompletion toChatCompletion() {
     final chatChoices = _choices.isEmpty
         ? [const ChatChoice(index: 0, message: AssistantMessage())]
@@ -952,12 +1235,23 @@ class ChatStreamAccumulator {
     final tcs = _buildToolCalls(choice);
     final lp = _buildLogprobs(choice);
     final rds = choice.reasoningDetails;
+    final audio = _buildAudio(choice);
+    if (audio != null && !audio.isComplete) {
+      throw StateError(
+        'Incomplete audio for choice $index; inspect partial audio snapshots before converting.',
+      );
+    }
 
     return ChatChoice(
       index: index,
-      finishReason: choice.finishReason,
+      finishReason:
+          choice.finishReason ??
+          (choice.audioDone && audio?.isComplete == true
+              ? FinishReason.stop
+              : null),
       logprobs: lp,
       message: AssistantMessage(
+        audio: audio?.toCompleteAudio(),
         content: contentStr.isNotEmpty ? contentStr : null,
         refusal: refusalStr.isNotEmpty ? refusalStr : null,
         toolCalls: tcs.isNotEmpty ? tcs : null,
@@ -999,6 +1293,12 @@ class _AccumulatedChoice {
   final List<_AccumulatedToolCall> toolCalls = [];
   final List<TokenLogprob> logprobsContent = [];
   final List<TokenLogprob> logprobsRefusal = [];
+  bool audioSeen = false;
+  String? audioId;
+  StringBuffer? audioData;
+  StringBuffer? audioTranscript;
+  int? audioExpiresAt;
+  bool audioDone = false;
 }
 
 /// Internal helper for accumulating tool call data.

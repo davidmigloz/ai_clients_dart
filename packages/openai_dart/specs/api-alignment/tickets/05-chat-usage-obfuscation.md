@@ -1,6 +1,6 @@
 # Preserve chat token details and obfuscation
 
-Status: implemented and independently reviewed; [PR #330](https://github.com/davidmigloz/ai_clients_dart/pull/330) open for review.
+Status: merged in [PR #330](https://github.com/davidmigloz/ai_clients_dart/pull/330); #323 closed.
 GitHub: [#323](https://github.com/davidmigloz/ai_clients_dart/issues/323).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 2 correctness](../correctness.md), CHAT-001–002.
@@ -30,4 +30,4 @@ Implementation and validation are recorded in
 2,199 unit tests pass with two existing skips, analysis is clean, and one
 bounded unstored live request passed (11 input/four output tokens; conservative
 $0.000003375). All independent reviewers approve; validated findings are resolved. Wider toolkit
-diagnostics remain visible and recorded. Issue #323 closes when its PR merges.
+diagnostics remain visible and recorded. PR #330 merged after all CI checks passed, closing #323.
