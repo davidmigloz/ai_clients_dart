@@ -7,7 +7,8 @@ import 'package:openai_dart/openai_dart.dart';
 /// Example demonstrating the Containers API for isolated execution environments.
 ///
 /// The Containers API allows you to:
-/// - Create isolated execution environments
+/// - Configure isolated execution environments with memory and network policies
+/// - Use a returned container ID with Code Interpreter
 /// - Upload and manage files within containers
 /// - Download file content from containers
 ///
@@ -52,11 +53,11 @@ Future<void> listContainersExample(OpenAIClient client) async {
     if (container.lastActiveAt != null) {
       print('  Last active: ${container.lastActiveAtDateTime}');
     }
-    if (container.expiresAfter != null) {
-      print(
-        '  Expires after: ${container.expiresAfter!.minutes} minutes '
-        '(anchor: ${container.expiresAfter!.anchor})',
-      );
+    if (container.expiresAfter?.minutes case final minutes?) {
+      print('  Expires after: $minutes minutes');
+    }
+    if (container.expiresAfter?.anchor case final anchor?) {
+      print('  Expiration anchor: $anchor');
     }
     print('');
   }
@@ -82,9 +83,11 @@ Future<void> containerLifecycleExample(OpenAIClient client) async {
   final container = await client.containers.create(
     CreateContainerRequest(
       name: 'example-container-$timestamp',
+      memoryLimit: ContainerMemoryLimit.gb1,
+      networkPolicy: ContainerNetworkPolicy.disabled,
       expiresAfter: const ContainerExpiration(
         anchor: 'last_active_at',
-        minutes: 20, // Maximum allowed
+        minutes: 20,
       ),
     ),
   );
@@ -92,6 +95,8 @@ Future<void> containerLifecycleExample(OpenAIClient client) async {
   print('Created container: ${container.id}');
   print('Name: ${container.name}');
   print('Status: ${container.status}');
+  print('Memory: ${container.memoryLimit?.value}');
+  print('Network: ${container.networkPolicy?.type}');
   print('Created at: ${container.createdAtDateTime}');
   print('');
 
@@ -100,6 +105,11 @@ Future<void> containerLifecycleExample(OpenAIClient client) async {
     final retrieved = await client.containers.retrieve(container.id);
     print('Retrieved container: ${retrieved.id}');
     print('Name matches: ${retrieved.name == container.name}');
+    // Use this tool in a Responses request while the container is active.
+    final tool = ResponseTool.codeInterpreter(
+      container: CodeInterpreterContainer.id(retrieved.id),
+    );
+    print('Code Interpreter configuration: ${tool.toJson()}');
     print('');
   } finally {
     // Delete the container

@@ -58,9 +58,11 @@ class ContainersResource extends ResourceBase {
   /// ## Parameters
   ///
   /// - [limit] - Maximum number of containers to return.
+  /// - [name] - Filter containers by name.
   /// - [order] - Sort order (asc or desc).
   /// - [after] - Cursor for pagination (get containers after this ID).
-  /// - [before] - Cursor for pagination (get containers before this ID).
+  /// - [before] - Legacy cursor retained for source compatibility. It is not
+  ///   part of the current documented API; use [after] for new pagination.
   ///
   /// ## Returns
   ///
@@ -77,6 +79,7 @@ class ContainersResource extends ResourceBase {
   /// ```
   Future<ContainerList> list({
     int? limit,
+    String? name,
     String? order,
     String? after,
     String? before,
@@ -84,6 +87,7 @@ class ContainersResource extends ResourceBase {
     ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (limit != null) queryParams['limit'] = limit.toString();
+    if (name != null) queryParams['name'] = name;
     if (order != null) queryParams['order'] = order;
     if (after != null) queryParams['after'] = after;
     if (before != null) queryParams['before'] = before;

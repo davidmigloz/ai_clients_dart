@@ -1,37 +1,44 @@
 import 'package:meta/meta.dart';
 
+import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import '../../containers/container_json_helpers.dart';
+import '../../containers/container_memory_limit.dart';
+import '../../containers/container_network_policy.dart';
+
+export '../../containers/container_memory_limit.dart';
+export '../../containers/container_network_policy.dart';
 
 /// Container configuration for the code interpreter tool.
 ///
-/// See [CodeInterpreterContainerId] and [CodeInterpreterContainerAuto].
+/// Use an existing container ID or an automatic configuration. Skills are
+/// configured through standalone creation, rather than the automatic shape.
 sealed class CodeInterpreterContainer {
   /// Creates a [CodeInterpreterContainer].
   const CodeInterpreterContainer();
 
-  /// Creates a [CodeInterpreterContainer] from JSON.
-  ///
-  /// Accepts a [String] (container ID) or a [Map] with `type: "auto"`.
-  factory CodeInterpreterContainer.fromJson(Object json) {
+  /// Creates a container from JSON, preserving future object variants.
+  factory CodeInterpreterContainer.fromJson(Object? json) {
     if (json is String) return CodeInterpreterContainerId(json);
-    if (json is Map<String, dynamic>) {
-      final type = json['type'] as String?;
-      if (type == 'auto') return CodeInterpreterContainerAuto.fromJson(json);
-      throw FormatException('Unknown CodeInterpreterContainer type: $type');
-    }
-    throw FormatException(
-      'Invalid CodeInterpreterContainer JSON: ${json.runtimeType}',
+    final map = requireContainerMap(json, 'CodeInterpreterContainer');
+    final type = requireContainerString(
+      map['type'],
+      'CodeInterpreterContainer.type',
     );
+    return switch (type) {
+      'auto' => CodeInterpreterContainerAuto.fromJson(map),
+      _ => UnknownCodeInterpreterContainer(map),
+    };
   }
 
-  /// Use an existing container by ID.
+  /// Uses an existing container by ID.
   static CodeInterpreterContainerId id(String id) =>
       CodeInterpreterContainerId(id);
 
-  /// Auto-create a container.
+  /// Automatically creates a container with optional files and settings.
   static CodeInterpreterContainerAuto auto({
     List<String>? fileIds,
-    int? memoryLimit,
+    ContainerMemoryLimit? memoryLimit,
     ContainerNetworkPolicy? networkPolicy,
   }) => CodeInterpreterContainerAuto(
     fileIds: fileIds,
@@ -43,17 +50,27 @@ sealed class CodeInterpreterContainer {
   Object toJson();
 }
 
-/// Use an existing container by ID.
+/// Uses an existing container by ID.
 @immutable
 class CodeInterpreterContainerId extends CodeInterpreterContainer {
+  /// Creates an existing-container reference.
+  const CodeInterpreterContainerId(this.id);
+
+  /// Creates a reference from a JSON string.
+  factory CodeInterpreterContainerId.fromJson(Object? json) =>
+      CodeInterpreterContainerId(
+        requireContainerString(json, 'CodeInterpreterContainerId'),
+      );
+
   /// The container ID.
   final String id;
 
-  /// Creates a [CodeInterpreterContainerId].
-  const CodeInterpreterContainerId(this.id);
-
   @override
-  Object toJson() => id;
+  String toJson() => id;
+
+  /// Creates a copy with a replaced container ID.
+  CodeInterpreterContainerId copyWith({String? id}) =>
+      CodeInterpreterContainerId(id ?? this.id);
 
   @override
   bool operator ==(Object other) =>
@@ -69,45 +86,81 @@ class CodeInterpreterContainerId extends CodeInterpreterContainer {
   String toString() => 'CodeInterpreterContainerId($id)';
 }
 
-/// Auto-create a container for code execution.
+/// Automatically creates a container for code execution.
 @immutable
 class CodeInterpreterContainerAuto extends CodeInterpreterContainer {
-  /// File IDs to make available in the container.
-  final List<String>? fileIds;
-
-  /// Memory limit in MB.
-  ///
-  /// Allowed values: 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536.
-  final int? memoryLimit;
-
-  /// Network access policy for the container.
-  final ContainerNetworkPolicy? networkPolicy;
-
-  /// Creates a [CodeInterpreterContainerAuto].
-  const CodeInterpreterContainerAuto({
-    this.fileIds,
+  /// Creates an automatic configuration, snapshotting optional file IDs.
+  CodeInterpreterContainerAuto({
+    List<String>? fileIds,
     this.memoryLimit,
     this.networkPolicy,
-  });
+  }) : fileIds = fileIds == null ? null : List.unmodifiable(fileIds);
 
-  /// Creates a [CodeInterpreterContainerAuto] from JSON.
+  /// Creates an automatic configuration from JSON.
   factory CodeInterpreterContainerAuto.fromJson(Map<String, dynamic> json) {
+    requireContainerType(json, 'auto', 'CodeInterpreterContainerAuto');
+    final networkPolicy = optionalContainerMap(
+      json,
+      'network_policy',
+      'CodeInterpreterContainerAuto',
+    );
     return CodeInterpreterContainerAuto(
-      fileIds: (json['file_ids'] as List?)?.cast<String>(),
-      memoryLimit: json['memory_limit'] as int?,
-      networkPolicy: json['network_policy'] != null
-          ? ContainerNetworkPolicy.fromJson(json['network_policy'] as Object)
-          : null,
+      fileIds: optionalContainerStrings(
+        json,
+        'file_ids',
+        'CodeInterpreterContainerAuto',
+      ),
+      memoryLimit: json['memory_limit'] == null
+          ? null
+          : ContainerMemoryLimit.fromJson(
+              requireContainerString(
+                json['memory_limit'],
+                'CodeInterpreterContainerAuto.memory_limit',
+              ),
+            ),
+      networkPolicy: networkPolicy == null
+          ? null
+          : ContainerNetworkPolicy.fromJson(networkPolicy),
     );
   }
 
+  /// Uploaded file IDs made available to code. The server permits at most 50.
+  final List<String>? fileIds;
+
+  /// Memory tier, such as [ContainerMemoryLimit.gb4].
+  ///
+  /// An explicit JSON null is normalized to omission when parsed.
+  final ContainerMemoryLimit? memoryLimit;
+
+  /// Optional outbound network access policy.
+  final ContainerNetworkPolicy? networkPolicy;
+
   @override
-  Object toJson() => {
+  Map<String, dynamic> toJson() => {
     'type': 'auto',
     if (fileIds != null) 'file_ids': fileIds,
-    if (memoryLimit != null) 'memory_limit': memoryLimit,
+    if (memoryLimit != null) 'memory_limit': memoryLimit!.toJson(),
     if (networkPolicy != null) 'network_policy': networkPolicy!.toJson(),
   };
+
+  /// Creates a copy; pass null to explicitly clear optional settings.
+  CodeInterpreterContainerAuto copyWith({
+    Object? fileIds = unsetCopyWithValue,
+    Object? memoryLimit = unsetCopyWithValue,
+    Object? networkPolicy = unsetCopyWithValue,
+  }) => CodeInterpreterContainerAuto(
+    fileIds: fileIds == unsetCopyWithValue
+        ? this.fileIds
+        : fileIds == null
+        ? null
+        : List<String>.from(fileIds as List),
+    memoryLimit: memoryLimit == unsetCopyWithValue
+        ? this.memoryLimit
+        : memoryLimit as ContainerMemoryLimit?,
+    networkPolicy: networkPolicy == unsetCopyWithValue
+        ? this.networkPolicy
+        : networkPolicy as ContainerNetworkPolicy?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -119,105 +172,53 @@ class CodeInterpreterContainerAuto extends CodeInterpreterContainer {
           networkPolicy == other.networkPolicy;
 
   @override
-  int get hashCode => Object.hash(
-    fileIds != null ? Object.hashAll(fileIds!) : null,
-    memoryLimit,
-    networkPolicy,
-  );
+  int get hashCode =>
+      Object.hash(listHash(fileIds), memoryLimit, networkPolicy);
 
   @override
   String toString() =>
-      'CodeInterpreterContainerAuto(fileIds: $fileIds, memoryLimit: $memoryLimit, networkPolicy: $networkPolicy)';
+      'CodeInterpreterContainerAuto(fileIds: $fileIds, '
+      'memoryLimit: $memoryLimit, networkPolicy: $networkPolicy)';
 }
 
-/// Network access policy for a code interpreter container.
-///
-/// See [ContainerNetworkPolicyDisabled] and [ContainerNetworkPolicyAllowlist].
-sealed class ContainerNetworkPolicy {
-  /// Creates a [ContainerNetworkPolicy].
-  const ContainerNetworkPolicy();
-
-  /// Creates a [ContainerNetworkPolicy] from JSON.
-  factory ContainerNetworkPolicy.fromJson(Object json) {
-    if (json is Map<String, dynamic>) {
-      final type = json['type'] as String?;
-      return switch (type) {
-        'disabled' => const ContainerNetworkPolicyDisabled(),
-        'allowlist' => ContainerNetworkPolicyAllowlist.fromJson(json),
-        _ => throw FormatException(
-          'Unknown ContainerNetworkPolicy type: $type',
-        ),
-      };
-    }
-    throw FormatException(
-      'Invalid ContainerNetworkPolicy JSON: ${json.runtimeType}',
-    );
-  }
-
-  /// Disable network access.
-  static const disabled = ContainerNetworkPolicyDisabled();
-
-  /// Allow network access to specific hosts.
-  static ContainerNetworkPolicyAllowlist allowlist(List<String> allowedHosts) =>
-      ContainerNetworkPolicyAllowlist(allowedHosts: allowedHosts);
-
-  /// Converts to JSON.
-  Map<String, dynamic> toJson();
-}
-
-/// Disable network access for the container.
+/// A future container variant retaining its complete immutable JSON payload.
 @immutable
-class ContainerNetworkPolicyDisabled extends ContainerNetworkPolicy {
-  /// Creates a [ContainerNetworkPolicyDisabled].
-  const ContainerNetworkPolicyDisabled();
+class UnknownCodeInterpreterContainer extends CodeInterpreterContainer {
+  /// Creates an unknown variant with a defensive JSON snapshot.
+  UnknownCodeInterpreterContainer(Map<String, dynamic> rawJson)
+    : type = requireContainerString(
+        rawJson['type'],
+        'UnknownCodeInterpreterContainer.type',
+      ),
+      rawJson = freezeContainerJsonMap(rawJson);
+
+  /// Creates an unknown container variant from JSON.
+  factory UnknownCodeInterpreterContainer.fromJson(Map<String, dynamic> json) =>
+      UnknownCodeInterpreterContainer(json);
+
+  /// The unfamiliar API discriminator.
+  final String type;
+
+  /// The recursively unmodifiable original JSON.
+  final Map<String, dynamic> rawJson;
 
   @override
-  Map<String, dynamic> toJson() => const {'type': 'disabled'};
+  Map<String, dynamic> toJson() => Map<String, dynamic>.from(rawJson);
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) || other is ContainerNetworkPolicyDisabled;
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  String toString() => 'ContainerNetworkPolicyDisabled()';
-}
-
-/// Allow network access to specific hosts.
-@immutable
-class ContainerNetworkPolicyAllowlist extends ContainerNetworkPolicy {
-  /// The list of allowed hostnames.
-  final List<String> allowedHosts;
-
-  /// Creates a [ContainerNetworkPolicyAllowlist].
-  const ContainerNetworkPolicyAllowlist({required this.allowedHosts});
-
-  /// Creates a [ContainerNetworkPolicyAllowlist] from JSON.
-  factory ContainerNetworkPolicyAllowlist.fromJson(Map<String, dynamic> json) {
-    return ContainerNetworkPolicyAllowlist(
-      allowedHosts: (json['allowed_hosts'] as List).cast<String>(),
-    );
-  }
-
-  @override
-  Map<String, dynamic> toJson() => {
-    'type': 'allowlist',
-    'allowed_hosts': allowedHosts,
-  };
+  /// Creates a copy with a replaced raw payload.
+  UnknownCodeInterpreterContainer copyWith({Map<String, dynamic>? rawJson}) =>
+      UnknownCodeInterpreterContainer(rawJson ?? this.rawJson);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ContainerNetworkPolicyAllowlist &&
+      other is UnknownCodeInterpreterContainer &&
           runtimeType == other.runtimeType &&
-          listsEqual(allowedHosts, other.allowedHosts);
+          mapsDeepEqual(rawJson, other.rawJson);
 
   @override
-  int get hashCode => Object.hashAll(allowedHosts);
+  int get hashCode => Object.hash(runtimeType, mapDeepHashCode(rawJson));
 
   @override
-  String toString() =>
-      'ContainerNetworkPolicyAllowlist(allowedHosts: $allowedHosts)';
+  String toString() => 'UnknownCodeInterpreterContainer(type: $type)';
 }

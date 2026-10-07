@@ -1,6 +1,6 @@
 # Add the complete Decisions API to openai_dart
 
-Status: implemented and independently reviewed; awaiting merge.
+Status: merged in [PR #319](https://github.com/davidmigloz/ai_clients_dart/pull/319); issue closed.
 GitHub: [issue #318](https://github.com/davidmigloz/ai_clients_dart/issues/318).
 Parent: [OpenAI API alignment #317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Decisions API](../decisions.md), requirements DEC-01 through DEC-11.
@@ -92,8 +92,9 @@ contract before implementation if the upstream sources have changed.
 
 ## Completion evidence
 
-Implemented on `feat/openai-decisions`. All acceptance criteria are verified;
-the issue remains open for merge. See the
+Implemented on `feat/openai-decisions` and merged October 7, 2026 in PR #319
+after all CI checks passed. Issue #318 is closed. All acceptance criteria are
+verified. See the
 [implementation review and verification record](../reviews/01-decisions-implementation.md)
 for commands, outcomes, the additional nullable-field fix, and the deliberately
 visible toolkit backlog. The subsequently authorized live integration test also

@@ -2285,6 +2285,289 @@
       "file": "lib/src/models/chat/content_part.dart",
       "schema": "ImageDetailParam",
       "note": "Existing shared image detail values, reused by Decisions."
+    },
+    "ContainerMemoryLimit": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ContainerMemoryLimit",
+      "file": "lib/src/models/containers/container_memory_limit.dart",
+      "schema": null,
+      "note": "Named scalar string enum represented by an immutable open value wrapper: gb1/gb4/gb16/gb64 presets and exact preservation of future strings. Primitive toJson shape is verified by public fixtures; no object properties or enum fallback are fabricated."
+    },
+    "CodeInterpreterContainer": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "CodeInterpreterContainer",
+      "file": "lib/src/models/responses/tools/code_interpreter_container.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "CodeInterpreterContainerAuto": "auto"
+        }
+      },
+      "note": "Synthetic string-ID-or-auto-object union. Unknown object variants preserve raw JSON."
+    },
+    "CodeInterpreterContainer:CodeInterpreterContainerId": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "CodeInterpreterContainerId",
+      "file": "lib/src/models/responses/tools/code_interpreter_container.dart",
+      "schema": null,
+      "parent": "CodeInterpreterContainer",
+      "note": "Dart scalar wrapper for the string ID member."
+    },
+    "AutoCodeInterpreterToolParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CodeInterpreterContainerAuto",
+      "file": "lib/src/models/responses/tools/code_interpreter_container.dart",
+      "schema": "AutoCodeInterpreterToolParam",
+      "parent": "CodeInterpreterContainer"
+    },
+    "CodeInterpreterContainer:UnknownCodeInterpreterContainer": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownCodeInterpreterContainer",
+      "file": "lib/src/models/responses/tools/code_interpreter_container.dart",
+      "schema": null,
+      "parent": "CodeInterpreterContainer",
+      "note": "Forward-compatible unknown object preserving immutable raw JSON."
+    },
+    "ContainerNetworkPolicy": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ContainerNetworkPolicy",
+      "file": "lib/src/models/containers/container_network_policy.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "ContainerNetworkPolicyDisabled": "disabled",
+          "ContainerNetworkPolicyAllowlist": "allowlist"
+        }
+      },
+      "note": "Synthetic discriminated request union from create and tool configuration. Response policy has a distinct optional-member shape."
+    },
+    "ContainerNetworkPolicyDisabledParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ContainerNetworkPolicyDisabled",
+      "file": "lib/src/models/containers/container_network_policy.dart",
+      "schema": "ContainerNetworkPolicyDisabledParam",
+      "parent": "ContainerNetworkPolicy"
+    },
+    "ContainerNetworkPolicyAllowlistParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ContainerNetworkPolicyAllowlist",
+      "file": "lib/src/models/containers/container_network_policy.dart",
+      "schema": "ContainerNetworkPolicyAllowlistParam",
+      "parent": "ContainerNetworkPolicy"
+    },
+    "ContainerNetworkPolicyDomainSecretParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ContainerNetworkPolicyDomainSecret",
+      "file": "lib/src/models/containers/container_network_policy.dart",
+      "schema": "ContainerNetworkPolicyDomainSecretParam"
+    },
+    "ContainerNetworkPolicy:UnknownContainerNetworkPolicy": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownContainerNetworkPolicy",
+      "file": "lib/src/models/containers/container_network_policy.dart",
+      "schema": null,
+      "parent": "ContainerNetworkPolicy",
+      "note": "Unknown request-policy JSON is recursively frozen and round-tripped."
+    },
+    "ContainerNetworkPolicyInfo": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ContainerNetworkPolicyInfo",
+      "file": "lib/src/models/containers/container_network_policy.dart",
+      "schema": null,
+      "note": "Typed inline ContainerResource.network_policy: required open string type, optional allowed_domains; no returned secrets. Exact partial/full shapes are covered in resource fixtures."
+    },
+    "CreateContainerBody": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateContainerRequest",
+      "file": "lib/src/models/containers/container_request.dart",
+      "schema": "CreateContainerBody"
+    },
+    "ContainerResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Container",
+      "file": "lib/src/models/containers/container.dart",
+      "schema": "ContainerResource",
+      "note": "Response expiration/network policy use dedicated optional-member types. No skills or secrets are invented on the response."
+    },
+    "ContainerListResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ContainerList",
+      "file": "lib/src/models/containers/container.dart",
+      "schema": "ContainerListResource",
+      "note": "first_id/last_id deliberately remain nullable for existing empty-list/provider compatibility, including omitted/null pagination IDs. Other required list fields parse strictly; see CONT-06/08 and empty-list fixtures."
+    },
+    "ContainerExpiration": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ContainerExpiration",
+      "file": "lib/src/models/containers/container.dart",
+      "schema": null,
+      "note": "Typed inline CreateContainerBody.expires_after with required anchor/minutes."
+    },
+    "ContainerExpirationInfo": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ContainerExpirationInfo",
+      "file": "lib/src/models/containers/container.dart",
+      "schema": null,
+      "note": "Typed inline ContainerResource.expires_after with independently optional anchor/minutes; valid empty/partial response objects are fixture tested."
+    },
+    "ContainerSkill": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ContainerSkill",
+      "file": "lib/src/models/containers/container_skill.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "ContainerSkillReference": "skill_reference",
+          "InlineContainerSkill": "inline"
+        }
+      },
+      "note": "Synthetic union from CreateContainerBody.skills.items; distinct from Skill resource entities."
+    },
+    "SkillReferenceParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ContainerSkillReference",
+      "file": "lib/src/models/containers/container_skill.dart",
+      "schema": "SkillReferenceParam",
+      "parent": "ContainerSkill"
+    },
+    "InlineSkillParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "InlineContainerSkill",
+      "file": "lib/src/models/containers/container_skill.dart",
+      "schema": "InlineSkillParam",
+      "parent": "ContainerSkill"
+    },
+    "ContainerSkill:UnknownContainerSkill": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownContainerSkill",
+      "file": "lib/src/models/containers/container_skill.dart",
+      "schema": null,
+      "parent": "ContainerSkill",
+      "note": "Preserves unknown future skill variants as immutable raw JSON."
+    },
+    "ContainerSkillSource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ContainerSkillSource",
+      "file": "lib/src/models/containers/container_skill.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "Base64ContainerSkillSource": "base64"
+        }
+      },
+      "note": "Known base64 ZIP source plus forward-compatible unknown source objects."
+    },
+    "InlineSkillSourceParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "Base64ContainerSkillSource",
+      "file": "lib/src/models/containers/container_skill.dart",
+      "schema": "InlineSkillSourceParam",
+      "parent": "ContainerSkillSource"
+    },
+    "ContainerSkillSource:UnknownContainerSkillSource": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownContainerSkillSource",
+      "file": "lib/src/models/containers/container_skill.dart",
+      "schema": null,
+      "parent": "ContainerSkillSource",
+      "note": "Unknown source payload preserved without exposing opaque bundle data in diagnostics."
+    },
+    "BetaContainerMemoryLimit": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ContainerMemoryLimit",
+      "file": "lib/src/models/containers/container_memory_limit.dart",
+      "schema": null,
+      "note": "Identical beta schema alias for ContainerMemoryLimit. Shares the canonical Dart implementation."
+    },
+    "BetaAutoCodeInterpreterToolParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CodeInterpreterContainerAuto",
+      "file": "lib/src/models/responses/tools/code_interpreter_container.dart",
+      "schema": "BetaAutoCodeInterpreterToolParam",
+      "parent": "CodeInterpreterContainer",
+      "note": "Identical beta schema alias for AutoCodeInterpreterToolParam. Shares the canonical Dart implementation."
+    },
+    "BetaContainerNetworkPolicyDisabledParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ContainerNetworkPolicyDisabled",
+      "file": "lib/src/models/containers/container_network_policy.dart",
+      "schema": "BetaContainerNetworkPolicyDisabledParam",
+      "parent": "ContainerNetworkPolicy",
+      "note": "Identical beta schema alias for ContainerNetworkPolicyDisabledParam. Shares the canonical Dart implementation."
+    },
+    "BetaContainerNetworkPolicyAllowlistParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ContainerNetworkPolicyAllowlist",
+      "file": "lib/src/models/containers/container_network_policy.dart",
+      "schema": "BetaContainerNetworkPolicyAllowlistParam",
+      "parent": "ContainerNetworkPolicy",
+      "note": "Identical beta schema alias for ContainerNetworkPolicyAllowlistParam. Shares the canonical Dart implementation."
+    },
+    "BetaContainerNetworkPolicyDomainSecretParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ContainerNetworkPolicyDomainSecret",
+      "file": "lib/src/models/containers/container_network_policy.dart",
+      "schema": "BetaContainerNetworkPolicyDomainSecretParam",
+      "note": "Identical beta schema alias for ContainerNetworkPolicyDomainSecretParam. Shares the canonical Dart implementation."
+    },
+    "BetaSkillReferenceParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ContainerSkillReference",
+      "file": "lib/src/models/containers/container_skill.dart",
+      "schema": "BetaSkillReferenceParam",
+      "parent": "ContainerSkill",
+      "note": "Identical beta schema alias for SkillReferenceParam. Shares the canonical Dart implementation."
+    },
+    "BetaInlineSkillParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "InlineContainerSkill",
+      "file": "lib/src/models/containers/container_skill.dart",
+      "schema": "BetaInlineSkillParam",
+      "parent": "ContainerSkill",
+      "note": "Identical beta schema alias for InlineSkillParam. Shares the canonical Dart implementation."
+    },
+    "BetaInlineSkillSourceParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "Base64ContainerSkillSource",
+      "file": "lib/src/models/containers/container_skill.dart",
+      "schema": "BetaInlineSkillSourceParam",
+      "parent": "ContainerSkillSource",
+      "note": "Identical beta schema alias for InlineSkillSourceParam. Shares the canonical Dart implementation."
     }
   }
 }

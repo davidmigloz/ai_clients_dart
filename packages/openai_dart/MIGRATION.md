@@ -6,6 +6,84 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming container configuration corrections
+
+These targeted breaking fixes align container configuration with the current API.
+The package version will be assigned by the release workflow; the minimum Dart
+SDK remains 3.12.
+
+### Replace integer memory values and allowed-host names
+
+Before:
+
+```dart
+const container = CodeInterpreterContainerAuto(
+  memoryLimit: 4096,
+  networkPolicy: ContainerNetworkPolicyAllowlist(
+    allowedHosts: ['api.example.com'],
+  ),
+);
+```
+
+After:
+
+```dart
+final container = CodeInterpreterContainerAuto(
+  memoryLimit: ContainerMemoryLimit.gb4,
+  networkPolicy: ContainerNetworkPolicyAllowlist(
+    allowedDomains: ['api.example.com'],
+  ),
+);
+```
+
+Use `gb1`, `gb4`, `gb16`, and `gb64` for the current `1g`, `4g`, `16g`, and `64g`
+wire values. Legacy 1024/4096/16384/65536 MB map to those presets. The previously
+documented 512/2048/8192/32768 sizes have no corresponding current tier; choose a
+supported tier explicitly. The open `ContainerMemoryLimit('...')` constructor
+preserves future values without silently resizing them.
+
+Allowlist JSON now uses `allowed_domains`. Update persisted old JSON and code
+using the `allowedHosts` constructor parameter/property. Positional
+`ContainerNetworkPolicy.allowlist(['api.example.com'])` calls remain valid.
+Optional `domainSecrets` use typed `ContainerNetworkPolicyDomainSecret` values.
+
+### Supply a name and handle response expiration separately
+
+`CreateContainerRequest` requires `name`. It gains optional memory, network policy,
+and typed skills. Request expiration still uses `ContainerExpiration` with required
+anchor/minutes. Returned `Container.expiresAfter` now uses
+`ContainerExpirationInfo`, whose anchor and minutes can independently be absent:
+
+```dart
+final minutes = returnedContainer.expiresAfter?.minutes;
+if (minutes != null) {
+  print('Expires after $minutes minutes of inactivity.');
+}
+```
+
+Do not pass response expiration information directly into a creation request;
+construct `ContainerExpiration` only when both required values are available.
+Returned network policy uses `ContainerNetworkPolicyInfo`; allowed domains can be
+absent and secret values are not returned.
+
+JSON parsing rejects malformed required fields, unexpected list object types,
+and expiration anchors other than `last_active_at`. Optional response expiration
+members may be omitted independently, including an empty object.
+
+### Replace const collection models and identity-based comparisons
+
+Creation requests, automatic configurations, allowlists, and container lists now
+snapshot their supplied lists, so their constructors are nonconst. Remove outer
+`const` where needed; scalar memory presets and other scalar values remain const.
+Collections are unmodifiable; replace them through `copyWith`, including empty
+lists, or clear optional fields with explicit null.
+
+Container/request/list equality now compares full values rather than only an ID,
+name, or list length. Use `container.id` explicitly when application logic needs
+identity across different snapshots of the same container.
+
+---
+
 ## Migrating from v9.x to v10.0.0
 
 v10.0.0 adds GPT Image 2.5 and custom image resolutions. `ImageSize` becomes a value class, and `ImageQuality` gains two variants; code using enum-only size APIs or exhaustive switches needs updating. The minimum Dart SDK remains 3.12.

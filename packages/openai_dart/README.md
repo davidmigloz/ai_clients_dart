@@ -189,6 +189,34 @@ Requests support 1–200 questions, 2–255 choices per choice question, 2–10 
 
 → [Full example](example/decisions_example.dart)
 
+### How do I configure an execution container?
+
+Create a standalone container with a memory tier and network policy, then pass its ID to Code Interpreter:
+
+```dart
+final container = await client.containers.create(
+  CreateContainerRequest(
+    name: 'my-container',
+    memoryLimit: ContainerMemoryLimit.gb1,
+    networkPolicy: ContainerNetworkPolicy.disabled,
+  ),
+);
+
+final tool = ResponseTool.codeInterpreter(
+  container: CodeInterpreterContainer.id(container.id),
+);
+// Use tool in a Responses request, then delete the container when finished.
+await client.containers.delete(container.id);
+```
+
+The current memory tiers are `gb1`, `gb4`, `gb16`, and `gb64`, which emit `1g`, `4g`, `16g`, and `64g`. Automatic containers accept the same configuration through `CodeInterpreterContainer.auto(...)`. An allowlist uses `ContainerNetworkPolicy.allowlist(['api.example.com'], domainSecrets: [...])`, with typed `ContainerNetworkPolicyDomainSecret` entries. Secret values are redacted in model diagnostics.
+
+Standalone creation also supports `ContainerSkill.reference(skillId: ..., version: 'latest')` and inline skills whose `ContainerSkillSource.base64(data: ...)` contains an already encoded ZIP bundle. Returned memory/network settings and expiration members can be absent; check them before use. Filter listing with `client.containers.list(name: 'my-container')`.
+
+See the [migration guide](MIGRATION.md#upcoming-container-configuration-corrections) for changes to integer memory values, `allowedHosts`, required names, response expiration, and const construction.
+
+→ [Full example](example/containers_example.dart)
+
 ### How do I create a response?
 
 <details>
@@ -838,7 +866,7 @@ See the [example/](example/) directory for complete examples:
 | [`audio_example.dart`](example/audio_example.dart) | Text-to-speech and transcription |
 | [`files_example.dart`](example/files_example.dart) | File upload and management |
 | [`conversations_example.dart`](example/conversations_example.dart) | Conversations API for state management |
-| [`containers_example.dart`](example/containers_example.dart) | Containers for isolated execution |
+| [`containers_example.dart`](example/containers_example.dart) | Container memory/network configuration, Code Interpreter IDs, and files |
 | [`chatkit_example.dart`](example/chatkit_example.dart) | ChatKit sessions and threads |
 | [`assistants_example.dart`](example/assistants_example.dart) | Assistants API (deprecated) |
 | [`evals_example.dart`](example/evals_example.dart) | Model evaluation and testing |
@@ -875,7 +903,7 @@ See the [example/](example/) directory for complete examples:
 | Fine-tuning | Supported; some job/grader/checkpoint operations pending |
 | Evals | ✅ Full |
 | Conversations | ✅ Full |
-| Containers | HTTP operations supported; configuration fields pending |
+| Containers | Supported with memory, network policies/domain secrets, and skill configuration |
 | Content Provenance Checks | ✅ Full |
 | ChatKit Beta | ✅ Full |
 | Realtime | ✅ Full (separate import) |

@@ -1,7 +1,7 @@
 # OpenAI API alignment
 
-Planning started October 7, 2026. Status: Decisions implemented and reviewed;
-remaining milestones are planned.
+Planning started October 7, 2026. Status: Decisions merged; Phase 2 specified
+and ticketed, with container configuration implemented and independently reviewed.
 
 Tracking parent: [GitHub issue #317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 This parent records planning progress; it is not an implementation ticket.
@@ -69,9 +69,32 @@ shared cache-write usage enhancement.
 Decisions implementation and both independent reviews are complete. The package
 unit suite passes (1,783 tests, two existing skips), and analysis is clean. The
 subsequently authorized live Decisions smoke test also passed with one request
-(387 input tokens, estimated $0.0000387). The GitHub ticket remains open for
-merge. The confirmed general policy permits
+(387 input tokens, estimated $0.0000387). [PR #319](https://github.com/davidmigloz/ai_clients_dart/pull/319)
+merged after all CI checks passed, closing #318. The confirmed general policy permits
 targeted breaking fixes with migration guidance; this first feature is additive.
+
+## Phase 2
+
+The [existing API correctness specification](correctness.md) records the next
+independently usable slices, source discrepancies, compatibility decisions, and
+acceptance boundaries. [Container configuration](containers.md) is first, tracked
+by the [repository ticket](tickets/02-container-configuration.md). Cache retention,
+cache diagnostics/controls, Chat usage/obfuscation, Chat audio, retry guidance, and
+image model requiredness follow as separate tickets.
+
+| Ticket | Independently usable outcome | Dependency |
+| --- | --- | --- |
+| [#320](https://github.com/davidmigloz/ai_clients_dart/issues/320) | Correct container memory/network configuration, secrets, skills, and returned settings | None; implemented and reviewed |
+| [#321](https://github.com/davidmigloz/ai_clients_dart/issues/321) | Emit the canonical cache-retention wire value | None |
+| [#322](https://github.com/davidmigloz/ai_clients_dart/issues/322) | Configure cache controls and inspect diagnostics | #321 |
+| [#323](https://github.com/davidmigloz/ai_clients_dart/issues/323) | Preserve Chat token details and stream obfuscation | None |
+| [#324](https://github.com/davidmigloz/ai_clients_dart/issues/324) | Preserve complete and streamed Chat audio | None |
+| [#325](https://github.com/davidmigloz/ai_clients_dart/issues/325) | Honor retry hints and stop replaying permanent quota failures | None |
+| [#326](https://github.com/davidmigloz/ai_clients_dart/issues/326) | Require explicit model selection where the image API requires it | None |
+
+Container [acceptance evidence and independent reviews](reviews/02-container-configuration.md)
+record the 1,841 passing unit tests, clean analysis, bounded live lifecycle, resolved
+findings, migration, and deliberately visible toolkit diagnostics.
 
 ## Proposed roadmap
 
@@ -112,10 +135,11 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
 
 ### Existing API correctness and Responses
 
-- Code-interpreter container `memory_limit` currently serializes integer MB;
-  the API expects `1g`, `4g`, `16g`, or `64g`. The allowlist key is
-  `allowed_domains`, not the current `allowed_hosts`; domain secrets are absent.
-- Container creation/response fields omit memory/network/skills configuration.
+- Resolved in [#320](https://github.com/davidmigloz/ai_clients_dart/issues/320),
+  awaiting merge: shared Code Interpreter/container memory now emits `1g`, `4g`,
+  `16g`, or `64g`, and allowlists emit `allowed_domains` with typed domain secrets.
+- Resolved in #320, awaiting merge: standalone creation supports memory/network/
+  skills configuration and responses preserve their supported returned settings.
 - Request cache options omit `comparison_response_id` and `prewarm`; response
   options/diagnostics omit related metadata. Shared Responses
   `cache_write_tokens` usage is implemented with Decisions in #318.
