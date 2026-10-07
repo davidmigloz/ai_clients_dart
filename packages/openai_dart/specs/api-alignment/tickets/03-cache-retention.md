@@ -43,5 +43,7 @@ Implemented on `fix/openai-cache-retention`. All acceptance criteria are verifie
 The [review and acceptance evidence](../reviews/03-cache-retention.md) records
 1,872 passing unit tests, two existing skips, clean analysis, public GA/beta
 fixtures, and both independent reviews. Wider toolkit diagnostics remain visible;
-there are no retention findings. No live API calls or package release were made.
+there are no retention errors/warnings or new diagnostics. Two existing
+informational String-versus-enum suggestions are recorded in the evidence.
+No live API calls or package release were made.
 Issue #321 remains open until its implementation PR merges.

@@ -42,7 +42,7 @@ accurate model guidance: the GPT-5.5 example selects `24h`, rather than unsuppor
 | `dart test --reporter=failures-only test/unit/` | 1,872 passed, two existing environment-dependent skips |
 | Initial affected-model/public-fixture suite | 492 passed before beta and final parsed-null additions |
 | Final focused public resource fixtures | 27 passed, including four beta-compaction variants |
-| Toolkit `verify --checks all --scope all` | Exports/docs/README pass; no retention findings |
+| Toolkit `verify --checks all --scope all` | Exports/docs/README pass; no new retention diagnostics or retention errors/warnings |
 | `generate-llms-txt` | Refreshed descriptions and token estimates |
 | `git diff --check` | Passed |
 
@@ -84,8 +84,11 @@ CACHE-005 findings remain unresolved.
 ## Wider diagnostics and boundaries
 
 Toolkit output remains at the container baseline: 21 implementation errors,
-four implementation warnings, 86 infos, and one consistency warning. None concerns
-retention. The report still exposes missing API families, existing cache/usage/
+four implementation warnings, 86 infos, and one consistency warning. Two unchanged
+infos suggest String instead of the typed retention enum on Chat requests and
+Response echoes; exact fixtures validate the deliberate enum mapping. There are
+no retention errors/warnings or new retention diagnostics. The report still
+exposes missing API families, existing cache/usage/
 image gaps, and two intentional nullable container-pagination exceptions; see
 [container evidence](02-container-configuration.md). No new exclusions were added.
 
