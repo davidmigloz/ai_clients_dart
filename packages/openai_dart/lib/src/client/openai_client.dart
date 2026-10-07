@@ -370,7 +370,7 @@ class OpenAIClient {
 
   ImagesResource? _images;
 
-  /// Images resource (DALL-E).
+  /// Images resource (GPT image models).
   ///
   /// Use this for image generation, editing, and variations.
   ///
@@ -379,12 +379,12 @@ class OpenAIClient {
   /// ```dart
   /// final response = await client.images.generate(
   ///   ImageGenerationRequest(
-  ///     model: 'dall-e-3',
+  ///     model: ImageModels.gptImage25Flare,
   ///     prompt: 'A white cat wearing a top hat',
   ///     size: ImageSize.size1024x1024,
   ///   ),
   /// );
-  /// print('Image URL: ${response.data.first.url}');
+  /// print('Base64 image: ${response.data.first.b64Json?.length} chars');
   /// ```
   ImagesResource get images => _images ??= ImagesResource(
     config: config,

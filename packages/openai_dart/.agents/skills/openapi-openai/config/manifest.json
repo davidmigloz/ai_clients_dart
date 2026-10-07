@@ -591,7 +591,8 @@
       "kind": "object",
       "dart_class": "ImageGenerationRequest",
       "file": "lib/src/models/images/image_request.dart",
-      "schema": "CreateImageRequest"
+      "schema": "CreateImageRequest",
+      "note": "Generation requires explicit nonnull model/prompt; arbitrary IDs retained, no client default. Full model and public generate/generateStream fixtures verify canonical JSON and copy/value contracts."
     },
     "CreateSpeechRequest": {
       "spec": "main",
@@ -2804,6 +2805,22 @@
       "file": "lib/src/models/chat/chat_audio.dart",
       "schema": null,
       "note": "Inline optional-nonnull ChatCompletionStreamResponseDelta.audio object: all four known members independently optional-nonnull; empty object and empty strings retained. Strict parsing follows canonical, while Python generated Optional typing is more permissive."
+    },
+    "CreateImageEditRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ImageEditRequest",
+      "file": "lib/src/models/images/image_request.dart",
+      "schema": "CreateImageEditRequest",
+      "note": "Multipart edit requires explicit nonnull model/image/prompt. Serialization lives in ImagesResource, not invented JSON bytes/fromJson methods. Uint8List source/mask use byte-content value contracts, with caller ownership preserved. Filenames and legacy moderation extension are existing Dart extras; representation limitations and wider diagnostics remain visible."
+    },
+    "EditImageBodyJsonParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ImageEditJsonRequest",
+      "file": "lib/src/models/images/image_edit_json_request.dart",
+      "schema": "EditImageBodyJsonParam",
+      "note": "Distinct JSON edit contract: optional nullable model is omitted when null, retaining documented server default gpt-image-2.5-sunburst; public editJson/editJsonStream fixtures verify omission and arbitrary explicit IDs. Existing missing copy/value/diagnostic methods remain a separate parity gap; no model behavior changed in this slice."
     }
   }
 }

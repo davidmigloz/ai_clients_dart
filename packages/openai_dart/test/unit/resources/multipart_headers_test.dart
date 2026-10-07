@@ -249,6 +249,7 @@ void main() {
           image: Uint8List.fromList([1, 2, 3, 4]),
           imageFilename: 'image.png',
           prompt: 'Add a hat',
+          model: 'fixture-model',
         ),
       );
 

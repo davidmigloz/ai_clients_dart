@@ -397,11 +397,9 @@ class ImagesResource extends ResourceBase with StreamingResource {
 
     // Add required fields
     httpRequest.fields['prompt'] = request.prompt;
+    httpRequest.fields['model'] = request.model;
 
     // Add optional fields
-    if (request.model != null) {
-      httpRequest.fields['model'] = request.model!;
-    }
     if (request.n != null) {
       httpRequest.fields['n'] = request.n.toString();
     }

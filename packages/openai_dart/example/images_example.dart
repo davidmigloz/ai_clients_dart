@@ -1,6 +1,9 @@
 // ignore_for_file: avoid_print
 /// Example demonstrating GPT Image 2.5 generation and editing.
 ///
+/// Generation and multipart editing require an explicit model. JSON editing
+/// permits omission; see image_model_selection_example.dart for a local demo.
+/// This example makes paid image requests when run with OPENAI_API_KEY.
 /// Run with: dart run example/images_example.dart
 library;
 

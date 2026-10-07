@@ -6,10 +6,13 @@ import 'package:test/test.dart';
 void main() {
   group('ImageGenerationRequest', () {
     test('creates with minimal parameters', () {
-      const request = ImageGenerationRequest(prompt: 'A beautiful sunset');
+      const request = ImageGenerationRequest(
+        prompt: 'A beautiful sunset',
+        model: 'fixture-model',
+      );
 
       expect(request.prompt, 'A beautiful sunset');
-      expect(request.model, isNull);
+      expect(request.model, 'fixture-model');
       expect(request.n, isNull);
     });
 
@@ -48,12 +51,15 @@ void main() {
     });
 
     test('toJson excludes null values', () {
-      const request = ImageGenerationRequest(prompt: 'Simple prompt');
+      const request = ImageGenerationRequest(
+        prompt: 'Simple prompt',
+        model: 'fixture-model',
+      );
 
       final json = request.toJson();
 
       expect(json['prompt'], 'Simple prompt');
-      expect(json.containsKey('model'), false);
+      expect(json['model'], 'fixture-model');
       expect(json.containsKey('n'), false);
       expect(json.containsKey('quality'), false);
     });
@@ -129,7 +135,10 @@ void main() {
     });
 
     test('omits new fields when unset', () {
-      const request = ImageGenerationRequest(prompt: 'plain');
+      const request = ImageGenerationRequest(
+        prompt: 'plain',
+        model: 'fixture-model',
+      );
       final json = request.toJson();
       for (final key in const [
         'background',
@@ -146,16 +155,19 @@ void main() {
     test('equality includes all fields', () {
       const a = ImageGenerationRequest(
         prompt: 'p',
+        model: 'fixture-model',
         background: ImageBackground.transparent,
         outputFormat: ImageOutputFormat.webp,
       );
       const b = ImageGenerationRequest(
         prompt: 'p',
+        model: 'fixture-model',
         background: ImageBackground.transparent,
         outputFormat: ImageOutputFormat.webp,
       );
       const c = ImageGenerationRequest(
         prompt: 'p',
+        model: 'fixture-model',
         background: ImageBackground.opaque,
         outputFormat: ImageOutputFormat.webp,
       );
@@ -170,6 +182,7 @@ void main() {
 
     test('copyWith overrides specified fields only', () {
       final original = ImageEditRequest(
+        model: 'fixture-model',
         image: imageBytes,
         imageFilename: 'a.png',
         prompt: 'p',
@@ -188,12 +201,14 @@ void main() {
 
     test('== distinguishes requests that differ only in maskFilename', () {
       final a = ImageEditRequest(
+        model: 'fixture-model',
         image: imageBytes,
         imageFilename: 'a.png',
         prompt: 'p',
         maskFilename: 'maskA.png',
       );
       final b = ImageEditRequest(
+        model: 'fixture-model',
         image: imageBytes,
         imageFilename: 'a.png',
         prompt: 'p',

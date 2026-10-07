@@ -3,11 +3,14 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
+import '../common/json_helpers.dart';
 import 'image_common.dart';
 
 /// A request to generate images from a text prompt.
 ///
-/// Supports DALL-E and GPT image models (including GPT Image 2.5).
+/// Supports GPT image models (including GPT Image 2.5) and legacy identifiers.
+/// DALL-E 2/3 retired May 12, 2026; legacy parameters remain for compatibility.
 ///
 /// ## Example
 ///
@@ -25,7 +28,7 @@ class ImageGenerationRequest {
   /// Creates an [ImageGenerationRequest].
   const ImageGenerationRequest({
     required this.prompt,
-    this.model,
+    required this.model,
     this.n,
     this.quality,
     this.responseFormat,
@@ -43,8 +46,11 @@ class ImageGenerationRequest {
   /// Creates an [ImageGenerationRequest] from JSON.
   factory ImageGenerationRequest.fromJson(Map<String, dynamic> json) {
     return ImageGenerationRequest(
-      prompt: json['prompt'] as String,
-      model: json['model'] as String?,
+      prompt: requireJsonString(
+        json['prompt'],
+        'ImageGenerationRequest.prompt',
+      ),
+      model: requireJsonString(json['model'], 'ImageGenerationRequest.model'),
       n: json['n'] as int?,
       quality: json['quality'] != null
           ? ImageQuality.fromJson(json['quality'] as String)
@@ -90,8 +96,8 @@ class ImageGenerationRequest {
   /// - Their `2026-09-08` snapshots
   /// - `gpt-image-2` and its `2026-04-21` snapshot
   /// - `gpt-image-1.5`, `gpt-image-1`, `gpt-image-1-mini`
-  /// - `dall-e-3`, `dall-e-2`
-  final String? model;
+  /// - `dall-e-3`, `dall-e-2` (legacy identifiers; retired May 12, 2026)
+  final String model;
 
   /// The number of images to generate.
   ///
@@ -158,7 +164,7 @@ class ImageGenerationRequest {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'prompt': prompt,
-    if (model != null) 'model': model,
+    'model': model,
     if (n != null) 'n': n,
     if (quality != null) 'quality': quality!.toJson(),
     if (responseFormat != null) 'response_format': responseFormat!.toJson(),
@@ -175,10 +181,11 @@ class ImageGenerationRequest {
 
   /// Creates a copy with the given fields replaced.
   ///
-  /// Nullable fields can be explicitly set to `null` to clear them.
+  /// Nullable fields can be explicitly set to `null` to clear them. Required
+  /// `prompt` and `model` retain their current values when omitted or null.
   ImageGenerationRequest copyWith({
     String? prompt,
-    Object? model = unsetCopyWithValue,
+    String? model,
     Object? n = unsetCopyWithValue,
     Object? quality = unsetCopyWithValue,
     Object? responseFormat = unsetCopyWithValue,
@@ -194,7 +201,7 @@ class ImageGenerationRequest {
   }) {
     return ImageGenerationRequest(
       prompt: prompt ?? this.prompt,
-      model: model == unsetCopyWithValue ? this.model : model as String?,
+      model: model ?? this.model,
       n: n == unsetCopyWithValue ? this.n : n as int?,
       quality: quality == unsetCopyWithValue
           ? this.quality
@@ -266,7 +273,7 @@ class ImageGenerationRequest {
   String toString() =>
       'ImageGenerationRequest(prompt: ${prompt.length} chars, model: $model, '
       'n: $n, size: $size, quality: $quality, responseFormat: $responseFormat, '
-      'style: $style, user: $user, background: $background, '
+      'style: $style, user: ${user == null ? 'null' : '[REDACTED]'}, background: $background, '
       'moderation: $moderation, outputFormat: $outputFormat, '
       'outputCompression: $outputCompression, stream: $stream, '
       'partialImages: $partialImages)';
@@ -298,7 +305,7 @@ class ImageEditRequest {
     required this.prompt,
     this.mask,
     this.maskFilename,
-    this.model,
+    required this.model,
     this.n,
     this.size,
     this.responseFormat,
@@ -339,7 +346,7 @@ class ImageEditRequest {
   ///
   /// Examples: `gpt-image-2.5-sunburst`, `gpt-image-2.5-flare`, their
   /// `2026-09-08` snapshots, and `gpt-image-2`.
-  final String? model;
+  final String model;
 
   /// The number of images to generate.
   final int? n;
@@ -383,7 +390,7 @@ class ImageEditRequest {
   /// Creates a copy with the given fields replaced.
   ///
   /// Nullable fields can be explicitly set to `null` to clear them. The
-  /// required `image`, `imageFilename`, and `prompt` are passed through
+  /// required `image`, `imageFilename`, `prompt`, and `model` are passed through
   /// unchanged unless explicitly overridden.
   ImageEditRequest copyWith({
     Uint8List? image,
@@ -391,7 +398,7 @@ class ImageEditRequest {
     String? prompt,
     Object? mask = unsetCopyWithValue,
     Object? maskFilename = unsetCopyWithValue,
-    Object? model = unsetCopyWithValue,
+    String? model,
     Object? n = unsetCopyWithValue,
     Object? size = unsetCopyWithValue,
     Object? responseFormat = unsetCopyWithValue,
@@ -413,7 +420,7 @@ class ImageEditRequest {
       maskFilename: maskFilename == unsetCopyWithValue
           ? this.maskFilename
           : maskFilename as String?,
-      model: model == unsetCopyWithValue ? this.model : model as String?,
+      model: model ?? this.model,
       n: n == unsetCopyWithValue ? this.n : n as int?,
       size: size == unsetCopyWithValue ? this.size : size as ImageSize?,
       responseFormat: responseFormat == unsetCopyWithValue
@@ -450,7 +457,9 @@ class ImageEditRequest {
       identical(this, other) ||
       other is ImageEditRequest &&
           runtimeType == other.runtimeType &&
+          listsEqual(image, other.image) &&
           imageFilename == other.imageFilename &&
+          listsEqual(mask, other.mask) &&
           maskFilename == other.maskFilename &&
           prompt == other.prompt &&
           model == other.model &&
@@ -469,7 +478,9 @@ class ImageEditRequest {
 
   @override
   int get hashCode => Object.hash(
+    listHash(image),
     imageFilename,
+    listHash(mask),
     maskFilename,
     prompt,
     model,
@@ -489,8 +500,14 @@ class ImageEditRequest {
 
   @override
   String toString() =>
-      'ImageEditRequest(image: $imageFilename, prompt: ${prompt.length} chars, '
-      'model: $model, inputFidelity: $inputFidelity, quality: $quality)';
+      'ImageEditRequest(image: ${image.length} bytes, imageFilename: ${imageFilename.length} chars, '
+      'prompt: ${prompt.length} chars, mask: ${mask == null ? 'null' : '${mask!.length} bytes'}, '
+      'maskFilename: ${maskFilename == null ? 'null' : '${maskFilename!.length} chars'}, '
+      'model: $model, n: $n, size: $size, responseFormat: $responseFormat, '
+      'user: ${user == null ? 'null' : '[REDACTED]'}, background: $background, '
+      'inputFidelity: $inputFidelity, quality: $quality, outputFormat: $outputFormat, '
+      'outputCompression: $outputCompression, moderation: $moderation, '
+      'stream: $stream, partialImages: $partialImages)';
 }
 
 /// A request to create variations of an image.
