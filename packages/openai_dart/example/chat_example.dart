@@ -19,6 +19,8 @@ Future<void> main() async {
         model: 'gpt-5.5',
         messages: [ChatMessage.user('What is the capital of France?')],
         maxTokens: 100,
+        // Existing legacy retention control; GPT-5.5 supports 24h only.
+        promptCacheRetention: PromptCacheRetention.h24,
       ),
     );
 

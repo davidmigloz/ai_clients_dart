@@ -1,10 +1,13 @@
 /// The retention policy for prompt cache entries.
+///
+/// Used by the existing `prompt_cache_retention` API control, which is deprecated
+/// in favor of `prompt_cache_options.ttl`.
 enum PromptCacheRetention {
   /// Unknown retention (fallback for unrecognized values).
   unknown('unknown'),
 
-  /// In-memory cache (cleared when the server restarts).
-  inMemory('in-memory'),
+  /// Standard in-memory cache retention.
+  inMemory('in_memory'),
 
   /// 24-hour cache retention.
   ///
@@ -18,7 +21,11 @@ enum PromptCacheRetention {
   const PromptCacheRetention(this.value);
 
   /// Creates a [PromptCacheRetention] from a JSON value.
+  ///
+  /// Accepts the legacy `in-memory` spelling for saved/provider payloads;
+  /// serialization always emits the canonical `in_memory` spelling.
   factory PromptCacheRetention.fromJson(String json) {
+    if (json == 'in-memory') return PromptCacheRetention.inMemory;
     return PromptCacheRetention.values.firstWhere(
       (e) => e.value == json,
       orElse: () => PromptCacheRetention.unknown,

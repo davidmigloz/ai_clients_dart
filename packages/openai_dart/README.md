@@ -253,6 +253,8 @@ client.close();
 
 Use `client.chat.completions.create(...)` for multi-turn conversations. The `response.text` convenience getter returns the first choice's message content.
 
+The API's existing `promptCacheRetention` setting is deprecated in favor of `prompt_cache_options.ttl`; cache-options alignment is tracked in [#322](https://github.com/davidmigloz/ai_clients_dart/issues/322). For the existing control, `PromptCacheRetention.h24` emits `24h`, while `inMemory` emits the canonical `in_memory`. GPT-5.5 and newer models support only `h24`; select `inMemory` only for models that support it. Legacy `in-memory` JSON still parses, and reserialization uses `in_memory`.
+
 ```dart
 import 'package:openai_dart/openai_dart.dart';
 
@@ -266,6 +268,7 @@ final response = await client.chat.completions.create(
       ChatMessage.user('What is the capital of France?'),
     ],
     maxTokens: 100,
+    promptCacheRetention: PromptCacheRetention.h24,
   ),
 );
 
@@ -854,7 +857,7 @@ See the [example/](example/) directory for complete examples:
 
 | Example | Description |
 |---------|-------------|
-| [`chat_example.dart`](example/chat_example.dart) | Basic chat completions with multi-turn conversations |
+| [`chat_example.dart`](example/chat_example.dart) | Chat completions, multi-turn conversations, and legacy cache retention |
 | [`streaming_example.dart`](example/streaming_example.dart) | Streaming responses with text deltas |
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Function calling with tool definitions |
 | [`vision_example.dart`](example/vision_example.dart) | Image analysis with vision models |

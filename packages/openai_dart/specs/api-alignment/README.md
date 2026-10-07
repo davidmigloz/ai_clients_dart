@@ -1,7 +1,7 @@
 # OpenAI API alignment
 
-Planning started October 7, 2026. Status: Decisions merged; Phase 2 specified
-and ticketed, with container configuration implemented and independently reviewed.
+Planning started October 7, 2026. Status: Decisions and container configuration
+merged; Phase 2 is specified and ticketed, with cache retention implemented and reviewed.
 
 Tracking parent: [GitHub issue #317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 This parent records planning progress; it is not an implementation ticket.
@@ -84,8 +84,8 @@ image model requiredness follow as separate tickets.
 
 | Ticket | Independently usable outcome | Dependency |
 | --- | --- | --- |
-| [#320](https://github.com/davidmigloz/ai_clients_dart/issues/320) | Correct container memory/network configuration, secrets, skills, and returned settings | None; implemented and reviewed |
-| [#321](https://github.com/davidmigloz/ai_clients_dart/issues/321) | Emit the canonical cache-retention wire value | None |
+| [#320](https://github.com/davidmigloz/ai_clients_dart/issues/320) | Correct container memory/network configuration, secrets, skills, and returned settings | Merged in #327 |
+| [#321](https://github.com/davidmigloz/ai_clients_dart/issues/321) | Emit the canonical cache-retention wire value | None; implemented and reviewed |
 | [#322](https://github.com/davidmigloz/ai_clients_dart/issues/322) | Configure cache controls and inspect diagnostics | #321 |
 | [#323](https://github.com/davidmigloz/ai_clients_dart/issues/323) | Preserve Chat token details and stream obfuscation | None |
 | [#324](https://github.com/davidmigloz/ai_clients_dart/issues/324) | Preserve complete and streamed Chat audio | None |
@@ -95,6 +95,13 @@ image model requiredness follow as separate tickets.
 Container [acceptance evidence and independent reviews](reviews/02-container-configuration.md)
 record the 1,841 passing unit tests, clean analysis, bounded live lifecycle, resolved
 findings, migration, and deliberately visible toolkit diagnostics.
+Container [PR #327](https://github.com/davidmigloz/ai_clients_dart/pull/327) merged
+after all CI checks passed, closing #320.
+
+Cache-retention [acceptance evidence and independent reviews](reviews/03-cache-retention.md)
+record 1,872 passing unit tests, clean analysis, canonical/legacy compatibility,
+public request/response fixtures, and the separate Chat equality correction
+required by #322.
 
 ## Proposed roadmap
 
@@ -135,10 +142,10 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
 
 ### Existing API correctness and Responses
 
-- Resolved in [#320](https://github.com/davidmigloz/ai_clients_dart/issues/320),
-  awaiting merge: shared Code Interpreter/container memory now emits `1g`, `4g`,
+- Merged in [#327](https://github.com/davidmigloz/ai_clients_dart/pull/327):
+  shared Code Interpreter/container memory now emits `1g`, `4g`,
   `16g`, or `64g`, and allowlists emit `allowed_domains` with typed domain secrets.
-- Resolved in #320, awaiting merge: standalone creation supports memory/network/
+- Merged in #327: standalone creation supports memory/network/
   skills configuration and responses preserve their supported returned settings.
 - Request cache options omit `comparison_response_id` and `prewarm`; response
   options/diagnostics omit related metadata. Shared Responses

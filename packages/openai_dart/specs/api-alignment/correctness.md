@@ -1,7 +1,9 @@
 # Existing API correctness: Phase 2 specification
 
-Status: source audit complete; container implementation is independently reviewed
-and awaiting merge. Parent
+Status: source audit complete; containers merged in
+[PR #327](https://github.com/davidmigloz/ai_clients_dart/pull/327), closing #320.
+Cache retention is implemented and independently reviewed; its
+[acceptance evidence](reviews/03-cache-retention.md) is recorded. Parent
 [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Decisions was merged in [#319](https://github.com/davidmigloz/ai_clients_dart/pull/319)
 after all CI checks passed, closing #318.
@@ -56,6 +58,10 @@ in the parent roadmap.
 - **CACHE-004:** Chat gets optional `prompt_cache_options` using only mode/TTL.
   Parse/serialize/copy-clear the nested object, including `{}`, through both
   ordinary and streamed requests. Responses-only controls do not leak into Chat.
+  When adding this field, complete Chat request equality/hash over all existing
+  fields as well as the new field. The CACHE-005 audit found that the current
+  request compares only model/messages, including when retention differs; do not
+  introduce another partial equality contract.
 - **CACHE-005:** `PromptCacheRetention.inMemory` emits `in_memory`. Accept both
   underscore and legacy `in-memory` input; keep `24h` and existing unknown fallback.
   Remove stale manifest/endpoint spelling exceptions. Enum names remain stable;

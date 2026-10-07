@@ -16,6 +16,8 @@ Configure Responses cache prewarm/comparison, inspect typed cache diagnostics, a
 - [ ] Implement every observable requirement in CACHE-001–004, CACHE-006 through the public API.
 - [ ] GA/beta ordinary and stream request fixtures; all diagnostic variants/reasons; false/zero/empty/omitted/null; comparison echo; immutable unknown payloads.
 - [ ] Changed models have complete serialization/copy/equality/hash/diagnostic contracts and nullable-clear semantics.
+- [ ] Complete Chat request equality/hash over every existing field when adding
+  cache options; regression fixtures include differing retention and nullable clearing.
 - [ ] Public wiring, exports/manifest, examples/docs, and required migration guidance are complete.
 - [ ] Format/fix/analyze, package unit tests, applicable toolkit checks, and independent requirements/standards reviews have recorded evidence; validated findings are resolved.
 

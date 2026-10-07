@@ -26,10 +26,9 @@ class CompactResponseRequest {
 
   /// Optional prompt cache retention policy.
   ///
-  /// The compact endpoint serializes this as `'in_memory'` (underscore) or
-  /// `'24h'`. Note that this differs from the chat/responses surface, which
-  /// uses `'in-memory'` (hyphen) for the same logical value; both spellings
-  /// are accepted on read.
+  /// Serializes as `in_memory` or `24h`, like the shared retention enum.
+  /// Legacy `in-memory` input remains accepted when reading JSON.
+  /// The API deprecates this control in favor of `prompt_cache_options.ttl`.
   final PromptCacheRetention? promptCacheRetention;
 
   /// Options for prompt caching.
@@ -64,12 +63,11 @@ class CompactResponseRequest {
       previousResponseId: json['previous_response_id'] as String?,
       instructions: json['instructions'] as String?,
       promptCacheKey: json['prompt_cache_key'] as String?,
-      promptCacheRetention: switch (json['prompt_cache_retention'] as String?) {
-        null => null,
-        'in_memory' || 'in-memory' => PromptCacheRetention.inMemory,
-        '24h' => PromptCacheRetention.h24,
-        _ => PromptCacheRetention.unknown,
-      },
+      promptCacheRetention: json['prompt_cache_retention'] != null
+          ? PromptCacheRetention.fromJson(
+              json['prompt_cache_retention'] as String,
+            )
+          : null,
       promptCacheOptions: json['prompt_cache_options'] != null
           ? PromptCacheOptionsParam.fromJson(
               json['prompt_cache_options'] as Map<String, dynamic>,
@@ -89,11 +87,7 @@ class CompactResponseRequest {
     if (instructions != null) 'instructions': instructions,
     if (promptCacheKey != null) 'prompt_cache_key': promptCacheKey,
     if (promptCacheRetention != null)
-      'prompt_cache_retention': switch (promptCacheRetention!) {
-        PromptCacheRetention.inMemory => 'in_memory',
-        PromptCacheRetention.h24 => '24h',
-        PromptCacheRetention.unknown => 'unknown',
-      },
+      'prompt_cache_retention': promptCacheRetention!.toJson(),
     if (promptCacheOptions != null)
       'prompt_cache_options': promptCacheOptions!.toJson(),
     if (serviceTier != null) 'service_tier': serviceTier!.toJson(),

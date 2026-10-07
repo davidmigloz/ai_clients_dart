@@ -1806,14 +1806,12 @@
     },
     "PromptCacheRetentionEnum": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "enum",
       "dart_class": "PromptCacheRetention",
       "file": "lib/src/models/responses/config/prompt_cache_retention.dart",
       "schema": "PromptCacheRetentionEnum",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Spec inconsistency: this named enum uses 'in_memory' (underscore) but the inline ModelResponseProperties.prompt_cache_retention used by chat/responses still uses 'in-memory' (hyphen). The Dart PromptCacheRetention enum maps inMemory -> 'in-memory'; CompactResponseRequest serializes/deserializes 'in_memory' explicitly to bridge the gap. Marked skip to avoid verifier flagging the value mismatch."
+      "tags": [],
+      "note": "Canonical underscore wire spelling; the shared parser also accepts legacy hyphen input. Unknown values retain the existing unknown fallback."
     },
     "CompactResponseMethodPublicBody": {
       "spec": "main",
@@ -2568,6 +2566,15 @@
       "schema": "BetaInlineSkillSourceParam",
       "parent": "ContainerSkillSource",
       "note": "Identical beta schema alias for InlineSkillSourceParam. Shares the canonical Dart implementation."
+    },
+    "BetaPromptCacheRetentionEnum": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "PromptCacheRetention",
+      "file": "lib/src/models/responses/config/prompt_cache_retention.dart",
+      "schema": "BetaPromptCacheRetentionEnum",
+      "tags": [],
+      "note": "Identical canonical/beta contract; shares PromptCacheRetention, including legacy input compatibility and unknown fallback."
     }
   }
 }
