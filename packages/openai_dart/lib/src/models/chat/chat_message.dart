@@ -2,6 +2,8 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import '../common/json_helpers.dart';
+import 'chat_audio.dart';
 import 'content_part.dart';
 import 'reasoning_detail.dart';
 import 'tool_call.dart';
@@ -78,11 +80,13 @@ sealed class ChatMessage {
     String? name,
     String? refusal,
     List<ToolCall>? toolCalls,
+    ChatAudio? audio,
   }) => AssistantMessage(
     content: content,
     name: name,
     refusal: refusal,
     toolCalls: toolCalls,
+    audio: audio,
   );
 
   /// Creates a tool message with the result of a tool call.
@@ -317,6 +321,7 @@ class UserMessage extends ChatMessage {
 /// - Text content
 /// - Tool/function calls
 /// - A refusal message
+/// - Complete audio or an audio reference for conversation replay
 /// - Reasoning content (for models that support reasoning like DeepSeek R1)
 ///
 /// ## Example
@@ -337,10 +342,37 @@ class AssistantMessage extends ChatMessage {
     this.reasoningContent,
     this.reasoning,
     this.reasoningDetails,
+    this.audio,
   });
 
   /// Creates an [AssistantMessage] from JSON.
   factory AssistantMessage.fromJson(Map<String, dynamic> json) {
+    return AssistantMessage._fromJson(json, response: false);
+  }
+
+  /// Creates a response message, requiring complete audio when supplied.
+  ///
+  /// An absent or null audio member is accepted. A nonnull response audio
+  /// object must contain id, data, transcript, and expiry.
+  factory AssistantMessage.fromResponseJson(Map<String, dynamic> json) {
+    return AssistantMessage._fromJson(json, response: true);
+  }
+
+  factory AssistantMessage._fromJson(
+    Map<String, dynamic> json, {
+    required bool response,
+  }) {
+    ChatAudio? audio;
+    if (json['audio'] != null) {
+      final raw = requireJsonObject(json['audio'], 'AssistantMessage.audio');
+      try {
+        audio = response
+            ? ChatCompletionAudio.fromJson(raw)
+            : ChatAudio.fromJson(raw);
+      } on FormatException catch (error) {
+        throw FormatException('AssistantMessage.audio: ${error.message}');
+      }
+    }
     return AssistantMessage(
       content: json['content'] as String?,
       name: json['name'] as String?,
@@ -348,6 +380,7 @@ class AssistantMessage extends ChatMessage {
       toolCalls: (json['tool_calls'] as List<dynamic>?)
           ?.map((e) => ToolCall.fromJson(e as Map<String, dynamic>))
           .toList(),
+      audio: audio,
       // Reasoning fields for OpenRouter/DeepSeek compatibility
       reasoningContent: json['reasoning_content'] as String?,
       reasoning: json['reasoning'] as String?,
@@ -387,6 +420,12 @@ class AssistantMessage extends ChatMessage {
   /// details including summaries, text, and encrypted data.
   final List<ReasoningDetail>? reasoningDetails;
 
+  /// Complete generated audio or an ID-only reference for later replay.
+  ///
+  /// Response parsing requires [ChatCompletionAudio]. Request serialization
+  /// sends only the identifier, including when complete audio is supplied.
+  final ChatAudio? audio;
+
   /// Whether this message contains tool calls.
   bool get hasToolCalls => toolCalls != null && toolCalls!.isNotEmpty;
 
@@ -413,7 +452,13 @@ class AssistantMessage extends ChatMessage {
     if (reasoning != null) 'reasoning': reasoning,
     if (reasoningDetails != null)
       'reasoning_details': reasoningDetails!.map((rd) => rd.toJson()).toList(),
+    if (audio != null) 'audio': audio!.toJson(),
   };
+
+  /// Converts a response message, always emitting its required nullable content.
+  ///
+  /// Other optional members keep the same omission/provider behavior as [toJson].
+  Map<String, dynamic> toResponseJson() => {...toJson(), 'content': content};
 
   /// Converts to JSON for sending back to the API.
   ///
@@ -427,6 +472,7 @@ class AssistantMessage extends ChatMessage {
     if (refusal != null) 'refusal': refusal,
     if (toolCalls != null)
       'tool_calls': toolCalls!.map((tc) => tc.toJson()).toList(),
+    if (audio != null) 'audio': {'id': audio!.id},
     // NOTE: reasoning fields intentionally excluded for API compatibility
   };
 
@@ -441,17 +487,19 @@ class AssistantMessage extends ChatMessage {
           listsEqual(toolCalls, other.toolCalls) &&
           reasoningContent == other.reasoningContent &&
           reasoning == other.reasoning &&
-          listsEqual(reasoningDetails, other.reasoningDetails);
+          listsEqual(reasoningDetails, other.reasoningDetails) &&
+          audio == other.audio;
 
   @override
   int get hashCode => Object.hash(
     content,
     name,
     refusal,
-    toolCalls != null ? Object.hashAll(toolCalls!) : null,
+    listHash(toolCalls),
     reasoningContent,
     reasoning,
-    reasoningDetails != null ? Object.hashAll(reasoningDetails!) : null,
+    listHash(reasoningDetails),
+    audio,
   );
 
   /// Creates a copy with the given fields replaced.
@@ -463,6 +511,7 @@ class AssistantMessage extends ChatMessage {
     Object? reasoningContent = unsetCopyWithValue,
     Object? reasoning = unsetCopyWithValue,
     Object? reasoningDetails = unsetCopyWithValue,
+    Object? audio = unsetCopyWithValue,
   }) {
     return AssistantMessage(
       content: content == unsetCopyWithValue
@@ -474,7 +523,9 @@ class AssistantMessage extends ChatMessage {
           : refusal as String?,
       toolCalls: toolCalls == unsetCopyWithValue
           ? this.toolCalls
-          : toolCalls as List<ToolCall>?,
+          : toolCalls == null
+          ? null
+          : List<ToolCall>.from(toolCalls as List),
       reasoningContent: reasoningContent == unsetCopyWithValue
           ? this.reasoningContent
           : reasoningContent as String?,
@@ -483,26 +534,29 @@ class AssistantMessage extends ChatMessage {
           : reasoning as String?,
       reasoningDetails: reasoningDetails == unsetCopyWithValue
           ? this.reasoningDetails
-          : reasoningDetails as List<ReasoningDetail>?,
+          : reasoningDetails == null
+          ? null
+          : List<ReasoningDetail>.from(reasoningDetails as List),
+      audio: audio == unsetCopyWithValue ? this.audio : audio as ChatAudio?,
     );
   }
 
   @override
-  String toString() {
-    final extras = [
-      if (name != null) 'name: $name',
-      if (refusal != null) 'refusal: $refusal',
-    ];
-    final suffix = extras.isEmpty ? '' : ', ${extras.join(', ')}';
-    if (hasToolCalls) {
-      return 'ChatMessage.assistant(toolCalls: ${toolCalls!.length}$suffix)';
-    }
-    if (hasReasoningContent) {
-      return 'ChatMessage.assistant($content, hasReasoning: true$suffix)';
-    }
-    return 'ChatMessage.assistant($content$suffix)';
-  }
+  String toString() =>
+      'ChatMessage.assistant(content: ${_textSummary(content)}, '
+      'name: ${name == null ? 'null' : '[REDACTED]'}, '
+      'refusal: ${_textSummary(refusal)}, '
+      'toolCalls: ${_listSummary(toolCalls)}, '
+      'reasoningContent: ${_textSummary(reasoningContent)}, '
+      'reasoning: ${_textSummary(reasoning)}, '
+      'reasoningDetails: ${_listSummary(reasoningDetails)}, audio: $audio)';
 }
+
+String _textSummary(String? value) =>
+    value == null ? 'null' : '${value.length} chars';
+
+String _listSummary(List<Object?>? value) =>
+    value == null ? 'null' : '${value.length} items';
 
 /// A tool message containing the result of a tool call.
 ///

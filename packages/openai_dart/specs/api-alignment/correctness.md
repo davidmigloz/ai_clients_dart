@@ -7,9 +7,8 @@ closing #321; its
 [acceptance evidence](reviews/03-cache-retention.md) is recorded. Cache controls/diagnostics
 merged in [PR #329](https://github.com/davidmigloz/ai_clients_dart/pull/329), closing #322;
 [acceptance evidence](reviews/04-cache-controls-diagnostics.md) is recorded. Chat usage/obfuscation
-is implemented and independently reviewed with
-[acceptance evidence](reviews/05-chat-usage-obfuscation.md) in
-[PR #330](https://github.com/davidmigloz/ai_clients_dart/pull/330), awaiting merge. Parent
+merged in [PR #330](https://github.com/davidmigloz/ai_clients_dart/pull/330), closing #323;
+[acceptance evidence](reviews/05-chat-usage-obfuscation.md) is recorded. Parent
 [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Decisions was merged in [#319](https://github.com/davidmigloz/ai_clients_dart/pull/319)
 after all CI checks passed, closing #318.
@@ -150,6 +149,22 @@ logprob value contracts, rather than introducing partial equality for new fields
 Keep const constructors and existing caller collection ownership. Do not add
 Chat audio here. Shared StreamOptions forwards the flag to existing Responses
 requests, but this slice does not claim broader Responses streaming parity.
+
+Implementation decisions for CHAT-003–005: use a structural ChatAudio union for
+ID-only references versus required complete outputs, plus independent partial
+ChatAudioDelta. Response parsing requires complete audio; generic assistant
+parsing supports both contexts. Outer assistant audio is nullable; delta audio
+and its supplied members reject null under canonical validation (Python generated
+delta Optional types differ). Response projection emits required nullable content;
+request projection emits audio ID only and preserves old provider reasoning.
+
+Mirror Node's last processed nonnull delta marker, including null/absent delta
+preservation and unknown/provider outer key presence. Keep finish synthesis in
+final conversion only, never raw event/snapshot metadata. Preserve opaque extras
+and provider-null provenance through serialization/copy/value contracts. Retain
+const constructors, caller collections, stable per-choice audio snapshots, and
+text-only behavior. No audio configuration/voice expansion or unrelated endpoint
+work is included.
 
 ## Retry and error contracts
 

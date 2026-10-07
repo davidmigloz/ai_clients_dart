@@ -1,6 +1,6 @@
 # Support complete and streamed chat audio
 
-Status: specified; implementation queued after the container slice.
+Status: implemented and independently reviewed; PR #331 open for review.
 GitHub: [#324](https://github.com/davidmigloz/ai_clients_dart/issues/324).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 2 correctness](../correctness.md), CHAT-003–005.
@@ -12,11 +12,11 @@ Inspect audio completions, replay id-only references, and reconstruct interleave
 
 ## Acceptance criteria
 
-- [ ] Implement every observable requirement in CHAT-003–005 through the public API.
-- [ ] Exact request projection; local SSE data/id/transcript/expiry chunks; late expiry; interleaved choices; empty/missing distinction; snapshots/reset; complete conversion and explicit incomplete-audio failure.
-- [ ] Changed models have complete serialization/copy/equality/hash/diagnostic contracts and nullable-clear semantics.
-- [ ] Public wiring, exports/manifest, examples/docs, and required migration guidance are complete.
-- [ ] Format/fix/analyze, package unit tests, applicable toolkit checks, and independent requirements/standards reviews have recorded evidence; validated findings are resolved.
+- [x] Implement every observable requirement in CHAT-003–005 through the public API.
+- [x] Exact request projection; local SSE data/id/transcript/expiry chunks; late expiry; interleaved choices; empty/missing distinction; snapshots/reset; complete conversion and explicit incomplete-audio failure.
+- [x] Changed models have complete serialization/copy/equality/hash/diagnostic contracts and nullable-clear semantics.
+- [x] Public wiring, exports/manifest, examples/docs, and required migration guidance are complete.
+- [x] Format/fix/analyze, package unit tests, applicable toolkit checks, and independent requirements/standards reviews have recorded evidence; validated findings are resolved.
 
 ## Compatibility and boundaries
 
@@ -25,4 +25,8 @@ Use deterministic public fixtures/MockClient/local servers. Unit tests are the d
 
 ## Completion evidence
 
-Pending. Record commands/results, remaining coverage diagnostics, review resolutions, and PR before closure.
+[Acceptance evidence](../reviews/06-chat-audio.md) records 2,282 passing unit
+tests, clean analysis, full public/model regressions, resolved review findings,
+README/migration/runnable example, and the authorized one-request live smoke
+(conservative $0.008544). Toolkit wider diagnostics remain explicit; no exclusions
+were added. [PR #331](https://github.com/davidmigloz/ai_clients_dart/pull/331) is open for review; close only after merge.

@@ -465,7 +465,7 @@ class ChatCompletionCreateRequest {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'model': model,
-    'messages': messages.map((m) => m.toJson()).toList(),
+    'messages': messages.map(_messageToRequestJson).toList(),
     if (frequencyPenalty != null) 'frequency_penalty': frequencyPenalty,
     if (logitBias != null) 'logit_bias': logitBias,
     if (logprobs != null) 'logprobs': logprobs,
@@ -903,4 +903,12 @@ List<String>? _parseStop(Object? stop) {
   if (stop is String) return [stop];
   if (stop is List) return stop.cast<String>();
   return null;
+}
+
+Map<String, dynamic> _messageToRequestJson(ChatMessage message) {
+  final json = message.toJson();
+  if (message is AssistantMessage && message.audio != null) {
+    json['audio'] = {'id': message.audio!.id};
+  }
+  return json;
 }

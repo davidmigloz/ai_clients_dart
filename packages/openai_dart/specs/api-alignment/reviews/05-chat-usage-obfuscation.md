@@ -5,7 +5,8 @@ Reviewed October 7, 2026 against CHAT-001–002 in the
 Tracking: [#323](https://github.com/davidmigloz/ai_clients_dart/issues/323),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Implementation branch: `feat/openai-chat-usage-obfuscation`.
-Implementation [PR #330](https://github.com/davidmigloz/ai_clients_dart/pull/330) is open for review; #323 closes on merge.
+Implementation [PR #330](https://github.com/davidmigloz/ai_clients_dart/pull/330)
+merged at `c65f3e96a91d4a4045068bb31f1197bb2f011f3d` after all CI checks passed, closing #323.
 
 ## Outcome and contracts
 
