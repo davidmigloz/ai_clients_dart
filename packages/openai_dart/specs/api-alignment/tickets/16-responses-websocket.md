@@ -1,6 +1,6 @@
 # Responses WebSocket transport and lane routing
 
-Status: implemented, verified and independently reviewed; PR pending.
+Status: implemented, verified and independently reviewed; merge pending.
 GitHub: [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-WS-01–04.
@@ -46,6 +46,7 @@ fixtures, browser verification and reviewed fixes. Package checks pass: OpenAI 1
 existing skips, clean analysis and formatting. Both JS/Wasm Chrome matrices and
 the offline example pass for $0. Full toolkit diagnostics remain classified and
 visible. Independent requirements and engineering peer reviews approve the final combined
-change; its PR is pending. Close #341 only after merge; steering
+change. Implementation [PR #353](https://github.com/davidmigloz/ai_clients_dart/pull/353)
+is open for review. Close #341 only after merge; steering
 #342 follows. The directly encountered shared nullable annotation correction
 is included in both client packages with migration guidance.

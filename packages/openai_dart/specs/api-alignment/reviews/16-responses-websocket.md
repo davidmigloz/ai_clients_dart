@@ -1,6 +1,8 @@
 # Responses WebSocket transport acceptance
 
-Status: implemented, verified and independently reviewed; PR pending.
+Status: implemented, verified and independently reviewed; merge pending.
+Implementation [PR #353](https://github.com/davidmigloz/ai_clients_dart/pull/353)
+is open for review; #341 closes only after merge.
 Tracking: [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirements: [RESP-WS-01–04](../responses.md#websocket-sessions).
@@ -150,5 +152,6 @@ provider-specific requiredness/default behavior is retained.
   read-only requirements review approves the completed runtime, tests and docs.
   Peer engineering scopes together cover every changed module independently.
   Two stale roadmap status sentences were corrected after review.
-- PR/final CI/merge remain pending. Close #341 only after merge; typed steering
+- PR #353 uses the exact create-pr template with validation/tracking in Details
+  and five checklist items at the end. Final CI/merge remain pending. Close #341 only after merge; typed steering
   #342, recovery #343 and injection #344 remain separate follow-ups.

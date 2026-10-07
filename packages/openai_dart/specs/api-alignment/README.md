@@ -173,7 +173,8 @@ diagnostics are classified in the evidence. Independent requirements and
 engineering reviews approve the final combined diff. Implementation
 [PR #352](https://github.com/davidmigloz/ai_clients_dart/pull/352) merged after green
 CI, closing #340. WebSocket transport #341 is implemented, verified and independently reviewed;
-its PR remains pending.
+implementation [PR #353](https://github.com/davidmigloz/ai_clients_dart/pull/353)
+is open for review; #341 closes only after merge.
 
 The #340 source recheck retains
 [OpenAPI 234829e](https://github.com/openai/openai-openapi/blob/234829e2b634b8fb159df7fcddbffad204173ffd/openapi.json),
@@ -189,7 +190,7 @@ wire changes. Unchanged source does not establish complete implementation parity
 | [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) ([13](tickets/13-compaction-progress.md)) | Typed compaction progress | Merged in #350 |
 | [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) ([14](tickets/14-access-programs.md)) | Select/inspect effective access program | Merged in #351 |
 | [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) ([15](tickets/15-tool-search.md)) | Complete client-discovered tools | Merged in #352 |
-| [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) ([16](tickets/16-responses-websocket.md)) | Persistent WS sessions, envelopes and named lanes | Implemented/verified/reviewed; PR pending |
+| [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) ([16](tickets/16-responses-websocket.md)) | Persistent WS sessions, envelopes and named lanes | Implemented/verified/reviewed in #353; merge pending |
 | [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) ([17](tickets/17-responses-steering.md)) | Safe mid-turn steering and continuation | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
 | [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) ([18](tickets/18-websocket-recovery.md)) | Opt-in reconnect and bounded unsent queue | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341)/[#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) |
 | [#344](https://github.com/davidmigloz/ai_clients_dart/issues/344) ([19](tickets/19-websocket-injection.md)) | Beta multi-agent tool-result injection | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
@@ -428,4 +429,5 @@ stub connectors, warm-up and continuation. Both client packages correct required
 nullable annotation events with migration guidance. All package checks pass
 (OpenAI 10,676 tests, sibling 506); JS/Wasm browser verification and the offline
 four-frame example pass for $0. Independent requirements and engineering peer reviews approve the final
-combined change; the implementation PR remains pending. Steering #342 follows after merge.
+combined change; implementation [PR #353](https://github.com/davidmigloz/ai_clients_dart/pull/353)
+is open for review; steering #342 follows after merge.
