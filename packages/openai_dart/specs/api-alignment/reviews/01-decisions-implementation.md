@@ -3,7 +3,8 @@
 Reviewed October 7, 2026 against [DEC-01–DEC-11](../decisions.md).
 Tracking: [#318](https://github.com/davidmigloz/ai_clients_dart/issues/318),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
-Implementation branch: `feat/openai-decisions`. The ticket remains open for merge.
+Implementation branch: `feat/openai-decisions`. PR #319 merged October 7, 2026
+after all CI checks passed, closing issue #318.
 
 ## Implemented outcome
 

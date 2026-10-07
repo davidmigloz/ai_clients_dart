@@ -621,7 +621,7 @@ void main() {
       final tool = ResponseTool.codeInterpreter(
         container: CodeInterpreterContainer.auto(
           fileIds: ['file_1'],
-          memoryLimit: 1024,
+          memoryLimit: ContainerMemoryLimit.gb1,
           networkPolicy: ContainerNetworkPolicy.disabled,
         ),
       );
@@ -630,7 +630,7 @@ void main() {
       expect(tool.container, isA<CodeInterpreterContainerAuto>());
       final auto = tool.container as CodeInterpreterContainerAuto;
       expect(auto.fileIds, ['file_1']);
-      expect(auto.memoryLimit, 1024);
+      expect(auto.memoryLimit, ContainerMemoryLimit.gb1);
       expect(auto.networkPolicy, isA<ContainerNetworkPolicyDisabled>());
     });
 
@@ -3083,18 +3083,18 @@ void main() {
     });
 
     test('CodeInterpreterContainerAuto round-trips through JSON', () {
-      const container = CodeInterpreterContainerAuto(
-        fileIds: ['file_1', 'file_2'],
-        memoryLimit: 2048,
+      final container = CodeInterpreterContainerAuto(
+        fileIds: const ['file_1', 'file_2'],
+        memoryLimit: ContainerMemoryLimit.gb4,
         networkPolicy: ContainerNetworkPolicyAllowlist(
-          allowedHosts: ['example.com'],
+          allowedDomains: const ['example.com'],
         ),
       );
 
-      final json = container.toJson() as Map<String, dynamic>;
+      final json = container.toJson();
       expect(json['type'], equals('auto'));
       expect(json['file_ids'], equals(['file_1', 'file_2']));
-      expect(json['memory_limit'], equals(2048));
+      expect(json['memory_limit'], equals('4g'));
       expect((json['network_policy'] as Map)['type'], equals('allowlist'));
 
       final restored = CodeInterpreterContainer.fromJson(json);
@@ -3103,9 +3103,9 @@ void main() {
     });
 
     test('CodeInterpreterContainerAuto minimal round-trips', () {
-      const container = CodeInterpreterContainerAuto();
+      final container = CodeInterpreterContainerAuto();
 
-      final json = container.toJson() as Map<String, dynamic>;
+      final json = container.toJson();
       expect(json['type'], equals('auto'));
       expect(json.containsKey('file_ids'), isFalse);
 
@@ -3124,14 +3124,14 @@ void main() {
     });
 
     test('ContainerNetworkPolicyAllowlist round-trips', () {
-      const policy = ContainerNetworkPolicyAllowlist(
-        allowedHosts: ['api.example.com', 'cdn.example.com'],
+      final policy = ContainerNetworkPolicyAllowlist(
+        allowedDomains: const ['api.example.com', 'cdn.example.com'],
       );
 
       final json = policy.toJson();
       expect(json['type'], equals('allowlist'));
       expect(
-        json['allowed_hosts'],
+        json['allowed_domains'],
         equals(['api.example.com', 'cdn.example.com']),
       );
 

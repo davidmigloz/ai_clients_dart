@@ -4,13 +4,14 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~6.8k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~7.2k tokens): Primary package documentation with installation, configuration, and usage examples.
 - [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/CHANGELOG.md) (~21.7k tokens): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/MIGRATION.md) (~11.7k tokens): Upgrade notes and breaking-change guidance.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/MIGRATION.md) (~12.3k tokens): Upgrade notes and breaking-change guidance.
 
 ## Examples
 
 - [decisions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/decisions_example.dart) (~639 tokens): Typed Decisions questions, refusals, usage, and inline images.
+- [containers_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/containers_example.dart) (~1.5k tokens): Container memory/network configuration, Code Interpreter IDs, and files.
 - [responses_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/responses_example.dart) (~870 tokens): Responses API with built-in tools.
 - [chat_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/chat_example.dart) (~432 tokens): Basic chat completions with multi-turn conversations.
 - [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/streaming_example.dart) (~464 tokens): Streaming responses with text deltas.
@@ -29,7 +30,6 @@
 - [content_provenance_checks_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/content_provenance_checks_example.dart) (~570 tokens): Content provenance (C2PA/SynthID) detection.
 - [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/error_handling_example.dart) (~1.2k tokens): Exception handling patterns.
 - [conversations_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/conversations_example.dart) (~1.5k tokens): Conversations API for state management.
-- [containers_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/containers_example.dart) (~1.4k tokens): Containers for isolated execution.
 - [chatkit_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/chatkit_example.dart) (~1.9k tokens): ChatKit sessions and threads.
 - [assistants_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/assistants_example.dart) (~1.3k tokens): Assistants API (deprecated).
 - [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/models_example.dart) (~780 tokens): Model listing and retrieval.
@@ -44,4 +44,4 @@
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~70.1k tokens**
+**Total: ~71.2k tokens**
