@@ -162,7 +162,8 @@ records the contracts, offline example, migration guidance and retained parity g
 Implementation [PR #350](https://github.com/davidmigloz/ai_clients_dart/pull/350)
 merged after green CI, closing #338. Access programs #339 are implemented and validated; [acceptance evidence](reviews/14-access-programs.md)
 records 784 new tests, the example and retained gaps. Independent requirements and engineering reviews approve the final combined
-diff; PR creation remains pending.
+diff. Implementation [PR #351](https://github.com/davidmigloz/ai_clients_dart/pull/351)
+is open for review; #339 stays open until merge.
 
 | Ticket | Demonstrable outcome | Status and dependencies |
 | --- | --- | --- |
@@ -171,7 +172,7 @@ diff; PR creation remains pending.
 | [#336](https://github.com/davidmigloz/ai_clients_dart/issues/336) ([11](tickets/11-web-search.md)) | GA web-search controls/actions/image results | Merged in #348 |
 | [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337) ([12](tickets/12-hosted-shell.md)) | Hosted/local shell configuration, replay and streams | Merged in #349 (#320 merged) |
 | [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) ([13](tickets/13-compaction-progress.md)) | Typed compaction progress | Merged in #350 |
-| [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) ([14](tickets/14-access-programs.md)) | Select/inspect effective access program | Implemented/reviewed; PR pending |
+| [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) ([14](tickets/14-access-programs.md)) | Select/inspect effective access program | Implemented/reviewed; merge pending in #351 |
 | [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) ([15](tickets/15-tool-search.md)) | Complete client-discovered tools | [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) async definitions |
 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) ([16](tickets/16-responses-websocket.md)) | Persistent WS sessions, envelopes and named lanes | None; shared shell/compaction events follow their tickets |
 | [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) ([17](tickets/17-responses-steering.md)) | Safe mid-turn steering and continuation | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
@@ -255,7 +256,7 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
 - Web search #336 merged in #348 with filters, access controls, return-token budget,
   image settings/results, action metadata and Includes.
 - Responses access-program configuration #339 is implemented, validated and independently
-  reviewed; PR creation is pending. Tool-search output definitions #340 are next.
+  reviewed in #351; merge is pending. Tool-search output definitions #340 are next.
 - Real GA/beta Responses parent mappings expose older request `user`, `prompt`
   and `conversation` gaps, plus returned safety identifier, top log probabilities,
   maximum tool calls, prompt/text/tool settings, completed time and conversation.

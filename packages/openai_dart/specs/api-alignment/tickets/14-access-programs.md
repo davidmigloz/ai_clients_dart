@@ -1,6 +1,6 @@
 # Responses access-program selection
 
-Status: implemented, verified and independently reviewed; PR creation pending.
+Status: implemented, verified and independently reviewed; merge pending.
 GitHub: [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-ACCESS-01–02.
@@ -38,5 +38,6 @@ Package publishing and unrelated API families are outside this ticket.
 two existing skips, clean fatal-info analysis, compiled README usage and the
 five-request offline example. Full toolkit diagnostics expose older parent gaps
 and the nullable-enum scanner limitation without new exclusions. Independent requirements/engineering
-reviews approve the final combined diff; PR creation remains pending; close #339 only after merge.
+reviews approve the final combined diff. Implementation [PR #351](https://github.com/davidmigloz/ai_clients_dart/pull/351)
+is open for review; close #339 only after merge.
 Tool search #340 follows this slice.
