@@ -1,6 +1,6 @@
 # Hosted/local shell configuration, replay and streams
 
-Status: implemented, verified and independently reviewed; merge pending.
+Status: implemented, verified, independently reviewed and merged in PR #349.
 GitHub: [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-SHELL-01–03.
@@ -35,8 +35,10 @@ Package publishing and unrelated API families are outside this ticket.
 
 [Acceptance evidence](../reviews/12-hosted-shell.md) records exact directional
 contracts, 5,163 passing unit tests, clean analysis, full toolkit diagnostics,
-README/migration guidance, the offline example and independent reviews. Close
-the issue only after implementation merge.
+README/migration guidance, the offline example and independent reviews.
 
 Implementation [PR #349](https://github.com/davidmigloz/ai_clients_dart/pull/349)
-is open for review; #337 closes only after merge.
+merged after green CI on October 7, 2026 at 18:56:48 UTC, closing #337.
+Merge commit: `9e0b572b823f70056401e4bcdc87a1d716a62d11`.
+Compaction progress [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338)
+is the next implementation slice.

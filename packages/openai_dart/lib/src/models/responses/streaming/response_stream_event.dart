@@ -23,6 +23,7 @@ import 'shell_call_output_delta.dart';
 /// - **Refusal events**: delta, done
 /// - **Function call events**: arguments delta, arguments done
 /// - **Reasoning events**: text delta, text done, summary events
+/// - **Compaction events**: [ResponseCompactionCompactingEvent]
 /// - **Audio events**: delta, done, transcript delta, transcript done
 /// - **Web search events**: in_progress, searching, completed
 /// - **File search events**: in_progress, searching, completed
@@ -89,6 +90,10 @@ sealed class ResponseStreamEvent {
         ReasoningSummaryTextDeltaEvent.fromJson(json),
       'response.reasoning_summary_text.done' =>
         ReasoningSummaryTextDoneEvent.fromJson(json),
+
+      // Compaction events
+      'response.compaction.compacting' =>
+        ResponseCompactionCompactingEvent.fromJson(json),
 
       // Audio events
       'response.audio.delta' => ResponseAudioDeltaEvent.fromJson(json),
@@ -193,6 +198,104 @@ sealed class ResponseStreamEvent {
   /// Returns `true` for [ResponseCompletedEvent], [ResponseFailedEvent],
   /// and [ResponseIncompleteEvent].
   bool get isFinal => false;
+}
+
+// ============================================================
+// Compaction Events
+// ============================================================
+
+/// Event emitted when summary content is sampled for a compaction trigger.
+///
+/// This is a progress notification. It contains no summary or encrypted content
+/// and does not signal the end of the response stream.
+@immutable
+class ResponseCompactionCompactingEvent extends ResponseStreamEvent {
+  @override
+  String get type => 'response.compaction.compacting';
+
+  /// The sequence number for ordering events.
+  @override
+  final int sequenceNumber;
+
+  /// The index of the compaction output item.
+  final int outputIndex;
+
+  /// The ID of the compaction output item.
+  final String itemId;
+
+  /// The beta multi-agent owner, when the event includes one.
+  final AgentTag? agent;
+
+  /// Creates a [ResponseCompactionCompactingEvent].
+  const ResponseCompactionCompactingEvent({
+    required this.sequenceNumber,
+    required this.outputIndex,
+    required this.itemId,
+    this.agent,
+  });
+
+  /// Creates a [ResponseCompactionCompactingEvent] from JSON.
+  factory ResponseCompactionCompactingEvent.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    const context = 'ResponseCompactionCompactingEvent';
+    requireJsonType(json, 'response.compaction.compacting', context);
+    return ResponseCompactionCompactingEvent(
+      sequenceNumber: requireJsonInt(
+        json['sequence_number'],
+        '$context.sequence_number',
+      ),
+      outputIndex: requireJsonInt(
+        json['output_index'],
+        '$context.output_index',
+      ),
+      itemId: requireJsonString(json['item_id'], '$context.item_id'),
+      agent: _streamEventAgent(json, context),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'sequence_number': sequenceNumber,
+    'output_index': outputIndex,
+    'item_id': itemId,
+    if (agent != null) 'agent': agent!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  ///
+  /// Passing `null` for [agent] removes that optional key.
+  ResponseCompactionCompactingEvent copyWith({
+    int? sequenceNumber,
+    int? outputIndex,
+    String? itemId,
+    Object? agent = unsetCopyWithValue,
+  }) => ResponseCompactionCompactingEvent(
+    sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+    outputIndex: outputIndex ?? this.outputIndex,
+    itemId: itemId ?? this.itemId,
+    agent: identical(agent, unsetCopyWithValue)
+        ? this.agent
+        : agent as AgentTag?,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ResponseCompactionCompactingEvent &&
+          runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
+          outputIndex == other.outputIndex &&
+          itemId == other.itemId &&
+          agent == other.agent;
+
+  @override
+  int get hashCode => Object.hash(sequenceNumber, outputIndex, itemId, agent);
+
+  @override
+  String toString() =>
+      'ResponseCompactionCompactingEvent(sequenceNumber: $sequenceNumber, outputIndex: $outputIndex, itemId: $itemId, agent: ${agent == null ? 'null' : '[${agent!.agentName.length} chars]'})';
 }
 
 // ============================================================
@@ -3857,7 +3960,7 @@ class ResponseCodeInterpreterCallCompletedEvent extends ResponseStreamEvent {
 // Shell Events
 // ============================================================
 
-AgentTag? _shellEventAgent(Map<String, dynamic> json, String context) {
+AgentTag? _streamEventAgent(Map<String, dynamic> json, String context) {
   if (!json.containsKey('agent')) return null;
   final value = requireJsonObject(json['agent'], '$context.agent');
   return AgentTag(
@@ -3919,7 +4022,7 @@ class ResponseShellCallCommandAddedEvent extends ResponseStreamEvent {
         '$context.command_index',
       ),
       command: requireJsonString(json['command'], '$context.command'),
-      agent: _shellEventAgent(json, context),
+      agent: _streamEventAgent(json, context),
     );
   }
 
@@ -4028,7 +4131,7 @@ class ResponseShellCallCommandDeltaEvent extends ResponseStreamEvent {
       ),
       delta: requireJsonString(json['delta'], '$context.delta'),
       obfuscation: optionalJsonString(json, 'obfuscation', context),
-      agent: _shellEventAgent(json, context),
+      agent: _streamEventAgent(json, context),
     );
   }
 
@@ -4144,7 +4247,7 @@ class ResponseShellCallCommandDoneEvent extends ResponseStreamEvent {
         '$context.command_index',
       ),
       command: requireJsonString(json['command'], '$context.command'),
-      agent: _shellEventAgent(json, context),
+      agent: _streamEventAgent(json, context),
     );
   }
 
@@ -4256,7 +4359,7 @@ class ResponseShellCallOutputContentDeltaEvent extends ResponseStreamEvent {
         requireJsonObject(json['delta'], '$context.delta'),
         context: '$context.delta',
       ),
-      agent: _shellEventAgent(json, context),
+      agent: _streamEventAgent(json, context),
     );
   }
 
@@ -4390,7 +4493,7 @@ class ResponseShellCallOutputContentDoneEvent extends ResponseStreamEvent {
       ),
       itemId: requireJsonString(json['item_id'], '$context.item_id'),
       output: output,
-      agent: _shellEventAgent(json, context),
+      agent: _streamEventAgent(json, context),
     );
   }
 

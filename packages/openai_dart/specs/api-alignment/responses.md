@@ -1,9 +1,9 @@
 # Responses capabilities: Phase 3 specification
 
-Status: independently reviewed specification; async tools, configuration updates
-and web search merged in #346–#348.
-Configuration updates are implemented and independently reviewed; merge pending.
-Remaining runtime slices are tracked below. Parent:
+Status: independently reviewed specification; async tools, configuration updates,
+web search and hosted/local shell merged in #346–#349. Compaction progress #338
+is implemented, validated and independently reviewed; its PR is pending creation. Access programs #339 follow after compaction. Remaining runtime slices
+are tracked below. Parent:
 [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 
 ## Objective and decisions
@@ -71,13 +71,13 @@ and its linked guides. Revalidate affected contracts before each implementation.
 
 ## Delivery slices
 
-| Order | Outcome | Requirements | Blockers |
+| Order | Outcome | Requirements | Status and dependencies |
 | --- | --- | --- | --- |
-| [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) (09) | Async function/custom calls and faithful replay | RESP-ASYNC-01–03 | None |
-| [#335](https://github.com/davidmigloz/ai_clients_dart/issues/335) (10) | Persistent reasoning configuration updates | RESP-CONFIG-01–02 | None |
-| [#336](https://github.com/davidmigloz/ai_clients_dart/issues/336) (11) | GA web-search controls, actions and results | RESP-WEB-01–03 | None |
-| [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337) (12) | Hosted/local shell configuration, replay and streaming | RESP-SHELL-01–03 | Container #320, merged |
-| [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) (13) | Observe compaction progress | RESP-COMPACT-01 | None |
+| [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) (09) | Async function/custom calls and faithful replay | RESP-ASYNC-01–03 | Merged in #346 |
+| [#335](https://github.com/davidmigloz/ai_clients_dart/issues/335) (10) | Persistent reasoning configuration updates | RESP-CONFIG-01–02 | Merged in #347 |
+| [#336](https://github.com/davidmigloz/ai_clients_dart/issues/336) (11) | GA web-search controls, actions and results | RESP-WEB-01–03 | Merged in #348 |
+| [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337) (12) | Hosted/local shell configuration, replay and streaming | RESP-SHELL-01–03 | Merged in #349; container #320 merged |
+| [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) (13) | Observe compaction progress | RESP-COMPACT-01 | Implemented; validation/review pending |
 | [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) (14) | Select and inspect Responses access programs | RESP-ACCESS-01–02 | None |
 | [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) (15) | Return complete client-discovered tools | RESP-SEARCH-01–02 | [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) for nested async definitions |
 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) (16) | Persistent Responses WebSocket sessions and lane routing | RESP-WS-01–04 | None; use the shared event contracts current at implementation |
@@ -244,6 +244,22 @@ conversation item parsers, `ResponseToolChoice` and `ResponseStreamEvent`.
   REST, context_management, trigger and encrypted compaction items stay available;
   do not force large-context paid calls or invent summary text. An offline progress
   example and malformed/unknown-event fixtures verify the boundary.
+
+The new sealed `ResponseStreamEvent` variant requires consumers with exhaustive
+switches to add `ResponseCompactionCompactingEvent`. Applications that previously
+inspected this discriminator through `UnknownEvent` should use the typed event.
+The wire event and existing unknown-event fallback remain unchanged.
+
+The existing `CompactionTriggerItem` DTO omits the optional canonical trigger
+`id`; this out-of-slice gap remains tracked for later parity work. Raw history
+replay preserves a provider ID without routing it through that DTO. The sibling
+`open_responses` published schema has no corresponding progress event; no
+speculative sibling variant is introduced.
+
+Implementation #338 has 63 model contract tests and 142 public REST/SSE fixtures
+(205 new deterministic tests). [Acceptance evidence](reviews/13-compaction-progress.md)
+records completed documentation, validation and independent approvals. The PR
+remains pending creation; access programs #339 are next.
 
 Sources: [compaction](https://developers.openai.com/api/docs/guides/compaction),
 [canonical progress event](https://github.com/openai/openai-openapi/blob/ee483b4b26b2695fedc5c8af7b187e5986bd0add/openapi.json),
@@ -462,5 +478,5 @@ focused fixtures, then format/fix/analyze, package unit tests and toolkit checks
 Two independent reviews verify requirements and engineering standards on the final
 combined diff, resolve validated findings and publish evidence before completion.
 
-This planning change adds no runtime behavior. Do not mark any Phase 3 ticket
-implemented or the complete-parity objective achieved until its own evidence exists.
+Each Phase 3 ticket must record its own acceptance evidence before completion.
+Completed slices do not establish complete parity for the remaining roadmap.
