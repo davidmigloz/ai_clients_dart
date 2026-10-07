@@ -1,6 +1,6 @@
 # Compaction progress events
 
-Status: implemented, verified and independently reviewed; PR creation pending.
+Status: implemented, verified and independently reviewed; merge pending.
 GitHub: [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-COMPACT-01.
@@ -50,5 +50,6 @@ records 5,368 passing unit tests, two existing skips, clean fatal-info analysis,
 compiled README/migration snippets, the offline example, full toolkit diagnostics
 and independent requirements/engineering approvals.
 
-The implementation PR is pending creation; close #338 only after merge. Access programs [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339)
+Implementation [PR #350](https://github.com/davidmigloz/ai_clients_dart/pull/350)
+is open for review; close #338 only after merge. Access programs [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339)
 follow this slice.

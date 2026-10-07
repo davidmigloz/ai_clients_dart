@@ -2,7 +2,8 @@
 
 Status: independently reviewed specification; async tools, configuration updates,
 web search and hosted/local shell merged in #346–#349. Compaction progress #338
-is implemented, validated and independently reviewed; its PR is pending creation. Access programs #339 follow after compaction. Remaining runtime slices
+is implemented, validated and independently reviewed in [PR #350](https://github.com/davidmigloz/ai_clients_dart/pull/350);
+merge remains pending. Access programs #339 follow after compaction. Remaining runtime slices
 are tracked below. Parent:
 [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 
@@ -258,8 +259,8 @@ speculative sibling variant is introduced.
 
 Implementation #338 has 63 model contract tests and 142 public REST/SSE fixtures
 (205 new deterministic tests). [Acceptance evidence](reviews/13-compaction-progress.md)
-records completed documentation, validation and independent approvals. The PR
-remains pending creation; access programs #339 are next.
+records completed documentation, validation and independent approvals. Implementation [PR #350](https://github.com/davidmigloz/ai_clients_dart/pull/350)
+remains open until merge; access programs #339 are next.
 
 Sources: [compaction](https://developers.openai.com/api/docs/guides/compaction),
 [canonical progress event](https://github.com/openai/openai-openapi/blob/ee483b4b26b2695fedc5c8af7b187e5986bd0add/openapi.json),

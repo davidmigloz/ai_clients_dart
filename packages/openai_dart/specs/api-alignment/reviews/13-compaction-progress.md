@@ -1,7 +1,8 @@
 # Compaction progress acceptance
 
-Status: implementation, validation and independent reviews complete; PR creation
-and merge pending.
+Status: implementation, validation and independent reviews complete; merge pending.
+Implementation [PR #350](https://github.com/davidmigloz/ai_clients_dart/pull/350)
+is open for review; #338 closes only after merge.
 Tracking: [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirement: [RESP-COMPACT-01](../responses.md#compaction).

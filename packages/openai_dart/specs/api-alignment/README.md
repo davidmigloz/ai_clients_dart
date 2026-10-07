@@ -159,7 +159,8 @@ Hosted/local shell #337 merged in
 Compaction progress #338 is implemented, validated and independently reviewed
 with 205 new deterministic tests; [acceptance evidence](reviews/13-compaction-progress.md)
 records the contracts, offline example, migration guidance and retained parity gaps.
-Its implementation PR is pending creation.
+Implementation [PR #350](https://github.com/davidmigloz/ai_clients_dart/pull/350)
+is open for review; #338 stays open until merge.
 
 | Ticket | Demonstrable outcome | Dependency |
 | --- | --- | --- |
@@ -167,7 +168,7 @@ Its implementation PR is pending creation.
 | [#335](https://github.com/davidmigloz/ai_clients_dart/issues/335) ([10](tickets/10-configuration-updates.md)) | Persistent reasoning effort updates | Merged in #347 |
 | [#336](https://github.com/davidmigloz/ai_clients_dart/issues/336) ([11](tickets/11-web-search.md)) | GA web-search controls/actions/image results | Merged in #348 |
 | [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337) ([12](tickets/12-hosted-shell.md)) | Hosted/local shell configuration, replay and streams | Merged in #349 (#320 merged) |
-| [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) ([13](tickets/13-compaction-progress.md)) | Typed compaction progress | Implemented/reviewed; PR pending |
+| [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) ([13](tickets/13-compaction-progress.md)) | Typed compaction progress | Implemented/reviewed; merge pending in #350 |
 | [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) ([14](tickets/14-access-programs.md)) | Select/inspect effective access program | None |
 | [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) ([15](tickets/15-tool-search.md)) | Complete client-discovered tools | [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) async definitions |
 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) ([16](tickets/16-responses-websocket.md)) | Persistent WS sessions, envelopes and named lanes | None; shared shell/compaction events follow their tickets |
