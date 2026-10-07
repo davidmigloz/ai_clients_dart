@@ -12,7 +12,10 @@ merged in [PR #330](https://github.com/davidmigloz/ai_clients_dart/pull/330), cl
 merged in [PR #331](https://github.com/davidmigloz/ai_clients_dart/pull/331), closing #324;
 [acceptance evidence](reviews/06-chat-audio.md) is recorded. Retry guidance
 merged in [PR #332](https://github.com/davidmigloz/ai_clients_dart/pull/332), closing #325;
-[acceptance evidence](reviews/07-retry-guidance.md) is recorded. Parent
+[acceptance evidence](reviews/07-retry-guidance.md) is recorded. Image model
+requiredness merged in [PR #333](https://github.com/davidmigloz/ai_clients_dart/pull/333),
+closing #326; [acceptance evidence](reviews/08-image-model-selection.md) is recorded.
+All Phase 2 tickets are complete. Parent
 [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Decisions was merged in [#319](https://github.com/davidmigloz/ai_clients_dart/pull/319)
 after all CI checks passed, closing #318.

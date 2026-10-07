@@ -5,7 +5,9 @@ Reviewed October 7, 2026 against IMG-01–04 in the
 Tracking: [#326](https://github.com/davidmigloz/ai_clients_dart/issues/326),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Implementation branch: `fix/openai-image-model-required`.
-Implementation [PR #333](https://github.com/davidmigloz/ai_clients_dart/pull/333) is open for review.
+Implementation [PR #333](https://github.com/davidmigloz/ai_clients_dart/pull/333) merged
+October 7, 2026 after all final-head CI checks passed, closing #326. Merge commit:
+`5eae6db755775d904cfe19df3f22e1bd26dedb73`.
 Package validation and independent reviews passed.
 
 ## Outcome and contracts

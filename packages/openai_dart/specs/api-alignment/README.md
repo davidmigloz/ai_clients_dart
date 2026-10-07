@@ -4,7 +4,7 @@ Planning started October 7, 2026. Status: Decisions, container configuration,
 cache retention, cache controls/diagnostics, and Chat usage/obfuscation merged.
 Chat audio merged in [PR #331](https://github.com/davidmigloz/ai_clients_dart/pull/331).
 Retry guidance merged in [PR #332](https://github.com/davidmigloz/ai_clients_dart/pull/332);
-image model requiredness #326 is implemented and reviewed in [PR #333](https://github.com/davidmigloz/ai_clients_dart/pull/333).
+image model requiredness #326 merged in [PR #333](https://github.com/davidmigloz/ai_clients_dart/pull/333).
 
 Tracking parent: [GitHub issue #317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 This parent records planning progress; it is not an implementation ticket.
@@ -93,7 +93,7 @@ image model requiredness follow as separate tickets.
 | [#323](https://github.com/davidmigloz/ai_clients_dart/issues/323) | Preserve Chat token details and stream obfuscation | None; merged in #330 |
 | [#324](https://github.com/davidmigloz/ai_clients_dart/issues/324) | Preserve complete and streamed Chat audio | Merged in #331 |
 | [#325](https://github.com/davidmigloz/ai_clients_dart/issues/325) | Honor retry hints and stop replaying permanent quota failures | Merged in #332 |
-| [#326](https://github.com/davidmigloz/ai_clients_dart/issues/326) | Require explicit model selection where the image API requires it | Reviewed; PR #333 open |
+| [#326](https://github.com/davidmigloz/ai_clients_dart/issues/326) | Require explicit model selection where the image API requires it | Merged in #333 |
 
 Container [acceptance evidence and independent reviews](reviews/02-container-configuration.md)
 record the 1,841 passing unit tests, clean analysis, bounded live lifecycle, resolved
@@ -129,25 +129,54 @@ Retry guidance [acceptance evidence](reviews/07-retry-guidance.md) records 2,454
 passing unit tests, clean analysis, independent approvals, complete server minima
 and permanent-quota behavior, precise pre-stream metadata, and a runnable local
 example verified without API cost. Implementation [PR #332](https://github.com/davidmigloz/ai_clients_dart/pull/332) merged
-after all CI checks passed, closing #325. Image model requiredness #326 is implemented and reviewed.
+after all CI checks passed, closing #325. Image model requiredness #326 merged in #333.
 
 Image model selection [acceptance evidence](reviews/08-image-model-selection.md)
 records 2,537 passing unit tests, clean analysis, independent approvals, required
 generation/multipart models with retained JSON-edit omission, complete changed-model
 contracts, migration/current examples and a local demo verified without API cost.
-Implementation [PR #333](https://github.com/davidmigloz/ai_clients_dart/pull/333) is open for review. This is the last specified Phase 2 slice;
-Phase 3 Responses capabilities needs a refreshed specification and tickets next.
+Implementation [PR #333](https://github.com/davidmigloz/ai_clients_dart/pull/333) merged
+after all CI checks passed, closing #326. All Phase 2 tickets are complete.
 
-## Proposed roadmap
+## Phase 3
 
-This is a candidate dependency map, not an accepted implementation spec. Keep
-all audited gaps visible even when they are deferred from a milestone.
+The [Responses specification](responses.md) records the next source-backed
+contracts, source discrepancies, compatibility/platform decisions and dependency
+boundaries. [Planning review](reviews/09-responses-planning.md) records the
+independent review. Runtime work is pending; these documents do not establish
+implemented coverage.
+
+| Ticket | Demonstrable outcome | Dependency |
+| --- | --- | --- |
+| [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) ([09](tickets/09-async-tools.md)) | Async function/custom calls and faithful replay | None; next implementation |
+| [#335](https://github.com/davidmigloz/ai_clients_dart/issues/335) ([10](tickets/10-configuration-updates.md)) | Persistent reasoning effort updates | None |
+| [#336](https://github.com/davidmigloz/ai_clients_dart/issues/336) ([11](tickets/11-web-search.md)) | GA web-search controls/actions/image results | None |
+| [#337](https://github.com/davidmigloz/ai_clients_dart/issues/337) ([12](tickets/12-hosted-shell.md)) | Hosted/local shell configuration, replay and streams | #320, merged |
+| [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) ([13](tickets/13-compaction-progress.md)) | Typed compaction progress | None |
+| [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) ([14](tickets/14-access-programs.md)) | Select/inspect effective access program | None |
+| [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) ([15](tickets/15-tool-search.md)) | Complete client-discovered tools | [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) async definitions |
+| [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) ([16](tickets/16-responses-websocket.md)) | Persistent WS sessions, envelopes and named lanes | None; shared shell/compaction events follow their tickets |
+| [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) ([17](tickets/17-responses-steering.md)) | Safe mid-turn steering and continuation | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
+| [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) ([18](tickets/18-websocket-recovery.md)) | Opt-in reconnect and bounded unsent queue | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341)/[#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) |
+| [#344](https://github.com/davidmigloz/ai_clients_dart/issues/344) ([19](tickets/19-websocket-injection.md)) | Beta multi-agent tool-result injection | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
+
+Implement the small async slice first, then continue through the table. Recovery
+and injection remain explicit follow-ups to basic transport; do not claim full
+WebSocket SDK parity before they are complete. Each ticket includes an offline
+example, public fixtures, documentation and independent review. All eleven tickets are native sub-issues of #317; active blockers are linked
+with GitHub dependencies. Async [#334](https://github.com/davidmigloz/ai_clients_dart/issues/334) is next.
+
+## Remaining roadmap
+
+Phases 1–2 are complete and Phase 3 has its own specification/tickets above.
+Later phases remain candidate outcomes pending detailed specifications. Keep
+all audited gaps visible even when deferred.
 
 | Phase | Demonstrable outcomes | Dependencies and scope notes |
 | --- | --- | --- |
-| 1. Decisions | Create typed decisions from text and inline images; receive predicate, choice, score, and refusal answers with complete usage | Implemented and reviewed in #318; does not require Agents or Live |
-| 2. Existing API correctness | Correct container wire formats; preserve cache diagnostics, token details, Chat audio chunks, and retry guidance | Mostly independent changes; the shared cache-write counter is already included in Decisions |
-| 3. Responses capabilities | Use async tools, reasoning configuration updates, GA web search controls/results, hosted shell, and Responses WebSocket steering | Establish transport behavior before steering; complete shared container configuration before dependent shell changes |
+| 1. Decisions | Create typed decisions from text and inline images; receive predicate, choice, score, and refusal answers with complete usage | Merged in #319/#318 |
+| 2. Existing API correctness | Correct container wire formats; preserve cache diagnostics, token details, Chat audio chunks, and retry guidance | All tickets merged in #327–#333; shared cache-write usage included in Decisions |
+| 3. Responses capabilities | Use async tools, reasoning configuration updates, GA web search controls/results, hosted shell, and Responses WebSocket steering | Specified above; transport precedes steering/recovery/injection, container dependency merged |
 | 4. Webhooks and safety | Verify and parse signed events; manage webhook endpoints; retrieve safety alerts/cases and preserve monitoring details | Event parsing/verification is independently useful; supports later Agents and Live workflows |
 | 5. Audio and Live | Generate speech with current voice/options; create custom voices; run a Live session and delegation workflows | Separate ordinary speech from Live; prompt-derived voice usage depends on Live |
 | 6. Agents and vaults | Run a durable session; handle tools, environments, artifacts, credentials, subagents, traces, and browser approvals | Slice around working session behaviors; browser approvals build on the basic session/event loop |
@@ -186,30 +215,32 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
   `comparison_response_id`/`prewarm` and typed diagnostics; Chat gains narrow options. Shared Responses
   `cache_write_tokens` usage is implemented with Decisions in #318.
 - Function/custom definitions and call items omit `async`.
-- Input/output parsers do not support `configuration_update`.
-- Responses WebSocket transport and steering are absent.
+- Input/list-input/conversation parsers lack `configuration_update`; canonical
+  OutputItem has no such variant and no dedicated streaming event is defined.
+- Responses WebSocket transport/steering and official opt-in reconnect helpers
+  are absent; exported beta injection DTOs still need transport integration.
 - Hosted shell environment configuration, item metadata, and stream events
   are incomplete; compaction progress also needs alignment.
 - Web search lacks newer filters, access controls, return-token budget, image
   settings/results, action metadata, and corresponding include values.
 - Responses access-program configuration and tool-search output definitions
-  need alignment.
+  need alignment. [Phase 3](responses.md) specifies these and the above gaps.
 - Chat usage/obfuscation merged in #330/#323; complete/streamed audio is
   merged in #331/#324.
 - Registering real Chat completion/message/delta mappings exposed older missing
   completion metadata, response annotations, and typed legacy function-call
   fields. These remain in the complete-parity inventory for later specification;
   audio finalization preserves legacy delta fields opaquely.
-- Image generation/multipart model requiredness is implemented and reviewed in
-  #326. JSON editing retains its distinct optional/nullable model contract.
+- Image generation/multipart model requiredness merged in #333/#326. JSON
+  editing retains its distinct optional/nullable model contract.
 - Existing JSON-edit copy/value/diagnostic conveniences remain a parity gap
   exposed by its real manifest mapping; multipart serialization is tested at the
-  resource boundary rather than through invented JSON byte encodings. Shared usage model convenience methods and
-  diagnostics also have existing limitations surfaced by the new manifest entries.
-- Retry decisions treat all 429s as transient, cap server delays, and do not
-  expose Retry-After guidance consistently for overload errors. Preserve the
-  repository's deliberate conservative treatment of non-idempotent requests
-  unless a documented decision changes it.
+  resource boundary rather than through invented JSON byte encodings.
+- Shared usage model convenience methods and diagnostics also have existing
+  limitations surfaced by the new manifest entries.
+- Retry guidance merged in #332/#325: structured permanent quota failures stop
+  replay, eligible waits honor the full server minimum, and error paths preserve
+  precise retry metadata. Conservative verb/cloneability policy remains intact.
 
 Sources: [cache diagnostics](https://developers.openai.com/api/docs/guides/prompt-caching/diagnostics),
 [async tools](https://developers.openai.com/api/docs/guides/async-tool-calling),
