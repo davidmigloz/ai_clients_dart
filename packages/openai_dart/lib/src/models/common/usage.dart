@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import 'copy_with_sentinel.dart';
+import 'json_helpers.dart';
 
 /// Token usage statistics for a request.
 ///
@@ -77,6 +78,8 @@ class Usage {
   };
 
   /// Creates a copy with replaced values.
+  ///
+  /// Nullable fields can be explicitly set to `null` to clear them.
   Usage copyWith({
     int? promptTokens,
     Object? completionTokens = unsetCopyWithValue,
@@ -122,20 +125,45 @@ class Usage {
   @override
   String toString() =>
       'Usage(promptTokens: $promptTokens, completionTokens: $completionTokens, '
-      'totalTokens: $totalTokens)';
+      'totalTokens: $totalTokens, promptTokensDetails: $promptTokensDetails, '
+      'completionTokensDetails: $completionTokensDetails)';
 }
 
 /// Detailed breakdown of prompt tokens.
 @immutable
 class PromptTokensDetails {
   /// Creates a [PromptTokensDetails].
-  const PromptTokensDetails({this.audioTokens, this.cachedTokens});
+  const PromptTokensDetails({
+    this.audioTokens,
+    this.cachedTokens,
+    this.cacheWriteTokens,
+    this.imageTokens,
+    this.textTokens,
+  });
 
   /// Creates a [PromptTokensDetails] from JSON.
   factory PromptTokensDetails.fromJson(Map<String, dynamic> json) {
     return PromptTokensDetails(
       audioTokens: json['audio_tokens'] as int?,
       cachedTokens: json['cached_tokens'] as int?,
+      cacheWriteTokens: json.containsKey('cache_write_tokens')
+          ? requireJsonInt(
+              json['cache_write_tokens'],
+              'PromptTokensDetails.cache_write_tokens',
+            )
+          : null,
+      imageTokens: json.containsKey('image_tokens')
+          ? requireJsonInt(
+              json['image_tokens'],
+              'PromptTokensDetails.image_tokens',
+            )
+          : null,
+      textTokens: json.containsKey('text_tokens')
+          ? requireJsonInt(
+              json['text_tokens'],
+              'PromptTokensDetails.text_tokens',
+            )
+          : null,
     );
   }
 
@@ -145,16 +173,39 @@ class PromptTokensDetails {
   /// The number of cached tokens in the prompt.
   final int? cachedTokens;
 
+  /// The unadjusted number of prompt tokens written to cache.
+  ///
+  /// Null means the counter was omitted. JSON null is rejected when parsing.
+  final int? cacheWriteTokens;
+
+  /// The number of image input tokens in the prompt.
+  ///
+  /// Null means the counter was omitted. JSON null is rejected when parsing.
+  final int? imageTokens;
+
+  /// The number of text input tokens in the prompt.
+  ///
+  /// Null means the counter was omitted. JSON null is rejected when parsing.
+  final int? textTokens;
+
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (audioTokens != null) 'audio_tokens': audioTokens,
     if (cachedTokens != null) 'cached_tokens': cachedTokens,
+    if (cacheWriteTokens != null) 'cache_write_tokens': cacheWriteTokens,
+    if (imageTokens != null) 'image_tokens': imageTokens,
+    if (textTokens != null) 'text_tokens': textTokens,
   };
 
   /// Creates a copy with replaced values.
+  ///
+  /// Nullable fields can be explicitly set to `null` to clear them.
   PromptTokensDetails copyWith({
     Object? audioTokens = unsetCopyWithValue,
     Object? cachedTokens = unsetCopyWithValue,
+    Object? cacheWriteTokens = unsetCopyWithValue,
+    Object? imageTokens = unsetCopyWithValue,
+    Object? textTokens = unsetCopyWithValue,
   }) {
     return PromptTokensDetails(
       audioTokens: audioTokens == unsetCopyWithValue
@@ -163,6 +214,15 @@ class PromptTokensDetails {
       cachedTokens: cachedTokens == unsetCopyWithValue
           ? this.cachedTokens
           : cachedTokens as int?,
+      cacheWriteTokens: cacheWriteTokens == unsetCopyWithValue
+          ? this.cacheWriteTokens
+          : cacheWriteTokens as int?,
+      imageTokens: imageTokens == unsetCopyWithValue
+          ? this.imageTokens
+          : imageTokens as int?,
+      textTokens: textTokens == unsetCopyWithValue
+          ? this.textTokens
+          : textTokens as int?,
     );
   }
 
@@ -172,14 +232,25 @@ class PromptTokensDetails {
       other is PromptTokensDetails &&
           runtimeType == other.runtimeType &&
           audioTokens == other.audioTokens &&
-          cachedTokens == other.cachedTokens;
+          cachedTokens == other.cachedTokens &&
+          cacheWriteTokens == other.cacheWriteTokens &&
+          imageTokens == other.imageTokens &&
+          textTokens == other.textTokens;
 
   @override
-  int get hashCode => Object.hash(audioTokens, cachedTokens);
+  int get hashCode => Object.hash(
+    audioTokens,
+    cachedTokens,
+    cacheWriteTokens,
+    imageTokens,
+    textTokens,
+  );
 
   @override
   String toString() =>
-      'PromptTokensDetails(audioTokens: $audioTokens, cachedTokens: $cachedTokens)';
+      'PromptTokensDetails(audioTokens: $audioTokens, cachedTokens: $cachedTokens, '
+      'cacheWriteTokens: $cacheWriteTokens, imageTokens: $imageTokens, '
+      'textTokens: $textTokens)';
 }
 
 /// Detailed breakdown of completion tokens.
@@ -191,6 +262,7 @@ class CompletionTokensDetails {
     this.reasoningTokens,
     this.acceptedPredictionTokens,
     this.rejectedPredictionTokens,
+    this.textTokens,
   });
 
   /// Creates a [CompletionTokensDetails] from JSON.
@@ -200,6 +272,12 @@ class CompletionTokensDetails {
       reasoningTokens: json['reasoning_tokens'] as int?,
       acceptedPredictionTokens: json['accepted_prediction_tokens'] as int?,
       rejectedPredictionTokens: json['rejected_prediction_tokens'] as int?,
+      textTokens: json.containsKey('text_tokens')
+          ? requireJsonInt(
+              json['text_tokens'],
+              'CompletionTokensDetails.text_tokens',
+            )
+          : null,
     );
   }
 
@@ -215,6 +293,11 @@ class CompletionTokensDetails {
   /// The number of rejected prediction tokens.
   final int? rejectedPredictionTokens;
 
+  /// The number of text output tokens generated by the model.
+  ///
+  /// Null means the counter was omitted. JSON null is rejected when parsing.
+  final int? textTokens;
+
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (audioTokens != null) 'audio_tokens': audioTokens,
@@ -223,14 +306,18 @@ class CompletionTokensDetails {
       'accepted_prediction_tokens': acceptedPredictionTokens,
     if (rejectedPredictionTokens != null)
       'rejected_prediction_tokens': rejectedPredictionTokens,
+    if (textTokens != null) 'text_tokens': textTokens,
   };
 
   /// Creates a copy with replaced values.
+  ///
+  /// Nullable fields can be explicitly set to `null` to clear them.
   CompletionTokensDetails copyWith({
     Object? audioTokens = unsetCopyWithValue,
     Object? reasoningTokens = unsetCopyWithValue,
     Object? acceptedPredictionTokens = unsetCopyWithValue,
     Object? rejectedPredictionTokens = unsetCopyWithValue,
+    Object? textTokens = unsetCopyWithValue,
   }) {
     return CompletionTokensDetails(
       audioTokens: audioTokens == unsetCopyWithValue
@@ -245,6 +332,9 @@ class CompletionTokensDetails {
       rejectedPredictionTokens: rejectedPredictionTokens == unsetCopyWithValue
           ? this.rejectedPredictionTokens
           : rejectedPredictionTokens as int?,
+      textTokens: textTokens == unsetCopyWithValue
+          ? this.textTokens
+          : textTokens as int?,
     );
   }
 
@@ -256,7 +346,8 @@ class CompletionTokensDetails {
           audioTokens == other.audioTokens &&
           reasoningTokens == other.reasoningTokens &&
           acceptedPredictionTokens == other.acceptedPredictionTokens &&
-          rejectedPredictionTokens == other.rejectedPredictionTokens;
+          rejectedPredictionTokens == other.rejectedPredictionTokens &&
+          textTokens == other.textTokens;
 
   @override
   int get hashCode => Object.hash(
@@ -264,6 +355,7 @@ class CompletionTokensDetails {
     reasoningTokens,
     acceptedPredictionTokens,
     rejectedPredictionTokens,
+    textTokens,
   );
 
   @override
@@ -271,5 +363,6 @@ class CompletionTokensDetails {
       'CompletionTokensDetails(audioTokens: $audioTokens, '
       'reasoningTokens: $reasoningTokens, '
       'acceptedPredictionTokens: $acceptedPredictionTokens, '
-      'rejectedPredictionTokens: $rejectedPredictionTokens)';
+      'rejectedPredictionTokens: $rejectedPredictionTokens, '
+      'textTokens: $textTokens)';
 }

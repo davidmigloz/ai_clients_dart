@@ -6,6 +6,40 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming Chat usage and stream-obfuscation alignment
+
+Chat usage gains optional prompt `cacheWriteTokens`, `imageTokens`, and
+`textTokens`, plus completion `textTokens`. Streams preserve these on the final
+usage-only chunk when `StreamOptions(includeUsage: true)` is requested; its
+`choices` list is empty. Use `event.textDelta` or `choices?.firstOrNull` rather
+than unconditionally accessing `.first`.
+
+`StreamOptions.includeObfuscation` now controls padding, and
+`ChatStreamEvent.obfuscation` preserves it as metadata. Omission keeps server
+defaults, false is sent explicitly, and an empty returned string remains present.
+Padding does not enter accumulated output. The shared options flag also
+serializes on Responses requests; `includeUsage` remains Chat-specific.
+
+The six new fields are optional but nonnull when supplied in JSON. Parsing rejects
+explicit null or the wrong type in the four new counters, `include_obfuscation`,
+and event `obfuscation`. Omit them instead. Nullable constructor values and
+`copyWith(...: null)` still clear by omission. Older completion counts, detail
+objects, request `include_usage`, and provider fields retain their existing null
+compatibility; embedding usage continues to work without completion counts.
+
+Stream events now compare all fields, including content, usage, and padding.
+Choice finish reasons/logprobs, tool-call delta type/function, and nested logprob
+bytes/alternatives also participate in equality/hash. Chunks with the same
+ID/timestamp but different data can now be distinct map/set keys. Const
+constructors remain available, and caller-owned collections stay mutable; avoid
+mutating a model used as a map/set key. New copies support explicit nullable
+clearing and empty list replacements.
+
+See [the streaming example](example/streaming_example.dart). Package versioning
+and release remain separate.
+
+---
+
 ## Upcoming cache-controls and diagnostics alignment
 
 Responses creation now uses the distinct `ResponsePromptCacheOptionsParam`,

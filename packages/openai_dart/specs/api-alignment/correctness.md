@@ -5,9 +5,10 @@ Status: source audit complete; containers merged in
 Cache retention merged in [PR #328](https://github.com/davidmigloz/ai_clients_dart/pull/328),
 closing #321; its
 [acceptance evidence](reviews/03-cache-retention.md) is recorded. Cache controls/diagnostics
-are implemented and independently reviewed with
-[acceptance evidence](reviews/04-cache-controls-diagnostics.md) in
-[PR #329](https://github.com/davidmigloz/ai_clients_dart/pull/329), awaiting merge. Parent
+merged in [PR #329](https://github.com/davidmigloz/ai_clients_dart/pull/329), closing #322;
+[acceptance evidence](reviews/04-cache-controls-diagnostics.md) is recorded. Chat usage/obfuscation
+is implemented and independently reviewed with
+[acceptance evidence](reviews/05-chat-usage-obfuscation.md), awaiting PR merge. Parent
 [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Decisions was merged in [#319](https://github.com/davidmigloz/ai_clients_dart/pull/319)
 after all CI checks passed, closing #318.
@@ -97,8 +98,8 @@ prewarm reject parsed null; comparison ID accepts it and normalizes to omission.
 Compaction keeps its canonical outer-nullable narrow options. Existing returned
 Response options tolerate outer null for provider compatibility. Const holder
 constructors stay available; only unknown diagnostic JSON is recursively frozen.
-Full Chat equality/hash includes every field, and shared nested JSON schemas and
-Chat and Responses request metadata use deep value equality with consistent hashes.
+Full Chat equality/hash includes every field. Shared nested JSON schemas and
+Chat/Responses request metadata use deep value equality with consistent hashes.
 
 ## Chat usage, obfuscation, and audio
 
@@ -138,6 +139,16 @@ Sources: [Python usage](https://github.com/openai/openai-python/blob/v3.26.0/src
 [Node accumulator](https://github.com/openai/openai-node/blob/v7.30.0/src/lib/ChatCompletionStream.ts).
 Assertions check interleaved choice isolation, fragment order, late expiry, stable
 snapshots, reset, and both request/response projections without making live audio.
+
+Implementation decisions for CHAT-001–002: new counters, request obfuscation
+control, and returned padding reject explicit parsed null/wrong types because
+their canonical members are nonnullable. Preserve old completion/detail-object/
+provider null compatibility. Constructor/copy null clears by omission. Complete
+all existing StreamOptions/Event fields and their nested Choice/ToolCallDelta/
+logprob value contracts, rather than introducing partial equality for new fields.
+Keep const constructors and existing caller collection ownership. Do not add
+Chat audio here. Shared StreamOptions forwards the flag to existing Responses
+requests, but this slice does not claim broader Responses streaming parity.
 
 ## Retry and error contracts
 

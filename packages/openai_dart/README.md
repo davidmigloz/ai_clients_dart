@@ -33,7 +33,7 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 
 - Responses API with streaming, multi-turn conversations, structured output, background mode, cache prewarming, and typed cache diagnostics
 - Decisions API for typed predicate, choice, and score answers from text or inline images
-- Chat Completions with tool calling, vision, structured output, and streaming
+- Chat Completions with tool calling, vision, structured output, detailed token usage, and stream obfuscation controls
 - Images, videos, audio (TTS, transcription, translation), and embeddings
 - Realtime API via WebSocket and WebRTC with audio streaming
 - Input token counting via `inputTokens` for cost estimation
@@ -347,32 +347,50 @@ client.close();
 <details>
 <summary><b>Show example</b></summary>
 
-Streaming returns token-by-token deltas as they arrive. You can iterate text deltas directly, collect all text at once, or accumulate chunks into a complete response object.
+Streaming returns content deltas plus metadata as they arrive. Request final usage
+with `includeUsage`; its additional chunk has an empty `choices` list. Use
+`event.textDelta` to safely handle content and usage-only events.
 
 ```dart
+final accumulator = ChatStreamAccumulator();
 final stream = client.chat.completions.createStream(
   ChatCompletionCreateRequest(
-    model: 'gpt-5.5',
-    messages: [ChatMessage.user('Tell me a story')],
+    model: 'gpt-6-luna',
+    reasoningEffort: ReasoningEffort.none,
+    messages: [ChatMessage.user('Tell me a short story')],
+    maxCompletionTokens: 64,
+    store: false,
+    streamOptions: const StreamOptions(
+      includeUsage: true,
+      includeObfuscation: true,
+    ),
   ),
 );
-
-// Iterate text deltas directly
-await for (final delta in stream.textDeltas()) {
-  stdout.write(delta);
-}
-
-// Or collect all text at once
-final text = await stream.collectText();
-
-// Or accumulate chunks into a complete ChatCompletion
-final accumulator = ChatStreamAccumulator();
 await for (final event in stream) {
   accumulator.add(event);
+  stdout.write(event.textDelta ?? '');
 }
 final completion = accumulator.toChatCompletion();
-print(completion.text);
+print(completion.usage?.promptTokensDetails?.cacheWriteTokens);
+print(completion.usage?.promptTokensDetails?.textTokens);
+print(completion.usage?.promptTokensDetails?.imageTokens);
+print(completion.usage?.completionTokensDetails?.textTokens);
 ```
+
+Prompt details preserve audio, cached, unadjusted cache-write, image, and text
+counts. Completion details preserve audio, reasoning, prediction, and text counts.
+These details also work on ordinary completions; missing counters remain absent,
+and zero remains zero. Interrupted streams can end before final usage arrives.
+
+`includeObfuscation` controls server padding that normalizes streamed payload
+sizes. Omit it to keep the server default (enabled), or set it to false to reduce
+bandwidth when you trust the network links. `ChatStreamEvent.obfuscation` exposes
+padding as metadata, including an empty string. It never becomes accumulated
+text, refusal, reasoning, or tool arguments; `textDeltas()` and `collectText()`
+also yield content only. The shared options model supports the flag on Responses
+requests too; `includeUsage` is Chat-specific. See the
+[official streaming reference](https://developers.openai.com/api/reference/resources/chat/subresources/completions/streaming-events)
+for the wire contract.
 
 → [Full example](example/streaming_example.dart)
 
@@ -911,7 +929,7 @@ See the [example/](example/) directory for complete examples:
 | Example | Description |
 |---------|-------------|
 | [`chat_example.dart`](example/chat_example.dart) | Chat completions, multi-turn conversations, and legacy cache retention |
-| [`streaming_example.dart`](example/streaming_example.dart) | Streaming responses with text deltas |
+| [`streaming_example.dart`](example/streaming_example.dart) | Content streaming, detailed final usage, and obfuscation controls |
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Function calling with tool definitions |
 | [`vision_example.dart`](example/vision_example.dart) | Image analysis with vision models |
 | [`responses_example.dart`](example/responses_example.dart) | Responses API with built-in tools |

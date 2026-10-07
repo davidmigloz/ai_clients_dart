@@ -7,8 +7,10 @@ import '../chat/chat_completion_moderation.dart';
 import '../chat/chat_message.dart';
 import '../chat/reasoning_detail.dart';
 import '../chat/tool_call.dart';
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../common/finish_reason.dart';
+import '../common/json_helpers.dart';
 import '../common/logprobs.dart';
 import '../common/usage.dart';
 
@@ -24,7 +26,7 @@ import '../common/usage.dart';
 /// final stream = client.chat.completions.createStream(request);
 ///
 /// await for (final event in stream) {
-///   final content = event.choices?.first.delta.content;
+///   final content = event.textDelta;
 ///   if (content != null) {
 ///     stdout.write(content);
 ///   }
@@ -44,6 +46,7 @@ class ChatStreamEvent {
     this.serviceTier,
     this.moderation,
     this.provider,
+    this.obfuscation,
   });
 
   /// Creates a [ChatStreamEvent] from JSON.
@@ -67,6 +70,12 @@ class ChatStreamEvent {
             )
           : null,
       provider: json['provider'] as String?,
+      obfuscation: json.containsKey('obfuscation')
+          ? requireJsonString(
+              json['obfuscation'],
+              'ChatStreamEvent.obfuscation',
+            )
+          : null,
     );
   }
 
@@ -110,13 +119,20 @@ class ChatStreamEvent {
   /// Moderation results for the request input and generated output.
   ///
   /// Present on the dedicated moderation chunk when moderated completions were
-  /// requested via [ChatCompletionCreateRequest.moderation].
+  /// requested via `ChatCompletionCreateRequest.moderation`.
   final ChatCompletionModeration? moderation;
 
   /// **OpenRouter only.** The provider that served the request.
   ///
   /// Not part of the official OpenAI API.
   final String? provider;
+
+  /// Random padding used to normalize streaming payload sizes.
+  ///
+  /// This is metadata rather than model output. It must not be appended to
+  /// content, tool arguments, or reasoning. An empty string is preserved when
+  /// supplied. Omission is supported; an explicitly null wire value is invalid.
+  final String? obfuscation;
 
   /// Gets the text delta from the first choice.
   ///
@@ -140,7 +156,49 @@ class ChatStreamEvent {
     if (serviceTier != null) 'service_tier': serviceTier,
     if (moderation != null) 'moderation': moderation!.toJson(),
     if (provider != null) 'provider': provider,
+    if (obfuscation != null) 'obfuscation': obfuscation,
   };
+
+  /// Creates a copy, allowing every optional field to be explicitly cleared.
+  ChatStreamEvent copyWith({
+    Object? id = unsetCopyWithValue,
+    Object? object = unsetCopyWithValue,
+    Object? created = unsetCopyWithValue,
+    Object? model = unsetCopyWithValue,
+    Object? choices = unsetCopyWithValue,
+    Object? usage = unsetCopyWithValue,
+    Object? systemFingerprint = unsetCopyWithValue,
+    Object? serviceTier = unsetCopyWithValue,
+    Object? moderation = unsetCopyWithValue,
+    Object? provider = unsetCopyWithValue,
+    Object? obfuscation = unsetCopyWithValue,
+  }) => ChatStreamEvent(
+    id: id == unsetCopyWithValue ? this.id : id as String?,
+    object: object == unsetCopyWithValue ? this.object : object as String?,
+    created: created == unsetCopyWithValue ? this.created : created as int?,
+    model: model == unsetCopyWithValue ? this.model : model as String?,
+    choices: choices == unsetCopyWithValue
+        ? this.choices
+        : choices == null
+        ? null
+        : List<ChatStreamChoice>.from(choices as List),
+    usage: usage == unsetCopyWithValue ? this.usage : usage as Usage?,
+    systemFingerprint: systemFingerprint == unsetCopyWithValue
+        ? this.systemFingerprint
+        : systemFingerprint as String?,
+    serviceTier: serviceTier == unsetCopyWithValue
+        ? this.serviceTier
+        : serviceTier as String?,
+    moderation: moderation == unsetCopyWithValue
+        ? this.moderation
+        : moderation as ChatCompletionModeration?,
+    provider: provider == unsetCopyWithValue
+        ? this.provider
+        : provider as String?,
+    obfuscation: obfuscation == unsetCopyWithValue
+        ? this.obfuscation
+        : obfuscation as String?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -148,13 +206,40 @@ class ChatStreamEvent {
       other is ChatStreamEvent &&
           runtimeType == other.runtimeType &&
           id == other.id &&
-          created == other.created;
+          object == other.object &&
+          created == other.created &&
+          model == other.model &&
+          listsEqual(choices, other.choices) &&
+          usage == other.usage &&
+          systemFingerprint == other.systemFingerprint &&
+          serviceTier == other.serviceTier &&
+          moderation == other.moderation &&
+          provider == other.provider &&
+          obfuscation == other.obfuscation;
 
   @override
-  int get hashCode => Object.hash(id, created);
+  int get hashCode => Object.hash(
+    id,
+    object,
+    created,
+    model,
+    listHash(choices),
+    usage,
+    systemFingerprint,
+    serviceTier,
+    moderation,
+    provider,
+    obfuscation,
+  );
 
   @override
-  String toString() => 'ChatStreamEvent(id: $id, model: $model)';
+  String toString() =>
+      'ChatStreamEvent(id: $id, object: $object, created: $created, model: $model, '
+      'choices: ${choices == null ? 'null' : '${choices!.length} items'}, '
+      'usage: $usage, systemFingerprint: $systemFingerprint, '
+      'serviceTier: $serviceTier, moderation: ${moderation == null ? 'null' : 'present'}, '
+      'provider: $provider, '
+      'obfuscation: ${obfuscation == null ? 'null' : '${obfuscation!.length} chars'})';
 }
 
 /// A single choice in a streaming response.
@@ -213,19 +298,40 @@ class ChatStreamChoice {
     if (logprobs != null) 'logprobs': logprobs!.toJson(),
   };
 
+  /// Creates a copy, allowing nullable metadata to be explicitly cleared.
+  ChatStreamChoice copyWith({
+    Object? index = unsetCopyWithValue,
+    ChatDelta? delta,
+    Object? finishReason = unsetCopyWithValue,
+    Object? logprobs = unsetCopyWithValue,
+  }) => ChatStreamChoice(
+    index: index == unsetCopyWithValue ? this.index : index as int?,
+    delta: delta ?? this.delta,
+    finishReason: finishReason == unsetCopyWithValue
+        ? this.finishReason
+        : finishReason as FinishReason?,
+    logprobs: logprobs == unsetCopyWithValue
+        ? this.logprobs
+        : logprobs as Logprobs?,
+  );
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ChatStreamChoice &&
           runtimeType == other.runtimeType &&
           index == other.index &&
-          delta == other.delta;
+          delta == other.delta &&
+          finishReason == other.finishReason &&
+          logprobs == other.logprobs;
 
   @override
-  int get hashCode => Object.hash(index, delta);
+  int get hashCode => Object.hash(index, delta, finishReason, logprobs);
 
   @override
-  String toString() => 'ChatStreamChoice(index: $index)';
+  String toString() =>
+      'ChatStreamChoice(index: $index, delta: present, finishReason: $finishReason, '
+      'logprobs: ${logprobs == null ? 'null' : 'present'})';
 }
 
 /// The delta content in a streaming chunk.
@@ -396,19 +502,38 @@ class ToolCallDelta {
     if (function != null) 'function': function!.toJson(),
   };
 
+  /// Creates a copy, allowing optional metadata to be explicitly cleared.
+  ToolCallDelta copyWith({
+    int? index,
+    Object? id = unsetCopyWithValue,
+    Object? type = unsetCopyWithValue,
+    Object? function = unsetCopyWithValue,
+  }) => ToolCallDelta(
+    index: index ?? this.index,
+    id: id == unsetCopyWithValue ? this.id : id as String?,
+    type: type == unsetCopyWithValue ? this.type : type as String?,
+    function: function == unsetCopyWithValue
+        ? this.function
+        : function as FunctionCallDelta?,
+  );
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ToolCallDelta &&
           runtimeType == other.runtimeType &&
           index == other.index &&
-          id == other.id;
+          id == other.id &&
+          type == other.type &&
+          function == other.function;
 
   @override
-  int get hashCode => Object.hash(index, id);
+  int get hashCode => Object.hash(index, id, type, function);
 
   @override
-  String toString() => 'ToolCallDelta(index: $index)';
+  String toString() =>
+      'ToolCallDelta(index: $index, id: $id, type: $type, '
+      'function: ${function == null ? 'null' : 'present'})';
 }
 
 /// A function call delta in a streaming chunk.

@@ -852,14 +852,14 @@
     },
     "CompletionUsage": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "Usage",
       "file": "lib/src/models/common/usage.dart",
       "schema": "CompletionUsage",
       "tags": [
         "acknowledged"
       ],
-      "note": "completionTokens is nullable for provider compat but spec requires non-null. toString missing promptTokensDetails/completionTokensDetails."
+      "note": "Shared Chat/provider Usage. Canonical completion_tokens remains nullable for provider/embedding compatibility; all detailed counters and full holder diagnostics/copy/value contracts have exact fixtures."
     },
     "ChatCompletionTool": {
       "spec": "main",
@@ -1019,34 +1019,16 @@
       "schema": "ChatCompletionRequestMessageContentPartRefusal",
       "parent": "ContentPart"
     },
-    "ChatStreamEvent": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": "ChatStreamEvent",
-      "file": "lib/src/models/streaming/chat_stream_event.dart",
-      "schema": null,
-      "discriminator": {
-        "field": "object",
-        "mapping": {
-          "CreateChatCompletionStreamResponse": "chat.completion.chunk"
-        }
-      },
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Not a sealed class in Dart (plain class). No spec schema. All required spec fields are nullable for provider compat. Has extra provider field for OpenRouter."
-    },
     "CreateChatCompletionStreamResponse": {
       "spec": "main",
-      "kind": "skip",
-      "dart_class": "ChatStreamChunk",
+      "kind": "object",
+      "dart_class": "ChatStreamEvent",
       "file": "lib/src/models/streaming/chat_stream_event.dart",
       "schema": "CreateChatCompletionStreamResponse",
-      "parent": "ChatStreamEvent",
       "tags": [
         "acknowledged"
       ],
-      "note": "Dart uses ChatStreamEvent (plain class) instead of separate ChatStreamChunk subclass. Required spec fields (id, choices, created, model, object) are nullable for provider compat."
+      "note": "Plain shared event class; id/choices/created/model/object remain nullable for compatible providers. Optional nonnull obfuscation, full value/copy contracts, and final usage-only chunk are tested through the public resource."
     },
     "ResponseFormat": {
       "spec": "main",
@@ -2748,6 +2730,30 @@
       "file": "lib/src/models/responses/config/prompt_cache_diagnostics.dart",
       "schema": null,
       "note": "Identical canonical/beta contract; shares the canonical Dart implementation. Immutable open string wrapper with all nine current presets; preserves future strings exactly. Wire scalar tested directly without fabricating enum fallback."
+    },
+    "ChatCompletionStreamOptions": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "StreamOptions",
+      "file": "lib/src/models/chat/chat_completion_request.dart",
+      "schema": null,
+      "note": "Concrete object body of canonical nullable-anyOf ChatCompletionStreamOptions. Generic verifier cannot extract wrapper properties; exact include_usage/include_obfuscation shapes and full contracts are covered by public/model fixtures. Existing Responses holder also forwards include_obfuscation; include_usage is Chat-specific."
+    },
+    "CompletionUsage:PromptTokensDetails": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "PromptTokensDetails",
+      "file": "lib/src/models/common/usage.dart",
+      "schema": null,
+      "note": "Typed inline CompletionUsage.prompt_tokens_details object. Optional known new counters reject malformed supplied values; old null compatibility retained. Exact inline properties and full contracts covered by public/model fixtures."
+    },
+    "CompletionUsage:CompletionTokensDetails": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "CompletionTokensDetails",
+      "file": "lib/src/models/common/usage.dart",
+      "schema": null,
+      "note": "Typed inline CompletionUsage.completion_tokens_details object. Optional known new counters reject malformed supplied values; old null compatibility retained. Exact inline properties and full contracts covered by public/model fixtures."
     }
   }
 }
