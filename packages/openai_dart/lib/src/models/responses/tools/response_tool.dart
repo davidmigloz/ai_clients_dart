@@ -67,6 +67,39 @@ sealed class ResponseTool {
     };
   }
 
+  /// Reads a tool discovered through tool search.
+  ///
+  /// Top-level functions require explicit nullable `parameters` and `strict`
+  /// fields. Nested namespace functions accept optional schemas and dotted
+  /// names. Ordinary [fromJson] retains its existing callable signature.
+  factory ResponseTool.fromToolSearchOutputJson(Map<String, dynamic> json) {
+    const context = 'ToolSearchOutputTool';
+    final type = requireJsonString(json['type'], '$context.type');
+    return switch (type) {
+      'function' => _parseNamespaceFunction(
+        json,
+        context,
+        requiredReturnedFields: true,
+      ),
+      'namespace' => _parseNamespaceTool(json, discovered: true),
+      'custom' => _parseNamespaceCustom(json, context),
+      _ => ResponseTool.fromJson(json),
+    };
+  }
+
+  /// Serializes a tool discovered through tool search.
+  ///
+  /// Top-level functions always emit nullable `parameters` and `strict` keys;
+  /// nested namespace functions keep their optional request fields omitted.
+  Map<String, dynamic> toToolSearchOutputJson() => switch (this) {
+    final FunctionTool tool => {
+      ...tool.toJson(),
+      'parameters': tool.parameters,
+      'strict': tool.strict,
+    },
+    _ => toJson(),
+  };
+
   /// Creates a function tool.
   static FunctionTool function({
     required String name,
@@ -1449,8 +1482,15 @@ class ComputerTool extends ResponseTool {
 }
 
 /// Namespace tool for grouping tools under a namespace.
+///
+/// Ordinary namespace parsing uses ordinary function names. Tool-search output
+/// parsing accepts discovered names containing dots through
+/// [ResponseTool.fromToolSearchOutputJson].
 @immutable
 class NamespaceTool extends ResponseTool {
+  /// The fixed namespace discriminator.
+  String get type => 'namespace';
+
   /// The namespace name.
   final String name;
 
@@ -1461,35 +1501,37 @@ class NamespaceTool extends ResponseTool {
   final List<NamespaceAllowedTool> tools;
 
   /// Creates a [NamespaceTool].
+  ///
+  /// The caller-owned list retains its existing ownership semantics. Parsed
+  /// namespaces take an unmodifiable snapshot instead.
   const NamespaceTool({
     required this.name,
     required this.description,
     required this.tools,
   });
 
-  /// Creates a [NamespaceTool] from JSON.
-  factory NamespaceTool.fromJson(Map<String, dynamic> json) {
-    return NamespaceTool(
-      name: json['name'] as String,
-      description: json['description'] as String,
-      tools: (json['tools'] as List).map<NamespaceAllowedTool>((e) {
-        final map = e as Map<String, dynamic>;
-        return switch (map['type'] as String?) {
-          'function' => FunctionTool.fromJson(map),
-          'custom' => CustomTool.fromJson(map),
-          _ => UnknownNamespaceTool(map),
-        };
-      }).toList(),
-    );
-  }
+  /// Creates an ordinary [NamespaceTool] from JSON.
+  factory NamespaceTool.fromJson(Map<String, dynamic> json) =>
+      _parseNamespaceTool(json, discovered: false);
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'namespace',
+    'type': type,
     'name': name,
     'description': description,
     'tools': tools.map((e) => e.toJson()).toList(),
   };
+
+  /// Creates a copy with the given fields replaced.
+  NamespaceTool copyWith({
+    String? name,
+    String? description,
+    List<NamespaceAllowedTool>? tools,
+  }) => NamespaceTool(
+    name: name ?? this.name,
+    description: description ?? this.description,
+    tools: tools ?? this.tools,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -1501,17 +1543,23 @@ class NamespaceTool extends ResponseTool {
           listsEqual(tools, other.tools);
 
   @override
-  int get hashCode => Object.hash(name, description, Object.hashAll(tools));
+  int get hashCode => Object.hash(name, description, listHash(tools));
 
   @override
   String toString() =>
-      'NamespaceTool(name: $name, description: $description, tools: $tools)';
+      'NamespaceTool(name: $name, description: ${description.length} chars, '
+      'tools: ${tools.length} items)';
 }
 
 /// Tool search tool for searching available tools.
 @immutable
 class ToolSearchTool extends ResponseTool {
+  /// The fixed tool-search discriminator.
+  String get type => 'tool_search';
+
   /// The execution type (server or client).
+  ///
+  /// Omission leaves the server's execution selection unchanged.
   final ToolSearchExecutionType? execution;
 
   /// Description of the tool search.
@@ -1521,26 +1569,54 @@ class ToolSearchTool extends ResponseTool {
   final Map<String, dynamic>? parameters;
 
   /// Creates a [ToolSearchTool].
+  ///
+  /// The caller-owned schema map retains its existing ownership semantics.
   const ToolSearchTool({this.execution, this.description, this.parameters});
 
   /// Creates a [ToolSearchTool] from JSON.
   factory ToolSearchTool.fromJson(Map<String, dynamic> json) {
+    const context = 'ToolSearchTool';
+    requireJsonType(json, 'tool_search', context);
     return ToolSearchTool(
-      execution: json['execution'] != null
-          ? ToolSearchExecutionType.fromJson(json['execution'] as String)
+      execution: json.containsKey('execution')
+          ? ToolSearchExecutionType.fromJson(
+              requireJsonString(json['execution'], '$context.execution'),
+            )
           : null,
-      description: json['description'] as String?,
-      parameters: json['parameters'] as Map<String, dynamic>?,
+      description: optionalJsonString(
+        json,
+        'description',
+        context,
+        nullable: true,
+      ),
+      parameters: _optionalToolDefinitionObject(json, 'parameters', context),
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'tool_search',
+    'type': type,
     if (execution != null) 'execution': execution!.toJson(),
     if (description != null) 'description': description,
     if (parameters != null) 'parameters': parameters,
   };
+
+  /// Creates a copy; pass null to clear an optional setting.
+  ToolSearchTool copyWith({
+    Object? execution = unsetCopyWithValue,
+    Object? description = unsetCopyWithValue,
+    Object? parameters = unsetCopyWithValue,
+  }) => ToolSearchTool(
+    execution: identical(execution, unsetCopyWithValue)
+        ? this.execution
+        : execution as ToolSearchExecutionType?,
+    description: identical(description, unsetCopyWithValue)
+        ? this.description
+        : description as String?,
+    parameters: identical(parameters, unsetCopyWithValue)
+        ? this.parameters
+        : parameters as Map<String, dynamic>?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -1549,14 +1625,179 @@ class ToolSearchTool extends ResponseTool {
           runtimeType == other.runtimeType &&
           execution == other.execution &&
           description == other.description &&
-          mapsEqual(parameters, other.parameters);
+          mapsDeepEqual(parameters, other.parameters);
 
   @override
-  int get hashCode => Object.hash(execution, description, mapHash(parameters));
+  int get hashCode =>
+      Object.hash(execution, description, mapDeepHashCode(parameters));
 
   @override
   String toString() =>
-      'ToolSearchTool(execution: $execution, description: $description, parameters: $parameters)';
+      'ToolSearchTool(execution: $execution, '
+      'description: ${description == null ? 'null' : '${description!.length} chars'}, '
+      'parameters: ${parameters == null ? 'null' : '${parameters!.length} keys'})';
+}
+
+NamespaceTool _parseNamespaceTool(
+  Map<String, dynamic> json, {
+  required bool discovered,
+}) {
+  final context = discovered
+      ? 'ToolSearchOutputNamespaceTool'
+      : 'NamespaceTool';
+  requireJsonType(json, 'namespace', context);
+  final name = requireJsonString(json['name'], '$context.name');
+  if (name.isEmpty) {
+    throw FormatException('$context.name: expected a nonempty string');
+  }
+  final description = requireJsonString(
+    json['description'],
+    '$context.description',
+  );
+  final rawTools = json['tools'];
+  if (rawTools is! List || rawTools.isEmpty) {
+    throw FormatException('$context.tools: expected a nonempty array');
+  }
+  final tools = <NamespaceAllowedTool>[];
+  for (var index = 0; index < rawTools.length; index++) {
+    final field = '$context.tools[$index]';
+    final tool = requireJsonObject(rawTools[index], field);
+    final type = requireJsonString(tool['type'], '$field.type');
+    tools.add(switch (type) {
+      'function' => _parseNamespaceFunction(
+        tool,
+        field,
+        discovered: discovered,
+      ),
+      'custom' => _parseNamespaceCustom(tool, field),
+      _ => UnknownNamespaceTool(_toolDefinitionSnapshot(tool, field)),
+    });
+  }
+  return NamespaceTool(
+    name: name,
+    description: description,
+    tools: List<NamespaceAllowedTool>.unmodifiable(tools),
+  );
+}
+
+FunctionTool _parseNamespaceFunction(
+  Map<String, dynamic> json,
+  String context, {
+  bool? discovered,
+  bool requiredReturnedFields = false,
+}) {
+  requireJsonType(json, 'function', context);
+  final name = requireJsonString(json['name'], '$context.name');
+  if (discovered != null) {
+    final pattern = RegExp(discovered ? r'[a-zA-Z0-9_.-]+' : r'[a-zA-Z0-9_-]+');
+    final match = pattern.matchAsPrefix(name);
+    if (name.length > 128 || match == null || match.end != name.length) {
+      throw FormatException('$context.name: invalid function name');
+    }
+  }
+  if (requiredReturnedFields) {
+    for (final key in ['parameters', 'strict']) {
+      if (!json.containsKey(key)) {
+        throw FormatException('$context.$key: missing required key');
+      }
+    }
+  }
+  return FunctionTool(
+    name: name,
+    description: optionalJsonString(
+      json,
+      'description',
+      context,
+      nullable: true,
+    ),
+    parameters: _optionalToolDefinitionObject(json, 'parameters', context),
+    strict: _optionalToolDefinitionBool(
+      json,
+      'strict',
+      context,
+      nullable: true,
+    ),
+    deferLoading: optionalJsonBool(json, 'defer_loading', context),
+    allowedCallers: _toolDefinitionAllowedCallers(
+      json,
+      context,
+      nonempty: discovered != null,
+    ),
+    outputSchema: _optionalToolDefinitionObject(json, 'output_schema', context),
+    async: optionalJsonBool(json, 'async', context),
+  );
+}
+
+CustomTool _parseNamespaceCustom(Map<String, dynamic> json, String context) {
+  requireJsonType(json, 'custom', context);
+  return CustomTool(
+    name: requireJsonString(json['name'], '$context.name'),
+    description: optionalJsonString(json, 'description', context),
+    format: _optionalToolDefinitionObject(
+      json,
+      'format',
+      context,
+      nullable: false,
+    ),
+    deferLoading: optionalJsonBool(json, 'defer_loading', context),
+    allowedCallers: _toolDefinitionAllowedCallers(
+      json,
+      context,
+      nonempty: true,
+    ),
+    async: optionalJsonBool(json, 'async', context),
+  );
+}
+
+Map<String, dynamic>? _optionalToolDefinitionObject(
+  Map<String, dynamic> json,
+  String key,
+  String context, {
+  bool nullable = true,
+}) {
+  if (!json.containsKey(key) || (nullable && json[key] == null)) return null;
+  final object = requireJsonObject(json[key], '$context.$key');
+  return _toolDefinitionSnapshot(object, '$context.$key');
+}
+
+Map<String, dynamic> _toolDefinitionSnapshot(
+  Map<String, dynamic> json,
+  String field,
+) {
+  try {
+    return freezeJsonObject(json);
+  } on FormatException catch (error) {
+    throw FormatException('$field: ${error.message}');
+  }
+}
+
+bool? _optionalToolDefinitionBool(
+  Map<String, dynamic> json,
+  String key,
+  String context, {
+  required bool nullable,
+}) =>
+    nullable && json[key] == null ? null : optionalJsonBool(json, key, context);
+
+List<CallableToolAllowedCaller>? _toolDefinitionAllowedCallers(
+  Map<String, dynamic> json,
+  String context, {
+  required bool nonempty,
+}) {
+  final value = json['allowed_callers'];
+  if (value == null) return null;
+  if (value is! List || (nonempty && value.isEmpty)) {
+    throw FormatException(
+      '$context.allowed_callers: expected an array'
+      '${nonempty ? ' with at least one item' : ''}',
+    );
+  }
+  return List<CallableToolAllowedCaller>.unmodifiable([
+    for (var index = 0; index < value.length; index++)
+      CallableToolAllowedCaller.fromJson(
+        requireJsonString(value[index], '$context.allowed_callers[$index]'),
+      ),
+  ]);
 }
 
 /// Local shell tool for command execution in a local environment.
@@ -1760,16 +2001,22 @@ class UnknownNamespaceTool implements NamespaceAllowedTool {
   @override
   Map<String, dynamic> toJson() => data;
 
+  /// Creates a copy with the raw payload replaced.
+  ///
+  /// Explicit construction and copying retain caller-owned map semantics.
+  UnknownNamespaceTool copyWith({Map<String, dynamic>? data}) =>
+      UnknownNamespaceTool(data ?? this.data);
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is UnknownNamespaceTool &&
           runtimeType == other.runtimeType &&
-          mapsEqual(data, other.data);
+          mapsDeepEqual(data, other.data);
 
   @override
-  int get hashCode => mapHash(data);
+  int get hashCode => mapDeepHashCode(data);
 
   @override
-  String toString() => 'UnknownNamespaceTool(data: $data)';
+  String toString() => 'UnknownNamespaceTool(data: ${data.length} keys)';
 }

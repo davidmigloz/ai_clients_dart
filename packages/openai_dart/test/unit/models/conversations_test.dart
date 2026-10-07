@@ -772,7 +772,10 @@ void main() {
       final json = {
         'type': 'tool_search_call',
         'id': 'tsc_2',
+        'call_id': null,
         'execution': 'server',
+        'arguments': null,
+        'status': 'completed',
       };
 
       final item = ConversationItem.fromJson(json);
@@ -813,7 +816,12 @@ void main() {
         'call_id': 'call_1',
         'execution': 'client',
         'tools': [
-          {'type': 'function', 'name': 'func1'},
+          {
+            'type': 'function',
+            'name': 'func1',
+            'parameters': null,
+            'strict': null,
+          },
         ],
         'status': 'completed',
       };
@@ -823,7 +831,7 @@ void main() {
       final tso = item as ConversationToolSearchOutputItem;
       expect(tso.id, 'tso_1');
       expect(tso.tools, hasLength(1));
-      expect(tso.tools!.first, isA<FunctionTool>());
+      expect(tso.tools.first, isA<FunctionTool>());
 
       final restored = ConversationItem.fromJson(tso.toJson());
       expect(restored, equals(tso));
@@ -833,9 +841,16 @@ void main() {
       final json = {
         'type': 'tool_search_output',
         'id': 'tso_2',
+        'call_id': null,
+        'status': 'completed',
         'execution': 'client',
         'tools': [
-          {'type': 'function', 'name': 'func1'},
+          {
+            'type': 'function',
+            'name': 'func1',
+            'parameters': null,
+            'strict': null,
+          },
         ],
       };
 
@@ -855,7 +870,12 @@ void main() {
         'call_id': 'call_3',
         'execution': 'server',
         'tools': [
-          {'type': 'function', 'name': 'func1'},
+          {
+            'type': 'function',
+            'name': 'func1',
+            'parameters': null,
+            'strict': null,
+          },
         ],
         'status': 'completed',
       };

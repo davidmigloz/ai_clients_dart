@@ -6,6 +6,7 @@ import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../../common/json_helpers.dart';
 import '../config/configuration_update_reasoning.dart';
+import '../config/function_call_output_status.dart';
 import '../config/function_call_status.dart';
 import '../config/item_status.dart';
 import '../config/message_phase.dart';
@@ -27,6 +28,7 @@ import 'output_item.dart'
         ShellCallOutputContent,
         ShellEnvironment;
 import 'shell_call_helpers.dart';
+import 'tool_search_item_helpers.dart';
 import 'web_search_action.dart';
 import 'web_search_result.dart';
 
@@ -47,6 +49,8 @@ import 'web_search_result.dart';
 /// - [CustomToolCallOutputInputItem] - Output from a custom tool call
 /// - [ToolSearchCallItemParam] - A tool search call
 /// - [ToolSearchOutputItemParam] - Tool search results
+/// - [ToolSearchCallResourceItem] - Stored tool search calls
+/// - [ToolSearchOutputResourceItem] - Stored discovered tools
 /// - [CompactionTriggerItem] - Triggers compaction of the current context
 /// - [AdditionalToolsItemParam] - Additional tool definitions made available
 ///   mid-conversation
@@ -92,8 +96,9 @@ sealed class Item {
 
   /// Creates an item returned by the Responses input-items resource.
   ///
-  /// Shell calls/results and stored configuration updates use distinct returned
-  /// contracts; use each model's conversion helper for writable replay.
+  /// Shell calls/results, tool search and stored configuration updates use
+  /// distinct returned contracts. Use conversion helpers for writable items or
+  /// raw output replay for arbitrary returned search arguments.
   factory Item.fromResourceJson(Map<String, dynamic> json) =>
       switch (json['type']) {
         'configuration_update' => ConfigurationUpdateItemResponse.fromJson(
@@ -101,6 +106,8 @@ sealed class Item {
         ),
         'shell_call' => ShellCallResourceItem.fromJson(json),
         'shell_call_output' => ShellCallOutputResourceItem.fromJson(json),
+        'tool_search_call' => ToolSearchCallResourceItem.fromJson(json),
+        'tool_search_output' => ToolSearchOutputResourceItem.fromJson(json),
         _ => Item.fromJson(json),
       };
 
@@ -1254,65 +1261,90 @@ class CustomToolCallOutputInputItem extends Item {
 /// A tool search call input item.
 @immutable
 class ToolSearchCallItemParam extends Item {
+  /// The fixed item discriminator.
+  String get type => 'tool_search_call';
+
   /// Unique identifier.
   final String? id;
 
-  /// The agent that produced this item.
-  ///
-  /// Only populated on the beta multi-agent protocol
-  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  /// The producing agent on the beta multi-agent protocol.
   final AgentTag? agent;
 
-  /// The call ID for this tool search call.
+  /// The search call identifier, when included in request history.
   final String? callId;
 
-  /// The execution type (server or client).
+  /// The server or client execution type.
   final ToolSearchExecutionType? execution;
 
-  /// The arguments for the tool search.
-  final Map<String, dynamic>? arguments;
+  /// Required object-shaped search arguments, including empty objects.
+  final Map<String, dynamic> arguments;
 
-  /// Item status.
+  /// The item status.
   final ItemStatus? status;
 
   /// Creates a [ToolSearchCallItemParam].
+  ///
+  /// Const construction retains caller-owned collections. Do not mutate them
+  /// while this value is used as a map key or set member. Parsed collections
+  /// are recursively unmodifiable snapshots.
   const ToolSearchCallItemParam({
     this.id,
     this.agent,
     this.callId,
     this.execution,
-    this.arguments,
+    required this.arguments,
     this.status,
   });
 
-  /// Creates a [ToolSearchCallItemParam] from JSON.
+  /// Creates a [ToolSearchCallItemParam] from contextual tool-search JSON.
   factory ToolSearchCallItemParam.fromJson(Map<String, dynamic> json) {
+    const context = 'ToolSearchCallItemParam';
+    requireJsonType(json, 'tool_search_call', context);
     return ToolSearchCallItemParam(
-      id: json['id'] as String?,
-      agent: json['agent'] != null
-          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
-          : null,
-      callId: json['call_id'] as String?,
-      execution: json['execution'] != null
-          ? ToolSearchExecutionType.fromJson(json['execution'] as String)
-          : null,
-      arguments: json['arguments'] as Map<String, dynamic>?,
-      status: json['status'] != null
-          ? ItemStatus.fromJson(json['status'] as String)
-          : null,
+      id: optionalJsonString(json, 'id', context, nullable: true),
+      agent: toolSearchJsonAgent(json, context, nullable: true),
+      callId: optionalJsonString(json, 'call_id', context, nullable: true),
+      execution: toolSearchOptionalExecution(json, context),
+      arguments: toolSearchInputArguments(json, context),
+      status: toolSearchOptionalStatus(json, context),
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'tool_search_call',
+    'type': type,
     if (id != null) 'id': id,
     if (agent != null) 'agent': agent!.toJson(),
     if (callId != null) 'call_id': callId,
     if (execution != null) 'execution': execution!.toJson(),
-    if (arguments != null) 'arguments': arguments,
+    'arguments': arguments,
     if (status != null) 'status': status!.toJson(),
   };
+
+  /// Creates a copy with nullable fields explicitly clearable.
+  ToolSearchCallItemParam copyWith({
+    Object? id = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
+    Object? callId = unsetCopyWithValue,
+    Object? execution = unsetCopyWithValue,
+    Map<String, dynamic>? arguments,
+    Object? status = unsetCopyWithValue,
+  }) => ToolSearchCallItemParam(
+    id: identical(id, unsetCopyWithValue) ? this.id : id as String?,
+    agent: identical(agent, unsetCopyWithValue)
+        ? this.agent
+        : agent as AgentTag?,
+    callId: identical(callId, unsetCopyWithValue)
+        ? this.callId
+        : callId as String?,
+    execution: identical(execution, unsetCopyWithValue)
+        ? this.execution
+        : execution as ToolSearchExecutionType?,
+    arguments: arguments ?? this.arguments,
+    status: identical(status, unsetCopyWithValue)
+        ? this.status
+        : status as ItemStatus?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -1338,34 +1370,38 @@ class ToolSearchCallItemParam extends Item {
 
   @override
   String toString() =>
-      'ToolSearchCallItemParam(id: $id, agent: $agent, callId: $callId, execution: $execution, status: $status)';
+      'ToolSearchCallItemParam(id: $id, agent: ${toolSearchActorSummary(agent?.agentName)}, callId: $callId, execution: $execution, arguments: ${toolSearchArgumentsSummary(arguments)}, status: $status)';
 }
 
 /// A tool search output input item.
 @immutable
 class ToolSearchOutputItemParam extends Item {
+  /// The fixed item discriminator.
+  String get type => 'tool_search_output';
+
   /// Unique identifier.
   final String? id;
 
-  /// The agent that produced this item.
-  ///
-  /// Only populated on the beta multi-agent protocol
-  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  /// The producing agent on the beta multi-agent protocol.
   final AgentTag? agent;
 
-  /// The call ID for this tool search output.
+  /// The search call identifier, when included in request history.
   final String? callId;
 
-  /// The execution type (server or client).
+  /// The server or client execution type.
   final ToolSearchExecutionType? execution;
 
-  /// The tools discovered by the search.
+  /// The complete discovered tool definitions, including empty results.
   final List<ResponseTool> tools;
 
-  /// Item status.
+  /// The item status.
   final ItemStatus? status;
 
   /// Creates a [ToolSearchOutputItemParam].
+  ///
+  /// Const construction retains caller-owned collections. Do not mutate them
+  /// while this value is used as a map key or set member. Parsed collections
+  /// are recursively unmodifiable snapshots.
   const ToolSearchOutputItemParam({
     this.id,
     this.agent,
@@ -1375,36 +1411,55 @@ class ToolSearchOutputItemParam extends Item {
     this.status,
   });
 
-  /// Creates a [ToolSearchOutputItemParam] from JSON.
+  /// Creates a [ToolSearchOutputItemParam] from contextual tool-search JSON.
   factory ToolSearchOutputItemParam.fromJson(Map<String, dynamic> json) {
+    const context = 'ToolSearchOutputItemParam';
+    requireJsonType(json, 'tool_search_output', context);
     return ToolSearchOutputItemParam(
-      id: json['id'] as String?,
-      agent: json['agent'] != null
-          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
-          : null,
-      callId: json['call_id'] as String?,
-      execution: json['execution'] != null
-          ? ToolSearchExecutionType.fromJson(json['execution'] as String)
-          : null,
-      tools: (json['tools'] as List)
-          .map((e) => ResponseTool.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      status: json['status'] != null
-          ? ItemStatus.fromJson(json['status'] as String)
-          : null,
+      id: optionalJsonString(json, 'id', context, nullable: true),
+      agent: toolSearchJsonAgent(json, context, nullable: true),
+      callId: optionalJsonString(json, 'call_id', context, nullable: true),
+      execution: toolSearchOptionalExecution(json, context),
+      tools: toolSearchJsonTools(json['tools'], '$context.tools'),
+      status: toolSearchOptionalStatus(json, context),
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'tool_search_output',
+    'type': type,
     if (id != null) 'id': id,
     if (agent != null) 'agent': agent!.toJson(),
     if (callId != null) 'call_id': callId,
     if (execution != null) 'execution': execution!.toJson(),
-    'tools': tools.map((e) => e.toJson()).toList(),
+    'tools': tools.map((tool) => tool.toToolSearchOutputJson()).toList(),
     if (status != null) 'status': status!.toJson(),
   };
+
+  /// Creates a copy with nullable fields explicitly clearable.
+  ToolSearchOutputItemParam copyWith({
+    Object? id = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
+    Object? callId = unsetCopyWithValue,
+    Object? execution = unsetCopyWithValue,
+    List<ResponseTool>? tools,
+    Object? status = unsetCopyWithValue,
+  }) => ToolSearchOutputItemParam(
+    id: identical(id, unsetCopyWithValue) ? this.id : id as String?,
+    agent: identical(agent, unsetCopyWithValue)
+        ? this.agent
+        : agent as AgentTag?,
+    callId: identical(callId, unsetCopyWithValue)
+        ? this.callId
+        : callId as String?,
+    execution: identical(execution, unsetCopyWithValue)
+        ? this.execution
+        : execution as ToolSearchExecutionType?,
+    tools: tools ?? this.tools,
+    status: identical(status, unsetCopyWithValue)
+        ? this.status
+        : status as ItemStatus?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -1424,7 +1479,297 @@ class ToolSearchOutputItemParam extends Item {
 
   @override
   String toString() =>
-      'ToolSearchOutputItemParam(id: $id, agent: $agent, callId: $callId, execution: $execution, tools: $tools, status: $status)';
+      'ToolSearchOutputItemParam(id: $id, agent: ${toolSearchActorSummary(agent?.agentName)}, callId: $callId, execution: $execution, tools: ${tools.length} items, status: $status)';
+}
+
+/// A tool search call returned by the Responses input-items resource.
+@immutable
+class ToolSearchCallResourceItem extends Item {
+  /// The fixed item discriminator.
+  String get type => 'tool_search_call';
+
+  /// Unique identifier.
+  final String id;
+
+  /// The producing agent on the beta multi-agent protocol.
+  final AgentTag? agent;
+
+  /// The search call identifier; returned items always serialize its key.
+  final String? callId;
+
+  /// The server or client execution type.
+  final ToolSearchExecutionType execution;
+
+  /// Search arguments. Returned arguments can be any JSON value.
+  final Object? arguments;
+
+  /// The item status.
+  final ItemStatus status;
+
+  /// The actor that created this item, when provided.
+  final String? createdBy;
+
+  /// Creates a [ToolSearchCallResourceItem].
+  ///
+  /// Const construction retains caller-owned collections. Do not mutate them
+  /// while this value is used as a map key or set member. Parsed collections
+  /// are recursively unmodifiable snapshots.
+  const ToolSearchCallResourceItem({
+    required this.id,
+    this.agent,
+    required this.callId,
+    required this.execution,
+    required this.arguments,
+    required this.status,
+    this.createdBy,
+  });
+
+  /// Creates a [ToolSearchCallResourceItem] from contextual tool-search JSON.
+  factory ToolSearchCallResourceItem.fromJson(Map<String, dynamic> json) {
+    const context = 'ToolSearchCallResourceItem';
+    requireJsonType(json, 'tool_search_call', context);
+    return ToolSearchCallResourceItem(
+      id: requireJsonString(json['id'], '$context.id'),
+      agent: toolSearchJsonAgent(json, context),
+      callId: toolSearchRequiredCallId(json, context),
+      execution: ToolSearchExecutionType.fromJson(
+        requireJsonString(json['execution'], '$context.execution'),
+      ),
+      arguments: toolSearchReturnedArguments(json, context),
+      status: ItemStatus.fromJson(
+        requireJsonString(json['status'], '$context.status'),
+      ),
+      createdBy: optionalJsonString(json, 'created_by', context),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    if (agent != null) 'agent': agent!.toJson(),
+    'call_id': callId,
+    'execution': execution.toJson(),
+    'arguments': arguments,
+    'status': status.toJson(),
+    if (createdBy != null) 'created_by': createdBy,
+  };
+
+  /// Creates a copy with nullable fields explicitly clearable.
+  ToolSearchCallResourceItem copyWith({
+    String? id,
+    Object? agent = unsetCopyWithValue,
+    Object? callId = unsetCopyWithValue,
+    ToolSearchExecutionType? execution,
+    Object? arguments = unsetCopyWithValue,
+    ItemStatus? status,
+    Object? createdBy = unsetCopyWithValue,
+  }) => ToolSearchCallResourceItem(
+    id: id ?? this.id,
+    agent: identical(agent, unsetCopyWithValue)
+        ? this.agent
+        : agent as AgentTag?,
+    callId: identical(callId, unsetCopyWithValue)
+        ? this.callId
+        : callId as String?,
+    execution: execution ?? this.execution,
+    arguments: identical(arguments, unsetCopyWithValue)
+        ? this.arguments
+        : arguments,
+    status: status ?? this.status,
+    createdBy: identical(createdBy, unsetCopyWithValue)
+        ? this.createdBy
+        : createdBy as String?,
+  );
+
+  /// Converts a stored object-shaped search call to writable input.
+  ///
+  /// Arbitrary returned JSON requires raw replay via
+  /// `ResponseInput.fromOutputItems`; it cannot become a typed request object.
+  ToolSearchCallItemParam toToolSearchCallItemParam() {
+    if (arguments is! Map) {
+      throw StateError(
+        'ToolSearchCallResourceItem.arguments: typed input requires an object',
+      );
+    }
+    return ToolSearchCallItemParam(
+      id: id,
+      agent: agent,
+      callId: callId,
+      execution: execution,
+      arguments: requireJsonObject(
+        arguments,
+        'ToolSearchCallResourceItem.arguments',
+      ),
+      status: status,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ToolSearchCallResourceItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          agent == other.agent &&
+          callId == other.callId &&
+          execution == other.execution &&
+          toolSearchArgumentsEqual(arguments, other.arguments) &&
+          status == other.status &&
+          createdBy == other.createdBy;
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    agent,
+    callId,
+    execution,
+    toolSearchArgumentsHash(arguments),
+    status,
+    createdBy,
+  );
+
+  @override
+  String toString() =>
+      'ToolSearchCallResourceItem(id: $id, agent: ${toolSearchActorSummary(agent?.agentName)}, callId: $callId, execution: $execution, arguments: ${toolSearchArgumentsSummary(arguments)}, status: $status, createdBy: ${toolSearchActorSummary(createdBy)})';
+}
+
+/// A tool search output returned by the Responses input-items resource.
+@immutable
+class ToolSearchOutputResourceItem extends Item {
+  /// The fixed item discriminator.
+  String get type => 'tool_search_output';
+
+  /// Unique identifier.
+  final String id;
+
+  /// The producing agent on the beta multi-agent protocol.
+  final AgentTag? agent;
+
+  /// The search call identifier; returned items always serialize its key.
+  final String? callId;
+
+  /// The server or client execution type.
+  final ToolSearchExecutionType execution;
+
+  /// The complete discovered tool definitions, including empty results.
+  final List<ResponseTool> tools;
+
+  /// The item status.
+  final FunctionCallOutputStatus status;
+
+  /// The actor that created this item, when provided.
+  final String? createdBy;
+
+  /// Creates a [ToolSearchOutputResourceItem].
+  ///
+  /// Const construction retains caller-owned collections. Do not mutate them
+  /// while this value is used as a map key or set member. Parsed collections
+  /// are recursively unmodifiable snapshots.
+  const ToolSearchOutputResourceItem({
+    required this.id,
+    this.agent,
+    required this.callId,
+    required this.execution,
+    required this.tools,
+    required this.status,
+    this.createdBy,
+  });
+
+  /// Creates a [ToolSearchOutputResourceItem] from contextual tool-search JSON.
+  factory ToolSearchOutputResourceItem.fromJson(Map<String, dynamic> json) {
+    const context = 'ToolSearchOutputResourceItem';
+    requireJsonType(json, 'tool_search_output', context);
+    return ToolSearchOutputResourceItem(
+      id: requireJsonString(json['id'], '$context.id'),
+      agent: toolSearchJsonAgent(json, context),
+      callId: toolSearchRequiredCallId(json, context),
+      execution: ToolSearchExecutionType.fromJson(
+        requireJsonString(json['execution'], '$context.execution'),
+      ),
+      tools: toolSearchJsonTools(json['tools'], '$context.tools'),
+      status: FunctionCallOutputStatus.fromJson(
+        requireJsonString(json['status'], '$context.status'),
+      ),
+      createdBy: optionalJsonString(json, 'created_by', context),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    if (agent != null) 'agent': agent!.toJson(),
+    'call_id': callId,
+    'execution': execution.toJson(),
+    'tools': tools.map((tool) => tool.toToolSearchOutputJson()).toList(),
+    'status': status.toJson(),
+    if (createdBy != null) 'created_by': createdBy,
+  };
+
+  /// Creates a copy with nullable fields explicitly clearable.
+  ToolSearchOutputResourceItem copyWith({
+    String? id,
+    Object? agent = unsetCopyWithValue,
+    Object? callId = unsetCopyWithValue,
+    ToolSearchExecutionType? execution,
+    List<ResponseTool>? tools,
+    FunctionCallOutputStatus? status,
+    Object? createdBy = unsetCopyWithValue,
+  }) => ToolSearchOutputResourceItem(
+    id: id ?? this.id,
+    agent: identical(agent, unsetCopyWithValue)
+        ? this.agent
+        : agent as AgentTag?,
+    callId: identical(callId, unsetCopyWithValue)
+        ? this.callId
+        : callId as String?,
+    execution: execution ?? this.execution,
+    tools: tools ?? this.tools,
+    status: status ?? this.status,
+    createdBy: identical(createdBy, unsetCopyWithValue)
+        ? this.createdBy
+        : createdBy as String?,
+  );
+
+  /// Converts discovered tools to writable input, omitting creator metadata.
+  ToolSearchOutputItemParam toToolSearchOutputItemParam() =>
+      ToolSearchOutputItemParam(
+        id: id,
+        agent: agent,
+        callId: callId,
+        execution: execution,
+        tools: tools,
+        status: ItemStatus.fromJson(status.toJson()),
+      );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ToolSearchOutputResourceItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          agent == other.agent &&
+          callId == other.callId &&
+          execution == other.execution &&
+          listsEqual(tools, other.tools) &&
+          status == other.status &&
+          createdBy == other.createdBy;
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    agent,
+    callId,
+    execution,
+    Object.hashAll(tools),
+    status,
+    createdBy,
+  );
+
+  @override
+  String toString() =>
+      'ToolSearchOutputResourceItem(id: $id, agent: ${toolSearchActorSummary(agent?.agentName)}, callId: $callId, execution: $execution, tools: ${tools.length} items, status: $status, createdBy: ${toolSearchActorSummary(createdBy)})';
 }
 
 /// An additional tools input item.

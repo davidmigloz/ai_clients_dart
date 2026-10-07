@@ -1,8 +1,9 @@
 # Access-program selection acceptance
 
-Status: implementation, validation and independent reviews complete; merge pending.
+Status: merged in PR #351; #339 closed.
 Implementation [PR #351](https://github.com/davidmigloz/ai_clients_dart/pull/351)
-is open for review; #339 closes only after merge.
+merged after green CI on October 7, 2026 at 20:34:09 UTC.
+Merge commit: `f5b8d0857ddbb765bea8a7b00b5fd7b28a9f8a88`.
 Tracking: [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirements: [RESP-ACCESS-01–02](../responses.md#access-programs).
@@ -127,5 +128,5 @@ source, runtime, fixture, README/llms and example boundary. Test fixture issues
 implementation agent; both reviewers reran the completed cases. Both reviewers
 approved the final combined diff and acceptance record with no remaining
 actionable findings. The specification status table was corrected to record
-#338 merged and #339 implemented/validated. #339 closes only after implementation
-merge; tool search #340 follows this slice.
+#338 merged and #339 implemented/validated. PR #351 subsequently merged, closing
+#339; tool search #340 follows this slice.

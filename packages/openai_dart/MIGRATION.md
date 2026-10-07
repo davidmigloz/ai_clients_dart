@@ -6,6 +6,110 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming tool-search fidelity
+
+Tool-search request and returned records now enforce their distinct wire
+contracts. Writable calls require nonnull object arguments. Returned calls,
+outputs and stored conversation records require their call ID (which may be null),
+execution, status and payload fields. Returned call arguments are `Object?` and
+always serialize, including null; writable arguments remain `Map<String, dynamic>`.
+Update manual constructions and check returned argument types before indexing:
+
+```dart
+// Before
+const input = ToolSearchCallItemParam(callId: 'search_1');
+const call = ToolSearchCallOutputItem(
+  id: 'tsc_1',
+  execution: ToolSearchExecutionType.client,
+);
+final goal = call.arguments?['goal'];
+
+// After
+const input = ToolSearchCallItemParam(
+  callId: 'search_1',
+  arguments: {'goal': 'inventory'},
+);
+const call = ToolSearchCallOutputItem(
+  id: 'tsc_1',
+  callId: 'search_1', // Use null for a hosted call without a call ID.
+  execution: ToolSearchExecutionType.client,
+  arguments: {'goal': 'inventory'},
+  status: ItemStatus.completed,
+);
+final arguments = call.arguments;
+final goal = arguments is Map<String, dynamic> ? arguments['goal'] : null;
+```
+
+For `ToolSearchOutputItem`, supply `id`, nullable `callId`, `execution`, `tools`
+and `FunctionCallOutputStatus`. For `ConversationToolSearchCallItem` and
+`ConversationToolSearchOutputItem`, supply their corresponding required fields
+and existing `ItemStatus`. Empty output tool lists remain valid. Optional
+`createdBy` is retained on returned/stored records; beta `agent` is retained on
+Responses records. Supplied null for those optional returned fields now throws a
+contextual `FormatException`. Writable optional nullable metadata still accepts
+null and omits it during serialization. Existing enum types and unknown-string
+fallbacks are retained; missing or malformed required values are rejected.
+
+`responses.inputItems.list` now returns `ToolSearchCallResourceItem` and
+`ToolSearchOutputResourceItem` for stored search records. These new sealed `Item`
+variants replace the writable parameter types in that resource path. Add cases
+to exhaustive switches and update casts:
+
+```dart
+// Before
+if (item is ToolSearchCallItemParam) {
+  final query = item.arguments;
+}
+
+// After
+if (item is ToolSearchCallResourceItem) {
+  final query = item.arguments; // Object?: guard before indexing.
+  if (query is Map<String, dynamic>) {
+    final writable = item.toToolSearchCallItemParam();
+  }
+}
+```
+
+`toToolSearchCallItemParam()` throws `StateError` for non-object returned
+arguments, because the writable contract cannot represent them. The output
+resource's `toToolSearchOutputItemParam()` retains the complete discovered tools.
+Both conversions omit returned-only creator metadata. To replay output JSON
+without converting it to writable DTOs, use
+`ResponseInput.fromOutputItems(rawOutputMaps)` with raw JSON maps, not typed
+`OutputItem` objects.
+
+Discovered namespace functions can use dotted names and omit optional definition
+fields. Parse or serialize standalone discovered JSON using the contextual API:
+
+```dart
+// Before
+final discovered = ResponseTool.fromJson(rawDiscoveredTool);
+final wire = discovered.toJson();
+
+// After
+final discovered = ResponseTool.fromToolSearchOutputJson(rawDiscoveredTool);
+final wire = discovered.toToolSearchOutputJson();
+```
+
+Search-item parsers and serializers already select this context automatically.
+For top-level discovered functions, `parameters` and `strict` must be present but
+may be null; contextual serialization supplies these keys. Nested discovered
+functions keep optional keys omitted. Ordinary `NamespaceTool.fromJson` follows
+the narrower request function naming rules. It now rejects empty namespace names
+and empty tool lists; a required empty description remains valid. Malformed known
+nested function/custom definitions fail contextually, while unknown nested tool
+types are retained as `UnknownNamespaceTool`.
+
+Existing const construction and ordinary function/custom factory signatures are
+retained. Caller-supplied collections retain their previous ownership semantics;
+parsed search records and definitions take recursively unmodifiable snapshots.
+New value/copy contracts preserve all fields, and search diagnostics summarize
+arguments, schemas and actor metadata without printing their payloads.
+
+See the [README](README.md#how-do-i-return-client-discovered-tools) and
+[offline example](example/tool_search_example.dart). This is an unreleased
+correction; no package version is changed here.
+
 ## Upcoming compaction progress
 
 `response.compaction.compacting` now decodes to
