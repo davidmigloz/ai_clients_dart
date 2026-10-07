@@ -580,17 +580,65 @@ void main() {
       expect(json['prompt_cache_retention'], '24h');
     });
 
-    test('fromJson parses prompt_cache_retention', () {
-      final json = {
-        'model': 'gpt-4o',
+    test('canonical and legacy retention inputs emit in_memory', () {
+      for (final wire in ['in_memory', 'in-memory']) {
+        final request = ChatCompletionCreateRequest.fromJson({
+          'model': 'fixture-model',
+          'messages': const [
+            {'role': 'user', 'content': 'Hello'},
+          ],
+          'prompt_cache_retention': wire,
+        });
+        expect(request.promptCacheRetention, PromptCacheRetention.inMemory);
+        expect(request.toJson()['prompt_cache_retention'], 'in_memory');
+        expect(request.copyWith(), request);
+        expect(request.copyWith().hashCode, request.hashCode);
+      }
+    });
+
+    test('retention unknown fallback is preserved', () {
+      final request = ChatCompletionCreateRequest.fromJson(const {
+        'model': 'fixture-model',
         'messages': [
           {'role': 'user', 'content': 'Hello'},
         ],
-        'prompt_cache_retention': 'in-memory',
-      };
+        'prompt_cache_retention': 'future-retention',
+      });
+      expect(request.promptCacheRetention, PromptCacheRetention.unknown);
+      expect(request.toJson()['prompt_cache_retention'], 'unknown');
+    });
 
-      final request = ChatCompletionCreateRequest.fromJson(json);
-      expect(request.promptCacheRetention, PromptCacheRetention.inMemory);
+    test('retention can be omitted, parsed from null, and cleared', () {
+      final original = ChatCompletionCreateRequest(
+        model: 'fixture-model',
+        messages: [ChatMessage.user('Hello')],
+        promptCacheRetention: PromptCacheRetention.inMemory,
+      );
+      expect(original.toJson()['prompt_cache_retention'], 'in_memory');
+      final cleared = original.copyWith(promptCacheRetention: null);
+      expect(cleared.promptCacheRetention, isNull);
+      expect(cleared.toJson().containsKey('prompt_cache_retention'), isFalse);
+      expect(cleared.toJson(), {
+        'model': 'fixture-model',
+        'messages': [
+          {'role': 'user', 'content': 'Hello'},
+        ],
+      });
+      expect(
+        original.copyWith().promptCacheRetention,
+        PromptCacheRetention.inMemory,
+      );
+      final parsedNull = ChatCompletionCreateRequest.fromJson({
+        ...original.toJson(),
+        'prompt_cache_retention': null,
+      });
+      expect(parsedNull.promptCacheRetention, isNull);
+      expect(
+        parsedNull.toJson().containsKey('prompt_cache_retention'),
+        isFalse,
+      );
+      expect(parsedNull, cleared);
+      expect(parsedNull.hashCode, cleared.hashCode);
     });
 
     test('supports safety_identifier parameter', () {

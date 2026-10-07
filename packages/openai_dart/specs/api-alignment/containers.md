@@ -1,6 +1,7 @@
 # Container configuration contract specification
 
-Status: implemented and independently reviewed; acceptance evidence is recorded
+Status: merged in [PR #327](https://github.com/davidmigloz/ai_clients_dart/pull/327);
+acceptance evidence is recorded
 in the [container review](reviews/02-container-configuration.md). This is Phase 2 of the
 [alignment roadmap](README.md). Decisions is merged in
 [PR #319](https://github.com/davidmigloz/ai_clients_dart/pull/319).

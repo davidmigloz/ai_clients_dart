@@ -3356,12 +3356,26 @@ void main() {
 
     test('unknown fallback', () {
       expect(PromptCacheRetention.fromJson('7d'), PromptCacheRetention.unknown);
+      expect(PromptCacheRetention.unknown.toJson(), 'unknown');
     });
 
     test('values encode correctly', () {
-      expect(PromptCacheRetention.inMemory.toJson(), 'in-memory');
+      expect(PromptCacheRetention.inMemory.toJson(), 'in_memory');
       expect(PromptCacheRetention.h24.toJson(), '24h');
     });
+
+    test(
+      'canonical and legacy inputs normalize to the canonical wire value',
+      () {
+        for (final wire in ['in_memory', 'in-memory']) {
+          final retention = PromptCacheRetention.fromJson(wire);
+          expect(retention, PromptCacheRetention.inMemory);
+          expect(retention.name, 'inMemory');
+          expect(retention.value, 'in_memory');
+          expect(retention.toJson(), 'in_memory');
+        }
+      },
+    );
   });
 
   group('ImageDetail original', () {
@@ -4220,6 +4234,16 @@ void main() {
         'prompt_cache_retention': 'in-memory',
       });
       expect(restored.promptCacheRetention, PromptCacheRetention.inMemory);
+      expect(restored.toJson()['prompt_cache_retention'], 'in_memory');
+    });
+
+    test('fromJson null retention is omitted on serialization', () {
+      final restored = CompactResponseRequest.fromJson(const {
+        'model': 'fixture-model',
+        'prompt_cache_retention': null,
+      });
+      expect(restored.promptCacheRetention, isNull);
+      expect(restored.toJson(), {'model': 'fixture-model'});
     });
 
     test('fromJson falls back to unknown for unrecognized values', () {
@@ -4228,6 +4252,7 @@ void main() {
         'prompt_cache_retention': 'forever',
       });
       expect(restored.promptCacheRetention, PromptCacheRetention.unknown);
+      expect(restored.toJson()['prompt_cache_retention'], 'unknown');
     });
 
     test('copyWith sets promptCacheRetention', () {
@@ -4245,6 +4270,11 @@ void main() {
       );
       final cleared = request.copyWith(promptCacheRetention: null);
       expect(cleared.promptCacheRetention, isNull);
+      expect(cleared.toJson().containsKey('prompt_cache_retention'), isFalse);
+      expect(
+        request.copyWith().promptCacheRetention,
+        PromptCacheRetention.inMemory,
+      );
     });
 
     test('toJson omits prompt_cache_retention when null', () {
@@ -4322,7 +4352,7 @@ void main() {
 
       final json = response.toJson();
       expect(json['prompt_cache_key'], 'key');
-      expect(json['prompt_cache_retention'], 'in-memory');
+      expect(json['prompt_cache_retention'], 'in_memory');
     });
 
     test('omits when null', () {

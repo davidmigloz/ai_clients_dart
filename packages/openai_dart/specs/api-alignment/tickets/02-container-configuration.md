@@ -1,6 +1,6 @@
 # Correct container configuration contracts
 
-Status: implemented and independently reviewed; awaiting PR merge.
+Status: merged in [PR #327](https://github.com/davidmigloz/ai_clients_dart/pull/327); issue closed.
 GitHub: [#320](https://github.com/davidmigloz/ai_clients_dart/issues/320).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Containers](../containers.md), CONT-01 through CONT-09.
@@ -52,4 +52,5 @@ verified. See the [review and acceptance evidence](../reviews/02-container-confi
 bounded live lifecycle passed and both test containers were deleted. The
 conservative published session estimate for two attempts is $0.06. Wider toolkit
 gaps and nullable pagination compatibility remain explicitly recorded. No package
-release was performed. Issue #320 stays open until the implementation PR merges.
+release was performed. PR #327 merged October 7, 2026 after all CI checks passed,
+closing issue #320.

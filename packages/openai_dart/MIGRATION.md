@@ -6,6 +6,46 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming cache-retention wire correction
+
+`PromptCacheRetention.inMemory.value` and `toJson()` now return `in_memory`,
+matching the current API. Enum names and constructors are unchanged. Both
+`in_memory` and legacy `in-memory` inputs parse as `inMemory`; reserialization
+always uses the underscore spelling. `h24` remains `24h`, and unrecognized values
+retain the existing `unknown` fallback.
+
+Update code or persisted-JSON assertions that compare the old wire spelling:
+
+Before:
+
+```dart
+final isInMemory = json['prompt_cache_retention'] == 'in-memory';
+```
+
+After:
+
+```dart
+final retention = switch (json['prompt_cache_retention']) {
+  final String value => PromptCacheRetention.fromJson(value),
+  _ => null,
+};
+final isInMemory = retention == PromptCacheRetention.inMemory;
+```
+
+Chat requests, returned Responses, and compaction use the same shared mapping.
+This correction does not add the pending Responses creation-request retention
+field or cache-options controls. Use `h24` for GPT-5.5 and newer models; their
+documented retention policy does not support `inMemory`. The package version is
+assigned by the release workflow.
+
+The API marks this existing retention control deprecated in favor of
+`prompt_cache_options.ttl`; that alignment is tracked separately in
+[#322](https://github.com/davidmigloz/ai_clients_dart/issues/322). Retention expresses
+a maximum policy, while TTL expresses a minimum lifetime, so do not substitute
+one for the other automatically. This correction preserves the existing control.
+
+---
+
 ## Upcoming container configuration corrections
 
 These targeted breaking fixes align container configuration with the current API.

@@ -4,6 +4,7 @@ Reviewed October 7, 2026 against [CONT-01–CONT-09](../containers.md).
 Tracking: [#320](https://github.com/davidmigloz/ai_clients_dart/issues/320),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Implementation branch: `fix/openai-container-configuration`.
+PR #327 merged October 7, 2026 after all CI checks passed, closing #320.
 
 ## Implemented outcome
 
