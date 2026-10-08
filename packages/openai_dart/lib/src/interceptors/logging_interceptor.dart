@@ -2,6 +2,7 @@ import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
 import '../utils/request_id.dart';
+import '../utils/webhooks/signing_secret_redaction.dart';
 import 'interceptor.dart';
 
 /// Interceptor that logs HTTP requests and responses.
@@ -91,7 +92,11 @@ class LoggingInterceptor implements Interceptor {
         ..finer('  Headers: ${response.headers}');
 
       if (logResponseBody && response.body.isNotEmpty) {
-        logger.finest('  Body: ${_truncate(response.body)}');
+        final diagnosticBody = redactWebhookSigningSecretBody(
+          response.body,
+          secretBearingResponse: revealsWebhookSigningSecret(request),
+        );
+        logger.finest('  Body: ${_truncate(diagnosticBody)}');
       }
 
       return response;

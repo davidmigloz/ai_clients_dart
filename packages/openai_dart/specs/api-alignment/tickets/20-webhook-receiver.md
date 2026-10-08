@@ -1,7 +1,7 @@
 # Verify and parse signed webhook notifications
 
-Status: implemented, independently reviewed and verified; PR #362 open, merge pending.
-Implementation [PR #362](https://github.com/davidmigloz/ai_clients_dart/pull/362) is open for review; #357 remains open until merge.
+Status: merged in PR #362 after green CI; #357 closed.
+Implementation [PR #362](https://github.com/davidmigloz/ai_clients_dart/pull/362) merged October 8, 2026 at `eea142bf9b100448f5216572e4db2d50a7ad0f5b`, closing #357, after all 14 final-head contexts passed (13 successes and standard Test(all) skip).
 GitHub: [#357](https://github.com/davidmigloz/ai_clients_dart/issues/357).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 4 Webhooks and safety](../webhooks-safety.md), WH-VERIFY-01–03, WH-EVENT-01–03.
@@ -40,4 +40,4 @@ publishing/version bumps and unrelated API families are outside this ticket.
 
 [Receiver acceptance evidence](../reviews/20-webhook-receiver.md) records the
 implementation, runtime fixtures, independent reviews and toolkit classifications.
-The issue stays open until implementation merge. Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) merged October 8, 2026 at `886659c3c11cbee89335788ba918eeecd528fce0` after green CI.
+The issue closed after implementation merge. Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) merged October 8, 2026 at `886659c3c11cbee89335788ba918eeecd528fce0` after green CI.

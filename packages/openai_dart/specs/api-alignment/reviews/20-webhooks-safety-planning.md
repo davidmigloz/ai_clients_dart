@@ -6,8 +6,8 @@ Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Tickets #357–#360 are native sub-issues of #317; #359 is blocked by #357 and
 #360 by #359. Endpoint management #358 has no prerequisite. Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) merged
 October 8, 2026 at `886659c3c11cbee89335788ba918eeecd528fce0` after green CI.
-Receiver #357 is now implemented/verified with merge pending; remaining slices
-are specified with implementation pending.
+Receiver #357 merged in PR #362; endpoint management #358 is implemented/verified
+with merge pending. Safety/error slices remain specified with implementation pending.
 
 ## Baseline and source evidence
 

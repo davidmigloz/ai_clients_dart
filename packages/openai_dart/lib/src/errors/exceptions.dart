@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../utils/webhooks/signing_secret_redaction.dart';
+
 /// Base exception class for OpenAI HTTP and client transport errors.
 ///
 /// Local webhook signature failures use `InvalidWebhookSignatureException`.
@@ -66,11 +68,18 @@ class ApiException extends OpenAIException {
 
   @override
   String toString() {
-    final buffer = StringBuffer('ApiException: $message')
+    final diagnosticMessage = redactWebhookSecretErrorValue(message, body);
+    final buffer = StringBuffer('ApiException: $diagnosticMessage')
       ..write(' (status: $statusCode');
-    if (type != null) buffer.write(', type: $type');
-    if (code != null) buffer.write(', code: $code');
-    if (param != null) buffer.write(', param: $param');
+    if (type != null) {
+      buffer.write(', type: ${redactWebhookSecretErrorValue(type, body)}');
+    }
+    if (code != null) {
+      buffer.write(', code: ${redactWebhookSecretErrorValue(code, body)}');
+    }
+    if (param != null) {
+      buffer.write(', param: ${redactWebhookSecretErrorValue(param, body)}');
+    }
     if (requestId != null) buffer.write(', request_id: $requestId');
     buffer.write(')');
     return buffer.toString();

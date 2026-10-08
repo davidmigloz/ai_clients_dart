@@ -87,9 +87,9 @@ export 'src/models/streaming/streaming.dart';
 export 'src/models/tools/tools.dart';
 // Models - Videos
 export 'src/models/videos/videos.dart';
+export 'src/models/webhooks/webhook_endpoint.dart';
 // Webhook received events
 export 'src/models/webhooks/webhook_event.dart';
-
 // Resources
 export 'src/resources/resources.dart';
 // Utils

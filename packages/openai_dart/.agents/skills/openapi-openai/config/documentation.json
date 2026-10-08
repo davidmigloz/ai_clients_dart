@@ -61,7 +61,8 @@
     "moderations": "moderation_example",
     "realtimeSessions": "realtime",
     "decisions": "decisions_example",
-    "webhooks": "webhooks_example"
+    "webhooks": "webhook_endpoints_example",
+    "webhookEventTypes": "webhook_endpoints_example"
   },
   "excluded_from_examples": [],
   "drift_patterns": [

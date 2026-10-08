@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../client/retry_after.dart';
 import '../errors/exceptions.dart';
+import '../utils/webhooks/signing_secret_redaction.dart';
 import 'interceptor.dart';
 
 /// Interceptor that handles error responses from the API.
@@ -37,17 +38,28 @@ class ErrorInterceptor implements Interceptor {
 
     // Check for error status codes
     if (response.statusCode >= 400) {
-      throw _parseErrorResponse(response);
+      throw _parseErrorResponse(
+        response,
+        secretBearingResponse: revealsWebhookSigningSecret(context.request),
+      );
     }
 
     return response;
   }
 
   /// Parses an error response and creates the appropriate exception.
-  ApiException _parseErrorResponse(http.Response response) {
+  ApiException _parseErrorResponse(
+    http.Response response, {
+    required bool secretBearingResponse,
+  }) {
     final statusCode = response.statusCode;
     final requestId = response.headers['x-request-id'];
     final retryAfter = parseRetryAfter(response.headers);
+
+    final diagnosticBody = redactWebhookSigningSecretBody(
+      response.body,
+      secretBearingResponse: secretBearingResponse,
+    );
 
     // Try to parse the error body
     String message;
@@ -63,23 +75,23 @@ class ErrorInterceptor implements Interceptor {
       if (json['error'] case final Map<String, dynamic> error) {
         message = error['message'] == null
             ? 'Unknown error'
-            : _errorString(error['message']) ?? response.body;
+            : _errorString(error['message']) ?? diagnosticBody;
         type = _errorString(error['type']);
         code = _errorString(error['code']);
         param = _errorString(error['param']);
       } else {
-        message = _errorString(json['message']) ?? response.body;
+        message = _errorString(json['message']) ?? diagnosticBody;
       }
     } catch (_) {
-      // Fallback to raw body if JSON parsing fails
-      message = response.body.isNotEmpty
-          ? response.body
+      // Keep unrelated raw-body behavior; omit malformed secret-bearing bodies.
+      message = diagnosticBody.isNotEmpty
+          ? diagnosticBody
           : 'HTTP $statusCode error';
     }
 
     return createApiException(
       statusCode: statusCode,
-      message: message,
+      message: redactWebhookSecretErrorValue(message, body)!,
       type: type,
       code: code,
       param: param,
