@@ -1,6 +1,7 @@
 # Multi-agent WebSocket tool-output injection
 
-Status: implemented, verified and independently reviewed; merge pending in [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356).
+Status: merged in PR #356 after green CI; #344 closed.
+Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) merged October 8, 2026 at `1e63d6b93bdf0028eb6925d45371b1f36deb5d7b`, closing #344, after all applicable final-head checks passed (14 contexts completed: 13 successes and the standard Test(all) skip).
 GitHub: [#344](https://github.com/davidmigloz/ai_clients_dart/issues/344).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-INJECT-01–02.
@@ -46,4 +47,4 @@ tests pass with two existing skips; 656 focused cases pass on VM and real Chrome
 JavaScript/Wasm. Formatting/fix/fatal-info analysis and offline example pass.
 Independent requirements and engineering reviews approve the combined diff.
 The full toolkit delta is classified; unrelated diagnostics remain visible.
-Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) is open for review. Close #344 only after merge.
+Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) merged October 8, 2026 at `1e63d6b93bdf0028eb6925d45371b1f36deb5d7b`, closing #344, after all applicable final-head checks passed (14 contexts completed: 13 successes and the standard Test(all) skip).
