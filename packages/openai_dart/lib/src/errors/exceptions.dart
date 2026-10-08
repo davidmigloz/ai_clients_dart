@@ -409,6 +409,7 @@ class AbortedException extends OpenAIException {
     this.stage,
     this.correlationId,
     this.timestamp,
+    this.redactDiagnostics = false,
     Object? cause,
   }) : super(message, cause: cause);
 
@@ -436,8 +437,12 @@ class AbortedException extends OpenAIException {
   /// When the abort occurred.
   final DateTime? timestamp;
 
+  /// Redacts automatic diagnostics while retaining explicit caller context.
+  final bool redactDiagnostics;
+
   @override
   String toString() {
+    if (redactDiagnostics) return 'AbortedException: [REDACTED]';
     final buffer = StringBuffer('AbortedException: $message');
     final details = <String>[];
     if (stage != null) details.add('stage: ${stage!.name}');
@@ -456,14 +461,22 @@ class AbortedException extends OpenAIException {
 @immutable
 class ConnectionException extends OpenAIException {
   /// Creates a new [ConnectionException].
-  const ConnectionException({required String message, this.url, Object? cause})
-    : super(message, cause: cause);
+  const ConnectionException({
+    required String message,
+    this.url,
+    this.redactDiagnostics = false,
+    Object? cause,
+  }) : super(message, cause: cause);
 
   /// The URL that failed to connect.
   final String? url;
 
+  /// Redacts automatic diagnostics while retaining explicit caller context.
+  final bool redactDiagnostics;
+
   @override
   String toString() {
+    if (redactDiagnostics) return 'ConnectionException: [REDACTED]';
     if (url case final u?) {
       return 'ConnectionException: $message (url: $u)';
     }

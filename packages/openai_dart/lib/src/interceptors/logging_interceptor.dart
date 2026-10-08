@@ -56,6 +56,10 @@ class LoggingInterceptor implements Interceptor {
     var request = context.request;
     final speechRequest = isSpeechRequest(request);
     final privateAudioRequest = isPrivateAudioRequest(request);
+    final voiceConsentRequest = isVoiceConsentRequest(request);
+    final diagnosticUrl = voiceConsentRequest
+        ? '[REDACTED]'
+        : request.url.toString();
     final startTime = DateTime.now();
 
     // Ensure request has a correlation ID for tracing
@@ -77,9 +81,14 @@ class LoggingInterceptor implements Interceptor {
     );
 
     // Log request
+    final diagnosticCorrelationId = voiceConsentRequest
+        ? '[REDACTED]'
+        : correlationId;
     logger
-      ..fine('→ ${request.method} ${request.url} [$correlationId]')
-      ..finer('  Headers: ${_sanitizeHeaders(request.headers)}');
+      ..fine('→ ${request.method} $diagnosticUrl [$diagnosticCorrelationId]')
+      ..finer(
+        '  Headers: ${voiceConsentRequest ? '[REDACTED]' : _sanitizeHeaders(request.headers)}',
+      );
 
     if (logRequestBody && request is http.Request && request.body.isNotEmpty) {
       logger.finest(
@@ -101,9 +110,12 @@ class LoggingInterceptor implements Interceptor {
       final requestId = privateAudioRequest
           ? correlationId
           : response.headers['x-request-id'] ?? correlationId;
+      final diagnosticResponseId = monitoringResponse || voiceConsentRequest
+          ? '[REDACTED]'
+          : requestId;
       logger
         ..fine(
-          '← ${response.statusCode} ${monitoringResponse ? '[REDACTED]' : request.url} (${duration.inMilliseconds}ms) [${monitoringResponse ? '[REDACTED]' : requestId}]',
+          '← ${response.statusCode} ${monitoringResponse ? '[REDACTED]' : diagnosticUrl} (${duration.inMilliseconds}ms) [$diagnosticResponseId]',
         )
         ..finer(
           '  Headers: ${monitoringResponse || privateAudioRequest ? '[REDACTED]' : response.headers}',
@@ -129,7 +141,7 @@ class LoggingInterceptor implements Interceptor {
       final duration = DateTime.now().difference(startTime);
       final diagnosticError = privateAudioRequest ? e.runtimeType : e;
       logger.warning(
-        '✕ ${request.method} ${request.url} failed after ${duration.inMilliseconds}ms [$correlationId]: $diagnosticError',
+        '✕ ${request.method} $diagnosticUrl failed after ${duration.inMilliseconds}ms [$diagnosticCorrelationId]: $diagnosticError',
       );
       rethrow;
     }

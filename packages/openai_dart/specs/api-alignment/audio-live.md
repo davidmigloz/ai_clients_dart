@@ -1,8 +1,8 @@
 # Audio and Live: Phase 5 specification
 
 Status: planning merged in [PR #373](https://github.com/davidmigloz/ai_clients_dart/pull/373);
-speech #366 merged in PR #374, existing Audio #367 independently approved pending merge,
-five other runtime tickets pending.
+speech #366 and existing Audio #367 merged in PRs #374/#375, consent management
+#368 implemented and independently approved, four other runtime tickets pending.
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Phase 4 is complete: [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365)
 merged October 8, 2026 at `fca1a3f4e453d88caed9ffa573d4ec665126c3cb`, closing #360
@@ -10,7 +10,8 @@ after all 14 final-head CI contexts completed (13 successes, standard Test(all) 
 Scope: seven independently usable implementation tickets, repository 24–30.
 The planning specification claims no runtime acceptance; speech implementation
 has its separate [acceptance record](reviews/24-speech.md), and file Audio has
-[its own acceptance record](reviews/25-existing-audio.md).
+[its own acceptance record](reviews/25-existing-audio.md). Consent management has
+[a separate acceptance record](reviews/26-voice-consents.md).
 
 ## Outcome and boundaries
 
@@ -88,6 +89,13 @@ File-Audio/Chat operation closures are unchanged; the pending custom-voice ticke
 implementation retains adopted 239c canonical bytes and their exact fetch/source
 metadata. The toolkit review misses this change, so independent normalized
 comparison is the evidence. No voice runtime DTO is implemented by ticket 25.
+
+Consent implementation adopts the reviewed b2751c66 candidate with its actual
+fetch timestamp and immutable source URL, archiving the prior 239c receipt. All
+five consent operations/components match the prior snapshot; only the already
+inventoried custom-voice type restriction changes. Python head 8e1fd258 changes
+only tests/test_uv_workflows.py; its 3.26.1 runtime surface and Node 7.30.1 remain
+unchanged. No Admin/OCI/custom-voice runtime completion is claimed.
 
 ## Ticket graph
 

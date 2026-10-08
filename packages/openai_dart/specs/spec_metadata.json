@@ -2,8 +2,8 @@
   "specs": {
     "main": {
       "current_version": "2.3.0",
-      "last_fetched": "2026-10-08T17:43:39.649060Z",
-      "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/239c481c5fd75052acb3e93cf72c15a7b4a45e74/openapi.json",
+      "last_fetched": "2026-10-08T19:34:07.493486Z",
+      "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/b2751c6625493c9c64db21b1b26a4d9300e589e3/openapi.json",
       "title": "OpenAI API",
       "version_history": [
         {
@@ -83,6 +83,12 @@
           "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/506aff0a8099581b50e119b87f8f2692cdad043f/openapi.json",
           "version": "2.3.0",
           "note": "506aff0a replaced by 239c481c on 2026-10-08 after review: Agents session spending controls and OCI external storage provider additions are retained in Phases 6/7 inventory; Audio/Chat contracts are unchanged. 356 operations and 2,013 schemas. #367 corrects existing Audio contracts without implementing these unrelated families."
+        },
+        {
+          "fetched_at": "2026-10-08T17:43:39.649060Z",
+          "note": "239c481c replaced by b2751c66 on October 8. Only VoiceResource.type narrows to audio_sample, as already inventoried in pending custom-voice ticket #369. All five voice consent operations/components are unchanged; this source promotion does not claim Voice/Admin/OCI runtime parity.",
+          "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/239c481c5fd75052acb3e93cf72c15a7b4a45e74/openapi.json",
+          "version": "2.3.0"
         }
       ]
     }
