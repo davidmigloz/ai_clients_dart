@@ -5,18 +5,24 @@ import '../../common/equality_helpers.dart';
 import '../../common/json_helpers.dart';
 import '../multi_agent/agent_tag.dart';
 import '../streaming/response_stream_event.dart';
+import 'responses_steer_event.dart';
+import 'responses_steer_required_input.dart';
 import 'websocket_json_helpers.dart';
+
+part 'responses_steer_server_events.dart';
 
 /// A server message on a persistent Responses WebSocket connection.
 ///
 /// Ordinary messages wrap the existing SSE models. Errors retain the richer
-/// WebSocket envelope. Future, steering and injection messages retain raw JSON
-/// until their dedicated typed support is added. Response completion does not
+/// WebSocket envelope. Steering acknowledgements retain submission identity and
+/// rejected input. Future and injection messages retain raw JSON. Completion does not
 /// indicate connection completion.
 ///
 /// Variants are [ResponsesStreamEvent] for ordinary shared events,
 /// [ResponsesErrorEvent] for full WebSocket errors, and
-/// [UnknownResponsesServerEvent] for lossless future messages.
+/// [ResponsesSteerAcceptedEvent], [ResponsesSteerPendingEvent] and
+/// [ResponsesSteerFailedEvent] for steering acknowledgements. Future messages use
+/// [UnknownResponsesServerEvent].
 @immutable
 sealed class ResponsesServerEvent {
   /// Creates a server envelope.
@@ -47,6 +53,15 @@ sealed class ResponsesServerEvent {
       'ResponsesServerEvent',
     );
     if (type == 'error') return ResponsesErrorEvent.fromJson(snapshot);
+    if (type == 'response.steer.accepted') {
+      return ResponsesSteerAcceptedEvent.fromJson(snapshot);
+    }
+    if (type == 'response.steer.pending') {
+      return ResponsesSteerPendingEvent.fromJson(snapshot);
+    }
+    if (type == 'response.steer.failed') {
+      return ResponsesSteerFailedEvent.fromJson(snapshot);
+    }
     if (!_sharedEventTypes.contains(type)) {
       return UnknownResponsesServerEvent(
         type: type,

@@ -6,6 +6,40 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming typed steering events
+
+`ResponsesServerEvent.fromJson` now dispatches `response.steer.accepted`,
+`response.steer.pending` and `response.steer.failed` to their typed variants.
+These previously appeared as `UnknownResponsesServerEvent`. Update casts and
+exhaustive switches over the sealed WebSocket hierarchy:
+
+```dart
+// Before
+final kind = switch (message) {
+  ResponsesStreamEvent() => 'response',
+  ResponsesErrorEvent() => 'error',
+  UnknownResponsesServerEvent() => 'future',
+};
+
+// After
+final kind = switch (message) {
+  ResponsesStreamEvent() => 'response',
+  ResponsesErrorEvent() => 'error',
+  ResponsesSteerAcceptedEvent() => 'steering queued',
+  ResponsesSteerPendingEvent() => 'steering waiting for saved input',
+  ResponsesSteerFailedEvent() => 'steering failed',
+  UnknownResponsesServerEvent() => 'future',
+};
+```
+
+All variants retain the original frame through `rawJson`; typed copies preserve
+future metadata. Known malformed steering frames now fail contextually rather
+than appearing as future events. Unknown discriminators still preserve raw JSON.
+Steering acknowledgment classes are WebSocket-only; the SSE dispatcher is unchanged.
+The additive `steer` and `sendSteer` methods do not change the existing `send` or
+`create` signatures. No automatic continuation create, tool execution or replay
+is introduced.
+
 ## Upcoming nullable streaming annotations
 
 `OutputTextAnnotationAddedEvent.annotation` is now required nullable, matching

@@ -8,7 +8,7 @@ Tool search #340 merged in
 [PR #352](https://github.com/davidmigloz/ai_clients_dart/pull/352), closing #340.
 WebSocket sessions #341 are implemented, verified and independently reviewed;
 implementation [PR #353](https://github.com/davidmigloz/ai_clients_dart/pull/353)
-is open for review; #341 closes only after merge. Steering #342 follows after merge. Remaining runtime slices are tracked below. Parent:
+merged after green CI, closing #341. Steering #342 is implemented, verified and independently reviewed in [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354); merge pending. Remaining runtime slices are tracked below. Parent:
 [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 
 ## Objective and decisions
@@ -79,6 +79,7 @@ and these official-client pins. The candidate is unchanged at 356 operations and
 | Guide top-level discovered function examples omit strict, while canonical FunctionTool requires nullable parameters and strict keys | Keep the canonical required-nullable top-level contract and supply explicit keys in fixtures/examples; nested discovered functions require only type/name |
 | Failed queue flush differs: Python does not requeue an attempted failed send; Node does | Snapshot UTF-8 frames at enqueue. Failed attempted writes have unknown delivery and never replay; report only never-attempted remainder as unsent |
 | Canonical WS ErrorPayload requires nullable code/param keys; guide connection-limit errors omit param | Preserve outer omission of code/param for compatible WS errors and supplied null distinctly; require type/message. Include the exact guide limit-error fixture |
+| Failed steering returns rejected input, which can violate the writable input schema | Require the input key but preserve any finite JSON value, including null, as an explicit compatibility inference; never coerce rejected input into a valid writable message |
 | Node reconnect enables only with callback, uses [0.75, 1.0] jitter and admits one oversized frame into an empty queue | Require an explicit reconnect preparation callback and adopt that jitter; enforce the configured queue byte bound with observable rejection, including its first frame (matches Python; differs from Node) |
 
 ## Delivery slices
@@ -92,8 +93,8 @@ and these official-client pins. The candidate is unchanged at 356 operations and
 | [#338](https://github.com/davidmigloz/ai_clients_dart/issues/338) (13) | Observe compaction progress | RESP-COMPACT-01 | Merged in #350 |
 | [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) (14) | Select and inspect Responses access programs | RESP-ACCESS-01–02 | Merged in #351 |
 | [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) (15) | Return complete client-discovered tools | RESP-SEARCH-01–02 | Merged in #352 |
-| [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) (16) | Persistent Responses WebSocket sessions and lane routing | RESP-WS-01–04 | Implemented/verified/reviewed in #353; merge pending |
-| [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) (17) | Steer a running WebSocket response | RESP-STEER-01–03 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
+| [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) (16) | Persistent Responses WebSocket sessions and lane routing | RESP-WS-01–04 | Merged in #353 |
+| [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) (17) | Steer a running WebSocket response | RESP-STEER-01–03 | Implemented/verified/reviewed in #354; merge pending |
 | [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) (18) | Opt-in socket reconnection and bounded unsent queue | RESP-RECOVER-01–02 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341)/[#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) for replay regression |
 | [#344](https://github.com/davidmigloz/ai_clients_dart/issues/344) (19) | Inject multi-agent tool results over WebSockets | RESP-INJECT-01–02 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
 
@@ -424,9 +425,20 @@ migration guidance. Existing shared DTO nested ownership, enum normalization and
 older item-ID/sequence/provider defaults remain explicit; full field parity is
 not claimed. Independent requirements and engineering peer reviews approve the combined
 change; implementation [PR #353](https://github.com/davidmigloz/ai_clients_dart/pull/353)
-is open for review; steering #342 follows after merge.
+merged after green CI, closing #341. Steering #342 is implemented, verified and independently reviewed in [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354); merge pending.
 
 ## Steering
+
+The October 8, 2026 implementation recheck retains OpenAPI
+`234829e2b634b8fb159df7fcddbffad204173ffd` and Python
+`4e152cdefe1844c2d5d78653310e9b9c0195c44e` / 3.26.0. Node main is now
+[`30d50ab3`](https://github.com/openai/openai-node/tree/30d50ab301f4c348726d1fcb9c51a84cb8feb71a),
+whose package version remains 7.30.0; this main revision is newer than the release
+pin above. Its Responses/steering/WebSocket contracts are unchanged. The new
+Node URL-upload filename decoding helper has no equivalent in Dart's explicit
+bytes/filename upload APIs. No speculative shared upload fix is needed here.
+The reviewed candidate equals the canonical JSON (356 operations/2,010 schemas);
+fetch-only metadata churn is not promoted as a new specification version.
 
 - **RESP-STEER-01:** Typed `response.steer` carries only type,
   previous_response_id and input; never stream_id or create settings. Input is a
@@ -458,10 +470,20 @@ is open for review; steering #342 follows after merge.
   started tools. The offline example covers automatic and required-input paths.
 
 Sources: [steering](https://developers.openai.com/api/docs/guides/steering),
-[canonical steering events](https://github.com/openai/openai-openapi/blob/ee483b4b26b2695fedc5c8af7b187e5986bd0add/openapi.json).
+[canonical steering events](https://github.com/openai/openai-openapi/blob/234829e2b634b8fb159df7fcddbffad204173ffd/openapi.json).
 Local entry points: new WS envelopes/connection and existing response lifecycle,
 input result DTOs. Deterministic fixtures verify write counts and all seven stubs,
 not only event types.
+
+Steering #342 implementation and verification are complete;
+[acceptance evidence](reviews/17-responses-steering.md) records 454 model cases,
+31 public/native cases, all seven identifying stubs, write-count/continuation
+races, 30 canonical GA/beta wire fixtures and the six-frame offline example.
+Package checks pass 11,158 unit tests with two existing skips; 484 new model/browser
+protocol cases pass on Chrome JavaScript and Wasm. Exhaustive-switch/cast migration,
+strict known-frame validation and rejected-input compatibility are explicit.
+Both independent reviews approve the final combined diff. Implementation [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354) is open for review;
+opt-in recovery #343 follows after merge.
 
 ## Opt-in connection recovery
 

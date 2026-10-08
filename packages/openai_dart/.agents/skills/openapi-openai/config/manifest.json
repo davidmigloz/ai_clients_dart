@@ -4120,7 +4120,7 @@
       "dart_class": "ResponsesServerEvent",
       "file": "lib/src/models/responses/websocket/responses_server_event.dart",
       "schema": "ResponsesServerEvent",
-      "note": "Persistent envelope reuses all 58 ordinary shared event codecs; WS errors retain complete metadata. Later steering/injection/future events remain lossless raw variants."
+      "note": "Persistent envelope reuses all 58 ordinary shared event codecs; WS errors retain complete metadata and steering events are typed. Later injection/future events remain lossless raw variants."
     },
     "ResponseWsError": {
       "spec": "main",
@@ -4169,7 +4169,7 @@
       "dart_class": "ResponsesServerEvent",
       "file": "lib/src/models/responses/websocket/responses_server_event.dart",
       "schema": "BetaResponsesServerEvent",
-      "note": "Persistent envelope reuses all 58 ordinary shared event codecs; WS errors retain complete metadata. Later steering/injection/future events remain lossless raw variants."
+      "note": "Persistent envelope reuses all 58 ordinary shared event codecs; WS errors retain complete metadata and steering events are typed. Later injection/future events remain lossless raw variants."
     },
     "BetaResponseWsError": {
       "spec": "main",
@@ -4247,6 +4247,332 @@
       "schema": "BetaResponseOutputTextAnnotationAddedEvent",
       "parent": "ResponseStreamEvent",
       "note": "Required nullable annotation now supported in shared SSE/WS codec, with presence validation, copy clear and full value contracts. Older optional itemId/sequence and index default tolerance remains explicitly unchanged."
+    },
+    "ResponseSteerEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponsesSteerEvent",
+      "file": "lib/src/models/responses/websocket/responses_steer_event.dart",
+      "schema": "ResponseSteerEvent",
+      "note": "Closed user-only request follows guide restrictions; no lane/create fields. Schema broader tool-output/id/status branches intentionally not writable."
+    },
+    "ResponseSteerInput": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ResponsesSteerInput",
+      "file": "lib/src/models/responses/websocket/responses_steer_event.dart",
+      "schema": "ResponseSteerInput",
+      "note": "String or nonempty user-message list; restrictive documented protocol rather than broader generated schema branches."
+    },
+    "ResponseSteerInputItem": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponsesSteerMessage",
+      "file": "lib/src/models/responses/websocket/responses_steer_event.dart",
+      "schema": "ResponseSteerInputItem",
+      "note": "Contextual guide-only user-message projection containing only type/role/content. No read-only identity/status or tool output."
+    },
+    "ResponseSteerInputItemList": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponsesSteerMessagesInput",
+      "file": "lib/src/models/responses/websocket/responses_steer_event.dart",
+      "schema": "ResponseSteerInputItemList",
+      "note": "Nonempty typed message-list variant; no fabricated array wrapper schema.",
+      "parent": "ResponsesSteerInput"
+    },
+    "ResponseSteerAcceptedEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponsesSteerAcceptedEvent",
+      "file": "lib/src/models/responses/websocket/responses_steer_server_events.dart",
+      "schema": "ResponseSteerAcceptedEvent",
+      "note": "Exact identity/sequence/lane; acceptance queues input and successor creation commits it. Dart part exported through server-event library.",
+      "parent": "ResponsesServerEvent"
+    },
+    "ResponseSteerPendingEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponsesSteerPendingEvent",
+      "file": "lib/src/models/responses/websocket/responses_steer_server_events.dart",
+      "schema": "ResponseSteerPendingEvent",
+      "note": "Open reason, complete identifying stubs, shared parent identity and optional lane. Application returns saved results once per parent. Dart part exported through server-event library.",
+      "parent": "ResponsesServerEvent"
+    },
+    "ResponseSteerFailedEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponsesSteerFailedEvent",
+      "file": "lib/src/models/responses/websocket/responses_steer_server_events.dart",
+      "schema": "ResponseSteerFailedEvent",
+      "note": "Open code and optional allocated ID. Original rejected input preserves arbitrary raw JSON as an explicit compatibility inference beyond the canonical writable shape. Dart part exported through server-event library.",
+      "parent": "ResponsesServerEvent"
+    },
+    "ResponseSteerRequiredInput": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ResponsesSteerRequiredInput",
+      "file": "lib/src/models/responses/websocket/responses_steer_required_input.dart",
+      "schema": "ResponseSteerRequiredInput",
+      "note": "Seven identifying-only closed inline variants plus lossless future fallback; complete result payloads belong in response.create."
+    },
+    "BetaResponseSteerEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponsesSteerEvent",
+      "file": "lib/src/models/responses/websocket/responses_steer_event.dart",
+      "schema": "BetaResponseSteerEvent",
+      "note": "Closed user-only request follows guide restrictions; no lane/create fields. Schema broader tool-output/id/status branches intentionally not writable."
+    },
+    "BetaResponseSteerInput": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ResponsesSteerInput",
+      "file": "lib/src/models/responses/websocket/responses_steer_event.dart",
+      "schema": "BetaResponseSteerInput",
+      "note": "String or nonempty user-message list; restrictive documented protocol rather than broader generated schema branches."
+    },
+    "BetaResponseSteerInputItem": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponsesSteerMessage",
+      "file": "lib/src/models/responses/websocket/responses_steer_event.dart",
+      "schema": "BetaResponseSteerInputItem",
+      "note": "Contextual guide-only user-message projection containing only type/role/content. No read-only identity/status or tool output."
+    },
+    "BetaResponseSteerInputItemList": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponsesSteerMessagesInput",
+      "file": "lib/src/models/responses/websocket/responses_steer_event.dart",
+      "schema": "BetaResponseSteerInputItemList",
+      "note": "Nonempty typed message-list variant; no fabricated array wrapper schema.",
+      "parent": "ResponsesSteerInput"
+    },
+    "BetaResponseSteerAcceptedEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponsesSteerAcceptedEvent",
+      "file": "lib/src/models/responses/websocket/responses_steer_server_events.dart",
+      "schema": "BetaResponseSteerAcceptedEvent",
+      "note": "Exact identity/sequence/lane; acceptance queues input and successor creation commits it. Dart part exported through server-event library.",
+      "parent": "ResponsesServerEvent"
+    },
+    "BetaResponseSteerPendingEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponsesSteerPendingEvent",
+      "file": "lib/src/models/responses/websocket/responses_steer_server_events.dart",
+      "schema": "BetaResponseSteerPendingEvent",
+      "note": "Open reason, complete identifying stubs, shared parent identity and optional lane. Application returns saved results once per parent. Dart part exported through server-event library.",
+      "parent": "ResponsesServerEvent"
+    },
+    "BetaResponseSteerFailedEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponsesSteerFailedEvent",
+      "file": "lib/src/models/responses/websocket/responses_steer_server_events.dart",
+      "schema": "BetaResponseSteerFailedEvent",
+      "note": "Open code and optional allocated ID. Original rejected input preserves arbitrary raw JSON as an explicit compatibility inference beyond the canonical writable shape. Dart part exported through server-event library.",
+      "parent": "ResponsesServerEvent"
+    },
+    "BetaResponseSteerRequiredInput": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ResponsesSteerRequiredInput",
+      "file": "lib/src/models/responses/websocket/responses_steer_required_input.dart",
+      "schema": "BetaResponseSteerRequiredInput",
+      "note": "Seven identifying-only closed inline variants plus lossless future fallback; complete result payloads belong in response.create."
+    },
+    "SteeringContent:InputTextContentParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponsesSteerTextPart",
+      "file": "lib/src/models/responses/websocket/responses_steer_content.dart",
+      "schema": "InputTextContentParam",
+      "parent": "ResponsesSteerContentPart",
+      "note": "Steering-specific text/image/file content preserves canonical optional/null fields without inheriting stronger legacy constructor constraints; no new binary data factory."
+    },
+    "SteeringContent:BetaInputTextContentParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponsesSteerTextPart",
+      "file": "lib/src/models/responses/websocket/responses_steer_content.dart",
+      "schema": "BetaInputTextContentParam",
+      "parent": "ResponsesSteerContentPart",
+      "note": "Steering-specific text/image/file content preserves canonical optional/null fields without inheriting stronger legacy constructor constraints; no new binary data factory."
+    },
+    "SteeringContent:InputImageContentParamAutoParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponsesSteerImagePart",
+      "file": "lib/src/models/responses/websocket/responses_steer_content.dart",
+      "schema": "InputImageContentParamAutoParam",
+      "parent": "ResponsesSteerContentPart",
+      "note": "Steering-specific text/image/file content preserves canonical optional/null fields without inheriting stronger legacy constructor constraints; no new binary data factory."
+    },
+    "SteeringContent:BetaInputImageContentParamAutoParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponsesSteerImagePart",
+      "file": "lib/src/models/responses/websocket/responses_steer_content.dart",
+      "schema": "BetaInputImageContentParamAutoParam",
+      "parent": "ResponsesSteerContentPart",
+      "note": "Steering-specific text/image/file content preserves canonical optional/null fields without inheriting stronger legacy constructor constraints; no new binary data factory."
+    },
+    "SteeringContent:InputFileContentParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponsesSteerFilePart",
+      "file": "lib/src/models/responses/websocket/responses_steer_content.dart",
+      "schema": "InputFileContentParam",
+      "parent": "ResponsesSteerContentPart",
+      "note": "Steering-specific text/image/file content preserves canonical optional/null fields without inheriting stronger legacy constructor constraints; no new binary data factory."
+    },
+    "SteeringContent:BetaInputFileContentParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponsesSteerFilePart",
+      "file": "lib/src/models/responses/websocket/responses_steer_content.dart",
+      "schema": "BetaInputFileContentParam",
+      "parent": "ResponsesSteerContentPart",
+      "note": "Steering-specific text/image/file content preserves canonical optional/null fields without inheriting stronger legacy constructor constraints; no new binary data factory."
+    },
+    "ResponsesSteerTextInput": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesSteerTextInput",
+      "file": "lib/src/models/responses/websocket/responses_steer_event.dart",
+      "schema": null,
+      "note": "Dart contextual/inline steering helper; no invented upstream component. Open codes/reasons remain String-valued properties, not closed Dart enums. Server helpers are exported through their parent Dart library."
+    },
+    "ResponsesSteerMessageContent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesSteerMessageContent",
+      "file": "lib/src/models/responses/websocket/responses_steer_event.dart",
+      "schema": null,
+      "note": "Dart contextual/inline steering helper; no invented upstream component. Open codes/reasons remain String-valued properties, not closed Dart enums. Server helpers are exported through their parent Dart library."
+    },
+    "ResponsesSteerTextContent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesSteerTextContent",
+      "file": "lib/src/models/responses/websocket/responses_steer_event.dart",
+      "schema": null,
+      "note": "Dart contextual/inline steering helper; no invented upstream component. Open codes/reasons remain String-valued properties, not closed Dart enums. Server helpers are exported through their parent Dart library."
+    },
+    "ResponsesSteerPartsContent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesSteerPartsContent",
+      "file": "lib/src/models/responses/websocket/responses_steer_event.dart",
+      "schema": null,
+      "note": "Dart contextual/inline steering helper; no invented upstream component. Open codes/reasons remain String-valued properties, not closed Dart enums. Server helpers are exported through their parent Dart library."
+    },
+    "ResponsesSteerContentPart": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesSteerContentPart",
+      "file": "lib/src/models/responses/websocket/responses_steer_content.dart",
+      "schema": null,
+      "note": "Dart contextual/inline steering helper; no invented upstream component. Open codes/reasons remain String-valued properties, not closed Dart enums. Server helpers are exported through their parent Dart library."
+    },
+    "ResponsesSteerFunctionCallOutput": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesSteerFunctionCallOutput",
+      "file": "lib/src/models/responses/websocket/responses_steer_required_input.dart",
+      "schema": null,
+      "note": "Dart contextual/inline steering helper; no invented upstream component. Open codes/reasons remain String-valued properties, not closed Dart enums. Server helpers are exported through their parent Dart library.",
+      "parent": "ResponsesSteerRequiredInput"
+    },
+    "ResponsesSteerCustomCallOutput": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesSteerCustomCallOutput",
+      "file": "lib/src/models/responses/websocket/responses_steer_required_input.dart",
+      "schema": null,
+      "note": "Dart contextual/inline steering helper; no invented upstream component. Open codes/reasons remain String-valued properties, not closed Dart enums. Server helpers are exported through their parent Dart library.",
+      "parent": "ResponsesSteerRequiredInput"
+    },
+    "ResponsesSteerComputerCallOutput": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesSteerComputerCallOutput",
+      "file": "lib/src/models/responses/websocket/responses_steer_required_input.dart",
+      "schema": null,
+      "note": "Dart contextual/inline steering helper; no invented upstream component. Open codes/reasons remain String-valued properties, not closed Dart enums. Server helpers are exported through their parent Dart library.",
+      "parent": "ResponsesSteerRequiredInput"
+    },
+    "ResponsesSteerShellCallOutput": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesSteerShellCallOutput",
+      "file": "lib/src/models/responses/websocket/responses_steer_required_input.dart",
+      "schema": null,
+      "note": "Dart contextual/inline steering helper; no invented upstream component. Open codes/reasons remain String-valued properties, not closed Dart enums. Server helpers are exported through their parent Dart library.",
+      "parent": "ResponsesSteerRequiredInput"
+    },
+    "ResponsesSteerApplyPatchCallOutput": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesSteerApplyPatchCallOutput",
+      "file": "lib/src/models/responses/websocket/responses_steer_required_input.dart",
+      "schema": null,
+      "note": "Dart contextual/inline steering helper; no invented upstream component. Open codes/reasons remain String-valued properties, not closed Dart enums. Server helpers are exported through their parent Dart library.",
+      "parent": "ResponsesSteerRequiredInput"
+    },
+    "ResponsesSteerToolSearchOutput": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesSteerToolSearchOutput",
+      "file": "lib/src/models/responses/websocket/responses_steer_required_input.dart",
+      "schema": null,
+      "note": "Dart contextual/inline steering helper; no invented upstream component. Open codes/reasons remain String-valued properties, not closed Dart enums. Server helpers are exported through their parent Dart library.",
+      "parent": "ResponsesSteerRequiredInput"
+    },
+    "ResponsesSteerMcpApprovalResponse": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesSteerMcpApprovalResponse",
+      "file": "lib/src/models/responses/websocket/responses_steer_required_input.dart",
+      "schema": null,
+      "note": "Dart contextual/inline steering helper; no invented upstream component. Open codes/reasons remain String-valued properties, not closed Dart enums. Server helpers are exported through their parent Dart library.",
+      "parent": "ResponsesSteerRequiredInput"
+    },
+    "UnknownResponsesSteerRequiredInput": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownResponsesSteerRequiredInput",
+      "file": "lib/src/models/responses/websocket/responses_steer_required_input.dart",
+      "schema": null,
+      "note": "Dart contextual/inline steering helper; no invented upstream component. Open codes/reasons remain String-valued properties, not closed Dart enums. Server helpers are exported through their parent Dart library.",
+      "parent": "ResponsesSteerRequiredInput"
+    },
+    "ResponsesSteerIdentity": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesSteerIdentity",
+      "file": "lib/src/models/responses/websocket/responses_steer_server_events.dart",
+      "schema": null,
+      "note": "Dart contextual/inline steering helper; no invented upstream component. Open codes/reasons remain String-valued properties, not closed Dart enums. Server helpers are exported through their parent Dart library."
+    },
+    "ResponsesFailedSteer": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesFailedSteer",
+      "file": "lib/src/models/responses/websocket/responses_steer_server_events.dart",
+      "schema": null,
+      "note": "Dart contextual/inline steering helper; no invented upstream component. Open codes/reasons remain String-valued properties, not closed Dart enums. Server helpers are exported through their parent Dart library."
+    },
+    "ResponsesSteerError": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesSteerError",
+      "file": "lib/src/models/responses/websocket/responses_steer_server_events.dart",
+      "schema": null,
+      "note": "Dart contextual/inline steering helper; no invented upstream component. Open codes/reasons remain String-valued properties, not closed Dart enums. Server helpers are exported through their parent Dart library."
     }
   }
 }

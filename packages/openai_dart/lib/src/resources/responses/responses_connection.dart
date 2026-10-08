@@ -6,21 +6,23 @@ import 'package:web_socket/web_socket.dart';
 import '../../models/responses/create_response_request.dart';
 import '../../models/responses/websocket/responses_create_event.dart';
 import '../../models/responses/websocket/responses_server_event.dart';
+import '../../models/responses/websocket/responses_steer_event.dart';
 import 'websocket_connector_common.dart';
 
 export 'websocket_connector.dart';
 
-/// A malformed or unsupported frame received on a Responses WebSocket.
+/// A malformed incoming or unserializable outgoing Responses WebSocket frame.
 ///
-/// The frame's contents are deliberately excluded from diagnostics. Protocol
+/// The frame's contents are deliberately excluded from diagnostics. Incoming
 /// failures appear as errors on [ResponsesConnection.events]; they do not turn
-/// into a response completion or close an otherwise usable connection.
+/// into a response completion or close an otherwise usable connection. Outgoing
+/// serialization failures are thrown before any socket write.
 class ResponsesProtocolException implements Exception {
   /// Creates an identifiable protocol error without retaining a payload.
   const ResponsesProtocolException({required this.kind});
 
   /// Classification: `binary`, `invalid_json`, `non_object`, `invalid_event`,
-  /// or `invalid_create`.
+  /// `invalid_create`, or `invalid_steer`.
   final String kind;
 
   @override
@@ -297,11 +299,18 @@ class ResponsesConnection {
       throw ArgumentError('multiAgent requires a beta Responses connection');
     }
     final json = event.toJson();
+    _sendFrame(json, invalidFrameKind: 'invalid_create');
+  }
+
+  void _sendFrame(
+    Map<String, dynamic> json, {
+    required String invalidFrameKind,
+  }) {
     final String encoded;
     try {
       encoded = jsonEncode(json);
     } catch (_) {
-      throw const ResponsesProtocolException(kind: 'invalid_create');
+      throw ResponsesProtocolException(kind: invalidFrameKind);
     }
     try {
       _socket.sendText(encoded);
@@ -327,6 +336,34 @@ class ResponsesConnection {
       streamId: streamId,
       generate: generate,
     ),
+  );
+
+  /// Sends one typed `response.steer` frame immediately.
+  ///
+  /// The target response determines the lane. A steer contains only its type,
+  /// parent response ID and user input. Acceptance queues server ownership;
+  /// successor creation is the commit point. Keep reading original and successor
+  /// events without sending another create or resending accepted input.
+  ///
+  /// If a pending message identifies tool results or approvals, return saved
+  /// results with one explicit create per parent on its original lane. This
+  /// method does not run tools, create successors, or replay after an unknown
+  /// outcome. Lost acknowledgments and disconnects do not prove rejection.
+  void sendSteer(ResponsesSteerEvent event) {
+    if (_closed) throw StateError('Responses WebSocket connection is closed');
+    _sendFrame(event.toJson(), invalidFrameKind: 'invalid_steer');
+  }
+
+  /// Queues user input for a continuation of the target response.
+  ///
+  /// Use the actual response ID received on this connection. Model and execution
+  /// mode support is determined by the server; failures are ordinary typed
+  /// steering messages. See [sendSteer] for continuation and ownership rules.
+  void steer({
+    required String previousResponseId,
+    required ResponsesSteerInput input,
+  }) => sendSteer(
+    ResponsesSteerEvent(previousResponseId: previousResponseId, input: input),
   );
 
   /// Releases the socket and reader exactly once.

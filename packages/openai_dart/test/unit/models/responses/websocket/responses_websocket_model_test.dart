@@ -750,9 +750,6 @@ void main() {
 
     for (final type in [
       'future.private',
-      'response.steer.accepted',
-      'response.steer.pending',
-      'response.steer.failed',
       'response.inject.created',
       'response.inject.failed',
     ]) {

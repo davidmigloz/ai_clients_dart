@@ -354,8 +354,9 @@ describes 16 in-flight responses, 32 named lanes plus default, and a 60-minute
 connection limit. On disconnection, recover manually using a stored response ID
 or replay full context with no parent. A `store: false` fork should reach
 `response.in_progress` before the source lane advances. Standalone compaction
-starts a new chain using the complete returned compacted window. Steering,
-automatic recovery and multi-agent tool-result injection remain planned follow-ups.
+starts a new chain using the complete returned compacted window. Mid-turn steering
+is described below. Automatic recovery and multi-agent tool-result injection
+remain planned follow-ups.
 
 → [Runnable offline example](example/responses_websocket_example.dart), with
 warm-up, two lanes, incremental continuation and awaited cleanup for $0.
@@ -363,6 +364,116 @@ warm-up, two lanes, incremental continuation and awaited cleanup for $0.
 The shared annotation-added event accepts its required nullable annotation value.
 See the [migration guide](MIGRATION.md#upcoming-nullable-streaming-annotations)
 before dereferencing `OutputTextAnnotationAddedEvent.annotation`.
+
+</details>
+
+### How do I steer a running Responses request?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Send user input after the original `response.created`, then keep reading until
+the successor completes:
+
+```dart
+final connection = await client.responses.connect();
+final reader = StreamIterator(connection.events);
+String? originalId;
+String? successorId;
+var completed = false;
+try {
+  connection.create(
+    const CreateResponseRequest(
+      model: 'gpt-6-sol',
+      input: ResponseInput.text('Draft a project plan.'),
+    ),
+  );
+  while (await reader.moveNext()) {
+    final message = reader.current;
+    if (message case ResponsesStreamEvent(
+      event: ResponseCreatedEvent(:final response),
+    )) {
+      if (originalId == null) {
+        originalId = response.id;
+        connection.steer(
+          previousResponseId: originalId,
+          input: const ResponsesSteerInput.text('Keep the scope small.'),
+        );
+      } else {
+        successorId = response.id; // The queued input is now committed.
+      }
+    } else if (message is ResponsesSteerAcceptedEvent) {
+      // Save message.steer.id. Acceptance queues input; keep reading.
+    } else if (message is ResponsesSteerPendingEvent) {
+      // This minimal example has no tool runner. Return saved results through
+      // one explicit create per parent on message.streamId; see the full example.
+      throw StateError('The continuation needs saved tool results or approval.');
+    } else if (message is ResponsesSteerFailedEvent ||
+        message is ResponsesErrorEvent) {
+      throw StateError('The request or steering failed.');
+    } else if (message case ResponsesStreamEvent(event: ResponseFailedEvent())) {
+      throw StateError('A response failed before the continuation completed.');
+    } else if (message case ResponsesStreamEvent(
+      event: ResponseIncompleteEvent(:final response),
+    )) {
+      if (response.id != originalId ||
+          response.incompleteDetails?.reason != 'steered') {
+        throw StateError('A response ended incomplete without successful steering.');
+      }
+    } else if (message case ResponsesStreamEvent(
+      event: ResponseCompletedEvent(:final response),
+    )) {
+      if (successorId != null && response.id == successorId) {
+        completed = true;
+        break;
+      }
+    }
+  }
+  if (!completed) {
+    throw StateError('Connection closed with an unknown steering outcome.');
+  }
+} finally {
+  try {
+    await connection.close();
+    await connection.done;
+  } finally {
+    await reader.cancel();
+  }
+}
+```
+
+Steering supports the GPT-6 family in supported single-agent modes, without a
+conversation binding or automatic compaction. Unsupported modes surface server
+failures; the client does not maintain a model allowlist. `ResponsesSteerEvent`
+contains only `type`, `previous_response_id` and `input`. `ResponsesSteerInput`
+accepts text or a nonempty list of user messages containing text/image/file parts.
+It excludes create settings, lane fields, message IDs/status and tool results.
+`sendSteer` accepts an already-built event; `steer` is the convenience method.
+
+`response.steer.accepted` queues the update; successor `response.created` commits
+it. The original can end as incomplete with reason `steered` or complete normally
+before that successor arrives. Steering does not rewrite emitted output, undo
+actions or cancel tools already running.
+
+For `waiting_for_required_input`, inspect `ResponsesSteerPendingEvent.requiredInput`.
+Its seven typed stub kinds identify function, custom, computer, shell, apply-patch,
+tool-search results or MCP approval; they are not complete result items. Use saved
+results in one explicit `create` per parent on the original lane. That request uses
+its own settings; the server prepends accepted steering. Several pending
+submissions can share the same stubs, and a matching create can arrive before a
+pending notification. Do not rerun tools or resend accepted input.
+
+Pending reasons and failure codes remain open strings. A failure preserves the
+original rejected raw input, optional allocated ID and lane, including future
+metadata. A failure after acceptance retains the same steering ID. Correct invalid
+input before deciding whether to submit it again. A missing acknowledgment or
+disconnect leaves the outcome unknown; no frame is automatically replayed.
+
+→ [Runnable offline steering example](example/responses_steering_example.dart)
+demonstrates automatic continuation and two pending submissions sharing one saved
+tool result, with exactly one continuation create and awaited cleanup for $0.
+See [migration guidance](MIGRATION.md#upcoming-typed-steering-events) for exhaustive
+WebSocket event switches and the [official steering guide](https://developers.openai.com/api/docs/guides/steering).
 
 </details>
 
@@ -1637,7 +1748,7 @@ See the [example/](example/) directory for complete examples:
 | API | Status |
 |-----|--------|
 | Chat Completions | Supported; stored-completion management pending |
-| Responses API | Supported with persistent WebSockets; steering, automatic recovery, tool-result injection and additional tool/configuration details pending |
+| Responses API | Supported with persistent WebSockets and mid-turn steering; automatic recovery, tool-result injection and additional tool/configuration details pending |
 | Decisions API | ✅ Full |
 | Embeddings | ✅ Full |
 | Images | ✅ Full |
