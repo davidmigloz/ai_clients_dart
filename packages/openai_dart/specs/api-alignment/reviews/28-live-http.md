@@ -70,6 +70,10 @@ and actual fetch receipt remain separate; adopted f6 bytes/metadata are preserve
 - Nested malformed fields preserve safe field/index context without source/offset
   or private content. Full combined validation includes tools using the final
   shared helper, beyond each author's earlier isolated platform runs.
+- Publication review reproduced JavaScript Infinity as a Dart int. Startup/update
+  backend token limits and snapshot expiry now reject nonfinite constructor/copy
+  values; all six core integer fields and tool numeric overflow paths have real
+  browser regressions. Valid canonical output remains unchanged.
 - No existing public constructor/enum/sealed union changes or package version bump;
   no breaking migration is invented. The offline example owns synthetic transport,
   preserves 48 stereo WAV bytes and never makes a real call or media request.
@@ -77,10 +81,10 @@ and actual fetch receipt remain separate; adopted f6 bytes/metadata are preserve
 ## Validation and remaining gates
 
 Format reports 602 unchanged Dart files; fix has nothing to apply and fatal-info
-package analysis reports no issues. The full package suite passes 16,934 cases,
-with two existing environment-dependent skips. There are 1,945 new VM cases:
-567 core, 642 tools, 728 HTTP/native regressions and eight logging cases. All
-1,941 common cases pass real Chrome JavaScript and Wasm; four native socket/Speech
+package analysis reports no issues. The full package suite passes 16,967 cases,
+with two existing environment-dependent skips. There are 1,978 new VM cases:
+591 core, 651 tools, 728 HTTP/native regressions and eight logging cases. All
+1,974 common cases pass real Chrome JavaScript and Wasm; four native socket/Speech
 identity cases are VM-only. Retained Audio/error regressions pass 889 cases.
 
 Independent requirements and both cross-author engineering reviews approve the

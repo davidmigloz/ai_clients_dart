@@ -44,7 +44,7 @@ bumps and unrelated API families are outside this ticket.
 ## Completion evidence
 
 See the [Live HTTP acceptance record](../reviews/28-live-http.md).
-The package suite passes 16,934 tests with two existing skips; new common fixtures
+The package suite passes 16,967 tests with two existing skips; new common fixtures
 pass VM/Chrome JavaScript/Wasm. Public canonical/source/docs evidence and independent
 combined reviews approve. Final published-head CI and actual merge are separate
 gates; #370 remains open until its runtime PR merges.
