@@ -5060,6 +5060,84 @@
       "kind": "extension",
       "file": "lib/src/models/webhooks/webhook_payloads.dart",
       "notes": "Inline realtime.call.incoming payload with call_id and SIP headers."
+    },
+    "ProjectEventTypeEnum": {
+      "schema": "ProjectEventTypeEnum",
+      "kind": "enum",
+      "file": "lib/src/models/webhooks/webhook_endpoint.dart",
+      "dart_class": "WebhookEventType",
+      "spec": "main",
+      "note": "Writable project subscription/test choices remain the exact closed canonical 23 choices; returned/discovery strings are open."
+    },
+    "PublicCreateEndpointBody": {
+      "schema": "PublicCreateEndpointBody",
+      "kind": "object",
+      "file": "lib/src/models/webhooks/webhook_endpoint.dart",
+      "dart_class": "WebhookEndpointCreateRequest",
+      "spec": "main"
+    },
+    "PublicUpdateEndpointBody": {
+      "schema": "PublicUpdateEndpointBody",
+      "kind": "object",
+      "file": "lib/src/models/webhooks/webhook_endpoint.dart",
+      "dart_class": "WebhookEndpointUpdateRequest",
+      "spec": "main"
+    },
+    "PublicRotateSecretBody": {
+      "schema": "PublicRotateSecretBody",
+      "kind": "object",
+      "file": "lib/src/models/webhooks/webhook_endpoint.dart",
+      "dart_class": "WebhookEndpointRotateSecretRequest",
+      "spec": "main"
+    },
+    "PublicTestEndpointBody": {
+      "schema": "PublicTestEndpointBody",
+      "kind": "object",
+      "file": "lib/src/models/webhooks/webhook_endpoint.dart",
+      "dart_class": "WebhookEndpointTestRequest",
+      "spec": "main"
+    },
+    "WebhookEndpointBody": {
+      "schema": "WebhookEndpointBody",
+      "kind": "object",
+      "file": "lib/src/models/webhooks/webhook_endpoint.dart",
+      "dart_class": "WebhookEndpoint",
+      "spec": "main"
+    },
+    "WebhookEndpointWithSecretResource": {
+      "schema": "WebhookEndpointWithSecretResource",
+      "kind": "object",
+      "file": "lib/src/models/webhooks/webhook_endpoint.dart",
+      "dart_class": "WebhookEndpointWithSecret",
+      "spec": "main"
+    },
+    "WebhookEndpointListResource": {
+      "schema": "WebhookEndpointListResource",
+      "kind": "object",
+      "file": "lib/src/models/webhooks/webhook_endpoint.dart",
+      "dart_class": "WebhookEndpointList",
+      "spec": "main"
+    },
+    "DeletedWebhookEndpointResource": {
+      "schema": "DeletedWebhookEndpointResource",
+      "kind": "object",
+      "file": "lib/src/models/webhooks/webhook_endpoint.dart",
+      "dart_class": "DeletedWebhookEndpoint",
+      "spec": "main"
+    },
+    "WebhookEndpointTestResultResource": {
+      "schema": "WebhookEndpointTestResultResource",
+      "kind": "object",
+      "file": "lib/src/models/webhooks/webhook_endpoint.dart",
+      "dart_class": "WebhookEndpointTestResult",
+      "spec": "main"
+    },
+    "WebhookEventTypeListResource": {
+      "schema": "WebhookEventTypeListResource",
+      "kind": "object",
+      "file": "lib/src/models/webhooks/webhook_endpoint.dart",
+      "dart_class": "WebhookEventTypeList",
+      "spec": "main"
     }
   }
 }

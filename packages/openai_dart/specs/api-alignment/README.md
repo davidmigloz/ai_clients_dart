@@ -210,10 +210,12 @@ and later-family gaps stay in the inventory.
 The [Webhooks and safety specification](webhooks-safety.md) records 17 requirement
 IDs, exact received/subscription inventories, signature policy, permission and
 error-shape boundaries. [Planning review](reviews/20-webhooks-safety-planning.md)
-records independent source/architecture checks. Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) merged October 8, 2026 at `886659c3c11cbee89335788ba918eeecd528fce0` after green CI. Receiver #357 is implemented and independently verified in [PR #362](https://github.com/davidmigloz/ai_clients_dart/pull/362), with merge pending.
+records independent source/architecture checks. Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) merged October 8, 2026 at `886659c3c11cbee89335788ba918eeecd528fce0` after green CI. Receiver #357 merged in [PR #362](https://github.com/davidmigloz/ai_clients_dart/pull/362)
+at `eea142bf9b100448f5216572e4db2d50a7ad0f5b` after green CI.
 Its [acceptance evidence](reviews/20-webhook-receiver.md) records runtime checks.
-Endpoint management, safety retrieval and monitoring errors remain specified
-with implementation pending.
+Endpoint management #358 is implemented and independently verified with merge
+pending; [acceptance evidence](reviews/21-webhook-endpoints.md) records its checks.
+Safety retrieval and monitoring errors remain specified with implementation pending.
 
 | Ticket | Demonstrable outcome | Prerequisite |
 | --- | --- | --- |
@@ -378,9 +380,9 @@ Sources: [cache diagnostics](https://developers.openai.com/api/docs/guides/promp
 - Python-only safety_identifier.blocked is absent from canonical/Node/unwrap unions;
   video event subscriptions lack typed inbound schemas. Phase 4 preserves those
   received values as unknown raw events until authoritative shapes are established.
-- Webhooks: local signed verification and 26 typed received events are implemented
-  and verified in #357 with merge pending. Seven endpoint operations plus event-type
-  listing remain pending in #358.
+- Webhooks: signed verification and 26 typed received events merged in #357/#362.
+  Seven endpoint operations plus event-type discovery are implemented/verified
+  in #358 with merge pending.
 - Audio: speech instructions and streaming, additional built-in/custom voices,
   sample-derived voice creation and consent management. The earlier
   [OpenAPI 3c4759c1](https://github.com/openai/openai-openapi/commit/3c4759c1ecc98a2ac3d3df85d54f4eb409f5957d)
@@ -519,5 +521,5 @@ reviews approve the final diff. Toolkit diagnostics remain visible with a
 classified delegated-serializer/value-scanner delta; no exclusions were added.
 Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) merged October 8, 2026 at `1e63d6b93bdf0028eb6925d45371b1f36deb5d7b`, closing #344, after all applicable final-head checks passed (14 contexts completed: 13 successes and the standard Test(all) skip).
 All eleven specified Phase 3 implementation tickets are merged. Phase 4 now has
-its own specification/tickets and an implemented, verified receiver #357 with
-merge pending; remaining parity inventory persists.
+its own specification/tickets, a merged receiver #357 and implemented/verified
+endpoint management #358 with merge pending; remaining parity inventory persists.

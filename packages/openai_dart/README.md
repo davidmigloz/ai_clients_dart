@@ -47,7 +47,7 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 
 - Files, uploads, batches, fine-tuning, moderations, evals, and model management
 - Conversations, containers, content provenance checks, ChatKit, and skills
-- Local signed webhook verification with 26 typed received event variants
+- Local signed webhook verification with 26 typed received event variants, plus project endpoint management/discovery
 - Assistants and vector stores (deprecated — use Responses API instead)
 
 See [API Coverage](#api-coverage) for the full coverage table.
@@ -1960,6 +1960,72 @@ JavaScript/Wasm runtime support does not make browser deployment of secrets safe
 three loopback deliveries (valid, duplicate, tampered) and makes no API calls.
 See the [official Webhooks guide](https://developers.openai.com/api/docs/guides/webhooks).
 
+### How do I manage webhook endpoints?
+
+The authenticated project API exposes `client.webhooks.create`, `list`, `retrieve`,
+`update`, `delete`, `rotateSecret` and `test`, plus `eventTypes.list()` to discover webhook event types.
+Create/update/test use the 23 canonical `WebhookEventType` choices, including
+video. Returned endpoint/discovery strings stay open to future values. Discovery
+alone does not make a future string admissible in a typed writable request.
+
+```dart
+import 'package:openai_dart/openai_dart.dart';
+
+Future<int> configureProjectWebhook(
+  OpenAIClient client,
+  Future<void> Function(String endpointId, String secret) saveSecret,
+) async {
+  final created = await client.webhooks.create(WebhookEndpointCreateRequest(
+    name: 'Completed responses',
+    url: 'https://receiver.example/webhook',
+    eventTypes: const [WebhookEventType.responseCompleted],
+  ));
+  await saveSecret(created.id, created.signingSecret);
+  final rotated = await client.webhooks.rotateSecret(created.id,
+    request: WebhookEndpointRotateSecretRequest(
+      keepOldSecretActiveFor24Hours: true,
+    ),
+  );
+  await saveSecret(rotated.id, rotated.signingSecret);
+  final tested = await client.webhooks.test(created.id,
+    WebhookEndpointTestRequest(eventType: WebhookEventType.responseCompleted),
+  );
+  // success:true means the test request completed. Check the receiver separately.
+  return tested.statusCode;
+}
+```
+
+Create requires a 1–256 character name, an HTTPS-prefixed URL of at most 2,048
+characters and a nonempty event list. Update uses POST, accepts any subset including
+`WebhookEndpointUpdateRequest()` and replaces the complete event set when supplied.
+Use `list(limit: ..., after: ...)` with the returned `lastId` cursor and `hasMore`;
+there is no inferred cursor, `before` or ordering parameter. Limits are 1–100,
+with server default 20. Required nullable signing hints/page cursors remain explicit
+nulls, while optional `updatedAt` stays omitted when absent.
+
+Create/rotate return `WebhookEndpointWithSecret`. Store the returned key securely;
+ordinary endpoint retrieval never returns it. Rotation with no request body or
+with the default false option invalidates the old key immediately. Explicit true
+allows a 24-hour overlap. Applications coordinate stored keys and receiver updates;
+rotation does not mutate `OpenAIConfig.webhookSecret`. `test` sends a real delivery:
+its `success: true` result may still report a 4xx/5xx `statusCode` from the receiver.
+Endpoint HTTP methods use normal auth, cancellation, closed-client checks and retry
+policy; local verification remains independent of HTTP/client lifetime.
+
+Built-in response logging redacts `signing_secret` structurally before truncation,
+including nested/escaped keys and short/raw-looking values. Safe default error
+messages and diagnostics omit secret values; raw response/model JSON and exception
+body remain available to the caller. Error codes/types/parameters and quota retry
+classification remain intact. As with existing client logging, configure
+`hierarchicalLoggingEnabled = true` when setting a nonroot client logger level.
+Custom logging of raw responses or `toJson()` remains caller-owned.
+
+→ [Offline endpoint lifecycle example](example/webhook_endpoints_example.dart),
+which uses MockClient for all eight operations, returned cursor/event discovery,
+secret storage/rotation and a completed test with receiver status 500. It makes
+no API calls and sends no external test delivery.
+See the [official Webhooks reference](https://developers.openai.com/api/reference/resources/webhooks).
+
 ## Error Handling
 
 <details>
@@ -2027,6 +2093,7 @@ See the [example/](example/) directory for complete examples:
 
 | Example | Description |
 |---------|-------------|
+| [`webhook_endpoints_example.dart`](example/webhook_endpoints_example.dart) | Offline project endpoint lifecycle, pagination, discovery, rotation and test status |
 | [`webhooks_example.dart`](example/webhooks_example.dart) | Offline signed receiver, acknowledgment and caller-owned deduplication |
 | [`chat_example.dart`](example/chat_example.dart) | Chat completions, multi-turn conversations, and legacy cache retention |
 | [`streaming_example.dart`](example/streaming_example.dart) | Content streaming, detailed final usage, and obfuscation controls |
@@ -2092,7 +2159,7 @@ See the [example/](example/) directory for complete examples:
 | Content Provenance Checks | ✅ Full |
 | ChatKit Beta | ✅ Full |
 | Realtime | ✅ Full (separate import) |
-| Webhooks | Local signed verification and 26 typed received events; endpoint management pending |
+| Webhooks | Local signed verification, 26 typed received events and all eight project endpoint/discovery operations |
 | Assistants (Deprecated) | ✅ Full (separate import) |
 | Threads (Deprecated) | ✅ Full (separate import) |
 | Messages (Deprecated) | ✅ Full (separate import) |
@@ -2100,7 +2167,7 @@ See the [example/](example/) directory for complete examples:
 | Vector Stores (Deprecated) | ✅ Full (separate import) |
 | Completions (Legacy) | ✅ Full |
 
-Agents, Live, safety retrieval, webhook management, vaults, and Administration remain part of the [API alignment roadmap](specs/api-alignment/README.md).
+Agents, Live, safety retrieval, vaults, and Administration remain part of the [API alignment roadmap](specs/api-alignment/README.md).
 
 ## Official Documentation
 

@@ -57,6 +57,8 @@
 
 - [webhooks_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/webhooks_example.dart): Offline signed receiver with original-byte verification, typed events, prompt acknowledgment and application-owned deduplication; no API key or charges.
 
+- [webhook_endpoints_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/webhook_endpoints_example.dart): Offline project webhook lifecycle with returned cursor/event discovery, signing-key storage/rotation, separate receiver status and cleanup; MockClient only, no API charges.
+
 ## Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_dart): Source tree, pubspec, and package-local files.

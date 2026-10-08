@@ -1,7 +1,7 @@
 # Signed webhook receiver acceptance
 
-Status: implemented, independently reviewed and verified; PR #362 open, merge pending.
-Implementation [PR #362](https://github.com/davidmigloz/ai_clients_dart/pull/362) is open for review; #357 remains open until merge.
+Status: merged in PR #362 after green CI; #357 closed.
+Implementation [PR #362](https://github.com/davidmigloz/ai_clients_dart/pull/362) merged October 8, 2026 at `eea142bf9b100448f5216572e4db2d50a7ad0f5b`, closing #357, after all 14 final-head contexts passed (13 successes and standard Test(all) skip).
 Tracking: [#357](https://github.com/davidmigloz/ai_clients_dart/issues/357),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirements: [WH-VERIFY-01–03 and WH-EVENT-01–03](../webhooks-safety.md).
@@ -134,7 +134,8 @@ source/schema receipts, manifest, example and documentation. Review corrections
 resolved a mistaken huge-time acceptance fixture and example HTTP duplicate-header
 handling/delivery identity before final freeze. Reviewers also independently
 confirmed the toolkit classifications. Final PR/CI status is recorded separately;
-#357 remains open until implementation merge. Next independent slice is #358;
+#357 closed after implementation merge. Endpoint management #358 is implemented
+and verified with merge pending;
 #359 and #360 retain their explicit dependency order.
 
 ## GitHub secret-scanning follow-up
@@ -153,4 +154,4 @@ protocol-prefixed fixture. The exact runtime key and all signed golden receipt
 bytes remain unchanged; no scanning rule is disabled. All 170 affected verifier/
 public-wrapper cases pass again on VM, real Chrome JavaScript and Wasm, with
 format/fix/fatal-info analysis clean. Independent review approves provenance and
-fixture preservation. Final CI is rechecked after the follow-up commit before merge.
+fixture preservation. Final CI passed again on follow-up head `99df2a4ead5f5c0b53240dbbbb44fd5d02ee1d91` before merge.

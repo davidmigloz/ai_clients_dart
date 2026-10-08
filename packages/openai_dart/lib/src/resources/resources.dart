@@ -33,5 +33,6 @@ export 'threads_resource.dart';
 export 'uploads_resource.dart';
 export 'vector_stores_resource.dart';
 export 'videos_resource.dart';
+export 'webhooks/webhook_event_types_resource.dart';
 export 'webhooks/webhook_verifier.dart';
 export 'webhooks_resource.dart';
