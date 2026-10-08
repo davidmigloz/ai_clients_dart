@@ -21,15 +21,9 @@ void main() {
   group('official and independent webhook HMAC receipts', () {
     _test('official shared Python/Node golden string and bytes', () {
       final vector = _vector('official');
-      final verifier =
-          const WebhookVerifier(
-              secret: 'whsec_RdvaYFYUXuIFuEbvZHwMfYFhUf7aMYjYcmM24+Aj40c=',
-            )
-            ..verifySignature(_body(vector), _headers(vector))
-            ..verifySignatureBytes(
-              utf8.encode(_body(vector)),
-              _headers(vector),
-            );
+      final verifier = const WebhookVerifier(secret: officialWebhookTestSecret)
+        ..verifySignature(_body(vector), _headers(vector))
+        ..verifySignatureBytes(utf8.encode(_body(vector)), _headers(vector));
       final event = verifier.unwrap(_body(vector), _headers(vector));
       expect(event.toJson(), jsonDecode(_body(vector)));
       expect(

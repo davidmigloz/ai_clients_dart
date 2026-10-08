@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 
 import 'webhook_verifier_vectors.dart';
 
-const _secret = 'whsec_RdvaYFYUXuIFuEbvZHwMfYFhUf7aMYjYcmM24+Aj40c=';
+const String _secret = officialWebhookTestSecret;
 const _tolerance = Duration(days: 36500);
 final Map<String, Object> _golden = verifierVectors['official']!;
 final _body = _golden['body']! as String;
