@@ -712,18 +712,12 @@ final _operations = <_Operation>[
     },
     (value) => (value as SafetyAlert).toJson(),
   ),
-  _Operation(
-    'cases.retrieve',
-    '/safety/cases',
-    128,
-    'SafetyCase',
-    _caseJson,
-    (client) {
-      final cases = client.safety.cases;
-      return (id, abort) => cases.retrieve(id, abortTrigger: abort);
-    },
-    (value) => (value as SafetyCase).toJson(),
-  ),
+  _Operation('cases.retrieve', '/safety/cases', 128, 'SafetyCase', _caseJson, (
+    client,
+  ) {
+    final cases = client.safety.cases;
+    return (id, abort) => cases.retrieve(id, abortTrigger: abort);
+  }, (value) => (value as SafetyCase).toJson()),
 ];
 
 class _CountingAuthProvider implements AuthProvider {
