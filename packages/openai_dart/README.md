@@ -1330,6 +1330,14 @@ fields. You can reuse the returned assistant message directly: actual request
 serialization projects its audio to `{id}` without sending data/transcript/expiry.
 Local response serialization retains the complete output and provider extensions.
 
+`ChatAudioConfig.voice` accepts existing `ChatAudioVoice` constants (including
+marin/cedar), `AudioVoice.named('provider-voice-name')`, or
+`AudioVoice.custom('voice_existing_id')`. Availability depends on the model and
+project access. `ChatAudioFormat.aac` is supported by the canonical request;
+Chat PCM uses `pcm16`, while Speech uses `pcm`. See the
+[offline voice/file-audio example](example/existing_audio_example.dart) and
+[migration notes](MIGRATION.md#upcoming-chat-voices-and-file-audio-corrections).
+
 Stream with PCM16 output and pass events to `ChatStreamAccumulator`. Each
 `ChatDelta.audio` is an independent partial update. `accumulator.audio` and each
 `accumulator.choices[i].audio` expose stable `ChatAudioDelta` snapshots with
@@ -1642,15 +1650,65 @@ final response = await client.audio.transcriptions.create(
   TranscriptionRequest(
     file: File('audio.mp3').readAsBytesSync(),
     filename: 'audio.mp3',
-    model: 'whisper-1',
+    model: 'gpt-transcribe',
+    languages: ['en'],
+    keywords: ['OpenAI'],
   ),
 );
 
 print('Transcription: ${response.text}');
 ```
 
+All 14 existing file-transcription fields are forwarded, including repeated
+`keywords`/`languages`, speaker names/data URLs, logprob inclusion and timestamp
+options. `fileContentType: 'audio/mpeg'` optionally sets the file MIME header;
+it is upload metadata, separate from those form fields. Requests snapshot their
+bytes/lists. Use plural `languages` for `gpt-transcribe`; its singular `language`
+is rejected, keywords cannot contain angle brackets/CR/LF, and no numeric prompt
+limit is published. Only `chunkingStrategy` and `stream` permit explicit null,
+which normalizes to omission as in Python; Node rejects null. False remains false,
+and `createStream` selects true. Speaker samples are data URLs; audio format and
+duration remain server-validated.
+
+Choose `transcriptions.create` for JSON, `createVerbose` for timestamps,
+`createDiarized` for speakers, and `createRaw` for text/SRT/VTT with the matching
+`responseFormat`. These specialist modes depend on the model. All buffered methods
+accept `abortTrigger`. `createStream` yields typed deltas, diarized segments and
+done events plus future received variants. A valid `transcript.text.done` releases
+the transport promptly; EOF or `[DONE]` before it is a stream error. Streams never
+replay consumed output and cancellation preserves injected borrowed clients.
+
+**Translation to English:**
+
+```dart
+final request = TranslationRequest(
+  file: File('audio.mp3').readAsBytesSync(),
+  filename: 'audio.mp3',
+  model: 'whisper-1',
+);
+final verbose = await client.audio.translations.createVerbose(request);
+print('${verbose.language}: ${verbose.text}'); // Output language is English.
+final subtitles = await client.audio.translations.createRaw(
+  request.copyWith(responseFormat: TranslationResponseFormat.vtt),
+);
+print(subtitles); // Raw text/subtitle whitespace is retained.
+```
+
+Translation `create` accepts JSON; verbose responses need no legacy `task` field,
+and segments are optional. All translation methods accept `abortTrigger`.
+Received JSON is deeply immutable and future metadata is preserved; known malformed
+fields fail with safe diagnostics while explicit response data remains available.
+
+The [February 26, 2027 sunset](https://developers.openai.com/api/docs/deprecations)
+lists Whisper/GPT-4o file-transcription models and recommends `gpt-transcribe` or
+`gpt-live-transcribe`. A replacement must support your translation, diarization,
+timestamp or subtitle workflow; currently operational specialist modes remain
+available. This date is separate from the January 6 TTS and January 20 legacy
+snapshot notices.
+
 → [Audio example](example/audio_example.dart) and
 [offline speech streaming example](example/speech_streaming_example.dart) ($0 API cost)
+and [offline file-audio/Chat voice example](example/existing_audio_example.dart).
 
 </details>
 
@@ -2301,6 +2359,7 @@ See the [example/](example/) directory for complete examples:
 | [`videos_example.dart`](example/videos_example.dart) | Sora video generation, editing, and extension |
 | [`audio_example.dart`](example/audio_example.dart) | Text-to-speech and transcription |
 | [`speech_streaming_example.dart`](example/speech_streaming_example.dart) | Offline buffered/byte/SSE speech, voice references and usage |
+| [`existing_audio_example.dart`](example/existing_audio_example.dart) | Offline modern file fields, verbose/raw translation, open/custom Chat voices and AAC |
 | [`chat_audio_example.dart`](example/chat_audio_example.dart) | Chat audio output, ID-only replay, and partial stream accumulation |
 | [`files_example.dart`](example/files_example.dart) | File upload and management |
 | [`conversations_example.dart`](example/conversations_example.dart) | Conversations API for state management |
@@ -2339,7 +2398,7 @@ See the [example/](example/) directory for complete examples:
 | Embeddings | ✅ Full |
 | Images | ✅ Full |
 | Videos (Sora) | ✅ Full |
-| Audio (Speech, Transcription, Translation) | Speech buffered/byte/SSE, current options and open/custom references; consent/voice creation and file-audio corrections tracked |
+| Audio (Speech, Transcription, Translation) | Buffered/streamed speech and file transcription; explicit JSON/verbose/raw translation, current options/open/custom references; consent/voice creation pending |
 | Files | ✅ Full |
 | Uploads | ✅ Full |
 | Batches | ✅ Full |

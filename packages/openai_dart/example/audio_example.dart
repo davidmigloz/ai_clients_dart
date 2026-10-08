@@ -90,7 +90,9 @@ Future<void> main() async {
       TranscriptionRequest(
         file: audioBytes,
         filename: 'speech.mp3',
-        model: 'gpt-4o-mini-transcribe',
+        model: 'gpt-transcribe',
+        languages: const ['en'],
+        keywords: const ['OpenAI'],
       ),
     );
 
@@ -104,7 +106,8 @@ Future<void> main() async {
           TranscriptionRequest(
             file: audioBytes,
             filename: 'speech.mp3',
-            model: 'gpt-4o-mini-transcribe',
+            // Preserve the operational timestamp-capable specialist workflow.
+            model: 'whisper-1',
           ),
         );
 

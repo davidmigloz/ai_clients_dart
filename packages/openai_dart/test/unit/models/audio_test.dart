@@ -194,15 +194,15 @@ void main() {
       final s = request.toString();
       // file is summarized as a byte count, not dumped.
       expect(s, contains('${request.file.length} bytes'));
-      expect(s, contains('a.mp3'));
-      expect(s, contains('gpt-4o-transcribe'));
+      expect(s, contains('filename: [REDACTED]'));
+      expect(s, contains('model: [REDACTED]'));
       expect(s, contains('TranscriptionChunkingStrategy.auto()'));
       // Nullable lists are summarized as '<n> items', not dumped.
       expect(s, contains('include: 1 items'));
       expect(s, contains('keywords: 1 items'));
       expect(s, contains('knownSpeakerNames: 1 items'));
       expect(s, contains('knownSpeakerReferences: 1 items'));
-      expect(s, contains('language: en'));
+      expect(s, contains('language: [REDACTED]'));
       expect(s, contains('languages: 1 items'));
       expect(s, contains('prompt'));
       expect(s, contains('diarized_json'));
@@ -537,11 +537,11 @@ void main() {
     });
 
     test('copyWith null-clears optional fields', () {
-      const response = TranscriptionResponse(
+      final response = TranscriptionResponse(
         text: 'Hello',
-        languages: [TranscriptionLanguage(code: 'en')],
+        languages: const [TranscriptionLanguage(code: 'en')],
         logprobs: [TranscriptionLogprob(token: 'Hi')],
-        usage: TranscriptTextUsageDuration(seconds: 1),
+        usage: const TranscriptTextUsageDuration(seconds: 1),
       );
       final cleared = response.copyWith(
         languages: null,
@@ -555,19 +555,19 @@ void main() {
     });
 
     test('toString references every field', () {
-      const withData = TranscriptionResponse(
+      final withData = TranscriptionResponse(
         text: 'Test transcription',
-        languages: [TranscriptionLanguage(code: 'en')],
+        languages: const [TranscriptionLanguage(code: 'en')],
         logprobs: [TranscriptionLogprob(token: 'Hi')],
-        usage: TranscriptTextUsageDuration(seconds: 1),
+        usage: const TranscriptTextUsageDuration(seconds: 1),
       );
       final s = withData.toString();
-      expect(s, contains('18 chars'));
+      expect(s, contains('text: [REDACTED]'));
       expect(s, contains('languages: 1 items'));
       expect(s, contains('logprobs: 1 items'));
       expect(s, contains('usage: TranscriptTextUsageDuration'));
 
-      const withoutData = TranscriptionResponse(text: 'Hi');
+      final withoutData = TranscriptionResponse(text: 'Hi');
       final s2 = withoutData.toString();
       expect(s2, contains('languages: null'));
       expect(s2, contains('logprobs: null'));
@@ -575,17 +575,17 @@ void main() {
     });
 
     test('== and hashCode cover every field', () {
-      const a = TranscriptionResponse(
+      final a = TranscriptionResponse(
         text: 'Hello',
-        languages: [TranscriptionLanguage(code: 'en')],
+        languages: const [TranscriptionLanguage(code: 'en')],
         logprobs: [TranscriptionLogprob(token: 'Hi')],
-        usage: TranscriptTextUsageDuration(seconds: 1),
+        usage: const TranscriptTextUsageDuration(seconds: 1),
       );
-      const b = TranscriptionResponse(
+      final b = TranscriptionResponse(
         text: 'Hello',
-        languages: [TranscriptionLanguage(code: 'en')],
+        languages: const [TranscriptionLanguage(code: 'en')],
         logprobs: [TranscriptionLogprob(token: 'Hi')],
-        usage: TranscriptTextUsageDuration(seconds: 1),
+        usage: const TranscriptTextUsageDuration(seconds: 1),
       );
       expect(a, equals(b));
       expect(a.hashCode, equals(b.hashCode));
@@ -640,12 +640,12 @@ void main() {
     });
 
     test('toJson round-trips', () {
-      const response = TranscriptionVerboseResponse(
+      final response = TranscriptionVerboseResponse(
         task: 'transcribe',
         language: 'en',
         duration: 1.5,
         text: 'Test',
-        usage: TranscriptTextUsageDuration(seconds: 2),
+        usage: const TranscriptTextUsageDuration(seconds: 2),
       );
       expect(
         TranscriptionVerboseResponse.fromJson(response.toJson()),
@@ -654,14 +654,14 @@ void main() {
     });
 
     test('copyWith null-clears optional fields, including task', () {
-      const response = TranscriptionVerboseResponse(
+      final response = TranscriptionVerboseResponse(
         task: 'transcribe',
         language: 'en',
         duration: 1.5,
         text: 'Test',
-        segments: [],
-        words: [],
-        usage: TranscriptTextUsageDuration(seconds: 2),
+        segments: const [],
+        words: const [],
+        usage: const TranscriptTextUsageDuration(seconds: 2),
       );
       final cleared = response.copyWith(
         task: null,
@@ -676,25 +676,25 @@ void main() {
     });
 
     test('toString references every field', () {
-      const withData = TranscriptionVerboseResponse(
+      final withData = TranscriptionVerboseResponse(
         task: 'transcribe',
         language: 'en',
         duration: 1.5,
         text: 'Test',
-        segments: [],
-        words: [],
-        usage: TranscriptTextUsageDuration(seconds: 2),
+        segments: const [],
+        words: const [],
+        usage: const TranscriptTextUsageDuration(seconds: 2),
       );
       final s = withData.toString();
-      expect(s, contains('task: transcribe'));
-      expect(s, contains('language: en'));
+      expect(s, contains('task: [REDACTED]'));
+      expect(s, contains('language: [REDACTED]'));
       expect(s, contains('duration: 1.5'));
-      expect(s, contains('4 chars'));
+      expect(s, contains('text: [REDACTED]'));
       expect(s, contains('segments: 0 items'));
       expect(s, contains('words: 0 items'));
       expect(s, contains('usage: TranscriptTextUsageDuration'));
 
-      const withoutData = TranscriptionVerboseResponse(
+      final withoutData = TranscriptionVerboseResponse(
         language: 'en',
         duration: 1.5,
         text: 'Test',
@@ -707,19 +707,19 @@ void main() {
     });
 
     test('== and hashCode cover every field', () {
-      const a = TranscriptionVerboseResponse(
+      final a = TranscriptionVerboseResponse(
         task: 'transcribe',
         language: 'en',
         duration: 1.5,
         text: 'Test',
-        usage: TranscriptTextUsageDuration(seconds: 2),
+        usage: const TranscriptTextUsageDuration(seconds: 2),
       );
-      const b = TranscriptionVerboseResponse(
+      final b = TranscriptionVerboseResponse(
         task: 'transcribe',
         language: 'en',
         duration: 1.5,
         text: 'Test',
-        usage: TranscriptTextUsageDuration(seconds: 2),
+        usage: const TranscriptTextUsageDuration(seconds: 2),
       );
       expect(a, equals(b));
       expect(a.hashCode, equals(b.hashCode));
@@ -781,9 +781,9 @@ void main() {
     test('toString references every field', () {
       final response = TranscriptionDiarizedResponse.fromJson(json);
       final s = response.toString();
-      expect(s, contains('task: transcribe'));
+      expect(s, contains('task: [REDACTED]'));
       expect(s, contains('duration: 42.7'));
-      expect(s, contains('1 segments'));
+      expect(s, contains('segments: 1 items'));
       expect(s, contains('usage: TranscriptTextUsageDuration'));
     });
 
@@ -841,10 +841,10 @@ void main() {
     test('toString references every field', () {
       final segment = TranscriptionDiarizedSegment.fromJson(json);
       final s = segment.toString();
-      expect(s, contains('id: seg_002'));
-      expect(s, contains('speaker: A'));
-      expect(s, contains('5.2-12.8'));
-      expect(s, contains('${segment.text.length} chars'));
+      expect(s, contains('id: [REDACTED]'));
+      expect(s, contains('speaker: [REDACTED]'));
+      expect(s, contains('start: 5.2, end: 12.8'));
+      expect(s, contains('text: [REDACTED]'));
     });
 
     test('== and hashCode cover every field', () {
@@ -975,14 +975,14 @@ void main() {
       expect(event.copyWith(), equals(event));
 
       final s = event.toString();
-      expect(s, contains('id: seg_002'));
-      expect(s, contains('speaker: A'));
-      expect(s, contains('5.2-12.8'));
-      expect(s, contains('${event.text.length} chars'));
+      expect(s, contains('id: [REDACTED]'));
+      expect(s, contains('speaker: [REDACTED]'));
+      expect(s, contains('start: 5.2, end: 12.8'));
+      expect(s, contains('text: [REDACTED]'));
     });
 
     test('TranscriptTextDeltaEvent copyWith null-clears nullable fields', () {
-      const event = TranscriptTextDeltaEvent(
+      final event = TranscriptTextDeltaEvent(
         delta: 'Hello',
         logprobs: [TranscriptionLogprob(token: 'He')],
         segmentId: 'seg_1',
@@ -994,19 +994,19 @@ void main() {
       expect(event.copyWith(), equals(event));
 
       final s = event.toString();
-      expect(s, contains('delta: Hello'));
+      expect(s, contains('delta: [REDACTED]'));
       expect(s, contains('logprobs: 1 items'));
-      expect(s, contains('segmentId: seg_1'));
+      expect(s, contains('segmentId: [REDACTED]'));
       expect(cleared.toString(), contains('logprobs: null'));
       expect(cleared.toString(), contains('segmentId: null'));
     });
 
     test('TranscriptTextDoneEvent copyWith null-clears nullable fields', () {
-      const event = TranscriptTextDoneEvent(
+      final event = TranscriptTextDoneEvent(
         text: 'Hello world',
-        languages: [TranscriptionLanguage(code: 'en')],
+        languages: const [TranscriptionLanguage(code: 'en')],
         logprobs: [TranscriptionLogprob(token: 'He')],
-        usage: TranscriptTextUsageTokens(
+        usage: const TranscriptTextUsageTokens(
           inputTokens: 1,
           outputTokens: 2,
           totalTokens: 3,
@@ -1024,7 +1024,7 @@ void main() {
       expect(event.copyWith(), equals(event));
 
       final s = event.toString();
-      expect(s, contains('11 chars'));
+      expect(s, contains('text: [REDACTED]'));
       expect(s, contains('languages: 1 items'));
       expect(s, contains('logprobs: 1 items'));
       expect(s, contains('usage: TranscriptTextUsageTokens'));
@@ -1183,9 +1183,9 @@ void main() {
         inputTokenDetails: TranscriptUsageInputTokenDetails(audioTokens: 4),
       );
       final s = usage.toString();
-      expect(s, contains('input: 1'));
-      expect(s, contains('output: 2'));
-      expect(s, contains('total: 3'));
+      expect(s, contains('inputTokens: 1'));
+      expect(s, contains('outputTokens: 2'));
+      expect(s, contains('totalTokens: 3'));
       expect(
         s,
         contains('inputTokenDetails: TranscriptUsageInputTokenDetails'),
@@ -1270,9 +1270,9 @@ void main() {
     });
 
     test('copyWith null-clears fields', () {
-      const logprob = TranscriptionLogprob(
+      final logprob = TranscriptionLogprob(
         token: 'Hi',
-        bytes: [1],
+        bytes: const [1],
         logprob: -0.1,
       );
       final cleared = logprob.copyWith(token: null, bytes: null, logprob: null);
@@ -1282,8 +1282,16 @@ void main() {
     });
 
     test('== and hashCode cover every field', () {
-      const a = TranscriptionLogprob(token: 'Hi', bytes: [1], logprob: -0.1);
-      const b = TranscriptionLogprob(token: 'Hi', bytes: [1], logprob: -0.1);
+      final a = TranscriptionLogprob(
+        token: 'Hi',
+        bytes: const [1],
+        logprob: -0.1,
+      );
+      final b = TranscriptionLogprob(
+        token: 'Hi',
+        bytes: const [1],
+        logprob: -0.1,
+      );
       expect(a, equals(b));
       expect(a.hashCode, equals(b.hashCode));
       expect(a, isNot(equals(a.copyWith(token: 'Bye'))));
@@ -1318,13 +1326,13 @@ void main() {
     });
 
     test('equality covers every field', () {
-      const base = TranscriptionSegment(
+      final base = TranscriptionSegment(
         id: 0,
         seek: 0,
         start: 0.5,
         end: 2.5,
         text: 'Hello world',
-        tokens: [1, 2, 3],
+        tokens: const [1, 2, 3],
         temperature: 0.0,
         avgLogprob: -0.5,
         compressionRatio: 1.2,

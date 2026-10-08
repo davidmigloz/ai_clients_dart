@@ -1,7 +1,8 @@
 # Speech options and streaming acceptance
 
 Status: implementation verified; independent requirements and cross-author
-engineering reviews approve. Runtime PR merge remains pending.
+engineering reviews approve. Runtime [PR #374](https://github.com/davidmigloz/ai_clients_dart/pull/374) merged October 8, 2026 at 17:41:41 UTC, squash
+`f76a2e8cbb8de0469310c4c0c0f31fc1ad13bbeb`; #366 is closed.
 Issue: [#366](https://github.com/davidmigloz/ai_clients_dart/issues/366).
 Specification: [Audio and Live](../audio-live.md), AUDIO-SPEECH-01–04.
 Ticket: [24](../tickets/24-speech.md).
@@ -126,7 +127,8 @@ mask HTTP status. Other API diagnostic policies remain unchanged.
 Independent requirements, resource/shared-HTTP engineering and model/docs/manifest
 engineering reviewers approve the final combined change with no open findings.
 Cross-author reviews rechecked each validated fix, while the requirements review
-also ran 90 public canonical-schema cases with 363 assertions. The final published
-head CI and actual merge receipt are recorded in the PR/issue. #366 stays open
-until merge; #367 is the next bounded existing-Audio correction. No package
+also ran 90 public canonical-schema cases with 363 assertions. Final reviewed head `1f7975ae8d2ffc3ca898f5f071ae502619996199` passed
+[CI run 37810626961](https://github.com/davidmigloz/ai_clients_dart/actions/runs/37810626961):
+14 contexts completed, 13 successes and the standard Test(all) skip. The actual
+merge receipt above closes #366; #367 is the next bounded existing-Audio correction. No package
 release, version bump, real recording upload or phone call occurs.

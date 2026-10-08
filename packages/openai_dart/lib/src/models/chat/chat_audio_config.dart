@@ -1,5 +1,11 @@
 import 'package:meta/meta.dart';
 
+import '../audio/audio_voice.dart';
+import '../common/equality_helpers.dart';
+import '../common/json_helpers.dart';
+
+export '../audio/audio_voice.dart';
+
 // =============================================================================
 // ChatModality
 // =============================================================================
@@ -54,9 +60,10 @@ enum ChatModality {
 
 /// Voice options for chat audio output.
 ///
-/// These voices are available for the `gpt-audio-1.5` model
-/// when generating audio responses.
-enum ChatAudioVoice {
+/// Preserves existing named conveniences and adds current named choices.
+/// Availability depends on the provider and model; open names and custom IDs
+/// are also admitted by the request contract.
+enum ChatAudioVoice implements AudioVoice {
   /// Alloy voice.
   alloy._('alloy'),
 
@@ -88,7 +95,13 @@ enum ChatAudioVoice {
   shimmer._('shimmer'),
 
   /// Verse voice.
-  verse._('verse');
+  verse._('verse'),
+
+  /// Marin voice.
+  marin._('marin'),
+
+  /// Cedar voice.
+  cedar._('cedar');
 
   const ChatAudioVoice._(this._value);
 
@@ -96,13 +109,16 @@ enum ChatAudioVoice {
   factory ChatAudioVoice.fromJson(String json) {
     return values.firstWhere(
       (e) => e._value == json,
-      orElse: () => throw FormatException('Unknown ChatAudioVoice: $json'),
+      orElse: () => throw const FormatException(
+        'ChatAudioVoice: expected a supported named voice',
+      ),
     );
   }
 
   final String _value;
 
   /// Converts to JSON string.
+  @override
   String toJson() => _value;
 
   @override
@@ -130,7 +146,10 @@ enum ChatAudioFormat {
   opus._('opus'),
 
   /// 16-bit PCM format (raw audio).
-  pcm16._('pcm16');
+  pcm16._('pcm16'),
+
+  /// AAC format (compressed).
+  aac._('aac');
 
   const ChatAudioFormat._(this._value);
 
@@ -138,7 +157,9 @@ enum ChatAudioFormat {
   factory ChatAudioFormat.fromJson(String json) {
     return values.firstWhere(
       (e) => e._value == json,
-      orElse: () => throw FormatException('Unknown ChatAudioFormat: $json'),
+      orElse: () => throw const FormatException(
+        'ChatAudioFormat: expected a supported audio format',
+      ),
     );
   }
 
@@ -180,26 +201,37 @@ class ChatAudioConfig {
 
   /// Creates a [ChatAudioConfig] from JSON.
   factory ChatAudioConfig.fromJson(Map<String, dynamic> json) {
+    final parsedVoice = AudioVoice.fromJson(json['voice']);
+    final voice = parsedVoice is NamedAudioVoice
+        ? _knownChatVoice(parsedVoice.name) ?? parsedVoice
+        : parsedVoice;
     return ChatAudioConfig(
-      voice: ChatAudioVoice.fromJson(json['voice'] as String),
-      format: ChatAudioFormat.fromJson(json['format'] as String),
+      voice: voice,
+      format: ChatAudioFormat.fromJson(
+        requireJsonString(json['format'], 'ChatAudioConfig.format'),
+      ),
     );
   }
 
   /// The voice to use for audio generation.
-  final ChatAudioVoice voice;
+  ///
+  /// Accepts built-in [ChatAudioVoice] constants, open names through
+  /// [AudioVoice.named], or an existing custom ID through [AudioVoice.custom].
+  /// Custom voice creation and eligibility are separate provider workflows.
+  final AudioVoice voice;
 
   /// The audio format to output.
   final ChatAudioFormat format;
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    'voice': voice.toJson(),
+    // Caller-defined interface implementations must produce an exact branch.
+    'voice': AudioVoice.fromJson(voice.toJson()).toJson(),
     'format': format.toJson(),
   };
 
   /// Creates a copy with replaced values.
-  ChatAudioConfig copyWith({ChatAudioVoice? voice, ChatAudioFormat? format}) {
+  ChatAudioConfig copyWith({AudioVoice? voice, ChatAudioFormat? format}) {
     return ChatAudioConfig(
       voice: voice ?? this.voice,
       format: format ?? this.format,
@@ -211,12 +243,18 @@ class ChatAudioConfig {
       identical(this, other) ||
       other is ChatAudioConfig &&
           runtimeType == other.runtimeType &&
-          voice == other.voice &&
-          format == other.format;
+          mapsDeepEqual(toJson(), other.toJson());
 
   @override
-  int get hashCode => Object.hash(voice, format);
+  int get hashCode => Object.hash(runtimeType, mapDeepHashCode(toJson()));
 
   @override
-  String toString() => 'ChatAudioConfig(voice: $voice, format: $format)';
+  String toString() => 'ChatAudioConfig(voice: [REDACTED], format: $format)';
+}
+
+ChatAudioVoice? _knownChatVoice(String value) {
+  for (final voice in ChatAudioVoice.values) {
+    if (voice.toJson() == value) return voice;
+  }
+  return null;
 }

@@ -238,9 +238,12 @@ usable slices, exact canonical/guide/SDK disagreements, protocol ownership and
 public offline acceptance boundaries. The [planning review](reviews/24-audio-live-planning.md)
 records source checks and independent findings. Planning [PR #373](https://github.com/davidmigloz/ai_clients_dart/pull/373)
 merged October 8, 2026 at `4058318979cf8ab999e8138015b52b3dc75ffbf6` after
-all 14 CI contexts completed (13 successes, standard Test(all) skip). Speech #366
-is implemented with [acceptance evidence](reviews/24-speech.md), pending runtime
-PR merge; the other six implementation tickets remain pending.
+all 14 CI contexts completed (13 successes, standard Test(all) skip). Speech #366 merged in [PR #374](https://github.com/davidmigloz/ai_clients_dart/pull/374)
+at `f76a2e8cbb8de0469310c4c0c0f31fc1ad13bbeb` on October 8, 17:41:41 UTC,
+after all 14 final-head CI contexts completed (13 successes, standard Test(all) skip).
+Its [acceptance evidence](reviews/24-speech.md) is complete. Existing Audio #367
+is implemented and independently approved with [acceptance evidence](reviews/25-existing-audio.md),
+pending runtime PR merge; five other runtime tickets remain pending.
 
 | Repository ticket | Demonstrable outcome | Prerequisite |
 | --- | --- | --- |
@@ -262,8 +265,9 @@ These slices do not establish full Realtime/Chat/shared Responses parity.
 
 ## Remaining roadmap
 
-Phases 1–4 are complete for their specified tickets. Phase 5 Audio/Live has seven specified implementation tickets; speech #366 is
-implemented pending merge and the other six remain pending. Later phases remain candidate outcomes pending
+Phases 1–4 are complete for their specified tickets. Phase 5 Audio/Live has seven
+specified implementation tickets: speech #366 is merged, existing Audio #367 is
+independently approved pending merge, and five remain pending. Later phases remain candidate outcomes pending
 detailed specifications. Keep all audited gaps visible even when deferred.
 
 | Phase | Demonstrable outcomes | Dependencies and scope notes |
@@ -423,7 +427,11 @@ Sources: [cache diagnostics](https://developers.openai.com/api/docs/guides/promp
   received values as unknown raw events until authoritative shapes are established.
 - Webhooks: signed verification and 26 typed received events merged in #357/#362.
   Seven endpoint operations plus event-type discovery merged in #358/#363.
-- Audio: speech instructions and streaming, additional built-in/custom voices,
+- Audio: the late October 8 [OpenAPI b2751c66](https://github.com/openai/openai-openapi/commit/b2751c6625493c9c64db21b1b26a4d9300e589e3)
+  narrows VoiceResource.type to audio_sample, aligning with SDKs. This updates
+  [pending custom voices #369](tickets/27-custom-voices.md); file-Audio/Chat
+  closures are unchanged and this implementation retains reviewed 239c canonical.
+  Speech instructions and streaming, additional built-in/custom voices,
   sample-derived voice creation and consent management. The earlier
   [OpenAPI 3c4759c1](https://github.com/openai/openai-openapi/commit/3c4759c1ecc98a2ac3d3df85d54f4eb409f5957d)
   removes text-prompt creation and its request schema; no implemented Dart voice
@@ -441,7 +449,11 @@ Sources: [Agents](https://developers.openai.com/api/docs/guides/agents-api/overv
 Administration is explicitly excluded by the current package manifest. The
 selected complete-parity scope includes expanding coverage to spend limits/alerts,
 model/tool permissions, data retention, key
-expiry, usage/cost dimensions, and external storage. Federation acquisition and
+expiry, usage/cost dimensions, and external storage. The reviewed October 8
+[OpenAPI 239c481c](https://github.com/openai/openai-openapi/commit/239c481c5fd75052acb3e93cf72c15a7b4a45e74)
+adds OCI external-storage request/response components and branches to three
+provider unions. These five normalized additions remain Phase 7 inventory;
+promoting the canonical source does not claim runtime OCI/Admin coverage. Federation acquisition and
 renewal need authentication helpers; injected certificate-capable REST clients
 already provide part of mTLS support. Regional domains are configurable today.
 

@@ -55,6 +55,7 @@ class LoggingInterceptor implements Interceptor {
   ) async {
     var request = context.request;
     final speechRequest = isSpeechRequest(request);
+    final privateAudioRequest = isPrivateAudioRequest(request);
     final startTime = DateTime.now();
 
     // Ensure request has a correlation ID for tracing
@@ -82,7 +83,7 @@ class LoggingInterceptor implements Interceptor {
 
     if (logRequestBody && request is http.Request && request.body.isNotEmpty) {
       logger.finest(
-        '  Body: ${speechRequest ? '[REDACTED speech request]' : _truncate(request.body)}',
+        '  Body: ${privateAudioRequest ? '[REDACTED audio request]' : _truncate(request.body)}',
       );
     }
 
@@ -90,24 +91,28 @@ class LoggingInterceptor implements Interceptor {
       final response = await next(updatedContext);
 
       // Monitoring response values remain caller-readable but stay out of logs.
-      final responseText = speechRequest
+      final responseText = privateAudioRequest
           ? ''
           : _diagnosticResponseText(response);
       final monitoringBody = redactMonitoringErrorBody(responseText);
       final monitoringResponse = monitoringBody != responseText;
       // Log response
       final duration = DateTime.now().difference(startTime);
-      final requestId = response.headers['x-request-id'] ?? correlationId;
+      final requestId = privateAudioRequest
+          ? correlationId
+          : response.headers['x-request-id'] ?? correlationId;
       logger
         ..fine(
           '← ${response.statusCode} ${monitoringResponse ? '[REDACTED]' : request.url} (${duration.inMilliseconds}ms) [${monitoringResponse ? '[REDACTED]' : requestId}]',
         )
         ..finer(
-          '  Headers: ${monitoringResponse ? '[REDACTED]' : response.headers}',
+          '  Headers: ${monitoringResponse || privateAudioRequest ? '[REDACTED]' : response.headers}',
         );
 
-      if (logResponseBody && speechRequest) {
-        logger.finest('  Body: [REDACTED speech response]');
+      if (logResponseBody && privateAudioRequest) {
+        logger.finest(
+          '  Body: ${speechRequest ? '[REDACTED speech response]' : '[REDACTED audio response]'}',
+        );
       } else if (logResponseBody && responseText.isNotEmpty) {
         final diagnosticBody = redactMonitoringErrorBody(
           redactWebhookSigningSecretBody(
@@ -122,7 +127,7 @@ class LoggingInterceptor implements Interceptor {
     } catch (e) {
       // Log error
       final duration = DateTime.now().difference(startTime);
-      final diagnosticError = speechRequest ? e.runtimeType : e;
+      final diagnosticError = privateAudioRequest ? e.runtimeType : e;
       logger.warning(
         '✕ ${request.method} ${request.url} failed after ${duration.inMilliseconds}ms [$correlationId]: $diagnosticError',
       );

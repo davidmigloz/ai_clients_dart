@@ -532,7 +532,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Spec uses allOf. Narrow prompt_cache_options and full request copy/equality/hash contracts have exact public create/stream and field-regression fixtures."
+      "note": "Actual allOf request mapping; existing narrow fields and full value/copy contracts retain public regression evidence. Inline audio has no standalone component: ChatAudioConfig now admits VoiceIdsOrCustomVoice through AudioVoice and all six canonical formats including AAC. Known/open/custom voice and direct/subresource create/stream fixtures verify affected inline contracts."
     },
     "CreateChatCompletionResponse": {
       "spec": "main",
@@ -602,7 +602,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Multipart form request (file bytes + filename, no JSON round-trip by design, so kind:object fromJson/toJson checks cannot apply). Fully implements the 31fcc3c spec surface: chunking_strategy, include, keywords, known_speaker_names/references, languages, stream, diarized_json response format. Has full copyWith/==/hashCode/toString."
+      "note": "Actual closed multipart request with all fourteen existing canonical fields. Filename/fileContentType are client upload metadata, not new form fields. Exact public multipart fixtures cover repeated arrays, nullable chunking/stream normalization to omission, false/forced streaming, bounds, file bytes/MIME and early writable sentinel admission; no invented JSON byte encoding or JSON factory."
     },
     "CreateTranscriptionResponseJson": {
       "spec": "main",
@@ -648,7 +648,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Request-only VAD tuning object serialized to bracketed multipart form fields (chunking_strategy[...]); the type=server_vad discriminator is emitted by the TranscriptionChunkingStrategyServerVad wrapper, so the Dart class has no type field and no JSON round-trip."
+      "note": "Actual request-only VAD tuning component with public fromJson(Map<String, dynamic>) and toJson() round-trip, emitting the fixed type=server_vad wire discriminator. The chunking wrapper also serializes it to bracketed multipart form fields (chunking_strategy[...]); public JSON and multipart fixtures verify both boundaries."
     },
     "AudioResponseFormat": {
       "spec": "main",
@@ -670,7 +670,7 @@
       "dart_class": "TranscriptionChunkingStrategy",
       "file": "lib/src/models/audio/transcription.dart",
       "schema": "TranscriptionChunkingStrategy",
-      "note": "Request-only string-or-object union (\"auto\" | VadConfig) dispatched by JSON shape, not a discriminator field. Serialized to multipart form fields, no fromJson."
+      "note": "Request-only string-or-object union (\"auto\" | VadConfig), with public fromJson(Object?) dispatch by JSON shape rather than a discriminator field. Strict writable admission and multipart form serialization are verified through public fixtures."
     },
     "TranscriptionChunkingStrategy:TranscriptionChunkingStrategyAuto": {
       "spec": "main",
@@ -1729,7 +1729,7 @@
       "dart_class": "AudioVoice",
       "file": "lib/src/models/audio/audio_voice.dart",
       "schema": "VoiceIdsOrCustomVoice",
-      "note": "Actual mixed open-string/closed custom {id} component represented by the public AudioVoice interface and NamedAudioVoice/CustomAudioVoice values; the interface remains open so the existing SpeechVoice enum implements it. Speech serialization validates custom implementations. Object scanner cannot extract scalar/object anyOf fields; public union fixtures verify both wire branches. Chat integration remains ticket #367."
+      "note": "Actual mixed open-string/closed custom {id} component represented by the public AudioVoice interface and NamedAudioVoice/CustomAudioVoice values; the existing SpeechVoice and ChatAudioVoice enums implement it. Speech and Chat serialization validate custom implementations. Object scanner cannot extract scalar/object anyOf fields; public union fixtures verify both wire branches and effective voice identity."
     },
     "Message": {
       "spec": "main",
@@ -5252,6 +5252,49 @@
       "file": "lib/src/models/audio/speech_stream_event.dart",
       "schema": "SpeechAudioDoneEvent",
       "note": "Actual speech SSE component; immutable received future metadata, complete value/copy contracts and raw Base64 audio distinct from inline-file data URLs. Usage is the real inline done-event object, not a fabricated component."
+    },
+    "CreateTranslationRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "TranslationRequest",
+      "file": "lib/src/models/audio/translation.dart",
+      "schema": "CreateTranslationRequest",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Actual closed multipart request. File bytes, filename and optional fileContentType are upload metadata; no invented JSON byte encoding or JSON factory. Public multipart fixtures cover all five canonical fields, mode admission, supplied nonnull values, exact bytes/MIME, abort and raw/JSON/verbose outputs."
+    },
+    "CreateTranslationResponseJson": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TranslationResponse",
+      "file": "lib/src/models/audio/translation.dart",
+      "schema": "CreateTranslationResponseJson",
+      "note": "Actual received component; strict canonical required/optional fields, finite deeply immutable received metadata, complete effective value/copy contracts and safe diagnostics. Verbose translation task is optional legacy metadata, never a required canonical field."
+    },
+    "CreateTranslationResponseVerboseJson": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TranslationVerboseResponse",
+      "file": "lib/src/models/audio/translation.dart",
+      "schema": "CreateTranslationResponseVerboseJson",
+      "note": "Actual received component; strict canonical required/optional fields, finite deeply immutable received metadata, complete effective value/copy contracts and safe diagnostics. Verbose translation task is optional legacy metadata, never a required canonical field."
+    },
+    "TranscriptionSegment": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TranscriptionSegment",
+      "file": "lib/src/models/audio/transcription.dart",
+      "schema": "TranscriptionSegment",
+      "note": "Actual received component; strict canonical required/optional fields, finite deeply immutable received metadata, complete effective value/copy contracts and safe diagnostics. Verbose translation task is optional legacy metadata, never a required canonical field."
+    },
+    "TranscriptionWord": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TranscriptionWord",
+      "file": "lib/src/models/audio/transcription.dart",
+      "schema": "TranscriptionWord",
+      "note": "Actual received component; strict canonical required/optional fields, finite deeply immutable received metadata, complete effective value/copy contracts and safe diagnostics. Verbose translation task is optional legacy metadata, never a required canonical field."
     }
   }
 }

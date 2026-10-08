@@ -2,7 +2,10 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import 'audio_json_helpers.dart';
+import 'file_audio_json_helpers.dart';
 import 'transcription.dart' show TranscriptionSegment;
 
 /// A request to translate audio into English text.
@@ -21,14 +24,15 @@ import 'transcription.dart' show TranscriptionSegment;
 @immutable
 class TranslationRequest {
   /// Creates a [TranslationRequest].
-  const TranslationRequest({
-    required this.file,
+  TranslationRequest({
+    required Uint8List file,
     required this.filename,
     required this.model,
+    this.fileContentType,
     this.prompt,
     this.responseFormat,
     this.temperature,
-  });
+  }) : file = Uint8List.fromList(file).asUnmodifiableView();
 
   /// The audio file to translate.
   ///
@@ -37,8 +41,12 @@ class TranslationRequest {
 
   /// The filename of the audio file.
   ///
-  /// Must include the file extension for proper format detection.
+  /// Provide enough format metadata for identification. An extension-bearing
+  /// filename and an appropriate [fileContentType] are recommended.
   final String filename;
+
+  /// Optional MIME metadata for the file part, separate from API form fields.
+  final String? fileContentType;
 
   /// The model to use for translation.
   ///
@@ -60,6 +68,41 @@ class TranslationRequest {
   /// Higher values make output more random, lower values more deterministic.
   final double? temperature;
 
+  /// Validates writable admission before authentication or multipart dispatch.
+  void validate() {
+    if (responseFormat == TranslationResponseFormat.unknown) {
+      throw const FormatException(
+        'TranslationRequest.responseFormat: unsupported writable value',
+      );
+    }
+    validateFileAudioTemperature(temperature, 'TranslationRequest.temperature');
+  }
+
+  /// Copies every field, with explicit null clearing optional values.
+  TranslationRequest copyWith({
+    Uint8List? file,
+    String? filename,
+    String? model,
+    Object? fileContentType = unsetCopyWithValue,
+    Object? prompt = unsetCopyWithValue,
+    Object? responseFormat = unsetCopyWithValue,
+    Object? temperature = unsetCopyWithValue,
+  }) => TranslationRequest(
+    file: file ?? this.file,
+    filename: filename ?? this.filename,
+    model: model ?? this.model,
+    fileContentType: fileContentType == unsetCopyWithValue
+        ? this.fileContentType
+        : fileContentType as String?,
+    prompt: prompt == unsetCopyWithValue ? this.prompt : prompt as String?,
+    responseFormat: responseFormat == unsetCopyWithValue
+        ? this.responseFormat
+        : responseFormat as TranslationResponseFormat?,
+    temperature: temperature == unsetCopyWithValue
+        ? this.temperature
+        : copyFileAudioNumber(temperature, 'TranslationRequest.temperature'),
+  );
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -68,6 +111,7 @@ class TranslationRequest {
           listsEqual(file, other.file) &&
           filename == other.filename &&
           model == other.model &&
+          fileContentType == other.fileContentType &&
           prompt == other.prompt &&
           responseFormat == other.responseFormat &&
           temperature == other.temperature;
@@ -77,13 +121,15 @@ class TranslationRequest {
     listHash(file),
     filename,
     model,
+    fileContentType,
     prompt,
     responseFormat,
     temperature,
   );
 
   @override
-  String toString() => 'TranslationRequest(filename: $filename, model: $model)';
+  String toString() =>
+      'TranslationRequest(file: ${file.length} bytes, filename: [REDACTED], model: [REDACTED], fileContentType: ${fileAudioPresence(fileContentType)}, prompt: ${fileAudioPresence(prompt)}, responseFormat: $responseFormat, temperature: $temperature)';
 }
 
 /// The format of the translation output.
@@ -132,103 +178,229 @@ enum TranslationResponseFormat {
   String toString() => _value;
 }
 
-/// A translation response.
-///
-/// Contains the translated English text from the audio input.
+/// Typed TranslationResponse fields and immutable received future metadata.
 @immutable
 class TranslationResponse {
-  /// Creates a [TranslationResponse].
-  const TranslationResponse({required this.text});
+  /// Creates a [TranslationResponse]; scalar const construction remains available.
+  const TranslationResponse({required this.text}) : rawJson = const {};
 
-  /// Creates a [TranslationResponse] from JSON.
-  factory TranslationResponse.fromJson(Map<String, dynamic> json) {
-    return TranslationResponse(text: json['text'] as String);
+  TranslationResponse._({
+    required this.text,
+    Map<String, dynamic> rawJson = const {},
+  }) : rawJson = snapshotAudioJson(
+         rawJson,
+         'TranslationResponse',
+         knownKeys: _fields,
+       ) {
+    toJson();
   }
 
-  /// The translated English text.
+  static const Set<String> _fields = {'text'};
+
+  /// Parses schema-known fields with contextual, value-safe diagnostics.
+  factory TranslationResponse.fromJson(Map<String, dynamic> json) {
+    final raw = snapshotAudioJson(
+      json,
+      'TranslationResponse',
+      knownKeys: _fields,
+    );
+    return TranslationResponse._(
+      text: requireFileAudioString(raw['text'], 'TranslationResponse.text'),
+      rawJson: raw,
+    );
+  }
+
+  /// The text field.
   final String text;
 
-  /// Converts to JSON.
-  Map<String, dynamic> toJson() => {'text': text};
+  /// Deeply immutable original received JSON; known typed fields are authoritative.
+  final Map<String, dynamic> rawJson;
+
+  /// Serializes current typed values and received future members.
+  Map<String, dynamic> toJson() {
+    return fileAudioJson(rawJson, _fields, {
+      'text': text,
+    }, 'TranslationResponse');
+  }
+
+  /// Copies every field; explicit null clears optional fields.
+  /// Fresh child replacements discard stale nested metadata unless rawJson overrides it.
+  TranslationResponse copyWith({String? text, Map<String, dynamic>? rawJson}) {
+    return TranslationResponse._(
+      text: text ?? this.text,
+      rawJson: copyFileAudioRaw(this.rawJson, rawJson, {}),
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is TranslationResponse &&
           runtimeType == other.runtimeType &&
-          text == other.text;
+          mapsDeepEqual(toJson(), other.toJson());
 
   @override
-  int get hashCode => text.hashCode;
+  int get hashCode => mapDeepHashCode(toJson());
 
   @override
-  String toString() => 'TranslationResponse(${text.length} chars)';
+  String toString() =>
+      'TranslationResponse(text: ${fileAudioPresence(text)}, rawJson: [REDACTED])';
 }
 
-/// A verbose translation response with additional metadata.
+/// English translation with duration and optional segment timestamps.
 ///
-/// Includes segment-level timestamps.
+/// Canonical responses require language, duration and text; [task] is retained
+/// only as optional legacy metadata. Parsed and constructed collections own
+/// immutable snapshots, including received future members.
 @immutable
 class TranslationVerboseResponse {
-  /// Creates a [TranslationVerboseResponse].
-  const TranslationVerboseResponse({
-    required this.task,
+  /// Creates a [TranslationVerboseResponse] with owned snapshots.
+  TranslationVerboseResponse({
+    this.task,
     required this.language,
     required this.duration,
     required this.text,
-    this.segments,
-  });
+    List<TranscriptionSegment>? segments,
+    Map<String, dynamic> rawJson = const {},
+  }) : segments = immutableFileAudioList(segments),
+       rawJson = snapshotAudioJson(
+         rawJson,
+         'TranslationVerboseResponse',
+         knownKeys: _fields,
+       ) {
+    toJson();
+  }
 
-  /// Creates a [TranslationVerboseResponse] from JSON.
+  static const Set<String> _fields = {
+    'language',
+    'duration',
+    'text',
+    'segments',
+    'task',
+  };
+
+  /// Parses schema-known fields with contextual, value-safe diagnostics.
   factory TranslationVerboseResponse.fromJson(Map<String, dynamic> json) {
+    final raw = snapshotAudioJson(
+      json,
+      'TranslationVerboseResponse',
+      knownKeys: _fields,
+    );
     return TranslationVerboseResponse(
-      task: json['task'] as String,
-      language: json['language'] as String,
-      duration: (json['duration'] as num).toDouble(),
-      text: json['text'] as String,
-      segments: (json['segments'] as List<dynamic>?)
-          ?.map((e) => TranscriptionSegment.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      task: optionalFileAudio(
+        raw,
+        'task',
+        'TranslationVerboseResponse',
+        requireFileAudioString,
+      ),
+      language: requireFileAudioString(
+        raw['language'],
+        'TranslationVerboseResponse.language',
+      ),
+      duration: requireAudioNumber(
+        raw['duration'],
+        'TranslationVerboseResponse.duration',
+      ),
+      text: requireFileAudioString(
+        raw['text'],
+        'TranslationVerboseResponse.text',
+      ),
+      segments: optionalFileAudio(
+        raw,
+        'segments',
+        'TranslationVerboseResponse',
+        (value, context) => requireFileAudioList<TranscriptionSegment>(
+          value,
+          context,
+          (value, context) => TranscriptionSegment.fromJson(
+            requireFileAudioMap(value, context),
+          ),
+        ),
+      ),
+      rawJson: raw,
     );
   }
 
-  /// The task performed (always "translate").
-  final String task;
+  /// Optional legacy task metadata; absent in the canonical response.
+  final String? task;
 
-  /// The detected source language.
+  /// Output language (English), not detected source language.
   final String language;
 
-  /// The duration of the audio in seconds.
+  /// The duration field.
   final double duration;
 
-  /// The full translated text.
+  /// The text field.
   final String text;
 
-  /// Segments with timestamps.
+  /// The segments field when present.
   final List<TranscriptionSegment>? segments;
 
-  /// Converts to JSON.
-  Map<String, dynamic> toJson() => {
-    'task': task,
-    'language': language,
-    'duration': duration,
-    'text': text,
-    if (segments != null) 'segments': segments!.map((s) => s.toJson()).toList(),
-  };
+  /// Deeply immutable original received JSON; known typed fields are authoritative.
+  final Map<String, dynamic> rawJson;
+
+  /// Serializes current typed values and received future members.
+  Map<String, dynamic> toJson() {
+    return fileAudioJson(rawJson, _fields, {
+      if (task != null) 'task': task,
+      'language': language,
+      'duration': duration,
+      'text': text,
+      if (segments != null)
+        'segments': mergeFileAudioChildren(
+          rawJson['segments'],
+          segments!.map((value) => value.toJson()).toList(),
+          const {
+            'id',
+            'seek',
+            'start',
+            'end',
+            'text',
+            'tokens',
+            'temperature',
+            'avg_logprob',
+            'compression_ratio',
+            'no_speech_prob',
+          },
+        ),
+    }, 'TranslationVerboseResponse');
+  }
+
+  /// Copies every field; explicit null clears optional fields.
+  /// Fresh child replacements discard stale nested metadata unless rawJson overrides it.
+  TranslationVerboseResponse copyWith({
+    Object? task = unsetCopyWithValue,
+    String? language,
+    double? duration,
+    String? text,
+    Object? segments = unsetCopyWithValue,
+    Map<String, dynamic>? rawJson,
+  }) {
+    return TranslationVerboseResponse(
+      task: task == unsetCopyWithValue ? this.task : task as String?,
+      language: language ?? this.language,
+      duration: duration ?? this.duration,
+      text: text ?? this.text,
+      segments: segments == unsetCopyWithValue
+          ? this.segments
+          : segments as List<TranscriptionSegment>?,
+      rawJson: copyFileAudioRaw(this.rawJson, rawJson, {
+        if (segments != unsetCopyWithValue) 'segments',
+      }),
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is TranslationVerboseResponse &&
           runtimeType == other.runtimeType &&
-          task == other.task &&
-          language == other.language &&
-          duration == other.duration;
+          mapsDeepEqual(toJson(), other.toJson());
 
   @override
-  int get hashCode => Object.hash(task, language, duration);
+  int get hashCode => mapDeepHashCode(toJson());
 
   @override
   String toString() =>
-      'TranslationVerboseResponse(language: $language, ${text.length} chars)';
+      'TranslationVerboseResponse(task: ${fileAudioPresence(task)}, language: ${fileAudioPresence(language)}, duration: $duration, text: ${fileAudioPresence(text)}, segments: ${fileAudioListSummary(segments)}, rawJson: [REDACTED])';
 }

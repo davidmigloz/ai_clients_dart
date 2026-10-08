@@ -6,6 +6,113 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming Chat voices and file audio corrections
+
+`ChatAudioConfig.voice` now accepts the shared typed `AudioVoice` interface.
+Existing const configs and `ChatAudioVoice` constants still work. Update code
+that assumes the getter or `copyWith` parameter only accepts the enum:
+
+```dart
+// Before
+final ChatAudioVoice voice = config.voice;
+
+// After
+final AudioVoice voice = config.voice;
+final custom = config.copyWith(voice: const AudioVoice.custom('voice_existing_id'));
+final open = config.copyWith(voice: const AudioVoice.named('provider-voice-name'));
+```
+
+Marin and cedar are appended to `ChatAudioVoice`; AAC is appended to
+`ChatAudioFormat`. Existing indices/names are retained, but exhaustive switches
+must handle the additions. Named conveniences do not guarantee availability on
+every model. Chat's `pcm16` remains distinct from Speech's `pcm`.
+
+File requests and response collections now own immutable snapshots. Remove
+`const` from constructors that contain bytes, lists or received JSON:
+`TranscriptionRequest`, `TranslationRequest`, `TranscriptionResponse`,
+`TranscriptionVerboseResponse`, `TranscriptionDiarizedResponse`,
+`TranscriptTextDeltaEvent`, `TranscriptTextDoneEvent`, `TranscriptTextUnknownEvent`,
+`TranscriptUsageUnknown`, `TranscriptionLogprob`, `TranscriptionSegment` and
+`TranslationVerboseResponse`. Scalar-only const constructors remain available.
+
+```dart
+// Before
+const result = TranscriptionResponse(text: 'Hello.');
+
+// After
+final result = TranscriptionResponse(text: 'Hello.');
+final edited = result.copyWith(text: 'Updated.');
+```
+
+Do not mutate `file`, response lists or `rawJson` after construction; use
+`copyWith`, including explicit null to clear optional values. Fresh nested model
+replacements discard stale child metadata; explicit parent raw overrides supply
+fresh extras while typed fields remain authoritative. REST logprob `bytes` retain
+numeric values without rounding; streamed logprob bytes must be integers.
+Missing/nonstring event discriminators fail; future string variants retain their
+deeply immutable JSON. Default diagnostics and built-in Audio body/response-header
+logging redact private content, while explicit `responseBody`, raw JSON and HTTP
+response causes remain caller-readable.
+
+`TranslationVerboseResponse.task` is now `String?`: canonical verbose translation
+requires language, duration and text, without requiring task or segments.
+`TranscriptionVerboseResponse.task` already was optional and remains so.
+Language describes the translated English output. Text and segments now affect
+value equality/hash. Update narrow getter assignments:
+
+```dart
+// Before
+final String task = translation.task;
+
+// After
+final String? task = translation.task;
+```
+
+Generic translation `create` accepts JSON only. Use explicit output methods:
+
+```dart
+// Before: a raw response was incorrectly sent through JSON decoding.
+await client.audio.translations.create(
+  TranslationRequest(
+    file: audioBytes,
+    filename: 'audio.mp3',
+    model: 'whisper-1',
+    responseFormat: TranslationResponseFormat.vtt,
+  ),
+);
+
+// After
+final subtitles = await client.audio.translations.createRaw(
+  request.copyWith(responseFormat: TranslationResponseFormat.vtt),
+);
+final detailed = await client.audio.translations.createVerbose(request);
+```
+
+Raw text/SRT/VTT preserve whitespace. All four buffered transcription methods and
+all translation methods accept `abortTrigger`; streaming retains abort support.
+Output modes and invalid writable unknown enum sentinels fail before auth. A valid
+`transcript.text.done` completes transcription SSE promptly even when HTTP stays
+open; later events are ignored. EOF or `[DONE]` before a valid typed done event is
+a `StreamException`. Cancellation disposes owned per-stream clients once and
+leaves injected borrowed clients usable; consumed output is never replayed.
+
+All 14 transcription form fields already existed. `fileContentType` adds optional
+client-side MIME metadata on the file part, outside those canonical form fields.
+Only `chunkingStrategy` and `stream` are nullable wire options: explicit null
+normalizes to multipart omission, matching Dart/Python behavior (Node rejects
+null). False is retained; `createStream` sends true. For `gpt-transcribe`, use
+plural `languages` instead of singular `language`; keywords cannot contain angle
+brackets, CR or LF. No numeric prompt limit is published for this model. Speaker
+references accept valid data URLs, including Base64 and percent-encoded forms;
+the server validates supported audio and duration.
+
+The February 26, 2027 Whisper/GPT-4o file-transcription sunset needs workflow-aware
+migration to `gpt-transcribe` or `gpt-live-transcribe`. Preserve currently
+operational Whisper translation, timestamps/subtitles and diarization workflows
+until a supported replacement fits their output requirements; do not substitute
+one model string across every mode. See the [offline example](example/existing_audio_example.dart)
+and [official sunset notice](https://developers.openai.com/api/docs/deprecations).
+
 ## Upcoming speech options and streaming
 
 `SpeechRequest.voice` now has the typed `AudioVoice` interface, accepting the

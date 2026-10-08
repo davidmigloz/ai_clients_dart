@@ -95,7 +95,10 @@ void main() {
       final mockClient = MockClient.streaming((req, _) async {
         requestCompleter.complete(req);
         return http.StreamedResponse(
-          Stream.fromIterable([utf8.encode('data: [DONE]\n\n')]),
+          Stream.fromIterable([
+            utf8.encode('data: {"type":"transcript.text.done","text":""}\n\n'),
+            utf8.encode('data: [DONE]\n\n'),
+          ]),
           200,
         );
       });

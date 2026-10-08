@@ -20,9 +20,9 @@ void main() {
     const TranscriptUsage durationUsage = TranscriptTextUsageDuration(
       seconds: 1.5,
     );
-    const TranscriptUsage unknownUsage = TranscriptUsageUnknown(
+    final TranscriptUsage unknownUsage = TranscriptUsageUnknown(
       rawType: 'future_usage_type',
-      rawJson: {'type': 'future_usage_type'},
+      rawJson: const {'type': 'future_usage_type'},
     );
 
     for (final usage in [tokensUsage, durationUsage, unknownUsage]) {

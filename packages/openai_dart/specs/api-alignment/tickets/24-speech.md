@@ -1,6 +1,6 @@
 # Generate buffered and streamed speech with current voices and options
 
-Status: implemented and independently approved; runtime PR merge gate pending.
+Status: merged in [PR #374](https://github.com/davidmigloz/ai_clients_dart/pull/374); #366 closed.
 GitHub: [#366](https://github.com/davidmigloz/ai_clients_dart/issues/366).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 5 Audio and Live](../audio-live.md), AUDIO-SPEECH-01–04.
@@ -23,7 +23,7 @@ Generate buffered and streamed speech with current voices and options through pu
 - [x] Changed models cover every declared field/variant, optional/null/absence, immutable parsed ownership, complete copy/clear, equality/hash and safe diagnostics. Known malformed values fail contextually; future receive-only metadata and closed writable admission remain distinct.
 - [x] Public factories/resources/parsers and real canonical manifest mappings are verified; no fake components or diagnostic exclusions. README/llms, runnable offline example and any actual breaking migration are complete.
 - [x] Focused public fixtures pass VM/Chrome JavaScript/Wasm where applicable; format → fix → fatal-info analysis, package unit suite and full OpenAPI toolkit evidence are recorded. Unrelated diagnostics/remaining parity gaps remain visible and classified.
-- [ ] Independent requirements and engineering reviews approve the final combined diff after validated findings are resolved; final-head CI is green before merge.
+- [x] Independent requirements and engineering reviews approve the final combined diff after validated findings are resolved; final-head CI is green before merge.
 
 ## Compatibility and boundaries
 
@@ -43,5 +43,6 @@ bumps and unrelated API families are outside this ticket.
 
 See the [speech acceptance record](../reviews/24-speech.md) for source, model,
 public resource, documentation, platform, toolkit and bounded live-smoke evidence.
-The final review/CI merge gate remains pending until verified on the published head;
-#366 stays open until its runtime PR merges.
+Final reviewed head `1f7975ae8d2ffc3ca898f5f071ae502619996199` passed all 14
+CI contexts (13 successes, standard Test(all) skip). PR #374 merged October 8,
+2026 at 17:41:41 UTC, squash `f76a2e8cbb8de0469310c4c0c0f31fc1ad13bbeb`.

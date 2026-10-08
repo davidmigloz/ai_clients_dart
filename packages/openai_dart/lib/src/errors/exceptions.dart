@@ -80,7 +80,7 @@ class ApiException extends OpenAIException {
   ResponsesMisalignmentDetails? get misalignment =>
       _misalignment ?? _parseMisalignment(body);
 
-  String? _diagnosticField(String? value) => isSpeechResponse(cause)
+  String? _diagnosticField(String? value) => isPrivateAudioResponse(cause)
       ? (value == null ? null : '[REDACTED]')
       : redactMonitoringErrorValue(
           redactWebhookSecretErrorValue(value, body),
@@ -501,15 +501,19 @@ class StreamException extends OpenAIException {
   const StreamException({
     required String message,
     this.partialData,
+    this.redactDiagnostics = false,
     Object? cause,
   }) : super(message, cause: cause);
 
   /// Any partial data received before the error occurred.
   final String? partialData;
 
+  /// Keeps automatic diagnostics private while retaining explicit caller data.
+  final bool redactDiagnostics;
+
   @override
   String toString() =>
-      'StreamException: ${redactMonitoringErrorValue(message, null, redact: partialData != null && redactMonitoringErrorBody(partialData!) != partialData)}';
+      'StreamException: ${redactMonitoringErrorValue(message, null, redact: redactDiagnostics || (partialData != null && redactMonitoringErrorBody(partialData!) != partialData))}';
 }
 
 /// Creates the appropriate exception based on HTTP status code.
