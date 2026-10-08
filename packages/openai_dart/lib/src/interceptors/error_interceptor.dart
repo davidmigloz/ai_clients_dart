@@ -40,6 +40,7 @@ class ErrorInterceptor implements Interceptor {
     if (response.statusCode >= 400) {
       throw _parseErrorResponse(
         response,
+        request: context.request,
         secretBearingResponse: revealsWebhookSigningSecret(context.request),
       );
     }
@@ -50,14 +51,18 @@ class ErrorInterceptor implements Interceptor {
   /// Parses an error response and creates the appropriate exception.
   ApiException _parseErrorResponse(
     http.Response response, {
+    required http.BaseRequest request,
     required bool secretBearingResponse,
   }) {
     final statusCode = response.statusCode;
     final requestId = response.headers['x-request-id'];
     final retryAfter = parseRetryAfter(response.headers);
+    // A malformed body cannot replace the original HTTP status/error class.
+    // Exact bytes remain available in the caller-readable response cause.
+    final responseText = _errorResponseText(response);
 
     final diagnosticBody = redactWebhookSigningSecretBody(
-      response.body,
+      responseText,
       secretBearingResponse: secretBearingResponse,
     );
 
@@ -69,7 +74,7 @@ class ErrorInterceptor implements Interceptor {
     Map<String, dynamic>? body;
 
     try {
-      final json = jsonDecode(response.body) as Map<String, dynamic>;
+      final json = jsonDecode(responseText) as Map<String, dynamic>;
       body = json;
 
       if (json['error'] case final Map<String, dynamic> error) {
@@ -98,7 +103,28 @@ class ErrorInterceptor implements Interceptor {
       requestId: requestId,
       body: body,
       retryAfter: retryAfter,
+      // Retain original bytes and headers for explicit caller inspection.
+      // Exception diagnostics never render this response body automatically.
+      cause: response.request != null
+          ? response
+          : http.Response.bytes(
+              response.bodyBytes,
+              response.statusCode,
+              request: request,
+              headers: response.headers,
+              isRedirect: response.isRedirect,
+              persistentConnection: response.persistentConnection,
+              reasonPhrase: response.reasonPhrase,
+            ),
     );
+  }
+}
+
+String _errorResponseText(http.Response response) {
+  try {
+    return response.body;
+  } on FormatException {
+    return utf8.decode(response.bodyBytes, allowMalformed: true);
   }
 }
 

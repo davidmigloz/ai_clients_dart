@@ -130,6 +130,8 @@ class OpenAIClient {
   }) : _config = config ?? const OpenAIConfig(),
        _httpClient = httpClient ?? http.Client(),
        _streamClientFactory = streamClientFactory ?? http.Client.new,
+       _audioStreamClientFactory =
+           streamClientFactory ?? (httpClient == null ? http.Client.new : null),
        _ownsHttpClient = httpClient == null {
     // Initialize logging first so LoggingInterceptor uses the configured level
     _initializeLogging();
@@ -191,6 +193,9 @@ class OpenAIClient {
   final OpenAIConfig _config;
   final http.Client _httpClient;
   final http.Client Function() _streamClientFactory;
+  // Speech streams borrow an injected client unless its caller supplies a
+  // dedicated factory. Production streams still own one client per request.
+  final http.Client Function()? _audioStreamClientFactory;
   final bool _ownsHttpClient;
   bool _closed = false;
   Logger? _logger;
@@ -348,7 +353,7 @@ class OpenAIClient {
   /// // Text-to-speech
   /// final audioBytes = await client.audio.speech.create(
   ///   SpeechRequest(
-  ///     model: 'tts-1',
+  ///     model: 'gpt-4o-mini-tts',
   ///     input: 'Hello, world!',
   ///     voice: SpeechVoice.alloy,
   ///   ),
@@ -369,7 +374,7 @@ class OpenAIClient {
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
-    streamClientFactory: _streamClientFactory,
+    streamClientFactory: _audioStreamClientFactory,
   );
 
   ImagesResource? _images;

@@ -236,8 +236,11 @@ README/llms documentation and a runnable local HTTP example. All four slices hav
 The [Audio and Live specification](audio-live.md) records seven independently
 usable slices, exact canonical/guide/SDK disagreements, protocol ownership and
 public offline acceptance boundaries. The [planning review](reviews/24-audio-live-planning.md)
-records source checks and independent findings. Runtime implementation is pending;
-no live API request, recording upload or phone call is part of planning.
+records source checks and independent findings. Planning [PR #373](https://github.com/davidmigloz/ai_clients_dart/pull/373)
+merged October 8, 2026 at `4058318979cf8ab999e8138015b52b3dc75ffbf6` after
+all 14 CI contexts completed (13 successes, standard Test(all) skip). Speech #366
+is implemented with [acceptance evidence](reviews/24-speech.md), pending runtime
+PR merge; the other six implementation tickets remain pending.
 
 | Repository ticket | Demonstrable outcome | Prerequisite |
 | --- | --- | --- |
@@ -259,8 +262,8 @@ These slices do not establish full Realtime/Chat/shared Responses parity.
 
 ## Remaining roadmap
 
-Phases 1–4 are complete for their specified tickets. Phase 5 Audio/Live has seven specified implementation tickets; runtime work is
-pending. Later phases remain candidate outcomes pending
+Phases 1–4 are complete for their specified tickets. Phase 5 Audio/Live has seven specified implementation tickets; speech #366 is
+implemented pending merge and the other six remain pending. Later phases remain candidate outcomes pending
 detailed specifications. Keep all audited gaps visible even when deferred.
 
 | Phase | Demonstrable outcomes | Dependencies and scope notes |

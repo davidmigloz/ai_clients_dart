@@ -129,3 +129,13 @@ The create-pr template retains Summary, Details, References and Test Plan in
 order, ending with its five literal implementation checklist lines. They remain
 unchecked because runtime criteria do not apply to a Markdown planning PR;
 Details explains that boundary rather than claiming absent runtime validation.
+
+## Planning merge receipt
+
+[PR #373](https://github.com/davidmigloz/ai_clients_dart/pull/373) merged October 8,
+2026 at 15:23:59 UTC, squash `4058318979cf8ab999e8138015b52b3dc75ffbf6`,
+after final head `80489e5d16d1a6932f87dd2731fdb476755f8327` completed all
+14 CI contexts (13 successes and the standard Test(all) skip). All seven runtime
+issues remain open at planning merge. Speech #366 now has a separate
+[runtime acceptance record](24-speech.md); the planning counts above remain
+historical evidence, not implementation claims.

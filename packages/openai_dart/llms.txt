@@ -25,6 +25,7 @@
 - [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/embeddings_example.dart) (~837 tokens): Text embeddings with dimension control.
 - [images_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/images_example.dart) (~1.2k tokens): GPT Image generation.
 - [image_model_selection_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/image_model_selection_example.dart) (~554 tokens): Local generation/multipart/JSON-edit model contracts without API calls.
+- [speech_streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/speech_streaming_example.dart) (~2k tokens): Offline buffered, raw-byte and typed SSE speech, open/custom voice references, immutable events and terminal usage.
 - [audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/audio_example.dart) (~1k tokens): Text-to-speech and transcription.
 - [realtime_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/realtime_example.dart) (~1.9k tokens): Realtime API (WebSocket and WebRTC).
 - [videos_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/videos_example.dart) (~1.6k tokens): Sora video generation, editing, and extension.

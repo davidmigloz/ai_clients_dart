@@ -6,6 +6,66 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming speech options and streaming
+
+`SpeechRequest.voice` now has the typed `AudioVoice` interface, accepting the
+existing `SpeechVoice` enum, open named voices and a closed custom ID reference.
+Existing const requests keep compiling. Code that assigns the getter to the
+old narrower enum type should handle the additional choices:
+
+```dart
+// Before
+final SpeechVoice voice = request.voice;
+
+// After
+final AudioVoice voice = request.voice;
+final wireVoice = voice.toJson(); // Name string or {id: string}.
+```
+
+Use `const AudioVoice.named('provider-voice-name')` for an open name and
+`const AudioVoice.custom('voice_existing_id')` for an existing custom voice.
+`SpeechVoice.values`, `.name`, `.index`, `.toJson()` and all original constants
+remain available; seven new enum variants are appended, retaining old indices.
+Update exhaustive enum switches for ash, ballad, coral, sage, verse, marin and cedar.
+`SpeechRequest.fromJson` returns the existing enum for known names; request value
+identity compares the effective voice wire value, including named built-in forms.
+
+`SpeechRequest` now validates its closed canonical JSON shape, optional nonnull
+fields, Unicode character limits and finite speed range during serialization.
+Unknown request keys, explicit null optional fields and invalid values fail with
+contextual messages. Do not send a `language` or `format` field from stale guide
+snippets; use `responseFormat`, and use `instructions` for delivery guidance.
+
+Buffered `speech.create` keeps returning `Uint8List` and gains `abortTrigger`.
+Use `createByteStream` for audio chunks and `createStream` for typed SSE audio/usage.
+These methods select audio/SSE respectively and reject a supplied incompatible
+`streamFormat` before authentication; buffered audio never returns SSE as a file.
+Raw Base64 in `SpeechAudioDeltaEvent.audio` decodes with `decodeAudio()` and has
+no data URL prefix. Unknown received events/metadata are deeply immutable; known
+malformed fields fail. Copying a done event with fresh usage removes stale nested
+metadata unless an explicit parent raw override is supplied.
+
+Speech stream cancellation closes owned per-stream clients once and cancels only
+subscriptions on an injected borrowed client. Pass `streamClientFactory` when
+an injected client needs a separate transport per stream. A valid
+`speech.audio.done` completes SSE and releases the transport promptly; later events
+are ignored. Unexpected EOF before that event is a `StreamException`; no consumed
+audio is replayed.
+HTTP exceptions keep their subtype/message/body/status/request ID/retry context
+and expose original response bytes/headers through `cause` (`http.Response`).
+Speech exception diagnostics and enabled built-in body logging redact request
+text/instructions/voice references and returned audio; explicit caller data remains
+available. Other resources retain their previous diagnostic policies.
+
+See the [offline speech example](example/speech_streaming_example.dart) and the
+[official sunset notice](https://developers.openai.com/api/docs/deprecations).
+The January 6, 2027 notice lists TTS models/snapshots and recommends a Realtime
+workflow; it does not separately list the mini-TTS alias. No automatic cross-endpoint
+model substitution is performed. The January 20, 2027 legacy
+Audio/Realtime/transcription snapshot sunset is a separate family-specific
+migration. The February 26, 2027 file-transcription sunset has its own specialist
+output/translation constraints.
+
 ## Upcoming structured monitoring errors
 
 `ErrorEvent.code` is now `String?`, matching the nullable OpenAI SSE field.

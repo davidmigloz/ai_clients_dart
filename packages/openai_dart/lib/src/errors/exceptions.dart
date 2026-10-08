@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../models/responses/misalignment_details.dart';
 import '../utils/monitoring_error_redaction.dart';
+import '../utils/speech_redaction.dart';
 import '../utils/webhooks/signing_secret_redaction.dart';
 
 /// Base exception class for OpenAI HTTP and client transport errors.
@@ -79,11 +80,13 @@ class ApiException extends OpenAIException {
   ResponsesMisalignmentDetails? get misalignment =>
       _misalignment ?? _parseMisalignment(body);
 
-  String? _diagnosticField(String? value) => redactMonitoringErrorValue(
-    redactWebhookSecretErrorValue(value, body),
-    body,
-    redact: misalignment != null,
-  );
+  String? _diagnosticField(String? value) => isSpeechResponse(cause)
+      ? (value == null ? null : '[REDACTED]')
+      : redactMonitoringErrorValue(
+          redactWebhookSecretErrorValue(value, body),
+          body,
+          redact: misalignment != null,
+        );
 
   String get _diagnosticMessage => _diagnosticField(message)!;
 

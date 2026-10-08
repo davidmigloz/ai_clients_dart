@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import '../errors/exceptions.dart';
 import '../models/audio/audio.dart';
 import 'base_resource.dart';
+import 'speech_stream_transport.dart';
 import 'streaming_resource.dart';
 
 /// Resource for audio operations.
@@ -57,6 +58,7 @@ class AudioResource extends ResourceBase {
     interceptorChain: interceptorChain,
     requestBuilder: requestBuilder,
     ensureNotClosed: ensureNotClosed,
+    streamClientFactory: streamClientFactory,
   );
 
   /// Access to speech-to-text (transcription) operations.
@@ -84,7 +86,7 @@ class AudioResource extends ResourceBase {
 /// Resource for text-to-speech operations.
 ///
 /// Converts text into natural-sounding speech audio.
-class SpeechResource extends ResourceBase {
+class SpeechResource extends ResourceBase with StreamingResource {
   /// Creates a [SpeechResource].
   SpeechResource({
     required super.config,
@@ -92,6 +94,7 @@ class SpeechResource extends ResourceBase {
     required super.interceptorChain,
     required super.requestBuilder,
     super.ensureNotClosed,
+    super.streamClientFactory,
   });
 
   static const _endpoint = '/audio/speech';
@@ -124,18 +127,147 @@ class SpeechResource extends ResourceBase {
   /// // Save to file
   /// File('output.mp3').writeAsBytesSync(audioBytes);
   /// ```
-  Future<Uint8List> create(SpeechRequest request) async {
+  Future<Uint8List> create(
+    SpeechRequest request, {
+    Future<void>? abortTrigger,
+  }) async {
     ensureNotClosed?.call();
+    final body = _speechBody(request, SpeechStreamFormat.audio);
+    await checkSpeechAbort(abortTrigger);
     final url = requestBuilder.buildUrl(_endpoint);
-    final headers = requestBuilder.buildHeaders();
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: {
+        'Accept': 'application/octet-stream',
+        'Content-Type': 'application/json',
+      },
+    );
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
+      ..headers['Accept'] = 'application/octet-stream'
+      ..headers['Content-Type'] = 'application/json'
+      ..body = jsonEncode(body);
     // ErrorInterceptor handles error responses, so we can return bodyBytes directly
-    final response = await interceptorChain.execute(httpRequest);
+    final response = await interceptorChain.execute(
+      httpRequest,
+      abortTrigger: abortTrigger,
+    );
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw _parseSpeechError(
+        http.Response.bytes(
+          response.bodyBytes,
+          response.statusCode,
+          headers: response.headers,
+          request: response.request ?? httpRequest,
+          isRedirect: response.isRedirect,
+          persistentConnection: response.persistentConnection,
+          reasonPhrase: response.reasonPhrase,
+        ),
+      );
+    }
+    if (_isSseContentType(response.headers['content-type'])) {
+      throw const ParseException(
+        message: 'Speech response media type does not match audio mode',
+      );
+    }
     return response.bodyBytes;
   }
+
+  /// Generates audio as raw response byte chunks.
+  ///
+  /// Selects `stream_format: audio`. An explicitly incompatible request is
+  /// rejected before authentication. No chunk has a data URL or SSE envelope,
+  /// and chunks are not independently complete audio files.
+  ///
+  /// A supplied stream-client factory creates an owned client per subscription.
+  /// Without a factory the HTTP client is borrowed and never closed here.
+  /// Cancellation releases this request and never retries consumed audio.
+  Stream<Uint8List> createByteStream(
+    SpeechRequest request, {
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    final body = _speechBody(request, SpeechStreamFormat.audio);
+    return _openSpeechBytes(
+      body,
+      accept: 'application/octet-stream',
+      abortTrigger: abortTrigger,
+    );
+  }
+
+  /// Generates typed audio delta and final usage events through SSE.
+  ///
+  /// Selects `stream_format: sse`. An explicitly incompatible request is rejected
+  /// before authentication. The provider must send [SpeechAudioDoneEvent] before
+  /// normal termination. A valid done event completes the stream and releases
+  /// its transport; cancellation does not fabricate a completion event.
+  /// Unknown received event types retain their complete JSON.
+  Stream<SpeechStreamEvent> createStream(
+    SpeechRequest request, {
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    final body = _speechBody(request, SpeechStreamFormat.sse);
+    return _consumeSpeechEvents(
+      _openSpeechBytes(
+        body,
+        accept: 'text/event-stream',
+        abortTrigger: abortTrigger,
+      ),
+    );
+  }
+
+  Map<String, dynamic> _speechBody(
+    SpeechRequest request,
+    SpeechStreamFormat mode,
+  ) {
+    if (request.streamFormat != null && request.streamFormat != mode) {
+      throw ArgumentError(
+        'SpeechRequest.streamFormat is incompatible with this speech method',
+      );
+    }
+    return {...request.toJson(), 'stream_format': mode.toJson()};
+  }
+
+  Stream<Uint8List> _openSpeechBytes(
+    Map<String, dynamic> body, {
+    required String accept,
+    Future<void>? abortTrigger,
+  }) => openSpeechByteStream(
+    httpClient: httpClient,
+    streamClientFactory: streamClientFactory,
+    requestBuilder: requestBuilder,
+    body: body,
+    accept: accept,
+    timeout: config.timeout,
+    ensureNotClosed: ensureNotClosed,
+    abortTrigger: abortTrigger,
+    parseError: _parseSpeechError,
+  );
+
+  ApiException _parseSpeechError(http.Response response) {
+    String responseText;
+    try {
+      responseText = response.body;
+    } on FormatException {
+      responseText = utf8.decode(response.bodyBytes, allowMalformed: true);
+    }
+    return parseStreamError(
+      response.statusCode,
+      responseText,
+      response.headers['x-request-id'] ??
+          response.request?.headers['X-Request-ID'] ??
+          'unknown',
+      headers: response.headers,
+      cause: response,
+    );
+  }
+
+  Stream<SpeechStreamEvent> _consumeSpeechEvents(Stream<Uint8List> bytes) =>
+      decodeSpeechEvents(bytes);
 }
+
+bool _isSseContentType(String? value) =>
+    value?.split(';').first.trim().toLowerCase() == 'text/event-stream';
 
 /// Resource for transcription (speech-to-text) operations.
 ///

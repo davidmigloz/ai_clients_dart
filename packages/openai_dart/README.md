@@ -1565,21 +1565,75 @@ and [migration guide](MIGRATION.md).
 <details>
 <summary><b>Show example</b></summary>
 
-The audio API supports both text-to-speech and speech-to-text. Use `client.audio.speech.create(...)` for TTS and `client.audio.transcriptions.create(...)` for transcription.
+Use `client.audio.speech.create(...)` for complete audio bytes,
+`createByteStream(...)` for audio chunks, or `createStream(...)` for typed speech
+SSE events. All three accept `abortTrigger`. Requests support `instructions`,
+all six audio formats, speed 0.25–4, thirteen built-in voice conveniences, open
+voice names and custom voice references.
 
-**Text-to-Speech:**
+**Buffered speech:**
 
 ```dart
-final audioBytes = await client.audio.speech.create(
-  SpeechRequest(
-    model: 'tts-1',
-    input: 'Hello! How are you today?',
-    voice: SpeechVoice.nova,
-  ),
+const speech = SpeechRequest(
+  model: 'gpt-4o-mini-tts',
+  input: 'Hello! How are you today?',
+  voice: SpeechVoice.marin,
+  instructions: 'Speak warmly and clearly.',
+  responseFormat: SpeechResponseFormat.mp3,
 );
-
-File('output.mp3').writeAsBytesSync(audioBytes);
+final audioBytes = await client.audio.speech.create(speech);
 ```
+
+**Audio chunks:**
+
+```dart
+await for (final chunk in client.audio.speech.createByteStream(speech)) {
+  // Write or play each chunk in delivery order using the requested audio format.
+  print('Received ${chunk.length} audio bytes');
+}
+```
+
+**Typed SSE audio and usage:**
+
+```dart
+await for (final event in client.audio.speech.createStream(speech)) {
+  switch (event) {
+    case SpeechAudioDeltaEvent():
+      final bytes = event.decodeAudio(); // Raw Base64 audio, without a data URL.
+      print('Received ${bytes.length} audio bytes');
+    case SpeechAudioDoneEvent():
+      print('Total tokens: ${event.usage.totalTokens}');
+    case SpeechUnknownEvent():
+      // Future event fields remain available in the immutable event.rawJson.
+      print('Received a future speech event');
+  }
+}
+```
+
+`AudioVoice.named('provider-voice-name')` forwards an open name;
+`AudioVoice.custom('voice_existing_id')` sends the closed `{id: ...}` reference.
+Custom voices require eligible project access and an existing voice; voice consent
+management and sample-derived creation remain tracked implementation work.
+`SpeechVoice` stays an enum, including the original six constants and seven new
+ones. See the [migration guide](MIGRATION.md#upcoming-speech-options-and-streaming)
+for the widened `SpeechRequest.voice` type and exhaustive-switch updates.
+
+An explicitly incompatible `streamFormat` is rejected before dispatch. Buffered
+and byte methods use audio mode, while `createStream` selects SSE. SSE requires a
+supporting model and does not work with `tts-1`/`tts-1-hd`. A stream borrows an
+injected HTTP client unless `streamClientFactory` supplies an owned client; canceling
+one stream leaves a borrowed client usable. Production streams own and dispose a
+dedicated client. A valid `speech.audio.done` completes SSE and releases its
+transport even if the HTTP body stays open; later events are ignored. An unexpected
+EOF before that event reports a stream failure without replaying consumed output.
+
+The [deprecation notice](https://developers.openai.com/api/docs/deprecations)
+schedules `tts-1`, `tts-1-hd` and the listed mini-TTS snapshots for January 6,
+2027 shutdown. The model page marks the mini-TTS family deprecated; the notice
+does not separately list the alias. Moving to the recommended Realtime model
+requires its Realtime workflow, rather than changing the model ID on `/audio/speech`.
+The January 20, 2027 legacy Audio/Realtime/transcription snapshot sunset and the
+February 26, 2027 file-transcription sunset are separate migrations.
 
 **Speech-to-Text:**
 
@@ -1595,7 +1649,8 @@ final response = await client.audio.transcriptions.create(
 print('Transcription: ${response.text}');
 ```
 
-→ [Full example](example/audio_example.dart)
+→ [Audio example](example/audio_example.dart) and
+[offline speech streaming example](example/speech_streaming_example.dart) ($0 API cost)
 
 </details>
 
@@ -2245,6 +2300,7 @@ See the [example/](example/) directory for complete examples:
 | [`images_example.dart`](example/images_example.dart) | GPT Image generation |
 | [`videos_example.dart`](example/videos_example.dart) | Sora video generation, editing, and extension |
 | [`audio_example.dart`](example/audio_example.dart) | Text-to-speech and transcription |
+| [`speech_streaming_example.dart`](example/speech_streaming_example.dart) | Offline buffered/byte/SSE speech, voice references and usage |
 | [`chat_audio_example.dart`](example/chat_audio_example.dart) | Chat audio output, ID-only replay, and partial stream accumulation |
 | [`files_example.dart`](example/files_example.dart) | File upload and management |
 | [`conversations_example.dart`](example/conversations_example.dart) | Conversations API for state management |
@@ -2283,7 +2339,7 @@ See the [example/](example/) directory for complete examples:
 | Embeddings | ✅ Full |
 | Images | ✅ Full |
 | Videos (Sora) | ✅ Full |
-| Audio (Speech, Transcription, Translation) | Supported; custom voices and some speech options pending |
+| Audio (Speech, Transcription, Translation) | Speech buffered/byte/SSE, current options and open/custom references; consent/voice creation and file-audio corrections tracked |
 | Files | ✅ Full |
 | Uploads | ✅ Full |
 | Batches | ✅ Full |

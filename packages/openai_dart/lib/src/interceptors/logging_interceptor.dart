@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 
 import '../utils/monitoring_error_redaction.dart';
 import '../utils/request_id.dart';
+import '../utils/speech_redaction.dart';
 import '../utils/webhooks/signing_secret_redaction.dart';
 import 'interceptor.dart';
 
@@ -53,6 +54,7 @@ class LoggingInterceptor implements Interceptor {
     InterceptorNext next,
   ) async {
     var request = context.request;
+    final speechRequest = isSpeechRequest(request);
     final startTime = DateTime.now();
 
     // Ensure request has a correlation ID for tracing
@@ -79,14 +81,18 @@ class LoggingInterceptor implements Interceptor {
       ..finer('  Headers: ${_sanitizeHeaders(request.headers)}');
 
     if (logRequestBody && request is http.Request && request.body.isNotEmpty) {
-      logger.finest('  Body: ${_truncate(request.body)}');
+      logger.finest(
+        '  Body: ${speechRequest ? '[REDACTED speech request]' : _truncate(request.body)}',
+      );
     }
 
     try {
       final response = await next(updatedContext);
 
       // Monitoring response values remain caller-readable but stay out of logs.
-      final responseText = _diagnosticResponseText(response);
+      final responseText = speechRequest
+          ? ''
+          : _diagnosticResponseText(response);
       final monitoringBody = redactMonitoringErrorBody(responseText);
       final monitoringResponse = monitoringBody != responseText;
       // Log response
@@ -100,7 +106,9 @@ class LoggingInterceptor implements Interceptor {
           '  Headers: ${monitoringResponse ? '[REDACTED]' : response.headers}',
         );
 
-      if (logResponseBody && responseText.isNotEmpty) {
+      if (logResponseBody && speechRequest) {
+        logger.finest('  Body: [REDACTED speech response]');
+      } else if (logResponseBody && responseText.isNotEmpty) {
         final diagnosticBody = redactMonitoringErrorBody(
           redactWebhookSigningSecretBody(
             responseText,
@@ -114,8 +122,9 @@ class LoggingInterceptor implements Interceptor {
     } catch (e) {
       // Log error
       final duration = DateTime.now().difference(startTime);
+      final diagnosticError = speechRequest ? e.runtimeType : e;
       logger.warning(
-        '✕ ${request.method} ${request.url} failed after ${duration.inMilliseconds}ms [$correlationId]: $e',
+        '✕ ${request.method} ${request.url} failed after ${duration.inMilliseconds}ms [$correlationId]: $diagnosticError',
       );
       rethrow;
     }
