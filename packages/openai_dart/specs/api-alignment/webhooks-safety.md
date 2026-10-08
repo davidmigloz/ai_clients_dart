@@ -3,6 +3,9 @@
 Status: receiver merged; endpoint management implemented/verified with merge pending; safety/error slices pending.
 Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) merged October 8, 2026 at `886659c3c11cbee89335788ba918eeecd528fce0` after green CI.
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
+Endpoint management [PR #363](https://github.com/davidmigloz/ai_clients_dart/pull/363)
+implements #358 with merge pending; [acceptance evidence](reviews/21-webhook-endpoints.md)
+records its verification.
 Scope: four independently demonstrable implementation tickets, repository 20–23.
 Receiver [PR #362](https://github.com/davidmigloz/ai_clients_dart/pull/362) merged at
 `eea142bf9b100448f5216572e4db2d50a7ad0f5b`, closing #357. Its

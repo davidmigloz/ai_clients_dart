@@ -1,6 +1,7 @@
 # Manage project webhook endpoints and discover event types
 
-Status: implemented, independently reviewed and verified; PR/merge pending.
+Status: implemented, independently reviewed and verified; PR #363 open, merge pending.
+Implementation [PR #363](https://github.com/davidmigloz/ai_clients_dart/pull/363) is open for review; #358 remains open until merge.
 GitHub: [#358](https://github.com/davidmigloz/ai_clients_dart/issues/358).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 4 Webhooks and safety](../webhooks-safety.md), WH-ENDPOINT-01–04.

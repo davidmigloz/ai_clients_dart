@@ -1,6 +1,7 @@
 # Project webhook endpoint management acceptance
 
-Status: implemented, independently reviewed and verified; PR/merge pending.
+Status: implemented, independently reviewed and verified; PR #363 open, merge pending.
+Implementation [PR #363](https://github.com/davidmigloz/ai_clients_dart/pull/363) is open for review; #358 remains open until merge.
 Tracking: [#358](https://github.com/davidmigloz/ai_clients_dart/issues/358),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirements: [WH-ENDPOINT-01–04](../webhooks-safety.md#project-endpoint-management).

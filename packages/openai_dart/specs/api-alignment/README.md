@@ -213,8 +213,8 @@ error-shape boundaries. [Planning review](reviews/20-webhooks-safety-planning.md
 records independent source/architecture checks. Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) merged October 8, 2026 at `886659c3c11cbee89335788ba918eeecd528fce0` after green CI. Receiver #357 merged in [PR #362](https://github.com/davidmigloz/ai_clients_dart/pull/362)
 at `eea142bf9b100448f5216572e4db2d50a7ad0f5b` after green CI.
 Its [acceptance evidence](reviews/20-webhook-receiver.md) records runtime checks.
-Endpoint management #358 is implemented and independently verified with merge
-pending; [acceptance evidence](reviews/21-webhook-endpoints.md) records its checks.
+Endpoint management #358 is implemented and independently verified in
+[PR #363](https://github.com/davidmigloz/ai_clients_dart/pull/363), with merge pending; [acceptance evidence](reviews/21-webhook-endpoints.md) records its checks.
 Safety retrieval and monitoring errors remain specified with implementation pending.
 
 | Ticket | Demonstrable outcome | Prerequisite |
