@@ -27632,6 +27632,17 @@
               "null"
             ]
           },
+          "spend_control": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SessionSpendControlParam"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional spending limit in USD cents. Omission or null creates an unlimited session."
+          },
           "stream": {
             "default": false,
             "description": "Whether to stream session events as server-sent events. Defaults to `false`.",
@@ -29985,6 +29996,9 @@
               },
               {
                 "$ref": "#/components/schemas/GcpExternalStorageProviderParams"
+              },
+              {
+                "$ref": "#/components/schemas/OciExternalStorageProviderParams"
               }
             ]
           }
@@ -37822,6 +37836,9 @@
               },
               {
                 "$ref": "#/components/schemas/GcpExternalStorageProviderResponse"
+              },
+              {
+                "$ref": "#/components/schemas/OciExternalStorageProviderResponse"
               }
             ]
           },
@@ -53505,6 +53522,62 @@
           "far_field"
         ],
         "type": "string"
+      },
+      "OciExternalStorageProviderParams": {
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "tenancy_ocid": {
+            "type": "string"
+          },
+          "type": {
+            "default": "oci",
+            "enum": [
+              "oci"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type",
+          "tenancy_ocid",
+          "region",
+          "bucket"
+        ],
+        "type": "object"
+      },
+      "OciExternalStorageProviderResponse": {
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "tenancy_ocid": {
+            "type": "string"
+          },
+          "type": {
+            "default": "oci",
+            "enum": [
+              "oci"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type",
+          "tenancy_ocid",
+          "region",
+          "bucket"
+        ],
+        "type": "object"
       },
       "OpenAIFile": {
         "description": "The `File` object represents a document that has been uploaded to OpenAI.",
@@ -77739,6 +77812,10 @@
             "minItems": 0,
             "type": "array"
           },
+          "spend_control": {
+            "$ref": "#/components/schemas/SessionSpendControlResource",
+            "description": "Configured spending limit and best-effort consumption, in USD cents. Unlimited sessions omit this object."
+          },
           "status": {
             "$ref": "#/components/schemas/SessionStatusResource",
             "description": "The current status of the session."
@@ -77778,6 +77855,52 @@
           "environment",
           "vault_ids",
           "usage"
+        ],
+        "type": "object"
+      },
+      "SessionSpendControlParam": {
+        "additionalProperties": false,
+        "description": "Sets the session-wide limit without changing recorded spend.",
+        "properties": {
+          "limit": {
+            "description": "Positive USD cents, or null to remove the limit.",
+            "format": "int64",
+            "maximum": 4503599627370495,
+            "minimum": 1,
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "limit"
+        ],
+        "type": "object"
+      },
+      "SessionSpendControlResource": {
+        "additionalProperties": false,
+        "description": "Session-wide spending control, present only when a limit is configured.",
+        "properties": {
+          "consumed": {
+            "description": "Best-effort recorded spend floored to whole USD cents, or null when unavailable.",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "limit": {
+            "description": "The configured positive limit in USD cents.",
+            "format": "int64",
+            "maximum": 4503599627370495,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "limit",
+          "consumed"
         ],
         "type": "object"
       },
@@ -81445,6 +81568,17 @@
               "object",
               "null"
             ]
+          },
+          "spend_control": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SessionSpendControlParam"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Omit to retain the limit; null or a null limit removes it without resetting spend."
           }
         },
         "type": "object"
@@ -88196,6 +88330,9 @@
           },
           {
             "$ref": "#/components/schemas/GcpExternalStorageProviderResponse"
+          },
+          {
+            "$ref": "#/components/schemas/OciExternalStorageProviderResponse"
           }
         ]
       },

@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 import '../errors/exceptions.dart';
 import '../models/audio/audio.dart';
+import 'audio_file_stream_transport.dart';
 import 'base_resource.dart';
 import 'speech_stream_transport.dart';
 import 'streaming_resource.dart';
@@ -314,22 +316,23 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
   ///   TranscriptionRequest(
   ///     file: audioBytes,
   ///     filename: 'audio.mp3',
-  ///     model: 'gpt-4o-transcribe',
-  ///     language: 'en',
+  ///     model: 'gpt-transcribe',
+  ///     languages: ['en'],
   ///   ),
   /// );
   ///
   /// print(response.text);
   /// ```
-  Future<TranscriptionResponse> create(TranscriptionRequest request) async {
+  Future<TranscriptionResponse> create(
+    TranscriptionRequest request, {
+    Future<void>? abortTrigger,
+  }) async {
     ensureNotClosed?.call();
+    request.validate();
     _rejectStream(request);
     _rejectNonJsonFormat(request);
-    final httpRequest = _createMultipartRequest(request);
-    httpRequest.headers.addAll(requestBuilder.buildMultipartHeaders());
-    final response = await interceptorChain.execute(httpRequest);
-    final json = jsonDecode(response.body) as Map<String, dynamic>;
-    return TranscriptionResponse.fromJson(json);
+    final response = await _execute(request, abortTrigger: abortTrigger);
+    return _decodeAudioFileJson(response, TranscriptionResponse.fromJson);
   }
 
   /// Transcribes audio with verbose output including timing.
@@ -357,18 +360,20 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
   /// }
   /// ```
   Future<TranscriptionVerboseResponse> createVerbose(
-    TranscriptionRequest request,
-  ) async {
+    TranscriptionRequest request, {
+    Future<void>? abortTrigger,
+  }) async {
     ensureNotClosed?.call();
+    request.validate();
     _rejectStream(request);
-    final verboseRequest = request.copyWith(
-      responseFormat: AudioResponseFormat.verboseJson,
+    final response = await _execute(
+      request.copyWith(responseFormat: AudioResponseFormat.verboseJson),
+      abortTrigger: abortTrigger,
     );
-    final httpRequest = _createMultipartRequest(verboseRequest);
-    httpRequest.headers.addAll(requestBuilder.buildMultipartHeaders());
-    final response = await interceptorChain.execute(httpRequest);
-    final json = jsonDecode(response.body) as Map<String, dynamic>;
-    return TranscriptionVerboseResponse.fromJson(json);
+    return _decodeAudioFileJson(
+      response,
+      TranscriptionVerboseResponse.fromJson,
+    );
   }
 
   /// Transcribes audio with per-speaker diarization.
@@ -394,18 +399,20 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
   /// }
   /// ```
   Future<TranscriptionDiarizedResponse> createDiarized(
-    TranscriptionRequest request,
-  ) async {
+    TranscriptionRequest request, {
+    Future<void>? abortTrigger,
+  }) async {
     ensureNotClosed?.call();
+    request.validate();
     _rejectStream(request);
-    final diarizedRequest = request.copyWith(
-      responseFormat: AudioResponseFormat.diarizedJson,
+    final response = await _execute(
+      request.copyWith(responseFormat: AudioResponseFormat.diarizedJson),
+      abortTrigger: abortTrigger,
     );
-    final httpRequest = _createMultipartRequest(diarizedRequest);
-    httpRequest.headers.addAll(requestBuilder.buildMultipartHeaders());
-    final response = await interceptorChain.execute(httpRequest);
-    final json = jsonDecode(response.body) as Map<String, dynamic>;
-    return TranscriptionDiarizedResponse.fromJson(json);
+    return _decodeAudioFileJson(
+      response,
+      TranscriptionDiarizedResponse.fromJson,
+    );
   }
 
   /// Transcribes audio and returns the raw response body.
@@ -427,8 +434,12 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
   ///   ),
   /// );
   /// ```
-  Future<String> createRaw(TranscriptionRequest request) async {
+  Future<String> createRaw(
+    TranscriptionRequest request, {
+    Future<void>? abortTrigger,
+  }) async {
     ensureNotClosed?.call();
+    request.validate();
     _rejectStream(request);
     if (!_rawFormats.contains(request.responseFormat)) {
       throw ArgumentError(
@@ -437,12 +448,12 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
         'createDiarized() for diarized_json.',
       );
     }
-    final httpRequest = _createMultipartRequest(request);
-    httpRequest.headers.addAll(requestBuilder.buildMultipartHeaders());
-    // response_format text/srt/vtt is not JSON — ErrorInterceptor still
-    // handles non-2xx responses, so returning the raw body directly is safe.
-    final response = await interceptorChain.execute(httpRequest);
-    return response.body;
+    final response = await _execute(
+      request,
+      accept: 'text/plain',
+      abortTrigger: abortTrigger,
+    );
+    return _decodeAudioFileText(response);
   }
 
   /// Streams a transcription as Server-Sent Events.
@@ -453,6 +464,9 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
   /// [TranscriptTextSegmentEvent]s per completed diarized segment.
   ///
   /// Streaming is not supported for the `whisper-1` model.
+  /// A validated done event completes the stream and releases its owned client;
+  /// an injected borrowed client remains usable. EOF before done is a stream
+  /// failure. Consumed output is never retried or replayed.
   ///
   /// ## Example
   ///
@@ -461,7 +475,7 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
   ///   TranscriptionRequest(
   ///     file: audioBytes,
   ///     filename: 'audio.mp3',
-  ///     model: 'gpt-4o-transcribe',
+  ///     model: 'gpt-transcribe',
   ///   ),
   /// );
   ///
@@ -483,33 +497,60 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
     Future<void>? abortTrigger,
   }) {
     ensureNotClosed?.call();
+    request.validate();
+    if (request.responseFormat != null &&
+        request.responseFormat != AudioResponseFormat.json &&
+        request.responseFormat != AudioResponseFormat.diarizedJson) {
+      throw ArgumentError(
+        'createStream() requires json, diarized_json or an unset responseFormat',
+      );
+    }
     final httpRequest = _createMultipartRequest(request, forceStream: true);
-    return streamSseEventsForRequest(
-      request: httpRequest,
+    return openTranscriptionStream(
+      preparedRequest: httpRequest,
+      httpClient: httpClient,
+      streamClientFactory: streamClientFactory,
+      requestBuilder: requestBuilder,
+      timeout: config.timeout,
+      parseError: _parseHttpError,
+      ensureNotClosed: ensureNotClosed,
       abortTrigger: abortTrigger,
-    ).map((json) {
-      final sseEvent = json['_event'] as String?;
-      final error = json['error'];
-      if (sseEvent == 'error' || error != null) {
-        throwInlineStreamError(json, sseEvent, error);
-      }
-      try {
-        return TranscriptionStreamEvent.fromJson(json);
-      } on FormatException catch (e) {
-        throw ParseException(
-          message: 'Failed to parse transcription stream event: $e',
-          responseBody: json.toString(),
-          cause: e,
-        );
-      } on TypeError catch (e) {
-        throw ParseException(
-          message: 'Failed to parse transcription stream event: $e',
-          responseBody: json.toString(),
-          cause: e,
-        );
-      }
-    });
+    );
   }
+
+  Future<http.Response> _execute(
+    TranscriptionRequest request, {
+    String accept = 'application/json',
+    Future<void>? abortTrigger,
+  }) async {
+    // Snapshot the upload and repeated fields before yielding to authentication.
+    final httpRequest = _createMultipartRequest(request);
+    await checkAudioFileAbort(abortTrigger);
+    ensureNotClosed?.call();
+    httpRequest.headers
+      ..addAll(requestBuilder.buildMultipartHeaders())
+      ..['Accept'] = accept;
+    final response = await interceptorChain.execute(
+      httpRequest,
+      abortTrigger: abortTrigger,
+    );
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw _parseHttpError(
+        _audioFileResponseWithRequest(response, httpRequest),
+      );
+    }
+    return response;
+  }
+
+  ApiException _parseHttpError(http.Response response) => parseStreamError(
+    response.statusCode,
+    _audioFileErrorText(response),
+    response.headers['x-request-id'] ??
+        response.request?.headers['X-Request-ID'] ??
+        'unknown',
+    headers: response.headers,
+    cause: response,
+  );
 
   void _rejectStream(TranscriptionRequest request) {
     if (request.stream ?? false) {
@@ -547,8 +588,9 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
     httpRequest.files.add(
       http.MultipartFile.fromBytes(
         'file',
-        request.file,
+        List<int>.of(request.file),
         filename: request.filename,
+        contentType: _audioFileContentType(request.fileContentType),
       ),
     );
 
@@ -628,7 +670,7 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
 /// Resource for audio translation operations.
 ///
 /// Translates audio from any supported language into English text.
-class TranslationsResource extends ResourceBase {
+class TranslationsResource extends ResourceBase with StreamingResource {
   /// Creates a [TranslationsResource].
   TranslationsResource({
     required super.config,
@@ -668,14 +710,97 @@ class TranslationsResource extends ResourceBase {
   ///
   /// print(response.text); // English translation
   /// ```
-  Future<TranslationResponse> create(TranslationRequest request) async {
+  Future<TranslationResponse> create(
+    TranslationRequest request, {
+    Future<void>? abortTrigger,
+  }) async {
     ensureNotClosed?.call();
-    final httpRequest = _createMultipartRequest(request);
-    httpRequest.headers.addAll(requestBuilder.buildMultipartHeaders());
-    final response = await interceptorChain.execute(httpRequest);
-    final json = jsonDecode(response.body) as Map<String, dynamic>;
-    return TranslationResponse.fromJson(json);
+    request.validate();
+    if (request.responseFormat != null &&
+        request.responseFormat != TranslationResponseFormat.json) {
+      throw ArgumentError(
+        'create() requires json or an unset responseFormat; use createVerbose() '
+        'for verbose_json or createRaw() for text, srt or vtt',
+      );
+    }
+    final response = await _execute(request, abortTrigger: abortTrigger);
+    return _decodeAudioFileJson(response, TranslationResponse.fromJson);
   }
+
+  /// Translates audio into English with duration and optional segment timings.
+  ///
+  /// Forces `verbose_json` after validating the supplied request.
+  Future<TranslationVerboseResponse> createVerbose(
+    TranslationRequest request, {
+    Future<void>? abortTrigger,
+  }) async {
+    ensureNotClosed?.call();
+    request.validate();
+    final response = await _execute(
+      request.copyWith(responseFormat: TranslationResponseFormat.verboseJson),
+      abortTrigger: abortTrigger,
+    );
+    return _decodeAudioFileJson(response, TranslationVerboseResponse.fromJson);
+  }
+
+  /// Returns English text or subtitles without trimming server whitespace.
+  ///
+  /// Requires `text`, `srt` or `vtt`; JSON modes have their own typed methods.
+  Future<String> createRaw(
+    TranslationRequest request, {
+    Future<void>? abortTrigger,
+  }) async {
+    ensureNotClosed?.call();
+    request.validate();
+    if (!const {
+      TranslationResponseFormat.text,
+      TranslationResponseFormat.srt,
+      TranslationResponseFormat.vtt,
+    }.contains(request.responseFormat)) {
+      throw ArgumentError(
+        'createRaw() requires text, srt or vtt responseFormat',
+      );
+    }
+    final response = await _execute(
+      request,
+      accept: 'text/plain',
+      abortTrigger: abortTrigger,
+    );
+    return _decodeAudioFileText(response);
+  }
+
+  Future<http.Response> _execute(
+    TranslationRequest request, {
+    String accept = 'application/json',
+    Future<void>? abortTrigger,
+  }) async {
+    final httpRequest = _createMultipartRequest(request);
+    await checkAudioFileAbort(abortTrigger);
+    ensureNotClosed?.call();
+    httpRequest.headers
+      ..addAll(requestBuilder.buildMultipartHeaders())
+      ..['Accept'] = accept;
+    final response = await interceptorChain.execute(
+      httpRequest,
+      abortTrigger: abortTrigger,
+    );
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw _parseHttpError(
+        _audioFileResponseWithRequest(response, httpRequest),
+      );
+    }
+    return response;
+  }
+
+  ApiException _parseHttpError(http.Response response) => parseStreamError(
+    response.statusCode,
+    _audioFileErrorText(response),
+    response.headers['x-request-id'] ??
+        response.request?.headers['X-Request-ID'] ??
+        'unknown',
+    headers: response.headers,
+    cause: response,
+  );
 
   http.MultipartRequest _createMultipartRequest(TranslationRequest request) {
     final url = requestBuilder.buildUrl(_endpoint);
@@ -685,8 +810,9 @@ class TranslationsResource extends ResourceBase {
     httpRequest.files.add(
       http.MultipartFile.fromBytes(
         'file',
-        request.file,
+        List<int>.of(request.file),
         filename: request.filename,
+        contentType: _audioFileContentType(request.fileContentType),
       ),
     );
 
@@ -707,3 +833,73 @@ class TranslationsResource extends ResourceBase {
     return httpRequest;
   }
 }
+
+MediaType? _audioFileContentType(String? contentType) {
+  if (contentType == null) return null;
+  try {
+    return MediaType.parse(contentType);
+  } on FormatException {
+    throw const FormatException('Audio file content type must be a MIME type');
+  }
+}
+
+String _audioFileErrorText(http.Response response) {
+  try {
+    return response.body;
+  } on FormatException {
+    return utf8.decode(response.bodyBytes, allowMalformed: true);
+  }
+}
+
+String _decodeAudioFileText(http.Response response) {
+  try {
+    return response.body;
+  } on FormatException {
+    throw ParseException(
+      message: 'Invalid audio file response encoding',
+      responseBody: utf8.decode(response.bodyBytes, allowMalformed: true),
+      cause: const FormatException('Expected a valid audio file text response'),
+    );
+  }
+}
+
+T _decodeAudioFileJson<T>(
+  http.Response response,
+  T Function(Map<String, dynamic>) parse,
+) {
+  final body = _decodeAudioFileText(response);
+  try {
+    final json = jsonDecode(body);
+    if (json is! Map<String, dynamic>) {
+      throw const FormatException('Expected an audio file JSON object');
+    }
+    return parse(json);
+  } on FormatException {
+    throw ParseException(
+      message: 'Invalid audio file JSON response',
+      responseBody: body,
+      cause: const FormatException('Expected a valid audio file JSON response'),
+    );
+  } on TypeError {
+    throw ParseException(
+      message: 'Invalid audio file JSON response',
+      responseBody: body,
+      cause: const FormatException('Expected a valid audio file JSON response'),
+    );
+  }
+}
+
+http.Response _audioFileResponseWithRequest(
+  http.Response response,
+  http.BaseRequest request,
+) => response.request != null
+    ? response
+    : http.Response.bytes(
+        response.bodyBytes,
+        response.statusCode,
+        headers: response.headers,
+        request: request,
+        isRedirect: response.isRedirect,
+        persistentConnection: response.persistentConnection,
+        reasonPhrase: response.reasonPhrase,
+      );

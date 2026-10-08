@@ -2,8 +2,8 @@
   "specs": {
     "main": {
       "current_version": "2.3.0",
-      "last_fetched": "2026-10-08T15:28:16.092352Z",
-      "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/506aff0a8099581b50e119b87f8f2692cdad043f/openapi.json",
+      "last_fetched": "2026-10-08T17:43:39.649060Z",
+      "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/239c481c5fd75052acb3e93cf72c15a7b4a45e74/openapi.json",
       "title": "OpenAI API",
       "version_history": [
         {
@@ -77,6 +77,12 @@
           "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/3c4759c1ecc98a2ac3d3df85d54f4eb409f5957d/openapi.json",
           "version": "2.3.0",
           "note": "3c4759c1 replaced by 506aff0a on 2026-10-08: five Agents/Vault list pagination parameter changes reviewed and retained in the Phase 6 inventory. Component/webhook/Phase 4 contracts unchanged; 356 operations/2,009 schemas. #357 adds local signed receivers only."
+        },
+        {
+          "fetched_at": "2026-10-08T15:28:16.092352Z",
+          "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/506aff0a8099581b50e119b87f8f2692cdad043f/openapi.json",
+          "version": "2.3.0",
+          "note": "506aff0a replaced by 239c481c on 2026-10-08 after review: Agents session spending controls and OCI external storage provider additions are retained in Phases 6/7 inventory; Audio/Chat contracts are unchanged. 356 operations and 2,013 schemas. #367 corrects existing Audio contracts without implementing these unrelated families."
         }
       ]
     }

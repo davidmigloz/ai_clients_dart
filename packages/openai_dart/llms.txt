@@ -26,6 +26,7 @@
 - [images_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/images_example.dart) (~1.2k tokens): GPT Image generation.
 - [image_model_selection_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/image_model_selection_example.dart) (~554 tokens): Local generation/multipart/JSON-edit model contracts without API calls.
 - [speech_streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/speech_streaming_example.dart) (~2k tokens): Offline buffered, raw-byte and typed SSE speech, open/custom voice references, immutable events and terminal usage.
+- [existing_audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/existing_audio_example.dart): Offline modern transcription fields, English verbose/raw translation, open/custom Chat voices and AAC; five mock requests, no API cost.
 - [audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/audio_example.dart) (~1k tokens): Text-to-speech and transcription.
 - [realtime_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/realtime_example.dart) (~1.9k tokens): Realtime API (WebSocket and WebRTC).
 - [videos_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/videos_example.dart) (~1.6k tokens): Sora video generation, editing, and extension.
@@ -64,6 +65,12 @@
 - [safety_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/safety_example.dart): Offline signed project/organization safety notices with two explicitly scoped MockClient GETs, deduplication, tampering rejection and separate workspace routing; no API key or charges.
 
 - [monitoring_errors_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/monitoring_errors_example.dart): Offline HTTP 403 before output and flat error/failed response after output, shared typed details and two scoped GETs from verified notices; five MockClient requests, passive tokens/instructions, no real API key or charges.
+
+## File audio and Chat voices
+
+ChatAudioConfig accepts typed open/custom AudioVoice references and marin/cedar; AAC is appended while pcm16 stays Chat-specific. File transcription already has all 14 form fields; fileContentType is optional file-part MIME metadata. Use gpt-transcribe with plural languages and supported keywords; specialist verbose/subtitle/diarization/English translation modes depend on the model. Translation create is JSON-only, createVerbose accepts canonical responses without task, and createRaw preserves text/SRT/VTT whitespace. Buffered file methods accept abortTrigger; transcription streams complete on valid transcript.text.done without replay. Received metadata/bytes/collections are immutable and private automatic diagnostics are redacted.
+
+The February 26, 2027 Whisper/GPT-4o file-transcription sunset requires workflow-aware migration to gpt-transcribe/gpt-live-transcribe; retain operational specialist outputs until a replacement fits. It is separate from January 6 TTS and January 20 legacy snapshot notices. See README and MIGRATION for widened getters, appended enum cases and removed collection constructor const.
 
 ## Optional
 

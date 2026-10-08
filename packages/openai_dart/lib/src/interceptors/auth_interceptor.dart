@@ -34,11 +34,11 @@ class AuthInterceptor implements Interceptor {
     // Get auth headers from provider
     final providerHeaders = authProvider.getHeaders();
 
-    // Speech selects its required media headers at the resource boundary.
+    // Audio selects its required media headers at the resource boundary.
     // Keep those request-level values when refreshing provider credentials.
     // Filter before copying the body: a conflicting charset could otherwise
     // change its encoding before a later header correction.
-    final authHeaders = isSpeechRequest(context.request)
+    final authHeaders = isPrivateAudioRequest(context.request)
         ? {
             for (final entry in providerHeaders.entries)
               if (entry.key.toLowerCase() != 'accept' &&

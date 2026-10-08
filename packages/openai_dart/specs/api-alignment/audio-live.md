@@ -1,14 +1,16 @@
 # Audio and Live: Phase 5 specification
 
 Status: planning merged in [PR #373](https://github.com/davidmigloz/ai_clients_dart/pull/373);
-speech #366 implemented pending merge, six runtime tickets pending.
+speech #366 merged in PR #374, existing Audio #367 independently approved pending merge,
+five other runtime tickets pending.
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Phase 4 is complete: [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365)
 merged October 8, 2026 at `fca1a3f4e453d88caed9ffa573d4ec665126c3cb`, closing #360
 after all 14 final-head CI contexts completed (13 successes, standard Test(all) skip).
 Scope: seven independently usable implementation tickets, repository 24–30.
 The planning specification claims no runtime acceptance; speech implementation
-has its separate [acceptance record](reviews/24-speech.md).
+has its separate [acceptance record](reviews/24-speech.md), and file Audio has
+[its own acceptance record](reviews/25-existing-audio.md).
 
 ## Outcome and boundaries
 
@@ -69,6 +71,23 @@ behavior. Disagreements are resolved explicitly below. Every implementation
 rechecks affected sources and records changes before promoting any new candidate.
 The [planning review](reviews/24-audio-live-planning.md) records source receipts,
 independent findings, contract coverage and validation separately from runtime evidence.
+
+The existing-Audio implementation promotes reviewed OpenAPI
+[239c481c](https://github.com/openai/openai-openapi/blob/239c481c5fd75052acb3e93cf72c15a7b4a45e74/openapi.json),
+published October 8 at 17:10:28 UTC (356 operations, 2,013 schemas). Ten normalized
+differences from the planning pin are five Agents spend-control changes and five
+OCI external-storage changes, inventoried in Phases 6/7. Affected Chat/file-Audio
+contracts and Python/Node heads are unchanged. Historical planning receipts above
+remain accurate; canonical metadata records the actual promotion/fetch.
+
+A final source recheck found [b2751c66](https://github.com/openai/openai-openapi/commit/b2751c6625493c9c64db21b1b26a4d9300e589e3),
+published October 8 at 17:55:47 UTC. It narrows only VoiceResource.type from an
+open string union to the audio_sample enum (three normalized leaf changes).
+File-Audio/Chat operation closures are unchanged; the pending custom-voice ticket
+27/#369 is updated below. The later candidate is reviewed separately; this bounded
+implementation retains adopted 239c canonical bytes and their exact fetch/source
+metadata. The toolkit review misses this change, so independent normalized
+comparison is the evidence. No voice runtime DTO is implemented by ticket 25.
 
 ## Ticket graph
 
@@ -232,8 +251,10 @@ lookup is a separate unresolved documentation-only operation below.
   omits unspecified type instead of inventing a second branch. Text-prompt voice
   creation was removed upstream in 3c4759c1; no obsolete Dart DTO needs removal.
 - **AUDIO-VOICE-02:** Cover every `VoiceResource` field: fixed object:`audio.voice`,
-  id/name/integer created_at and open string type. Canonical type permits future
-  values despite SDK Literal narrowing to audio_sample. Preserve immutable
+  id/name/integer created_at and fixed type:audio_sample. The late October 8
+  b2751c66 revision narrows the formerly open string to the same enum as SDKs.
+  Any future received type tolerance must be explicit, distinct from canonical
+  acceptance and closed writable admission. Preserve immutable
   receive-only extras under the declared policy, exact copy/hash/JSON ownership,
   and safe diagnostics. Return a voice ID for the custom speech/Live reference
   object without universally widening Chat or Realtime voice fields.
