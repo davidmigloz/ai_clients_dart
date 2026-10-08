@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:web_socket/web_socket.dart';
 
 import '../../models/responses/create_response_request.dart';
+import '../../models/responses/items/item.dart';
+import '../../models/responses/multi_agent/response_inject_event.dart';
 import '../../models/responses/websocket/responses_create_event.dart';
 import '../../models/responses/websocket/responses_server_event.dart';
 import '../../models/responses/websocket/responses_steer_event.dart';
@@ -26,7 +28,7 @@ class ResponsesProtocolException implements Exception {
   const ResponsesProtocolException({required this.kind});
 
   /// Classification: `binary`, `invalid_json`, `non_object`, `invalid_event`,
-  /// `invalid_create`, or `invalid_steer`.
+  /// `invalid_create`, `invalid_steer`, or `invalid_inject`.
   final String kind;
 
   @override
@@ -396,6 +398,39 @@ class ResponsesConnection {
   }) => sendSteer(
     ResponsesSteerEvent(previousResponseId: previousResponseId, input: input),
   );
+
+  /// Submits client-owned input to an active beta multi-agent response.
+  ///
+  /// The target response chooses the lane; an injection contains only `type`,
+  /// `response_id` and `input`. Beta opt-in is required before any frame is
+  /// serialized or written. The server validates its broad item union and
+  /// currently accepts client-owned tool outputs which resume a waiting agent.
+  ///
+  /// Track each outstanding submission before calling this synchronous method.
+  /// Keep reading until the response is terminal and every submission has a
+  /// created or failed acknowledgement, including acknowledgements after
+  /// response completion. This method does not execute tools, match submissions
+  /// to acknowledgements, create continuations or replay attempted frames.
+  /// Recovery queue rejection and attempted-write failures follow [send]'s
+  /// explicit exception rules.
+  void sendInject(ResponseInjectEvent event) {
+    if (_closed) throw StateError('Responses WebSocket connection is closed');
+    if (!beta) {
+      throw ArgumentError(
+        'response.inject requires a beta Responses connection',
+      );
+    }
+    _sendFrame(event.toJson(), invalidFrameKind: 'invalid_inject');
+  }
+
+  /// Submits saved input items to the active response on its existing lane.
+  ///
+  /// Use the ID received in `response.created`. For an already-completed failure,
+  /// the application may explicitly continue from the completed response with
+  /// the returned uncommitted input, after collecting all acknowledgements.
+  /// See [sendInject] for submission ownership and recovery rules.
+  void inject({required String responseId, required List<Item> input}) =>
+      sendInject(ResponseInjectEvent(responseId: responseId, input: input));
 
   /// Releases the socket and reader exactly once.
   ///

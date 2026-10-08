@@ -192,22 +192,22 @@ wire changes. Unchanged source does not establish complete implementation parity
 | [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) ([15](tickets/15-tool-search.md)) | Complete client-discovered tools | Merged in #352 |
 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) ([16](tickets/16-responses-websocket.md)) | Persistent WS sessions, envelopes and named lanes | Merged in #353 |
 | [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) ([17](tickets/17-responses-steering.md)) | Safe mid-turn steering and continuation | Merged in #354 |
-| [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) ([18](tickets/18-websocket-recovery.md)) | Opt-in reconnect and bounded unsent queue | Implemented/verified/reviewed in #355; merge pending |
+| [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) ([18](tickets/18-websocket-recovery.md)) | Opt-in reconnect and bounded unsent queue | Merged in #355 |
 | [#344](https://github.com/davidmigloz/ai_clients_dart/issues/344) ([19](tickets/19-websocket-injection.md)) | Beta multi-agent tool-result injection | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
 
 Async tools, configuration updates, web search, shell, compaction progress,
-access programs, tool search #340 and Responses WebSocket sessions
-[#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) are merged. Steering
-#342 merged after green CI in [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354), closing #342. Recovery
-#343 is implemented and reviewed; injection #344 remains the next follow-up. Do not claim full
-WebSocket SDK parity before they are complete. Each ticket includes an offline
-example, public fixtures, documentation and independent review. All eleven tickets are native sub-issues of #317; active blockers are linked
-with GitHub dependencies. Steering #342 is implemented, verified and independently reviewed;
-its implementation [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354) merged after green CI. Opt-in recovery #343 is implemented, verified and independently reviewed.
+access programs, tool search #340, Responses WebSocket sessions #341, steering
+#342 and recovery #343 are merged after green CI. Beta injection #344 is
+implemented, verified and independently reviewed; Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) is open for review. Each ticket includes an offline
+example, public fixtures, documentation and independent review. All eleven
+Phase 3 tickets are native sub-issues of #317. These specified slices do not
+establish complete WebSocket or Responses SDK parity; remaining shared model
+and later-family gaps stay in the inventory.
 
 ## Remaining roadmap
 
-Phases 1–2 are complete and Phase 3 has its own specification/tickets above.
+Phases 1–2 are complete. Phase 3 has its specification/tickets above; its final
+injection slice is implemented, verified and independently reviewed; Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) is open for review.
 Later phases remain candidate outcomes pending detailed specifications. Keep
 all audited gaps visible even when deferred.
 
@@ -217,7 +217,7 @@ all audited gaps visible even when deferred.
 | 2. Existing API correctness | Correct container wire formats; preserve cache diagnostics, token details, Chat audio chunks, and retry guidance | All tickets merged in #327–#333; shared cache-write usage included in Decisions |
 | 3. Responses capabilities | Use async tools, reasoning configuration updates, GA web search controls/results, hosted shell, and Responses WebSocket steering | Specified above; transport precedes steering/recovery/injection, container dependency merged |
 | 4. Webhooks and safety | Verify and parse signed events; manage webhook endpoints; retrieve safety alerts/cases and preserve monitoring details | Event parsing/verification is independently useful; supports later Agents and Live workflows |
-| 5. Audio and Live | Generate speech with current voice/options; create custom voices; run a Live session and delegation workflows | Separate ordinary speech from Live; prompt-derived voice usage depends on Live |
+| 5. Audio and Live | Generate speech with current voice/options; create custom voices; run a Live session and delegation workflows | Separate ordinary speech from Live; custom voice creation requires an audio sample and consent |
 | 6. Agents and vaults | Run a durable session; handle tools, environments, artifacts, credentials, subagents, traces, and browser approvals | Slice around working session behaviors; browser approvals build on the basic session/event loop |
 | Throughout | Truthful API coverage, current examples, model capability guidance, and sunset notices | Accompany each relevant ticket; do not claim full coverage prematurely |
 | 7. Administration and storage | Manage organization/project controls, keys, usage/costs, and external storage | Explicit expansion beyond the current manifest exclusions; specify the Admin namespace and authentication separately |
@@ -263,7 +263,13 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
   remaining complete-parity inventory.
 - Responses WebSocket transport #341 merged in #353. Typed steering #342 is
   merged after green CI in [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354). Opt-in
-  recovery #343 is implemented/verified/reviewed; beta injection #344 remains next.
+  recovery #343 merged in #355; beta injection #344 is implemented, verified and
+  independently reviewed with merge pending in [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356).
+- Injection retains the legacy shared `Item` request codec: some generated input
+  variants are unsupported, known extra fields may be trimmed and nested defaults/
+  collection ownership remain legacy behavior. Full generated input-union parity
+  remains in the inventory. Raw failed reporting and validated raw continuation
+  preserve future JSON without claiming writable admission for arbitrary values.
 - Hosted/local shell #337 merged in #349 with environment configuration,
   directional calls/results and five stream events.
 - Compaction progress #338 merged in #350 with typed nonterminal decoding,
@@ -338,7 +344,10 @@ Sources: [cache diagnostics](https://developers.openai.com/api/docs/guides/promp
 - Webhooks: seven endpoint operations, event-type listing, typed events, and
   signature verification.
 - Audio: speech instructions and streaming, additional built-in/custom voices,
-  sample-derived and prompt-derived voice creation, and consent management.
+  sample-derived voice creation and consent management. Latest canonical
+  [OpenAPI 3c4759c1](https://github.com/openai/openai-openapi/commit/3c4759c1ecc98a2ac3d3df85d54f4eb409f5957d)
+  removes text-prompt creation and its request schema; no implemented Dart voice
+  DTO is affected. This supersedes the initial prompt-derived candidate outcome.
 
 Sources: [Agents](https://developers.openai.com/api/docs/guides/agents-api/overview),
 [Agents computer use](https://developers.openai.com/api/docs/guides/agents-api/tools/computer-use),
@@ -458,4 +467,18 @@ checks pass 11,262 tests/two existing skips with clean formatting/fix/analysis.
 The exact README wrapper compiles and the offline four-write example costs $0.
 Independent requirements and engineering reviews approve the combined diff.
 Full toolkit diagnostic sets remain exactly unchanged; no exclusions were added.
-Implementation [PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) is open for review; final CI/merge remain pending. Beta injection #344 follows.
+Implementation [PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) merged after green CI, closing #343. Beta injection #344 is in progress.
+
+
+Injection #344 [acceptance evidence](reviews/19-websocket-injection.md) records
+beta tool-result submission and typed acknowledgment races, caller-owned tools,
+raw failed reporting/explicit continuation, full value/copy contracts and no
+automatic replay. All 11,448 package unit tests pass with two existing skips;
+656 focused cases pass on VM and real Chrome JavaScript/Wasm. All 512 Dart files
+format unchanged; fix/fatal-info analysis and the offline $0 example pass. Literal
+README/migration snippets compile. Requirements and cross-author engineering
+reviews approve the final diff. Toolkit diagnostics remain visible with a
+classified delegated-serializer/value-scanner delta; no exclusions were added.
+Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) is open for review; close #344 only after merge. Once merged, all eleven
+specified Phase 3 tickets are complete. Phase 4 Webhooks/safety is the next
+specification and ticket-planning milestone; remaining parity inventory persists.

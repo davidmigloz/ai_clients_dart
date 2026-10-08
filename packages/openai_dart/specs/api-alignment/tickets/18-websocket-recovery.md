@@ -1,7 +1,7 @@
 # Opt-in Responses WebSocket reconnection
 
-Status: implemented, verified and independently reviewed; merge pending.
-Implementation [PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) is open for review; #343 closes only after merge.
+Status: merged in PR #355 after green CI; #343 closed.
+Implementation [PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) merged October 8, 2026 at `22b8cfdace42edd8dbe54e88de0341ee2b73426a`, closing #343.
 GitHub: [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-RECOVER-01–02.
@@ -44,4 +44,4 @@ and the offline four-write example verifies rejection/final reporting for $0.
 Full toolkit diagnostic sets remain exactly unchanged and visible;
 exports/docs/README checks pass. Independent requirements and engineering peer
 reviews approve the combined diff after findings are resolved. Implementation
-[PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) is open for review; final CI/merge remain pending. Close #343 only after merge.
+[PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) merged after all applicable final-head checks passed (14 contexts completed) at `22b8cfdace42edd8dbe54e88de0341ee2b73426a`, closing #343. Injection #344 is in progress.

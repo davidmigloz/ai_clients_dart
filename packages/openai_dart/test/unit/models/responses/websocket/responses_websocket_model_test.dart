@@ -748,11 +748,7 @@ void main() {
       });
     }
 
-    for (final type in [
-      'future.private',
-      'response.inject.created',
-      'response.inject.failed',
-    ]) {
+    for (final type in ['future.private']) {
       test('future/raw message $type preserves arbitrary nested fields', () {
         final source = <String, dynamic>{
           'type': type,

@@ -3,25 +3,31 @@ import 'package:meta/meta.dart';
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../../common/json_helpers.dart';
+import '../items/item.dart';
 import '../multi_agent/agent_tag.dart';
+import '../multi_agent/response_inject_event.dart' show ResponseInjectErrorCode;
 import '../streaming/response_stream_event.dart';
 import 'responses_steer_event.dart';
 import 'responses_steer_required_input.dart';
 import 'websocket_json_helpers.dart';
 
+part 'responses_inject_server_events.dart';
 part 'responses_steer_server_events.dart';
 
 /// A server message on a persistent Responses WebSocket connection.
 ///
 /// Ordinary messages wrap the existing SSE models. Errors retain the richer
 /// WebSocket envelope. Steering acknowledgements retain submission identity and
-/// rejected input. Future and injection messages retain raw JSON. Completion does not
+/// rejected input. Injection acknowledgements retain full uncommitted input.
+/// Future messages retain raw JSON. Completion does not
 /// indicate connection completion.
 ///
 /// Variants are [ResponsesStreamEvent] for ordinary shared events,
 /// [ResponsesErrorEvent] for full WebSocket errors, and
 /// [ResponsesSteerAcceptedEvent], [ResponsesSteerPendingEvent] and
-/// [ResponsesSteerFailedEvent] for steering acknowledgements. Future messages use
+/// [ResponsesSteerFailedEvent] for steering acknowledgements;
+/// [ResponseInjectCreatedEvent] and [ResponseInjectFailedEvent] for beta injection
+/// acknowledgements. Future messages use
 /// [UnknownResponsesServerEvent].
 @immutable
 sealed class ResponsesServerEvent {
@@ -53,6 +59,12 @@ sealed class ResponsesServerEvent {
       'ResponsesServerEvent',
     );
     if (type == 'error') return ResponsesErrorEvent.fromJson(snapshot);
+    if (type == 'response.inject.created') {
+      return ResponseInjectCreatedEvent.fromJson(snapshot);
+    }
+    if (type == 'response.inject.failed') {
+      return ResponseInjectFailedEvent.fromJson(snapshot);
+    }
     if (type == 'response.steer.accepted') {
       return ResponsesSteerAcceptedEvent.fromJson(snapshot);
     }
@@ -199,7 +211,7 @@ class ResponsesStreamEvent extends ResponsesServerEvent {
       'rawJson: ${rawJson.length} entries)';
 }
 
-/// A future server message, including steering/injection before typed support.
+/// A lossless envelope for server messages with future discriminators.
 @immutable
 class UnknownResponsesServerEvent extends ResponsesServerEvent {
   @override
