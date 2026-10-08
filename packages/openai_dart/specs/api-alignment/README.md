@@ -397,6 +397,17 @@ Sources: [cache diagnostics](https://developers.openai.com/api/docs/guides/promp
   are nonnull integers 1–100 with default 20; parameter-order/description changes are
   also reviewed. No schemas or Phase 4 routes changed. Toolkit review missed the
   parameter delta; independent normalized comparison records it for Phase 6.
+- A final October 8 check found newer [OpenAPI 35b0d4e](https://github.com/openai/openai-openapi/commit/35b0d4ebb841f2706e1c0aa31c7d47ecdd43c71d),
+  published at 16:33:26 UTC. Five normalized additions concern Agents session
+  spending control: optional nullable `spend_control` on create/update, optional
+  returned control, and distinct closed request/resource components. Request
+  `limit` is required nullable; positive limits are USD cents 1–4,503,599,627,370,495.
+  Create omission/null is unlimited; update omission retains and null or a null limit removes the
+  limit without resetting recorded spend. Returned `limit` is required nonnull;
+  `consumed` is required nullable, nonnegative best-effort whole USD cents.
+  Unlimited sessions omit returned control. These contracts join Phase 6 inventory.
+  All Speech request/voice/event contracts remain unchanged; #366 keeps its
+  reviewed 506aff0a canonical pin and does not implement the Agents additions.
 - Vaults: ten credential/vault operations, including credential networking,
   environment-variable secrets, metadata, and rotation.
 - Live: seven HTTP operations plus transport/event and delegation support.

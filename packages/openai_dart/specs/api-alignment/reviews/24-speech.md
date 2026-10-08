@@ -8,7 +8,7 @@ Ticket: [24](../tickets/24-speech.md).
 
 ## Source and canonical receipts
 
-October 8 fresh heads still match OpenAPI
+Pre-publication October 8 source checks matched OpenAPI
 `506aff0a8099581b50e119b87f8f2692cdad043f`, Python
 `9301e319ea33ef28fba380f39a289dedc14652c1` (3.26.1) and Node
 `bc6c0bfb70f253d5caa3f335699e9713ea9067b5` (7.30.1).
@@ -22,6 +22,17 @@ SpeechAudioDoneEvent. Their real manifest mappings name the public implementatio
 inline usage stays inline, with no invented component or diagnostic exclusion.
 Canonical governs wire shape; the speech guide governs model restrictions and the
 sunset notice governs workflow migration, as settled in the phase specification.
+
+A final upstream check after publication found [OpenAPI 35b0d4e](https://github.com/openai/openai-openapi/commit/35b0d4ebb841f2706e1c0aa31c7d47ecdd43c71d),
+published October 8 at 16:33:26 UTC. Fresh fetch/review and normalized comparison
+find exactly five additions: CreateAgentSessionParams/UpdateAgentSessionParams
+spend_control, SessionResource spend_control and two distinct closed
+SessionSpendControlParam/SessionSpendControlResource components. The complete
+Speech schema closure and POST operation are unchanged; Python/Node heads also
+remain unchanged. These Agents contracts are recorded in the Phase 6 inventory.
+This Speech implementation keeps the reviewed 506aff0a snapshot; the later
+candidate is reviewed for inventory and not promoted as an adopted runtime
+contract. Committed canonical bytes and their fetch/source metadata stay pinned.
 
 ## Requirement evidence
 
