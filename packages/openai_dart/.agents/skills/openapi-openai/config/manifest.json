@@ -5334,6 +5334,30 @@
       "file": "lib/src/models/audio/voice_consent.dart",
       "schema": "VoiceConsentDeletedResource",
       "note": "Actual fixed-object deletion response; deleted is a required boolean, including false, not a fabricated true discriminator. Immutable receive-only future metadata and complete value/copy/private diagnostics."
+    },
+    "CreateVoiceRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomVoiceCreateRequest",
+      "file": "lib/src/models/audio/custom_voice.dart",
+      "schema": "CreateVoiceRequest",
+      "note": "Actual single-branch request union mapped to its concrete multipart DTO, matching canonical and both SDK aliases. No invented prompt variant or sealed hierarchy. Binary-only create has no fabricated JSON representation; scanner limitations remain visible with real public multipart fixtures, no new skips/tags/exclusions."
+    },
+    "CreateVoiceFromConsentRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomVoiceCreateRequest",
+      "file": "lib/src/models/audio/custom_voice.dart",
+      "schema": "CreateVoiceFromConsentRequest",
+      "note": "Actual closed multipart object: required name/audio_sample/consent and optional fixed audio_sample type. Unicode name 1–256, original immutable file bytes/filename, eight normalized MIME bases and10MiB verified through actual multipart; omitted type remains omitted. No invented JSON binary factory or diagnostic exclusion."
+    },
+    "VoiceResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomVoice",
+      "file": "lib/src/models/audio/custom_voice.dart",
+      "schema": "VoiceResource",
+      "note": "Actual closed response: fixed audio.voice object and fixed audio_sample creation type; strict known fields, finite immutable receive-only future JSON, complete effective copy/value/hash contracts and private diagnostics. Unknown known-field type values are rejected, distinct from receive-only extra-field compatibility."
     }
   }
 }

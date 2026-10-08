@@ -1,13 +1,10 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
-import '../errors/exceptions.dart';
 import '../models/audio/voice_consent.dart';
-import '../platform/http_utils.dart';
-import '../utils/http_error_response.dart';
+import '../utils/private_audio_http.dart';
 import 'base_resource.dart';
 
 /// Resource for managing voice consent recordings.
@@ -40,7 +37,7 @@ class VoiceConsentsResource extends ResourceBase {
     request.validate();
     final contentType = MediaType.parse(request.effectiveRecordingContentType);
     final url = requestBuilder.buildUrl(_endpoint);
-    await _checkAbort(abortTrigger);
+    await checkPrivateAudioAbort(abortTrigger, 'Voice consent');
     ensureNotClosed?.call();
 
     final httpRequest = http.MultipartRequest('POST', url)
@@ -154,7 +151,7 @@ class VoiceConsentsResource extends ResourceBase {
   }) async {
     final url = requestBuilder.buildUrl(path, queryParams: query);
     final encodedBody = body == null ? null : jsonEncode(body);
-    await _checkAbort(abortTrigger);
+    await checkPrivateAudioAbort(abortTrigger, 'Voice consent');
     ensureNotClosed?.call();
     final request = http.Request(method, url)
       ..headers.addAll(
@@ -174,44 +171,12 @@ class VoiceConsentsResource extends ResourceBase {
   Future<http.Response> _send(
     http.BaseRequest request, {
     Future<void>? abortTrigger,
-  }) async {
-    try {
-      final response = await interceptorChain.execute(
-        request,
-        abortTrigger: abortTrigger,
-      );
-      if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw parseHttpErrorResponse(response, request: request);
-      }
-      return response;
-    } on AbortedException catch (error) {
-      throw AbortedException(
-        message: error.message,
-        stage: error.stage,
-        correlationId: error.correlationId,
-        timestamp: error.timestamp,
-        cause: error.cause ?? error,
-        redactDiagnostics: true,
-      );
-    } on http.ClientException catch (error) {
-      throw ConnectionException(
-        message: error.message,
-        url: error.uri?.toString() ?? request.url.toString(),
-        cause: error,
-        redactDiagnostics: true,
-      );
-    } catch (error) {
-      if (isSocketException(error)) {
-        throw ConnectionException(
-          message: 'Voice consent connection failed',
-          url: request.url.toString(),
-          cause: error,
-          redactDiagnostics: true,
-        );
-      }
-      rethrow;
-    }
-  }
+  }) => sendPrivateAudioRequest(
+    request,
+    interceptorChain: interceptorChain,
+    context: 'Voice consent',
+    abortTrigger: abortTrigger,
+  );
 
   String _consentPath(String consentId) {
     // Dart Uri normalizes literal and escaped dot segments. Reject only these
@@ -232,69 +197,5 @@ class VoiceConsentsResource extends ResourceBase {
     http.Response response,
     T Function(Map<String, dynamic>) parse,
     String operation,
-  ) {
-    final responseBody = utf8.decode(response.bodyBytes, allowMalformed: true);
-    final Map<String, dynamic> json;
-    try {
-      final decoded = jsonDecode(utf8.decode(response.bodyBytes));
-      if (decoded is! Map<String, dynamic>) {
-        throw const FormatException('Expected a JSON object.');
-      }
-      json = decoded;
-    } on FormatException {
-      throw ParseException(
-        message:
-            'Invalid voice consent $operation response: '
-            'expected a UTF-8 JSON object.',
-        responseBody: responseBody,
-        cause: const FormatException('Expected a UTF-8 JSON object.'),
-      );
-    }
-
-    try {
-      return parse(json);
-    } on FormatException catch (error) {
-      // Model parsers report field context without including received values.
-      // Strip any source attached to a FormatException before retaining it.
-      throw ParseException(
-        message: 'Invalid voice consent $operation response: ${error.message}',
-        responseBody: responseBody,
-        cause: FormatException(error.message),
-      );
-    } on TypeError {
-      throw ParseException(
-        message:
-            'Invalid voice consent $operation response: '
-            'a known field has an invalid type.',
-        responseBody: responseBody,
-        cause: const FormatException('A known field has an invalid type.'),
-      );
-    } on ArgumentError {
-      throw ParseException(
-        message:
-            'Invalid voice consent $operation response: '
-            'a known field is invalid.',
-        responseBody: responseBody,
-        cause: const FormatException('A known field is invalid.'),
-      );
-    }
-  }
-}
-
-Future<void> _checkAbort(Future<void>? abortTrigger) async {
-  if (abortTrigger == null) return;
-  var aborted = false;
-  unawaited(
-    abortTrigger.then<void>(
-      (_) => aborted = true,
-      onError: (Object _, StackTrace _) => aborted = true,
-    ),
-  );
-  await Future<void>.value();
-  if (aborted) {
-    throw const AbortedException(
-      message: 'Voice consent request aborted before dispatch',
-      stage: AbortionStage.beforeRequest,
-    );
-  }
+  ) => parsePrivateAudioResponse(response, parse, 'voice consent $operation');
 }

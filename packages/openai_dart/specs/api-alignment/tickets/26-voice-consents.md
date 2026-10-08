@@ -1,6 +1,6 @@
 # Manage voice consent recordings through all five operations
 
-Status: implemented and independently approved; runtime PR merge gate pending.
+Status: merged in [PR #376](https://github.com/davidmigloz/ai_clients_dart/pull/376); #368 closed.
 GitHub: [#368](https://github.com/davidmigloz/ai_clients_dart/issues/368).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 5 Audio and Live](../audio-live.md), AUDIO-CONSENT-01–03.
@@ -22,7 +22,7 @@ Manage voice consent recordings through all five operations through public APIs,
 - [x] Changed models cover every declared field/variant, optional/null/absence, immutable parsed ownership, complete copy/clear, equality/hash and safe diagnostics. Known malformed values fail contextually; future receive-only metadata and closed writable admission remain distinct.
 - [x] Public factories/resources/parsers and real canonical manifest mappings are verified; no fake components or diagnostic exclusions. README/llms, runnable offline example and any actual breaking migration are complete.
 - [x] Focused public fixtures pass VM/Chrome JavaScript/Wasm where applicable; format → fix → fatal-info analysis, package unit suite and full OpenAPI toolkit evidence are recorded. Unrelated diagnostics/remaining parity gaps remain visible and classified.
-- [ ] Independent requirements and engineering reviews approve the final combined diff after validated findings are resolved; final-head CI is green before merge.
+- [x] Independent requirements and engineering reviews approve the final combined diff after validated findings are resolved; final-head CI is green before merge.
 
 ## Compatibility and boundaries
 
@@ -42,5 +42,6 @@ bumps and unrelated API families are outside this ticket.
 
 See the [consent acceptance record](../reviews/26-voice-consents.md).
 Package/platform/documentation checks and independent combined reviews pass.
-The final review/CI gate remains unchecked until verified on the published head;
-#368 stays open until its runtime PR merges.
+Final reviewed head `cadd3f39ba82e12cb0764a87dc5808f01894e5b4` passed all
+14 CI contexts (13 successes, standard Test(all) skip). PR #376 merged October 8
+at 20:13:36 UTC, squash `2856c21eed697b7ec24a79e70e66800fe5ec0b79`.

@@ -56,8 +56,9 @@ class LoggingInterceptor implements Interceptor {
     var request = context.request;
     final speechRequest = isSpeechRequest(request);
     final privateAudioRequest = isPrivateAudioRequest(request);
-    final voiceConsentRequest = isVoiceConsentRequest(request);
-    final diagnosticUrl = voiceConsentRequest
+    final privateVoiceRequest =
+        isVoiceConsentRequest(request) || isCustomVoiceRequest(request);
+    final diagnosticUrl = privateVoiceRequest
         ? '[REDACTED]'
         : request.url.toString();
     final startTime = DateTime.now();
@@ -81,13 +82,13 @@ class LoggingInterceptor implements Interceptor {
     );
 
     // Log request
-    final diagnosticCorrelationId = voiceConsentRequest
+    final diagnosticCorrelationId = privateVoiceRequest
         ? '[REDACTED]'
         : correlationId;
     logger
       ..fine('→ ${request.method} $diagnosticUrl [$diagnosticCorrelationId]')
       ..finer(
-        '  Headers: ${voiceConsentRequest ? '[REDACTED]' : _sanitizeHeaders(request.headers)}',
+        '  Headers: ${privateVoiceRequest ? '[REDACTED]' : _sanitizeHeaders(request.headers)}',
       );
 
     if (logRequestBody && request is http.Request && request.body.isNotEmpty) {
@@ -110,7 +111,7 @@ class LoggingInterceptor implements Interceptor {
       final requestId = privateAudioRequest
           ? correlationId
           : response.headers['x-request-id'] ?? correlationId;
-      final diagnosticResponseId = monitoringResponse || voiceConsentRequest
+      final diagnosticResponseId = monitoringResponse || privateVoiceRequest
           ? '[REDACTED]'
           : requestId;
       logger

@@ -1,12 +1,12 @@
 import 'dart:typed_data';
 
-import 'package:http_parser/http_parser.dart';
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../common/json_helpers.dart';
 import 'audio_json_helpers.dart';
+import 'audio_upload_helpers.dart';
 
 /// A multipart upload of an original voice consent recording.
 ///
@@ -27,15 +27,19 @@ final class VoiceConsentCreateRequest {
     required this.filename,
     required this.language,
     String? recordingContentType,
-  }) : recording = _snapshotRecording(recording),
-       recordingContentType = _normalizeRecordingContentType(
+  }) : recording = snapshotAudioUploadBytes(
+         recording,
+         'VoiceConsentCreateRequest.recording',
+       ),
+       recordingContentType = normalizeAudioUploadContentType(
          recordingContentType,
+         'VoiceConsentCreateRequest.recordingContentType',
        ) {
     validate();
   }
 
   /// Maximum recording size in bytes: 10 MiB.
-  static const int maxRecordingBytes = 10 * 1024 * 1024;
+  static const int maxRecordingBytes = audioUploadMaxBytes;
 
   /// Label for this consent recording; no local grammar or length restriction.
   final String name;
@@ -56,36 +60,20 @@ final class VoiceConsentCreateRequest {
   final String? recordingContentType;
 
   /// Supported base MIME type used for the recording part.
-  String get effectiveRecordingContentType {
-    if (recordingContentType != null) return recordingContentType!;
-    final extensionStart = filename.lastIndexOf('.');
-    final extension = extensionStart < 0
-        ? null
-        : filename.substring(extensionStart + 1).toLowerCase();
-    final inferred = _recordingMimeExtensions[extension];
-    if (inferred == null) {
-      throw const FormatException(
-        'VoiceConsentCreateRequest.recordingContentType: '
-        'provide a supported audio MIME type for an unrecognized filename extension',
-      );
-    }
-    return inferred;
-  }
+  String get effectiveRecordingContentType => resolveAudioUploadContentType(
+    filename,
+    recordingContentType,
+    'VoiceConsentCreateRequest.recordingContentType',
+  );
 
   /// Validates upload admission before authentication or multipart dispatch.
-  void validate() {
-    if (recording.length > maxRecordingBytes) {
-      throw const FormatException(
-        'VoiceConsentCreateRequest.recording: maximum size is 10 MiB',
-      );
-    }
-    if (!_recordingMimeTypes.contains(effectiveRecordingContentType)) {
-      throw const FormatException(
-        'VoiceConsentCreateRequest.recordingContentType: '
-        'unsupported audio MIME type',
-      );
-    }
-  }
+  void validate() => validateAudioUpload(
+    recording,
+    filename: filename,
+    contentType: recordingContentType,
+    bytesContext: 'VoiceConsentCreateRequest.recording',
+    contentTypeContext: 'VoiceConsentCreateRequest.recordingContentType',
+  );
 
   /// Copies every upload field; explicit null clears supplied MIME metadata.
   VoiceConsentCreateRequest copyWith({
@@ -518,60 +506,6 @@ final class VoiceConsentDeleted {
       'VoiceConsentDeleted(object: $object, id: [REDACTED], '
       'deleted: $deleted, rawJson: ${rawJson.length} entries)';
 }
-
-Uint8List _snapshotRecording(Uint8List recording) {
-  if (recording.length > VoiceConsentCreateRequest.maxRecordingBytes) {
-    throw const FormatException(
-      'VoiceConsentCreateRequest.recording: maximum size is 10 MiB',
-    );
-  }
-  return Uint8List.fromList(recording).asUnmodifiableView();
-}
-
-String? _normalizeRecordingContentType(String? contentType) {
-  if (contentType == null) return null;
-  final String base;
-  try {
-    base = MediaType.parse(contentType).mimeType;
-  } on FormatException {
-    throw const FormatException(
-      'VoiceConsentCreateRequest.recordingContentType: '
-      'expected a valid supported audio MIME type',
-    );
-  }
-  if (!_recordingMimeTypes.contains(base)) {
-    throw const FormatException(
-      'VoiceConsentCreateRequest.recordingContentType: '
-      'unsupported audio MIME type',
-    );
-  }
-  return base;
-}
-
-const _recordingMimeTypes = {
-  'audio/mpeg',
-  'audio/wav',
-  'audio/x-wav',
-  'audio/ogg',
-  'audio/aac',
-  'audio/flac',
-  'audio/webm',
-  'audio/mp4',
-};
-
-const _recordingMimeExtensions = {
-  'mp3': 'audio/mpeg',
-  'mpeg': 'audio/mpeg',
-  'mpga': 'audio/mpeg',
-  'wav': 'audio/wav',
-  'ogg': 'audio/ogg',
-  'oga': 'audio/ogg',
-  'aac': 'audio/aac',
-  'flac': 'audio/flac',
-  'webm': 'audio/webm',
-  'mp4': 'audio/mp4',
-  'm4a': 'audio/mp4',
-};
 
 String? _nullableConsentString(Object? value, String context) =>
     value == null ? null : requireJsonString(value, context);
