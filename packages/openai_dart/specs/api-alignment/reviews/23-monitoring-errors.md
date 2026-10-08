@@ -1,7 +1,7 @@
 # Structured monitoring errors implementation acceptance
 
-Status: implemented, independently reviewed and runtime verified; PR #365 open; final-head CI pending.
-Implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365) is open for review; #360 remains open until merge.
+Status: implemented, independently reviewed, runtime verified and merged.
+Implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365) merged October 8, 2026 at `fca1a3f4e453d88caed9ffa573d4ec665126c3cb` (2026-10-08T14:20:48Z) after all 14 final-head contexts completed (13 successes and the standard Test(all) skip), closing #360.
 Tracking: [#360](https://github.com/davidmigloz/ai_clients_dart/issues/360),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [SAFETY-ERROR-01–04](../webhooks-safety.md).
@@ -99,6 +99,5 @@ output are targeted breaking corrections; no package version or release changes.
 
 Independent requirements and cross-author engineering reviewers approve the final
 combined diff, docs/example/manifest and evidence with no open findings. All 253
-local documentation file/anchor links resolve. The implementation issue remains
-open until merge; Phase 5 Audio/Live requires its next planning specification and
-ticket breakdown after this final Phase 4 ticket merges.
+local documentation file/anchor links resolve. Issue #360 is closed after merge. This completes all four specified Phase 4
+implementation tickets; Phase 5 Audio/Live planning follows.

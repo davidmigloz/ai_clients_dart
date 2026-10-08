@@ -1,7 +1,7 @@
 # Preserve structured monitoring errors across HTTP and Responses
 
-Status: implemented, independently reviewed and runtime verified; PR #365 open; final-head CI pending.
-Implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365) is open for review; #360 remains open until merge.
+Status: implemented, independently reviewed, runtime verified and merged.
+Implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365) merged October 8, 2026 at `fca1a3f4e453d88caed9ffa573d4ec665126c3cb` (2026-10-08T14:20:48Z) after all 14 final-head contexts completed (13 successes and the standard Test(all) skip), closing #360.
 GitHub: [#360](https://github.com/davidmigloz/ai_clients_dart/issues/360).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 4 Webhooks and safety](../webhooks-safety.md), SAFETY-ERROR-01–04.
@@ -42,4 +42,4 @@ publishing/version bumps and unrelated API families are outside this ticket.
 [Implementation acceptance evidence](../reviews/23-monitoring-errors.md) records
 305 new focused cases on VM/Chrome JavaScript/Wasm, exact canonical versus legacy
 schema classifications, offline example and migration guidance. Independent requirements and engineering reviews approve the final combined
-diff with no open findings. Implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365) is open; final-head CI is pending; close #360 only after implementation merge. The planning review does not claim runtime acceptance. Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) merged October 8, 2026 at `886659c3c11cbee89335788ba918eeecd528fce0` after green CI.
+diff with no open findings. Implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365) merged October 8, 2026 at `fca1a3f4e453d88caed9ffa573d4ec665126c3cb` (2026-10-08T14:20:48Z) after all 14 final-head contexts completed (13 successes and the standard Test(all) skip), closing #360. The planning review does not claim runtime acceptance. Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) merged October 8, 2026 at `886659c3c11cbee89335788ba918eeecd528fce0` after green CI.

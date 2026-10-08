@@ -1,7 +1,8 @@
 # Webhooks and safety: Phase 4 specification
 
-Status: receiver, endpoint management and safety retrieval merged; monitoring errors implemented and runtime verified; independent final reviews approved; implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365) is open with final-head CI pending.
+Status: all four specified implementation tickets are merged; Phase 4 complete.
 Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) merged October 8, 2026 at `886659c3c11cbee89335788ba918eeecd528fce0` after green CI.
+Implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365) merged October 8, 2026 at `fca1a3f4e453d88caed9ffa573d4ec665126c3cb` (2026-10-08T14:20:48Z) after all 14 final-head contexts completed (13 successes and the standard Test(all) skip), closing #360.
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Endpoint management [PR #363](https://github.com/davidmigloz/ai_clients_dart/pull/363)
 merged October 8, 2026 at `b5159171218e8feb9f720c5db7d1d82ea3cf1a80` after all 14 final-head CI contexts completed (13 successful, one standard skip), closing #358; [acceptance evidence](reviews/21-webhook-endpoints.md)
@@ -390,6 +391,5 @@ validation is separate from future runtime acceptance.
 [Ticket 23 acceptance evidence](reviews/23-monitoring-errors.md) records shared
 HTTP/failed-response/WS details, canonical flat nullable SSE errors, passive
 investigation and targeted migration guidance. 305 new focused fixtures pass
-VM/Chrome JavaScript/Wasm with $0 API cost. Independent final reviews approve the combined diff; implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365)
-is open with final-head CI pending; #360 remains open until merge. The remaining media/Agents/Live/Admin
+VM/Chrome JavaScript/Wasm with $0 API cost. Implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365) merged October 8, 2026 at `fca1a3f4e453d88caed9ffa573d4ec665126c3cb` (2026-10-08T14:20:48Z) after all 14 final-head contexts completed (13 successes and the standard Test(all) skip), closing #360. The remaining media/Agents/Live/Admin
 error shapes retain their separate inventory and permission boundaries.
