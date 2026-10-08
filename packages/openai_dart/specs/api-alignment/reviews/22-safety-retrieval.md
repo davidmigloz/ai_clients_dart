@@ -93,8 +93,15 @@ schema/runtime corpora were rerun on the corrected model hash. Effective value
 comparison delegates to actual serialization, keeping typed/raw precedence and
 equality/hash aligned without adding duplicate serialization or scanner exclusions.
 
+
+The first CI run identified a formatter-version difference: local Dart 3.12.2
+had accepted one fixture layout that CI's stable Dart 3.13.5 reformatted.
+The single resource-test call layout was updated with the CI SDK; stable root
+format checking and focused VM fixtures were rerun. Product/model behavior is
+unchanged. Current published documentation has 159 valid local file links.
+
 Independent requirements and cross-author engineering reviews approve the final
 23-file combined diff with no open findings, after validating the corrections and
-current source/model/runtime hashes. All 157 local documentation links resolve.
+current source/model/runtime hashes. All 159 local documentation links resolve.
 PR/CI status is recorded separately. #359 remains open until its
 implementation PR merges; #360 follows it.

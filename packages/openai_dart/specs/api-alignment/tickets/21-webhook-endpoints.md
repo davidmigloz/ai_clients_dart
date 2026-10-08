@@ -40,4 +40,4 @@ publishing/version bumps and unrelated API families are outside this ticket.
 
 [Endpoint management acceptance evidence](../reviews/21-webhook-endpoints.md)
 records the implementation, runtime verification and independent reviews.
-The issue remains open until implementation merge. Receiver [PR #362](https://github.com/davidmigloz/ai_clients_dart/pull/362) merged October 8, 2026 at `eea142bf9b100448f5216572e4db2d50a7ad0f5b`, closing #357, after all 14 final-head contexts passed (13 successes and standard Test(all) skip).
+PR #363 merged at `b5159171218e8feb9f720c5db7d1d82ea3cf1a80`, closing #358 after green CI. Receiver [PR #362](https://github.com/davidmigloz/ai_clients_dart/pull/362) merged October 8, 2026 at `eea142bf9b100448f5216572e4db2d50a7ad0f5b`, closing #357, after all 14 final-head contexts passed (13 successes and standard Test(all) skip).
