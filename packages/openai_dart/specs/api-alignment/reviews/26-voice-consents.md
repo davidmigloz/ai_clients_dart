@@ -1,7 +1,8 @@
 # Voice consent management acceptance
 
 Status: implementation verified; independent requirements and cross-author
-engineering reviews approve. Runtime PR merge gate remains pending.
+engineering reviews approve. Runtime [PR #376](https://github.com/davidmigloz/ai_clients_dart/pull/376) merged
+October 8, 2026 at 20:13:36 UTC, squash `2856c21eed697b7ec24a79e70e66800fe5ec0b79`; #368 is closed.
 [#368](https://github.com/davidmigloz/ai_clients_dart/issues/368),
 [ticket 26](../tickets/26-voice-consents.md), AUDIO-CONSENT-01–03 in the
 [Phase 5 specification](../audio-live.md).
@@ -99,6 +100,7 @@ scanner limitations are verified by real public factories and multipart fixtures
 there are no new diagnostic exclusions, fabricated schemas or checker changes.
 
 Independent requirements, model/resource/shared-HTTP and documentation engineering
-reviews approve the final combined change with no unresolved findings. Published
-head CI/artifact checks and actual merge remain separate gates, recorded in the
-PR/issue. #368 stays open until merge; #369 sample-derived voice creation is next.
+reviews approve the final combined change with no unresolved findings. Final reviewed head `cadd3f39ba82e12cb0764a87dc5808f01894e5b4` passed
+[workflow 37836884914](https://github.com/davidmigloz/ai_clients_dart/actions/runs/37836884914):
+14 contexts, 13 successes and the standard Test(all) skip. The actual merge receipt
+above closes #368; #369 sample-derived voice creation is next.

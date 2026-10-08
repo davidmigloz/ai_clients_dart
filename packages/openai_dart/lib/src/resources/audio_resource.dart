@@ -11,6 +11,7 @@ import 'base_resource.dart';
 import 'speech_stream_transport.dart';
 import 'streaming_resource.dart';
 import 'voice_consents_resource.dart';
+import 'voices_resource.dart';
 
 /// Resource for audio operations.
 ///
@@ -54,6 +55,7 @@ class AudioResource extends ResourceBase {
   TranscriptionsResource? _transcriptions;
   TranslationsResource? _translations;
   VoiceConsentsResource? _voiceConsents;
+  VoicesResource? _voices;
 
   /// Access to text-to-speech operations.
   SpeechResource get speech => _speech ??= SpeechResource(
@@ -95,6 +97,15 @@ class AudioResource extends ResourceBase {
         requestBuilder: requestBuilder,
         ensureNotClosed: ensureNotClosed,
       );
+
+  /// Access to sample-derived custom voice creation.
+  VoicesResource get voices => _voices ??= VoicesResource(
+    config: config,
+    httpClient: httpClient,
+    interceptorChain: interceptorChain,
+    requestBuilder: requestBuilder,
+    ensureNotClosed: ensureNotClosed,
+  );
 }
 
 /// Resource for text-to-speech operations.

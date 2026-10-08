@@ -1,8 +1,9 @@
 # Audio and Live: Phase 5 specification
 
 Status: planning merged in [PR #373](https://github.com/davidmigloz/ai_clients_dart/pull/373);
-speech #366 and existing Audio #367 merged in PRs #374/#375, consent management
-#368 implemented and independently approved, four other runtime tickets pending.
+speech #366, existing Audio #367 and consent management #368 merged in PRs
+#374/#375/#376. Custom voice creation #369 is implemented and independently approved;
+three Live runtime tickets remain pending.
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Phase 4 is complete: [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365)
 merged October 8, 2026 at `fca1a3f4e453d88caed9ffa573d4ec665126c3cb`, closing #360
@@ -11,7 +12,8 @@ Scope: seven independently usable implementation tickets, repository 24–30.
 The planning specification claims no runtime acceptance; speech implementation
 has its separate [acceptance record](reviews/24-speech.md), and file Audio has
 [its own acceptance record](reviews/25-existing-audio.md). Consent management has
-[a separate acceptance record](reviews/26-voice-consents.md).
+[a separate acceptance record](reviews/26-voice-consents.md). Custom voice creation
+has [its own acceptance record](reviews/27-custom-voices.md).
 
 ## Outcome and boundaries
 
@@ -95,7 +97,13 @@ fetch timestamp and immutable source URL, archiving the prior 239c receipt. All
 five consent operations/components match the prior snapshot; only the already
 inventoried custom-voice type restriction changes. Python head 8e1fd258 changes
 only tests/test_uv_workflows.py; its 3.26.1 runtime surface and Node 7.30.1 remain
-unchanged. No Admin/OCI/custom-voice runtime completion is claimed.
+unchanged. That consent slice claimed no Admin/OCI/custom-voice runtime completion.
+
+Custom voice implementation rechecks the same b2751c66/Python 8e1fd258/Node bc6c0bfb
+heads. The fetched candidate equals adopted canonical JSON; canonical bytes and
+original source/fetch metadata are preserved. All three voice component roots and
+POST /audio/voices are unchanged; the fixed audio_sample type now agrees across
+canonical and both clients. No prompt-based voice branch is recreated.
 
 ## Ticket graph
 

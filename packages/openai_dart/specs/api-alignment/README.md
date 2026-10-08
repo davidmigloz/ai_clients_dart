@@ -246,8 +246,12 @@ merged in [PR #375](https://github.com/davidmigloz/ai_clients_dart/pull/375)
 at `98e67ac93bc524a6a40a49ffb04a3c38c00f89ec` on October 8 at 19:31:30 UTC,
 after all 14 CI contexts passed (13 successes, standard Test(all) skip). Its
 [acceptance evidence](reviews/25-existing-audio.md) is complete. Consent management
-#368 is implemented and independently approved with [evidence](reviews/26-voice-consents.md);
-four other runtime tickets remain pending.
+#368 merged in [PR #376](https://github.com/davidmigloz/ai_clients_dart/pull/376)
+at `2856c21eed697b7ec24a79e70e66800fe5ec0b79` on October 8, 20:13:36 UTC,
+after all final-head CI contexts passed (13 successes, standard Test(all) skip).
+Its [acceptance evidence](reviews/26-voice-consents.md) is complete. Custom voice
+creation #369 is implemented and independently approved with [evidence](reviews/27-custom-voices.md);
+three Live runtime tickets remain pending.
 
 | Repository ticket | Demonstrable outcome | Prerequisite |
 | --- | --- | --- |
@@ -270,8 +274,9 @@ These slices do not establish full Realtime/Chat/shared Responses parity.
 ## Remaining roadmap
 
 Phases 1–4 are complete for their specified tickets. Phase 5 Audio/Live has seven
-specified implementation tickets: speech #366 and existing Audio #367 are merged,
-consent management #368 is implemented and independently approved, and four remain pending. Later phases remain candidate outcomes pending
+specified implementation tickets: speech #366, existing Audio #367 and consent
+management #368 are merged; custom voice creation #369 is implemented and independently approved; three Live tickets
+remain pending. Later phases remain candidate outcomes pending
 detailed specifications. Keep all audited gaps visible even when deferred.
 
 | Phase | Demonstrable outcomes | Dependencies and scope notes |

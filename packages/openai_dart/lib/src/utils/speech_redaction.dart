@@ -21,7 +21,14 @@ bool isAudioFileRequest(http.BaseRequest? request) =>
 bool isPrivateAudioRequest(http.BaseRequest? request) =>
     isSpeechRequest(request) ||
     isAudioFileRequest(request) ||
-    isVoiceConsentRequest(request);
+    isVoiceConsentRequest(request) ||
+    isCustomVoiceRequest(request);
+
+/// Identifies the single custom voice creation operation.
+bool isCustomVoiceRequest(http.BaseRequest? request) =>
+    request != null &&
+    request.method == 'POST' &&
+    request.url.path.endsWith('/audio/voices');
 
 /// Identifies the five consent operations, including opaque encoded IDs.
 bool isVoiceConsentRequest(http.BaseRequest? request) {
