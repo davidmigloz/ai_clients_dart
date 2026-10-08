@@ -247,6 +247,125 @@ client.close();
 
 </details>
 
+### How do I use persistent Responses WebSockets?
+
+<details>
+<summary><b>Show example</b></summary>
+
+On native Dart/Flutter, open an authenticated connection through the existing
+client configuration and read its lane-aware envelopes:
+
+```dart
+final connection = await client.responses.connect();
+final latest = <String, String>{};
+final bothLaneCompletions = Completer<void>();
+final subscription = connection.events.listen(
+  (message) {
+    if (message case ResponsesStreamEvent(
+      streamId: final lane?,
+      event: ResponseCompletedEvent(:final response),
+    )) {
+      latest[lane] = response.id;
+      if (latest.containsKey('planner') &&
+          latest.containsKey('research') &&
+          !bothLaneCompletions.isCompleted) {
+        bothLaneCompletions.complete();
+      }
+    } else if (message is ResponsesErrorEvent) {
+      // Inspect message.error.code and message.status to choose lane recovery.
+      if (!bothLaneCompletions.isCompleted) {
+        bothLaneCompletions.completeError(
+          StateError('A lane request failed.'),
+        );
+      }
+    }
+  },
+  onError: (Object error) {
+    // Protocol/transport failures are identifiable, payload-redacted exceptions.
+    if (!bothLaneCompletions.isCompleted) {
+      bothLaneCompletions.completeError(error);
+    }
+  },
+  onDone: () {
+    if (!bothLaneCompletions.isCompleted) {
+      bothLaneCompletions.completeError(
+        StateError('Connection closed before both lanes completed.'),
+      );
+    }
+  },
+);
+try {
+  await Future.wait<void>([
+    Future<void>.sync(
+      () => connection
+        ..create(
+          const CreateResponseRequest(
+            model: 'gpt-6-sol',
+            input: ResponseInput.text('Draft a plan.'),
+          ),
+          streamId: 'planner',
+        )
+        ..create(
+          const CreateResponseRequest(
+            model: 'gpt-6-sol',
+            input: ResponseInput.text('Research the risks.'),
+          ),
+          streamId: 'research',
+        ),
+    ),
+    bothLaneCompletions.future,
+  ], eagerError: true);
+} finally {
+  try {
+    await connection.close();
+    await connection.done;
+  } finally {
+    await subscription.cancel();
+  }
+}
+```
+
+`streamId` routes events and orders requests within a lane; `previousResponseId`
+selects ancestry. Continue with the actual returned ID and only new input. A lane
+reused without a parent starts a new response. `generate: false` warms state and
+returns an ID for subsequent chaining. These are WebSocket-only fields;
+`ResponsesCreateEvent` composes the normal request, omits `stream`/false
+`background`, rejects `background: true`, and retains `streamOptions`.
+
+Response completion and request-scoped server errors leave the connection open.
+`ResponsesErrorEvent` retains full error metadata and absent-versus-null
+`code`/`param`. Shared events use `ResponsesStreamEvent.event`; future events
+retain raw JSON. One socket reader emits interleaved envelopes. The first listener
+receives buffered early events, including events before an early close; the default
+opening capacity is 1,024 and overflow fails explicitly. After the first listener,
+only active subscribers receive broadcasts. Cancelling a listener removes that
+listener; explicitly await connection cleanup. `done` completes independently of
+event draining. Close code/reason expose observed transport facts.
+
+Browser WebSockets cannot send custom headers. Any configured auth/default/org/
+project/version headers reject before dialing with proxy guidance. Use an explicit
+headerless client configuration and an authenticated backend WebSocket proxy.
+`additionalHeaders` and configured header precedence apply on native platforms;
+`beta: true` forces the multi-agent opt-in header. `connector` is an injectable
+seam, and `connectionTimeout` defaults to the configured connect timeout.
+
+The current [WebSocket guide](https://developers.openai.com/api/docs/guides/websocket-mode)
+describes 16 in-flight responses, 32 named lanes plus default, and a 60-minute
+connection limit. On disconnection, recover manually using a stored response ID
+or replay full context with no parent. A `store: false` fork should reach
+`response.in_progress` before the source lane advances. Standalone compaction
+starts a new chain using the complete returned compacted window. Steering,
+automatic recovery and multi-agent tool-result injection remain planned follow-ups.
+
+→ [Runnable offline example](example/responses_websocket_example.dart), with
+warm-up, two lanes, incremental continuation and awaited cleanup for $0.
+
+The shared annotation-added event accepts its required nullable annotation value.
+See the [migration guide](MIGRATION.md#upcoming-nullable-streaming-annotations)
+before dereferencing `OutputTextAnnotationAddedEvent.annotation`.
+
+</details>
+
 ### How do I return client-discovered tools?
 
 <details>
@@ -1504,6 +1623,7 @@ See the [example/](example/) directory for complete examples:
 | [`compaction_progress_example.dart`](example/compaction_progress_example.dart) | Offline nonterminal compaction progress and opaque final output preservation |
 | [`access_programs_example.dart`](example/access_programs_example.dart) | Offline access-program selection, server defaults and effective returned metadata |
 | [`tool_search_example.dart`](example/tool_search_example.dart) | Offline client tool-search continuation with the original call ID and complete discovered definitions |
+| [`responses_websocket_example.dart`](example/responses_websocket_example.dart) | Offline warm-up, two persistent lanes and incremental continuation with awaited cleanup |
 | [`realtime_example.dart`](example/realtime_example.dart) | Realtime API (WebSocket and WebRTC) |
 | [`fine_tuning_example.dart`](example/fine_tuning_example.dart) | Fine-tuning job management |
 | [`completions_example.dart`](example/completions_example.dart) | Legacy completions API |
@@ -1517,7 +1637,7 @@ See the [example/](example/) directory for complete examples:
 | API | Status |
 |-----|--------|
 | Chat Completions | Supported; stored-completion management pending |
-| Responses API | Supported; WebSockets and additional tool/configuration details pending |
+| Responses API | Supported with persistent WebSockets; steering, automatic recovery, tool-result injection and additional tool/configuration details pending |
 | Decisions API | ✅ Full |
 | Embeddings | ✅ Full |
 | Images | ✅ Full |

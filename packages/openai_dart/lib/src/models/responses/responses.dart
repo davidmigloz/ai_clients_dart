@@ -84,3 +84,4 @@ export 'response_input.dart';
 export 'response_usage.dart';
 export 'streaming/streaming.dart';
 export 'tools/tools.dart';
+export 'websocket/websocket.dart';

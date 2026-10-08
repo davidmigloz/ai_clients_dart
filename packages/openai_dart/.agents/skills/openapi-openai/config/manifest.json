@@ -361,14 +361,11 @@
     },
     "ResponsesClientEventResponseCreate": {
       "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "file": null,
+      "kind": "object",
+      "dart_class": "ResponsesCreateEvent",
+      "file": "lib/src/models/responses/websocket/responses_create_event.dart",
       "schema": "ResponsesClientEventResponseCreate",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Realtime client event embedding CreateResponse; constructed inline by the realtime resource."
+      "note": "Composes CreateResponseRequest; WebSocket lane and guide generate extension; omit stream/background and retain stream_options. Replaces obsolete Realtime skip. Public wire fixtures verify complete supported request fields."
     },
     "PersonalityEnum": {
       "spec": "main",
@@ -4116,6 +4113,140 @@
       "schema": null,
       "parent": "NamespaceAllowedTool",
       "note": "Future nested tool definitions preserve immutable parsed raw JSON, deep value/hash and safe diagnostics; known malformed function/custom definitions fail contextually."
+    },
+    "ResponsesServerEvent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ResponsesServerEvent",
+      "file": "lib/src/models/responses/websocket/responses_server_event.dart",
+      "schema": "ResponsesServerEvent",
+      "note": "Persistent envelope reuses all 58 ordinary shared event codecs; WS errors retain complete metadata. Later steering/injection/future events remain lossless raw variants."
+    },
+    "ResponseWsError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponsesErrorEvent",
+      "file": "lib/src/models/responses/websocket/responses_server_event.dart",
+      "schema": "ResponseWsError",
+      "note": "WS-only full error envelope; beta nullable agent retains presence. Existing SSE error remains compatible.",
+      "parent": "ResponsesServerEvent"
+    },
+    "ErrorPayload": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponsesErrorPayload",
+      "file": "lib/src/models/responses/websocket/responses_server_event.dart",
+      "schema": "ErrorPayload",
+      "note": "Required type/message; nullable code/param presence recorded with explicit provider omission compatibility. Headers/misalignment/future keys retained and redacted."
+    },
+    "MisalignmentErrorDetailsResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponsesMisalignmentDetails",
+      "file": "lib/src/models/responses/websocket/responses_server_event.dart",
+      "schema": "MisalignmentErrorDetailsResource",
+      "note": "All known optional fields validate contextually; opaque review target retains omission/null and future raw keys."
+    },
+    "_MisalignmentSteer": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponsesMisalignmentSteer",
+      "file": "lib/src/models/responses/websocket/responses_server_event.dart",
+      "schema": "_MisalignmentSteer",
+      "note": "Required public continuation message; future raw fields preserved with safe diagnostics."
+    },
+    "BetaResponsesClientEventResponseCreate": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponsesCreateEvent",
+      "file": "lib/src/models/responses/websocket/responses_create_event.dart",
+      "schema": "BetaResponsesClientEventResponseCreate",
+      "note": "Composes CreateResponseRequest; WebSocket lane and guide generate extension; omit stream/background and retain stream_options. Replaces obsolete Realtime skip. Public wire fixtures verify complete supported request fields."
+    },
+    "BetaResponsesServerEvent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ResponsesServerEvent",
+      "file": "lib/src/models/responses/websocket/responses_server_event.dart",
+      "schema": "BetaResponsesServerEvent",
+      "note": "Persistent envelope reuses all 58 ordinary shared event codecs; WS errors retain complete metadata. Later steering/injection/future events remain lossless raw variants."
+    },
+    "BetaResponseWsError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponsesErrorEvent",
+      "file": "lib/src/models/responses/websocket/responses_server_event.dart",
+      "schema": "BetaResponseWsError",
+      "note": "WS-only full error envelope; beta nullable agent retains presence. Existing SSE error remains compatible.",
+      "parent": "ResponsesServerEvent"
+    },
+    "BetaErrorPayload": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponsesErrorPayload",
+      "file": "lib/src/models/responses/websocket/responses_server_event.dart",
+      "schema": "BetaErrorPayload",
+      "note": "Required type/message; nullable code/param presence recorded with explicit provider omission compatibility. Headers/misalignment/future keys retained and redacted."
+    },
+    "BetaMisalignmentErrorDetailsResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponsesMisalignmentDetails",
+      "file": "lib/src/models/responses/websocket/responses_server_event.dart",
+      "schema": "BetaMisalignmentErrorDetailsResource",
+      "note": "All known optional fields validate contextually; opaque review target retains omission/null and future raw keys."
+    },
+    "Beta_MisalignmentSteer": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponsesMisalignmentSteer",
+      "file": "lib/src/models/responses/websocket/responses_server_event.dart",
+      "schema": "Beta_MisalignmentSteer",
+      "note": "Required public continuation message; future raw fields preserved with safe diagnostics."
+    },
+    "ResponsesStreamEvent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesStreamEvent",
+      "file": "lib/src/models/responses/websocket/responses_server_event.dart",
+      "schema": null,
+      "note": "Dart shared-event/lossless future envelope extension; no invented upstream leaf schema.",
+      "parent": "ResponsesServerEvent"
+    },
+    "UnknownResponsesServerEvent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownResponsesServerEvent",
+      "file": "lib/src/models/responses/websocket/responses_server_event.dart",
+      "schema": null,
+      "note": "Dart shared-event/lossless future envelope extension; no invented upstream leaf schema.",
+      "parent": "ResponsesServerEvent"
+    },
+    "ResponsesConnection": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesConnection",
+      "file": "lib/src/resources/responses/responses_connection.dart",
+      "schema": null,
+      "note": "Caller-owned persistent connection with observable bounded early buffer, close lifecycle and completion; no invented REST operation or automatic replay."
+    },
+    "ResponseOutputTextAnnotationAddedEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OutputTextAnnotationAddedEvent",
+      "file": "lib/src/models/responses/streaming/response_stream_event.dart",
+      "schema": "ResponseOutputTextAnnotationAddedEvent",
+      "parent": "ResponseStreamEvent",
+      "note": "Required nullable annotation now supported in shared SSE/WS codec, with presence validation, copy clear and full value contracts. Older optional itemId/sequence and index default tolerance remains explicitly unchanged."
+    },
+    "BetaResponseOutputTextAnnotationAddedEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OutputTextAnnotationAddedEvent",
+      "file": "lib/src/models/responses/streaming/response_stream_event.dart",
+      "schema": "BetaResponseOutputTextAnnotationAddedEvent",
+      "parent": "ResponseStreamEvent",
+      "note": "Required nullable annotation now supported in shared SSE/WS codec, with presence validation, copy clear and full value contracts. Older optional itemId/sequence and index default tolerance remains explicitly unchanged."
     }
   }
 }
