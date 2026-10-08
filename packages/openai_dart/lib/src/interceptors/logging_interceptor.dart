@@ -57,7 +57,9 @@ class LoggingInterceptor implements Interceptor {
     final speechRequest = isSpeechRequest(request);
     final privateAudioRequest = isPrivateAudioRequest(request);
     final privateVoiceRequest =
-        isVoiceConsentRequest(request) || isCustomVoiceRequest(request);
+        isVoiceConsentRequest(request) ||
+        isCustomVoiceRequest(request) ||
+        isLiveRequest(request);
     final diagnosticUrl = privateVoiceRequest
         ? '[REDACTED]'
         : request.url.toString();
@@ -93,7 +95,11 @@ class LoggingInterceptor implements Interceptor {
 
     if (logRequestBody && request is http.Request && request.body.isNotEmpty) {
       logger.finest(
-        '  Body: ${privateAudioRequest ? '[REDACTED audio request]' : _truncate(request.body)}',
+        '  Body: ${isLiveRequest(request)
+            ? '[REDACTED Live request]'
+            : privateAudioRequest
+            ? '[REDACTED audio request]'
+            : _truncate(request.body)}',
       );
     }
 
@@ -124,7 +130,11 @@ class LoggingInterceptor implements Interceptor {
 
       if (logResponseBody && privateAudioRequest) {
         logger.finest(
-          '  Body: ${speechRequest ? '[REDACTED speech response]' : '[REDACTED audio response]'}',
+          '  Body: ${isLiveRequest(request)
+              ? '[REDACTED Live response]'
+              : speechRequest
+              ? '[REDACTED speech response]'
+              : '[REDACTED audio response]'}',
         );
       } else if (logResponseBody && responseText.isNotEmpty) {
         final diagnosticBody = redactMonitoringErrorBody(

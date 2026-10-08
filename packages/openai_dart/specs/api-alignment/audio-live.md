@@ -2,8 +2,8 @@
 
 Status: planning merged in [PR #373](https://github.com/davidmigloz/ai_clients_dart/pull/373);
 speech #366, existing Audio #367 and consent management #368 merged in PRs
-#374/#375/#376. Custom voice creation #369 is implemented and independently approved;
-three Live runtime tickets remain pending.
+#374/#375/#376. Custom voice creation #369 merged in PR #377. Live HTTP #370 is implemented
+and independently approved; two subsequent Live runtime tickets remain pending.
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Phase 4 is complete: [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365)
 merged October 8, 2026 at `fca1a3f4e453d88caed9ffa573d4ec665126c3cb`, closing #360
@@ -607,3 +607,43 @@ Publishing or package version bumps are outside this work.
   remaining operational legacy APIs retain the [roadmap](README.md). Existing
   Responses/shared Item/tool/model gaps are unchanged; Live-specific full tool
   coverage does not establish parity for those older unions.
+
+## Live HTTP source refinement
+
+Live HTTP ticket 28/#370 promotes reviewed
+[OpenAPI f6f80b90](https://github.com/openai/openai-openapi/blob/f6f80b90bb96d74c22b05a68295af6e7359a48a6/openapi.json),
+published October 8 at 20:44:03 UTC, with its actual fetch timestamp and immutable
+source URL. The prior b275 metadata retains its original fetch receipt. Independent
+normalized comparison finds 16 changed leaves: 14 added tool-choice components
+and two backend tool_choice unions. The 13 tool input schemas and all seven Live
+HTTP operations are unchanged. There are 356 operations and 2,027 schemas.
+
+This pin replaces the planning enum-or-arbitrary-object tool selection with typed
+scalar modes, 12 specific object choices and allowed_tools (1–128 specific choices).
+Function, MCP and custom choices have declared fields; the other specific choices
+are type-only open objects. The allowed set excludes namespace choices, scalar
+entries and recursive allowed_tools. Preserve finite open extras without inventing
+input tool configuration fields from these selection schemas. Python 8e1fd258
+(3.26.1) and Node bc6c0bfb (7.30.1) runtime heads remain unchanged and their create
+helpers remain narrower WebRTC-only. Canonical governs full WebRTC/SIP creation.
+
+The current SIP guide still says 200 for outbound creation, while the canonical
+contract and method reference specify 201 after initialization. The canonical
+status is used. Request SIP credentials/SDP are distinct from receive-only SIP
+metadata: the response declares only type:sip but its open object preserves any
+finite future keys without exposing typed trunk credentials or SDP properties.
+The documented outbound SIP request limit is 1 MiB of serialized UTF-8 JSON;
+ticket 28 validates that exact aggregate body before dispatch. Ringing is limited
+to three minutes and connected calls to two hours by the service, with no request
+duration override or client timer. These SIP limits do not narrow WebRTC bodies
+or the independent canonical backend tool configuration schemas.
+
+A final source check found unrelated
+[OpenAPI 978d0571](https://github.com/openai/openai-openapi/commit/978d0571e61ab2b18b80a84d17276f05403aace7),
+published October 8 at 21:10:05 UTC. It adds owned hosted-environment creation/listing,
+two lifecycle webhooks and environment reference/status refinements (358 operations,
+2,035 schemas; 15 normalized changes). All 100 Live closure components and all Live
+paths are unchanged. The [Phase 6 inventory](README.md#late-agents-environment-inventory)
+records these additions; ticket 28 retains reviewed f6 bytes and exact metadata.
+The newer fetched candidate/receipt is kept separately without claiming its runtime
+implementation or complete parity.

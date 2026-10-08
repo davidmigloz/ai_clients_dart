@@ -20,6 +20,7 @@ export 'files_resource.dart';
 export 'fine_tuning_resource.dart';
 export 'images_resource.dart';
 export 'input_tokens_resource.dart';
+export 'live_resource.dart';
 export 'messages_resource.dart';
 export 'models_resource.dart';
 export 'moderations_resource.dart';

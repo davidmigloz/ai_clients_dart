@@ -1849,6 +1849,100 @@ exposes creation only, with no client voice list/retrieve/update/delete methods.
 
 </details>
 
+### How do I signal Live sessions and control calls?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use the cached `client.live.sessions` resource for Live HTTP signaling and call
+controls. Supply SDP from your application's WebRTC peer, then apply the returned
+answer to that peer. Your application owns capture, playback and media transport.
+
+```dart
+final created = await client.live.sessions.create(
+  LiveSessionCreateRequest(
+    session: LiveMediaSessionCreateParams(
+      model: 'gpt-live-1',
+      instructions: 'Help the caller schedule an appointment.',
+      store: true,
+    ),
+    transport: LiveWebRTCTransport(sdp: callerOfferSdp),
+  ),
+);
+final answer = created.transport as LiveWebRTCResponseTransport;
+// Apply answer.sdp to your WebRTC peer; retain created.session.id unchanged.
+
+// Once this stored session has finished and its recording is finalized:
+final wav = await client.live.sessions.downloadRecording(created.session.id);
+final chunks = client.live.sessions.downloadRecordingStream(created.session.id);
+
+final fork = await client.live.sessions.fork(
+  created.session.id,
+  LiveForkRequest(transport: LiveWebRTCTransport(sdp: newPeerOfferSdp)),
+);
+// Apply fork.transport.sdp to the new peer. fork.session.id is a new session.
+```
+
+Downloads require a finalized stored recording. Storage defaults to false,
+requires project policy and is unavailable with Zero Data Retention. Finalized
+recordings remain available for 30 days. WAV bytes are preserved, with input on
+the left channel and output on the right. A `503` retains its original HTTP
+response and `Retry-After` header in `ApiException.cause`; the client does not poll
+or enable storage automatically. Stream completion, cancellation and timeouts
+release owned transports while preserving an injected shared client.
+
+For outbound SIP, supply `LiveSIPTransport(destination: ..., trunk: ...)` with
+an E.164 destination and `LiveSIPTrunk` containing the provider URL, caller number
+and `LiveSIPTrunkAuth` Digest credentials. Keep credentials on your server.
+Outbound eligibility, a TLS-signaling/Opus/SDES-SRTP trunk and provider setup are
+service requirements. A `201` means initialized, before the callee answers.
+Outbound SIP bodies are limited to 1 MiB of serialized UTF-8 JSON. The service
+limits ringing to three minutes and connected calls to two hours; these limits
+cannot be configured in the request.
+Each create places a new call; ambiguous timeout/connection/5xx failures are
+sent once. A tracing ID does not deduplicate calls.
+
+Verify incoming webhook bytes first and use `LiveTransportIncomingWebhookEvent`
+`data.sessionId` for your chosen `accept` or `reject` action. Acceptance requires
+`LiveCallAcceptRequest(session: LiveCallAcceptSession(model: ...))`; rejection
+requires `LiveCallRejectRequest(statusCode: ...)` from 300 through 699.
+`refer(id, LiveCallReferRequest(targetUri: ...))` transfers a SIP call and
+`hangup(id)` sends no body. Verification never accepts, rejects or transfers a
+call automatically. IDs are opaque and encoded once; only recording download
+applies its own documented stored-session ID pattern.
+
+Shared startup models cover text-only history, frontend permissions, audio,
+delegation and all 13 canonical Live tool input branches. Live tool configuration
+is distinct from Responses tool models; wire coverage does not guarantee runtime
+support for every branch. Tool selection has typed scalar modes, 12 specific
+choices and an `allowed_tools` set of 1–128 specific choices. Optional nullable
+settings preserve omission, explicit null and values; `hasInstructions: true`
+with a null value emits null, while `copyWith(clearInstructions: true)` omits it.
+Model, voice, initial history, audio format, startup instructions and delegation
+mode are immutable after startup; `LiveSessionUpdateParams` changes backend
+settings only. History allows 128 messages with one text part each; the 8,192
+rendered-token and 16,384 frontend-instruction limits are enforced by the service.
+
+`LiveVoice` supports open names and its own open custom-ID object (1–128 Unicode
+characters), independently of Speech's closed custom reference. Primary WebSocket
+audio configuration admits PCM16LE at 16/24 kHz or G.711 PCMA/PCMU at 8 kHz.
+WebRTC/SIP negotiate media and omit `audio.format`. Frontend capability omission
+or `all` allows all events; an empty selection permits none, and restrictions
+do not apply to trusted sideband connections. Live WebSocket connections, event
+codecs and transcript helpers remain in the next alignment tickets.
+
+Models retain finite immutable open JSON and private caller-readable wire data.
+Default diagnostics and built-in logging redact SDP, credentials, audio,
+instructions, transcripts, identifiers and future private metadata.
+
+→ [Runnable offline Live HTTP example](example/live_http_example.dart)
+(seven default mock requests, $0 API cost). Add `--accept-incoming` or
+`--reject-incoming` to choose an incoming action, or `--recording-not-ready` to
+inspect a simulated `503`. See the [Live guide](https://developers.openai.com/api/docs/guides/live)
+and [SIP setup](https://developers.openai.com/api/docs/guides/voice-sip?api=live).
+
+</details>
+
 ### How do I use the Realtime API?
 
 <details>
@@ -2499,6 +2593,7 @@ See the [example/](example/) directory for complete examples:
 | [`existing_audio_example.dart`](example/existing_audio_example.dart) | Offline modern file fields, verbose/raw translation, open/custom Chat voices and AAC |
 | [`voice_consents_example.dart`](example/voice_consents_example.dart) | Offline upload/list/retrieve/rename/delete consent lifecycle and explicit pagination |
 | [`voices_example.dart`](example/voices_example.dart) | Offline explicit consent and sample upload, then caller-selected custom voice reference |
+| [`live_http_example.dart`](example/live_http_example.dart) | Offline WebRTC/SIP signaling, explicit call controls, verified incoming notice, WAV downloads and REST fork |
 | [`chat_audio_example.dart`](example/chat_audio_example.dart) | Chat audio output, ID-only replay, and partial stream accumulation |
 | [`files_example.dart`](example/files_example.dart) | File upload and management |
 | [`conversations_example.dart`](example/conversations_example.dart) | Conversations API for state management |
@@ -2538,6 +2633,7 @@ See the [example/](example/) directory for complete examples:
 | Images | ✅ Full |
 | Videos (Sora) | ✅ Full |
 | Audio (Speech, Transcription, Translation, Custom Voices) | Buffered/streamed speech and file transcription; explicit JSON/verbose/raw translation, current options/open/custom references, all five consent operations and sample-derived voice creation; guide-only consent phrase lookup remains untyped |
+| Live | All seven HTTP operations, buffered/streamed recordings and shared startup/tool models; WebSocket connections/events and transcript helpers pending |
 | Files | ✅ Full |
 | Uploads | ✅ Full |
 | Batches | ✅ Full |
@@ -2559,7 +2655,7 @@ See the [example/](example/) directory for complete examples:
 | Vector Stores (Deprecated) | ✅ Full (separate import) |
 | Completions (Legacy) | ✅ Full |
 
-Agents, Live, vaults, and Administration remain part of the [API alignment roadmap](specs/api-alignment/README.md).
+Agents, remaining Live workflows, vaults, and Administration remain part of the [API alignment roadmap](specs/api-alignment/README.md).
 
 ## Official Documentation
 

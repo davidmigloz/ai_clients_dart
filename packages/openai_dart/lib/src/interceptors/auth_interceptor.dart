@@ -34,7 +34,7 @@ class AuthInterceptor implements Interceptor {
     // Get auth headers from provider
     final providerHeaders = authProvider.getHeaders();
 
-    // Audio selects its required media headers at the resource boundary.
+    // Private audio and Live select required media headers at the resource boundary.
     // Keep those request-level values when refreshing provider credentials.
     // Filter before copying the body: a conflicting charset could otherwise
     // change its encoding before a later header correction.
@@ -70,6 +70,12 @@ class AuthInterceptor implements Interceptor {
         ..followRedirects = original.followRedirects
         ..maxRedirects = original.maxRedirects
         ..persistentConnection = original.persistentConnection;
+      // Copying an empty body can synthesize text/plain. A bodyless private
+      // operation deliberately selected no Content-Type at its boundary.
+      if (isPrivateAudioRequest(original) &&
+          !original.headers.containsKey('content-type')) {
+        request.headers.remove('content-type');
+      }
     } else if (original is http.MultipartRequest) {
       final multipart = http.MultipartRequest(original.method, original.url)
         ..headers.addAll(original.headers)

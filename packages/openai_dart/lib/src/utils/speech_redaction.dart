@@ -22,7 +22,34 @@ bool isPrivateAudioRequest(http.BaseRequest? request) =>
     isSpeechRequest(request) ||
     isAudioFileRequest(request) ||
     isVoiceConsentRequest(request) ||
-    isCustomVoiceRequest(request);
+    isCustomVoiceRequest(request) ||
+    isLiveRequest(request);
+
+/// Identifies the seven Live HTTP operations, including custom base paths.
+bool isLiveRequest(http.BaseRequest? request) {
+  if (request == null) return false;
+  final segments = request.url.pathSegments;
+  if (segments.length >= 2 &&
+      segments[segments.length - 2] == 'live' &&
+      segments.last == 'sessions') {
+    return request.method == 'POST';
+  }
+  if (segments.length < 4 ||
+      segments[segments.length - 4] != 'live' ||
+      segments[segments.length - 3] != 'sessions') {
+    return false;
+  }
+  return segments.last == 'content'
+      ? request.method == 'GET'
+      : request.method == 'POST' &&
+            const {
+              'accept',
+              'fork',
+              'hangup',
+              'refer',
+              'reject',
+            }.contains(segments.last);
+}
 
 /// Identifies the single custom voice creation operation.
 bool isCustomVoiceRequest(http.BaseRequest? request) =>

@@ -65,7 +65,9 @@
     "webhookEventTypes": "webhook_endpoints_example",
     "safety": "safety_example",
     "safetyAlerts": "safety_example",
-    "safetyCases": "safety_example"
+    "safetyCases": "safety_example",
+    "live": "live_http_example",
+    "liveSessions": "live_http_example"
   },
   "excluded_from_examples": [],
   "drift_patterns": [

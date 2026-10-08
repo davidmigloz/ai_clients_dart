@@ -45201,6 +45201,84 @@
           }
         }
       },
+      "LiveAllowedToolsChoiceParam": {
+        "properties": {
+          "mode": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LiveToolChoiceValueEnum",
+                "description": "How to select a tool from the allowed set."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tools": {
+            "description": "The tools that the delegated Responses model may call.",
+            "items": {
+              "discriminator": {
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/LiveFunctionToolChoiceParam"
+                },
+                {
+                  "$ref": "#/components/schemas/LiveMCPToolChoiceParam"
+                },
+                {
+                  "$ref": "#/components/schemas/LiveSpecificFileSearchParam"
+                },
+                {
+                  "$ref": "#/components/schemas/LiveSpecificWebSearchParam"
+                },
+                {
+                  "$ref": "#/components/schemas/LiveSpecificWebSearchPreviewParam"
+                },
+                {
+                  "$ref": "#/components/schemas/LiveSpecificImageGenParam"
+                },
+                {
+                  "$ref": "#/components/schemas/LiveSpecificComputerParam"
+                },
+                {
+                  "$ref": "#/components/schemas/LiveSpecificCodeInterpreterParam"
+                },
+                {
+                  "$ref": "#/components/schemas/LiveSpecificProgrammaticToolCallingParam"
+                },
+                {
+                  "$ref": "#/components/schemas/LiveSpecificFunctionShellParam"
+                },
+                {
+                  "$ref": "#/components/schemas/LiveSpecificCustomToolParam"
+                },
+                {
+                  "$ref": "#/components/schemas/LiveSpecificApplyPatchParam"
+                }
+              ]
+            },
+            "maxItems": 128,
+            "minItems": 1,
+            "type": "array"
+          },
+          "type": {
+            "default": "allowed_tools",
+            "description": "The tool choice type. Always `allowed_tools`.",
+            "enum": [
+              "allowed_tools"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type",
+          "tools"
+        ],
+        "type": "object"
+      },
       "LiveApplyPatchToolInputParam": {
         "properties": {
           "type": {
@@ -46115,6 +46193,28 @@
             "type": "session.start"
           }
         }
+      },
+      "LiveFunctionToolChoiceParam": {
+        "properties": {
+          "name": {
+            "description": "The name of the function tool to call.",
+            "type": "string"
+          },
+          "type": {
+            "default": "function",
+            "description": "The tool to call. Always `function`.",
+            "enum": [
+              "function"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type",
+          "name"
+        ],
+        "type": "object"
       },
       "LiveFunctionToolInputParam": {
         "description": "A function tool available to the Responses backend when the Live model delegates a task.",
@@ -47309,6 +47409,39 @@
         ],
         "type": "object"
       },
+      "LiveMCPToolChoiceParam": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "description": "The name of the MCP tool to call. If omitted, the server may choose a default.",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "server_label": {
+            "description": "The label of the MCP server to call.",
+            "type": "string"
+          },
+          "type": {
+            "default": "mcp",
+            "description": "The tool to call. Always `mcp`.",
+            "enum": [
+              "mcp"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type",
+          "server_label"
+        ],
+        "type": "object"
+      },
       "LiveMCPToolInputParam": {
         "properties": {
           "type": {
@@ -47820,8 +47953,50 @@
                 "$ref": "#/components/schemas/LiveToolChoiceEnum"
               },
               {
-                "additionalProperties": {},
-                "type": "object"
+                "discriminator": {
+                  "propertyName": "type"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/LiveFunctionToolChoiceParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveMCPToolChoiceParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveSpecificFileSearchParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveSpecificWebSearchParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveSpecificWebSearchPreviewParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveSpecificImageGenParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveSpecificComputerParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveSpecificCodeInterpreterParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveSpecificProgrammaticToolCallingParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveSpecificFunctionShellParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveSpecificCustomToolParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveSpecificApplyPatchParam"
+                  }
+                ]
+              },
+              {
+                "$ref": "#/components/schemas/LiveAllowedToolsChoiceParam"
               }
             ]
           },
@@ -47962,8 +48137,50 @@
                 "$ref": "#/components/schemas/LiveToolChoiceEnum"
               },
               {
-                "additionalProperties": {},
-                "type": "object"
+                "discriminator": {
+                  "propertyName": "type"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/LiveFunctionToolChoiceParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveMCPToolChoiceParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveSpecificFileSearchParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveSpecificWebSearchParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveSpecificWebSearchPreviewParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveSpecificImageGenParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveSpecificComputerParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveSpecificCodeInterpreterParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveSpecificProgrammaticToolCallingParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveSpecificFunctionShellParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveSpecificCustomToolParam"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LiveSpecificApplyPatchParam"
+                  }
+                ]
+              },
+              {
+                "$ref": "#/components/schemas/LiveAllowedToolsChoiceParam"
               }
             ]
           },
@@ -49276,6 +49493,185 @@
         ],
         "type": "object"
       },
+      "LiveSpecificApplyPatchParam": {
+        "description": "Forces the model to call the apply_patch tool when executing a tool call.",
+        "properties": {
+          "type": {
+            "default": "apply_patch",
+            "description": "The tool to call. Always `apply_patch`.",
+            "enum": [
+              "apply_patch"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "Specific apply patch tool choice",
+        "type": "object"
+      },
+      "LiveSpecificCodeInterpreterParam": {
+        "properties": {
+          "type": {
+            "default": "code_interpreter",
+            "description": "The tool to call. Always `code_interpreter`.",
+            "enum": [
+              "code_interpreter"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "LiveSpecificComputerParam": {
+        "properties": {
+          "type": {
+            "default": "computer",
+            "description": "The tool to call. Always `computer`.",
+            "enum": [
+              "computer"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "LiveSpecificCustomToolParam": {
+        "properties": {
+          "name": {
+            "description": "The name of the custom tool to call.",
+            "type": "string"
+          },
+          "type": {
+            "default": "custom",
+            "description": "The tool to call. Always `custom`.",
+            "enum": [
+              "custom"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type",
+          "name"
+        ],
+        "type": "object"
+      },
+      "LiveSpecificFileSearchParam": {
+        "properties": {
+          "type": {
+            "default": "file_search",
+            "description": "The tool to call. Always `file_search`.",
+            "enum": [
+              "file_search"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "LiveSpecificFunctionShellParam": {
+        "description": "Forces the model to call the shell tool when a tool call is required.",
+        "properties": {
+          "type": {
+            "default": "shell",
+            "description": "The tool to call. Always `shell`.",
+            "enum": [
+              "shell"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "Specific shell tool choice",
+        "type": "object"
+      },
+      "LiveSpecificImageGenParam": {
+        "properties": {
+          "type": {
+            "default": "image_generation",
+            "description": "The tool to call. Always `image_generation`.",
+            "enum": [
+              "image_generation"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "LiveSpecificProgrammaticToolCallingParam": {
+        "properties": {
+          "type": {
+            "default": "programmatic_tool_calling",
+            "description": "The tool to call. Always `programmatic_tool_calling`.",
+            "enum": [
+              "programmatic_tool_calling"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "LiveSpecificWebSearchParam": {
+        "properties": {
+          "type": {
+            "default": "web_search",
+            "description": "The tool to call. Always `web_search`.",
+            "enum": [
+              "web_search"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "LiveSpecificWebSearchPreviewParam": {
+        "properties": {
+          "type": {
+            "default": "web_search_preview",
+            "description": "The tool to call. Always `web_search_preview`.",
+            "enum": [
+              "web_search_preview"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
       "LiveTextVerbosity": {
         "enum": [
           "low",
@@ -49403,6 +49799,14 @@
         "enum": [
           "auto",
           "none",
+          "required"
+        ],
+        "type": "string"
+      },
+      "LiveToolChoiceValueEnum": {
+        "enum": [
+          "none",
+          "auto",
           "required"
         ],
         "type": "string"

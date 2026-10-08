@@ -73,6 +73,8 @@ export 'src/models/files/files.dart';
 export 'src/models/fine_tuning/fine_tuning.dart';
 // Models - Images
 export 'src/models/images/images.dart';
+// Models - Live
+export 'src/models/live/live.dart';
 // Models - Models (metadata)
 export 'src/models/models/models.dart';
 // Models - Moderations
