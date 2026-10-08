@@ -2,8 +2,9 @@
 
 Status: planning merged in [PR #373](https://github.com/davidmigloz/ai_clients_dart/pull/373);
 speech #366, existing Audio #367 and consent management #368 merged in PRs
-#374/#375/#376. Custom voice creation #369 merged in PR #377. Live HTTP #370 is implemented
-and independently approved; two subsequent Live runtime tickets remain pending.
+#374/#375/#376. Custom voice creation #369 merged in PR #377. Live HTTP #370 merged
+in PR #378. Live WebSockets #371 is implemented and locally verified; stored fork and transcript
+workflow #372 remains pending.
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Phase 4 is complete: [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365)
 merged October 8, 2026 at `fca1a3f4e453d88caed9ffa573d4ec665126c3cb`, closing #360
@@ -104,6 +105,15 @@ heads. The fetched candidate equals adopted canonical JSON; canonical bytes and
 original source/fetch metadata are preserved. All three voice component roots and
 POST /audio/voices are unchanged; the fixed audio_sample type now agrees across
 canonical and both clients. No prompt-based voice branch is recreated.
+
+Live WebSocket implementation rechecks
+[c7224137](https://github.com/openai/openai-openapi/blob/c72241375fbe33a7192f5660b173e541b56e4b2f/openapi.json)
+(358 operations, 2,035 schemas) and the same Python/Node runtime heads. The full
+287-component client/server/sideband/fork/InputItem closure and all seven Live
+path objects equal the adopted f6 pin. Later Agents environments and project
+lifecycle enum additions stay in Phase 6 inventory; f6 canonical bytes and their
+original metadata remain intact. Distinct Live input-item adapters close exact
+backend item-admission gaps without changing standalone Responses models.
 
 ## Ticket graph
 

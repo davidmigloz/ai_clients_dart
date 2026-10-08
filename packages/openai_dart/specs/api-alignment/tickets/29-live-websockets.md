@@ -1,6 +1,6 @@
 # Run primary and sideband Live conversations with complete event codecs
 
-Status: specified; runtime implementation pending.
+Status: implemented and independently approved; publication and final-head CI pending.
 GitHub: [#371](https://github.com/davidmigloz/ai_clients_dart/issues/371).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 5 Audio and Live](../audio-live.md), LIVE-WS-01–04, LIVE-EVENT-01–04, LIVE-WORK-01–02.
@@ -12,19 +12,19 @@ Run primary and sideband Live conversations with complete event codecs through p
 
 ## Acceptance criteria
 
-- [ ] Injected primary/sideband connections preserve exact sessions/attach routes, auth/org/project headers, custom prefixes/encoded IDs and optional sideband graceful_close; no model query or duplicate startup on media/sideband. Document three-second SIP progress replay with original event IDs and explicit application deduplication, never audio/action replay.
-- [ ] Role-safe writers cover 11 primary/9 sideband commands and full fields/correlation/contracts; shared fork codecs avoid a duplicate hierarchy. No sideband start/audio append, Realtime commit or writable DTMF command.
-- [ ] All 22 received components plus unknown immutable events/metadata are public. Resolve the allOf alias and document 18 canonical/15 SDK sideband mismatch, supporting reflected audio/DTMF/SIP progress without a blanket event_id.
-- [ ] Client and reflected audio append use directional contracts. Primary formats versus sideband PCM16LE 24 kHz/timestamps are exact; raw Base64 bytes, delivery order and frame gaps preserve original data.
-- [ ] Response.event keeps any finite nested object, even without type. Outer event_id is required nonnull, client_event_id optional nonnull and delegation_id optional nullable. Compact snapshots retain raw data rather than pass through strict standalone Response.
-- [ ] Live errors/usage are distinct from HTTP/SSE/backend token billing. Canonical code string and guide-only required-present code:null compatibility are separately tested; wrong/missing known fields fail. A command error or moderated cutoff does not close the session automatically.
-- [ ] Session.closed confirms finalization despite active snapshot status; premature socket close remains unconfirmed. Install the final listener before sending close, reject new work while closing and test immediate final events. Bounded drain/abort/local close releases owned resources once, with borrowed clients preserved.
-- [ ] Browser policy rejects all nonempty headers before auth/connect; use trusted server signaling/caller data channel or injected backend proxy. No invented Live ephemeral keys, automatic reconnect/start/audio/tool replay or action runner.
-- [ ] Concurrent taps support application plus transcript helper. Offline primary/sideband and manual delegation examples keep IDs/action ownership; submit every pending function result before one explicit response.create, without waiting for a nonexistent item-create ack.
+- [x] Injected primary/sideband connections preserve exact sessions/attach routes, auth/org/project headers, custom prefixes/encoded IDs and optional sideband graceful_close; no model query or duplicate startup on media/sideband. Document three-second SIP progress replay with original event IDs and explicit application deduplication, never audio/action replay.
+- [x] Role-safe writers cover 11 primary/9 sideband commands and full fields/correlation/contracts; shared fork codecs avoid a duplicate hierarchy. No sideband start/audio append, Realtime commit or writable DTMF command.
+- [x] All 22 received components plus unknown immutable events/metadata are public. Resolve the allOf alias and document 18 canonical/15 SDK sideband mismatch, supporting reflected audio/DTMF/SIP progress without a blanket event_id.
+- [x] Client and reflected audio append use directional contracts. Primary formats versus sideband PCM16LE 24 kHz/timestamps are exact; raw Base64 bytes, delivery order and frame gaps preserve original data.
+- [x] Response.event keeps any finite nested object, even without type. Outer event_id is required nonnull, client_event_id optional nonnull and delegation_id optional nullable. Compact snapshots retain raw data rather than pass through strict standalone Response.
+- [x] Live errors/usage are distinct from HTTP/SSE/backend token billing. Canonical code string and guide-only required-present code:null compatibility are separately tested; wrong/missing known fields fail. A command error or moderated cutoff does not close the session automatically.
+- [x] Session.closed confirms finalization despite active snapshot status; premature socket close remains unconfirmed. Install the final listener before sending close, reject new work while closing and test immediate final events. Bounded drain/abort/local close releases owned resources once, with borrowed clients preserved.
+- [x] Browser policy rejects all nonempty headers before auth/connect; use trusted server signaling/caller data channel or injected backend proxy. No invented Live ephemeral keys, automatic reconnect/start/audio/tool replay or action runner.
+- [x] Concurrent taps support application plus transcript helper. Offline primary/sideband and manual delegation examples keep IDs/action ownership; submit every pending function result before one explicit response.create, without waiting for a nonexistent item-create ack.
 
-- [ ] Changed models cover every declared field/variant, optional/null/absence, immutable parsed ownership, complete copy/clear, equality/hash and safe diagnostics. Known malformed values fail contextually; future receive-only metadata and closed writable admission remain distinct.
-- [ ] Public factories/resources/parsers and real canonical manifest mappings are verified; no fake components or diagnostic exclusions. README/llms, runnable offline example and any actual breaking migration are complete.
-- [ ] Focused public fixtures pass VM/Chrome JavaScript/Wasm where applicable; format → fix → fatal-info analysis, package unit suite and full OpenAPI toolkit evidence are recorded. Unrelated diagnostics/remaining parity gaps remain visible and classified.
+- [x] Changed models cover every declared field/variant, optional/null/absence, immutable parsed ownership, complete copy/clear, equality/hash and safe diagnostics. Known malformed values fail contextually; future receive-only metadata and closed writable admission remain distinct.
+- [x] Public factories/resources/parsers and real canonical manifest mappings are verified; no fake components or diagnostic exclusions. README/llms, runnable offline example and any actual breaking migration are complete.
+- [x] Focused public fixtures pass VM/Chrome JavaScript/Wasm where applicable; format → fix → fatal-info analysis, package unit suite and full OpenAPI toolkit evidence are recorded. Unrelated diagnostics/remaining parity gaps remain visible and classified.
 - [ ] Independent requirements and engineering reviews approve the final combined diff after validated findings are resolved; final-head CI is green before merge.
 
 ## Compatibility and boundaries
@@ -43,5 +43,10 @@ bumps and unrelated API families are outside this ticket.
 
 ## Completion evidence
 
-Implementation acceptance evidence will be added when the runtime PR is reviewed.
-This planning ticket is unimplemented; its unchecked criteria are not test results.
+[Acceptance record](../reviews/29-live-websockets.md) records source closure,
+public model/resource/corpus and VM/Chrome/platform evidence. Local format,
+fix, fatal-info analysis and the 20,654-case package unit suite pass. Independent
+combined requirements and engineering reviews approve the implementation. The
+final criterion remains pending until published-head CI; checks and actual merge
+are recorded in the GitHub issue/PR.
+Stored fork/transcript helpers remain ticket 30.

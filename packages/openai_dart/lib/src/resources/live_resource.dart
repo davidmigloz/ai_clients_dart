@@ -8,9 +8,13 @@ import '../models/live/live_http.dart';
 import '../utils/http_error_response.dart';
 import '../utils/private_audio_http.dart';
 import 'base_resource.dart';
+import 'live/live_connect.dart';
+import 'live/live_connection.dart';
 import 'speech_stream_transport.dart';
 
-/// HTTP signaling and explicit controls for caller-owned Live media sessions.
+export 'live/live_connection.dart';
+
+/// Live HTTP signaling, media controls and primary/sideband WebSocket connections.
 class LiveResource extends ResourceBase {
   /// Creates the cached Live resource.
   LiveResource({
@@ -21,6 +25,79 @@ class LiveResource extends ResourceBase {
     super.ensureNotClosed,
     super.streamClientFactory,
   });
+
+  /// Opens a primary socket without starting a session. Call `start` explicitly
+  /// and await its acknowledgment before submitting application work.
+  ///
+  /// The browser default rejects configured handshake headers before asking
+  /// for credentials. Use trusted backend signaling/caller media, or supply
+  /// an explicitly authenticated proxy connector. Connections are caller-owned
+  /// after opening; client closure does not close them.
+  Future<LivePrimaryConnection> connect({
+    LiveWebSocketConnector? connector,
+    Map<String, String>? additionalHeaders,
+    Duration? connectionTimeout,
+    int maxBufferedEvents = 1024,
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    return openLiveConnection(
+      config: config,
+      requestBuilder: requestBuilder,
+      sideband: false,
+      endpoint: '/live/sessions',
+      connector: connector,
+      additionalHeaders: additionalHeaders,
+      connectionTimeout: connectionTimeout,
+      maxBufferedEvents: maxBufferedEvents,
+      abortTrigger: abortTrigger,
+      ensureNotClosed: ensureNotClosed,
+    ).then((connection) => connection as LivePrimaryConnection);
+  }
+
+  /// Attaches a trusted sideband to an already-running session without startup
+  /// or audio submission. Optional graceful_close is sent exactly as supplied.
+  ///
+  /// SIP progress from the preceding three seconds may be replayed with its
+  /// original IDs. Application deduplication is explicit; audio and actions
+  /// are never replayed by this client.
+  Future<LiveSidebandConnection> attach(
+    String sessionId, {
+    bool? gracefulClose,
+    LiveWebSocketConnector? connector,
+    Map<String, String>? additionalHeaders,
+    Duration? connectionTimeout,
+    int maxBufferedEvents = 1024,
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    if (sessionId.isEmpty || sessionId == '.' || sessionId == '..') {
+      throw const FormatException(
+        'Live sessionId: expected an opaque path identifier',
+      );
+    }
+    final String encoded;
+    try {
+      encoded = Uri.encodeComponent(sessionId);
+    } on ArgumentError {
+      throw const FormatException(
+        'Live sessionId: expected an encodable opaque path identifier',
+      );
+    }
+    return openLiveConnection(
+      config: config,
+      requestBuilder: requestBuilder,
+      sideband: true,
+      endpoint: '/live/sessions/$encoded/attach',
+      gracefulClose: gracefulClose,
+      connector: connector,
+      additionalHeaders: additionalHeaders,
+      connectionTimeout: connectionTimeout,
+      maxBufferedEvents: maxBufferedEvents,
+      abortTrigger: abortTrigger,
+      ensureNotClosed: ensureNotClosed,
+    ).then((connection) => connection as LiveSidebandConnection);
+  }
 
   LiveSessionsResource? _sessions;
 

@@ -1,6 +1,6 @@
 # Signal Live WebRTC and SIP sessions and control stored recordings
 
-Status: implemented and independently approved; runtime PR merge gate pending.
+Status: merged in [PR #378](https://github.com/davidmigloz/ai_clients_dart/pull/378), closing #370 after independent approval and final-head CI.
 GitHub: [#370](https://github.com/davidmigloz/ai_clients_dart/issues/370).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 5 Audio and Live](../audio-live.md), LIVE-HTTP-01–04, LIVE-CONFIG-01–04.

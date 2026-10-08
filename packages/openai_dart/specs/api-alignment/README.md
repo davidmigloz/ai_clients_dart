@@ -6,6 +6,12 @@ Chat audio merged in [PR #331](https://github.com/davidmigloz/ai_clients_dart/pu
 Retry guidance merged in [PR #332](https://github.com/davidmigloz/ai_clients_dart/pull/332);
 image model requiredness #326 merged in [PR #333](https://github.com/davidmigloz/ai_clients_dart/pull/333).
 
+Phases 1–4 and Audio/Live HTTP #366–370 are merged. Live HTTP
+[PR #378](https://github.com/davidmigloz/ai_clients_dart/pull/378) closed #370;
+Live WebSockets #371 is implemented and locally verified, followed by #372 stored fork and
+transcript workflows. Agents/Vaults, Administration and remaining parity phases
+retain their inventory below.
+
 Tracking parent: [GitHub issue #317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 This parent records planning progress; it is not an implementation ticket.
 
@@ -278,8 +284,9 @@ These slices do not establish full Realtime/Chat/shared Responses parity.
 
 Phases 1–4 are complete for their specified tickets. Phase 5 Audio/Live has seven
 specified implementation tickets: speech #366, existing Audio #367 and consent
-management #368 and custom voice creation #369 are merged. Live HTTP #370 is
-implemented and independently approved; two later Live tickets remain pending. Later phases remain candidate outcomes pending
+management #368, custom voice creation #369 and Live HTTP #370 are merged.
+Live WebSockets #371 is implemented and locally verified; #372 stored fork/transcript workflows
+follows. Later phases remain candidate outcomes pending
 detailed specifications. Keep all audited gaps visible even when deferred.
 
 | Phase | Demonstrable outcomes | Dependencies and scope notes |
@@ -313,6 +320,25 @@ scores, and cache-write usage. No model-event streaming is documented.
 
 Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
 [create reference](https://developers.openai.com/api/reference/resources/decisions/methods/create).
+
+Publication-time [OpenAPI fd15e7a8](https://github.com/openai/openai-openapi/blob/fd15e7a8c492008db728bd079d936b7b7bf13e23/openapi.json)
+on October 8 broadens DecisionInputImage.image_url from `^data:` to
+`^(data:|https?://)`, allowing publicly accessible HTTP(S) images. The existing
+client still enforces inline data URLs. A separate Decisions follow-up must align
+constructors/parsers/copies, documentation and positive/negative fixtures with
+this new contract; #318 remains the completed earlier snapshot, rather than
+evidence of this later addition. File IDs and other unsupported input kinds remain
+excluded.
+
+The same commit adds optional nullable SafetyAlertResource.detailed_explanation:
+a generated explanation temporarily available for eligible zero data retention
+alerts and omitted when unavailable. This is a Safety alert field, despite the
+commit message referring to decision responses. Preserve absence versus null,
+copy/clear behavior and private diagnostics in a separate Safety follow-up.
+Fresh toolkit fetch/review and immutable-source comparison confirm that these
+eight normalized leaves do not affect the 287 Live/input components or seven
+Live HTTP paths. Both additions remain pending inventory; the Live WebSocket
+slice retains its adopted canonical bytes and metadata.
 
 ### Existing API correctness and Responses
 
@@ -639,3 +665,32 @@ Handle `agent.environment.ready` and `agent.environment.failed` as typed lifecyc
 notifications during that slice, with caller-selected environment lookup/action.
 They currently remain receive-only unknown webhook values in this package; the
 existing 26 typed webhook branches retain their reviewed f6 source claims.
+
+## Live WebSocket source review
+
+The next Live slice rechecks immutable
+[OpenAPI c7224137](https://github.com/openai/openai-openapi/blob/c72241375fbe33a7192f5660b173e541b56e4b2f/openapi.json),
+published October 8 at 21:46:20 UTC (358 operations, 2,035 schemas). A fresh
+candidate and its actual fetch receipt remain separate from the adopted f6 pin.
+All 287 components reachable from primary/sideband/fork client and server unions
+and InputItem, plus all seven Live HTTP path objects, are unchanged. Canonical f6
+bytes and original metadata are preserved. The comparison records 27 differing
+normalized paths, including shifted enum indices; these are Agents environment
+additions already inventoried above. The later refinement adds
+`agent.environment.ready` and `agent.environment.failed` to ProjectEventTypeEnum.
+Typed lifecycle events and endpoint discovery remain Phase 6 work; unknown
+received events remain passively preserved meanwhile.
+
+Python 8e1fd258 (3.26.1) and Node bc6c0bfb (7.30.1) remain unchanged. Canonical
+LiveServerEvent resolves through its allOf alias to the full 22-event union;
+canonical sideband declares 18, SDK sideband 15. Shared received codecs admit the
+full union with documented reflected audio/DTMF/progress delivery and directional
+constraints. SDK automatic reconnection/queue helpers remain inventory entries;
+this slice deliberately exposes application-controlled connections without replay.
+
+The existing Responses Item helper covers a narrower set of backend input
+contracts. Live's source-derived adapters retain the complete canonical InputItem
+union and its typed reachable payloads independently, including optional/null
+fields and omitted easy-message/reference discriminators. Existing Item/OutputItem
+conversion detaches their serialized values only when the canonical contract fits.
+This does not claim wider standalone Responses/legacy parity outside the slice.
