@@ -811,6 +811,30 @@ void main() {
         final raw = <String, dynamic>{
           'type': type,
           'stream_id': 'lane',
+          if (type.startsWith('response.steer.')) 'sequence_number': 2,
+          if (type.startsWith('response.steer.'))
+            'steer': {
+              'id': 'steer_saved',
+              'previous_response_id': 'resp_parent',
+              if (type == 'response.steer.failed')
+                'input': {'original_rejected': true},
+            },
+          if (type == 'response.steer.pending')
+            'reason': 'future_provider_reason',
+          if (type == 'response.steer.pending')
+            'required_input': [
+              {
+                'type': 'function_call_output',
+                'call_id': 'call_saved',
+                'name': 'get_status',
+              },
+            ],
+          if (type == 'response.steer.failed')
+            'error': {
+              'type': 'invalid_request_error',
+              'code': 'future_provider_code',
+              'message': 'private failure',
+            },
           'future': {
             'items': [
               null,
@@ -821,6 +845,14 @@ void main() {
         try {
           socket.frame(raw);
           final message = await next;
+          switch (type) {
+            case 'response.steer.accepted':
+              expect(message, isA<ResponsesSteerAcceptedEvent>());
+            case 'response.steer.pending':
+              expect(message, isA<ResponsesSteerPendingEvent>());
+            case 'response.steer.failed':
+              expect(message, isA<ResponsesSteerFailedEvent>());
+          }
           expect(message.toJson(), raw);
           expect(message.streamId, 'lane');
           expect(connection.isClosed, isFalse);

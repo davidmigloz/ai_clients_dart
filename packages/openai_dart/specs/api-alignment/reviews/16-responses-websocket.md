@@ -1,8 +1,9 @@
 # Responses WebSocket transport acceptance
 
-Status: implemented, verified and independently reviewed; merge pending.
+Status: merged in PR #353; #341 closed.
 Implementation [PR #353](https://github.com/davidmigloz/ai_clients_dart/pull/353)
-is open for review; #341 closes only after merge.
+merged after all final-head checks passed on October 8, 2026 at 05:04:30 UTC,
+commit `b1c7b0238921b25be1f3592f5f4b1cd9cc2479d6`, closing #341.
 Tracking: [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirements: [RESP-WS-01–04](../responses.md#websocket-sessions).
@@ -153,5 +154,6 @@ provider-specific requiredness/default behavior is retained.
   Peer engineering scopes together cover every changed module independently.
   Two stale roadmap status sentences were corrected after review.
 - PR #353 uses the exact create-pr template with validation/tracking in Details
-  and five checklist items at the end. Final CI/merge remain pending. Close #341 only after merge; typed steering
+  and five checklist items at the end. Final [GitHub workflow](https://github.com/davidmigloz/ai_clients_dart/actions/runs/37692620646), CodeQL and all applicable checks passed at
+  `f68d76adcf6820813c9818ce0444e1f13ea6c200`; #353 merged and closed #341. Typed steering
   #342, recovery #343 and injection #344 remain separate follow-ups.
