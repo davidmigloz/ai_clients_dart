@@ -6,7 +6,7 @@ Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Endpoint management [PR #363](https://github.com/davidmigloz/ai_clients_dart/pull/363)
 merged October 8, 2026 at `b5159171218e8feb9f720c5db7d1d82ea3cf1a80` after all 14 final-head CI contexts completed (13 successful, one standard skip), closing #358; [acceptance evidence](reviews/21-webhook-endpoints.md)
 records its verification.
-Safety retrieval #359 is independently reviewed and verified;
+Safety retrieval [PR #364](https://github.com/davidmigloz/ai_clients_dart/pull/364) implements #359 with merge pending;
 [acceptance evidence](reviews/22-safety-retrieval.md) records its runtime checks.
 Scope: four independently demonstrable implementation tickets, repository 20–23.
 Receiver [PR #362](https://github.com/davidmigloz/ai_clients_dart/pull/362) merged at

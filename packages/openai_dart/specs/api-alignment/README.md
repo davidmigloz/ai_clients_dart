@@ -217,8 +217,7 @@ Endpoint management [PR #363](https://github.com/davidmigloz/ai_clients_dart/pul
 `b5159171218e8feb9f720c5db7d1d82ea3cf1a80` after green CI, closing #358; [acceptance evidence](reviews/21-webhook-endpoints.md) records its checks.
 Safety retrieval #359 is implemented, independently reviewed and verified;
 [acceptance evidence](reviews/22-safety-retrieval.md) records 13,236 passing unit
-tests with two existing skips and all three focused runtimes. Its PR creation is
-pending; monitoring errors #360 follow after merge.
+tests with two existing skips and all three focused runtimes. Implementation [PR #364](https://github.com/davidmigloz/ai_clients_dart/pull/364) is open with merge pending; monitoring errors #360 follow after merge.
 
 | Ticket | Demonstrable outcome | Prerequisite |
 | --- | --- | --- |

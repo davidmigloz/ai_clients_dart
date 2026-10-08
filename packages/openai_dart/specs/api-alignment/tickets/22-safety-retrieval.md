@@ -1,6 +1,7 @@
 # Retrieve project safety alerts and organization cases
 
-Status: implemented, independently reviewed and verified; PR creation pending.
+Status: implemented, independently reviewed and verified; PR #364 open, merge pending.
+Implementation [PR #364](https://github.com/davidmigloz/ai_clients_dart/pull/364) is open for review; #359 stays open until merge.
 GitHub: [#359](https://github.com/davidmigloz/ai_clients_dart/issues/359).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 4 Webhooks and safety](../webhooks-safety.md), SAFETY-READ-01–03.
@@ -41,6 +42,6 @@ VM/Chrome JavaScript/Wasm, 106 exact canonical serialization cases, nine explici
 receive-only future-enum cases and 568 independent runtime checks. All 542 Dart
 files format/fix/fatal-info analysis clear; exact README/offline example pass with
 MockClient only and $0 cost. Toolkit resolves the missing Safety resource and adds
-no diagnostics or exclusions. Link the PR after creation; close #359 only after
+no diagnostics or exclusions. Implementation [PR #364](https://github.com/davidmigloz/ai_clients_dart/pull/364) is ready for CI; close #359 only after
 implementation merge. Independent requirements and cross-author engineering reviews approve the final
 combined diff with no open findings. The planning review does not claim runtime acceptance. Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) merged October 8, 2026 at `886659c3c11cbee89335788ba918eeecd528fce0` after green CI.

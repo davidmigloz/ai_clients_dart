@@ -1,6 +1,7 @@
 # Safety retrieval implementation acceptance
 
-Status: implemented, independently reviewed and verified; PR creation pending.
+Status: implemented, independently reviewed and verified; PR #364 open, merge pending.
+Implementation [PR #364](https://github.com/davidmigloz/ai_clients_dart/pull/364) is open for review; #359 stays open until merge.
 Tracking: [#359](https://github.com/davidmigloz/ai_clients_dart/issues/359),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [SAFETY-READ-01–03](../webhooks-safety.md).
@@ -95,5 +96,5 @@ equality/hash aligned without adding duplicate serialization or scanner exclusio
 Independent requirements and cross-author engineering reviews approve the final
 23-file combined diff with no open findings, after validating the corrections and
 current source/model/runtime hashes. All 157 local documentation links resolve.
-PR/CI status will be recorded after creation. #359 remains open until its
+PR/CI status is recorded separately. #359 remains open until its
 implementation PR merges; #360 follows it.
