@@ -217,7 +217,7 @@ Endpoint management [PR #363](https://github.com/davidmigloz/ai_clients_dart/pul
 `b5159171218e8feb9f720c5db7d1d82ea3cf1a80` after green CI, closing #358; [acceptance evidence](reviews/21-webhook-endpoints.md) records its checks.
 Safety retrieval #359 is merged, independently reviewed and verified;
 [acceptance evidence](reviews/22-safety-retrieval.md) records 13,236 passing unit
-tests with two existing skips and all three focused runtimes. Safety retrieval [PR #364](https://github.com/davidmigloz/ai_clients_dart/pull/364) merged October 8, 2026 at `a466e8500aae91347f9c2d004a0854c969c6e779` after all 14 final-head contexts completed (13 successes and the standard Test(all) skip), closing #359. Monitoring errors #360 are implemented with [acceptance evidence](reviews/23-monitoring-errors.md): 305 new focused cases pass VM/Chrome JavaScript/Wasm, shared typed details and flat SSE corrections have migration guidance, and the offline investigation example costs $0. Independent requirements and engineering reviews approve the final combined diff; Implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365) is open with final-head CI pending.
+tests with two existing skips and all three focused runtimes. Safety retrieval [PR #364](https://github.com/davidmigloz/ai_clients_dart/pull/364) merged October 8, 2026 at `a466e8500aae91347f9c2d004a0854c969c6e779` after all 14 final-head contexts completed (13 successes and the standard Test(all) skip), closing #359. Monitoring errors #360 are implemented with [acceptance evidence](reviews/23-monitoring-errors.md): 305 new focused cases pass VM/Chrome JavaScript/Wasm, shared typed details and flat SSE corrections have migration guidance, and the offline investigation example costs $0. Implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365) merged October 8, 2026 at `fca1a3f4e453d88caed9ffa573d4ec665126c3cb` (2026-10-08T14:20:48Z) after all 14 final-head contexts completed (13 successes and the standard Test(all) skip), closing #360.
 
 | Ticket | Demonstrable outcome | Prerequisite |
 | --- | --- | --- |
@@ -229,13 +229,38 @@ tests with two existing skips and all three focused runtimes. Safety retrieval [
 The first receiver ticket includes verification so its example handles signed
 notifications end to end. Endpoint management remains independently usable.
 Safety detail retrieval and structured errors are separate slices. The receiver now provides public offline fixtures, complete value/copy contracts,
-README/llms documentation and a runnable local HTTP example. Remaining slices
-will include their own runtime acceptance and independent reviews.
+README/llms documentation and a runnable local HTTP example. All four slices have their own runtime acceptance and independent reviews.
+
+## Phase 5
+
+The [Audio and Live specification](audio-live.md) records seven independently
+usable slices, exact canonical/guide/SDK disagreements, protocol ownership and
+public offline acceptance boundaries. The [planning review](reviews/24-audio-live-planning.md)
+records source checks and independent findings. Runtime implementation is pending;
+no live API request, recording upload or phone call is part of planning.
+
+| Repository ticket | Demonstrable outcome | Prerequisite |
+| --- | --- | --- |
+| [#366](https://github.com/davidmigloz/ai_clients_dart/issues/366) ([24](tickets/24-speech.md)) | Buffered/byte-streamed/SSE speech, current open/custom voices | None |
+| [#367](https://github.com/davidmigloz/ai_clients_dart/issues/367) ([25](tickets/25-existing-audio.md)) | Correct Chat voice/AAC and transcription/translation contracts | 24 for shared voice reference |
+| [#368](https://github.com/davidmigloz/ai_clients_dart/issues/368) ([26](tickets/26-voice-consents.md)) | All five consent management operations | None |
+| [#369](https://github.com/davidmigloz/ai_clients_dart/issues/369) ([27](tickets/27-custom-voices.md)) | Sample-derived voice creation from explicit consent | 26 for offline workflow |
+| [#370](https://github.com/davidmigloz/ai_clients_dart/issues/370) ([28](tickets/28-live-http.md)) | All seven Live HTTP operations and full startup configuration | None; reuses merged signed receiver |
+| [#371](https://github.com/davidmigloz/ai_clients_dart/issues/371) ([29](tickets/29-live-websockets.md)) | Primary/sideband WS, role-safe commands and complete events | 28 |
+| [#372](https://github.com/davidmigloz/ai_clients_dart/issues/372) ([30](tickets/30-live-forks-transcripts.md)) | Stored WS forks, manual delegation and transcript helpers | 29, transitively 28 |
+
+Speech comes first. Existing file-audio defects get a separate correction PR;
+consent and sample creation remain separate usable workflows. Live HTTP includes
+canonical outbound SIP beyond current SDK helpers, then transports reuse its
+configuration. Forking creates a new stored-history session; application state
+and external actions are never implicitly replayed. Documentation-only consent
+phrase lookup and SDK reconnect/queue conveniences retain explicit inventory.
+These slices do not establish full Realtime/Chat/shared Responses parity.
 
 ## Remaining roadmap
 
-Phases 1–3 are complete for their specified tickets. Phase 4 has its own
-specification/ticket slices above. Later phases remain candidate outcomes pending
+Phases 1–4 are complete for their specified tickets. Phase 5 Audio/Live has seven specified implementation tickets; runtime work is
+pending. Later phases remain candidate outcomes pending
 detailed specifications. Keep all audited gaps visible even when deferred.
 
 | Phase | Demonstrable outcomes | Dependencies and scope notes |
@@ -243,8 +268,8 @@ detailed specifications. Keep all audited gaps visible even when deferred.
 | 1. Decisions | Create typed decisions from text and inline images; receive predicate, choice, score, and refusal answers with complete usage | Merged in #319/#318 |
 | 2. Existing API correctness | Correct container wire formats; preserve cache diagnostics, token details, Chat audio chunks, and retry guidance | All tickets merged in #327–#333; shared cache-write usage included in Decisions |
 | 3. Responses capabilities | Use async tools, reasoning configuration updates, GA web search controls/results, hosted shell, and Responses WebSocket steering | All eleven specified tickets merged in #346–#356; remaining shared gaps inventoried |
-| 4. Webhooks and safety | Verify and parse signed events; manage webhook endpoints; retrieve safety alerts/cases and preserve monitoring details | Specified above; signed receiver first, independent endpoint lifecycle, safety retrieval then structured errors |
-| 5. Audio and Live | Generate speech with current voice/options; create custom voices; run a Live session and delegation workflows | Separate ordinary speech from Live; custom voice creation requires an audio sample and consent |
+| 4. Webhooks and safety | Verify and parse signed events; manage webhook endpoints; retrieve safety alerts/cases and preserve monitoring details | All four specified tickets merged in #362–#365 |
+| 5. Audio and Live | Generate speech with current voice/options; create custom voices; run a Live session and delegation workflows | Seven specified slices; speech first, bounded existing-audio fixes, consents/voices, Live HTTP/WS/forks |
 | 6. Agents and vaults | Run a durable session; handle tools, environments, artifacts, credentials, subagents, traces, and browser approvals | Slice around working session behaviors; browser approvals build on the basic session/event loop |
 | Throughout | Truthful API coverage, current examples, model capability guidance, and sunset notices | Accompany each relevant ticket; do not claim full coverage prematurely |
 | 7. Administration and storage | Manage organization/project controls, keys, usage/costs, and external storage | Explicit expansion beyond the current manifest exclusions; specify the Admin namespace and authentication separately |
@@ -373,7 +398,7 @@ Sources: [cache diagnostics](https://developers.openai.com/api/docs/guides/promp
   environment-variable secrets, metadata, and rotation.
 - Live: seven HTTP operations plus transport/event and delegation support.
 - Safety: project alert/organization case retrieval is implemented/verified in
-  #359; structured monitoring details are implemented in #360, with independent final reviews approved; implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365) is open with final-head CI pending. Enterprise workspace alert notifications are
+  #359; structured monitoring details are merged in #360/PR #365. Enterprise workspace alert notifications are
   included in its receiver, while api.chatgpt.com administrator-key lookup with
   chatgpt.enterprise.safety_alerts.read remains in Phase 7 administration inventory.
   No silent project-key routing or unsupported workspace-response guarantee.
@@ -523,4 +548,4 @@ classified delegated-serializer/value-scanner delta; no exclusions were added.
 Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) merged October 8, 2026 at `1e63d6b93bdf0028eb6925d45371b1f36deb5d7b`, closing #344, after all applicable final-head checks passed (14 contexts completed: 13 successes and the standard Test(all) skip).
 All eleven specified Phase 3 implementation tickets are merged. Phase 4 now has
 its own specification/tickets, merged receiver #357 and endpoint management #358,
-and merged safety retrieval #359; monitoring errors #360 are implemented and runtime verified, with independent final reviews approved; implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365) is open with final-head CI pending. Remaining parity inventory persists.
+and merged safety retrieval #359; monitoring errors #360 are merged in PR #365. Remaining parity inventory persists.
