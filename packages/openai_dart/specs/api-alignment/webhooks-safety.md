@@ -1,12 +1,12 @@
 # Webhooks and safety: Phase 4 specification
 
-Status: receiver and endpoint management merged; safety retrieval implemented/verified; monitoring errors pending.
+Status: receiver, endpoint management and safety retrieval merged; monitoring errors implemented and runtime verified; independent final reviews approved; implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365) is open with final-head CI pending.
 Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) merged October 8, 2026 at `886659c3c11cbee89335788ba918eeecd528fce0` after green CI.
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Endpoint management [PR #363](https://github.com/davidmigloz/ai_clients_dart/pull/363)
 merged October 8, 2026 at `b5159171218e8feb9f720c5db7d1d82ea3cf1a80` after all 14 final-head CI contexts completed (13 successful, one standard skip), closing #358; [acceptance evidence](reviews/21-webhook-endpoints.md)
 records its verification.
-Safety retrieval [PR #364](https://github.com/davidmigloz/ai_clients_dart/pull/364) implements #359 with merge pending;
+Safety retrieval [PR #364](https://github.com/davidmigloz/ai_clients_dart/pull/364) merged October 8, 2026 at `a466e8500aae91347f9c2d004a0854c969c6e779` after all 14 final-head contexts completed (13 successes and the standard Test(all) skip), closing #359.
 [acceptance evidence](reviews/22-safety-retrieval.md) records its runtime checks.
 Scope: four independently demonstrable implementation tickets, repository 20–23.
 Receiver [PR #362](https://github.com/davidmigloz/ai_clients_dart/pull/362) merged at
@@ -384,3 +384,12 @@ requirements and engineering reviews approve the final combined diff after
 validated findings are resolved. Open PRs with the exact create-pr template and
 close implementation issues only after merge. This plan's source/link/graph
 validation is separate from future runtime acceptance.
+
+## Structured monitoring implementation acceptance
+
+[Ticket 23 acceptance evidence](reviews/23-monitoring-errors.md) records shared
+HTTP/failed-response/WS details, canonical flat nullable SSE errors, passive
+investigation and targeted migration guidance. 305 new focused fixtures pass
+VM/Chrome JavaScript/Wasm with $0 API cost. Independent final reviews approve the combined diff; implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365)
+is open with final-head CI pending; #360 remains open until merge. The remaining media/Agents/Live/Admin
+error shapes retain their separate inventory and permission boundaries.

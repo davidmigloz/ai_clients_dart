@@ -4,12 +4,15 @@ import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../../common/json_helpers.dart';
 import '../items/item.dart';
+import '../misalignment_details.dart';
 import '../multi_agent/agent_tag.dart';
 import '../multi_agent/response_inject_event.dart' show ResponseInjectErrorCode;
 import '../streaming/response_stream_event.dart';
 import 'responses_steer_event.dart';
 import 'responses_steer_required_input.dart';
 import 'websocket_json_helpers.dart';
+
+export '../misalignment_details.dart';
 
 part 'responses_inject_server_events.dart';
 part 'responses_steer_server_events.dart';
@@ -144,6 +147,7 @@ class ResponsesStreamEvent extends ResponsesServerEvent {
 
   @override
   Map<String, dynamic> toJson() {
+    snapshotResponsesJson(rawJson, 'ResponsesStreamEvent');
     if (!_sharedEventTypes.contains(type) ||
         event is ErrorEvent ||
         event is UnknownEvent) {
@@ -156,8 +160,38 @@ class ResponsesStreamEvent extends ResponsesServerEvent {
   }
 
   Map<String, dynamic> _valueJson() {
-    final json = overlayResponsesJson(rawJson, event.toJson())
-      ..remove('stream_id');
+    final typed = event.toJson();
+    final json = overlayResponsesJson(rawJson, typed)..remove('stream_id');
+    final typedResponse = typed['response'];
+    final originalResponse = rawJson['response'];
+    if (typedResponse is Map<String, dynamic> &&
+        json['response'] is Map<String, dynamic>) {
+      final response = json['response'] as Map<String, dynamic>;
+      final originalError = originalResponse is Map<String, dynamic>
+          ? originalResponse['error']
+          : null;
+      final typedError = typedResponse['error'];
+      if (typedError is Map<String, dynamic>) {
+        response['error'] = mergeResponsesModelJson(
+          originalError,
+          typedError,
+          const {'type', 'code', 'message', 'param', 'misalignment'},
+          childKeys: const {
+            'misalignment': {
+              'detailed_explanation',
+              'error_type',
+              'review_target',
+              'steer',
+            },
+            'steer': {'message'},
+          },
+        );
+      } else if (originalError is Map<String, dynamic>) {
+        // Clearing a typed error must not restore its old parent snapshot.
+        // Original nullable `error: null` remains untouched for compatibility.
+        response.remove('error');
+      }
+    }
     if (streamId != null) json['stream_id'] = streamId;
     return json;
   }
@@ -354,7 +388,8 @@ class ResponsesErrorEvent extends ResponsesServerEvent {
 
   @override
   Map<String, dynamic> toJson() {
-    error.misalignment?._validate();
+    snapshotResponsesJson(rawJson, 'ResponsesErrorEvent');
+    error.misalignment?.toJson();
     return _valueJson();
   }
 
@@ -363,7 +398,20 @@ class ResponsesErrorEvent extends ResponsesServerEvent {
     const {'type', 'error', 'status', 'sequence_number', 'stream_id', 'agent'},
     {
       'type': type,
-      'error': error._valueJson(),
+      'error': mergeResponsesModelJson(
+        rawJson['error'],
+        error._valueJson(),
+        const {'type', 'message', 'code', 'param', 'headers', 'misalignment'},
+        childKeys: const {
+          'misalignment': {
+            'detailed_explanation',
+            'error_type',
+            'review_target',
+            'steer',
+          },
+          'steer': {'message'},
+        },
+      ),
       if (status != null) 'status': status,
       if (sequenceNumber != null) 'sequence_number': sequenceNumber,
       if (streamId != null) 'stream_id': streamId,
@@ -389,24 +437,44 @@ class ResponsesErrorEvent extends ResponsesServerEvent {
     Object? agent = unsetCopyWithValue,
     bool? hasAgent,
     Map<String, dynamic>? rawJson,
-  }) => ResponsesErrorEvent(
-    error: error ?? this.error,
-    status: identical(status, unsetCopyWithValue)
-        ? this.status
-        : status as int?,
-    sequenceNumber: identical(sequenceNumber, unsetCopyWithValue)
-        ? this.sequenceNumber
-        : sequenceNumber as int?,
-    streamId: identical(streamId, unsetCopyWithValue)
-        ? this.streamId
-        : streamId as String?,
-    agent: identical(agent, unsetCopyWithValue)
-        ? this.agent
-        : agent as AgentTag?,
-    hasAgent:
-        hasAgent ?? (!identical(agent, unsetCopyWithValue) || this.hasAgent),
-    rawJson: rawJson ?? this.rawJson,
-  );
+  }) {
+    final replacingAgent = !identical(agent, unsetCopyWithValue);
+    final newAgent = replacingAgent ? agent as AgentTag? : this.agent;
+    final replacingChild = error != null || replacingAgent;
+    final retainedRaw = rawJson ?? this.rawJson;
+    final reconciledRaw = !replacingChild || rawJson != null
+        ? retainedRaw
+        : replaceResponsesTypedJson(
+            retainedRaw,
+            {
+              if (error != null) 'error': _valueJson()['error'],
+              if (replacingAgent) 'agent': _valueJson()['agent'],
+            },
+            {
+              if (error != null) 'error': error._valueJson(),
+              if (replacingAgent && newAgent != null)
+                'agent': newAgent.toJson(),
+            },
+          );
+    return ResponsesErrorEvent(
+      error: error ?? this.error,
+      status: identical(status, unsetCopyWithValue)
+          ? this.status
+          : status as int?,
+      sequenceNumber: identical(sequenceNumber, unsetCopyWithValue)
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+      streamId: identical(streamId, unsetCopyWithValue)
+          ? this.streamId
+          : streamId as String?,
+      agent: newAgent,
+      hasAgent:
+          hasAgent ?? (!identical(agent, unsetCopyWithValue) || this.hasAgent),
+      rawJson: replacingChild && rawJson == null
+          ? freezeJsonObject(reconciledRaw)
+          : reconciledRaw,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -528,7 +596,8 @@ class ResponsesErrorPayload {
 
   /// Converts to JSON without conflating absent and nullable keys.
   Map<String, dynamic> toJson() {
-    misalignment?._validate();
+    snapshotResponsesJson(rawJson, 'ResponsesErrorPayload');
+    misalignment?.toJson();
     return _valueJson();
   }
 
@@ -541,7 +610,20 @@ class ResponsesErrorPayload {
       if (hasCode || code != null) 'code': code,
       if (hasParam || param != null) 'param': param,
       if (headers != null) 'headers': Map<String, String>.from(headers!),
-      if (misalignment != null) 'misalignment': misalignment!._valueJson(),
+      if (misalignment != null)
+        'misalignment': mergeResponsesModelJson(
+          rawJson['misalignment'],
+          misalignment!.toJson(),
+          const {
+            'detailed_explanation',
+            'error_type',
+            'review_target',
+            'steer',
+          },
+          childKeys: const {
+            'steer': {'message'},
+          },
+        ),
     },
   );
 
@@ -557,22 +639,44 @@ class ResponsesErrorPayload {
     Object? headers = unsetCopyWithValue,
     Object? misalignment = unsetCopyWithValue,
     Map<String, dynamic>? rawJson,
-  }) => ResponsesErrorPayload(
-    type: type ?? this.type,
-    message: message ?? this.message,
-    code: identical(code, unsetCopyWithValue) ? this.code : code as String?,
-    param: identical(param, unsetCopyWithValue) ? this.param : param as String?,
-    hasCode: hasCode ?? (!identical(code, unsetCopyWithValue) || this.hasCode),
-    hasParam:
-        hasParam ?? (!identical(param, unsetCopyWithValue) || this.hasParam),
-    headers: identical(headers, unsetCopyWithValue)
-        ? this.headers
-        : headers as Map<String, String>?,
-    misalignment: identical(misalignment, unsetCopyWithValue)
+  }) {
+    final replacingDetails = !identical(misalignment, unsetCopyWithValue);
+    final details = identical(misalignment, unsetCopyWithValue)
         ? this.misalignment
-        : misalignment as ResponsesMisalignmentDetails?,
-    rawJson: rawJson ?? this.rawJson,
-  );
+        : misalignment as ResponsesMisalignmentDetails?;
+    final retainedRaw = rawJson ?? this.rawJson;
+    final reconciledRaw = !replacingDetails || rawJson != null
+        ? retainedRaw
+        : replaceResponsesTypedJson(
+            retainedRaw,
+            {
+              if (this.misalignment != null)
+                'misalignment': _valueJson()['misalignment'],
+            },
+            {if (details != null) 'misalignment': details.toJson()},
+          );
+    return ResponsesErrorPayload(
+      type: type ?? this.type,
+      message: message ?? this.message,
+      code: identical(code, unsetCopyWithValue) ? this.code : code as String?,
+      param: identical(param, unsetCopyWithValue)
+          ? this.param
+          : param as String?,
+      hasCode:
+          hasCode ?? (!identical(code, unsetCopyWithValue) || this.hasCode),
+      hasParam:
+          hasParam ?? (!identical(param, unsetCopyWithValue) || this.hasParam),
+      headers: identical(headers, unsetCopyWithValue)
+          ? this.headers
+          : headers as Map<String, String>?,
+      misalignment: identical(misalignment, unsetCopyWithValue)
+          ? this.misalignment
+          : misalignment as ResponsesMisalignmentDetails?,
+      rawJson: replacingDetails && rawJson == null
+          ? freezeJsonObject(reconciledRaw)
+          : reconciledRaw,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -592,217 +696,6 @@ class ResponsesErrorPayload {
       'headers: ${headers == null ? 'null' : '${headers!.length} entries'}, '
       'misalignment: ${responsesPresence(misalignment)}, '
       'rawJson: ${rawJson.length} entries)';
-}
-
-/// Optional public explanation, open classification and continuation metadata.
-@immutable
-class ResponsesMisalignmentDetails {
-  /// The public explanation for the block.
-  final String? detailedExplanation;
-
-  /// Open classification string; unknown values are preserved.
-  final String? errorType;
-
-  /// Opaque review target; sensitive and nullable when present.
-  final String? reviewTarget;
-
-  /// Distinguishes an absent review target from explicit null.
-  final bool hasReviewTarget;
-
-  /// Public continuation instruction.
-  final ResponsesMisalignmentSteer? steer;
-
-  /// Original immutable JSON, including future details.
-  final Map<String, dynamic> rawJson;
-
-  /// Creates review details, preserving const construction.
-  const ResponsesMisalignmentDetails({
-    this.detailedExplanation,
-    this.errorType,
-    this.reviewTarget,
-    bool hasReviewTarget = false,
-    this.steer,
-    this.rawJson = const {},
-  }) : hasReviewTarget = hasReviewTarget || reviewTarget != null;
-
-  /// Parses every canonical member with contextual validation.
-  factory ResponsesMisalignmentDetails.fromJson(Map<String, dynamic> json) {
-    final snapshot = snapshotResponsesJson(
-      json,
-      'ResponsesMisalignmentDetails',
-    );
-    final target = optionalJsonString(
-      snapshot,
-      'review_target',
-      'ResponsesMisalignmentDetails',
-      nullable: true,
-    );
-    _validateReviewTarget(target);
-    return ResponsesMisalignmentDetails(
-      detailedExplanation: optionalJsonString(
-        snapshot,
-        'detailed_explanation',
-        'ResponsesMisalignmentDetails',
-      ),
-      errorType: optionalJsonString(
-        snapshot,
-        'error_type',
-        'ResponsesMisalignmentDetails',
-      ),
-      reviewTarget: target,
-      hasReviewTarget: snapshot.containsKey('review_target'),
-      steer: snapshot.containsKey('steer')
-          ? ResponsesMisalignmentSteer.fromJson(
-              requireJsonObject(
-                snapshot['steer'],
-                'ResponsesMisalignmentDetails.steer',
-              ),
-            )
-          : null,
-      rawJson: snapshot,
-    );
-  }
-
-  /// Converts to JSON with exact nullable target presence.
-  Map<String, dynamic> toJson() {
-    _validate();
-    return _valueJson();
-  }
-
-  void _validate() => _validateReviewTarget(reviewTarget);
-
-  Map<String, dynamic> _valueJson() => mergeResponsesJson(
-    rawJson,
-    const {'detailed_explanation', 'error_type', 'review_target', 'steer'},
-    {
-      if (detailedExplanation != null)
-        'detailed_explanation': detailedExplanation,
-      if (errorType != null) 'error_type': errorType,
-      if (reviewTarget != null || hasReviewTarget)
-        'review_target': reviewTarget,
-      if (steer != null) 'steer': steer!.toJson(),
-    },
-  );
-
-  /// Copies every field, allowing optional fields to be cleared. Explicit null
-  /// target retains its key; also set `hasReviewTarget: false` to omit it.
-  ResponsesMisalignmentDetails copyWith({
-    Object? detailedExplanation = unsetCopyWithValue,
-    Object? errorType = unsetCopyWithValue,
-    Object? reviewTarget = unsetCopyWithValue,
-    bool? hasReviewTarget,
-    Object? steer = unsetCopyWithValue,
-    Map<String, dynamic>? rawJson,
-  }) => ResponsesMisalignmentDetails(
-    detailedExplanation: identical(detailedExplanation, unsetCopyWithValue)
-        ? this.detailedExplanation
-        : detailedExplanation as String?,
-    errorType: identical(errorType, unsetCopyWithValue)
-        ? this.errorType
-        : errorType as String?,
-    reviewTarget: identical(reviewTarget, unsetCopyWithValue)
-        ? this.reviewTarget
-        : reviewTarget as String?,
-    hasReviewTarget:
-        hasReviewTarget ??
-        (!identical(reviewTarget, unsetCopyWithValue) || this.hasReviewTarget),
-    steer: identical(steer, unsetCopyWithValue)
-        ? this.steer
-        : steer as ResponsesMisalignmentSteer?,
-    rawJson: rawJson ?? this.rawJson,
-  );
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ResponsesMisalignmentDetails &&
-          runtimeType == other.runtimeType &&
-          mapsDeepEqual(_valueJson(), other._valueJson());
-
-  @override
-  int get hashCode => Object.hash(runtimeType, mapDeepHashCode(_valueJson()));
-
-  @override
-  String toString() =>
-      'ResponsesMisalignmentDetails('
-      'detailedExplanation: ${responsesPresence(detailedExplanation)}, '
-      'errorType: ${responsesPresence(errorType)}, '
-      'reviewTarget: ${responsesPresence(reviewTarget)}, '
-      'hasReviewTarget: $hasReviewTarget, steer: ${responsesPresence(steer)}, '
-      'rawJson: ${rawJson.length} entries)';
-}
-
-/// A public continuation instruction included with misalignment details.
-@immutable
-class ResponsesMisalignmentSteer {
-  /// Human-readable continuation instruction, potentially sensitive.
-  final String message;
-
-  /// Original immutable JSON, including future fields.
-  final Map<String, dynamic> rawJson;
-
-  /// Creates an instruction.
-  const ResponsesMisalignmentSteer({
-    required this.message,
-    this.rawJson = const {},
-  });
-
-  /// Parses its required message without discarding future keys.
-  factory ResponsesMisalignmentSteer.fromJson(Map<String, dynamic> json) {
-    final snapshot = snapshotResponsesJson(json, 'ResponsesMisalignmentSteer');
-    return ResponsesMisalignmentSteer(
-      message: requireJsonString(
-        snapshot['message'],
-        'ResponsesMisalignmentSteer.message',
-      ),
-      rawJson: snapshot,
-    );
-  }
-
-  /// Converts to JSON; typed edits take precedence over original JSON.
-  Map<String, dynamic> toJson() =>
-      mergeResponsesJson(rawJson, const {'message'}, {'message': message});
-
-  /// Copies both typed and raw metadata.
-  ResponsesMisalignmentSteer copyWith({
-    String? message,
-    Map<String, dynamic>? rawJson,
-  }) => ResponsesMisalignmentSteer(
-    message: message ?? this.message,
-    rawJson: rawJson ?? this.rawJson,
-  );
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ResponsesMisalignmentSteer &&
-          runtimeType == other.runtimeType &&
-          mapsDeepEqual(toJson(), other.toJson());
-
-  @override
-  int get hashCode => Object.hash(runtimeType, mapDeepHashCode(toJson()));
-
-  @override
-  String toString() =>
-      'ResponsesMisalignmentSteer(message: [REDACTED], '
-      'rawJson: ${rawJson.length} entries)';
-}
-
-final _reviewTargetPattern = RegExp(r'^[A-Za-z0-9._~:-]+$');
-
-void _validateReviewTarget(String? target) {
-  if (target != null &&
-      (target.isEmpty ||
-          target.length > 96 ||
-          !_reviewTargetPattern.hasMatch(target) ||
-          target.codeUnits.any(
-            (unit) => unit > 127 || unit == 10 || unit == 13,
-          ))) {
-    throw const FormatException(
-      'ResponsesMisalignmentDetails.review_target: expected 1–96 permitted '
-      'ASCII characters',
-    );
-  }
 }
 
 // Kept in step with the shared SSE dispatcher; its 58 variants are

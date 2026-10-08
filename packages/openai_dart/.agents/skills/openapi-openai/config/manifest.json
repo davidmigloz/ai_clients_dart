@@ -4145,17 +4145,17 @@
       "spec": "main",
       "kind": "object",
       "dart_class": "ResponsesMisalignmentDetails",
-      "file": "lib/src/models/responses/websocket/responses_server_event.dart",
+      "file": "lib/src/models/responses/misalignment_details.dart",
       "schema": "MisalignmentErrorDetailsResource",
-      "note": "All known optional fields validate contextually; opaque review target retains omission/null and future raw keys."
+      "note": "Shared passive HTTP/failed-response/WS metadata. Open fields, exact opaque token bounds, absent/null review target, immutable parsed future JSON and redacted diagnostics. Old WS import re-exports and const names retained."
     },
     "_MisalignmentSteer": {
       "spec": "main",
       "kind": "object",
       "dart_class": "ResponsesMisalignmentSteer",
-      "file": "lib/src/models/responses/websocket/responses_server_event.dart",
+      "file": "lib/src/models/responses/misalignment_details.dart",
       "schema": "_MisalignmentSteer",
-      "note": "Required public continuation message; future raw fields preserved with safe diagnostics."
+      "note": "Required passive message; caller decides whether any instruction is appropriate. Immutable parsed future JSON, full replacement/clear semantics, compatible const construction and redacted diagnostics."
     },
     "BetaResponsesClientEventResponseCreate": {
       "spec": "main",
@@ -4194,17 +4194,17 @@
       "spec": "main",
       "kind": "object",
       "dart_class": "ResponsesMisalignmentDetails",
-      "file": "lib/src/models/responses/websocket/responses_server_event.dart",
+      "file": "lib/src/models/responses/misalignment_details.dart",
       "schema": "BetaMisalignmentErrorDetailsResource",
-      "note": "All known optional fields validate contextually; opaque review target retains omission/null and future raw keys."
+      "note": "Shared passive HTTP/failed-response/WS metadata. Open fields, exact opaque token bounds, absent/null review target, immutable parsed future JSON and redacted diagnostics. Old WS import re-exports and const names retained."
     },
     "Beta_MisalignmentSteer": {
       "spec": "main",
       "kind": "object",
       "dart_class": "ResponsesMisalignmentSteer",
-      "file": "lib/src/models/responses/websocket/responses_server_event.dart",
+      "file": "lib/src/models/responses/misalignment_details.dart",
       "schema": "Beta_MisalignmentSteer",
-      "note": "Required public continuation message; future raw fields preserved with safe diagnostics."
+      "note": "Required passive message; caller decides whether any instruction is appropriate. Immutable parsed future JSON, full replacement/clear semantics, compatible const construction and redacted diagnostics."
     },
     "ResponsesStreamEvent": {
       "spec": "main",
@@ -5178,6 +5178,62 @@
       "file": "lib/src/models/safety/safety.dart",
       "schema": "SafetyCaseNoticeType",
       "note": "Read-only safety details; received future enum strings are preserved with explicit raw companions."
+    },
+    "ResponseStreamEvent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ResponseStreamEvent",
+      "file": "lib/src/models/responses/streaming/response_stream_event.dart",
+      "schema": "ResponseStreamEvent",
+      "discriminator": {
+        "field": "type"
+      },
+      "note": "Real canonical shared SSE union (59 schema branches); existing ordinary codecs plus corrected flat ErrorEvent. Unknown string dispatch stays lossless; missing/nonstring discriminator fails contextually. Existing unrelated variant fidelity gaps remain inventoried."
+    },
+    "BetaResponseStreamEvent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ResponseStreamEvent",
+      "file": "lib/src/models/responses/streaming/response_stream_event.dart",
+      "schema": "BetaResponseStreamEvent",
+      "discriminator": {
+        "field": "type"
+      },
+      "note": "Real canonical shared SSE union (59 schema branches); existing ordinary codecs plus corrected flat ErrorEvent. Unknown string dispatch stays lossless; missing/nonstring discriminator fails contextually. Existing unrelated variant fidelity gaps remain inventoried."
+    },
+    "ResponseErrorEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ErrorEvent",
+      "file": "lib/src/models/responses/streaming/response_stream_event.dart",
+      "schema": "ResponseErrorEvent",
+      "parent": "ResponseStreamEvent",
+      "note": "Flat nullable code/param plus message and sequence; optional nullable beta agent. Legacy nested/flat omitted nullable keys/sequence are explicitly receive-only, with presence retained and no invented message/code. Future metadata opaque, not declared SSE misalignment/headers."
+    },
+    "BetaResponseErrorEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ErrorEvent",
+      "file": "lib/src/models/responses/streaming/response_stream_event.dart",
+      "schema": "BetaResponseErrorEvent",
+      "parent": "ResponseStreamEvent",
+      "note": "Flat nullable code/param plus message and sequence; optional nullable beta agent. Legacy nested/flat omitted nullable keys/sequence are explicitly receive-only, with presence retained and no invented message/code. Future metadata opaque, not declared SSE misalignment/headers."
+    },
+    "ResponseError": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseError",
+      "file": "lib/src/models/responses/response_error.dart",
+      "schema": "ResponseError",
+      "note": "Distinct failed-response code/message plus optional shared misalignment; canonical code nonnull closed enum. Legacy type/param, omitted/null code and unknown strings remain explicitly receive-only. No declared headers. Effective raw metadata/replacement/value contracts tested."
+    },
+    "BetaResponseError": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseError",
+      "file": "lib/src/models/responses/response_error.dart",
+      "schema": "BetaResponseError",
+      "note": "Identical canonical beta failed-response component; shares ResponseError. Distinct failed-response code/message plus optional shared misalignment; canonical code nonnull closed enum. Legacy type/param, omitted/null code and unknown strings remain explicitly receive-only. No declared headers. Effective raw metadata/replacement/value contracts tested."
     }
   }
 }

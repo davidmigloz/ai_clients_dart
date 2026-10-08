@@ -1,7 +1,7 @@
 # Safety retrieval implementation acceptance
 
-Status: implemented, independently reviewed and verified; PR #364 open, merge pending.
-Implementation [PR #364](https://github.com/davidmigloz/ai_clients_dart/pull/364) is open for review; #359 stays open until merge.
+Status: implemented, independently reviewed, verified and merged.
+Safety retrieval [PR #364](https://github.com/davidmigloz/ai_clients_dart/pull/364) merged October 8, 2026 at `a466e8500aae91347f9c2d004a0854c969c6e779` after all 14 final-head contexts completed (13 successes and the standard Test(all) skip), closing #359.
 Tracking: [#359](https://github.com/davidmigloz/ai_clients_dart/issues/359),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [SAFETY-READ-01–03](../webhooks-safety.md).

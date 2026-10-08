@@ -6,6 +6,70 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming structured monitoring errors
+
+`ErrorEvent.code` is now `String?`, matching the nullable OpenAI SSE field.
+Update code that assumes every streamed error has a code:
+
+```dart
+// Before
+final String code = event.code;
+
+// After
+final String? code = event.code;
+final label = code ?? 'No error code supplied'; // Application display only.
+```
+
+`ErrorEvent.toJson()` now emits flat SSE fields. Code that reads the previous
+nested `error` output should use the top-level keys:
+
+```dart
+// Before
+final wire = event.toJson();
+final message = (wire['error'] as Map<String, dynamic>)['message'];
+
+// After
+final wire = event.toJson();
+final message = wire['message'];
+final code = wire['code']; // May be null.
+```
+
+Canonical SSE errors require `message`, `sequence_number`, and nullable `code`
+and `param`. New constructors emit the nullable keys; parsed legacy flat or
+nested input may omit them or the sequence. Explicit presence flags preserve
+those receive-only omissions without inventing a code or message. Supplied
+wrong types still fail. Nested legacy input normalizes to flat output. Optional
+beta `agent` preserves absence versus explicit null. SSE future fields remain
+opaque JSON; the SSE schema does not declare typed misalignment or headers.
+
+Failed `ResponseError` has its own canonical `code`/`message` shape with optional
+`misalignment`; serialization no longer invents `type` or `param`. Existing const
+constructor calls and the legacy `type` getter (default `'error'`) remain
+available. Absent legacy type stays omitted on the wire; explicit `type: null`
+normalizes to `'error'` with `hasType: true`. Legacy omitted/null codes, legacy type/param and future code strings
+remain documented receive-only compatibility. Nonnull code/param values imply
+presence; clear both a nullable value and its presence flag to omit a key.
+
+`ResponsesMisalignmentDetails` and `ResponsesMisalignmentSteer` now live in a
+shared model file. Public names, const constructors, and imports from the old
+WebSocket server-event file remain compatible through re-exports. Parsed future
+JSON is deeply immutable; direct const collections remain caller-owned.
+
+Fresh nested WebSocket/error/agent replacements discard the previous child's
+future metadata. Use a detail, steer or error payload's own `copyWith` to retain its
+metadata, or explicitly supply parent `rawJson` when intentionally overriding
+future fields. AgentTag holds typed fields only: replacing `agent`, even with
+`agent.copyWith`, drops future agent keys stored by the parent. Omit the `agent`
+argument to retain those keys, or explicitly supply parent `rawJson`. Clearing a known typed field removes stale raw values.
+
+HTTP failures expose `ApiException.misalignment` without changing exception
+subtype, status, code, request ID, raw body or retry classification. Malformed
+optional HTTP details are ignored; failed-response and WebSocket DTO details
+validate strictly. Default monitoring diagnostics redact sensitive values while
+original fields remain readable. Review tokens and steer messages are passive
+investigation data: they do not trigger retry, replay, tool execution or a
+continuation. See the [offline monitoring example](example/monitoring_errors_example.dart).
+
 ## Upcoming typed injection events
 
 `response.inject.created` and `response.inject.failed` now produce

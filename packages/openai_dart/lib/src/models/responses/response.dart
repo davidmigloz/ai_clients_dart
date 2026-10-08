@@ -188,7 +188,9 @@ class Response {
           ? ResponseUsage.fromJson(json['usage'] as Map<String, dynamic>)
           : null,
       error: json['error'] != null
-          ? ResponseError.fromJson(json['error'] as Map<String, dynamic>)
+          ? ResponseError.fromJson(
+              requireJsonObject(json['error'], 'Response.error'),
+            )
           : null,
       incompleteDetails: json['incomplete_details'] != null
           ? IncompleteDetails.fromJson(
@@ -532,25 +534,29 @@ class Response {
   ]);
 
   @override
-  String toString() =>
-      'Response(id: $id, object: $object, createdAt: $createdAt, status: $status, '
-      'output: ${output.length} items, usage: $usage, '
-      'error: ${_presenceSummary(error)}, '
-      'incompleteDetails: ${_presenceSummary(incompleteDetails)}, '
-      'model: $model, instructions: ${_textSummary(instructions)}, '
-      'previousResponseId: ${_identifierSummary(previousResponseId)}, '
-      'serviceTier: $serviceTier, '
-      'metadata: ${metadata == null ? 'null' : '${metadata!.length} entries'}, '
-      'maxOutputTokens: $maxOutputTokens, '
-      'temperature: $temperature, topP: $topP, background: $background, '
-      'parallelToolCalls: $parallelToolCalls, '
-      'promptCacheKey: ${_identifierSummary(promptCacheKey)}, '
-      'promptCacheRetention: $promptCacheRetention, '
-      'promptCacheOptions: ${_cacheOptionsSummary(promptCacheOptions)}, '
-      'promptCacheDiagnostics: $promptCacheDiagnostics, '
-      'moderation: ${_presenceSummary(moderation)}, '
-      'reasoning: ${_reasoningSummary(reasoning)}, truncation: $truncation, '
-      'accessPrograms: $accessPrograms)';
+  String toString() {
+    final redact =
+        error?.misalignment != null ||
+        error?.code == 'misalignment_policy_violation';
+    return 'Response(id: ${redact ? '[REDACTED]' : id}, object: ${redact ? '[REDACTED]' : object}, createdAt: $createdAt, status: $status, '
+        'output: ${output.length} items, usage: $usage, '
+        'error: ${_presenceSummary(error)}, '
+        'incompleteDetails: ${_presenceSummary(incompleteDetails)}, '
+        'model: ${redact ? '[REDACTED]' : model}, instructions: ${redact ? '[REDACTED]' : _textSummary(instructions)}, '
+        'previousResponseId: ${_identifierSummary(previousResponseId)}, '
+        'serviceTier: ${redact ? '[REDACTED]' : serviceTier}, '
+        'metadata: ${metadata == null ? 'null' : '${metadata!.length} entries'}, '
+        'maxOutputTokens: $maxOutputTokens, '
+        'temperature: $temperature, topP: $topP, background: $background, '
+        'parallelToolCalls: $parallelToolCalls, '
+        'promptCacheKey: ${_identifierSummary(promptCacheKey)}, '
+        'promptCacheRetention: $promptCacheRetention, '
+        'promptCacheOptions: ${_cacheOptionsSummary(promptCacheOptions)}, '
+        'promptCacheDiagnostics: ${redact ? _presenceSummary(promptCacheDiagnostics) : promptCacheDiagnostics}, '
+        'moderation: ${_presenceSummary(moderation)}, '
+        'reasoning: ${_reasoningSummary(reasoning)}, truncation: $truncation, '
+        'accessPrograms: $accessPrograms)';
+  }
 }
 
 String _textSummary(String? value) =>

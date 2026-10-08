@@ -961,7 +961,7 @@ void main() {
         parsed
             .copyWith(agent: const AgentTag(agentName: 'other'))
             .toJson()['agent'],
-        {'agent_name': 'other', 'future_agent': 'retained'},
+        {'agent_name': 'other'},
       );
     });
 

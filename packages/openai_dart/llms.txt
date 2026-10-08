@@ -1,12 +1,13 @@
 # OpenAI Dart Client
 
-> Dart client for the OpenAI API with Responses API, Decisions API, Chat Completions, images, videos, audio, custom tools, embeddings, evals, realtime, signed webhooks, safety retrieval, and more.
+> Dart client for the OpenAI API with Responses API, Decisions API, Chat Completions, images, videos, audio, custom tools, embeddings, evals, realtime, signed webhooks, safety retrieval, structured monitoring errors, and more.
 
 ## Docs
 
 - [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~9.8k tokens): Primary package documentation with installation, configuration, and usage examples.
 - [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/CHANGELOG.md) (~21.7k tokens): Release history and version-by-version changes.
 - [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/MIGRATION.md) (~15.7k tokens): Upgrade notes and breaking-change guidance.
+- [Monitoring failures](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md#how-do-i-inspect-monitoring-failures): Shared passive HTTP/failed Response/WS details, flat nullable SSE errors, scoped investigation and migration boundaries.
 
 ## Examples
 
@@ -60,6 +61,8 @@
 - [webhook_endpoints_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/webhook_endpoints_example.dart): Offline project webhook lifecycle with returned cursor/event discovery, signing-key storage/rotation, separate receiver status and cleanup; MockClient only, no API charges.
 
 - [safety_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/safety_example.dart): Offline signed project/organization safety notices with two explicitly scoped MockClient GETs, deduplication, tampering rejection and separate workspace routing; no API key or charges.
+
+- [monitoring_errors_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/monitoring_errors_example.dart): Offline HTTP 403 before output and flat error/failed response after output, shared typed details and two scoped GETs from verified notices; five MockClient requests, passive tokens/instructions, no real API key or charges.
 
 ## Optional
 
