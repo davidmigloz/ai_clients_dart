@@ -1,12 +1,14 @@
 # Audio and Live: Phase 5 specification
 
-Status: independently reviewed specification; all seven runtime tickets pending.
+Status: planning merged in [PR #373](https://github.com/davidmigloz/ai_clients_dart/pull/373);
+speech #366 implemented pending merge, six runtime tickets pending.
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Phase 4 is complete: [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365)
 merged October 8, 2026 at `fca1a3f4e453d88caed9ffa573d4ec665126c3cb`, closing #360
 after all 14 final-head CI contexts completed (13 successes, standard Test(all) skip).
 Scope: seven independently usable implementation tickets, repository 24–30.
-This planning change implements no runtime API and claims no new runtime acceptance.
+The planning specification claims no runtime acceptance; speech implementation
+has its separate [acceptance record](reviews/24-speech.md).
 
 ## Outcome and boundaries
 

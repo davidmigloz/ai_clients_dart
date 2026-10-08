@@ -1,6 +1,6 @@
 # Generate buffered and streamed speech with current voices and options
 
-Status: specified; runtime implementation pending.
+Status: implemented and independently approved; runtime PR merge gate pending.
 GitHub: [#366](https://github.com/davidmigloz/ai_clients_dart/issues/366).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 5 Audio and Live](../audio-live.md), AUDIO-SPEECH-01–04.
@@ -12,17 +12,17 @@ Generate buffered and streamed speech with current voices and options through pu
 
 ## Acceptance criteria
 
-- [ ] Buffered client.audio.speech.create keeps its Uint8List return; explicit byte and SSE streams select their modes and reject incompatible options before auth/request work; audio/SSE Accept headers match their actual media.
-- [ ] Closed CreateSpeechRequest supports instructions, six formats, audio/sse, speed 0.25–4, input/instructions up to 4,096 Unicode characters, open models and typed open/custom voices; all 13 named voices have conveniences.
-- [ ] Existing const built-in requests and named voice constants remain compatible where practical; any enum.values/exhaustive switch change has migration. No untyped Object voice or invented language/format field.
-- [ ] Both speech SSE components preserve required audio/usage, all three integer token counts, unknown events/metadata and original Base64 strings. An explicit decode helper yields raw bytes without a data URL.
-- [ ] Public byte/SSE fixtures cover split UTF-8/lines/events, malformed known payloads, non-2xx error context, termination, pre-auth/midstream abort, subscription cancellation, owned/borrowed clients and no consumed-data replay.
-- [ ] Offline example demonstrates buffered output and both streams with built-in/custom/open names at $0 cost; docs explain current models and tts-1/tts-1-hd SSE restrictions.
-- [ ] Docs include January 6, 2027 TTS snapshot sunset and recommended Realtime workflow migration, distinguish the unlisted mini-TTS alias and other January/February sunset dates, and never recommend a model-string swap across endpoints.
+- [x] Buffered client.audio.speech.create keeps its Uint8List return; explicit byte and SSE streams select their modes and reject incompatible options before auth/request work; audio/SSE Accept headers match their actual media.
+- [x] Closed CreateSpeechRequest supports instructions, six formats, audio/sse, speed 0.25–4, input/instructions up to 4,096 Unicode characters, open models and typed open/custom voices; all 13 named voices have conveniences.
+- [x] Existing const built-in requests and named voice constants remain compatible where practical; any enum.values/exhaustive switch change has migration. No untyped Object voice or invented language/format field.
+- [x] Both speech SSE components preserve required audio/usage, all three integer token counts, unknown events/metadata and original Base64 strings. An explicit decode helper yields raw bytes without a data URL.
+- [x] Public byte/SSE fixtures cover split UTF-8/lines/events, malformed known payloads, non-2xx error context, termination, pre-auth/midstream abort, subscription cancellation, owned/borrowed clients and no consumed-data replay.
+- [x] Offline example demonstrates buffered output and both streams with built-in/custom/open names at $0 cost; docs explain current models and tts-1/tts-1-hd SSE restrictions.
+- [x] Docs include January 6, 2027 TTS snapshot sunset and recommended Realtime workflow migration, distinguish the unlisted mini-TTS alias and other January/February sunset dates, and never recommend a model-string swap across endpoints.
 
-- [ ] Changed models cover every declared field/variant, optional/null/absence, immutable parsed ownership, complete copy/clear, equality/hash and safe diagnostics. Known malformed values fail contextually; future receive-only metadata and closed writable admission remain distinct.
-- [ ] Public factories/resources/parsers and real canonical manifest mappings are verified; no fake components or diagnostic exclusions. README/llms, runnable offline example and any actual breaking migration are complete.
-- [ ] Focused public fixtures pass VM/Chrome JavaScript/Wasm where applicable; format → fix → fatal-info analysis, package unit suite and full OpenAPI toolkit evidence are recorded. Unrelated diagnostics/remaining parity gaps remain visible and classified.
+- [x] Changed models cover every declared field/variant, optional/null/absence, immutable parsed ownership, complete copy/clear, equality/hash and safe diagnostics. Known malformed values fail contextually; future receive-only metadata and closed writable admission remain distinct.
+- [x] Public factories/resources/parsers and real canonical manifest mappings are verified; no fake components or diagnostic exclusions. README/llms, runnable offline example and any actual breaking migration are complete.
+- [x] Focused public fixtures pass VM/Chrome JavaScript/Wasm where applicable; format → fix → fatal-info analysis, package unit suite and full OpenAPI toolkit evidence are recorded. Unrelated diagnostics/remaining parity gaps remain visible and classified.
 - [ ] Independent requirements and engineering reviews approve the final combined diff after validated findings are resolved; final-head CI is green before merge.
 
 ## Compatibility and boundaries
@@ -41,5 +41,7 @@ bumps and unrelated API families are outside this ticket.
 
 ## Completion evidence
 
-Implementation acceptance evidence will be added when the runtime PR is reviewed.
-This planning ticket is unimplemented; its unchecked criteria are not test results.
+See the [speech acceptance record](../reviews/24-speech.md) for source, model,
+public resource, documentation, platform, toolkit and bounded live-smoke evidence.
+The final review/CI merge gate remains pending until verified on the published head;
+#366 stays open until its runtime PR merges.

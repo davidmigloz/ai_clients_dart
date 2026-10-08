@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 
 import '../auth/auth_provider.dart';
+import '../utils/speech_redaction.dart';
 import 'interceptor.dart';
 
 /// Interceptor that adds authentication headers to requests.
@@ -31,7 +32,20 @@ class AuthInterceptor implements Interceptor {
     InterceptorNext next,
   ) {
     // Get auth headers from provider
-    final authHeaders = authProvider.getHeaders();
+    final providerHeaders = authProvider.getHeaders();
+
+    // Speech selects its required media headers at the resource boundary.
+    // Keep those request-level values when refreshing provider credentials.
+    // Filter before copying the body: a conflicting charset could otherwise
+    // change its encoding before a later header correction.
+    final authHeaders = isSpeechRequest(context.request)
+        ? {
+            for (final entry in providerHeaders.entries)
+              if (entry.key.toLowerCase() != 'accept' &&
+                  entry.key.toLowerCase() != 'content-type')
+                entry.key: entry.value,
+          }
+        : providerHeaders;
 
     // Create a new request with auth headers
     final request = _cloneRequestWithHeaders(context.request, authHeaders);

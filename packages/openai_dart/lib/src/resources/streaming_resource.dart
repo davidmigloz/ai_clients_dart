@@ -179,6 +179,7 @@ mixin StreamingResource on ResourceBase {
     String body,
     String requestId, {
     Map<String, String> headers = const {},
+    Object? cause,
   }) {
     final retryAfter = parseRetryAfter(headers);
     String message;
@@ -210,6 +211,7 @@ mixin StreamingResource on ResourceBase {
       requestId: requestId,
       body: json,
       retryAfter: retryAfter,
+      cause: cause,
     );
   }
 

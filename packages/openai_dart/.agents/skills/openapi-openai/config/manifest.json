@@ -587,14 +587,11 @@
     },
     "CreateSpeechRequest": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "SpeechRequest",
       "file": "lib/src/models/audio/speech_request.dart",
       "schema": "CreateSpeechRequest",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Missing copyWith. Spec has new fields (instructions, stream_format) not yet in Dart."
+      "note": "Complete closed speech request, current instructions/stream format, typed built-in/open/custom voice admission and const compatibility; canonical optional fields remain nonnull."
     },
     "CreateTranscriptionRequest": {
       "spec": "main",
@@ -1728,14 +1725,11 @@
     },
     "VoiceIdsOrCustomVoice": {
       "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "file": null,
+      "kind": "object",
+      "dart_class": "AudioVoice",
+      "file": "lib/src/models/audio/audio_voice.dart",
       "schema": "VoiceIdsOrCustomVoice",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred. Current voice enums sufficient for known voice IDs."
+      "note": "Actual mixed open-string/closed custom {id} component represented by the public AudioVoice interface and NamedAudioVoice/CustomAudioVoice values; the interface remains open so the existing SpeechVoice enum implements it. Speech serialization validates custom implementations. Object scanner cannot extract scalar/object anyOf fields; public union fixtures verify both wire branches. Chat integration remains ticket #367."
     },
     "Message": {
       "spec": "main",
@@ -5234,6 +5228,30 @@
       "file": "lib/src/models/responses/response_error.dart",
       "schema": "BetaResponseError",
       "note": "Identical canonical beta failed-response component; shares ResponseError. Distinct failed-response code/message plus optional shared misalignment; canonical code nonnull closed enum. Legacy type/param, omitted/null code and unknown strings remain explicitly receive-only. No declared headers. Effective raw metadata/replacement/value contracts tested."
+    },
+    "CreateSpeechResponseStreamEvent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "SpeechStreamEvent",
+      "file": "lib/src/models/audio/speech_stream_event.dart",
+      "schema": "CreateSpeechResponseStreamEvent",
+      "note": "Actual speech SSE component; immutable received future metadata, complete value/copy contracts and raw Base64 audio distinct from inline-file data URLs. Usage is the real inline done-event object, not a fabricated component."
+    },
+    "SpeechAudioDeltaEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SpeechAudioDeltaEvent",
+      "file": "lib/src/models/audio/speech_stream_event.dart",
+      "schema": "SpeechAudioDeltaEvent",
+      "note": "Actual speech SSE component; immutable received future metadata, complete value/copy contracts and raw Base64 audio distinct from inline-file data URLs. Usage is the real inline done-event object, not a fabricated component."
+    },
+    "SpeechAudioDoneEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SpeechAudioDoneEvent",
+      "file": "lib/src/models/audio/speech_stream_event.dart",
+      "schema": "SpeechAudioDoneEvent",
+      "note": "Actual speech SSE component; immutable received future metadata, complete value/copy contracts and raw Base64 audio distinct from inline-file data URLs. Usage is the real inline done-event object, not a fabricated component."
     }
   }
 }

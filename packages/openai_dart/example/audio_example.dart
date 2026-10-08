@@ -50,20 +50,21 @@ Future<void> main() async {
     }
     print('');
 
-    // Text-to-Speech with HD quality
-    print('=== HD Quality ===\n');
+    // Model-directed speech delivery
+    print('=== Speech Instructions ===\n');
 
     final hdBytes = await client.audio.speech.create(
       const SpeechRequest(
         model: 'gpt-4o-mini-tts',
-        input: 'This is high definition audio quality.',
+        input: 'Speak this sentence calmly and clearly.',
+        instructions: 'Use a calm, clear delivery.',
         voice: SpeechVoice.onyx,
       ),
     );
 
     final hdFile = File('output_hd.mp3');
     await hdFile.writeAsBytes(hdBytes);
-    print('Saved HD audio to ${hdFile.path}\n');
+    print('Saved instructed audio to ${hdFile.path}\n');
 
     // Text-to-Speech with speed adjustment
     print('=== Speed Adjustment ===\n');

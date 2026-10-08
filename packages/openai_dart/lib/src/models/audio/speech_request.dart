@@ -1,6 +1,10 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
+import '../common/json_helpers.dart';
+import 'audio_json_helpers.dart';
+import 'audio_voice.dart';
 
 /// A request to generate speech from text.
 ///
@@ -22,28 +26,65 @@ class SpeechRequest {
     required this.model,
     required this.input,
     required this.voice,
+    this.instructions,
     this.responseFormat,
     this.speed,
+    this.streamFormat,
   });
 
   /// Creates a [SpeechRequest] from JSON.
   factory SpeechRequest.fromJson(Map<String, dynamic> json) {
+    final snapshot = snapshotAudioJson(
+      json,
+      'SpeechRequest',
+      knownKeys: _knownKeys,
+    );
+    requireClosedAudioJson(snapshot, _knownKeys, 'SpeechRequest');
+    final voiceValue = snapshot['voice'];
+    final parsedVoice = AudioVoice.fromJson(
+      voiceValue is String
+          ? voiceValue
+          : requireJsonObject(voiceValue, 'SpeechRequest.voice'),
+    );
+    final voice = parsedVoice is NamedAudioVoice
+        ? _knownVoice(parsedVoice.name) ?? parsedVoice
+        : parsedVoice;
+    final input = requireJsonString(snapshot['input'], 'SpeechRequest.input');
+    final instructions = optionalJsonString(
+      snapshot,
+      'instructions',
+      'SpeechRequest',
+    );
+    _validateLength(input, 'SpeechRequest.input');
+    if (instructions != null) {
+      _validateLength(instructions, 'SpeechRequest.instructions');
+    }
     return SpeechRequest(
-      model: json['model'] as String,
-      input: json['input'] as String,
-      voice: SpeechVoice.fromJson(json['voice'] as String),
-      responseFormat: json['response_format'] != null
-          ? SpeechResponseFormat.fromJson(json['response_format'] as String)
+      model: requireJsonString(snapshot['model'], 'SpeechRequest.model'),
+      input: input,
+      voice: voice,
+      instructions: instructions,
+      responseFormat: snapshot.containsKey('response_format')
+          ? _parseResponseFormat(
+              snapshot['response_format'],
+              'SpeechRequest.response_format',
+            )
           : null,
-      speed: (json['speed'] as num?)?.toDouble(),
+      speed: snapshot.containsKey('speed')
+          ? _parseSpeed(snapshot['speed'])
+          : null,
+      streamFormat: snapshot.containsKey('stream_format')
+          ? _parseStreamFormat(
+              snapshot['stream_format'],
+              'SpeechRequest.stream_format',
+            )
+          : null,
     );
   }
 
   /// The TTS model to use.
   ///
-  /// Available models:
-  /// - `tts-1` - Standard quality, lower latency
-  /// - `tts-1-hd` - Higher quality audio
+  /// Accepts current and future provider model IDs. Some options are model-specific.
   final String model;
 
   /// The text to generate audio for.
@@ -52,7 +93,13 @@ class SpeechRequest {
   final String input;
 
   /// The voice to use for speech generation.
-  final SpeechVoice voice;
+  /// Existing [SpeechVoice] values, open names and custom ID references are supported.
+  final AudioVoice voice;
+
+  /// Optional instructions for voice delivery, limited to 4,096 Unicode characters.
+  ///
+  /// Unsupported by `tts-1` and `tts-1-hd`; omitted when null.
+  final String? instructions;
 
   /// The audio format for the output.
   ///
@@ -64,14 +111,40 @@ class SpeechRequest {
   /// Range: 0.25 to 4.0. Default is 1.0.
   final double? speed;
 
-  /// Converts to JSON.
-  Map<String, dynamic> toJson() => {
-    'model': model,
-    'input': input,
-    'voice': voice.toJson(),
-    if (responseFormat != null) 'response_format': responseFormat!.toJson(),
-    if (speed != null) 'speed': speed,
+  /// Audio byte streaming or SSE events; the server defaults to audio when omitted.
+  ///
+  /// SSE is unsupported by `tts-1` and `tts-1-hd`.
+  final SpeechStreamFormat? streamFormat;
+
+  static const _knownKeys = {
+    'model',
+    'input',
+    'voice',
+    'instructions',
+    'response_format',
+    'speed',
+    'stream_format',
   };
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() {
+    _validateLength(input, 'SpeechRequest.input');
+    if (instructions != null) {
+      _validateLength(instructions!, 'SpeechRequest.instructions');
+    }
+    if (speed != null) _parseSpeed(speed);
+    // An interface implementation must still produce one exact writable branch.
+    final voiceJson = AudioVoice.fromJson(voice.toJson()).toJson();
+    return {
+      'model': model,
+      'input': input,
+      'voice': voiceJson,
+      if (instructions != null) 'instructions': instructions,
+      if (responseFormat != null) 'response_format': responseFormat!.toJson(),
+      if (speed != null) 'speed': speed,
+      if (streamFormat != null) 'stream_format': streamFormat!.toJson(),
+    };
+  }
 
   /// Creates a copy with the given fields replaced.
   ///
@@ -79,18 +152,32 @@ class SpeechRequest {
   SpeechRequest copyWith({
     String? model,
     String? input,
-    SpeechVoice? voice,
+    AudioVoice? voice,
+    Object? instructions = unsetCopyWithValue,
     Object? responseFormat = unsetCopyWithValue,
     Object? speed = unsetCopyWithValue,
+    Object? streamFormat = unsetCopyWithValue,
   }) {
     return SpeechRequest(
       model: model ?? this.model,
       input: input ?? this.input,
       voice: voice ?? this.voice,
-      responseFormat: responseFormat == unsetCopyWithValue
+      instructions: identical(instructions, unsetCopyWithValue)
+          ? this.instructions
+          : instructions == null
+          ? null
+          : requireJsonString(instructions, 'SpeechRequest.instructions'),
+      responseFormat: identical(responseFormat, unsetCopyWithValue)
           ? this.responseFormat
-          : responseFormat as SpeechResponseFormat?,
-      speed: speed == unsetCopyWithValue ? this.speed : speed as double?,
+          : _copyResponseFormat(responseFormat),
+      speed: identical(speed, unsetCopyWithValue)
+          ? this.speed
+          : speed == null
+          ? null
+          : _parseSpeed(speed),
+      streamFormat: identical(streamFormat, unsetCopyWithValue)
+          ? this.streamFormat
+          : _copyStreamFormat(streamFormat),
     );
   }
 
@@ -99,22 +186,20 @@ class SpeechRequest {
       identical(this, other) ||
       other is SpeechRequest &&
           runtimeType == other.runtimeType &&
-          model == other.model &&
-          input == other.input &&
-          voice == other.voice &&
-          responseFormat == other.responseFormat &&
-          speed == other.speed;
+          mapsDeepEqual(toJson(), other.toJson());
 
   @override
-  int get hashCode => Object.hash(model, input, voice, responseFormat, speed);
+  int get hashCode => Object.hash(runtimeType, mapDeepHashCode(toJson()));
 
   @override
   String toString() =>
-      'SpeechRequest(model: $model, voice: $voice, ${input.length} chars)';
+      'SpeechRequest(model: [REDACTED], input: ${input.runes.length} chars, '
+      'voice: [REDACTED], instructions: ${audioPresence(instructions)}, '
+      'responseFormat: $responseFormat, speed: $speed, streamFormat: $streamFormat)';
 }
 
 /// Available voices for text-to-speech.
-enum SpeechVoice {
+enum SpeechVoice implements AudioVoice {
   /// Alloy voice.
   alloy._('alloy'),
 
@@ -131,21 +216,46 @@ enum SpeechVoice {
   nova._('nova'),
 
   /// Shimmer voice.
-  shimmer._('shimmer');
+  shimmer._('shimmer'),
+
+  /// Ash voice.
+  ash._('ash'),
+
+  /// Ballad voice.
+  ballad._('ballad'),
+
+  /// Coral voice.
+  coral._('coral'),
+
+  /// Sage voice.
+  sage._('sage'),
+
+  /// Verse voice.
+  verse._('verse'),
+
+  /// Marin voice.
+  marin._('marin'),
+
+  /// Cedar voice.
+  cedar._('cedar');
 
   const SpeechVoice._(this._value);
 
   /// Creates from JSON string.
   factory SpeechVoice.fromJson(String json) {
-    return values.firstWhere(
-      (e) => e._value == json,
-      orElse: () => throw FormatException('Unknown voice: $json'),
-    );
+    final voice = _knownVoice(json);
+    if (voice == null) {
+      throw const FormatException(
+        'SpeechVoice: expected a supported named voice',
+      );
+    }
+    return voice;
   }
 
   final String _value;
 
   /// Converts to JSON string.
+  @override
   String toJson() => _value;
 
   @override
@@ -176,10 +286,7 @@ enum SpeechResponseFormat {
 
   /// Creates from JSON string.
   factory SpeechResponseFormat.fromJson(String json) {
-    return values.firstWhere(
-      (e) => e._value == json,
-      orElse: () => throw FormatException('Unknown audio format: $json'),
-    );
+    return _parseResponseFormat(json, 'SpeechResponseFormat');
   }
 
   final String _value;
@@ -189,4 +296,82 @@ enum SpeechResponseFormat {
 
   @override
   String toString() => _value;
+}
+
+/// Wire representation of streamed speech output.
+enum SpeechStreamFormat {
+  /// Stream binary audio bytes.
+  audio._('audio'),
+
+  /// Stream typed Server-Sent Events.
+  sse._('sse');
+
+  const SpeechStreamFormat._(this._value);
+
+  /// Parses an exact, closed stream format.
+  factory SpeechStreamFormat.fromJson(String json) =>
+      _parseStreamFormat(json, 'SpeechStreamFormat');
+
+  final String _value;
+
+  /// Serializes the wire value.
+  String toJson() => _value;
+
+  @override
+  String toString() => _value;
+}
+
+SpeechVoice? _knownVoice(String value) {
+  for (final voice in SpeechVoice.values) {
+    if (voice.toJson() == value) return voice;
+  }
+  return null;
+}
+
+SpeechResponseFormat _parseResponseFormat(Object? value, String context) {
+  final string = requireJsonString(value, context);
+  for (final format in SpeechResponseFormat.values) {
+    if (format.toJson() == string) return format;
+  }
+  throw FormatException('$context: expected a supported audio format');
+}
+
+SpeechStreamFormat _parseStreamFormat(Object? value, String context) {
+  final string = requireJsonString(value, context);
+  for (final format in SpeechStreamFormat.values) {
+    if (format.toJson() == string) return format;
+  }
+  throw FormatException('$context: expected audio or sse');
+}
+
+SpeechResponseFormat? _copyResponseFormat(Object? value) {
+  if (value == null || value is SpeechResponseFormat) {
+    return value as SpeechResponseFormat?;
+  }
+  throw const FormatException(
+    'SpeechRequest.response_format: expected a SpeechResponseFormat',
+  );
+}
+
+SpeechStreamFormat? _copyStreamFormat(Object? value) {
+  if (value == null || value is SpeechStreamFormat) {
+    return value as SpeechStreamFormat?;
+  }
+  throw const FormatException(
+    'SpeechRequest.stream_format: expected a SpeechStreamFormat',
+  );
+}
+
+void _validateLength(String value, String context) {
+  if (value.runes.length > 4096) {
+    throw FormatException('$context: expected at most 4096 Unicode characters');
+  }
+}
+
+double _parseSpeed(Object? value) {
+  final speed = requireAudioNumber(value, 'SpeechRequest.speed');
+  if (speed < 0.25 || speed > 4) {
+    throw const FormatException('SpeechRequest.speed: expected 0.25 through 4');
+  }
+  return speed;
 }

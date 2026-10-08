@@ -236,8 +236,11 @@ README/llms documentation and a runnable local HTTP example. All four slices hav
 The [Audio and Live specification](audio-live.md) records seven independently
 usable slices, exact canonical/guide/SDK disagreements, protocol ownership and
 public offline acceptance boundaries. The [planning review](reviews/24-audio-live-planning.md)
-records source checks and independent findings. Runtime implementation is pending;
-no live API request, recording upload or phone call is part of planning.
+records source checks and independent findings. Planning [PR #373](https://github.com/davidmigloz/ai_clients_dart/pull/373)
+merged October 8, 2026 at `4058318979cf8ab999e8138015b52b3dc75ffbf6` after
+all 14 CI contexts completed (13 successes, standard Test(all) skip). Speech #366
+is implemented with [acceptance evidence](reviews/24-speech.md), pending runtime
+PR merge; the other six implementation tickets remain pending.
 
 | Repository ticket | Demonstrable outcome | Prerequisite |
 | --- | --- | --- |
@@ -259,8 +262,8 @@ These slices do not establish full Realtime/Chat/shared Responses parity.
 
 ## Remaining roadmap
 
-Phases 1–4 are complete for their specified tickets. Phase 5 Audio/Live has seven specified implementation tickets; runtime work is
-pending. Later phases remain candidate outcomes pending
+Phases 1–4 are complete for their specified tickets. Phase 5 Audio/Live has seven specified implementation tickets; speech #366 is
+implemented pending merge and the other six remain pending. Later phases remain candidate outcomes pending
 detailed specifications. Keep all audited gaps visible even when deferred.
 
 | Phase | Demonstrable outcomes | Dependencies and scope notes |
@@ -394,6 +397,17 @@ Sources: [cache diagnostics](https://developers.openai.com/api/docs/guides/promp
   are nonnull integers 1–100 with default 20; parameter-order/description changes are
   also reviewed. No schemas or Phase 4 routes changed. Toolkit review missed the
   parameter delta; independent normalized comparison records it for Phase 6.
+- A final October 8 check found newer [OpenAPI 35b0d4e](https://github.com/openai/openai-openapi/commit/35b0d4ebb841f2706e1c0aa31c7d47ecdd43c71d),
+  published at 16:33:26 UTC. Five normalized additions concern Agents session
+  spending control: optional nullable `spend_control` on create/update, optional
+  returned control, and distinct closed request/resource components. Request
+  `limit` is required nullable; positive limits are USD cents 1–4,503,599,627,370,495.
+  Create omission/null is unlimited; update omission retains and null or a null limit removes the
+  limit without resetting recorded spend. Returned `limit` is required nonnull;
+  `consumed` is required nullable, nonnegative best-effort whole USD cents.
+  Unlimited sessions omit returned control. These contracts join Phase 6 inventory.
+  All Speech request/voice/event contracts remain unchanged; #366 keeps its
+  reviewed 506aff0a canonical pin and does not implement the Agents additions.
 - Vaults: ten credential/vault operations, including credential networking,
   environment-variable secrets, metadata, and rotation.
 - Live: seven HTTP operations plus transport/event and delegation support.

@@ -6,6 +6,40 @@ import 'package:openai_dart/openai_dart.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('public non-Speech errors honor advertised response charset', () async {
+    final bytes = latin1.encode('café');
+    final transport = MockClient((request) async {
+      expect(request.url.path, '/v1/models');
+      return http.Response.bytes(
+        bytes,
+        400,
+        headers: {
+          'content-type': 'text/plain; charset=iso-8859-1',
+          'x-request-id': 'req-charset-fixture',
+        },
+        request: request,
+      );
+    });
+    final client = OpenAIClient(
+      config: const OpenAIConfig(retryPolicy: RetryPolicy(maxRetries: 0)),
+      httpClient: transport,
+    );
+    addTearDown(client.close);
+    addTearDown(transport.close);
+    try {
+      await client.models.list();
+      fail('Expected BadRequestException');
+    } on BadRequestException catch (error) {
+      expect(error.message, 'café');
+      expect(error.requestId, 'req-charset-fixture');
+      expect(error.toString(), contains('café'));
+      final response = error.cause! as http.Response;
+      expect(response.body, 'café');
+      expect(response.bodyBytes, bytes);
+      expect(response.request?.url.path, '/v1/models');
+    }
+  });
+
   for (final status in [429, 503]) {
     for (final headers in <Map<String, String>>[
       {'retry-after-ms': '1.2345', 'retry-after': '9'},
