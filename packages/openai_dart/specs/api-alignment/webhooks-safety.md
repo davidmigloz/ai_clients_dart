@@ -1,6 +1,7 @@
 # Webhooks and safety: Phase 4 specification
 
 Status: independently reviewed specification; implementation pending.
+Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) is open for review.
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Scope: four independently demonstrable implementation tickets, repository 20–23.
 Planning changes do not implement these capabilities.

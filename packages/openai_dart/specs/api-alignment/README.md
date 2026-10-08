@@ -210,7 +210,8 @@ and later-family gaps stay in the inventory.
 The [Webhooks and safety specification](webhooks-safety.md) records 17 requirement
 IDs, exact received/subscription inventories, signature policy, permission and
 error-shape boundaries. [Planning review](reviews/20-webhooks-safety-planning.md)
-records independent source/architecture checks. These tickets are specified;
+records independent source/architecture checks. Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) is open
+for review. These tickets are specified;
 implementation and runtime acceptance remain pending.
 
 | Ticket | Demonstrable outcome | Prerequisite |
