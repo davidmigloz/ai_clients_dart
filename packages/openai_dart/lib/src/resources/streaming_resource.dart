@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 
 import '../client/retry_after.dart';
 import '../errors/exceptions.dart';
+import '../utils/monitoring_error_redaction.dart';
 import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
 
@@ -334,7 +335,9 @@ mixin StreamingResource on ResourceBase {
       message = 'Unknown stream error';
     }
 
-    Logger('OpenAIClient').warning('Inline stream error: $message');
+    Logger('OpenAIClient').warning(
+      'Inline stream error: ${redactMonitoringErrorValue(message, json)}',
+    );
 
     // Strip internal `_event` field and encode as JSON for partialData
     final cleanJson = Map<String, dynamic>.from(json)

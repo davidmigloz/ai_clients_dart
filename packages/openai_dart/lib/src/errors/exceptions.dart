@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../models/responses/misalignment_details.dart';
+import '../utils/monitoring_error_redaction.dart';
 import '../utils/webhooks/signing_secret_redaction.dart';
 
 /// Base exception class for OpenAI HTTP and client transport errors.
@@ -45,6 +47,7 @@ class ApiException extends OpenAIException {
     this.code,
     this.requestId,
     this.body,
+    this._misalignment,
     Object? cause,
   }) : super(message, cause: cause);
 
@@ -66,21 +69,41 @@ class ApiException extends OpenAIException {
   /// The raw response body, if available.
   final Map<String, dynamic>? body;
 
+  final ResponsesMisalignmentDetails? _misalignment;
+
+  /// Optional typed monitoring details, preserved without changing this failure.
+  ///
+  /// Malformed optional metadata returns null. HTTP status, message, code,
+  /// request ID and the original body remain available for investigation.
+  /// These passive details perform no continuation or workflow action.
+  ResponsesMisalignmentDetails? get misalignment =>
+      _misalignment ?? _parseMisalignment(body);
+
+  String? _diagnosticField(String? value) => redactMonitoringErrorValue(
+    redactWebhookSecretErrorValue(value, body),
+    body,
+    redact: misalignment != null,
+  );
+
+  String get _diagnosticMessage => _diagnosticField(message)!;
+
   @override
   String toString() {
-    final diagnosticMessage = redactWebhookSecretErrorValue(message, body);
+    final diagnosticMessage = _diagnosticMessage;
     final buffer = StringBuffer('ApiException: $diagnosticMessage')
       ..write(' (status: $statusCode');
     if (type != null) {
-      buffer.write(', type: ${redactWebhookSecretErrorValue(type, body)}');
+      buffer.write(', type: ${_diagnosticField(type)}');
     }
     if (code != null) {
-      buffer.write(', code: ${redactWebhookSecretErrorValue(code, body)}');
+      buffer.write(', code: ${_diagnosticField(code)}');
     }
     if (param != null) {
-      buffer.write(', param: ${redactWebhookSecretErrorValue(param, body)}');
+      buffer.write(', param: ${_diagnosticField(param)}');
     }
-    if (requestId != null) buffer.write(', request_id: $requestId');
+    if (requestId != null) {
+      buffer.write(', request_id: ${_diagnosticField(requestId)}');
+    }
     buffer.write(')');
     return buffer.toString();
   }
@@ -109,11 +132,12 @@ class AuthenticationException extends ApiException {
     super.param,
     super.requestId,
     super.body,
+    super.misalignment,
     super.cause,
   }) : super(statusCode: 401);
 
   @override
-  String toString() => 'AuthenticationException: $message';
+  String toString() => 'AuthenticationException: $_diagnosticMessage';
 }
 
 /// Exception thrown when access is denied (HTTP 403).
@@ -130,11 +154,12 @@ class PermissionDeniedException extends ApiException {
     super.param,
     super.requestId,
     super.body,
+    super.misalignment,
     super.cause,
   }) : super(statusCode: 403);
 
   @override
-  String toString() => 'PermissionDeniedException: $message';
+  String toString() => 'PermissionDeniedException: $_diagnosticMessage';
 }
 
 /// Exception thrown when a resource is not found (HTTP 404).
@@ -151,11 +176,12 @@ class NotFoundException extends ApiException {
     super.param,
     super.requestId,
     super.body,
+    super.misalignment,
     super.cause,
   }) : super(statusCode: 404);
 
   @override
-  String toString() => 'NotFoundException: $message';
+  String toString() => 'NotFoundException: $_diagnosticMessage';
 }
 
 /// Exception thrown when the request conflicts with current state (HTTP 409).
@@ -171,11 +197,12 @@ class ConflictException extends ApiException {
     super.param,
     super.requestId,
     super.body,
+    super.misalignment,
     super.cause,
   }) : super(statusCode: 409);
 
   @override
-  String toString() => 'ConflictException: $message';
+  String toString() => 'ConflictException: $_diagnosticMessage';
 }
 
 /// Exception thrown when the request cannot be processed (HTTP 422).
@@ -192,11 +219,12 @@ class UnprocessableEntityException extends ApiException {
     super.param,
     super.requestId,
     super.body,
+    super.misalignment,
     super.cause,
   }) : super(statusCode: 422);
 
   @override
-  String toString() => 'UnprocessableEntityException: $message';
+  String toString() => 'UnprocessableEntityException: $_diagnosticMessage';
 }
 
 /// Exception thrown when rate limited (HTTP 429).
@@ -227,6 +255,7 @@ class RateLimitException extends ApiException {
     super.param,
     super.requestId,
     super.body,
+    super.misalignment,
     this.retryAfter,
     super.cause,
   }) : super(statusCode: 429);
@@ -239,9 +268,9 @@ class RateLimitException extends ApiException {
   @override
   String toString() {
     if (retryAfter case final duration?) {
-      return 'RateLimitException: $message (retry after: ${_formatRetryAfter(duration)})';
+      return 'RateLimitException: $_diagnosticMessage (retry after: ${_formatRetryAfter(duration)})';
     }
-    return 'RateLimitException: $message';
+    return 'RateLimitException: $_diagnosticMessage';
   }
 }
 
@@ -258,11 +287,12 @@ class BadRequestException extends ApiException {
     super.param,
     super.requestId,
     super.body,
+    super.misalignment,
     super.cause,
   }) : super(statusCode: 400);
 
   @override
-  String toString() => 'BadRequestException: $message';
+  String toString() => 'BadRequestException: $_diagnosticMessage';
 }
 
 /// Exception thrown when an internal server error occurs (HTTP 5xx).
@@ -279,6 +309,7 @@ class InternalServerException extends ApiException {
     super.param,
     super.requestId,
     super.body,
+    super.misalignment,
     this.retryAfter,
     super.cause,
   });
@@ -290,7 +321,7 @@ class InternalServerException extends ApiException {
 
   @override
   String toString() =>
-      'InternalServerException: $message (status: $statusCode'
+      'InternalServerException: $_diagnosticMessage (status: $statusCode'
       '${retryAfter == null ? '' : ', retry after: ${_formatRetryAfter(retryAfter!)}'})';
 }
 
@@ -474,7 +505,8 @@ class StreamException extends OpenAIException {
   final String? partialData;
 
   @override
-  String toString() => 'StreamException: $message';
+  String toString() =>
+      'StreamException: ${redactMonitoringErrorValue(message, null, redact: partialData != null && redactMonitoringErrorBody(partialData!) != partialData)}';
 }
 
 /// Creates the appropriate exception based on HTTP status code.
@@ -489,9 +521,11 @@ ApiException createApiException({
   String? param,
   String? requestId,
   Map<String, dynamic>? body,
+  ResponsesMisalignmentDetails? misalignment,
   Duration? retryAfter,
   Object? cause,
 }) {
+  final details = misalignment ?? _parseMisalignment(body);
   return switch (statusCode) {
     400 => BadRequestException(
       message: message,
@@ -500,6 +534,7 @@ ApiException createApiException({
       param: param,
       requestId: requestId,
       body: body,
+      misalignment: details,
       cause: cause,
     ),
     401 => AuthenticationException(
@@ -509,6 +544,7 @@ ApiException createApiException({
       param: param,
       requestId: requestId,
       body: body,
+      misalignment: details,
       cause: cause,
     ),
     403 => PermissionDeniedException(
@@ -518,6 +554,7 @@ ApiException createApiException({
       param: param,
       requestId: requestId,
       body: body,
+      misalignment: details,
       cause: cause,
     ),
     404 => NotFoundException(
@@ -527,6 +564,7 @@ ApiException createApiException({
       param: param,
       requestId: requestId,
       body: body,
+      misalignment: details,
       cause: cause,
     ),
     409 => ConflictException(
@@ -536,6 +574,7 @@ ApiException createApiException({
       param: param,
       requestId: requestId,
       body: body,
+      misalignment: details,
       cause: cause,
     ),
     422 => UnprocessableEntityException(
@@ -545,6 +584,7 @@ ApiException createApiException({
       param: param,
       requestId: requestId,
       body: body,
+      misalignment: details,
       cause: cause,
     ),
     429 => RateLimitException(
@@ -554,6 +594,7 @@ ApiException createApiException({
       param: param,
       requestId: requestId,
       body: body,
+      misalignment: details,
       retryAfter: retryAfter,
       cause: cause,
     ),
@@ -565,6 +606,7 @@ ApiException createApiException({
       param: param,
       requestId: requestId,
       body: body,
+      misalignment: details,
       retryAfter: retryAfter,
       cause: cause,
     ),
@@ -576,7 +618,21 @@ ApiException createApiException({
       param: param,
       requestId: requestId,
       body: body,
+      misalignment: details,
       cause: cause,
     ),
   };
+}
+
+ResponsesMisalignmentDetails? _parseMisalignment(Map<String, dynamic>? body) {
+  final error = body?['error'] ?? body;
+  if (error is! Map<String, dynamic>) return null;
+  final details = error['misalignment'];
+  if (details is! Map<String, dynamic>) return null;
+  try {
+    return ResponsesMisalignmentDetails.fromJson(details);
+  } catch (_) {
+    // Optional metadata must never mask the original HTTP failure.
+    return null;
+  }
 }

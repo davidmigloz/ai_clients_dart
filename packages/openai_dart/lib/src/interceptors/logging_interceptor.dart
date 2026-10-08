@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
+import '../utils/monitoring_error_redaction.dart';
 import '../utils/request_id.dart';
 import '../utils/webhooks/signing_secret_redaction.dart';
 import 'interceptor.dart';
@@ -82,19 +85,27 @@ class LoggingInterceptor implements Interceptor {
     try {
       final response = await next(updatedContext);
 
+      // Monitoring response values remain caller-readable but stay out of logs.
+      final responseText = _diagnosticResponseText(response);
+      final monitoringBody = redactMonitoringErrorBody(responseText);
+      final monitoringResponse = monitoringBody != responseText;
       // Log response
       final duration = DateTime.now().difference(startTime);
       final requestId = response.headers['x-request-id'] ?? correlationId;
       logger
         ..fine(
-          '← ${response.statusCode} ${request.url} (${duration.inMilliseconds}ms) [$requestId]',
+          '← ${response.statusCode} ${monitoringResponse ? '[REDACTED]' : request.url} (${duration.inMilliseconds}ms) [${monitoringResponse ? '[REDACTED]' : requestId}]',
         )
-        ..finer('  Headers: ${response.headers}');
+        ..finer(
+          '  Headers: ${monitoringResponse ? '[REDACTED]' : response.headers}',
+        );
 
-      if (logResponseBody && response.body.isNotEmpty) {
-        final diagnosticBody = redactWebhookSigningSecretBody(
-          response.body,
-          secretBearingResponse: revealsWebhookSigningSecret(request),
+      if (logResponseBody && responseText.isNotEmpty) {
+        final diagnosticBody = redactMonitoringErrorBody(
+          redactWebhookSigningSecretBody(
+            responseText,
+            secretBearingResponse: revealsWebhookSigningSecret(request),
+          ),
         );
         logger.finest('  Body: ${_truncate(diagnosticBody)}');
       }
@@ -174,5 +185,14 @@ class LoggingInterceptor implements Interceptor {
       return value;
     }
     return '${value.substring(0, maxBodyLength)}... (truncated)';
+  }
+}
+
+// Diagnostics must not make binary or malformed response decoding a failure.
+String _diagnosticResponseText(http.Response response) {
+  try {
+    return response.body;
+  } on FormatException {
+    return utf8.decode(response.bodyBytes, allowMalformed: true);
   }
 }

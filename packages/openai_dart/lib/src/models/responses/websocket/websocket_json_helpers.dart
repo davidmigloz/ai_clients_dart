@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import '../../common/json_helpers.dart';
 
 /// Validates and snapshots arbitrary JSON without including payloads in errors.
@@ -5,28 +7,42 @@ Map<String, dynamic> snapshotResponsesJson(
   Map<String, dynamic> json,
   String context,
 ) {
-  _validateJson(json, context);
+  _validateJson(json, context, HashSet<Object>.identity());
   return freezeJsonObject(json);
 }
 
-void _validateJson(Object? value, String context) {
+void _validateJson(Object? value, String context, Set<Object> ancestors) {
   if (value == null || value is String || value is bool) return;
   // Dart2JS may classify Infinity as an int. Validate finiteness for every
   // numeric representation before accepting either integers or doubles.
   if (value is num && value.isFinite) return;
   if (value is List<dynamic>) {
-    for (var index = 0; index < value.length; index++) {
-      _validateJson(value[index], '$context[$index]');
+    if (!ancestors.add(value)) {
+      throw FormatException('$context: expected acyclic JSON');
+    }
+    try {
+      for (var index = 0; index < value.length; index++) {
+        _validateJson(value[index], '$context[$index]', ancestors);
+      }
+    } finally {
+      ancestors.remove(value);
     }
     return;
   }
   if (value is Map<dynamic, dynamic>) {
-    for (final entry in value.entries) {
-      if (entry.key is! String) {
-        throw FormatException('$context: expected string object keys');
+    if (!ancestors.add(value)) {
+      throw FormatException('$context: expected acyclic JSON');
+    }
+    try {
+      for (final entry in value.entries) {
+        if (entry.key is! String) {
+          throw FormatException('$context: expected string object keys');
+        }
+        // Provider-defined keys may themselves contain sensitive text.
+        _validateJson(entry.value, '$context member', ancestors);
       }
-      // Provider-defined keys may themselves contain sensitive text.
-      _validateJson(entry.value, '$context member');
+    } finally {
+      ancestors.remove(value);
     }
     return;
   }
@@ -43,6 +59,35 @@ Map<String, dynamic> mergeResponsesJson(
     if (!knownKeys.contains(entry.key)) entry.key: entry.value,
   ...fields,
 };
+
+/// Retains future child metadata while removing omitted schema-known members.
+///
+/// Callers reconcile replacements in `copyWith` before applying this merge.
+/// Explicit parent raw metadata remains available for the new child, while
+/// typed fields always determine schema-known output.
+Map<String, dynamic> mergeResponsesModelJson(
+  Object? original,
+  Map<String, dynamic> typed,
+  Set<String> knownKeys, {
+  Map<String, Set<String>> childKeys = const {},
+}) {
+  final raw = original is Map<String, dynamic>
+      ? original
+      : const <String, dynamic>{};
+  return mergeResponsesJson(raw, knownKeys, {
+    for (final entry in typed.entries)
+      entry.key:
+          childKeys.containsKey(entry.key) &&
+              entry.value is Map<String, dynamic>
+          ? mergeResponsesModelJson(
+              raw[entry.key],
+              entry.value as Map<String, dynamic>,
+              childKeys[entry.key]!,
+              childKeys: childKeys,
+            )
+          : entry.value,
+  });
+}
 
 /// Retains nested future provider metadata when shared typed DTOs serialize.
 Map<String, dynamic> overlayResponsesJson(

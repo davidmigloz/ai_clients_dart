@@ -49,6 +49,7 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 - Conversations, containers, content provenance checks, ChatKit, and skills
 - Local signed webhook verification with 26 typed received event variants, plus project endpoint management/discovery
 - Read-only project safety alerts and organization cases through `client.safety`
+- Shared typed monitoring details on HTTP/failed Responses/WebSocket errors, with canonical flat SSE errors
 - Assistants and vector stores (deprecated — use Responses API instead)
 
 See [API Coverage](#api-coverage) for the full coverage table.
@@ -2027,6 +2028,73 @@ queuing, prompt acknowledgment and deduplication before background investigation
 See [Misalignment monitoring](https://developers.openai.com/api/docs/guides/safety-checks/misalignment-monitoring)
 and [Safety enforcement notifications](https://developers.openai.com/api/docs/guides/safety-enforcement).
 
+### How do I inspect monitoring failures?
+
+HTTP failures expose passive `ApiException.misalignment`, including a 403 received
+before streaming starts. Failed Responses expose `response.error?.misalignment`;
+WebSocket errors use `event.error.misalignment`. All share
+`ResponsesMisalignmentDetails` and `ResponsesMisalignmentSteer`, retaining their
+existing WebSocket names and direct imports.
+
+```dart
+import 'package:openai_dart/openai_dart.dart';
+
+Future<void> inspectMonitoringFailure(OpenAIClient client) async {
+  try {
+    await for (final event in client.responses.createStream(
+      const CreateResponseRequest(
+        model: 'gpt-6-sol',
+        input: ResponseInput.text('Run the requested task.'),
+      ),
+    )) {
+      switch (event) {
+        case ErrorEvent():
+          print('Flat error: code present=${event.hasCode}; '
+              'code is null=${event.code == null}.');
+        case ResponseFailedEvent(:final response):
+          print('Failed response: monitoring details present='
+              '${response.error?.misalignment != null}.');
+        default:
+          break;
+      }
+    }
+  } on PermissionDeniedException catch (error) {
+    print('HTTP ${error.statusCode}: monitoring details present='
+        '${error.misalignment != null}.');
+    // Original code, requestId and body remain readable for trusted investigation.
+  }
+}
+```
+
+Details retain an open `errorType`, optional explanation/steer and an opaque
+nullable `reviewTarget`; `hasReviewTarget` distinguishes omission from explicit
+null. Nonnull targets require 1–96 ASCII letters, digits or `._~:-` characters,
+without newlines. Parsed future
+metadata is finite and deeply immutable. HTTP optional malformed details return
+null while preserving the original exception/status/code/request ID/body and retry
+classification; malformed supplied details on failed Responses or WS models fail
+contextually. Default diagnostics and automatic monitoring response logs redact
+sensitive explanations, instructions, tokens and identifiers. Caller-readable
+values remain intact; avoid printing raw bodies or opaque strings.
+
+Flat SSE `ErrorEvent` keeps nullable `code`/`param` and sequence presence; it does
+not declare typed misalignment or headers. Failed `ResponseError` keeps its
+distinct code/message/misalignment shape and emits no invented legacy type/param.
+Legacy input/const constructor compatibility and the targeted output corrections
+are described in the [migration guide](MIGRATION.md#upcoming-structured-monitoring-errors).
+
+A policy 403 is not retried. Inspect failures without automatic reconnect,
+replay, tool execution or continuation; one blocked WS response does not close
+other multiplexed lanes. Existing opt-in recovery for unrelated transport failures
+remains available. Use IDs from trusted verified notices for separately scoped
+alert/case retrieval as shown above. `reviewTarget` is not a safety resource ID,
+and `steer.message` is not an instruction to execute. The API offers no generic
+resume/unblock method or monitoring configuration parameter.
+
+→ [Runnable offline monitoring example](example/monitoring_errors_example.dart):
+HTTP 403 before output, flat error/failed response after output, then two explicit
+scoped GETs from signed notices. Five MockClient requests, no real API key or charges.
+
 ### How do I manage webhook endpoints?
 
 The authenticated project API exposes `client.webhooks.create`, `list`, `retrieve`,
@@ -2160,6 +2228,7 @@ See the [example/](example/) directory for complete examples:
 
 | Example | Description |
 |---------|-------------|
+| [`monitoring_errors_example.dart`](example/monitoring_errors_example.dart) | Offline typed HTTP/SSE monitoring failures and explicit scoped investigation |
 | [`safety_example.dart`](example/safety_example.dart) | Offline verified notifications and separately scoped alert/case retrieval |
 | [`webhook_endpoints_example.dart`](example/webhook_endpoints_example.dart) | Offline project endpoint lifecycle, pagination, discovery, rotation and test status |
 | [`webhooks_example.dart`](example/webhooks_example.dart) | Offline signed receiver, acknowledgment and caller-owned deduplication |
@@ -2228,7 +2297,7 @@ See the [example/](example/) directory for complete examples:
 | ChatKit Beta | ✅ Full |
 | Realtime | ✅ Full (separate import) |
 | Webhooks | Local signed verification, 26 typed received events and all eight project endpoint/discovery operations |
-| Safety | Read-only project alerts and organization cases; workspace lookup remains separate |
+| Safety | Read-only project alerts/organization cases and shared HTTP/Responses/WS monitoring details; workspace lookup remains separate |
 | Assistants (Deprecated) | ✅ Full (separate import) |
 | Threads (Deprecated) | ✅ Full (separate import) |
 | Messages (Deprecated) | ✅ Full (separate import) |
@@ -2236,7 +2305,7 @@ See the [example/](example/) directory for complete examples:
 | Vector Stores (Deprecated) | ✅ Full (separate import) |
 | Completions (Legacy) | ✅ Full |
 
-Agents, Live, monitoring error details, vaults, and Administration remain part of the [API alignment roadmap](specs/api-alignment/README.md).
+Agents, Live, vaults, and Administration remain part of the [API alignment roadmap](specs/api-alignment/README.md).
 
 ## Official Documentation
 

@@ -9,6 +9,7 @@ import '../content/output_content.dart';
 import '../items/output_item.dart';
 import '../multi_agent/agent_tag.dart';
 import '../response.dart';
+import '../websocket/websocket_json_helpers.dart';
 import 'shell_call_output_delta.dart';
 
 /// A streaming event from the Responses API.
@@ -43,7 +44,7 @@ sealed class ResponseStreamEvent {
 
   /// Creates a [ResponseStreamEvent] from JSON.
   factory ResponseStreamEvent.fromJson(Map<String, dynamic> json) {
-    final type = json['type'] as String;
+    final type = requireJsonString(json['type'], 'ResponseStreamEvent.type');
     return switch (type) {
       // Response lifecycle events
       'response.created' => ResponseCreatedEvent.fromJson(json),
@@ -684,8 +685,16 @@ class ResponseFailedEvent extends ResponseStreamEvent {
   }
 
   @override
-  String toString() =>
-      'ResponseFailedEvent(response: ${response.id}, agent: $agent)';
+  String toString() {
+    final monitored =
+        response.error?.misalignment != null ||
+        response.error?.code == 'misalignment_policy_violation';
+    return monitored
+        ? 'ResponseFailedEvent(response: [REDACTED], '
+              'sequenceNumber: $sequenceNumber, '
+              'agent: ${responsesPresence(agent)})'
+        : 'ResponseFailedEvent(response: ${response.id}, agent: $agent)';
+  }
 }
 
 /// Event emitted when a response is incomplete.
@@ -5899,101 +5908,247 @@ class ResponseCustomToolCallInputDoneEvent extends ResponseStreamEvent {
 // Error Events
 // ============================================================
 
-/// Event emitted when an error occurs.
+/// Event emitted when an error occurs in a Responses SSE stream.
+///
+/// Canonical output is flat: nullable `code` and `param`, `message`, and
+/// `sequence_number`. Beta multi-agent `agent` is optional and nullable. Future
+/// fields are opaque metadata; this event declares no typed monitoring details.
+///
+/// Receiving legacy nested `error` objects remains supported. Legacy omissions
+/// of code/param in either flat or nested legacy input retain
+/// [hasCode]/[hasParam], rather than inventing values. Missing
+/// sequence numbers remain omitted for legacy inputs and existing construction;
+/// a supplied null or malformed sequence number is rejected. A message is always
+/// required. Legacy nested input normalizes to flat output, with its original
+/// envelope available in [rawJson].
 @immutable
 class ErrorEvent extends ResponseStreamEvent {
   @override
   String get type => 'error';
 
+  /// The sequence number, or null for legacy omission.
   @override
   final int? sequenceNumber;
 
-  /// The agent that owns this multi-agent streaming event.
-  ///
-  /// Only populated on the beta multi-agent protocol
-  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  /// Whether a sequence number is available rather than omitted.
+  bool get hasSequenceNumber => sequenceNumber != null;
+
+  /// The optional beta multi-agent owner.
   final AgentTag? agent;
 
-  /// The error code.
-  final String code;
+  /// Whether the nullable beta agent key was supplied, including explicit null.
+  final bool hasAgent;
 
-  /// The error message.
+  /// The nullable open provider error code.
+  final String? code;
+
+  /// Whether code is present, including explicit null.
+  final bool hasCode;
+
+  /// The error message, which can contain sensitive information.
   final String message;
 
-  /// The error parameter, if applicable.
+  /// The nullable error parameter.
   final String? param;
 
-  /// Creates an [ErrorEvent].
+  /// Whether param is present, including explicit null.
+  final bool hasParam;
+
+  /// The original input, including future metadata.
+  ///
+  /// Parsing and copies take deeply immutable snapshots. For const constructor
+  /// compatibility, caller-supplied constructor metadata must not be mutated.
+  /// Typed fields take precedence over schema-known members during serialization.
+  final Map<String, dynamic> rawJson;
+
+  final bool _legacyNestedInput;
+
+  /// Creates an [ErrorEvent], preserving existing const construction.
+  ///
+  /// New construction emits canonical nullable code/param keys by default. A
+  /// missing [sequenceNumber] remains omitted and does not become zero. To omit
+  /// a legacy nullable key, pass null with its presence flag set to false.
   const ErrorEvent({
     required this.code,
     required this.message,
     this.param,
     this.sequenceNumber,
     this.agent,
+    bool hasCode = true,
+    bool hasParam = true,
+    bool hasAgent = false,
+    this.rawJson = const {},
+  }) : hasCode = hasCode || code != null,
+       hasParam = hasParam || param != null,
+       hasAgent = hasAgent || agent != null,
+       _legacyNestedInput = false;
+
+  const ErrorEvent._parsed({
+    required this.code,
+    required this.message,
+    required this.param,
+    required this.sequenceNumber,
+    required this.agent,
+    required this.hasCode,
+    required this.hasParam,
+    required this.hasAgent,
+    required this.rawJson,
+    required this._legacyNestedInput,
   });
 
-  /// Creates an [ErrorEvent] from JSON.
+  /// Parses canonical flat fields or the documented legacy nested envelope.
+  ///
+  /// Canonical flat input requires nullable code/param keys. Receiving legacy
+  /// flat or nested omissions remains supported with explicit presence flags;
+  /// that tolerance does not claim canonical schema admission. Top-level message
+  /// takes precedence over any opaque `error` overflow member in flat input.
   factory ErrorEvent.fromJson(Map<String, dynamic> json) {
-    final error = json['error'] as Map<String, dynamic>? ?? json;
-    return ErrorEvent(
-      code: error['code'] as String? ?? 'unknown',
-      message: error['message'] as String? ?? 'Unknown error',
-      param: error['param'] as String?,
-      sequenceNumber: json['sequence_number'] as int?,
-      agent: json['agent'] != null
-          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
-          : null,
+    requireJsonType(json, 'error', 'ErrorEvent');
+    final snapshot = snapshotResponsesJson(json, 'ErrorEvent');
+    final legacyNestedInput =
+        !snapshot.containsKey('message') && snapshot['error'] != null;
+    final error = legacyNestedInput
+        ? requireJsonObject(snapshot['error'], 'ErrorEvent.error')
+        : snapshot;
+    AgentTag? agent;
+    if (snapshot['agent'] != null) {
+      final agentJson = requireJsonObject(
+        snapshot['agent'],
+        'ErrorEvent.agent',
+      );
+      agent = AgentTag(
+        agentName: requireJsonString(
+          agentJson['agent_name'],
+          'ErrorEvent.agent.agent_name',
+        ),
+      );
+    }
+    return ErrorEvent._parsed(
+      code: optionalJsonString(error, 'code', 'ErrorEvent', nullable: true),
+      message: requireJsonString(error['message'], 'ErrorEvent.message'),
+      param: optionalJsonString(error, 'param', 'ErrorEvent', nullable: true),
+      sequenceNumber: optionalJsonInt(
+        snapshot,
+        'sequence_number',
+        'ErrorEvent',
+      ),
+      agent: agent,
+      hasCode: error.containsKey('code'),
+      hasParam: error.containsKey('param'),
+      hasAgent: snapshot.containsKey('agent'),
+      rawJson: snapshot,
+      legacyNestedInput: legacyNestedInput,
     );
   }
 
   @override
-  Map<String, dynamic> toJson() => {
-    'type': type,
-    'error': {
-      'code': code,
-      'message': message,
-      if (param != null) 'param': param,
-    },
-    if (sequenceNumber != null) 'sequence_number': sequenceNumber,
-    if (agent != null) 'agent': agent!.toJson(),
-  };
+  Map<String, dynamic> toJson() {
+    snapshotResponsesJson(rawJson, 'ErrorEvent.rawJson');
+    return mergeResponsesJson(
+      rawJson,
+      {
+        'type',
+        'code',
+        'message',
+        'param',
+        'sequence_number',
+        'agent',
+        if (_legacyNestedInput) 'error',
+      },
+      {
+        'type': type,
+        if (hasCode) 'code': code,
+        'message': message,
+        if (hasParam) 'param': param,
+        if (hasSequenceNumber) 'sequence_number': sequenceNumber,
+        if (hasAgent)
+          'agent': agent == null
+              ? null
+              : mergeResponsesModelJson(
+                  rawJson['agent'],
+                  agent!.toJson(),
+                  const {'agent_name'},
+                ),
+      },
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ErrorEvent &&
           runtimeType == other.runtimeType &&
-          code == other.code &&
-          message == other.message &&
-          param == other.param &&
-          sequenceNumber == other.sequenceNumber &&
-          agent == other.agent;
+          mapsDeepEqual(toJson(), other.toJson());
 
   @override
-  int get hashCode => Object.hash(code, message, param, sequenceNumber, agent);
+  int get hashCode => Object.hash(runtimeType, mapDeepHashCode(toJson()));
 
-  /// Creates a copy with replaced values.
+  /// Copies all fields. Explicit null clears code/param to a present nullable
+  /// key, clears agent to explicit null, and omits a sequence number.
+  ///
+  /// Set a nullable presence flag to false with its value null to restore
+  /// omission. A fresh agent replacement drops the old child's future metadata;
+  /// an explicit parent [rawJson] override supplies metadata for the replacement.
   ErrorEvent copyWith({
-    String? code,
+    Object? code = unsetCopyWithValue,
     String? message,
     Object? param = unsetCopyWithValue,
     Object? sequenceNumber = unsetCopyWithValue,
     Object? agent = unsetCopyWithValue,
+    bool? hasCode,
+    bool? hasParam,
+    bool? hasAgent,
+    Map<String, dynamic>? rawJson,
   }) {
-    return ErrorEvent(
-      code: code ?? this.code,
+    final newCode = identical(code, unsetCopyWithValue)
+        ? this.code
+        : code as String?;
+    final newParam = identical(param, unsetCopyWithValue)
+        ? this.param
+        : param as String?;
+    final newAgent = identical(agent, unsetCopyWithValue)
+        ? this.agent
+        : agent as AgentTag?;
+    final retainedRaw = rawJson ?? this.rawJson;
+    final reconciledRaw =
+        rawJson == null && !identical(agent, unsetCopyWithValue)
+        ? (<String, dynamic>{
+            ...retainedRaw,
+            if (newAgent != null) 'agent': newAgent.toJson(),
+          }..removeWhere((key, _) => key == 'agent' && newAgent == null))
+        : retainedRaw;
+    return ErrorEvent._parsed(
+      code: newCode,
       message: message ?? this.message,
-      param: param == unsetCopyWithValue ? this.param : param as String?,
-      sequenceNumber: sequenceNumber == unsetCopyWithValue
+      param: newParam,
+      sequenceNumber: identical(sequenceNumber, unsetCopyWithValue)
           ? this.sequenceNumber
           : sequenceNumber as int?,
-      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
+      agent: newAgent,
+      hasCode:
+          (hasCode ?? (!identical(code, unsetCopyWithValue) || this.hasCode)) ||
+          newCode != null,
+      hasParam:
+          (hasParam ??
+              (!identical(param, unsetCopyWithValue) || this.hasParam)) ||
+          newParam != null,
+      hasAgent:
+          (hasAgent ??
+              (!identical(agent, unsetCopyWithValue) || this.hasAgent)) ||
+          newAgent != null,
+      rawJson: snapshotResponsesJson(reconciledRaw, 'ErrorEvent.rawJson'),
+      legacyNestedInput: rawJson == null && _legacyNestedInput,
     );
   }
 
   @override
   String toString() =>
-      'ErrorEvent(code: $code, message: $message, agent: $agent)';
+      'ErrorEvent(code: ${responsesPresence(code)}, hasCode: $hasCode, '
+      'message: [REDACTED], param: ${responsesPresence(param)}, '
+      'hasParam: $hasParam, sequenceNumber: $sequenceNumber, '
+      'hasSequenceNumber: $hasSequenceNumber, '
+      'agent: ${responsesPresence(agent)}, hasAgent: $hasAgent, '
+      'rawJson: ${rawJson.length} entries)';
 }
 
 // ============================================================

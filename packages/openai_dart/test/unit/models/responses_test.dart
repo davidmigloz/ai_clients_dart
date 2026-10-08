@@ -2850,7 +2850,8 @@ void main() {
           errorEvent.toJson(),
           equals({
             'type': 'error',
-            'error': {'code': 'server_error', 'message': 'Something broke'},
+            'code': 'server_error',
+            'message': 'Something broke',
             'agent': {'agent_name': 'critic'},
           }),
         );
