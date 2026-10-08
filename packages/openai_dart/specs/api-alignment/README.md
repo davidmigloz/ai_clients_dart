@@ -217,7 +217,7 @@ Endpoint management [PR #363](https://github.com/davidmigloz/ai_clients_dart/pul
 `b5159171218e8feb9f720c5db7d1d82ea3cf1a80` after green CI, closing #358; [acceptance evidence](reviews/21-webhook-endpoints.md) records its checks.
 Safety retrieval #359 is merged, independently reviewed and verified;
 [acceptance evidence](reviews/22-safety-retrieval.md) records 13,236 passing unit
-tests with two existing skips and all three focused runtimes. Safety retrieval [PR #364](https://github.com/davidmigloz/ai_clients_dart/pull/364) merged October 8, 2026 at `a466e8500aae91347f9c2d004a0854c969c6e779` after all 14 final-head contexts completed (13 successes and the standard Test(all) skip), closing #359. Monitoring errors #360 are implemented with [acceptance evidence](reviews/23-monitoring-errors.md): 305 new focused cases pass VM/Chrome JavaScript/Wasm, shared typed details and flat SSE corrections have migration guidance, and the offline investigation example costs $0. Independent requirements and engineering reviews approve the final combined diff; PR creation is pending.
+tests with two existing skips and all three focused runtimes. Safety retrieval [PR #364](https://github.com/davidmigloz/ai_clients_dart/pull/364) merged October 8, 2026 at `a466e8500aae91347f9c2d004a0854c969c6e779` after all 14 final-head contexts completed (13 successes and the standard Test(all) skip), closing #359. Monitoring errors #360 are implemented with [acceptance evidence](reviews/23-monitoring-errors.md): 305 new focused cases pass VM/Chrome JavaScript/Wasm, shared typed details and flat SSE corrections have migration guidance, and the offline investigation example costs $0. Independent requirements and engineering reviews approve the final combined diff; Implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365) is open with final-head CI pending.
 
 | Ticket | Demonstrable outcome | Prerequisite |
 | --- | --- | --- |
@@ -373,7 +373,7 @@ Sources: [cache diagnostics](https://developers.openai.com/api/docs/guides/promp
   environment-variable secrets, metadata, and rotation.
 - Live: seven HTTP operations plus transport/event and delegation support.
 - Safety: project alert/organization case retrieval is implemented/verified in
-  #359; structured monitoring details are implemented in #360, with independent final reviews approved; PR creation pending. Enterprise workspace alert notifications are
+  #359; structured monitoring details are implemented in #360, with independent final reviews approved; implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365) is open with final-head CI pending. Enterprise workspace alert notifications are
   included in its receiver, while api.chatgpt.com administrator-key lookup with
   chatgpt.enterprise.safety_alerts.read remains in Phase 7 administration inventory.
   No silent project-key routing or unsupported workspace-response guarantee.
@@ -523,4 +523,4 @@ classified delegated-serializer/value-scanner delta; no exclusions were added.
 Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) merged October 8, 2026 at `1e63d6b93bdf0028eb6925d45371b1f36deb5d7b`, closing #344, after all applicable final-head checks passed (14 contexts completed: 13 successes and the standard Test(all) skip).
 All eleven specified Phase 3 implementation tickets are merged. Phase 4 now has
 its own specification/tickets, merged receiver #357 and endpoint management #358,
-and merged safety retrieval #359; monitoring errors #360 are implemented and runtime verified, with independent final reviews approved; PR creation pending. Remaining parity inventory persists.
+and merged safety retrieval #359; monitoring errors #360 are implemented and runtime verified, with independent final reviews approved; implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365) is open with final-head CI pending. Remaining parity inventory persists.

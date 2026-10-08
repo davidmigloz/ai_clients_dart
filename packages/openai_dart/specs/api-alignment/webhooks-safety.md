@@ -1,6 +1,6 @@
 # Webhooks and safety: Phase 4 specification
 
-Status: receiver, endpoint management and safety retrieval merged; monitoring errors implemented and runtime verified; independent final reviews approved; PR creation pending.
+Status: receiver, endpoint management and safety retrieval merged; monitoring errors implemented and runtime verified; independent final reviews approved; implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365) is open with final-head CI pending.
 Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) merged October 8, 2026 at `886659c3c11cbee89335788ba918eeecd528fce0` after green CI.
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Endpoint management [PR #363](https://github.com/davidmigloz/ai_clients_dart/pull/363)
@@ -390,6 +390,6 @@ validation is separate from future runtime acceptance.
 [Ticket 23 acceptance evidence](reviews/23-monitoring-errors.md) records shared
 HTTP/failed-response/WS details, canonical flat nullable SSE errors, passive
 investigation and targeted migration guidance. 305 new focused fixtures pass
-VM/Chrome JavaScript/Wasm with $0 API cost. Independent final reviews approve the combined diff; PR creation
-is pending; #360 remains open until merge. The remaining media/Agents/Live/Admin
+VM/Chrome JavaScript/Wasm with $0 API cost. Independent final reviews approve the combined diff; implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365)
+is open with final-head CI pending; #360 remains open until merge. The remaining media/Agents/Live/Admin
 error shapes retain their separate inventory and permission boundaries.

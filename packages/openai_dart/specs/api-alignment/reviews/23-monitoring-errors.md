@@ -1,6 +1,7 @@
 # Structured monitoring errors implementation acceptance
 
-Status: implemented, independently reviewed and runtime verified; PR creation pending.
+Status: implemented, independently reviewed and runtime verified; PR #365 open; final-head CI pending.
+Implementation [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365) is open for review; #360 remains open until merge.
 Tracking: [#360](https://github.com/davidmigloz/ai_clients_dart/issues/360),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [SAFETY-ERROR-01–04](../webhooks-safety.md).
