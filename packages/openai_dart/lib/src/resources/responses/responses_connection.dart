@@ -7,8 +7,12 @@ import '../../models/responses/create_response_request.dart';
 import '../../models/responses/websocket/responses_create_event.dart';
 import '../../models/responses/websocket/responses_server_event.dart';
 import '../../models/responses/websocket/responses_steer_event.dart';
+import 'responses_recovering_websocket.dart';
+import 'responses_recovery.dart';
 import 'websocket_connector_common.dart';
 
+export 'responses_recovering_websocket.dart';
+export 'responses_recovery.dart';
 export 'websocket_connector.dart';
 
 /// A malformed incoming or unserializable outgoing Responses WebSocket frame.
@@ -63,8 +67,10 @@ class ResponsesEventBufferOverflowException implements Exception {
 /// One socket reader emits interleaved lanes on a broadcast [events] stream.
 /// Response completion and server error messages leave the socket open. A
 /// listener's cancellation removes only that listener; explicitly await [close]
-/// to release the transport. This connection does not automatically reconnect,
-/// replay requests, queue sends, or cancel a model response.
+/// to release the transport. By default it does not reconnect or queue sends.
+/// An explicitly supplied [recovery] helper may reopen sockets and queue only
+/// newly unsent frames; submitted work is never replayed. Closing the connection
+/// does not cancel a model response.
 class ResponsesConnection {
   /// Wraps an already-open socket and starts reading it immediately.
   ///
@@ -76,6 +82,7 @@ class ResponsesConnection {
     this._socket, {
     this.maxBufferedEvents = 1024,
     this.beta = false,
+    this.recovery,
   }) {
     if (maxBufferedEvents <= 0) {
       throw ArgumentError.value(
@@ -102,6 +109,9 @@ class ResponsesConnection {
   /// Whether this connection was opened with the beta multi-agent handshake.
   final bool beta;
 
+  /// Opted-in recovery state and final unsent report, or null by default.
+  final ResponsesRecovery? recovery;
+
   late final StreamController<ResponsesServerEvent> _eventController;
   StreamSubscription<WebSocketEvent>? _subscription;
   final List<_BufferedResponsesEvent> _openingBuffer = [];
@@ -125,13 +135,18 @@ class ResponsesConnection {
   /// Whether shutdown has begun or the peer has closed the socket.
   bool get isClosed => _closed;
 
-  /// Actual peer/transport close code when a close notification was observed.
+  /// Final transport close code when a close notification was observed.
   ///
-  /// This may include server or abnormal codes which callers cannot send.
+  /// Ordinary connections retain actual peer facts. Opted-in recovery reports
+  /// final logical helper facts, including the requested explicit close code;
+  /// interruption codes are available on [recovery]'s attempt context. Codes may
+  /// include server or abnormal values which callers cannot send.
   int? get closeCode => _closeCode;
 
-  /// Actual peer/transport close reason when a notification was observed.
+  /// Final transport close reason when a notification was observed.
   ///
+  /// With opted-in recovery this is the final logical helper reason;
+  /// interruption reasons are retained in the recovery attempt context.
   /// A reason may contain service information; avoid logging it indiscriminately.
   String? get closeReason => _closeReason;
 
@@ -176,8 +191,9 @@ class ResponsesConnection {
   }
 
   void _handleSocketEvent(WebSocketEvent event) {
-    // Close notifications carry actual transport facts, including during an
-    // explicit close. Other data after shutdown has begun is ignored.
+    // Close notifications carry final transport facts: actual peer facts for
+    // ordinary sockets, logical helper facts with recovery. Other data after
+    // shutdown has begun is ignored.
     if (event case CloseReceived(:final code, :final reason)) {
       _closeCode = code;
       _closeReason = reason;
@@ -289,10 +305,13 @@ class ResponsesConnection {
     unawaited(_eventController.close());
   }
 
-  /// Sends one typed `response.create` frame immediately.
+  /// Sends one typed `response.create` frame or queues it during opted-in recovery.
   ///
-  /// GA connections reject beta-only `multiAgent` configuration. Send failures
-  /// end the transport and are thrown as [ResponsesTransportException].
+  /// GA connections reject beta-only `multiAgent` configuration. Ordinary
+  /// socket failures close the connection and throw [ResponsesTransportException].
+  /// With recovery enabled, [ResponsesSendQueueOverflowException] rejects only
+  /// the new frame and leaves recovery active. An attempted write failure closes
+  /// the connection with [ResponsesDeliveryUnknownException]; it is never retried.
   void send(ResponsesCreateEvent event) {
     if (_closed) throw StateError('Responses WebSocket connection is closed');
     if (!beta && event.request.multiAgent != null) {
@@ -314,7 +333,17 @@ class ResponsesConnection {
     }
     try {
       _socket.sendText(encoded);
-    } catch (_) {
+    } catch (failure) {
+      if (recovery != null && failure is ResponsesSendQueueOverflowException) {
+        // Overflow rejects only this newly unsent frame. Recovery and the
+        // existing bounded queue remain usable.
+        rethrow;
+      }
+      if (recovery != null && failure is ResponsesDeliveryUnknownException) {
+        _emitError(failure);
+        _shutdownInBackground(closeSocket: true);
+        rethrow;
+      }
       const error = ResponsesTransportException(operation: 'send');
       _emitError(error);
       _shutdownInBackground(closeSocket: true);
@@ -338,7 +367,7 @@ class ResponsesConnection {
     ),
   );
 
-  /// Sends one typed `response.steer` frame immediately.
+  /// Sends one typed `response.steer` frame or queues it during opted-in recovery.
   ///
   /// The target response determines the lane. A steer contains only its type,
   /// parent response ID and user input. Acceptance queues server ownership;
@@ -349,6 +378,8 @@ class ResponsesConnection {
   /// results with one explicit create per parent on its original lane. This
   /// method does not run tools, create successors, or replay after an unknown
   /// outcome. Lost acknowledgments and disconnects do not prove rejection.
+  /// Recovery queue rejection and attempted-write failures follow [send]'s
+  /// explicit exception rules.
   void sendSteer(ResponsesSteerEvent event) {
     if (_closed) throw StateError('Responses WebSocket connection is closed');
     _sendFrame(event.toJson(), invalidFrameKind: 'invalid_steer');

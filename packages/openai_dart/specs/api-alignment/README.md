@@ -174,7 +174,7 @@ engineering reviews approve the final combined diff. Implementation
 [PR #352](https://github.com/davidmigloz/ai_clients_dart/pull/352) merged after green
 CI, closing #340. WebSocket transport #341 is implemented, verified and independently reviewed;
 implementation [PR #353](https://github.com/davidmigloz/ai_clients_dart/pull/353)
-merged after green CI, closing #341. Steering #342 is implemented, verified and independently reviewed in [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354); merge pending.
+merged after green CI, closing #341. Steering #342 merged after green CI in [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354), closing #342.
 
 The #340 source recheck retains
 [OpenAPI 234829e](https://github.com/openai/openai-openapi/blob/234829e2b634b8fb159df7fcddbffad204173ffd/openapi.json),
@@ -191,19 +191,19 @@ wire changes. Unchanged source does not establish complete implementation parity
 | [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) ([14](tickets/14-access-programs.md)) | Select/inspect effective access program | Merged in #351 |
 | [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) ([15](tickets/15-tool-search.md)) | Complete client-discovered tools | Merged in #352 |
 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) ([16](tickets/16-responses-websocket.md)) | Persistent WS sessions, envelopes and named lanes | Merged in #353 |
-| [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) ([17](tickets/17-responses-steering.md)) | Safe mid-turn steering and continuation | Implemented/verified/reviewed in #354; merge pending |
-| [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) ([18](tickets/18-websocket-recovery.md)) | Opt-in reconnect and bounded unsent queue | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341)/[#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) |
+| [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) ([17](tickets/17-responses-steering.md)) | Safe mid-turn steering and continuation | Merged in #354 |
+| [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) ([18](tickets/18-websocket-recovery.md)) | Opt-in reconnect and bounded unsent queue | Implemented/verified/reviewed in #355; merge pending |
 | [#344](https://github.com/davidmigloz/ai_clients_dart/issues/344) ([19](tickets/19-websocket-injection.md)) | Beta multi-agent tool-result injection | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
 
 Async tools, configuration updates, web search, shell, compaction progress,
 access programs, tool search #340 and Responses WebSocket sessions
 [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) are merged. Steering
-#342 is implemented, verified and independently reviewed in [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354); merge pending. Recovery
-and injection remain explicit follow-ups to basic transport; do not claim full
+#342 merged after green CI in [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354), closing #342. Recovery
+#343 is implemented and reviewed; injection #344 remains the next follow-up. Do not claim full
 WebSocket SDK parity before they are complete. Each ticket includes an offline
 example, public fixtures, documentation and independent review. All eleven tickets are native sub-issues of #317; active blockers are linked
 with GitHub dependencies. Steering #342 is implemented, verified and independently reviewed;
-its implementation [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354) is open for review. Opt-in recovery #343 follows after merge.
+its implementation [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354) merged after green CI. Opt-in recovery #343 is implemented, verified and independently reviewed.
 
 ## Remaining roadmap
 
@@ -262,8 +262,8 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
   tolerance against required upstream `first_id`/`last_id`; this stays in the
   remaining complete-parity inventory.
 - Responses WebSocket transport #341 merged in #353. Typed steering #342 is
-  implemented, verified and independently reviewed; its implementation [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354) is open for review. Official
-  opt-in recovery and beta injection integration remain in #343–#344.
+  merged after green CI in [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354). Opt-in
+  recovery #343 is implemented/verified/reviewed; beta injection #344 remains next.
 - Hosted/local shell #337 merged in #349 with environment configuration,
   directional calls/results and five stream events.
 - Compaction progress #338 merged in #350 with typed nonterminal decoding,
@@ -319,6 +319,12 @@ Sources: [cache diagnostics](https://developers.openai.com/api/docs/guides/promp
 [web search](https://developers.openai.com/api/docs/guides/tools-web-search),
 [shell](https://developers.openai.com/api/docs/guides/tools-shell),
 [errors](https://developers.openai.com/api/docs/guides/error-codes).
+
+- Fresh Node main `534e691da6979e75c17a14bc04f1daff81fdbeef` (still 7.30.0)
+  adds structured-output parsing only for absent/null/final_answer message phases.
+  Its WebSocket/recovery sources are unchanged. Dart has no equivalent Responses
+  `outputParsed`/structured-output parser helper; this SDK convenience gap remains
+  in the complete-parity inventory for the later shared-utilities phase.
 
 ### Missing API families and audio workflows
 
@@ -432,7 +438,7 @@ nullable annotation events with migration guidance. All package checks pass
 (OpenAI 10,676 tests, sibling 506); JS/Wasm browser verification and the offline
 four-frame example pass for $0. Independent requirements and engineering peer reviews approve the final
 combined change; implementation [PR #353](https://github.com/davidmigloz/ai_clients_dart/pull/353)
-merged after green CI, closing #341. Steering #342 is implemented, verified and independently reviewed in [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354); merge pending.
+merged after green CI, closing #341. Steering #342 merged after green CI in [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354), closing #342.
 
 Steering #342 [acceptance evidence](reviews/17-responses-steering.md) records
 user-only text/image/file requests, all seven identifying pending stubs, full
@@ -441,4 +447,15 @@ counts. Final package checks pass 11,158 tests/two existing skips; 484 new
 model/browser protocol cases pass in both Chrome JavaScript and Wasm. The exact
 README and migration After block compile; the offline six-frame example costs
 $0. Independent requirements and engineering peer reviews approve the final
-combined diff. Implementation [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354) is open for review; recovery #343 follows after merge.
+combined diff. Implementation [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354) merged after green CI; recovery #343 is implemented, verified and independently reviewed.
+
+
+Recovery #343 [acceptance evidence](reviews/18-websocket-recovery.md) records
+explicit opt-in preparation/auth refresh, SDK close/timing policy, strict UTF-8
+FIFO snapshots, nonterminal overflow, prompt cancellation and no attempted-frame
+replay. All 104 new cases pass on VM and real Chrome JavaScript/Wasm; package
+checks pass 11,262 tests/two existing skips with clean formatting/fix/analysis.
+The exact README wrapper compiles and the offline four-write example costs $0.
+Independent requirements and engineering reviews approve the combined diff.
+Full toolkit diagnostic sets remain exactly unchanged; no exclusions were added.
+Implementation [PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) is open for review; final CI/merge remain pending. Beta injection #344 follows.

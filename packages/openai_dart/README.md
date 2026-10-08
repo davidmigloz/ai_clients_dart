@@ -340,7 +340,8 @@ receives buffered early events, including events before an early close; the defa
 opening capacity is 1,024 and overflow fails explicitly. After the first listener,
 only active subscribers receive broadcasts. Cancelling a listener removes that
 listener; explicitly await connection cleanup. `done` completes independently of
-event draining. Close code/reason expose observed transport facts.
+event draining. By default, close code/reason expose observed transport facts;
+with recovery enabled they describe final logical closure as detailed below.
 
 Browser WebSockets cannot send custom headers. Any configured auth/default/org/
 project/version headers reject before dialing with proxy guidance. Use an explicit
@@ -355,8 +356,8 @@ connection limit. On disconnection, recover manually using a stored response ID
 or replay full context with no parent. A `store: false` fork should reach
 `response.in_progress` before the source lane advances. Standalone compaction
 starts a new chain using the complete returned compacted window. Mid-turn steering
-is described below. Automatic recovery and multi-agent tool-result injection
-remain planned follow-ups.
+is described below. [Opt-in socket recovery](#how-do-i-recover-a-responses-websocket)
+is available; multi-agent tool-result injection remains a planned follow-up.
 
 → [Runnable offline example](example/responses_websocket_example.dart), with
 warm-up, two lanes, incremental continuation and awaited cleanup for $0.
@@ -474,6 +475,115 @@ demonstrates automatic continuation and two pending submissions sharing one save
 tool result, with exactly one continuation create and awaited cleanup for $0.
 See [migration guidance](MIGRATION.md#upcoming-typed-steering-events) for exhaustive
 WebSocket event switches and the [official steering guide](https://developers.openai.com/api/docs/guides/steering).
+
+</details>
+
+### How do I recover a Responses WebSocket?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Supply `reconnect` to opt in. The required preparation callback lets your
+application reconcile history and update its authentication provider before a
+replacement socket opens. Pass your normal application session loop to this
+wrapper; submitted work is never replayed for you:
+
+```dart
+Future<void> runRecoverableSession(
+  OpenAIClient client,
+  Future<void> Function(ResponsesConnection) runSession,
+) async {
+  final connection = await client.responses.connect(
+    reconnect: ResponsesReconnectOptions(
+      onReconnecting: (context) {
+        // Reconcile application state before continuing. Abort if it is unsafe.
+        return const ResponsesReconnectDecision.continueWith();
+      },
+    ),
+  );
+  final recovery = connection.recovery!;
+  final lifecycle = recovery.events.listen((change) {
+    // Lifecycle diagnostics redact payloads, header/query values and reasons.
+    print(change);
+  });
+  try {
+    await runSession(connection);
+  } finally {
+    try {
+      await connection.close();
+      await connection.done;
+      final report = await recovery.done;
+      print('${report.unsentMessages.length} never-attempted frames remain.');
+      // Inspect snapshots deliberately; decide whether/how to submit new work.
+    } finally {
+      await lifecycle.cancel();
+    }
+  }
+}
+```
+
+Omitting `reconnect` keeps the default behavior. With recovery enabled, defaults
+are five attempts, an initial 500 ms exponential delay capped at eight seconds,
+and jitter between 0.75 and 1.0. Durations truncate to whole milliseconds before
+jitter; the resulting delay rounds to the nearest millisecond. Only closes 1001, 1005, 1006, 1011, 1012, 1013 and
+1015 admit recovery; clean, protocol, policy and unknown closes stop it.
+Authentication is rebuilt for each dial. Initial handshake failures are not
+retried. Explicit close stops logical recovery promptly during preparation,
+waiting or dialing. User callbacks may finish later; late errors are consumed
+and late sockets are disposed. A callback exception or abort ends recovery.
+
+`ResponsesReconnectDecision.continueWith(queryParameters: ..., headers: ...)`
+replaces the previous override maps for subsequent attempts. Null reuses them;
+empty maps clear the overrides. The helper snapshots returned maps before its
+delay. Fresh configured defaults/auth still apply, and beta opt-in is forced
+last. Attempt context exposes timing and the triggering close, while your
+application retains its own credential, query and conversation state.
+
+Only new frames sent while recovery is in progress enter the FIFO queue. Its
+strict default limit is 1 MiB (1,048,576 serialized UTF-8 bytes), including the
+first frame. Bytes are captured at enqueue, so caller mutation cannot change the
+message or accounting. Overflow throws `ResponsesSendQueueOverflowException`
+and emits `ResponsesRecoveryQueueOverflow`; only the new frame is rejected and
+recovery continues. Zero attempts disables retries, zero queue bytes disables queuing and rejects
+every new frame, and zero delay/cap permits immediate attempts.
+
+An attempted send or queued flush failure has unknown delivery. It emits
+`ResponsesRecoveryDeliveryUnknown`, permanently closes the logical connection,
+and never retries that frame. A direct send also throws
+`ResponsesDeliveryUnknownException`. `recovery.done` and `unsentMessages` report
+only the immutable never-attempted remainder; a rejected overflow frame is also
+excluded. `ResponsesUnsentMessage.text` holds exact wire text, `byteLength` its
+UTF-8 size, and `message` an immutable decoded JSON object when valid. These
+payloads may contain sensitive input; do not log or replay them automatically.
+
+The strict first-frame bound matches Python and differs from Node's oversized
+first-frame exception. Never replaying a failed attempted write matches Python;
+terminating on that failure is this Dart helper's explicit policy. Python logs
+flush failures and Node may requeue an attempted failed frame. These choices do
+not imply parity with other SDK output-parsing or application recovery helpers.
+
+`recovery.events` reports reconnecting, reconnected, overflow, uncertain delivery,
+transport error and final closure. `currentAttempt`, `lastEvent` and the final
+report remain inspectable without an active listener. Cancelling a lifecycle
+listener does not close the connection. `recovery.done` completes independently
+of listener draining. With recovery enabled, `connection.closeCode`/`closeReason`
+represent final logical closure, including caller-requested close values; they
+are not necessarily a physical peer notification. `currentAttempt` retains the
+triggering physical close context, and the final report's `cause` classifies why
+recovery ended.
+
+Opening a socket does not restore any lane's cache, conversation history or
+accepted steering. Continue using a valid stored response ID when available,
+or start a new chain with full retained input and no parent. Missing
+acknowledgments remain unknown outcomes. Native connectors support headers;
+browser connectors reject all custom headers, including returned overrides, so
+use an authenticated backend proxy with a headerless browser configuration.
+See the [official recovery guide](https://developers.openai.com/api/docs/guides/websocket-mode#reconnect-and-recover).
+
+→ [Runnable offline recovery example](example/responses_recovery_example.dart)
+proves original create/accepted-steer frames never replay, new frames flush FIFO,
+overflow stays nonfatal, and final unsent snapshots remain immutable with awaited
+cleanup and no API key or charges.
 
 </details>
 
@@ -1748,7 +1858,7 @@ See the [example/](example/) directory for complete examples:
 | API | Status |
 |-----|--------|
 | Chat Completions | Supported; stored-completion management pending |
-| Responses API | Supported with persistent WebSockets and mid-turn steering; automatic recovery, tool-result injection and additional tool/configuration details pending |
+| Responses API | Supported with persistent WebSockets, mid-turn steering and opt-in socket recovery; tool-result injection and additional tool/configuration details pending |
 | Decisions API | ✅ Full |
 | Embeddings | ✅ Full |
 | Images | ✅ Full |

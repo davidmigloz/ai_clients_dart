@@ -103,20 +103,31 @@ class ResponsesResource extends ResourceBase with StreamingResource {
   ///
   /// [connectionTimeout] defaults to `config.connectTimeout`. The injected
   /// [connector] receives the resolved URL and headers. Timed-out or late-opened
-  /// sockets after client closure are disposed. There is no handshake retry or
-  /// automatic response replay. Existing connections stay caller-owned when the
-  /// client closes: always await `connection.close()` in a finally block.
+  /// sockets after client closure are disposed. The initial handshake is not
+  /// retried. Existing connections stay caller-owned when the client closes:
+  /// always await `connection.close()` in a finally block.
   ///
   /// [maxBufferedEvents] bounds messages/errors received before the first
   /// listener attaches. Overflow fails the connection explicitly.
+  ///
+  /// [reconnect] enables opt-in socket recovery. Its preparation callback runs
+  /// before every retry; authentication is rebuilt for each dial. Query/header
+  /// decisions replace their previous override maps, omission retains them and
+  /// an empty map clears them. Base URL queries and configured auth/defaults
+  /// remain subject to the normal precedence, with the beta header forced last.
+  /// The connection's `recovery` helper exposes lifecycle and final never-attempted
+  /// messages. Reopening does not restore conversation/cache/accepted steering.
+  /// Already-attempted frames never replay; only new unsent frames can queue.
   Future<ResponsesConnection> connect({
     bool beta = false,
     ResponsesWebSocketConnector? connector,
     Map<String, String>? additionalHeaders,
     Duration? connectionTimeout,
     int maxBufferedEvents = 1024,
+    ResponsesReconnectOptions? reconnect,
   }) {
     ensureNotClosed?.call();
+    reconnect?.validate();
     final timeout = connectionTimeout ?? config.connectTimeout;
     if (timeout <= Duration.zero) {
       throw ArgumentError('connectionTimeout must be positive.');
@@ -130,6 +141,7 @@ class ResponsesResource extends ResourceBase with StreamingResource {
       additionalHeaders: additionalHeaders,
       timeout: timeout,
       maxBufferedEvents: maxBufferedEvents,
+      reconnect: reconnect,
     );
   }
 
@@ -139,10 +151,82 @@ class ResponsesResource extends ResourceBase with StreamingResource {
     required Map<String, String>? additionalHeaders,
     required Duration timeout,
     required int maxBufferedEvents,
+    required ResponsesReconnectOptions? reconnect,
   }) async {
+    final initialHeaders = reconnect == null || additionalHeaders == null
+        ? additionalHeaders
+        : Map<String, String>.unmodifiable(additionalHeaders);
+    final socket = await _openWebSocket(
+      beta: beta,
+      connector: connector,
+      additionalHeaders: initialHeaders,
+      timeout: timeout,
+    );
+    // Splitting opening from the connection wrapper adds an await boundary.
+    // Preserve the eager admission rule and dispose a socket if the client
+    // closes between the raw opening and the wrapper's construction.
+    try {
+      ensureNotClosed?.call();
+    } catch (_) {
+      await _disposeLateSocket(socket.close);
+      rethrow;
+    }
+    if (reconnect == null) {
+      return ResponsesConnection(
+        socket,
+        beta: beta,
+        maxBufferedEvents: maxBufferedEvents,
+      );
+    }
+
+    var currentHeaders = initialHeaders;
+    Map<String, String>? currentQuery;
+    final recoveryOptions = reconnect.copyWith(
+      onReconnecting: (context) {
+        ensureNotClosed?.call();
+        return reconnect.onReconnecting(context);
+      },
+    );
+    final recoveringSocket = ResponsesRecoveringWebSocket(
+      socket,
+      options: recoveryOptions,
+      reconnect: (decision) {
+        ensureNotClosed?.call();
+        if (decision.headers != null) currentHeaders = decision.headers;
+        if (decision.queryParameters != null) {
+          currentQuery = decision.queryParameters;
+        }
+        return _openWebSocket(
+          beta: beta,
+          connector: connector,
+          additionalHeaders: currentHeaders,
+          queryParameters: currentQuery,
+          timeout: timeout,
+        );
+      },
+    );
+    return ResponsesConnection(
+      recoveringSocket,
+      recovery: recoveringSocket.recovery,
+      beta: beta,
+      maxBufferedEvents: maxBufferedEvents,
+    );
+  }
+
+  Future<WebSocket> _openWebSocket({
+    required bool beta,
+    required ResponsesWebSocketConnector connector,
+    required Map<String, String>? additionalHeaders,
+    required Duration timeout,
+    Map<String, String>? queryParameters,
+  }) async {
+    ensureNotClosed?.call();
     final Uri endpoint;
     try {
-      endpoint = requestBuilder.buildUrl(_endpoint);
+      endpoint = requestBuilder.buildUrl(
+        _endpoint,
+        queryParams: queryParameters,
+      );
     } on FormatException {
       throw ArgumentError('baseUrl must be a valid absolute WebSocket URL.');
     }
@@ -213,11 +297,7 @@ class ResponsesResource extends ResourceBase with StreamingResource {
       await _disposeLateSocket(socket.close);
       rethrow;
     }
-    return ResponsesConnection(
-      socket,
-      beta: beta,
-      maxBufferedEvents: maxBufferedEvents,
-    );
+    return socket;
   }
 
   static Future<void> _disposeLateSocket(
