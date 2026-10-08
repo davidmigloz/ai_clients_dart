@@ -1,6 +1,6 @@
 # Beta multi-agent WebSocket injection acceptance
 
-Status: implemented, verified and independently reviewed; PR creation pending.
+Status: implemented, verified and independently reviewed; merge pending in [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356).
 Tracking: [#344](https://github.com/davidmigloz/ai_clients_dart/issues/344),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirements: [RESP-INJECT-01–02](../responses.md#multi-agent-websocket-injection).

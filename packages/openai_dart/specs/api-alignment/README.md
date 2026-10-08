@@ -198,7 +198,7 @@ wire changes. Unchanged source does not establish complete implementation parity
 Async tools, configuration updates, web search, shell, compaction progress,
 access programs, tool search #340, Responses WebSocket sessions #341, steering
 #342 and recovery #343 are merged after green CI. Beta injection #344 is
-implemented, verified and independently reviewed; PR creation is pending. Each ticket includes an offline
+implemented, verified and independently reviewed; Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) is open for review. Each ticket includes an offline
 example, public fixtures, documentation and independent review. All eleven
 Phase 3 tickets are native sub-issues of #317. These specified slices do not
 establish complete WebSocket or Responses SDK parity; remaining shared model
@@ -207,7 +207,7 @@ and later-family gaps stay in the inventory.
 ## Remaining roadmap
 
 Phases 1–2 are complete. Phase 3 has its specification/tickets above; its final
-injection slice is implemented, verified and independently reviewed; PR creation is pending.
+injection slice is implemented, verified and independently reviewed; Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) is open for review.
 Later phases remain candidate outcomes pending detailed specifications. Keep
 all audited gaps visible even when deferred.
 
@@ -264,7 +264,7 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
 - Responses WebSocket transport #341 merged in #353. Typed steering #342 is
   merged after green CI in [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354). Opt-in
   recovery #343 merged in #355; beta injection #344 is implemented, verified and
-  independently reviewed with PR creation pending.
+  independently reviewed with merge pending in [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356).
 - Injection retains the legacy shared `Item` request codec: some generated input
   variants are unsupported, known extra fields may be trimmed and nested defaults/
   collection ownership remain legacy behavior. Full generated input-union parity
@@ -479,6 +479,6 @@ format unchanged; fix/fatal-info analysis and the offline $0 example pass. Liter
 README/migration snippets compile. Requirements and cross-author engineering
 reviews approve the final diff. Toolkit diagnostics remain visible with a
 classified delegated-serializer/value-scanner delta; no exclusions were added.
-PR creation is pending; close #344 only after merge. Once merged, all eleven
+Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) is open for review; close #344 only after merge. Once merged, all eleven
 specified Phase 3 tickets are complete. Phase 4 Webhooks/safety is the next
 specification and ticket-planning milestone; remaining parity inventory persists.

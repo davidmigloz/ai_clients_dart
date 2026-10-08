@@ -548,7 +548,7 @@ are the starting point; add faithful envelopes and actual transport wiring.
 
 ### Injection implementation
 
-#344 is implemented, verified and independently reviewed; PR creation is pending.
+#344 is implemented, verified and independently reviewed; Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) is open for review.
 [Acceptance evidence](reviews/19-websocket-injection.md) records exact beta
 handshake/request projection, typed created/failed acknowledgments, raw failed
 input and unknown-code preservation, multiple outstanding injections and late
