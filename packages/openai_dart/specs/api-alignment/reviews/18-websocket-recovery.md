@@ -1,6 +1,7 @@
 # Opt-in Responses WebSocket recovery acceptance
 
-Status: implemented, verified and independently reviewed; PR creation pending.
+Status: implemented, verified and independently reviewed; merge pending.
+Implementation [PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) is open for review; #343 closes only after merge.
 Tracking: [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirements: [RESP-RECOVER-01–02](../responses.md#opt-in-connection-recovery).
@@ -156,5 +157,5 @@ author approves their own implementation. All validated findings are resolved:
 - Direct/flush failures never requeue attempted frames; explicit close consumes
   late outcomes and final unsent state remains available independently of readers.
 
-The implementation PR will use the exact create-pr template. GitHub CI and merge
+Implementation [PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) uses the exact create-pr template. GitHub CI/merge
 remain pending. Close #343 only after merge; beta injection #344 follows.

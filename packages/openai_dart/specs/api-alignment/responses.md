@@ -95,7 +95,7 @@ and these official-client pins. The candidate is unchanged at 356 operations and
 | [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) (15) | Return complete client-discovered tools | RESP-SEARCH-01–02 | Merged in #352 |
 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) (16) | Persistent Responses WebSocket sessions and lane routing | RESP-WS-01–04 | Merged in #353 |
 | [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) (17) | Steer a running WebSocket response | RESP-STEER-01–03 | Merged in #354 |
-| [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) (18) | Opt-in socket reconnection and bounded unsent queue | RESP-RECOVER-01–02 | Implemented/verified/reviewed; PR creation pending |
+| [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) (18) | Opt-in socket reconnection and bounded unsent queue | RESP-RECOVER-01–02 | Implemented/verified/reviewed in #355; merge pending |
 | [#344](https://github.com/davidmigloz/ai_clients_dart/issues/344) (19) | Inject multi-agent tool results over WebSockets | RESP-INJECT-01–02 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
 
 Linked numbers are GitHub issues; parenthetical numbers are repository ticket sequence. Implement in this
@@ -522,7 +522,7 @@ Recovery #343 is implemented, verified and independently reviewed;
 policy choices, 104 new VM/Chrome JavaScript/Wasm cases, 11,262 package tests
 (two existing skips), clean package quality and unchanged toolkit diagnostics.
 The literal README wrapper and offline four-write example pass for $0.
-PR creation/CI and merge remain pending; #344 follows.
+Implementation [PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) is open for review; final CI/merge remain pending. #344 follows.
 
 ## Multi-agent WebSocket injection
 

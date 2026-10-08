@@ -192,7 +192,7 @@ wire changes. Unchanged source does not establish complete implementation parity
 | [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) ([15](tickets/15-tool-search.md)) | Complete client-discovered tools | Merged in #352 |
 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) ([16](tickets/16-responses-websocket.md)) | Persistent WS sessions, envelopes and named lanes | Merged in #353 |
 | [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) ([17](tickets/17-responses-steering.md)) | Safe mid-turn steering and continuation | Merged in #354 |
-| [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) ([18](tickets/18-websocket-recovery.md)) | Opt-in reconnect and bounded unsent queue | Implemented/verified/reviewed; PR creation pending |
+| [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) ([18](tickets/18-websocket-recovery.md)) | Opt-in reconnect and bounded unsent queue | Implemented/verified/reviewed in #355; merge pending |
 | [#344](https://github.com/davidmigloz/ai_clients_dart/issues/344) ([19](tickets/19-websocket-injection.md)) | Beta multi-agent tool-result injection | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
 
 Async tools, configuration updates, web search, shell, compaction progress,
@@ -458,4 +458,4 @@ checks pass 11,262 tests/two existing skips with clean formatting/fix/analysis.
 The exact README wrapper compiles and the offline four-write example costs $0.
 Independent requirements and engineering reviews approve the combined diff.
 Full toolkit diagnostic sets remain exactly unchanged; no exclusions were added.
-PR creation/CI and merge remain pending; beta injection #344 follows.
+Implementation [PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) is open for review; final CI/merge remain pending. Beta injection #344 follows.
