@@ -6,6 +6,92 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming typed injection events
+
+`response.inject.created` and `response.inject.failed` now produce
+`ResponseInjectCreatedEvent` and `ResponseInjectFailedEvent` from the sealed
+WebSocket dispatcher, rather than `UnknownResponsesServerEvent`. Existing class
+names, constructors and legacy import paths remain available. Update exhaustive
+switches alongside the existing steering variants:
+
+```dart
+// Before
+final kind = switch (message) {
+  ResponsesStreamEvent() => 'response',
+  ResponsesErrorEvent() => 'error',
+  ResponsesSteerAcceptedEvent() => 'steering queued',
+  ResponsesSteerPendingEvent() => 'steering pending',
+  ResponsesSteerFailedEvent() => 'steering failed',
+  UnknownResponsesServerEvent() => 'future',
+};
+
+// After
+final kind = switch (message) {
+  ResponsesStreamEvent() => 'response',
+  ResponsesErrorEvent() => 'error',
+  ResponsesSteerAcceptedEvent() => 'steering queued',
+  ResponsesSteerPendingEvent() => 'steering pending',
+  ResponsesSteerFailedEvent() => 'steering failed',
+  ResponseInjectCreatedEvent() => 'injection committed',
+  ResponseInjectFailedEvent() => 'injection uncommitted',
+  UnknownResponsesServerEvent() => 'future',
+};
+```
+
+`ResponseInjectFailedEvent.input` is now raw `List<Object?>` instead of
+`List<Item>`. Parsing preserves exact nested finite JSON, including future fields,
+without coercing uncommitted data through the narrower Item decoder. Direct
+legacy constructor lists of Items still serialize, but readers must validate raw
+values before choosing to continue:
+
+```dart
+// Before
+final wire = failure.input.map((item) => item.toJson()).toList();
+
+// After
+final wire = failure.input.map((value) {
+  if (value is! Map<String, dynamic>) {
+    throw StateError('Uncommitted input is not an item object');
+  }
+  return value;
+}).toList();
+// Validate call IDs/output against saved results before an explicit create.
+final input = ResponseInput.fromOutputItems(wire);
+```
+
+The returned array is reporting data, not a guarantee that every value is valid
+new input. Do not automatically resend it. Wait for response completion and all
+injection acknowledgments; only explicitly continue known uncommitted results on
+the original lane. Accepted or delivery-unknown input must not automatically
+replay, and tool execution must not repeat.
+
+Known injection frames now validate required fields/discriminators contextually.
+On injection acknowledgments, a supplied `stream_id: null` is invalid; omit the key instead.
+`copyWith(streamId: null)` still clears the optional field. Outbound input enforces
+the existing canonical 16,384-item maximum without a new minimum or narrower
+allowlist. The existing Item codec's legacy subtype/extra-field behavior remains
+unchanged and does not guarantee full input-union parity.
+
+`ResponseInjectError.code` retains its enum API. New `rawCode` preserves future
+strings; `rawCode ?? code.toJson()` gives the effective wire code. The canonical
+schema still declares only `response_already_completed` and `response_not_found`;
+unknown string preservation is explicit forward tolerance. Replacing `code` via
+copyWith clears a previous raw override unless one is explicitly supplied, and
+conflicting overrides fail serialization. Parsed error/acknowledgment future
+metadata survives typed copies; payload-bearing diagnostics are redacted.
+
+Replaced nested identity/error/required-input objects now reconcile their own
+raw metadata with the parent envelope, including the existing steering variants.
+A scalar child copy such as `event.error.copyWith(message: ...)` retains its
+future fields; an explicit raw clear or fresh complete child replacement removes
+old child-owned metadata instead of resurrecting it from the parent. Replacing a
+required-input list respects the supplied stub values/order. An explicitly
+supplied parent `rawJson` override retains priority.
+
+`inject` and `sendInject` are additive, beta-only methods. The existing HTTP beta
+query behavior, SSE dispatcher and connection send/create/steer signatures remain
+available. No automatic tool runner, continuation or replay is introduced.
+
 ## Upcoming typed steering events
 
 `ResponsesServerEvent.fromJson` now dispatches `response.steer.accepted`,
@@ -28,6 +114,8 @@ final kind = switch (message) {
   ResponsesSteerAcceptedEvent() => 'steering queued',
   ResponsesSteerPendingEvent() => 'steering waiting for saved input',
   ResponsesSteerFailedEvent() => 'steering failed',
+  ResponseInjectCreatedEvent() => 'injection committed',
+  ResponseInjectFailedEvent() => 'injection uncommitted',
   UnknownResponsesServerEvent() => 'future',
 };
 ```

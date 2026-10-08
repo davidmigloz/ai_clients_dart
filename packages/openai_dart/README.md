@@ -357,7 +357,8 @@ or replay full context with no parent. A `store: false` fork should reach
 `response.in_progress` before the source lane advances. Standalone compaction
 starts a new chain using the complete returned compacted window. Mid-turn steering
 is described below. [Opt-in socket recovery](#how-do-i-recover-a-responses-websocket)
-is available; multi-agent tool-result injection remains a planned follow-up.
+and [multi-agent tool-result injection](#how-do-i-inject-multi-agent-tool-results)
+are available.
 
 → [Runnable offline example](example/responses_websocket_example.dart), with
 warm-up, two lanes, incremental continuation and awaited cleanup for $0.
@@ -584,6 +585,159 @@ See the [official recovery guide](https://developers.openai.com/api/docs/guides/
 proves original create/accepted-steer frames never replay, new frames flush FIFO,
 overflow stays nonfatal, and final unsent snapshots remain immutable with awaited
 cleanup and no API key or charges.
+
+</details>
+
+### How do I inject multi-agent tool results?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Open a native beta connection with `client.responses.connect(beta: true)` and
+set `multiAgent: MultiAgentConfig(enabled: true)` on your create request. Choose
+a model that supports the beta using the current model documentation; this client
+does not impose a model allowlist. Return each developer-owned result as it becomes
+available, using the response ID received from `response.created`. This helper
+uses a caller-owned open connection and returns the completed ID, lane and raw
+uncommitted input. Choose any continuation on that same socket, then await
+`connection.close()` in your outer finally block:
+
+```dart
+Future<({String responseId, String streamId, List<Object?> uncommitted})>
+runInjectedTurn(
+  ResponsesConnection connection,
+  CreateResponseRequest request,
+  Future<String> Function(FunctionCallOutputItemResponse) executeTool,
+) async {
+  final reader = StreamIterator(connection.events);
+  final savedCallIds = <String>{};
+  final uncommitted = <Object?>[];
+  String? responseId;
+  var pending = 0;
+  String? completedResponseId;
+  try {
+    connection.create(request, streamId: 'planner');
+    while (await reader.moveNext()) {
+      final message = reader.current;
+      // Other subscribers may process other lanes on this caller-owned socket.
+      if (message.streamId != 'planner' &&
+          !(message is ResponsesErrorEvent && message.streamId == null)) {
+        continue;
+      }
+      if (message case ResponsesStreamEvent(
+        event: ResponseCreatedEvent(:final response),
+      )) {
+        responseId = response.id;
+      } else if (message case ResponsesStreamEvent(
+        event: OutputItemDoneEvent(
+          item: final FunctionCallOutputItemResponse call,
+        ),
+      )) {
+        if (responseId == null) throw StateError('Missing response identity');
+        if (!savedCallIds.add(call.callId)) continue;
+        final output = await executeTool(
+          call,
+        ); // The application owns execution.
+        pending++;
+        connection.inject(
+          responseId: responseId,
+          input: [
+            FunctionCallOutputItem.string(callId: call.callId, output: output),
+          ],
+        );
+      } else if (message is ResponseInjectCreatedEvent ||
+          message is ResponseInjectFailedEvent) {
+        final target = message is ResponseInjectCreatedEvent
+            ? message.responseId
+            : (message as ResponseInjectFailedEvent).responseId;
+        if (target != responseId || pending == 0) {
+          throw StateError('Unexpected injection acknowledgment');
+        }
+        pending--;
+        if (message is ResponseInjectFailedEvent) {
+          if (message.error.code !=
+              ResponseInjectErrorCode.responseAlreadyCompleted) {
+            throw StateError(
+              'Injection was not committed; inspect the failure',
+            );
+          }
+          uncommitted.addAll(message.input); // Keep the original raw JSON.
+        }
+      } else if (message case ResponsesStreamEvent(
+        event: ResponseCompletedEvent(:final response),
+      )) {
+        if (response.id != responseId) {
+          throw StateError('Unexpected completion');
+        }
+        completedResponseId = response.id;
+      } else if (message is ResponsesErrorEvent) {
+        throw StateError('A WebSocket error interrupted the turn');
+      } else if (message case ResponsesStreamEvent(
+        event: ResponseFailedEvent() || ResponseIncompleteEvent(),
+      )) {
+        throw StateError('The response ended unsuccessfully');
+      }
+      if (completedResponseId != null && pending == 0) {
+        return (
+          responseId: completedResponseId,
+          streamId: 'planner',
+          uncommitted: uncommitted,
+        );
+      }
+    }
+    throw StateError('Socket ended before completion and every acknowledgment');
+  } finally {
+    await reader
+        .cancel(); // The caller retains the connection for continuation.
+  }
+}
+```
+
+`sendInject(ResponseInjectEvent(...))` sends the same explicit frame. Its wire
+fields are exactly `type`, `response_id` and `input`; injection has no `stream_id`
+argument because the target determines the lane. Requests retain the existing
+broad `List<Item>` surface and enforce the canonical 16,384-item maximum. The
+server currently accepts client-owned tool outputs. A nonempty rule or narrower
+client tool whitelist is not invented. Both methods require a beta connection.
+The shared Item decoder still has legacy subtype/unknown-field limitations; this
+integration does not establish complete generated input-union parity.
+
+An accepted acknowledgment has no submission ID or echoed input. Track the count
+of submissions for each response and its lane, and read until the response is
+terminal and every injection has a created/failed acknowledgment. Calls may
+originate from the root or a subagent; existing item/event agent tags remain
+available. Hosted `multi_agent_call` and `multi_agent_call_output` are server-owned
+and must not be executed or injected as developer tools.
+
+Failed input is now a deeply immutable raw `List<Object?>`, preserving future
+metadata and malformed nested values. Its outer value must still be an array.
+`response_already_completed` permits the application to choose an explicit new
+create with the uncommitted results and completed parent on the original lane.
+Validate the saved results first; `ResponseInput.fromOutputItems(validatedMaps)`
+preserves their raw fields. Do not send accepted results again or rerun a tool.
+`response_not_found` needs identity reconciliation. Unknown error strings survive
+in `error.rawCode`; the existing enum remains available. Malformed request frames
+can produce a generic status-400 error followed by socket closure; observe both.
+Lost acknowledgments or attempted write failures leave delivery unknown and do
+not trigger replay. Opt-in recovery queues only newly unsent frames as described
+above.
+
+Injection acknowledgments add two sealed WebSocket variants; the SSE dispatcher
+is unchanged. See the [migration guide](MIGRATION.md#upcoming-typed-injection-events)
+for exhaustive switches, the raw failed-input getter, and stricter known-frame
+validation.
+
+The standard browser connector rejects custom headers, including the forced beta
+header. Use a backend proxy that authenticates and adds the beta header server
+side; wrap an already-open headerless proxy socket with
+`ResponsesConnection(proxySocket, beta: true)` or use an explicit proxy connector.
+Realtime ephemeral bearer authentication does not apply. See the
+[official multi-agent guide](https://developers.openai.com/api/docs/guides/responses-multi-agent).
+
+→ [Runnable offline injection example](example/responses_injection_example.dart)
+shows root/subagent function calls, a hosted action, multiple outstanding
+injections and an acknowledgment after completion, with one explicit raw-result
+continuation, no tool rerun and awaited cleanup for $0.
 
 </details>
 
@@ -1858,7 +2012,7 @@ See the [example/](example/) directory for complete examples:
 | API | Status |
 |-----|--------|
 | Chat Completions | Supported; stored-completion management pending |
-| Responses API | Supported with persistent WebSockets, mid-turn steering and opt-in socket recovery; tool-result injection and additional tool/configuration details pending |
+| Responses API | Supported with persistent WebSockets, mid-turn steering, opt-in recovery and beta tool-result injection; additional tool/configuration details pending |
 | Decisions API | ✅ Full |
 | Embeddings | ✅ Full |
 | Images | ✅ Full |

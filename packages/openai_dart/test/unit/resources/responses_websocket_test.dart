@@ -800,7 +800,7 @@ void main() {
       'response.inject.failed',
       'future.provider_event',
     ]) {
-      test('future/dependent frame retains complete raw JSON: $type', () async {
+      test('typed/future frame retains complete raw JSON: $type', () async {
         final socket = _Socket();
         final client = OpenAIClient();
         final connection = await client.responses.connect(
@@ -811,7 +811,23 @@ void main() {
         final raw = <String, dynamic>{
           'type': type,
           'stream_id': 'lane',
-          if (type.startsWith('response.steer.')) 'sequence_number': 2,
+          if (type.startsWith('response.steer.') ||
+              type.startsWith('response.inject.'))
+            'sequence_number': 2,
+          if (type.startsWith('response.inject.')) 'response_id': 'resp_parent',
+          if (type == 'response.inject.failed')
+            'input': [
+              {
+                'type': 'function_call_output',
+                'call_id': 'call_saved',
+                'output': 'saved result',
+              },
+            ],
+          if (type == 'response.inject.failed')
+            'error': {
+              'code': 'future_provider_code',
+              'message': 'private failure',
+            },
           if (type.startsWith('response.steer.'))
             'steer': {
               'id': 'steer_saved',
@@ -852,6 +868,10 @@ void main() {
               expect(message, isA<ResponsesSteerPendingEvent>());
             case 'response.steer.failed':
               expect(message, isA<ResponsesSteerFailedEvent>());
+            case 'response.inject.created':
+              expect(message, isA<ResponseInjectCreatedEvent>());
+            case 'response.inject.failed':
+              expect(message, isA<ResponseInjectFailedEvent>());
           }
           expect(message.toJson(), raw);
           expect(message.streamId, 'lane');

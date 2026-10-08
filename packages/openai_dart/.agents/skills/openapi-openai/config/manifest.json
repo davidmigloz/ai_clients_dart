@@ -1934,23 +1934,25 @@
       "dart_class": "ResponseInjectEvent",
       "file": "lib/src/models/responses/multi_agent/response_inject_event.dart",
       "schema": "BetaResponseInjectEvent",
-      "note": "Beta multi-agent WebSocket protocol event; no HTTP path in spec, no transport wired (data model only)."
+      "note": "Beta WebSocket-only request wired through sendInject/inject. Emits exact type/response_id/input; finite extra parsed frame members retain legacy ignored/projection tolerance. Canonical maximum 16384 and no invented output allowlist/nonempty constraint. Shared Item codec remains legacy and incomplete; no HTTP operation."
     },
     "BetaResponseInjectCreatedEvent": {
       "spec": "main",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "ResponseInjectCreatedEvent",
-      "file": "lib/src/models/responses/multi_agent/response_inject_event.dart",
+      "file": "lib/src/models/responses/websocket/responses_inject_server_events.dart",
       "schema": "BetaResponseInjectCreatedEvent",
-      "note": "Beta multi-agent WebSocket protocol event; data model only."
+      "note": "Actual beta WebSocket accepted acknowledgment as a sealed server variant; required response_id/sequence and optional nonnull stream_id, immutable future metadata. No invented typed agent field or submission identity.",
+      "parent": "ResponsesServerEvent"
     },
     "BetaResponseInjectFailedEvent": {
       "spec": "main",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "ResponseInjectFailedEvent",
-      "file": "lib/src/models/responses/multi_agent/response_inject_event.dart",
+      "file": "lib/src/models/responses/websocket/responses_inject_server_events.dart",
       "schema": "BetaResponseInjectFailedEvent",
-      "note": "Beta multi-agent WebSocket protocol event; data model only. Inline error object modeled as ResponseInjectError + ResponseInjectErrorCode."
+      "note": "Actual beta WebSocket acknowledgment as a sealed server variant; required scalar fields, optional nonnull stream_id, immutable future metadata. Failed input is raw finite JSON array; no Item coercion. No invented typed agent field.",
+      "parent": "ResponsesServerEvent"
     },
     "DecisionRequest": {
       "spec": "main",
@@ -4120,7 +4122,7 @@
       "dart_class": "ResponsesServerEvent",
       "file": "lib/src/models/responses/websocket/responses_server_event.dart",
       "schema": "ResponsesServerEvent",
-      "note": "Persistent envelope reuses all 58 ordinary shared event codecs; WS errors retain complete metadata and steering events are typed. Later injection/future events remain lossless raw variants."
+      "note": "Persistent envelope reuses all 58 ordinary shared event codecs; WS errors retain complete metadata; steering and beta injection acknowledgments are typed, with immutable future metadata. Unknown discriminators remain lossless raw variants."
     },
     "ResponseWsError": {
       "spec": "main",
@@ -4169,7 +4171,7 @@
       "dart_class": "ResponsesServerEvent",
       "file": "lib/src/models/responses/websocket/responses_server_event.dart",
       "schema": "BetaResponsesServerEvent",
-      "note": "Persistent envelope reuses all 58 ordinary shared event codecs; WS errors retain complete metadata and steering events are typed. Later injection/future events remain lossless raw variants."
+      "note": "Persistent envelope reuses all 58 ordinary shared event codecs; WS errors retain complete metadata; steering and beta injection acknowledgments are typed, with immutable future metadata. Unknown discriminators remain lossless raw variants."
     },
     "BetaResponseWsError": {
       "spec": "main",
@@ -4707,6 +4709,24 @@
       "file": "lib/src/resources/responses/responses_recovering_websocket.dart",
       "schema": null,
       "note": "SDK-only opt-in Responses recovery helper; no REST wire schema or operation. Queue records preserve immutable exact serialized UTF-8 text; lifecycle/decision types are local and do not emit API JSON."
+    },
+    "ResponseInjectError": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponseInjectError",
+      "file": "lib/src/models/responses/websocket/responses_inject_server_events.dart",
+      "schema": null,
+      "parent": "BetaResponseInjectFailedEvent",
+      "note": "Actual inline BetaResponseInjectFailedEvent.error object; canonical two-value code enum retained with explicit forward rawCode tolerance, future error metadata and safe contextual parsing."
+    },
+    "ResponseInjectErrorCode": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponseInjectErrorCode",
+      "file": "lib/src/models/responses/multi_agent/response_inject_event.dart",
+      "schema": null,
+      "parent": "BetaResponseInjectFailedEvent",
+      "note": "Actual inline failed.error.code two-value enum plus legacy unknown SDK sentinel; rawCode on ResponseInjectError preserves future provider strings rather than normalizing."
     }
   }
 }

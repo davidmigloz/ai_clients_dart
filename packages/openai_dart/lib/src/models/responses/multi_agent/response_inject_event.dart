@@ -1,319 +1,129 @@
 import 'package:meta/meta.dart';
 
-import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import '../../common/json_helpers.dart';
 import '../items/item.dart';
+import '../websocket/responses_server_event.dart' show ResponseInjectError;
+import '../websocket/websocket_json_helpers.dart';
 
-/// A client-sent event that injects additional input into an active response.
+export '../websocket/responses_server_event.dart'
+    show
+        ResponseInjectCreatedEvent,
+        ResponseInjectError,
+        ResponseInjectFailedEvent;
+
+/// Injects input into an active beta multi-agent Responses WebSocket response.
 ///
-/// This belongs to the beta multi-agent WebSocket protocol
-/// (`OpenAI-Beta: responses_multi_agent=v1`). The OpenAPI spec defines no HTTP
-/// path for this event — it is only ever sent over the WebSocket connection
-/// used by that protocol. This package does not wire up any transport for it;
-/// it is provided as a model for users implementing the WebSocket protocol
-/// themselves.
+/// Exactly type, response_id and input are sent. The server currently admits
+/// client-owned results that resume a waiting agent and commits them atomically.
+/// This writable model retains the existing broad [Item] input surface; it does
+/// not invent a tool whitelist or require a nonempty array. Transport opt-in is
+/// the beta Responses connection, not an HTTP endpoint.
+///
+/// Parsing projects known frame fields, ignoring additional finite JSON members.
+/// It uses the existing shared Item codec: unknown kinds are rejected,
+/// extra known-item metadata may be trimmed, and nested ownership/defaults keep
+/// that codec's existing behavior. Only the outer parsed list is snapshotted;
+/// this model does not claim complete generated input-union or raw-item fidelity.
 @immutable
 class ResponseInjectEvent {
-  /// The type of the event. Always `response.inject`.
+  /// Fixed event discriminator.
   String get type => 'response.inject';
 
-  /// The ID of the active response that should receive the input.
+  /// Actual active response ID received from response.created.
   final String responseId;
 
-  /// Input items to inject into the active response.
-  ///
-  /// Limited to a maximum of 16384 items.
+  /// Existing writable input items, at most 16,384. Empty input remains valid.
   final List<Item> input;
 
-  /// Creates a [ResponseInjectEvent].
+  /// Creates a const event with caller-owned item collections.
   const ResponseInjectEvent({required this.responseId, required this.input});
 
-  /// Creates a [ResponseInjectEvent] from JSON.
+  /// Validates known frame fields and parses the existing broad Item surface.
   factory ResponseInjectEvent.fromJson(Map<String, dynamic> json) {
+    const context = 'ResponseInjectEvent';
+    requireJsonType(json, 'response.inject', context);
+    final snapshot = snapshotResponsesJson(json, context);
+    final values = snapshot['input'];
+    if (values is! List<dynamic>) {
+      throw const FormatException(
+        'ResponseInjectEvent.input: expected an array',
+      );
+    }
+    _validateInjectInputCount(values.length);
+    final items = <Item>[];
+    for (var index = 0; index < values.length; index++) {
+      try {
+        final item = requireJsonObject(values[index], '$context.input[$index]');
+        requireJsonString(item['type'], '$context.input[$index].type');
+        items.add(Item.fromJson(item));
+      } catch (_) {
+        // Shared codec errors can retain provider payloads or lack context.
+        throw FormatException(
+          '$context.input[$index]: malformed or unsupported item',
+        );
+      }
+    }
     return ResponseInjectEvent(
-      responseId: json['response_id'] as String,
-      input: (json['input'] as List)
-          .map((e) => Item.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      responseId: requireJsonString(
+        snapshot['response_id'],
+        '$context.response_id',
+      ),
+      input: List<Item>.unmodifiable(items),
     );
   }
 
-  /// Converts to JSON.
-  Map<String, dynamic> toJson() => {
+  /// Serializes exactly three fields and validates count/finite JSON in release.
+  Map<String, dynamic> toJson() {
+    _validateInjectInputCount(input.length);
+    final json = _valueJson();
+    snapshotResponsesJson(json, 'ResponseInjectEvent');
+    return json;
+  }
+
+  Map<String, dynamic> _valueJson() => {
     'type': type,
     'response_id': responseId,
-    'input': input.map((e) => e.toJson()).toList(),
+    'input': input.map((item) => item.toJson()).toList(),
   };
+
+  /// Copies both required fields, preserving constructor collection ownership.
+  ResponseInjectEvent copyWith({String? responseId, List<Item>? input}) =>
+      ResponseInjectEvent(
+        responseId: responseId ?? this.responseId,
+        input: input ?? this.input,
+      );
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ResponseInjectEvent &&
           runtimeType == other.runtimeType &&
-          responseId == other.responseId &&
-          listsEqual(input, other.input);
-
+          mapsDeepEqual(_valueJson(), other._valueJson());
   @override
-  int get hashCode => Object.hash(responseId, listHash(input));
-
-  /// Creates a copy with replaced values.
-  ResponseInjectEvent copyWith({String? responseId, List<Item>? input}) {
-    return ResponseInjectEvent(
-      responseId: responseId ?? this.responseId,
-      input: input ?? this.input,
-    );
-  }
-
+  int get hashCode => Object.hash(runtimeType, mapDeepHashCode(_valueJson()));
   @override
   String toString() =>
-      'ResponseInjectEvent(responseId: $responseId, input: $input)';
+      'ResponseInjectEvent(responseId: [REDACTED], input: ${input.length} items)';
 }
 
-/// A server-sent event confirming that injected input was accepted.
+void _validateInjectInputCount(int count) {
+  if (count > 16384) {
+    throw const FormatException(
+      'ResponseInjectEvent.input: at most 16384 items',
+    );
+  }
+}
+
+/// Canonical injection failures: already completed or response not found.
 ///
-/// This belongs to the beta multi-agent WebSocket protocol
-/// (`OpenAI-Beta: responses_multi_agent=v1`). The OpenAPI spec defines no HTTP
-/// path for this event — it is only ever received over the WebSocket
-/// connection used by that protocol. This package does not wire up any
-/// transport for it; it is provided as a model for users implementing the
-/// WebSocket protocol themselves.
-@immutable
-class ResponseInjectCreatedEvent {
-  /// The type of the event. Always `response.inject.created`.
-  String get type => 'response.inject.created';
-
-  /// The ID of the response that accepted the input.
-  final String responseId;
-
-  /// The sequence number of this event.
-  final int sequenceNumber;
-
-  /// The multiplexed WebSocket stream that emitted the event.
-  ///
-  /// This field is present only when WebSocket multiplexing is enabled
-  /// separately.
-  final String? streamId;
-
-  /// Creates a [ResponseInjectCreatedEvent].
-  const ResponseInjectCreatedEvent({
-    required this.responseId,
-    required this.sequenceNumber,
-    this.streamId,
-  });
-
-  /// Creates a [ResponseInjectCreatedEvent] from JSON.
-  factory ResponseInjectCreatedEvent.fromJson(Map<String, dynamic> json) {
-    return ResponseInjectCreatedEvent(
-      responseId: json['response_id'] as String,
-      sequenceNumber: json['sequence_number'] as int,
-      streamId: json['stream_id'] as String?,
-    );
-  }
-
-  /// Converts to JSON.
-  Map<String, dynamic> toJson() => {
-    'type': type,
-    'response_id': responseId,
-    'sequence_number': sequenceNumber,
-    if (streamId != null) 'stream_id': streamId,
-  };
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ResponseInjectCreatedEvent &&
-          runtimeType == other.runtimeType &&
-          responseId == other.responseId &&
-          sequenceNumber == other.sequenceNumber &&
-          streamId == other.streamId;
-
-  @override
-  int get hashCode => Object.hash(responseId, sequenceNumber, streamId);
-
-  /// Creates a copy with replaced values.
-  ResponseInjectCreatedEvent copyWith({
-    String? responseId,
-    int? sequenceNumber,
-    Object? streamId = unsetCopyWithValue,
-  }) {
-    return ResponseInjectCreatedEvent(
-      responseId: responseId ?? this.responseId,
-      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
-      streamId: streamId == unsetCopyWithValue
-          ? this.streamId
-          : streamId as String?,
-    );
-  }
-
-  @override
-  String toString() =>
-      'ResponseInjectCreatedEvent(responseId: $responseId, '
-      'sequenceNumber: $sequenceNumber, streamId: $streamId)';
-}
-
-/// A server-sent event indicating injected input was rejected.
-///
-/// This belongs to the beta multi-agent WebSocket protocol
-/// (`OpenAI-Beta: responses_multi_agent=v1`). The OpenAPI spec defines no HTTP
-/// path for this event — it is only ever received over the WebSocket
-/// connection used by that protocol. This package does not wire up any
-/// transport for it; it is provided as a model for users implementing the
-/// WebSocket protocol themselves.
-@immutable
-class ResponseInjectFailedEvent {
-  /// The type of the event. Always `response.inject.failed`.
-  String get type => 'response.inject.failed';
-
-  /// The ID of the response that rejected the input.
-  final String responseId;
-
-  /// The raw input items that were not committed.
-  final List<Item> input;
-
-  /// The error describing why the input was rejected.
-  final ResponseInjectError error;
-
-  /// The sequence number of this event.
-  final int sequenceNumber;
-
-  /// The multiplexed WebSocket stream that emitted the event.
-  ///
-  /// This field is present only when WebSocket multiplexing is enabled
-  /// separately.
-  final String? streamId;
-
-  /// Creates a [ResponseInjectFailedEvent].
-  const ResponseInjectFailedEvent({
-    required this.responseId,
-    required this.input,
-    required this.error,
-    required this.sequenceNumber,
-    this.streamId,
-  });
-
-  /// Creates a [ResponseInjectFailedEvent] from JSON.
-  factory ResponseInjectFailedEvent.fromJson(Map<String, dynamic> json) {
-    return ResponseInjectFailedEvent(
-      responseId: json['response_id'] as String,
-      input: (json['input'] as List)
-          .map((e) => Item.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      error: ResponseInjectError.fromJson(
-        json['error'] as Map<String, dynamic>,
-      ),
-      sequenceNumber: json['sequence_number'] as int,
-      streamId: json['stream_id'] as String?,
-    );
-  }
-
-  /// Converts to JSON.
-  Map<String, dynamic> toJson() => {
-    'type': type,
-    'response_id': responseId,
-    'input': input.map((e) => e.toJson()).toList(),
-    'error': error.toJson(),
-    'sequence_number': sequenceNumber,
-    if (streamId != null) 'stream_id': streamId,
-  };
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ResponseInjectFailedEvent &&
-          runtimeType == other.runtimeType &&
-          responseId == other.responseId &&
-          listsEqual(input, other.input) &&
-          error == other.error &&
-          sequenceNumber == other.sequenceNumber &&
-          streamId == other.streamId;
-
-  @override
-  int get hashCode =>
-      Object.hash(responseId, listHash(input), error, sequenceNumber, streamId);
-
-  /// Creates a copy with replaced values.
-  ResponseInjectFailedEvent copyWith({
-    String? responseId,
-    List<Item>? input,
-    ResponseInjectError? error,
-    int? sequenceNumber,
-    Object? streamId = unsetCopyWithValue,
-  }) {
-    return ResponseInjectFailedEvent(
-      responseId: responseId ?? this.responseId,
-      input: input ?? this.input,
-      error: error ?? this.error,
-      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
-      streamId: streamId == unsetCopyWithValue
-          ? this.streamId
-          : streamId as String?,
-    );
-  }
-
-  @override
-  String toString() =>
-      'ResponseInjectFailedEvent(responseId: $responseId, input: $input, '
-      'error: $error, sequenceNumber: $sequenceNumber, streamId: $streamId)';
-}
-
-/// The error describing why an injected input was rejected.
-///
-/// This belongs to the beta multi-agent WebSocket protocol
-/// (`OpenAI-Beta: responses_multi_agent=v1`).
-@immutable
-class ResponseInjectError {
-  /// The error code.
-  final ResponseInjectErrorCode code;
-
-  /// A human-readable message describing the error.
-  final String message;
-
-  /// Creates a [ResponseInjectError].
-  const ResponseInjectError({required this.code, required this.message});
-
-  /// Creates a [ResponseInjectError] from JSON.
-  factory ResponseInjectError.fromJson(Map<String, dynamic> json) {
-    return ResponseInjectError(
-      code: ResponseInjectErrorCode.fromJson(json['code'] as String),
-      message: json['message'] as String,
-    );
-  }
-
-  /// Converts to JSON.
-  Map<String, dynamic> toJson() => {'code': code.toJson(), 'message': message};
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ResponseInjectError &&
-          runtimeType == other.runtimeType &&
-          code == other.code &&
-          message == other.message;
-
-  @override
-  int get hashCode => Object.hash(code, message);
-
-  /// Creates a copy with replaced values.
-  ResponseInjectError copyWith({
-    ResponseInjectErrorCode? code,
-    String? message,
-  }) {
-    return ResponseInjectError(
-      code: code ?? this.code,
-      message: message ?? this.message,
-    );
-  }
-
-  @override
-  String toString() => 'ResponseInjectError(code: $code, message: $message)';
-}
-
-/// The reason an injected input was rejected.
+/// The unknown enum member is a compatibility fallback, not a third canonical
+/// value; [ResponseInjectError.rawCode] preserves future provider strings.
 ///
 /// This belongs to the beta multi-agent WebSocket protocol
 /// (`OpenAI-Beta: responses_multi_agent=v1`).
 enum ResponseInjectErrorCode {
-  /// Unknown error code (fallback for unrecognized values).
+  /// Unknown enum fallback. [ResponseInjectError.rawCode] retains the wire string.
   unknown('unknown'),
 
   /// The response had already completed when the input was received.
