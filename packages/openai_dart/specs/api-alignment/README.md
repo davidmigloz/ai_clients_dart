@@ -250,8 +250,11 @@ after all 14 CI contexts passed (13 successes, standard Test(all) skip). Its
 at `2856c21eed697b7ec24a79e70e66800fe5ec0b79` on October 8, 20:13:36 UTC,
 after all final-head CI contexts passed (13 successes, standard Test(all) skip).
 Its [acceptance evidence](reviews/26-voice-consents.md) is complete. Custom voice
-creation #369 is implemented and independently approved with [evidence](reviews/27-custom-voices.md);
-three Live runtime tickets remain pending.
+creation #369 merged in [PR #377](https://github.com/davidmigloz/ai_clients_dart/pull/377)
+on October 8 at 20:49:30 UTC, commit `3e2b488e896f820118b575108c50586ae08ec867`,
+after all 14 final-head CI contexts completed (13 successes, standard Test(all) skip).
+Its [acceptance evidence](reviews/27-custom-voices.md) records the merge. Live HTTP
+#370 is implemented and independently approved; two later Live tickets remain pending.
 
 | Repository ticket | Demonstrable outcome | Prerequisite |
 | --- | --- | --- |
@@ -275,8 +278,8 @@ These slices do not establish full Realtime/Chat/shared Responses parity.
 
 Phases 1–4 are complete for their specified tickets. Phase 5 Audio/Live has seven
 specified implementation tickets: speech #366, existing Audio #367 and consent
-management #368 are merged; custom voice creation #369 is implemented and independently approved; three Live tickets
-remain pending. Later phases remain candidate outcomes pending
+management #368 and custom voice creation #369 are merged. Live HTTP #370 is
+implemented and independently approved; two later Live tickets remain pending. Later phases remain candidate outcomes pending
 detailed specifications. Keep all audited gaps visible even when deferred.
 
 | Phase | Demonstrable outcomes | Dependencies and scope notes |
@@ -438,8 +441,9 @@ Sources: [cache diagnostics](https://developers.openai.com/api/docs/guides/promp
   Seven endpoint operations plus event-type discovery merged in #358/#363.
 - Audio: the late October 8 [OpenAPI b2751c66](https://github.com/openai/openai-openapi/commit/b2751c6625493c9c64db21b1b26a4d9300e589e3)
   narrows VoiceResource.type to audio_sample, aligning with SDKs. This updates
-  [pending custom voices #369](tickets/27-custom-voices.md); file-Audio/Chat
-  closures are unchanged and this implementation retains reviewed 239c canonical.
+  [merged custom voices #369](tickets/27-custom-voices.md); file-Audio/Chat
+  closures were unchanged, and that bounded Audio implementation retained reviewed
+  239c canonical before consent management adopted b275.
   Speech instructions and streaming, additional built-in/custom voices,
   sample-derived voice creation and consent management. The earlier
   [OpenAPI 3c4759c1](https://github.com/openai/openai-openapi/commit/3c4759c1ecc98a2ac3d3df85d54f4eb409f5957d)
@@ -584,3 +588,54 @@ Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356
 All eleven specified Phase 3 implementation tickets are merged. Phase 4 now has
 its own specification/tickets, merged receiver #357 and endpoint management #358,
 and merged safety retrieval #359; monitoring errors #360 are merged in PR #365. Remaining parity inventory persists.
+
+## Live HTTP source refinement
+
+Live HTTP ticket 28/#370 promotes reviewed
+[OpenAPI f6f80b90](https://github.com/openai/openai-openapi/blob/f6f80b90bb96d74c22b05a68295af6e7359a48a6/openapi.json),
+published October 8 at 20:44:03 UTC, with its actual fetch timestamp and immutable
+source URL. The prior b275 metadata retains its original fetch receipt. Independent
+normalized comparison finds 16 changed leaves: 14 added tool-choice components
+and two backend tool_choice unions. The 13 tool input schemas and all seven Live
+HTTP operations are unchanged. There are 356 operations and 2,027 schemas.
+
+This pin replaces the planning enum-or-arbitrary-object tool selection with typed
+scalar modes, 12 specific object choices and allowed_tools (1–128 specific choices).
+Function, MCP and custom choices have declared fields; the other specific choices
+are type-only open objects. The allowed set excludes namespace choices, scalar
+entries and recursive allowed_tools. Preserve finite open extras without inventing
+input tool configuration fields from these selection schemas. Python 8e1fd258
+(3.26.1) and Node bc6c0bfb (7.30.1) runtime heads remain unchanged and their create
+helpers remain narrower WebRTC-only. Canonical governs full WebRTC/SIP creation.
+
+The current SIP guide still says 200 for outbound creation, while the canonical
+contract and method reference specify 201 after initialization. The canonical
+status is used. Request SIP credentials/SDP are distinct from receive-only SIP
+metadata: the response declares only type:sip but its open object preserves any
+finite future keys without exposing typed trunk credentials or SDP properties.
+The documented outbound SIP request limit is 1 MiB of serialized UTF-8 JSON;
+ticket 28 validates that exact aggregate body before dispatch. Ringing is limited
+to three minutes and connected calls to two hours by the service, with no request
+duration override or client timer. These SIP limits do not narrow WebRTC bodies
+or the independent canonical backend tool configuration schemas.
+
+## Late Agents environment inventory
+
+The final October 8 source check found
+[OpenAPI 978d0571](https://github.com/openai/openai-openapi/commit/978d0571e61ab2b18b80a84d17276f05403aace7),
+published at 21:10:05 UTC: 358 operations and 2,035 schemas. Fifteen normalized
+changes add GET/POST `/agents/environments`, eight component roots, two environment
+lifecycle webhooks and hosted-environment reference/status refinements. All 100
+Live closure components and every Live path are unchanged; SDK heads are unchanged.
+The late candidate and its actual fetch receipt are retained separately. Ticket 28
+keeps reviewed f6 canonical bytes and their original metadata.
+
+Phase 6 must include owned-environment pagination (limit/order/after/type),
+prewarming-beta access, explicit hosted configuration/template inheritance,
+optional nullable vault IDs and the documented 24-hour scoped Idempotency-Key
+creation contract. Model `CreateAgentEnvironmentParams`, its single hosted branch,
+the list and event envelopes, environment reference exclusions and the new ready status.
+Handle `agent.environment.ready` and `agent.environment.failed` as typed lifecycle
+notifications during that slice, with caller-selected environment lookup/action.
+They currently remain receive-only unknown webhook values in this package; the
+existing 26 typed webhook branches retain their reviewed f6 source claims.

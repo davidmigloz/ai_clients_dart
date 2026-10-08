@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../errors/exceptions.dart';
 import '../interceptors/interceptor.dart';
 import '../utils/request_id.dart';
+import '../utils/speech_redaction.dart';
 import 'retry_wrapper.dart';
 
 /// Builds and executes an interceptor chain.
@@ -165,7 +166,10 @@ class InterceptorChain {
 
           try {
             final streamedResponse = await httpClient.send(abortableRequest);
-            return await http.Response.fromStream(streamedResponse);
+            return await _bufferPrivateResponse(
+              streamedResponse,
+              abortableRequest,
+            );
           } on http.RequestAbortedException catch (e) {
             // Convert http package's abort exception to our AbortedException
             throw AbortedException(
@@ -178,7 +182,7 @@ class InterceptorChain {
         } else {
           // No abort trigger - normal execution
           final streamedResponse = await httpClient.send(requestToSend);
-          return http.Response.fromStream(streamedResponse);
+          return _bufferPrivateResponse(streamedResponse, requestToSend);
         }
       }
 
@@ -212,6 +216,27 @@ class InterceptorChain {
 
     return executeTransport();
   }
+}
+
+Future<http.Response> _bufferPrivateResponse(
+  http.StreamedResponse streamed,
+  http.BaseRequest sentRequest,
+) async {
+  final response = await http.Response.fromStream(streamed);
+  if (response.request != null || !isPrivateAudioRequest(sentRequest)) {
+    return response;
+  }
+  // Some injected transports omit request context. Retain the actual sent
+  // auth/trace headers for all private response modes, including 1xx/3xx errors.
+  return http.Response.bytes(
+    response.bodyBytes,
+    response.statusCode,
+    request: sentRequest,
+    headers: response.headers,
+    isRedirect: response.isRedirect,
+    persistentConnection: response.persistentConnection,
+    reasonPhrase: response.reasonPhrase,
+  );
 }
 
 /// Wrapper to make a BaseRequest abortable.

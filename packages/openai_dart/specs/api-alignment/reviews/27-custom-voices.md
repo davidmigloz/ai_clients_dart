@@ -1,7 +1,7 @@
 # Custom voice creation acceptance
 
 Status: implementation verified; independent requirements and cross-author
-engineering reviews approve. Runtime PR merge gate remains pending.
+engineering reviews approve. Runtime PR merged, closing #369.
 [#369](https://github.com/davidmigloz/ai_clients_dart/issues/369),
 [ticket 27](../tickets/27-custom-voices.md), AUDIO-VOICE-01–03 in the
 [Phase 5 specification](../audio-live.md). Prerequisite consent #368 is closed by
@@ -92,3 +92,8 @@ added. Independent requirements and cross-author engineering reviews approve the
 combined change after resolved findings, with no open issues. Published-head CI,
 artifact verification and actual merge remain separate gates recorded in PR/issue.
 #369 stays open until actual merge; #370 Live HTTP and configuration is next.
+
+## Merge evidence
+
+Custom voice creation #369 merged in [PR #377](https://github.com/davidmigloz/ai_clients_dart/pull/377) on October 8, 2026 at 20:49:30 UTC, commit `3e2b488e896f820118b575108c50586ae08ec867`, after all 14 final-head CI contexts completed (13 successes and the standard Test(all) skip).
+The reviewed head was `0bdb022bf59fe4ca6713aad902a139a7c40d7dfc`; #370 follows independently.

@@ -21,6 +21,7 @@ import '../resources/evals_resource.dart';
 import '../resources/files_resource.dart';
 import '../resources/fine_tuning_resource.dart';
 import '../resources/images_resource.dart';
+import '../resources/live_resource.dart';
 import '../resources/models_resource.dart';
 import '../resources/moderations_resource.dart';
 import '../resources/realtime_resource.dart';
@@ -83,6 +84,7 @@ import 'retry_wrapper.dart';
 /// - [skills] - Skills API for skill bundles and versions
 /// - [beta] - Beta features (Assistants, Threads, etc.)
 /// - [realtime] - Real-time API (WebSocket)
+/// - [live] - Live WebRTC/SIP signaling, call controls and recording downloads
 /// - [contentProvenanceChecks] - Content provenance detection
 ///
 /// ## Configuration
@@ -193,7 +195,7 @@ class OpenAIClient {
   final OpenAIConfig _config;
   final http.Client _httpClient;
   final http.Client Function() _streamClientFactory;
-  // Speech streams borrow an injected client unless its caller supplies a
+  // Private binary streams borrow an injected client unless its caller supplies a
   // dedicated factory. Production streams still own one client per request.
   final http.Client Function()? _audioStreamClientFactory;
   final bool _ownsHttpClient;
@@ -369,6 +371,22 @@ class OpenAIClient {
   /// );
   /// ```
   AudioResource get audio => _audio ??= AudioResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+    streamClientFactory: _audioStreamClientFactory,
+  );
+
+  LiveResource? _live;
+
+  /// Live HTTP signaling, call controls and stored recording downloads.
+  ///
+  /// Use `live.sessions` with caller-owned WebRTC SDP or an eligible SIP trunk.
+  /// The application supplies its media connection and explicitly chooses each
+  /// call action. Creating an outbound SIP session initializes the call.
+  LiveResource get live => _live ??= LiveResource(
     config: config,
     httpClient: _httpClient,
     interceptorChain: _interceptorChain,

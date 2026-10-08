@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import '../client/request_builder.dart';
 import '../errors/exceptions.dart';
 import '../models/audio/speech_stream_event.dart';
+import '../platform/http_utils.dart';
 import '../utils/streaming_parser.dart';
 
 /// Checks a completed cancellation signal before authentication or dispatch.
@@ -50,16 +51,58 @@ Stream<Uint8List> openSpeechByteStream({
   required ApiException Function(http.Response response) parseError,
   void Function()? ensureNotClosed,
   Future<void>? abortTrigger,
-}) => _SpeechByteOperation(
+}) => _PrivateByteOperation(
   httpClient: httpClient,
   streamClientFactory: streamClientFactory,
   requestBuilder: requestBuilder,
+  method: 'POST',
+  endpoint: '/audio/speech',
+  context: 'Speech',
   body: body,
   accept: accept,
   timeout: timeout,
   parseError: parseError,
   ensureNotClosed: ensureNotClosed,
   abortTrigger: abortTrigger,
+  timeoutResponseBody: false,
+  redactTransportErrors: false,
+).stream;
+
+/// Opens a private binary HTTP response with cancellation and bounded waits.
+///
+/// A factory client is owned by this operation; an injected client is borrowed.
+/// No request is replayed. [validateResponse] checks successful response headers
+/// before any bytes are delivered. Non-success bodies use [parseError] instead.
+Stream<Uint8List> openPrivateByteStream({
+  required http.Client httpClient,
+  required http.Client Function()? streamClientFactory,
+  required RequestBuilder requestBuilder,
+  required String method,
+  required String endpoint,
+  Map<String, dynamic>? body,
+  required String accept,
+  required Duration timeout,
+  required String context,
+  required ApiException Function(http.Response response) parseError,
+  void Function(http.StreamedResponse response)? validateResponse,
+  void Function()? ensureNotClosed,
+  Future<void>? abortTrigger,
+}) => _PrivateByteOperation(
+  httpClient: httpClient,
+  streamClientFactory: streamClientFactory,
+  requestBuilder: requestBuilder,
+  method: method,
+  endpoint: endpoint,
+  context: context,
+  body: body,
+  accept: accept,
+  timeout: timeout,
+  parseError: parseError,
+  validateResponse: validateResponse,
+  ensureNotClosed: ensureNotClosed,
+  abortTrigger: abortTrigger,
+  timeoutResponseBody: true,
+  redactTransportErrors: true,
 ).stream;
 
 /// Decodes speech SSE while forwarding cancellation before the first byte.
@@ -238,27 +281,35 @@ class _SpeechEventOperation {
   }
 }
 
-class _SpeechByteOperation {
-  _SpeechByteOperation({
+class _PrivateByteOperation {
+  _PrivateByteOperation({
     required this.httpClient,
     required this.streamClientFactory,
     required this.requestBuilder,
+    required this.method,
+    required this.endpoint,
+    required this.context,
     required this.body,
     required this.accept,
     required this.timeout,
     required this.parseError,
     required this.ensureNotClosed,
     required this.abortTrigger,
+    required this.timeoutResponseBody,
+    required this.redactTransportErrors,
+    this.validateResponse,
   }) {
     _controller = StreamController<Uint8List>(
       onListen: () => unawaited(_start()),
       onPause: () {
         _paused = true;
+        _bodyTimer?.cancel();
         _subscription?.pause();
       },
       onResume: () {
         _paused = false;
         _subscription?.resume();
+        _armBodyTimeout();
       },
       onCancel: _cancel,
     );
@@ -267,17 +318,25 @@ class _SpeechByteOperation {
   final http.Client httpClient;
   final http.Client Function()? streamClientFactory;
   final RequestBuilder requestBuilder;
-  final Map<String, dynamic> body;
+  final String method;
+  final String endpoint;
+  final String context;
+  final Map<String, dynamic>? body;
   final String accept;
   final Duration timeout;
   final ApiException Function(http.Response response) parseError;
   final void Function()? ensureNotClosed;
   final Future<void>? abortTrigger;
+  final bool timeoutResponseBody;
+  final bool redactTransportErrors;
+  final void Function(http.StreamedResponse response)? validateResponse;
 
   late final StreamController<Uint8List> _controller;
   final _cancelSignal = Completer<void>();
   StreamSubscription<List<int>>? _subscription;
+  Timer? _bodyTimer;
   http.Client? _client;
+  http.BaseRequest? _request;
   bool _ownsClient = false;
   bool _clientClosed = false;
   bool _paused = false;
@@ -306,8 +365,8 @@ class _SpeechByteOperation {
       ensureNotClosed?.call();
       final request =
           http.AbortableRequest(
-              'POST',
-              requestBuilder.buildUrl('/audio/speech'),
+              method,
+              requestBuilder.buildUrl(endpoint),
               abortTrigger: _cancelSignal.future,
             )
             ..headers.addAll(
@@ -319,8 +378,10 @@ class _SpeechByteOperation {
               ),
             )
             ..headers['Accept'] = accept
-            ..headers['Content-Type'] = 'application/json'
-            ..body = jsonEncode(body);
+            ..headers['Content-Type'] = 'application/json';
+      if (body != null) request.body = jsonEncode(body);
+      if (body == null) request.headers.remove('content-type');
+      _request = request;
 
       _client = streamClientFactory?.call() ?? httpClient;
       _ownsClient =
@@ -354,15 +415,16 @@ class _SpeechByteOperation {
           await Future.any([
             pendingResponse,
             _cancelSignal.future.then<http.StreamedResponse>(
-              (_) => throw const AbortedException(
-                message: 'Speech streaming request was canceled',
+              (_) => throw AbortedException(
+                message: '$context streaming request was canceled',
                 stage: AbortionStage.duringStream,
+                redactDiagnostics: redactTransportErrors,
               ),
             ),
           ]).timeout(
             timeout,
             onTimeout: () => throw RequestTimeoutException(
-              message: 'Speech streaming request timed out',
+              message: '$context streaming request timed out',
               timeout: timeout,
             ),
           );
@@ -374,6 +436,14 @@ class _SpeechByteOperation {
 
       final failed = response.statusCode < 200 || response.statusCode >= 300;
       if (!failed) {
+        if (validateResponse != null) {
+          try {
+            validateResponse!(response);
+          } catch (_) {
+            await discardResponse(response);
+            rethrow;
+          }
+        }
         final contentType = response.headers['content-type']
             ?.split(';')
             .first
@@ -385,9 +455,9 @@ class _SpeechByteOperation {
                 (accept != 'text/event-stream' &&
                     contentType == 'text/event-stream'))) {
           await discardResponse(response);
-          throw const ParseException(
+          throw ParseException(
             message:
-                'Speech response media type does not match the selected mode',
+                '$context response media type does not match the selected mode',
           );
         }
       }
@@ -396,6 +466,7 @@ class _SpeechByteOperation {
       _subscription = response.stream.listen(
         (bytes) {
           if (_settled || _cancelled) return;
+          _armBodyTimeout();
           if (failed) {
             errorBytes.add(bytes);
           } else {
@@ -404,7 +475,7 @@ class _SpeechByteOperation {
         },
         onError: (Object error, StackTrace stackTrace) {
           if (error is http.RequestAbortedException) {
-            _abort();
+            _abort(cause: error);
           } else {
             _fail(error, stackTrace);
           }
@@ -432,9 +503,10 @@ class _SpeechByteOperation {
         },
       );
       if (_paused) _subscription?.pause();
+      _armBodyTimeout();
     } catch (error, stackTrace) {
       if (error is http.RequestAbortedException) {
-        _abort();
+        _abort(cause: error);
       } else {
         _fail(error, stackTrace);
       }
@@ -443,6 +515,26 @@ class _SpeechByteOperation {
 
   void _signalCancellation() {
     if (!_cancelSignal.isCompleted) _cancelSignal.complete();
+  }
+
+  void _armBodyTimeout() {
+    _bodyTimer?.cancel();
+    if (!timeoutResponseBody ||
+        _subscription == null ||
+        _paused ||
+        _settled ||
+        _cancelled) {
+      return;
+    }
+    _bodyTimer = Timer(timeout, () {
+      _fail(
+        RequestTimeoutException(
+          message: '$context streaming response timed out',
+          timeout: timeout,
+        ),
+        StackTrace.current,
+      );
+    });
   }
 
   void _closeClient() {
@@ -464,12 +556,17 @@ class _SpeechByteOperation {
     }
   }
 
-  void _abort() {
+  void _abort({Object? cause}) {
     if (_settled || _cancelled) return;
     _fail(
       AbortedException(
-        message: 'Speech request aborted by user',
+        message: '$context request aborted by user',
         stage: _sent ? AbortionStage.duringStream : AbortionStage.beforeRequest,
+        correlationId: redactTransportErrors
+            ? _request?.headers['x-request-id']
+            : null,
+        cause: redactTransportErrors ? cause : null,
+        redactDiagnostics: redactTransportErrors,
       ),
       StackTrace.current,
     );
@@ -478,9 +575,28 @@ class _SpeechByteOperation {
   void _fail(Object error, StackTrace stackTrace) {
     if (_settled || _cancelled) return;
     _settled = true;
+    _bodyTimer?.cancel();
     _signalCancellation();
     _closeClient();
-    _controller.addError(error, stackTrace);
+    final Object diagnosticError;
+    if (redactTransportErrors && error is http.ClientException) {
+      diagnosticError = ConnectionException(
+        message: error.message,
+        url: error.uri?.toString() ?? _request?.url.toString(),
+        cause: error,
+        redactDiagnostics: true,
+      );
+    } else if (redactTransportErrors && isSocketException(error)) {
+      diagnosticError = ConnectionException(
+        message: '$context connection failed',
+        url: _request?.url.toString(),
+        cause: error,
+        redactDiagnostics: true,
+      );
+    } else {
+      diagnosticError = error;
+    }
+    _controller.addError(diagnosticError, stackTrace);
     if (_subscription case final subscription?) {
       unawaited(_cancelSpeechSubscription(subscription));
     }
@@ -490,12 +606,14 @@ class _SpeechByteOperation {
   void _finish() {
     if (_settled || _cancelled) return;
     _settled = true;
+    _bodyTimer?.cancel();
     _closeClient();
     _closeController();
   }
 
   Future<void> _cancel() async {
     _cancelled = true;
+    _bodyTimer?.cancel();
     _signalCancellation();
     _closeClient();
     await _cancelSpeechSubscription(_subscription);

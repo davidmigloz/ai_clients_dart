@@ -84,6 +84,16 @@ ChatAudioConfig accepts typed open/custom AudioVoice references and marin/cedar;
 
 The February 26, 2027 Whisper/GPT-4o file-transcription sunset requires workflow-aware migration to gpt-transcribe/gpt-live-transcribe; retain operational specialist outputs until a replacement fits. It is separate from January 6 TTS and January 20 legacy snapshot notices. See README and MIGRATION for widened getters, appended enum cases and removed collection constructor const.
 
+## Live HTTP sessions
+
+- [live_http_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/live_http_example.dart): Offline caller-SDP WebRTC and SIP signaling, explicit refer/hangup, verified incoming notice with opt-in accept/reject, buffered/streamed stereo WAV and REST fork; seven default mock requests, $0 API cost.
+
+client.live.sessions is cached and implements create/accept/reject/refer/hangup/fork/downloadRecording/downloadRecordingStream. Canonical create supports WebRTC offers and outbound SIP (E.164 destination, TLS provider URL, Digest auth, caller number), beyond the pinned clients' narrower helpers. SIP 201 means initialized before answer; ambiguous POST timeout/connection/5xx is sent once, and tracing does not deduplicate. Exact 201 JSON/empty 200/WAV response modes, shared auth/abort/errors, opaque encoded IDs and closed-client guards. Content has its own live_ ID pattern and preserves WAV plus 503 Retry-After. Storage defaults false, needs project policy, excludes ZDR; finalized recordings last 30 days. No polling or automatic call actions. Verify live.transport.incoming and use data.sessionId for an explicitly chosen control.
+
+Complete shared startup/media/fork/session/audio/history/frontend/delegation models preserve declared fields, optional/null/absence, copy/clear and finite immutable open JSON. Thirteen distinct Live tool input variants plus nested shell helpers; 12 typed specific choices and allowed_tools 1–128. Service runtime support may be narrower than canonical wire coverage. Startup model/voice/history/audio format/instructions/delegation mode remain immutable; updates change backend settings. PCM16LE at 16/24 kHz and G.711 PCMA/PCMU at 8 kHz are primary-WebSocket formats; WebRTC/SIP omit audio.format. Live custom voice objects are open with IDs of 1–128 characters, independently of Speech's closed custom reference. Default logs/diagnostics redact private wire data; explicit caller models/errors remain readable. Live WebSocket transports/codecs/transcript helpers remain pending.
+
+Outbound SIP creation enforces the documented 1 MiB serialized UTF-8 body limit. The service limits ringing to three minutes and connected calls to two hours; request configuration does not change these durations. Forks reject known inherited model/voice/instructions/history overrides even through raw JSON, while preserving unrelated finite future metadata.
+
 ## Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_dart): Source tree, pubspec, and package-local files.

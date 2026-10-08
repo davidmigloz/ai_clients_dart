@@ -5349,7 +5349,7 @@
       "dart_class": "CustomVoiceCreateRequest",
       "file": "lib/src/models/audio/custom_voice.dart",
       "schema": "CreateVoiceFromConsentRequest",
-      "note": "Actual closed multipart object: required name/audio_sample/consent and optional fixed audio_sample type. Unicode name 1–256, original immutable file bytes/filename, eight normalized MIME bases and10MiB verified through actual multipart; omitted type remains omitted. No invented JSON binary factory or diagnostic exclusion."
+      "note": "Actual closed multipart object: required name/audio_sample/consent and optional fixed audio_sample type. Unicode name 1\u2013256, original immutable file bytes/filename, eight normalized MIME bases and10MiB verified through actual multipart; omitted type remains omitted. No invented JSON binary factory or diagnostic exclusion."
     },
     "VoiceResource": {
       "spec": "main",
@@ -5358,6 +5358,1016 @@
       "file": "lib/src/models/audio/custom_voice.dart",
       "schema": "VoiceResource",
       "note": "Actual closed response: fixed audio.voice object and fixed audio_sample creation type; strict known fields, finite immutable receive-only future JSON, complete effective copy/value/hash contracts and private diagnostics. Unknown known-field type values are rejected, distinct from receive-only extra-field compatibility."
+    },
+    "LiveAllowedServerEventParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveAllowedServerEventParam",
+      "file": "lib/src/models/live/live_config.dart",
+      "schema": "LiveAllowedServerEventParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveAudioFormat": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "LiveAudioFormat",
+      "file": "lib/src/models/live/live_audio.dart",
+      "schema": "LiveAudioFormat",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "LiveSessionAudioFormatPCMAParam": "audio/pcma",
+          "LiveSessionAudioFormatPCMParam": "audio/pcm",
+          "LiveSessionAudioFormatPCMUParam": "audio/pcmu"
+        }
+      }
+    },
+    "LiveCallAcceptRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveCallAcceptRequest",
+      "file": "lib/src/models/live/live_http.dart",
+      "schema": "LiveCallAcceptRequest",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveCallAcceptSession": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveCallAcceptSession",
+      "file": "lib/src/models/live/live_config.dart",
+      "schema": "LiveCallAcceptSession",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveCallReferRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveCallReferRequest",
+      "file": "lib/src/models/live/live_http.dart",
+      "schema": "LiveCallReferRequest",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveCallRejectRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveCallRejectRequest",
+      "file": "lib/src/models/live/live_http.dart",
+      "schema": "LiveCallRejectRequest",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveClientConfigParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveClientConfigParam",
+      "file": "lib/src/models/live/live_config.dart",
+      "schema": "LiveClientConfigParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveClientDelegationParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveClientDelegationParam",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "schema": "LiveClientDelegationParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "delegation"
+    },
+    "LiveContainerMemoryLimit": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "LiveContainerMemoryLimit",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveContainerMemoryLimit",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "enum_values": [
+        "1g",
+        "4g",
+        "16g",
+        "64g"
+      ]
+    },
+    "LiveCreateResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveCreateResponse",
+      "file": "lib/src/models/live/live_http.dart",
+      "schema": "LiveCreateResponse",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveCustomVoiceParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveCustomVoiceParam",
+      "file": "lib/src/models/live/live_audio.dart",
+      "schema": "LiveCustomVoiceParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveVoice"
+    },
+    "LiveDataChannelConfigParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveDataChannelConfigParam",
+      "file": "lib/src/models/live/live_config.dart",
+      "schema": "LiveDataChannelConfigParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveDelegationReasoningInputParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveDelegationReasoningInputParam",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "schema": "LiveDelegationReasoningInputParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveDelegationTextInputParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveDelegationTextInputParam",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "schema": "LiveDelegationTextInputParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveForkAudioParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveForkAudioParam",
+      "file": "lib/src/models/live/live_audio.dart",
+      "schema": "LiveForkAudioParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveForkRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveForkRequest",
+      "file": "lib/src/models/live/live_http.dart",
+      "schema": "LiveForkRequest",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveForkSessionConfigParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveForkSessionConfigParam",
+      "file": "lib/src/models/live/live_config.dart",
+      "schema": "LiveForkSessionConfigParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveInitialAssistantMessageItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveInitialAssistantMessageItemParam",
+      "file": "lib/src/models/live/live_history.dart",
+      "schema": "LiveInitialAssistantMessageItemParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveInitialItem"
+    },
+    "LiveInitialDeveloperMessageItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveInitialDeveloperMessageItemParam",
+      "file": "lib/src/models/live/live_history.dart",
+      "schema": "LiveInitialDeveloperMessageItemParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveInitialItem"
+    },
+    "LiveInitialInputTextContentPartParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveInitialInputTextContentPartParam",
+      "file": "lib/src/models/live/live_history.dart",
+      "schema": "LiveInitialInputTextContentPartParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveInitialItem": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "LiveInitialItem",
+      "file": "lib/src/models/live/live_history.dart",
+      "schema": "LiveInitialItem",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "discriminator": {
+        "field": "role",
+        "mapping": {
+          "LiveInitialAssistantMessageItemParam": "assistant",
+          "LiveInitialDeveloperMessageItemParam": "developer",
+          "LiveInitialUserMessageItemParam": "user"
+        }
+      }
+    },
+    "LiveInitialMessageStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "LiveInitialMessageStatus",
+      "file": "lib/src/models/live/live_history.dart",
+      "schema": "LiveInitialMessageStatus",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "enum_values": [
+        "incomplete",
+        "completed"
+      ]
+    },
+    "LiveInitialOutputTextContentPartParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveInitialOutputTextContentPartParam",
+      "file": "lib/src/models/live/live_history.dart",
+      "schema": "LiveInitialOutputTextContentPartParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveInitialAssistantContentPart"
+    },
+    "LiveInitialSessionAudioOutputParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveInitialSessionAudioOutputParam",
+      "file": "lib/src/models/live/live_audio.dart",
+      "schema": "LiveInitialSessionAudioOutputParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveInitialSessionAudioParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveInitialSessionAudioParam",
+      "file": "lib/src/models/live/live_audio.dart",
+      "schema": "LiveInitialSessionAudioParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveInitialTextContentPartParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveInitialTextContentPartParam",
+      "file": "lib/src/models/live/live_history.dart",
+      "schema": "LiveInitialTextContentPartParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveInitialAssistantContentPart"
+    },
+    "LiveInitialUserMessageItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveInitialUserMessageItemParam",
+      "file": "lib/src/models/live/live_history.dart",
+      "schema": "LiveInitialUserMessageItemParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveInitialItem"
+    },
+    "LiveMediaSessionAudioParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveMediaSessionAudioParam",
+      "file": "lib/src/models/live/live_audio.dart",
+      "schema": "LiveMediaSessionAudioParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveMediaSessionCreateParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveMediaSessionCreateParams",
+      "file": "lib/src/models/live/live_config.dart",
+      "schema": "LiveMediaSessionCreateParams",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveMediaSessionForkParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveMediaSessionForkParams",
+      "file": "lib/src/models/live/live_config.dart",
+      "schema": "LiveMediaSessionForkParams",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveReasoningEffort": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "LiveReasoningEffort",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "schema": "LiveReasoningEffort",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "enum_values": [
+        "none",
+        "minimal",
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ]
+    },
+    "LiveReasoningSummary": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "LiveReasoningSummary",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "schema": "LiveReasoningSummary",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "enum_values": [
+        "concise",
+        "detailed",
+        "auto"
+      ]
+    },
+    "LiveResponsesDelegationParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveResponsesDelegationParam",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "schema": "LiveResponsesDelegationParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "delegation"
+    },
+    "LiveResponsesDelegationSettingsInputParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveResponsesDelegationSettingsInputParam",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "schema": "LiveResponsesDelegationSettingsInputParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveResponsesDelegationSettingsUpdateInputParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveResponsesDelegationSettingsUpdateInputParam",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "schema": "LiveResponsesDelegationSettingsUpdateInputParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveResponsesDelegationUpdateParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveResponsesDelegationUpdateParam",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "schema": "LiveResponsesDelegationUpdateParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveResponsesServiceTier": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "LiveResponsesServiceTier",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "schema": "LiveResponsesServiceTier",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "enum_values": [
+        "auto",
+        "default",
+        "fast_tier_temp_pilot",
+        "flex",
+        "priority",
+        "ultrafast"
+      ]
+    },
+    "LiveSIPTransport": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveSIPTransport",
+      "file": "lib/src/models/live/live_http.dart",
+      "schema": "LiveSIPTransport",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveTransport"
+    },
+    "LiveSIPTrunk": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveSIPTrunk",
+      "file": "lib/src/models/live/live_http.dart",
+      "schema": "LiveSIPTrunk",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveSIPTrunkAuth": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveSIPTrunkAuth",
+      "file": "lib/src/models/live/live_http.dart",
+      "schema": "LiveSIPTrunkAuth",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveSessionAudioFormatPCMAParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveSessionAudioFormatPCMAParam",
+      "file": "lib/src/models/live/live_audio.dart",
+      "schema": "LiveSessionAudioFormatPCMAParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveAudioFormat"
+    },
+    "LiveSessionAudioFormatPCMParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveSessionAudioFormatPCMParam",
+      "file": "lib/src/models/live/live_audio.dart",
+      "schema": "LiveSessionAudioFormatPCMParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveAudioFormat"
+    },
+    "LiveSessionAudioFormatPCMUParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveSessionAudioFormatPCMUParam",
+      "file": "lib/src/models/live/live_audio.dart",
+      "schema": "LiveSessionAudioFormatPCMUParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveAudioFormat"
+    },
+    "LiveSessionCreateParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveSessionCreateParams",
+      "file": "lib/src/models/live/live_config.dart",
+      "schema": "LiveSessionCreateParams",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveSessionCreateRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveSessionCreateRequest",
+      "file": "lib/src/models/live/live_http.dart",
+      "schema": "LiveSessionCreateRequest",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveSessionCreateResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveSessionCreateResponse",
+      "file": "lib/src/models/live/live_http.dart",
+      "schema": "LiveSessionCreateResponse",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveSessionResourceParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveSessionResourceParam",
+      "file": "lib/src/models/live/live_config.dart",
+      "schema": "LiveSessionResourceParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveSessionUpdateParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveSessionUpdateParams",
+      "file": "lib/src/models/live/live_config.dart",
+      "schema": "LiveSessionUpdateParams",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveTextVerbosity": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "LiveTextVerbosity",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "schema": "LiveTextVerbosity",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "enum_values": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "LiveToolChoiceEnum": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "LiveToolChoiceEnum",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "schema": "LiveToolChoiceEnum",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "enum_values": [
+        "auto",
+        "none",
+        "required"
+      ]
+    },
+    "LiveToolChoiceValueEnum": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "LiveToolChoiceValueEnum",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveToolChoiceValueEnum",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "enum_values": [
+        "none",
+        "auto",
+        "required"
+      ]
+    },
+    "LiveWebRTCTransport": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveWebRTCTransport",
+      "file": "lib/src/models/live/live_http.dart",
+      "schema": "LiveWebRTCTransport",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveTransport"
+    },
+    "LiveFunctionToolInputParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveFunctionTool",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveFunctionToolInputParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveTool"
+    },
+    "LiveWebSearchToolInputParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveWebSearchTool",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveWebSearchToolInputParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveTool"
+    },
+    "LiveFileSearchToolInputParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveFileSearchTool",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveFileSearchToolInputParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveTool"
+    },
+    "LiveCodeInterpreterToolInputParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveCodeInterpreterTool",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveCodeInterpreterToolInputParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveTool"
+    },
+    "LiveHostedShellToolInputParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveHostedShellTool",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveHostedShellToolInputParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveTool"
+    },
+    "LiveImageGenerationToolInputParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveImageGenerationTool",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveImageGenerationToolInputParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveTool"
+    },
+    "LiveMCPToolInputParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveMCPTool",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveMCPToolInputParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveTool"
+    },
+    "LiveCustomToolInputParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveCustomTool",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveCustomToolInputParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveTool"
+    },
+    "LiveNamespaceToolInputParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveNamespaceTool",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveNamespaceToolInputParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveTool"
+    },
+    "LiveToolSearchToolInputParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveToolSearchTool",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveToolSearchToolInputParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveTool"
+    },
+    "LiveProgrammaticToolInputParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveProgrammaticTool",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveProgrammaticToolInputParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveTool"
+    },
+    "LiveComputerToolInputParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveComputerTool",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveComputerToolInputParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveTool"
+    },
+    "LiveApplyPatchToolInputParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveApplyPatchTool",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveApplyPatchToolInputParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveTool"
+    },
+    "LiveHostedShellContainerAutoParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveHostedShellContainerAuto",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveHostedShellContainerAutoParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveShellEnvironment"
+    },
+    "LiveContainerReferenceParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveContainerReference",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveContainerReferenceParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveShellEnvironment"
+    },
+    "LiveLocalEnvironmentParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveLocalEnvironment",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveLocalEnvironmentParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveShellEnvironment"
+    },
+    "LiveContainerNetworkPolicyDisabledParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveContainerNetworkPolicyDisabled",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveContainerNetworkPolicyDisabledParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveContainerNetworkPolicy"
+    },
+    "LiveHostedShellNetworkPolicyAllowlistParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveHostedShellNetworkPolicyAllowlist",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveHostedShellNetworkPolicyAllowlistParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveContainerNetworkPolicy"
+    },
+    "LiveSkillReferenceParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveSkillReference",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveSkillReferenceParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveHostedSkill"
+    },
+    "LiveInlineSkillParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveInlineSkill",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveInlineSkillParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveHostedSkill"
+    },
+    "LiveInlineSkillSourceParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveInlineSkillSource",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveInlineSkillSourceParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveLocalSkillParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveLocalSkill",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveLocalSkillParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "LiveFunctionToolChoiceParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveFunctionToolChoice",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveFunctionToolChoiceParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveSpecificToolChoice"
+    },
+    "LiveMCPToolChoiceParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveMCPToolChoice",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveMCPToolChoiceParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveSpecificToolChoice"
+    },
+    "LiveSpecificCustomToolParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveSpecificCustomTool",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveSpecificCustomToolParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveSpecificToolChoice"
+    },
+    "LiveAllowedToolsChoiceParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveAllowedToolsChoice",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveAllowedToolsChoiceParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveToolChoice"
+    },
+    "LiveSpecificApplyPatchParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveSpecificApplyPatch",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveSpecificApplyPatchParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveSpecificToolChoice"
+    },
+    "LiveSpecificCodeInterpreterParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveSpecificCodeInterpreter",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveSpecificCodeInterpreterParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveSpecificToolChoice"
+    },
+    "LiveSpecificComputerParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveSpecificComputer",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveSpecificComputerParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveSpecificToolChoice"
+    },
+    "LiveSpecificFileSearchParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveSpecificFileSearch",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveSpecificFileSearchParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveSpecificToolChoice"
+    },
+    "LiveSpecificFunctionShellParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveSpecificFunctionShell",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveSpecificFunctionShellParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveSpecificToolChoice"
+    },
+    "LiveSpecificImageGenParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveSpecificImageGen",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveSpecificImageGenParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveSpecificToolChoice"
+    },
+    "LiveSpecificProgrammaticToolCallingParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveSpecificProgrammaticToolCalling",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveSpecificProgrammaticToolCallingParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveSpecificToolChoice"
+    },
+    "LiveSpecificWebSearchParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveSpecificWebSearch",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveSpecificWebSearchParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveSpecificToolChoice"
+    },
+    "LiveSpecificWebSearchPreviewParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveSpecificWebSearchPreview",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveSpecificWebSearchPreviewParam",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "parent": "LiveSpecificToolChoice"
+    },
+    "session": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveCreatedSession",
+      "file": "lib/src/models/live/live_http.dart",
+      "schema": "session",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+    },
+    "delegation": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "LiveDelegation",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "schema": "delegation",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "LiveClientDelegationParam": "client",
+          "LiveResponsesDelegationParam": "responses"
+        }
+      }
+    },
+    "LiveTransport": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "LiveTransport",
+      "file": "lib/src/models/live/live_http.dart",
+      "schema": "LiveSessionCreateRequest",
+      "note": "Dart aggregate of the actual inline LiveSessionCreateRequest.properties.transport union; no independent component is fabricated. Exact branch admission verified by public canonical corpus.",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "LiveSIPTransport": "sip",
+          "LiveWebRTCTransport": "webrtc"
+        }
+      }
+    },
+    "LiveResponseTransport": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "LiveResponseTransport",
+      "file": "lib/src/models/live/live_http.dart",
+      "schema": "LiveSessionCreateResponse",
+      "note": "Dart aggregate of the actual inline LiveSessionCreateResponse.properties.transport union; no independent component is fabricated. Exact branch admission verified by public canonical corpus.",
+      "discriminator": {
+        "field": "type",
+        "mapping": {}
+      }
+    },
+    "LiveVoice": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "LiveVoice",
+      "file": "lib/src/models/live/live_audio.dart",
+      "schema": "LiveInitialSessionAudioOutputParam",
+      "note": "Dart aggregate of the actual inline LiveInitialSessionAudioOutputParam.properties.voice union; no independent component is fabricated. Exact branch admission verified by public canonical corpus."
+    },
+    "LiveDelegationUpdate": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "LiveDelegationUpdate",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "schema": "LiveSessionUpdateParams",
+      "note": "Dart aggregate of the actual inline LiveSessionUpdateParams.properties.delegation.anyOf[0] discriminated object union inside the nullable wrapper; no independent component is fabricated. Exact branch admission verified by public canonical corpus.",
+      "discriminator": {
+        "field": "type",
+        "mapping": {}
+      }
+    },
+    "LiveAllowedClientEvents": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "LiveAllowedClientEvents",
+      "file": "lib/src/models/live/live_config.dart",
+      "schema": "LiveDataChannelConfigParam",
+      "note": "Dart aggregate of the actual inline LiveDataChannelConfigParam.properties.allowed_client_events union; no independent component is fabricated. Exact branch admission verified by public canonical corpus."
+    },
+    "LiveAllowedServerEvents": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "LiveAllowedServerEvents",
+      "file": "lib/src/models/live/live_config.dart",
+      "schema": "LiveDataChannelConfigParam",
+      "note": "Dart aggregate of the actual inline LiveDataChannelConfigParam.properties.allowed_server_events union; no independent component is fabricated. Exact branch admission verified by public canonical corpus."
+    },
+    "LiveInitialAssistantContentPart": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "LiveInitialAssistantContentPart",
+      "file": "lib/src/models/live/live_history.dart",
+      "schema": "LiveInitialAssistantMessageItemParam",
+      "note": "Dart aggregate of the actual inline LiveInitialAssistantMessageItemParam.properties.content.items union; no independent component is fabricated. Exact branch admission verified by public canonical corpus.",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "LiveInitialOutputTextContentPartParam": "output_text",
+          "LiveInitialTextContentPartParam": "text"
+        }
+      }
+    },
+    "LiveTool": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "LiveTool",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveResponsesDelegationSettingsInputParam",
+      "note": "Dart aggregate of the actual inline LiveResponsesDelegationSettingsInputParam.properties.tools.items union; no independent component is fabricated. Exact branch admission verified by public canonical corpus.",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "LiveFunctionToolInputParam": "function",
+          "LiveWebSearchToolInputParam": "web_search",
+          "LiveFileSearchToolInputParam": "file_search",
+          "LiveCodeInterpreterToolInputParam": "code_interpreter",
+          "LiveHostedShellToolInputParam": "shell",
+          "LiveImageGenerationToolInputParam": "image_generation",
+          "LiveMCPToolInputParam": "mcp",
+          "LiveCustomToolInputParam": "custom",
+          "LiveNamespaceToolInputParam": "namespace",
+          "LiveToolSearchToolInputParam": "tool_search",
+          "LiveProgrammaticToolInputParam": "programmatic_tool_calling",
+          "LiveComputerToolInputParam": "computer",
+          "LiveApplyPatchToolInputParam": "apply_patch"
+        }
+      }
+    },
+    "LiveShellEnvironment": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "LiveShellEnvironment",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveHostedShellToolInputParam",
+      "note": "Dart aggregate of the actual inline LiveHostedShellToolInputParam.properties.environment.anyOf[0] union; no independent component is fabricated. Exact branch admission verified by public canonical corpus.",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "LiveHostedShellContainerAutoParam": "container_auto",
+          "LiveContainerReferenceParam": "container_reference",
+          "LiveLocalEnvironmentParam": "local"
+        }
+      }
+    },
+    "LiveContainerNetworkPolicy": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "LiveContainerNetworkPolicy",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveHostedShellContainerAutoParam",
+      "note": "Dart aggregate of the actual inline LiveHostedShellContainerAutoParam.properties.network_policy.anyOf[0] union; no independent component is fabricated. Exact branch admission verified by public canonical corpus.",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "LiveContainerNetworkPolicyDisabledParam": "disabled",
+          "LiveHostedShellNetworkPolicyAllowlistParam": "allowlist"
+        }
+      }
+    },
+    "LiveHostedSkill": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "LiveHostedSkill",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveHostedShellContainerAutoParam",
+      "note": "Dart aggregate of the actual inline LiveHostedShellContainerAutoParam.properties.skills.anyOf[0].items union; no independent component is fabricated. Exact branch admission verified by public canonical corpus.",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "LiveSkillReferenceParam": "skill_reference",
+          "LiveInlineSkillParam": "inline"
+        }
+      }
+    },
+    "LiveSpecificToolChoice": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "LiveSpecificToolChoice",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveAllowedToolsChoiceParam",
+      "note": "Dart aggregate of the actual inline LiveAllowedToolsChoiceParam.properties.tools.items union; no independent component is fabricated. Exact branch admission verified by public canonical corpus.",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "LiveFunctionToolChoiceParam": "function",
+          "LiveMCPToolChoiceParam": "mcp",
+          "LiveSpecificCustomToolParam": "custom",
+          "LiveSpecificApplyPatchParam": "apply_patch",
+          "LiveSpecificCodeInterpreterParam": "code_interpreter",
+          "LiveSpecificComputerParam": "computer",
+          "LiveSpecificFileSearchParam": "file_search",
+          "LiveSpecificFunctionShellParam": "shell",
+          "LiveSpecificImageGenParam": "image_generation",
+          "LiveSpecificProgrammaticToolCallingParam": "programmatic_tool_calling",
+          "LiveSpecificWebSearchParam": "web_search",
+          "LiveSpecificWebSearchPreviewParam": "web_search_preview"
+        }
+      }
+    },
+    "LiveToolChoice": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "LiveToolChoice",
+      "file": "lib/src/models/live/live_tools.dart",
+      "schema": "LiveResponsesDelegationSettingsInputParam",
+      "note": "Dart aggregate of the actual LiveResponsesDelegationSettingsInputParam.properties.tool_choice mixed scalar/object union (oneOf); no independent component is fabricated. Specific object choices are nested in oneOf[1]; exact branch admission verified by public canonical corpus."
     }
   }
 }
