@@ -1,6 +1,7 @@
 # Mid-turn Responses steering
 
-Status: implemented, verified and independently reviewed; PR pending.
+Status: implemented, verified and independently reviewed; merge pending.
+Implementation [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354) is open for review; #342 closes only after merge.
 GitHub: [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 3 Responses](../responses.md), RESP-STEER-01–03.
@@ -50,5 +51,4 @@ Thirty serialized GA/beta fixtures validate independently against their schemas.
 The exact README usage and migration After block compile; the six-frame offline
 example and terminal-failure probes pass for $0. Full toolkit diagnostics remain
 visible and independently classified. Requirements and engineering peer reviews
-approve the final combined diff after all validated findings are resolved. The
-implementation PR is pending; close #342 only after merge. Recovery #343 follows.
+approve the final combined diff after all validated findings are resolved. Implementation [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354) is open for review; close #342 only after merge. Recovery #343 follows.

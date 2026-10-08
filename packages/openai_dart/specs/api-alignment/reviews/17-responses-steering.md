@@ -1,6 +1,7 @@
 # Mid-turn Responses steering acceptance
 
-Status: implemented, verified and independently reviewed; PR pending.
+Status: implemented, verified and independently reviewed; merge pending.
+Implementation [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354) is open for review; #342 closes only after merge.
 Tracking: [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirements: [RESP-STEER-01–03](../responses.md#steering).
@@ -152,5 +153,6 @@ self-approves their own implementation. All validated findings are resolved:
 - Accepted-then-failed public fixtures return the actual submitted input; arbitrary
   rejected input remains separately covered by model contracts.
 
-Implementation PR and final GitHub CI remain pending. Close #342 only after merge;
+Implementation [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354) uses the exact create-pr template.
+Final GitHub CI/merge remain pending. Close #342 only after merge;
 opt-in recovery #343 and multi-agent injection #344 remain separate follow-ups.

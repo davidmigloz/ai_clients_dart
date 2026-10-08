@@ -8,7 +8,7 @@ Tool search #340 merged in
 [PR #352](https://github.com/davidmigloz/ai_clients_dart/pull/352), closing #340.
 WebSocket sessions #341 are implemented, verified and independently reviewed;
 implementation [PR #353](https://github.com/davidmigloz/ai_clients_dart/pull/353)
-merged after green CI, closing #341. Steering #342 is implemented, verified and independently reviewed; PR pending. Remaining runtime slices are tracked below. Parent:
+merged after green CI, closing #341. Steering #342 is implemented, verified and independently reviewed in [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354); merge pending. Remaining runtime slices are tracked below. Parent:
 [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 
 ## Objective and decisions
@@ -94,7 +94,7 @@ and these official-client pins. The candidate is unchanged at 356 operations and
 | [#339](https://github.com/davidmigloz/ai_clients_dart/issues/339) (14) | Select and inspect Responses access programs | RESP-ACCESS-01–02 | Merged in #351 |
 | [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) (15) | Return complete client-discovered tools | RESP-SEARCH-01–02 | Merged in #352 |
 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) (16) | Persistent Responses WebSocket sessions and lane routing | RESP-WS-01–04 | Merged in #353 |
-| [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) (17) | Steer a running WebSocket response | RESP-STEER-01–03 | Implemented/verified/reviewed; PR pending |
+| [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) (17) | Steer a running WebSocket response | RESP-STEER-01–03 | Implemented/verified/reviewed in #354; merge pending |
 | [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) (18) | Opt-in socket reconnection and bounded unsent queue | RESP-RECOVER-01–02 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341)/[#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) for replay regression |
 | [#344](https://github.com/davidmigloz/ai_clients_dart/issues/344) (19) | Inject multi-agent tool results over WebSockets | RESP-INJECT-01–02 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
 
@@ -425,7 +425,7 @@ migration guidance. Existing shared DTO nested ownership, enum normalization and
 older item-ID/sequence/provider defaults remain explicit; full field parity is
 not claimed. Independent requirements and engineering peer reviews approve the combined
 change; implementation [PR #353](https://github.com/davidmigloz/ai_clients_dart/pull/353)
-merged after green CI, closing #341. Steering #342 is implemented, verified and independently reviewed; PR pending.
+merged after green CI, closing #341. Steering #342 is implemented, verified and independently reviewed in [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354); merge pending.
 
 ## Steering
 
@@ -482,7 +482,7 @@ races, 30 canonical GA/beta wire fixtures and the six-frame offline example.
 Package checks pass 11,158 unit tests with two existing skips; 484 new model/browser
 protocol cases pass on Chrome JavaScript and Wasm. Exhaustive-switch/cast migration,
 strict known-frame validation and rejected-input compatibility are explicit.
-Both independent reviews approve the final combined diff. Its PR is pending;
+Both independent reviews approve the final combined diff. Implementation [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354) is open for review;
 opt-in recovery #343 follows after merge.
 
 ## Opt-in connection recovery
