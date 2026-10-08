@@ -2,7 +2,9 @@
 
 Status: implementation verified; independent requirements and cross-author
 engineering reviews approve.
-Runtime PR merge gate remains pending. Issue [#367](https://github.com/davidmigloz/ai_clients_dart/issues/367),
+Runtime [PR #375](https://github.com/davidmigloz/ai_clients_dart/pull/375) merged
+October 8, 2026 at 19:31:30 UTC, squash `98e67ac93bc524a6a40a49ffb04a3c38c00f89ec`;
+#367 is closed. Issue [#367](https://github.com/davidmigloz/ai_clients_dart/issues/367),
 [ticket 25](../tickets/25-existing-audio.md), [Phase 5](../audio-live.md),
 AUDIO-EXISTING-01–04. Prerequisite #366 is closed by merged PR #374.
 
@@ -117,6 +119,7 @@ Exports/docs/README have no issues. Unrelated missing APIs remain visible.
 
 Independent requirements, resource/shared-HTTP/Chat engineering and
 model/docs/manifest engineering reviews approve the final combined change with no
-open findings. Final published-head CI/artifact checks and actual merge remain
-separate gates, recorded in the PR/issue. #367 stays open until merge; #368 voice
-consent management is next.
+open findings. Final reviewed head `47baee607ba4feea48b5965354b39202a20a1190` passed
+[workflow 37827335113](https://github.com/davidmigloz/ai_clients_dart/actions/runs/37827335113):
+14 contexts, 13 successes and the standard Test(all) skip. The actual merge receipt
+above closes #367; #368 voice consent management is next.

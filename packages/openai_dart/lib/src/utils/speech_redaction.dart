@@ -19,7 +19,25 @@ bool isAudioFileRequest(http.BaseRequest? request) =>
 
 /// Identifies audio operations whose text or binary bodies require redaction.
 bool isPrivateAudioRequest(http.BaseRequest? request) =>
-    isSpeechRequest(request) || isAudioFileRequest(request);
+    isSpeechRequest(request) ||
+    isAudioFileRequest(request) ||
+    isVoiceConsentRequest(request);
+
+/// Identifies the five consent operations, including opaque encoded IDs.
+bool isVoiceConsentRequest(http.BaseRequest? request) {
+  if (request == null) return false;
+  final segments = request.url.pathSegments;
+  final collection =
+      segments.length >= 2 &&
+      segments[segments.length - 2] == 'audio' &&
+      segments.last == 'voice_consents';
+  final item =
+      segments.length >= 3 &&
+      segments[segments.length - 3] == 'audio' &&
+      segments[segments.length - 2] == 'voice_consents';
+  return (collection && const {'GET', 'POST'}.contains(request.method)) ||
+      (item && const {'GET', 'POST', 'DELETE'}.contains(request.method));
+}
 
 /// Retains explicit caller HTTP data while redacting audio diagnostics.
 bool isPrivateAudioResponse(Object? cause) =>

@@ -85555,18 +85555,11 @@
             "x-stainless-const": true
           },
           "type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "enum": [
-                  "audio_sample"
-                ],
-                "type": "string"
-              }
+            "description": "How the voice was created.",
+            "enum": [
+              "audio_sample"
             ],
-            "description": "How the voice was created."
+            "type": "string"
           }
         },
         "required": [

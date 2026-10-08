@@ -66,6 +66,12 @@
 
 - [monitoring_errors_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/monitoring_errors_example.dart): Offline HTTP 403 before output and flat error/failed response after output, shared typed details and two scoped GETs from verified notices; five MockClient requests, passive tokens/instructions, no real API key or charges.
 
+- [voice_consents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/voice_consents_example.dart): Offline complete consent lifecycle, two explicit pages and browser MIME normalization; five default mock requests, six with explicit --delete, no API cost.
+
+## Voice consent management
+
+client.audio.voiceConsents is cached and supports create/list/retrieve/update/delete with abort, shared auth and conservative retries. Create is a three-field multipart upload with immutable recording bytes, filename and optional normalized MIME metadata; eight supported bases and 10 MiB limit. Update is required-name JSON POST. List only accepts after/limit and fetches one page; cursor presence distinguishes omission/null/value. Closed canonical responses preserve immutable receive-only future extras; deleted false remains false. Private default diagnostics/logs retain explicit caller error/HTTP context. Eligible project/access, api.voices.write and the current consent phrase are service requirements; recordings/sample must come from the same person/project. Sample-derived voice creation remains pending, and no undocumented consent_phrases DTO is invented.
+
 ## File audio and Chat voices
 
 ChatAudioConfig accepts typed open/custom AudioVoice references and marin/cedar; AAC is appended while pcm16 stays Chat-specific. File transcription already has all 14 form fields; fileContentType is optional file-part MIME metadata. Use gpt-transcribe with plural languages and supported keywords; specialist verbose/subtitle/diarization/English translation modes depend on the model. Translation create is JSON-only, createVerbose accepts canonical responses without task, and createRaw preserves text/SRT/VTT whitespace. Buffered file methods accept abortTrigger; transcription streams complete on valid transcript.text.done without replay. Received metadata/bytes/collections are immutable and private automatic diagnostics are redacted.

@@ -1620,8 +1620,9 @@ await for (final event in client.audio.speech.createStream(speech)) {
 
 `AudioVoice.named('provider-voice-name')` forwards an open name;
 `AudioVoice.custom('voice_existing_id')` sends the closed `{id: ...}` reference.
-Custom voices require eligible project access and an existing voice; voice consent
-management and sample-derived creation remain tracked implementation work.
+Custom voices require eligible project access and an existing voice.
+[Consent management](#how-do-i-manage-voice-consent-recordings) is available;
+sample-derived voice creation remains tracked implementation work.
 `SpeechVoice` stays an enum, including the original six constants and seven new
 ones. See the [migration guide](MIGRATION.md#upcoming-speech-options-and-streaming)
 for the widened `SpeechRequest.voice` type and exhaustive-switch updates.
@@ -1709,6 +1710,74 @@ snapshot notices.
 → [Audio example](example/audio_example.dart) and
 [offline speech streaming example](example/speech_streaming_example.dart) ($0 API cost)
 and [offline file-audio/Chat voice example](example/existing_audio_example.dart).
+
+</details>
+
+### How do I manage voice consent recordings?
+
+<details>
+<summary><b>Show example</b></summary>
+
+The cached `client.audio.voiceConsents` resource uploads, lists, retrieves,
+renames and deletes consent recordings. Production creation requires an eligible
+project, `api.voices.write`, and a recording of the current approved consent phrase.
+Keep the consent and later voice sample in the same project and from the same
+person. Follow the [official custom voice guide](https://developers.openai.com/api/docs/guides/custom-voices).
+
+```dart
+final consent = await client.audio.voiceConsents.create(
+  VoiceConsentCreateRequest(
+    name: 'Actor consent',
+    recording: audioBytes, // Uint8List from an explicitly obtained recording.
+    filename: 'consent.webm',
+    language: 'en-US',
+    recordingContentType: 'audio/webm;codecs=opus',
+  ),
+);
+final page = await client.audio.voiceConsents.list(limit: 20);
+final retrieved = await client.audio.voiceConsents.retrieve(consent.id);
+final renamed = await client.audio.voiceConsents.update(
+  consent.id,
+  const VoiceConsentUpdateRequest(name: 'Updated actor label'),
+);
+// Select pagination and deletion explicitly in your application.
+final after = page.lastId;
+if (page.hasMore && after != null) {
+  final nextPage = await client.audio.voiceConsents.list(after: after, limit: 20);
+}
+if (deleteRequested) { // Your application's explicit deletion choice.
+  final deleted = await client.audio.voiceConsents.delete(consent.id);
+}
+```
+
+Uploads snapshot the original bytes and normalize MIME parameters to one of the
+supported base types: audio/mpeg, audio/wav, audio/x-wav, audio/ogg, audio/aac,
+audio/flac, audio/webm or audio/mp4. The maximum is **10 MiB**. A recognized filename
+extension can supply omitted MIME metadata; other filenames need an explicit
+supported `recordingContentType`. This does not transcode or inspect recording
+content. `name` and the BCP 47 `language` are open strings; the service validates
+phrases and eligibility. Sample speech minimums belong to later voice creation.
+
+`list` takes only `after` and `limit` (1–100, omitted service default 20).
+It returns one page without fetching more or inferring a cursor. `firstId`/`lastId`
+and `hasFirstId`/`hasLastId` distinguish omitted, null and supplied cursors; check
+`hasMore` and choose the next cursor deliberately. `deleted` preserves the returned
+boolean, including false. Rename is a required-name JSON POST; recording bytes
+cannot be changed through rename. Opaque IDs are encoded as one path segment.
+
+All five methods accept `abortTrigger` and use shared auth, errors and conservative
+retry: multipart creation is sent once, rename follows POST retry rules and
+idempotent DELETE follows the configured shared retry policy. Models preserve
+immutable receive-only future metadata while rejecting malformed known fields;
+update JSON remains closed. Consent IDs, cursors, labels, recordings and echoed
+headers stay private in default diagnostics and built-in logging. Explicit error
+messages, response bodies, URLs and causes remain available for caller inspection.
+
+→ [Runnable offline lifecycle example](example/voice_consents_example.dart)
+(five mock requests by default, six with explicit `--delete`, $0 API cost).
+This manages consent recordings; custom voice
+creation is the next separate workflow. `GET /audio/consent_phrases` is documented
+upstream but has no canonical typed response, so no phrase DTO is invented here.
 
 </details>
 
@@ -2360,6 +2429,7 @@ See the [example/](example/) directory for complete examples:
 | [`audio_example.dart`](example/audio_example.dart) | Text-to-speech and transcription |
 | [`speech_streaming_example.dart`](example/speech_streaming_example.dart) | Offline buffered/byte/SSE speech, voice references and usage |
 | [`existing_audio_example.dart`](example/existing_audio_example.dart) | Offline modern file fields, verbose/raw translation, open/custom Chat voices and AAC |
+| [`voice_consents_example.dart`](example/voice_consents_example.dart) | Offline upload/list/retrieve/rename/delete consent lifecycle and explicit pagination |
 | [`chat_audio_example.dart`](example/chat_audio_example.dart) | Chat audio output, ID-only replay, and partial stream accumulation |
 | [`files_example.dart`](example/files_example.dart) | File upload and management |
 | [`conversations_example.dart`](example/conversations_example.dart) | Conversations API for state management |
@@ -2398,7 +2468,7 @@ See the [example/](example/) directory for complete examples:
 | Embeddings | ✅ Full |
 | Images | ✅ Full |
 | Videos (Sora) | ✅ Full |
-| Audio (Speech, Transcription, Translation) | Buffered/streamed speech and file transcription; explicit JSON/verbose/raw translation, current options/open/custom references; consent/voice creation pending |
+| Audio (Speech, Transcription, Translation) | Buffered/streamed speech and file transcription; explicit JSON/verbose/raw translation, current options/open/custom references and all five consent operations; sample-derived voice creation pending |
 | Files | ✅ Full |
 | Uploads | ✅ Full |
 | Batches | ✅ Full |

@@ -5295,6 +5295,45 @@
       "file": "lib/src/models/audio/transcription.dart",
       "schema": "TranscriptionWord",
       "note": "Actual received component; strict canonical required/optional fields, finite deeply immutable received metadata, complete effective value/copy contracts and safe diagnostics. Verbose translation task is optional legacy metadata, never a required canonical field."
+    },
+    "CreateVoiceConsentRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VoiceConsentCreateRequest",
+      "file": "lib/src/models/audio/voice_consent.dart",
+      "schema": "CreateVoiceConsentRequest",
+      "note": "Actual closed multipart component, deliberately mapped as an object so all scanner diagnostics remain visible; JSON-method/binary scanner limitations are verified at the public multipart boundary, without invented JSON methods or exclusions: required name, recording file and language. Typed immutable bytes, filename and normalized MIME are upload metadata; there is no invented JSON binary encoding/factory. Public multipart fixtures verify all three canonical fields, eight supported MIME bases,10MiB,abort,privacy and non-replay."
+    },
+    "UpdateVoiceConsentRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VoiceConsentUpdateRequest",
+      "file": "lib/src/models/audio/voice_consent.dart",
+      "schema": "UpdateVoiceConsentRequest"
+    },
+    "VoiceConsentResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VoiceConsent",
+      "file": "lib/src/models/audio/voice_consent.dart",
+      "schema": "VoiceConsentResource",
+      "note": "Actual fixed-object consent resource with strict known fields, deeply immutable receive-only future metadata, complete copy/value contracts and private diagnostics."
+    },
+    "VoiceConsentListResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VoiceConsentList",
+      "file": "lib/src/models/audio/voice_consent.dart",
+      "schema": "VoiceConsentListResource",
+      "note": "Actual consent page: fixed list object, required data/has_more, distinct omitted/null/value first_id/last_id. Explicit page requests only; no inferred cursors/hidden iteration. Immutable received future extras stay receive-only."
+    },
+    "VoiceConsentDeletedResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VoiceConsentDeleted",
+      "file": "lib/src/models/audio/voice_consent.dart",
+      "schema": "VoiceConsentDeletedResource",
+      "note": "Actual fixed-object deletion response; deleted is a required boolean, including false, not a fabricated true discriminator. Immutable receive-only future metadata and complete value/copy/private diagnostics."
     }
   }
 }
