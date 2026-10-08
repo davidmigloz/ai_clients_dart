@@ -5,7 +5,7 @@
 ![Discord](https://img.shields.io/discord/1123158322812555295?label=discord)
 [![MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://github.com/davidmigloz/ai_clients_dart/blob/main/LICENSE)
 
-Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-reference)** with Responses API, Decisions API, Chat Completions, images, videos, audio, custom tools, embeddings, evals, realtime, signed webhooks, and more. It gives Dart and Flutter applications a pure Dart, type-safe client across iOS, Android, macOS, Windows, Linux, Web, and server-side Dart.
+Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-reference)** with Responses API, Decisions API, Chat Completions, images, videos, audio, custom tools, embeddings, evals, realtime, signed webhooks, safety detail retrieval, and more. It gives Dart and Flutter applications a pure Dart, type-safe client across iOS, Android, macOS, Windows, Linux, Web, and server-side Dart.
 
 > [!TIP]
 > Coding agents: start with [llms.txt](./llms.txt). It links to the package docs, examples, and optional references in a compact format.
@@ -48,6 +48,7 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 - Files, uploads, batches, fine-tuning, moderations, evals, and model management
 - Conversations, containers, content provenance checks, ChatKit, and skills
 - Local signed webhook verification with 26 typed received event variants, plus project endpoint management/discovery
+- Read-only project safety alerts and organization cases through `client.safety`
 - Assistants and vector stores (deprecated — use Responses API instead)
 
 See [API Coverage](#api-coverage) for the full coverage table.
@@ -1960,6 +1961,72 @@ JavaScript/Wasm runtime support does not make browser deployment of secrets safe
 three loopback deliveries (valid, duplicate, tampered) and makes no API calls.
 See the [official Webhooks guide](https://developers.openai.com/api/docs/guides/webhooks).
 
+### How do I investigate verified safety notifications?
+
+Verify the original delivery bytes, then use `data.id` for an explicit lookup.
+Project alerts need `api.safety.alerts.read`; organization cases need
+`api.safety.read` on a key for the notified organization. Select separately scoped
+clients on trusted infrastructure.
+
+```dart
+import 'package:openai_dart/openai_dart.dart';
+
+Future<void> inspectSafetyNotice(
+  List<int> originalBytes,
+  Map<String, String> headers,
+  String signingSecret,
+  OpenAIClient projectClient,
+  OpenAIClient organizationClient,
+) async {
+  final event = WebhookVerifier(
+    secret: signingSecret,
+  ).unwrapBytes(originalBytes, headers);
+  switch (event) {
+    case SafetyAlertCreatedWebhookEvent():
+      final alert = await projectClient.safety.alerts.retrieve(event.data.id);
+      print('Block registered: ${alert.requestPaused}');
+    case SafetyWarningIssuedWebhookEvent(:final data) ||
+        SafetyDeactivationIssuedWebhookEvent(:final data):
+      final safetyCase = await organizationClient.safety.cases.retrieve(
+        data.id,
+      );
+      print('Notice: ${safetyCase.notice.type.name}');
+    case SafetyOrgAlertCreatedWebhookEvent():
+      print(
+        'Workspace notice requires a separately scoped administrator lookup.',
+      );
+    default:
+      break;
+  }
+}
+```
+
+`event.id` identifies the notification. `data.id` identifies the alert or case;
+`entityIdentifier` is the application's safety identifier. `requestPaused` reports
+block registration, without confirming execution stopped or earlier effects were
+reversed. Both detail types retain required `reason: null`; alert reasons can be
+null for Zero Data Retention requests. The models preserve open response metadata
+in deeply immutable `rawJson`. Future received enum strings use `unknown` with
+`rawErrorType` or `rawType`, preserving their exact spelling on serialization.
+Model diagnostics redact reasons, identifiers and future values.
+
+These are two GET operations with no list or enforcement action. ID maxima are
+38 and 128 Unicode characters respectively; IDs are encoded once. Empty and dot
+segments are rejected because they cannot address an individual resource through
+Dart's URI path normalization. Normal HTTP exceptions and request IDs apply.
+
+Workspace `safety.org_alert.created` uses
+`https://api.chatgpt.com/v1/safety/alerts/{id}` with a workspace administrator key
+and `chatgpt.enterprise.safety_alerts.read`. That separate lookup remains in the
+Administration inventory. The webhook parser performs no automatic GET.
+
+→ [Runnable offline safety example](example/safety_example.dart): two scoped
+MockClient GETs after signature verification, duplicate/tampered delivery checks,
+and explicit workspace routing. No API key or charges. Applications own durable
+queuing, prompt acknowledgment and deduplication before background investigation.
+See [Misalignment monitoring](https://developers.openai.com/api/docs/guides/safety-checks/misalignment-monitoring)
+and [Safety enforcement notifications](https://developers.openai.com/api/docs/guides/safety-enforcement).
+
 ### How do I manage webhook endpoints?
 
 The authenticated project API exposes `client.webhooks.create`, `list`, `retrieve`,
@@ -2093,6 +2160,7 @@ See the [example/](example/) directory for complete examples:
 
 | Example | Description |
 |---------|-------------|
+| [`safety_example.dart`](example/safety_example.dart) | Offline verified notifications and separately scoped alert/case retrieval |
 | [`webhook_endpoints_example.dart`](example/webhook_endpoints_example.dart) | Offline project endpoint lifecycle, pagination, discovery, rotation and test status |
 | [`webhooks_example.dart`](example/webhooks_example.dart) | Offline signed receiver, acknowledgment and caller-owned deduplication |
 | [`chat_example.dart`](example/chat_example.dart) | Chat completions, multi-turn conversations, and legacy cache retention |
@@ -2160,6 +2228,7 @@ See the [example/](example/) directory for complete examples:
 | ChatKit Beta | ✅ Full |
 | Realtime | ✅ Full (separate import) |
 | Webhooks | Local signed verification, 26 typed received events and all eight project endpoint/discovery operations |
+| Safety | Read-only project alerts and organization cases; workspace lookup remains separate |
 | Assistants (Deprecated) | ✅ Full (separate import) |
 | Threads (Deprecated) | ✅ Full (separate import) |
 | Messages (Deprecated) | ✅ Full (separate import) |
@@ -2167,7 +2236,7 @@ See the [example/](example/) directory for complete examples:
 | Vector Stores (Deprecated) | ✅ Full (separate import) |
 | Completions (Legacy) | ✅ Full |
 
-Agents, Live, safety retrieval, vaults, and Administration remain part of the [API alignment roadmap](specs/api-alignment/README.md).
+Agents, Live, monitoring error details, vaults, and Administration remain part of the [API alignment roadmap](specs/api-alignment/README.md).
 
 ## Official Documentation
 

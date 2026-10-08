@@ -62,7 +62,10 @@
     "realtimeSessions": "realtime",
     "decisions": "decisions_example",
     "webhooks": "webhook_endpoints_example",
-    "webhookEventTypes": "webhook_endpoints_example"
+    "webhookEventTypes": "webhook_endpoints_example",
+    "safety": "safety_example",
+    "safetyAlerts": "safety_example",
+    "safetyCases": "safety_example"
   },
   "excluded_from_examples": [],
   "drift_patterns": [

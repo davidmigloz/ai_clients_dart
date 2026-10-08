@@ -26,6 +26,7 @@ import '../resources/moderations_resource.dart';
 import '../resources/realtime_resource.dart';
 import '../resources/realtime_sessions_resource.dart';
 import '../resources/responses_resource.dart';
+import '../resources/safety_resource.dart';
 import '../resources/skills_resource.dart';
 import '../resources/uploads_resource.dart';
 import '../resources/videos_resource.dart';
@@ -76,7 +77,8 @@ import 'retry_wrapper.dart';
 /// - [models] - Model information
 /// - [moderations] - Content moderation
 /// - [decisions] - Typed classification and scoring
-/// - [webhooks] - Local signed webhook verification and typed events
+/// - [webhooks] - Signed webhook verification and endpoint management
+/// - [safety] - Project safety alerts and organization cases
 /// - [fineTuning] - Fine-tuning jobs
 /// - [skills] - Skills API for skill bundles and versions
 /// - [beta] - Beta features (Assistants, Threads, etc.)
@@ -928,6 +930,21 @@ class OpenAIClient {
   /// Uses the configured webhook secret or a per-call override. These local
   /// methods need no API key and remain usable after the client is closed.
   WebhooksResource get webhooks => _webhooks ??= WebhooksResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+  );
+
+  SafetyResource? _safety;
+
+  /// Read-only project safety alerts and organization cases.
+  ///
+  /// Alert lookup needs a project key with `api.safety.alerts.read`; case lookup
+  /// needs a key for the notified organization with `api.safety.read`.
+  /// Callers select the appropriate client explicitly after verifying a notice.
+  SafetyResource get safety => _safety ??= SafetyResource(
     config: config,
     httpClient: _httpClient,
     interceptorChain: _interceptorChain,

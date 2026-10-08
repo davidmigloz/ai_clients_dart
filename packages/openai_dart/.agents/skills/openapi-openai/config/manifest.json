@@ -5138,6 +5138,46 @@
       "file": "lib/src/models/webhooks/webhook_endpoint.dart",
       "dart_class": "WebhookEventTypeList",
       "spec": "main"
+    },
+    "SafetyAlert": {
+      "kind": "object",
+      "spec": "main",
+      "dart_class": "SafetyAlert",
+      "file": "lib/src/models/safety/safety.dart",
+      "schema": "SafetyAlertResource",
+      "note": "Open response object; required nullable reason keys remain present and future properties are retained."
+    },
+    "SafetyAlertErrorType": {
+      "kind": "enum",
+      "spec": "main",
+      "dart_class": "SafetyAlertErrorType",
+      "file": "lib/src/models/safety/safety.dart",
+      "schema": "SafetyAlertErrorType",
+      "note": "Read-only safety details; received future enum strings are preserved with explicit raw companions."
+    },
+    "SafetyCase": {
+      "kind": "object",
+      "spec": "main",
+      "dart_class": "SafetyCase",
+      "file": "lib/src/models/safety/safety.dart",
+      "schema": "SafetyCaseResource",
+      "note": "Open response object; required nullable reason keys remain present and future properties are retained."
+    },
+    "SafetyCaseNotice": {
+      "kind": "object",
+      "spec": "main",
+      "dart_class": "SafetyCaseNotice",
+      "file": "lib/src/models/safety/safety.dart",
+      "schema": "SafetyCaseNotice",
+      "note": "Open response notice with required type; future properties are retained immutably."
+    },
+    "SafetyCaseNoticeType": {
+      "kind": "enum",
+      "spec": "main",
+      "dart_class": "SafetyCaseNoticeType",
+      "file": "lib/src/models/safety/safety.dart",
+      "schema": "SafetyCaseNoticeType",
+      "note": "Read-only safety details; received future enum strings are preserved with explicit raw companions."
     }
   }
 }

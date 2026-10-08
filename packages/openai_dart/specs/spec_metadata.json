@@ -2,7 +2,7 @@
   "specs": {
     "main": {
       "current_version": "2.3.0",
-      "last_fetched": "2026-10-08T10:42:09.823594Z",
+      "last_fetched": "2026-10-08T12:41:10.594544Z",
       "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/506aff0a8099581b50e119b87f8f2692cdad043f/openapi.json",
       "title": "OpenAI API",
       "version_history": [
