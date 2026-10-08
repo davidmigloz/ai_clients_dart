@@ -3,7 +3,9 @@
 Status: independent planning reviews complete; validated findings resolved.
 Scope: [specification](../webhooks-safety.md), repository tickets 20–23 and roadmap.
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
-Planning PR and implementation issues will be linked before publication.
+Tickets #357–#360 are native sub-issues of #317; #359 is blocked by #357 and
+#360 by #359. Endpoint management #358 has no prerequisite. Planning PR creation
+is pending.
 
 ## Baseline and source evidence
 
@@ -86,7 +88,7 @@ planning findings remain.
 
 Validation confirms 17 unique requirement IDs, all 26 actual event/schema pairs,
 23 writable subscription choices, all eight endpoint operations, two safety GETs and
-four ticket families with an acyclic dependency graph. All 18 distinct specification
+four ticket families with an acyclic dependency graph. All 22 distinct specification
 URLs return HTTP 200 and 54 local Markdown links resolve. Source schema/webhook and
 independent parameter-delta comparisons pass. Git whitespace checks pass; final
 CI will be reported separately. Only Markdown planning/tracking files change;

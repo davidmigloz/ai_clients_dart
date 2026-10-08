@@ -67,10 +67,10 @@ sources before each implementation and publish any revised decision in its evide
 
 | Repository ticket | Demonstrable capability | Requirements | Prerequisite |
 | --- | --- | --- | --- |
-| [20](tickets/20-webhook-receiver.md) | Verify and parse signed notifications locally | WH-VERIFY-01–03, WH-EVENT-01–03 | None |
-| [21](tickets/21-webhook-endpoints.md) | Manage project endpoints and discover event types | WH-ENDPOINT-01–04 | None; shares the eventual webhooks namespace |
-| [22](tickets/22-safety-retrieval.md) | Retrieve safety details from a verified notice | SAFETY-READ-01–03 | 20 for the signed-notice example |
-| [23](tickets/23-monitoring-errors.md) | Inspect monitoring failures across HTTP/Responses | SAFETY-ERROR-01–04 | 22 for the investigation example |
+| [#357](https://github.com/davidmigloz/ai_clients_dart/issues/357) ([20](tickets/20-webhook-receiver.md)) | Verify and parse signed notifications locally | WH-VERIFY-01–03, WH-EVENT-01–03 | None |
+| [#358](https://github.com/davidmigloz/ai_clients_dart/issues/358) ([21](tickets/21-webhook-endpoints.md)) | Manage project endpoints and discover event types | WH-ENDPOINT-01–04 | None; shares the eventual webhooks namespace |
+| [#359](https://github.com/davidmigloz/ai_clients_dart/issues/359) ([22](tickets/22-safety-retrieval.md)) | Retrieve safety details from a verified notice | SAFETY-READ-01–03 | 20 for the signed-notice example |
+| [#360](https://github.com/davidmigloz/ai_clients_dart/issues/360) ([23](tickets/23-monitoring-errors.md)) | Inspect monitoring failures across HTTP/Responses | SAFETY-ERROR-01–04 | 22 for the investigation example |
 
 Dependencies describe usable examples, not an invented coupling between HTTP
 models and the verifier. Implement in the listed order; each ticket gets its own

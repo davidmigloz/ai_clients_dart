@@ -1,7 +1,7 @@
 # Verify and parse signed webhook notifications
 
 Status: specified and independently reviewed; implementation pending.
-GitHub: implementation issue will be linked before plan publication.
+GitHub: [#357](https://github.com/davidmigloz/ai_clients_dart/issues/357).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 4 Webhooks and safety](../webhooks-safety.md), WH-VERIFY-01–03, WH-EVENT-01–03.
 Dependencies: None.

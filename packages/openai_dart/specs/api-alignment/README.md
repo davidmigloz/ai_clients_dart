@@ -215,10 +215,10 @@ implementation and runtime acceptance remain pending.
 
 | Ticket | Demonstrable outcome | Prerequisite |
 | --- | --- | --- |
-| [20](tickets/20-webhook-receiver.md) | Verify original bytes and parse 26 source-backed webhook variants | None |
-| [21](tickets/21-webhook-endpoints.md) | Manage endpoints, signing secrets, tests and event-type discovery | None |
-| [22](tickets/22-safety-retrieval.md) | Explicitly retrieve project alerts/organization cases from verified notices | 20 for signed-notice example |
-| [23](tickets/23-monitoring-errors.md) | Preserve typed HTTP/failed-response monitoring details and canonical flat SSE errors | 22 for investigation example |
+| [#357](https://github.com/davidmigloz/ai_clients_dart/issues/357) ([20](tickets/20-webhook-receiver.md)) | Verify original bytes and parse 26 source-backed webhook variants | None |
+| [#358](https://github.com/davidmigloz/ai_clients_dart/issues/358) ([21](tickets/21-webhook-endpoints.md)) | Manage endpoints, signing secrets, tests and event-type discovery | None |
+| [#359](https://github.com/davidmigloz/ai_clients_dart/issues/359) ([22](tickets/22-safety-retrieval.md)) | Explicitly retrieve project alerts/organization cases from verified notices | 20 for signed-notice example |
+| [#360](https://github.com/davidmigloz/ai_clients_dart/issues/360) ([23](tickets/23-monitoring-errors.md)) | Preserve typed HTTP/failed-response monitoring details and canonical flat SSE errors | 22 for investigation example |
 
 The first receiver ticket includes verification so its example handles signed
 notifications end to end. Endpoint management remains independently usable.

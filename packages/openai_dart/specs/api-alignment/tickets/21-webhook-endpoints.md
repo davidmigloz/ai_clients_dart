@@ -1,7 +1,7 @@
 # Manage project webhook endpoints and discover event types
 
 Status: specified and independently reviewed; implementation pending.
-GitHub: implementation issue will be linked before plan publication.
+GitHub: [#358](https://github.com/davidmigloz/ai_clients_dart/issues/358).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 4 Webhooks and safety](../webhooks-safety.md), WH-ENDPOINT-01–04.
 Dependencies: None; endpoint management is useful independently of verification.

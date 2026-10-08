@@ -1,10 +1,10 @@
 # Retrieve project safety alerts and organization cases
 
 Status: specified and independently reviewed; implementation pending.
-GitHub: implementation issue will be linked before plan publication.
+GitHub: [#359](https://github.com/davidmigloz/ai_clients_dart/issues/359).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 4 Webhooks and safety](../webhooks-safety.md), SAFETY-READ-01–03.
-Dependencies: Ticket 20 for the verified-notification example; HTTP methods themselves do not require a verifier.
+Dependencies: [#357](https://github.com/davidmigloz/ai_clients_dart/issues/357) for the verified-notification example; HTTP methods themselves do not require a verifier.
 
 ## Demonstrable outcome
 

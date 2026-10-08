@@ -1,10 +1,10 @@
 # Preserve structured monitoring errors across HTTP and Responses
 
 Status: specified and independently reviewed; implementation pending.
-GitHub: implementation issue will be linked before plan publication.
+GitHub: [#360](https://github.com/davidmigloz/ai_clients_dart/issues/360).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 4 Webhooks and safety](../webhooks-safety.md), SAFETY-ERROR-01–04.
-Dependencies: Ticket 22 for the offline investigation example (transitively 20); shared error extraction does not require safety resource calls.
+Dependencies: [#359](https://github.com/davidmigloz/ai_clients_dart/issues/359) for the offline investigation example (transitively 20); shared error extraction does not require safety resource calls.
 
 ## Demonstrable outcome
 
