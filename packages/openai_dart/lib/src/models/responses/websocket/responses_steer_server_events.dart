@@ -276,19 +276,33 @@ class ResponsesSteerAcceptedEvent extends ResponsesServerEvent {
   );
 
   /// Copies all members; explicit null clears only the optional lane.
+  /// Replacing [steer] reconciles its metadata, including explicit nested clears.
   ResponsesSteerAcceptedEvent copyWith({
     int? sequenceNumber,
     ResponsesSteerIdentity? steer,
     Object? streamId = unsetCopyWithValue,
     Map<String, dynamic>? rawJson,
-  }) => ResponsesSteerAcceptedEvent(
-    sequenceNumber: sequenceNumber ?? this.sequenceNumber,
-    steer: steer ?? this.steer,
-    streamId: identical(streamId, unsetCopyWithValue)
-        ? this.streamId
-        : streamId as String?,
-    rawJson: rawJson ?? this.rawJson,
-  );
+  }) {
+    final retainedRaw = rawJson ?? this.rawJson;
+    final reconciledRaw = steer == null || rawJson != null
+        ? retainedRaw
+        : replaceResponsesTypedJson(
+            retainedRaw,
+            {'steer': _valueJson()['steer']},
+            {'steer': steer.toJson()},
+          );
+    return ResponsesSteerAcceptedEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      steer: steer ?? this.steer,
+      streamId: identical(streamId, unsetCopyWithValue)
+          ? this.streamId
+          : streamId as String?,
+      rawJson: steer != null && rawJson == null
+          ? freezeJsonObject(reconciledRaw)
+          : reconciledRaw,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -396,6 +410,8 @@ class ResponsesSteerPendingEvent extends ResponsesServerEvent {
   );
 
   /// Copies all members; explicit null clears only the optional lane.
+  /// Nested replacements reconcile owned metadata, including explicit clears.
+  /// Copy a stub to preserve its metadata; a fresh replacement carries its own.
   ResponsesSteerPendingEvent copyWith({
     int? sequenceNumber,
     ResponsesSteerIdentity? steer,
@@ -403,16 +419,41 @@ class ResponsesSteerPendingEvent extends ResponsesServerEvent {
     List<ResponsesSteerRequiredInput>? requiredInput,
     Object? streamId = unsetCopyWithValue,
     Map<String, dynamic>? rawJson,
-  }) => ResponsesSteerPendingEvent(
-    sequenceNumber: sequenceNumber ?? this.sequenceNumber,
-    steer: steer ?? this.steer,
-    reason: reason ?? this.reason,
-    requiredInput: requiredInput ?? this.requiredInput,
-    streamId: identical(streamId, unsetCopyWithValue)
-        ? this.streamId
-        : streamId as String?,
-    rawJson: rawJson ?? this.rawJson,
-  );
+  }) {
+    final retainedRaw = rawJson ?? this.rawJson;
+    final replacingChild = steer != null || requiredInput != null;
+    final reconciledRaw = !replacingChild || rawJson != null
+        ? retainedRaw
+        : replaceResponsesTypedJson(
+            retainedRaw,
+            {
+              if (steer != null) 'steer': _valueJson()['steer'],
+              if (requiredInput != null)
+                'required_input': _steerRequiredInputJson(
+                  retainedRaw['required_input'],
+                  this.requiredInput,
+                ),
+            },
+            {
+              if (steer != null) 'steer': steer.toJson(),
+              if (requiredInput != null)
+                'required_input': _steerRequiredInputJson(null, requiredInput),
+            },
+          );
+    return ResponsesSteerPendingEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      steer: steer ?? this.steer,
+      reason: reason ?? this.reason,
+      requiredInput: requiredInput ?? this.requiredInput,
+      streamId: identical(streamId, unsetCopyWithValue)
+          ? this.streamId
+          : streamId as String?,
+      rawJson: replacingChild && rawJson == null
+          ? freezeJsonObject(reconciledRaw)
+          : reconciledRaw,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -500,21 +541,42 @@ class ResponsesSteerFailedEvent extends ResponsesServerEvent {
   );
 
   /// Copies all members; explicit null clears only the optional lane.
+  /// Replacing nested models reconciles metadata, including explicit clears.
   ResponsesSteerFailedEvent copyWith({
     int? sequenceNumber,
     ResponsesFailedSteer? steer,
     ResponsesSteerError? error,
     Object? streamId = unsetCopyWithValue,
     Map<String, dynamic>? rawJson,
-  }) => ResponsesSteerFailedEvent(
-    sequenceNumber: sequenceNumber ?? this.sequenceNumber,
-    steer: steer ?? this.steer,
-    error: error ?? this.error,
-    streamId: identical(streamId, unsetCopyWithValue)
-        ? this.streamId
-        : streamId as String?,
-    rawJson: rawJson ?? this.rawJson,
-  );
+  }) {
+    final retainedRaw = rawJson ?? this.rawJson;
+    final replacingChild = steer != null || error != null;
+    final reconciledRaw = !replacingChild || rawJson != null
+        ? retainedRaw
+        : replaceResponsesTypedJson(
+            retainedRaw,
+            {
+              if (steer != null) 'steer': _valueJson()['steer'],
+              if (error != null) 'error': _valueJson()['error'],
+            },
+            {
+              if (steer != null) 'steer': steer._valueJson(),
+              if (error != null) 'error': error.toJson(),
+            },
+          );
+    return ResponsesSteerFailedEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      steer: steer ?? this.steer,
+      error: error ?? this.error,
+      streamId: identical(streamId, unsetCopyWithValue)
+          ? this.streamId
+          : streamId as String?,
+      rawJson: replacingChild && rawJson == null
+          ? freezeJsonObject(reconciledRaw)
+          : reconciledRaw,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

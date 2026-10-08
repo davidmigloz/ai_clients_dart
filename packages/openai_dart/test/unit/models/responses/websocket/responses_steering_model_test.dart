@@ -69,6 +69,23 @@ void _wireEqual(Object value, Object parsed) {
   expect(parsed.hashCode, value.hashCode);
 }
 
+ResponsesSteerPendingEvent _pendingWithFutureStubs() =>
+    ResponsesSteerPendingEvent.fromJson(
+      _server('pending')
+        ..['required_input'] = [
+          {
+            'type': 'future_tool_output',
+            'call_id': 'call_first',
+            'future': {'owner': 'first'},
+          },
+          {
+            'type': 'future_tool_output',
+            'call_id': 'call_second',
+            'future': {'owner': 'second'},
+          },
+        ],
+    );
+
 void main() {
   group('outbound steering', () {
     for (final input in <ResponsesSteerInput>[
@@ -1231,12 +1248,12 @@ void main() {
     );
 
     test(
-      'fresh nested typed edits retain future metadata and clear known fields',
+      'nested scalar copies retain their own future metadata and clear known fields',
       () {
         final accepted = ResponsesSteerAcceptedEvent.fromJson(
           _server('accepted'),
         );
-        final edited = accepted.copyWith(steer: _id);
+        final edited = accepted.copyWith(steer: accepted.steer.copyWith());
         expect(
           (edited.toJson()['steer'] as Map<String, dynamic>)['future_steer'],
           accepted.steer.rawJson['future_steer'],
@@ -1251,11 +1268,8 @@ void main() {
         );
         final failed = ResponsesSteerFailedEvent.fromJson(_server('failed'));
         final cleared = failed.copyWith(
-          steer: const ResponsesFailedSteer(
-            previousResponseId: 'resp_private',
-            input: null,
-          ),
-          error: const ResponsesSteerError(
+          steer: failed.steer.copyWith(input: null, id: null),
+          error: failed.error.copyWith(
             code: 'changed',
             message: 'private-secret',
           ),
@@ -1273,8 +1287,177 @@ void main() {
       },
     );
 
+    for (final pending in [false, true]) {
+      final kind = pending ? 'pending' : 'accepted';
+      test('explicit $kind identity metadata clear stays cleared', () {
+        final parsed = ResponsesServerEvent.fromJson(_server(kind));
+        final changed = parsed is ResponsesSteerPendingEvent
+            ? parsed.copyWith(steer: parsed.steer.copyWith(rawJson: {}))
+            : (parsed as ResponsesSteerAcceptedEvent).copyWith(
+                steer: parsed.steer.copyWith(rawJson: {}),
+              );
+        expect(changed.toJson()['steer'], _id.toJson());
+        expect(
+          changed.toJson()['future_envelope'],
+          parsed.toJson()['future_envelope'],
+        );
+        expect(changed.rawJson.clear, throwsUnsupportedError);
+        expect(
+          () => (changed.rawJson['steer'] as Map<String, dynamic>).clear(),
+          throwsUnsupportedError,
+        );
+        _wireEqual(changed, ResponsesServerEvent.fromJson(changed.toJson()));
+      });
+      test('fresh $kind identity replacement drops old owned metadata', () {
+        final parsed = ResponsesServerEvent.fromJson(_server(kind));
+        final changed = parsed is ResponsesSteerPendingEvent
+            ? parsed.copyWith(steer: _id)
+            : (parsed as ResponsesSteerAcceptedEvent).copyWith(steer: _id);
+        expect(changed.toJson()['steer'], _id.toJson());
+        _wireEqual(changed, ResponsesServerEvent.fromJson(changed.toJson()));
+      });
+      test('ordinary $kind scalar copy retains child metadata', () {
+        final parsed = ResponsesServerEvent.fromJson(_server(kind));
+        final changed = parsed is ResponsesSteerPendingEvent
+            ? parsed.copyWith(
+                steer: parsed.steer.copyWith(previousResponseId: 'changed'),
+              )
+            : (parsed as ResponsesSteerAcceptedEvent).copyWith(
+                steer: parsed.steer.copyWith(previousResponseId: 'changed'),
+              );
+        expect(
+          (changed.toJson()['steer'] as Map<String, dynamic>)['future_steer'],
+          (parsed.toJson()['steer'] as Map<String, dynamic>)['future_steer'],
+        );
+        _wireEqual(changed, ResponsesServerEvent.fromJson(changed.toJson()));
+      });
+      test(
+        'explicit $kind parent override takes priority over reconciliation',
+        () {
+          final parsed = ResponsesServerEvent.fromJson(_server(kind));
+          final raw = <String, dynamic>{
+            'steer': {'parent_override': true},
+            'replacement_parent': true,
+          };
+          final changed = parsed is ResponsesSteerPendingEvent
+              ? parsed.copyWith(
+                  steer: parsed.steer.copyWith(rawJson: {}),
+                  rawJson: raw,
+                )
+              : (parsed as ResponsesSteerAcceptedEvent).copyWith(
+                  steer: parsed.steer.copyWith(rawJson: {}),
+                  rawJson: raw,
+                );
+          expect(identical(changed.rawJson, raw), isTrue);
+          expect(changed.toJson()['steer'], {
+            'parent_override': true,
+            ..._id.toJson(),
+          });
+          expect(changed.toJson().containsKey('future_envelope'), isFalse);
+          _wireEqual(changed, ResponsesServerEvent.fromJson(changed.toJson()));
+        },
+      );
+    }
+    for (final fresh in [false, true]) {
+      test(
+        'failed error ${fresh ? 'fresh replacement' : 'explicit raw clear'} stays replaced',
+        () {
+          final parsed = ResponsesSteerFailedEvent.fromJson(_server('failed'));
+          final error = fresh ? _error : parsed.error.copyWith(rawJson: {});
+          final changed = parsed.copyWith(error: error);
+          expect(changed.toJson()['error'], error.toJson());
+          expect(changed.toJson()['steer'], parsed.toJson()['steer']);
+          _wireEqual(changed, ResponsesServerEvent.fromJson(changed.toJson()));
+        },
+      );
+    }
     test(
-      'required-input replacement keeps matching future stub metadata only',
+      'failed steer clear removes metadata and optional ID without stale input',
+      () {
+        final parsed = ResponsesSteerFailedEvent.fromJson(_server('failed'));
+        final changed = parsed.copyWith(
+          steer: parsed.steer.copyWith(rawJson: {}, input: null, id: null),
+        );
+        expect(changed.toJson()['steer'], {
+          'previous_response_id': 'resp_private',
+          'input': null,
+        });
+        expect(changed.toJson()['error'], parsed.toJson()['error']);
+        _wireEqual(changed, ResponsesServerEvent.fromJson(changed.toJson()));
+      },
+    );
+    test(
+      'simultaneous failed child clears preserve only parent future metadata',
+      () {
+        final parsed = ResponsesSteerFailedEvent.fromJson(_server('failed'));
+        final changed = parsed.copyWith(
+          steer: parsed.steer.copyWith(rawJson: {}, input: null, id: null),
+          error: parsed.error.copyWith(rawJson: {}, code: 'changed'),
+        );
+        expect(changed.toJson()['steer'], changed.steer.toJson());
+        expect(changed.toJson()['error'], changed.error.toJson());
+        expect(
+          changed.toJson()['future_envelope'],
+          parsed.toJson()['future_envelope'],
+        );
+        expect(changed.rawJson.clear, throwsUnsupportedError);
+        _wireEqual(changed, ResponsesServerEvent.fromJson(changed.toJson()));
+      },
+    );
+    test(
+      'failed explicit parent override wins with both child replacements',
+      () {
+        final parsed = ResponsesSteerFailedEvent.fromJson(_server('failed'));
+        final raw = <String, dynamic>{
+          'steer': {'parent_steer': true},
+          'error': {'parent_error': true},
+          'replacement_parent': true,
+        };
+        final changed = parsed.copyWith(
+          steer: parsed.steer.copyWith(rawJson: {}),
+          error: parsed.error.copyWith(rawJson: {}),
+          rawJson: raw,
+        );
+        expect(identical(changed.rawJson, raw), isTrue);
+        expect(changed.toJson()['steer'], {
+          'parent_steer': true,
+          ...changed.steer.toJson(),
+        });
+        expect(changed.toJson()['error'], {
+          'parent_error': true,
+          ...changed.error.toJson(),
+        });
+        expect(changed.toJson().containsKey('future_envelope'), isFalse);
+        _wireEqual(changed, ResponsesServerEvent.fromJson(changed.toJson()));
+      },
+    );
+    test('failed nested metadata replacement removes old nested children', () {
+      final parsed = ResponsesSteerFailedEvent.fromJson(_server('failed'));
+      final changed = parsed.copyWith(
+        steer: parsed.steer.copyWith(
+          rawJson: {
+            'future_steer': {'replacement': true},
+          },
+        ),
+        error: parsed.error.copyWith(
+          rawJson: {
+            'future_error': {'replacement': false},
+          },
+        ),
+      );
+      expect(
+        (changed.toJson()['steer'] as Map<String, dynamic>)['future_steer'],
+        {'replacement': true},
+      );
+      expect(
+        (changed.toJson()['error'] as Map<String, dynamic>)['future_error'],
+        {'replacement': false},
+      );
+      _wireEqual(changed, ResponsesServerEvent.fromJson(changed.toJson()));
+    });
+
+    test(
+      'required-input scalar copies retain owned metadata while fresh replacements replace',
       () {
         final json = _server('pending')
           ..['required_input'] = [
@@ -1291,11 +1474,9 @@ void main() {
           ];
         final parsed = ResponsesSteerPendingEvent.fromJson(json);
         final same = parsed.copyWith(
-          requiredInput: const [
-            UnknownResponsesSteerRequiredInput(
-              type: 'future_tool_output',
-              rawJson: {'call_id': 'call_same'},
-            ),
+          requiredInput: [
+            (parsed.requiredInput.first as UnknownResponsesSteerRequiredInput)
+                .copyWith(),
           ],
         );
         expect(same.toJson()['required_input'], [
@@ -1337,6 +1518,184 @@ void main() {
         expect(reset.toJson()['required_input'], [
           {'type': 'future_tool_output', 'call_id': 'call_same'},
         ]);
+      },
+    );
+
+    test('required-input child raw clear removes old owned stub metadata', () {
+      final parsed = _pendingWithFutureStubs();
+      final first =
+          parsed.requiredInput.first as UnknownResponsesSteerRequiredInput;
+      final changed = parsed.copyWith(
+        requiredInput: [
+          first.copyWith(rawJson: const {'call_id': 'call_first'}),
+        ],
+      );
+      expect(changed.toJson()['required_input'], [
+        {'type': 'future_tool_output', 'call_id': 'call_first'},
+      ]);
+      expect(changed.rawJson.clear, throwsUnsupportedError);
+      expect(
+        () => (changed.rawJson['required_input'] as List<dynamic>).clear(),
+        throwsUnsupportedError,
+      );
+      _wireEqual(changed, ResponsesServerEvent.fromJson(changed.toJson()));
+    });
+    test(
+      'fresh same-identity required-input replacement carries only its own fields',
+      () {
+        final parsed = _pendingWithFutureStubs();
+        final changed = parsed.copyWith(
+          requiredInput: const [
+            UnknownResponsesSteerRequiredInput(
+              type: 'future_tool_output',
+              rawJson: {'call_id': 'call_first', 'replacement': true},
+            ),
+          ],
+        );
+        expect(changed.toJson()['required_input'], [
+          {
+            'type': 'future_tool_output',
+            'call_id': 'call_first',
+            'replacement': true,
+          },
+        ]);
+        _wireEqual(changed, ResponsesServerEvent.fromJson(changed.toJson()));
+      },
+    );
+    test(
+      'required-input reorder keeps each child metadata without index carry',
+      () {
+        final parsed = _pendingWithFutureStubs();
+        final changed = parsed.copyWith(
+          requiredInput: [
+            (parsed.requiredInput[1] as UnknownResponsesSteerRequiredInput)
+                .copyWith(),
+            (parsed.requiredInput[0] as UnknownResponsesSteerRequiredInput)
+                .copyWith(),
+          ],
+        );
+        expect(changed.toJson()['required_input'], [
+          parsed.requiredInput[1].toJson(),
+          parsed.requiredInput[0].toJson(),
+        ]);
+        _wireEqual(changed, ResponsesServerEvent.fromJson(changed.toJson()));
+      },
+    );
+    test('direct stub overlay is retained until explicit list replacement', () {
+      const constructed = ResponsesSteerPendingEvent(
+        sequenceNumber: 3,
+        steer: _id,
+        reason: 'future reason',
+        requiredInput: [
+          UnknownResponsesSteerRequiredInput(
+            type: 'future_tool_output',
+            rawJson: {'call_id': 'call_first'},
+          ),
+        ],
+        rawJson: {
+          'required_input': [
+            {
+              'type': 'future_tool_output',
+              'call_id': 'call_first',
+              'parent_only': true,
+            },
+          ],
+        },
+      );
+      expect(constructed.toJson()['required_input'], [
+        {
+          'type': 'future_tool_output',
+          'call_id': 'call_first',
+          'parent_only': true,
+        },
+      ]);
+      final changed = constructed.copyWith(
+        requiredInput: constructed.requiredInput,
+      );
+      expect(changed.toJson()['required_input'], [
+        {'type': 'future_tool_output', 'call_id': 'call_first'},
+      ]);
+      _wireEqual(changed, ResponsesServerEvent.fromJson(changed.toJson()));
+    });
+    test(
+      'required-input scalar child copy preserves explicitly retained metadata',
+      () {
+        final parsed = _pendingWithFutureStubs();
+        final first =
+            parsed.requiredInput.first as UnknownResponsesSteerRequiredInput;
+        final changed = parsed.copyWith(
+          requiredInput: [
+            first.copyWith(
+              rawJson: {...first.rawJson, 'call_id': 'call_changed'},
+            ),
+          ],
+        );
+        expect(changed.toJson()['required_input'], [
+          {
+            'type': 'future_tool_output',
+            'call_id': 'call_changed',
+            'future': {'owner': 'first'},
+          },
+        ]);
+        _wireEqual(changed, ResponsesServerEvent.fromJson(changed.toJson()));
+      },
+    );
+    test(
+      'explicit parent override retains direct required-input overlay policy',
+      () {
+        final parsed = _pendingWithFutureStubs();
+        final raw = <String, dynamic>{
+          'required_input': [
+            {
+              'type': 'future_tool_output',
+              'call_id': 'call_first',
+              'parent_override': true,
+            },
+          ],
+          'replacement_parent': true,
+        };
+        final changed = parsed.copyWith(
+          requiredInput: const [
+            UnknownResponsesSteerRequiredInput(
+              type: 'future_tool_output',
+              rawJson: {'call_id': 'call_first'},
+            ),
+          ],
+          rawJson: raw,
+        );
+        expect(identical(changed.rawJson, raw), isTrue);
+        expect(changed.toJson()['required_input'], [
+          {
+            'type': 'future_tool_output',
+            'call_id': 'call_first',
+            'parent_override': true,
+          },
+        ]);
+        _wireEqual(changed, ResponsesServerEvent.fromJson(changed.toJson()));
+      },
+    );
+    test(
+      'simultaneous pending identity and stub metadata clears remain independent',
+      () {
+        final parsed = _pendingWithFutureStubs();
+        final changed = parsed.copyWith(
+          steer: parsed.steer.copyWith(rawJson: {}),
+          requiredInput: const [
+            UnknownResponsesSteerRequiredInput(
+              type: 'future_tool_output',
+              rawJson: {'call_id': 'call_first'},
+            ),
+          ],
+        );
+        expect(changed.toJson()['steer'], _id.toJson());
+        expect(changed.toJson()['required_input'], [
+          {'type': 'future_tool_output', 'call_id': 'call_first'},
+        ]);
+        expect(
+          changed.toJson()['future_envelope'],
+          parsed.toJson()['future_envelope'],
+        );
+        _wireEqual(changed, ResponsesServerEvent.fromJson(changed.toJson()));
       },
     );
 
@@ -1419,6 +1778,89 @@ void main() {
           throwsFormatException,
         );
       });
+    }
+    for (final pending in [false, true]) {
+      test(
+        'direct ${pending ? 'pending' : 'accepted'} parent-only identity metadata clears on replacement',
+        () {
+          final ResponsesServerEvent constructed = pending
+              ? const ResponsesSteerPendingEvent(
+                  sequenceNumber: 3,
+                  steer: _id,
+                  reason: 'future reason',
+                  requiredInput: [
+                    ResponsesSteerShellCallOutput(callId: 'call'),
+                  ],
+                  rawJson: {
+                    'steer': {'parent_only': true},
+                  },
+                )
+              : const ResponsesSteerAcceptedEvent(
+                  sequenceNumber: 3,
+                  steer: _id,
+                  rawJson: {
+                    'steer': {'parent_only': true},
+                  },
+                );
+          expect(
+            (constructed.toJson()['steer']
+                as Map<String, dynamic>)['parent_only'],
+            isTrue,
+          );
+          final changed = constructed is ResponsesSteerPendingEvent
+              ? constructed.copyWith(steer: _id)
+              : (constructed as ResponsesSteerAcceptedEvent).copyWith(
+                  steer: _id,
+                );
+          expect(changed.toJson()['steer'], _id.toJson());
+          _wireEqual(changed, ResponsesServerEvent.fromJson(changed.toJson()));
+        },
+      );
+    }
+    for (final error in [false, true]) {
+      test(
+        'direct failed parent-only ${error ? 'error' : 'steer'} metadata clears independently',
+        () {
+          const constructed = ResponsesSteerFailedEvent(
+            sequenceNumber: 3,
+            steer: ResponsesFailedSteer(
+              id: 'steer_private',
+              previousResponseId: 'resp_private',
+              input: 'original',
+            ),
+            error: _error,
+            rawJson: {
+              'steer': {'parent_only': true},
+              'error': {'parent_only': true},
+            },
+          );
+          for (final child in ['steer', 'error']) {
+            expect(
+              (constructed.toJson()[child]
+                  as Map<String, dynamic>)['parent_only'],
+              isTrue,
+            );
+          }
+          _wireEqual(constructed, constructed.copyWith());
+          final changed = error
+              ? constructed.copyWith(
+                  error: constructed.error.copyWith(rawJson: {}),
+                )
+              : constructed.copyWith(
+                  steer: constructed.steer.copyWith(rawJson: {}),
+                );
+          final replaced = error ? 'error' : 'steer';
+          final untouched = error ? 'steer' : 'error';
+          expect(
+            (changed.toJson()[replaced] as Map<String, dynamic>).containsKey(
+              'parent_only',
+            ),
+            isFalse,
+          );
+          expect(changed.toJson()[untouched], constructed.toJson()[untouched]);
+          _wireEqual(changed, ResponsesServerEvent.fromJson(changed.toJson()));
+        },
+      );
     }
     test(
       'known steering discriminators never fall back on malformed objects',
