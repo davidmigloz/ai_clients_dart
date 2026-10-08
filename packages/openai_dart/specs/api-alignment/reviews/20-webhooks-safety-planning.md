@@ -4,8 +4,10 @@ Status: independent planning reviews complete; validated findings resolved.
 Scope: [specification](../webhooks-safety.md), repository tickets 20–23 and roadmap.
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Tickets #357–#360 are native sub-issues of #317; #359 is blocked by #357 and
-#360 by #359. Endpoint management #358 has no prerequisite. Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) is open
-for review; implementation remains pending.
+#360 by #359. Endpoint management #358 has no prerequisite. Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) merged
+October 8, 2026 at `886659c3c11cbee89335788ba918eeecd528fce0` after green CI.
+Receiver #357 is now implemented/verified with merge pending; remaining slices
+are specified with implementation pending.
 
 ## Baseline and source evidence
 
@@ -21,8 +23,10 @@ Fresh toolkit fetch/candidate agrees with independently fetched pinned OpenAPI
 506aff0a; it has 356 operations/2,009 schemas. All component schemas, webhook
 entries and Phase 4 paths match canonical 3c4759c1. Independent parameter-identity
 comparison finds five Agents/Vault pagination changes despite toolkit review
-reporting zero changes. They are recorded in Phase 6 inventory. Canonical and
-actual fetch metadata remain unchanged in this documentation-only plan.
+reporting zero changes. They are recorded in Phase 6 inventory. At planning time,
+canonical and actual fetch metadata remained unchanged. Receiver implementation
+subsequently promotes 506aff0a; its [acceptance evidence](20-webhook-receiver.md)
+records fresh SDK pins and runtime verification.
 Fresh Python b9bc5c14/3.26.0 and Node 3edaf0f3/7.30.0 have unchanged relevant webhook
 verification/resource/event and safety/error source files. References are pinned
 in the specification; guides/reference pages were opened and compared.

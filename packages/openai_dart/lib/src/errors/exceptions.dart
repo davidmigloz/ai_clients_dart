@@ -1,9 +1,10 @@
 import 'package:meta/meta.dart';
 
-/// Base exception class for all OpenAI client errors.
+/// Base exception class for OpenAI HTTP and client transport errors.
 ///
-/// All exceptions thrown by the OpenAI client extend this class,
-/// allowing for catch-all error handling when needed.
+/// Local webhook signature failures use `InvalidWebhookSignatureException`.
+/// Configuration and authenticated webhook parsing can also throw standard
+/// ArgumentError and FormatException, outside this sealed hierarchy.
 @immutable
 sealed class OpenAIException implements Exception {
   /// Creates a new [OpenAIException] with the given message.

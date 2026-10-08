@@ -1,10 +1,12 @@
 # Webhooks and safety: Phase 4 specification
 
-Status: independently reviewed specification; implementation pending.
-Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) is open for review.
+Status: independently reviewed specification; receiver implemented/verified with merge pending, other slices pending.
+Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) merged October 8, 2026 at `886659c3c11cbee89335788ba918eeecd528fce0` after green CI.
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Scope: four independently demonstrable implementation tickets, repository 20–23.
-Planning changes do not implement these capabilities.
+Receiver [PR #362](https://github.com/davidmigloz/ai_clients_dart/pull/362) and
+[acceptance evidence](reviews/20-webhook-receiver.md) records the first
+implementation. The planning PR itself contains no runtime implementation.
 
 ## Outcome and boundaries
 
@@ -49,15 +51,16 @@ Audited October 8, 2026 against:
   [Alerts reference](https://developers.openai.com/api/reference/resources/safety/subresources/alerts)
   and [Cases reference](https://developers.openai.com/api/reference/resources/safety/subresources/cases).
 
-Canonical remains reviewed 3c4759c1 (356 operations/2,009 schemas). Fresh candidate
-and independently fetched pinned JSON agree. All component schemas, inbound
+Receiver #357 promotes reviewed 506aff0a (356 operations/2,009 schemas), replacing
+3c4759c1 after the fresh candidate and independently fetched pinned JSON agree. All component schemas, inbound
 webhooks and Phase 4 paths are unchanged. Five Agents/Vault list operations have
 pagination parameter changes: `/agents`, `/agents/sessions`,
 `/agents/sessions/{session_id}/artifacts`, `/vaults` and
 `/vaults/{vault_id}/credentials`. These remain Phase 6 inventory. Toolkit review
 reports no changes because its comparison misses this parameter delta; independent
-parameter-identity comparison establishes it. No candidate promotion or fetch-only
-metadata churn is retained in this documentation-only plan.
+parameter-identity comparison establishes it. The planning PR retained its original
+canonical snapshot; receiver implementation promotes the reviewed candidate and
+records the actual fresh/archived fetch metadata in its acceptance evidence.
 
 Canonical schemas govern wire shapes. Guides establish workflow/permission
 boundaries. SDK-only local verification conventions are named explicitly below;

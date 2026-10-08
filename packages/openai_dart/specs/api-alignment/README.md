@@ -210,9 +210,10 @@ and later-family gaps stay in the inventory.
 The [Webhooks and safety specification](webhooks-safety.md) records 17 requirement
 IDs, exact received/subscription inventories, signature policy, permission and
 error-shape boundaries. [Planning review](reviews/20-webhooks-safety-planning.md)
-records independent source/architecture checks. Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) is open
-for review. These tickets are specified;
-implementation and runtime acceptance remain pending.
+records independent source/architecture checks. Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) merged October 8, 2026 at `886659c3c11cbee89335788ba918eeecd528fce0` after green CI. Receiver #357 is implemented and independently verified in [PR #362](https://github.com/davidmigloz/ai_clients_dart/pull/362), with merge pending.
+Its [acceptance evidence](reviews/20-webhook-receiver.md) records runtime checks.
+Endpoint management, safety retrieval and monitoring errors remain specified
+with implementation pending.
 
 | Ticket | Demonstrable outcome | Prerequisite |
 | --- | --- | --- |
@@ -223,10 +224,9 @@ implementation and runtime acceptance remain pending.
 
 The first receiver ticket includes verification so its example handles signed
 notifications end to end. Endpoint management remains independently usable.
-Safety detail retrieval and structured errors are separate slices. No model, API
-method, test or example is implemented by this planning change. Implementations
-will include their own public offline fixtures, complete value/copy contracts,
-README/llms/examples, migration as needed and independent reviews.
+Safety detail retrieval and structured errors are separate slices. The receiver now provides public offline fixtures, complete value/copy contracts,
+README/llms documentation and a runnable local HTTP example. Remaining slices
+will include their own runtime acceptance and independent reviews.
 
 ## Remaining roadmap
 
@@ -378,10 +378,11 @@ Sources: [cache diagnostics](https://developers.openai.com/api/docs/guides/promp
 - Python-only safety_identifier.blocked is absent from canonical/Node/unwrap unions;
   video event subscriptions lack typed inbound schemas. Phase 4 preserves those
   received values as unknown raw events until authoritative shapes are established.
-- Webhooks: seven endpoint operations, event-type listing, typed events, and
-  signature verification.
+- Webhooks: local signed verification and 26 typed received events are implemented
+  and verified in #357 with merge pending. Seven endpoint operations plus event-type
+  listing remain pending in #358.
 - Audio: speech instructions and streaming, additional built-in/custom voices,
-  sample-derived voice creation and consent management. Latest canonical
+  sample-derived voice creation and consent management. The earlier
   [OpenAPI 3c4759c1](https://github.com/openai/openai-openapi/commit/3c4759c1ecc98a2ac3d3df85d54f4eb409f5957d)
   removes text-prompt creation and its request schema; no implemented Dart voice
   DTO is affected. This supersedes the initial prompt-derived candidate outcome.
@@ -518,4 +519,5 @@ reviews approve the final diff. Toolkit diagnostics remain visible with a
 classified delegated-serializer/value-scanner delta; no exclusions were added.
 Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) merged October 8, 2026 at `1e63d6b93bdf0028eb6925d45371b1f36deb5d7b`, closing #344, after all applicable final-head checks passed (14 contexts completed: 13 successes and the standard Test(all) skip).
 All eleven specified Phase 3 implementation tickets are merged. Phase 4 now has
-its own specification/tickets; remaining parity inventory persists.
+its own specification/tickets and an implemented, verified receiver #357 with
+merge pending; remaining parity inventory persists.

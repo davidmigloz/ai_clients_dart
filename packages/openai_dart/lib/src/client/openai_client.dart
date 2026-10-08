@@ -29,6 +29,7 @@ import '../resources/responses_resource.dart';
 import '../resources/skills_resource.dart';
 import '../resources/uploads_resource.dart';
 import '../resources/videos_resource.dart';
+import '../resources/webhooks_resource.dart';
 import 'config.dart';
 import 'interceptor_chain.dart';
 import 'request_builder.dart';
@@ -75,6 +76,7 @@ import 'retry_wrapper.dart';
 /// - [models] - Model information
 /// - [moderations] - Content moderation
 /// - [decisions] - Typed classification and scoring
+/// - [webhooks] - Local signed webhook verification and typed events
 /// - [fineTuning] - Fine-tuning jobs
 /// - [skills] - Skills API for skill bundles and versions
 /// - [beta] - Beta features (Assistants, Threads, etc.)
@@ -918,6 +920,20 @@ class OpenAIClient {
         requestBuilder: _requestBuilder,
         ensureNotClosed: _ensureNotClosed,
       );
+
+  WebhooksResource? _webhooks;
+
+  /// Local signature verification and typed webhook parsing.
+  ///
+  /// Uses the configured webhook secret or a per-call override. These local
+  /// methods need no API key and remain usable after the client is closed.
+  WebhooksResource get webhooks => _webhooks ??= WebhooksResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+  );
 
   void _ensureNotClosed() {
     if (_closed) {

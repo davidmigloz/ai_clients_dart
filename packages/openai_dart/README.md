@@ -5,7 +5,7 @@
 ![Discord](https://img.shields.io/discord/1123158322812555295?label=discord)
 [![MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://github.com/davidmigloz/ai_clients_dart/blob/main/LICENSE)
 
-Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-reference)** with Responses API, Decisions API, Chat Completions, images, videos, audio, custom tools, embeddings, evals, realtime, and more. It gives Dart and Flutter applications a pure Dart, type-safe client across iOS, Android, macOS, Windows, Linux, Web, and server-side Dart.
+Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-reference)** with Responses API, Decisions API, Chat Completions, images, videos, audio, custom tools, embeddings, evals, realtime, signed webhooks, and more. It gives Dart and Flutter applications a pure Dart, type-safe client across iOS, Android, macOS, Windows, Linux, Web, and server-side Dart.
 
 > [!TIP]
 > Coding agents: start with [llms.txt](./llms.txt). It links to the package docs, examples, and optional references in a compact format.
@@ -47,6 +47,7 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 
 - Files, uploads, batches, fine-tuning, moderations, evals, and model management
 - Conversations, containers, content provenance checks, ChatKit, and skills
+- Local signed webhook verification with 26 typed received event variants
 - Assistants and vector stores (deprecated — use Responses API instead)
 
 See [API Coverage](#api-coverage) for the full coverage table.
@@ -54,7 +55,7 @@ See [API Coverage](#api-coverage) for the full coverage table.
 ## Why choose this client?
 
 - Pure Dart with no Flutter dependency — works in mobile apps, backends, and CLIs.
-- Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
+- Type-safe request and response models with minimal dependencies (`http`, `crypto`, `logging`, `meta`).
 - Streaming, retries, interceptors, and error handling built into the client.
 - Supports OpenAI generation, media, operational, and Realtime APIs; see the coverage table for remaining gaps.
 - Resource-based API design matching official SDKs.
@@ -134,6 +135,7 @@ final client = OpenAIClient(
 ```dart
 final client = OpenAIClient.fromEnvironment();
 // Reads OPENAI_API_KEY, OPENAI_BASE_URL, OPENAI_ORG_ID, OPENAI_PROJECT_ID
+// Also reads optional OPENAI_WEBHOOK_SECRET for local verification.
 ```
 
 **With API key directly:**
@@ -1899,6 +1901,65 @@ for (final result in check.results) {
 
 </details>
 
+### How do I receive signed webhooks?
+
+Use the original request bytes and headers with `WebhookVerifier.unwrapBytes`.
+The standalone verifier needs only a signing secret. On a trusted receiver,
+`WebhookVerifier.fromEnvironment()` reads `OPENAI_WEBHOOK_SECRET` without requiring
+an API key. An existing client also exposes these local methods through
+`client.webhooks`, using `OpenAIConfig(webhookSecret: ...)` or a per-call `secret`.
+Local verification remains available after the client closes.
+
+```dart
+import 'package:openai_dart/openai_dart.dart';
+
+WebhookEvent receiveDelivery(
+  List<int> originalBytes,
+  Map<String, String> headers,
+  String signingSecret,
+) {
+  final verifier = WebhookVerifier(secret: signingSecret);
+  // Verification happens before UTF-8, JSON or model parsing.
+  return verifier.unwrapBytes(originalBytes, headers);
+}
+```
+
+The 26 received event variants include Responses, Batch, Evals, fine-tuning,
+Agent sessions, incoming Live/Realtime calls and safety notifications. Dispatch on
+concrete types such as `ResponseCompletedWebhookEvent`. Future event types,
+including video notifications without a published inbound schema, become
+`UnknownWebhookEvent` and retain their raw JSON. Parsed known events also preserve
+finite future metadata. Replacing a typed child uses that child's complete JSON;
+metadata from the previous child is not restored. Optional `object` stays omitted
+when absent, while Agent and safety events require `object: "event"`.
+
+`verifySignature`/`unwrap` accept an untouched string; their `Bytes` counterparts
+preserve exact original bytes. Required signed headers are case-insensitive,
+nonempty and unambiguous. A `whsec_` secret uses canonical padded standard Base64;
+other secrets are literal UTF-8 keys. Signature candidates accept `v1,<Base64>` or
+bare canonical Base64, including rotation lists. The default five-minute timestamp
+tolerance has inclusive past/future bounds. Timestamp text must be ASCII decimal
+in 0..2^53−1; leading zeros retain their signed spelling. These strict policies
+intentionally reject the loose timestamp/Base64 coercions used by some official
+SDK helpers. An empty per-call secret fails instead of falling back.
+
+Catch `InvalidWebhookSignatureException` for invalid signatures/timestamps,
+`FormatException` for authenticated malformed event bodies, and `ArgumentError`
+for invalid secret/tolerance configuration. This signature exception is separate
+from HTTP `OpenAIException`. The verifier performs no automatic acknowledgment,
+deduplication, API lookup or workflow action. Applications persist/queue their own
+work and acknowledge promptly. Return a `2xx` status for successful receipt. The
+provider retries failed or timed-out deliveries for up to 72 hours with exponential
+backoff and treats `3xx` redirects as failures. Duplicate deliveries can use the
+authenticated `webhook-id` as an idempotency key. Safety webhook contracts also
+specify `410 Gone` as a signal to stop retries. These are delivery policies owned
+by the receiver, with no SDK scheduler. Signing secrets belong on trusted infrastructure;
+JavaScript/Wasm runtime support does not make browser deployment of secrets safe.
+
+→ [Runnable offline signed receiver](example/webhooks_example.dart), which sends
+three loopback deliveries (valid, duplicate, tampered) and makes no API calls.
+See the [official Webhooks guide](https://developers.openai.com/api/docs/guides/webhooks).
+
 ## Error Handling
 
 <details>
@@ -1966,6 +2027,7 @@ See the [example/](example/) directory for complete examples:
 
 | Example | Description |
 |---------|-------------|
+| [`webhooks_example.dart`](example/webhooks_example.dart) | Offline signed receiver, acknowledgment and caller-owned deduplication |
 | [`chat_example.dart`](example/chat_example.dart) | Chat completions, multi-turn conversations, and legacy cache retention |
 | [`streaming_example.dart`](example/streaming_example.dart) | Content streaming, detailed final usage, and obfuscation controls |
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Function calling with tool definitions |
@@ -2030,6 +2092,7 @@ See the [example/](example/) directory for complete examples:
 | Content Provenance Checks | ✅ Full |
 | ChatKit Beta | ✅ Full |
 | Realtime | ✅ Full (separate import) |
+| Webhooks | Local signed verification and 26 typed received events; endpoint management pending |
 | Assistants (Deprecated) | ✅ Full (separate import) |
 | Threads (Deprecated) | ✅ Full (separate import) |
 | Messages (Deprecated) | ✅ Full (separate import) |

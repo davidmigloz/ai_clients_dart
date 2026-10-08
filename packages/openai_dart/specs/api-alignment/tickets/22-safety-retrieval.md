@@ -37,4 +37,4 @@ publishing/version bumps and unrelated API families are outside this ticket.
 
 Implementation, runtime verification and independent implementation review remain
 pending. Link its acceptance evidence and PR when complete; close the issue only
-after implementation merge. The planning review does not claim runtime acceptance. Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) is open for review.
+after implementation merge. The planning review does not claim runtime acceptance. Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) merged October 8, 2026 at `886659c3c11cbee89335788ba918eeecd528fce0` after green CI.

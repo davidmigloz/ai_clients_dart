@@ -4727,6 +4727,339 @@
       "schema": null,
       "parent": "BetaResponseInjectFailedEvent",
       "note": "Actual inline failed.error.code two-value enum plus legacy unknown SDK sentinel; rawCode on ResponseInjectError preserves future provider strings rather than normalizing."
+    },
+    "WebhookAgentSessionActionRequired": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionActionRequiredWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookAgentSessionActionRequired",
+      "parent": "WebhookAgentSessionEnvelope",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookAgentSessionCreated": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionCreatedWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookAgentSessionCreated",
+      "parent": "WebhookAgentSessionEnvelope",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookAgentSessionFailed": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionFailedWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookAgentSessionFailed",
+      "parent": "WebhookAgentSessionEnvelope",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookAgentSessionIdle": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionIdleWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookAgentSessionIdle",
+      "parent": "WebhookAgentSessionEnvelope",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookAgentSessionInProgress": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionInProgressWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookAgentSessionInProgress",
+      "parent": "WebhookAgentSessionEnvelope",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookBatchCancelled": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "BatchCancelledWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookBatchCancelled",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookBatchCompleted": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "BatchCompletedWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookBatchCompleted",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookBatchExpired": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "BatchExpiredWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookBatchExpired",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookBatchFailed": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "BatchFailedWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookBatchFailed",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookEvalRunCanceled": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "EvalRunCanceledWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookEvalRunCanceled",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookEvalRunFailed": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "EvalRunFailedWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookEvalRunFailed",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookEvalRunSucceeded": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "EvalRunSucceededWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookEvalRunSucceeded",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookFineTuningJobCancelled": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FineTuningJobCancelledWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookFineTuningJobCancelled",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookFineTuningJobFailed": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FineTuningJobFailedWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookFineTuningJobFailed",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookFineTuningJobSucceeded": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FineTuningJobSucceededWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookFineTuningJobSucceeded",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookLiveCallIncoming": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveCallIncomingWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookLiveCallIncoming",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookLiveTransportIncoming": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveTransportIncomingWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookLiveTransportIncoming",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookRealtimeCallIncoming": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeCallIncomingWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookRealtimeCallIncoming",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookResponseCancelled": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponseCancelledWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookResponseCancelled",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookResponseCompleted": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponseCompletedWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookResponseCompleted",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookResponseFailed": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponseFailedWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookResponseFailed",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookResponseIncomplete": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResponseIncompleteWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookResponseIncomplete",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookSafetyAlertCreated": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SafetyAlertCreatedWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookSafetyAlertCreated",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookSafetyDeactivationIssued": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SafetyDeactivationIssuedWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookSafetyDeactivationIssued",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookSafetyOrgAlertCreated": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SafetyOrgAlertCreatedWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookSafetyOrgAlertCreated",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "WebhookSafetyWarningIssued": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SafetyWarningIssuedWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookSafetyWarningIssued",
+      "parent": "WebhookEvent",
+      "note": "Typed source-backed received event; finite immutable future metadata is receive-only tolerance. Optional object presence remains distinct from nine required Agent/safety envelopes."
+    },
+    "AgentSessionActionRequiredPayloadResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionActionRequiredPayloadResource",
+      "file": "lib/src/models/webhooks/webhook_payloads.dart",
+      "schema": "AgentSessionActionRequiredPayloadResource"
+    },
+    "AgentSessionConnectPayloadResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionConnectPayloadResource",
+      "file": "lib/src/models/webhooks/webhook_payloads.dart",
+      "schema": "AgentSessionConnectPayloadResource"
+    },
+    "AgentSessionCreatedPayloadResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionCreatedPayloadResource",
+      "file": "lib/src/models/webhooks/webhook_payloads.dart",
+      "schema": "AgentSessionCreatedPayloadResource"
+    },
+    "AgentSessionEnvironmentPayloadResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionEnvironmentPayloadResource",
+      "file": "lib/src/models/webhooks/webhook_payloads.dart",
+      "schema": "AgentSessionEnvironmentPayloadResource"
+    },
+    "AgentSessionRequiredActionPayloadResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionRequiredActionPayloadResource",
+      "file": "lib/src/models/webhooks/webhook_payloads.dart",
+      "schema": "AgentSessionRequiredActionPayloadResource"
+    },
+    "AgentSessionRequiredActionTypeResource": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AgentSessionRequiredActionTypeResource",
+      "file": "lib/src/models/webhooks/webhook_payloads.dart",
+      "schema": "AgentSessionRequiredActionTypeResource"
+    },
+    "WebhookAgentSessionEnvelope": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "WebhookAgentSessionEnvelope",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookAgentSessionEnvelope"
+    },
+    "WebhookEvent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "WebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": null,
+      "note": "Dart sealed aggregate for26 top-level OpenAPI webhook components; no invented aggregate component. Unknown discriminators remain finite raw data."
+    },
+    "UnknownWebhookEvent": {
+      "schema": null,
+      "kind": "extension",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "notes": "Receive-only unknown discriminator extension; finite deeply immutable raw JSON retained without invented component."
+    },
+    "WebhookIdData": {
+      "schema": null,
+      "kind": "extension",
+      "file": "lib/src/models/webhooks/webhook_payloads.dart",
+      "notes": "Shared typed view of inline id-only received payloads; no named component exists."
+    },
+    "WebhookSafetyAlertData": {
+      "schema": null,
+      "kind": "extension",
+      "file": "lib/src/models/webhooks/webhook_payloads.dart",
+      "notes": "Inline safety.alert.created data with canonical alert_32-lower-hex identity."
+    },
+    "WebhookSipHeader": {
+      "schema": null,
+      "kind": "extension",
+      "file": "lib/src/models/webhooks/webhook_payloads.dart",
+      "notes": "Typed inline SIP name/value entries, preserving ordered duplicates."
+    },
+    "LiveCallIncomingWebhookData": {
+      "schema": null,
+      "kind": "extension",
+      "file": "lib/src/models/webhooks/webhook_payloads.dart",
+      "notes": "Inline deprecated live.call.incoming payload with session_id and SIP headers."
+    },
+    "LiveTransportIncomingWebhookData": {
+      "schema": null,
+      "kind": "extension",
+      "file": "lib/src/models/webhooks/webhook_payloads.dart",
+      "notes": "Inline live.transport.incoming SIP payload; fixed type and session_id."
+    },
+    "RealtimeCallIncomingWebhookData": {
+      "schema": null,
+      "kind": "extension",
+      "file": "lib/src/models/webhooks/webhook_payloads.dart",
+      "notes": "Inline realtime.call.incoming payload with call_id and SIP headers."
     }
   }
 }
