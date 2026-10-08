@@ -1,7 +1,7 @@
 # Manage project webhook endpoints and discover event types
 
-Status: implemented, independently reviewed and verified; PR #363 open, merge pending.
-Implementation [PR #363](https://github.com/davidmigloz/ai_clients_dart/pull/363) is open for review; #358 remains open until merge.
+Status: merged after independent review, runtime verification and green CI.
+Implementation [PR #363](https://github.com/davidmigloz/ai_clients_dart/pull/363) merged October 8, 2026 at `b5159171218e8feb9f720c5db7d1d82ea3cf1a80` after all 14 final-head CI contexts completed (13 successful, one standard skip), closing #358.
 GitHub: [#358](https://github.com/davidmigloz/ai_clients_dart/issues/358).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 4 Webhooks and safety](../webhooks-safety.md), WH-ENDPOINT-01–04.
@@ -40,4 +40,4 @@ publishing/version bumps and unrelated API families are outside this ticket.
 
 [Endpoint management acceptance evidence](../reviews/21-webhook-endpoints.md)
 records the implementation, runtime verification and independent reviews.
-The issue remains open until implementation merge. Receiver [PR #362](https://github.com/davidmigloz/ai_clients_dart/pull/362) merged October 8, 2026 at `eea142bf9b100448f5216572e4db2d50a7ad0f5b`, closing #357, after all 14 final-head contexts passed (13 successes and standard Test(all) skip).
+PR #363 merged at `b5159171218e8feb9f720c5db7d1d82ea3cf1a80`, closing #358 after green CI. Receiver [PR #362](https://github.com/davidmigloz/ai_clients_dart/pull/362) merged October 8, 2026 at `eea142bf9b100448f5216572e4db2d50a7ad0f5b`, closing #357, after all 14 final-head contexts passed (13 successes and standard Test(all) skip).

@@ -1,7 +1,7 @@
 # Project webhook endpoint management acceptance
 
-Status: implemented, independently reviewed and verified; PR #363 open, merge pending.
-Implementation [PR #363](https://github.com/davidmigloz/ai_clients_dart/pull/363) is open for review; #358 remains open until merge.
+Status: merged after independent review, runtime verification and green CI.
+Implementation [PR #363](https://github.com/davidmigloz/ai_clients_dart/pull/363) merged October 8, 2026 at `b5159171218e8feb9f720c5db7d1d82ea3cf1a80` after all 14 final-head CI contexts completed (13 successful, one standard skip), closing #358.
 Tracking: [#358](https://github.com/davidmigloz/ai_clients_dart/issues/358),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirements: [WH-ENDPOINT-01–04](../webhooks-safety.md#project-endpoint-management).
@@ -134,7 +134,5 @@ method, fake component, exclusion or toolkit change masks these or unrelated gap
 
 Independent requirements and cross-author engineering reviews approve models,
 resource/abort/retry/URI fixtures, redaction/error preservation, source/schema
-proof, manifest, docs and example after validated findings are fixed. Final-head
-PR/CI status is recorded separately; #358 stays open until its implementation
-merges. Next is #359 safety retrieval (receiver prerequisite now merged), then
+proof, manifest, docs and example after validated findings are fixed. Final-head CI completed before merge; #358 is closed. Next is #359 safety retrieval (receiver prerequisite now merged), then
 #360 monitoring details; later API/SDK parity phases remain inventoried.

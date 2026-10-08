@@ -1,6 +1,6 @@
 # OpenAI Dart Client
 
-> Dart client for the OpenAI API with Responses API, Decisions API, Chat Completions, images, videos, audio, custom tools, embeddings, evals, realtime, and more.
+> Dart client for the OpenAI API with Responses API, Decisions API, Chat Completions, images, videos, audio, custom tools, embeddings, evals, realtime, signed webhooks, safety retrieval, and more.
 
 ## Docs
 
@@ -58,6 +58,8 @@
 - [webhooks_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/webhooks_example.dart): Offline signed receiver with original-byte verification, typed events, prompt acknowledgment and application-owned deduplication; no API key or charges.
 
 - [webhook_endpoints_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/webhook_endpoints_example.dart): Offline project webhook lifecycle with returned cursor/event discovery, signing-key storage/rotation, separate receiver status and cleanup; MockClient only, no API charges.
+
+- [safety_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/safety_example.dart): Offline signed project/organization safety notices with two explicitly scoped MockClient GETs, deduplication, tampering rejection and separate workspace routing; no API key or charges.
 
 ## Optional
 

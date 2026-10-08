@@ -79,6 +79,8 @@ export 'src/models/models/models.dart';
 export 'src/models/moderations/moderations.dart';
 // Models - Responses
 export 'src/models/responses/responses.dart';
+// Models - Safety
+export 'src/models/safety/safety.dart';
 // Models - Skills
 export 'src/models/skills/skills.dart';
 // Models - Streaming
