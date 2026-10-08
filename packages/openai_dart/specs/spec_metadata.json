@@ -2,8 +2,8 @@
   "specs": {
     "main": {
       "current_version": "2.3.0",
-      "last_fetched": "2026-10-07T19:51:18.524540Z",
-      "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/234829e2b634b8fb159df7fcddbffad204173ffd/openapi.json",
+      "last_fetched": "2026-10-08T07:39:58.694094Z",
+      "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/3c4759c1ecc98a2ac3d3df85d54f4eb409f5957d/openapi.json",
       "title": "OpenAI API",
       "version_history": [
         {
@@ -65,6 +65,12 @@
           "note": "17f9a66 replaced by 234829e on 2026-10-07; only the QuestionParamChoice choices description changed. Reviewed access-program and endpoint wire contracts remain unchanged.",
           "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/17f9a665031777071b26e63356d78280bf7c128c/openapi.json",
           "version": "2.3.0"
+        },
+        {
+          "version": "2.3.0",
+          "fetched_at": "2026-10-07T19:51:18.524540Z",
+          "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/234829e2b634b8fb159df7fcddbffad204173ffd/openapi.json",
+          "note": "3c4759c1… supersedes 234829e2… on 2026-10-08: text-prompt custom voice creation removed; audio sample plus consent remain required. Injection schemas unchanged; 356 operations/2,009 schemas. Audio-family implementation stays in Phase 5."
         }
       ]
     }

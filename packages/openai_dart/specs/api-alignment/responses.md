@@ -95,7 +95,7 @@ and these official-client pins. The candidate is unchanged at 356 operations and
 | [#340](https://github.com/davidmigloz/ai_clients_dart/issues/340) (15) | Return complete client-discovered tools | RESP-SEARCH-01–02 | Merged in #352 |
 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) (16) | Persistent Responses WebSocket sessions and lane routing | RESP-WS-01–04 | Merged in #353 |
 | [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) (17) | Steer a running WebSocket response | RESP-STEER-01–03 | Merged in #354 |
-| [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) (18) | Opt-in socket reconnection and bounded unsent queue | RESP-RECOVER-01–02 | Implemented/verified/reviewed in #355; merge pending |
+| [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) (18) | Opt-in socket reconnection and bounded unsent queue | RESP-RECOVER-01–02 | Merged in #355 |
 | [#344](https://github.com/davidmigloz/ai_clients_dart/issues/344) (19) | Inject multi-agent tool results over WebSockets | RESP-INJECT-01–02 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
 
 Linked numbers are GitHub issues; parenthetical numbers are repository ticket sequence. Implement in this
@@ -522,7 +522,7 @@ Recovery #343 is implemented, verified and independently reviewed;
 policy choices, 104 new VM/Chrome JavaScript/Wasm cases, 11,262 package tests
 (two existing skips), clean package quality and unchanged toolkit diagnostics.
 The literal README wrapper and offline four-write example pass for $0.
-Implementation [PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) is open for review; final CI/merge remain pending. #344 follows.
+Implementation [PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) merged after green CI, closing #343. #344 is in progress.
 
 ## Multi-agent WebSocket injection
 
@@ -544,6 +544,25 @@ Source: [Responses multi-agent](https://developers.openai.com/api/docs/guides/re
 The guide explicitly says current SDK WS connectors take the beta header rather
 than the HTTP `betas` argument. Existing response.inject/created/failed exports
 are the starting point; add faithful envelopes and actual transport wiring.
+
+
+### Injection implementation
+
+#344 is implemented, verified and independently reviewed; PR creation is pending.
+[Acceptance evidence](reviews/19-websocket-injection.md) records exact beta
+handshake/request projection, typed created/failed acknowledgments, raw failed
+input and unknown-code preservation, multiple outstanding injections and late
+acknowledgment races. Application-owned tools never rerun or replay automatically;
+explicit raw continuation retains parent/lane/future fields. The legacy broad
+Item request codec remains bounded and documented rather than claiming complete
+input-union parity. New sealed variants/raw getter and nested metadata-copy
+corrections have migration guidance. All 11,448 package unit tests pass with two
+existing skips; 656 focused cases pass on VM and real Chrome JavaScript/Wasm.
+All 512 Dart files format unchanged, fix applies nothing and fatal-info analysis
+passes. The literal README/migration snippets compile and the offline example
+costs $0. Full toolkit delta is independently classified with unrelated gaps
+visible and no exclusions. Requirements and cross-author engineering reviews
+approve the final combined implementation. Close #344 only after merge.
 
 ## Acceptance and completion evidence
 

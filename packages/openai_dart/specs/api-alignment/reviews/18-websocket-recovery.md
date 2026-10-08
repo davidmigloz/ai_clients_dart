@@ -1,12 +1,12 @@
 # Opt-in Responses WebSocket recovery acceptance
 
-Status: implemented, verified and independently reviewed; merge pending.
-Implementation [PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) is open for review; #343 closes only after merge.
+Status: merged in PR #355 after green CI; #343 closed.
+Implementation [PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) merged October 8, 2026 at `22b8cfdace42edd8dbe54e88de0341ee2b73426a`, closing #343.
 Tracking: [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343),
 parent [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Requirements: [RESP-RECOVER-01–02](../responses.md#opt-in-connection-recovery).
 Dependencies #341/#342 merged in PR #353/#354. Steering merged October 8, 2026
-at `eeaa8e7b1b8e821fc518287167c5fb06b549cdd8` after all 14 final-head checks passed.
+at `eeaa8e7b1b8e821fc518287167c5fb06b549cdd8` after all applicable final-head checks passed (14 contexts completed).
 
 ## Sources and scope
 
@@ -157,5 +157,6 @@ author approves their own implementation. All validated findings are resolved:
 - Direct/flush failures never requeue attempted frames; explicit close consumes
   late outcomes and final unsent state remains available independently of readers.
 
-Implementation [PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) uses the exact create-pr template. GitHub CI/merge
-remain pending. Close #343 only after merge; beta injection #344 follows.
+Implementation [PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) uses the exact create-pr template. All applicable checks passed (14 contexts completed)
+on final head `c4960cfd9ed0ccf8c8cbd2756bbb39b4c4df5af1`. Merged October 8, 2026
+at `22b8cfdace42edd8dbe54e88de0341ee2b73426a`, closing #343. Injection #344 is in progress.
