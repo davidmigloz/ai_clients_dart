@@ -4228,7 +4228,7 @@
       "dart_class": "ResponsesConnection",
       "file": "lib/src/resources/responses/responses_connection.dart",
       "schema": null,
-      "note": "Caller-owned persistent connection with observable bounded early buffer, close lifecycle and completion; no invented REST operation or automatic replay."
+      "note": "Caller-owned persistent connection with bounded early buffer and close completion; optional ResponsesRecovery exposes final logical helper close facts and never-attempted queue snapshots. No invented REST operation or automatic replay."
     },
     "ResponseOutputTextAnnotationAddedEvent": {
       "spec": "main",
@@ -4573,6 +4573,140 @@
       "file": "lib/src/models/responses/websocket/responses_steer_server_events.dart",
       "schema": null,
       "note": "Dart contextual/inline steering helper; no invented upstream component. Open codes/reasons remain String-valued properties, not closed Dart enums. Server helpers are exported through their parent Dart library."
+    },
+    "ResponsesReconnectPreparation": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesReconnectPreparation",
+      "file": "lib/src/resources/responses/responses_recovery.dart",
+      "schema": null,
+      "note": "SDK-only opt-in Responses recovery helper; no REST wire schema or operation. Queue records preserve immutable exact serialized UTF-8 text; lifecycle/decision types are local and do not emit API JSON."
+    },
+    "ResponsesReconnectOptions": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesReconnectOptions",
+      "file": "lib/src/resources/responses/responses_recovery.dart",
+      "schema": null,
+      "note": "SDK-only opt-in Responses recovery helper; no REST wire schema or operation. Queue records preserve immutable exact serialized UTF-8 text; lifecycle/decision types are local and do not emit API JSON."
+    },
+    "ResponsesReconnectContext": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesReconnectContext",
+      "file": "lib/src/resources/responses/responses_recovery.dart",
+      "schema": null,
+      "note": "SDK-only opt-in Responses recovery helper; no REST wire schema or operation. Queue records preserve immutable exact serialized UTF-8 text; lifecycle/decision types are local and do not emit API JSON."
+    },
+    "ResponsesReconnectDecision": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesReconnectDecision",
+      "file": "lib/src/resources/responses/responses_recovery.dart",
+      "schema": null,
+      "note": "SDK-only opt-in Responses recovery helper; no REST wire schema or operation. Queue records preserve immutable exact serialized UTF-8 text; lifecycle/decision types are local and do not emit API JSON."
+    },
+    "ResponsesUnsentMessage": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesUnsentMessage",
+      "file": "lib/src/resources/responses/responses_recovery.dart",
+      "schema": null,
+      "note": "SDK-only opt-in Responses recovery helper; no REST wire schema or operation. Queue records preserve immutable exact serialized UTF-8 text; lifecycle/decision types are local and do not emit API JSON."
+    },
+    "ResponsesRecoveryEvent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesRecoveryEvent",
+      "file": "lib/src/resources/responses/responses_recovery.dart",
+      "schema": null,
+      "note": "SDK-only opt-in Responses recovery helper; no REST wire schema or operation. Queue records preserve immutable exact serialized UTF-8 text; lifecycle/decision types are local and do not emit API JSON."
+    },
+    "ResponsesRecoveryTransportError": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesRecoveryTransportError",
+      "file": "lib/src/resources/responses/responses_recovery.dart",
+      "schema": null,
+      "note": "SDK-only opt-in Responses recovery helper; no REST wire schema or operation. Queue records preserve immutable exact serialized UTF-8 text; lifecycle/decision types are local and do not emit API JSON.",
+      "parent": "ResponsesRecoveryEvent"
+    },
+    "ResponsesRecoveryReconnecting": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesRecoveryReconnecting",
+      "file": "lib/src/resources/responses/responses_recovery.dart",
+      "schema": null,
+      "note": "SDK-only opt-in Responses recovery helper; no REST wire schema or operation. Queue records preserve immutable exact serialized UTF-8 text; lifecycle/decision types are local and do not emit API JSON.",
+      "parent": "ResponsesRecoveryEvent"
+    },
+    "ResponsesRecoveryReconnected": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesRecoveryReconnected",
+      "file": "lib/src/resources/responses/responses_recovery.dart",
+      "schema": null,
+      "note": "SDK-only opt-in Responses recovery helper; no REST wire schema or operation. Queue records preserve immutable exact serialized UTF-8 text; lifecycle/decision types are local and do not emit API JSON.",
+      "parent": "ResponsesRecoveryEvent"
+    },
+    "ResponsesRecoveryQueueOverflow": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesRecoveryQueueOverflow",
+      "file": "lib/src/resources/responses/responses_recovery.dart",
+      "schema": null,
+      "note": "SDK-only opt-in Responses recovery helper; no REST wire schema or operation. Queue records preserve immutable exact serialized UTF-8 text; lifecycle/decision types are local and do not emit API JSON.",
+      "parent": "ResponsesRecoveryEvent"
+    },
+    "ResponsesRecoveryDeliveryUnknown": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesRecoveryDeliveryUnknown",
+      "file": "lib/src/resources/responses/responses_recovery.dart",
+      "schema": null,
+      "note": "SDK-only opt-in Responses recovery helper; no REST wire schema or operation. Queue records preserve immutable exact serialized UTF-8 text; lifecycle/decision types are local and do not emit API JSON.",
+      "parent": "ResponsesRecoveryEvent"
+    },
+    "ResponsesSendQueueOverflowException": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesSendQueueOverflowException",
+      "file": "lib/src/resources/responses/responses_recovery.dart",
+      "schema": null,
+      "note": "SDK-only opt-in Responses recovery helper; no REST wire schema or operation. Queue records preserve immutable exact serialized UTF-8 text; lifecycle/decision types are local and do not emit API JSON."
+    },
+    "ResponsesDeliveryUnknownException": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesDeliveryUnknownException",
+      "file": "lib/src/resources/responses/responses_recovery.dart",
+      "schema": null,
+      "note": "SDK-only opt-in Responses recovery helper; no REST wire schema or operation. Queue records preserve immutable exact serialized UTF-8 text; lifecycle/decision types are local and do not emit API JSON."
+    },
+    "ResponsesRecoveryClosed": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesRecoveryClosed",
+      "file": "lib/src/resources/responses/responses_recovery.dart",
+      "schema": null,
+      "note": "SDK-only opt-in Responses recovery helper; no REST wire schema or operation. Queue records preserve immutable exact serialized UTF-8 text; lifecycle/decision types are local and do not emit API JSON.",
+      "parent": "ResponsesRecoveryEvent"
+    },
+    "ResponsesRecovery": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesRecovery",
+      "file": "lib/src/resources/responses/responses_recovering_websocket.dart",
+      "schema": null,
+      "note": "SDK-only opt-in Responses recovery helper; no REST wire schema or operation. Queue records preserve immutable exact serialized UTF-8 text; lifecycle/decision types are local and do not emit API JSON."
+    },
+    "ResponsesRecoveringWebSocket": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesRecoveringWebSocket",
+      "file": "lib/src/resources/responses/responses_recovering_websocket.dart",
+      "schema": null,
+      "note": "SDK-only opt-in Responses recovery helper; no REST wire schema or operation. Queue records preserve immutable exact serialized UTF-8 text; lifecycle/decision types are local and do not emit API JSON."
     }
   }
 }
