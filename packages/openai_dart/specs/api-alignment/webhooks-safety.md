@@ -4,7 +4,8 @@ Status: independently reviewed specification; receiver implemented/verified with
 Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) merged October 8, 2026 at `886659c3c11cbee89335788ba918eeecd528fce0` after green CI.
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Scope: four independently demonstrable implementation tickets, repository 20–23.
-Receiver [acceptance evidence](reviews/20-webhook-receiver.md) records the first
+Receiver [PR #362](https://github.com/davidmigloz/ai_clients_dart/pull/362) and
+[acceptance evidence](reviews/20-webhook-receiver.md) records the first
 implementation. The planning PR itself contains no runtime implementation.
 
 ## Outcome and boundaries

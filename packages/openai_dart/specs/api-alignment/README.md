@@ -210,7 +210,7 @@ and later-family gaps stay in the inventory.
 The [Webhooks and safety specification](webhooks-safety.md) records 17 requirement
 IDs, exact received/subscription inventories, signature policy, permission and
 error-shape boundaries. [Planning review](reviews/20-webhooks-safety-planning.md)
-records independent source/architecture checks. Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) merged October 8, 2026 at `886659c3c11cbee89335788ba918eeecd528fce0` after green CI. Receiver #357 is implemented and independently verified, with merge pending.
+records independent source/architecture checks. Planning [PR #361](https://github.com/davidmigloz/ai_clients_dart/pull/361) merged October 8, 2026 at `886659c3c11cbee89335788ba918eeecd528fce0` after green CI. Receiver #357 is implemented and independently verified in [PR #362](https://github.com/davidmigloz/ai_clients_dart/pull/362), with merge pending.
 Its [acceptance evidence](reviews/20-webhook-receiver.md) records runtime checks.
 Endpoint management, safety retrieval and monitoring errors remain specified
 with implementation pending.
