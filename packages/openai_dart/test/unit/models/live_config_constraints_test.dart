@@ -25,6 +25,154 @@ LiveClientConfigParam _client() =>
     LiveClientConfigParam(dataChannel: LiveDataChannelConfigParam());
 
 void main() {
+  group('Finite typed Live integers across runtimes', () {
+    final fixtures =
+        <
+          ({
+            String name,
+            String key,
+            int finite,
+            Map<String, dynamic> json,
+            Object Function(dynamic) create,
+            Object Function(dynamic) copy,
+            Object Function(Map<String, dynamic>) parse,
+            bool copyAcceptsObject,
+          })
+        >[
+          (
+            name: 'startup backend tokens',
+            key: 'max_output_tokens',
+            finite: 16,
+            json: {'model': 'backend-future', 'max_output_tokens': 16},
+            create: (dynamic value) =>
+                LiveResponsesDelegationSettingsInputParam(
+                  model: 'backend-future',
+                  maxOutputTokens: value,
+                ).toJson(),
+            copy: (dynamic value) => LiveResponsesDelegationSettingsInputParam(
+              model: 'backend-future',
+            ).copyWith(maxOutputTokens: value).toJson(),
+            parse: (json) => LiveResponsesDelegationSettingsInputParam.fromJson(
+              json,
+            ).toJson(),
+            copyAcceptsObject: true,
+          ),
+          (
+            name: 'update backend tokens',
+            key: 'max_output_tokens',
+            finite: 16,
+            json: {'max_output_tokens': 16},
+            create: (dynamic value) =>
+                LiveResponsesDelegationSettingsUpdateInputParam(
+                  maxOutputTokens: value,
+                ).toJson(),
+            copy: (dynamic value) =>
+                LiveResponsesDelegationSettingsUpdateInputParam()
+                    .copyWith(maxOutputTokens: value)
+                    .toJson(),
+            parse: (json) =>
+                LiveResponsesDelegationSettingsUpdateInputParam.fromJson(
+                  json,
+                ).toJson(),
+            copyAcceptsObject: true,
+          ),
+          (
+            name: 'resolved snapshot expiry',
+            key: 'expires_at',
+            finite: -1,
+            json: {
+              'model': 'live-future',
+              'id': _private,
+              'expires_at': -1,
+              'status': 'active',
+            },
+            create: (dynamic value) => LiveSessionResourceParam(
+              model: 'live-future',
+              id: _private,
+              expiresAt: value,
+            ).toJson(),
+            copy: (dynamic value) => LiveSessionResourceParam(
+              model: 'live-future',
+              id: _private,
+              expiresAt: 1,
+            ).copyWith(expiresAt: value).toJson(),
+            parse: (json) => LiveSessionResourceParam.fromJson(json).toJson(),
+            copyAcceptsObject: false,
+          ),
+          (
+            name: 'PCM sample rate',
+            key: 'rate',
+            finite: 16000,
+            json: {'type': 'audio/pcm', 'rate': 16000},
+            create: (dynamic value) =>
+                LiveSessionAudioFormatPCMParam(rate: value).toJson(),
+            copy: (dynamic value) => LiveSessionAudioFormatPCMParam(
+              rate: 16000,
+            ).copyWith(rate: value).toJson(),
+            parse: (json) =>
+                LiveSessionAudioFormatPCMParam.fromJson(json).toJson(),
+            copyAcceptsObject: false,
+          ),
+          (
+            name: 'PCMA sample rate',
+            key: 'rate',
+            finite: 8000,
+            json: {'type': 'audio/pcma', 'rate': 8000},
+            create: (dynamic value) =>
+                LiveSessionAudioFormatPCMAParam(rate: value).toJson(),
+            copy: (dynamic value) => LiveSessionAudioFormatPCMAParam(
+              rate: 8000,
+            ).copyWith(rate: value).toJson(),
+            parse: (json) =>
+                LiveSessionAudioFormatPCMAParam.fromJson(json).toJson(),
+            copyAcceptsObject: false,
+          ),
+          (
+            name: 'PCMU sample rate',
+            key: 'rate',
+            finite: 8000,
+            json: {'type': 'audio/pcmu', 'rate': 8000},
+            create: (dynamic value) =>
+                LiveSessionAudioFormatPCMUParam(rate: value).toJson(),
+            copy: (dynamic value) => LiveSessionAudioFormatPCMUParam(
+              rate: 8000,
+            ).copyWith(rate: value).toJson(),
+            parse: (json) =>
+                LiveSessionAudioFormatPCMUParam.fromJson(json).toJson(),
+            copyAcceptsObject: false,
+          ),
+        ];
+    for (final fixture in fixtures) {
+      for (final text in ['Infinity', '-Infinity', 'NaN']) {
+        test('${fixture.name} rejects dynamically parsed $text', () {
+          // JavaScript represents Infinity as an int; VM/Wasm reject the
+          // dynamic double at a typed int boundary before validation runs.
+          final dynamic value = num.parse(text);
+          final constructorError = value is int
+              ? _safeError(fixture.key)
+              : isA<TypeError>();
+          expect(() => fixture.create(value), throwsA(constructorError));
+          expect(
+            () => fixture.copy(value),
+            throwsA(
+              fixture.copyAcceptsObject
+                  ? _safeError(fixture.key)
+                  : constructorError,
+            ),
+          );
+          expect(
+            () => fixture.parse({...fixture.json, fixture.key: value}),
+            throwsA(_safeError(fixture.key)),
+          );
+        });
+      }
+      test('${fixture.name} retains finite constructor/copy/parser wire', () {
+        expect(fixture.create(fixture.finite), fixture.json);
+        expect(fixture.copy(fixture.finite), fixture.json);
+        expect(fixture.parse(fixture.json), fixture.json);
+      });
+    }
+  });
   group('WebSocket audio encodings', () {
     for (final rate in [16000, 24000]) {
       test('PCM exact $rate rate and dispatcher', () {

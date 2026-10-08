@@ -760,7 +760,7 @@ class LiveResponsesDelegationSettingsInputParam extends LiveJsonModel {
   @override
   void validate() {
     if (maxOutputTokens != null) {
-      if (maxOutputTokens! < 16) {
+      if (!maxOutputTokens!.isFinite || maxOutputTokens! < 16) {
         throw const FormatException(
           'LiveResponsesDelegationSettingsInputParam.max_output_tokens: unsupported integer value',
         );
@@ -1084,7 +1084,7 @@ class LiveResponsesDelegationSettingsUpdateInputParam extends LiveJsonModel {
   @override
   void validate() {
     if (maxOutputTokens != null) {
-      if (maxOutputTokens! < 16) {
+      if (!maxOutputTokens!.isFinite || maxOutputTokens! < 16) {
         throw const FormatException(
           'LiveResponsesDelegationSettingsUpdateInputParam.max_output_tokens: unsupported integer value',
         );

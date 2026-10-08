@@ -463,6 +463,82 @@ void main() {
     );
   });
 
+  group('runtime nonfinite tool admission across numeric backends', () {
+    for (final literal in ['Infinity', '-Infinity', 'NaN']) {
+      test('runtime $literal cannot replace the nullable string version', () {
+        final dynamic value = num.parse(literal);
+        expect((value as num).isFinite, isFalse);
+        _expectSafeFailure(
+          () => LiveSkillReference(skillId: 'x', version: value),
+          'version',
+        );
+        _expectSafeFailure(
+          () => LiveSkillReference.fromJson({
+            'type': 'skill_reference',
+            'skill_id': 'x',
+            'version': value,
+          }),
+          'version',
+        );
+        _expectSafeFailure(
+          () => LiveSkillReference(skillId: 'x').copyWith(version: value),
+          'version',
+        );
+      });
+      test('runtime $literal cannot replace typed nullable tool controls', () {
+        final dynamic value = num.parse(literal);
+        <void Function()>[
+          () => LiveFunctionTool(name: '', description: value),
+          () => LiveFunctionTool(name: '').copyWith(description: value),
+          () => LiveFunctionTool(name: '', strict: value),
+          () => LiveFunctionTool(name: '').copyWith(strict: value),
+          () => LiveFunctionTool(name: '', parameters: value),
+          () => LiveFunctionTool(name: '').copyWith(parameters: value),
+          () => LiveHostedShellTool(environment: value),
+          () => LiveHostedShellTool().copyWith(environment: value),
+          () => LiveHostedShellContainerAuto(fileIds: value),
+          () => LiveHostedShellContainerAuto().copyWith(fileIds: value),
+          () => LiveHostedShellContainerAuto(memoryLimit: value),
+          () => LiveHostedShellContainerAuto().copyWith(memoryLimit: value),
+          () => LiveHostedShellContainerAuto(networkPolicy: value),
+          () => LiveHostedShellContainerAuto().copyWith(networkPolicy: value),
+          () => LiveHostedShellContainerAuto(skills: value),
+          () => LiveHostedShellContainerAuto().copyWith(skills: value),
+          () => LiveLocalEnvironment(skills: value),
+          () => LiveLocalEnvironment().copyWith(skills: value),
+          () => LiveMCPToolChoice(serverLabel: '', name: value),
+          () => LiveMCPToolChoice(serverLabel: '').copyWith(name: value),
+          () => LiveAllowedToolsChoice(
+            tools: [LiveSpecificFileSearch()],
+            mode: value,
+          ),
+          () => LiveAllowedToolsChoice(
+            tools: [LiveSpecificFileSearch()],
+          ).copyWith(mode: value),
+        ].forEach(_expectSafeFailure);
+      });
+      test('runtime $literal cannot enter any open tool snapshot by copy', () {
+        final dynamic value = num.parse(literal);
+        for (final fixture in _fixtures) {
+          _expectSafeFailure(
+            () => fixture.copyRaw(fixture.parse(fixture.complete), {
+              _secret: value,
+            }),
+          );
+        }
+        _expectSafeFailure(
+          () => LiveFunctionTool(name: '', parameters: {_secret: value}),
+          'parameters',
+        );
+        _expectSafeFailure(
+          () =>
+              LiveFunctionTool(name: '').copyWith(parameters: {_secret: value}),
+          'parameters',
+        );
+      });
+    }
+  });
+
   group('exact container and choice boundaries', () {
     for (final length in [0, 1, 50]) {
       test('file ids accepts $length immutable entries', () {

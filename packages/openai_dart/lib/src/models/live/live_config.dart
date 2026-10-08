@@ -655,6 +655,7 @@ class LiveSessionResourceParam extends LiveJsonModel {
 
   @override
   void validate() {
+    requireLiveInt(expiresAt, 'LiveSessionResourceParam.expires_at');
     validateLiveLength(model, 'LiveSessionResourceParam.model', min: 1);
     audio?.validate();
     client?.validate();
