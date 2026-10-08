@@ -136,3 +136,21 @@ handling/delivery identity before final freeze. Reviewers also independently
 confirmed the toolkit classifications. Final PR/CI status is recorded separately;
 #357 remains open until implementation merge. Next independent slice is #358;
 #359 and #360 retain their explicit dependency order.
+
+## GitHub secret-scanning follow-up
+
+[Alert #1](https://github.com/davidmigloz/ai_clients_dart/security/secret-scanning/1)
+matched a partial prefix of the public synthetic golden test key in two receiver
+unit-test files. Independent exact-value/hash comparisons locate the same full
+fixture in [official Python tests](https://github.com/openai/openai-python/blob/9301e319ea33ef28fba380f39a289dedc14652c1/tests/lib/test_webhooks.py#L22)
+and [official Node tests](https://github.com/openai/openai-node/blob/bc6c0bfb70f253d5caa3f335699e9713ea9067b5/tests/api-resources/webhooks.test.ts#L20).
+The alert is resolved as `used_in_tests`; it does not implicate a repository
+deployment credential. No production validation, rotation or history rewrite
+was performed.
+
+Both tests now reference a documented public Base64 key and reconstruct the
+protocol-prefixed fixture. The exact runtime key and all signed golden receipt
+bytes remain unchanged; no scanning rule is disabled. All 170 affected verifier/
+public-wrapper cases pass again on VM, real Chrome JavaScript and Wasm, with
+format/fix/fatal-info analysis clean. Independent review approves provenance and
+fixture preservation. Final CI is rechecked after the follow-up commit before merge.
