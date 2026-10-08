@@ -60,7 +60,8 @@
     "images": "images_example",
     "moderations": "moderation_example",
     "realtimeSessions": "realtime",
-    "decisions": "decisions_example"
+    "decisions": "decisions_example",
+    "webhooks": "webhooks_example"
   },
   "excluded_from_examples": [],
   "drift_patterns": [

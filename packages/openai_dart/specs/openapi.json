@@ -88255,17 +88255,16 @@
         "operationId": "listAgents",
         "parameters": [
           {
-            "description": "The maximum number of resources to return.",
+            "description": "The maximum number of resources to return, between 1 and 100. Defaults to 20.",
             "in": "query",
             "name": "limit",
             "required": false,
             "schema": {
+              "default": 20,
               "format": "int64",
+              "maximum": 100,
               "minimum": 1,
-              "type": [
-                "integer",
-                "null"
-              ]
+              "type": "integer"
             }
           },
           {
@@ -89383,21 +89382,20 @@
         "operationId": "listAgentSessions",
         "parameters": [
           {
-            "description": "The maximum number of resources to return.",
+            "description": "The maximum number of resources to return, between 1 and 100. Defaults to 20.",
             "in": "query",
             "name": "limit",
             "required": false,
             "schema": {
+              "default": 20,
               "format": "int64",
+              "maximum": 100,
               "minimum": 1,
-              "type": [
-                "integer",
-                "null"
-              ]
+              "type": "integer"
             }
           },
           {
-            "description": "Sort order by the `created_at` timestamp. Use `asc` for ascending order or `desc` for descending order. Defaults to `desc`.",
+            "description": "The order in which resources are returned. Defaults to `desc`.",
             "in": "query",
             "name": "order",
             "required": false,
@@ -89407,9 +89405,9 @@
             }
           },
           {
-            "description": "Only return sessions whose root agent has this ID. Omit to return sessions for all agents.",
+            "description": "Return resources after this resource ID in the selected order.",
             "in": "query",
-            "name": "agent_id",
+            "name": "after",
             "required": false,
             "schema": {
               "maxLength": 1048576,
@@ -89418,9 +89416,9 @@
             }
           },
           {
-            "description": "Return resources after this resource ID in the selected order.",
+            "description": "Only return sessions whose root agent has this ID. Omit to return sessions for all agents.",
             "in": "query",
-            "name": "after",
+            "name": "agent_id",
             "required": false,
             "schema": {
               "maxLength": 1048576,
@@ -89973,47 +89971,43 @@
             }
           },
           {
-            "description": "Sort by creation time and ID. Defaults to descending.",
+            "description": "The maximum number of resources to return, between 1 and 100. Defaults to 20.",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int64",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "The order in which resources are returned. Defaults to `desc`.",
             "in": "query",
             "name": "order",
             "required": false,
             "schema": {
-              "$ref": "#/components/schemas/ListOrderParam"
+              "$ref": "#/components/schemas/ListOrderParam",
+              "default": "desc"
+            }
+          },
+          {
+            "description": "Return resources after this resource ID in the selected order.",
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "maxLength": 1048576,
+              "minLength": 0,
+              "type": "string"
             }
           },
           {
             "description": "Restrict the listing to artifacts produced by this environment.",
             "in": "query",
             "name": "environment_id",
-            "required": false,
-            "schema": {
-              "maxLength": 1048576,
-              "minLength": 0,
-              "type": [
-                "string",
-                "null"
-              ]
-            }
-          },
-          {
-            "description": "The maximum number of artifacts to return, between 1 and 100.",
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "format": "int64",
-              "maximum": 100,
-              "minimum": 1,
-              "type": [
-                "integer",
-                "null"
-              ]
-            }
-          },
-          {
-            "description": "Return artifacts after this immutable artifact ID.",
-            "in": "query",
-            "name": "after",
             "required": false,
             "schema": {
               "maxLength": 1048576,
@@ -117371,6 +117365,40 @@
         "operationId": "listVaults",
         "parameters": [
           {
+            "description": "The maximum number of resources to return, between 1 and 100. Defaults to 20.",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int64",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "The order in which resources are returned. Defaults to `desc`.",
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ListOrderParam",
+              "default": "desc"
+            }
+          },
+          {
+            "description": "Return resources after this resource ID in the selected order.",
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "maxLength": 1048576,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
             "description": "Exact string matches supplied as `metadata[key]=value`. All supplied pairs must match. Up to 16 pairs, with keys from 1 to 64 characters and values up to 512 characters. Filtering is eventually consistent; metadata changes may take time to appear.",
             "explode": true,
             "in": "query",
@@ -117394,47 +117422,12 @@
             "style": "deepObject"
           },
           {
-            "description": "Sort order by the `created_at` timestamp. Use `asc` for ascending order or `desc` for descending order. Defaults to `desc`.",
-            "in": "query",
-            "name": "order",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/ListOrderParam",
-              "default": "desc"
-            }
-          },
-          {
-            "description": "The maximum number of resources to return. Defaults to 20. Values are clamped between 1 and 100.",
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "format": "int64",
-              "minimum": 0,
-              "type": [
-                "integer",
-                "null"
-              ]
-            }
-          },
-          {
             "description": "Filter by one status or a list, such as `status=active` or `status[]=active&status[]=archived`. Both statuses are included by default.",
             "in": "query",
             "name": "status",
             "required": false,
             "schema": {
               "$ref": "#/components/schemas/VaultStatusFilterParam"
-            }
-          },
-          {
-            "description": "Return resources after this resource ID in the selected order.",
-            "in": "query",
-            "name": "after",
-            "required": false,
-            "schema": {
-              "maxLength": 1048576,
-              "minLength": 0,
-              "type": "string"
             }
           }
         ],
@@ -117964,6 +117957,40 @@
             }
           },
           {
+            "description": "The maximum number of resources to return, between 1 and 100. Defaults to 20.",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int64",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "The order in which resources are returned. Defaults to `desc`.",
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ListOrderParam",
+              "default": "desc"
+            }
+          },
+          {
+            "description": "Return resources after this resource ID in the selected order.",
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "maxLength": 1048576,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
             "description": "Exact string matches supplied as `metadata[key]=value`. All supplied pairs must match. Up to 16 pairs, with keys from 1 to 64 characters and values up to 512 characters. Filtering is eventually consistent; metadata changes may take time to appear.",
             "explode": true,
             "in": "query",
@@ -117987,47 +118014,12 @@
             "style": "deepObject"
           },
           {
-            "description": "Sort order by the `created_at` timestamp. Use `asc` for ascending order or `desc` for descending order. Defaults to `desc`.",
-            "in": "query",
-            "name": "order",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/ListOrderParam",
-              "default": "desc"
-            }
-          },
-          {
-            "description": "The maximum number of resources to return. Defaults to 20. Values are clamped between 1 and 100.",
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "format": "int64",
-              "minimum": 0,
-              "type": [
-                "integer",
-                "null"
-              ]
-            }
-          },
-          {
             "description": "Filter by one status or a list, such as `status=active` or `status[]=active&status[]=archived`. Both statuses are included by default.",
             "in": "query",
             "name": "status",
             "required": false,
             "schema": {
               "$ref": "#/components/schemas/VaultStatusFilterParam"
-            }
-          },
-          {
-            "description": "Return resources after this resource ID in the selected order.",
-            "in": "query",
-            "name": "after",
-            "required": false,
-            "schema": {
-              "maxLength": 1048576,
-              "minLength": 0,
-              "type": "string"
             }
           }
         ],

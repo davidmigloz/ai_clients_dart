@@ -55,6 +55,8 @@
 - [input_tokens_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/input_tokens_example.dart) (~487 tokens): Input token counting.
 - [openai_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/openai_dart_example.dart) (~577 tokens): Quick-start overview.
 
+- [webhooks_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/webhooks_example.dart): Offline signed receiver with original-byte verification, typed events, prompt acknowledgment and application-owned deduplication; no API key or charges.
+
 ## Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_dart): Source tree, pubspec, and package-local files.

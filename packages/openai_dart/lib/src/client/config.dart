@@ -97,6 +97,7 @@ class OpenAIConfig {
     this.apiVersion,
     this.organization,
     this.project,
+    this.webhookSecret,
   });
 
   /// Creates an [OpenAIConfig] using runtime environment variables.
@@ -106,6 +107,10 @@ class OpenAIConfig {
   /// - `OPENAI_BASE_URL` for a custom base URL
   /// - `OPENAI_ORG_ID` for the organization ID
   /// - `OPENAI_PROJECT_ID` for the project ID
+  /// - `OPENAI_WEBHOOK_SECRET` for local signature verification
+  ///
+  /// A receiver that needs only a webhook secret can use
+  /// `WebhookVerifier.fromEnvironment()` without an API key.
   ///
   /// All environment variables are read at runtime via [getEnvironmentVariable],
   /// consistent with [ApiKeyProvider.fromEnvironment].
@@ -116,6 +121,7 @@ class OpenAIConfig {
     final baseUrl = getEnvironmentVariable('OPENAI_BASE_URL');
     final orgId = getEnvironmentVariable('OPENAI_ORG_ID');
     final projectId = getEnvironmentVariable('OPENAI_PROJECT_ID');
+    final webhookSecret = getEnvironmentVariable('OPENAI_WEBHOOK_SECRET');
 
     return OpenAIConfig(
       authProvider: ApiKeyProvider.fromEnvironment(),
@@ -124,6 +130,9 @@ class OpenAIConfig {
           : 'https://api.openai.com/v1',
       organization: (orgId != null && orgId.isNotEmpty) ? orgId : null,
       project: (projectId != null && projectId.isNotEmpty) ? projectId : null,
+      webhookSecret: (webhookSecret != null && webhookSecret.isNotEmpty)
+          ? webhookSecret
+          : null,
     );
   }
 
@@ -206,6 +215,12 @@ class OpenAIConfig {
   /// If set, this is included as the `OpenAI-Project` header.
   final String? project;
 
+  /// Signing secret for local webhook verification.
+  ///
+  /// This is never sent with outbound API requests. Per-call secrets override
+  /// this value; explicit empty secrets fail rather than falling back.
+  final String? webhookSecret;
+
   /// Creates a copy of this configuration with the given fields replaced.
   ///
   /// To clear a nullable field, pass `null` explicitly. Fields not provided
@@ -221,6 +236,7 @@ class OpenAIConfig {
     Object? apiVersion = _unset,
     Object? organization = _unset,
     Object? project = _unset,
+    Object? webhookSecret = _unset,
   }) {
     return OpenAIConfig(
       authProvider: _resolveField<AuthProvider>(
@@ -245,6 +261,15 @@ class OpenAIConfig {
         this.organization,
       ),
       project: _resolveField<String>(project, 'project', this.project),
+      webhookSecret: _resolveWebhookSecret(webhookSecret),
+    );
+  }
+
+  String? _resolveWebhookSecret(Object? value) {
+    if (identical(value, _unset)) return webhookSecret;
+    if (value == null || value is String) return value as String?;
+    throw ArgumentError(
+      'OpenAIConfig.copyWith: webhookSecret must be a String or null.',
     );
   }
 
@@ -280,7 +305,8 @@ class OpenAIConfig {
         _mapEquals(other.defaultHeaders, defaultHeaders) &&
         other.apiVersion == apiVersion &&
         other.organization == organization &&
-        other.project == project;
+        other.project == project &&
+        other.webhookSecret == webhookSecret;
   }
 
   @override
@@ -298,7 +324,12 @@ class OpenAIConfig {
     apiVersion,
     organization,
     project,
+    webhookSecret,
   );
+
+  @override
+  String toString() =>
+      'OpenAIConfig(webhookSecret: ${webhookSecret == null ? 'not configured' : '[REDACTED]'})';
 
   bool _mapEquals(Map<String, String> a, Map<String, String> b) {
     if (a.length != b.length) return false;
