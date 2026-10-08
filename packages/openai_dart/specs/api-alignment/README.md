@@ -193,30 +193,52 @@ wire changes. Unchanged source does not establish complete implementation parity
 | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) ([16](tickets/16-responses-websocket.md)) | Persistent WS sessions, envelopes and named lanes | Merged in #353 |
 | [#342](https://github.com/davidmigloz/ai_clients_dart/issues/342) ([17](tickets/17-responses-steering.md)) | Safe mid-turn steering and continuation | Merged in #354 |
 | [#343](https://github.com/davidmigloz/ai_clients_dart/issues/343) ([18](tickets/18-websocket-recovery.md)) | Opt-in reconnect and bounded unsent queue | Merged in #355 |
-| [#344](https://github.com/davidmigloz/ai_clients_dart/issues/344) ([19](tickets/19-websocket-injection.md)) | Beta multi-agent tool-result injection | [#341](https://github.com/davidmigloz/ai_clients_dart/issues/341) |
+| [#344](https://github.com/davidmigloz/ai_clients_dart/issues/344) ([19](tickets/19-websocket-injection.md)) | Beta multi-agent tool-result injection | Merged in #356 |
 
 Async tools, configuration updates, web search, shell, compaction progress,
 access programs, tool search #340, Responses WebSocket sessions #341, steering
 #342 and recovery #343 are merged after green CI. Beta injection #344 is
-implemented, verified and independently reviewed; Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) is open for review. Each ticket includes an offline
+merged in [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) after green CI. Each ticket includes an offline
 example, public fixtures, documentation and independent review. All eleven
 Phase 3 tickets are native sub-issues of #317. These specified slices do not
 establish complete WebSocket or Responses SDK parity; remaining shared model
 and later-family gaps stay in the inventory.
 
+
+## Phase 4
+
+The [Webhooks and safety specification](webhooks-safety.md) records 17 requirement
+IDs, exact received/subscription inventories, signature policy, permission and
+error-shape boundaries. [Planning review](reviews/20-webhooks-safety-planning.md)
+records independent source/architecture checks. These tickets are specified;
+implementation and runtime acceptance remain pending.
+
+| Ticket | Demonstrable outcome | Prerequisite |
+| --- | --- | --- |
+| [20](tickets/20-webhook-receiver.md) | Verify original bytes and parse 26 source-backed webhook variants | None |
+| [21](tickets/21-webhook-endpoints.md) | Manage endpoints, signing secrets, tests and event-type discovery | None |
+| [22](tickets/22-safety-retrieval.md) | Explicitly retrieve project alerts/organization cases from verified notices | 20 for signed-notice example |
+| [23](tickets/23-monitoring-errors.md) | Preserve typed HTTP/failed-response monitoring details and canonical flat SSE errors | 22 for investigation example |
+
+The first receiver ticket includes verification so its example handles signed
+notifications end to end. Endpoint management remains independently usable.
+Safety detail retrieval and structured errors are separate slices. No model, API
+method, test or example is implemented by this planning change. Implementations
+will include their own public offline fixtures, complete value/copy contracts,
+README/llms/examples, migration as needed and independent reviews.
+
 ## Remaining roadmap
 
-Phases 1–2 are complete. Phase 3 has its specification/tickets above; its final
-injection slice is implemented, verified and independently reviewed; Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) is open for review.
-Later phases remain candidate outcomes pending detailed specifications. Keep
-all audited gaps visible even when deferred.
+Phases 1–3 are complete for their specified tickets. Phase 4 has its own
+specification/ticket slices above. Later phases remain candidate outcomes pending
+detailed specifications. Keep all audited gaps visible even when deferred.
 
 | Phase | Demonstrable outcomes | Dependencies and scope notes |
 | --- | --- | --- |
 | 1. Decisions | Create typed decisions from text and inline images; receive predicate, choice, score, and refusal answers with complete usage | Merged in #319/#318 |
 | 2. Existing API correctness | Correct container wire formats; preserve cache diagnostics, token details, Chat audio chunks, and retry guidance | All tickets merged in #327–#333; shared cache-write usage included in Decisions |
-| 3. Responses capabilities | Use async tools, reasoning configuration updates, GA web search controls/results, hosted shell, and Responses WebSocket steering | Specified above; transport precedes steering/recovery/injection, container dependency merged |
-| 4. Webhooks and safety | Verify and parse signed events; manage webhook endpoints; retrieve safety alerts/cases and preserve monitoring details | Event parsing/verification is independently useful; supports later Agents and Live workflows |
+| 3. Responses capabilities | Use async tools, reasoning configuration updates, GA web search controls/results, hosted shell, and Responses WebSocket steering | All eleven specified tickets merged in #346–#356; remaining shared gaps inventoried |
+| 4. Webhooks and safety | Verify and parse signed events; manage webhook endpoints; retrieve safety alerts/cases and preserve monitoring details | Specified above; signed receiver first, independent endpoint lifecycle, safety retrieval then structured errors |
 | 5. Audio and Live | Generate speech with current voice/options; create custom voices; run a Live session and delegation workflows | Separate ordinary speech from Live; custom voice creation requires an audio sample and consent |
 | 6. Agents and vaults | Run a durable session; handle tools, environments, artifacts, credentials, subagents, traces, and browser approvals | Slice around working session behaviors; browser approvals build on the basic session/event loop |
 | Throughout | Truthful API coverage, current examples, model capability guidance, and sunset notices | Accompany each relevant ticket; do not claim full coverage prematurely |
@@ -264,7 +286,7 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
 - Responses WebSocket transport #341 merged in #353. Typed steering #342 is
   merged after green CI in [PR #354](https://github.com/davidmigloz/ai_clients_dart/pull/354). Opt-in
   recovery #343 merged in #355; beta injection #344 is implemented, verified and
-  independently reviewed with merge pending in [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356).
+  merged after green CI in [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356).
 - Injection retains the legacy shared `Item` request codec: some generated input
   variants are unsupported, known extra fields may be trimmed and nested defaults/
   collection ownership remain legacy behavior. Full generated input-union parity
@@ -326,7 +348,7 @@ Sources: [cache diagnostics](https://developers.openai.com/api/docs/guides/promp
 [shell](https://developers.openai.com/api/docs/guides/tools-shell),
 [errors](https://developers.openai.com/api/docs/guides/error-codes).
 
-- Fresh Node main `534e691da6979e75c17a14bc04f1daff81fdbeef` (still 7.30.0)
+- Earlier reviewed Node main `534e691da6979e75c17a14bc04f1daff81fdbeef` (still 7.30.0)
   adds structured-output parsing only for absent/null/final_answer message phases.
   Its WebSocket/recovery sources are unchanged. Dart has no equivalent Responses
   `outputParsed`/structured-output parser helper; this SDK convenience gap remains
@@ -337,10 +359,24 @@ Sources: [cache diagnostics](https://developers.openai.com/api/docs/guides/promp
 - Agents: 35 operations covering agents, environments, durable sessions,
   events, artifacts, items, subagents, turns, and traces. Browser use adds
   website approvals and authentication responses.
+- Fresh OpenAPI 506aff0a changes pagination parameters on five Agents/Vault lists:
+  agents, sessions, session artifacts, vaults and vault credentials. Supplied limits
+  are nonnull integers 1–100 with default 20; parameter-order/description changes are
+  also reviewed. No schemas or Phase 4 routes changed. Toolkit review missed the
+  parameter delta; independent normalized comparison records it for Phase 6.
 - Vaults: ten credential/vault operations, including credential networking,
   environment-variable secrets, metadata, and rotation.
 - Live: seven HTTP operations plus transport/event and delegation support.
-- Safety: alert/case retrieval and structured monitoring details.
+- Safety: project alert/organization case retrieval and structured monitoring
+  details are specified in Phase 4. Enterprise workspace alert notifications are
+  included in its receiver, while api.chatgpt.com administrator-key lookup with
+  chatgpt.enterprise.safety_alerts.read remains in Phase 7 administration inventory.
+  No silent project-key routing or unsupported workspace-response guarantee.
+- Video Error-2 headers/misalignment and shared inline-stream error/logging fidelity
+  remain in media/shared-utility inventory; they do not define failed ResponseError.
+- Python-only safety_identifier.blocked is absent from canonical/Node/unwrap unions;
+  video event subscriptions lack typed inbound schemas. Phase 4 preserves those
+  received values as unknown raw events until authoritative shapes are established.
 - Webhooks: seven endpoint operations, event-type listing, typed events, and
   signature verification.
 - Audio: speech instructions and streaming, additional built-in/custom voices,
@@ -467,7 +503,7 @@ checks pass 11,262 tests/two existing skips with clean formatting/fix/analysis.
 The exact README wrapper compiles and the offline four-write example costs $0.
 Independent requirements and engineering reviews approve the combined diff.
 Full toolkit diagnostic sets remain exactly unchanged; no exclusions were added.
-Implementation [PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) merged after green CI, closing #343. Beta injection #344 is in progress.
+Implementation [PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) merged after green CI, closing #343. Beta injection #344 merged in PR #356.
 
 
 Injection #344 [acceptance evidence](reviews/19-websocket-injection.md) records
@@ -479,6 +515,6 @@ format unchanged; fix/fatal-info analysis and the offline $0 example pass. Liter
 README/migration snippets compile. Requirements and cross-author engineering
 reviews approve the final diff. Toolkit diagnostics remain visible with a
 classified delegated-serializer/value-scanner delta; no exclusions were added.
-Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) is open for review; close #344 only after merge. Once merged, all eleven
-specified Phase 3 tickets are complete. Phase 4 Webhooks/safety is the next
-specification and ticket-planning milestone; remaining parity inventory persists.
+Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) merged October 8, 2026 at `1e63d6b93bdf0028eb6925d45371b1f36deb5d7b`, closing #344, after all applicable final-head checks passed (14 contexts completed: 13 successes and the standard Test(all) skip).
+All eleven specified Phase 3 implementation tickets are merged. Phase 4 now has
+its own specification/tickets; remaining parity inventory persists.

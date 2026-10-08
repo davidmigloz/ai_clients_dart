@@ -522,7 +522,7 @@ Recovery #343 is implemented, verified and independently reviewed;
 policy choices, 104 new VM/Chrome JavaScript/Wasm cases, 11,262 package tests
 (two existing skips), clean package quality and unchanged toolkit diagnostics.
 The literal README wrapper and offline four-write example pass for $0.
-Implementation [PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) merged after green CI, closing #343. #344 is in progress.
+Implementation [PR #355](https://github.com/davidmigloz/ai_clients_dart/pull/355) merged after green CI, closing #343. #344 merged in PR #356.
 
 ## Multi-agent WebSocket injection
 
@@ -548,7 +548,7 @@ are the starting point; add faithful envelopes and actual transport wiring.
 
 ### Injection implementation
 
-#344 is implemented, verified and independently reviewed; Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) is open for review.
+#344 is complete. Implementation [PR #356](https://github.com/davidmigloz/ai_clients_dart/pull/356) merged October 8, 2026 at `1e63d6b93bdf0028eb6925d45371b1f36deb5d7b`, closing #344, after all applicable final-head checks passed (14 contexts completed: 13 successes and the standard Test(all) skip).
 [Acceptance evidence](reviews/19-websocket-injection.md) records exact beta
 handshake/request projection, typed created/failed acknowledgments, raw failed
 input and unknown-code preservation, multiple outstanding injections and late
@@ -562,7 +562,7 @@ All 512 Dart files format unchanged, fix applies nothing and fatal-info analysis
 passes. The literal README/migration snippets compile and the offline example
 costs $0. Full toolkit delta is independently classified with unrelated gaps
 visible and no exclusions. Requirements and cross-author engineering reviews
-approve the final combined implementation. Close #344 only after merge.
+approve the final combined implementation. Phase 3 implementation tickets are merged.
 
 ## Acceptance and completion evidence
 
