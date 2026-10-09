@@ -1,6 +1,7 @@
 # Saved agent CRUD and configuration
 
-Status: active bounded milestone; implementation acceptance pending.
+Status: implemented; published-head review, CI and merge acceptance pending.
+Acceptance record: [saved-agent implementation](../reviews/33-saved-agents.md).
 GitHub: [#385](https://github.com/davidmigloz/ai_clients_dart/issues/385).
 Primary requirements: `AGENTS-CRUD-01`.
 Native GitHub blockers: none.
@@ -38,18 +39,18 @@ This ticket owns these 5 operations and their complete request/response/paramete
 
 ## Acceptance criteria
 
-- [ ] Public mock requests demonstrate create/list/retrieve/update/delete with exact paths, methods, bodies, query placement, auth context and mandatory beta-header precedence; no administrator routing is introduced.
-- [ ] Every persisted tool and MCP transport variant, text/reasoning/service-tier branch, required-nullable field, update clear/reset state, metadata boundary and tool-count/UTF-8 budget boundary has canonical serialization and malformed-input coverage.
-- [ ] The offline example completes saved-agent CRUD and pagination; it exercises an actual update clear/reset and a safe deletion result without a paid model run.
-- [ ] Public request bodies/parameters are captured through the exported client and validated against the pinned canonical contracts; the feature assertions fail against base `08f9594dc73703e521aae4cb070a0be34509642a`, rather than merely mirroring model implementation.
-- [ ] Constructor/parser/copy tests cover all owned discriminator variants, required-nullable/optional-nonnull/tri-state values, nested ownership, equality/hash with the same fields, safe diagnostics, unknown-received fallback and malformed-known errors.
-- [ ] A runnable offline example, package README and regenerated llms documentation describe the real public capability and its limits; actual implemented types have honest manifest mappings and unchanged unrelated exclusions/verifier policy.
+- [x] Public mock requests demonstrate create/list/retrieve/update/delete with exact paths, methods, bodies, query placement, auth context and mandatory beta-header precedence; no administrator routing is introduced.
+- [x] Every persisted tool and MCP transport variant, text/reasoning/service-tier branch, required-nullable field, update clear/reset state, metadata boundary and tool-count/UTF-8 budget boundary has canonical serialization and malformed-input coverage.
+- [x] The offline example completes saved-agent CRUD and pagination; it exercises an actual update clear/reset and a safe deletion result without a paid model run.
+- [x] Public request bodies/parameters are captured through the exported client and validated against the pinned canonical contracts; the feature assertions fail against base `08f9594dc73703e521aae4cb070a0be34509642a`, rather than merely mirroring model implementation.
+- [x] Constructor/parser/copy tests cover all owned discriminator variants, required-nullable/optional-nonnull/tri-state values, nested ownership, equality/hash with the same fields, safe diagnostics, unknown-received fallback and malformed-known errors.
+- [x] A runnable offline example, package README and regenerated llms documentation describe the real public capability and its limits; actual implemented types have honest manifest mappings and unchanged unrelated exclusions/verifier policy.
 - [ ] Required formatting/fixes/analysis, affected focused fixtures on VM/browser JavaScript/Wasm, and the package unit suite pass; independent requirements and engineering reviews approve the published final commit, and that exact head has green CI before a user-authorized merge.
 
 ## Source and validation evidence
 
 Wire authority is immutable OpenAPI [`0ef225c4f701046f8fe88cae9d29d0df4d1a9fa9`](https://github.com/openai/openai-openapi/blob/0ef225c4f701046f8fe88cae9d29d0df4d1a9fa9/openapi.json), normalized SHA256 `3e3ddd4f2a584f657294a0a9266ed07b1103a103a38c4dd45a008c8be5450686`. Cross-check workflow/header behavior against the [official guide](https://developers.openai.com/api/docs/guides/agents-api/configuration) and pinned [Python 3.26.1](https://github.com/openai/openai-python/tree/c511a77159bc870f31c34388311b7cc62ef15f08) / [Node 7.31.0](https://github.com/openai/openai-node/tree/37af8fc9c78bd5c4d2979c5d51870dd38964e156) clients, resolving source discrepancies as recorded in the specification. Verify these frozen pins and retain actual source/verification receipts at implementation time. New upstream changes are outside this milestone unless they block an included operation; handle those within the existing ticket or bring a scope-changing blocker to the user.
 
-All tests and examples default to deterministic mock HTTP/SSE, local servers or pure fixtures, with no live API calls, API key or paid hosted execution required ($0). Schema-only planning witnesses do not satisfy runtime acceptance. The implementation PR must record actual canonical assertions, supported-platform checks, independent review and retained toolkit diagnostics; this planning ticket claims none of those checks have already passed for a future implementation.
+All tests and examples default to deterministic mock HTTP/SSE, local servers or pure fixtures, with no live API calls, API key or paid hosted execution required ($0). Schema-only planning witnesses do not satisfy runtime acceptance. The implementation PR must record actual canonical assertions, supported-platform checks, independent review and retained toolkit diagnostics; the linked implementation acceptance record distinguishes completed local checks from pending published-head gates.
 
 Raw session creation/events, environment management, automatic tool dispatch, result collection, webhooks, and runtime configuration issue #316 remain in their own slices. No release/version bump is part of this ticket.

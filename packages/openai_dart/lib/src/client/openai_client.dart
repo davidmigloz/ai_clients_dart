@@ -6,6 +6,7 @@ import '../interceptors/auth_interceptor.dart';
 import '../interceptors/error_interceptor.dart';
 import '../interceptors/interceptor.dart';
 import '../interceptors/logging_interceptor.dart';
+import '../resources/agents_resource.dart';
 import '../resources/audio_resource.dart';
 import '../resources/batches_resource.dart';
 import '../resources/beta_resource.dart';
@@ -66,6 +67,7 @@ import 'retry_wrapper.dart';
 /// ## Resources
 ///
 /// The client provides access to the following API resources:
+/// - `agents` - Saved-agent CRUD and persisted configuration (Agents beta)
 ///
 /// - [chat] - Chat completions (GPT-4, GPT-3.5, etc.)
 /// - [completions] - Legacy text completions
@@ -264,6 +266,21 @@ class OpenAIClient {
   // ============================================================
   // Resources
   // ============================================================
+
+  AgentsResource? _agents;
+
+  /// Saved agent CRUD and configuration, using the Agents beta API.
+  ///
+  /// Creation stores configuration without starting a session or running tools.
+  /// The resource uses this client's project, authentication and HTTP policy.
+  AgentsResource get agents => _agents ??= AgentsResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+    streamClientFactory: _streamClientFactory,
+  );
 
   ChatResource? _chat;
 

@@ -46,6 +46,7 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 
 ### Operational APIs
 
+- Saved agent CRUD with persisted function, MCP, web search and computer-use configuration through `client.agents`
 - Files, uploads, batches, fine-tuning, moderations, evals, and model management
 - Conversations, containers, content provenance checks, ChatKit, and skills
 - Local signed webhook verification with 26 typed received event variants, plus project endpoint management/discovery
@@ -161,6 +162,83 @@ final client = OpenAIClient(
 </details>
 
 ## Usage
+
+### How do I save and update an agent configuration?
+
+Use `client.agents` to create, list, retrieve, update and delete reusable agent
+configuration. These five operations use your ordinary API key and project context,
+and force `OpenAI-Beta: agents=v1` after caller headers. Creating an agent stores
+configuration; it does not start a session, execute tools or run a model.
+
+```dart
+final agent = await client.agents.create(
+  CreateAgentRequest(
+    model: 'gpt-6-astra',
+    name: 'Research assistant',
+    reasoning: AgentReasoningConfig(summary: AgentReasoningSummaryParam.auto),
+    serviceTier: AgentServiceTierParam.fast,
+    tools: [
+      AgentTool.function(
+        name: 'lookup',
+        description: 'Look up an application-provided reference.',
+        parameters: {
+          'type': 'object',
+          'properties': {'query': {'type': 'string'}},
+        },
+      ),
+    ],
+  ),
+);
+final page = await client.agents.list(limit: 10, order: AgentListOrder.asc);
+if (page.hasMore && page.lastId != null) {
+  await client.agents.list(
+    limit: 10,
+    order: AgentListOrder.asc,
+    after: page.lastId,
+  );
+}
+final saved = await client.agents.retrieve(agent.id);
+final reset = await client.agents.update(
+  saved.id,
+  UpdateAgentRequest(clearName: true, clearReasoning: true, metadata: {}),
+);
+assert(reset.name == null);
+final deletion = await client.agents.delete(saved.id);
+assert(deletion.deleted);
+```
+
+Update omission keeps a field unchanged. Supplied objects, lists and maps replace
+the whole field. For example, `reasoning: AgentReasoningConfig(effort: ...)` replaces
+the saved reasoning configuration, including its summary. `clearReasoning: true`
+sends explicit JSON null to reset it; `clearName`, `clearTools` and `clearMetadata`
+clear those fields. Copies distinguish omission from explicit null, and `clearX`
+wins over a simultaneous value. An absent create field leaves the service default
+in control. The requested model string is retained without normalization.
+
+Saved-agent tools have separate request and received types. `AgentTool` supports
+function, tool search, programmatic tool calling, MCP, web search and computer use.
+Persisted MCP HTTP/stdio configuration is credential-free; an optional credential
+ID refers to a vault credential rather than embedding a secret. `AgentTextConfig`
+supports plain text or JSON Schema output, and `AgentMultiAgentConfig` configures
+subagent availability without running subagents. Future received tool/transport
+variants and enum strings are retained; unknown request variants are rejected.
+
+Request limits are checked in release builds: names use at most 128 Unicode
+characters, metadata at most 16 pairs with 64-character keys and 512-character
+values, and tools at most 2,000 entries / 3 MiB of compact UTF-8 JSON. Returned
+resources follow their separate limits. Page cursors may be null on empty pages;
+keep the same order and limit when using `lastId` as `after`. Opaque path IDs are
+encoded as one segment; empty and exact dot segments are rejected as local URI
+safeguards. Configuration and HTTP diagnostics redact private payloads, while
+explicit properties and `toJson()` remain available to the caller.
+
+Injected HTTP clients remain caller-owned. Sessions, environments, traces,
+subagent inspection and Vault operations are scheduled in their own bounded
+implementation tickets. The runnable example exercises all six saved tool types,
+pagination, replacement, clear/reset and deletion with seven mock requests and
+explicit transport cleanup, without an API key or paid API call.
+
+→ [Offline saved-agent example](example/saved_agents_example.dart)
 
 ### How do I classify or score shared input?
 
@@ -2810,6 +2888,7 @@ See the [example/](example/) directory for complete examples:
 
 | Example | Description |
 |---------|-------------|
+| [`saved_agents_example.dart`](example/saved_agents_example.dart) | Offline saved-agent CRUD, all six persisted tools, pagination, replacement and clear/reset |
 | [`monitoring_errors_example.dart`](example/monitoring_errors_example.dart) | Offline typed HTTP/SSE monitoring failures and explicit scoped investigation |
 | [`safety_example.dart`](example/safety_example.dart) | Offline verified notifications and separately scoped alert/case retrieval |
 | [`safety_explanations_example.dart`](example/safety_explanations_example.dart) | Offline project alert explanation presence, copy/clear and private diagnostics |
@@ -2868,6 +2947,7 @@ See the [example/](example/) directory for complete examples:
 
 | API | Status |
 |-----|--------|
+| Agents | Saved agent create/list/retrieve/update/delete with persisted configuration; sessions, environments, history and subagent inspection pending |
 | Chat Completions | Supported; stored-completion management pending |
 | Responses API | Supported with persistent WebSockets, mid-turn steering, opt-in recovery and beta tool-result injection; additional tool/configuration details pending |
 | Decisions API | ✅ Full |
@@ -2897,7 +2977,7 @@ See the [example/](example/) directory for complete examples:
 | Vector Stores (Deprecated) | ✅ Full (separate import) |
 | Completions (Legacy) | ✅ Full |
 
-Agents, vaults, Administration and retained SDK transport/media conveniences remain part of the [API alignment roadmap](specs/api-alignment/README.md).
+Remaining Agents and Vaults operations belong to the bounded [API alignment roadmap](specs/api-alignment/README.md). Administration and retained SDK transport/media conveniences are deferred inventory.
 
 ## Official Documentation
 

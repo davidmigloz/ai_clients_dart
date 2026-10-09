@@ -34,7 +34,7 @@ class AuthInterceptor implements Interceptor {
     // Get auth headers from provider
     final providerHeaders = authProvider.getHeaders();
 
-    // Private audio and Live select required media headers at the resource boundary.
+    // Private resources select their required media headers at the boundary.
     // Keep those request-level values when refreshing provider credentials.
     // Filter before copying the body: a conflicting charset could otherwise
     // change its encoding before a later header correction.
@@ -42,7 +42,9 @@ class AuthInterceptor implements Interceptor {
         ? {
             for (final entry in providerHeaders.entries)
               if (entry.key.toLowerCase() != 'accept' &&
-                  entry.key.toLowerCase() != 'content-type')
+                  entry.key.toLowerCase() != 'content-type' &&
+                  (!isSavedAgentRequest(context.request) ||
+                      entry.key.toLowerCase() != 'openai-beta'))
                 entry.key: entry.value,
           }
         : providerHeaders;

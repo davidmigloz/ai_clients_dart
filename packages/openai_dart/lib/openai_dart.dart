@@ -47,6 +47,8 @@ export 'src/interceptors/auth_interceptor.dart';
 export 'src/interceptors/error_interceptor.dart';
 export 'src/interceptors/interceptor.dart';
 export 'src/interceptors/logging_interceptor.dart';
+// Models - Saved Agents
+export 'src/models/agents/agents.dart';
 // Models - Audio
 export 'src/models/audio/audio.dart';
 // Models - Batches
