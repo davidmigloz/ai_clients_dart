@@ -9763,6 +9763,102 @@
       "file": "lib/src/models/live/live_client_events.dart",
       "schema": "LiveForkClientEvent",
       "note": "Actual canonical command union: primary11, sideband9, fork11. Fork union reuses LiveClientEvent.fromForkJson with distinct startup; primary and sideband factories remain role strict."
+    },
+    "LiveResponsesEvent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "LiveResponsesEvent",
+      "file": "lib/src/models/live/live_response_events.dart",
+      "schema": "LiveResponseEvent",
+      "note": "Genuine complete outer Live response.event wire alias, parsed/serialized through immutable source LiveResponseEvent. Nested logical dispatch views are SDK helpers, not fabricated canonical variants; type getter denotes nested type, source retains outer type. Lifecycle compactness and typed granular compatibility are explicit; unknown finite nested objects remain raw."
+    },
+    "LiveResponsesLifecycleEvent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "LiveResponsesLifecycleEvent",
+      "file": "lib/src/models/live/live_response_events.dart",
+      "schema": "LiveResponseEvent",
+      "note": "Genuine complete outer Live response.event wire alias, parsed/serialized through immutable source LiveResponseEvent. Nested logical dispatch views are SDK helpers, not fabricated canonical variants; type getter denotes nested type, source retains outer type. Lifecycle compactness and typed granular compatibility are explicit; unknown finite nested objects remain raw."
+    },
+    "LiveResponsesGranularEvent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "LiveResponsesGranularEvent",
+      "file": "lib/src/models/live/live_response_events.dart",
+      "schema": "LiveResponseEvent",
+      "note": "Genuine complete outer Live response.event wire alias, parsed/serialized through immutable source LiveResponseEvent. Nested logical dispatch views are SDK helpers, not fabricated canonical variants; type getter denotes nested type, source retains outer type. Lifecycle compactness and typed granular compatibility are explicit; unknown finite nested objects remain raw."
+    },
+    "LiveResponsesRawEvent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "LiveResponsesRawEvent",
+      "file": "lib/src/models/live/live_response_events.dart",
+      "schema": "LiveResponseEvent",
+      "note": "Genuine complete outer Live response.event wire alias, parsed/serialized through immutable source LiveResponseEvent. Nested logical dispatch views are SDK helpers, not fabricated canonical variants; type getter denotes nested type, source retains outer type. Lifecycle compactness and typed granular compatibility are explicit; unknown finite nested objects remain raw."
+    },
+    "LiveCompactResponse": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "LiveCompactResponse",
+      "file": "lib/src/models/live/live_response_events.dart",
+      "schema": null,
+      "note": "Genuine SDK sparse lifecycle snapshot projection: all present known Response fields validated, omission/null/future finite JSON retained. No formal independent schema, full Response requiredness or fabricated canonical component is claimed."
+    },
+    "LiveTranscriptOptions": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "LiveTranscriptOptions",
+      "file": "lib/src/helpers/live/live_transcript_values.dart",
+      "schema": null,
+      "note": "Genuine pure SDK/Dart transcript projection value with no independent API wire codec/schema. Immutable complete copy/equality/hash/privacy; local IDs, source timing and closure reasons are not server turns or audible completion. Playback projection is an explicit Dart caller-clock convenience, separately from actual SDK grouping algorithms."
+    },
+    "LiveTranscriptFragment": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "LiveTranscriptFragment",
+      "file": "lib/src/helpers/live/live_transcript_values.dart",
+      "schema": null,
+      "note": "Genuine pure SDK/Dart transcript projection value with no independent API wire codec/schema. Immutable complete copy/equality/hash/privacy; local IDs, source timing and closure reasons are not server turns or audible completion. Playback projection is an explicit Dart caller-clock convenience, separately from actual SDK grouping algorithms."
+    },
+    "LiveTranscriptSegment": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "LiveTranscriptSegment",
+      "file": "lib/src/helpers/live/live_transcript_values.dart",
+      "schema": null,
+      "note": "Genuine pure SDK/Dart transcript projection value with no independent API wire codec/schema. Immutable complete copy/equality/hash/privacy; local IDs, source timing and closure reasons are not server turns or audible completion. Playback projection is an explicit Dart caller-clock convenience, separately from actual SDK grouping algorithms."
+    },
+    "LiveTranscriptUpdate": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "LiveTranscriptUpdate",
+      "file": "lib/src/helpers/live/live_transcript_values.dart",
+      "schema": null,
+      "note": "Genuine pure SDK/Dart transcript projection value with no independent API wire codec/schema. Immutable complete copy/equality/hash/privacy; local IDs, source timing and closure reasons are not server turns or audible completion. Playback projection is an explicit Dart caller-clock convenience, separately from actual SDK grouping algorithms."
+    },
+    "LiveTranscriptPlayback": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "LiveTranscriptPlayback",
+      "file": "lib/src/helpers/live/live_transcript_values.dart",
+      "schema": null,
+      "note": "Genuine pure SDK/Dart transcript projection value with no independent API wire codec/schema. Immutable complete copy/equality/hash/privacy; local IDs, source timing and closure reasons are not server turns or audible completion. Playback projection is an explicit Dart caller-clock convenience, separately from actual SDK grouping algorithms."
+    },
+    "LiveTranscriptSpeaker": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "LiveTranscriptSpeaker",
+      "file": "lib/src/helpers/live/live_transcript_values.dart",
+      "schema": null,
+      "note": "Genuine local SDK/Dart transcript enum constants with standard equality/hash and no API wire enum, JSON codec or copy method. Speaker/close decisions describe a lossy local projection; no server turn IDs, server completion status or audible playback confirmation is invented."
+    },
+    "LiveTranscriptCloseReason": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "LiveTranscriptCloseReason",
+      "file": "lib/src/helpers/live/live_transcript_values.dart",
+      "schema": null,
+      "note": "Genuine local SDK/Dart transcript enum constants with standard equality/hash and no API wire enum, JSON codec or copy method. Speaker/close decisions describe a lossy local projection; no server turn IDs, server completion status or audible playback confirmation is invented."
     }
   }
 }

@@ -13,6 +13,7 @@ Future<LiveConnection> openLiveConnection({
   required OpenAIConfig config,
   required RequestBuilder requestBuilder,
   required bool sideband,
+  bool fork = false,
   required String endpoint,
   bool? gracefulClose,
   LiveWebSocketConnector? connector,
@@ -23,6 +24,7 @@ Future<LiveConnection> openLiveConnection({
   void Function()? ensureNotClosed,
 }) async {
   ensureNotClosed?.call();
+  if (sideband && fork) throw ArgumentError('A fork is not a sideband.');
   final timeout = connectionTimeout ?? config.connectTimeout;
   if (!timeout.inMicroseconds.isFinite || timeout <= Duration.zero) {
     throw ArgumentError('connectionTimeout must be positive.');
@@ -150,6 +152,14 @@ Future<LiveConnection> openLiveConnection({
     rethrow;
   }
   try {
+    if (fork) {
+      return LiveForkConnection(
+        socket,
+        maxBufferedEvents: maxBufferedEvents,
+        abortTrigger: abortTrigger,
+        correlationId: trace,
+      );
+    }
     return sideband
         ? LiveSidebandConnection(
             socket,

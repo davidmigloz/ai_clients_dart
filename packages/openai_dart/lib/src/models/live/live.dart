@@ -9,5 +9,6 @@ export 'live_history.dart';
 export 'live_http.dart';
 export 'live_input_item.dart';
 export 'live_json_helpers.dart' show LiveJsonModel;
+export 'live_response_events.dart';
 export 'live_server_events.dart';
 export 'live_tools.dart';

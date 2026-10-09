@@ -99,6 +99,56 @@ class LiveResource extends ResourceBase {
     ).then((connection) => connection as LiveSidebandConnection);
   }
 
+  /// Opens a new fork of a finalized stored session without startup or replay.
+  ///
+  /// Explicitly call `start(LiveForkSessionStartEvent(session: ...))` and await
+  /// the new session acknowledgment. An empty overrides object inherits the
+  /// stored configuration; the model, voice and conversation cannot be changed.
+  /// Storage availability and outstanding application state remain caller-owned.
+  Future<LiveForkConnection> forkConnection(
+    String sessionId, {
+    LiveWebSocketConnector? connector,
+    Map<String, String>? additionalHeaders,
+    Duration? connectionTimeout,
+    int maxBufferedEvents = 1024,
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    if (sessionId.isEmpty || sessionId == '.' || sessionId == '..') {
+      throw const FormatException(
+        'Live sessionId: expected an opaque path identifier',
+      );
+    }
+    final String encoded;
+    try {
+      encoded = Uri.encodeComponent(sessionId);
+      if (Uri.decodeComponent(encoded) != sessionId) {
+        throw const FormatException();
+      }
+    } on ArgumentError {
+      throw const FormatException(
+        'Live sessionId: expected an encodable opaque path identifier',
+      );
+    } on FormatException {
+      throw const FormatException(
+        'Live sessionId: expected an encodable opaque path identifier',
+      );
+    }
+    return openLiveConnection(
+      config: config,
+      requestBuilder: requestBuilder,
+      sideband: false,
+      fork: true,
+      endpoint: '/live/sessions/$encoded/fork',
+      connector: connector,
+      additionalHeaders: additionalHeaders,
+      connectionTimeout: connectionTimeout,
+      maxBufferedEvents: maxBufferedEvents,
+      abortTrigger: abortTrigger,
+      ensureNotClosed: ensureNotClosed,
+    ).then((connection) => connection as LiveForkConnection);
+  }
+
   LiveSessionsResource? _sessions;
 
   /// Cached HTTP sessions resource.
