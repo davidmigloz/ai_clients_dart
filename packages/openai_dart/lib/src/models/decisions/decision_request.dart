@@ -8,8 +8,8 @@ import 'decision_question.dart';
 
 /// A request to answer ordered predicate, choice, or score questions.
 ///
-/// The Decisions API currently supports `gpt-6-luna` with user text and inline
-/// images. The model identifier remains open for future models. A request accepts
+/// The Decisions API currently supports `gpt-6-luna` with user text and
+/// data URL or publicly accessible HTTP(S) images. The model identifier remains open for future models. A request accepts
 /// 1–200 questions and up to 128 images; the server validates these limits.
 @immutable
 class DecisionRequest {
@@ -42,7 +42,7 @@ class DecisionRequest {
   /// The model identifier, currently `gpt-6-luna`.
   final String model;
 
-  /// Text or user messages containing text and inline images.
+  /// Text or user messages containing text and data URL or HTTP(S) images.
   final DecisionInput input;
 
   /// The ordered questions to answer.

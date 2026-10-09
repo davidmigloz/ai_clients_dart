@@ -92,11 +92,14 @@ Text parts emit `type: input_text` and `text`.
 Do not introduce a nonempty-text, nonempty-message-list, or nonempty-part-list
 constraint: the reviewed schema permits those values to be empty.
 
-### DEC-04: Inline image inputs
+### DEC-04: Image inputs (original scope and URL follow-up)
 
 Image parts emit `type: input_image`, `image_url`, and optional `detail`.
-Data URL input must begin with `data:`. Reject external URLs and file IDs at the
-dedicated image-input construction/parsing boundary. A binary convenience factory
+The original October 7 snapshot admitted only `data:` URLs. The later
+[URL follow-up](image-safety-followups.md) supersedes that restriction with exact
+case-sensitive `data:`, `http://` or `https://` prefixes. File IDs remain excluded;
+image validity/public accessibility are service checks. Preserve URLs unchanged at
+the dedicated image-input construction/parsing boundary. A binary convenience factory
 must construct `data:<mediaType>;base64,<encoded bytes>`; it must not send raw base64.
 
 Support `low`, `high`, `auto`, and `original` details through the shared type.

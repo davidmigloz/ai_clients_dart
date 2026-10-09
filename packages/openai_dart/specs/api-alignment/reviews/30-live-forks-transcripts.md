@@ -3,7 +3,7 @@
 Status: implemented and independently approved for [#372](https://github.com/davidmigloz/ai_clients_dart/issues/372),
 [ticket 30](../tickets/30-live-forks-transcripts.md). Independent combined
 requirements/publication and cross-author engineering reviews have no open
-findings. Published-head CI and merge remain pending. The user-authorized
+findings. [PR #380](https://github.com/davidmigloz/ai_clients_dart/pull/380) merged October 9 at 07:06:07 UTC, squash `a7907e4dc747190cc6ec36ede27b53fda9acb1c5`, closing #372. Reviewed head `1b3d5773702f0b74917d65896aabe0aec728d3a4` passed all 14 contexts (13 successes, standard Test(all) skip). Independent combined requirements/publication and cross-author engineering reviews approved; external full review was skipped for unavailable credits. All 30 original implementation issues are closed; later parity work remains in parent #317. The user-authorized
 [PR #379](https://github.com/davidmigloz/ai_clients_dart/pull/379) merge closed #371
 at `d00ee5cfc4a61df04b4e7c59c6ea4e8e34c79648`, the base of this slice.
 

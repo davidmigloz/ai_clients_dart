@@ -6,11 +6,13 @@ Chat audio merged in [PR #331](https://github.com/davidmigloz/ai_clients_dart/pu
 Retry guidance merged in [PR #332](https://github.com/davidmigloz/ai_clients_dart/pull/332);
 image model requiredness #326 merged in [PR #333](https://github.com/davidmigloz/ai_clients_dart/pull/333).
 
-Phases 1–4 and Audio/Live #366–371 are merged. Live HTTP
+Phases 1–5 and Audio/Live #366–372 are merged. Live HTTP
 [PR #378](https://github.com/davidmigloz/ai_clients_dart/pull/378) closed #370;
 [PR #379](https://github.com/davidmigloz/ai_clients_dart/pull/379) closed #371.
-Stored fork and transcript workflows #372 are implemented and locally verified;
-their publication and merge gates remain pending.
+Stored fork/transcript workflows #372 merged in
+[PR #380](https://github.com/davidmigloz/ai_clients_dart/pull/380), completing all
+30 original implementation tickets. The new Decisions/Safety follow-ups and
+Phases 6–8 remain pending; parent #317 stays open.
 Agents/Vaults, Administration and remaining parity phases
 retain their inventory below.
 
@@ -267,8 +269,8 @@ Its [acceptance evidence](reviews/27-custom-voices.md) records the merge. Live H
 #370 merged in [PR #378](https://github.com/davidmigloz/ai_clients_dart/pull/378),
 and Live WebSockets #371 merged in
 [PR #379](https://github.com/davidmigloz/ai_clients_dart/pull/379).
-Stored fork/transcript #372 has [local acceptance evidence](reviews/30-live-forks-transcripts.md);
-its published-head CI and merge remain pending.
+Stored fork/transcript #372 merged in PR #380; its
+[acceptance evidence](reviews/30-live-forks-transcripts.md) includes final-head CI.
 
 | Repository ticket | Demonstrable outcome | Prerequisite |
 | --- | --- | --- |
@@ -293,8 +295,9 @@ These slices do not establish full Realtime/Chat/shared Responses parity.
 Phases 1–4 are complete for their specified tickets. Phase 5 Audio/Live has seven
 specified implementation tickets: speech #366, existing Audio #367 and consent
 management #368, custom voice creation #369 and Live HTTP #370 are merged.
-Live WebSockets #371 is merged; #372 stored fork/transcript workflows are
-implemented and locally verified, with publication and merge gates pending.
+Live WebSockets #371 and stored fork/transcript #372 are merged, completing
+Phase 5 and all 30 original implementation tickets. New Decisions/Safety
+follow-ups and later parity phases remain open.
 Later phases remain candidate outcomes pending
 detailed specifications. Keep all audited gaps visible even when deferred.
 
@@ -304,7 +307,7 @@ detailed specifications. Keep all audited gaps visible even when deferred.
 | 2. Existing API correctness | Correct container wire formats; preserve cache diagnostics, token details, Chat audio chunks, and retry guidance | All tickets merged in #327–#333; shared cache-write usage included in Decisions |
 | 3. Responses capabilities | Use async tools, reasoning configuration updates, GA web search controls/results, hosted shell, and Responses WebSocket steering | All eleven specified tickets merged in #346–#356; remaining shared gaps inventoried |
 | 4. Webhooks and safety | Verify and parse signed events; manage webhook endpoints; retrieve safety alerts/cases and preserve monitoring details | All four specified tickets merged in #362–#365 |
-| 5. Audio and Live | Generate speech with current voice/options; create custom voices; run a Live session and delegation workflows | Six slices merged; final fork/transcript slice locally verified, publication/merge pending |
+| 5. Audio and Live | Generate speech with current voice/options; create custom voices; run a Live session and delegation workflows | All seven specified slices merged in #374–#380; later SDK helper inventory remains open |
 | 6. Agents and vaults | Run a durable session; handle tools, environments, artifacts, credentials, subagents, traces, and browser approvals | Slice around working session behaviors; browser approvals build on the basic session/event loop |
 | Throughout | Truthful API coverage, current examples, model capability guidance, and sunset notices | Accompany each relevant ticket; do not claim full coverage prematurely |
 | 7. Administration and storage | Manage organization/project controls, keys, usage/costs, and external storage | Explicit expansion beyond the current manifest exclusions; specify the Admin namespace and authentication separately |
@@ -348,6 +351,17 @@ Fresh toolkit fetch/review and immutable-source comparison confirm that these
 eight normalized leaves do not affect the 287 Live/input components or seven
 Live HTTP paths. Both additions remain pending inventory; the Live WebSocket
 slice retains its adopted canonical bytes and metadata.
+
+The source-backed [refinement specification](image-safety-followups.md) creates
+separate native tickets [#381](https://github.com/davidmigloz/ai_clients_dart/issues/381)
+([31](tickets/31-decision-image-urls.md), Decisions URL inputs, implemented locally)
+and [#382](https://github.com/davidmigloz/ai_clients_dart/issues/382)
+([32](tickets/32-safety-explanations.md), typed Safety explanations, pending).
+Both depend only on their respective merged APIs; they get separate PRs.
+Reviewed OpenAPI 0ef225c4 is now promoted with actual immutable-fetch metadata;
+all 124 global normalized comparisons are classified: seven Decisions leaves,
+one pending Safety property and 116 pending Agents leaves, including array shifts.
+Promotion does not implement those later API families or complete SDK parity.
 
 ### Existing API correctness and Responses
 

@@ -1,6 +1,6 @@
 # Fork stored Live sessions and group transcripts with manual delegation
 
-Status: implemented; local acceptance recorded below. Publication CI and merge pending.
+Status: merged in [PR #380](https://github.com/davidmigloz/ai_clients_dart/pull/380), closing #372.
 GitHub: [#372](https://github.com/davidmigloz/ai_clients_dart/issues/372).
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Phase 5 Audio and Live](../audio-live.md), LIVE-FORK-01–03, LIVE-WORK-03, LIVE-TRANSCRIPT-01–02.
@@ -24,7 +24,7 @@ Fork stored Live sessions and group transcripts with manual delegation through p
 - [x] Changed models cover every declared field/variant, optional/null/absence, immutable parsed ownership, complete copy/clear, equality/hash and safe diagnostics. Known malformed values fail contextually; future receive-only metadata and closed writable admission remain distinct.
 - [x] Public factories/resources/parsers and real canonical manifest mappings are verified; no fake components or diagnostic exclusions. README/llms, runnable offline example and any actual breaking migration are complete.
 - [x] Focused public fixtures pass VM/Chrome JavaScript/Wasm where applicable; format → fix → fatal-info analysis, package unit suite and full OpenAPI toolkit evidence are recorded. Unrelated diagnostics/remaining parity gaps remain visible and classified.
-- [ ] Independent requirements and engineering reviews approve the final combined diff after validated findings are resolved; final-head CI is green before merge.
+- [x] Independent requirements and engineering reviews approve the final combined diff after validated findings are resolved; final-head CI is green before merge.
 
 ## Compatibility and boundaries
 
@@ -44,8 +44,9 @@ bumps and unrelated API families are outside this ticket.
 
 The [acceptance review](../reviews/30-live-forks-transcripts.md) records exact
 source contracts, independent public/canonical evidence, platform tests,
-documentation and the $0 offline workflow. The final criterion remains open until
-independent combined review and published-head CI are confirmed; merge requires
-the user's next instruction. Storage/ZDR/recording availability are service
+documentation and the $0 offline workflow. Independent combined review and final-head CI are complete; the user authorized
+the merge recorded above. Storage/ZDR/recording availability are service
 policies exercised through injected service failures, not invented local
 organization validators.
+
+[PR #380](https://github.com/davidmigloz/ai_clients_dart/pull/380) merged October 9 at 07:06:07 UTC, squash `a7907e4dc747190cc6ec36ede27b53fda9acb1c5`, closing #372. Reviewed head `1b3d5773702f0b74917d65896aabe0aec728d3a4` passed all 14 contexts (13 successes, standard Test(all) skip). Independent combined requirements/publication and cross-author engineering reviews approved; external full review was skipped for unavailable credits. All 30 original implementation issues are closed; later parity work remains in parent #317.

@@ -7,10 +7,11 @@ import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import 'decision_helpers.dart';
 
-/// Shared text or inline image evidence for a Decisions request.
+/// Shared text or image evidence for a Decisions request.
 ///
-/// Only user messages with text and inline images are supported. Empty text,
-/// message lists, and part lists are valid representations.
+/// Only user messages with text and data URL or publicly accessible HTTP(S)
+/// images are supported. Empty text, message lists, and part lists are valid
+/// representations.
 @immutable
 sealed class DecisionInput {
   const DecisionInput();
@@ -118,7 +119,7 @@ class MessagesDecisionInput extends DecisionInput {
       'MessagesDecisionInput(messages: ${messages.length} items)';
 }
 
-/// A Decisions user message containing text or inline image parts.
+/// A Decisions user message containing text or image parts.
 @immutable
 class DecisionInputMessage {
   /// Creates a message with the fixed `user` role and `message` type.
@@ -245,7 +246,7 @@ class TextDecisionContent extends DecisionContent {
   String toString() => 'TextDecisionContent(text: ${text.length} chars)';
 }
 
-/// Ordered text and inline image parts in a Decisions user message.
+/// Ordered text and image parts in a Decisions user message.
 @immutable
 class PartsDecisionContent extends DecisionContent {
   /// Creates content with an unmodifiable copy of [parts].
@@ -287,7 +288,7 @@ class PartsDecisionContent extends DecisionContent {
   String toString() => 'PartsDecisionContent(parts: ${parts.length} items)';
 }
 
-/// Text or inline image evidence in a Decisions message.
+/// Text or image evidence in a Decisions message.
 @immutable
 sealed class DecisionInputPart {
   const DecisionInputPart();
@@ -295,10 +296,12 @@ sealed class DecisionInputPart {
   /// Creates an `input_text` part.
   const factory DecisionInputPart.text(String text) = TextDecisionInputPart;
 
-  /// Creates an inline image, requiring [imageUrl] to begin with `data:`.
+  /// Creates an image from a data URL or publicly accessible HTTP(S) URL.
   ///
-  /// Omitting [detail] lets the server apply its `auto` default. External URLs
-  /// and file IDs are unsupported. At most 128 images are allowed per request.
+  /// [imageUrl] must begin with `data:`, `http://`, or `https://`, with the
+  /// original spelling retained. The server validates the image and URL
+  /// accessibility. File IDs are unsupported. Omitting [detail] lets the server
+  /// apply its `auto` default. At most 128 images are allowed per request.
   factory DecisionInputPart.image({
     required String imageUrl,
     ImageDetail? detail,
@@ -373,14 +376,17 @@ class TextDecisionInputPart extends DecisionInputPart {
       'TextDecisionInputPart(type: $type, text: ${text.length} chars)';
 }
 
-/// An `input_image` Decisions part containing an inline data URL.
+/// An `input_image` Decisions part containing a data URL or public HTTP(S) URL.
 @immutable
 class ImageDecisionInputPart extends DecisionInputPart {
-  /// Creates an image part, rejecting external URLs and file IDs at runtime.
+  /// Creates an image part, requiring a supported URL prefix at runtime.
+  ///
+  /// Supports `data:`, `http://`, and `https://` without normalizing their
+  /// contents. The server validates image data and public URL accessibility.
   ImageDecisionInputPart({required String imageUrl, this.detail})
     : imageUrl = _validateImageUrl(imageUrl);
 
-  /// A base64-encoded image in a data URL.
+  /// A base64-encoded image in a data URL or a public HTTP(S) image URL.
   final String imageUrl;
 
   /// The image detail level; omitted or null uses the server's `auto` default.
@@ -389,16 +395,16 @@ class ImageDecisionInputPart extends DecisionInputPart {
   @override
   String get type => 'input_image';
 
-  /// Reads an inline image part, rejecting invalid references and detail values.
+  /// Reads an image part, rejecting unsupported URL prefixes and detail values.
   factory ImageDecisionInputPart.fromJson(Map<String, dynamic> json) {
     requireDecisionType(json, 'input_image', 'ImageDecisionInputPart');
     final imageUrl = requireDecisionString(
       json['image_url'],
       'ImageDecisionInputPart.image_url',
     );
-    if (!imageUrl.startsWith('data:')) {
+    if (!_hasSupportedImageUrlPrefix(imageUrl)) {
       throw const FormatException(
-        'ImageDecisionInputPart.image_url: expected an inline data URL',
+        'ImageDecisionInputPart.image_url: expected a data URL or HTTP(S) URL',
       );
     }
     final detail = json['detail'];
@@ -413,11 +419,18 @@ class ImageDecisionInputPart extends DecisionInputPart {
   }
 
   static String _validateImageUrl(String imageUrl) {
-    if (!imageUrl.startsWith('data:')) {
-      throw ArgumentError('Decision image URLs must begin with "data:"');
+    if (!_hasSupportedImageUrlPrefix(imageUrl)) {
+      throw ArgumentError(
+        'Decision image URLs must begin with "data:", "http://", or "https://"',
+      );
     }
     return imageUrl;
   }
+
+  static bool _hasSupportedImageUrlPrefix(String imageUrl) =>
+      imageUrl.startsWith('data:') ||
+      imageUrl.startsWith('http://') ||
+      imageUrl.startsWith('https://');
 
   @override
   Map<String, dynamic> toJson() => {
@@ -426,7 +439,7 @@ class ImageDecisionInputPart extends DecisionInputPart {
     if (detail != null) 'detail': detail!.toJson(),
   };
 
-  /// Creates a copy with replaced image data or detail.
+  /// Creates a copy with a replaced image URL or detail.
   ///
   /// Passing null for [detail] clears the explicit detail setting.
   ImageDecisionInputPart copyWith({

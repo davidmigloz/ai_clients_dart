@@ -55,6 +55,107 @@ void main() {
       },
     );
 
+    test('posts mixed image URL evidence without fetching remote images', () async {
+      final requests = <http.Request>[];
+      final client = OpenAIClient(
+        config: const OpenAIConfig(
+          authProvider: ApiKeyProvider('sk-test-key'),
+          retryPolicy: RetryPolicy(maxRetries: 0),
+        ),
+        httpClient: MockClient((request) async {
+          requests.add(request);
+          return http.Response(jsonEncode(_responseFixture()), 200);
+        }),
+      );
+      addTearDown(client.close);
+      final request = DecisionRequest(
+        model: 'future-decision-model',
+        input: DecisionInput.messages([
+          DecisionInputMessage(
+            content: DecisionContent.parts([
+              const DecisionInputPart.text('Inspect this photo.'),
+              DecisionInputPart.imageBytes(
+                const [0, 1, 2, 255],
+                mediaType: 'image/png',
+                detail: ImageDetail.original,
+              ),
+              DecisionInputPart.image(
+                imageUrl: 'http://example.com/image%2Fone.png?v=1#preview',
+                detail: ImageDetail.high,
+              ),
+            ]),
+          ),
+          DecisionInputMessage(
+            content: DecisionContent.parts([
+              DecisionInputPart.image(
+                imageUrl:
+                    'https://EXAMPLE.com:443/photo.png?signature=a%2Bb&v=1#frame',
+              ),
+              const DecisionInputPart.text('Compare their visible damage.'),
+            ]),
+          ),
+        ]),
+        questions: const [
+          DecisionQuestion.predicate(
+            instructions: 'Is it damaged?',
+            name: 'damaged',
+          ),
+        ],
+      );
+
+      final response = await client.decisions.create(request);
+
+      expect(requests, hasLength(1));
+      expect(requests.single.method, 'POST');
+      expect(
+        requests.single.url,
+        Uri.parse('https://api.openai.com/v1/decisions'),
+      );
+      expect(jsonDecode(requests.single.body), {
+        'model': 'future-decision-model',
+        'input': [
+          {
+            'type': 'message',
+            'role': 'user',
+            'content': [
+              {'type': 'input_text', 'text': 'Inspect this photo.'},
+              {
+                'type': 'input_image',
+                'image_url': 'data:image/png;base64,AAEC/w==',
+                'detail': 'original',
+              },
+              {
+                'type': 'input_image',
+                'image_url': 'http://example.com/image%2Fone.png?v=1#preview',
+                'detail': 'high',
+              },
+            ],
+          },
+          {
+            'type': 'message',
+            'role': 'user',
+            'content': [
+              {
+                'type': 'input_image',
+                'image_url':
+                    'https://EXAMPLE.com:443/photo.png?signature=a%2Bb&v=1#frame',
+              },
+              {'type': 'input_text', 'text': 'Compare their visible damage.'},
+            ],
+          },
+        ],
+        'questions': [
+          {
+            'type': 'predicate',
+            'instructions': 'Is it damaged?',
+            'name': 'damaged',
+          },
+        ],
+      });
+      expect(response.model, 'future-decision-model');
+      expect(response.answers.single, isA<PredicateDecisionAnswer>());
+    });
+
     test('surfaces typed HTTP 400 errors with metadata', () async {
       final body = <String, dynamic>{
         'error': {
