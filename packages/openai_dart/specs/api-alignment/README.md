@@ -11,8 +11,13 @@ Phases 1–5 and Audio/Live #366–372 are merged. Live HTTP
 [PR #379](https://github.com/davidmigloz/ai_clients_dart/pull/379) closed #371.
 Stored fork/transcript workflows #372 merged in
 [PR #380](https://github.com/davidmigloz/ai_clients_dart/pull/380), completing all
-30 original implementation tickets. The new Decisions/Safety follow-ups and
-Phases 6–8 remain pending; parent #317 stays open.
+30 original implementation tickets. Decisions HTTP(S) images #381 merged in
+[PR #383](https://github.com/davidmigloz/ai_clients_dart/pull/383) at
+`bc89ad9a8fb79d889e7945030fa9f6524d73d781` on October 9, 07:54:42 UTC, after
+both independent reviews and all 14 final-head contexts completed. Safety
+explanations #382 are implemented and locally verified; published-head CI and
+merge remain pending. Phases 6–8 remain pending and parent
+#317 stays open.
 Agents/Vaults, Administration and remaining parity phases
 retain their inventory below.
 
@@ -296,14 +301,15 @@ Phases 1–4 are complete for their specified tickets. Phase 5 Audio/Live has se
 specified implementation tickets: speech #366, existing Audio #367 and consent
 management #368, custom voice creation #369 and Live HTTP #370 are merged.
 Live WebSockets #371 and stored fork/transcript #372 are merged, completing
-Phase 5 and all 30 original implementation tickets. New Decisions/Safety
-follow-ups and later parity phases remain open.
+Phase 5 and all 30 original implementation tickets. The Decisions image URL
+follow-up #381 also merged in #383; Safety explanations #382 and later parity
+phases remain open.
 Later phases remain candidate outcomes pending
 detailed specifications. Keep all audited gaps visible even when deferred.
 
 | Phase | Demonstrable outcomes | Dependencies and scope notes |
 | --- | --- | --- |
-| 1. Decisions | Create typed decisions from text and inline images; receive predicate, choice, score, and refusal answers with complete usage | Merged in #319/#318 |
+| 1. Decisions | Create typed decisions from text, inline images and public HTTP(S) images; receive predicate, choice, score, and refusal answers with complete usage | Merged in #319/#318 and #383/#381 |
 | 2. Existing API correctness | Correct container wire formats; preserve cache diagnostics, token details, Chat audio chunks, and retry guidance | All tickets merged in #327–#333; shared cache-write usage included in Decisions |
 | 3. Responses capabilities | Use async tools, reasoning configuration updates, GA web search controls/results, hosted shell, and Responses WebSocket steering | All eleven specified tickets merged in #346–#356; remaining shared gaps inventoried |
 | 4. Webhooks and safety | Verify and parse signed events; manage webhook endpoints; retrieve safety alerts/cases and preserve monitoring details | All four specified tickets merged in #362–#365 |
@@ -335,32 +341,35 @@ Sources: [guide](https://developers.openai.com/api/docs/guides/decisions),
 
 Publication-time [OpenAPI fd15e7a8](https://github.com/openai/openai-openapi/blob/fd15e7a8c492008db728bd079d936b7b7bf13e23/openapi.json)
 on October 8 broadens DecisionInputImage.image_url from `^data:` to
-`^(data:|https?://)`, allowing publicly accessible HTTP(S) images. The existing
-client still enforces inline data URLs. A separate Decisions follow-up must align
-constructors/parsers/copies, documentation and positive/negative fixtures with
-this new contract; #318 remains the completed earlier snapshot, rather than
-evidence of this later addition. File IDs and other unsupported input kinds remain
-excluded.
+`^(data:|https?://)`, allowing publicly accessible HTTP(S) images. Follow-up #381
+merged in #383, aligning constructors/parsers/copies, documentation and positive/
+negative fixtures with this new contract. Its [acceptance review](reviews/31-decision-image-urls.md)
+records literal URL preservation and offline VM/Chrome JavaScript/Wasm coverage;
+#318 remains the completed earlier snapshot. File IDs and other unsupported input
+kinds remain excluded.
 
 The same commit adds optional nullable SafetyAlertResource.detailed_explanation:
 a generated explanation temporarily available for eligible zero data retention
 alerts and omitted when unavailable. This is a Safety alert field, despite the
 commit message referring to decision responses. Preserve absence versus null,
 copy/clear behavior and private diagnostics in a separate Safety follow-up.
-Fresh toolkit fetch/review and immutable-source comparison confirm that these
-eight normalized leaves do not affect the 287 Live/input components or seven
-Live HTTP paths. Both additions remain pending inventory; the Live WebSocket
-slice retains its adopted canonical bytes and metadata.
+The Live WebSocket review previously confirmed these eight normalized leaves did
+not affect its 287 Live/input components or seven Live HTTP paths, and retained
+its then-adopted canonical source. The later Decisions follow-up promoted reviewed
+OpenAPI 0ef225c4. The Safety slice's fresh fetch/review confirms byte-identical
+canonical JSON, so it keeps that source and its actual promotion metadata.
 
 The source-backed [refinement specification](image-safety-followups.md) creates
 separate native tickets [#381](https://github.com/davidmigloz/ai_clients_dart/issues/381)
-([31](tickets/31-decision-image-urls.md), Decisions URL inputs, implemented locally)
+([31](tickets/31-decision-image-urls.md), Decisions URL inputs, merged in #383)
 and [#382](https://github.com/davidmigloz/ai_clients_dart/issues/382)
-([32](tickets/32-safety-explanations.md), typed Safety explanations, pending).
+([32](tickets/32-safety-explanations.md), typed Safety explanations, implemented and
+locally verified; published-head CI/merge pending).
 Both depend only on their respective merged APIs; they get separate PRs.
 Reviewed OpenAPI 0ef225c4 is now promoted with actual immutable-fetch metadata;
 all 124 global normalized comparisons are classified: seven Decisions leaves,
-one pending Safety property and 116 pending Agents leaves, including array shifts.
+one Safety property (now implemented by #382) and 116 pending Agents leaves,
+including array shifts.
 Promotion does not implement those later API families or complete SDK parity.
 
 ### Existing API correctness and Responses

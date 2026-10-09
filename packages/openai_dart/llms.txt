@@ -4,7 +4,7 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~27.4k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~27.9k tokens): Primary package documentation with installation, configuration, and usage examples.
 - [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/CHANGELOG.md) (~21.7k tokens): Release history and version-by-version changes.
 - [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/MIGRATION.md) (~22.2k tokens): Upgrade notes and breaking-change guidance.
 - [Monitoring failures](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md#how-do-i-inspect-monitoring-failures): Shared passive HTTP/failed Response/WS details, flat nullable SSE errors, scoped investigation and migration boundaries.
@@ -64,6 +64,7 @@
 - [webhook_endpoints_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/webhook_endpoints_example.dart) (~1.4k tokens): Offline project webhook lifecycle with returned cursor/event discovery, signing-key storage/rotation, separate receiver status and cleanup; MockClient only, no API charges.
 
 - [safety_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/safety_example.dart) (~1.5k tokens): Offline signed project/organization safety notices with two explicitly scoped MockClient GETs, deduplication, tampering rejection and separate workspace routing; no API key or charges.
+- [safety_explanations_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/safety_explanations_example.dart) (~795 tokens): Offline absent/null/text/empty explanation responses, four mock GETs, explicit copy/clear and private diagnostics; no API key or charges.
 
 - [monitoring_errors_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/monitoring_errors_example.dart) (~2.6k tokens): Offline HTTP 403 before output and flat error/failed response after output, shared typed details and two scoped GETs from verified notices; five MockClient requests, passive tokens/instructions, no real API key or charges.
 
@@ -115,10 +116,14 @@ LiveTranscriptGrouper attaches a non-consuming event tap; complete segment snaps
 
 ## Decisions image references
 
-DecisionInputPart.image admits exact case-sensitive `data:`, `http://`, `https://` prefixes through constructors/parsers/copies. Strings are preserved, including escapes/query/fragment; the service checks image validity and public accessibility. The client does not fetch or normalize images. imageBytes and omitted detail/auto behavior remain compatible; all four ImageDetail values and 128-image request limit remain. File IDs/unsupported roles/audio/tools stay excluded. Current canonical schema and HTTP reference supersede older inline-only guide/SDK prose. The offline URL example closes its caller-owned mock transport. Safety detailed_explanation remains a separate pending follow-up.
+DecisionInputPart.image admits exact case-sensitive `data:`, `http://`, `https://` prefixes through constructors/parsers/copies. Strings are preserved, including escapes/query/fragment; the service checks image validity and public accessibility. The client does not fetch or normalize images. imageBytes and omitted detail/auto behavior remain compatible; all four ImageDetail values and 128-image request limit remain. File IDs/unsupported roles/audio/tools stay excluded. Current canonical schema and HTTP reference supersede older inline-only guide/SDK prose. The offline URL example closes its caller-owned mock transport.
+
+## Safety alert explanations
+
+SafetyAlert exposes typed detailedExplanation and hasDetailedExplanation, preserving absent/null/string including empty text. Constructor omission can adopt a valid explanation from legacy rawJson; explicit typed/presence inputs win. copyWith omission preserves, detailedExplanation:null retains a null key and hasDetailedExplanation:false removes it from effective JSON. Known raw values remain validated and cannot override typed values or resurrect cleared keys; finite future JSON is deeply immutable. rawJson retains the detached received snapshot, including an original explanation after effective clear; toJson reflects current typed presence/value. Equality/hash follow complete effective JSON and default diagnostics redact explanation/private metadata. The service determines temporary eligible-ZDR availability; reason:null does not prove eligibility. Existing explicit project GET/scoping remains, with no alert list/control/cache or changed webhook field. The Responses monitoring explanation remains optional nonnull. The offline example closes its caller-owned mock transport.
 
 ## Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~142k tokens**
+**Total: ~144k tokens**

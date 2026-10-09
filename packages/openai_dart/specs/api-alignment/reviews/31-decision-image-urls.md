@@ -3,7 +3,11 @@
 Status: implemented and independently approved for [#381](https://github.com/davidmigloz/ai_clients_dart/issues/381),
 [ticket 31](../tickets/31-decision-image-urls.md), DEC-URL-01–06.
 Independent requirements/publication and engineering reviews approve the final
-combined diff with no open findings. Exact published-head CI and merge remain pending.
+combined diff with no open findings. [PR #383](https://github.com/davidmigloz/ai_clients_dart/pull/383)
+merged October 9, 2026 at 07:54:42 UTC, commit
+`bc89ad9a8fb79d889e7945030fa9f6524d73d781`, closing #381. All 14 exact-head
+contexts completed (13 successes and the standard Test(all) skip) for reviewed
+commit `72d9918bf8f557f40352c2969514b8911385e686`; no review findings remained.
 [PR #380](https://github.com/davidmigloz/ai_clients_dart/pull/380) merged at
 `a7907e4dc747190cc6ec36ede27b53fda9acb1c5`, closing the last of the 30 original
 implementation tickets. This follow-up does not close the remaining parity parent.
@@ -103,5 +107,6 @@ The separate Safety ticket uses the actual merged #359 prerequisite and remains
 unchecked/unimplemented. Agents/Vaults, Administration/storage, authentication,
 legacy lifetimes and shared SDK conveniences stay in the roadmap. All 30 old
 children are closed; the two new refinement tickets are independently tracked.
-Published-head CI, feedback and user-authorized merge are separate gates recorded
-in the PR/issues after this local acceptance snapshot.
+Published-head CI, feedback and user-authorized merge passed after this local
+acceptance snapshot, as recorded above. The following Safety slice updates its
+own current progress without rewriting this review's source/test receipts.

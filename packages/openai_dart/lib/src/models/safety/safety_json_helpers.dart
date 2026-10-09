@@ -79,6 +79,34 @@ String? _safetyNullableString(
 String? _safetyCopyString(Object? value, String context) =>
     value == null ? null : requireJsonString(value, context);
 
+({String? value, bool present}) _safetyExplanation(
+  Object? value,
+  bool? present,
+  Map<String, dynamic> raw,
+) {
+  final supplied = !identical(value, unsetCopyWithValue);
+  final typedValue = supplied
+      ? _safetyCopyString(value, 'SafetyAlert.detailedExplanation')
+      : null;
+  final rawPresent = raw.containsKey('detailed_explanation');
+  final rawValue = rawPresent
+      ? _safetyCopyString(
+          raw['detailed_explanation'],
+          'SafetyAlert.rawJson.detailed_explanation',
+        )
+      : null;
+  if (!supplied && present == null) {
+    return (value: rawValue, present: rawPresent);
+  }
+  final effectivePresence = present ?? true;
+  if (!effectivePresence && typedValue != null) {
+    throw const FormatException(
+      'SafetyAlert.detailedExplanation: a nonnull value requires presence',
+    );
+  }
+  return (value: typedValue, present: effectivePresence);
+}
+
 bool _safetyBool(Object? value, String context) {
   if (value is! bool) throw FormatException('$context: expected a boolean');
   return value;

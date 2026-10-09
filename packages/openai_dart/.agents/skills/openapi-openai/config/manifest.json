@@ -5139,7 +5139,7 @@
       "dart_class": "SafetyAlert",
       "file": "lib/src/models/safety/safety.dart",
       "schema": "SafetyAlertResource",
-      "note": "Open response object; required nullable reason keys remain present and future properties are retained."
+      "note": "Open response object; required nullable reason remains present; optional nullable detailed_explanation preserves absent/null/string with typed presence, copy/clear and private diagnostics. Future properties remain finite and deeply immutable."
     },
     "SafetyAlertErrorType": {
       "kind": "enum",

@@ -87,14 +87,54 @@ enum SafetyCaseNoticeType {
 /// properties are preserved as finite, deeply immutable JSON. Unknown received
 /// error strings use [errorType] equal to [SafetyAlertErrorType.unknown] and
 /// preserve the wire value in [rawErrorType]. No retrieval or action occurs
-/// during parsing.
+/// during parsing. [hasDetailedExplanation] distinguishes an absent optional
+/// explanation from an explicitly null explanation.
 @immutable
 class SafetyAlert with _SafetyValue {
   /// Creates a safety alert.
   ///
   /// [rawErrorType] is required only for [SafetyAlertErrorType.unknown] and
   /// must be absent for known choices.
+  ///
+  /// Omitting both [detailedExplanation] and [hasDetailedExplanation] adopts a
+  /// valid explanation already in [rawJson], preserving earlier raw-only
+  /// construction. Otherwise the explicit value or presence wins. An explicit
+  /// null value retains its JSON key; `hasDetailedExplanation: false` omits it.
+  /// A nonnull value cannot be combined with false presence. Explanation values
+  /// accept only strings or null and are validated without disclosing content,
+  /// including stale known values in [rawJson].
   SafetyAlert({
+    required String id,
+    required int createdAt,
+    required String requestId,
+    required String responseId,
+    required String model,
+    required bool requestPaused,
+    required SafetyAlertErrorType errorType,
+    String? rawErrorType,
+    required String? reason,
+    Object? detailedExplanation = unsetCopyWithValue,
+    bool? hasDetailedExplanation,
+    Map<String, dynamic> rawJson = const {},
+  }) : this._(
+         id: id,
+         createdAt: createdAt,
+         requestId: requestId,
+         responseId: responseId,
+         model: model,
+         requestPaused: requestPaused,
+         errorType: errorType,
+         rawErrorType: rawErrorType,
+         reason: reason,
+         explanation: _safetyExplanation(
+           detailedExplanation,
+           hasDetailedExplanation,
+           rawJson,
+         ),
+         rawJson: _safetySnapshot(rawJson, 'SafetyAlert.rawJson'),
+       );
+
+  SafetyAlert._({
     required this.id,
     required this.createdAt,
     required this.requestId,
@@ -104,8 +144,10 @@ class SafetyAlert with _SafetyValue {
     required this.errorType,
     this.rawErrorType,
     required this.reason,
-    Map<String, dynamic> rawJson = const {},
-  }) : rawJson = _safetySnapshot(rawJson, 'SafetyAlert.rawJson') {
+    required ({String? value, bool present}) explanation,
+    required this.rawJson,
+  }) : detailedExplanation = explanation.value,
+       hasDetailedExplanation = explanation.present {
     _safetyRawChoice(
       errorType == SafetyAlertErrorType.unknown,
       rawErrorType,
@@ -147,6 +189,17 @@ class SafetyAlert with _SafetyValue {
   /// The JSON key remains required when its value is null.
   final String? reason;
 
+  /// A generated explanation, temporarily available for eligible zero data
+  /// retention alerts. Availability is determined by the service.
+  ///
+  /// This is null for either an absent key or an explicitly null value; use
+  /// [hasDetailedExplanation] to distinguish those states. A null [reason] does
+  /// not establish eligibility, and neither field proves execution stopped.
+  final String? detailedExplanation;
+
+  /// Whether the optional explanation key is present, including explicit null.
+  final bool hasDetailedExplanation;
+
   /// The fixed canonical object value.
   String get object => 'safety.alert';
 
@@ -186,6 +239,11 @@ class SafetyAlert with _SafetyValue {
           ? rawErrorType
           : null,
       reason: _safetyNullableString(snapshot, 'reason', 'SafetyAlert'),
+      detailedExplanation: _safetyCopyString(
+        snapshot['detailed_explanation'],
+        'SafetyAlert.detailed_explanation',
+      ),
+      hasDetailedExplanation: snapshot.containsKey('detailed_explanation'),
       rawJson: snapshot,
     );
   }
@@ -195,6 +253,15 @@ class SafetyAlert with _SafetyValue {
   /// Selecting a known [errorType] clears the previous unknown raw value.
   /// Unknown choices require an unknown [rawErrorType]. An empty [rawJson]
   /// removes future properties without changing typed fields.
+  ///
+  /// Omitting [detailedExplanation] preserves its current value and presence.
+  /// Explicit null retains the serialized key; `hasDetailedExplanation: false`
+  /// clears the effective typed value and omits that key from [toJson]. The
+  /// immutable received [rawJson] snapshot remains available. Setting true
+  /// without a value makes an absent key
+  /// explicitly null. Unlike raw-only construction, replacing [rawJson] never
+  /// adopts its explanation or resurrects a removed key. Known raw explanation
+  /// values are still validated even when they would not be serialized.
   SafetyAlert copyWith({
     String? id,
     int? createdAt,
@@ -205,25 +272,41 @@ class SafetyAlert with _SafetyValue {
     SafetyAlertErrorType? errorType,
     Object? rawErrorType = unsetCopyWithValue,
     Object? reason = unsetCopyWithValue,
+    Object? detailedExplanation = unsetCopyWithValue,
+    bool? hasDetailedExplanation,
     Map<String, dynamic>? rawJson,
-  }) => SafetyAlert(
-    id: id ?? this.id,
-    createdAt: createdAt ?? this.createdAt,
-    requestId: requestId ?? this.requestId,
-    responseId: responseId ?? this.responseId,
-    model: model ?? this.model,
-    requestPaused: requestPaused ?? this.requestPaused,
-    errorType: errorType ?? this.errorType,
-    rawErrorType: identical(rawErrorType, unsetCopyWithValue)
-        ? errorType != null && errorType != SafetyAlertErrorType.unknown
-              ? null
-              : this.rawErrorType
-        : _safetyCopyString(rawErrorType, 'SafetyAlert.rawErrorType'),
-    reason: identical(reason, unsetCopyWithValue)
-        ? this.reason
-        : _safetyCopyString(reason, 'SafetyAlert.reason'),
-    rawJson: rawJson ?? this.rawJson,
-  );
+  }) {
+    final replacingExplanation = !identical(
+      detailedExplanation,
+      unsetCopyWithValue,
+    );
+    return SafetyAlert(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      requestId: requestId ?? this.requestId,
+      responseId: responseId ?? this.responseId,
+      model: model ?? this.model,
+      requestPaused: requestPaused ?? this.requestPaused,
+      errorType: errorType ?? this.errorType,
+      rawErrorType: identical(rawErrorType, unsetCopyWithValue)
+          ? errorType != null && errorType != SafetyAlertErrorType.unknown
+                ? null
+                : this.rawErrorType
+          : _safetyCopyString(rawErrorType, 'SafetyAlert.rawErrorType'),
+      reason: identical(reason, unsetCopyWithValue)
+          ? this.reason
+          : _safetyCopyString(reason, 'SafetyAlert.reason'),
+      detailedExplanation: replacingExplanation
+          ? detailedExplanation
+          : hasDetailedExplanation == false
+          ? null
+          : this.detailedExplanation,
+      hasDetailedExplanation:
+          hasDetailedExplanation ??
+          (replacingExplanation || this.hasDetailedExplanation),
+      rawJson: rawJson ?? this.rawJson,
+    );
+  }
 
   @override
   Map<String, dynamic> _valueJson() => toJson();
@@ -242,6 +325,7 @@ class SafetyAlert with _SafetyValue {
         'request_paused',
         'error_type',
         'reason',
+        'detailed_explanation',
       },
       {
         'id': id,
@@ -253,6 +337,7 @@ class SafetyAlert with _SafetyValue {
         'request_paused': requestPaused,
         'error_type': rawErrorType ?? errorType.toJson(),
         'reason': reason,
+        if (hasDetailedExplanation) 'detailed_explanation': detailedExplanation,
       },
     ),
     'SafetyAlert JSON',
@@ -265,6 +350,12 @@ class SafetyAlert with _SafetyValue {
       'responseId: [redacted], model: [redacted], requestPaused: $requestPaused, '
       'errorType: $errorType, rawErrorType: ${rawErrorType == null ? 'null' : '[redacted]'}, '
       'reason: ${reason == null ? 'null' : '[redacted]'}, '
+      'detailedExplanation: ${!hasDetailedExplanation
+          ? 'absent'
+          : detailedExplanation == null
+          ? 'null'
+          : '[redacted]'}, '
+      'hasDetailedExplanation: $hasDetailedExplanation, '
       'object: $object, rawJson: [redacted])';
 }
 
