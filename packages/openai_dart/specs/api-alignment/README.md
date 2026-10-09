@@ -18,17 +18,17 @@ both independent reviews and all 14 final-head contexts completed. Safety
 explanations #382 merged in [PR #384](https://github.com/davidmigloz/ai_clients_dart/pull/384)
 at `08f9594dc73703e521aae4cb070a0be34509642a` on October 9, 12:34:17 UTC, after
 all 14 exact-head contexts completed and both independent reviews approved. All
-32 specified implementation tickets are closed. The user has now bounded the finish line to seven core Agents/Vaults tickets on the audited snapshot. Parent #317 stays open until those seven are accepted; optional helpers and later parity phases are deferred inventory.
+32 specified implementation tickets are closed. The user has now bounded the finish line to seven core Agents/Vaults tickets on the audited snapshot plus one expressly approved HTTP/2 evaluation. Parent #317 stays open until those seven and the evaluation are accepted; optional helpers and later parity phases are deferred inventory.
 
 Tracking parent: [GitHub issue #317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
-This parent tracks the bounded milestone; it can close after its seven remaining core tickets are accepted, without claiming full parity.
+This parent tracks the bounded milestone; it can close after its seven remaining core tickets and one approved HTTP/2 evaluation are accepted, without claiming full parity or requiring a transport migration.
 The [progress history](progress-history.md) preserves every earlier parent-issue
 receipt through the Live WebSocket merge; current work remains in this roadmap.
 
 ## Objective and current decisions
 
 Finish the seven core Agents/Vaults HTTP tickets against the frozen audited
-snapshot, through independently usable, reviewed changes. The original broader
+snapshot and one expressly approved optional HTTP/2 evaluation, through reviewed changes. The original broader
 complete-parity ambition remains deferred inventory, not the current finish line.
 
 | Decision | Status |
@@ -37,6 +37,7 @@ complete-parity ambition remains deferred inventory, not the current finish line
 | Keep specifications in the repository and track work with GitHub issues | Confirmed by the user |
 | Initial complete-parity target, with Decisions leading | Superseded by the user's bounded finish line on October 9 |
 | Freeze the audited snapshot; finish seven core Agents/Vaults tickets; defer helpers and later parity phases | Confirmed by the user |
+| One additional optional HTTP/2 evaluation | Confirmed by the user; ends with an adopt/defer decision, no automatic migration |
 | Create more alignment issues or milestones | Only after an explicit user request |
 | Permit targeted breaking corrections with migration guidance, preserving compatibility where practical | Confirmed by the user |
 | Publish or release package versions | Outside the current planning request |
@@ -301,7 +302,9 @@ These slices do not establish full Realtime/Chat/shared Responses parity.
 
 The user accepted this finish line on October 9: freeze the audited OpenAPI
 `0ef225c4`, Python `c511a771` and Node `37af8fc9` snapshots; finish only the seven
-core HTTP tickets below. They own all 47 Agents/Vaults HTTP operations. The
+core HTTP tickets below. They own all 47 Agents/Vaults HTTP operations. The user
+subsequently approved one independent HTTP/2 evaluation, bringing the fixed
+remaining work to eight items: seven implementations plus one evaluation. The
 [specification](agents-vaults.md), [operation/source ledger](agents-vaults-plan.json)
 and [planning review](reviews/33-agents-vaults-planning.md) preserve exact contracts.
 The 321 reachable schema components are source counts, not new class counts.
@@ -317,8 +320,9 @@ The 321 reachable schema components are source counts, not new class counts.
 | [#391](https://github.com/davidmigloz/ai_clients_dart/issues/391) ([39](tickets/39-subagents.md)) | Subagent inspection and history | 34, 35 |
 
 Finish when these seven issues meet their existing public API, offline example,
-documentation, testing, independent-review and final-head CI acceptance. Parent
-#317 can then close. No release/version bump or full parity claim is implied.
+documentation, testing, independent-review and final-head CI acceptance, and the
+one additional [HTTP/2 evaluation](http2-evaluation.md) ([#399](https://github.com/davidmigloz/ai_clients_dart/issues/399) ([ticket 46](tickets/46-http2-evaluation.md)))
+has an accepted reproducible adopt/defer report. Parent #317 can then close. No release/version bump or full parity claim is implied.
 Saved-agent CRUD #385 is first; Vault management #388 is independent. The proposed
 Dart surface remains `client.agents` and `client.vaults`. Inline session configuration
 and known IDs do not require prior saved-resource creation.
@@ -345,7 +349,7 @@ management #368, custom voice creation #369 and Live HTTP #370 are merged.
 Live WebSockets #371 and stored fork/transcript #372 are merged, completing
 Phase 5 and all 30 original implementation tickets. The Decisions image URL
 follow-up #381 merged in #383 and Safety explanations #382 merged in #384.
-All 32 previously specified implementation tickets are closed. Seven core Phase6 tickets remain in the bounded milestone; the rest is deferred inventory. Keep audited gaps visible without treating them as an automatic work queue.
+All 32 previously specified implementation tickets are closed. Seven core Phase6 tickets plus one authorized HTTP/2 evaluation remain in the bounded milestone; the rest is deferred inventory. Keep audited gaps visible without treating them as an automatic work queue.
 
 | Phase | Demonstrable outcomes | Dependencies and scope notes |
 | --- | --- | --- |
@@ -362,7 +366,7 @@ All 32 previously specified implementation tickets are closed. Seven core Phase6
 The earlier complete-parity target is historical context. The user's bounded
 finish line supersedes it. The inventory below preserves unimplemented contracts
 and sunset evidence for possible future explicit prioritization; it does not prevent
-closing the bounded milestone after its seven active tickets are accepted.
+closing the bounded milestone after its seven core tickets and one approved evaluation are accepted.
 
 ## Audit inventory and references
 

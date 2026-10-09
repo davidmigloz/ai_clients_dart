@@ -4,7 +4,7 @@ Status: original source/contract planning reviews approved. User-authorized
 bounded-scope revision below is independently approved with no open findings.
 Specification: [Agents and Vaults](../agents-vaults.md).
 Coverage: [operation, component and source ledger](../agents-vaults-plan.json).
-Original reviewed inventory: 13 tickets, repository 33–45. Current active milestone: seven tickets 33–39; tickets 40–45 are deferred. This record accepts
+Original reviewed inventory: 13 tickets, repository 33–45. Current active milestone: seven core tickets 33–39 plus one authorized HTTP/2 evaluation 46; tickets 40–45 are deferred. This record accepts
 planning only; it does not claim runtime implementation or complete parity.
 
 ## Source receipts and authority
@@ -133,7 +133,10 @@ closure, checks all 321 schema fingerprints and 52 source hashes, confirms the
 planning-only file boundary. Whitespace checks pass. Final published blob/template/
 graph checks and exact-head CI are reported in the PR and parent before merge.
 
-## User-authorized bounded finish line
+## User-authorized bounded finish line (initial seven-ticket revision)
+
+This section preserves the first bounded decision and its receipts. The subsequent
+user-approved HTTP/2 evaluation adds one finite work item, as recorded below.
 
 On October 9, the user accepted a frozen snapshot and seven core Agents/Vaults
 HTTP tickets (#385–#391). The six workflow/helper tickets (#392–#397) remain open,
@@ -162,3 +165,24 @@ findings, preserving all source/provenance and active contract/acceptance bodies
 Receipt SHA256: `db4902459e65ccc67805f3b406c70f5592bf058a9d4555b121a8b71643b96dba`.
 Publication checks verify the new active/deferred graph and current PR head; earlier
 13-ticket publication counts and CI receipts remain historical.
+
+## One expressly approved HTTP/2 evaluation
+
+After the bounded revision, the user approved [one additional evaluation](../http2-evaluation.md)
+([#399](https://github.com/davidmigloz/ai_clients_dart/issues/399) ([ticket 46](../tickets/46-http2-evaluation.md))). Remaining work is now seven unchanged
+core implementation tickets plus this one independent evaluation. It owns no canonical
+HTTP operation/schema and has no dependency on the pending core implementations.
+Completion requires a reviewed reproducible adopt/defer report; production migration,
+upstream fixes and automatically generated follow-on issues are not prerequisites.
+The prior seven-ticket scope/publication receipts remain historical; current issue
+links, active count and exact-head CI are validated in the updated PR and parent.
+
+Independent source/compatibility review approved this documentation-only addition
+with no open findings. It verified the published/tagged `http2` 3.1.0 receipts,
+four finite requirements, matched reusable local TLS baselines and defer as a valid
+completion outcome. The original source/provenance ledger and all 13 existing
+ticket documents remain unchanged. Review receipt SHA256:
+`ee973ef122c115298f69cfd4aa79acc9eae1cb870a3ec1d437c2b29c5f74cd50`.
+The reviewed draft preceded issue-number publication; final publication review
+checks the actual #399 links, eight-item graph and exact published head separately.
+This approval supplies no benchmark or runtime compatibility evidence; cost $0.

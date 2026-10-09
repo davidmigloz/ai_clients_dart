@@ -1,6 +1,6 @@
 {
   "format_version": 1,
-  "status": "bounded planning milestone; seven core HTTP tickets active; implementation pending",
+  "status": "bounded planning milestone; seven core HTTP tickets plus one authorized evaluation; acceptance pending",
   "parent_issue": 317,
   "repository_base_commit": "08f9594dc73703e521aae4cb070a0be34509642a",
   "reviewed_at_utc": "2026-10-09T12:36:45.060428+00:00",
@@ -38,7 +38,10 @@
     "active_slices": 7,
     "deferred_slices": 6,
     "active_primary_requirements": 12,
-    "deferred_primary_requirements": 18
+    "deferred_primary_requirements": 18,
+    "active_evaluation_slices": 1,
+    "total_active_work_items": 8,
+    "evaluation_requirements": 4
   },
   "scope_notes": [
     "Schema counts are source components, not new Dart class counts. Shared contracts may be reused only after wire equivalence is proved.",
@@ -4899,7 +4902,7 @@
   "planning_api_cost_usd": 0,
   "milestone": {
     "decision_date": "2026-10-09",
-    "user_decision": "Accepted bounded finish line: frozen audited snapshot; seven core Agents/Vaults HTTP tickets; six workflow/helper tickets and later parity phases deferred.",
+    "user_decision": "Accepted bounded finish line: frozen audited snapshot; seven core Agents/Vaults HTTP tickets; six workflow/helper tickets and later parity phases deferred. User subsequently approved exactly one independent optional HTTP2 evaluation ticket, completing with an adopt/defer report rather than an automatic migration.",
     "source_policy": "Use source_pins and source_bytes recorded in this ledger. Verify the pinned contracts; do not adopt new upstream heads automatically.",
     "active_repository_tickets": [
       33,
@@ -4935,7 +4938,7 @@
       396,
       397
     ],
-    "completion_condition": "Close parent #317 after all seven active tickets have accepted public implementations, examples/documentation, existing quality gates, independent reviews and green final-head CI. Deferred inventory is not a completion prerequisite.",
+    "completion_condition": "Close parent #317 after the seven core tickets meet their existing implementation acceptance and the one HTTP2 evaluation has a reviewed, reproducible adopt/defer decision. A defer decision is successful evaluation completion; no production migration or follow-on issue is required.",
     "expansion_policy": "No new alignment issues or milestones without an explicit user request. Resolve blockers or regressions affecting the included 47 operations within the existing tickets; report scope-changing blockers for a user decision.",
     "deferred_later_work": [
       "Administration/storage",
@@ -4943,6 +4946,36 @@
       "Legacy endpoints",
       "Remaining shared SDK/model parity"
     ],
-    "coverage_claim": "Completion establishes this fixed core milestone only, not complete API/SDK parity."
+    "coverage_claim": "Completion establishes this fixed core milestone only, not complete API/SDK parity.",
+    "additional_evaluations": [
+      {
+        "ticket": 46,
+        "document": "tickets/46-http2-evaluation.md",
+        "specification": "http2-evaluation.md",
+        "title": "Evaluate optional HTTP/2 transport support",
+        "status": "active bounded evaluation; decision and measurements pending",
+        "github_issue": {
+          "number": 399,
+          "url": "https://github.com/davidmigloz/ai_clients_dart/issues/399"
+        },
+        "dependencies": [],
+        "requirement_ids": [
+          "HTTP2-EVAL-01",
+          "HTTP2-EVAL-02",
+          "HTTP2-EVAL-03",
+          "HTTP2-EVAL-04"
+        ],
+        "canonical_operation_ids": [],
+        "source_version": "http2 3.1.0",
+        "archive_sha256": "480bf904908b4e4ec4fac8117f69f5ff54cf48c12b1761f0a192e1e10196ee7b",
+        "adapter_sha256": "6b1698059e602fa6cf429d7c8a242ad672e8e481033de0117d119afdfccb12d8",
+        "completion_outcomes": [
+          "adopt recommendation for a demonstrated safe optional use case",
+          "defer recommendation with recorded blockers/measurements"
+        ],
+        "production_migration_authorized": false,
+        "automatic_follow_on_work_authorized": false
+      }
+    ]
   }
 }

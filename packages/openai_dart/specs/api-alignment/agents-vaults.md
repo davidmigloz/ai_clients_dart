@@ -1,13 +1,13 @@
 # Agents and Vaults: Phase 6 specification
 
-Status: **bounded milestone; seven core tickets active; implementation acceptance pending**. Parent:
+Status: **bounded milestone; seven core tickets plus one evaluation active; acceptance pending**. Parent:
 [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 The preceding 32 implementation tickets are closed after
 [PR #384](https://github.com/davidmigloz/ai_clients_dart/pull/384) merged at
 `08f9594dc73703e521aae4cb070a0be34509642a`. That completion does not establish
-complete API/SDK parity. The current milestone closes after its seven active core tickets are accepted.
+complete API/SDK parity. The current milestone closes after its seven active core tickets and the separately approved HTTP/2 evaluation are accepted.
 
-Active scope: seven core HTTP capabilities, repository tickets 33–39 / issues #385–#391. Six workflow/helper capabilities (tickets 40–45 / issues #392–#397) are retained as deferred backlog. The
+Active API scope: seven core HTTP capabilities, repository tickets 33–39 / issues #385–#391. Six workflow/helper capabilities (tickets 40–45 / issues #392–#397) are retained as deferred backlog. The
 [machine-readable plan](agents-vaults-plan.json) is the exhaustive operation,
 component and primary requirement ownership ledger. All new ticket acceptance
 criteria remain unchecked. This specification implements no public Dart API,
@@ -18,11 +18,11 @@ adds no runtime manifest mapping and makes no live API request.
 Applications manage saved agents, create and inspect durable sessions, consume
 raw event streams, submit explicit messages/tool results/cancellation/approval
 responses, inspect turn/subagent history and traces, provision hosted environments,
-manage write-only credentials, and download published artifacts. These seven core HTTP slices define the finish line. Lifecycle webhooks, recovery examples and optional run/dispatch/result/file helpers are deferred; their audited requirements remain below for future explicit prioritization.
+manage write-only credentials, and download published artifacts. These seven core HTTP slices define the API implementation finish line; the separately authorized HTTP/2 evaluation adds one report, not another API implementation. Lifecycle webhooks, recovery examples and optional run/dispatch/result/file helpers are deferred; their audited requirements remain below for future explicit prioritization.
 
-On October 9, the user accepted a bounded finish line, superseding the original complete-parity execution target. Freeze the audited OpenAPI/Python/Node pins below, implement only the seven core HTTP tickets, then stop this alignment milestone. Repository documents plus GitHub issues and targeted breaking corrections with migration guidance remain agreed policies.
+On October 9, the user accepted a bounded finish line, superseding the original complete-parity execution target. Freeze the audited OpenAPI/Python/Node pins below, implement only the seven core HTTP tickets, then stop this alignment milestone after the separately approved [HTTP/2 evaluation](http2-evaluation.md) ([#399](https://github.com/davidmigloz/ai_clients_dart/issues/399) ([ticket 46](tickets/46-http2-evaluation.md))) has an accepted adopt/defer report. This adds one finite evaluation, not a production migration. Repository documents plus GitHub issues and targeted breaking corrections with migration guidance remain agreed policies.
 
-Parent #317 can close when #385–#391 meet their existing implementation/review/CI acceptance. The six deferred workflow/helper issues stay open in the backlog without native membership in this tracker. Administration/storage, authentication/legacy, runtime configuration [#316](https://github.com/davidmigloz/ai_clients_dart/issues/316) and remaining shared SDK/model gaps are also deferred; they are not completion prerequisites.
+Parent #317 can close when #385–#391 meet their existing implementation/review/CI acceptance and the one HTTP/2 evaluation has reviewed, reproducible evidence and a final adopt/defer decision. A defer outcome satisfies the evaluation. The six deferred workflow/helper issues stay open in the backlog without native membership in this tracker. Administration/storage, authentication/legacy, runtime configuration [#316](https://github.com/davidmigloz/ai_clients_dart/issues/316) and remaining shared SDK/model gaps are also deferred; they are not completion prerequisites.
 
 No new alignment issues or milestones are created without an explicit user request. Resolve blockers or regressions affecting these 47 operations within the existing seven tickets. Report a scope-changing blocker for a user decision. Verify fixed source bytes and contracts rather than adopting new upstream heads automatically. Finishing this milestone establishes its stated capabilities, not complete API/SDK parity.
 
@@ -516,4 +516,4 @@ Acceptance remains pending:
 - [ ] All seven core workflows have executable offline demonstrations; raw browser approval/auth inputs remain covered without requiring deferred orchestration helpers.
 - [ ] Every introduced public API has an example, README guidance, correct manifest/export entries and migration notes for any breaking correction.
 - [ ] All affected platform checks, independent reviews and final-head CI pass; implementation issues are closed only by their accepted PRs.
-- [ ] Parent #317 closes when these seven tickets are accepted, with deferred work recorded and no complete API/SDK parity claim.
+- [ ] Parent #317 closes when the seven core tickets and the one HTTP/2 evaluation are accepted, with deferred work recorded and no complete API/SDK parity or automatic transport migration claim.
