@@ -1,6 +1,7 @@
 # Vault and write-only credential management
 
-Status: active bounded milestone; implementation acceptance pending.
+Status: implemented; published-head review, CI and merge acceptance pending.
+Acceptance record: [Vaults implementation](../reviews/36-vaults-credentials.md).
 GitHub: [#388](https://github.com/davidmigloz/ai_clients_dart/issues/388).
 Primary requirements: `AGENTS-VAULT-01`, `AGENTS-VAULT-02`.
 Native GitHub blockers: none.
@@ -45,13 +46,13 @@ This ticket owns these 10 operations and their complete request/response/paramet
 
 ## Acceptance criteria
 
-- [ ] Public mock requests demonstrate all ten operations, secret-bearing create/rotation bodies, safe returned inspection/delete results, exact beta/auth context, deep-object metadata query encoding, scalar/list status encoding and ID pagination.
-- [ ] Every create/rotate/returned auth and networking variant, metadata omission/value/null rule, nonempty rotation requirement, OAuth expiry/refresh semantics and name/string/UTF-8/host/secret boundary has canonical and malformed-input coverage.
-- [ ] Secret sentinel fixtures prove request values are intentionally serializable for transport while safe resources, default diagnostics, validation errors, equality/hash ownership and unknown received data handling do not leak secrets.
-- [ ] An offline vault/credential example completes create, safe retrieve/list, rotation and deletion; README/llms document write-only secrets, caller-owned consent/revocation and placeholder/new-environment limitations.
-- [ ] Public request bodies/parameters are captured through the exported client and validated against the pinned canonical contracts; the feature assertions fail against base `08f9594dc73703e521aae4cb070a0be34509642a`, rather than merely mirroring model implementation.
-- [ ] Constructor/parser/copy tests cover all owned discriminator variants, required-nullable/optional-nonnull/tri-state values, nested ownership, equality/hash with the same fields, safe diagnostics, unknown-received fallback and malformed-known errors.
-- [ ] A runnable offline example, package README and regenerated llms documentation describe the real public capability and its limits; actual implemented types have honest manifest mappings and unchanged unrelated exclusions/verifier policy.
+- [x] Public mock requests demonstrate all ten operations, secret-bearing create/rotation bodies, safe returned inspection/delete results, exact beta/auth context, deep-object metadata query encoding, scalar/list status encoding and ID pagination.
+- [x] Every create/rotate/returned auth and networking variant, metadata omission/value/null rule, nonempty rotation requirement, OAuth expiry/refresh semantics and name/string/UTF-8/host/secret boundary has canonical and malformed-input coverage.
+- [x] Secret sentinel fixtures prove request values are intentionally serializable for transport while safe resources, default diagnostics, validation errors, equality/hash ownership and unknown received data handling do not leak secrets.
+- [x] An offline vault/credential example completes create, safe retrieve/list, rotation and deletion; README/llms document write-only secrets, caller-owned consent/revocation and placeholder/new-environment limitations.
+- [x] Public request bodies/parameters are captured through the exported client and validated against the pinned canonical contracts; the feature assertions fail against base `08f9594dc73703e521aae4cb070a0be34509642a`, rather than merely mirroring model implementation.
+- [x] Constructor/parser/copy tests cover all owned discriminator variants, required-nullable/optional-nonnull/tri-state values, nested ownership, equality/hash with the same fields, safe diagnostics, unknown-received fallback and malformed-known errors.
+- [x] A runnable offline example, package README and regenerated llms documentation describe the real public capability and its limits; actual implemented types have honest manifest mappings and unchanged unrelated exclusions/verifier policy.
 - [ ] Required formatting/fixes/analysis, affected focused fixtures on VM/browser JavaScript/Wasm, and the package unit suite pass; independent requirements and engineering reviews approve the published final commit, and that exact head has green CI before a user-authorized merge.
 
 ## Source and validation evidence

@@ -49,6 +49,7 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 - Saved agent CRUD with persisted function, MCP, web search and computer-use configuration through `client.agents`
 - Durable sessions with JSON/SSE creation, persistent raw event observation, manual function/approval input and explicit cancellation through `client.agents.sessions`
 - Root session/turn history and currently published OTLP trace pages through session items, turns and traces resources
+- Vault CRUD and write-only credential creation/rotation with safe returned authentication metadata
 - Files, uploads, batches, fine-tuning, moderations, evals, and model management
 - Conversations, containers, content provenance checks, ChatKit, and skills
 - Local signed webhook verification with 26 typed received event variants, plus project endpoint management/discovery
@@ -234,9 +235,10 @@ encoded as one segment; empty and exact dot segments are rejected as local URI
 safeguards. Configuration and HTTP diagnostics redact private payloads, while
 explicit properties and `toJson()` remain available to the caller.
 
-Injected HTTP clients remain caller-owned. Sessions, environments, traces,
-subagent inspection and Vault operations are scheduled in their own bounded
-implementation tickets. The runnable example exercises all six saved tool types,
+Injected HTTP clients remain caller-owned. Durable sessions, root/turn history
+and published traces are available through `client.agents.sessions`; Vaults and
+write-only credentials use `client.vaults`. Owned environments and subagent
+inspection remain in the bounded implementation queue. The runnable example exercises all six saved tool types,
 pagination, replacement, clear/reset and deletion with seven mock requests and
 explicit transport cleanup, without an API key or paid API call.
 
@@ -335,6 +337,82 @@ session's project and have `api.traces.read` or `api.agents.read` permission.
 
 → [Offline session-history example](example/agent_session_history_example.dart) —
 known-ID root/turn inspection and two trace pages, with no live calls or key ($0).
+
+
+### Vaults and write-only credentials
+
+Manage Vaults independently of session creation through `client.vaults`:
+
+```dart
+final vault = await client.vaults.create(CreateVaultRequest(name: 'Example Vault'));
+final credentials = client.vaults.credentials;
+final credential = await credentials.create(vault.id,
+  CreateVaultCredentialRequest(name: 'Hosted API credential',
+    auth: CreateVaultEnvironmentVariableAuth(secretName: 'SERVICE_API_KEY',
+      secretValue: 'application-supplied-secret',
+      networking: VaultCredentialNetworking.limited(
+        allowedHosts: ['api.example.com']))));
+await client.vaults.retrieve(vault.id);
+final vaultPage = await client.vaults.list(metadata: {'application': 'demo'},
+  status: VaultStatusFilter.single(VaultStatus.active));
+await client.vaults.update(vault.id, UpdateVaultRequest(metadata: {}));
+final safe = await credentials.retrieve(vault.id, credential.id);
+final credentialPage = await credentials.list(vault.id, limit: 20);
+await credentials.rotate(vault.id, credential.id,
+  RotateVaultCredentialRequest(auth: RotateVaultEnvironmentVariableAuth(
+    secretValue: 'application-supplied-replacement'), metadata: {}));
+await credentials.delete(vault.id, credential.id);
+await client.vaults.delete(vault.id);
+```
+
+Read real secrets from application-owned secret storage; the snippet illustrates
+transport fields. Creation supports `mcp_oauth`, `static_bearer` and
+`environment_variable` through separate create, rotation and returned auth unions.
+Returned auth has no token/access-token/refresh-token/client-secret/secret-value
+readback fields. Known write-only fields in malformed returned auth are rejected;
+other finite future fields remain privately owned. Default diagnostics redact
+request bodies, metadata, URLs, headers and received values. Explicit exception
+fields retain HTTP context for deliberate inspection.
+
+Rotation needs `auth` or `metadata` and cannot change auth method, destination,
+environment secret name or networking. Omitted OAuth expiry preserves it unless
+a new access token is supplied; a new token without expiry or explicit-null expiry
+clears it. Omitted/null refresh tokens and client secrets retain stored secrets;
+omitted scope retains it and explicit null clears it. Nullable request fields use
+`clearX: true` to emit JSON null; these flags express wire presence, whose storage
+meaning follows the individual field. Metadata update/rotation is optional
+nonnull: omission retains, `{}` clears, and JSON null is invalid.
+
+Names retain their supplied spelling and must contain 1–256 UTF-8 bytes after
+trimming. Vault creation metadata permits 1,024 pairs with 256-character keys and
+1,048,576-character values and supports explicit null; vault updates, credential
+creation/rotation and list filters use 16 pairs, 64-character keys and
+512-character values. List metadata uses `metadata[key]=value` with AND matching
+and eventual consistency. Scalar status uses `status`; arrays use repeated
+`status[]`. Both active and archived are included by default; an empty status
+array supplies no pairs. Lists accept limits 1–100 and exclusive `after` IDs;
+reuse `lastId` with the same order/filters, and retain nullable empty-page boundaries.
+
+Hosted environment-variable secrets supply placeholders to sandbox code, with
+substitution only for allowed outgoing HTTPS requests on ports 443/8443. The
+environment network policy must also permit the destination. Credential networking
+`unrestricted` requires restricted environment network access with explicit
+`allowed_domains`; it does not grant unrestricted sandbox networking. Limited
+networking permits 1–16 distinct hostnames/IPv4 addresses after lowercase
+normalization, without scheme/path/port/wildcard/IPv6. Request host spelling remains
+intact for service normalization. Secret names use ASCII identifier syntax;
+`CODEX_*` and managed proxy/certificate names are reserved. Known conventional
+proxy/certificate names are rejected locally; additional managed names remain
+service-owned. Secret values are nonempty and reject CR/LF/NUL.
+
+Placeholders cannot supply secrets for local computation, self-hosted environments
+or application function tools. Rotation affects values used by new sessions or
+environments and does not promise immediate replacement inside an existing sandbox.
+Provider OAuth consent/revocation stays caller-owned; deleting a stored credential
+or Vault does not revoke provider tokens or cancel running work.
+
+→ [Offline Vaults example](example/vaults_example.dart) — all ten operations,
+synthetic write-only secrets and safe returned metadata, no live API or key ($0).
 
 
 ### How do I classify or score shared input?
@@ -2985,6 +3063,7 @@ See the [example/](example/) directory for complete examples:
 
 | Example | Description |
 |---------|-------------|
+| [`vaults_example.dart`](example/vaults_example.dart) | Offline Vault CRUD and write-only credential create/rotate with safe inspection |
 | [`agent_session_history_example.dart`](example/agent_session_history_example.dart) | Offline root/turn history and published OTLP trace pagination |
 | [`agent_sessions_example.dart`](example/agent_sessions_example.dart) | Offline durable sessions, persistent observation, manual function result and explicit cancellation |
 | [`saved_agents_example.dart`](example/saved_agents_example.dart) | Offline saved-agent CRUD, all six persisted tools, pagination, replacement and clear/reset |
@@ -3047,6 +3126,7 @@ See the [example/](example/) directory for complete examples:
 | API | Status |
 |-----|--------|
 | Agents | Saved agent CRUD and durable session CRUD, JSON/SSE creation, persistent event observation and manual inputs; root/turn history and published OTLP traces; owned environments and subagent inspection pending |
+| Vaults | Vault CRUD and write-only OAuth, bearer and hosted environment-variable credential management |
 | Chat Completions | Supported; stored-completion management pending |
 | Responses API | Supported with persistent WebSockets, mid-turn steering, opt-in recovery and beta tool-result injection; additional tool/configuration details pending |
 | Decisions API | ✅ Full |

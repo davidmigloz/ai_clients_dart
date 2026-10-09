@@ -37,6 +37,7 @@ export 'skills_resource.dart';
 export 'streaming_resource.dart';
 export 'threads_resource.dart';
 export 'uploads_resource.dart';
+export 'vaults_resource.dart';
 export 'vector_stores_resource.dart';
 export 'videos_resource.dart';
 export 'voice_consents_resource.dart';

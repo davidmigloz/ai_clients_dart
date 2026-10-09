@@ -12007,6 +12007,379 @@
       "file": "lib/src/models/agents/agent_session_history.dart",
       "schema": "SessionTurnTraceResource",
       "note": "Actual frozen root history/trace envelope. Required nullable page cursors, separate existing17-way history items, finite detached private OTLP JSON, immutable copies and equality/hash validated with canonical exported-client fixtures."
+    },
+    "CreateMcpOauthRefreshParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateVaultMcpOauthRefresh",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "CreateMcpOauthRefreshParam",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "CreateMcpOauthTokenEndpointAuthParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "CreateVaultTokenEndpointAuth",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "CreateMcpOauthTokenEndpointAuthParam",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "CreateMcpOauthTokenEndpointAuthParamClientSecretBasic": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CreateVaultTokenEndpointClientSecretBasic",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "CreateMcpOauthTokenEndpointAuthParamClientSecretBasic",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "CreateVaultTokenEndpointAuth"
+    },
+    "CreateMcpOauthTokenEndpointAuthParamClientSecretPost": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CreateVaultTokenEndpointClientSecretPost",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "CreateMcpOauthTokenEndpointAuthParamClientSecretPost",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "CreateVaultTokenEndpointAuth"
+    },
+    "CreateMcpOauthTokenEndpointAuthParamNone": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CreateVaultTokenEndpointNone",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "CreateMcpOauthTokenEndpointAuthParamNone",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "CreateVaultTokenEndpointAuth"
+    },
+    "CreateVaultCredentialAuthParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "CreateVaultCredentialAuth",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "CreateVaultCredentialAuthParam",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "CreateVaultCredentialAuthParamEnvironmentVariable": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CreateVaultEnvironmentVariableAuth",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "CreateVaultCredentialAuthParamEnvironmentVariable",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "CreateVaultCredentialAuth"
+    },
+    "CreateVaultCredentialAuthParamMcpOauth": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CreateVaultMcpOauthAuth",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "CreateVaultCredentialAuthParamMcpOauth",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "CreateVaultCredentialAuth"
+    },
+    "CreateVaultCredentialAuthParamStaticBearer": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CreateVaultStaticBearerAuth",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "CreateVaultCredentialAuthParamStaticBearer",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "CreateVaultCredentialAuth"
+    },
+    "CreateVaultCredentialParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateVaultCredentialRequest",
+      "file": "lib/src/models/vaults/vault_core.dart",
+      "schema": "CreateVaultCredentialParams",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "CreateVaultParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateVaultRequest",
+      "file": "lib/src/models/vaults/vault_core.dart",
+      "schema": "CreateVaultParams",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "DeletedVaultCredentialResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeletedVaultCredential",
+      "file": "lib/src/models/vaults/vault_core.dart",
+      "schema": "DeletedVaultCredentialResource",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "DeletedVaultResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeletedVault",
+      "file": "lib/src/models/vaults/vault_core.dart",
+      "schema": "DeletedVaultResource",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "McpOauthRefreshResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VaultMcpOauthRefresh",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "McpOauthRefreshResource",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "McpOauthTokenEndpointAuthResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "VaultTokenEndpointAuth",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "McpOauthTokenEndpointAuthResource",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "McpOauthTokenEndpointAuthResourceClientSecretBasic": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VaultTokenEndpointClientSecretBasic",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "McpOauthTokenEndpointAuthResourceClientSecretBasic",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "VaultTokenEndpointAuth"
+    },
+    "McpOauthTokenEndpointAuthResourceClientSecretPost": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VaultTokenEndpointClientSecretPost",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "McpOauthTokenEndpointAuthResourceClientSecretPost",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "VaultTokenEndpointAuth"
+    },
+    "McpOauthTokenEndpointAuthResourceNone": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VaultTokenEndpointNone",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "McpOauthTokenEndpointAuthResourceNone",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "VaultTokenEndpointAuth"
+    },
+    "RotateMcpOauthRefreshParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RotateVaultMcpOauthRefresh",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "RotateMcpOauthRefreshParam",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "RotateMcpOauthTokenEndpointAuthParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "RotateVaultTokenEndpointAuth",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "RotateMcpOauthTokenEndpointAuthParam",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "RotateMcpOauthTokenEndpointAuthParamClientSecretBasic": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "RotateVaultTokenEndpointClientSecretBasic",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "RotateMcpOauthTokenEndpointAuthParamClientSecretBasic",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "RotateVaultTokenEndpointAuth"
+    },
+    "RotateMcpOauthTokenEndpointAuthParamClientSecretPost": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "RotateVaultTokenEndpointClientSecretPost",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "RotateMcpOauthTokenEndpointAuthParamClientSecretPost",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "RotateVaultTokenEndpointAuth"
+    },
+    "RotateVaultCredentialAuthParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "RotateVaultCredentialAuth",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "RotateVaultCredentialAuthParam",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "RotateVaultCredentialAuthParamEnvironmentVariable": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "RotateVaultEnvironmentVariableAuth",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "RotateVaultCredentialAuthParamEnvironmentVariable",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "RotateVaultCredentialAuth"
+    },
+    "RotateVaultCredentialAuthParamMcpOauth": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "RotateVaultMcpOauthAuth",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "RotateVaultCredentialAuthParamMcpOauth",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "RotateVaultCredentialAuth"
+    },
+    "RotateVaultCredentialAuthParamStaticBearer": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "RotateVaultStaticBearerAuth",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "RotateVaultCredentialAuthParamStaticBearer",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "RotateVaultCredentialAuth"
+    },
+    "RotateVaultCredentialParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RotateVaultCredentialRequest",
+      "file": "lib/src/models/vaults/vault_core.dart",
+      "schema": "RotateVaultCredentialParams",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "UpdateVaultParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateVaultRequest",
+      "file": "lib/src/models/vaults/vault_core.dart",
+      "schema": "UpdateVaultParams",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "VaultCredentialAuthResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "VaultCredentialAuth",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "VaultCredentialAuthResource",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "VaultCredentialAuthResourceEnvironmentVariable": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VaultEnvironmentVariableAuth",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "VaultCredentialAuthResourceEnvironmentVariable",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "VaultCredentialAuth"
+    },
+    "VaultCredentialAuthResourceMcpOauth": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VaultMcpOauthAuth",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "VaultCredentialAuthResourceMcpOauth",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "VaultCredentialAuth"
+    },
+    "VaultCredentialAuthResourceStaticBearer": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VaultStaticBearerAuth",
+      "file": "lib/src/models/vaults/vault_auth.dart",
+      "schema": "VaultCredentialAuthResourceStaticBearer",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "VaultCredentialAuth"
+    },
+    "VaultCredentialListResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VaultCredentialList",
+      "file": "lib/src/models/vaults/vault_core.dart",
+      "schema": "VaultCredentialListResource",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "VaultCredentialNetworkingParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "VaultCredentialNetworking",
+      "file": "lib/src/models/vaults/vault_networking.dart",
+      "schema": "VaultCredentialNetworkingParam",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "VaultCredentialNetworkingParamLimited": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VaultLimitedNetworking",
+      "file": "lib/src/models/vaults/vault_networking.dart",
+      "schema": "VaultCredentialNetworkingParamLimited",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "VaultCredentialNetworking"
+    },
+    "VaultCredentialNetworkingParamUnrestricted": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VaultUnrestrictedNetworking",
+      "file": "lib/src/models/vaults/vault_networking.dart",
+      "schema": "VaultCredentialNetworkingParamUnrestricted",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "VaultCredentialNetworking"
+    },
+    "VaultCredentialNetworkingResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "VaultCredentialNetworkingResource",
+      "file": "lib/src/models/vaults/vault_networking.dart",
+      "schema": "VaultCredentialNetworkingResource",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "VaultCredentialNetworkingResourceLimited": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VaultLimitedNetworkingResource",
+      "file": "lib/src/models/vaults/vault_networking.dart",
+      "schema": "VaultCredentialNetworkingResourceLimited",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "VaultCredentialNetworkingResource"
+    },
+    "VaultCredentialNetworkingResourceUnrestricted": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VaultUnrestrictedNetworkingResource",
+      "file": "lib/src/models/vaults/vault_networking.dart",
+      "schema": "VaultCredentialNetworkingResourceUnrestricted",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures.",
+      "parent": "VaultCredentialNetworkingResource"
+    },
+    "VaultCredentialResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VaultCredential",
+      "file": "lib/src/models/vaults/vault_core.dart",
+      "schema": "VaultCredentialResource",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "VaultListResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VaultList",
+      "file": "lib/src/models/vaults/vault_core.dart",
+      "schema": "VaultListResource",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "VaultResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Vault",
+      "file": "lib/src/models/vaults/vault_core.dart",
+      "schema": "VaultResource",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "VaultStatusFilterParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "VaultStatusFilter",
+      "file": "lib/src/models/vaults/vault_core.dart",
+      "schema": "VaultStatusFilterParam",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "VaultStatusParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VaultStatus",
+      "file": "lib/src/models/vaults/vault_core.dart",
+      "schema": "VaultStatusParam",
+      "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
     }
   }
 }

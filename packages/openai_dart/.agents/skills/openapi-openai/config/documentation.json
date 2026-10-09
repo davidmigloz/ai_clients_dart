@@ -69,7 +69,9 @@
     "live": "live_http_example",
     "liveSessions": "live_http_example",
     "agents": "saved_agents_example",
-    "agentSessions": "agent_sessions_example"
+    "agentSessions": "agent_sessions_example",
+    "vaults": "vaults_example",
+    "vaultCredentials": "vaults_example"
   },
   "excluded_from_examples": [],
   "drift_patterns": [

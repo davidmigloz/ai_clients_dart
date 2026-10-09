@@ -1,7 +1,11 @@
 # Session history, turns and traces acceptance
 
-Status: implementation for [#387](https://github.com/davidmigloz/ai_clients_dart/issues/387),
-[ticket 35](../tickets/35-history-traces.md). Local source/runtime acceptance passes; exact published-head reviews and CI remain publication gates.
+Status: merged in [PR #402](https://github.com/davidmigloz/ai_clients_dart/pull/402),
+closing #387, on October 9, 19:58:29 UTC. Squash commit
+`c3a3191121f3c32b760189801cb6ecb0cfe69753`; approved head
+`31b689893a4929287a0d7762844e5ff617917cea` had both independent published
+content/CI approvals, zero findings and all 14 completed contexts
+(13 successes and the standard Test (all) skip), with CLEAN merge state.
 
 ## Frozen contract and delivered scope
 
@@ -80,9 +84,12 @@ package unit suite passes 23,782 cases with two existing environment skips.
 Ordered stable formatting, fixes and fatal-info analysis pass. Independent review
 identified and resolved JavaScript accepting non-finite values as integers in
 trace construction/copy; permanent constructor, parser and copy tests cover it.
-Final combined requirements and engineering approval, exact published-head review
-and CI remain publication gates. This record does not claim an unpublished commit
-has passed CI.
+Final combined requirements and engineering approval, published-head review and
+CI completed before the user-authorized merge. Published content receipts:
+requirements `d066910d31f454ad4af975c5dbab5837ce7b38e7ef3ed21977482365d79c03cd`,
+engineering `2ebae14da6913923eed9ee92351706700ff788116a6b62f366dcf2c630a6e310`;
+CI supplements `6312b55507af875424d5f34c04cf96c266212547e7a52b7cacfe86d8465cba18`
+and `79c41654c7449602c1836382597fc28f8d9a5ca89853a904e36f690cd1c0048f`.
 
 ## Toolkit diagnostics and bounded progress
 
@@ -93,5 +100,5 @@ with no added or removed diagnostic identities. All inherited limitations stay
 visible; no checker, exclusion, skip or global lint is weakened. Docs/exports/
 README checks pass. Prior durable-session merge acceptance is updated truthfully.
 
-Parent #317 remains open for five core issues #387–391 and evaluation #399 until
+Parent #317 remains open for four core issues #388–391 and evaluation #399 until
 individual merge acceptance. Helpers #392–397 and Admin/legacy work remain deferred.

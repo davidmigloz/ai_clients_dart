@@ -28,7 +28,9 @@ bool isPrivateAudioRequest(http.BaseRequest? request) =>
 
 /// Identifies implemented Agents routes containing private configuration/input.
 bool isAgentsApiRequest(http.BaseRequest? request) =>
-    isSavedAgentRequest(request) || isAgentSessionRequest(request);
+    isSavedAgentRequest(request) ||
+    isAgentSessionRequest(request) ||
+    isVaultRequest(request);
 
 /// Identifies implemented raw session/event/history operations, including custom bases.
 bool isAgentSessionRequest(http.BaseRequest? request) {
@@ -137,3 +139,28 @@ bool isVoiceConsentRequest(http.BaseRequest? request) {
 /// Retains explicit caller HTTP data while redacting audio diagnostics.
 bool isPrivateAudioResponse(Object? cause) =>
     cause is http.BaseResponse && isPrivateAudioRequest(cause.request);
+
+/// Identifies all ten private Vault/credential routes, including custom bases.
+bool isVaultRequest(http.BaseRequest? request) {
+  if (request == null) return false;
+  final s = request.url.pathSegments;
+  final collection =
+      s.isNotEmpty &&
+      s.last == 'vaults' &&
+      const {'GET', 'POST'}.contains(request.method);
+  final vault =
+      s.length >= 2 &&
+      s[s.length - 2] == 'vaults' &&
+      const {'GET', 'POST', 'DELETE'}.contains(request.method);
+  final credentials =
+      s.length >= 3 &&
+      s[s.length - 3] == 'vaults' &&
+      s.last == 'credentials' &&
+      const {'GET', 'POST'}.contains(request.method);
+  final credential =
+      s.length >= 4 &&
+      s[s.length - 4] == 'vaults' &&
+      s[s.length - 2] == 'credentials' &&
+      const {'GET', 'POST', 'DELETE'}.contains(request.method);
+  return collection || vault || credentials || credential;
+}
