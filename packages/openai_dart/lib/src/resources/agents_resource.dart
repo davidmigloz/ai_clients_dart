@@ -6,6 +6,7 @@ import '../errors/exceptions.dart';
 import '../models/agents/agent_json_helpers.dart';
 import '../models/agents/agents.dart';
 import '../utils/private_audio_http.dart';
+import 'agent_environments_resource.dart';
 import 'agent_sessions_resource.dart';
 import 'base_resource.dart';
 
@@ -15,6 +16,21 @@ import 'base_resource.dart';
 /// after caller headers. This resource manages reusable configuration only;
 /// creation does not start a session, run a model or execute a configured tool.
 class AgentsResource extends ResourceBase {
+  AgentEnvironmentsResource? _environments;
+
+  /// Owned hosted prewarming and reusable environment templates.
+  AgentEnvironmentsResource get environments {
+    ensureNotClosed?.call();
+    return _environments ??= AgentEnvironmentsResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+      streamClientFactory: streamClientFactory,
+    );
+  }
+
   AgentSessionsResource? _sessions;
 
   /// Raw durable session CRUD, persistent events and manual input submission.

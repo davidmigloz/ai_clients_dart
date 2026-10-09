@@ -1,6 +1,6 @@
 # Vault and write-only credential management
 
-Status: implemented; published-head review, CI and merge acceptance pending.
+Status: merged in PR #403; issue #388 closed.
 Acceptance record: [Vaults implementation](../reviews/36-vaults-credentials.md).
 GitHub: [#388](https://github.com/davidmigloz/ai_clients_dart/issues/388).
 Primary requirements: `AGENTS-VAULT-01`, `AGENTS-VAULT-02`.
@@ -62,3 +62,7 @@ Wire authority is immutable OpenAPI [`0ef225c4f701046f8fe88cae9d29d0df4d1a9fa9`]
 All tests and examples default to deterministic mock HTTP/SSE, local servers or pure fixtures, with no live API calls, API key or paid hosted execution required ($0). Schema-only planning witnesses do not satisfy runtime acceptance. The implementation PR must record actual canonical assertions, supported-platform checks, independent review and retained toolkit diagnostics; this planning ticket claims none of those checks have already passed for a future implementation.
 
 Session/environment resource attachment is owned by tickets 34/37. Hosted execution, provider OAuth consent flows, provider token revocation, browser authentication UI and runtime configuration issue #316 remain outside this slice. No release/version bump is part of this ticket.
+
+## Merge receipt
+
+Merged in [PR #403](https://github.com/davidmigloz/ai_clients_dart/pull/403) at `9a31d51ddaf59f4a415cdea08c914accd5f255dd` on `2026-10-09T20:38:41Z` after both independent published content/CI approvals and all 14 exact-head contexts completed (13 successes/standard skip). Reviewed head: `01a72bd5ca439dafe180bf84d1fef570fe0eecec`.

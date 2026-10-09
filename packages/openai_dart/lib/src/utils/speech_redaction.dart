@@ -30,7 +30,8 @@ bool isPrivateAudioRequest(http.BaseRequest? request) =>
 bool isAgentsApiRequest(http.BaseRequest? request) =>
     isSavedAgentRequest(request) ||
     isAgentSessionRequest(request) ||
-    isVaultRequest(request);
+    isVaultRequest(request) ||
+    isAgentEnvironmentRequest(request);
 
 /// Identifies implemented raw session/event/history operations, including custom bases.
 bool isAgentSessionRequest(http.BaseRequest? request) {
@@ -163,4 +164,26 @@ bool isVaultRequest(http.BaseRequest? request) {
       s[s.length - 2] == 'credentials' &&
       const {'GET', 'POST', 'DELETE'}.contains(request.method);
   return collection || vault || credentials || credential;
+}
+
+/// Implemented environment/template routes, including custom base paths.
+bool isAgentEnvironmentRequest(http.BaseRequest? request) {
+  if (request == null) return false;
+  final s = request.url.pathSegments;
+  if (s.length >= 2 &&
+      s[s.length - 2] == 'agents' &&
+      s.last == 'environments') {
+    return const {'GET', 'POST'}.contains(request.method);
+  }
+  if (s.length >= 3 &&
+      s[s.length - 3] == 'agents' &&
+      s[s.length - 2] == 'environments') {
+    return request.method == 'GET' ||
+        (s.last == 'templates' && request.method == 'POST');
+  }
+  return s.length >= 4 &&
+      s[s.length - 4] == 'agents' &&
+      s[s.length - 3] == 'environments' &&
+      s[s.length - 2] == 'templates' &&
+      const {'GET', 'POST', 'DELETE'}.contains(request.method);
 }

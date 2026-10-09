@@ -71,7 +71,9 @@
     "agents": "saved_agents_example",
     "agentSessions": "agent_sessions_example",
     "vaults": "vaults_example",
-    "vaultCredentials": "vaults_example"
+    "vaultCredentials": "vaults_example",
+    "agentEnvironments": "agent_environments_example",
+    "agentEnvironmentTemplates": "agent_environments_example"
   },
   "excluded_from_examples": [],
   "drift_patterns": [

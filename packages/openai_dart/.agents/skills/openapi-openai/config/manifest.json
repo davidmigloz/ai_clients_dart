@@ -12380,6 +12380,163 @@
       "file": "lib/src/models/vaults/vault_core.dart",
       "schema": "VaultStatusParam",
       "note": "Actual frozen Vault contract; separate secret-bearing create/rotation and safe received auth. Private finite owned extras, exact required/nullable presence, typed copies and canonical fixtures."
+    },
+    "AgentEnvironmentListResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentEnvironmentList",
+      "file": "lib/src/models/agents/agent_environment_core.dart",
+      "schema": "AgentEnvironmentListResource",
+      "note": "Actual frozen owned-environment/template contract. Separate hosted-only prewarming and safe resource metadata; exact tri-state/null presence, finite immutable extras, typed copies and canonical public fixtures."
+    },
+    "CreateAgentEnvironmentParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateAgentEnvironmentRequest",
+      "file": "lib/src/models/agents/agent_environment_core.dart",
+      "schema": "CreateAgentEnvironmentParams",
+      "note": "Actual frozen owned-environment/template contract. Separate hosted-only prewarming and safe resource metadata; exact tri-state/null presence, finite immutable extras, typed copies and canonical public fixtures."
+    },
+    "CreateEnvironmentParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentPrewarmEnvironment",
+      "file": "lib/src/models/agents/agent_environment_core.dart",
+      "schema": "CreateEnvironmentParam",
+      "note": "Actual frozen owned-environment/template contract. Separate hosted-only prewarming and safe resource metadata; exact tri-state/null presence, finite immutable extras, typed copies and canonical public fixtures."
+    },
+    "CreateEnvironmentParamOpenaiHosted": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentPrewarmHostedEnvironment",
+      "file": "lib/src/models/agents/agent_environment_core.dart",
+      "schema": "CreateEnvironmentParamOpenaiHosted",
+      "note": "Actual frozen owned-environment/template contract. Separate hosted-only prewarming and safe resource metadata; exact tri-state/null presence, finite immutable extras, typed copies and canonical public fixtures.",
+      "parent": "AgentPrewarmEnvironment"
+    },
+    "CreateEnvironmentTemplateParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateAgentEnvironmentTemplateRequest",
+      "file": "lib/src/models/agents/agent_environment_templates.dart",
+      "schema": "CreateEnvironmentTemplateParams",
+      "note": "Actual frozen owned-environment/template contract. Separate hosted-only prewarming and safe resource metadata; exact tri-state/null presence, finite immutable extras, typed copies and canonical public fixtures."
+    },
+    "DeletedEnvironmentTemplateResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeletedAgentEnvironmentTemplate",
+      "file": "lib/src/models/agents/agent_environment_templates.dart",
+      "schema": "DeletedEnvironmentTemplateResource",
+      "note": "Actual frozen owned-environment/template contract. Separate hosted-only prewarming and safe resource metadata; exact tri-state/null presence, finite immutable extras, typed copies and canonical public fixtures."
+    },
+    "EnvironmentStatusResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentEnvironmentStatus",
+      "file": "lib/src/models/agents/agent_environment_core.dart",
+      "schema": "EnvironmentStatusResource",
+      "note": "Actual frozen owned-environment/template contract. Separate hosted-only prewarming and safe resource metadata; exact tri-state/null presence, finite immutable extras, typed copies and canonical public fixtures. Scalar JSON string wrapper, preserving unknown received values; not a Dart enum."
+    },
+    "EnvironmentTemplateListResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentEnvironmentTemplateList",
+      "file": "lib/src/models/agents/agent_environment_templates.dart",
+      "schema": "EnvironmentTemplateListResource",
+      "note": "Actual frozen owned-environment/template contract. Separate hosted-only prewarming and safe resource metadata; exact tri-state/null presence, finite immutable extras, typed copies and canonical public fixtures."
+    },
+    "EnvironmentTemplateResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentEnvironmentTemplate",
+      "file": "lib/src/models/agents/agent_environment_templates.dart",
+      "schema": "EnvironmentTemplateResource",
+      "note": "Actual frozen owned-environment/template contract. Separate hosted-only prewarming and safe resource metadata; exact tri-state/null presence, finite immutable extras, typed copies and canonical public fixtures."
+    },
+    "EnvironmentTypeParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentEnvironmentType",
+      "file": "lib/src/models/agents/agent_environment_core.dart",
+      "schema": "EnvironmentTypeParam",
+      "note": "Actual frozen owned-environment/template contract. Separate hosted-only prewarming and safe resource metadata; exact tri-state/null presence, finite immutable extras, typed copies and canonical public fixtures. Scalar JSON string wrapper, preserving unknown received values; not a Dart enum."
+    },
+    "EnvironmentTypeResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentEnvironmentTypeResource",
+      "file": "lib/src/models/agents/agent_environment_core.dart",
+      "schema": "EnvironmentTypeResource",
+      "note": "Actual frozen owned-environment/template contract. Separate hosted-only prewarming and safe resource metadata; exact tri-state/null presence, finite immutable extras, typed copies and canonical public fixtures. Scalar JSON string wrapper, preserving unknown received values; not a Dart enum."
+    },
+    "HostedTemplateFileResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentHostedTemplateFile",
+      "file": "lib/src/models/agents/agent_environment_templates.dart",
+      "schema": "HostedTemplateFileResource",
+      "note": "Actual frozen owned-environment/template contract. Separate hosted-only prewarming and safe resource metadata; exact tri-state/null presence, finite immutable extras, typed copies and canonical public fixtures."
+    },
+    "HostedTemplateFileResourceFileId": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentHostedTemplateFileFileId",
+      "file": "lib/src/models/agents/agent_environment_templates.dart",
+      "schema": "HostedTemplateFileResourceFileId",
+      "note": "Actual frozen owned-environment/template contract. Separate hosted-only prewarming and safe resource metadata; exact tri-state/null presence, finite immutable extras, typed copies and canonical public fixtures.",
+      "parent": "AgentHostedTemplateFile"
+    },
+    "HostedTemplateFileResourceInline": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentHostedTemplateFileInline",
+      "file": "lib/src/models/agents/agent_environment_templates.dart",
+      "schema": "HostedTemplateFileResourceInline",
+      "note": "Actual frozen owned-environment/template contract. Separate hosted-only prewarming and safe resource metadata; exact tri-state/null presence, finite immutable extras, typed copies and canonical public fixtures.",
+      "parent": "AgentHostedTemplateFile"
+    },
+    "HostedTemplateSkillResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentHostedTemplateSkill",
+      "file": "lib/src/models/agents/agent_environment_templates.dart",
+      "schema": "HostedTemplateSkillResource",
+      "note": "Actual frozen owned-environment/template contract. Separate hosted-only prewarming and safe resource metadata; exact tri-state/null presence, finite immutable extras, typed copies and canonical public fixtures."
+    },
+    "HostedTemplateSkillResourceInline": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentHostedTemplateSkillInline",
+      "file": "lib/src/models/agents/agent_environment_templates.dart",
+      "schema": "HostedTemplateSkillResourceInline",
+      "note": "Actual frozen owned-environment/template contract. Separate hosted-only prewarming and safe resource metadata; exact tri-state/null presence, finite immutable extras, typed copies and canonical public fixtures.",
+      "parent": "AgentHostedTemplateSkill"
+    },
+    "HostedTemplateSkillResourceSkillReference": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentHostedTemplateSkillSkillReference",
+      "file": "lib/src/models/agents/agent_environment_templates.dart",
+      "schema": "HostedTemplateSkillResourceSkillReference",
+      "note": "Actual frozen owned-environment/template contract. Separate hosted-only prewarming and safe resource metadata; exact tri-state/null presence, finite immutable extras, typed copies and canonical public fixtures.",
+      "parent": "AgentHostedTemplateSkill"
+    },
+    "PublicEnvironmentResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentEnvironment",
+      "file": "lib/src/models/agents/agent_environment_core.dart",
+      "schema": "PublicEnvironmentResource",
+      "note": "Actual frozen owned-environment/template contract. Separate hosted-only prewarming and safe resource metadata; exact tri-state/null presence, finite immutable extras, typed copies and canonical public fixtures."
+    },
+    "UpdateEnvironmentTemplateParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateAgentEnvironmentTemplateRequest",
+      "file": "lib/src/models/agents/agent_environment_templates.dart",
+      "schema": "UpdateEnvironmentTemplateParams",
+      "note": "Actual frozen owned-environment/template contract. Separate hosted-only prewarming and safe resource metadata; exact tri-state/null presence, finite immutable extras, typed copies and canonical public fixtures."
     }
   }
 }

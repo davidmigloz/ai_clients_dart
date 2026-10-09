@@ -45,7 +45,8 @@ class AuthInterceptor implements Interceptor {
                   entry.key.toLowerCase() != 'content-type' &&
                   (!isAgentsApiRequest(context.request) ||
                       entry.key.toLowerCase() != 'openai-beta') &&
-                  (!isAgentSessionRequest(context.request) ||
+                  (!(isAgentSessionRequest(context.request) ||
+                          isAgentEnvironmentRequest(context.request)) ||
                       entry.key.toLowerCase() != 'idempotency-key'))
                 entry.key: entry.value,
           }

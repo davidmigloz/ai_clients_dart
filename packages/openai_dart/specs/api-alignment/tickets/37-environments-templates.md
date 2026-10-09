@@ -1,6 +1,6 @@
 # Owned hosted environments and templates
 
-Status: active bounded milestone; implementation acceptance pending.
+Status: implemented locally; final published-head review/CI and user-authorized merge pending.
 GitHub: [#389](https://github.com/davidmigloz/ai_clients_dart/issues/389).
 Primary requirements: `AGENTS-ENV-01`, `AGENTS-ENV-02`.
 Native GitHub blockers: [#385](https://github.com/davidmigloz/ai_clients_dart/issues/385).
@@ -59,3 +59,7 @@ Wire authority is immutable OpenAPI [`0ef225c4f701046f8fe88cae9d29d0df4d1a9fa9`]
 All tests and examples default to deterministic mock HTTP/SSE, local servers or pure fixtures, with no live API calls, API key or paid hosted execution required ($0). Schema-only planning witnesses do not satisfy runtime acceptance. The implementation PR must record actual canonical assertions, supported-platform checks, independent review and retained toolkit diagnostics; this planning ticket claims none of those checks have already passed for a future implementation.
 
 Session attachment/exclusivity is ticket 34; live files/artifacts ticket 38; environment notifications ticket 40. Self-hosted providers/executors, hosted live runs, suspension/resume/reset actions and resource-cleanup guarantees are not introduced here. No release/version bump is part of this ticket.
+
+## Implementation
+
+[Acceptance evidence](../reviews/37-environments-templates.md) records the actual typed contracts, exported eight-operation resource, offline example and source/runtime checks. This record does not claim publication or CI before those gates run.

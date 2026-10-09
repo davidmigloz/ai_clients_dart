@@ -1,8 +1,7 @@
 # Vaults and write-only credentials acceptance
 
 Status: implementation for [#388](https://github.com/davidmigloz/ai_clients_dart/issues/388),
-[ticket 36](../tickets/36-vaults-credentials.md). Local contracts and public checks
-pass; final combined reviews, exact published-head reviews and CI remain gates.
+[ticket 36](../tickets/36-vaults-credentials.md). All local checks, independent published-head reviews and exact-head CI passed; merged in PR #403.
 
 ## Frozen contract and delivered scope
 
@@ -116,6 +115,10 @@ contract. This inspection limitation remains visible. All other implementation
 and consistency identities stay unchanged; docs/exports/README checks pass.
 Actual example bindings are added without exclusions, skips or verifier changes.
 
-History merge acceptance for #402 is recorded. Parent #317 remains open for four
-core issues #388–391 and HTTP/2 evaluation #399 until individual merge acceptance.
+History merge acceptance for #402 is recorded. Parent #317 remains open for three
+core issues #389–391 and HTTP/2 evaluation #399 until individual merge acceptance.
 Helpers #392–397 and Admin/legacy remain deferred; no further issue is created.
+
+## Final merge
+
+Merged in [PR #403](https://github.com/davidmigloz/ai_clients_dart/pull/403) at `9a31d51ddaf59f4a415cdea08c914accd5f255dd` on `2026-10-09T20:38:41Z` after both independent published content/CI approvals and all 14 exact-head contexts completed (13 successes/standard skip). Reviewed head: `01a72bd5ca439dafe180bf84d1fef570fe0eecec`.
