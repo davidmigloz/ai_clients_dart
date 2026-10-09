@@ -512,7 +512,7 @@
       "ticket": 36,
       "document": "tickets/36-vaults-credentials.md",
       "title": "Vault and write-only credential management",
-      "status": "implemented; published-head review, CI and merge acceptance pending",
+      "status": "merged in PR #403; issue #388 closed",
       "github_issue": {
         "number": 388,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/388"
@@ -585,13 +585,22 @@
       ],
       "milestone_scope": "active",
       "tracking_parent_issue": 317,
-      "acceptance_record": "reviews/36-vaults-credentials.md"
+      "acceptance_record": "reviews/36-vaults-credentials.md",
+      "implementation_merge": {
+        "pull_request": 403,
+        "head": "01a72bd5ca439dafe180bf84d1fef570fe0eecec",
+        "squash_commit": "9a31d51ddaf59f4a415cdea08c914accd5f255dd",
+        "merged_at_utc": "2026-10-09T20:38:41Z",
+        "ci_contexts": 14,
+        "successful_contexts": 13,
+        "standard_skipped_contexts": 1
+      }
     },
     {
       "ticket": 37,
       "document": "tickets/37-environments-templates.md",
       "title": "Owned hosted environments and templates",
-      "status": "active bounded milestone; implementation acceptance pending",
+      "status": "implemented locally; published-head reviews/CI and user-authorized merge pending",
       "github_issue": {
         "number": 389,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/389"
@@ -665,7 +674,9 @@
         "UpdateEnvironmentTemplateParams"
       ],
       "milestone_scope": "active",
-      "tracking_parent_issue": 317
+      "tracking_parent_issue": 317,
+      "implementation_review": "reviews/37-environments-templates.md",
+      "acceptance_record": "reviews/37-environments-templates.md"
     },
     {
       "ticket": 38,

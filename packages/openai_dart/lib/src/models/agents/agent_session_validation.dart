@@ -109,12 +109,19 @@ void _validateAgentSessionWorkspacePath(String path) {
 }
 
 /// Checks standard base64 syntax; ZIP/content processing belongs to the service.
-void _validateAgentSessionBase64(String data, String context) {
+void _validateAgentSessionBase64(
+  String data,
+  String context, {
+  int? maxDecodedBytes,
+}) {
   if (!RegExp(r'^[A-Za-z0-9+/]*={0,2}$').hasMatch(data)) {
     throw FormatException('$context: expected standard base64');
   }
   try {
-    base64.decode(data);
+    final decoded = base64.decode(data);
+    if (maxDecodedBytes != null && decoded.length > maxDecodedBytes) {
+      throw FormatException('$context: decoded bytes exceed the source limit');
+    }
   } on FormatException {
     throw FormatException('$context: expected standard base64');
   }
@@ -125,6 +132,33 @@ void _validateAgentSessionEventRuntimeBudget(Map<String, dynamic> body) {
   if (utf8.encode(jsonEncode(body)).length > 4194304) {
     throw const FormatException(
       'Session events exceed the 4 MiB runtime JSON limit',
+    );
+  }
+}
+
+/// Checks the shared hosted-file creation budget from the frozen file guide.
+/// Inline content is at most 5 MiB each and 10 MiB per creation configuration.
+/// Files API references and capability ZIP archives have separate service limits.
+void validateAgentHostedFileBudget(
+  List<AgentSessionHostedEnvironmentFileConfig>? files,
+) {
+  var total = 0;
+  for (final file in files ?? <AgentSessionHostedEnvironmentFileConfig>[]) {
+    if (file is AgentSessionHostedEnvironmentFileConfigInline) {
+      // Individual validation establishes standard-base64 syntax and padding.
+      file.validate();
+      final data = file.data;
+      final padding = data.endsWith('==')
+          ? 2
+          : data.endsWith('=')
+          ? 1
+          : 0;
+      total += data.length ~/ 4 * 3 - padding;
+    }
+  }
+  if (total > 10485760) {
+    throw const FormatException(
+      'Hosted inline files exceed the 10 MiB creation limit',
     );
   }
 }

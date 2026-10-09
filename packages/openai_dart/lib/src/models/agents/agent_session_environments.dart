@@ -853,6 +853,7 @@ final class AgentSessionHostedEnvironment extends AgentSessionEnvironment {
   }
   @override
   void validate() {
+    validateAgentHostedFileBudget(files);
     if (environmentId != null &&
         toJson().keys.any((key) => key != 'type' && key != 'environment_id')) {
       throw const FormatException(
@@ -2107,7 +2108,7 @@ final class AgentSessionHostedEnvironmentFileConfigInline
   @override
   void validate() {
     _validateAgentSessionWorkspacePath(path);
-    _validateAgentSessionBase64(data, 'Inline file');
+    _validateAgentSessionBase64(data, 'Inline file', maxDecodedBytes: 5242880);
     validateAgentLength(
       data,
       'AgentSessionHostedEnvironmentFileConfigInline.data',

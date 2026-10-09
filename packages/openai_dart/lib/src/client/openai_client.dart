@@ -68,7 +68,7 @@ import 'retry_wrapper.dart';
 /// ## Resources
 ///
 /// The client provides access to the following API resources:
-/// - `agents` - Saved agents, durable sessions, root/turn history and traces (Agents beta)
+/// - `agents` - Saved agents, durable sessions, root/turn history and traces; owned environments and templates (Agents beta)
 /// - `vaults` - Vaults and write-only credential management (Agents beta)
 ///
 /// - [chat] - Chat completions (GPT-4, GPT-3.5, etc.)
@@ -271,7 +271,7 @@ class OpenAIClient {
 
   AgentsResource? _agents;
 
-  /// Saved agent CRUD and configuration, using the Agents beta API.
+  /// Saved agents, durable sessions, owned environments and reusable templates.
   ///
   /// Creation stores configuration without starting a session or running tools.
   /// The resource uses this client's project, authentication and HTTP policy.

@@ -50,6 +50,7 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 - Durable sessions with JSON/SSE creation, persistent raw event observation, manual function/approval input and explicit cancellation through `client.agents.sessions`
 - Root session/turn history and currently published OTLP trace pages through session items, turns and traces resources
 - Vault CRUD and write-only credential creation/rotation with safe returned authentication metadata
+- Owned hosted environment prewarming and reusable environment template CRUD with safe metadata views
 - Files, uploads, batches, fine-tuning, moderations, evals, and model management
 - Conversations, containers, content provenance checks, ChatKit, and skills
 - Local signed webhook verification with 26 typed received event variants, plus project endpoint management/discovery
@@ -237,8 +238,9 @@ explicit properties and `toJson()` remain available to the caller.
 
 Injected HTTP clients remain caller-owned. Durable sessions, root/turn history
 and published traces are available through `client.agents.sessions`; Vaults and
-write-only credentials use `client.vaults`. Owned environments and subagent
-inspection remain in the bounded implementation queue. The runnable example exercises all six saved tool types,
+write-only credentials use `client.vaults`. Owned environments and templates use
+`client.agents.environments` and `.templates`; live environment files/artifacts
+and subagent inspection remain in the bounded implementation queue. The runnable example exercises all six saved tool types,
 pagination, replacement, clear/reset and deletion with seven mock requests and
 explicit transport cleanup, without an API key or paid API call.
 
@@ -338,6 +340,72 @@ session's project and have `api.traces.read` or `api.agents.read` permission.
 → [Offline session-history example](example/agent_session_history_example.dart) —
 known-ID root/turn inspection and two trace pages, with no live calls or key ($0).
 
+
+### Agent environments and templates
+
+Reuse hosted configuration and prewarm an owned environment through
+`client.agents.environments`:
+
+```dart
+final templates = client.agents.environments.templates;
+final template = await templates.create(CreateAgentEnvironmentTemplateRequest(
+  name: 'Reusable setup',
+  network: AgentSessionNetworkPolicyConfig(
+    access: AgentSessionNetworkAccessConfig.disabled),
+));
+await templates.retrieve(template.id);
+await templates.list(limit: 20, order: AgentListOrder.desc);
+await templates.update(template.id, UpdateAgentEnvironmentTemplateRequest(
+  clearNetwork: true, clearDesktop: true, name: 'Updated setup'));
+final environment = await client.agents.environments.create(
+  CreateAgentEnvironmentRequest(environment: AgentPrewarmEnvironment.openaiHosted(
+    environmentTemplateId: template.id)),
+  idempotencyKey: 'my-application-prewarm-001',
+);
+await client.agents.environments.list(type: AgentEnvironmentType.openaiHosted);
+await client.agents.environments.retrieve(environment.id);
+await templates.delete(template.id);
+```
+
+Prewarming is beta and requires account eligibility. Its hosted-only configuration
+has no `environmentId` or `containerSize`, and accepts at most ten vault IDs.
+Sessions have a separate environment attachment contract. Shared hosted configuration
+supports packages, desktop, network, variables, setup commands, capability directories,
+file-ID or plain-base64 inline files, skill references or inline ZIP skills, and inline
+ZIP plugins. These reuse the corresponding `AgentSession...Config` types because the
+canonical contracts are identical. File destinations stay within `/workspace`;
+capability and setup directories are absolute. Inline files allow 5 MiB decoded
+bytes per file and 10 MiB total per submitted configuration. Template-inherited
+combined limits and Files API sizes are checked by the service. The API validates
+archive contents.
+
+Templates apply before inline settings; network overrides cannot broaden their
+policy. Omitted network defaults belong to the API version. On template update,
+omission preserves a field, `clearNetwork: true` resets network policy, and
+`clearDesktop: true` disables desktop. Maps and arrays replace complete fields.
+Package installation and setup run before the runtime network policy takes effect.
+
+Returned environments expose ID, hosting type, status and installed safe file/skill/plugin
+metadata; templates also expose timestamps and safe configuration metadata. They never
+recover confidential setup command bodies, environment values or inline contents from
+request caches. Template file references and skill version selectors remain distinct
+from installed environment metadata. Received future values retain their wire strings
+with private diagnostics; malformed known resource values fail privately.
+
+Environment creation keys have 1–256 Unicode characters. The service deduplicates for
+24 hours within the authenticated organization/project/creator. Retry the same JSON
+and key for current state; mismatched parameters or incomplete creation return HTTP
+409. Retained deleted keys do not recreate environments. After retention expires the
+key may create a fresh environment; without a key each call creates anew. The client
+carries the header and surfaces service responses, with no local deduplication cache.
+
+All seven statuses—pending, ready, connected, disconnected, suspended, expired and
+failed—are represented. Session, environment, provider and artifact lifetimes are
+independent. Status names do not imply environment suspend/resume/reset/delete methods;
+template deletion does not promise cleanup of sessions, environments or artifacts.
+
+→ [Offline environments example](example/agent_environments_example.dart) — all eight
+operations with mock HTTP, no API key or paid prewarming ($0).
 
 ### Vaults and write-only credentials
 
@@ -3063,6 +3131,7 @@ See the [example/](example/) directory for complete examples:
 
 | Example | Description |
 |---------|-------------|
+| [`agent_environments_example.dart`](example/agent_environments_example.dart) | Offline template CRUD and owned hosted environment prewarming, pagination and safe inspection |
 | [`vaults_example.dart`](example/vaults_example.dart) | Offline Vault CRUD and write-only credential create/rotate with safe inspection |
 | [`agent_session_history_example.dart`](example/agent_session_history_example.dart) | Offline root/turn history and published OTLP trace pagination |
 | [`agent_sessions_example.dart`](example/agent_sessions_example.dart) | Offline durable sessions, persistent observation, manual function result and explicit cancellation |
@@ -3125,7 +3194,7 @@ See the [example/](example/) directory for complete examples:
 
 | API | Status |
 |-----|--------|
-| Agents | Saved agent CRUD and durable session CRUD, JSON/SSE creation, persistent event observation and manual inputs; root/turn history and published OTLP traces; owned environments and subagent inspection pending |
+| Agents | Saved agent CRUD and durable session CRUD, JSON/SSE creation, persistent event observation and manual inputs; root/turn history and published OTLP traces; owned hosted environments and template CRUD; subagent inspection pending |
 | Vaults | Vault CRUD and write-only OAuth, bearer and hosted environment-variable credential management |
 | Chat Completions | Supported; stored-completion management pending |
 | Responses API | Supported with persistent WebSockets, mid-turn steering, opt-in recovery and beta tool-result injection; additional tool/configuration details pending |

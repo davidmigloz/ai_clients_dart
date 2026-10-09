@@ -4,12 +4,14 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~31k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~31.8k tokens): Primary package documentation with installation, configuration, and usage examples.
 - [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/CHANGELOG.md) (~21.7k tokens): Release history and version-by-version changes.
 - [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/MIGRATION.md) (~22.2k tokens): Upgrade notes and breaking-change guidance.
 - [Monitoring failures](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md#how-do-i-inspect-monitoring-failures): Shared passive HTTP/failed Response/WS details, flat nullable SSE errors, scoped investigation and migration boundaries.
 
 ## Examples
+
+- [agent_environments_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/agent_environments_example.dart) (~985 tokens): Offline all-eight-operation hosted template and prewarming lifecycle, caller-selected idempotency, safe views and separate lifetimes; no API/key or paid execution ($0).
 
 - [vaults_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/vaults_example.dart) (~1.2k tokens): Offline all-ten-operation Vault and write-only credential lifecycle, safe inspection and rotation; synthetic values, no live API/key ($0).
 
@@ -131,4 +133,4 @@ SafetyAlert exposes typed detailedExplanation and hasDetailedExplanation, preser
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~153k tokens**
+**Total: ~155k tokens**
