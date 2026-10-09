@@ -31,7 +31,8 @@ bool isAgentsApiRequest(http.BaseRequest? request) =>
     isSavedAgentRequest(request) ||
     isAgentSessionRequest(request) ||
     isVaultRequest(request) ||
-    isAgentEnvironmentRequest(request);
+    isAgentEnvironmentRequest(request) ||
+    isAgentFileRequest(request);
 
 /// Identifies implemented raw session/event/history operations, including custom bases.
 bool isAgentSessionRequest(http.BaseRequest? request) {
@@ -186,4 +187,30 @@ bool isAgentEnvironmentRequest(http.BaseRequest? request) {
       s[s.length - 3] == 'environments' &&
       s[s.length - 2] == 'templates' &&
       const {'GET', 'POST', 'DELETE'}.contains(request.method);
+}
+
+/// Six live-file/artifact routes; paths, inline contents and metadata are private.
+bool isAgentFileRequest(http.BaseRequest? request) {
+  if (request == null) return false;
+  final s = request.url.pathSegments;
+  if (s.length >= 4 && s[s.length - 4] == 'agents') {
+    if (s[s.length - 3] == 'environments' && s.last == 'files') {
+      return const {'GET', 'POST'}.contains(request.method);
+    }
+    if (s[s.length - 3] == 'sessions' && s.last == 'artifacts') {
+      return request.method == 'GET';
+    }
+  }
+  if (s.length >= 5 &&
+      s[s.length - 5] == 'agents' &&
+      s[s.length - 4] == 'sessions' &&
+      s[s.length - 2] == 'artifacts') {
+    return const {'GET', 'DELETE'}.contains(request.method);
+  }
+  return s.length >= 6 &&
+      s[s.length - 6] == 'agents' &&
+      s[s.length - 5] == 'sessions' &&
+      s[s.length - 3] == 'artifacts' &&
+      s.last == 'content' &&
+      request.method == 'GET';
 }

@@ -90,6 +90,7 @@ Stream<Uint8List> openPrivateByteStream({
   void Function()? ensureNotClosed,
   Future<void>? abortTrigger,
   bool timeoutResponseBody = true,
+  bool sanitizeConnectorErrors = false,
 }) => _PrivateByteOperation(
   httpClient: httpClient,
   streamClientFactory: streamClientFactory,
@@ -108,6 +109,7 @@ Stream<Uint8List> openPrivateByteStream({
   abortTrigger: abortTrigger,
   timeoutResponseBody: timeoutResponseBody,
   redactTransportErrors: true,
+  sanitizeConnectorErrors: sanitizeConnectorErrors,
 ).stream;
 
 /// Decodes speech SSE while forwarding cancellation before the first byte.
@@ -303,6 +305,7 @@ class _PrivateByteOperation {
     required this.timeoutResponseBody,
     required this.redactTransportErrors,
     this.validateResponse,
+    this.sanitizeConnectorErrors = false,
     Map<String, String>? additionalHeaders,
     this.betaFeature,
   }) : additionalHeaders = additionalHeaders == null
@@ -340,6 +343,7 @@ class _PrivateByteOperation {
   final Future<void>? abortTrigger;
   final bool timeoutResponseBody;
   final bool redactTransportErrors;
+  final bool sanitizeConnectorErrors;
   final void Function(http.StreamedResponse response)? validateResponse;
 
   late final StreamController<Uint8List> _controller;
@@ -375,23 +379,25 @@ class _PrivateByteOperation {
 
     try {
       ensureNotClosed?.call();
-      final request =
-          http.AbortableRequest(
-              method,
-              requestBuilder.buildUrl(endpoint),
-              abortTrigger: _cancelSignal.future,
-            )
-            ..headers.addAll(
-              requestBuilder.buildHeaders(
-                additionalHeaders: {
-                  ...?additionalHeaders,
-                  'Accept': accept,
-                  'Content-Type': 'application/json',
-                },
-              ),
-            )
-            ..headers['Accept'] = accept
-            ..headers['Content-Type'] = 'application/json';
+      final request = _external(
+        () =>
+            http.AbortableRequest(
+                method,
+                requestBuilder.buildUrl(endpoint),
+                abortTrigger: _cancelSignal.future,
+              )
+              ..headers.addAll(
+                requestBuilder.buildHeaders(
+                  additionalHeaders: {
+                    ...?additionalHeaders,
+                    'Accept': accept,
+                    'Content-Type': 'application/json',
+                  },
+                ),
+              )
+              ..headers['Accept'] = accept
+              ..headers['Content-Type'] = 'application/json',
+      );
       if (betaFeature != null) request.headers['openai-beta'] = betaFeature!;
       if (body != null) {
         request
@@ -402,11 +408,11 @@ class _PrivateByteOperation {
       if (body == null) request.headers.remove('content-type');
       _request = request;
 
-      _client = streamClientFactory?.call() ?? httpClient;
+      _client = _external(() => streamClientFactory?.call() ?? httpClient);
       _ownsClient =
           streamClientFactory != null && !identical(_client, httpClient);
       _sent = true;
-      final pendingResponse = _client!.send(request);
+      final pendingResponse = _sendRequest(request);
       var discardedResponse = false;
 
       Future<void> discardResponse(http.StreamedResponse response) async {
@@ -483,44 +489,48 @@ class _PrivateByteOperation {
       }
 
       final errorBytes = BytesBuilder();
-      _subscription = response.stream.listen(
-        (bytes) {
-          if (_settled || _cancelled) return;
-          _armBodyTimeout();
-          if (failed) {
-            errorBytes.add(bytes);
-          } else {
-            _controller.add(Uint8List.fromList(bytes));
-          }
-        },
-        onError: (Object error, StackTrace stackTrace) {
-          if (error is http.RequestAbortedException) {
-            _abort(cause: error);
-          } else {
-            _fail(error, stackTrace);
-          }
-        },
-        onDone: () {
-          if (_settled || _cancelled) return;
-          if (failed) {
-            final errorResponse = http.Response.bytes(
-              errorBytes.takeBytes(),
-              response.statusCode,
-              headers: response.headers,
-              request: response.request ?? request,
-              isRedirect: response.isRedirect,
-              persistentConnection: response.persistentConnection,
-              reasonPhrase: response.reasonPhrase,
-            );
-            try {
-              _fail(parseError(errorResponse), StackTrace.current);
-            } catch (error, stackTrace) {
-              _fail(error, stackTrace);
+      _subscription = _external(
+        () => response.stream.listen(
+          (bytes) {
+            if (_settled || _cancelled) return;
+            _armBodyTimeout();
+            if (failed) {
+              errorBytes.add(bytes);
+            } else {
+              _controller.add(Uint8List.fromList(bytes));
             }
-          } else {
-            _finish();
-          }
-        },
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            if (error is http.RequestAbortedException) {
+              _abort(cause: error);
+            } else {
+              _fail(_connectorError(error), stackTrace);
+            }
+          },
+          onDone: () {
+            if (_settled || _cancelled) return;
+            if (failed) {
+              final errorResponse = http.Response.bytes(
+                errorBytes.takeBytes(),
+                response.statusCode,
+                headers: response.headers,
+                request: sanitizeConnectorErrors
+                    ? request
+                    : response.request ?? request,
+                isRedirect: response.isRedirect,
+                persistentConnection: response.persistentConnection,
+                reasonPhrase: response.reasonPhrase,
+              );
+              try {
+                _fail(parseError(errorResponse), StackTrace.current);
+              } catch (error, stackTrace) {
+                _fail(error, stackTrace);
+              }
+            } else {
+              _finish();
+            }
+          },
+        ),
       );
       if (_paused) _subscription?.pause();
       _armBodyTimeout();
@@ -530,6 +540,48 @@ class _PrivateByteOperation {
       } else {
         _fail(error, stackTrace);
       }
+    }
+  }
+
+  // Caller-supplied provider/factory/connector exceptions may themselves be SDK
+  // exceptions with unredacted private messages. Sanitize at their origin so
+  // local HTTP, parse, timeout and abort errors keep their established classes.
+  Object _connectorError(Object error) =>
+      !sanitizeConnectorErrors || error is http.RequestAbortedException
+      ? error
+      : ConnectionException(
+          message: '$context transport failed',
+          cause: error,
+          redactDiagnostics: true,
+        );
+
+  T _external<T>(T Function() callback) {
+    try {
+      return callback();
+    } catch (error) {
+      if (sanitizeConnectorErrors && error is! http.RequestAbortedException) {
+        throw ConnectionException(
+          message: '$context transport failed',
+          cause: error,
+          redactDiagnostics: true,
+        );
+      }
+      rethrow;
+    }
+  }
+
+  Future<http.StreamedResponse> _sendRequest(http.BaseRequest request) async {
+    try {
+      return await _client!.send(request);
+    } catch (error) {
+      if (sanitizeConnectorErrors && error is! http.RequestAbortedException) {
+        throw ConnectionException(
+          message: '$context transport failed',
+          cause: error,
+          redactDiagnostics: true,
+        );
+      }
+      rethrow;
     }
   }
 

@@ -43,14 +43,14 @@ This ticket owns these 8 operations and their complete request/response/paramete
 
 ## Acceptance criteria
 
-- [ ] Public mock requests demonstrate all eight operations, source headers/auth context, owned/template paths and filters, safe retrieval/deletion results, ID pagination, idempotency header Unicode bounds and surfaced HTTP 409 behavior.
-- [ ] Every hosted file/skill/plugin/network/package/desktop branch, template update omit/null/value state, source array/byte/directory limit, prewarming ten-vault bound and required resource field has canonical malformed-input and copy/ownership coverage.
-- [ ] Public and session-environment shape differences, all seven statuses, omission-driven network defaults, confidentiality and absent unsupported lifecycle actions are verified; no locally cached hidden command/archive/secret data is returned.
-- [ ] A runnable offline example creates/retrieves a template, prewarms and lists/retrieves an owned environment using a caller-chosen idempotency key; README/llms explain safe views, beta eligibility and independent session/environment lifetimes.
-- [ ] Public request bodies/parameters are captured through the exported client and validated against the pinned canonical contracts; the feature assertions fail against base `08f9594dc73703e521aae4cb070a0be34509642a`, rather than merely mirroring model implementation.
-- [ ] Constructor/parser/copy tests cover all owned discriminator variants, required-nullable/optional-nonnull/tri-state values, nested ownership, equality/hash with the same fields, safe diagnostics, unknown-received fallback and malformed-known errors.
-- [ ] A runnable offline example, package README and regenerated llms documentation describe the real public capability and its limits; actual implemented types have honest manifest mappings and unchanged unrelated exclusions/verifier policy.
-- [ ] Required formatting/fixes/analysis, affected focused fixtures on VM/browser JavaScript/Wasm, and the package unit suite pass; independent requirements and engineering reviews approve the published final commit, and that exact head has green CI before a user-authorized merge.
+- [x] Public mock requests demonstrate all eight operations, source headers/auth context, owned/template paths and filters, safe retrieval/deletion results, ID pagination, idempotency header Unicode bounds and surfaced HTTP 409 behavior.
+- [x] Every hosted file/skill/plugin/network/package/desktop branch, template update omit/null/value state, source array/byte/directory limit, prewarming ten-vault bound and required resource field has canonical malformed-input and copy/ownership coverage.
+- [x] Public and session-environment shape differences, all seven statuses, omission-driven network defaults, confidentiality and absent unsupported lifecycle actions are verified; no locally cached hidden command/archive/secret data is returned.
+- [x] A runnable offline example creates/retrieves a template, prewarms and lists/retrieves an owned environment using a caller-chosen idempotency key; README/llms explain safe views, beta eligibility and independent session/environment lifetimes.
+- [x] Public request bodies/parameters are captured through the exported client and validated against the pinned canonical contracts; the feature assertions fail against base `08f9594dc73703e521aae4cb070a0be34509642a`, rather than merely mirroring model implementation.
+- [x] Constructor/parser/copy tests cover all owned discriminator variants, required-nullable/optional-nonnull/tri-state values, nested ownership, equality/hash with the same fields, safe diagnostics, unknown-received fallback and malformed-known errors.
+- [x] A runnable offline example, package README and regenerated llms documentation describe the real public capability and its limits; actual implemented types have honest manifest mappings and unchanged unrelated exclusions/verifier policy.
+- [x] Required formatting/fixes/analysis, affected focused fixtures on VM/browser JavaScript/Wasm, and the package unit suite pass; independent requirements and engineering reviews approve the published final commit, and that exact head has green CI before a user-authorized merge.
 
 ## Source and validation evidence
 
@@ -63,3 +63,5 @@ Session attachment/exclusivity is ticket 34; live files/artifacts ticket 38; env
 ## Implementation
 
 [Acceptance evidence](../reviews/37-environments-templates.md) records the actual typed contracts, exported eight-operation resource, offline example and source/runtime checks. This record does not claim publication or CI before those gates run.
+
+Merged in [PR #404](https://github.com/davidmigloz/ai_clients_dart/pull/404) at `435b4cf04155b665ebe8a8a6909dc8bce364a49b` on `2026-10-09T21:15:29Z` after both independent published content/CI approvals and all 14 exact-head contexts completed (13 successes/standard skip). Reviewed head: `48ac187f104e29644a28da8825bafe21fe3c4a05`.

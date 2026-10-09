@@ -8,6 +8,7 @@ import '../models/agents/agent_json_helpers.dart';
 import '../models/agents/agent_session_models.dart';
 import '../utils/http_error_response.dart';
 import '../utils/private_audio_http.dart';
+import 'agent_environment_files_resource.dart';
 import 'agent_session_stream.dart';
 import 'base_resource.dart';
 import 'speech_stream_transport.dart';
@@ -19,6 +20,21 @@ import 'speech_stream_transport.dart';
 /// Cancelling observation leaves durable work running; cancellation input and
 /// session deletion are separate explicitly submitted lifecycle actions.
 class AgentSessionsResource extends ResourceBase with _AgentSessionHttp {
+  AgentSessionArtifactsResource? _artifacts;
+
+  /// Published immutable artifacts; lifetime is independent of the environment.
+  AgentSessionArtifactsResource get artifacts {
+    ensureNotClosed?.call();
+    return _artifacts ??= AgentSessionArtifactsResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+      streamClientFactory: streamClientFactory,
+    );
+  }
+
   /// Creates a resource using the ordinary client policy and transport.
   AgentSessionsResource({
     required super.config,

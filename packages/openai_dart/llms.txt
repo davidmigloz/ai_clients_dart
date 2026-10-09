@@ -4,7 +4,7 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~31.8k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~32.6k tokens): Primary package documentation with installation, configuration, and usage examples.
 - [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/CHANGELOG.md) (~21.7k tokens): Release history and version-by-version changes.
 - [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/MIGRATION.md) (~22.2k tokens): Upgrade notes and breaking-change guidance.
 - [Monitoring failures](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md#how-do-i-inspect-monitoring-failures): Shared passive HTTP/failed Response/WS details, flat nullable SSE errors, scoped investigation and migration boundaries.
@@ -129,8 +129,14 @@ DecisionInputPart.image admits exact case-sensitive `data:`, `http://`, `https:/
 
 SafetyAlert exposes typed detailedExplanation and hasDetailedExplanation, preserving absent/null/string including empty text. Constructor omission can adopt a valid explanation from legacy rawJson; explicit typed/presence inputs win. copyWith omission preserves, detailedExplanation:null retains a null key and hasDetailedExplanation:false removes it from effective JSON. Known raw values remain validated and cannot override typed values or resurrect cleared keys; finite future JSON is deeply immutable. rawJson retains the detached received snapshot, including an original explanation after effective clear; toJson reflects current typed presence/value. Equality/hash follow complete effective JSON and default diagnostics redact explanation/private metadata. The service determines temporary eligible-ZDR availability; reason:null does not prove eligibility. Existing explicit project GET/scoping remains, with no alert list/control/cache or changed webhook field. The Responses monitoring explanation remains optional nonnull. The offline example closes its caller-owned mock transport.
 
+## Live files and published artifacts
+
+- [agent_files_artifacts_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/agent_files_artifacts_example.dart) (~1.2k tokens): Offline input copy, distinct live opaque-page versus artifact-ID pagination, completed-turn metadata, exact bytes and byte-stream downloads after mocked environment expiry, artifact deletion and borrowed transport cleanup; $0 API cost.
+
+client.agents.environments.files.create/list use existing file_id or standard-base64 inline configs directly. Live pages require object:page and nullable next; advance page with identical path/limit/order. client.agents.sessions.artifacts.list/retrieve/delete/download/downloadStream preserve immutable session/environment/turn ownership, original hosted path, size and publication timestamp. Artifact pages use after/lastId and nullable environment filter, with required nullable firstId/lastId. Null query values are omitted. All routes force agents=v1; byte downloads force octet-stream and remove Content-Type, preserve NUL/non-UTF8/empty bytes, use no JSON/text decoding or replay/interceptors, and borrow injected transports. Distinct factory transports are owned. Local abort/cancel releases only observation/download; no session action, delete or local filesystem path is chosen. Published completed-hosted-turn outputs survive environment expiry; unpublished outputs may not survive cancellation/deletion. Retain downloads before session deletion. Artifact deletion leaves live files intact. Canonical metadata sizes have no upper cap; guide file-reference/publication limits remain service-owned. Helpers and subagent inspection retain their separate bounded/deferred tracking.
+
 ## Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~155k tokens**
+**Total: ~157k tokens**

@@ -12537,6 +12537,54 @@
       "file": "lib/src/models/agents/agent_environment_templates.dart",
       "schema": "UpdateEnvironmentTemplateParams",
       "note": "Actual frozen owned-environment/template contract. Separate hosted-only prewarming and safe resource metadata; exact tri-state/null presence, finite immutable extras, typed copies and canonical public fixtures."
+    },
+    "DeletedSessionArtifactResource": {
+      "kind": "object",
+      "file": "lib/src/models/agents/agent_file_models.dart",
+      "dart_class": "DeletedAgentSessionArtifact",
+      "spec": "main",
+      "schema": "DeletedSessionArtifactResource",
+      "note": "Actual frozen file/artifact contract; source/public/platform tests cover exact wire and private owned values."
+    },
+    "EnvironmentFileListResource": {
+      "kind": "object",
+      "file": "lib/src/models/agents/agent_file_models.dart",
+      "dart_class": "AgentEnvironmentFileList",
+      "spec": "main",
+      "schema": "EnvironmentFileListResource",
+      "note": "Actual frozen file/artifact contract; source/public/platform tests cover exact wire and private owned values."
+    },
+    "EnvironmentFilePageObjectResource": {
+      "kind": "object",
+      "file": "lib/src/models/agents/agent_file_models.dart",
+      "dart_class": "AgentEnvironmentFilePageObject",
+      "spec": "main",
+      "schema": "EnvironmentFilePageObjectResource",
+      "note": "Actual frozen file/artifact contract; source/public/platform tests cover exact wire and private owned values."
+    },
+    "EnvironmentFileResource": {
+      "kind": "object",
+      "file": "lib/src/models/agents/agent_file_models.dart",
+      "dart_class": "AgentEnvironmentFile",
+      "spec": "main",
+      "schema": "EnvironmentFileResource",
+      "note": "Actual frozen file/artifact contract; source/public/platform tests cover exact wire and private owned values."
+    },
+    "SessionArtifactListResource": {
+      "kind": "object",
+      "file": "lib/src/models/agents/agent_file_models.dart",
+      "dart_class": "AgentSessionArtifactList",
+      "spec": "main",
+      "schema": "SessionArtifactListResource",
+      "note": "Actual frozen file/artifact contract; source/public/platform tests cover exact wire and private owned values."
+    },
+    "SessionArtifactResource": {
+      "kind": "object",
+      "file": "lib/src/models/agents/agent_file_models.dart",
+      "dart_class": "AgentSessionArtifact",
+      "spec": "main",
+      "schema": "SessionArtifactResource",
+      "note": "Actual frozen file/artifact contract; source/public/platform tests cover exact wire and private owned values."
     }
   }
 }

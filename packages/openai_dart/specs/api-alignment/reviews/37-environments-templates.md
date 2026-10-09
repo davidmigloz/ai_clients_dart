@@ -1,8 +1,7 @@
 # Owned environments and templates acceptance
 
 Status: implementation for [#389](https://github.com/davidmigloz/ai_clients_dart/issues/389),
-[ticket 37](../tickets/37-environments-templates.md). Published-head reviews, CI and
-the next user-authorized merge remain separate final gates.
+[ticket 37](../tickets/37-environments-templates.md). Published-head reviews, exact-head CI and the user-authorized merge are complete.
 
 ## Frozen source and delivered scope
 
@@ -99,3 +98,9 @@ CI. GitHub tracking receives those receipts after publication; this document doe
 not fabricate future CI or merge results.
 
 Audit directory: `/tmp/openai-alignment-audit/37-environments-templates`.
+
+## Published acceptance and merge
+
+Merged in [PR #404](https://github.com/davidmigloz/ai_clients_dart/pull/404) at `435b4cf04155b665ebe8a8a6909dc8bce364a49b` on `2026-10-09T21:15:29Z` after both independent published content/CI approvals and all 14 exact-head contexts completed (13 successes/standard skip). Reviewed head: `48ac187f104e29644a28da8825bafe21fe3c4a05`.
+
+Published requirements/engineering content receipts: `7b3000d0a4f18e75b636e37a047d8550d5f8fd396fcc5db9a7440ec19c7c3cdb` / `c9a04ee2a170ac2c2556296363ec08bcdece3fd0bc2bbac13172280862c0eab4`. CI supplements: `95b24a5c250630d615a43ac6e01edfd6b39310e16b5ea2e20e5e60295cc8d6cb` / `fc5c37103f75c21622fd313dfc3ed67fb757690fae39ce8abc15c08173195d82`. Root immutable CI receipt: `fe87dd6327d5589fa6486c22f587955555bb2129c7b60c5c09d5ed3b77ce49cd`.
