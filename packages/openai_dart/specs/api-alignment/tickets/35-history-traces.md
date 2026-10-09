@@ -1,6 +1,7 @@
 # Session history, turns and traces
 
-Status: active bounded milestone; implementation acceptance pending.
+Status: implemented; published-head review, CI and merge acceptance pending.
+Acceptance record: [history implementation](../reviews/35-history-traces.md).
 GitHub: [#387](https://github.com/davidmigloz/ai_clients_dart/issues/387).
 Primary requirements: `AGENTS-HISTORY-01`.
 Native GitHub blockers: [#386](https://github.com/davidmigloz/ai_clients_dart/issues/386).
@@ -38,12 +39,12 @@ This ticket owns these 5 operations and their complete request/response/paramete
 
 ## Acceptance criteria
 
-- [ ] Actual public mock GETs cover all five paths, nested session/turn ID placement, mandatory beta headers, ID pagination including empty/null-boundary pages, retrieval errors and trace-page parameters.
-- [ ] All history/content/action variants and required-nullable turn fields round-trip with malformed-known and detached deep-ownership/private-diagnostics coverage; authentication history contains no submitted secret values.
-- [ ] Offline fixtures show root history distinct from child history, multiple trace pages and arbitrary OTLP payloads; the example states publication/16 MiB limits and neither replays historical tool calls nor waits for late traces.
-- [ ] Public request bodies/parameters are captured through the exported client and validated against the pinned canonical contracts; the feature assertions fail against base `08f9594dc73703e521aae4cb070a0be34509642a`, rather than merely mirroring model implementation.
-- [ ] Constructor/parser/copy tests cover all owned discriminator variants, required-nullable/optional-nonnull/tri-state values, nested ownership, equality/hash with the same fields, safe diagnostics, unknown-received fallback and malformed-known errors.
-- [ ] A runnable offline example, package README and regenerated llms documentation describe the real public capability and its limits; actual implemented types have honest manifest mappings and unchanged unrelated exclusions/verifier policy.
+- [x] Actual public mock GETs cover all five paths, nested session/turn ID placement, mandatory beta headers, ID pagination including empty/null-boundary pages, retrieval errors and trace-page parameters.
+- [x] All history/content/action variants and required-nullable turn fields round-trip with malformed-known and detached deep-ownership/private-diagnostics coverage; authentication history contains no submitted secret values.
+- [x] Offline fixtures show root history distinct from child history, multiple trace pages and arbitrary OTLP payloads; the example states publication/16 MiB limits and neither replays historical tool calls nor waits for late traces.
+- [x] Public request bodies/parameters are captured through the exported client and validated against the pinned canonical contracts; the feature assertions fail against base `08f9594dc73703e521aae4cb070a0be34509642a`, rather than merely mirroring model implementation.
+- [x] Constructor/parser/copy tests cover all owned discriminator variants, required-nullable/optional-nonnull/tri-state values, nested ownership, equality/hash with the same fields, safe diagnostics, unknown-received fallback and malformed-known errors.
+- [x] A runnable offline example, package README and regenerated llms documentation describe the real public capability and its limits; actual implemented types have honest manifest mappings and unchanged unrelated exclusions/verifier policy.
 - [ ] Required formatting/fixes/analysis, affected focused fixtures on VM/browser JavaScript/Wasm, and the package unit suite pass; independent requirements and engineering reviews approve the published final commit, and that exact head has green CI before a user-authorized merge.
 
 ## Source and validation evidence

@@ -1,6 +1,6 @@
 # Raw durable sessions and manual event loop
 
-Status: implemented; published-head review, CI and merge acceptance pending.
+Status: merged in [PR #401](https://github.com/davidmigloz/ai_clients_dart/pull/401); issue #386 closed.
 Acceptance record: [durable-session implementation](../reviews/34-durable-sessions.md).
 GitHub: [#386](https://github.com/davidmigloz/ai_clients_dart/issues/386).
 Primary requirements: `AGENTS-SESSION-01`, `AGENTS-SESSION-02`, `AGENTS-SESSION-03`, `AGENTS-SESSION-04`.
@@ -53,7 +53,7 @@ This ticket owns these 7 operations and their complete request/response/paramete
 - [x] Public request bodies/parameters are captured through the exported client and validated against the pinned canonical contracts; the feature assertions fail against base `08f9594dc73703e521aae4cb070a0be34509642a`, rather than merely mirroring model implementation.
 - [x] Constructor/parser/copy tests cover all owned discriminator variants, required-nullable/optional-nonnull/tri-state values, nested ownership, equality/hash with the same fields, safe diagnostics, unknown-received fallback and malformed-known errors.
 - [x] A runnable offline example, package README and regenerated llms documentation describe the real public capability and its limits; actual implemented types have honest manifest mappings and unchanged unrelated exclusions/verifier policy.
-- [ ] Required formatting/fixes/analysis, affected focused fixtures on VM/browser JavaScript/Wasm, and the package unit suite pass; independent requirements and engineering reviews approve the published final commit, and that exact head has green CI before a user-authorized merge.
+- [x] Required formatting/fixes/analysis, affected focused fixtures on VM/browser JavaScript/Wasm, and the package unit suite pass; independent requirements and engineering reviews approve the published final commit, and that exact head has green CI before a user-authorized merge.
 
 ## Source and validation evidence
 

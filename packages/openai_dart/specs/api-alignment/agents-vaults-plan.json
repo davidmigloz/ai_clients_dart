@@ -148,7 +148,7 @@
       "ticket": 34,
       "document": "tickets/34-durable-sessions.md",
       "title": "Raw durable sessions and manual event loop",
-      "status": "implemented; published-head review, CI and merge acceptance pending",
+      "status": "merged in PR #401; issue #386 closed",
       "github_issue": {
         "number": 386,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/386"
@@ -398,13 +398,22 @@
       ],
       "milestone_scope": "active",
       "tracking_parent_issue": 317,
-      "acceptance_record": "reviews/34-durable-sessions.md"
+      "acceptance_record": "reviews/34-durable-sessions.md",
+      "implementation_merge": {
+        "pull_request": 401,
+        "head": "b733e8b79dcad02fe727b3b2635d4f5193ce56c7",
+        "squash_commit": "7893afa2ab07014dbeddd19e4bc017b5d6e507c2",
+        "merged_at_utc": "2026-10-09T19:00:00Z",
+        "ci_contexts": 14,
+        "successful_contexts": 13,
+        "standard_skipped_contexts": 1
+      }
     },
     {
       "ticket": 35,
       "document": "tickets/35-history-traces.md",
       "title": "Session history, turns and traces",
-      "status": "active bounded milestone; implementation acceptance pending",
+      "status": "implemented; published-head review, CI and merge acceptance pending",
       "github_issue": {
         "number": 387,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/387"
@@ -487,7 +496,8 @@
         "WebSearchCallItemResource"
       ],
       "milestone_scope": "active",
-      "tracking_parent_issue": 317
+      "tracking_parent_issue": 317,
+      "acceptance_record": "reviews/35-history-traces.md"
     },
     {
       "ticket": 36,
