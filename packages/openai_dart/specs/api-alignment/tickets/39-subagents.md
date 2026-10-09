@@ -1,6 +1,6 @@
 # Subagent inspection and history
 
-Status: planned; implementation acceptance pending.
+Status: active bounded milestone; implementation acceptance pending.
 GitHub: [#391](https://github.com/davidmigloz/ai_clients_dart/issues/391).
 Primary requirements: `AGENTS-SUBAGENT-01`.
 Native GitHub blockers: [#386](https://github.com/davidmigloz/ai_clients_dart/issues/386), [#387](https://github.com/davidmigloz/ai_clients_dart/issues/387).
@@ -8,6 +8,8 @@ Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Specification: [Agents and Vaults](../agents-vaults.md), `AGENTS-SUBAGENT-01`.
 Coverage: [operation/schema ownership ledger](../agents-vaults-plan.json), ticket 39.
 Dependency: [Ticket 34](34-durable-sessions.md) supplies session/subagent event contracts and [ticket 35](35-history-traces.md) supplies shared history/turn models and pagination. All methods accept known IDs without requiring a new coordinator turn or a client-side worker process.
+
+Bounded scope: one of seven active core tickets (#385–#391). Verify the frozen source pins; no automatic upstream adoption or additional issue creation. Existing raw wire/privacy/quality acceptance remains required.
 
 ## Problem and user outcome
 
@@ -48,7 +50,7 @@ This ticket owns these 6 operations and their complete request/response/paramete
 
 ## Source and validation evidence
 
-Wire authority is immutable OpenAPI [`0ef225c4f701046f8fe88cae9d29d0df4d1a9fa9`](https://github.com/openai/openai-openapi/blob/0ef225c4f701046f8fe88cae9d29d0df4d1a9fa9/openapi.json), normalized SHA256 `3e3ddd4f2a584f657294a0a9266ed07b1103a103a38c4dd45a008c8be5450686`. Cross-check workflow/header behavior against the [official guide](https://developers.openai.com/api/docs/guides/agents-api/multi-agent) and pinned [Python 3.26.1](https://github.com/openai/openai-python/tree/c511a77159bc870f31c34388311b7cc62ef15f08) / [Node 7.31.0](https://github.com/openai/openai-node/tree/37af8fc9c78bd5c4d2979c5d51870dd38964e156) clients, resolving source discrepancies as recorded in the specification. Recheck freshness and retain actual source/verification receipts at implementation time.
+Wire authority is immutable OpenAPI [`0ef225c4f701046f8fe88cae9d29d0df4d1a9fa9`](https://github.com/openai/openai-openapi/blob/0ef225c4f701046f8fe88cae9d29d0df4d1a9fa9/openapi.json), normalized SHA256 `3e3ddd4f2a584f657294a0a9266ed07b1103a103a38c4dd45a008c8be5450686`. Cross-check workflow/header behavior against the [official guide](https://developers.openai.com/api/docs/guides/agents-api/multi-agent) and pinned [Python 3.26.1](https://github.com/openai/openai-python/tree/c511a77159bc870f31c34388311b7cc62ef15f08) / [Node 7.31.0](https://github.com/openai/openai-node/tree/37af8fc9c78bd5c4d2979c5d51870dd38964e156) clients, resolving source discrepancies as recorded in the specification. Verify these frozen pins and retain actual source/verification receipts at implementation time. New upstream changes are outside this milestone unless they block an included operation; handle those within the existing ticket or bring a scope-changing blocker to the user.
 
 All tests and examples default to deterministic mock HTTP/SSE, local servers or pure fixtures, with no live API calls, API key or paid hosted execution required ($0). Schema-only planning witnesses do not satisfy runtime acceptance. The implementation PR must record actual canonical assertions, supported-platform checks, independent review and retained toolkit diagnostics; this planning ticket claims none of those checks have already passed for a future implementation.
 

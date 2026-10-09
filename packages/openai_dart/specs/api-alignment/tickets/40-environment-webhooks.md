@@ -1,12 +1,14 @@
 # Environment lifecycle webhooks and subscriptions
 
-Status: planned; implementation acceptance pending.
+Status: deferred outside the bounded milestone; not implemented.
 GitHub: [#392](https://github.com/davidmigloz/ai_clients_dart/issues/392).
 Primary requirements: `AGENTS-WEBHOOK-01`.
 Native GitHub blockers: [#389](https://github.com/davidmigloz/ai_clients_dart/issues/389), [#357](https://github.com/davidmigloz/ai_clients_dart/issues/357), [#358](https://github.com/davidmigloz/ai_clients_dart/issues/358).
-Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
+Original tracker: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317); removed from its active child list.
 Specification: [Agents and Vaults](../agents-vaults.md), AGENTS-WEBHOOK-01.
 Dependencies: [ticket 37](37-environments-templates.md); merged [#357](https://github.com/davidmigloz/ai_clients_dart/issues/357) and [#358](https://github.com/davidmigloz/ai_clients_dart/issues/358).
+
+Deferred backlog: retained for future explicit prioritization; this ticket does not block completion of #317. Its acceptance remains unchecked, and implementation will not start automatically.
 
 ## User capability and scope
 

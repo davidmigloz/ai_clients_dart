@@ -18,26 +18,26 @@ both independent reviews and all 14 final-head contexts completed. Safety
 explanations #382 merged in [PR #384](https://github.com/davidmigloz/ai_clients_dart/pull/384)
 at `08f9594dc73703e521aae4cb070a0be34509642a` on October 9, 12:34:17 UTC, after
 all 14 exact-head contexts completed and both independent reviews approved. All
-32 specified implementation tickets are closed. Phases 6–8 remain pending and
-parent #317 stays open.
-Agents/Vaults, Administration and remaining parity phases
-retain their inventory below.
+32 specified implementation tickets are closed. The user has now bounded the finish line to seven core Agents/Vaults tickets on the audited snapshot. Parent #317 stays open until those seven are accepted; optional helpers and later parity phases are deferred inventory.
 
 Tracking parent: [GitHub issue #317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
-This parent records planning progress; it is not an implementation ticket.
+This parent tracks the bounded milestone; it can close after its seven remaining core tickets are accepted, without claiming full parity.
 The [progress history](progress-history.md) preserves every earlier parent-issue
 receipt through the Live WebSocket merge; current work remains in this roadmap.
 
 ## Objective and current decisions
 
-Bring `openai_dart` into alignment with the current public API contracts and
-official clients through independently usable, reviewed changes.
+Finish the seven core Agents/Vaults HTTP tickets against the frozen audited
+snapshot, through independently usable, reviewed changes. The original broader
+complete-parity ambition remains deferred inventory, not the current finish line.
 
 | Decision | Status |
 | --- | --- |
 | Use a scope interview, written specs, dependency-linked tickets, implementation, and independent review | Requested |
 | Keep specifications in the repository and track work with GitHub issues | Confirmed by the user |
-| Target complete parity, including Administration and legacy gaps, with modern APIs/fixes first and Decisions leading | Recorded from the user's scope response |
+| Initial complete-parity target, with Decisions leading | Superseded by the user's bounded finish line on October 9 |
+| Freeze the audited snapshot; finish seven core Agents/Vaults tickets; defer helpers and later parity phases | Confirmed by the user |
+| Create more alignment issues or milestones | Only after an explicit user request |
 | Permit targeted breaking corrections with migration guidance, preserving compatibility where practical | Confirmed by the user |
 | Publish or release package versions | Outside the current planning request |
 
@@ -297,24 +297,16 @@ and external actions are never implicitly replayed. Documentation-only consent
 phrase lookup and SDK reconnect/queue conveniences retain explicit inventory.
 These slices do not establish full Realtime/Chat/shared Responses parity.
 
-## Phase 6: Agents and Vaults
+## Bounded finish line: core Agents and Vaults
 
-The [Agents and Vaults specification](agents-vaults.md),
-[machine-readable operation/source ledger](agents-vaults-plan.json) and
-[independent planning review](reviews/33-agents-vaults-planning.md) define the next
-13 implementation slices. They cover all 47 current HTTP operations in seven
-non-overlapping groups, then six webhook/workflow/SDK-helper outcomes. The
-321 reachable schema components overlap across tickets and include shared types;
-this count does not imply 321 new Dart classes or implemented coverage.
+The user accepted this finish line on October 9: freeze the audited OpenAPI
+`0ef225c4`, Python `c511a771` and Node `37af8fc9` snapshots; finish only the seven
+core HTTP tickets below. They own all 47 Agents/Vaults HTTP operations. The
+[specification](agents-vaults.md), [operation/source ledger](agents-vaults-plan.json)
+and [planning review](reviews/33-agents-vaults-planning.md) preserve exact contracts.
+The 321 reachable schema components are source counts, not new class counts.
 
-The proposed Dart surface is `client.agents` plus `client.vaults`, following
-existing resource-family accessors. The official clients use their beta namespace;
-the physical paths and required `OpenAI-Beta: agents=v1` header remain unchanged.
-This is a documented Dart design choice, not a previously confirmed user naming
-preference. All runtime acceptance criteria are pending. The merged Safety fix
-completes the prior 32 specified children; Phase 6 adds 13 planned children.
-
-| Ticket | Demonstrable outcome | Implementation prerequisite |
+| Active issue / repository ticket | Capability | Prerequisite |
 | --- | --- | --- |
 | [#385](https://github.com/davidmigloz/ai_clients_dart/issues/385) ([33](tickets/33-saved-agents.md)) | Saved agent CRUD and configuration | None |
 | [#386](https://github.com/davidmigloz/ai_clients_dart/issues/386) ([34](tickets/34-durable-sessions.md)) | Raw durable sessions and manual event loop | 33 |
@@ -323,24 +315,27 @@ completes the prior 32 specified children; Phase 6 adds 13 planned children.
 | [#389](https://github.com/davidmigloz/ai_clients_dart/issues/389) ([37](tickets/37-environments-templates.md)) | Owned hosted environments and templates | 33 |
 | [#390](https://github.com/davidmigloz/ai_clients_dart/issues/390) ([38](tickets/38-files-artifacts.md)) | Live environment files and published artifacts | 34, 37 |
 | [#391](https://github.com/davidmigloz/ai_clients_dart/issues/391) ([39](tickets/39-subagents.md)) | Subagent inspection and history | 34, 35 |
-| [#392](https://github.com/davidmigloz/ai_clients_dart/issues/392) ([40](tickets/40-environment-webhooks.md)) | Environment lifecycle webhooks and subscriptions | 37; merged #357/#358 |
-| [#393](https://github.com/davidmigloz/ai_clients_dart/issues/393) ([41](tickets/41-browser-recovery.md)) | Browser approvals and current-state recovery | 34, 35, 37 |
-| [#394](https://github.com/davidmigloz/ai_clients_dart/issues/394) ([42](tickets/42-idle-run-helper.md)) | Optional idle-session run observation | 34 |
-| [#395](https://github.com/davidmigloz/ai_clients_dart/issues/395) ([43](tickets/43-local-dispatch.md)) | Opt-in local function dispatch | 42 |
-| [#396](https://github.com/davidmigloz/ai_clients_dart/issues/396) ([44](tickets/44-result-parser.md)) | Completed-result collection and local structured parsing | 42, 43 |
-| [#397](https://github.com/davidmigloz/ai_clients_dart/issues/397) ([45](tickets/45-file-helpers.md)) | Portable file and artifact convenience | 38, 44 |
 
-Saved agent CRUD is the first implementation. Its namespace dependency for later
-Agents resources does not require callers to create a saved agent; sessions can
-use inline configuration. Vault management is independently usable. Browser
-recovery observes current state without replaying submitted actions. Optional
-helpers close local observation separately from explicit backend cancellation.
-Default fixtures and examples are offline and cost $0; this planning change makes
-no hosted-environment or other live API requests.
+Finish when these seven issues meet their existing public API, offline example,
+documentation, testing, independent-review and final-head CI acceptance. Parent
+#317 can then close. No release/version bump or full parity claim is implied.
+Saved-agent CRUD #385 is first; Vault management #388 is independent. The proposed
+Dart surface remains `client.agents` and `client.vaults`. Inline session configuration
+and known IDs do not require prior saved-resource creation.
 
-Administration/storage and authentication/remaining legacy parity still need
-separate specifications. Runtime configuration [#316](https://github.com/davidmigloz/ai_clients_dart/issues/316)
-remains open for Phase 8 coordination and does not block these Phase 6 slices.
+The six workflow/helper issues #392–#397 stay open with `f:deferred`, outside this
+tracker's active native children. Their audited contracts remain in the ledger and
+ticket files; deferral does not mark them complete. Manual function results, browser
+approval/authentication inputs and privacy/no-retry rules remain part of raw session
+#386. Optional workflow orchestration, lifecycle webhooks and SDK conveniences are
+not required to finish the core HTTP milestone.
+
+Administration/storage, authentication/legacy, remaining shared SDK/model gaps and
+runtime configuration #316 are deferred. No new alignment issues or milestones
+without an explicit user request. Verify the fixed source pins; later API/SDK changes
+do not expand this milestone. Resolve in-scope blockers/regressions in the existing
+tickets, and report scope-changing blockers for a user decision. Default checks and
+examples remain offline, with no paid hosted provisioning for planning.
 
 ## Remaining roadmap
 
@@ -350,10 +345,7 @@ management #368, custom voice creation #369 and Live HTTP #370 are merged.
 Live WebSockets #371 and stored fork/transcript #372 are merged, completing
 Phase 5 and all 30 original implementation tickets. The Decisions image URL
 follow-up #381 merged in #383 and Safety explanations #382 merged in #384.
-All 32 specified implementation tickets are closed; later parity phases remain
-open.
-Phase 6 is specified below; Phases 7–8 remain candidate outcomes pending
-detailed specifications. Keep all audited gaps visible even when deferred.
+All 32 previously specified implementation tickets are closed. Seven core Phase6 tickets remain in the bounded milestone; the rest is deferred inventory. Keep audited gaps visible without treating them as an automatic work queue.
 
 | Phase | Demonstrable outcomes | Dependencies and scope notes |
 | --- | --- | --- |
@@ -362,17 +354,15 @@ detailed specifications. Keep all audited gaps visible even when deferred.
 | 3. Responses capabilities | Use async tools, reasoning configuration updates, GA web search controls/results, hosted shell, and Responses WebSocket steering | All eleven specified tickets merged in #346–#356; remaining shared gaps inventoried |
 | 4. Webhooks and safety | Verify and parse signed events; manage webhook endpoints; retrieve safety alerts/cases and preserve monitoring details | All four specified tickets merged in #362–#365 |
 | 5. Audio and Live | Generate speech with current voice/options; create custom voices; run a Live session and delegation workflows | All seven specified slices merged in #374–#380; later SDK helper inventory remains open |
-| 6. Agents and vaults | Run durable sessions with environments, files, credentials, subagents, traces, browser approvals and opt-in helpers | [13 planned tickets](#phase-6-agents-and-vaults); implementation pending |
+| 6. Core Agents and Vaults | All 47 HTTP operations, including raw manual action inputs | [Seven active tickets](#bounded-finish-line-core-agents-and-vaults); implementation pending |
 | Throughout | Truthful API coverage, current examples, model capability guidance, and sunset notices | Accompany each relevant ticket; do not claim full coverage prematurely |
-| 7. Administration and storage | Manage organization/project controls, keys, usage/costs, and external storage | Explicit expansion beyond the current manifest exclusions; specify the Admin namespace and authentication separately |
-| 8. Authentication and remaining parity | Federation helpers, mTLS transport extensions, stored Chat management, and still-operational legacy gaps | Reuse or coordinate with existing issue #316 where relevant; prioritize by remaining API lifetime |
+| Deferred: Administration and storage | Manage organization/project controls, keys, usage/costs, and external storage | Explicit expansion beyond the current manifest exclusions; specify the Admin namespace and authentication separately |
+| Deferred: Authentication and remaining parity | Federation helpers, mTLS transport extensions, stored Chat management, and still-operational legacy gaps | Reuse or coordinate with existing issue #316 where relevant; prioritize by remaining API lifetime |
 
-The user selected modern APIs/fixes with Decisions first and included complete
-parity including Administration/legacy gaps. The recorded interpretation is a
-complete-parity target delivered in that priority order. Retired endpoints cannot
-be restored by a client: preserve relevant compatibility surfaces and migration
-guidance, and implement remaining legacy endpoints only while the API supports
-them. Recheck sunset status when drafting their tickets.
+The earlier complete-parity target is historical context. The user's bounded
+finish line supersedes it. The inventory below preserves unimplemented contracts
+and sunset evidence for possible future explicit prioritization; it does not prevent
+closing the bounded milestone after its seven active tickets are accepted.
 
 ## Audit inventory and references
 
@@ -571,8 +561,8 @@ Sources: [Agents](https://developers.openai.com/api/docs/guides/agents-api/overv
 
 ### Administration, authentication, legacy, and documentation work
 
-Administration is explicitly excluded by the current package manifest. The
-selected complete-parity scope includes expanding coverage to spend limits/alerts,
+Administration is deferred outside the bounded milestone and explicitly excluded
+by the current package manifest. The original complete-parity inventory includes spend limits/alerts,
 model/tool permissions, data retention, key
 expiry, usage/cost dimensions, and external storage. The reviewed October 8
 [OpenAPI 239c481c](https://github.com/openai/openai-openapi/commit/239c481c5fd75052acb3e93cf72c15a7b4a45e74)
@@ -583,8 +573,9 @@ renewal need authentication helpers; injected certificate-capable REST clients
 already provide part of mTLS support. Regional domains are configurable today.
 
 Remaining legacy gaps include stored Chat Completions management and still-live
-fine-tuning pause/resume, grader, and checkpoint-permission operations. Give these
-their own tickets and sunset checks rather than recreating already-retired APIs.
+fine-tuning pause/resume, grader, and checkpoint-permission operations. These remain
+deferred inventory; no tickets or implementation start automatically. Recheck sunset
+status only if the user explicitly prioritizes this work later.
 
 Build/Launch/Grow are server-managed organization usage tiers. They are distinct
 from request `service_tier`; no new usage-tier client enum is needed.
@@ -592,8 +583,9 @@ from request `service_tier`; no new usage-tier client enum is needed.
 Text model IDs accept strings, so new GPT-6 identifiers need capability guidance
 and examples rather than closed-enum updates.
 
-Update Assistants shutdown guidance, upcoming Evals/fine-tuning/audio/model
-sunsets, and inaccurate full-coverage statements. Existing Fast mode, Image 2.5,
+Later documentation inventory includes Assistants shutdown guidance and upcoming
+Evals/fine-tuning/audio/model sunsets. Correct any coverage claim touched by the
+seven active tickets, without opening a separate documentation work stream. Existing Fast mode, Image 2.5,
 modern transcription, GA Realtime calls/translations, moderation, programmatic
 tools, Responses multi-agent, MCP tunnels, and corrected Evals cancellation
 should not be reimplemented.
@@ -747,8 +739,8 @@ prewarming-beta access, explicit hosted configuration/template inheritance,
 optional nullable vault IDs and the documented 24-hour scoped Idempotency-Key
 creation contract. Model `CreateAgentEnvironmentParams`, its single hosted branch,
 the list and event envelopes, environment reference exclusions and the new ready status.
-Handle `agent.environment.ready` and `agent.environment.failed` as typed lifecycle
-notifications during that slice, with caller-selected environment lookup/action.
+Typed `agent.environment.ready` and `agent.environment.failed` lifecycle notifications
+are deferred in #392. The raw session environment events remain active in #386.
 They currently remain receive-only unknown webhook values in this package; the
 existing 26 typed webhook branches retain their reviewed f6 source claims.
 
@@ -759,8 +751,8 @@ components add suspended/expired environment session events and lifecycle
 webhooks. EnvironmentStatusResource adds suspended; SessionEnvironmentStatusResource
 adds suspended and expired. SessionEvent and ProjectEventTypeEnum add their
 corresponding branches and values. All operation path objects are unchanged.
-These are Phase 6 requirements, including required nullable turn_id and closed
-session-event fields, plus the genuine shared webhook envelope. Suspension means
+Required nullable turn_id and closed session-event fields remain active in #386.
+The shared webhook envelope and lifecycle subscriptions are deferred in #392. Suspension means
 an idle hosted environment was checkpointed and stopped; expiration means its
 checkpoint expired. They remain pending typed runtime/notification coverage.
 The full difference from adopted f6 includes twelve added components and 124
@@ -780,8 +772,8 @@ bytes and original metadata are preserved. The comparison records 27 differing
 normalized paths, including shifted enum indices; these are Agents environment
 additions already inventoried above. The later refinement adds
 `agent.environment.ready` and `agent.environment.failed` to ProjectEventTypeEnum.
-Typed lifecycle events and endpoint discovery remain Phase 6 work; unknown
-received events remain passively preserved meanwhile.
+Typed environment lifecycle webhooks/subscriptions are deferred in #392; unknown
+received events remain passively preserved. Raw SSE environment events stay in #386.
 
 Python 8e1fd258 (3.26.1) and Node bc6c0bfb (7.30.1) remain unchanged. Canonical
 LiveServerEvent resolves through its allOf alias to the full 22-event union;

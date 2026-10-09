@@ -1,13 +1,15 @@
 # Optional idle-session run observation
 
-Status: planned; implementation acceptance pending.
+Status: deferred outside the bounded milestone; not implemented.
 GitHub: [#394](https://github.com/davidmigloz/ai_clients_dart/issues/394).
 Primary requirements: `AGENTS-HELPER-01`, `AGENTS-HELPER-02`, `AGENTS-HELPER-03`, `AGENTS-HELPER-04`.
 Native GitHub blockers: [#386](https://github.com/davidmigloz/ai_clients_dart/issues/386).
-Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
+Original tracker: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317); removed from its active child list.
 Specification: [Agents and Vaults](../agents-vaults.md), AGENTS-HELPER-01–04.
 Dependency: [ticket 34](34-durable-sessions.md).
 Shared reference: input-key portion of AGENTS-HELPER-08, primarily owned by [ticket 43](43-local-dispatch.md).
+
+Deferred backlog: retained for future explicit prioritization; this ticket does not block completion of #317. Its acceptance remains unchecked, and implementation will not start automatically.
 
 ## User capability and scope
 

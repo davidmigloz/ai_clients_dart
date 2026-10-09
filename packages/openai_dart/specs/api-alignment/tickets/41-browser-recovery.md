@@ -1,12 +1,14 @@
 # Browser approvals and current-state recovery
 
-Status: planned; implementation acceptance pending.
+Status: deferred outside the bounded milestone; not implemented.
 GitHub: [#393](https://github.com/davidmigloz/ai_clients_dart/issues/393).
 Primary requirements: `AGENTS-FLOW-01`, `AGENTS-FLOW-02`.
 Native GitHub blockers: [#386](https://github.com/davidmigloz/ai_clients_dart/issues/386), [#387](https://github.com/davidmigloz/ai_clients_dart/issues/387), [#389](https://github.com/davidmigloz/ai_clients_dart/issues/389).
-Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
+Original tracker: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317); removed from its active child list.
 Specification: [Agents and Vaults](../agents-vaults.md), AGENTS-FLOW-01–02.
 Dependencies: [ticket 34](34-durable-sessions.md), [ticket 35](35-history-traces.md) and [ticket 37](37-environments-templates.md).
+
+Deferred backlog: retained for future explicit prioritization; this ticket does not block completion of #317. Its acceptance remains unchecked, and implementation will not start automatically.
 
 ## User capability and scope
 

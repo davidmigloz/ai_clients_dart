@@ -1,12 +1,14 @@
 # Portable file and artifact convenience
 
-Status: planned; implementation acceptance pending.
+Status: deferred outside the bounded milestone; not implemented.
 GitHub: [#397](https://github.com/davidmigloz/ai_clients_dart/issues/397).
 Primary requirements: `AGENTS-FILE-HELPER-01`, `AGENTS-FILE-HELPER-02`, `AGENTS-FILE-HELPER-03`.
 Native GitHub blockers: [#390](https://github.com/davidmigloz/ai_clients_dart/issues/390), [#396](https://github.com/davidmigloz/ai_clients_dart/issues/396).
-Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
+Original tracker: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317); removed from its active child list.
 Specification: [Agents and Vaults](../agents-vaults.md), AGENTS-FILE-HELPER-01–03.
 Dependencies: [ticket 38](38-files-artifacts.md) and [ticket 44](44-result-parser.md).
+
+Deferred backlog: retained for future explicit prioritization; this ticket does not block completion of #317. Its acceptance remains unchecked, and implementation will not start automatically.
 
 ## User capability and scope
 

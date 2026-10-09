@@ -1,12 +1,14 @@
 # Opt-in local function dispatch
 
-Status: planned; implementation acceptance pending.
+Status: deferred outside the bounded milestone; not implemented.
 GitHub: [#395](https://github.com/davidmigloz/ai_clients_dart/issues/395).
 Primary requirements: `AGENTS-HELPER-05`, `AGENTS-HELPER-06`, `AGENTS-HELPER-07`, `AGENTS-HELPER-08`.
 Native GitHub blockers: [#394](https://github.com/davidmigloz/ai_clients_dart/issues/394).
-Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
+Original tracker: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317); removed from its active child list.
 Specification: [Agents and Vaults](../agents-vaults.md), AGENTS-HELPER-05–08.
 Dependency: [ticket 42](42-idle-run-helper.md), with its raw session dependency.
+
+Deferred backlog: retained for future explicit prioritization; this ticket does not block completion of #317. Its acceptance remains unchecked, and implementation will not start automatically.
 
 ## User capability and scope
 

@@ -1,10 +1,10 @@
 # Agents and Vaults planning review
 
-Status: canonical engineering, SDK/workflow requirements and roadmap/coverage
-reviews approve the combined planning documents; no open planning findings.
+Status: original source/contract planning reviews approved. User-authorized
+bounded-scope revision below is independently approved with no open findings.
 Specification: [Agents and Vaults](../agents-vaults.md).
 Coverage: [operation, component and source ledger](../agents-vaults-plan.json).
-Scope: 13 planned implementation tickets, repository 33–45. This record accepts
+Original reviewed inventory: 13 tickets, repository 33–45. Current active milestone: seven tickets 33–39; tickets 40–45 are deferred. This record accepts
 planning only; it does not claim runtime implementation or complete parity.
 
 ## Source receipts and authority
@@ -116,7 +116,7 @@ ending with the five literal implementation checklist lines. Those stay unchecke
 because this planning PR has no runtime acceptance; Details records that boundary.
 Final publication graph/blob/template checks and exact-head CI are separate gates.
 
-## Native issue publication
+## Native issue publication (original plan; superseded below)
 
 GitHub issues [#385](https://github.com/davidmigloz/ai_clients_dart/issues/385)–[#397](https://github.com/davidmigloz/ai_clients_dart/issues/397)
 are open native children of #317, with package/type labels and the CODEOWNERS
@@ -132,3 +132,33 @@ closure, checks all 321 schema fingerprints and 52 source hashes, confirms the
 30 primary owners and acyclic dependencies, resolves local links and verifies the
 planning-only file boundary. Whitespace checks pass. Final published blob/template/
 graph checks and exact-head CI are reported in the PR and parent before merge.
+
+## User-authorized bounded finish line
+
+On October 9, the user accepted a frozen snapshot and seven core Agents/Vaults
+HTTP tickets (#385–#391). The six workflow/helper tickets (#392–#397) remain open,
+unchecked and labeled deferred, with no native membership in tracker #317. Existing
+backlog dependency edges and full source/contract inventories are preserved. The
+active graph contains 39 children:32 closed and seven pending; no active dependency
+points to deferred work. Seven active tickets own all 47 HTTP operations and 12
+primary requirements; 18 other requirements remain deferred.
+
+Parent #317 can close after the seven core tickets satisfy existing implementation,
+example/documentation, platform checks, independent review and final-head CI gates.
+Raw browser action/auth inputs and privacy/no-retry rules remain in ticket 34.
+Administration/storage, authentication/legacy, issue 316 and shared SDK/model gaps
+are not completion prerequisites. This boundary is not a complete parity claim.
+
+Active tickets verify pinned source contracts without automatically adopting new
+heads. New alignment issues/milestones require an explicit user request; included
+operation blockers/regressions are handled within existing tickets, and scope-changing
+blockers are reported for a user decision. No wire contract, source bytes, runtime,
+manifest, metadata or dependency changes are introduced by this scope revision.
+Earlier approvals and publication receipts remain historical evidence of the wider
+plan; final bounded-scope validation is recorded in the updated PR and tracker.
+
+Independent bounded-scope review approved the revised documents with no open
+findings, preserving all source/provenance and active contract/acceptance bodies.
+Receipt SHA256: `db4902459e65ccc67805f3b406c70f5592bf058a9d4555b121a8b71643b96dba`.
+Publication checks verify the new active/deferred graph and current PR head; earlier
+13-ticket publication counts and CI receipts remain historical.

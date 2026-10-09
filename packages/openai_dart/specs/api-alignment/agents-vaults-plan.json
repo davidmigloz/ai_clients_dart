@@ -1,6 +1,6 @@
 {
   "format_version": 1,
-  "status": "planning only; no runtime implementation or parity claim",
+  "status": "bounded planning milestone; seven core HTTP tickets active; implementation pending",
   "parent_issue": 317,
   "repository_base_commit": "08f9594dc73703e521aae4cb070a0be34509642a",
   "reviewed_at_utc": "2026-10-09T12:36:45.060428+00:00",
@@ -34,21 +34,26 @@
     "vaults_transitive_schemas": 47,
     "combined_transitive_schemas": 321,
     "http_slices": 7,
-    "workflow_helper_slices": 6
+    "workflow_helper_slices": 6,
+    "active_slices": 7,
+    "deferred_slices": 6,
+    "active_primary_requirements": 12,
+    "deferred_primary_requirements": 18
   },
   "scope_notes": [
     "Schema counts are source components, not new Dart class counts. Shared contracts may be reused only after wire equivalence is proved.",
     "Operation ownership is disjoint; schema closures overlap deliberately. Webhook/helper slices add no canonical HTTP operations.",
     "Dependencies are implementation/demo prerequisites, not service requirements to create saved agents or owned environments before using known IDs.",
     "All implementation criteria remain unchecked. Existing manifest mappings, exclusions and metadata are unchanged.",
-    "Phase 7 Administration/storage and Phase 8 authentication/legacy, including issue 316, remain separate."
+    "Phase 7 Administration/storage and Phase 8 authentication/legacy, including issue 316, remain separate.",
+    "The user superseded the original complete-parity execution target with a bounded seven-ticket milestone on 2026-10-09. The full inventory is preserved as deferred evidence, not an automatic work queue."
   ],
   "tickets": [
     {
       "ticket": 33,
       "document": "tickets/33-saved-agents.md",
       "title": "Saved agent CRUD and configuration",
-      "status": "planned; implementation acceptance pending",
+      "status": "active bounded milestone; implementation acceptance pending",
       "github_issue": {
         "number": 385,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/385"
@@ -121,13 +126,15 @@
         "WebSearchLocationResource",
         "WebSearchModeParam",
         "WebSearchModeResource"
-      ]
+      ],
+      "milestone_scope": "active",
+      "tracking_parent_issue": 317
     },
     {
       "ticket": 34,
       "document": "tickets/34-durable-sessions.md",
       "title": "Raw durable sessions and manual event loop",
-      "status": "planned; implementation acceptance pending",
+      "status": "active bounded milestone; implementation acceptance pending",
       "github_issue": {
         "number": 386,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/386"
@@ -374,13 +381,15 @@
         "WebSearchLocationResource",
         "WebSearchModeParam",
         "WebSearchModeResource"
-      ]
+      ],
+      "milestone_scope": "active",
+      "tracking_parent_issue": 317
     },
     {
       "ticket": 35,
       "document": "tickets/35-history-traces.md",
       "title": "Session history, turns and traces",
-      "status": "planned; implementation acceptance pending",
+      "status": "active bounded milestone; implementation acceptance pending",
       "github_issue": {
         "number": 387,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/387"
@@ -461,13 +470,15 @@
         "WebSearchActionResourceOther",
         "WebSearchActionResourceSearch",
         "WebSearchCallItemResource"
-      ]
+      ],
+      "milestone_scope": "active",
+      "tracking_parent_issue": 317
     },
     {
       "ticket": 36,
       "document": "tickets/36-vaults-credentials.md",
       "title": "Vault and write-only credential management",
-      "status": "planned; implementation acceptance pending",
+      "status": "active bounded milestone; implementation acceptance pending",
       "github_issue": {
         "number": 388,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/388"
@@ -537,13 +548,15 @@
         "VaultResource",
         "VaultStatusFilterParam",
         "VaultStatusParam"
-      ]
+      ],
+      "milestone_scope": "active",
+      "tracking_parent_issue": 317
     },
     {
       "ticket": 37,
       "document": "tickets/37-environments-templates.md",
       "title": "Owned hosted environments and templates",
-      "status": "planned; implementation acceptance pending",
+      "status": "active bounded milestone; implementation acceptance pending",
       "github_issue": {
         "number": 389,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/389"
@@ -615,13 +628,15 @@
         "PublicEnvironmentResource",
         "SetupCommandParam",
         "UpdateEnvironmentTemplateParams"
-      ]
+      ],
+      "milestone_scope": "active",
+      "tracking_parent_issue": 317
     },
     {
       "ticket": 38,
       "document": "tickets/38-files-artifacts.md",
       "title": "Live environment files and published artifacts",
-      "status": "planned; implementation acceptance pending",
+      "status": "active bounded milestone; implementation acceptance pending",
       "github_issue": {
         "number": 390,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/390"
@@ -654,13 +669,15 @@
         "ListOrderParam",
         "SessionArtifactListResource",
         "SessionArtifactResource"
-      ]
+      ],
+      "milestone_scope": "active",
+      "tracking_parent_issue": 317
     },
     {
       "ticket": 39,
       "document": "tickets/39-subagents.md",
       "title": "Subagent inspection and history",
-      "status": "planned; implementation acceptance pending",
+      "status": "active bounded milestone; implementation acceptance pending",
       "github_issue": {
         "number": 391,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/391"
@@ -744,13 +761,15 @@
         "WebSearchActionResourceOther",
         "WebSearchActionResourceSearch",
         "WebSearchCallItemResource"
-      ]
+      ],
+      "milestone_scope": "active",
+      "tracking_parent_issue": 317
     },
     {
       "ticket": 40,
       "document": "tickets/40-environment-webhooks.md",
       "title": "Environment lifecycle webhooks and subscriptions",
-      "status": "planned; implementation acceptance pending",
+      "status": "deferred outside bounded milestone; not implemented",
       "github_issue": {
         "number": 392,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/392"
@@ -766,13 +785,15 @@
       "merged_prerequisite_issues": [
         357,
         358
-      ]
+      ],
+      "milestone_scope": "deferred",
+      "tracking_parent_issue": null
     },
     {
       "ticket": 41,
       "document": "tickets/41-browser-recovery.md",
       "title": "Browser approvals and current-state recovery",
-      "status": "planned; implementation acceptance pending",
+      "status": "deferred outside bounded milestone; not implemented",
       "github_issue": {
         "number": 393,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/393"
@@ -787,13 +808,15 @@
         "AGENTS-FLOW-02"
       ],
       "http_operation_ids": [],
-      "transitive_schema_names": []
+      "transitive_schema_names": [],
+      "milestone_scope": "deferred",
+      "tracking_parent_issue": null
     },
     {
       "ticket": 42,
       "document": "tickets/42-idle-run-helper.md",
       "title": "Optional idle-session run observation",
-      "status": "planned; implementation acceptance pending",
+      "status": "deferred outside bounded milestone; not implemented",
       "github_issue": {
         "number": 394,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/394"
@@ -808,13 +831,15 @@
         "AGENTS-HELPER-04"
       ],
       "http_operation_ids": [],
-      "transitive_schema_names": []
+      "transitive_schema_names": [],
+      "milestone_scope": "deferred",
+      "tracking_parent_issue": null
     },
     {
       "ticket": 43,
       "document": "tickets/43-local-dispatch.md",
       "title": "Opt-in local function dispatch",
-      "status": "planned; implementation acceptance pending",
+      "status": "deferred outside bounded milestone; not implemented",
       "github_issue": {
         "number": 395,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/395"
@@ -829,13 +854,15 @@
         "AGENTS-HELPER-08"
       ],
       "http_operation_ids": [],
-      "transitive_schema_names": []
+      "transitive_schema_names": [],
+      "milestone_scope": "deferred",
+      "tracking_parent_issue": null
     },
     {
       "ticket": 44,
       "document": "tickets/44-result-parser.md",
       "title": "Completed-result collection and local structured parsing",
-      "status": "planned; implementation acceptance pending",
+      "status": "deferred outside bounded milestone; not implemented",
       "github_issue": {
         "number": 396,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/396"
@@ -851,13 +878,15 @@
         "AGENTS-HELPER-12"
       ],
       "http_operation_ids": [],
-      "transitive_schema_names": []
+      "transitive_schema_names": [],
+      "milestone_scope": "deferred",
+      "tracking_parent_issue": null
     },
     {
       "ticket": 45,
       "document": "tickets/45-file-helpers.md",
       "title": "Portable file and artifact convenience",
-      "status": "planned; implementation acceptance pending",
+      "status": "deferred outside bounded milestone; not implemented",
       "github_issue": {
         "number": 397,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/397"
@@ -872,7 +901,9 @@
         "AGENTS-FILE-HELPER-03"
       ],
       "http_operation_ids": [],
-      "transitive_schema_names": []
+      "transitive_schema_names": [],
+      "milestone_scope": "deferred",
+      "tracking_parent_issue": null
     }
   ],
   "operations": [
@@ -4865,5 +4896,53 @@
       "page_url": "https://developers.openai.com/api/docs/guides/agents-api/observability"
     }
   },
-  "planning_api_cost_usd": 0
+  "planning_api_cost_usd": 0,
+  "milestone": {
+    "decision_date": "2026-10-09",
+    "user_decision": "Accepted bounded finish line: frozen audited snapshot; seven core Agents/Vaults HTTP tickets; six workflow/helper tickets and later parity phases deferred.",
+    "source_policy": "Use source_pins and source_bytes recorded in this ledger. Verify the pinned contracts; do not adopt new upstream heads automatically.",
+    "active_repository_tickets": [
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39
+    ],
+    "active_github_issues": [
+      385,
+      386,
+      387,
+      388,
+      389,
+      390,
+      391
+    ],
+    "deferred_repository_tickets": [
+      40,
+      41,
+      42,
+      43,
+      44,
+      45
+    ],
+    "deferred_github_issues": [
+      392,
+      393,
+      394,
+      395,
+      396,
+      397
+    ],
+    "completion_condition": "Close parent #317 after all seven active tickets have accepted public implementations, examples/documentation, existing quality gates, independent reviews and green final-head CI. Deferred inventory is not a completion prerequisite.",
+    "expansion_policy": "No new alignment issues or milestones without an explicit user request. Resolve blockers or regressions affecting the included 47 operations within the existing tickets; report scope-changing blockers for a user decision.",
+    "deferred_later_work": [
+      "Administration/storage",
+      "Authentication/runtime configuration issue 316",
+      "Legacy endpoints",
+      "Remaining shared SDK/model parity"
+    ],
+    "coverage_claim": "Completion establishes this fixed core milestone only, not complete API/SDK parity."
+  }
 }

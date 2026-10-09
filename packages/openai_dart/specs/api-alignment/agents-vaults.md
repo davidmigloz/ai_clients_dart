@@ -1,13 +1,13 @@
 # Agents and Vaults: Phase 6 specification
 
-Status: **planning only; implementation acceptance pending**. Parent:
+Status: **bounded milestone; seven core tickets active; implementation acceptance pending**. Parent:
 [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 The preceding 32 implementation tickets are closed after
 [PR #384](https://github.com/davidmigloz/ai_clients_dart/pull/384) merged at
 `08f9594dc73703e521aae4cb070a0be34509642a`. That completion does not establish
-Agents/Vaults parity or close the broader alignment roadmap.
+complete API/SDK parity. The current milestone closes after its seven active core tickets are accepted.
 
-Scope: 13 independently reviewable capabilities, repository tickets 33–45. The
+Active scope: seven core HTTP capabilities, repository tickets 33–39 / issues #385–#391. Six workflow/helper capabilities (tickets 40–45 / issues #392–#397) are retained as deferred backlog. The
 [machine-readable plan](agents-vaults-plan.json) is the exhaustive operation,
 component and primary requirement ownership ledger. All new ticket acceptance
 criteria remain unchecked. This specification implements no public Dart API,
@@ -18,18 +18,13 @@ adds no runtime manifest mapping and makes no live API request.
 Applications manage saved agents, create and inspect durable sessions, consume
 raw event streams, submit explicit messages/tool results/cancellation/approval
 responses, inspect turn/subagent history and traces, provision hosted environments,
-manage write-only credentials, and download published artifacts. Later optional
-helpers add a bounded run observation, local function dispatch, completed-result
-collection, structured parsing and selected-file convenience. Every HTTP slice
-provides a usable public workflow before helper work depends on it.
+manage write-only credentials, and download published artifacts. These seven core HTTP slices define the finish line. Lifecycle webhooks, recovery examples and optional run/dispatch/result/file helpers are deferred; their audited requirements remain below for future explicit prioritization.
 
-The user has selected modern APIs and fixes first, complete parity including
-Admin/legacy gaps, repository documents plus GitHub issues, and targeted breaking
-corrections with migration guidance. These decisions remain in force. Phase 7
-Administration/storage and Phase 8 authentication/legacy retain their separate
-roadmap scope. Runtime configuration proposal
-[#316](https://github.com/davidmigloz/ai_clients_dart/issues/316) is separate from
-these Phase 6 capabilities and does not block their specification or implementation.
+On October 9, the user accepted a bounded finish line, superseding the original complete-parity execution target. Freeze the audited OpenAPI/Python/Node pins below, implement only the seven core HTTP tickets, then stop this alignment milestone. Repository documents plus GitHub issues and targeted breaking corrections with migration guidance remain agreed policies.
+
+Parent #317 can close when #385–#391 meet their existing implementation/review/CI acceptance. The six deferred workflow/helper issues stay open in the backlog without native membership in this tracker. Administration/storage, authentication/legacy, runtime configuration [#316](https://github.com/davidmigloz/ai_clients_dart/issues/316) and remaining shared SDK/model gaps are also deferred; they are not completion prerequisites.
+
+No new alignment issues or milestones are created without an explicit user request. Resolve blockers or regressions affecting these 47 operations within the existing seven tickets. Report a scope-changing blocker for a user decision. Verify fixed source bytes and contracts rather than adopting new upstream heads automatically. Finishing this milestone establishes its stated capabilities, not complete API/SDK parity.
 
 Durable Agents are distinct from Responses, Live and Realtime. A durable session,
 a selected turn, the application's local observation and an environment have
@@ -72,8 +67,8 @@ Audited October 9, 2026 at `2026-10-09T12:36:45.060428+00:00` against fresh head
 Immutable OpenAPI establishes fields, paths, response media types, discriminators
 and requiredness. Descriptions and guides establish workflow constraints. Pinned
 SDK implementation establishes helper behavior; language-specific behavior is
-identified separately below. Every implementation ticket rechecks affected
-sources and records any difference before changing canonical bytes or metadata.
+identified separately below. Each active implementation ticket verifies these fixed
+sources. New upstream releases do not change milestone acceptance automatically.
 This planning work preserves the adopted source and its actual fetch metadata.
 
 ## Public Dart design decisions
@@ -102,21 +97,21 @@ introduces no mutable shared-client reconfiguration requirement.
 
 ## Ticket graph and complete HTTP ownership
 
-| Repository ticket | Independently demonstrable capability | Primary requirements | Prerequisite |
-| --- | --- | --- | --- |
-| [#385](https://github.com/davidmigloz/ai_clients_dart/issues/385) ([33](tickets/33-saved-agents.md)) | Saved agent create/list/retrieve/update/delete with complete configuration | AGENTS-CRUD-01 | None |
-| [#386](https://github.com/davidmigloz/ai_clients_dart/issues/386) ([34](tickets/34-durable-sessions.md)) | JSON/SSE session creation and raw manual durable event loop | AGENTS-SESSION-01–04 | 33 for namespace/shared configuration |
-| [#387](https://github.com/davidmigloz/ai_clients_dart/issues/387) ([35](tickets/35-history-traces.md)) | Session/turn history and currently published OTLP traces | AGENTS-HISTORY-01 | 34 |
-| [#388](https://github.com/davidmigloz/ai_clients_dart/issues/388) ([36](tickets/36-vaults-credentials.md)) | Vault CRUD and secret create/rotate with safe returned metadata | AGENTS-VAULT-01–02 | None |
-| [#389](https://github.com/davidmigloz/ai_clients_dart/issues/389) ([37](tickets/37-environments-templates.md)) | Owned hosted environment provisioning and template CRUD | AGENTS-ENV-01–02 | 33 for namespace/shared configuration |
-| [#390](https://github.com/davidmigloz/ai_clients_dart/issues/390) ([38](tickets/38-files-artifacts.md)) | Mutable live files and immutable published artifact bytes | AGENTS-FILES-01 | 34, 37 |
-| [#391](https://github.com/davidmigloz/ai_clients_dart/issues/391) ([39](tickets/39-subagents.md)) | Session-scoped subagent items, turns and turn items | AGENTS-SUBAGENT-01 | 34, 35 |
-| [#392](https://github.com/davidmigloz/ai_clients_dart/issues/392) ([40](tickets/40-environment-webhooks.md)) | Typed environment lifecycle notifications and endpoint subscriptions | AGENTS-WEBHOOK-01 | 37; existing merged webhook receiver/management |
-| [#393](https://github.com/davidmigloz/ai_clients_dart/issues/393) ([41](tickets/41-browser-recovery.md)) | Explicit browser actions and recovery from current session/history | AGENTS-FLOW-01–02 | 34, 35, 37 |
-| [#394](https://github.com/davidmigloz/ai_clients_dart/issues/394) ([42](tickets/42-idle-run-helper.md)) | Optional single-use idle-session run observation | AGENTS-HELPER-01–04 | 34 |
-| [#395](https://github.com/davidmigloz/ai_clients_dart/issues/395) ([43](tickets/43-local-dispatch.md)) | Opt-in local function dispatch and stable result submission | AGENTS-HELPER-05–08 | 42 |
-| [#396](https://github.com/davidmigloz/ai_clients_dart/issues/396) ([44](tickets/44-result-parser.md)) | Completed-result collection and local structured parsing | AGENTS-HELPER-09–12 | 42, 43 |
-| [#397](https://github.com/davidmigloz/ai_clients_dart/issues/397) ([45](tickets/45-file-helpers.md)) | Portable selected-file staging and exact artifact lookup; optional IO adapter | AGENTS-FILE-HELPER-01–03 | 38, 44 |
+| Repository ticket | Independently demonstrable capability | Primary requirements | Prerequisite | Scope |
+| --- | --- | --- | --- | --- |
+| [#385](https://github.com/davidmigloz/ai_clients_dart/issues/385) ([33](tickets/33-saved-agents.md)) | Saved agent create/list/retrieve/update/delete with complete configuration | AGENTS-CRUD-01 | None | Active |
+| [#386](https://github.com/davidmigloz/ai_clients_dart/issues/386) ([34](tickets/34-durable-sessions.md)) | JSON/SSE session creation and raw manual durable event loop | AGENTS-SESSION-01–04 | 33 for namespace/shared configuration | Active |
+| [#387](https://github.com/davidmigloz/ai_clients_dart/issues/387) ([35](tickets/35-history-traces.md)) | Session/turn history and currently published OTLP traces | AGENTS-HISTORY-01 | 34 | Active |
+| [#388](https://github.com/davidmigloz/ai_clients_dart/issues/388) ([36](tickets/36-vaults-credentials.md)) | Vault CRUD and secret create/rotate with safe returned metadata | AGENTS-VAULT-01–02 | None | Active |
+| [#389](https://github.com/davidmigloz/ai_clients_dart/issues/389) ([37](tickets/37-environments-templates.md)) | Owned hosted environment provisioning and template CRUD | AGENTS-ENV-01–02 | 33 for namespace/shared configuration | Active |
+| [#390](https://github.com/davidmigloz/ai_clients_dart/issues/390) ([38](tickets/38-files-artifacts.md)) | Mutable live files and immutable published artifact bytes | AGENTS-FILES-01 | 34, 37 | Active |
+| [#391](https://github.com/davidmigloz/ai_clients_dart/issues/391) ([39](tickets/39-subagents.md)) | Session-scoped subagent items, turns and turn items | AGENTS-SUBAGENT-01 | 34, 35 | Active |
+| [#392](https://github.com/davidmigloz/ai_clients_dart/issues/392) ([40](tickets/40-environment-webhooks.md)) | Typed environment lifecycle notifications and endpoint subscriptions | AGENTS-WEBHOOK-01 | 37; existing merged webhook receiver/management | Deferred |
+| [#393](https://github.com/davidmigloz/ai_clients_dart/issues/393) ([41](tickets/41-browser-recovery.md)) | Explicit browser actions and recovery from current session/history | AGENTS-FLOW-01–02 | 34, 35, 37 | Deferred |
+| [#394](https://github.com/davidmigloz/ai_clients_dart/issues/394) ([42](tickets/42-idle-run-helper.md)) | Optional single-use idle-session run observation | AGENTS-HELPER-01–04 | 34 | Deferred |
+| [#395](https://github.com/davidmigloz/ai_clients_dart/issues/395) ([43](tickets/43-local-dispatch.md)) | Opt-in local function dispatch and stable result submission | AGENTS-HELPER-05–08 | 42 | Deferred |
+| [#396](https://github.com/davidmigloz/ai_clients_dart/issues/396) ([44](tickets/44-result-parser.md)) | Completed-result collection and local structured parsing | AGENTS-HELPER-09–12 | 42, 43 | Deferred |
+| [#397](https://github.com/davidmigloz/ai_clients_dart/issues/397) ([45](tickets/45-file-helpers.md)) | Portable selected-file staging and exact artifact lookup; optional IO adapter | AGENTS-FILE-HELPER-01–03 | 38, 44 | Deferred |
 
 Dependencies describe shared implementation and complete demonstrations. The
 service accepts inline agent configuration and environment `none`; a session
@@ -309,7 +304,9 @@ ownership without adding an unverified Dart executor daemon or transport endpoin
   Rotation affects a new sandbox/session. Provider consent/revocation is application-
   owned; Vault deletion neither revokes provider tokens nor cancels ongoing work.
 
-## Browser actions and current-state recovery
+## Browser actions and current-state recovery (deferred backlog)
+
+These requirements are retained as audited backlog and do not block this milestone. Raw manual action/approval inputs and their privacy/no-retry rules remain active in ticket 34.
 
 - **AGENTS-FLOW-01:** Demonstrate all current browser-origin decisions: wire `approve` (allow),
   `deny`, and `cancel` (dismiss), separately from
@@ -333,7 +330,9 @@ on already-public raw operations. Its acceptance must show request/recovery beha
 prose alone does not close it. Full browser automation, UI, password manager and
 self-hosted compute management remain application responsibilities.
 
-## Optional run and function-dispatch helpers
+## Optional run and function-dispatch helpers (deferred backlog)
+
+These requirements are retained as audited backlog and do not block this milestone. Raw manual action/approval inputs and their privacy/no-retry rules remain active in ticket 34.
 
 Pinned behavior comes from Python
 [follow-up observation](https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/lib/streaming/agents/_streams.py)
@@ -388,7 +387,9 @@ and [dispatch](https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c
   retry timers. **Primary owner: ticket 43**; ticket 42 references its input-key policy
   only, without duplicating complete acceptance ownership.
 
-## Completed results and structured parsing
+## Completed results and structured parsing (deferred backlog)
+
+These requirements are retained as audited backlog and do not block this milestone. Raw manual action/approval inputs and their privacy/no-retry rules remain active in ticket 34.
 
 Pinned behavior comes from Python
 [result](https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/lib/beta/agents/_result.py)
@@ -428,7 +429,9 @@ and [parser](https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c5d
   before HTTP; parser/callback metadata never enters wire JSON. Use Dart adapters,
   rather than importing Pydantic/Zod runtimes or inferring unsupported schema behavior.
 
-## Portable file and artifact helpers
+## Portable file and artifact helpers (deferred backlog)
+
+These requirements are retained as audited backlog and do not block this milestone. Raw manual action/approval inputs and their privacy/no-retry rules remain active in ticket 34.
 
 Pinned behavior comes from Python
 [files](https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/lib/beta/agents/_files.py)
@@ -474,7 +477,7 @@ rather than silently included in the 47 HTTP-operation completion claim.
 
 ## Verification, examples and acceptance
 
-Each ticket demonstrates its public capability with deterministic MockClient/local
+Each active ticket demonstrates its public capability with deterministic MockClient/local
 HTTP/SSE fixtures and a runnable **offline example**, updates package README and
 `llms.txt` where its public surface is introduced, and records independent review.
 Public serialization fixtures use the actual request/resource methods and canonical
@@ -486,15 +489,14 @@ component names; existing exclusions and verifier rules cannot hide pending work
 
 Transport fixtures exercise media/header precedence, every pagination mode, JSON/
 SSE/binary responses, chunk boundaries, explicit HTTP errors, malformed known events,
-unknown received fallbacks, subscription readiness and disposal. Helper fixtures use
+unknown received fallbacks, subscription readiness and disposal. Deferred helper acceptance, if explicitly resumed later, uses
 controlled streams and fake time to prove selected-root boundaries, 1,024-ID eviction,
 exactly-once callback invocation, retry body/key stability, observer privacy, partial
 outcomes and parser execution. File fixtures prove binary fidelity, exact artifact
 matching, cursor progress, selected-file isolation and cleanup ownership.
 
 Portable contract/value/public workflow checks run on VM, real Chrome JavaScript
-and Wasm where supported by the existing package workflow; IO-specific checks run
-on VM separately. Format, automatic fixes and clean static analysis run in repository
+and Wasm where supported by the existing package workflow. Optional IO-helper checks belong to deferred ticket 45 if explicitly resumed. Format, automatic fixes and clean static analysis run in repository
 order. Exact published-head CI and independent requirement/engineering approval are
 recorded before any implementation is declared accepted or merged. A docs-only
 planning PR does not claim those future runtime checks have passed.
@@ -510,8 +512,8 @@ live smoke uses the user's cost-bounded authorization and records actual scope/c
 Acceptance remains pending:
 
 - [ ] All 47 canonical HTTP operations are mapped to implemented public methods and actual source-contract tests.
-- [ ] All 30 primary requirements have separate ticket acceptance evidence; shared references do not double-count completion.
-- [ ] Environment webhook, browser/recovery and optional helper workflows have their own executable offline demonstrations.
+- [ ] All 12 active primary requirements have ticket acceptance evidence; 18 deferred requirements do not count toward milestone completion.
+- [ ] All seven core workflows have executable offline demonstrations; raw browser approval/auth inputs remain covered without requiring deferred orchestration helpers.
 - [ ] Every introduced public API has an example, README guidance, correct manifest/export entries and migration notes for any breaking correction.
 - [ ] All affected platform checks, independent reviews and final-head CI pass; implementation issues are closed only by their accepted PRs.
-- [ ] Later Administration/storage and authentication/legacy work remains accurately tracked before broader parity is claimed.
+- [ ] Parent #317 closes when these seven tickets are accepted, with deferred work recorded and no complete API/SDK parity claim.

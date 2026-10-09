@@ -1,12 +1,14 @@
 # Completed-result collection and local structured parsing
 
-Status: planned; implementation acceptance pending.
+Status: deferred outside the bounded milestone; not implemented.
 GitHub: [#396](https://github.com/davidmigloz/ai_clients_dart/issues/396).
 Primary requirements: `AGENTS-HELPER-09`, `AGENTS-HELPER-10`, `AGENTS-HELPER-11`, `AGENTS-HELPER-12`.
 Native GitHub blockers: [#394](https://github.com/davidmigloz/ai_clients_dart/issues/394), [#395](https://github.com/davidmigloz/ai_clients_dart/issues/395).
-Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
+Original tracker: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317); removed from its active child list.
 Specification: [Agents and Vaults](../agents-vaults.md), AGENTS-HELPER-09–12.
 Dependencies: [ticket 42](42-idle-run-helper.md) and [ticket 43](43-local-dispatch.md).
+
+Deferred backlog: retained for future explicit prioritization; this ticket does not block completion of #317. Its acceptance remains unchecked, and implementation will not start automatically.
 
 ## User capability and scope
 
