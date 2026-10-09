@@ -6,14 +6,18 @@ Chat audio merged in [PR #331](https://github.com/davidmigloz/ai_clients_dart/pu
 Retry guidance merged in [PR #332](https://github.com/davidmigloz/ai_clients_dart/pull/332);
 image model requiredness #326 merged in [PR #333](https://github.com/davidmigloz/ai_clients_dart/pull/333).
 
-Phases 1–4 and Audio/Live HTTP #366–370 are merged. Live HTTP
+Phases 1–4 and Audio/Live #366–371 are merged. Live HTTP
 [PR #378](https://github.com/davidmigloz/ai_clients_dart/pull/378) closed #370;
-Live WebSockets #371 is implemented and locally verified, followed by #372 stored fork and
-transcript workflows. Agents/Vaults, Administration and remaining parity phases
+[PR #379](https://github.com/davidmigloz/ai_clients_dart/pull/379) closed #371.
+Stored fork and transcript workflows #372 are implemented and locally verified;
+their publication and merge gates remain pending.
+Agents/Vaults, Administration and remaining parity phases
 retain their inventory below.
 
 Tracking parent: [GitHub issue #317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 This parent records planning progress; it is not an implementation ticket.
+The [progress history](progress-history.md) preserves every earlier parent-issue
+receipt through the Live WebSocket merge; current work remains in this roadmap.
 
 ## Objective and current decisions
 
@@ -260,7 +264,11 @@ creation #369 merged in [PR #377](https://github.com/davidmigloz/ai_clients_dart
 on October 8 at 20:49:30 UTC, commit `3e2b488e896f820118b575108c50586ae08ec867`,
 after all 14 final-head CI contexts completed (13 successes, standard Test(all) skip).
 Its [acceptance evidence](reviews/27-custom-voices.md) records the merge. Live HTTP
-#370 is implemented and independently approved; two later Live tickets remain pending.
+#370 merged in [PR #378](https://github.com/davidmigloz/ai_clients_dart/pull/378),
+and Live WebSockets #371 merged in
+[PR #379](https://github.com/davidmigloz/ai_clients_dart/pull/379).
+Stored fork/transcript #372 has [local acceptance evidence](reviews/30-live-forks-transcripts.md);
+its published-head CI and merge remain pending.
 
 | Repository ticket | Demonstrable outcome | Prerequisite |
 | --- | --- | --- |
@@ -285,8 +293,9 @@ These slices do not establish full Realtime/Chat/shared Responses parity.
 Phases 1–4 are complete for their specified tickets. Phase 5 Audio/Live has seven
 specified implementation tickets: speech #366, existing Audio #367 and consent
 management #368, custom voice creation #369 and Live HTTP #370 are merged.
-Live WebSockets #371 is implemented and locally verified; #372 stored fork/transcript workflows
-follows. Later phases remain candidate outcomes pending
+Live WebSockets #371 is merged; #372 stored fork/transcript workflows are
+implemented and locally verified, with publication and merge gates pending.
+Later phases remain candidate outcomes pending
 detailed specifications. Keep all audited gaps visible even when deferred.
 
 | Phase | Demonstrable outcomes | Dependencies and scope notes |
@@ -295,7 +304,7 @@ detailed specifications. Keep all audited gaps visible even when deferred.
 | 2. Existing API correctness | Correct container wire formats; preserve cache diagnostics, token details, Chat audio chunks, and retry guidance | All tickets merged in #327–#333; shared cache-write usage included in Decisions |
 | 3. Responses capabilities | Use async tools, reasoning configuration updates, GA web search controls/results, hosted shell, and Responses WebSocket steering | All eleven specified tickets merged in #346–#356; remaining shared gaps inventoried |
 | 4. Webhooks and safety | Verify and parse signed events; manage webhook endpoints; retrieve safety alerts/cases and preserve monitoring details | All four specified tickets merged in #362–#365 |
-| 5. Audio and Live | Generate speech with current voice/options; create custom voices; run a Live session and delegation workflows | Seven specified slices; speech first, bounded existing-audio fixes, consents/voices, Live HTTP/WS/forks |
+| 5. Audio and Live | Generate speech with current voice/options; create custom voices; run a Live session and delegation workflows | Six slices merged; final fork/transcript slice locally verified, publication/merge pending |
 | 6. Agents and vaults | Run a durable session; handle tools, environments, artifacts, credentials, subagents, traces, and browser approvals | Slice around working session behaviors; browser approvals build on the basic session/event loop |
 | Throughout | Truthful API coverage, current examples, model capability guidance, and sunset notices | Accompany each relevant ticket; do not claim full coverage prematurely |
 | 7. Administration and storage | Manage organization/project controls, keys, usage/costs, and external storage | Explicit expansion beyond the current manifest exclusions; specify the Admin namespace and authentication separately |
@@ -410,6 +419,12 @@ slice retains its adopted canonical bytes and metadata.
   resource boundary rather than through invented JSON byte encodings.
 - Shared usage model convenience methods and diagnostics also have existing
   limitations surfaced by the new manifest entries.
+- Publication-time Node [88bb9848](https://github.com/openai/openai-node/commit/88bb98485668c50a22fba9c0e04dfb5f784db239)
+  preserves cached/reasoning and other detail counters in Chat runner
+  `totalUsage()` aggregation, including omission/zero and ownership semantics.
+  Dart has no equivalent automatic Chat runner aggregation helper; this remains
+  shared SDK helper inventory, without implying a regression in the existing
+  per-completion typed usage contract. This change does not implement a Live feature.
 - Retry guidance merged in #332/#325: structured permanent quota failures stop
   replay, eligible waits honor the full server minimum, and error paths preserve
   precise retry metadata. Conservative verb/cloneability policy remains intact.
@@ -665,6 +680,22 @@ Handle `agent.environment.ready` and `agent.environment.failed` as typed lifecyc
 notifications during that slice, with caller-selected environment lookup/action.
 They currently remain receive-only unknown webhook values in this package; the
 existing 26 typed webhook branches retain their reviewed f6 source claims.
+
+The October 9 fork/transcript source recheck finds
+[OpenAPI 0ef225c4](https://github.com/openai/openai-openapi/blob/0ef225c4f701046f8fe88cae9d29d0df4d1a9fa9/openapi.json)
+(358 operations, 2,039 schemas). Relative to the later fd15 snapshot, four
+components add suspended/expired environment session events and lifecycle
+webhooks. EnvironmentStatusResource adds suspended; SessionEnvironmentStatusResource
+adds suspended and expired. SessionEvent and ProjectEventTypeEnum add their
+corresponding branches and values. All operation path objects are unchanged.
+These are Phase 6 requirements, including required nullable turn_id and closed
+session-event fields, plus the genuine shared webhook envelope. Suspension means
+an idle hosted environment was checkpointed and stopped; expiration means its
+checkpoint expired. They remain pending typed runtime/notification coverage.
+The full difference from adopted f6 includes twelve added components and 124
+normalized leaves, including shifted array indices; this does not represent 124
+independent features. All 287 Live/input components and seven Live paths remain
+unchanged, so the fork/transcript slice preserves f6 bytes and original metadata.
 
 ## Live WebSocket source review
 

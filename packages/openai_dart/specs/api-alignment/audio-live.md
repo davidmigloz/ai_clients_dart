@@ -3,8 +3,10 @@
 Status: planning merged in [PR #373](https://github.com/davidmigloz/ai_clients_dart/pull/373);
 speech #366, existing Audio #367 and consent management #368 merged in PRs
 #374/#375/#376. Custom voice creation #369 merged in PR #377. Live HTTP #370 merged
-in PR #378. Live WebSockets #371 is implemented and locally verified; stored fork and transcript
-workflow #372 remains pending.
+in PR #378. Live WebSockets #371 merged in PR #379; stored fork and transcript
+workflow #372 is implemented with local acceptance recorded in
+[the fork/transcript review](reviews/30-live-forks-transcripts.md); publication CI
+and merge remain separate gates.
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Phase 4 is complete: [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365)
 merged October 8, 2026 at `fca1a3f4e453d88caed9ffa573d4ec665126c3cb`, closing #360
@@ -553,9 +555,11 @@ lookup is a separate unresolved documentation-only operation below.
   store, format restrictions, unavailable recording, abort and unconfirmed close.
   Neither a transport reconnect nor a fork claims restoration of application tools.
 - **LIVE-TRANSCRIPT-01:** Provide pure transcript grouping helpers covering the
-  pinned SDK algorithms: speaker/text timing segments, group boundaries,
-  acknowledgments/interruptions and playback timeline projection. Playback helpers
-  transform caller-supplied timing, not drive hardware. Use pinned SDK defaults: minimum turn separation 500 ms, assistant silence
+  pinned SDK algorithms: speaker/text timing segments, group boundaries and
+  acknowledgments/interruptions. Provide an additive Dart playback projection
+  that transforms caller-supplied timing without driving hardware. The actual
+  SDK has no pure playback timeline algorithm; its media examples are separate
+  caller integrations. Use pinned SDK defaults: minimum turn separation 500 ms, assistant silence
   2,000 ms, backchannel maximum 1,000 ms and isolation 2,000 ms. Include synthetic
   SDK golden fixtures, chunk boundaries, timing gaps, late/duplicate/out-of-order
   metadata, fake clocks, flush/reentrancy/listener failures and timer disposal;

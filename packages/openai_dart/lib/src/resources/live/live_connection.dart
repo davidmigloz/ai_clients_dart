@@ -7,8 +7,10 @@ import '../../errors/exceptions.dart';
 import '../../models/live/live_client_events.dart';
 import '../../models/live/live_config.dart';
 import '../../models/live/live_server_events.dart';
+import 'live_data_channel.dart';
 import 'websocket_connector_common.dart';
 
+export 'live_data_channel.dart';
 export 'websocket_connector.dart';
 
 /// A malformed incoming frame or invalid outgoing command.
@@ -65,7 +67,7 @@ class LiveUnconfirmedCloseException implements Exception {
       'LiveUnconfirmedCloseException: finalization unconfirmed';
 }
 
-/// Shared lifecycle of a primary or trusted sideband Live connection.
+/// Shared lifecycle of a primary, fork or trusted sideband Live connection.
 ///
 /// One reader broadcasts received events to concurrent application taps. Early
 /// events/errors are retained for the first listener only. Later listeners see
@@ -107,6 +109,43 @@ sealed class LiveConnection {
     initialSession: initialSession,
     ownsSocket: ownsSocket,
     maxBufferedEvents: maxBufferedEvents,
+    abortTrigger: abortTrigger,
+    correlationId: correlationId,
+  );
+
+  /// Wraps a fork socket; startup must use the distinct stored-session command.
+  factory LiveConnection.fork(
+    WebSocket socket, {
+    bool ownsSocket = true,
+    int maxBufferedEvents = 1024,
+    LiveSessionResourceParam? initialSession,
+    Future<void>? abortTrigger,
+    String? correlationId,
+  }) => LiveForkConnection(
+    socket,
+    ownsSocket: ownsSocket,
+    maxBufferedEvents: maxBufferedEvents,
+    initialSession: initialSession,
+    abortTrigger: abortTrigger,
+    correlationId: correlationId,
+  );
+
+  /// Borrows an already-started typed media data channel, owning only its tap.
+  ///
+  /// Caller signaling, media and other channel listeners remain caller-owned.
+  /// No startup or audio append is admitted and cleanup cancels only this reader.
+  static LivePrimaryConnection dataChannel(
+    LiveDataChannel channel, {
+    int maxBufferedEvents = 1024,
+    LiveSessionResourceParam? initialSession,
+    Future<void>? abortTrigger,
+    String? correlationId,
+  }) => LivePrimaryConnection(
+    LiveDataChannelSocket(channel),
+    ownsSocket: false,
+    sessionAlreadyStarted: true,
+    maxBufferedEvents: maxBufferedEvents,
+    initialSession: initialSession,
     abortTrigger: abortTrigger,
     correlationId: correlationId,
   );
@@ -192,7 +231,7 @@ sealed class LiveConnection {
   /// The confirmed final event, with its original final snapshot and reason.
   LiveSessionClosed? get finalEvent => _final;
 
-  /// Latest primary startup acknowledgment, if received.
+  /// Latest primary or fork startup acknowledgment, if received.
   LiveSessionStarted? get startedEvent => _started;
 
   /// Latest received resolved session, or a supplied known initial snapshot.
@@ -232,7 +271,7 @@ sealed class LiveConnection {
         final LiveServerEvent event;
         try {
           event = LiveServerEvent.fromJson(decoded)
-            ..validateForChannel(_channel);
+            ..validateForChannel(_channel == 'fork' ? 'primary' : _channel);
         } catch (error) {
           _emit(
             _BufferedLiveEvent.error(
@@ -369,6 +408,9 @@ sealed class LiveConnection {
     final mode = snapshot != null
         ? snapshot.delegation?.type ?? 'client'
         : _startupConfiguration?.delegation?.type ?? 'client';
+    if (command is LiveForkSessionStartEvent && snapshot != null) {
+      command.session.validateForSession(snapshot);
+    }
     if (command is LiveSessionUpdateParam) {
       if (snapshot != null) {
         command.session.validateForSession(snapshot);
@@ -591,6 +633,82 @@ final class LivePrimaryConnection extends LiveConnection {
       await _wait(_startedSignal.future, timeout, abortTrigger, 'startup');
       return _started ??
           (throw const LiveTransportException(operation: 'startup_closed'));
+    } on AbortedException {
+      await close();
+      rethrow;
+    } on LiveTransportException {
+      await close();
+      rethrow;
+    }
+  }
+}
+
+/// A stored-session fork writer with distinct startup and acknowledgment gating.
+///
+/// All ordinary commands reuse the primary protocol after session.started. No
+/// application state, audio, external actions or startup are replayed implicitly.
+final class LiveForkConnection extends LiveConnection {
+  /// Reads a fork socket immediately without sending startup.
+  LiveForkConnection(
+    WebSocket socket, {
+    super.ownsSocket = true,
+    super.maxBufferedEvents = 1024,
+    super.initialSession,
+    super.abortTrigger,
+    String? correlationId,
+  }) : super._(socket, 'fork', correlationId);
+
+  bool _startupSent = false;
+  @override
+  bool get _canFinalize => _startupSent && _started != null;
+
+  /// Sends one of the 11 fork commands; a primary startup is always rejected.
+  void send(LiveClientEvent event) {
+    _ensureWritable();
+    if (event is LiveSessionStartEvent) {
+      throw const LiveProtocolException(kind: 'primary_start_on_fork');
+    }
+    if (event is LiveForkSessionStartEvent) {
+      if (_startupSent) throw StateError('Live fork startup was already sent.');
+      event.validate();
+      final overrides = event.session.toJson();
+      if (overrides.keys.any(
+        (key) => !const {'audio', 'delegation', 'store'}.contains(key),
+      )) {
+        throw const LiveProtocolException(kind: 'unsupported_fork_override');
+      }
+      final audio = event.session.audio?.toJson();
+      if (audio != null && audio.keys.any((key) => key != 'format')) {
+        throw const LiveProtocolException(
+          kind: 'unsupported_fork_audio_override',
+        );
+      }
+      _validateKnownSession(event);
+      _startupSent = true;
+      _write(event);
+      return;
+    }
+    if (!_startupSent || _started == null) {
+      throw StateError('Live fork session has not started.');
+    }
+    _write(event);
+  }
+
+  /// Explicitly starts the fork and waits for its new session acknowledgment.
+  Future<LiveSessionStarted> start(
+    LiveForkSessionStartEvent event, {
+    Duration timeout = const Duration(seconds: 30),
+    Future<void>? abortTrigger,
+  }) async {
+    _validateTimeout(timeout);
+    try {
+      await _checkAbort(abortTrigger);
+      send(event);
+      await _wait(_startedSignal.future, timeout, abortTrigger, 'fork_startup');
+      return _started ??
+          (throw const LiveTransportException(
+            operation: 'fork_startup_closed',
+          ));
     } on AbortedException {
       await close();
       rethrow;

@@ -1,6 +1,12 @@
 # Live WebSocket acceptance
 
-Status: implementation independently approved; publication and final-head CI pending.
+Status: merged in [PR #379](https://github.com/davidmigloz/ai_clients_dart/pull/379), closing #371.
+Reviewed head `9e886dc75c04a3bf9b1909e62a7064d2ba6649cc` passed all 14 CI
+contexts (13 successes, standard Test(all) skip). User-authorized merge on
+October 9 at 05:02:13 UTC produced squash
+`d00ee5cfc4a61df04b4e7c59c6ea4e8e34c79648`. External full review was skipped
+for unavailable credits; independent local requirements/engineering approvals
+supplied the review evidence.
 [#371](https://github.com/davidmigloz/ai_clients_dart/issues/371),
 [ticket 29](../tickets/29-live-websockets.md), LIVE-WS-01–04,
 LIVE-EVENT-01–04 and LIVE-WORK-01–02. Live HTTP

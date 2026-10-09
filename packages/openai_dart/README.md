@@ -1930,8 +1930,7 @@ audio configuration admits PCM16LE at 16/24 kHz or G.711 PCMA/PCMU at 8 kHz.
 WebRTC/SIP negotiate media and omit `audio.format`. Frontend capability omission
 or `all` allows all events; an empty selection permits none, and restrictions
 do not apply to trusted sideband connections. Primary/sideband WebSocket
-connections and event codecs are available below; stored WebSocket forks and
-transcript workflow helpers remain in the next alignment ticket.
+connections, stored WebSocket forks and transcript helpers are available below.
 
 Models retain finite immutable open JSON and private caller-readable wire data.
 Default diagnostics and built-in logging redact SDP, credentials, audio,
@@ -2023,6 +2022,8 @@ secret endpoint. Wrap an HTTP-started data channel with
 this admits application commands while forbidding duplicate startup and audio
 append. Supply `initialSession` when its resolved configuration is known. The
 caller retains ownership of the adapter and media.
+For a broadcast typed channel, `LiveConnection.dataChannel(callerChannel)`
+returns an already-started primary writer and owns only its message tap.
 
 → [Runnable offline primary/sideband example](example/live_websocket_example.dart)
 demonstrates concurrent observers, manual delegation, two function results before
@@ -2030,6 +2031,92 @@ one continuation and confirmed usage, using synthetic peers at $0 API cost.
 See [WebSockets](https://developers.openai.com/api/docs/guides/voice-websockets?api=live),
 [server controls](https://developers.openai.com/api/docs/guides/voice-server-controls?api=live)
 and [session management](https://developers.openai.com/api/docs/guides/live-conversations).
+
+</details>
+
+### How do I fork stored Live sessions and group captions?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Finish the original with `store: true`, wait for `session.closed`, and retain its
+ID and your application task state. Storage must be enabled and permitted for
+the project; ZDR disables it. A WebSocket fork gets a new connection and ID:
+
+```dart
+final fork = await client.live.forkConnection(sourceSessionId);
+final captions = LiveTranscriptGrouper();
+final captionTextById = <String, String>{};
+final updates = captions.updates.listen((update) {
+  // Each update is a complete snapshot. Replace text instead of appending it.
+  captionTextById[update.segment.id] = update.segment.text;
+});
+final attachment = captions.attach(fork);
+try {
+  final started = await fork.start(
+    LiveForkSessionStartEvent(session: LiveForkSessionConfigParam()),
+  );
+  print(started.session.id); // Save the new ID for controls and sidebands.
+  // Receive application events on an independent fork.events tap. Explicitly
+  // finish backend work before requesting session finalization.
+  final ended = await fork.closeSession();
+  print(ended.usage.seconds);
+} finally {
+  await attachment.detach();
+  captions.close();
+  await updates.cancel();
+  await fork.close();
+}
+```
+
+The empty startup object inherits model, voice, frontend instructions and saved
+history. New WebSocket writers admit the documented `store`, Responses backend
+settings and `audio.format` overrides; WebRTC client permissions and unknown
+startup/audio override keys are rejected. The new connection defaults to PCM16
+24 kHz independently of the source format. It cannot change delegation ownership.
+The shared HTTP fork DTO retains its canonical open metadata contract. A fork
+requires a finalized recording; it does not restore or replay external actions.
+Check the outcome of previously submitted work before deliberately routing current
+results to the new delegation and session.
+
+Dispatch a `LiveResponseEvent` with `LiveResponsesEvent.fromLiveEvent(event)`.
+`LiveResponsesLifecycleEvent.response` is a sparse `LiveCompactResponse` view,
+preserving omission/null and future data. `LiveResponsesGranularEvent.granularEvent`
+uses the ordinary granular codec where compatible. Future nested types, and
+source-valid child shapes the ordinary codec cannot represent, remain lossless
+`LiveResponsesRawEvent` values. Known malformed fields fail contextually. The
+adapter's `type` is the nested discriminator; `source.type` and `toJson()` retain
+the complete outer `response.event` frame and correlation.
+
+Keep a call ledger from granular events, not empty lifecycle `output`/`tools`.
+Collect every active call through the backend generation's final event, authorize
+and submit all results, then send one continuation without an item-create ack
+wait. Canceled or stale application outcomes need an explicit policy. Backend
+completion, Live finalization and audible playback have separate lifetimes.
+
+Grouping follows the SDK speaker/backchannel policy with defaults of 500 ms turn
+separation, 2,000 ms assistant inactivity, 1,000 ms backchannel duration and
+2,000 ms isolation, plus a 50 ms speaker settle window. Duplicate IDs are ignored;
+timestamp resets end the previous local epoch. Some acknowledgments are suppressed,
+so keep raw event taps for a lossless transcript. Segment IDs and close reasons
+are local projection values, not server turns or voice activity detection.
+`flush()`, `reset(clearSegments: ...)`, `close()` and attachment detachment are
+explicit. Each helper owns only its timer and tap; application listeners and other
+groupers keep working. `isSessionFinalized` requires observing `session.closed`.
+
+`LiveTranscriptGrouping` offers a pure explicit-time policy. The Dart convenience
+`projectLiveTranscriptPlayback(segment, sourceAnchorMs: ..., playbackAnchorMs: ...,
+rate: ...)` maps source timing to a caller-supplied playback clock; it schedules no
+audio and confirms no audible completion. Hardware playback remains caller-owned.
+Reconnect, unsent queues, raw transport escape hatches and full SDK media helpers
+remain separate inventory.
+The transcript helpers include [upstream attribution and license notices](THIRD_PARTY_NOTICES.md).
+
+→ [Runnable offline fork/transcript example](example/live_workflows_example.dart)
+demonstrates both delegation modes, finalized originals, two mock WAV downloads,
+inherited state, interleaved/canceled call IDs, caption taps and borrowed-channel
+cleanup at $0 cost. See [stored session management](https://developers.openai.com/api/docs/guides/live-conversations)
+and [delegation](https://developers.openai.com/api/docs/guides/live-delegation).
 
 </details>
 
@@ -2685,6 +2772,7 @@ See the [example/](example/) directory for complete examples:
 | [`voices_example.dart`](example/voices_example.dart) | Offline explicit consent and sample upload, then caller-selected custom voice reference |
 | [`live_http_example.dart`](example/live_http_example.dart) | Offline WebRTC/SIP signaling, explicit call controls, verified incoming notice, WAV downloads and REST fork |
 | [`live_websocket_example.dart`](example/live_websocket_example.dart) | Offline primary/sideband Live, concurrent event taps, manual delegation and graceful finalization |
+| [`live_workflows_example.dart`](example/live_workflows_example.dart) | Offline stored forks, inherited state, compact Responses, caption grouping and borrowed-channel cleanup |
 | [`chat_audio_example.dart`](example/chat_audio_example.dart) | Chat audio output, ID-only replay, and partial stream accumulation |
 | [`files_example.dart`](example/files_example.dart) | File upload and management |
 | [`conversations_example.dart`](example/conversations_example.dart) | Conversations API for state management |
@@ -2724,7 +2812,7 @@ See the [example/](example/) directory for complete examples:
 | Images | ✅ Full |
 | Videos (Sora) | ✅ Full |
 | Audio (Speech, Transcription, Translation, Custom Voices) | Buffered/streamed speech and file transcription; explicit JSON/verbose/raw translation, current options/open/custom references, all five consent operations and sample-derived voice creation; guide-only consent phrase lookup remains untyped |
-| Live | All seven HTTP operations, recordings, shared configuration/tools, primary/sideband WebSockets and complete event codecs; stored WebSocket fork/transcript workflow helpers pending |
+| Live | All seven HTTP operations, recordings, shared configuration/tools, primary/sideband/fork WebSockets, complete event codecs, compact Responses dispatch and transcript helpers; reconnect/queue/media convenience parity remains inventoried |
 | Files | ✅ Full |
 | Uploads | ✅ Full |
 | Batches | ✅ Full |
@@ -2746,7 +2834,7 @@ See the [example/](example/) directory for complete examples:
 | Vector Stores (Deprecated) | ✅ Full (separate import) |
 | Completions (Legacy) | ✅ Full |
 
-Agents, remaining Live workflows, vaults, and Administration remain part of the [API alignment roadmap](specs/api-alignment/README.md).
+Agents, vaults, Administration and retained SDK transport/media conveniences remain part of the [API alignment roadmap](specs/api-alignment/README.md).
 
 ## Official Documentation
 

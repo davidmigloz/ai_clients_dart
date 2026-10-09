@@ -38,6 +38,10 @@ export 'src/client/retry_wrapper.dart';
 export 'src/errors/exceptions.dart';
 // Extensions
 export 'src/extensions/extensions.dart';
+// Live transcript helpers
+export 'src/helpers/live/live_transcript_grouper.dart';
+export 'src/helpers/live/live_transcript_grouping.dart';
+export 'src/helpers/live/live_transcript_values.dart';
 // Interceptors
 export 'src/interceptors/auth_interceptor.dart';
 export 'src/interceptors/error_interceptor.dart';
