@@ -384,6 +384,73 @@
           "encrypted_content"
         ]
       },
+      "AgentEnvironmentEvent": {
+        "additionalProperties": false,
+        "description": "Identifies the environment whose lifecycle changed.",
+        "properties": {
+          "id": {
+            "description": "The ID of the environment.",
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "AgentEnvironmentListResource": {
+        "additionalProperties": false,
+        "description": "A page of Agents API resources, with IDs for retrieving additional pages.",
+        "properties": {
+          "data": {
+            "description": "The resources returned in this page, in the requested sort order.",
+            "items": {
+              "$ref": "#/components/schemas/PublicEnvironmentResource"
+            },
+            "maxItems": 2000,
+            "minItems": 0,
+            "type": "array"
+          },
+          "first_id": {
+            "description": "The ID of the first resource in `data`, or `null` if the page is empty.",
+            "minLength": 0,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "has_more": {
+            "description": "Whether there are more resources to retrieve after this page.",
+            "type": "boolean"
+          },
+          "last_id": {
+            "description": "The ID of the last resource in `data`, or `null` if the page is empty. Pass this as `after` with the same order and filters.",
+            "minLength": 0,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "object": {
+            "default": "list",
+            "description": "The object type, which is always `list`.",
+            "enum": [
+              "list"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "object",
+          "data",
+          "first_id",
+          "last_id",
+          "has_more"
+        ],
+        "type": "object"
+      },
       "AgentListResource": {
         "additionalProperties": false,
         "description": "A page of Agents API resources, with IDs for retrieving additional pages.",
@@ -27475,6 +27542,34 @@
           "name": "Costs object"
         }
       },
+      "CreateAgentEnvironmentParams": {
+        "additionalProperties": false,
+        "description": "Parameters for creating an execution environment before its sessions.",
+        "properties": {
+          "environment": {
+            "$ref": "#/components/schemas/CreateEnvironmentParam",
+            "description": "The required hosting type and its configuration."
+          },
+          "vault_ids": {
+            "description": "The IDs of up to 10 vaults made available to an OpenAI-hosted environment.",
+            "items": {
+              "maxLength": 1048576,
+              "minLength": 0,
+              "type": "string"
+            },
+            "maxItems": 10,
+            "minItems": 0,
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "environment"
+        ],
+        "type": "object"
+      },
       "CreateAgentParams": {
         "additionalProperties": false,
         "description": "Parameters for creating a reusable agent.",
@@ -29233,6 +29328,162 @@
           "model",
           "data",
           "usage"
+        ],
+        "type": "object"
+      },
+      "CreateEnvironmentParam": {
+        "description": "Configuration for a new prewarmed OpenAI-hosted environment.",
+        "discriminator": {
+          "mapping": {
+            "openai_hosted": "#/components/schemas/CreateEnvironmentParamOpenaiHosted"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/CreateEnvironmentParamOpenaiHosted"
+          }
+        ],
+        "x-oai-discriminator-values": [
+          "openai_hosted"
+        ]
+      },
+      "CreateEnvironmentParamOpenaiHosted": {
+        "additionalProperties": false,
+        "description": "Provision an OpenAI-hosted environment from inline configuration or a template.",
+        "properties": {
+          "capability_directories": {
+            "description": "Directories that contain capabilities exposed to the agent. Defaults to an empty list.",
+            "items": {
+              "maxLength": 1048576,
+              "minLength": 0,
+              "type": "string"
+            },
+            "maxItems": 16384,
+            "minItems": 0,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "desktop": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DesktopParam"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Desktop provisioning. Omission or null inherits the template setting, or defaults to disabled."
+          },
+          "env": {
+            "additionalProperties": {
+              "maxLength": 1048576,
+              "minLength": 0,
+              "type": "string"
+            },
+            "description": "Environment variables made available to the agent.",
+            "maxProperties": 1024,
+            "minProperties": 0,
+            "propertyNames": {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "environment_template_id": {
+            "description": "A reusable hosted template applied before inline configuration. Omitted fields inherit the template; network overrides cannot broaden its policy.",
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "files": {
+            "description": "Files available before the agent starts. Defaults to an empty list.",
+            "items": {
+              "$ref": "#/components/schemas/HostedEnvironmentFileParam"
+            },
+            "maxItems": 50,
+            "minItems": 0,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "network": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NetworkPolicyParam"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Network access policy for the environment. If omitted, the API version determines whether network access is enabled or disabled."
+          },
+          "packages": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EnvironmentPackagesParam"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Packages to install in the environment. Defaults to empty package lists."
+          },
+          "plugins": {
+            "description": "Plugins provided as inline ZIP archives. Defaults to an empty list.",
+            "items": {
+              "$ref": "#/components/schemas/HostedPluginParam"
+            },
+            "maxItems": 32,
+            "minItems": 0,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "setup_commands": {
+            "description": "Ordered, confidential setup commands. Command bodies are never returned.",
+            "items": {
+              "$ref": "#/components/schemas/SetupCommandParam"
+            },
+            "maxItems": 16,
+            "minItems": 0,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "skills": {
+            "description": "Skills referenced by ID or provided as inline ZIP archives. Defaults to an empty list.",
+            "items": {
+              "$ref": "#/components/schemas/HostedSkillParam"
+            },
+            "maxItems": 200,
+            "minItems": 0,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "type": {
+            "default": "openai_hosted",
+            "description": "The type of the object. Always `openai_hosted`.",
+            "enum": [
+              "openai_hosted"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type"
         ],
         "type": "object"
       },
@@ -34075,7 +34326,7 @@
         "type": "string"
       },
       "DecisionInput": {
-        "description": "The text or images to evaluate for every question. Provide a text string or user messages containing text and inline images. Images must be inline data URLs; at most 128 images are allowed across all messages in one request. External URLs, files, audio, tools, and item references are not supported.",
+        "description": "The text or images to evaluate for every question. Provide a text string or user messages containing text and images. Images can be base64 data URLs or publicly accessible HTTP(S) URLs; at most 128 images are allowed across all messages in one request. Files, audio, tools, and item references are not supported.",
         "oneOf": [
           {
             "maxLength": 10485760,
@@ -34107,7 +34358,7 @@
         ]
       },
       "DecisionInputContent": {
-        "description": "Text evidence or an ordered list of text and inline image parts.",
+        "description": "Text evidence or an ordered list of text and image parts.",
         "oneOf": [
           {
             "maxLength": 10485760,
@@ -34148,7 +34399,7 @@
       },
       "DecisionInputImage": {
         "additionalProperties": false,
-        "description": "An inline image. External URLs and file IDs are not supported.",
+        "description": "An image provided as a base64 data URL or a publicly accessible HTTP(S) URL. File IDs are not supported.",
         "properties": {
           "detail": {
             "anyOf": [
@@ -34163,10 +34414,10 @@
             "description": "The image detail level, using the selected model's image profile. Defaults to auto."
           },
           "image_url": {
-            "description": "A base64-encoded image in a data URL.",
+            "description": "A base64-encoded image in a data URL or a publicly accessible HTTP(S) image URL.",
             "maxLength": 1073741824,
             "minLength": 0,
-            "pattern": "^data:",
+            "pattern": "^(data:|https?://)",
             "type": "string"
           },
           "type": {
@@ -34186,7 +34437,7 @@
       },
       "DecisionInputMessage": {
         "additionalProperties": false,
-        "description": "A user message containing text or inline images.",
+        "description": "A user message containing text or images.",
         "properties": {
           "content": {
             "$ref": "#/components/schemas/DecisionInputContent"
@@ -35652,6 +35903,68 @@
       "EnvironmentParamOpenaiHosted": {
         "additionalProperties": false,
         "description": "An existing OpenAI-hosted environment or new inline/template-based hosted configuration.",
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "packages"
+              ]
+            },
+            {
+              "required": [
+                "setup_commands"
+              ]
+            },
+            {
+              "required": [
+                "network"
+              ]
+            },
+            {
+              "required": [
+                "desktop"
+              ]
+            },
+            {
+              "required": [
+                "env"
+              ]
+            },
+            {
+              "required": [
+                "capability_directories"
+              ]
+            },
+            {
+              "required": [
+                "skills"
+              ]
+            },
+            {
+              "required": [
+                "plugins"
+              ]
+            },
+            {
+              "required": [
+                "files"
+              ]
+            },
+            {
+              "required": [
+                "environment_template_id"
+              ]
+            },
+            {
+              "required": [
+                "container_size"
+              ]
+            }
+          ],
+          "required": [
+            "environment_id"
+          ]
+        },
         "properties": {
           "capability_directories": {
             "description": "Directories that contain capabilities exposed to the agent. Defaults to an empty list.",
@@ -35700,6 +36013,12 @@
               "object",
               "null"
             ]
+          },
+          "environment_id": {
+            "description": "An existing prewarmed environment. Cannot be combined with a template or inline configuration.",
+            "maxLength": 256,
+            "minLength": 9,
+            "type": "string"
           },
           "environment_template_id": {
             "description": "A reusable hosted template applied before inline session configuration. Omitted fields inherit the template; network overrides cannot broaden its policy.",
@@ -36022,16 +36341,20 @@
         "description": "The public lifecycle status of an execution environment.",
         "enum": [
           "pending",
+          "ready",
           "connected",
           "disconnected",
+          "suspended",
           "expired",
           "failed"
         ],
         "type": "string",
         "x-enumDescriptions": [
           "",
+          "Provisioning succeeded and the environment is available for attachment or use.",
           "",
           "",
+          "The sandbox is stopped and can be resumed from its private checkpoint.",
           "",
           ""
         ]
@@ -36189,6 +36512,13 @@
           "files"
         ],
         "type": "object"
+      },
+      "EnvironmentTypeParam": {
+        "description": "The hosting type of an execution environment.",
+        "enum": [
+          "openai_hosted"
+        ],
+        "type": "string"
       },
       "EnvironmentTypeResource": {
         "description": "The kind of execution environment.",
@@ -56416,6 +56746,10 @@
           "realtime.call.incoming",
           "video.completed",
           "video.failed",
+          "agent.environment.ready",
+          "agent.environment.failed",
+          "agent.environment.suspended",
+          "agent.environment.expired",
           "agent.session.created",
           "agent.session.action_required",
           "agent.session.in_progress",
@@ -75221,6 +75555,17 @@
             "format": "unixtime",
             "type": "integer"
           },
+          "detailed_explanation": {
+            "anyOf": [
+              {
+                "description": "A generated explanation, temporarily available for eligible zero data retention alerts. Omitted when unavailable.",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "error_type": {
             "$ref": "#/components/schemas/SafetyAlertErrorType"
           },
@@ -75988,6 +76333,8 @@
           "ready",
           "connected",
           "disconnected",
+          "suspended",
+          "expired",
           "failed"
         ],
         "type": "string",
@@ -75996,6 +76343,8 @@
           "The environment is ready to connect.",
           "The environment is connected.",
           "The environment is disconnected.",
+          "The environment is stopped and can be resumed from its private checkpoint.",
+          "The environment and its private checkpoint have expired.",
           "The environment failed to connect."
         ]
       },
@@ -76046,10 +76395,12 @@
             "agent.session.created": "#/components/schemas/SessionEventAgentSessionCreated",
             "agent.session.environment.connected": "#/components/schemas/SessionEventAgentSessionEnvironmentConnected",
             "agent.session.environment.disconnected": "#/components/schemas/SessionEventAgentSessionEnvironmentDisconnected",
+            "agent.session.environment.expired": "#/components/schemas/SessionEventAgentSessionEnvironmentExpired",
             "agent.session.environment.failed": "#/components/schemas/SessionEventAgentSessionEnvironmentFailed",
             "agent.session.environment.pending": "#/components/schemas/SessionEventAgentSessionEnvironmentPending",
             "agent.session.environment.ready": "#/components/schemas/SessionEventAgentSessionEnvironmentReady",
             "agent.session.environment.reset": "#/components/schemas/SessionEventAgentSessionEnvironmentReset",
+            "agent.session.environment.suspended": "#/components/schemas/SessionEventAgentSessionEnvironmentSuspended",
             "agent.session.failed": "#/components/schemas/SessionEventAgentSessionFailed",
             "agent.session.idle": "#/components/schemas/SessionEventAgentSessionIdle",
             "agent.session.in_progress": "#/components/schemas/SessionEventAgentSessionInProgress",
@@ -76082,6 +76433,12 @@
           },
           {
             "$ref": "#/components/schemas/SessionEventAgentSessionEnvironmentReady"
+          },
+          {
+            "$ref": "#/components/schemas/SessionEventAgentSessionEnvironmentSuspended"
+          },
+          {
+            "$ref": "#/components/schemas/SessionEventAgentSessionEnvironmentExpired"
           },
           {
             "$ref": "#/components/schemas/SessionEventAgentSessionEnvironmentReset"
@@ -76174,6 +76531,8 @@
         "x-oai-discriminator-values": [
           "error",
           "agent.session.environment.ready",
+          "agent.session.environment.suspended",
+          "agent.session.environment.expired",
           "agent.session.environment.reset",
           "agent.output.command_execution_output.delta",
           "agent.session.created",
@@ -76385,6 +76744,51 @@
         ],
         "type": "object"
       },
+      "SessionEventAgentSessionEnvironmentExpired": {
+        "additionalProperties": false,
+        "description": "Emitted after a suspended hosted session environment and its checkpoint expire.",
+        "properties": {
+          "environment": {
+            "$ref": "#/components/schemas/SessionEnvironmentStateResource",
+            "description": "The current environment state."
+          },
+          "event_id": {
+            "description": "The unique ID of the event.",
+            "minLength": 0,
+            "type": "string"
+          },
+          "session_id": {
+            "description": "The ID of the session associated with the event.",
+            "minLength": 0,
+            "type": "string"
+          },
+          "turn_id": {
+            "description": "The ID of the turn associated with the event, when applicable.",
+            "minLength": 0,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type": {
+            "default": "agent.session.environment.expired",
+            "description": "The type of the object. Always `agent.session.environment.expired`.",
+            "enum": [
+              "agent.session.environment.expired"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type",
+          "event_id",
+          "session_id",
+          "turn_id",
+          "environment"
+        ],
+        "type": "object"
+      },
       "SessionEventAgentSessionEnvironmentFailed": {
         "additionalProperties": false,
         "description": "Emitted when a session environment fails.",
@@ -76570,6 +76974,51 @@
           "turn_id",
           "environment_id",
           "reset_count"
+        ],
+        "type": "object"
+      },
+      "SessionEventAgentSessionEnvironmentSuspended": {
+        "additionalProperties": false,
+        "description": "Emitted after an idle hosted session environment is checkpointed and stopped.",
+        "properties": {
+          "environment": {
+            "$ref": "#/components/schemas/SessionEnvironmentStateResource",
+            "description": "The current environment state."
+          },
+          "event_id": {
+            "description": "The unique ID of the event.",
+            "minLength": 0,
+            "type": "string"
+          },
+          "session_id": {
+            "description": "The ID of the session associated with the event.",
+            "minLength": 0,
+            "type": "string"
+          },
+          "turn_id": {
+            "description": "The ID of the turn associated with the event, when applicable.",
+            "minLength": 0,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type": {
+            "default": "agent.session.environment.suspended",
+            "description": "The type of the object. Always `agent.session.environment.suspended`.",
+            "enum": [
+              "agent.session.environment.suspended"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type",
+          "event_id",
+          "session_id",
+          "turn_id",
+          "environment"
         ],
         "type": "object"
       },
@@ -86775,6 +87224,146 @@
         "title": "Web search tool call",
         "type": "object"
       },
+      "WebhookAgentEnvironmentExpired": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WebhookAgentSessionEnvelope"
+          },
+          {
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/AgentEnvironmentEvent"
+              },
+              "type": {
+                "description": "The event type. Always `agent.environment.expired`.",
+                "enum": [
+                  "agent.environment.expired"
+                ],
+                "type": "string",
+                "x-stainless-const": true
+              }
+            },
+            "required": [
+              "type",
+              "data"
+            ],
+            "type": "object"
+          }
+        ],
+        "description": "Sent when an agent environment expires and can no longer resume from a snapshot.\n",
+        "title": "agent.environment.expired",
+        "type": "object",
+        "x-oaiMeta": {
+          "example": "{\n  \"id\": \"evt_123\",\n  \"object\": \"event\",\n  \"created_at\": 1719168000,\n  \"type\": \"agent.environment.expired\",\n  \"data\": {\"id\": \"ccarenv_123\"}\n}\n",
+          "group": "webhook-events",
+          "name": "agent.environment.expired"
+        }
+      },
+      "WebhookAgentEnvironmentFailed": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WebhookAgentSessionEnvelope"
+          },
+          {
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/AgentEnvironmentEvent"
+              },
+              "type": {
+                "description": "The event type. Always `agent.environment.failed`.",
+                "enum": [
+                  "agent.environment.failed"
+                ],
+                "type": "string",
+                "x-stainless-const": true
+              }
+            },
+            "required": [
+              "type",
+              "data"
+            ],
+            "type": "object"
+          }
+        ],
+        "description": "Sent when setup fails for a prewarmed OpenAI-hosted environment before it is attached to a session.\n",
+        "title": "agent.environment.failed",
+        "type": "object",
+        "x-oaiMeta": {
+          "example": "{\n  \"id\": \"evt_123\",\n  \"object\": \"event\",\n  \"created_at\": 1719168000,\n  \"type\": \"agent.environment.failed\",\n  \"data\": {\"id\": \"ccarenv_123\"}\n}\n",
+          "group": "webhook-events",
+          "name": "agent.environment.failed"
+        }
+      },
+      "WebhookAgentEnvironmentReady": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WebhookAgentSessionEnvelope"
+          },
+          {
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/AgentEnvironmentEvent"
+              },
+              "type": {
+                "description": "The event type. Always `agent.environment.ready`.",
+                "enum": [
+                  "agent.environment.ready"
+                ],
+                "type": "string",
+                "x-stainless-const": true
+              }
+            },
+            "required": [
+              "type",
+              "data"
+            ],
+            "type": "object"
+          }
+        ],
+        "description": "Sent when a prewarmed OpenAI-hosted environment finishes setup before being attached to a session.\n",
+        "title": "agent.environment.ready",
+        "type": "object",
+        "x-oaiMeta": {
+          "example": "{\n  \"id\": \"evt_123\",\n  \"object\": \"event\",\n  \"created_at\": 1719168000,\n  \"type\": \"agent.environment.ready\",\n  \"data\": {\"id\": \"ccarenv_123\"}\n}\n",
+          "group": "webhook-events",
+          "name": "agent.environment.ready"
+        }
+      },
+      "WebhookAgentEnvironmentSuspended": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WebhookAgentSessionEnvelope"
+          },
+          {
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/AgentEnvironmentEvent"
+              },
+              "type": {
+                "description": "The event type. Always `agent.environment.suspended`.",
+                "enum": [
+                  "agent.environment.suspended"
+                ],
+                "type": "string",
+                "x-stainless-const": true
+              }
+            },
+            "required": [
+              "type",
+              "data"
+            ],
+            "type": "object"
+          }
+        ],
+        "description": "Sent when an agent environment is suspended and can resume from a snapshot.\n",
+        "title": "agent.environment.suspended",
+        "type": "object",
+        "x-oaiMeta": {
+          "example": "{\n  \"id\": \"evt_123\",\n  \"object\": \"event\",\n  \"created_at\": 1719168000,\n  \"type\": \"agent.environment.suspended\",\n  \"data\": {\"id\": \"ccarenv_123\"}\n}\n",
+          "group": "webhook-events",
+          "name": "agent.environment.suspended"
+        }
+      },
       "WebhookAgentSessionActionRequired": {
         "allOf": [
           {
@@ -89006,6 +89595,267 @@
           }
         },
         "summary": "Create an agent",
+        "tags": [
+          "Agents"
+        ]
+      }
+    },
+    "/agents/environments": {
+      "get": {
+        "description": "Lists OpenAI-hosted environments owned by the authenticated principal. Requires access to the prewarming beta.",
+        "operationId": "listAgentEnvironments",
+        "parameters": [
+          {
+            "description": "The maximum number of resources to return, between 1 and 100. Defaults to 20.",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int64",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "The order in which resources are returned. Defaults to `desc`.",
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ListOrderParam",
+              "default": "desc"
+            }
+          },
+          {
+            "description": "Return resources after this resource ID in the selected order.",
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "maxLength": 1048576,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The hosting type to list. Defaults to `openai_hosted`.",
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/EnvironmentTypeParam"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvironmentListResource",
+                  "description": "An ID-paginated list of owned environments."
+                }
+              }
+            },
+            "description": "A page of owned environments."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse-2"
+                }
+              }
+            },
+            "description": "The request was invalid."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse-2"
+                }
+              }
+            },
+            "description": "Authentication or project context was missing."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse-2"
+                }
+              }
+            },
+            "description": "The API key lacks the required permission."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse-2"
+                }
+              }
+            },
+            "description": "The requested environment or referenced resource was not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse-2"
+                }
+              }
+            },
+            "description": "The request conflicted with the current environment state."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse-2"
+                }
+              }
+            },
+            "description": "An internal error occurred."
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse-2"
+                }
+              }
+            },
+            "description": "The service is temporarily unavailable."
+          }
+        },
+        "summary": "List agent environments",
+        "tags": [
+          "Agents"
+        ]
+      },
+      "post": {
+        "description": "Creates an OpenAI-hosted environment before creating a session. Requires access to the prewarming beta.",
+        "operationId": "createAgentEnvironment",
+        "parameters": [
+          {
+            "description": "Deduplicates creation for 24 hours within the authenticated organization, project, and creator. Retry the same JSON parameters with the same key to retrieve the original environment in its current state. Different parameters or an incomplete hosted creation return 409. Deleted environments are not recreated. After retention expires, the key may create a new environment. Without this header, each request creates a new environment.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAgentEnvironmentParams"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicEnvironmentResource"
+                }
+              }
+            },
+            "description": "The created OpenAI-hosted environment."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse-2"
+                }
+              }
+            },
+            "description": "The request was invalid."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse-2"
+                }
+              }
+            },
+            "description": "Authentication or project context was missing."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse-2"
+                }
+              }
+            },
+            "description": "The API key lacks the required permission."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse-2"
+                }
+              }
+            },
+            "description": "The requested environment or referenced resource was not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse-2"
+                }
+              }
+            },
+            "description": "The request conflicted with the current environment state."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse-2"
+                }
+              }
+            },
+            "description": "The request exceeded a rate or capacity limit."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse-2"
+                }
+              }
+            },
+            "description": "An internal error occurred."
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse-2"
+                }
+              }
+            },
+            "description": "The service is temporarily unavailable."
+          }
+        },
+        "summary": "Create an agent environment",
         "tags": [
           "Agents"
         ]
@@ -97240,7 +98090,7 @@
     },
     "/decisions": {
       "post": {
-        "description": "Use this endpoint to ask classification or scoring questions about the same input. You\u2019ll get the answers back in the order you asked the questions.\n\nFor text, you can pass a string. You can also send user messages containing `input_text` and `input_image` parts, with up to 128 images per request. Images must be data URLs; external URLs and file IDs aren\u2019t accepted. Other message roles, function calls, files, audio, and item references aren\u2019t supported.\n\nSometimes a question returns a refusal instead of an answer. The result has type `refusal` and includes the question\u2019s name, or `null` if you didn\u2019t give it one.",
+        "description": "Use this endpoint to ask classification or scoring questions about the same input. You\u2019ll get the answers back in the order you asked the questions.\n\nFor text, you can pass a string. You can also send user messages containing `input_text` and `input_image` parts, with up to 128 images per request. Images can be base64 data URLs or publicly accessible HTTP(S) URLs. File IDs aren\u2019t accepted. Other message roles, function calls, files, audio, and item references aren\u2019t supported.\n\nSometimes a question returns a refusal instead of an answer. The result has type `refusal` and includes the question\u2019s name, or `null` if you didn\u2019t give it one.",
         "operationId": "createDecision",
         "requestBody": {
           "content": {
@@ -121907,6 +122757,86 @@
     }
   ],
   "webhooks": {
+    "agent_environment_expired": {
+      "post": {
+        "description": "Sent when an agent environment expires and can no longer resume from a snapshot.\n",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookAgentEnvironmentExpired"
+              }
+            }
+          },
+          "description": "The event payload sent by the API."
+        },
+        "responses": {
+          "200": {
+            "description": "Return a 200 status code to acknowledge receipt of the event. Non-200\nstatus codes will be retried.\n"
+          }
+        }
+      }
+    },
+    "agent_environment_failed": {
+      "post": {
+        "description": "Sent when setup fails for a prewarmed OpenAI-hosted environment before it is attached to a session.\n",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookAgentEnvironmentFailed"
+              }
+            }
+          },
+          "description": "The event payload sent by the API."
+        },
+        "responses": {
+          "200": {
+            "description": "Return a 200 status code to acknowledge receipt of the event. Non-200\nstatus codes will be retried.\n"
+          }
+        }
+      }
+    },
+    "agent_environment_ready": {
+      "post": {
+        "description": "Sent when a prewarmed OpenAI-hosted environment finishes setup before being attached to a session.\n",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookAgentEnvironmentReady"
+              }
+            }
+          },
+          "description": "The event payload sent by the API."
+        },
+        "responses": {
+          "200": {
+            "description": "Return a 200 status code to acknowledge receipt of the event. Non-200\nstatus codes will be retried.\n"
+          }
+        }
+      }
+    },
+    "agent_environment_suspended": {
+      "post": {
+        "description": "Sent when an agent environment is suspended and can resume from a snapshot.\n",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookAgentEnvironmentSuspended"
+              }
+            }
+          },
+          "description": "The event payload sent by the API."
+        },
+        "responses": {
+          "200": {
+            "description": "Return a 200 status code to acknowledge receipt of the event. Non-200\nstatus codes will be retried.\n"
+          }
+        }
+      }
+    },
     "agent_session_action_required": {
       "post": {
         "description": "Sent when an agent session requires an action. Retrieve the session for action details.\n",

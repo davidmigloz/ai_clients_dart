@@ -7,8 +7,8 @@ import 'base_resource.dart';
 
 /// Resource for typed classification and scoring with the Decisions API.
 ///
-/// Access through `OpenAIClient.decisions`. The API accepts text and inline
-/// images and returns ordered predicate, choice, score, or refusal answers.
+/// Access through `OpenAIClient.decisions`. The API accepts text and data URL or publicly
+/// accessible HTTP(S) images and returns ordered predicate, choice, score, or refusal answers.
 class DecisionsResource extends ResourceBase {
   /// Creates a [DecisionsResource].
   DecisionsResource({
@@ -19,7 +19,7 @@ class DecisionsResource extends ResourceBase {
     super.ensureNotClosed,
   });
 
-  /// Evaluates ordered questions against shared text or inline-image input.
+  /// Evaluates ordered questions against shared text or image input.
   ///
   /// Currently supports `gpt-6-luna`. There is no model-event streaming mode.
   /// A refusal is represented by an answer variant in the returned response.

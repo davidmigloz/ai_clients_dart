@@ -2034,7 +2034,7 @@
           "ImageDecisionInputPart": "input_image"
         }
       },
-      "note": "Synthetic union from DecisionInputContentParts.items; restricted to inline text and data-url images."
+      "note": "Synthetic union from DecisionInputContentParts.items; restricted to text and data URL/public HTTP(S) images."
     },
     "DecisionInputText": {
       "spec": "main",

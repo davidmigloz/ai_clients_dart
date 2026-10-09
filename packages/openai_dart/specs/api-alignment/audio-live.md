@@ -4,9 +4,9 @@ Status: planning merged in [PR #373](https://github.com/davidmigloz/ai_clients_d
 speech #366, existing Audio #367 and consent management #368 merged in PRs
 #374/#375/#376. Custom voice creation #369 merged in PR #377. Live HTTP #370 merged
 in PR #378. Live WebSockets #371 merged in PR #379; stored fork and transcript
-workflow #372 is implemented with local acceptance recorded in
-[the fork/transcript review](reviews/30-live-forks-transcripts.md); publication CI
-and merge remain separate gates.
+workflow #372 merged in PR #380, completing all seven specified slices.
+[The fork/transcript review](reviews/30-live-forks-transcripts.md) records its
+independent acceptance and final-head CI. Later SDK/parity inventory remains open.
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Phase 4 is complete: [PR #365](https://github.com/davidmigloz/ai_clients_dart/pull/365)
 merged October 8, 2026 at `fca1a3f4e453d88caed9ffa573d4ec665126c3cb`, closing #360

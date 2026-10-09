@@ -32,7 +32,7 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 ### Generation and streaming
 
 - Responses API with streaming, multi-turn conversations, structured output, background mode, cache prewarming, and typed cache diagnostics
-- Decisions API for typed predicate, choice, and score answers from text or inline images
+- Decisions API for typed predicate, choice, and score answers from text or data URL/HTTP(S) images
 - Chat Completions with tool calling, vision, structured output, detailed usage, audio completion/streaming, and obfuscation controls
 - Images, videos, audio (TTS, transcription, translation), and embeddings
 - Realtime API via WebSocket and WebRTC with audio streaming
@@ -164,7 +164,7 @@ final client = OpenAIClient(
 
 ### How do I classify or score shared input?
 
-The [Decisions API](https://developers.openai.com/api/docs/guides/decisions) returns ordered typed answers to predicate, choice, and score questions. It currently supports `gpt-6-luna` and accepts text or inline images.
+The [Decisions API](https://developers.openai.com/api/reference/resources/decisions/methods/create) returns ordered typed answers to predicate, choice, and score questions. It currently supports `gpt-6-luna` and accepts text, inline data URLs and publicly accessible HTTP(S) images.
 
 ```dart
 final decision = await client.decisions.create(
@@ -189,7 +189,23 @@ for (final answer in decision.answers) {
 }
 ```
 
-Use `DecisionInput.messages` with `DecisionContent.parts` for mixed text/image input. `DecisionInputPart.image(imageUrl: ...)` accepts a data URL; `DecisionInputPart.imageBytes(bytes, mediaType: 'image/png')` builds the MIME/base64 data URL. Files, external image URLs, other roles, tools, and audio are unsupported. Unset image detail defaults to `auto` on the server.
+Use `DecisionInput.messages` with `DecisionContent.parts` for mixed text/image input. `DecisionInputPart.image(imageUrl: ...)` accepts a data URL or a publicly accessible HTTP(S) URL; `DecisionInputPart.imageBytes(bytes, mediaType: 'image/png')` builds the MIME/base64 data URL. File IDs, other roles, tools, and audio are unsupported. Unset image detail defaults to `auto` on the server.
+
+```dart
+final image = DecisionInputPart.image(
+  imageUrl: 'https://images.example.com/product.png',
+  detail: ImageDetail.original,
+);
+final inline = DecisionInputPart.imageBytes([1, 2, 3], mediaType: 'image/png');
+```
+
+Image constructors, parsers and copies admit the case-sensitive prefixes `data:`,
+`http://` and `https://`, preserving the supplied string. OpenAI checks image
+validity and public accessibility; the Dart client sends the reference without
+downloading or normalizing it. The current HTTP reference and schema support
+remote images; older guide and SDK descriptions may still say inline-only.
+→ [Offline HTTP(S)/inline image example](example/decision_image_urls_example.dart)
+verifies one mock POST, exact URL strings, mixed part order and image details at $0 cost.
 
 Requests support 1–200 questions, 2–255 choices per choice question, 2–10 levels per score question, and up to 128 images across all messages. An optional `safetyIdentifier` is limited to 128 characters. Choice values preserve strings and booleans as distinct types; score answers can be fractional. Refusals can occur alongside successful answers. There is no model-event streaming mode.
 
@@ -2761,6 +2777,7 @@ See the [example/](example/) directory for complete examples:
 | [`async_tools_example.dart`](example/async_tools_example.dart) | Local async function/custom jobs, original call IDs and latest-response continuation |
 | [`prompt_cache_example.dart`](example/prompt_cache_example.dart) | Responses prewarming, comparison diagnostics, and narrow Chat cache options |
 | [`decisions_example.dart`](example/decisions_example.dart) | Typed Decisions questions, refusals, usage, and inline images |
+| [`decision_image_urls_example.dart`](example/decision_image_urls_example.dart) | Offline HTTP(S)/data image references, exact mixed input and one mock POST |
 | [`embeddings_example.dart`](example/embeddings_example.dart) | Text embeddings with dimension control |
 | [`image_model_selection_example.dart`](example/image_model_selection_example.dart) | Local generation/multipart/JSON-edit model contracts without API calls |
 | [`images_example.dart`](example/images_example.dart) | GPT Image generation |

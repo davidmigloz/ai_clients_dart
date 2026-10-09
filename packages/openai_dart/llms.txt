@@ -4,14 +4,15 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~27.2k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~27.4k tokens): Primary package documentation with installation, configuration, and usage examples.
 - [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/CHANGELOG.md) (~21.7k tokens): Release history and version-by-version changes.
 - [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/MIGRATION.md) (~22.2k tokens): Upgrade notes and breaking-change guidance.
 - [Monitoring failures](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md#how-do-i-inspect-monitoring-failures): Shared passive HTTP/failed Response/WS details, flat nullable SSE errors, scoped investigation and migration boundaries.
 
 ## Examples
 
-- [decisions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/decisions_example.dart) (~639 tokens): Typed Decisions questions, refusals, usage, and inline images.
+- [decisions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/decisions_example.dart) (~639 tokens): Typed Decisions questions, refusals, usage, and optional inline images.
+- [decision_image_urls_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/decision_image_urls_example.dart) (~823 tokens): Offline HTTP/HTTPS/data images, exact literal strings/order/details and one mock POST; $0 API cost.
 - [containers_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/containers_example.dart) (~1.5k tokens): Container memory/network configuration, Code Interpreter IDs, and files.
 - [responses_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/responses_example.dart) (~870 tokens): Responses API with built-in tools.
 - [async_tools_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/async_tools_example.dart) (~1.3k tokens): Local async function/custom jobs, original call IDs and latest-response continuation.
@@ -112,8 +113,12 @@ LiveResponsesEvent.fromLiveEvent dispatches sparse lifecycle snapshots via LiveC
 
 LiveTranscriptGrouper attaches a non-consuming event tap; complete segment snapshots replace caption text by local ID. SDK grouping defaults are 500/2000/1000/2000 ms plus a 50 ms settle window, with event-ID dedup, timestamp reset, acknowledgments/interruptions and monotonic inactivity fallback. Raw taps remain lossless while grouping can suppress backchannels. Helper closure cancels only its timer/tap; finalized requires observed session.closed. Pure LiveTranscriptGrouping uses explicit source time. projectLiveTranscriptPlayback is an additive Dart caller-clock projection, not SDK hardware playback or audible completion. LiveConnection.dataChannel(callerChannel) is a typed already-started borrowed writer; cleanup never closes caller media/listeners. Opt-in reconnect/unsent queues/escape hatches/media engines remain inventory.
 
+## Decisions image references
+
+DecisionInputPart.image admits exact case-sensitive `data:`, `http://`, `https://` prefixes through constructors/parsers/copies. Strings are preserved, including escapes/query/fragment; the service checks image validity and public accessibility. The client does not fetch or normalize images. imageBytes and omitted detail/auto behavior remain compatible; all four ImageDetail values and 128-image request limit remain. File IDs/unsupported roles/audio/tools stay excluded. Current canonical schema and HTTP reference supersede older inline-only guide/SDK prose. The offline URL example closes its caller-owned mock transport. Safety detailed_explanation remains a separate pending follow-up.
+
 ## Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~141k tokens**
+**Total: ~142k tokens**

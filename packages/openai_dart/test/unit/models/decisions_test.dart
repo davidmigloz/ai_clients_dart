@@ -177,14 +177,208 @@ void main() {
 
     for (final detail in ImageDetail.values) {
       test('preserves ${detail.name} image detail', () {
-        final part = DecisionInputPart.image(
-          imageUrl: 'data:image/png;base64,AQID',
-          detail: detail,
-        );
-        expect(part.toJson()['detail'], detail.name);
-        expect(DecisionInputPart.fromJson(part.toJson()), part);
+        for (final imageUrl in [
+          'data:image/png;base64,AQID',
+          'http://example.com/image.png',
+          'https://example.com/image.png',
+        ]) {
+          final part = DecisionInputPart.image(
+            imageUrl: imageUrl,
+            detail: detail,
+          );
+          expect(part.toJson(), {
+            'type': 'input_image',
+            'image_url': imageUrl,
+            'detail': detail.name,
+          });
+          expect(DecisionInputPart.fromJson(part.toJson()), part);
+        }
       });
     }
+
+    for (final imageUrl in [
+      'data:',
+      'http://',
+      'https://',
+      'http://example.com/image%2Fone.png?signature=a%2Bb&v=1#preview',
+      'https://EXAMPLE.com:443/photo.png?key=synthetic-secret&v=1#frame',
+      'https://例え.example/写真.png?caption=é',
+    ]) {
+      test('retains supported image URL literal $imageUrl', () {
+        final fixture = <String, dynamic>{
+          'type': 'input_image',
+          'image_url': imageUrl,
+        };
+        final part = DecisionInputPart.image(imageUrl: imageUrl);
+        expect(part.toJson(), fixture);
+        expect(ImageDecisionInputPart(imageUrl: imageUrl), part);
+        expect(ImageDecisionInputPart.fromJson(fixture), part);
+        expect(DecisionInputPart.fromJson(fixture), part);
+        expect(DecisionInputPart.fromJson(fixture).hashCode, part.hashCode);
+        final messageFixture = <String, dynamic>{
+          'type': 'message',
+          'role': 'user',
+          'content': [fixture],
+        };
+        final message = DecisionInputMessage(
+          content: DecisionContent.parts([part]),
+        );
+        expect(DecisionInputMessage.fromJson(messageFixture), message);
+        expect(
+          DecisionInput.fromJson([messageFixture]),
+          DecisionInput.messages([message]),
+        );
+        expect(part.toJson().containsKey('detail'), isFalse);
+        expect(
+          ImageDecisionInputPart.fromJson({
+            ...fixture,
+            'detail': null,
+          }).toJson(),
+          fixture,
+        );
+      });
+    }
+
+    test('image copies move between supported prefixes and clear detail', () {
+      final original = ImageDecisionInputPart(
+        imageUrl: 'data:image/png;base64,AQID',
+        detail: ImageDetail.high,
+      );
+      final http = original.copyWith(imageUrl: 'http://example.com/image.png');
+      final https = http.copyWith(imageUrl: 'https://example.com/image.png');
+      expect(original.copyWith(), original);
+      expect(original.copyWith().hashCode, original.hashCode);
+      expect(http.imageUrl, 'http://example.com/image.png');
+      expect(http.detail, ImageDetail.high);
+      expect(https.detail, ImageDetail.high);
+      expect(https.copyWith(detail: null).toJson(), {
+        'type': 'input_image',
+        'image_url': 'https://example.com/image.png',
+      });
+      expect(https.copyWith(imageUrl: original.imageUrl), original);
+      expect(original.imageUrl, 'data:image/png;base64,AQID');
+    });
+
+    test(
+      'image values compare exact URLs and detail without exposing URLs',
+      () {
+        const imageUrl =
+            'https://example.com/photo.png?api_key=synthetic-image-secret';
+        final part = ImageDecisionInputPart(
+          imageUrl: imageUrl,
+          detail: ImageDetail.original,
+        );
+        final equal = ImageDecisionInputPart.fromJson(const {
+          'type': 'input_image',
+          'image_url': imageUrl,
+          'detail': 'original',
+        });
+        expect(equal, part);
+        expect(equal.hashCode, part.hashCode);
+        expect({part, equal}, hasLength(1));
+        expect(part.copyWith(imageUrl: '$imageUrl#preview'), isNot(part));
+        expect(part.copyWith(detail: ImageDetail.low), isNot(part));
+        expect(
+          part.toString(),
+          contains('imageUrl: [${imageUrl.length} chars]'),
+        );
+        expect(part.toString(), isNot(contains(imageUrl)));
+        expect(part.toString(), isNot(contains('synthetic-image-secret')));
+      },
+    );
+
+    test(
+      'image prefix errors retain context without disclosing references',
+      () {
+        const imageUrl =
+            'ftp://example.com/image.png?api_key=synthetic-image-secret';
+        final valid = ImageDecisionInputPart(
+          imageUrl: 'https://example.com/image.png',
+        );
+        for (final create in <void Function()>[
+          () => DecisionInputPart.image(imageUrl: imageUrl),
+          () => valid.copyWith(imageUrl: imageUrl),
+        ]) {
+          expect(
+            create,
+            throwsA(
+              isA<ArgumentError>()
+                  .having(
+                    (error) => error.toString(),
+                    'context',
+                    contains('image'),
+                  )
+                  .having(
+                    (error) => error.toString(),
+                    'private URL',
+                    isNot(contains(imageUrl)),
+                  )
+                  .having(
+                    (error) => error.toString(),
+                    'private query',
+                    isNot(contains('synthetic-image-secret')),
+                  ),
+            ),
+          );
+        }
+        expect(
+          () => DecisionInputPart.fromJson(const {
+            'type': 'input_image',
+            'image_url': imageUrl,
+          }),
+          throwsA(
+            isA<FormatException>()
+                .having(
+                  (error) => error.message,
+                  'context',
+                  contains('ImageDecisionInputPart.image_url'),
+                )
+                .having(
+                  (error) => error.toString(),
+                  'private query',
+                  isNot(contains('synthetic-image-secret')),
+                ),
+          ),
+        );
+      },
+    );
+
+    test('rejects malformed known images after admitting HTTP(S) URLs', () {
+      for (final imageUrl in <Object?>[null, 7, false, [], {}]) {
+        final fixture = {'type': 'input_image', 'image_url': imageUrl};
+        expect(
+          () => ImageDecisionInputPart.fromJson(fixture),
+          throwsFormatException,
+        );
+        expect(
+          () => DecisionInputPart.fromJson(fixture),
+          throwsFormatException,
+        );
+      }
+      expect(
+        () => ImageDecisionInputPart.fromJson(const {'type': 'input_image'}),
+        throwsFormatException,
+      );
+      for (final type in <Object?>[null, 'input_text', 'future_image', 7]) {
+        expect(
+          () => ImageDecisionInputPart.fromJson({
+            'type': type,
+            'image_url': 'https://example.com/image.png',
+          }),
+          throwsFormatException,
+        );
+      }
+      for (final detail in <Object?>['future_detail', 7, false]) {
+        expect(
+          () => ImageDecisionInputPart.fromJson({
+            'type': 'input_image',
+            'image_url': 'https://example.com/image.png',
+            'detail': detail,
+          }),
+          throwsFormatException,
+        );
+      }
+    });
 
     test('allows empty text, message lists, and content part lists', () {
       expect(const DecisionInput.text('').toJson(), '');
@@ -210,7 +404,21 @@ void main() {
     });
 
     for (final imageUrl in [
-      'https://example.com/image.png',
+      '',
+      ' ',
+      'Data:image/png;base64,AQID',
+      'HTTP://example.com/image.png',
+      'HTTPS://example.com/image.png',
+      ' https://example.com/image.png',
+      '\nhttps://example.com/image.png',
+      'prefix:https://example.com/image.png',
+      'http:example.com/image.png',
+      'https:/example.com/image.png',
+      '//example.com/image.png',
+      'example.com/image.png',
+      'ftp://example.com/image.png',
+      'file:///image.png',
+      'javascript:image',
       'AQID',
       'file_123',
     ]) {
@@ -218,6 +426,23 @@ void main() {
         expect(
           () => DecisionInputPart.image(imageUrl: imageUrl),
           throwsArgumentError,
+        );
+        expect(
+          () => ImageDecisionInputPart(imageUrl: imageUrl),
+          throwsArgumentError,
+        );
+        expect(
+          () => ImageDecisionInputPart(
+            imageUrl: 'https://example.com/image.png',
+          ).copyWith(imageUrl: imageUrl),
+          throwsArgumentError,
+        );
+        expect(
+          () => ImageDecisionInputPart.fromJson({
+            'type': 'input_image',
+            'image_url': imageUrl,
+          }),
+          throwsFormatException,
         );
         expect(
           () => DecisionInputPart.fromJson({
