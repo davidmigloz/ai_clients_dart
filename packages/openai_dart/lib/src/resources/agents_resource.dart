@@ -6,6 +6,7 @@ import '../errors/exceptions.dart';
 import '../models/agents/agent_json_helpers.dart';
 import '../models/agents/agents.dart';
 import '../utils/private_audio_http.dart';
+import 'agent_sessions_resource.dart';
 import 'base_resource.dart';
 
 /// Saved Agents API configuration, scoped to the authenticated project.
@@ -14,6 +15,21 @@ import 'base_resource.dart';
 /// after caller headers. This resource manages reusable configuration only;
 /// creation does not start a session, run a model or execute a configured tool.
 class AgentsResource extends ResourceBase {
+  AgentSessionsResource? _sessions;
+
+  /// Raw durable session CRUD, persistent events and manual input submission.
+  AgentSessionsResource get sessions {
+    ensureNotClosed?.call();
+    return _sessions ??= AgentSessionsResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+      streamClientFactory: streamClientFactory,
+    );
+  }
+
   /// Creates the cached resource using the ordinary client HTTP policy.
   AgentsResource({
     required super.config,

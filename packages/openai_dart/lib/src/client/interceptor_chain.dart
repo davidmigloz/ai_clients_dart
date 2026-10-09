@@ -61,38 +61,51 @@ class InterceptorChain {
   /// When the abort trigger completes, any in-flight operation will be cancelled.
   ///
   /// Returns the HTTP response after all interceptors have processed it.
+  /// When [allowRetries] is false, transport runs once and repeated interceptor
+  /// continuations receive that same result or failure. This prevents replay of
+  /// sensitive authentication submissions, including by custom retry middleware.
   Future<http.Response> execute(
     http.BaseRequest request, {
     Future<void>? abortTrigger,
+    bool allowRetries = true,
   }) {
     ensureNotClosed?.call();
 
     final context = RequestContext(
       request: request,
-      metadata: {},
+      metadata: {if (!allowRetries) 'automaticRetriesDisabled': true},
       abortTrigger: abortTrigger,
     );
 
-    return _buildChain(0)(context);
+    Future<http.Response>? firstTransport;
+    final InterceptorNext? terminal = allowRetries
+        ? null
+        : (context) => firstTransport ??= Future<http.Response>.microtask(
+            () => _executeTransport(context, allowRetries: false),
+          );
+    return _buildChain(0, terminal: terminal)(context);
   }
 
   /// Builds the interceptor chain recursively.
-  InterceptorNext _buildChain(int index) {
+  InterceptorNext _buildChain(int index, {InterceptorNext? terminal}) {
     if (index >= interceptors.length) {
       // Terminal: execute the actual HTTP request
-      return _executeTransport;
+      return terminal ?? _executeTransport;
     }
 
     // Recursive: call current interceptor with next in chain
     return (context) {
       final interceptor = interceptors[index];
-      final next = _buildChain(index + 1);
+      final next = _buildChain(index + 1, terminal: terminal);
       return interceptor.intercept(context, next);
     };
   }
 
   /// Executes the HTTP transport with optional retry wrapper.
-  Future<http.Response> _executeTransport(RequestContext context) {
+  Future<http.Response> _executeTransport(
+    RequestContext context, {
+    bool allowRetries = true,
+  }) {
     final originalRequest = context.request;
 
     // Extract correlation ID upfront for tracing (used in retries and abort).
@@ -205,7 +218,8 @@ class InterceptorChain {
     // Execute with or without retry wrapper
     // Note: Retries are only supported for http.Request types because other
     // request types (MultipartRequest, StreamedRequest) cannot be safely cloned.
-    if (retryWrapper case final wrapper? when originalRequest is http.Request) {
+    if (retryWrapper case final wrapper?
+        when originalRequest is http.Request && allowRetries) {
       return wrapper.executeWithRetry(
         originalRequest,
         executeTransport,

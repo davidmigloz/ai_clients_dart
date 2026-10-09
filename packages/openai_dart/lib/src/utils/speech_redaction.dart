@@ -24,7 +24,34 @@ bool isPrivateAudioRequest(http.BaseRequest? request) =>
     isVoiceConsentRequest(request) ||
     isCustomVoiceRequest(request) ||
     isLiveRequest(request) ||
-    isSavedAgentRequest(request);
+    isAgentsApiRequest(request);
+
+/// Identifies implemented Agents routes containing private configuration/input.
+bool isAgentsApiRequest(http.BaseRequest? request) =>
+    isSavedAgentRequest(request) || isAgentSessionRequest(request);
+
+/// Identifies the seven raw session/event operations, including custom bases.
+bool isAgentSessionRequest(http.BaseRequest? request) {
+  if (request == null) return false;
+  final segments = request.url.pathSegments;
+  final collection =
+      segments.length >= 2 &&
+      segments[segments.length - 2] == 'agents' &&
+      segments.last == 'sessions' &&
+      const {'GET', 'POST'}.contains(request.method);
+  final item =
+      segments.length >= 3 &&
+      segments[segments.length - 3] == 'agents' &&
+      segments[segments.length - 2] == 'sessions' &&
+      const {'GET', 'POST', 'DELETE'}.contains(request.method);
+  final events =
+      segments.length >= 4 &&
+      segments[segments.length - 4] == 'agents' &&
+      segments[segments.length - 3] == 'sessions' &&
+      segments.last == 'events' &&
+      const {'GET', 'POST'}.contains(request.method);
+  return collection || item || events;
+}
 
 /// Identifies the five saved-agent operations, including custom base paths.
 ///

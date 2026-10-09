@@ -80,6 +80,8 @@ Stream<Uint8List> openPrivateByteStream({
   required String method,
   required String endpoint,
   Map<String, dynamic>? body,
+  Map<String, String>? additionalHeaders,
+  String? betaFeature,
   required String accept,
   required Duration timeout,
   required String context,
@@ -87,6 +89,7 @@ Stream<Uint8List> openPrivateByteStream({
   void Function(http.StreamedResponse response)? validateResponse,
   void Function()? ensureNotClosed,
   Future<void>? abortTrigger,
+  bool timeoutResponseBody = true,
 }) => _PrivateByteOperation(
   httpClient: httpClient,
   streamClientFactory: streamClientFactory,
@@ -95,13 +98,15 @@ Stream<Uint8List> openPrivateByteStream({
   endpoint: endpoint,
   context: context,
   body: body,
+  additionalHeaders: additionalHeaders,
+  betaFeature: betaFeature,
   accept: accept,
   timeout: timeout,
   parseError: parseError,
   validateResponse: validateResponse,
   ensureNotClosed: ensureNotClosed,
   abortTrigger: abortTrigger,
-  timeoutResponseBody: true,
+  timeoutResponseBody: timeoutResponseBody,
   redactTransportErrors: true,
 ).stream;
 
@@ -298,12 +303,16 @@ class _PrivateByteOperation {
     required this.timeoutResponseBody,
     required this.redactTransportErrors,
     this.validateResponse,
-  }) {
+    Map<String, String>? additionalHeaders,
+    this.betaFeature,
+  }) : additionalHeaders = additionalHeaders == null
+           ? null
+           : Map<String, String>.unmodifiable(additionalHeaders) {
     _controller = StreamController<Uint8List>(
       onListen: () => unawaited(_start()),
       onPause: () {
         _paused = true;
-        _bodyTimer?.cancel();
+        if (!_failedResponse) _bodyTimer?.cancel();
         _subscription?.pause();
       },
       onResume: () {
@@ -322,6 +331,8 @@ class _PrivateByteOperation {
   final String endpoint;
   final String context;
   final Map<String, dynamic>? body;
+  final Map<String, String>? additionalHeaders;
+  final String? betaFeature;
   final String accept;
   final Duration timeout;
   final ApiException Function(http.Response response) parseError;
@@ -344,6 +355,7 @@ class _PrivateByteOperation {
   bool _settled = false;
   bool _sent = false;
   bool _controllerClosing = false;
+  bool _failedResponse = false;
 
   Stream<Uint8List> get stream => _controller.stream;
 
@@ -372,6 +384,7 @@ class _PrivateByteOperation {
             ..headers.addAll(
               requestBuilder.buildHeaders(
                 additionalHeaders: {
+                  ...?additionalHeaders,
                   'Accept': accept,
                   'Content-Type': 'application/json',
                 },
@@ -379,7 +392,13 @@ class _PrivateByteOperation {
             )
             ..headers['Accept'] = accept
             ..headers['Content-Type'] = 'application/json';
-      if (body != null) request.body = jsonEncode(body);
+      if (betaFeature != null) request.headers['openai-beta'] = betaFeature!;
+      if (body != null) {
+        request
+          ..headers['content-type'] = 'application/json; charset=utf-8'
+          ..encoding = utf8
+          ..bodyBytes = utf8.encode(jsonEncode(body));
+      }
       if (body == null) request.headers.remove('content-type');
       _request = request;
 
@@ -435,6 +454,7 @@ class _PrivateByteOperation {
       }
 
       final failed = response.statusCode < 200 || response.statusCode >= 300;
+      _failedResponse = failed;
       if (!failed) {
         if (validateResponse != null) {
           try {
@@ -518,6 +538,21 @@ class _PrivateByteOperation {
   }
 
   void _armBodyTimeout() {
+    if (_settled || _cancelled) return;
+    // Persistent successful observation may remain idle indefinitely. Failed
+    // responses have a total read deadline, even if paused or trickling bytes.
+    if (_failedResponse) {
+      _bodyTimer ??= Timer(timeout, () {
+        _fail(
+          RequestTimeoutException(
+            message: '$context error response timed out',
+            timeout: timeout,
+          ),
+          StackTrace.current,
+        );
+      });
+      return;
+    }
     _bodyTimer?.cancel();
     if (!timeoutResponseBody ||
         _subscription == null ||

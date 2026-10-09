@@ -18,10 +18,14 @@ both independent reviews and all 14 final-head contexts completed. Safety
 explanations #382 merged in [PR #384](https://github.com/davidmigloz/ai_clients_dart/pull/384)
 at `08f9594dc73703e521aae4cb070a0be34509642a` on October 9, 12:34:17 UTC, after
 all 14 exact-head contexts completed and both independent reviews approved. All
-32 specified implementation tickets are closed. The user has now bounded the finish line to seven core Agents/Vaults tickets on the audited snapshot plus one expressly approved HTTP/2 evaluation. Parent #317 stays open until those seven and the evaluation are accepted; optional helpers and later parity phases are deferred inventory.
+32 original and follow-up implementation tickets are closed. Saved agents #385
+merged in [PR #400](https://github.com/davidmigloz/ai_clients_dart/pull/400) at
+`c1df20199dd450c80a7ecb8ae65eb74f6afeb184` on October 9, 16:47:07 UTC,
+after both final-head reviews and all 14 contexts completed. There are now 33
+merged implementations, six remaining core issues (#386–391) and evaluation #399. The user has now bounded the finish line to seven core Agents/Vaults tickets on the audited snapshot plus one expressly approved HTTP/2 evaluation. Parent #317 stays open until those seven and the evaluation are accepted; optional helpers and later parity phases are deferred inventory.
 
 Tracking parent: [GitHub issue #317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
-This parent tracks the bounded milestone; it can close after its seven remaining core tickets and one approved HTTP/2 evaluation are accepted, without claiming full parity or requiring a transport migration.
+This parent tracks the bounded milestone; it can close after its six remaining core tickets and one approved HTTP/2 evaluation are accepted, without claiming full parity or requiring a transport migration.
 The [progress history](progress-history.md) preserves every earlier parent-issue
 receipt through the Live WebSocket merge; current work remains in this roadmap.
 

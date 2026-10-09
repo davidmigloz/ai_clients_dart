@@ -17,11 +17,13 @@ Future<http.Response> sendPrivateAudioRequest(
   required InterceptorChain interceptorChain,
   required String context,
   Future<void>? abortTrigger,
+  bool allowRetries = true,
 }) async {
   try {
     final response = await interceptorChain.execute(
       request,
       abortTrigger: abortTrigger,
+      allowRetries: allowRetries,
     );
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw parseHttpErrorResponse(response, request: request);

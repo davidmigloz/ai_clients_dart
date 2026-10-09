@@ -1,6 +1,7 @@
 # Raw durable sessions and manual event loop
 
-Status: active bounded milestone; implementation acceptance pending.
+Status: implemented; published-head review, CI and merge acceptance pending.
+Acceptance record: [durable-session implementation](../reviews/34-durable-sessions.md).
 GitHub: [#386](https://github.com/davidmigloz/ai_clients_dart/issues/386).
 Primary requirements: `AGENTS-SESSION-01`, `AGENTS-SESSION-02`, `AGENTS-SESSION-03`, `AGENTS-SESSION-04`.
 Native GitHub blockers: [#385](https://github.com/davidmigloz/ai_clients_dart/issues/385).
@@ -43,15 +44,15 @@ This ticket owns these 7 operations and their complete request/response/paramete
 
 ## Acceptance criteria
 
-- [ ] A public mock/local-SSE workflow exercises JSON and streamed creation, persistent GET observation, manual message/function-result/approval/authentication/cancel inputs, HTTP 202 empty acceptance, list/retrieve/update/delete, exact headers and no invented replay parameters.
-- [ ] Every one of the 33 received event variants, four writable input variants, nested browser response branches and three required-action variants has valid canonical, malformed-known and ownership/privacy coverage; all environment/session states and required-nullable fields are represented.
-- [ ] Fresh UTF-8/chunk-boundary, multi-event, error, early EOF, stream abort/caller-owned transport and cancel-versus-delete fixtures verify raw observation behavior; closing the observer sends no backend cancellation request.
-- [ ] Spending-control omit/null/value transitions, returned null rejection, exact platform-safe maximum, hosted-ID exclusivity including null inline fields, per-session tool/MCP distinctions and source request limits are covered at public and model boundaries.
-- [ ] The low-level browser authentication submission path cannot be automatically retried, including by configured retry interceptors; public mock evidence proves sensitive values stay out of default diagnostics/errors and persisted safe history.
-- [ ] A runnable offline raw-session example shows an inline `environment: none` turn, manual function result and explicit cancellation with saved/hosted attachment as optional configuration; README and llms explain persistent observation and HTTP acceptance.
-- [ ] Public request bodies/parameters are captured through the exported client and validated against the pinned canonical contracts; the feature assertions fail against base `08f9594dc73703e521aae4cb070a0be34509642a`, rather than merely mirroring model implementation.
-- [ ] Constructor/parser/copy tests cover all owned discriminator variants, required-nullable/optional-nonnull/tri-state values, nested ownership, equality/hash with the same fields, safe diagnostics, unknown-received fallback and malformed-known errors.
-- [ ] A runnable offline example, package README and regenerated llms documentation describe the real public capability and its limits; actual implemented types have honest manifest mappings and unchanged unrelated exclusions/verifier policy.
+- [x] A public mock/local-SSE workflow exercises JSON and streamed creation, persistent GET observation, manual message/function-result/approval/authentication/cancel inputs, HTTP 202 empty acceptance, list/retrieve/update/delete, exact headers and no invented replay parameters.
+- [x] Every one of the 33 received event variants, four writable input variants, nested browser response branches and three required-action variants has valid canonical, malformed-known and ownership/privacy coverage; all environment/session states and required-nullable fields are represented.
+- [x] Fresh UTF-8/chunk-boundary, multi-event, error, early EOF, stream abort/caller-owned transport and cancel-versus-delete fixtures verify raw observation behavior; closing the observer sends no backend cancellation request.
+- [x] Spending-control omit/null/value transitions, returned null rejection, exact platform-safe maximum, hosted-ID exclusivity including null inline fields, per-session tool/MCP distinctions and source request limits are covered at public and model boundaries.
+- [x] The low-level browser authentication submission path cannot be automatically retried, including by configured retry interceptors; public mock evidence proves sensitive values stay out of default diagnostics/errors and persisted safe history.
+- [x] A runnable offline raw-session example shows an inline `environment: none` turn, manual function result and explicit cancellation with saved/hosted attachment as optional configuration; README and llms explain persistent observation and HTTP acceptance.
+- [x] Public request bodies/parameters are captured through the exported client and validated against the pinned canonical contracts; the feature assertions fail against base `08f9594dc73703e521aae4cb070a0be34509642a`, rather than merely mirroring model implementation.
+- [x] Constructor/parser/copy tests cover all owned discriminator variants, required-nullable/optional-nonnull/tri-state values, nested ownership, equality/hash with the same fields, safe diagnostics, unknown-received fallback and malformed-known errors.
+- [x] A runnable offline example, package README and regenerated llms documentation describe the real public capability and its limits; actual implemented types have honest manifest mappings and unchanged unrelated exclusions/verifier policy.
 - [ ] Required formatting/fixes/analysis, affected focused fixtures on VM/browser JavaScript/Wasm, and the package unit suite pass; independent requirements and engineering reviews approve the published final commit, and that exact head has green CI before a user-authorized merge.
 
 ## Source and validation evidence
