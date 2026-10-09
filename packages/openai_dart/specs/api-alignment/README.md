@@ -15,9 +15,11 @@ Stored fork/transcript workflows #372 merged in
 [PR #383](https://github.com/davidmigloz/ai_clients_dart/pull/383) at
 `bc89ad9a8fb79d889e7945030fa9f6524d73d781` on October 9, 07:54:42 UTC, after
 both independent reviews and all 14 final-head contexts completed. Safety
-explanations #382 are implemented and locally verified; published-head CI and
-merge remain pending. Phases 6–8 remain pending and parent
-#317 stays open.
+explanations #382 merged in [PR #384](https://github.com/davidmigloz/ai_clients_dart/pull/384)
+at `08f9594dc73703e521aae4cb070a0be34509642a` on October 9, 12:34:17 UTC, after
+all 14 exact-head contexts completed and both independent reviews approved. All
+32 specified implementation tickets are closed. Phases 6–8 remain pending and
+parent #317 stays open.
 Agents/Vaults, Administration and remaining parity phases
 retain their inventory below.
 
@@ -295,6 +297,51 @@ and external actions are never implicitly replayed. Documentation-only consent
 phrase lookup and SDK reconnect/queue conveniences retain explicit inventory.
 These slices do not establish full Realtime/Chat/shared Responses parity.
 
+## Phase 6: Agents and Vaults
+
+The [Agents and Vaults specification](agents-vaults.md),
+[machine-readable operation/source ledger](agents-vaults-plan.json) and
+[independent planning review](reviews/33-agents-vaults-planning.md) define the next
+13 implementation slices. They cover all 47 current HTTP operations in seven
+non-overlapping groups, then six webhook/workflow/SDK-helper outcomes. The
+321 reachable schema components overlap across tickets and include shared types;
+this count does not imply 321 new Dart classes or implemented coverage.
+
+The proposed Dart surface is `client.agents` plus `client.vaults`, following
+existing resource-family accessors. The official clients use their beta namespace;
+the physical paths and required `OpenAI-Beta: agents=v1` header remain unchanged.
+This is a documented Dart design choice, not a previously confirmed user naming
+preference. All runtime acceptance criteria are pending. The merged Safety fix
+completes the prior 32 specified children; Phase 6 adds 13 planned children.
+
+| Ticket | Demonstrable outcome | Implementation prerequisite |
+| --- | --- | --- |
+| [#385](https://github.com/davidmigloz/ai_clients_dart/issues/385) ([33](tickets/33-saved-agents.md)) | Saved agent CRUD and configuration | None |
+| [#386](https://github.com/davidmigloz/ai_clients_dart/issues/386) ([34](tickets/34-durable-sessions.md)) | Raw durable sessions and manual event loop | 33 |
+| [#387](https://github.com/davidmigloz/ai_clients_dart/issues/387) ([35](tickets/35-history-traces.md)) | Session history, turns and traces | 34 |
+| [#388](https://github.com/davidmigloz/ai_clients_dart/issues/388) ([36](tickets/36-vaults-credentials.md)) | Vault and write-only credential management | None |
+| [#389](https://github.com/davidmigloz/ai_clients_dart/issues/389) ([37](tickets/37-environments-templates.md)) | Owned hosted environments and templates | 33 |
+| [#390](https://github.com/davidmigloz/ai_clients_dart/issues/390) ([38](tickets/38-files-artifacts.md)) | Live environment files and published artifacts | 34, 37 |
+| [#391](https://github.com/davidmigloz/ai_clients_dart/issues/391) ([39](tickets/39-subagents.md)) | Subagent inspection and history | 34, 35 |
+| [#392](https://github.com/davidmigloz/ai_clients_dart/issues/392) ([40](tickets/40-environment-webhooks.md)) | Environment lifecycle webhooks and subscriptions | 37; merged #357/#358 |
+| [#393](https://github.com/davidmigloz/ai_clients_dart/issues/393) ([41](tickets/41-browser-recovery.md)) | Browser approvals and current-state recovery | 34, 35, 37 |
+| [#394](https://github.com/davidmigloz/ai_clients_dart/issues/394) ([42](tickets/42-idle-run-helper.md)) | Optional idle-session run observation | 34 |
+| [#395](https://github.com/davidmigloz/ai_clients_dart/issues/395) ([43](tickets/43-local-dispatch.md)) | Opt-in local function dispatch | 42 |
+| [#396](https://github.com/davidmigloz/ai_clients_dart/issues/396) ([44](tickets/44-result-parser.md)) | Completed-result collection and local structured parsing | 42, 43 |
+| [#397](https://github.com/davidmigloz/ai_clients_dart/issues/397) ([45](tickets/45-file-helpers.md)) | Portable file and artifact convenience | 38, 44 |
+
+Saved agent CRUD is the first implementation. Its namespace dependency for later
+Agents resources does not require callers to create a saved agent; sessions can
+use inline configuration. Vault management is independently usable. Browser
+recovery observes current state without replaying submitted actions. Optional
+helpers close local observation separately from explicit backend cancellation.
+Default fixtures and examples are offline and cost $0; this planning change makes
+no hosted-environment or other live API requests.
+
+Administration/storage and authentication/remaining legacy parity still need
+separate specifications. Runtime configuration [#316](https://github.com/davidmigloz/ai_clients_dart/issues/316)
+remains open for Phase 8 coordination and does not block these Phase 6 slices.
+
 ## Remaining roadmap
 
 Phases 1–4 are complete for their specified tickets. Phase 5 Audio/Live has seven
@@ -302,9 +349,10 @@ specified implementation tickets: speech #366, existing Audio #367 and consent
 management #368, custom voice creation #369 and Live HTTP #370 are merged.
 Live WebSockets #371 and stored fork/transcript #372 are merged, completing
 Phase 5 and all 30 original implementation tickets. The Decisions image URL
-follow-up #381 also merged in #383; Safety explanations #382 and later parity
-phases remain open.
-Later phases remain candidate outcomes pending
+follow-up #381 merged in #383 and Safety explanations #382 merged in #384.
+All 32 specified implementation tickets are closed; later parity phases remain
+open.
+Phase 6 is specified below; Phases 7–8 remain candidate outcomes pending
 detailed specifications. Keep all audited gaps visible even when deferred.
 
 | Phase | Demonstrable outcomes | Dependencies and scope notes |
@@ -314,7 +362,7 @@ detailed specifications. Keep all audited gaps visible even when deferred.
 | 3. Responses capabilities | Use async tools, reasoning configuration updates, GA web search controls/results, hosted shell, and Responses WebSocket steering | All eleven specified tickets merged in #346–#356; remaining shared gaps inventoried |
 | 4. Webhooks and safety | Verify and parse signed events; manage webhook endpoints; retrieve safety alerts/cases and preserve monitoring details | All four specified tickets merged in #362–#365 |
 | 5. Audio and Live | Generate speech with current voice/options; create custom voices; run a Live session and delegation workflows | All seven specified slices merged in #374–#380; later SDK helper inventory remains open |
-| 6. Agents and vaults | Run a durable session; handle tools, environments, artifacts, credentials, subagents, traces, and browser approvals | Slice around working session behaviors; browser approvals build on the basic session/event loop |
+| 6. Agents and vaults | Run durable sessions with environments, files, credentials, subagents, traces, browser approvals and opt-in helpers | [13 planned tickets](#phase-6-agents-and-vaults); implementation pending |
 | Throughout | Truthful API coverage, current examples, model capability guidance, and sunset notices | Accompany each relevant ticket; do not claim full coverage prematurely |
 | 7. Administration and storage | Manage organization/project controls, keys, usage/costs, and external storage | Explicit expansion beyond the current manifest exclusions; specify the Admin namespace and authentication separately |
 | 8. Authentication and remaining parity | Federation helpers, mTLS transport extensions, stored Chat management, and still-operational legacy gaps | Reuse or coordinate with existing issue #316 where relevant; prioritize by remaining API lifetime |
@@ -363,8 +411,7 @@ The source-backed [refinement specification](image-safety-followups.md) creates
 separate native tickets [#381](https://github.com/davidmigloz/ai_clients_dart/issues/381)
 ([31](tickets/31-decision-image-urls.md), Decisions URL inputs, merged in #383)
 and [#382](https://github.com/davidmigloz/ai_clients_dart/issues/382)
-([32](tickets/32-safety-explanations.md), typed Safety explanations, implemented and
-locally verified; published-head CI/merge pending).
+([32](tickets/32-safety-explanations.md), typed Safety explanations, merged in #384).
 Both depend only on their respective merged APIs; they get separate PRs.
 Reviewed OpenAPI 0ef225c4 is now promoted with actual immutable-fetch metadata;
 all 124 global normalized comparisons are classified: seven Decisions leaves,
@@ -469,7 +516,8 @@ Sources: [cache diagnostics](https://developers.openai.com/api/docs/guides/promp
 
 ### Missing API families and audio workflows
 
-- Agents: 35 operations covering agents, environments, durable sessions,
+- Agents: 37 current operations (the earlier 35 plus two owned-environment
+  operations) covering agents, environments, durable sessions,
   events, artifacts, items, subagents, turns, and traces. Browser use adds
   website approvals and authentication responses.
 - Fresh OpenAPI 506aff0a changes pagination parameters on five Agents/Vault lists:
