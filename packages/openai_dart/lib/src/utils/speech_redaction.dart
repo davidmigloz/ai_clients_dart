@@ -17,13 +17,32 @@ bool isAudioFileRequest(http.BaseRequest? request) =>
     (request.url.path.endsWith('/audio/transcriptions') ||
         request.url.path.endsWith('/audio/translations'));
 
-/// Identifies audio operations whose text or binary bodies require redaction.
+/// Identifies private operations whose text or binary bodies require redaction.
 bool isPrivateAudioRequest(http.BaseRequest? request) =>
     isSpeechRequest(request) ||
     isAudioFileRequest(request) ||
     isVoiceConsentRequest(request) ||
     isCustomVoiceRequest(request) ||
-    isLiveRequest(request);
+    isLiveRequest(request) ||
+    isSavedAgentRequest(request);
+
+/// Identifies the five saved-agent operations, including custom base paths.
+///
+/// Saved instructions, metadata, MCP headers and setup commands are private.
+/// Other Agents routes remain separately scoped to their implementation tickets.
+bool isSavedAgentRequest(http.BaseRequest? request) {
+  if (request == null) return false;
+  final segments = request.url.pathSegments;
+  final collection =
+      segments.isNotEmpty &&
+      segments.last == 'agents' &&
+      const {'GET', 'POST'}.contains(request.method);
+  final item =
+      segments.length >= 2 &&
+      segments[segments.length - 2] == 'agents' &&
+      const {'GET', 'POST', 'DELETE'}.contains(request.method);
+  return collection || item;
+}
 
 /// Identifies the seven Live HTTP operations, including custom base paths.
 bool isLiveRequest(http.BaseRequest? request) {

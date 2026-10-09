@@ -56,7 +56,7 @@
       "ticket": 33,
       "document": "tickets/33-saved-agents.md",
       "title": "Saved agent CRUD and configuration",
-      "status": "active bounded milestone; implementation acceptance pending",
+      "status": "implemented; published-head review, CI and merge acceptance pending",
       "github_issue": {
         "number": 385,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/385"
@@ -131,7 +131,8 @@
         "WebSearchModeResource"
       ],
       "milestone_scope": "active",
-      "tracking_parent_issue": 317
+      "tracking_parent_issue": 317,
+      "implementation_review": "reviews/33-saved-agents.md"
     },
     {
       "ticket": 34,

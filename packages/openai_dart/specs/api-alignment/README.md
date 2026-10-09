@@ -323,7 +323,8 @@ Finish when these seven issues meet their existing public API, offline example,
 documentation, testing, independent-review and final-head CI acceptance, and the
 one additional [HTTP/2 evaluation](http2-evaluation.md) ([#399](https://github.com/davidmigloz/ai_clients_dart/issues/399) ([ticket 46](tickets/46-http2-evaluation.md)))
 has an accepted reproducible adopt/defer report. Parent #317 can then close. No release/version bump or full parity claim is implied.
-Saved-agent CRUD #385 is first; Vault management #388 is independent. The proposed
+Planning [PR #398](https://github.com/davidmigloz/ai_clients_dart/pull/398) merged
+after green CI. Saved-agent CRUD #385 is implemented with [local acceptance evidence](reviews/33-saved-agents.md); published-head review, CI and merge remain pending. Vault management #388 is independent. The proposed
 Dart surface remains `client.agents` and `client.vaults`. Inline session configuration
 and known IDs do not require prior saved-resource creation.
 

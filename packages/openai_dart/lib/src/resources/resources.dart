@@ -1,6 +1,7 @@
 /// API resource classes for the OpenAI client.
 library;
 
+export 'agents_resource.dart';
 export 'assistants_resource.dart';
 export 'audio_resource.dart';
 export 'base_resource.dart';

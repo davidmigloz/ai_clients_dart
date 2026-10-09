@@ -67,7 +67,8 @@
     "safetyAlerts": "safety_example",
     "safetyCases": "safety_example",
     "live": "live_http_example",
-    "liveSessions": "live_http_example"
+    "liveSessions": "live_http_example",
+    "agents": "saved_agents_example"
   },
   "excluded_from_examples": [],
   "drift_patterns": [

@@ -56,10 +56,12 @@ class LoggingInterceptor implements Interceptor {
     var request = context.request;
     final speechRequest = isSpeechRequest(request);
     final privateAudioRequest = isPrivateAudioRequest(request);
+    final savedAgentRequest = isSavedAgentRequest(request);
     final privateVoiceRequest =
         isVoiceConsentRequest(request) ||
         isCustomVoiceRequest(request) ||
-        isLiveRequest(request);
+        isLiveRequest(request) ||
+        savedAgentRequest;
     final diagnosticUrl = privateVoiceRequest
         ? '[REDACTED]'
         : request.url.toString();
@@ -95,7 +97,9 @@ class LoggingInterceptor implements Interceptor {
 
     if (logRequestBody && request is http.Request && request.body.isNotEmpty) {
       logger.finest(
-        '  Body: ${isLiveRequest(request)
+        '  Body: ${savedAgentRequest
+            ? '[REDACTED Agents request]'
+            : isLiveRequest(request)
             ? '[REDACTED Live request]'
             : privateAudioRequest
             ? '[REDACTED audio request]'
@@ -130,7 +134,9 @@ class LoggingInterceptor implements Interceptor {
 
       if (logResponseBody && privateAudioRequest) {
         logger.finest(
-          '  Body: ${isLiveRequest(request)
+          '  Body: ${savedAgentRequest
+              ? '[REDACTED Agents response]'
+              : isLiveRequest(request)
               ? '[REDACTED Live response]'
               : speechRequest
               ? '[REDACTED speech response]'

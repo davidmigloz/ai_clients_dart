@@ -5349,7 +5349,7 @@
       "dart_class": "CustomVoiceCreateRequest",
       "file": "lib/src/models/audio/custom_voice.dart",
       "schema": "CreateVoiceFromConsentRequest",
-      "note": "Actual closed multipart object: required name/audio_sample/consent and optional fixed audio_sample type. Unicode name 1\u2013256, original immutable file bytes/filename, eight normalized MIME bases and10MiB verified through actual multipart; omitted type remains omitted. No invented JSON binary factory or diagnostic exclusion."
+      "note": "Actual closed multipart object: required name/audio_sample/consent and optional fixed audio_sample type. Unicode name 1–256, original immutable file bytes/filename, eight normalized MIME bases and10MiB verified through actual multipart; omitted type remains omitted. No invented JSON binary factory or diagnostic exclusion."
     },
     "VoiceResource": {
       "spec": "main",
@@ -9859,6 +9859,474 @@
       "file": "lib/src/helpers/live/live_transcript_values.dart",
       "schema": null,
       "note": "Genuine local SDK/Dart transcript enum constants with standard equality/hash and no API wire enum, JSON codec or copy method. Speaker/close decisions describe a lossy local projection; no server turn IDs, server completion status or audible playback confirmation is invented."
+    },
+    "AgentListResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentList",
+      "file": "lib/src/models/agents/agent.dart",
+      "schema": "AgentListResource",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "AgentResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Agent",
+      "file": "lib/src/models/agents/agent.dart",
+      "schema": "AgentResource",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "CreateAgentParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateAgentRequest",
+      "file": "lib/src/models/agents/agent.dart",
+      "schema": "CreateAgentParams",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "DeletedAgentResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeletedAgent",
+      "file": "lib/src/models/agents/agent.dart",
+      "schema": "DeletedAgentResource",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "ErrorBodyResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentErrorBody",
+      "file": "lib/src/models/agents/agent.dart",
+      "schema": "ErrorBodyResource",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "ErrorResponse-2": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentErrorResponse",
+      "file": "lib/src/models/agents/agent.dart",
+      "schema": "ErrorResponse-2",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "ListOrderParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentListOrder",
+      "file": "lib/src/models/agents/agent_enums.dart",
+      "schema": "ListOrderParam",
+      "note": "Actual string-valued Agents class wrapper, not a Dart enum: retains future received strings exactly; request fields validate the pinned closed set. Public canonical fixtures cover all enum members and request rejection."
+    },
+    "McpConnectionOriginParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentMcpConnectionOriginParam",
+      "file": "lib/src/models/agents/agent_enums.dart",
+      "schema": "McpConnectionOriginParam",
+      "note": "Actual string-valued Agents class wrapper, not a Dart enum: retains future received strings exactly; request fields validate the pinned closed set. Public canonical fixtures cover all enum members and request rejection."
+    },
+    "McpConnectionOriginResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentMcpConnectionOriginResource",
+      "file": "lib/src/models/agents/agent_enums.dart",
+      "schema": "McpConnectionOriginResource",
+      "note": "Actual string-valued Agents class wrapper, not a Dart enum: retains future received strings exactly; request fields validate the pinned closed set. Public canonical fixtures cover all enum members and request rejection."
+    },
+    "MultiAgentConfigCurrentParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentMultiAgentConfig",
+      "file": "lib/src/models/agents/agent_config.dart",
+      "schema": "MultiAgentConfigCurrentParam",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "MultiAgentConfigResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentMultiAgent",
+      "file": "lib/src/models/agents/agent_config.dart",
+      "schema": "MultiAgentConfigResource",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "PersistedAgentToolConfigParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentTool",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "schema": "PersistedAgentToolConfigParam",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "PersistedAgentToolConfigParamComputerUse": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentComputerUseTool",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "schema": "PersistedAgentToolConfigParamComputerUse",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests.",
+      "parent": "AgentTool"
+    },
+    "PersistedAgentToolConfigParamFunction": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentFunctionTool",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "schema": "PersistedAgentToolConfigParamFunction",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests.",
+      "parent": "AgentTool"
+    },
+    "PersistedAgentToolConfigParamMcp": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentMcpTool",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "schema": "PersistedAgentToolConfigParamMcp",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests.",
+      "parent": "AgentTool"
+    },
+    "PersistedAgentToolConfigParamProgrammaticToolCalling": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentProgrammaticToolCallingTool",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "schema": "PersistedAgentToolConfigParamProgrammaticToolCalling",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests.",
+      "parent": "AgentTool"
+    },
+    "PersistedAgentToolConfigParamToolSearch": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentToolSearchTool",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "schema": "PersistedAgentToolConfigParamToolSearch",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests.",
+      "parent": "AgentTool"
+    },
+    "PersistedAgentToolConfigParamWebSearch": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentWebSearchTool",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "schema": "PersistedAgentToolConfigParamWebSearch",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests.",
+      "parent": "AgentTool"
+    },
+    "PersistedAgentToolResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentToolResource",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "schema": "PersistedAgentToolResource",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "PersistedAgentToolResourceComputerUse": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentComputerUseToolResource",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "schema": "PersistedAgentToolResourceComputerUse",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests.",
+      "parent": "AgentToolResource"
+    },
+    "PersistedAgentToolResourceFunction": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentFunctionToolResource",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "schema": "PersistedAgentToolResourceFunction",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests.",
+      "parent": "AgentToolResource"
+    },
+    "PersistedAgentToolResourceMcp": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentMcpToolResource",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "schema": "PersistedAgentToolResourceMcp",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests.",
+      "parent": "AgentToolResource"
+    },
+    "PersistedAgentToolResourceProgrammaticToolCalling": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentProgrammaticToolCallingToolResource",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "schema": "PersistedAgentToolResourceProgrammaticToolCalling",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests.",
+      "parent": "AgentToolResource"
+    },
+    "PersistedAgentToolResourceToolSearch": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentToolSearchToolResource",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "schema": "PersistedAgentToolResourceToolSearch",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests.",
+      "parent": "AgentToolResource"
+    },
+    "PersistedAgentToolResourceWebSearch": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentWebSearchToolResource",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "schema": "PersistedAgentToolResourceWebSearch",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests.",
+      "parent": "AgentToolResource"
+    },
+    "PersistedMcpTransportConfigParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentMcpTransport",
+      "file": "lib/src/models/agents/agent_mcp_transport.dart",
+      "schema": "PersistedMcpTransportConfigParam",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "PersistedMcpTransportConfigParamHttp": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentMcpHttpTransport",
+      "file": "lib/src/models/agents/agent_mcp_transport.dart",
+      "schema": "PersistedMcpTransportConfigParamHttp",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests.",
+      "parent": "AgentMcpTransport"
+    },
+    "PersistedMcpTransportConfigParamStdio": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentMcpStdioTransport",
+      "file": "lib/src/models/agents/agent_mcp_transport.dart",
+      "schema": "PersistedMcpTransportConfigParamStdio",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests.",
+      "parent": "AgentMcpTransport"
+    },
+    "PersistedMcpTransportResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentMcpTransportResource",
+      "file": "lib/src/models/agents/agent_mcp_transport.dart",
+      "schema": "PersistedMcpTransportResource",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "PersistedMcpTransportResourceHttp": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentMcpHttpTransportResource",
+      "file": "lib/src/models/agents/agent_mcp_transport.dart",
+      "schema": "PersistedMcpTransportResourceHttp",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests.",
+      "parent": "AgentMcpTransportResource"
+    },
+    "PersistedMcpTransportResourceStdio": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentMcpStdioTransportResource",
+      "file": "lib/src/models/agents/agent_mcp_transport.dart",
+      "schema": "PersistedMcpTransportResourceStdio",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests.",
+      "parent": "AgentMcpTransportResource"
+    },
+    "ReasoningEffortParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentReasoningEffortParam",
+      "file": "lib/src/models/agents/agent_enums.dart",
+      "schema": "ReasoningEffortParam",
+      "note": "Actual string-valued Agents class wrapper, not a Dart enum: retains future received strings exactly; request fields validate the pinned closed set. Public canonical fixtures cover all enum members and request rejection."
+    },
+    "ReasoningEffortResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentReasoningEffortResource",
+      "file": "lib/src/models/agents/agent_enums.dart",
+      "schema": "ReasoningEffortResource",
+      "note": "Actual string-valued Agents class wrapper, not a Dart enum: retains future received strings exactly; request fields validate the pinned closed set. Public canonical fixtures cover all enum members and request rejection."
+    },
+    "ReasoningParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentReasoningConfig",
+      "file": "lib/src/models/agents/agent_config.dart",
+      "schema": "ReasoningParam",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "ReasoningResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentReasoning",
+      "file": "lib/src/models/agents/agent_config.dart",
+      "schema": "ReasoningResource",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "ReasoningSummaryParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentReasoningSummaryParam",
+      "file": "lib/src/models/agents/agent_enums.dart",
+      "schema": "ReasoningSummaryParam",
+      "note": "Actual string-valued Agents class wrapper, not a Dart enum: retains future received strings exactly; request fields validate the pinned closed set. Public canonical fixtures cover all enum members and request rejection."
+    },
+    "ReasoningSummaryResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentReasoningSummaryResource",
+      "file": "lib/src/models/agents/agent_enums.dart",
+      "schema": "ReasoningSummaryResource",
+      "note": "Actual string-valued Agents class wrapper, not a Dart enum: retains future received strings exactly; request fields validate the pinned closed set. Public canonical fixtures cover all enum members and request rejection."
+    },
+    "ServiceTierParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentServiceTierParam",
+      "file": "lib/src/models/agents/agent_enums.dart",
+      "schema": "ServiceTierParam",
+      "note": "Actual string-valued Agents class wrapper, not a Dart enum: retains future received strings exactly; request fields validate the pinned closed set. Public canonical fixtures cover all enum members and request rejection."
+    },
+    "ServiceTierResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentServiceTierResource",
+      "file": "lib/src/models/agents/agent_enums.dart",
+      "schema": "ServiceTierResource",
+      "note": "Actual string-valued Agents class wrapper, not a Dart enum: retains future received strings exactly; request fields validate the pinned closed set. Public canonical fixtures cover all enum members and request rejection."
+    },
+    "TextFormatParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentTextFormat",
+      "file": "lib/src/models/agents/agent_config.dart",
+      "schema": "TextFormatParam",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "TextFormatParamJsonSchema": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentJsonSchemaFormat",
+      "file": "lib/src/models/agents/agent_config.dart",
+      "schema": "TextFormatParamJsonSchema",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests.",
+      "parent": "AgentTextFormat"
+    },
+    "TextFormatParamText": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentPlainTextFormat",
+      "file": "lib/src/models/agents/agent_config.dart",
+      "schema": "TextFormatParamText",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests.",
+      "parent": "AgentTextFormat"
+    },
+    "TextFormatResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentTextFormatResource",
+      "file": "lib/src/models/agents/agent_config.dart",
+      "schema": "TextFormatResource",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "TextFormatResourceJsonSchema": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentJsonSchemaFormatResource",
+      "file": "lib/src/models/agents/agent_config.dart",
+      "schema": "TextFormatResourceJsonSchema",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests.",
+      "parent": "AgentTextFormatResource"
+    },
+    "TextFormatResourceText": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentPlainTextFormatResource",
+      "file": "lib/src/models/agents/agent_config.dart",
+      "schema": "TextFormatResourceText",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests.",
+      "parent": "AgentTextFormatResource"
+    },
+    "TextParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentTextConfig",
+      "file": "lib/src/models/agents/agent_config.dart",
+      "schema": "TextParam",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "TextResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentText",
+      "file": "lib/src/models/agents/agent_config.dart",
+      "schema": "TextResource",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "UpdateAgentParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateAgentRequest",
+      "file": "lib/src/models/agents/agent.dart",
+      "schema": "UpdateAgentParams",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "VerbosityParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentVerbosityParam",
+      "file": "lib/src/models/agents/agent_enums.dart",
+      "schema": "VerbosityParam",
+      "note": "Actual string-valued Agents class wrapper, not a Dart enum: retains future received strings exactly; request fields validate the pinned closed set. Public canonical fixtures cover all enum members and request rejection."
+    },
+    "VerbosityResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentVerbosityResource",
+      "file": "lib/src/models/agents/agent_enums.dart",
+      "schema": "VerbosityResource",
+      "note": "Actual string-valued Agents class wrapper, not a Dart enum: retains future received strings exactly; request fields validate the pinned closed set. Public canonical fixtures cover all enum members and request rejection."
+    },
+    "WebSearchContextSizeParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentWebSearchContextSizeParam",
+      "file": "lib/src/models/agents/agent_enums.dart",
+      "schema": "WebSearchContextSizeParam",
+      "note": "Actual string-valued Agents class wrapper, not a Dart enum: retains future received strings exactly; request fields validate the pinned closed set. Public canonical fixtures cover all enum members and request rejection."
+    },
+    "WebSearchContextSizeResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentWebSearchContextSizeResource",
+      "file": "lib/src/models/agents/agent_enums.dart",
+      "schema": "WebSearchContextSizeResource",
+      "note": "Actual string-valued Agents class wrapper, not a Dart enum: retains future received strings exactly; request fields validate the pinned closed set. Public canonical fixtures cover all enum members and request rejection."
+    },
+    "WebSearchLocationParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentWebSearchLocation",
+      "file": "lib/src/models/agents/agent_config.dart",
+      "schema": "WebSearchLocationParam",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "WebSearchLocationResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentWebSearchLocationResource",
+      "file": "lib/src/models/agents/agent_config.dart",
+      "schema": "WebSearchLocationResource",
+      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+    },
+    "WebSearchModeParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentWebSearchModeParam",
+      "file": "lib/src/models/agents/agent_enums.dart",
+      "schema": "WebSearchModeParam",
+      "note": "Actual string-valued Agents class wrapper, not a Dart enum: retains future received strings exactly; request fields validate the pinned closed set. Public canonical fixtures cover all enum members and request rejection."
+    },
+    "WebSearchModeResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentWebSearchModeResource",
+      "file": "lib/src/models/agents/agent_enums.dart",
+      "schema": "WebSearchModeResource",
+      "note": "Actual string-valued Agents class wrapper, not a Dart enum: retains future received strings exactly; request fields validate the pinned closed set. Public canonical fixtures cover all enum members and request rejection."
     }
   }
 }
