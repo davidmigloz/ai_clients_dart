@@ -8,6 +8,222 @@ import 'package:openai_dart/openai_dart.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('Public Safety alert explanations', () {
+    for (final (label, present, explanation) in <(String, bool, String?)>[
+      ('absent', false, null),
+      ('explicit null', true, null),
+      ('empty string', true, ''),
+      ('private text', true, 'private-explanation-value'),
+      ('Unicode text', true, 'Private explanation: café 😀\nsecond line'),
+    ]) {
+      test('GET preserves $label explanation and effective copies', () async {
+        final json = _alertJson()
+          ..['future'] = {
+            'private-future-value': [null, false, 1],
+          };
+        if (present) json['detailed_explanation'] = explanation;
+        final requests = <http.Request>[];
+        final client = _client((request) async {
+          requests.add(request);
+          return _response(json);
+        });
+        addTearDown(client.close);
+
+        final alert = await client.safety.alerts.retrieve('project-alert-id');
+
+        expect(requests, hasLength(1));
+        expect(requests.single.method, 'GET');
+        expect(requests.single.url.path, '/v1/safety/alerts/project-alert-id');
+        expect(requests.single.body, isEmpty);
+        expect(requests.single.headers['openai-project'], 'proj-fixture');
+        expect(alert.hasDetailedExplanation, present);
+        expect(alert.detailedExplanation, explanation);
+        expect(alert.toJson(), json);
+        expect(alert.copyWith(), alert);
+        expect(alert.copyWith().hashCode, alert.hashCode);
+        expect(SafetyAlert.fromJson(alert.toJson()), alert);
+        expect(SafetyAlert.fromJson(alert.toJson()).hashCode, alert.hashCode);
+        expect(alert.toString(), isNot(contains('private-explanation-value')));
+        expect(alert.toString(), isNot(contains('private-future-value')));
+        expect(alert.toString(), isNot(contains('café')));
+
+        final explicitNull = alert.copyWith(detailedExplanation: null);
+        expect(explicitNull.hasDetailedExplanation, isTrue);
+        expect(explicitNull.detailedExplanation, isNull);
+        expect(explicitNull.toJson(), {...json, 'detailed_explanation': null});
+        final cleared = alert.copyWith(hasDetailedExplanation: false);
+        final withoutExplanation = Map<String, dynamic>.from(json)
+          ..remove('detailed_explanation');
+        expect(cleared.hasDetailedExplanation, isFalse);
+        expect(cleared.detailedExplanation, isNull);
+        expect(cleared.toJson(), withoutExplanation);
+        expect(
+          cleared
+              .copyWith(rawJson: {...json, 'detailed_explanation': 'stale'})
+              .toJson(),
+          withoutExplanation,
+        );
+        expect(alert.hasDetailedExplanation, present);
+        expect(alert.detailedExplanation, explanation);
+        expect(requests, hasLength(1));
+      });
+    }
+
+    for (final explanation in <Object>[
+      false,
+      7,
+      1.5,
+      ['private-response-value'],
+      {'private-response-value': true},
+    ]) {
+      test(
+        'GET rejects ${explanation.runtimeType} explanation privately',
+        () async {
+          final json = _alertJson()..['detailed_explanation'] = explanation;
+          var requests = 0;
+          final client = _client((request) async {
+            requests++;
+            return _response(json);
+          });
+          addTearDown(client.close);
+
+          await expectLater(
+            client.safety.alerts.retrieve('project-alert-id'),
+            throwsA(_safeResponseError(_operations.first)),
+          );
+          expect(requests, 1);
+        },
+      );
+    }
+
+    test(
+      'retrieved explanation copies cannot bypass known raw validation',
+      () async {
+        final json = _alertJson()
+          ..['detailed_explanation'] = 'private-explanation-value';
+        var requests = 0;
+        final client = _client((request) async {
+          requests++;
+          return _response(json);
+        });
+        addTearDown(client.close);
+        final alert = await client.safety.alerts.retrieve('project-alert-id');
+
+        for (final malformed in <Object>[
+          false,
+          7,
+          ['private-raw-explanation'],
+          {'private-raw-explanation': true},
+        ]) {
+          for (final typed in <Object?>[null, 'replacement']) {
+            expect(
+              () => alert.copyWith(
+                detailedExplanation: typed,
+                rawJson: {...json, 'detailed_explanation': malformed},
+              ),
+              throwsA(
+                isA<FormatException>()
+                    .having((error) => error.source, 'source', isNull)
+                    .having(
+                      (error) => error.message,
+                      'context',
+                      contains('detailed_explanation'),
+                    )
+                    .having(
+                      (error) => error.toString(),
+                      'private value',
+                      isNot(contains('private-raw-explanation')),
+                    ),
+              ),
+            );
+          }
+        }
+        expect(alert.detailedExplanation, 'private-explanation-value');
+        expect(requests, 1);
+      },
+    );
+
+    test(
+      'retrieved explanation snapshots and values retain owned future JSON',
+      () async {
+        final json = _alertJson()
+          ..['detailed_explanation'] = 'private-explanation-value'
+          ..['future'] = {
+            'nested': [1, 'private-future-value'],
+          };
+        final client = _client((request) async => _response(json));
+        addTearDown(client.close);
+        final alert = await client.safety.alerts.retrieve('project-alert-id');
+        final initialJson = alert.toJson();
+        final initialHash = alert.hashCode;
+        json['detailed_explanation'] = 'caller-changed';
+        ((json['future'] as Map<String, dynamic>)['nested'] as List<Object?>)
+            .clear();
+
+        expect(alert.detailedExplanation, 'private-explanation-value');
+        expect(alert.toJson(), initialJson);
+        expect(alert.hashCode, initialHash);
+        expect(
+          () => alert.rawJson['detailed_explanation'] = 'changed',
+          throwsUnsupportedError,
+        );
+        expect(
+          ((alert.rawJson['future'] as Map<String, dynamic>)['nested']
+                  as List<Object?>)
+              .clear,
+          throwsUnsupportedError,
+        );
+        expect(alert.copyWith(rawJson: {}), isNot(alert));
+        expect(
+          alert.copyWith(rawJson: {}).detailedExplanation,
+          alert.detailedExplanation,
+        );
+        expect(alert.copyWith(rawJson: {}).hasDetailedExplanation, isTrue);
+        expect(alert.copyWith(detailedExplanation: null), isNot(alert));
+        expect(alert.copyWith(hasDetailedExplanation: false), isNot(alert));
+        expect(alert.copyWith(detailedExplanation: ''), isNot(alert));
+        expect(
+          alert.copyWith(detailedExplanation: null),
+          isNot(alert.copyWith(hasDetailedExplanation: false)),
+        );
+      },
+    );
+
+    test(
+      'separate explicit lookups retain availability changes without caching',
+      () async {
+        final fixtures = [
+          _alertJson()..['detailed_explanation'] = 'temporarily supplied',
+          _alertJson(),
+          _alertJson()..['detailed_explanation'] = null,
+        ];
+        var requests = 0;
+        final client = _client(
+          (request) async => _response(fixtures[requests++]),
+        );
+        addTearDown(client.close);
+
+        final supplied = await client.safety.alerts.retrieve(
+          'project-alert-id',
+        );
+        final absent = await client.safety.alerts.retrieve('project-alert-id');
+        final explicitNull = await client.safety.alerts.retrieve(
+          'project-alert-id',
+        );
+
+        expect(requests, 3);
+        expect(supplied.detailedExplanation, 'temporarily supplied');
+        expect(supplied.hasDetailedExplanation, isTrue);
+        expect(absent.detailedExplanation, isNull);
+        expect(absent.hasDetailedExplanation, isFalse);
+        expect(explicitNull.detailedExplanation, isNull);
+        expect(explicitNull.hasDetailedExplanation, isTrue);
+        expect(absent, isNot(explicitNull));
+        expect(supplied.detailedExplanation, 'temporarily supplied');
+      },
+    );
+  });
+
   group('Public safety resources', () {
     for (final operation in _operations) {
       test('${operation.name} uses its exact GET route and headers', () async {

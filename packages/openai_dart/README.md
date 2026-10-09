@@ -2546,7 +2546,52 @@ reversed. Both detail types retain required `reason: null`; alert reasons can be
 null for Zero Data Retention requests. The models preserve open response metadata
 in deeply immutable `rawJson`. Future received enum strings use `unknown` with
 `rawErrorType` or `rawType`, preserving their exact spelling on serialization.
-Model diagnostics redact reasons, identifiers and future values.
+Model diagnostics redact reasons, explanations, identifiers and future values.
+
+Project alerts also expose optional nullable `detailedExplanation` with
+`hasDetailedExplanation` to distinguish an omitted key from an explicit null.
+Empty text remains a present value. The service temporarily provides generated
+explanations for eligible Zero Data Retention alerts and omits them when
+unavailable. A null `reason` does not establish eligibility or availability.
+
+```dart
+import 'package:openai_dart/openai_dart.dart';
+
+Future<void> inspectSafetyExplanation(
+  OpenAIClient projectClient,
+  String alertId,
+) async {
+  final alert = await projectClient.safety.alerts.retrieve(alertId);
+  switch ((alert.hasDetailedExplanation, alert.detailedExplanation)) {
+    case (false, _):
+      print('Explanation omitted by the service.');
+    case (true, null):
+      print('Explanation explicitly null.');
+    case (true, final String explanation):
+      // Access the actual text explicitly; default model diagnostics redact it.
+      print('Explanation received: ${explanation.length} characters.');
+  }
+
+  final explicitNull = alert.copyWith(detailedExplanation: null);
+  final omitted = alert.copyWith(hasDetailedExplanation: false);
+  print('Null retained: ${explicitNull.hasDetailedExplanation}');
+  print('Key omitted: ${!omitted.hasDetailedExplanation}');
+}
+```
+
+`copyWith()` preserves the value and presence. Explicit null retains the key;
+`hasDetailedExplanation: false` removes it from serialized JSON. Known raw
+values are validated and cannot override explicit typed
+fields or resurrect a cleared explanation. `rawJson` remains a detached received
+snapshot and can still contain the original explanation; `toJson()` represents
+the effective typed fields. Constructor omission can adopt a valid explanation
+from legacy raw-only construction. This response field is separate from the
+nonnull optional explanation in Responses monitoring errors.
+
+→ [Runnable offline explanation example](example/safety_explanations_example.dart):
+four explicit mock GETs cover absent, null, text and empty text, plus copy/clear and
+private diagnostics. No API key or charges. See the
+[official Safety alert retrieve reference](https://developers.openai.com/api/reference/resources/safety/subresources/alerts/methods/retrieve).
 
 These are two GET operations with no list or enforcement action. ID maxima are
 38 and 128 Unicode characters respectively; IDs are encoded once. Empty and dot
@@ -2767,6 +2812,7 @@ See the [example/](example/) directory for complete examples:
 |---------|-------------|
 | [`monitoring_errors_example.dart`](example/monitoring_errors_example.dart) | Offline typed HTTP/SSE monitoring failures and explicit scoped investigation |
 | [`safety_example.dart`](example/safety_example.dart) | Offline verified notifications and separately scoped alert/case retrieval |
+| [`safety_explanations_example.dart`](example/safety_explanations_example.dart) | Offline project alert explanation presence, copy/clear and private diagnostics |
 | [`webhook_endpoints_example.dart`](example/webhook_endpoints_example.dart) | Offline project endpoint lifecycle, pagination, discovery, rotation and test status |
 | [`webhooks_example.dart`](example/webhooks_example.dart) | Offline signed receiver, acknowledgment and caller-owned deduplication |
 | [`chat_example.dart`](example/chat_example.dart) | Chat completions, multi-turn conversations, and legacy cache retention |
@@ -2843,7 +2889,7 @@ See the [example/](example/) directory for complete examples:
 | ChatKit Beta | ✅ Full |
 | Realtime | ✅ Full (separate import) |
 | Webhooks | Local signed verification, 26 typed received events and all eight project endpoint/discovery operations |
-| Safety | Read-only project alerts/organization cases and shared HTTP/Responses/WS monitoring details; workspace lookup remains separate |
+| Safety | Read-only project alerts with typed explanation presence, organization cases and shared HTTP/Responses/WS monitoring details; workspace lookup remains separate |
 | Assistants (Deprecated) | ✅ Full (separate import) |
 | Threads (Deprecated) | ✅ Full (separate import) |
 | Messages (Deprecated) | ✅ Full (separate import) |

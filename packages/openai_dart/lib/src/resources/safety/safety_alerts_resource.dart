@@ -25,6 +25,10 @@ class SafetyAlertsResource extends ResourceBase {
   ///
   /// A returned `requestPaused` value describes successful block registration;
   /// it does not confirm that execution stopped or earlier effects were undone.
+  /// [SafetyAlert.detailedExplanation] is temporarily available for eligible
+  /// zero data retention alerts and omitted when unavailable. Its presence is
+  /// retained separately from a null value; a null reason does not establish
+  /// eligibility. The service determines availability.
   /// Workspace `safety.org_alert.created` notices use the separate
   /// `api.chatgpt.com` administrator API and must not be routed here.
   Future<SafetyAlert> retrieve(

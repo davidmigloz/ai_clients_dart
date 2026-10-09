@@ -63,7 +63,7 @@ void main() {
         'error_type': ['private-value'],
         'reason': {'private-value': true},
       },
-      knownFields: _alertJson().keys.toSet(),
+      knownFields: {..._alertJson().keys, 'detailed_explanation'},
     ),
     'SafetyCase': _Adapter(
       fixture: _caseJson,
@@ -313,6 +313,8 @@ void main() {
               'errorType',
               'rawErrorType',
               'reason',
+              'detailedExplanation',
+              'hasDetailedExplanation',
               'rawJson',
             ],
             'SafetyCase' => [
@@ -333,6 +335,271 @@ void main() {
       );
     });
   }
+
+  group('SafetyAlert optional nullable explanations', () {
+    final states = <String, ({bool present, String? value})>{
+      'absent': (present: false, value: null),
+      'explicit null': (present: true, value: null),
+      'empty string': (present: true, value: ''),
+      'text': (present: true, value: 'explanation-private'),
+      'Unicode': (present: true, value: '説明-private-😀'),
+    };
+    for (final entry in states.entries) {
+      test('${entry.key} preserves wire presence and effective value', () {
+        final state = entry.value;
+        final json = _alertJson();
+        if (state.present) json['detailed_explanation'] = state.value;
+        final value = SafetyAlert.fromJson(json);
+        final constructed = _constructAlert({
+          if (state.present) #detailedExplanation: state.value,
+        });
+        expect(value.hasDetailedExplanation, state.present);
+        expect(value.detailedExplanation, state.value);
+        expect(value.toJson(), json);
+        expect(constructed, value);
+        expect(constructed.hashCode, value.hashCode);
+        expect(value.copyWith(), value);
+        expect(value.copyWith().hashCode, value.hashCode);
+        final roundtrip = SafetyAlert.fromJson(value.toJson());
+        expect(roundtrip, value);
+        expect(roundtrip.hashCode, value.hashCode);
+        expect({value: true}[roundtrip], isTrue);
+        final description = value.toString();
+        expect(
+          description,
+          contains('hasDetailedExplanation: ${state.present}'),
+        );
+        expect(
+          description,
+          contains(
+            'detailedExplanation: ${!state.present
+                ? 'absent'
+                : state.value == null
+                ? 'null'
+                : '[redacted]'}',
+          ),
+        );
+        expect(description, isNot(contains('private')));
+      });
+
+      test('${entry.key} copy supports preserve, null, replace and remove', () {
+        final state = entry.value;
+        final json = _alertJson();
+        if (state.present) json['detailed_explanation'] = state.value;
+        final value = SafetyAlert.fromJson(json);
+        final retained = value.copyWith(
+          rawJson: {'detailed_explanation': 'stale-private'},
+        );
+        expect(retained, value);
+        expect(retained.hashCode, value.hashCode);
+        expect(retained.toJson(), json);
+
+        final nullCopy = value.copyWith(detailedExplanation: null);
+        expect(nullCopy.hasDetailedExplanation, isTrue);
+        expect(nullCopy.detailedExplanation, isNull);
+        expect(
+          nullCopy.toJson(),
+          _alertJson()..['detailed_explanation'] = null,
+        );
+        final replaced = value.copyWith(
+          detailedExplanation: 'replacement-private',
+        );
+        expect(replaced.hasDetailedExplanation, isTrue);
+        expect(replaced.detailedExplanation, 'replacement-private');
+        expect(
+          replaced.toJson(),
+          _alertJson()..['detailed_explanation'] = 'replacement-private',
+        );
+        final cleared = value.copyWith(hasDetailedExplanation: false);
+        expect(cleared.hasDetailedExplanation, isFalse);
+        expect(cleared.detailedExplanation, isNull);
+        expect(cleared.toJson(), _alertJson());
+        expect(cleared.copyWith(), cleared);
+        expect(
+          cleared.copyWith(
+            rawJson: {'detailed_explanation': 'resurrection-private'},
+          ),
+          cleared,
+        );
+        expect(cleared.copyWith().hashCode, cleared.hashCode);
+        final reinstatedNull = cleared.copyWith(hasDetailedExplanation: true);
+        expect(reinstatedNull, nullCopy);
+        expect(reinstatedNull.hashCode, nullCopy.hashCode);
+      });
+    }
+
+    test('all explanation states are distinct in equality and hash keys', () {
+      final values = [
+        for (final state in states.values)
+          _constructAlert({
+            if (state.present) #detailedExplanation: state.value,
+          }),
+      ];
+      expect(values.toSet(), hasLength(states.length));
+      expect({
+        for (final value in values) value: true,
+      }, hasLength(states.length));
+      for (final value in values) {
+        final restored = SafetyAlert.fromJson(value.toJson());
+        expect(restored, value);
+        expect(restored.hashCode, value.hashCode);
+      }
+    });
+
+    for (final value in <String?>[null, '', 'raw-private']) {
+      test(
+        'raw-only construction adopts valid ${value == null
+            ? 'null'
+            : value.isEmpty
+            ? 'empty string'
+            : 'text'}',
+        () {
+          final raw = <String, dynamic>{'detailed_explanation': value};
+          final alert = _constructAlert({#rawJson: raw});
+          expect(alert.hasDetailedExplanation, isTrue);
+          expect(alert.detailedExplanation, value);
+          expect(
+            alert.toJson(),
+            _alertJson()..['detailed_explanation'] = value,
+          );
+          raw['detailed_explanation'] = 'mutated-private';
+          expect(alert.detailedExplanation, value);
+          expect(alert.rawJson['detailed_explanation'], value);
+          expect(alert.copyWith(rawJson: {}), alert);
+        },
+      );
+    }
+
+    test('explicit construction controls win over valid known raw values', () {
+      final raw = <String, dynamic>{'detailed_explanation': 'raw-private'};
+      final explicit = _constructAlert({
+        #rawJson: raw,
+        #detailedExplanation: 'typed-private',
+      });
+      expect(explicit.detailedExplanation, 'typed-private');
+      expect(explicit.toJson()['detailed_explanation'], 'typed-private');
+      final explicitNull = _constructAlert({
+        #rawJson: raw,
+        #detailedExplanation: null,
+      });
+      expect(explicitNull.hasDetailedExplanation, isTrue);
+      expect(explicitNull.detailedExplanation, isNull);
+      expect(explicitNull.toJson()['detailed_explanation'], isNull);
+      final presenceNull = _constructAlert({
+        #rawJson: raw,
+        #hasDetailedExplanation: true,
+      });
+      expect(presenceNull, explicitNull);
+      final absent = _constructAlert({
+        #rawJson: raw,
+        #hasDetailedExplanation: false,
+      });
+      expect(absent.detailedExplanation, isNull);
+      expect(absent.hasDetailedExplanation, isFalse);
+      expect(absent.toJson(), _alertJson());
+      expect(absent.copyWith(rawJson: raw), absent);
+    });
+
+    test('false presence cannot conceal an explicit nonnull explanation', () {
+      for (final action in <void Function()>[
+        () => _constructAlert({
+          #detailedExplanation: 'value-private',
+          #hasDetailedExplanation: false,
+        }),
+        () => SafetyAlert.fromJson(_alertJson()).copyWith(
+          detailedExplanation: 'value-private',
+          hasDetailedExplanation: false,
+        ),
+      ]) {
+        expect(action, _privateExplanationError());
+      }
+      final absent = _constructAlert({
+        #detailedExplanation: null,
+        #hasDetailedExplanation: false,
+      });
+      expect(absent.toJson(), _alertJson());
+    });
+
+    final malformed = <String, Object?>{
+      'integer': 7,
+      'fraction': 1.5,
+      'boolean': false,
+      'array': ['value-private'],
+      'object': {'key-private': 'value-private'},
+    };
+    for (final entry in malformed.entries) {
+      test(
+        '${entry.key} explanation fails parsing, construction and copies privately',
+        () {
+          final good = _constructAlert({#detailedExplanation: 'typed-private'});
+          for (final action in <void Function()>[
+            () => SafetyAlert.fromJson(
+              _alertJson()..['detailed_explanation'] = entry.value,
+            ),
+            () => _constructAlert({#detailedExplanation: entry.value}),
+            () => good.copyWith(detailedExplanation: entry.value),
+            () => _constructAlert({
+              #detailedExplanation: null,
+              #hasDetailedExplanation: false,
+              #rawJson: {'detailed_explanation': entry.value},
+            }),
+            () => _constructAlert({
+              #detailedExplanation: 'typed-private',
+              #rawJson: {'detailed_explanation': entry.value},
+            }),
+            () => good.copyWith(rawJson: {'detailed_explanation': entry.value}),
+            () => good.copyWith(
+              hasDetailedExplanation: false,
+              rawJson: {'detailed_explanation': entry.value},
+            ),
+          ]) {
+            expect(action, _privateExplanationError());
+          }
+        },
+      );
+    }
+
+    test(
+      'explanation edits retain owned finite future data and required reason',
+      () {
+        final future = <String, dynamic>{
+          'items': <Object?>['metadata-private'],
+        };
+        final json = _alertJson()
+          ..['reason'] = null
+          ..['detailed_explanation'] = 'explanation-private'
+          ..['future'] = future;
+        final alert = SafetyAlert.fromJson(json);
+        (future['items'] as List<Object?>).clear();
+        json['detailed_explanation'] = 'mutated-private';
+        final cleared = alert.copyWith(hasDetailedExplanation: false);
+        expect(alert.detailedExplanation, 'explanation-private');
+        expect(cleared.reason, isNull);
+        expect(cleared.toJson().containsKey('reason'), isTrue);
+        expect(cleared.toJson()['future'], {
+          'items': ['metadata-private'],
+        });
+        expect(() => alert.rawJson['future'] = null, throwsUnsupportedError);
+        expect(
+          () =>
+              (alert.rawJson['future'] as Map<String, dynamic>)['items'] = null,
+          throwsUnsupportedError,
+        );
+        expect(
+          () =>
+              ((alert.rawJson['future'] as Map<String, dynamic>)['items']
+                      as List)
+                  .clear(),
+          throwsUnsupportedError,
+        );
+        expect(cleared.toString(), isNot(contains('private')));
+        expect(
+          () => SafetyAlert.fromJson({...alert.toJson()}..remove('reason')),
+          throwsFormatException,
+        );
+      },
+    );
+  });
 
   group('SafetyAlert required values and enum choices', () {
     final choices = <String, SafetyAlertErrorType>{
@@ -463,6 +730,10 @@ void main() {
           'other',
         ),
         'reason': (base.copyWith(reason: 'new-reason'), 'new-reason'),
+        'detailed_explanation': (
+          base.copyWith(detailedExplanation: 'new-explanation'),
+          'new-explanation',
+        ),
       };
       for (final entry in variants.entries) {
         final (copy, replacement) = entry.value;
@@ -699,3 +970,41 @@ void main() {
     });
   });
 }
+
+SafetyAlert _constructAlert(Map<Symbol, Object?> fields) =>
+    Function.apply(SafetyAlert.new, const [], <Symbol, Object?>{
+          #id: 'alert-id-private',
+          #createdAt: -7,
+          #requestId: 'request-id-private',
+          #responseId: 'response-id-private',
+          #model: 'model-private',
+          #requestPaused: false,
+          #errorType: SafetyAlertErrorType.potentiallyUnintendedDataTransfer,
+          #reason: 'reason-private',
+          ...fields,
+        })
+        as SafetyAlert;
+
+Matcher _privateExplanationError() => throwsA(
+  isA<FormatException>()
+      .having(
+        (error) => error.message,
+        'Safety context',
+        contains('SafetyAlert'),
+      )
+      .having(
+        (error) => error.message,
+        'explanation field',
+        anyOf(
+          contains('detailedExplanation'),
+          contains('detailed_explanation'),
+        ),
+      )
+      .having((error) => error.source, 'source', isNull)
+      .having((error) => error.offset, 'offset', isNull)
+      .having(
+        (error) => error.toString(),
+        'private values',
+        isNot(contains('private')),
+      ),
+);

@@ -1,7 +1,9 @@
 # Decisions image URLs and Safety explanations: source refinements
 
-Status: Decisions URL ticket 31 is being implemented; Safety explanation ticket 32
-is specified separately. Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
+Status: Decisions URL ticket 31 merged in [PR #383](https://github.com/davidmigloz/ai_clients_dart/pull/383);
+Safety explanation ticket 32 is implemented and locally verified separately;
+published-head CI and merge remain pending.
+Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 All 30 original implementation tickets merged through PR #380; these are later
 source refinements, not evidence that Phases 6–8 or complete SDK parity are finished.
 
@@ -64,7 +66,7 @@ which is optional nonnull and has its own established contract.
   Record all existing/new toolkit diagnostics honestly, and preserve later
   Safety/Agents/Admin/legacy gaps separately.
 
-## Safety explanation requirements (separate pending slice)
+## Safety explanation requirements (separate slice)
 
 - **SAFETY-EXPLANATION-01:** Typed optional nullable string accessor and presence
   preserve absent/null/string from public retrieval, including empty text.
