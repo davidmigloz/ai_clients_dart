@@ -1,8 +1,8 @@
 # Decisions image URLs and Safety explanations: source refinements
 
 Status: Decisions URL ticket 31 merged in [PR #383](https://github.com/davidmigloz/ai_clients_dart/pull/383);
-Safety explanation ticket 32 is implemented and locally verified separately;
-published-head CI and merge remain pending.
+Safety explanation ticket 32 merged in [PR #384](https://github.com/davidmigloz/ai_clients_dart/pull/384).
+Both source refinements are complete; Phases 6–8 remain open.
 Parent: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 All 30 original implementation tickets merged through PR #380; these are later
 source refinements, not evidence that Phases 6–8 or complete SDK parity are finished.

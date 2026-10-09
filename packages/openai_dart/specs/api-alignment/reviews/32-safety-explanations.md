@@ -4,7 +4,13 @@ Status: implemented and independently approved for
 [#382](https://github.com/davidmigloz/ai_clients_dart/issues/382),
 [ticket 32](../tickets/32-safety-explanations.md), SAFETY-EXPLANATION-01–06.
 Independent requirements and engineering reviews approve the final combined diff
-with no open findings. Published-head CI and user-authorized merge are separate final gates.
+with no open findings. [PR #384](https://github.com/davidmigloz/ai_clients_dart/pull/384)
+merged October 9, 2026 at 12:34:17 UTC, squash
+`08f9594dc73703e521aae4cb070a0be34509642a`, closing #382. All 14 exact-head
+contexts completed (13 successes and the standard Test(all) skip) for reviewed
+head `a35c993818a413cc93be89fef1f1b20faa704868`; no review findings remained.
+The external status skipped full review for unavailable credits; the independent
+local reviews supply the actual review evidence.
 
 ## Source contract and preservation
 

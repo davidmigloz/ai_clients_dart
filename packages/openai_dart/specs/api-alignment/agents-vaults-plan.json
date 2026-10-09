@@ -1,0 +1,4981 @@
+{
+  "format_version": 1,
+  "status": "bounded planning milestone; seven core HTTP tickets plus one authorized evaluation; acceptance pending",
+  "parent_issue": 317,
+  "repository_base_commit": "08f9594dc73703e521aae4cb070a0be34509642a",
+  "reviewed_at_utc": "2026-10-09T12:36:45.060428+00:00",
+  "source_authority": {
+    "wire": "immutable OpenAPI",
+    "workflow": "official guides",
+    "helpers": "pinned official SDK implementations; Dart choices declared separately"
+  },
+  "source_pins": {
+    "openapi": "0ef225c4f701046f8fe88cae9d29d0df4d1a9fa9",
+    "python": "c511a77159bc870f31c34388311b7cc62ef15f08",
+    "node": "37af8fc9c78bd5c4d2979c5d51870dd38964e156",
+    "python_version": "3.26.1",
+    "node_version": "7.31.0"
+  },
+  "source_bytes": {
+    "canonical_json_sha256": "3e3ddd4f2a584f657294a0a9266ed07b1103a103a38c4dd45a008c8be5450686",
+    "raw_openapi_sha256": "ff5a4408cabb13e09430813b67a59f67366a58a4dec1f20bac89e4c96fab7fb5",
+    "raw_openapi_url": "https://raw.githubusercontent.com/openai/openai-openapi/0ef225c4f701046f8fe88cae9d29d0df4d1a9fa9/openapi.json",
+    "candidate_equals_canonical_bytes": true,
+    "raw_equals_canonical_semantics": true,
+    "source_promotion": false,
+    "adopted_metadata_preserved": true
+  },
+  "counts": {
+    "agents_operations": 37,
+    "vault_operations": 10,
+    "combined_operations": 47,
+    "combined_paths": 28,
+    "agents_transitive_schemas": 277,
+    "vaults_transitive_schemas": 47,
+    "combined_transitive_schemas": 321,
+    "http_slices": 7,
+    "workflow_helper_slices": 6,
+    "active_slices": 7,
+    "deferred_slices": 6,
+    "active_primary_requirements": 12,
+    "deferred_primary_requirements": 18,
+    "active_evaluation_slices": 1,
+    "total_active_work_items": 8,
+    "evaluation_requirements": 4
+  },
+  "scope_notes": [
+    "Schema counts are source components, not new Dart class counts. Shared contracts may be reused only after wire equivalence is proved.",
+    "Operation ownership is disjoint; schema closures overlap deliberately. Webhook/helper slices add no canonical HTTP operations.",
+    "Dependencies are implementation/demo prerequisites, not service requirements to create saved agents or owned environments before using known IDs.",
+    "All implementation criteria remain unchecked. Existing manifest mappings, exclusions and metadata are unchanged.",
+    "Phase 7 Administration/storage and Phase 8 authentication/legacy, including issue 316, remain separate.",
+    "The user superseded the original complete-parity execution target with a bounded seven-ticket milestone on 2026-10-09. The full inventory is preserved as deferred evidence, not an automatic work queue."
+  ],
+  "tickets": [
+    {
+      "ticket": 33,
+      "document": "tickets/33-saved-agents.md",
+      "title": "Saved agent CRUD and configuration",
+      "status": "active bounded milestone; implementation acceptance pending",
+      "github_issue": {
+        "number": 385,
+        "url": "https://github.com/davidmigloz/ai_clients_dart/issues/385"
+      },
+      "dependencies": [],
+      "requirement_ids": [
+        "AGENTS-CRUD-01"
+      ],
+      "http_operation_ids": [
+        "listAgents",
+        "createAgent",
+        "deleteAgent",
+        "retrieveAgent",
+        "updateAgent"
+      ],
+      "transitive_schema_names": [
+        "AgentListResource",
+        "AgentResource",
+        "CreateAgentParams",
+        "DeletedAgentResource",
+        "ErrorBodyResource",
+        "ErrorResponse-2",
+        "ListOrderParam",
+        "McpConnectionOriginParam",
+        "McpConnectionOriginResource",
+        "MultiAgentConfigCurrentParam",
+        "MultiAgentConfigResource",
+        "PersistedAgentToolConfigParam",
+        "PersistedAgentToolConfigParamComputerUse",
+        "PersistedAgentToolConfigParamFunction",
+        "PersistedAgentToolConfigParamMcp",
+        "PersistedAgentToolConfigParamProgrammaticToolCalling",
+        "PersistedAgentToolConfigParamToolSearch",
+        "PersistedAgentToolConfigParamWebSearch",
+        "PersistedAgentToolResource",
+        "PersistedAgentToolResourceComputerUse",
+        "PersistedAgentToolResourceFunction",
+        "PersistedAgentToolResourceMcp",
+        "PersistedAgentToolResourceProgrammaticToolCalling",
+        "PersistedAgentToolResourceToolSearch",
+        "PersistedAgentToolResourceWebSearch",
+        "PersistedMcpTransportConfigParam",
+        "PersistedMcpTransportConfigParamHttp",
+        "PersistedMcpTransportConfigParamStdio",
+        "PersistedMcpTransportResource",
+        "PersistedMcpTransportResourceHttp",
+        "PersistedMcpTransportResourceStdio",
+        "ReasoningEffortParam",
+        "ReasoningEffortResource",
+        "ReasoningParam",
+        "ReasoningResource",
+        "ReasoningSummaryParam",
+        "ReasoningSummaryResource",
+        "ServiceTierParam",
+        "ServiceTierResource",
+        "TextFormatParam",
+        "TextFormatParamJsonSchema",
+        "TextFormatParamText",
+        "TextFormatResource",
+        "TextFormatResourceJsonSchema",
+        "TextFormatResourceText",
+        "TextParam",
+        "TextResource",
+        "UpdateAgentParams",
+        "VerbosityParam",
+        "VerbosityResource",
+        "WebSearchContextSizeParam",
+        "WebSearchContextSizeResource",
+        "WebSearchLocationParam",
+        "WebSearchLocationResource",
+        "WebSearchModeParam",
+        "WebSearchModeResource"
+      ],
+      "milestone_scope": "active",
+      "tracking_parent_issue": 317
+    },
+    {
+      "ticket": 34,
+      "document": "tickets/34-durable-sessions.md",
+      "title": "Raw durable sessions and manual event loop",
+      "status": "active bounded milestone; implementation acceptance pending",
+      "github_issue": {
+        "number": 386,
+        "url": "https://github.com/davidmigloz/ai_clients_dart/issues/386"
+      },
+      "dependencies": [
+        33
+      ],
+      "requirement_ids": [
+        "AGENTS-SESSION-01",
+        "AGENTS-SESSION-02",
+        "AGENTS-SESSION-03",
+        "AGENTS-SESSION-04"
+      ],
+      "http_operation_ids": [
+        "listAgentSessions",
+        "createAgentSession",
+        "deleteAgentSession",
+        "retrieveAgentSession",
+        "updateAgentSession",
+        "listAgentSessionEvents",
+        "createAgentSessionEvents"
+      ],
+      "transitive_schema_names": [
+        "AgentContentResource",
+        "AgentMessageItemResource",
+        "AgentOutputItemResource",
+        "AgentToolConfigParam",
+        "AgentToolConfigParamComputerUse",
+        "AgentToolConfigParamFunction",
+        "AgentToolConfigParamMcp",
+        "AgentToolConfigParamProgrammaticToolCalling",
+        "AgentToolConfigParamToolSearch",
+        "AgentToolConfigParamWebSearch",
+        "AgentToolResource",
+        "AgentToolResourceComputerUse",
+        "AgentToolResourceFunction",
+        "AgentToolResourceMcp",
+        "AgentToolResourceProgrammaticToolCalling",
+        "AgentToolResourceWebSearch",
+        "AssistantMessageItemResource",
+        "BrowserAuthenticationFieldResource",
+        "BrowserAuthenticationFieldValueParam",
+        "BrowserAuthenticationHistoryRequestKindResource",
+        "BrowserAuthenticationHistoryRequestKindResourceBrowserAuthentication",
+        "BrowserAuthenticationOptionResource",
+        "BrowserAuthenticationRequestItemResource",
+        "BrowserOriginAccessDecisionParam",
+        "CloseSubagentCallItemResource",
+        "CommandExecutionItemResource",
+        "ComputerScreenshotResource",
+        "ComputerUseApprovalRequestKindResource",
+        "ComputerUseApprovalRequestKindResourceBrowserAuthentication",
+        "ComputerUseApprovalRequestKindResourceBrowserOriginAccess",
+        "ComputerUseApprovalRequestResultItemResource",
+        "ComputerUseApprovalResponseKindResource",
+        "ComputerUseApprovalResponseKindResourceBrowserAuthenticationCancelResource",
+        "ComputerUseApprovalResponseKindResourceBrowserAuthenticationSubmitResource",
+        "ComputerUseApprovalResponseParam",
+        "ComputerUseApprovalResponseParamBrowserAuthentication",
+        "ComputerUseApprovalResponseParamBrowserAuthenticationCancelParam",
+        "ComputerUseApprovalResponseParamBrowserAuthenticationSubmitParam",
+        "ComputerUseApprovalResponseParamBrowserOriginAccessParam",
+        "ComputerUseCallItemResource",
+        "ContainerSizeParam",
+        "ContainerSizeResource",
+        "CreateAgentSessionParams",
+        "CreateSessionEventsParams",
+        "CreateSessionInputParam",
+        "CreateSubagentCallItemResource",
+        "DeletedSessionResource",
+        "DesktopParam",
+        "DesktopResource",
+        "EncryptedContentResource",
+        "EnvironmentPackagesParam",
+        "EnvironmentPackagesResource",
+        "EnvironmentParam",
+        "EnvironmentParamNone",
+        "EnvironmentParamOpenaiHosted",
+        "EnvironmentParamSelfHosted",
+        "EnvironmentResource",
+        "EnvironmentResourceNone",
+        "EnvironmentResourceOpenaiHosted",
+        "EnvironmentResourceSelfHosted",
+        "ErrorBodyResource",
+        "ErrorResponse-2",
+        "FunctionCallItemResource",
+        "FunctionCallOutputItemResource",
+        "FunctionCallOutputParam",
+        "FunctionCallOutputResource",
+        "FunctionCallStatusResource",
+        "HostedEnvironmentFileParam",
+        "HostedEnvironmentFileParamFileId",
+        "HostedEnvironmentFileParamInline",
+        "HostedEnvironmentFileResource",
+        "HostedEnvironmentFileResourceFileId",
+        "HostedEnvironmentFileResourceInline",
+        "HostedPluginParam",
+        "HostedPluginParamInline",
+        "HostedPluginResource",
+        "HostedPluginResourceInline",
+        "HostedSkillParam",
+        "HostedSkillParamInline",
+        "HostedSkillParamSkillReference",
+        "HostedSkillResource",
+        "HostedSkillResourceInline",
+        "HostedSkillResourceSkillReference",
+        "InlineCapabilitySourceParam",
+        "InlineCapabilitySourceParamBase64",
+        "InputContentParam",
+        "InputContentParamInputImage",
+        "InputContentParamInputText",
+        "InputContentResource",
+        "InputContentResourceInputImage",
+        "InputContentResourceInputText",
+        "InputMessageParam",
+        "InputTokensDetailsResource-2",
+        "InterruptSubagentCallItemResource",
+        "ListOrderParam",
+        "McpCallItemResource",
+        "McpConnectionOriginParam",
+        "McpConnectionOriginResource",
+        "McpTransportConfigParam",
+        "McpTransportConfigParamHttp",
+        "McpTransportConfigParamStdio",
+        "McpTransportResource",
+        "McpTransportResourceHttp",
+        "McpTransportResourceStdio",
+        "MessageContentResource",
+        "MessageContentResourceInputImage",
+        "MessageContentResourceInputText",
+        "MessageContentResourceOutputText",
+        "MessageItemResource",
+        "MessagePhaseResource",
+        "MultiAgentConfigCurrentParam",
+        "MultiAgentConfigResource",
+        "NetworkAccessParam",
+        "NetworkAccessResource",
+        "NetworkPolicyParam",
+        "NetworkPolicyResource",
+        "OutputItemStatusResource",
+        "OutputTextResource",
+        "OutputTokensDetailsResource-2",
+        "ReasoningEffortParam",
+        "ReasoningEffortResource",
+        "ReasoningItemResource",
+        "ReasoningParam",
+        "ReasoningResource",
+        "ReasoningSummaryParam",
+        "ReasoningSummaryResource",
+        "ResumeSubagentCallItemResource",
+        "SendSubagentInputCallItemResource",
+        "ServiceTierParam",
+        "ServiceTierResource",
+        "SessionAgentConfigParam",
+        "SessionAgentResource",
+        "SessionEnvironmentErrorResource",
+        "SessionEnvironmentStateResource",
+        "SessionEnvironmentStatusResource",
+        "SessionErrorResource",
+        "SessionEvent",
+        "SessionEventAgentOutputCommandExecutionOutputDelta",
+        "SessionEventAgentSessionCreated",
+        "SessionEventAgentSessionEnvironmentConnected",
+        "SessionEventAgentSessionEnvironmentDisconnected",
+        "SessionEventAgentSessionEnvironmentExpired",
+        "SessionEventAgentSessionEnvironmentFailed",
+        "SessionEventAgentSessionEnvironmentPending",
+        "SessionEventAgentSessionEnvironmentReady",
+        "SessionEventAgentSessionEnvironmentReset",
+        "SessionEventAgentSessionEnvironmentSuspended",
+        "SessionEventAgentSessionFailed",
+        "SessionEventAgentSessionIdle",
+        "SessionEventAgentSessionInProgress",
+        "SessionEventAgentSessionRequiresAction",
+        "SessionEventAgentSessionSubagentActive",
+        "SessionEventAgentSessionSubagentClosed",
+        "SessionEventAgentSessionSubagentCreated",
+        "SessionEventAgentSessionTurnCancelled",
+        "SessionEventAgentSessionTurnCompleted",
+        "SessionEventAgentSessionTurnContentPartAdded",
+        "SessionEventAgentSessionTurnContentPartDone",
+        "SessionEventAgentSessionTurnCreated",
+        "SessionEventAgentSessionTurnFailed",
+        "SessionEventAgentSessionTurnInProgress",
+        "SessionEventAgentSessionTurnItemAdded",
+        "SessionEventAgentSessionTurnItemDone",
+        "SessionEventAgentSessionTurnOutputTextDelta",
+        "SessionEventAgentSessionTurnOutputTextDone",
+        "SessionEventAgentSessionTurnReasoningSummaryPartAdded",
+        "SessionEventAgentSessionTurnReasoningSummaryPartDone",
+        "SessionEventAgentSessionTurnReasoningSummaryTextDelta",
+        "SessionEventAgentSessionTurnReasoningSummaryTextDone",
+        "SessionEventError",
+        "SessionInputParam",
+        "SessionInputParamAgentSessionInputCancel",
+        "SessionInputParamAgentSessionInputComputerUseApprovalRequestResult",
+        "SessionInputParamAgentSessionInputMessage",
+        "SessionInputParamAgentSessionInputToolResult",
+        "SessionListResource",
+        "SessionMessageRoleResource",
+        "SessionRequiredActionResource",
+        "SessionRequiredActionResourceComputerUseApprovalRequest",
+        "SessionRequiredActionResourceEnvironmentConnection",
+        "SessionRequiredActionResourceFunctionCall",
+        "SessionResource",
+        "SessionSpendControlParam",
+        "SessionSpendControlResource",
+        "SessionStatusResource",
+        "SessionTurnErrorCodeResource",
+        "SessionTurnErrorResource",
+        "SessionTurnItemResource",
+        "SetupCommandParam",
+        "SubagentObjectResource",
+        "SubagentResource",
+        "SubagentStatusResource",
+        "SummaryTextResource",
+        "TextFormatParam",
+        "TextFormatParamJsonSchema",
+        "TextFormatParamText",
+        "TextFormatResource",
+        "TextFormatResourceJsonSchema",
+        "TextFormatResourceText",
+        "TextParam",
+        "TextResource",
+        "TokenUsageResource",
+        "TurnObjectResource",
+        "TurnResource",
+        "TurnStatusResource",
+        "UpdateAgentSessionParams",
+        "UpdateSessionAgentParam",
+        "UpdateSessionReasoningParam",
+        "VerbosityParam",
+        "VerbosityResource",
+        "WaitForSubagentsCallItemResource",
+        "WebSearchActionResource",
+        "WebSearchActionResourceFindInPage",
+        "WebSearchActionResourceOpenPage",
+        "WebSearchActionResourceOther",
+        "WebSearchActionResourceSearch",
+        "WebSearchCallItemResource",
+        "WebSearchContextSizeParam",
+        "WebSearchContextSizeResource",
+        "WebSearchLocationParam",
+        "WebSearchLocationResource",
+        "WebSearchModeParam",
+        "WebSearchModeResource"
+      ],
+      "milestone_scope": "active",
+      "tracking_parent_issue": 317
+    },
+    {
+      "ticket": 35,
+      "document": "tickets/35-history-traces.md",
+      "title": "Session history, turns and traces",
+      "status": "active bounded milestone; implementation acceptance pending",
+      "github_issue": {
+        "number": 387,
+        "url": "https://github.com/davidmigloz/ai_clients_dart/issues/387"
+      },
+      "dependencies": [
+        34
+      ],
+      "requirement_ids": [
+        "AGENTS-HISTORY-01"
+      ],
+      "http_operation_ids": [
+        "listAgentSessionItems",
+        "listAgentSessionTurns",
+        "retrieveAgentSessionTurn",
+        "listAgentSessionTurnItems",
+        "listAgentSessionTraces"
+      ],
+      "transitive_schema_names": [
+        "AgentContentResource",
+        "AgentMessageItemResource",
+        "BrowserAuthenticationFieldResource",
+        "BrowserAuthenticationHistoryRequestKindResource",
+        "BrowserAuthenticationHistoryRequestKindResourceBrowserAuthentication",
+        "BrowserAuthenticationOptionResource",
+        "BrowserAuthenticationRequestItemResource",
+        "CloseSubagentCallItemResource",
+        "CommandExecutionItemResource",
+        "ComputerScreenshotResource",
+        "ComputerUseApprovalRequestResultItemResource",
+        "ComputerUseApprovalResponseKindResource",
+        "ComputerUseApprovalResponseKindResourceBrowserAuthenticationCancelResource",
+        "ComputerUseApprovalResponseKindResourceBrowserAuthenticationSubmitResource",
+        "ComputerUseCallItemResource",
+        "CreateSubagentCallItemResource",
+        "EncryptedContentResource",
+        "ErrorBodyResource",
+        "ErrorResponse-2",
+        "FunctionCallItemResource",
+        "FunctionCallOutputItemResource",
+        "FunctionCallOutputResource",
+        "FunctionCallStatusResource",
+        "InputContentResource",
+        "InputContentResourceInputImage",
+        "InputContentResourceInputText",
+        "InputTokensDetailsResource-2",
+        "InterruptSubagentCallItemResource",
+        "ListOrderParam",
+        "McpCallItemResource",
+        "MessageContentResource",
+        "MessageContentResourceInputImage",
+        "MessageContentResourceInputText",
+        "MessageContentResourceOutputText",
+        "MessageItemResource",
+        "MessagePhaseResource",
+        "OutputItemStatusResource",
+        "OutputTextResource",
+        "OutputTokensDetailsResource-2",
+        "ReasoningItemResource",
+        "ResumeSubagentCallItemResource",
+        "SendSubagentInputCallItemResource",
+        "SessionItemListResource",
+        "SessionMessageRoleResource",
+        "SessionTraceListResource",
+        "SessionTurnErrorCodeResource",
+        "SessionTurnErrorResource",
+        "SessionTurnItemResource",
+        "SessionTurnListResource",
+        "SessionTurnTraceResource",
+        "SummaryTextResource",
+        "TokenUsageResource",
+        "TurnObjectResource",
+        "TurnResource",
+        "TurnStatusResource",
+        "WaitForSubagentsCallItemResource",
+        "WebSearchActionResource",
+        "WebSearchActionResourceFindInPage",
+        "WebSearchActionResourceOpenPage",
+        "WebSearchActionResourceOther",
+        "WebSearchActionResourceSearch",
+        "WebSearchCallItemResource"
+      ],
+      "milestone_scope": "active",
+      "tracking_parent_issue": 317
+    },
+    {
+      "ticket": 36,
+      "document": "tickets/36-vaults-credentials.md",
+      "title": "Vault and write-only credential management",
+      "status": "active bounded milestone; implementation acceptance pending",
+      "github_issue": {
+        "number": 388,
+        "url": "https://github.com/davidmigloz/ai_clients_dart/issues/388"
+      },
+      "dependencies": [],
+      "requirement_ids": [
+        "AGENTS-VAULT-01",
+        "AGENTS-VAULT-02"
+      ],
+      "http_operation_ids": [
+        "listVaults",
+        "createVault",
+        "deleteVault",
+        "retrieveVault",
+        "updateVault",
+        "listVaultCredentials",
+        "createVaultCredential",
+        "deleteVaultCredential",
+        "retrieveVaultCredential",
+        "rotateVaultCredential"
+      ],
+      "transitive_schema_names": [
+        "CreateMcpOauthRefreshParam",
+        "CreateMcpOauthTokenEndpointAuthParam",
+        "CreateMcpOauthTokenEndpointAuthParamClientSecretBasic",
+        "CreateMcpOauthTokenEndpointAuthParamClientSecretPost",
+        "CreateMcpOauthTokenEndpointAuthParamNone",
+        "CreateVaultCredentialAuthParam",
+        "CreateVaultCredentialAuthParamEnvironmentVariable",
+        "CreateVaultCredentialAuthParamMcpOauth",
+        "CreateVaultCredentialAuthParamStaticBearer",
+        "CreateVaultCredentialParams",
+        "CreateVaultParams",
+        "DeletedVaultCredentialResource",
+        "DeletedVaultResource",
+        "ErrorBodyResource",
+        "ErrorResponse-2",
+        "ListOrderParam",
+        "McpOauthRefreshResource",
+        "McpOauthTokenEndpointAuthResource",
+        "McpOauthTokenEndpointAuthResourceClientSecretBasic",
+        "McpOauthTokenEndpointAuthResourceClientSecretPost",
+        "McpOauthTokenEndpointAuthResourceNone",
+        "RotateMcpOauthRefreshParam",
+        "RotateMcpOauthTokenEndpointAuthParam",
+        "RotateMcpOauthTokenEndpointAuthParamClientSecretBasic",
+        "RotateMcpOauthTokenEndpointAuthParamClientSecretPost",
+        "RotateVaultCredentialAuthParam",
+        "RotateVaultCredentialAuthParamEnvironmentVariable",
+        "RotateVaultCredentialAuthParamMcpOauth",
+        "RotateVaultCredentialAuthParamStaticBearer",
+        "RotateVaultCredentialParams",
+        "UpdateVaultParams",
+        "VaultCredentialAuthResource",
+        "VaultCredentialAuthResourceEnvironmentVariable",
+        "VaultCredentialAuthResourceMcpOauth",
+        "VaultCredentialAuthResourceStaticBearer",
+        "VaultCredentialListResource",
+        "VaultCredentialNetworkingParam",
+        "VaultCredentialNetworkingParamLimited",
+        "VaultCredentialNetworkingParamUnrestricted",
+        "VaultCredentialNetworkingResource",
+        "VaultCredentialNetworkingResourceLimited",
+        "VaultCredentialNetworkingResourceUnrestricted",
+        "VaultCredentialResource",
+        "VaultListResource",
+        "VaultResource",
+        "VaultStatusFilterParam",
+        "VaultStatusParam"
+      ],
+      "milestone_scope": "active",
+      "tracking_parent_issue": 317
+    },
+    {
+      "ticket": 37,
+      "document": "tickets/37-environments-templates.md",
+      "title": "Owned hosted environments and templates",
+      "status": "active bounded milestone; implementation acceptance pending",
+      "github_issue": {
+        "number": 389,
+        "url": "https://github.com/davidmigloz/ai_clients_dart/issues/389"
+      },
+      "dependencies": [
+        33
+      ],
+      "requirement_ids": [
+        "AGENTS-ENV-01",
+        "AGENTS-ENV-02"
+      ],
+      "http_operation_ids": [
+        "listAgentEnvironments",
+        "createAgentEnvironment",
+        "retrieveAgentEnvironment",
+        "listAgentEnvironmentTemplates",
+        "createAgentEnvironmentTemplate",
+        "deleteAgentEnvironmentTemplate",
+        "retrieveAgentEnvironmentTemplate",
+        "updateAgentEnvironmentTemplate"
+      ],
+      "transitive_schema_names": [
+        "AgentEnvironmentListResource",
+        "CreateAgentEnvironmentParams",
+        "CreateEnvironmentParam",
+        "CreateEnvironmentParamOpenaiHosted",
+        "CreateEnvironmentTemplateParams",
+        "DeletedEnvironmentTemplateResource",
+        "DesktopParam",
+        "DesktopResource",
+        "EnvironmentPackagesParam",
+        "EnvironmentPackagesResource",
+        "EnvironmentStatusResource",
+        "EnvironmentTemplateListResource",
+        "EnvironmentTemplateResource",
+        "EnvironmentTypeParam",
+        "EnvironmentTypeResource",
+        "ErrorBodyResource",
+        "ErrorResponse-2",
+        "HostedEnvironmentFileParam",
+        "HostedEnvironmentFileParamFileId",
+        "HostedEnvironmentFileParamInline",
+        "HostedEnvironmentFileResource",
+        "HostedEnvironmentFileResourceFileId",
+        "HostedEnvironmentFileResourceInline",
+        "HostedPluginParam",
+        "HostedPluginParamInline",
+        "HostedPluginResource",
+        "HostedPluginResourceInline",
+        "HostedSkillParam",
+        "HostedSkillParamInline",
+        "HostedSkillParamSkillReference",
+        "HostedSkillResource",
+        "HostedSkillResourceInline",
+        "HostedSkillResourceSkillReference",
+        "HostedTemplateFileResource",
+        "HostedTemplateFileResourceFileId",
+        "HostedTemplateFileResourceInline",
+        "HostedTemplateSkillResource",
+        "HostedTemplateSkillResourceInline",
+        "HostedTemplateSkillResourceSkillReference",
+        "InlineCapabilitySourceParam",
+        "InlineCapabilitySourceParamBase64",
+        "ListOrderParam",
+        "NetworkAccessParam",
+        "NetworkAccessResource",
+        "NetworkPolicyParam",
+        "NetworkPolicyResource",
+        "PublicEnvironmentResource",
+        "SetupCommandParam",
+        "UpdateEnvironmentTemplateParams"
+      ],
+      "milestone_scope": "active",
+      "tracking_parent_issue": 317
+    },
+    {
+      "ticket": 38,
+      "document": "tickets/38-files-artifacts.md",
+      "title": "Live environment files and published artifacts",
+      "status": "active bounded milestone; implementation acceptance pending",
+      "github_issue": {
+        "number": 390,
+        "url": "https://github.com/davidmigloz/ai_clients_dart/issues/390"
+      },
+      "dependencies": [
+        34,
+        37
+      ],
+      "requirement_ids": [
+        "AGENTS-FILES-01"
+      ],
+      "http_operation_ids": [
+        "listAgentEnvironmentFiles",
+        "createAgentEnvironmentFile",
+        "listAgentSessionArtifacts",
+        "deleteAgentSessionArtifact",
+        "retrieveAgentSessionArtifact",
+        "retrieveAgentSessionArtifactContent"
+      ],
+      "transitive_schema_names": [
+        "DeletedSessionArtifactResource",
+        "EnvironmentFileListResource",
+        "EnvironmentFilePageObjectResource",
+        "EnvironmentFileResource",
+        "ErrorBodyResource",
+        "ErrorResponse-2",
+        "HostedEnvironmentFileParam",
+        "HostedEnvironmentFileParamFileId",
+        "HostedEnvironmentFileParamInline",
+        "ListOrderParam",
+        "SessionArtifactListResource",
+        "SessionArtifactResource"
+      ],
+      "milestone_scope": "active",
+      "tracking_parent_issue": 317
+    },
+    {
+      "ticket": 39,
+      "document": "tickets/39-subagents.md",
+      "title": "Subagent inspection and history",
+      "status": "active bounded milestone; implementation acceptance pending",
+      "github_issue": {
+        "number": 391,
+        "url": "https://github.com/davidmigloz/ai_clients_dart/issues/391"
+      },
+      "dependencies": [
+        34,
+        35
+      ],
+      "requirement_ids": [
+        "AGENTS-SUBAGENT-01"
+      ],
+      "http_operation_ids": [
+        "listAgentSessionSubagents",
+        "retrieveAgentSessionSubagent",
+        "listAgentSessionSubagentItems",
+        "listAgentSessionSubagentTurns",
+        "retrieveAgentSessionSubagentTurn",
+        "listAgentSessionSubagentTurnItems"
+      ],
+      "transitive_schema_names": [
+        "AgentContentResource",
+        "AgentMessageItemResource",
+        "BrowserAuthenticationFieldResource",
+        "BrowserAuthenticationHistoryRequestKindResource",
+        "BrowserAuthenticationHistoryRequestKindResourceBrowserAuthentication",
+        "BrowserAuthenticationOptionResource",
+        "BrowserAuthenticationRequestItemResource",
+        "CloseSubagentCallItemResource",
+        "CommandExecutionItemResource",
+        "ComputerScreenshotResource",
+        "ComputerUseApprovalRequestResultItemResource",
+        "ComputerUseApprovalResponseKindResource",
+        "ComputerUseApprovalResponseKindResourceBrowserAuthenticationCancelResource",
+        "ComputerUseApprovalResponseKindResourceBrowserAuthenticationSubmitResource",
+        "ComputerUseCallItemResource",
+        "CreateSubagentCallItemResource",
+        "EncryptedContentResource",
+        "ErrorBodyResource",
+        "ErrorResponse-2",
+        "FunctionCallItemResource",
+        "FunctionCallOutputItemResource",
+        "FunctionCallOutputResource",
+        "FunctionCallStatusResource",
+        "InputContentResource",
+        "InputContentResourceInputImage",
+        "InputContentResourceInputText",
+        "InputTokensDetailsResource-2",
+        "InterruptSubagentCallItemResource",
+        "ListOrderParam",
+        "McpCallItemResource",
+        "MessageContentResource",
+        "MessageContentResourceInputImage",
+        "MessageContentResourceInputText",
+        "MessageContentResourceOutputText",
+        "MessageItemResource",
+        "MessagePhaseResource",
+        "OutputItemStatusResource",
+        "OutputTextResource",
+        "OutputTokensDetailsResource-2",
+        "ReasoningItemResource",
+        "ResumeSubagentCallItemResource",
+        "SendSubagentInputCallItemResource",
+        "SessionItemListResource",
+        "SessionMessageRoleResource",
+        "SessionTurnErrorCodeResource",
+        "SessionTurnErrorResource",
+        "SessionTurnItemResource",
+        "SessionTurnListResource",
+        "SubagentObjectResource",
+        "SubagentResource",
+        "SubagentStatusResource",
+        "SummaryTextResource",
+        "TokenUsageResource",
+        "TurnObjectResource",
+        "TurnResource",
+        "TurnStatusResource",
+        "WaitForSubagentsCallItemResource",
+        "WebSearchActionResource",
+        "WebSearchActionResourceFindInPage",
+        "WebSearchActionResourceOpenPage",
+        "WebSearchActionResourceOther",
+        "WebSearchActionResourceSearch",
+        "WebSearchCallItemResource"
+      ],
+      "milestone_scope": "active",
+      "tracking_parent_issue": 317
+    },
+    {
+      "ticket": 40,
+      "document": "tickets/40-environment-webhooks.md",
+      "title": "Environment lifecycle webhooks and subscriptions",
+      "status": "deferred outside bounded milestone; not implemented",
+      "github_issue": {
+        "number": 392,
+        "url": "https://github.com/davidmigloz/ai_clients_dart/issues/392"
+      },
+      "dependencies": [
+        37
+      ],
+      "requirement_ids": [
+        "AGENTS-WEBHOOK-01"
+      ],
+      "http_operation_ids": [],
+      "transitive_schema_names": [],
+      "merged_prerequisite_issues": [
+        357,
+        358
+      ],
+      "milestone_scope": "deferred",
+      "tracking_parent_issue": null
+    },
+    {
+      "ticket": 41,
+      "document": "tickets/41-browser-recovery.md",
+      "title": "Browser approvals and current-state recovery",
+      "status": "deferred outside bounded milestone; not implemented",
+      "github_issue": {
+        "number": 393,
+        "url": "https://github.com/davidmigloz/ai_clients_dart/issues/393"
+      },
+      "dependencies": [
+        34,
+        35,
+        37
+      ],
+      "requirement_ids": [
+        "AGENTS-FLOW-01",
+        "AGENTS-FLOW-02"
+      ],
+      "http_operation_ids": [],
+      "transitive_schema_names": [],
+      "milestone_scope": "deferred",
+      "tracking_parent_issue": null
+    },
+    {
+      "ticket": 42,
+      "document": "tickets/42-idle-run-helper.md",
+      "title": "Optional idle-session run observation",
+      "status": "deferred outside bounded milestone; not implemented",
+      "github_issue": {
+        "number": 394,
+        "url": "https://github.com/davidmigloz/ai_clients_dart/issues/394"
+      },
+      "dependencies": [
+        34
+      ],
+      "requirement_ids": [
+        "AGENTS-HELPER-01",
+        "AGENTS-HELPER-02",
+        "AGENTS-HELPER-03",
+        "AGENTS-HELPER-04"
+      ],
+      "http_operation_ids": [],
+      "transitive_schema_names": [],
+      "milestone_scope": "deferred",
+      "tracking_parent_issue": null
+    },
+    {
+      "ticket": 43,
+      "document": "tickets/43-local-dispatch.md",
+      "title": "Opt-in local function dispatch",
+      "status": "deferred outside bounded milestone; not implemented",
+      "github_issue": {
+        "number": 395,
+        "url": "https://github.com/davidmigloz/ai_clients_dart/issues/395"
+      },
+      "dependencies": [
+        42
+      ],
+      "requirement_ids": [
+        "AGENTS-HELPER-05",
+        "AGENTS-HELPER-06",
+        "AGENTS-HELPER-07",
+        "AGENTS-HELPER-08"
+      ],
+      "http_operation_ids": [],
+      "transitive_schema_names": [],
+      "milestone_scope": "deferred",
+      "tracking_parent_issue": null
+    },
+    {
+      "ticket": 44,
+      "document": "tickets/44-result-parser.md",
+      "title": "Completed-result collection and local structured parsing",
+      "status": "deferred outside bounded milestone; not implemented",
+      "github_issue": {
+        "number": 396,
+        "url": "https://github.com/davidmigloz/ai_clients_dart/issues/396"
+      },
+      "dependencies": [
+        42,
+        43
+      ],
+      "requirement_ids": [
+        "AGENTS-HELPER-09",
+        "AGENTS-HELPER-10",
+        "AGENTS-HELPER-11",
+        "AGENTS-HELPER-12"
+      ],
+      "http_operation_ids": [],
+      "transitive_schema_names": [],
+      "milestone_scope": "deferred",
+      "tracking_parent_issue": null
+    },
+    {
+      "ticket": 45,
+      "document": "tickets/45-file-helpers.md",
+      "title": "Portable file and artifact convenience",
+      "status": "deferred outside bounded milestone; not implemented",
+      "github_issue": {
+        "number": 397,
+        "url": "https://github.com/davidmigloz/ai_clients_dart/issues/397"
+      },
+      "dependencies": [
+        38,
+        44
+      ],
+      "requirement_ids": [
+        "AGENTS-FILE-HELPER-01",
+        "AGENTS-FILE-HELPER-02",
+        "AGENTS-FILE-HELPER-03"
+      ],
+      "http_operation_ids": [],
+      "transitive_schema_names": [],
+      "milestone_scope": "deferred",
+      "tracking_parent_issue": null
+    }
+  ],
+  "operations": [
+    {
+      "operation_id": "createAgent",
+      "owner_ticket": 33,
+      "method": "POST",
+      "path": "/agents",
+      "direct_schema_names": [
+        "AgentResource",
+        "CreateAgentParams",
+        "ErrorResponse-2"
+      ]
+    },
+    {
+      "operation_id": "createAgentEnvironment",
+      "owner_ticket": 37,
+      "method": "POST",
+      "path": "/agents/environments",
+      "direct_schema_names": [
+        "CreateAgentEnvironmentParams",
+        "ErrorResponse-2",
+        "PublicEnvironmentResource"
+      ]
+    },
+    {
+      "operation_id": "createAgentEnvironmentFile",
+      "owner_ticket": 38,
+      "method": "POST",
+      "path": "/agents/environments/{environment_id}/files",
+      "direct_schema_names": [
+        "EnvironmentFileResource",
+        "ErrorResponse-2",
+        "HostedEnvironmentFileParam"
+      ]
+    },
+    {
+      "operation_id": "createAgentEnvironmentTemplate",
+      "owner_ticket": 37,
+      "method": "POST",
+      "path": "/agents/environments/templates",
+      "direct_schema_names": [
+        "CreateEnvironmentTemplateParams",
+        "EnvironmentTemplateResource",
+        "ErrorResponse-2"
+      ]
+    },
+    {
+      "operation_id": "createAgentSession",
+      "owner_ticket": 34,
+      "method": "POST",
+      "path": "/agents/sessions",
+      "direct_schema_names": [
+        "CreateAgentSessionParams",
+        "ErrorResponse-2",
+        "SessionEvent",
+        "SessionResource"
+      ]
+    },
+    {
+      "operation_id": "createAgentSessionEvents",
+      "owner_ticket": 34,
+      "method": "POST",
+      "path": "/agents/sessions/{session_id}/events",
+      "direct_schema_names": [
+        "CreateSessionEventsParams",
+        "ErrorResponse-2"
+      ]
+    },
+    {
+      "operation_id": "createVault",
+      "owner_ticket": 36,
+      "method": "POST",
+      "path": "/vaults",
+      "direct_schema_names": [
+        "CreateVaultParams",
+        "ErrorResponse-2",
+        "VaultResource"
+      ]
+    },
+    {
+      "operation_id": "createVaultCredential",
+      "owner_ticket": 36,
+      "method": "POST",
+      "path": "/vaults/{vault_id}/credentials",
+      "direct_schema_names": [
+        "CreateVaultCredentialParams",
+        "ErrorResponse-2",
+        "VaultCredentialResource"
+      ]
+    },
+    {
+      "operation_id": "deleteAgent",
+      "owner_ticket": 33,
+      "method": "DELETE",
+      "path": "/agents/{agent_id}",
+      "direct_schema_names": [
+        "DeletedAgentResource",
+        "ErrorResponse-2"
+      ]
+    },
+    {
+      "operation_id": "deleteAgentEnvironmentTemplate",
+      "owner_ticket": 37,
+      "method": "DELETE",
+      "path": "/agents/environments/templates/{environment_template_id}",
+      "direct_schema_names": [
+        "DeletedEnvironmentTemplateResource",
+        "ErrorResponse-2"
+      ]
+    },
+    {
+      "operation_id": "deleteAgentSession",
+      "owner_ticket": 34,
+      "method": "DELETE",
+      "path": "/agents/sessions/{session_id}",
+      "direct_schema_names": [
+        "DeletedSessionResource",
+        "ErrorResponse-2"
+      ]
+    },
+    {
+      "operation_id": "deleteAgentSessionArtifact",
+      "owner_ticket": 38,
+      "method": "DELETE",
+      "path": "/agents/sessions/{session_id}/artifacts/{artifact_id}",
+      "direct_schema_names": [
+        "DeletedSessionArtifactResource",
+        "ErrorResponse-2"
+      ]
+    },
+    {
+      "operation_id": "deleteVault",
+      "owner_ticket": 36,
+      "method": "DELETE",
+      "path": "/vaults/{vault_id}",
+      "direct_schema_names": [
+        "DeletedVaultResource",
+        "ErrorResponse-2"
+      ]
+    },
+    {
+      "operation_id": "deleteVaultCredential",
+      "owner_ticket": 36,
+      "method": "DELETE",
+      "path": "/vaults/{vault_id}/credentials/{credential_id}",
+      "direct_schema_names": [
+        "DeletedVaultCredentialResource",
+        "ErrorResponse-2"
+      ]
+    },
+    {
+      "operation_id": "listAgentEnvironmentFiles",
+      "owner_ticket": 38,
+      "method": "GET",
+      "path": "/agents/environments/{environment_id}/files",
+      "direct_schema_names": [
+        "EnvironmentFileListResource",
+        "ErrorResponse-2",
+        "ListOrderParam"
+      ]
+    },
+    {
+      "operation_id": "listAgentEnvironmentTemplates",
+      "owner_ticket": 37,
+      "method": "GET",
+      "path": "/agents/environments/templates",
+      "direct_schema_names": [
+        "EnvironmentTemplateListResource",
+        "ErrorResponse-2",
+        "ListOrderParam"
+      ]
+    },
+    {
+      "operation_id": "listAgentEnvironments",
+      "owner_ticket": 37,
+      "method": "GET",
+      "path": "/agents/environments",
+      "direct_schema_names": [
+        "AgentEnvironmentListResource",
+        "EnvironmentTypeParam",
+        "ErrorResponse-2",
+        "ListOrderParam"
+      ]
+    },
+    {
+      "operation_id": "listAgentSessionArtifacts",
+      "owner_ticket": 38,
+      "method": "GET",
+      "path": "/agents/sessions/{session_id}/artifacts",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "ListOrderParam",
+        "SessionArtifactListResource"
+      ]
+    },
+    {
+      "operation_id": "listAgentSessionEvents",
+      "owner_ticket": 34,
+      "method": "GET",
+      "path": "/agents/sessions/{session_id}/events",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "SessionEvent"
+      ]
+    },
+    {
+      "operation_id": "listAgentSessionItems",
+      "owner_ticket": 35,
+      "method": "GET",
+      "path": "/agents/sessions/{session_id}/items",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "ListOrderParam",
+        "SessionItemListResource"
+      ]
+    },
+    {
+      "operation_id": "listAgentSessionSubagentItems",
+      "owner_ticket": 39,
+      "method": "GET",
+      "path": "/agents/sessions/{session_id}/subagents/{subagent_id}/items",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "ListOrderParam",
+        "SessionItemListResource"
+      ]
+    },
+    {
+      "operation_id": "listAgentSessionSubagentTurnItems",
+      "owner_ticket": 39,
+      "method": "GET",
+      "path": "/agents/sessions/{session_id}/subagents/{subagent_id}/turns/{turn_id}/items",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "ListOrderParam",
+        "SessionItemListResource"
+      ]
+    },
+    {
+      "operation_id": "listAgentSessionSubagentTurns",
+      "owner_ticket": 39,
+      "method": "GET",
+      "path": "/agents/sessions/{session_id}/subagents/{subagent_id}/turns",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "ListOrderParam",
+        "SessionTurnListResource"
+      ]
+    },
+    {
+      "operation_id": "listAgentSessionSubagents",
+      "owner_ticket": 39,
+      "method": "GET",
+      "path": "/agents/sessions/{session_id}/subagents",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "ListOrderParam",
+        "SubagentResource"
+      ]
+    },
+    {
+      "operation_id": "listAgentSessionTraces",
+      "owner_ticket": 35,
+      "method": "GET",
+      "path": "/agents/sessions/{session_id}/traces",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "ListOrderParam",
+        "SessionTraceListResource"
+      ]
+    },
+    {
+      "operation_id": "listAgentSessionTurnItems",
+      "owner_ticket": 35,
+      "method": "GET",
+      "path": "/agents/sessions/{session_id}/turns/{turn_id}/items",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "ListOrderParam",
+        "SessionItemListResource"
+      ]
+    },
+    {
+      "operation_id": "listAgentSessionTurns",
+      "owner_ticket": 35,
+      "method": "GET",
+      "path": "/agents/sessions/{session_id}/turns",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "ListOrderParam",
+        "SessionTurnListResource"
+      ]
+    },
+    {
+      "operation_id": "listAgentSessions",
+      "owner_ticket": 34,
+      "method": "GET",
+      "path": "/agents/sessions",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "ListOrderParam",
+        "SessionListResource"
+      ]
+    },
+    {
+      "operation_id": "listAgents",
+      "owner_ticket": 33,
+      "method": "GET",
+      "path": "/agents",
+      "direct_schema_names": [
+        "AgentListResource",
+        "ErrorResponse-2",
+        "ListOrderParam"
+      ]
+    },
+    {
+      "operation_id": "listVaultCredentials",
+      "owner_ticket": 36,
+      "method": "GET",
+      "path": "/vaults/{vault_id}/credentials",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "ListOrderParam",
+        "VaultCredentialListResource",
+        "VaultStatusFilterParam"
+      ]
+    },
+    {
+      "operation_id": "listVaults",
+      "owner_ticket": 36,
+      "method": "GET",
+      "path": "/vaults",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "ListOrderParam",
+        "VaultListResource",
+        "VaultStatusFilterParam"
+      ]
+    },
+    {
+      "operation_id": "retrieveAgent",
+      "owner_ticket": 33,
+      "method": "GET",
+      "path": "/agents/{agent_id}",
+      "direct_schema_names": [
+        "AgentResource",
+        "ErrorResponse-2"
+      ]
+    },
+    {
+      "operation_id": "retrieveAgentEnvironment",
+      "owner_ticket": 37,
+      "method": "GET",
+      "path": "/agents/environments/{environment_id}",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "PublicEnvironmentResource"
+      ]
+    },
+    {
+      "operation_id": "retrieveAgentEnvironmentTemplate",
+      "owner_ticket": 37,
+      "method": "GET",
+      "path": "/agents/environments/templates/{environment_template_id}",
+      "direct_schema_names": [
+        "EnvironmentTemplateResource",
+        "ErrorResponse-2"
+      ]
+    },
+    {
+      "operation_id": "retrieveAgentSession",
+      "owner_ticket": 34,
+      "method": "GET",
+      "path": "/agents/sessions/{session_id}",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "SessionResource"
+      ]
+    },
+    {
+      "operation_id": "retrieveAgentSessionArtifact",
+      "owner_ticket": 38,
+      "method": "GET",
+      "path": "/agents/sessions/{session_id}/artifacts/{artifact_id}",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "SessionArtifactResource"
+      ]
+    },
+    {
+      "operation_id": "retrieveAgentSessionArtifactContent",
+      "owner_ticket": 38,
+      "method": "GET",
+      "path": "/agents/sessions/{session_id}/artifacts/{artifact_id}/content",
+      "direct_schema_names": [
+        "ErrorResponse-2"
+      ]
+    },
+    {
+      "operation_id": "retrieveAgentSessionSubagent",
+      "owner_ticket": 39,
+      "method": "GET",
+      "path": "/agents/sessions/{session_id}/subagents/{subagent_id}",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "SubagentResource"
+      ]
+    },
+    {
+      "operation_id": "retrieveAgentSessionSubagentTurn",
+      "owner_ticket": 39,
+      "method": "GET",
+      "path": "/agents/sessions/{session_id}/subagents/{subagent_id}/turns/{turn_id}",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "TurnResource"
+      ]
+    },
+    {
+      "operation_id": "retrieveAgentSessionTurn",
+      "owner_ticket": 35,
+      "method": "GET",
+      "path": "/agents/sessions/{session_id}/turns/{turn_id}",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "TurnResource"
+      ]
+    },
+    {
+      "operation_id": "retrieveVault",
+      "owner_ticket": 36,
+      "method": "GET",
+      "path": "/vaults/{vault_id}",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "VaultResource"
+      ]
+    },
+    {
+      "operation_id": "retrieveVaultCredential",
+      "owner_ticket": 36,
+      "method": "GET",
+      "path": "/vaults/{vault_id}/credentials/{credential_id}",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "VaultCredentialResource"
+      ]
+    },
+    {
+      "operation_id": "rotateVaultCredential",
+      "owner_ticket": 36,
+      "method": "POST",
+      "path": "/vaults/{vault_id}/credentials/{credential_id}",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "RotateVaultCredentialParams",
+        "VaultCredentialResource"
+      ]
+    },
+    {
+      "operation_id": "updateAgent",
+      "owner_ticket": 33,
+      "method": "POST",
+      "path": "/agents/{agent_id}",
+      "direct_schema_names": [
+        "AgentResource",
+        "ErrorResponse-2",
+        "UpdateAgentParams"
+      ]
+    },
+    {
+      "operation_id": "updateAgentEnvironmentTemplate",
+      "owner_ticket": 37,
+      "method": "POST",
+      "path": "/agents/environments/templates/{environment_template_id}",
+      "direct_schema_names": [
+        "EnvironmentTemplateResource",
+        "ErrorResponse-2",
+        "UpdateEnvironmentTemplateParams"
+      ]
+    },
+    {
+      "operation_id": "updateAgentSession",
+      "owner_ticket": 34,
+      "method": "POST",
+      "path": "/agents/sessions/{session_id}",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "SessionResource",
+        "UpdateAgentSessionParams"
+      ]
+    },
+    {
+      "operation_id": "updateVault",
+      "owner_ticket": 36,
+      "method": "POST",
+      "path": "/vaults/{vault_id}",
+      "direct_schema_names": [
+        "ErrorResponse-2",
+        "UpdateVaultParams",
+        "VaultResource"
+      ]
+    }
+  ],
+  "schema_receipts": [
+    {
+      "name": "AgentContentResource",
+      "canonical_json_sha256": "34b00a771b7ba6e2334790d4aa04dc0e84cfd937b4c5bd70cf417a4402c7d1e5",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "AgentEnvironmentListResource",
+      "canonical_json_sha256": "80b0122de5cdc2d9764fe81866ddadc0b6e761e6f1c56cc0d6c7aecdb9a02dda",
+      "required_by_tickets": [
+        37
+      ]
+    },
+    {
+      "name": "AgentListResource",
+      "canonical_json_sha256": "591e488bbfa5951b4baab850dbe55410862e34db0eee516bfc24aa4efd0067e2",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "AgentMessageItemResource",
+      "canonical_json_sha256": "52c60c42b049ef645bd650b1cd9ffa2c77fe02a7ae27a78e14c3ddfd127b05e2",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "AgentOutputItemResource",
+      "canonical_json_sha256": "9439d12dec47d4cf479590c87addce09f3170e60df9c47f2a1641bf871074bb5",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "AgentResource",
+      "canonical_json_sha256": "9b6b9cfd88a61db1eb65c75b696bddba83d208bdffac586ebe8d943e883415d4",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "AgentToolConfigParam",
+      "canonical_json_sha256": "888e42db36cc4c52e1a60ac9d892c3281653a4d8465c9b330ca9a3220f4f81f0",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "AgentToolConfigParamComputerUse",
+      "canonical_json_sha256": "03ee129fec774e8abc22a56b627d80071efc8bff3a87740c49155e9ecad39520",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "AgentToolConfigParamFunction",
+      "canonical_json_sha256": "4edac3a2dacf1562476b2e8efc95a31a27c101f3987a0bbb11ef523d92667505",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "AgentToolConfigParamMcp",
+      "canonical_json_sha256": "c087403841c30aad2822db628cb95df1bb99356de285da2a8e2a37c8433b0901",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "AgentToolConfigParamProgrammaticToolCalling",
+      "canonical_json_sha256": "0f2334a66b6e99a6846b482571ee62fcc540e0c67e545873e3658fc64f8f5eea",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "AgentToolConfigParamToolSearch",
+      "canonical_json_sha256": "8ec87f2967d8eaa920f83a79a2d0a305316a9cd11f3cf64458c6bc2e3c877049",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "AgentToolConfigParamWebSearch",
+      "canonical_json_sha256": "e40d2b46ec0f9a035e9e242547a811cd15bb1918a1fa10c63c643b56dcc11eb5",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "AgentToolResource",
+      "canonical_json_sha256": "322801dae22d4cd247dffefc4f540d7eca70d55e8e9756924196026abe70d51a",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "AgentToolResourceComputerUse",
+      "canonical_json_sha256": "80425b194dc626e7255fab3c357df3f2c53dc5d48d53f25f11f4549ecc299799",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "AgentToolResourceFunction",
+      "canonical_json_sha256": "f13603f1e22f7ee1fd8fa4422205e0a9577fdab482db96cdf53a79e5808c4af6",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "AgentToolResourceMcp",
+      "canonical_json_sha256": "a28ccf572e27063d36aeba887d4b2aa0148c2a1413aa3f48b873c8b5361c6cc3",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "AgentToolResourceProgrammaticToolCalling",
+      "canonical_json_sha256": "94c50824fa4c482c7c5f9252ac967e11e23688711ee7a68bd2798c5412a5e2b7",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "AgentToolResourceWebSearch",
+      "canonical_json_sha256": "48865584723484d029438a68c89d47ea6165e3f3f3117766d3559e1c2a4ea137",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "AssistantMessageItemResource",
+      "canonical_json_sha256": "5623ace938c4b6b551dbdba82a9137811f9c7c19bcde870a6b213adaa894076d",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "BrowserAuthenticationFieldResource",
+      "canonical_json_sha256": "7bb94cb6e0318228a78225064a991932b820b109717cd05d0f909e009115bd06",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "BrowserAuthenticationFieldValueParam",
+      "canonical_json_sha256": "75bb6a6118abbf8a210f6e4151d1c4cf41a63458251c226cda9f7bfca835d18a",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "BrowserAuthenticationHistoryRequestKindResource",
+      "canonical_json_sha256": "227628730bcef6f991d83e1db922a3c44dede2721a89dae60dbada2b1fe32f34",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "BrowserAuthenticationHistoryRequestKindResourceBrowserAuthentication",
+      "canonical_json_sha256": "d4d2e72a5694cdfaafe1423482d1d4efefff5624bb222ea4c633a6266c13e47c",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "BrowserAuthenticationOptionResource",
+      "canonical_json_sha256": "5dc4aacc3050b6b62daa420e672db276c56e6c8267487a490d3b18a940623bf7",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "BrowserAuthenticationRequestItemResource",
+      "canonical_json_sha256": "695af849be2157f9900c05caf3508f5f0eb46a177d72ebf2bdd2b6cf45beac84",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "BrowserOriginAccessDecisionParam",
+      "canonical_json_sha256": "63f0b8cf6ac018136fa69727c9b79b641d978135bb047d63e943e0a202b57880",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "CloseSubagentCallItemResource",
+      "canonical_json_sha256": "d50b7a41c8196aca292dcc2fe387b2c90df0da7662a9d9fc0f0520d49686e311",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "CommandExecutionItemResource",
+      "canonical_json_sha256": "53d6d81981dd4641e4e9496d2b8ecfc7ed4500b3ede0c40647bb0047eb06bc22",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "ComputerScreenshotResource",
+      "canonical_json_sha256": "3dde318b01237dd4950da9a6d9d38b01bfdba29b093eab3a9cbee5235b1abc0e",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "ComputerUseApprovalRequestKindResource",
+      "canonical_json_sha256": "ee570031daea37f2f78b7c957085ae45eb2ffeaf5ffa2a9beaf7b79b50d8950e",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "ComputerUseApprovalRequestKindResourceBrowserAuthentication",
+      "canonical_json_sha256": "d4d2e72a5694cdfaafe1423482d1d4efefff5624bb222ea4c633a6266c13e47c",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "ComputerUseApprovalRequestKindResourceBrowserOriginAccess",
+      "canonical_json_sha256": "7f7abc316eea81ba054728e33e14e285b320b46fd47f65135d3c6fdbd988eb43",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "ComputerUseApprovalRequestResultItemResource",
+      "canonical_json_sha256": "209a745cccd63744446ed961a85c42ecb1b02dc97c968477c43eae0f4c1276cd",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "ComputerUseApprovalResponseKindResource",
+      "canonical_json_sha256": "5f594de6e6cb60957aff8d72d3d9247553e12d9eed9eb1907e381082cbd6f7e7",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "ComputerUseApprovalResponseKindResourceBrowserAuthenticationCancelResource",
+      "canonical_json_sha256": "45a0bcd66d33ac500d43dfc5950571be94b669e7d2e0a0e4d3f98d0847eb287f",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "ComputerUseApprovalResponseKindResourceBrowserAuthenticationSubmitResource",
+      "canonical_json_sha256": "6cca478b07c90d4bc8a9886f13edd8365dbe53ba1e8e475a76e0190bca8afce8",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "ComputerUseApprovalResponseParam",
+      "canonical_json_sha256": "612a82faf733e9b4f4de37f853493b42aa728a37dfc9aec43fbe80029f7eb10c",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "ComputerUseApprovalResponseParamBrowserAuthentication",
+      "canonical_json_sha256": "498ea54599c02c97488a9f120e72b5d5d28bcd4c4475cb6e4fc8a364e4d328c6",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "ComputerUseApprovalResponseParamBrowserAuthenticationCancelParam",
+      "canonical_json_sha256": "45a0bcd66d33ac500d43dfc5950571be94b669e7d2e0a0e4d3f98d0847eb287f",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "ComputerUseApprovalResponseParamBrowserAuthenticationSubmitParam",
+      "canonical_json_sha256": "dcab1893c650b53fa9b519f3d098603ea6eab88c3321704b60f848a63e68285d",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "ComputerUseApprovalResponseParamBrowserOriginAccessParam",
+      "canonical_json_sha256": "a56cbbc1009dca67b200e4a74c5d1b4d4959734af6454f0f9c5e22fcb4111719",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "ComputerUseCallItemResource",
+      "canonical_json_sha256": "53d70c96d0cc4fabfa822074c6f8516acaaae4ef2f5ef76da34c856325de7474",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "ContainerSizeParam",
+      "canonical_json_sha256": "8ab54a16c02d410f0c83911fb60c4b6940259ad0cb048c717578b5cbea5d5d3e",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "ContainerSizeResource",
+      "canonical_json_sha256": "ac80c3f9ada86ee34d93776a3590ba660740f952df750bdecdec5ce460f57672",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "CreateAgentEnvironmentParams",
+      "canonical_json_sha256": "8df71de47119e73ecec95aadc5ce137f75aec475cbfa6b5829833667d9f992d9",
+      "required_by_tickets": [
+        37
+      ]
+    },
+    {
+      "name": "CreateAgentParams",
+      "canonical_json_sha256": "06a90c42210f8df8e5ac0bda5bca97166d604c96906d8521b3080136ef938932",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "CreateAgentSessionParams",
+      "canonical_json_sha256": "9eda987b480b91b53bdf4f6d91c81ca5432ac718eb1721cf5daff224cc2fb326",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "CreateEnvironmentParam",
+      "canonical_json_sha256": "381ec8a66ec88af33b271282c26676b819bd55e7c4022dab6138990733037c50",
+      "required_by_tickets": [
+        37
+      ]
+    },
+    {
+      "name": "CreateEnvironmentParamOpenaiHosted",
+      "canonical_json_sha256": "2141376bdb4577bfd127d31e9d26c95db43c191cdd5041902452960fe092386a",
+      "required_by_tickets": [
+        37
+      ]
+    },
+    {
+      "name": "CreateEnvironmentTemplateParams",
+      "canonical_json_sha256": "67a01ab760c760abbf01db5123a13ba77a0b1ee8ddd89224bbf9b169fcb46493",
+      "required_by_tickets": [
+        37
+      ]
+    },
+    {
+      "name": "CreateMcpOauthRefreshParam",
+      "canonical_json_sha256": "6556391048e25941b874cd0ea2bf8dd5fc422f91fcbce8f008b9fc5ffd193fe7",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "CreateMcpOauthTokenEndpointAuthParam",
+      "canonical_json_sha256": "ae0777ec100a49545e166e5147f07c0243bee9a75c3d23a003300dc5125f7dbb",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "CreateMcpOauthTokenEndpointAuthParamClientSecretBasic",
+      "canonical_json_sha256": "38bc635bb676dbed14ccb302cb0a29d69062baa4c2b1becaae46e438fdd3e6c6",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "CreateMcpOauthTokenEndpointAuthParamClientSecretPost",
+      "canonical_json_sha256": "cb99c2f33e9bbbdb7e429faf1ab30101c3531bf42b1961c85a4a376e4ba7ba44",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "CreateMcpOauthTokenEndpointAuthParamNone",
+      "canonical_json_sha256": "86b8efc284ec9419375a72e93396e30f6627d69a975e8042890266173d8a1a9c",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "CreateSessionEventsParams",
+      "canonical_json_sha256": "852b7fd731a3d60696a270b524806f65d5780ce19ebc5e8a2bfa5dceef9d3e9f",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "CreateSessionInputParam",
+      "canonical_json_sha256": "fc61b554f616e359bcffad2fb985e506b57781617148d1757f2387992e9f7835",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "CreateSubagentCallItemResource",
+      "canonical_json_sha256": "3d3f273da572b2036847e878e8318295e9697b405c145717cd294d0ecaeeb880",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "CreateVaultCredentialAuthParam",
+      "canonical_json_sha256": "d7e5f04276564d3a68c38e2db8a8f9adf7282485ff22777d9a2e6eb8dfc4f31c",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "CreateVaultCredentialAuthParamEnvironmentVariable",
+      "canonical_json_sha256": "795e1833de688845c0874dfc550881d82f656638ff319ed560a6111753ac7713",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "CreateVaultCredentialAuthParamMcpOauth",
+      "canonical_json_sha256": "502bc9309112327beb0d840da41064b2e447ff0b2d62044648b3404543fa157f",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "CreateVaultCredentialAuthParamStaticBearer",
+      "canonical_json_sha256": "dbde2cfd1c2867ddbaa01959ffe7fe2652ec6e73054af779e921b97636dbafe9",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "CreateVaultCredentialParams",
+      "canonical_json_sha256": "1cc5a84ad7c016d977e27e019497b72a2f152b1b8bc9ccbc2d4ec61fa04e76d7",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "CreateVaultParams",
+      "canonical_json_sha256": "3218b62e935e3ea9822e11265c952f19a468177880027b1c40976238d9e41663",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "DeletedAgentResource",
+      "canonical_json_sha256": "d066f6f140af0a635a67499fff4ada2058a7a4593eb2496cc086576577aba937",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "DeletedEnvironmentTemplateResource",
+      "canonical_json_sha256": "8089136e40f3533fceecd65bf250c36bb69a261ba82cc7c4ef677341724ee72d",
+      "required_by_tickets": [
+        37
+      ]
+    },
+    {
+      "name": "DeletedSessionArtifactResource",
+      "canonical_json_sha256": "00b9857c5b8e24586bda15743d86799680a8f8e2e7442949cdc856978f841a3f",
+      "required_by_tickets": [
+        38
+      ]
+    },
+    {
+      "name": "DeletedSessionResource",
+      "canonical_json_sha256": "391ae0ca1eb496d9af2e5f48ffa63058182694b3067fbedc3353b5e838bcedc9",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "DeletedVaultCredentialResource",
+      "canonical_json_sha256": "136bf59808c37299eab5cf18a8cd5a5e57d9b3c17bb3cca525b5a6227f2ddfbd",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "DeletedVaultResource",
+      "canonical_json_sha256": "33aa6a0d227671b8e6f14204d056411da0160bf2bd1dd5da20b45d1de641bb97",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "DesktopParam",
+      "canonical_json_sha256": "809a3e53ce9fc745ffe2f9161af68e77bf04909094683ac83d81a64218bac2b0",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "DesktopResource",
+      "canonical_json_sha256": "e8dafcf6053a0131510761d5ecba4283d0efcc48a777aa573ccb9c87816e332f",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "EncryptedContentResource",
+      "canonical_json_sha256": "93f46d5e87ac50e45633796e432cf36da72724b79e5128202c6302cf23dafe6b",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "EnvironmentFileListResource",
+      "canonical_json_sha256": "dcf56260b807449db462f849b848aed9bb09cd45102d0990f92aee0b0589e39a",
+      "required_by_tickets": [
+        38
+      ]
+    },
+    {
+      "name": "EnvironmentFilePageObjectResource",
+      "canonical_json_sha256": "c70bd8a37d9e472b3da21cf96d3d604f8fb54fba9a425d5be931e61b05130341",
+      "required_by_tickets": [
+        38
+      ]
+    },
+    {
+      "name": "EnvironmentFileResource",
+      "canonical_json_sha256": "1019087ff9ece7f7c7c25536353419a60f64be668e44331355bd30432ebd2f8f",
+      "required_by_tickets": [
+        38
+      ]
+    },
+    {
+      "name": "EnvironmentPackagesParam",
+      "canonical_json_sha256": "69d5f8deea7ddb2c85b1ee165b8207ad2c83d5d54fd3ef47a4507765a8ad346d",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "EnvironmentPackagesResource",
+      "canonical_json_sha256": "6e5575e8d12c6ba41c4a03877e971cbb981d995019367c7dc57abf9713c361e5",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "EnvironmentParam",
+      "canonical_json_sha256": "89673919187dbdf68318ac5f12404ca95f4f16a035905ec845e803c4d3bf957e",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "EnvironmentParamNone",
+      "canonical_json_sha256": "77b19dccb695ce3012643bf072c7c8b139364bf341d4bbb4aac6a346979543b5",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "EnvironmentParamOpenaiHosted",
+      "canonical_json_sha256": "b0035d8c9f57a802d332c30d8bdbdfdd109accc73bdf9f24867193d2a8db7199",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "EnvironmentParamSelfHosted",
+      "canonical_json_sha256": "502e3083350bfad041e0af67affff03131a6a80addd89c9b86c275fe93f152f4",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "EnvironmentResource",
+      "canonical_json_sha256": "b92227f6c07cc654ec96a3b94643d6839d5c95f05c4e0b285885629282c4fc95",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "EnvironmentResourceNone",
+      "canonical_json_sha256": "3b43a7990f6c14fae8f8b5d1cfa86752c6eb58aeacc69328457f8917c6eb8d0c",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "EnvironmentResourceOpenaiHosted",
+      "canonical_json_sha256": "e936b346c48b2ee7d3c63fa1c99c5ba7082128ce2570322bd4228cac6e1e3a63",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "EnvironmentResourceSelfHosted",
+      "canonical_json_sha256": "8e0c53484792083420402dd9efee6bd297480491a09ede305a3936befbe8355a",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "EnvironmentStatusResource",
+      "canonical_json_sha256": "4db1589103e326f20d6a5a395d5869e4d9e2d1e4d2ff18b51b17a4e9e8782aeb",
+      "required_by_tickets": [
+        37
+      ]
+    },
+    {
+      "name": "EnvironmentTemplateListResource",
+      "canonical_json_sha256": "23380218c68b75a7334fb983a21d058a62fbefff42e13875b130ae3a47620aee",
+      "required_by_tickets": [
+        37
+      ]
+    },
+    {
+      "name": "EnvironmentTemplateResource",
+      "canonical_json_sha256": "812e4454f5a3afaaf1f54bd04e1cba245e15bbbfa9f4c071d0ce7e8aba077cf7",
+      "required_by_tickets": [
+        37
+      ]
+    },
+    {
+      "name": "EnvironmentTypeParam",
+      "canonical_json_sha256": "0eaa11edda54621a159e07f35c44614e7d433b2bad364a97cc5935bfc30e9456",
+      "required_by_tickets": [
+        37
+      ]
+    },
+    {
+      "name": "EnvironmentTypeResource",
+      "canonical_json_sha256": "15907aed47a7c5a50387bc7100063196ba637ccd280cf9d83dfda7ddbe97eb25",
+      "required_by_tickets": [
+        37
+      ]
+    },
+    {
+      "name": "ErrorBodyResource",
+      "canonical_json_sha256": "a1cf4ed6add75c6d6d9781a1299dd44794bede8ddcec0baf44584d577c3cd3cc",
+      "required_by_tickets": [
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39
+      ]
+    },
+    {
+      "name": "ErrorResponse-2",
+      "canonical_json_sha256": "1ab45e4595f2c0b05e2d064ff38a13617ebb8fa5261cc439e20cc1900ef5f5d2",
+      "required_by_tickets": [
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39
+      ]
+    },
+    {
+      "name": "FunctionCallItemResource",
+      "canonical_json_sha256": "36278081538f5769a78204cc2e175acf0357b1e03980a93cba213a0ebe03ac38",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "FunctionCallOutputItemResource",
+      "canonical_json_sha256": "bca37a8e087bebc9be74e0b076db50912748240c2da599c4b1c1c90ebc4a0349",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "FunctionCallOutputParam",
+      "canonical_json_sha256": "746fea6d96c2b350c77003d1a3e6558deed9666d4794dd898cde68b4e4baaabe",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "FunctionCallOutputResource",
+      "canonical_json_sha256": "58e5b757b6bc58f9f4c078a85b76bf764947bc44d3da8b34dad5b10a317c1f87",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "FunctionCallStatusResource",
+      "canonical_json_sha256": "488e338aad7cf50bc235b86be50bfadec647ed6b6e91db6b0f448e0d5df70bbe",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "HostedEnvironmentFileParam",
+      "canonical_json_sha256": "faa74518095bc55d36c7df4ae3606bba7efa7b88e46493d52afa8a9815197721",
+      "required_by_tickets": [
+        34,
+        37,
+        38
+      ]
+    },
+    {
+      "name": "HostedEnvironmentFileParamFileId",
+      "canonical_json_sha256": "c645c76c25904359f94f813046957be15865f4fe090e7e1d821a85409c3e4872",
+      "required_by_tickets": [
+        34,
+        37,
+        38
+      ]
+    },
+    {
+      "name": "HostedEnvironmentFileParamInline",
+      "canonical_json_sha256": "075fb725121f6cd32c1a6ef608ccde3eaa4a1f5680ea287ed2b3e5bff97bcf32",
+      "required_by_tickets": [
+        34,
+        37,
+        38
+      ]
+    },
+    {
+      "name": "HostedEnvironmentFileResource",
+      "canonical_json_sha256": "5e8c80a613b0b8dd1d22b32cfb109a263fcb5c0d1cc8e3a222ac0832d1e8b579",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "HostedEnvironmentFileResourceFileId",
+      "canonical_json_sha256": "b296f189cda1d713e90656a87f1e355ab76ddaa36d11647b85d32e1221e72d4a",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "HostedEnvironmentFileResourceInline",
+      "canonical_json_sha256": "d8f4f3f38935f970d079fad644d228f9e3f1e526a62fa5598cd950f91da195a5",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "HostedPluginParam",
+      "canonical_json_sha256": "8ba4e18f503ad788f8769a2d89d64be36e331a504fbd3cd798ec5d92c3d90dd3",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "HostedPluginParamInline",
+      "canonical_json_sha256": "7718ef74f00f8a04ce4362fe831e8c812bebfa20dff44d73c3da322e8d54f014",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "HostedPluginResource",
+      "canonical_json_sha256": "38e29509c25e6213637fc5e4722f4829ec157f5a19e8ce72e355e1eef9cd313f",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "HostedPluginResourceInline",
+      "canonical_json_sha256": "ce1d92cd8ec154f8e62f255934c0d748600c8c8af8edcd087234b488f6f117ed",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "HostedSkillParam",
+      "canonical_json_sha256": "438359887789db75cf124faa523f4711cb04abd9160f9b88b4eb6a7aef081f9c",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "HostedSkillParamInline",
+      "canonical_json_sha256": "8f4835e514147721bd4b77336ac39a25c681ba3ae0ba0e4d19f64d1facd6842b",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "HostedSkillParamSkillReference",
+      "canonical_json_sha256": "3c68cb7394759239972a92e3a23407e54e8a0edd17d7a6fda3f253894b580ffa",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "HostedSkillResource",
+      "canonical_json_sha256": "1ab3c5cad719261e785e0797a04621026c9a02da319a30a299623123e32aea4a",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "HostedSkillResourceInline",
+      "canonical_json_sha256": "97b6571cc82eda74ac51daa9555be74c76792c543313e6963a83e41188b8141c",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "HostedSkillResourceSkillReference",
+      "canonical_json_sha256": "5e01262fcac1c34c34810ed22dc8c001d8c64609a22d3ad882bf0e7260178203",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "HostedTemplateFileResource",
+      "canonical_json_sha256": "6c5de2f40c71f2d53fa4771b8410d94b2cb801587e7e8b57c56232f0289c17aa",
+      "required_by_tickets": [
+        37
+      ]
+    },
+    {
+      "name": "HostedTemplateFileResourceFileId",
+      "canonical_json_sha256": "0f37e42a616af08b8a2d9c41ca59dc3756965c74c18d9177afd62ee9bc24bfa3",
+      "required_by_tickets": [
+        37
+      ]
+    },
+    {
+      "name": "HostedTemplateFileResourceInline",
+      "canonical_json_sha256": "55aed6d5fed673f58ed5f1375791ba32041a4832135be7105aba6315117a8ebf",
+      "required_by_tickets": [
+        37
+      ]
+    },
+    {
+      "name": "HostedTemplateSkillResource",
+      "canonical_json_sha256": "1e78ecd29fe2a2b808850f3bdcd47f5d451d83e7658ce422d701ef38f05ac3ff",
+      "required_by_tickets": [
+        37
+      ]
+    },
+    {
+      "name": "HostedTemplateSkillResourceInline",
+      "canonical_json_sha256": "63e3b0a0803b62603d7f1188563a1a1a10c7519decfa8a3823c478343fb7fe61",
+      "required_by_tickets": [
+        37
+      ]
+    },
+    {
+      "name": "HostedTemplateSkillResourceSkillReference",
+      "canonical_json_sha256": "8912b3719c3ab70d294c32fc586e6528e0c3e4d24bbfed68db78545503f8d31f",
+      "required_by_tickets": [
+        37
+      ]
+    },
+    {
+      "name": "InlineCapabilitySourceParam",
+      "canonical_json_sha256": "c6e7f4f89c47b8ab0afea1dc303305c49bd5ddb81014b36ac46f0820b3320c25",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "InlineCapabilitySourceParamBase64",
+      "canonical_json_sha256": "2ae64499f0e38133cf2017c3038b6f126f0e1a53e495da06b61378cfe36e7384",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "InputContentParam",
+      "canonical_json_sha256": "f94088c7e9c4df2b23f75a1a1e160a0a916466ae27da0d2b2babd1e6c6dd27dc",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "InputContentParamInputImage",
+      "canonical_json_sha256": "6ec2e5d93ea0df1c32cb76c6d17d621cd4e4986ac934743071e536b0dad3e5f3",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "InputContentParamInputText",
+      "canonical_json_sha256": "fc74da6394539a6f929d54a7621286d820f5fcb7363e36f94bdce370af3fd11f",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "InputContentResource",
+      "canonical_json_sha256": "0513beea023fb5ee60f38ff3d2929407702dfc1e5e894d6b261775219c4c618e",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "InputContentResourceInputImage",
+      "canonical_json_sha256": "01408384216d7ccc471c372430e009627ebd1fb78b71996c6eb2ecf0c40f1159",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "InputContentResourceInputText",
+      "canonical_json_sha256": "c863257b04af657d8b8d9995eabeb75815662c6794b0bf8a7f8ef298913d130d",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "InputMessageParam",
+      "canonical_json_sha256": "258b0a744b4bfd09c4eff0401eab2bf7c4138b968de34177fa21d353db090727",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "InputTokensDetailsResource-2",
+      "canonical_json_sha256": "093ce11148b3a6fb2b106e39e2c912f49fa3c83f0e42a5b498bcb3fedbbf58ee",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "InterruptSubagentCallItemResource",
+      "canonical_json_sha256": "480aa15ce59bcaefd749322588562103a16aa94cb05ed53437d4866fa679e4f8",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "ListOrderParam",
+      "canonical_json_sha256": "7ae4f5fb7ab15a9528922c8416427a0354eddabb93a423c612809fc5b3c85769",
+      "required_by_tickets": [
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39
+      ]
+    },
+    {
+      "name": "McpCallItemResource",
+      "canonical_json_sha256": "6c405932897a1652de23bb71045a05e7bede9cd2e44f4ea85a8cc6fbeb65bb9c",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "McpConnectionOriginParam",
+      "canonical_json_sha256": "88c43811416c746ebdd74213d54f59f9c56bd642da2894cd1eccc18f9ade2cfe",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "McpConnectionOriginResource",
+      "canonical_json_sha256": "a8a9a1ac0b380f58a192fb4eb6f9eb11b0d80cfa1bc0800959ed44188a575863",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "McpOauthRefreshResource",
+      "canonical_json_sha256": "da8f6854b000cb52b99be3a85a468c3b24312aa534d63a26169a779d4672285a",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "McpOauthTokenEndpointAuthResource",
+      "canonical_json_sha256": "8d871bc5cd34298c957ab13b6e5e9ffec4179b7a41ec734b78093f2dd1dfe4c2",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "McpOauthTokenEndpointAuthResourceClientSecretBasic",
+      "canonical_json_sha256": "a774a14987754c0bc52a792634bab67826a2e6c6dda0223e21593396ea3cff15",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "McpOauthTokenEndpointAuthResourceClientSecretPost",
+      "canonical_json_sha256": "5aef6f137a4e58a08026eb34698d95323c10c647fa299c5f1a2cfbb0abdb2d70",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "McpOauthTokenEndpointAuthResourceNone",
+      "canonical_json_sha256": "86b8efc284ec9419375a72e93396e30f6627d69a975e8042890266173d8a1a9c",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "McpTransportConfigParam",
+      "canonical_json_sha256": "4adf09904791bad8665c2b9f162887baed9b056ed1e6bc68a40eb0fd5ad0fe0c",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "McpTransportConfigParamHttp",
+      "canonical_json_sha256": "9ec61475ba945af559dcbf826c04c3574938312cd5e86ceca5db0614957d3e82",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "McpTransportConfigParamStdio",
+      "canonical_json_sha256": "1faf83e8d31640a1caab32238cf4913a33733d994cbb95da7b7c736290275737",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "McpTransportResource",
+      "canonical_json_sha256": "02abbc92e847290b7c0d68069bc2d1b97c9865b03e90ecdbf5a9b507425e27a2",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "McpTransportResourceHttp",
+      "canonical_json_sha256": "74d23b0ecc4b24e7638dedabd2164da9cb3d08a6d36c1cc957a6bcc7e5d6fec2",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "McpTransportResourceStdio",
+      "canonical_json_sha256": "3b5f32164d451092616fe2016eba02543a906fc3bcaecba899fa0a36c5df8288",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "MessageContentResource",
+      "canonical_json_sha256": "30b8ec756ed11596521d50e2b943a55607a6f1446555d6a59c5a21a5d5cbb7e6",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "MessageContentResourceInputImage",
+      "canonical_json_sha256": "a4dea1a06822faff91a97a1341aec1a6672d956c2fdb5348560226b2b0b22d27",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "MessageContentResourceInputText",
+      "canonical_json_sha256": "5d3721e97655887101ca59906eecbe9fb334410eff3cab4a91368ce0386d488b",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "MessageContentResourceOutputText",
+      "canonical_json_sha256": "ecf8c107f7ed930b633456ea08374cd117a11082d188613d4e9400217879022e",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "MessageItemResource",
+      "canonical_json_sha256": "1c5117a0ba28fefca89b9918fc42453f8dcd26e06990ba05e953c4bde5a5ed12",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "MessagePhaseResource",
+      "canonical_json_sha256": "76fc9a205a429a03ef748afed21179aeeb5623e96d25bb003dee17aaaed7a695",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "MultiAgentConfigCurrentParam",
+      "canonical_json_sha256": "9b3bdaaac3bbabb9121a4e5c64e1159bab34bff28f2157312687eee4f5d37eae",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "MultiAgentConfigResource",
+      "canonical_json_sha256": "e1513dd6dd00fc385666781b33a12094ee12ae41c4ee034d9aea3642c9480130",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "NetworkAccessParam",
+      "canonical_json_sha256": "3d8829f16470275557ce9b6678fe0a23fd356b72c429d9597f08cb78a8f70403",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "NetworkAccessResource",
+      "canonical_json_sha256": "3d8829f16470275557ce9b6678fe0a23fd356b72c429d9597f08cb78a8f70403",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "NetworkPolicyParam",
+      "canonical_json_sha256": "ef45284c2d2a5e97b309f8c4be775b0883d00d12619ed9cb5387fc9fc6132d12",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "NetworkPolicyResource",
+      "canonical_json_sha256": "4cbd98aff539de5139acf0a13020a2db9d82def09759fe4647a6d4bd143d70c8",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "OutputItemStatusResource",
+      "canonical_json_sha256": "8d405ad10657252d468421474f7e0a4150184127b5a6bbad7ab75ed56e6fc230",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "OutputTextResource",
+      "canonical_json_sha256": "4ab513265af6e0f9c711b85d45a0ad54f505009004a9baee62ad34202a7dfe28",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "OutputTokensDetailsResource-2",
+      "canonical_json_sha256": "fd02e8121f9f3c131cd3294aa45985ec37ba2ef17405c1f505e1c18f274bc69c",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "PersistedAgentToolConfigParam",
+      "canonical_json_sha256": "4e430df184db40c629159f790b99f60ab2c071564f9921741839c31deb9b8aa0",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "PersistedAgentToolConfigParamComputerUse",
+      "canonical_json_sha256": "03ee129fec774e8abc22a56b627d80071efc8bff3a87740c49155e9ecad39520",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "PersistedAgentToolConfigParamFunction",
+      "canonical_json_sha256": "4edac3a2dacf1562476b2e8efc95a31a27c101f3987a0bbb11ef523d92667505",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "PersistedAgentToolConfigParamMcp",
+      "canonical_json_sha256": "95be45598f59697e5c7ddf8c805cd17be7fee3196f3bcb43bf5db9615ded7a24",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "PersistedAgentToolConfigParamProgrammaticToolCalling",
+      "canonical_json_sha256": "0f2334a66b6e99a6846b482571ee62fcc540e0c67e545873e3658fc64f8f5eea",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "PersistedAgentToolConfigParamToolSearch",
+      "canonical_json_sha256": "8ec87f2967d8eaa920f83a79a2d0a305316a9cd11f3cf64458c6bc2e3c877049",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "PersistedAgentToolConfigParamWebSearch",
+      "canonical_json_sha256": "e40d2b46ec0f9a035e9e242547a811cd15bb1918a1fa10c63c643b56dcc11eb5",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "PersistedAgentToolResource",
+      "canonical_json_sha256": "991da331974dafeccd4a3e9f98262a5019692fdb9d52f54639a400a70873ab52",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "PersistedAgentToolResourceComputerUse",
+      "canonical_json_sha256": "80425b194dc626e7255fab3c357df3f2c53dc5d48d53f25f11f4549ecc299799",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "PersistedAgentToolResourceFunction",
+      "canonical_json_sha256": "f13603f1e22f7ee1fd8fa4422205e0a9577fdab482db96cdf53a79e5808c4af6",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "PersistedAgentToolResourceMcp",
+      "canonical_json_sha256": "e4450e759d0ccf45395b2bdad1ebb62125433c26ae2bd5f094c94cd4312ad4e8",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "PersistedAgentToolResourceProgrammaticToolCalling",
+      "canonical_json_sha256": "94c50824fa4c482c7c5f9252ac967e11e23688711ee7a68bd2798c5412a5e2b7",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "PersistedAgentToolResourceToolSearch",
+      "canonical_json_sha256": "8ec87f2967d8eaa920f83a79a2d0a305316a9cd11f3cf64458c6bc2e3c877049",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "PersistedAgentToolResourceWebSearch",
+      "canonical_json_sha256": "48865584723484d029438a68c89d47ea6165e3f3f3117766d3559e1c2a4ea137",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "PersistedMcpTransportConfigParam",
+      "canonical_json_sha256": "fbeba89ff046fce0ed12be93c45737d5eabd5a0e1219fbcd5b4fda62764e61e2",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "PersistedMcpTransportConfigParamHttp",
+      "canonical_json_sha256": "b482e61c8e28a2d8dc709e41f757f93b04962610104a25fd6ac08e1f70e20888",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "PersistedMcpTransportConfigParamStdio",
+      "canonical_json_sha256": "ffedf85c388de6f961e6c481e0204b74866f1c802ed579b9c531f41e8060fe4a",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "PersistedMcpTransportResource",
+      "canonical_json_sha256": "38e41e5cfca3eb422a5477d5bd643aba9173e2eb5b785f40ccc95fe358c4dabe",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "PersistedMcpTransportResourceHttp",
+      "canonical_json_sha256": "399341a3f05559c854db5e44905eddc13deb603d004973833aa48eb06dbd793f",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "PersistedMcpTransportResourceStdio",
+      "canonical_json_sha256": "3b5f32164d451092616fe2016eba02543a906fc3bcaecba899fa0a36c5df8288",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "PublicEnvironmentResource",
+      "canonical_json_sha256": "e9c3a8f12af5ef52be3b20f9dc5c23ab4492c7012f2b736a254219a50dd68f9d",
+      "required_by_tickets": [
+        37
+      ]
+    },
+    {
+      "name": "ReasoningEffortParam",
+      "canonical_json_sha256": "3c42338b4e9464a5f8b71376ae7c6de40c20a425fae797824188b0e2fddb7838",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "ReasoningEffortResource",
+      "canonical_json_sha256": "cfb1b80f68039e26adb907c6d73e6830694e1151670e28bd78d439caa3e0135b",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "ReasoningItemResource",
+      "canonical_json_sha256": "6f88b9c689890d22d32203c33810c0d618982d3b05a552c3871a05229ad0aeb4",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "ReasoningParam",
+      "canonical_json_sha256": "a05d5a17624aeb8271bac6a8a98a02f2d8e386301af0bac18fa041e1a8a57269",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "ReasoningResource",
+      "canonical_json_sha256": "dd9647cf9c7de0b79b5cadf2f476d01f15c3a4eca6c419bab86d93acaf51ff1b",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "ReasoningSummaryParam",
+      "canonical_json_sha256": "1e413593578d1f8e0ff3e970305bad938c9ae25f1c914b2ddb0bf5545c088dd3",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "ReasoningSummaryResource",
+      "canonical_json_sha256": "82f15fb587ce1b90e6d4665cb28f02d3321bdf4b4e24713b2d43ed1785f605aa",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "ResumeSubagentCallItemResource",
+      "canonical_json_sha256": "5aa8cf0f144a5a8eb2c242317f21c696f9c0b6174276400d752b8fbbc3335843",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "RotateMcpOauthRefreshParam",
+      "canonical_json_sha256": "f0d9ec85d8bf21e5737e7b992e3fbc5b22176d37f8f0ce6101df10d0a0352ca0",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "RotateMcpOauthTokenEndpointAuthParam",
+      "canonical_json_sha256": "3116670ff9fc72009b1e292cb6ff1f3a1f0263a6eb01a51619a641cc09e71479",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "RotateMcpOauthTokenEndpointAuthParamClientSecretBasic",
+      "canonical_json_sha256": "4c216b409f7c7595dc39ded780a281b40407533aa932f6f5f8490742b176cf1d",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "RotateMcpOauthTokenEndpointAuthParamClientSecretPost",
+      "canonical_json_sha256": "dacca998b7603908a36a6919f3bd1611810d970b174abdf8af2623ff079c3ce9",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "RotateVaultCredentialAuthParam",
+      "canonical_json_sha256": "5e92ff7ce366a7a1c3552a9e96b16f5c0bf0db71fc004ed721a37244e82d35b4",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "RotateVaultCredentialAuthParamEnvironmentVariable",
+      "canonical_json_sha256": "e754d4f1e0bf7b2c99f954b7ecb132eb1ec7c737cc718b94335690f83e9f1d06",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "RotateVaultCredentialAuthParamMcpOauth",
+      "canonical_json_sha256": "f388b0907d77c237093ecc466218bbb34227bb0b56f6771182cfae5a5ef55d3b",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "RotateVaultCredentialAuthParamStaticBearer",
+      "canonical_json_sha256": "e510ea8f3cc92c42b5444daa1ca56d7a007842eccbeee7c3b37ac8791bb8c1f9",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "RotateVaultCredentialParams",
+      "canonical_json_sha256": "f532ce8e917286d3705ca6159938d4dfe3b5dd411200e49682c787d30bcb109e",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "SendSubagentInputCallItemResource",
+      "canonical_json_sha256": "693348f84e74e4cdaf64062ca38b96e96903fe82b14c9f18a8d3019759866280",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "ServiceTierParam",
+      "canonical_json_sha256": "362cfdffc589c05d97a484b86f6817570a120a1a3bc74b9ea75f7cfd180e3af4",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "ServiceTierResource",
+      "canonical_json_sha256": "8f2d90d8769b8103e82f8f0c168827b4b6cfada2968fc64833110b374c84c81b",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "SessionAgentConfigParam",
+      "canonical_json_sha256": "faa13a05be566c2ea0f380af7f7e004b3be230716872aa4dde660ab6bd80910d",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionAgentResource",
+      "canonical_json_sha256": "2bae541071e7cc4dfdff82ad8da5f661052af27bbaefcff0bc6355dd396ac2db",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionArtifactListResource",
+      "canonical_json_sha256": "bba0c22b00dc5d4c63eca93f698de3ec82e45fb695b18433e08cb1217680ffa1",
+      "required_by_tickets": [
+        38
+      ]
+    },
+    {
+      "name": "SessionArtifactResource",
+      "canonical_json_sha256": "4583cc801b63be1ba107286da2105a566631c4fdc41615e4eba0eb55bdfc17e5",
+      "required_by_tickets": [
+        38
+      ]
+    },
+    {
+      "name": "SessionEnvironmentErrorResource",
+      "canonical_json_sha256": "4611c688aa41747a53f4907b552fdad3901105e67eb1628ee9086cc30698efc2",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEnvironmentStateResource",
+      "canonical_json_sha256": "5c492bde7f8597a51f3211d7b93261365711b80758568763a3b0426e0874e89e",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEnvironmentStatusResource",
+      "canonical_json_sha256": "73d92fb302e512717b7190aa7987ac4725edf6e2c9920590b29ece3803f5d9e1",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionErrorResource",
+      "canonical_json_sha256": "77ca11439b77ad1e5e3eb13ae306e7ca010bc662d87773fa26aa1b2bed84e011",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEvent",
+      "canonical_json_sha256": "b90cbedff326289a67b1922527729a2be067c3998c358cec4ec12dfbed198ea1",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentOutputCommandExecutionOutputDelta",
+      "canonical_json_sha256": "292f6f7bec87f49c66c1ec63bc106843cbdc3245aa53e679d7db65b4a08b5201",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionCreated",
+      "canonical_json_sha256": "41cc9a31cf19433fc3ec4d77aeae831390e5b57afda8c4390cbb1fcc439901b2",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionEnvironmentConnected",
+      "canonical_json_sha256": "bced4fe93df3d52be0cb12c55c293f73e17a6bea1a308768ef1e47242c9b17d8",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionEnvironmentDisconnected",
+      "canonical_json_sha256": "2d8ddd53db1aba2467a813cb9f210d6e98b7ca4e7352b819a94152219b9a7713",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionEnvironmentExpired",
+      "canonical_json_sha256": "48a57c19cee1adc209b14c2268c89346dc23a48046d4ba19ec6a7e5b3190fd33",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionEnvironmentFailed",
+      "canonical_json_sha256": "e6947aa8c6075710a116181b3f14c6c8d45f3397effc414ea2e41d96f9f614c5",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionEnvironmentPending",
+      "canonical_json_sha256": "59ca7d47e138931799e1b5b1f63b35755d4397741a51e60580dd9490d5c97f11",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionEnvironmentReady",
+      "canonical_json_sha256": "14ef888ab4d30dd555eec515efb20be6300f2e6f0bdb5ac3b3bb90656559134d",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionEnvironmentReset",
+      "canonical_json_sha256": "01e05820bb251f770db405af86173965672f4522eef4b0f4d9a40d30e9abf52a",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionEnvironmentSuspended",
+      "canonical_json_sha256": "7bf9ea433fb50c9d153dcc9cb6f35bd6ba6267789bb983f6a65138912fc94204",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionFailed",
+      "canonical_json_sha256": "45e8f29a3ab640dc5fe1325d8f67dd67696747d71fedd27c5840b0bb4ae2f4ad",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionIdle",
+      "canonical_json_sha256": "8b9f4e7db3e2375198578b47725fa4bc79b172fcf13a1de2d635369fbcfe26d3",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionInProgress",
+      "canonical_json_sha256": "b807b76948e82b80fe7a7fa9ef48b12a079df25ac220d892f63589fc0c41b7fe",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionRequiresAction",
+      "canonical_json_sha256": "69be5253f828aa93da3beac4967ec19af89326ddada9f99af62a89c6083c102e",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionSubagentActive",
+      "canonical_json_sha256": "014ff802f943bf2f9944b1594fd1418bd49f3bb567c36b16f80416bed2392118",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionSubagentClosed",
+      "canonical_json_sha256": "bb450a891d99f75402ff4c0ce6539c73266c6c02c3a61a41f720dc6407d9a9e3",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionSubagentCreated",
+      "canonical_json_sha256": "b52857cc7a3ef1b7dc319c53fff03cd8171d24bfe0ad2899e073e78e2b5d2f21",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionTurnCancelled",
+      "canonical_json_sha256": "6cc0f4b1605b8f1e35d98e0a028b8bf8e8382b6b64c72b0b0c9514098ac092d6",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionTurnCompleted",
+      "canonical_json_sha256": "7b5a1342e3483da80c919df5fb621f5e29777da96dbc2c5f21ae423f844f0f41",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionTurnContentPartAdded",
+      "canonical_json_sha256": "b419f2d0223049cbda6c997ecc4ac01a7f214abbe292311fb76a31ea0786c588",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionTurnContentPartDone",
+      "canonical_json_sha256": "f7302f032e45b46c1ee5aecee0328257085fc907700a8fdb8a8531082c449419",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionTurnCreated",
+      "canonical_json_sha256": "adaab85ba2f625db8643a9c31c90cbb22dd19b911542b23b3a0aa593f0219dda",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionTurnFailed",
+      "canonical_json_sha256": "2aecbb04f8910545fab423b7704ae22d6087db54c0b8eca02800e6234f6dc1d4",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionTurnInProgress",
+      "canonical_json_sha256": "41930a9a9da1addf9658592e082f07c5daf4a1167ac586f594d3a5aa680b31b6",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionTurnItemAdded",
+      "canonical_json_sha256": "99c747689cb19c1d8e9226fa8bf403637e7669fd21e0e801d39f320b12a9c768",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionTurnItemDone",
+      "canonical_json_sha256": "de8d4af9da9353c2406ba63eb0cf3e5648b3f4fb0b081089da48386a5eae2d15",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionTurnOutputTextDelta",
+      "canonical_json_sha256": "ba110fac96f2812043732a0d642b7f4621e3c8bbf1bef44a9c4a97ebfda72b9c",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionTurnOutputTextDone",
+      "canonical_json_sha256": "e7688a33fb28fc73e10cfc1bebd947cecbcdf3f5587cefd4f309f17a6bf7cc12",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionTurnReasoningSummaryPartAdded",
+      "canonical_json_sha256": "e7884c66740e804ea981928b3bfc6849cfbdf26b9b63bb1f27e2160919288218",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionTurnReasoningSummaryPartDone",
+      "canonical_json_sha256": "1e137968ff5429430507a8e0f5939c480ef796febabd596270172e84d5cdff9a",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionTurnReasoningSummaryTextDelta",
+      "canonical_json_sha256": "11bcb57cc69d1a780627eefcdb9880d1c3d7157150865f94728e7237cccaa0ca",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventAgentSessionTurnReasoningSummaryTextDone",
+      "canonical_json_sha256": "2f981335527af26a9f6b4fff081d7a0761e230e9de155b6287b4c064fcad255e",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionEventError",
+      "canonical_json_sha256": "969badf70b07bfe13fe42bc518489fcd273df7eaa491e929e28f46c91ce1530c",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionInputParam",
+      "canonical_json_sha256": "71b19cbe4e66f6c198f7b7b9ac0f674a609ed8db0393b38423a63dce2ee1577c",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionInputParamAgentSessionInputCancel",
+      "canonical_json_sha256": "b41f5b83bb1577f5ed9ccc9e92a92f230234bdd1c637eb6e5410747aeb76d24d",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionInputParamAgentSessionInputComputerUseApprovalRequestResult",
+      "canonical_json_sha256": "8f087077658323d562645ec05c5de6a577c8c345b8f7fdd004d75532453e1930",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionInputParamAgentSessionInputMessage",
+      "canonical_json_sha256": "f2d1ddfed2faaa964310a8504f01a60e67b3373be8096a187c4c91a563009937",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionInputParamAgentSessionInputToolResult",
+      "canonical_json_sha256": "6f6142cf679ff05f23588f8df2be2a8b5f73e8c11f38b1990ae8638fd19d8d54",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionItemListResource",
+      "canonical_json_sha256": "06bf5117754cad191c75a6ef1985c27480d8a860fad9b270afbf7e7c1015ed70",
+      "required_by_tickets": [
+        35,
+        39
+      ]
+    },
+    {
+      "name": "SessionListResource",
+      "canonical_json_sha256": "aa39c9a52f31b7c6817046b9ebd60c85d377359c66297a3b67e6da705ece612b",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionMessageRoleResource",
+      "canonical_json_sha256": "f6fa745b37b6324bda644b90593aa1533f88d3c55fb1511aa95188e92261edd4",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "SessionRequiredActionResource",
+      "canonical_json_sha256": "75f64bafde6564d8c06fb7a800a3853a16f7490e3d2b6cc732edf7a7777b563f",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionRequiredActionResourceComputerUseApprovalRequest",
+      "canonical_json_sha256": "4f90e2ec01c3107c7d63168486d99d3b707c751599c318369a122b868d7d281a",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionRequiredActionResourceEnvironmentConnection",
+      "canonical_json_sha256": "c5c2f3f8e753052f7b38829f0d91ccab7cd83bd1b2125f056944b66c0c9008ae",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionRequiredActionResourceFunctionCall",
+      "canonical_json_sha256": "44b3324324795f63842e8953fac499fda0af50987d1901b93c9256dd1e2eab3e",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionResource",
+      "canonical_json_sha256": "0835e451c3fa6cd7d37dcedcd9e3981722b3cb0638b33ed443e96bb3d623f34c",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionSpendControlParam",
+      "canonical_json_sha256": "92c1a535662a22c7d60396b136c84ec144d3fb34f217342dffd2848278e68965",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionSpendControlResource",
+      "canonical_json_sha256": "fe835625877bbf3aadc3acce817d0d34fcd53a64c8d353e833f9445b355b72f9",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionStatusResource",
+      "canonical_json_sha256": "0a918c5eec612e877d45938368d8ab452927645db7f9517273ba61fcf78e53a4",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "SessionTraceListResource",
+      "canonical_json_sha256": "f40386d928ba7bd709ac104559bed714ebb2927fec37df281cfdc0c1164d25b6",
+      "required_by_tickets": [
+        35
+      ]
+    },
+    {
+      "name": "SessionTurnErrorCodeResource",
+      "canonical_json_sha256": "b0fc225362bb0c4141565b815984a6c0daab729ca236c639f483eeb84a63f7e2",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "SessionTurnErrorResource",
+      "canonical_json_sha256": "b0697bd5c7e7cd2430218e5d27a4e31d3fd9efa9a1db244c480fed46ac6668be",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "SessionTurnItemResource",
+      "canonical_json_sha256": "72a3f87b7803bdc8d5798b5f13ef9fabc428665e7b0b43d9f0e34835634ec74e",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "SessionTurnListResource",
+      "canonical_json_sha256": "fe4c6dc4828ec1f24646804893a68288248d5c9b8e2f27b0226a52321bf90b32",
+      "required_by_tickets": [
+        35,
+        39
+      ]
+    },
+    {
+      "name": "SessionTurnTraceResource",
+      "canonical_json_sha256": "dec8bb262b04d627185ee61005c16eff28e81f262a11cca0d344f1e1fbe73142",
+      "required_by_tickets": [
+        35
+      ]
+    },
+    {
+      "name": "SetupCommandParam",
+      "canonical_json_sha256": "8405ada1e8105ea84807fc994cd232e981a27565bac7c6954be6313eab2abc60",
+      "required_by_tickets": [
+        34,
+        37
+      ]
+    },
+    {
+      "name": "SubagentObjectResource",
+      "canonical_json_sha256": "0fea9314fafd036acc4dd00cabf4c0201ca5902c3d8e080f16ab27b363d041a8",
+      "required_by_tickets": [
+        34,
+        39
+      ]
+    },
+    {
+      "name": "SubagentResource",
+      "canonical_json_sha256": "cec7dcaaeb27b8828440dad556cded94f8b932200816b00811c77ac84b2b13c1",
+      "required_by_tickets": [
+        34,
+        39
+      ]
+    },
+    {
+      "name": "SubagentStatusResource",
+      "canonical_json_sha256": "32ffa6bc12cd871f3ba2a717f22ba9b9fb2531d5271c7d98de2df3fdecec4bbf",
+      "required_by_tickets": [
+        34,
+        39
+      ]
+    },
+    {
+      "name": "SummaryTextResource",
+      "canonical_json_sha256": "fad222ee95204021762ebbb1fef34f2ab7b02ef4d7a60620cd32b5a73660d193",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "TextFormatParam",
+      "canonical_json_sha256": "da941118f04352076ccd047d90f54974b22c992f4a4e0d609a848cea8f6b8492",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "TextFormatParamJsonSchema",
+      "canonical_json_sha256": "621ce32547d4920c232503ef565b21827c81e3f9861ba931246792f4d9323975",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "TextFormatParamText",
+      "canonical_json_sha256": "685602fc89c381329d147f97ed84f192fb3d15be1e1a8018476782b6dc4db3c6",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "TextFormatResource",
+      "canonical_json_sha256": "926fc9eef44938ac3c2183c6748e97eff8ce72eb6eaafec107db687e06beab2f",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "TextFormatResourceJsonSchema",
+      "canonical_json_sha256": "dcb7857cc163a3fc8992eba1c276291dc0a0a3063934c34fcfbc26d360e6f5fc",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "TextFormatResourceText",
+      "canonical_json_sha256": "685602fc89c381329d147f97ed84f192fb3d15be1e1a8018476782b6dc4db3c6",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "TextParam",
+      "canonical_json_sha256": "a4d49e228f7ca8f7f7756b0d082722ac97c15ceb14dbf9a8fafa21988424b87e",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "TextResource",
+      "canonical_json_sha256": "dfc3dcdccce24fb42d86ae9dcd8578de25211b7e0df576fbe1786c6445c4782c",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "TokenUsageResource",
+      "canonical_json_sha256": "d31fe1d0239fd71497eb35496cd45f942796d35ee3a36a2fba9fab9c7f3b1023",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "TurnObjectResource",
+      "canonical_json_sha256": "aaed9864ef1f50c8c748ac9107204d862b25004e99f78b0deb6bbc8efdc2539c",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "TurnResource",
+      "canonical_json_sha256": "da13340db7593fa4db8505de1a1eb5aa423b7d85da613778068512dd8a680cfc",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "TurnStatusResource",
+      "canonical_json_sha256": "0d9f6f243284574bc8b16c4d7cbb6a8f777efb0d0c4a89896221747767bca61c",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "UpdateAgentParams",
+      "canonical_json_sha256": "3e5fa66f3ea3c8388e77cc73587572ad7567ac6943ad3837da7c006ca5550708",
+      "required_by_tickets": [
+        33
+      ]
+    },
+    {
+      "name": "UpdateAgentSessionParams",
+      "canonical_json_sha256": "37c48af36ee913b53e5d73e8a61ac53d53a50bc1298ef9d35f7c56018c398c9f",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "UpdateEnvironmentTemplateParams",
+      "canonical_json_sha256": "929da6b6b8ac14d2bbadd1db80fc293264700474a2546e45500473a4cb3b4b59",
+      "required_by_tickets": [
+        37
+      ]
+    },
+    {
+      "name": "UpdateSessionAgentParam",
+      "canonical_json_sha256": "5551db870d47f384361590cdc6f3a61df99e202edf737cba65242838830405ed",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "UpdateSessionReasoningParam",
+      "canonical_json_sha256": "992d02dd0d863f9656e19637494bc4c63efa0dcc427f57e4c9545e94afb6fc0b",
+      "required_by_tickets": [
+        34
+      ]
+    },
+    {
+      "name": "UpdateVaultParams",
+      "canonical_json_sha256": "eec692c30584b1ed16352d7c5008c6ffb93f90703037bc768e351e8abf2eccee",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "VaultCredentialAuthResource",
+      "canonical_json_sha256": "4527dffa9e32dfe28f77b1f9d023b0062985b639a6d81a1e3c5b5e44f8a6d26d",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "VaultCredentialAuthResourceEnvironmentVariable",
+      "canonical_json_sha256": "e3cecb9ccf1bed83be892cb9d5b337e4722a9d43daf0f38bed9653fe92c12956",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "VaultCredentialAuthResourceMcpOauth",
+      "canonical_json_sha256": "64a2fd75518dec6e117dacc45a211bfb296d91375b1127712e51577b6e51c51f",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "VaultCredentialAuthResourceStaticBearer",
+      "canonical_json_sha256": "1e93afe484f94b5f92c2ec3d787be9a07c2f16d01ce835717385335db18f5bbe",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "VaultCredentialListResource",
+      "canonical_json_sha256": "1fe33c805c5909d51fe212953a4a3eb1cf96adcc14b4dedda2cc4f6b06fe2d15",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "VaultCredentialNetworkingParam",
+      "canonical_json_sha256": "2af4eb45f94e74649b3698c1213d6bcfc50aa1f6b309a5798f2c03b90b1d8912",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "VaultCredentialNetworkingParamLimited",
+      "canonical_json_sha256": "0da162cfec7802c5682564fa36a745f279002a9211ae4e1366e9fd93bdc15f25",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "VaultCredentialNetworkingParamUnrestricted",
+      "canonical_json_sha256": "02977d6cb3768a4092db736af63eef2d607fb230fcea7405bae90f8f1b06177b",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "VaultCredentialNetworkingResource",
+      "canonical_json_sha256": "bd89d35246bc72879ec669e0b99a42ff7fe49cb64408e62f2a57075de0d0a7cc",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "VaultCredentialNetworkingResourceLimited",
+      "canonical_json_sha256": "d7ff5643dff6d1c31291efbad44b3e013dd6e0948bdefd91be22f5fdc6461b77",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "VaultCredentialNetworkingResourceUnrestricted",
+      "canonical_json_sha256": "02977d6cb3768a4092db736af63eef2d607fb230fcea7405bae90f8f1b06177b",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "VaultCredentialResource",
+      "canonical_json_sha256": "5f488cdc0b8c9cddd26ff795db9f5e259071e606cc9d368f9873629e3aa0a237",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "VaultListResource",
+      "canonical_json_sha256": "b4de6755e37eb51f56def7af90af485aefe8d83ac11d403877b338412180057d",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "VaultResource",
+      "canonical_json_sha256": "d51fe38cac147ceb628536f3b9574afdd63d071dfac9f813c8142543df2e6ec7",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "VaultStatusFilterParam",
+      "canonical_json_sha256": "40b05f481913a072896eaffbd64481d46ce4cb47e7bf2aeb30764a93a16672df",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "VaultStatusParam",
+      "canonical_json_sha256": "c6194c9296898c22e86240d6b0664d07f5dd4961af181c075d1acdb857ab546d",
+      "required_by_tickets": [
+        36
+      ]
+    },
+    {
+      "name": "VerbosityParam",
+      "canonical_json_sha256": "1755618097d8dd4e73ebccaa964934c0e31b0aa34ac6fd891c230561953f4439",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "VerbosityResource",
+      "canonical_json_sha256": "66426dae8dc4e49208b698d73f9b511d96ba96ae2ec4b389e58e3045fbb7a69a",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "WaitForSubagentsCallItemResource",
+      "canonical_json_sha256": "c8b8f78ce2f83aee089f6546289b0bb557b885398cd8370203fe22d4d986a3ac",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "WebSearchActionResource",
+      "canonical_json_sha256": "8fb367c1abd3e099541f0bfaf9156b9d6d3bec5c6fe70728cd0425b27977d629",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "WebSearchActionResourceFindInPage",
+      "canonical_json_sha256": "54e4ce5a9d8d3f220847b232a6d677a973aa58f426c4a1fa9f324ede4f263550",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "WebSearchActionResourceOpenPage",
+      "canonical_json_sha256": "51edb7ff819c03ff19257feb8bac9b1ccf1dc316664f380e9f8ee33ff72baf25",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "WebSearchActionResourceOther",
+      "canonical_json_sha256": "b6476d5c807135f23bf530935f07da14f1dbc4bfd79b4fae67e52d7bf8a78211",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "WebSearchActionResourceSearch",
+      "canonical_json_sha256": "763b2ae75788d16f98b4e0cdace63378622911b72ca7c212dad92ae20c800039",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "WebSearchCallItemResource",
+      "canonical_json_sha256": "9f32442e2b0b8933e1ffeba4d8ebb767de71847a20aa0727183d07a211416183",
+      "required_by_tickets": [
+        34,
+        35,
+        39
+      ]
+    },
+    {
+      "name": "WebSearchContextSizeParam",
+      "canonical_json_sha256": "092ae74326dac3281c1e7c8d55a6083406ba96ffa3dcd84c619f252c5e0f6519",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "WebSearchContextSizeResource",
+      "canonical_json_sha256": "092ae74326dac3281c1e7c8d55a6083406ba96ffa3dcd84c619f252c5e0f6519",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "WebSearchLocationParam",
+      "canonical_json_sha256": "e46a8398f125c24cc30abf224f06f8fae92ae6ccac505aa04fcd4ab79573b1e2",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "WebSearchLocationResource",
+      "canonical_json_sha256": "c8d683d12d32d39e236dc1be732fe71672da5d75bdb481247c0026d6f122d95d",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "WebSearchModeParam",
+      "canonical_json_sha256": "4b324193e46ea9532586b50a8489316438ace4f231e5ed5bbfc191b6566c4093",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    },
+    {
+      "name": "WebSearchModeResource",
+      "canonical_json_sha256": "972a07595b5014314876d24f011cc31f85fa9542370644aae2fc23a715731cab",
+      "required_by_tickets": [
+        33,
+        34
+      ]
+    }
+  ],
+  "helper_source_ownership": [
+    {
+      "id": "AGENTS-HELPER-01",
+      "sources": [
+        "python-followup",
+        "node-followup",
+        "guide-sessions"
+      ],
+      "owner_ticket": 42
+    },
+    {
+      "id": "AGENTS-HELPER-02",
+      "sources": [
+        "python-followup",
+        "node-followup"
+      ],
+      "owner_ticket": 42
+    },
+    {
+      "id": "AGENTS-HELPER-03",
+      "sources": [
+        "python-followup",
+        "node-followup",
+        "node-turn"
+      ],
+      "owner_ticket": 42
+    },
+    {
+      "id": "AGENTS-HELPER-04",
+      "sources": [
+        "python-followup",
+        "node-followup",
+        "guide-sessions-events"
+      ],
+      "owner_ticket": 42
+    },
+    {
+      "id": "AGENTS-HELPER-05",
+      "sources": [
+        "python-dispatch",
+        "node-dispatch",
+        "python-create",
+        "node-create",
+        "node-turn"
+      ],
+      "owner_ticket": 43
+    },
+    {
+      "id": "AGENTS-HELPER-06",
+      "sources": [
+        "python-tool-events",
+        "node-dispatch"
+      ],
+      "owner_ticket": 43
+    },
+    {
+      "id": "AGENTS-HELPER-07",
+      "sources": [
+        "python-dispatch",
+        "node-dispatch",
+        "node-helper-guide"
+      ],
+      "owner_ticket": 43
+    },
+    {
+      "id": "AGENTS-HELPER-08",
+      "sources": [
+        "python-followup",
+        "node-followup",
+        "python-dispatch",
+        "node-dispatch",
+        "node-events"
+      ],
+      "owner_ticket": 43
+    },
+    {
+      "id": "AGENTS-HELPER-09",
+      "sources": [
+        "python-result",
+        "node-collection",
+        "node-helper-guide"
+      ],
+      "owner_ticket": 44
+    },
+    {
+      "id": "AGENTS-HELPER-10",
+      "sources": [
+        "python-result",
+        "node-result",
+        "node-output-text"
+      ],
+      "owner_ticket": 44
+    },
+    {
+      "id": "AGENTS-HELPER-11",
+      "sources": [
+        "python-result",
+        "node-result",
+        "node-collection"
+      ],
+      "owner_ticket": 44
+    },
+    {
+      "id": "AGENTS-HELPER-12",
+      "sources": [
+        "python-output",
+        "python-result",
+        "node-parse",
+        "node-helper-guide"
+      ],
+      "owner_ticket": 44
+    },
+    {
+      "id": "AGENTS-FILE-HELPER-01",
+      "sources": [
+        "python-files",
+        "node-files",
+        "node-helper-guide"
+      ],
+      "owner_ticket": 45
+    },
+    {
+      "id": "AGENTS-FILE-HELPER-02",
+      "sources": [
+        "python-artifacts",
+        "node-artifacts",
+        "node-pages"
+      ],
+      "owner_ticket": 45
+    },
+    {
+      "id": "AGENTS-FILE-HELPER-03",
+      "sources": [
+        "python-files",
+        "node-fs",
+        "node-helper-guide"
+      ],
+      "owner_ticket": 45
+    }
+  ],
+  "primary_sources": {
+    "python-followup": {
+      "kind": "immutable official SDK source",
+      "revision": "c511a77159bc870f31c34388311b7cc62ef15f08",
+      "path": "src/openai/lib/streaming/agents/_streams.py",
+      "url": "https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/lib/streaming/agents/_streams.py",
+      "sha256": "4b1348e79e5795346c1dd4261af15112ae203ef9d889fb765176241f88c5cf88",
+      "anchors": {
+        "_RECENT_EVENT_LIMIT": [
+          55,
+          70
+        ],
+        "class _TurnState": [
+          58
+        ],
+        "class AgentSessionStream": [
+          89
+        ],
+        "class AsyncAgentSessionStream": [
+          235
+        ],
+        "requires an idle": [
+          142,
+          280
+        ],
+        "events.stream": [
+          142,
+          144,
+          280,
+          282
+        ],
+        "events.create": [
+          146,
+          284
+        ],
+        "yield event": [
+          222,
+          360
+        ]
+      }
+    },
+    "node-followup": {
+      "kind": "immutable official SDK source",
+      "revision": "37af8fc9c78bd5c4d2979c5d51870dd38964e156",
+      "path": "src/lib/agents/agent-session-stream.ts",
+      "url": "https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c5d51870dd38964e156/src/lib/agents/agent-session-stream.ts",
+      "sha256": "5381b9f3cd630bedd3ba47be89c707fb6a9c20b9437acd1d4b549b27f29028fe",
+      "anchors": {
+        "single input writer": [
+          55
+        ],
+        "session.status": [
+          172
+        ],
+        "withResponse()": [
+          177
+        ],
+        "yield event": [
+          205
+        ],
+        "idempotency-key": [
+          105,
+          107,
+          111,
+          112
+        ],
+        "finalResult()": [
+          154,
+          155
+        ],
+        "abort(reason": [
+          130,
+          131
+        ]
+      }
+    },
+    "node-turn": {
+      "kind": "immutable official SDK source",
+      "revision": "37af8fc9c78bd5c4d2979c5d51870dd38964e156",
+      "path": "src/lib/agents/turn-state.ts",
+      "url": "https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c5d51870dd38964e156/src/lib/agents/turn-state.ts",
+      "sha256": "b20aa8aa58d176dcc15136e9d3effcbd68660c1c7e31a497d4498e83591587ec",
+      "anchors": {
+        "1024": [
+          17
+        ],
+        "subagent_id": [
+          26
+        ],
+        "agent.session.idle": [
+          45
+        ],
+        "JSON.stringify": [
+          54
+        ]
+      }
+    },
+    "python-dispatch": {
+      "kind": "immutable official SDK source",
+      "revision": "c511a77159bc870f31c34388311b7cc62ef15f08",
+      "path": "src/openai/lib/streaming/agents/_dispatch.py",
+      "url": "https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/lib/streaming/agents/_dispatch.py",
+      "sha256": "7a4e1fa7968a5e13d9337cad45daf82b77276c4313c82fdfd369976870b820bf",
+      "anchors": {
+        "_handled_calls": [
+          50,
+          58,
+          60
+        ],
+        "deepcopy(call)": [
+          62
+        ],
+        "idempotency_key =": [
+          108,
+          160
+        ],
+        "0.1, 0.3, 0.6": [
+          109,
+          161
+        ],
+        "on_tool_error": [
+          71,
+          77,
+          94,
+          96,
+          127,
+          133,
+          147,
+          149
+        ],
+        "Observer failures": [
+          101,
+          153
+        ]
+      }
+    },
+    "node-dispatch": {
+      "kind": "immutable official SDK source",
+      "revision": "37af8fc9c78bd5c4d2979c5d51870dd38964e156",
+      "path": "src/lib/beta/agents/tool-dispatcher.ts",
+      "url": "https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c5d51870dd38964e156/src/lib/beta/agents/tool-dispatcher.ts",
+      "sha256": "26b3f0e04d3f90d972ace6bf0685dc8ccce82837708e6dd8e743e675383046d0",
+      "anchors": {
+        "structuredClone(call)": [
+          93
+        ],
+        "Tool handler failed.": [
+          148
+        ],
+        "100, 300, 600": [
+          198
+        ],
+        "Unknown pending tool call": [
+          205
+        ],
+        "idempotency-key": [
+          71,
+          72
+        ],
+        "Object.freeze": [
+          128
+        ],
+        "Promise.race": [
+          181
+        ]
+      }
+    },
+    "python-tool-events": {
+      "kind": "immutable official SDK source",
+      "revision": "c511a77159bc870f31c34388311b7cc62ef15f08",
+      "path": "src/openai/lib/streaming/agents/_tools.py",
+      "url": "https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/lib/streaming/agents/_tools.py",
+      "sha256": "4b5c44416fd57d1b1e6b63cb6b771d31294c3f780689eb74f4f3c1f2afacfd69",
+      "anchors": {
+        "Function arguments must": [
+          20
+        ],
+        "Mapping": [
+          5,
+          25
+        ],
+        "Tool handler failed.": [
+          49
+        ],
+        "Unknown pending tool call": [
+          59
+        ]
+      }
+    },
+    "python-create": {
+      "kind": "immutable official SDK source",
+      "revision": "c511a77159bc870f31c34388311b7cc62ef15f08",
+      "path": "src/openai/resources/beta/agents/sessions/sessions.py",
+      "url": "https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/resources/beta/agents/sessions/sessions.py",
+      "sha256": "279f07bb54f24f90ce9dfcc6b5ac71a56d911333c545e977e9428bb76a260410",
+      "anchors": {
+        "tool_handlers requires stream=True": [
+          349,
+          853
+        ],
+        "with_output_schema": [
+          69,
+          347,
+          851
+        ],
+        "OpenAI-Beta": [
+          346,
+          409,
+          458,
+          519,
+          571,
+          850,
+          915,
+          964,
+          1025,
+          1077
+        ],
+        "stream_cls=AgentSessionEventStream": [
+          379
+        ]
+      }
+    },
+    "node-create": {
+      "kind": "immutable official SDK source",
+      "revision": "37af8fc9c78bd5c4d2979c5d51870dd38964e156",
+      "path": "src/lib/beta/agents/agent-session-create-stream.ts",
+      "url": "https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c5d51870dd38964e156/src/lib/beta/agents/agent-session-create-stream.ts",
+      "sha256": "3eae8a69c259c68abbf33702fced04fd9ed339c390cd9a2371707d70ab261b44",
+      "anchors": {
+        "toolHandlers": [
+          88,
+          92,
+          97,
+          111
+        ],
+        "yield event": [
+          34
+        ],
+        "captureCreationTools": [
+          87
+        ]
+      }
+    },
+    "python-result": {
+      "kind": "immutable official SDK source",
+      "revision": "c511a77159bc870f31c34388311b7cc62ef15f08",
+      "path": "src/openai/lib/beta/agents/_result.py",
+      "url": "https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/lib/beta/agents/_result.py",
+      "sha256": "553444be6cc46aeb333b7c9c35c5a12ad664d0be40785379ff74d9d2161f5bcb",
+      "anchors": {
+        "class AgentTurnResult": [
+          21,
+          74,
+          99,
+          198
+        ],
+        "item.phase": [
+          135
+        ],
+        "output_index": [
+          139
+        ],
+        "requires_action": [
+          71,
+          142,
+          183
+        ],
+        "with_result_collection": [
+          214
+        ],
+        "_parsed_result": [
+          205,
+          232,
+          233,
+          234
+        ],
+        "Could not parse": [
+          67
+        ]
+      }
+    },
+    "node-result": {
+      "kind": "immutable official SDK source",
+      "revision": "37af8fc9c78bd5c4d2979c5d51870dd38964e156",
+      "path": "src/lib/beta/agents/agent-turn-result-collector.ts",
+      "url": "https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c5d51870dd38964e156/src/lib/beta/agents/agent-turn-result-collector.ts",
+      "sha256": "c3539ba2dac9873b59413f0f41c06ce3af39ca696e5c7fdfd65e04a283198460",
+      "anchors": {
+        "subagent_id": [
+          36
+        ],
+        "event.item.phase": [
+          66
+        ],
+        "output_index": [
+          71
+        ],
+        "checkAction": [
+          94,
+          116
+        ],
+        "finish()": [
+          115
+        ],
+        "structuredClone": [
+          32,
+          37,
+          52,
+          71
+        ]
+      }
+    },
+    "node-collection": {
+      "kind": "immutable official SDK source",
+      "revision": "37af8fc9c78bd5c4d2979c5d51870dd38964e156",
+      "path": "src/lib/beta/agents/result-collection.ts",
+      "url": "https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c5d51870dd38964e156/src/lib/beta/agents/result-collection.ts",
+      "sha256": "cafe2a509a6a672c17f3b917c0024006fa9a4c3bc59393a31effe35b9df79f24",
+      "anchors": {
+        "before consuming events": [
+          38
+        ],
+        "only be consumed once": [
+          46
+        ],
+        "finalResult()": [
+          38,
+          82
+        ],
+        "release()": [
+          111
+        ]
+      }
+    },
+    "node-parse": {
+      "kind": "immutable official SDK source",
+      "revision": "37af8fc9c78bd5c4d2979c5d51870dd38964e156",
+      "path": "src/lib/beta/agents/parse-result.ts",
+      "url": "https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c5d51870dd38964e156/src/lib/beta/agents/parse-result.ts",
+      "sha256": "62a7b2b1ae4b2f585130b63455344c35d5547803b78156cde410ce0eb0dcc205",
+      "anchors": {
+        "first ??=": [
+          22
+        ],
+        "output_text": [
+          20
+        ],
+        "AgentOutputParseError": [
+          8,
+          27,
+          32
+        ],
+        "cannot override the body": [
+          111
+        ]
+      }
+    },
+    "python-output": {
+      "kind": "immutable official SDK source",
+      "revision": "c511a77159bc870f31c34388311b7cc62ef15f08",
+      "path": "src/openai/lib/beta/agents/_output.py",
+      "url": "https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/lib/beta/agents/_output.py",
+      "sha256": "a23bd24db8d13fab5757f2acfb1de8f6b61975751c02c2ed3f466449aead9961",
+      "anchors": {
+        "Pydantic model": [
+          22,
+          26
+        ],
+        "Pass output_type or agent.text.format": [
+          41
+        ],
+        "json_schema": [
+          32
+        ]
+      }
+    },
+    "node-output-text": {
+      "kind": "immutable official SDK source",
+      "revision": "37af8fc9c78bd5c4d2979c5d51870dd38964e156",
+      "path": "src/lib/agents/output-text.ts",
+      "url": "https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c5d51870dd38964e156/src/lib/agents/output-text.ts",
+      "sha256": "bd89e4278e74673a987288a65b56f2081d2d3184f13c10dc7a338d9490f79adf",
+      "anchors": {
+        "output_text": [
+          3,
+          5
+        ],
+        "join": [
+          5
+        ]
+      }
+    },
+    "node-files": {
+      "kind": "immutable official SDK source",
+      "revision": "37af8fc9c78bd5c4d2979c5d51870dd38964e156",
+      "path": "src/lib/beta/agents/files.ts",
+      "url": "https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c5d51870dd38964e156/src/lib/beta/agents/files.ts",
+      "sha256": "c20b447e9b6e0006ece60445f43f0bde00214b4d5f84df696cddfb31db182307",
+      "anchors": {
+        "uploadedFiles": [
+          16,
+          23,
+          24,
+          26,
+          86,
+          91,
+          96,
+          110,
+          117
+        ],
+        "user_data": [
+          90
+        ],
+        "AgentFileUploadError": [
+          20,
+          21,
+          96,
+          117
+        ],
+        "validateAgentFilePath": [
+          32,
+          61
+        ]
+      }
+    },
+    "python-files": {
+      "kind": "immutable official SDK source",
+      "revision": "c511a77159bc870f31c34388311b7cc62ef15f08",
+      "path": "src/openai/lib/beta/agents/_files.py",
+      "url": "https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/lib/beta/agents/_files.py",
+      "sha256": "f2ac9757522ec341e47a7f38dde9655dd4e4ad0875911b42c896e505a1f4bb12",
+      "anchors": {
+        "user_data": [
+          183,
+          220,
+          268,
+          289
+        ],
+        "AgentFilePreparationError": [
+          57,
+          187,
+          225
+        ],
+        "AgentFileStagingError": [
+          65,
+          272,
+          293
+        ],
+        "symlink": [
+          90,
+          91,
+          121,
+          122,
+          134,
+          135,
+          161
+        ]
+      }
+    },
+    "node-fs": {
+      "kind": "immutable official SDK source",
+      "revision": "37af8fc9c78bd5c4d2979c5d51870dd38964e156",
+      "path": "src/helpers/beta/agents/filesystem.ts",
+      "url": "https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c5d51870dd38964e156/src/helpers/beta/agents/filesystem.ts",
+      "sha256": "58e5a7d8f666f812d3269e4e188fda404bd7ad0ae731350638f802d4a2f31b39",
+      "anchors": {
+        "agentFileDestination": [
+          125
+        ],
+        "O_NOFOLLOW": [
+          56,
+          151
+        ],
+        "truncate(0)": [
+          161
+        ],
+        "realpath": [
+          4,
+          28
+        ]
+      }
+    },
+    "node-artifacts": {
+      "kind": "immutable official SDK source",
+      "revision": "37af8fc9c78bd5c4d2979c5d51870dd38964e156",
+      "path": "src/lib/beta/agents/result-artifacts.ts",
+      "url": "https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c5d51870dd38964e156/src/lib/beta/agents/result-artifacts.ts",
+      "sha256": "06fe9e9d0a2a6ac504327731055fbdf4154dfd43e88de52c01567f28c3bd1115",
+      "anchors": {
+        "artifact.turn_id": [
+          31
+        ],
+        "artifact.path": [
+          32
+        ],
+        "Multiple artifacts": [
+          35
+        ],
+        "caller-chosen destination": [
+          52
+        ],
+        "pipeTo": [
+          64,
+          66,
+          70
+        ]
+      }
+    },
+    "python-artifacts": {
+      "kind": "immutable official SDK source",
+      "revision": "c511a77159bc870f31c34388311b7cc62ef15f08",
+      "path": "src/openai/lib/beta/agents/_artifacts.py",
+      "url": "https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/lib/beta/agents/_artifacts.py",
+      "sha256": "dd0b4ae735d3848edd3969c8b2bae4c45082d6df0418f24b86fa0046f17f041b",
+      "anchors": {
+        "artifact.turn_id": [
+          80,
+          151
+        ],
+        "artifact.path": [
+          80,
+          151
+        ],
+        "More than one": [
+          82,
+          153
+        ],
+        "explicit local destination": [
+          55,
+          126
+        ]
+      }
+    },
+    "node-pages": {
+      "kind": "immutable official SDK source",
+      "revision": "37af8fc9c78bd5c4d2979c5d51870dd38964e156",
+      "path": "src/lib/beta/agents/pages.ts",
+      "url": "https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c5d51870dd38964e156/src/lib/beta/agents/pages.ts",
+      "sha256": "adc17644f5bd651076646928fd7b2b1a67b8762956d410fa67650071ce7c686c",
+      "anchors": {
+        "last_id": [
+          20,
+          26
+        ],
+        "cannot advance": [
+          7,
+          28
+        ]
+      }
+    },
+    "python-events": {
+      "kind": "immutable official SDK source",
+      "revision": "c511a77159bc870f31c34388311b7cc62ef15f08",
+      "path": "src/openai/resources/beta/agents/sessions/events.py",
+      "url": "https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/resources/beta/agents/sessions/events.py",
+      "sha256": "e9ef5a4a841fc141afc57ca6fe0a5e6ba6c7e9766aec721ea8d47bc64a90321e",
+      "anchors": {
+        "Accept": [
+          79,
+          122,
+          194,
+          237
+        ],
+        "Idempotency-Key": [
+          80,
+          195
+        ],
+        "OpenAI-Beta": [
+          81,
+          123,
+          196,
+          238
+        ],
+        "cast_to=NoneType": [
+          92,
+          207
+        ]
+      }
+    },
+    "node-events": {
+      "kind": "immutable official SDK source",
+      "revision": "37af8fc9c78bd5c4d2979c5d51870dd38964e156",
+      "path": "src/resources/beta/agents/sessions/events.ts",
+      "url": "https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c5d51870dd38964e156/src/resources/beta/agents/sessions/events.ts",
+      "sha256": "dc7945da9a709ed4b4c27979ae2e74e4870bbab0f575943e18d11588f49ddca4",
+      "anchors": {
+        "'Idempotency-Key': idempotencyKey": [
+          52,
+          62
+        ],
+        "text/event-stream": [
+          89
+        ],
+        "__security": [
+          66,
+          93
+        ]
+      }
+    },
+    "python-vault-response": {
+      "kind": "immutable official SDK source",
+      "revision": "c511a77159bc870f31c34388311b7cc62ef15f08",
+      "path": "src/openai/types/beta/agents/vaults/credential_auth.py",
+      "url": "https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/types/beta/agents/vaults/credential_auth.py",
+      "sha256": "183035d358d5b863eda8dd249ceea271900c410b6c7297a1a17497af9802338b",
+      "anchors": {
+        "never returned": [
+          46,
+          75
+        ],
+        "Public refresh metadata": [
+          21,
+          56
+        ],
+        "secret_name": [
+          84
+        ],
+        "443 and 8443": [
+          75
+        ]
+      }
+    },
+    "python-vault-rotate": {
+      "kind": "immutable official SDK source",
+      "revision": "c511a77159bc870f31c34388311b7cc62ef15f08",
+      "path": "src/openai/types/beta/agents/vaults/credential_auth_rotate_param.py",
+      "url": "https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/types/beta/agents/vaults/credential_auth_rotate_param.py",
+      "sha256": "42f3ede4266b557f221f0d5e3bdfc4c70d1524f9733bad05c6b01365e17e46f2",
+      "anchors": {
+        "write-only": [
+          20,
+          46,
+          56,
+          79
+        ],
+        "preserves the expiry": [
+          51
+        ],
+        "remain unchanged": [
+          75
+        ],
+        "Omit or pass": [
+          25
+        ]
+      }
+    },
+    "node-env": {
+      "kind": "immutable official SDK source",
+      "revision": "37af8fc9c78bd5c4d2979c5d51870dd38964e156",
+      "path": "src/resources/beta/agents/environments/environments.ts",
+      "url": "https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c5d51870dd38964e156/src/resources/beta/agents/environments/environments.ts",
+      "sha256": "888ac6338aeb419894c93f25a3c89e6ae7b4769fbe9c83fd0b9ef760ef8dbfc3",
+      "anchors": {
+        "prewarming beta": [
+          145,
+          200
+        ],
+        "authenticated principal": [
+          199
+        ],
+        "status: 'pending'": [
+          375
+        ]
+      }
+    },
+    "python-env-state": {
+      "kind": "immutable official SDK source",
+      "revision": "c511a77159bc870f31c34388311b7cc62ef15f08",
+      "path": "src/openai/types/beta/agent_session_environment_state.py",
+      "url": "https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/types/beta/agent_session_environment_state.py",
+      "sha256": "ae6a27379c4e137ee46062d772e4d047f41dd91bbcb0154893778ef3dba04469",
+      "anchors": {
+        "status: Literal": [
+          33
+        ]
+      }
+    },
+    "python-env-info": {
+      "kind": "immutable official SDK source",
+      "revision": "c511a77159bc870f31c34388311b7cc62ef15f08",
+      "path": "src/openai/types/beta/agents/environment_info.py",
+      "url": "https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/types/beta/agents/environment_info.py",
+      "sha256": "2121b885a1a0ddc66b1c571300d7080f9a9765b3d25cf2ebed3268e721f37f43",
+      "anchors": {
+        "status: Literal": [
+          32
+        ]
+      }
+    },
+    "python-session": {
+      "kind": "immutable official SDK source",
+      "revision": "c511a77159bc870f31c34388311b7cc62ef15f08",
+      "path": "src/openai/types/beta/agent_session.py",
+      "url": "https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/types/beta/agent_session.py",
+      "sha256": "c402ae3543116602e00cd3769e47687a5615abe8097bf09ca56060ca2e3fb7e5",
+      "anchors": {
+        "status: Literal": [
+          231
+        ]
+      }
+    },
+    "python-auth-submit": {
+      "kind": "immutable official SDK source",
+      "revision": "c511a77159bc870f31c34388311b7cc62ef15f08",
+      "path": "src/openai/types/beta/agent_browser_authentication_submit_param.py",
+      "url": "https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/types/beta/agent_browser_authentication_submit_param.py",
+      "sha256": "582e0230786f4490f0dcd338cf5bbd001ff9e12cd6a5e7a8130dd8af6de185cc",
+      "anchors": {
+        "six active fields": [
+          25
+        ],
+        "120 KiB": [
+          27
+        ],
+        "selected_option": [
+          33
+        ]
+      }
+    },
+    "node-helper-guide": {
+      "kind": "immutable official SDK source",
+      "revision": "37af8fc9c78bd5c4d2979c5d51870dd38964e156",
+      "path": "docs/agents/helpers.md",
+      "url": "https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c5d51870dd38964e156/docs/agents/helpers.md",
+      "sha256": "027f6987d17b1df0a9e29212f60803a14319cbf718d2d9f4fc3619bcf2f98614",
+      "anchors": {
+        "finalResult()": [
+          29,
+          38,
+          48,
+          51,
+          102,
+          141,
+          148,
+          174
+        ],
+        "withResultCollection()": [
+          46,
+          51
+        ],
+        "onToolError": [
+          61,
+          70
+        ],
+        "filesystem sandbox": [
+          210
+        ],
+        "uploadedFiles": [
+          205
+        ]
+      }
+    },
+    "guide-overview": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/overview.md",
+      "bytes": 14754,
+      "sha256": "86d6e3e2d71eed7819289ed0e6e8f23a415339777c1c47fd92b211b12f8f16c7",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/overview"
+    },
+    "guide-sessions": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/sessions.md",
+      "bytes": 18647,
+      "sha256": "807edb7e4eb6f93e45247629351e977e92cac939d3e3d98f7a0bb8bdcb398b73",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/sessions"
+    },
+    "guide-environments-openai-hosted": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/environments/openai-hosted.md",
+      "bytes": 15995,
+      "sha256": "388bd3c1cb8d33dc24319823d90b818cca2052a81d3d02ce64cb010e9f23f10e",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/environments/openai-hosted"
+    },
+    "guide-environments-self-hosted": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/environments/self-hosted.md",
+      "bytes": 10601,
+      "sha256": "5e378eccc2ee1061c6d57e388d581baee1f2edef9f1bccd22de5f99b1029ee62",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/environments/self-hosted"
+    },
+    "guide-environments-lifecycle": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/environments/lifecycle.md",
+      "bytes": 6638,
+      "sha256": "6db11cac239bacb8b4ebf8fed9ea7f58fa6df45a73a3b2dd8c13fc35804fbb26",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/environments/lifecycle"
+    },
+    "guide-environments-security": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/environments/security.md",
+      "bytes": 3345,
+      "sha256": "75e68b4ecc7e23fdb18daeb8228c1ae44c1f73dfcd4badc7ef617be9a65f45df",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/environments/security"
+    },
+    "guide-environments-files": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/environments/files.md",
+      "bytes": 7241,
+      "sha256": "b7325001822e2d84fca1a99635dc48e3aa70fbf6da1846405b59420e5f878bc4",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/environments/files"
+    },
+    "guide-tools-functions": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/tools/functions.md",
+      "bytes": 6683,
+      "sha256": "672f81d3c35e9da3087a15c14901d5a46ed515c069708ce8ae5aad5e7aeb4fcd",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/tools/functions"
+    },
+    "guide-tools-computer-use": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/tools/computer-use.md",
+      "bytes": 124934,
+      "sha256": "1c26ea045a7c66d0d0afd6ad8413574e00bf3704173d41fa68b91472ff9955c9",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/tools/computer-use"
+    },
+    "guide-tools-vaults": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/tools/vaults.md",
+      "bytes": 25323,
+      "sha256": "f8593705217f9ecdcb7042f48653fcae6c1b621ade9b9f60e026c3b4bca2d013",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/tools/vaults"
+    },
+    "guide-tools-mcp": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/tools/mcp.md",
+      "bytes": 7770,
+      "sha256": "ba318ffa296cd1626884cd7b3687d171c1fdd118aaf2b0862a686ed544408163",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/tools/mcp"
+    },
+    "guide-errors": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/errors.md",
+      "bytes": 21410,
+      "sha256": "c2f053fb72180dc66979154029b1aa1e5e60809b296bc46d597681f2ed16f23f",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/errors"
+    },
+    "guide-tracing": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/tracing.md",
+      "bytes": 11940,
+      "sha256": "fc21a8bb6a6b73e1297fbc020b7ff6ba8784a1aa67576295f24cf81db91b2adf",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/tracing"
+    },
+    "guide-changelog": {
+      "url": "https://developers.openai.com/api/docs/changelog.md",
+      "bytes": 74650,
+      "sha256": "8227aaf06b87ca643723b21d02024597a1a208e9cd8395a44f76f342ae77d487",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/changelog"
+    },
+    "guide-sessions-events": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/sessions/events.md",
+      "bytes": 21027,
+      "sha256": "f9c9eb431d107a6a219744754a4e04325162b9b6ad7818c80c0338afc3d885fb",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/sessions/events"
+    },
+    "guide-sessions-manage": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/sessions/manage.md",
+      "bytes": 8340,
+      "sha256": "ff5da02a2b8d9ec558696bd51038849763606239626b451af7fba2ba1b2b471b",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/sessions/manage"
+    },
+    "guide-sessions-webhooks": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/sessions/webhooks.md",
+      "bytes": 12313,
+      "sha256": "843a7357a1520ff079422820c3787fe57c6b07954990a6146841328b27cdb02a",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/sessions/webhooks"
+    },
+    "guide-configuration": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/configuration.md",
+      "bytes": 16685,
+      "sha256": "d1ee65500118ee3789da7c91898e4245ee0a0aac2fd35aa4fdb3a01c56284b0f",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/configuration"
+    },
+    "guide-architecture": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/architecture.md",
+      "bytes": 5845,
+      "sha256": "755df9fa1c04a492876c914dab97e88a358ef069a96c2acc39f88d189bdfc2e3",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/architecture"
+    },
+    "guide-tools-plugins": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/tools/plugins.md",
+      "bytes": 8748,
+      "sha256": "d8e278a8266ce6c29fce9f1bf1e960ac4320cd64d6731f69dbd6327e25e4f13e",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/tools/plugins"
+    },
+    "guide-multi-agent": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/multi-agent.md",
+      "bytes": 16339,
+      "sha256": "b3b8b4b44828b31055d3e6a764bd2d3cf0b2b682d5d7ae247ec3898b578082a5",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/multi-agent"
+    },
+    "guide-observability": {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/observability.md",
+      "bytes": 16038,
+      "sha256": "f6edd10ab0b0c3f0208f1090e2c3e4d22607e63dd87b46dc81d01c0d050176c1",
+      "kind": "current official guide snapshot",
+      "page_url": "https://developers.openai.com/api/docs/guides/agents-api/observability"
+    }
+  },
+  "planning_api_cost_usd": 0,
+  "milestone": {
+    "decision_date": "2026-10-09",
+    "user_decision": "Accepted bounded finish line: frozen audited snapshot; seven core Agents/Vaults HTTP tickets; six workflow/helper tickets and later parity phases deferred. User subsequently approved exactly one independent optional HTTP2 evaluation ticket, completing with an adopt/defer report rather than an automatic migration.",
+    "source_policy": "Use source_pins and source_bytes recorded in this ledger. Verify the pinned contracts; do not adopt new upstream heads automatically.",
+    "active_repository_tickets": [
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39
+    ],
+    "active_github_issues": [
+      385,
+      386,
+      387,
+      388,
+      389,
+      390,
+      391
+    ],
+    "deferred_repository_tickets": [
+      40,
+      41,
+      42,
+      43,
+      44,
+      45
+    ],
+    "deferred_github_issues": [
+      392,
+      393,
+      394,
+      395,
+      396,
+      397
+    ],
+    "completion_condition": "Close parent #317 after the seven core tickets meet their existing implementation acceptance and the one HTTP2 evaluation has a reviewed, reproducible adopt/defer decision. A defer decision is successful evaluation completion; no production migration or follow-on issue is required.",
+    "expansion_policy": "No new alignment issues or milestones without an explicit user request. Resolve blockers or regressions affecting the included 47 operations within the existing tickets; report scope-changing blockers for a user decision.",
+    "deferred_later_work": [
+      "Administration/storage",
+      "Authentication/runtime configuration issue 316",
+      "Legacy endpoints",
+      "Remaining shared SDK/model parity"
+    ],
+    "coverage_claim": "Completion establishes this fixed core milestone only, not complete API/SDK parity.",
+    "additional_evaluations": [
+      {
+        "ticket": 46,
+        "document": "tickets/46-http2-evaluation.md",
+        "specification": "http2-evaluation.md",
+        "title": "Evaluate optional HTTP/2 transport support",
+        "status": "active bounded evaluation; decision and measurements pending",
+        "github_issue": {
+          "number": 399,
+          "url": "https://github.com/davidmigloz/ai_clients_dart/issues/399"
+        },
+        "dependencies": [],
+        "requirement_ids": [
+          "HTTP2-EVAL-01",
+          "HTTP2-EVAL-02",
+          "HTTP2-EVAL-03",
+          "HTTP2-EVAL-04"
+        ],
+        "canonical_operation_ids": [],
+        "source_version": "http2 3.1.0",
+        "archive_sha256": "480bf904908b4e4ec4fac8117f69f5ff54cf48c12b1761f0a192e1e10196ee7b",
+        "adapter_sha256": "6b1698059e602fa6cf429d7c8a242ad672e8e481033de0117d119afdfccb12d8",
+        "completion_outcomes": [
+          "adopt recommendation for a demonstrated safe optional use case",
+          "defer recommendation with recorded blockers/measurements"
+        ],
+        "production_migration_authorized": false,
+        "automatic_follow_on_work_authorized": false
+      }
+    ]
+  }
+}
