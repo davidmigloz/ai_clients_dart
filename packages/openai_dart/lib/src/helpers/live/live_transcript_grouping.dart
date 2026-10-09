@@ -215,8 +215,9 @@ final class LiveTranscriptGrouping {
             _wordBoundary(fragment.text, atEnd: false)
         ? ' '
         : '';
-    turn.text += separator + fragment.text;
-    turn.endMs = math.max(turn.endMs, fragment.endMs);
+    turn
+      ..text += separator + fragment.text
+      ..endMs = math.max(turn.endMs, fragment.endMs);
   }
 
   void _buffer(

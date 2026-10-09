@@ -120,6 +120,11 @@ dependent skips. This slice adds 681 VM cases; all 683 new browser cases pass
 each Chrome compiler. The root offline workflow and literal README fork snippet
 pass without API calls. README/llms expose actual public helpers, source constraints,
 ownership and privacy; token annotations use real toolkit o200k_base counts.
+Publication CI identified one Dart 3.12 cascade style diagnostic. Rewriting the
+two consecutive transcript assignments as a cascade preserves receiver identity
+and evaluation order. Fatal-info analysis is clean on both Dart 3.12.2 and 3.13.5,
+with all 132 helper tests rerun successfully on each VM. No analyzer ignore or
+policy change was introduced; the fresh published head requires its own CI gate.
 The [progress history](../progress-history.md) preserves all 63,987 characters of
 the prior tracking-parent body verbatim before its current roadmap is condensed.
 
