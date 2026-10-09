@@ -1,9 +1,11 @@
 # Raw durable sessions and manual event loop acceptance
 
-Status: implementation for [#386](https://github.com/davidmigloz/ai_clients_dart/issues/386),
-[ticket 34](../tickets/34-durable-sessions.md). Local source/runtime/platform validation and independent
-review pass; exact published-head review and CI are publication gates.
-The implementation PR records those receipts before a user-authorized merge.
+Status: merged in [PR #401](https://github.com/davidmigloz/ai_clients_dart/pull/401)
+on October 9, 2026 at 19:00:00 UTC, squash
+`7893afa2ab07014dbeddd19e4bc017b5d6e507c2`. Both independent reviewers approved
+published head `b733e8b79dcad02fe727b3b2635d4f5193ce56c7` with zero findings.
+All 14 exact-head contexts completed (13 successes and standard Test(all) skip),
+merge state CLEAN; issue #386 is closed.
 
 ## Frozen source and scope
 
@@ -129,6 +131,6 @@ union fields/types/nullability. Canonical fixture assertions
 and independent review establish their actual contracts. Docs, exports and README
 verification pass. No checker, exclusion, skip or global lint rule is weakened.
 
-Parent #317 remains open for six core implementations (#386–391) and evaluation
+Parent #317 remains open for five core implementations (#387–391) and evaluation
 #399 until their individual merge acceptance. Helpers #392–397 and Admin/legacy
 work remain deferred. This slice creates no further tickets.

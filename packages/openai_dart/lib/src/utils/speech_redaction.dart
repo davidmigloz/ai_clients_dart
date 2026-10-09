@@ -30,7 +30,7 @@ bool isPrivateAudioRequest(http.BaseRequest? request) =>
 bool isAgentsApiRequest(http.BaseRequest? request) =>
     isSavedAgentRequest(request) || isAgentSessionRequest(request);
 
-/// Identifies the seven raw session/event operations, including custom bases.
+/// Identifies implemented raw session/event/history operations, including custom bases.
 bool isAgentSessionRequest(http.BaseRequest? request) {
   if (request == null) return false;
   final segments = request.url.pathSegments;
@@ -50,7 +50,22 @@ bool isAgentSessionRequest(http.BaseRequest? request) {
       segments[segments.length - 3] == 'sessions' &&
       segments.last == 'events' &&
       const {'GET', 'POST'}.contains(request.method);
-  return collection || item || events;
+  final history =
+      request.method == 'GET' &&
+      ((segments.length >= 4 &&
+              segments[segments.length - 4] == 'agents' &&
+              segments[segments.length - 3] == 'sessions' &&
+              const {'items', 'turns', 'traces'}.contains(segments.last)) ||
+          (segments.length >= 5 &&
+              segments[segments.length - 5] == 'agents' &&
+              segments[segments.length - 4] == 'sessions' &&
+              segments[segments.length - 2] == 'turns') ||
+          (segments.length >= 6 &&
+              segments[segments.length - 6] == 'agents' &&
+              segments[segments.length - 5] == 'sessions' &&
+              segments[segments.length - 3] == 'turns' &&
+              segments.last == 'items'));
+  return collection || item || events || history;
 }
 
 /// Identifies the five saved-agent operations, including custom base paths.

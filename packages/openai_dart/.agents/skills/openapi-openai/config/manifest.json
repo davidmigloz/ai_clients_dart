@@ -11975,6 +11975,38 @@
       "schema": "WebSearchCallItemResource",
       "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
       "parent": "AgentSessionOutputItem"
+    },
+    "SessionItemListResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionItemList",
+      "file": "lib/src/models/agents/agent_session_history.dart",
+      "schema": "SessionItemListResource",
+      "note": "Actual frozen root history/trace envelope. Required nullable page cursors, separate existing17-way history items, finite detached private OTLP JSON, immutable copies and equality/hash validated with canonical exported-client fixtures."
+    },
+    "SessionTurnListResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionTurnList",
+      "file": "lib/src/models/agents/agent_session_history.dart",
+      "schema": "SessionTurnListResource",
+      "note": "Actual frozen root history/trace envelope. Required nullable page cursors, separate existing17-way history items, finite detached private OTLP JSON, immutable copies and equality/hash validated with canonical exported-client fixtures."
+    },
+    "SessionTraceListResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionTraceList",
+      "file": "lib/src/models/agents/agent_session_history.dart",
+      "schema": "SessionTraceListResource",
+      "note": "Actual frozen root history/trace envelope. Required nullable page cursors, separate existing17-way history items, finite detached private OTLP JSON, immutable copies and equality/hash validated with canonical exported-client fixtures."
+    },
+    "SessionTurnTraceResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionTurnTrace",
+      "file": "lib/src/models/agents/agent_session_history.dart",
+      "schema": "SessionTurnTraceResource",
+      "note": "Actual frozen root history/trace envelope. Required nullable page cursors, separate existing17-way history items, finite detached private OTLP JSON, immutable copies and equality/hash validated with canonical exported-client fixtures."
     }
   }
 }

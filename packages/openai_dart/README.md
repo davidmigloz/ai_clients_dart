@@ -48,6 +48,7 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 
 - Saved agent CRUD with persisted function, MCP, web search and computer-use configuration through `client.agents`
 - Durable sessions with JSON/SSE creation, persistent raw event observation, manual function/approval input and explicit cancellation through `client.agents.sessions`
+- Root session/turn history and currently published OTLP trace pages through session items, turns and traces resources
 - Files, uploads, batches, fine-tuning, moderations, evals, and model management
 - Conversations, containers, content provenance checks, ChatKit, and skills
 - Local signed webhook verification with 26 typed received event variants, plus project endpoint management/discovery
@@ -295,6 +296,45 @@ this endpoint makes no 24-hour retention promise.
 → [Offline durable-session example](example/agent_sessions_example.dart) — inline
 creation, persistent observation, manual function result, cap changes and explicit
 cancellation followed by deletion; no live calls or API key ($0).
+
+
+### Session history and traces
+
+Read known session IDs without creating a session or resuming observation:
+
+```dart
+final sessions = client.agents.sessions;
+final items = await sessions.items.list('session_id', limit: 20,
+  order: AgentListOrder.asc);
+final turns = await sessions.turns.list('session_id', order: AgentListOrder.asc);
+final turn = await sessions.turns.retrieve('session_id', 'turn_id');
+final turnItems = await sessions.turns.items.list('session_id', 'turn_id');
+final traces = await sessions.traces.list('session_id', limit: 1,
+  order: AgentListOrder.asc);
+```
+
+All four list methods accept `limit` (1–100), `order` and exclusive `after` IDs.
+Use `lastId` with the same order/context for the next page; empty boundaries remain
+null. Root history includes coordinator interactions with children; each child has
+separate history. The 17 typed history branches include safe browser authentication
+records without submitted form-value fields. Historical function/approval output
+is inspection state and does not authorize replaying an action. Required-nullable
+turn usage, errors and timestamps remain present; a terminal turn is distinct from
+session idle or observer EOF, and recorded usage is not a final spending ledger.
+
+`traces.list` returns finite, deeply owned arbitrary OTLP maps with private default
+diagnostics. Trace IDs are root-turn pagination anchors. Pages contain only data
+published when read, skip unpublished traces and never await late updates. A page
+sequence therefore does not promise a complete historical export. The service limits
+trace reads and JSON responses to 16 MiB per request; request fewer traces when it
+reports that limit. API exceptions retain status and explicit caller-readable HTTP
+context while default logging and messages redact private payloads.
+
+Trace export must be enabled for the organization. The key must belong to the
+session's project and have `api.traces.read` or `api.agents.read` permission.
+
+→ [Offline session-history example](example/agent_session_history_example.dart) —
+known-ID root/turn inspection and two trace pages, with no live calls or key ($0).
 
 
 ### How do I classify or score shared input?
@@ -2945,6 +2985,7 @@ See the [example/](example/) directory for complete examples:
 
 | Example | Description |
 |---------|-------------|
+| [`agent_session_history_example.dart`](example/agent_session_history_example.dart) | Offline root/turn history and published OTLP trace pagination |
 | [`agent_sessions_example.dart`](example/agent_sessions_example.dart) | Offline durable sessions, persistent observation, manual function result and explicit cancellation |
 | [`saved_agents_example.dart`](example/saved_agents_example.dart) | Offline saved-agent CRUD, all six persisted tools, pagination, replacement and clear/reset |
 | [`monitoring_errors_example.dart`](example/monitoring_errors_example.dart) | Offline typed HTTP/SSE monitoring failures and explicit scoped investigation |
@@ -3005,7 +3046,7 @@ See the [example/](example/) directory for complete examples:
 
 | API | Status |
 |-----|--------|
-| Agents | Saved agent CRUD and durable session CRUD, JSON/SSE creation, persistent event observation and manual inputs; owned environments, history and subagent inspection pending |
+| Agents | Saved agent CRUD and durable session CRUD, JSON/SSE creation, persistent event observation and manual inputs; root/turn history and published OTLP traces; owned environments and subagent inspection pending |
 | Chat Completions | Supported; stored-completion management pending |
 | Responses API | Supported with persistent WebSockets, mid-turn steering, opt-in recovery and beta tool-result injection; additional tool/configuration details pending |
 | Decisions API | ✅ Full |

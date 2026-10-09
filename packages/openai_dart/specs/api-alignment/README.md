@@ -22,10 +22,15 @@ all 14 exact-head contexts completed and both independent reviews approved. All
 merged in [PR #400](https://github.com/davidmigloz/ai_clients_dart/pull/400) at
 `c1df20199dd450c80a7ecb8ae65eb74f6afeb184` on October 9, 16:47:07 UTC,
 after both final-head reviews and all 14 contexts completed. There are now 33
-merged implementations, six remaining core issues (#386–391) and evaluation #399. The user has now bounded the finish line to seven core Agents/Vaults tickets on the audited snapshot plus one expressly approved HTTP/2 evaluation. Parent #317 stays open until those seven and the evaluation are accepted; optional helpers and later parity phases are deferred inventory.
+merged implementations before durable sessions #386. Durable sessions merged in
+[PR #401](https://github.com/davidmigloz/ai_clients_dart/pull/401) at
+`7893afa2ab07014dbeddd19e4bc017b5d6e507c2` on October 9, 19:00:00 UTC, with both
+published reviews and all 14 contexts complete (13 successes/standard skip).
+There are now 34 merged implementations, five remaining core issues (#387–391)
+and evaluation #399. The user has now bounded the finish line to seven core Agents/Vaults tickets on the audited snapshot plus one expressly approved HTTP/2 evaluation. Parent #317 stays open until those seven and the evaluation are accepted; optional helpers and later parity phases are deferred inventory.
 
 Tracking parent: [GitHub issue #317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
-This parent tracks the bounded milestone; it can close after its six remaining core tickets and one approved HTTP/2 evaluation are accepted, without claiming full parity or requiring a transport migration.
+This parent tracks the bounded milestone; it can close after its five remaining core tickets and one approved HTTP/2 evaluation are accepted, without claiming full parity or requiring a transport migration.
 The [progress history](progress-history.md) preserves every earlier parent-issue
 receipt through the Live WebSocket merge; current work remains in this roadmap.
 

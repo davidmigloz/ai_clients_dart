@@ -44,6 +44,46 @@ class AgentSessionsResource extends ResourceBase with _AgentSessionHttp {
     );
   }
 
+  AgentSessionItemsResource? _items;
+  AgentSessionTurnsResource? _turns;
+  AgentSessionTracesResource? _traces;
+
+  /// Root-agent history, including coordinator interactions with children.
+  AgentSessionItemsResource get items {
+    ensureNotClosed?.call();
+    return _items ??= AgentSessionItemsResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+  }
+
+  /// Root turns and their persisted items; historical actions are not replayed.
+  AgentSessionTurnsResource get turns {
+    ensureNotClosed?.call();
+    return _turns ??= AgentSessionTurnsResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+  }
+
+  /// Currently published OTLP traces, with root-turn ID pagination.
+  AgentSessionTracesResource get traces {
+    ensureNotClosed?.call();
+    return _traces ??= AgentSessionTracesResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+  }
+
   /// Creates a session with HTTP 201 JSON.
   ///
   /// Inline configuration needs a model when `agentId` is omitted. Environment
@@ -429,4 +469,210 @@ mixin _AgentSessionHttp on ResourceBase {
       timeoutResponseBody: false,
     ),
   );
+}
+
+/// ID cursors are exclusive in the selected order. These are persisted root-agent records; each child has a separate history. They are not authority to replay old tool or approval actions.
+class AgentSessionItemsResource extends ResourceBase with _AgentSessionHttp {
+  /// Creates a history resource sharing ordinary client policy and ownership.
+  AgentSessionItemsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
+
+  /// Reads one available page; keep the same order/context when using lastId.
+  Future<AgentSessionItemList> list(
+    String sessionId, {
+    int? limit,
+    AgentListOrder? order,
+    String? after,
+    Map<String, String>? additionalHeaders,
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    final path = _sessionPath(sessionId);
+    final query = _historyQuery(limit: limit, order: order, after: after);
+    return _json(
+      'GET',
+      '$path/items',
+      AgentSessionItemList.fromJson,
+      query: query,
+      additionalHeaders: additionalHeaders,
+      abortTrigger: abortTrigger,
+    );
+  }
+}
+
+/// ID cursors are exclusive in the selected order. These are persisted root-agent records; each child has a separate history. They are not authority to replay old tool or approval actions.
+class AgentSessionTurnsResource extends ResourceBase with _AgentSessionHttp {
+  /// Creates a history resource sharing ordinary client policy and ownership.
+  AgentSessionTurnsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
+  AgentSessionTurnItemsResource? _items;
+
+  /// Items belonging to one root-agent turn.
+  AgentSessionTurnItemsResource get items {
+    ensureNotClosed?.call();
+    return _items ??= AgentSessionTurnItemsResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+  }
+
+  /// Retrieves status/timestamps/usage/error; a terminal turn is distinct from session idle.
+  Future<AgentSessionTurn> retrieve(
+    String sessionId,
+    String turnId, {
+    Map<String, String>? additionalHeaders,
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    return _json(
+      'GET',
+      _turnPath(sessionId, turnId),
+      AgentSessionTurn.fromJson,
+      additionalHeaders: additionalHeaders,
+      abortTrigger: abortTrigger,
+    );
+  }
+
+  /// Reads one available page; keep the same order/context when using lastId.
+  Future<AgentSessionTurnList> list(
+    String sessionId, {
+    int? limit,
+    AgentListOrder? order,
+    String? after,
+    Map<String, String>? additionalHeaders,
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    final path = _sessionPath(sessionId);
+    final query = _historyQuery(limit: limit, order: order, after: after);
+    return _json(
+      'GET',
+      '$path/turns',
+      AgentSessionTurnList.fromJson,
+      query: query,
+      additionalHeaders: additionalHeaders,
+      abortTrigger: abortTrigger,
+    );
+  }
+}
+
+/// ID cursors are exclusive in the selected order. These are persisted root-agent records; each child has a separate history. They are not authority to replay old tool or approval actions.
+class AgentSessionTurnItemsResource extends ResourceBase
+    with _AgentSessionHttp {
+  /// Creates a history resource sharing ordinary client policy and ownership.
+  AgentSessionTurnItemsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
+
+  /// Reads one available page; keep the same order/context when using lastId.
+  Future<AgentSessionItemList> list(
+    String sessionId,
+    String turnId, {
+    int? limit,
+    AgentListOrder? order,
+    String? after,
+    Map<String, String>? additionalHeaders,
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    final path = _turnPath(sessionId, turnId);
+    final query = _historyQuery(limit: limit, order: order, after: after);
+    return _json(
+      'GET',
+      '$path/items',
+      AgentSessionItemList.fromJson,
+      query: query,
+      additionalHeaders: additionalHeaders,
+      abortTrigger: abortTrigger,
+    );
+  }
+}
+
+/// The service limits reads and JSON to 16 MiB. Request fewer traces if the service reports this limit. Pages skip unpublished traces and never wait for later updates; IDs are root-turn anchors. Export permission must be enabled for the organization/project.
+class AgentSessionTracesResource extends ResourceBase with _AgentSessionHttp {
+  /// Creates a history resource sharing ordinary client policy and ownership.
+  AgentSessionTracesResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
+
+  /// Reads one available page; keep the same order/context when using lastId.
+  Future<AgentSessionTraceList> list(
+    String sessionId, {
+    int? limit,
+    AgentListOrder? order,
+    String? after,
+    Map<String, String>? additionalHeaders,
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    final path = _sessionPath(sessionId);
+    final query = _historyQuery(limit: limit, order: order, after: after);
+    return _json(
+      'GET',
+      '$path/traces',
+      AgentSessionTraceList.fromJson,
+      query: query,
+      additionalHeaders: additionalHeaders,
+      abortTrigger: abortTrigger,
+    );
+  }
+}
+
+String _turnPath(String sessionId, String turnId) =>
+    '${_sessionPath(sessionId)}/turns/${_opaqueTurnId(turnId)}';
+String _opaqueTurnId(String id) {
+  validateAgentLength(id, 'Agents turnId', max: 1048576);
+  if (id.isEmpty || id == '.' || id == '..') {
+    throw const FormatException('Agents turnId: expected an opaque segment');
+  }
+  try {
+    return Uri.encodeComponent(id);
+  } on ArgumentError {
+    throw const FormatException('Agents turnId: expected an encodable segment');
+  }
+}
+
+Map<String, String> _historyQuery({
+  int? limit,
+  AgentListOrder? order,
+  String? after,
+}) {
+  if (limit != null) {
+    validateAgentInt(limit, 'Agents history.limit', min: 1, max: 100);
+  }
+  if (order != null) {
+    validateAgentEnum(order.value, const [
+      'asc',
+      'desc',
+    ], 'Agents history.order');
+  }
+  if (after != null) {
+    validateAgentLength(after, 'Agents history.after', max: 1048576);
+  }
+  return {
+    if (limit != null) 'limit': limit.toString(),
+    if (order != null) 'order': order.value,
+    'after': ?after,
+  };
 }
