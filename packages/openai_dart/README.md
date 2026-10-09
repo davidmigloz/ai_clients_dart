@@ -36,6 +36,7 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 - Chat Completions with tool calling, vision, structured output, detailed usage, audio completion/streaming, and obfuscation controls
 - Images, videos, audio (TTS, transcription, translation), and embeddings
 - Realtime API via WebSocket and WebRTC with audio streaming
+- Live HTTP signaling, primary/sideband WebSockets, typed events and explicit call controls
 - Input token counting via `inputTokens` for cost estimation
 
 ### Tools
@@ -1928,8 +1929,9 @@ characters), independently of Speech's closed custom reference. Primary WebSocke
 audio configuration admits PCM16LE at 16/24 kHz or G.711 PCMA/PCMU at 8 kHz.
 WebRTC/SIP negotiate media and omit `audio.format`. Frontend capability omission
 or `all` allows all events; an empty selection permits none, and restrictions
-do not apply to trusted sideband connections. Live WebSocket connections, event
-codecs and transcript helpers remain in the next alignment tickets.
+do not apply to trusted sideband connections. Primary/sideband WebSocket
+connections and event codecs are available below; stored WebSocket forks and
+transcript workflow helpers remain in the next alignment ticket.
 
 Models retain finite immutable open JSON and private caller-readable wire data.
 Default diagnostics and built-in logging redact SDP, credentials, audio,
@@ -1940,6 +1942,94 @@ instructions, transcripts, identifiers and future private metadata.
 `--reject-incoming` to choose an incoming action, or `--recording-not-ready` to
 inspect a simulated `503`. See the [Live guide](https://developers.openai.com/api/docs/guides/live)
 and [SIP setup](https://developers.openai.com/api/docs/guides/voice-sip?api=live).
+
+</details>
+
+### How do I use primary and sideband Live WebSockets?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Open a fresh primary connection with `client.live.connect()`. It sends no startup
+automatically and adds no model query. Install your event listeners, explicitly
+start the session, and await `session.started` before sending application work:
+
+```dart
+final connection = await client.live.connect();
+final captions = connection.events.listen((event) {
+  if (event is LiveInputTranscriptDelta) {
+    print(event.delta);
+  }
+});
+try {
+  await connection.start(
+    LiveSessionStartEvent(
+      session: LiveSessionCreateParams(
+        model: 'gpt-live-1',
+        audio: LiveInitialSessionAudioParam(
+          format: LiveAudioFormat.pcm(rate: 24000),
+        ),
+      ),
+    ),
+  );
+  // Supply raw Base64 from caller-owned mono PCM16LE capture at 24 kHz.
+  connection.send(LiveInputAudioAppendEvent(audio: base64Pcm16Audio));
+  final finalized = await connection.closeSession(
+    timeout: const Duration(seconds: 15),
+  );
+  print(finalized.usage.seconds);
+} finally {
+  await captions.cancel();
+  await connection.close();
+}
+```
+
+`client.live.attach(sessionId, gracefulClose: true)` attaches a trusted sideband
+to an existing WebRTC/SIP session. Its writer accepts nine shared commands and
+excludes `session.start` and audio append; primary writers accept eleven. Both
+use the complete 22-event received hierarchy, including reflected sideband audio,
+DTMF notifications and SIP progress, with immutable raw fallback for future event
+types. This resolves the narrower canonical/SDK sideband-union discrepancy.
+Reflected sideband audio is mono PCM16LE at 24 kHz; output frames include
+`start_ms`/`end_ms`. Keep original bytes, delivery order and timeline gaps.
+
+`LiveResponseEvent.event` retains any finite nested object, including compact
+Responses snapshots and objects without `type`. Correlate its outer
+`delegationId` with delegation metadata; omission/null remain distinct. The Live
+backend accepts `LiveInputItem` adapters for every declared canonical input branch,
+including item shapes the ordinary Responses `Item` helper cannot represent.
+For function requests, designate one application action owner, submit every
+pending result with `LiveResponseItemCreateParam`, then explicitly send one
+`LiveResponseCreateParam`. There is no item-create success acknowledgment to
+await. Client delegation instead uses transcripts/application state and explicit
+thinking/commentary/instruction appends with the received delegation ID.
+
+`closeSession()` stops new work, sends one close request, drains until
+`LiveSessionClosed`, and releases owned resources within bounded waits.
+`isFinalized` confirms that event; a socket close alone leaves finalization
+unconfirmed. `latestUsageSeconds` replaces cumulative snapshots rather than
+summing them. Keep delegated backend token usage separately. `close()` releases
+the local transport without requesting session finalization. Concurrent event
+taps may observe captions and application work; canceling one tap does not close
+the connection. There is no automatic reconnect, startup/audio/tool replay or
+external action runner. SIP progress may replay only the preceding three seconds
+with original IDs; application deduplication is explicit.
+
+Default browser sockets reject every configured handshake header before asking
+for credentials. Use trusted server signaling and caller-owned WebRTC media/data
+channels, or an explicitly injected backend proxy connector. Live has no client
+secret endpoint. Wrap an HTTP-started data channel with
+`LivePrimaryConnection(adapter, sessionAlreadyStarted: true, ownsSocket: false)`;
+this admits application commands while forbidding duplicate startup and audio
+append. Supply `initialSession` when its resolved configuration is known. The
+caller retains ownership of the adapter and media.
+
+→ [Runnable offline primary/sideband example](example/live_websocket_example.dart)
+demonstrates concurrent observers, manual delegation, two function results before
+one continuation and confirmed usage, using synthetic peers at $0 API cost.
+See [WebSockets](https://developers.openai.com/api/docs/guides/voice-websockets?api=live),
+[server controls](https://developers.openai.com/api/docs/guides/voice-server-controls?api=live)
+and [session management](https://developers.openai.com/api/docs/guides/live-conversations).
 
 </details>
 
@@ -2594,6 +2684,7 @@ See the [example/](example/) directory for complete examples:
 | [`voice_consents_example.dart`](example/voice_consents_example.dart) | Offline upload/list/retrieve/rename/delete consent lifecycle and explicit pagination |
 | [`voices_example.dart`](example/voices_example.dart) | Offline explicit consent and sample upload, then caller-selected custom voice reference |
 | [`live_http_example.dart`](example/live_http_example.dart) | Offline WebRTC/SIP signaling, explicit call controls, verified incoming notice, WAV downloads and REST fork |
+| [`live_websocket_example.dart`](example/live_websocket_example.dart) | Offline primary/sideband Live, concurrent event taps, manual delegation and graceful finalization |
 | [`chat_audio_example.dart`](example/chat_audio_example.dart) | Chat audio output, ID-only replay, and partial stream accumulation |
 | [`files_example.dart`](example/files_example.dart) | File upload and management |
 | [`conversations_example.dart`](example/conversations_example.dart) | Conversations API for state management |
@@ -2633,7 +2724,7 @@ See the [example/](example/) directory for complete examples:
 | Images | ✅ Full |
 | Videos (Sora) | ✅ Full |
 | Audio (Speech, Transcription, Translation, Custom Voices) | Buffered/streamed speech and file transcription; explicit JSON/verbose/raw translation, current options/open/custom references, all five consent operations and sample-derived voice creation; guide-only consent phrase lookup remains untyped |
-| Live | All seven HTTP operations, buffered/streamed recordings and shared startup/tool models; WebSocket connections/events and transcript helpers pending |
+| Live | All seven HTTP operations, recordings, shared configuration/tools, primary/sideband WebSockets and complete event codecs; stored WebSocket fork/transcript workflow helpers pending |
 | Files | ✅ Full |
 | Uploads | ✅ Full |
 | Batches | ✅ Full |

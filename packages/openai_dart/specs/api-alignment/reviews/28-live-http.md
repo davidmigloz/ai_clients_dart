@@ -1,7 +1,10 @@
 # Live HTTP acceptance
 
-Status: implementation verified; independent requirements and cross-author
-engineering reviews approve. Published-head CI and actual merge remain separate gates. [#370](https://github.com/davidmigloz/ai_clients_dart/issues/370),
+Status: merged in [PR #378](https://github.com/davidmigloz/ai_clients_dart/pull/378),
+closing #370 after independent requirements/engineering approval and final-head
+CI. Reviewed head `3e277a5c66f54abac4f9def7d273489953f00a81` passed all 14 contexts
+(13 successes, standard Test (all) skip); merge commit
+`98b32e699bd61532c948a910ad9869e91fb23a73`. [#370](https://github.com/davidmigloz/ai_clients_dart/issues/370),
 [ticket 28](../tickets/28-live-http.md), LIVE-HTTP-01–04 and LIVE-CONFIG-01–04.
 Custom voices [PR #377](https://github.com/davidmigloz/ai_clients_dart/pull/377)
 merged, closing #369; Live has no dependency on custom voice creation.
