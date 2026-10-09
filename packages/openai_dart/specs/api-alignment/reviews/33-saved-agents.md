@@ -1,10 +1,11 @@
 # Saved agent CRUD and configuration acceptance
 
-Status: implemented for [#385](https://github.com/davidmigloz/ai_clients_dart/issues/385),
-[ticket 33](../tickets/33-saved-agents.md), AGENTS-CRUD-01. Local runtime and
-source acceptance pass; published-head independent review and CI are the remaining
-publication gates. The implementation PR records those receipts before any
-user-authorized merge. This record does not claim an unpublished commit has passed CI.
+Status: merged in [PR #400](https://github.com/davidmigloz/ai_clients_dart/pull/400)
+on October 9, 2026 at 16:47:07 UTC, squash
+`c1df20199dd450c80a7ecb8ae65eb74f6afeb184`. Both independent reviewers
+approved published head `f92b25e9bc222a45a1027426be7e2eb5d7e26d6a` with no
+remaining findings. All 14 exact-head contexts completed (13 successes and the
+standard Test(all) skip); merge state was CLEAN. Issue #385 is closed.
 
 ## Source contract and scope
 
@@ -97,7 +98,6 @@ All 1,083 prior manifest entries remain unchanged, with 56 real additions.
 Documentation maps the actual saved-agent example; docs, exports and README
 verification pass. Remaining baseline API coverage findings stay visible.
 
-Parent #317 remains open for seven core implementations and one authorized HTTP/2
-evaluation until their individual merge acceptance. Issue #385 remains open until
-its implementation PR merges. Six helper issues and remaining Admin/legacy work
+Parent #317 remains open for six core implementations (#386–391) and one authorized
+HTTP/2 evaluation (#399) until their individual merge acceptance. Six helper issues and remaining Admin/legacy work
 remain deferred; no new tickets are created by this slice.

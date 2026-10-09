@@ -47,6 +47,7 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 ### Operational APIs
 
 - Saved agent CRUD with persisted function, MCP, web search and computer-use configuration through `client.agents`
+- Durable sessions with JSON/SSE creation, persistent raw event observation, manual function/approval input and explicit cancellation through `client.agents.sessions`
 - Files, uploads, batches, fine-tuning, moderations, evals, and model management
 - Conversations, containers, content provenance checks, ChatKit, and skills
 - Local signed webhook verification with 26 typed received event variants, plus project endpoint management/discovery
@@ -239,6 +240,62 @@ pagination, replacement, clear/reset and deletion with seven mock requests and
 explicit transport cleanup, without an API key or paid API call.
 
 → [Offline saved-agent example](example/saved_agents_example.dart)
+
+### Durable agent sessions
+
+`client.agents.sessions` creates sessions as HTTP 201 JSON or, through
+`createStream`, HTTP 201 SSE. It also lists, retrieves, updates and deletes sessions.
+`events.stream` observes HTTP 200 SSE, and `events.create` submits inputs with
+HTTP 202 empty acceptance. The caller handles function results and browser approvals
+explicitly; the client does not run callbacks or provision a self-hosted executor.
+
+```dart
+final session = await client.agents.sessions.create(CreateAgentSessionRequest(
+  agent: AgentSessionAgentConfig(model: 'requested-model'),
+  environment: AgentSessionEnvironment.none(),
+  input: AgentSessionInitialInput.text('Hello'),
+));
+final observer = client.agents.sessions.events.stream(session.id).listen((event) {
+  // Handle typed AgentSessionRequiresActionEvent and other raw events here.
+});
+await client.agents.sessions.events.create(session.id,
+  CreateAgentSessionEventsRequest(events: [AgentSessionInput.cancel()]),
+);
+await observer.cancel();
+```
+
+Subscribe before submitting new work. Observation stays open through idle, required
+actions, turn completion and typed error events. Cancelling an observer or reaching
+HTTP EOF releases observation only; neither proves completion nor cancels or deletes
+durable work. Cancel input has no target turn ID. Retrieve or observe cancellation
+before the separate DELETE action. GET observation has no replay cursor and does
+not reconnect automatically.
+
+Inline agent configuration needs a model if no saved `agentId` is supplied.
+Environment `none` needs initial input; streamed hosted creation also needs input.
+Self-hosted creation may wait for executor connectivity. Saved agents, Vaults and
+prewarmed environments are optional. An existing hosted `environmentId` excludes
+all inline/template/container fields, including explicitly null desktop settings.
+Supplied saved-agent overrides replace configuration fields.
+
+Spending controls use whole USD cents up to `4503599627370495`. Create omission/null
+is unlimited; update omission retains the cap, while `clearSpendControl: true` or
+`AgentSessionSpendControlConfig(limit: null)` removes it without resetting spend.
+This session cap is separate from organization usage tiers and rate limits.
+
+Follow-up inputs and initial input/output schemas have a 4 MiB compact UTF-8 JSON
+budget; service metadata adds overhead. Browser authentication values have a 120 KiB
+JSON budget and are never automatically retried, even by configured interceptors.
+After uncertain delivery, retrieve current required actions before deciding whether
+to resubmit. No authentication values are saved to local history. Default logging
+and diagnostics redact private session URLs, headers, tokens, commands and archives.
+Use idempotency keys of 1–256 Unicode characters for logical event submissions;
+this endpoint makes no 24-hour retention promise.
+
+→ [Offline durable-session example](example/agent_sessions_example.dart) — inline
+creation, persistent observation, manual function result, cap changes and explicit
+cancellation followed by deletion; no live calls or API key ($0).
+
 
 ### How do I classify or score shared input?
 
@@ -2888,6 +2945,7 @@ See the [example/](example/) directory for complete examples:
 
 | Example | Description |
 |---------|-------------|
+| [`agent_sessions_example.dart`](example/agent_sessions_example.dart) | Offline durable sessions, persistent observation, manual function result and explicit cancellation |
 | [`saved_agents_example.dart`](example/saved_agents_example.dart) | Offline saved-agent CRUD, all six persisted tools, pagination, replacement and clear/reset |
 | [`monitoring_errors_example.dart`](example/monitoring_errors_example.dart) | Offline typed HTTP/SSE monitoring failures and explicit scoped investigation |
 | [`safety_example.dart`](example/safety_example.dart) | Offline verified notifications and separately scoped alert/case retrieval |
@@ -2947,7 +3005,7 @@ See the [example/](example/) directory for complete examples:
 
 | API | Status |
 |-----|--------|
-| Agents | Saved agent create/list/retrieve/update/delete with persisted configuration; sessions, environments, history and subagent inspection pending |
+| Agents | Saved agent CRUD and durable session CRUD, JSON/SSE creation, persistent event observation and manual inputs; owned environments, history and subagent inspection pending |
 | Chat Completions | Supported; stored-completion management pending |
 | Responses API | Supported with persistent WebSockets, mid-turn steering, opt-in recovery and beta tool-result injection; additional tool/configuration details pending |
 | Decisions API | ✅ Full |

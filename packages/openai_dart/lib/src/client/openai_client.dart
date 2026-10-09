@@ -279,7 +279,7 @@ class OpenAIClient {
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
-    streamClientFactory: _streamClientFactory,
+    streamClientFactory: _audioStreamClientFactory,
   );
 
   ChatResource? _chat;

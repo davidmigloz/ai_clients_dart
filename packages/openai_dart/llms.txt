@@ -4,13 +4,14 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~28.8k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~29.5k tokens): Primary package documentation with installation, configuration, and usage examples.
 - [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/CHANGELOG.md) (~21.7k tokens): Release history and version-by-version changes.
 - [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/MIGRATION.md) (~22.2k tokens): Upgrade notes and breaking-change guidance.
 - [Monitoring failures](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md#how-do-i-inspect-monitoring-failures): Shared passive HTTP/failed Response/WS details, flat nullable SSE errors, scoped investigation and migration boundaries.
 
 ## Examples
 
+- [agent_sessions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/agent_sessions_example.dart) (~1.7k tokens): Offline durable sessions, persistent SSE, manual function results, cap updates and explicit cancellation/deletion; $0, no API key.
 - [saved_agents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/saved_agents_example.dart) (~1.9k tokens): Offline saved-agent CRUD, six persisted tools, pagination, replacement and explicit clear/reset; seven mock requests, caller-owned transport cleanup and $0 cost.
 - [decisions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/decisions_example.dart) (~639 tokens): Typed Decisions questions, refusals, usage, and optional inline images.
 - [decision_image_urls_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/decision_image_urls_example.dart) (~823 tokens): Offline HTTP/HTTPS/data images, exact literal strings/order/details and one mock POST; $0 API cost.
@@ -127,4 +128,4 @@ SafetyAlert exposes typed detailedExplanation and hasDetailedExplanation, preser
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~146k tokens**
+**Total: ~149k tokens**

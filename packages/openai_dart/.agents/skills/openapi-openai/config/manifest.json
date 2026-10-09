@@ -5349,7 +5349,7 @@
       "dart_class": "CustomVoiceCreateRequest",
       "file": "lib/src/models/audio/custom_voice.dart",
       "schema": "CreateVoiceFromConsentRequest",
-      "note": "Actual closed multipart object: required name/audio_sample/consent and optional fixed audio_sample type. Unicode name 1–256, original immutable file bytes/filename, eight normalized MIME bases and10MiB verified through actual multipart; omitted type remains omitted. No invented JSON binary factory or diagnostic exclusion."
+      "note": "Actual closed multipart object: required name/audio_sample/consent and optional fixed audio_sample type. Unicode name 1\u2013256, original immutable file bytes/filename, eight normalized MIME bases and10MiB verified through actual multipart; omitted type remains omitted. No invented JSON binary factory or diagnostic exclusion."
     },
     "VoiceResource": {
       "spec": "main",
@@ -10327,6 +10327,1654 @@
       "file": "lib/src/models/agents/agent_enums.dart",
       "schema": "WebSearchModeResource",
       "note": "Actual string-valued Agents class wrapper, not a Dart enum: retains future received strings exactly; request fields validate the pinned closed set. Public canonical fixtures cover all enum members and request rejection."
+    },
+    "AgentContentResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionContent",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "AgentContentResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "AgentMessageItemResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionAgentMessageItemResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "AgentMessageItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionTurnItem"
+    },
+    "AgentOutputItemResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionOutputItem",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "AgentOutputItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "AgentToolConfigParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionTool",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "schema": "AgentToolConfigParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "AgentToolConfigParamComputerUse": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionComputerUseTool",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "schema": "AgentToolConfigParamComputerUse",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionTool"
+    },
+    "AgentToolConfigParamFunction": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionFunctionTool",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "schema": "AgentToolConfigParamFunction",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionTool"
+    },
+    "AgentToolConfigParamMcp": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionMcpTool",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "schema": "AgentToolConfigParamMcp",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionTool"
+    },
+    "AgentToolConfigParamProgrammaticToolCalling": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionProgrammaticToolCallingTool",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "schema": "AgentToolConfigParamProgrammaticToolCalling",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionTool"
+    },
+    "AgentToolConfigParamToolSearch": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionToolSearchTool",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "schema": "AgentToolConfigParamToolSearch",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionTool"
+    },
+    "AgentToolConfigParamWebSearch": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionWebSearchTool",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "schema": "AgentToolConfigParamWebSearch",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionTool"
+    },
+    "AgentToolResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionToolResource",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "schema": "AgentToolResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "AgentToolResourceComputerUse": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionComputerUseToolResource",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "schema": "AgentToolResourceComputerUse",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionToolResource"
+    },
+    "AgentToolResourceFunction": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionFunctionToolResource",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "schema": "AgentToolResourceFunction",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionToolResource"
+    },
+    "AgentToolResourceMcp": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionMcpToolResource",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "schema": "AgentToolResourceMcp",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionToolResource"
+    },
+    "AgentToolResourceProgrammaticToolCalling": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionProgrammaticToolCallingToolResource",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "schema": "AgentToolResourceProgrammaticToolCalling",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionToolResource"
+    },
+    "AgentToolResourceWebSearch": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionWebSearchToolResource",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "schema": "AgentToolResourceWebSearch",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionToolResource"
+    },
+    "AssistantMessageItemResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionAssistantMessageItemResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "AssistantMessageItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionOutputItem"
+    },
+    "BrowserAuthenticationFieldResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionBrowserAuthenticationField",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "BrowserAuthenticationFieldResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "BrowserAuthenticationFieldValueParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionBrowserAuthenticationFieldValue",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "BrowserAuthenticationFieldValueParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "BrowserAuthenticationHistoryRequestKindResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionBrowserAuthenticationHistoryRequestKindResource",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "BrowserAuthenticationHistoryRequestKindResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "BrowserAuthenticationHistoryRequestKindResourceBrowserAuthentication": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionBrowserAuthenticationHistoryRequestKindResourceBrowserAuthentication",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "BrowserAuthenticationHistoryRequestKindResourceBrowserAuthentication",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionBrowserAuthenticationHistoryRequestKindResource"
+    },
+    "BrowserAuthenticationOptionResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionBrowserAuthenticationOption",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "BrowserAuthenticationOptionResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "BrowserAuthenticationRequestItemResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionBrowserAuthenticationRequestItemResource",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "BrowserAuthenticationRequestItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionOutputItem"
+    },
+    "BrowserOriginAccessDecisionParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionBrowserOriginAccessDecision",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "schema": "BrowserOriginAccessDecisionParam",
+      "note": "Actual string-valued session wrapper class, not a Dart enum or object wire value. Preserves future strings; request validators enforce known canonical members. Source fixture and platform tests cover values; object inspection cannot extract scalar fields."
+    },
+    "CloseSubagentCallItemResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionCloseSubagentCallItemResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "CloseSubagentCallItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionOutputItem"
+    },
+    "CommandExecutionItemResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionCommandExecutionItemResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "CommandExecutionItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionOutputItem"
+    },
+    "ComputerScreenshotResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionComputerScreenshotResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "ComputerScreenshotResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "ComputerUseApprovalRequestKindResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionComputerUseApprovalRequestKind",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "ComputerUseApprovalRequestKindResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "ComputerUseApprovalRequestKindResourceBrowserAuthentication": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionBrowserAuthenticationRequest",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "ComputerUseApprovalRequestKindResourceBrowserAuthentication",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionComputerUseApprovalRequestKind"
+    },
+    "ComputerUseApprovalRequestKindResourceBrowserOriginAccess": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionBrowserOriginAccessRequest",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "ComputerUseApprovalRequestKindResourceBrowserOriginAccess",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionComputerUseApprovalRequestKind"
+    },
+    "ComputerUseApprovalRequestResultItemResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionComputerUseApprovalRequestResultItemResource",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "ComputerUseApprovalRequestResultItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionTurnItem"
+    },
+    "ComputerUseApprovalResponseKindResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionBrowserAuthenticationResponseResource",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "ComputerUseApprovalResponseKindResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "ComputerUseApprovalResponseKindResourceBrowserAuthenticationCancelResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionBrowserAuthenticationCancelResource",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "ComputerUseApprovalResponseKindResourceBrowserAuthenticationCancelResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionBrowserAuthenticationResponseResource"
+    },
+    "ComputerUseApprovalResponseKindResourceBrowserAuthenticationSubmitResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionBrowserAuthenticationSubmitResource",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "ComputerUseApprovalResponseKindResourceBrowserAuthenticationSubmitResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionBrowserAuthenticationResponseResource"
+    },
+    "ComputerUseApprovalResponseParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionComputerUseApprovalResponse",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "ComputerUseApprovalResponseParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "ComputerUseApprovalResponseParamBrowserAuthentication": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionBrowserAuthenticationResponse",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "ComputerUseApprovalResponseParamBrowserAuthentication",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionComputerUseApprovalResponse"
+    },
+    "ComputerUseApprovalResponseParamBrowserAuthenticationCancelParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionBrowserAuthenticationCancel",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "ComputerUseApprovalResponseParamBrowserAuthenticationCancelParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionBrowserAuthenticationResponse"
+    },
+    "ComputerUseApprovalResponseParamBrowserAuthenticationSubmitParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionBrowserAuthenticationSubmit",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "ComputerUseApprovalResponseParamBrowserAuthenticationSubmitParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionBrowserAuthenticationResponse"
+    },
+    "ComputerUseApprovalResponseParamBrowserOriginAccessParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionBrowserOriginAccessResponse",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "ComputerUseApprovalResponseParamBrowserOriginAccessParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionComputerUseApprovalResponse"
+    },
+    "ComputerUseCallItemResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionComputerUseCallItemResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "ComputerUseCallItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionOutputItem"
+    },
+    "ContainerSizeParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionContainerSizeConfig",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "schema": "ContainerSizeParam",
+      "note": "Actual string-valued session wrapper class, not a Dart enum or object wire value. Preserves future strings; request validators enforce known canonical members. Source fixture and platform tests cover values; object inspection cannot extract scalar fields."
+    },
+    "ContainerSizeResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionContainerSizeResource",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "schema": "ContainerSizeResource",
+      "note": "Actual string-valued session wrapper class, not a Dart enum or object wire value. Preserves future strings; request validators enforce known canonical members. Source fixture and platform tests cover values; object inspection cannot extract scalar fields."
+    },
+    "CreateAgentSessionParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateAgentSessionRequest",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "CreateAgentSessionParams",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "CreateSessionEventsParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateAgentSessionEventsRequest",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "CreateSessionEventsParams",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "CreateSessionInputParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionInitialInput",
+      "file": "lib/src/models/agents/agent_session_inputs.dart",
+      "schema": "CreateSessionInputParam",
+      "note": "Actual scalar-string/array union class with separate typed branches, not an object wire value. Canonical parent request/resource and copy fixtures test both branches; object-field inspection has no schema fields to extract."
+    },
+    "CreateSubagentCallItemResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionCreateSubagentCallItemResource",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "CreateSubagentCallItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionOutputItem"
+    },
+    "DeletedSessionResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeletedAgentSession",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "DeletedSessionResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "DesktopParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionDesktopConfig",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "DesktopParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "DesktopResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionDesktopResource",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "DesktopResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "EncryptedContentResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionEncryptedContentResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "EncryptedContentResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionContent"
+    },
+    "EnvironmentPackagesParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionEnvironmentPackagesConfig",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "EnvironmentPackagesParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "EnvironmentPackagesResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionEnvironmentPackagesResource",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "EnvironmentPackagesResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "EnvironmentParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionEnvironment",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "EnvironmentParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "EnvironmentParamNone": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionNoneEnvironment",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "EnvironmentParamNone",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEnvironment"
+    },
+    "EnvironmentParamOpenaiHosted": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionHostedEnvironment",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "EnvironmentParamOpenaiHosted",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEnvironment"
+    },
+    "EnvironmentParamSelfHosted": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionSelfHostedEnvironment",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "EnvironmentParamSelfHosted",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEnvironment"
+    },
+    "EnvironmentResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionEnvironmentResource",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "EnvironmentResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "EnvironmentResourceNone": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionNoneEnvironmentResource",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "EnvironmentResourceNone",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEnvironmentResource"
+    },
+    "EnvironmentResourceOpenaiHosted": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionHostedEnvironmentResource",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "EnvironmentResourceOpenaiHosted",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEnvironmentResource"
+    },
+    "EnvironmentResourceSelfHosted": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionSelfHostedEnvironmentResource",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "EnvironmentResourceSelfHosted",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEnvironmentResource"
+    },
+    "FunctionCallItemResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionFunctionCallItemResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "FunctionCallItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionOutputItem"
+    },
+    "FunctionCallOutputItemResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionFunctionCallOutputItemResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "FunctionCallOutputItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionTurnItem"
+    },
+    "FunctionCallOutputParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionFunctionOutput",
+      "file": "lib/src/models/agents/agent_session_inputs.dart",
+      "schema": "FunctionCallOutputParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "FunctionCallOutputResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionFunctionOutputResource",
+      "file": "lib/src/models/agents/agent_session_inputs.dart",
+      "schema": "FunctionCallOutputResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "FunctionCallStatusResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionFunctionCallStatusResource",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "schema": "FunctionCallStatusResource",
+      "note": "Actual string-valued session wrapper class, not a Dart enum or object wire value. Preserves future strings; request validators enforce known canonical members. Source fixture and platform tests cover values; object inspection cannot extract scalar fields."
+    },
+    "HostedEnvironmentFileParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionHostedEnvironmentFileConfig",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "HostedEnvironmentFileParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "HostedEnvironmentFileParamFileId": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionHostedEnvironmentFileConfigFileId",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "HostedEnvironmentFileParamFileId",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionHostedEnvironmentFileConfig"
+    },
+    "HostedEnvironmentFileParamInline": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionHostedEnvironmentFileConfigInline",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "HostedEnvironmentFileParamInline",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionHostedEnvironmentFileConfig"
+    },
+    "HostedEnvironmentFileResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionHostedEnvironmentFileResource",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "HostedEnvironmentFileResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "HostedEnvironmentFileResourceFileId": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionHostedEnvironmentFileResourceFileId",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "HostedEnvironmentFileResourceFileId",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionHostedEnvironmentFileResource"
+    },
+    "HostedEnvironmentFileResourceInline": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionHostedEnvironmentFileResourceInline",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "HostedEnvironmentFileResourceInline",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionHostedEnvironmentFileResource"
+    },
+    "HostedPluginParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionHostedPluginConfig",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "HostedPluginParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "HostedPluginParamInline": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionHostedPluginConfigInline",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "HostedPluginParamInline",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionHostedPluginConfig"
+    },
+    "HostedPluginResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionHostedPluginResource",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "HostedPluginResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "HostedPluginResourceInline": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionHostedPluginResourceInline",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "HostedPluginResourceInline",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionHostedPluginResource"
+    },
+    "HostedSkillParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionHostedSkillConfig",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "HostedSkillParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "HostedSkillParamInline": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionHostedSkillConfigInline",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "HostedSkillParamInline",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionHostedSkillConfig"
+    },
+    "HostedSkillParamSkillReference": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionHostedSkillConfigSkillReference",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "HostedSkillParamSkillReference",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionHostedSkillConfig"
+    },
+    "HostedSkillResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionHostedSkillResource",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "HostedSkillResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "HostedSkillResourceInline": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionHostedSkillResourceInline",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "HostedSkillResourceInline",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionHostedSkillResource"
+    },
+    "HostedSkillResourceSkillReference": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionHostedSkillResourceSkillReference",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "HostedSkillResourceSkillReference",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionHostedSkillResource"
+    },
+    "InlineCapabilitySourceParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionInlineCapabilitySourceConfig",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "InlineCapabilitySourceParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "InlineCapabilitySourceParamBase64": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionInlineCapabilitySourceConfigBase64",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "InlineCapabilitySourceParamBase64",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionInlineCapabilitySourceConfig"
+    },
+    "InputContentParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionInputContent",
+      "file": "lib/src/models/agents/agent_session_inputs.dart",
+      "schema": "InputContentParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "InputContentParamInputImage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionInputContentConfigInputImage",
+      "file": "lib/src/models/agents/agent_session_inputs.dart",
+      "schema": "InputContentParamInputImage",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionInputContent"
+    },
+    "InputContentParamInputText": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionInputContentConfigInputText",
+      "file": "lib/src/models/agents/agent_session_inputs.dart",
+      "schema": "InputContentParamInputText",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionInputContent"
+    },
+    "InputContentResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionInputContentResource",
+      "file": "lib/src/models/agents/agent_session_inputs.dart",
+      "schema": "InputContentResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "InputContentResourceInputImage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionInputContentResourceInputImage",
+      "file": "lib/src/models/agents/agent_session_inputs.dart",
+      "schema": "InputContentResourceInputImage",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionInputContentResource"
+    },
+    "InputContentResourceInputText": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionInputContentResourceInputText",
+      "file": "lib/src/models/agents/agent_session_inputs.dart",
+      "schema": "InputContentResourceInputText",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionInputContentResource"
+    },
+    "InputMessageParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionInputMessage",
+      "file": "lib/src/models/agents/agent_session_inputs.dart",
+      "schema": "InputMessageParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "InputTokensDetailsResource-2": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionInputTokensDetailsResourceDetails",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "InputTokensDetailsResource-2",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "InterruptSubagentCallItemResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionInterruptSubagentCallItemResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "InterruptSubagentCallItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionOutputItem"
+    },
+    "McpCallItemResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionMcpCallItemResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "McpCallItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionOutputItem"
+    },
+    "McpTransportConfigParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionMcpTransport",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "schema": "McpTransportConfigParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "McpTransportConfigParamHttp": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionMcpHttpTransport",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "schema": "McpTransportConfigParamHttp",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionMcpTransport"
+    },
+    "McpTransportConfigParamStdio": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionMcpStdioTransport",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "schema": "McpTransportConfigParamStdio",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionMcpTransport"
+    },
+    "McpTransportResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionMcpTransportResource",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "schema": "McpTransportResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "McpTransportResourceHttp": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionMcpHttpTransportResource",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "schema": "McpTransportResourceHttp",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionMcpTransportResource"
+    },
+    "McpTransportResourceStdio": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionMcpStdioTransportResource",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "schema": "McpTransportResourceStdio",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionMcpTransportResource"
+    },
+    "MessageContentResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionMessageContent",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "MessageContentResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "MessageContentResourceInputImage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionMessageContentResourceInputImage",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "MessageContentResourceInputImage",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionMessageContent"
+    },
+    "MessageContentResourceInputText": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionMessageContentResourceInputText",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "MessageContentResourceInputText",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionMessageContent"
+    },
+    "MessageContentResourceOutputText": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionMessageContentResourceOutputText",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "MessageContentResourceOutputText",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionMessageContent"
+    },
+    "MessageItemResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionMessageItemResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "MessageItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionTurnItem"
+    },
+    "MessagePhaseResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionMessagePhaseResource",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "schema": "MessagePhaseResource",
+      "note": "Actual string-valued session wrapper class, not a Dart enum or object wire value. Preserves future strings; request validators enforce known canonical members. Source fixture and platform tests cover values; object inspection cannot extract scalar fields."
+    },
+    "NetworkAccessParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionNetworkAccessConfig",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "schema": "NetworkAccessParam",
+      "note": "Actual string-valued session wrapper class, not a Dart enum or object wire value. Preserves future strings; request validators enforce known canonical members. Source fixture and platform tests cover values; object inspection cannot extract scalar fields."
+    },
+    "NetworkAccessResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionNetworkAccessResource",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "schema": "NetworkAccessResource",
+      "note": "Actual string-valued session wrapper class, not a Dart enum or object wire value. Preserves future strings; request validators enforce known canonical members. Source fixture and platform tests cover values; object inspection cannot extract scalar fields."
+    },
+    "NetworkPolicyParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionNetworkPolicyConfig",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "NetworkPolicyParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "NetworkPolicyResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionNetworkPolicyResource",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "NetworkPolicyResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "OutputItemStatusResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionOutputItemStatusResource",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "schema": "OutputItemStatusResource",
+      "note": "Actual string-valued session wrapper class, not a Dart enum or object wire value. Preserves future strings; request validators enforce known canonical members. Source fixture and platform tests cover values; object inspection cannot extract scalar fields."
+    },
+    "OutputTextResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionOutputTextResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "OutputTextResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionContent"
+    },
+    "OutputTokensDetailsResource-2": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionOutputTokensDetailsResourceDetails",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "OutputTokensDetailsResource-2",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "ReasoningItemResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionReasoningItemResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "ReasoningItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionOutputItem"
+    },
+    "ResumeSubagentCallItemResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionResumeSubagentCallItemResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "ResumeSubagentCallItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionOutputItem"
+    },
+    "SendSubagentInputCallItemResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionSendSubagentInputCallItemResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "SendSubagentInputCallItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionOutputItem"
+    },
+    "SessionAgentConfigParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionAgentConfig",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "SessionAgentConfigParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "SessionAgentResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionAgent",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "SessionAgentResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "SessionEnvironmentErrorResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionEnvironmentErrorResource",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "SessionEnvironmentErrorResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "SessionEnvironmentStateResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionEnvironmentStateResource",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "SessionEnvironmentStateResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "SessionEnvironmentStatusResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionEnvironmentStatusResource",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "schema": "SessionEnvironmentStatusResource",
+      "note": "Actual string-valued session wrapper class, not a Dart enum or object wire value. Preserves future strings; request validators enforce known canonical members. Source fixture and platform tests cover values; object inspection cannot extract scalar fields."
+    },
+    "SessionErrorResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionErrorResource",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "SessionErrorResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "SessionEvent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEvent",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "SessionEventAgentOutputCommandExecutionOutputDelta": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionAgentOutputCommandExecutionOutputDeltaEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentOutputCommandExecutionOutputDelta",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionCreated": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionCreatedEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionCreated",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionEnvironmentConnected": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionEnvironmentConnectedEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionEnvironmentConnected",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionEnvironmentDisconnected": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionEnvironmentDisconnectedEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionEnvironmentDisconnected",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionEnvironmentExpired": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionEnvironmentExpiredEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionEnvironmentExpired",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionEnvironmentFailed": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionEnvironmentFailedEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionEnvironmentFailed",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionEnvironmentPending": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionEnvironmentPendingEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionEnvironmentPending",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionEnvironmentReady": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionEnvironmentReadyEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionEnvironmentReady",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionEnvironmentReset": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionEnvironmentResetEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionEnvironmentReset",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionEnvironmentSuspended": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionEnvironmentSuspendedEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionEnvironmentSuspended",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionFailed": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionFailedEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionFailed",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionIdle": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionIdleEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionIdle",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionInProgress": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionInProgressEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionInProgress",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionRequiresAction": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionRequiresActionEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionRequiresAction",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionSubagentActive": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionSubagentActiveEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionSubagentActive",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionSubagentClosed": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionSubagentClosedEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionSubagentClosed",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionSubagentCreated": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionSubagentCreatedEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionSubagentCreated",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionTurnCancelled": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionTurnCancelledEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionTurnCancelled",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionTurnCompleted": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionTurnCompletedEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionTurnCompleted",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionTurnContentPartAdded": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionTurnContentPartAddedEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionTurnContentPartAdded",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionTurnContentPartDone": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionTurnContentPartDoneEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionTurnContentPartDone",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionTurnCreated": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionTurnCreatedEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionTurnCreated",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionTurnFailed": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionTurnFailedEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionTurnFailed",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionTurnInProgress": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionTurnInProgressEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionTurnInProgress",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionTurnItemAdded": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionTurnItemAddedEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionTurnItemAdded",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionTurnItemDone": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionTurnItemDoneEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionTurnItemDone",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionTurnOutputTextDelta": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionTurnOutputTextDeltaEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionTurnOutputTextDelta",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionTurnOutputTextDone": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionTurnOutputTextDoneEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionTurnOutputTextDone",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionTurnReasoningSummaryPartAdded": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionTurnReasoningSummaryPartAddedEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionTurnReasoningSummaryPartAdded",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionTurnReasoningSummaryPartDone": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionTurnReasoningSummaryPartDoneEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionTurnReasoningSummaryPartDone",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionTurnReasoningSummaryTextDelta": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionTurnReasoningSummaryTextDeltaEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionTurnReasoningSummaryTextDelta",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionTurnReasoningSummaryTextDone": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionTurnReasoningSummaryTextDoneEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionTurnReasoningSummaryTextDone",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionErrorEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventError",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionInputParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionInput",
+      "file": "lib/src/models/agents/agent_session_inputs.dart",
+      "schema": "SessionInputParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "SessionInputParamAgentSessionInputCancel": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionCancelInput",
+      "file": "lib/src/models/agents/agent_session_inputs.dart",
+      "schema": "SessionInputParamAgentSessionInputCancel",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionInput"
+    },
+    "SessionInputParamAgentSessionInputComputerUseApprovalRequestResult": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionApprovalResultInput",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "SessionInputParamAgentSessionInputComputerUseApprovalRequestResult",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionInput"
+    },
+    "SessionInputParamAgentSessionInputMessage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionMessageInput",
+      "file": "lib/src/models/agents/agent_session_inputs.dart",
+      "schema": "SessionInputParamAgentSessionInputMessage",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionInput"
+    },
+    "SessionInputParamAgentSessionInputToolResult": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionToolResultInput",
+      "file": "lib/src/models/agents/agent_session_inputs.dart",
+      "schema": "SessionInputParamAgentSessionInputToolResult",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionInput"
+    },
+    "SessionListResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionList",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "SessionListResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "SessionMessageRoleResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionMessageRoleResource",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "schema": "SessionMessageRoleResource",
+      "note": "Actual string-valued session wrapper class, not a Dart enum or object wire value. Preserves future strings; request validators enforce known canonical members. Source fixture and platform tests cover values; object inspection cannot extract scalar fields."
+    },
+    "SessionRequiredActionResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionRequiredAction",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "SessionRequiredActionResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "SessionRequiredActionResourceComputerUseApprovalRequest": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionComputerUseApprovalRequiredAction",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "SessionRequiredActionResourceComputerUseApprovalRequest",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionRequiredAction"
+    },
+    "SessionRequiredActionResourceEnvironmentConnection": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionEnvironmentConnectionRequiredAction",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "SessionRequiredActionResourceEnvironmentConnection",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionRequiredAction"
+    },
+    "SessionRequiredActionResourceFunctionCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionFunctionCallRequiredAction",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "SessionRequiredActionResourceFunctionCall",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionRequiredAction"
+    },
+    "SessionResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSession",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "SessionResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "SessionSpendControlParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionSpendControlConfig",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "SessionSpendControlParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "SessionSpendControlResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionSpendControl",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "SessionSpendControlResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "SessionStatusResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionStatusResource",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "schema": "SessionStatusResource",
+      "note": "Actual string-valued session wrapper class, not a Dart enum or object wire value. Preserves future strings; request validators enforce known canonical members. Source fixture and platform tests cover values; object inspection cannot extract scalar fields."
+    },
+    "SessionTurnErrorCodeResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionTurnErrorCodeResource",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "schema": "SessionTurnErrorCodeResource",
+      "note": "Actual string-valued session wrapper class, not a Dart enum or object wire value. Preserves future strings; request validators enforce known canonical members. Source fixture and platform tests cover values; object inspection cannot extract scalar fields."
+    },
+    "SessionTurnErrorResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionTurnErrorResource",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "SessionTurnErrorResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "SessionTurnItemResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionTurnItem",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "SessionTurnItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "SetupCommandParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionSetupCommandConfig",
+      "file": "lib/src/models/agents/agent_session_environments.dart",
+      "schema": "SetupCommandParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "SubagentObjectResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionSubagentObjectResource",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "schema": "SubagentObjectResource",
+      "note": "Actual string-valued session wrapper class, not a Dart enum or object wire value. Preserves future strings; request validators enforce known canonical members. Source fixture and platform tests cover values; object inspection cannot extract scalar fields."
+    },
+    "SubagentResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionSubagent",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "SubagentResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "SubagentStatusResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionSubagentStatusResource",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "schema": "SubagentStatusResource",
+      "note": "Actual string-valued session wrapper class, not a Dart enum or object wire value. Preserves future strings; request validators enforce known canonical members. Source fixture and platform tests cover values; object inspection cannot extract scalar fields."
+    },
+    "SummaryTextResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionSummaryTextResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "SummaryTextResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "TokenUsageResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionTokenUsageResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "TokenUsageResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "TurnObjectResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionTurnObjectResource",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "schema": "TurnObjectResource",
+      "note": "Actual string-valued session wrapper class, not a Dart enum or object wire value. Preserves future strings; request validators enforce known canonical members. Source fixture and platform tests cover values; object inspection cannot extract scalar fields."
+    },
+    "TurnResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionTurn",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "TurnResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "TurnStatusResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionTurnStatusResource",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "schema": "TurnStatusResource",
+      "note": "Actual string-valued session wrapper class, not a Dart enum or object wire value. Preserves future strings; request validators enforce known canonical members. Source fixture and platform tests cover values; object inspection cannot extract scalar fields."
+    },
+    "UpdateAgentSessionParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateAgentSessionRequest",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "UpdateAgentSessionParams",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "UpdateSessionAgentParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionAgentUpdate",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "UpdateSessionAgentParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "UpdateSessionReasoningParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionReasoningUpdate",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "UpdateSessionReasoningParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "WaitForSubagentsCallItemResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionWaitForSubagentsCallItemResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "WaitForSubagentsCallItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionOutputItem"
+    },
+    "WebSearchActionResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionWebSearchActionResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "WebSearchActionResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "WebSearchActionResourceFindInPage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionWebSearchActionResourceFindInPage",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "WebSearchActionResourceFindInPage",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionWebSearchActionResource"
+    },
+    "WebSearchActionResourceOpenPage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionWebSearchActionResourceOpenPage",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "WebSearchActionResourceOpenPage",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionWebSearchActionResource"
+    },
+    "WebSearchActionResourceOther": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionWebSearchActionResourceOther",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "WebSearchActionResourceOther",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionWebSearchActionResource"
+    },
+    "WebSearchActionResourceSearch": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionWebSearchActionResourceSearch",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "WebSearchActionResourceSearch",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionWebSearchActionResource"
+    },
+    "WebSearchCallItemResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionWebSearchCallItemResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "WebSearchCallItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionOutputItem"
     }
   }
 }

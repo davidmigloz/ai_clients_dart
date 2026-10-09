@@ -56,7 +56,7 @@ class LoggingInterceptor implements Interceptor {
     var request = context.request;
     final speechRequest = isSpeechRequest(request);
     final privateAudioRequest = isPrivateAudioRequest(request);
-    final savedAgentRequest = isSavedAgentRequest(request);
+    final savedAgentRequest = isAgentsApiRequest(request);
     final privateVoiceRequest =
         isVoiceConsentRequest(request) ||
         isCustomVoiceRequest(request) ||

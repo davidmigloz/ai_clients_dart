@@ -43,8 +43,10 @@ class AuthInterceptor implements Interceptor {
             for (final entry in providerHeaders.entries)
               if (entry.key.toLowerCase() != 'accept' &&
                   entry.key.toLowerCase() != 'content-type' &&
-                  (!isSavedAgentRequest(context.request) ||
-                      entry.key.toLowerCase() != 'openai-beta'))
+                  (!isAgentsApiRequest(context.request) ||
+                      entry.key.toLowerCase() != 'openai-beta') &&
+                  (!isAgentSessionRequest(context.request) ||
+                      entry.key.toLowerCase() != 'idempotency-key'))
                 entry.key: entry.value,
           }
         : providerHeaders;
