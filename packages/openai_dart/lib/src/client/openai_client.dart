@@ -31,6 +31,7 @@ import '../resources/responses_resource.dart';
 import '../resources/safety_resource.dart';
 import '../resources/skills_resource.dart';
 import '../resources/uploads_resource.dart';
+import '../resources/vaults_resource.dart';
 import '../resources/videos_resource.dart';
 import '../resources/webhooks_resource.dart';
 import 'config.dart';
@@ -67,7 +68,8 @@ import 'retry_wrapper.dart';
 /// ## Resources
 ///
 /// The client provides access to the following API resources:
-/// - `agents` - Saved-agent CRUD and persisted configuration (Agents beta)
+/// - `agents` - Saved agents, durable sessions, root/turn history and traces (Agents beta)
+/// - `vaults` - Vaults and write-only credential management (Agents beta)
 ///
 /// - [chat] - Chat completions (GPT-4, GPT-3.5, etc.)
 /// - [completions] - Legacy text completions
@@ -281,6 +283,21 @@ class OpenAIClient {
     ensureNotClosed: _ensureNotClosed,
     streamClientFactory: _audioStreamClientFactory,
   );
+
+  VaultsResource? _vaults;
+
+  /// Project-scoped Vaults and write-only credential management (Agents beta).
+  /// Uses this client's authentication, project and injected HTTP ownership.
+  VaultsResource get vaults {
+    _ensureNotClosed();
+    return _vaults ??= VaultsResource(
+      config: config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+  }
 
   ChatResource? _chat;
 

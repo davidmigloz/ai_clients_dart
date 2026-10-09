@@ -26,11 +26,15 @@ merged implementations before durable sessions #386. Durable sessions merged in
 [PR #401](https://github.com/davidmigloz/ai_clients_dart/pull/401) at
 `7893afa2ab07014dbeddd19e4bc017b5d6e507c2` on October 9, 19:00:00 UTC, with both
 published reviews and all 14 contexts complete (13 successes/standard skip).
-There are now 34 merged implementations, five remaining core issues (#387–391)
+Root/turn history and traces merged in
+[PR #402](https://github.com/davidmigloz/ai_clients_dart/pull/402) at
+`c3a3191121f3c32b760189801cb6ecb0cfe69753` on October 9, 19:58:29 UTC,
+after both published content/CI approvals and all 14 completed contexts.
+There are now 35 merged implementations, four remaining core issues (#388–391)
 and evaluation #399. The user has now bounded the finish line to seven core Agents/Vaults tickets on the audited snapshot plus one expressly approved HTTP/2 evaluation. Parent #317 stays open until those seven and the evaluation are accepted; optional helpers and later parity phases are deferred inventory.
 
 Tracking parent: [GitHub issue #317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
-This parent tracks the bounded milestone; it can close after its five remaining core tickets and one approved HTTP/2 evaluation are accepted, without claiming full parity or requiring a transport migration.
+This parent tracks the bounded milestone; it can close after its four remaining core tickets and one approved HTTP/2 evaluation are accepted, without claiming full parity or requiring a transport migration.
 The [progress history](progress-history.md) preserves every earlier parent-issue
 receipt through the Live WebSocket merge; current work remains in this roadmap.
 

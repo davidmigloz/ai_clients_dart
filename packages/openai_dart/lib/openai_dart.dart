@@ -95,6 +95,7 @@ export 'src/models/skills/skills.dart';
 export 'src/models/streaming/streaming.dart';
 // Models - Tools
 export 'src/models/tools/tools.dart';
+export 'src/models/vaults/vault_models.dart';
 // Models - Videos
 export 'src/models/videos/videos.dart';
 export 'src/models/webhooks/webhook_endpoint.dart';

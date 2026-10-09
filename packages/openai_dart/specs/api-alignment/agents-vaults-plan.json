@@ -413,7 +413,7 @@
       "ticket": 35,
       "document": "tickets/35-history-traces.md",
       "title": "Session history, turns and traces",
-      "status": "implemented; published-head review, CI and merge acceptance pending",
+      "status": "merged in PR #402; issue #387 closed",
       "github_issue": {
         "number": 387,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/387"
@@ -497,13 +497,22 @@
       ],
       "milestone_scope": "active",
       "tracking_parent_issue": 317,
-      "acceptance_record": "reviews/35-history-traces.md"
+      "acceptance_record": "reviews/35-history-traces.md",
+      "implementation_merge": {
+        "pull_request": 402,
+        "head": "31b689893a4929287a0d7762844e5ff617917cea",
+        "squash_commit": "c3a3191121f3c32b760189801cb6ecb0cfe69753",
+        "merged_at_utc": "2026-10-09T19:58:29Z",
+        "ci_contexts": 14,
+        "successful_contexts": 13,
+        "standard_skipped_contexts": 1
+      }
     },
     {
       "ticket": 36,
       "document": "tickets/36-vaults-credentials.md",
       "title": "Vault and write-only credential management",
-      "status": "active bounded milestone; implementation acceptance pending",
+      "status": "implemented; published-head review, CI and merge acceptance pending",
       "github_issue": {
         "number": 388,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/388"
@@ -575,7 +584,8 @@
         "VaultStatusParam"
       ],
       "milestone_scope": "active",
-      "tracking_parent_issue": 317
+      "tracking_parent_issue": 317,
+      "acceptance_record": "reviews/36-vaults-credentials.md"
     },
     {
       "ticket": 37,
