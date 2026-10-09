@@ -65,12 +65,14 @@ annotations are regenerated with the actual encoder: 146,420 tokens (~146k).
 
 ## Validation and independent review
 
-Ordered package formatting, fixes and fatal-info analysis pass on Dart 3.12.2.
+Ordered package fixes and fatal-info analysis pass on Dart 3.12.2. Stable
+Dart 3.13.5 package formatting passes after restoring an existing Safety fixture
+to its unchanged base layout; the earlier 3.12 formatter used a different closure
+layout. This CI correction changes no runtime or test behavior.
 All 586 focused cases pass on VM, real Chrome JavaScript and real Chrome Wasm.
 The full package unit suite passes 21,981 cases with two existing environment skips.
 Eight permanent transport regressions cover header ownership, beta precedence,
 UTF-8, private collection-name IDs, and exported configuration/clear states.
-One existing Safety fixture receives only the package formatter's closure layout.
 
 Independent requirements review validates 37 captured public operations against
 frozen canonical contracts with 339 source assertions, all writable enum values,
