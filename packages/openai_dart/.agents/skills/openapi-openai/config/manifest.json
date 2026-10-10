@@ -12585,6 +12585,14 @@
       "spec": "main",
       "schema": "SessionArtifactResource",
       "note": "Actual frozen file/artifact contract; source/public/platform tests cover exact wire and private owned values."
+    },
+    "AgentSessionSubagentList": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "AgentSessionSubagentList",
+      "file": "lib/src/models/agents/agent_subagent_list.dart",
+      "schema": null,
+      "note": "Actual typed envelope for inline GET /agents/sessions/{session_id}/subagents responses/200/content/application/json/schema. JSON pointer #/paths/~1agents~1sessions~1{session_id}~1subagents/get/responses/200/content/application~1json/schema. No fabricated canonical schema. Exact inline wire, required nullable boundaries, finite detached children/extras and immutable copies are source/runtime verified."
     }
   }
 }

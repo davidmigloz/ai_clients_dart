@@ -1,6 +1,6 @@
 # Subagent inspection and history
 
-Status: active bounded milestone; implementation acceptance pending.
+Status: implemented locally; published-head reviews/CI and user-authorized merge pending.
 GitHub: [#391](https://github.com/davidmigloz/ai_clients_dart/issues/391).
 Primary requirements: `AGENTS-SUBAGENT-01`.
 Native GitHub blockers: [#386](https://github.com/davidmigloz/ai_clients_dart/issues/386), [#387](https://github.com/davidmigloz/ai_clients_dart/issues/387).
@@ -55,3 +55,7 @@ Wire authority is immutable OpenAPI [`0ef225c4f701046f8fe88cae9d29d0df4d1a9fa9`]
 All tests and examples default to deterministic mock HTTP/SSE, local servers or pure fixtures, with no live API calls, API key or paid hosted execution required ($0). Schema-only planning witnesses do not satisfy runtime acceptance. The implementation PR must record actual canonical assertions, supported-platform checks, independent review and retained toolkit diagnostics; this planning ticket claims none of those checks have already passed for a future implementation.
 
 Coordinator multi-agent configuration and live events remain tickets 33/34. Local automatic tool dispatch, idle-run/result helpers, child creation/termination orchestration and self-hosted provider processes are separate capabilities. No release/version bump is part of this ticket.
+
+## Implementation record
+
+[Acceptance evidence](../reviews/39-subagents.md) records the six inspection GETs, exact inline list adapter, reused canonical models and actual source/public/runtime checks. Published-head reviews and exact-head CI remain separate final gates; this commit does not claim a future merge.

@@ -6,7 +6,9 @@ import '../errors/exceptions.dart';
 import '../models/agents/agent_enums.dart';
 import '../models/agents/agent_json_helpers.dart';
 import '../models/agents/agent_session_models.dart';
+import '../models/agents/agent_subagent_list.dart';
 import '../utils/http_error_response.dart';
+import '../utils/private_agent_inspection_http.dart';
 import '../utils/private_audio_http.dart';
 import 'agent_environment_files_resource.dart';
 import 'agent_session_stream.dart';
@@ -44,6 +46,21 @@ class AgentSessionsResource extends ResourceBase with _AgentSessionHttp {
     super.ensureNotClosed,
     super.streamClientFactory,
   });
+
+  AgentSessionSubagentsResource? _subagents;
+
+  /// Child state and history, separate from coordinator history. Inspection does
+  /// not execute, resume, interrupt or close a child, or replay historical tools.
+  AgentSessionSubagentsResource get subagents {
+    ensureNotClosed?.call();
+    return _subagents ??= AgentSessionSubagentsResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+  }
 
   AgentSessionEventsResource? _events;
 
@@ -402,16 +419,21 @@ mixin _AgentSessionHttp on ResourceBase {
       }
     }
     await checkPrivateAudioAbort(abortTrigger, 'Agents sessions');
-    final request =
-        http.Request(method, requestBuilder.buildUrl(path, queryParams: query))
-          ..headers.addAll(
-            requestBuilder.buildBetaHeaders(
-              betaFeature: 'agents=v1',
-              additionalHeaders: callerHeaders,
-            ),
-          )
-          ..headers['openai-beta'] = 'agents=v1'
-          ..headers['accept'] = 'application/json';
+    final request = http.Request(
+      method,
+      requestBuilder.buildUrl(path, queryParams: query),
+    );
+    request.headers.addAll(
+      privateAgentInspectionExternal(
+        request,
+        () => requestBuilder.buildBetaHeaders(
+          betaFeature: 'agents=v1',
+          additionalHeaders: callerHeaders,
+        ),
+      ),
+    );
+    request.headers['openai-beta'] = 'agents=v1';
+    request.headers['accept'] = 'application/json';
     if (callerIdempotencyKey != null) {
       request.headers['idempotency-key'] = callerIdempotencyKey;
     }
@@ -691,4 +713,245 @@ Map<String, String> _historyQuery({
     if (order != null) 'order': order.value,
     'after': ?after,
   };
+}
+
+/// Service-owned child state and history; root coordinator history is separate.
+/// There are no child create/resume/interrupt/close actions in this resource.
+/// Closed children may resume: openedAt remains stable and closedAt becomes null.
+class AgentSessionSubagentsResource extends ResourceBase
+    with _AgentSessionHttp {
+  /// Shares ordinary authentication, project, HTTP policy and borrowed transport.
+  AgentSessionSubagentsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
+  AgentSessionSubagentItemsResource? _items;
+
+  /// Child item history.
+  AgentSessionSubagentItemsResource get items {
+    ensureNotClosed?.call();
+    return _items ??= AgentSessionSubagentItemsResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+  }
+
+  AgentSessionSubagentTurnsResource? _turns;
+
+  /// Child turn history and individual turn items.
+  AgentSessionSubagentTurnsResource get turns {
+    ensureNotClosed?.call();
+    return _turns ??= AgentSessionSubagentTurnsResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+  }
+
+  /// Reads one ID page. Advance with lastId while retaining order and context.
+  Future<AgentSessionSubagentList> list(
+    String sessionId, {
+    int? limit,
+    AgentListOrder? order,
+    String? after,
+    Map<String, String>? additionalHeaders,
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    final path = '${_sessionPath(sessionId)}/subagents';
+    final query = _historyQuery(limit: limit, order: order, after: after);
+    return _json(
+      'GET',
+      path,
+      AgentSessionSubagentList.fromJson,
+      query: query,
+      additionalHeaders: additionalHeaders,
+      abortTrigger: abortTrigger,
+    );
+  }
+
+  /// Retrieves received service state. Does not generate local transitions.
+  Future<AgentSessionSubagent> retrieve(
+    String sessionId,
+    String subagentId, {
+    Map<String, String>? additionalHeaders,
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    return _json(
+      'GET',
+      _subagentPath(sessionId, subagentId),
+      AgentSessionSubagent.fromJson,
+      additionalHeaders: additionalHeaders,
+      abortTrigger: abortTrigger,
+    );
+  }
+}
+
+/// Persisted child items. Historical tool calls never authorize automatic replay.
+class AgentSessionSubagentItemsResource extends ResourceBase
+    with _AgentSessionHttp {
+  /// Shares ordinary authentication, project, HTTP policy and borrowed transport.
+  AgentSessionSubagentItemsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
+
+  /// Reads one ID page. Advance with lastId while retaining order and context.
+  Future<AgentSessionItemList> list(
+    String sessionId,
+    String subagentId, {
+    int? limit,
+    AgentListOrder? order,
+    String? after,
+    Map<String, String>? additionalHeaders,
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    final path = '${_subagentPath(sessionId, subagentId)}/items';
+    final query = _historyQuery(limit: limit, order: order, after: after);
+    return _json(
+      'GET',
+      path,
+      AgentSessionItemList.fromJson,
+      query: query,
+      additionalHeaders: additionalHeaders,
+      abortTrigger: abortTrigger,
+    );
+  }
+}
+
+/// Persisted child turns, with independent status/timestamps/error/usage.
+class AgentSessionSubagentTurnsResource extends ResourceBase
+    with _AgentSessionHttp {
+  /// Shares ordinary authentication, project, HTTP policy and borrowed transport.
+  AgentSessionSubagentTurnsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
+  AgentSessionSubagentTurnItemsResource? _items;
+
+  /// Items belonging to one child turn.
+  AgentSessionSubagentTurnItemsResource get items {
+    ensureNotClosed?.call();
+    return _items ??= AgentSessionSubagentTurnItemsResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+  }
+
+  /// Reads one ID page. Advance with lastId while retaining order and context.
+  Future<AgentSessionTurnList> list(
+    String sessionId,
+    String subagentId, {
+    int? limit,
+    AgentListOrder? order,
+    String? after,
+    Map<String, String>? additionalHeaders,
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    final path = '${_subagentPath(sessionId, subagentId)}/turns';
+    final query = _historyQuery(limit: limit, order: order, after: after);
+    return _json(
+      'GET',
+      path,
+      AgentSessionTurnList.fromJson,
+      query: query,
+      additionalHeaders: additionalHeaders,
+      abortTrigger: abortTrigger,
+    );
+  }
+
+  /// Retrieves received service state. Does not generate local transitions.
+  Future<AgentSessionTurn> retrieve(
+    String sessionId,
+    String subagentId,
+    String turnId, {
+    Map<String, String>? additionalHeaders,
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    return _json(
+      'GET',
+      _subagentTurnPath(sessionId, subagentId, turnId),
+      AgentSessionTurn.fromJson,
+      additionalHeaders: additionalHeaders,
+      abortTrigger: abortTrigger,
+    );
+  }
+}
+
+/// Persisted items from one child turn, separate from root turns.
+class AgentSessionSubagentTurnItemsResource extends ResourceBase
+    with _AgentSessionHttp {
+  /// Shares ordinary authentication, project, HTTP policy and borrowed transport.
+  AgentSessionSubagentTurnItemsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
+
+  /// Reads one ID page. Advance with lastId while retaining order and context.
+  Future<AgentSessionItemList> list(
+    String sessionId,
+    String subagentId,
+    String turnId, {
+    int? limit,
+    AgentListOrder? order,
+    String? after,
+    Map<String, String>? additionalHeaders,
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    final path = '${_subagentTurnPath(sessionId, subagentId, turnId)}/items';
+    final query = _historyQuery(limit: limit, order: order, after: after);
+    return _json(
+      'GET',
+      path,
+      AgentSessionItemList.fromJson,
+      query: query,
+      additionalHeaders: additionalHeaders,
+      abortTrigger: abortTrigger,
+    );
+  }
+}
+
+String _subagentPath(String sessionId, String subagentId) =>
+    '${_sessionPath(sessionId)}/subagents/${_subagentId(subagentId)}';
+String _subagentTurnPath(String sessionId, String subagentId, String turnId) =>
+    '${_subagentPath(sessionId, subagentId)}/turns/${_opaqueTurnId(turnId)}';
+String _subagentId(String id) {
+  validateAgentLength(id, 'Agents subagentId', max: 1048576);
+  if (id.isEmpty || id == '.' || id == '..') {
+    throw const FormatException(
+      'Agents subagentId: expected an opaque segment',
+    );
+  }
+  try {
+    return Uri.encodeComponent(id);
+  } on ArgumentError {
+    throw const FormatException(
+      'Agents subagentId: expected an encodable segment',
+    );
+  }
 }

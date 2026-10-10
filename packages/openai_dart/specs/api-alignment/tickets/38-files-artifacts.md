@@ -1,6 +1,6 @@
 # Live environment files and published artifacts
 
-Status: implemented locally; published-head reviews/CI and user-authorized merge pending.
+Status: merged in PR #405 after independent published-head reviews and green CI.
 GitHub: [#390](https://github.com/davidmigloz/ai_clients_dart/issues/390).
 Primary requirements: `AGENTS-FILES-01`.
 Native GitHub blockers: [#386](https://github.com/davidmigloz/ai_clients_dart/issues/386), [#389](https://github.com/davidmigloz/ai_clients_dart/issues/389).
@@ -40,14 +40,14 @@ This ticket owns these 6 operations and their complete request/response/paramete
 
 ## Acceptance criteria
 
-- [ ] Actual public mock JSON/download requests cover all six paths, nested IDs, forced beta and download Accept precedence, file-ID/inline-copy bodies, artifact deletes and binary content with null/non-UTF-8/NUL bytes intact.
-- [ ] Separate public pagination fixtures prove opaque `page`/required nullable `next` behavior for live files and `after`/nullable environment filter/boundary IDs for artifacts, including empty and multi-page results.
-- [ ] File/artifact required fields, branch/byte/path/size limits, malformed known data, deep ownership/equality/copy, private diagnostics and local stream cancellation are covered on supported VM/browser JavaScript/Wasm targets.
-- [ ] An offline example stages a file, lists live workspace pages, inspects a completed-turn artifact and downloads exact bytes after a mocked expired environment; README/llms explain publication and lifetime limits.
-- [ ] Public request bodies/parameters are captured through the exported client and validated against the pinned canonical contracts; the feature assertions fail against base `08f9594dc73703e521aae4cb070a0be34509642a`, rather than merely mirroring model implementation.
-- [ ] Constructor/parser/copy tests cover all owned discriminator variants, required-nullable/optional-nonnull/tri-state values, nested ownership, equality/hash with the same fields, safe diagnostics, unknown-received fallback and malformed-known errors.
-- [ ] A runnable offline example, package README and regenerated llms documentation describe the real public capability and its limits; actual implemented types have honest manifest mappings and unchanged unrelated exclusions/verifier policy.
-- [ ] Required formatting/fixes/analysis, affected focused fixtures on VM/browser JavaScript/Wasm, and the package unit suite pass; independent requirements and engineering reviews approve the published final commit, and that exact head has green CI before a user-authorized merge.
+- [x] Actual public mock JSON/download requests cover all six paths, nested IDs, forced beta and download Accept precedence, file-ID/inline-copy bodies, artifact deletes and binary content with null/non-UTF-8/NUL bytes intact.
+- [x] Separate public pagination fixtures prove opaque `page`/required nullable `next` behavior for live files and `after`/nullable environment filter/boundary IDs for artifacts, including empty and multi-page results.
+- [x] File/artifact required fields, branch/byte/path/size limits, malformed known data, deep ownership/equality/copy, private diagnostics and local stream cancellation are covered on supported VM/browser JavaScript/Wasm targets.
+- [x] An offline example stages a file, lists live workspace pages, inspects a completed-turn artifact and downloads exact bytes after a mocked expired environment; README/llms explain publication and lifetime limits.
+- [x] Public request bodies/parameters are captured through the exported client and validated against the pinned canonical contracts; the feature assertions fail against base `08f9594dc73703e521aae4cb070a0be34509642a`, rather than merely mirroring model implementation.
+- [x] Constructor/parser/copy tests cover all owned discriminator variants, required-nullable/optional-nonnull/tri-state values, nested ownership, equality/hash with the same fields, safe diagnostics, unknown-received fallback and malformed-known errors.
+- [x] A runnable offline example, package README and regenerated llms documentation describe the real public capability and its limits; actual implemented types have honest manifest mappings and unchanged unrelated exclusions/verifier policy.
+- [x] Required formatting/fixes/analysis, affected focused fixtures on VM/browser JavaScript/Wasm, and the package unit suite pass; independent requirements and engineering reviews approve the published final commit, and that exact head has green CI before a user-authorized merge.
 
 ## Source and validation evidence
 
@@ -60,3 +60,5 @@ Portable Files API upload orchestration, local filesystem safety adapters, outpu
 ## Implementation record
 
 [Acceptance evidence](../reviews/38-files-artifacts.md) records delivered exported file/artifact resources, source/runtime checks and offline documentation. Published-head reviews and exact-head CI remain separate gates; this commit does not claim a future merge.
+
+Merged in [PR #405](https://github.com/davidmigloz/ai_clients_dart/pull/405) at `7fcfb3f797347e16165f14eabd6381fc5c3ca07b` on `2026-10-10T07:34:16Z` after both independent published content/CI approvals and all 14 exact-head contexts completed (13 successes/standard skip). Reviewed head: `92f7cb3acc32737eb98758f503bf4f405f791146`.
