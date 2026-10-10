@@ -2,6 +2,7 @@ import 'package:http/http.dart' as http;
 
 import '../errors/exceptions.dart';
 import '../interceptors/interceptor.dart';
+import '../utils/private_agent_inspection_http.dart';
 import '../utils/request_id.dart';
 import '../utils/speech_redaction.dart';
 import 'retry_wrapper.dart';
@@ -178,10 +179,17 @@ class InterceptorChain {
           );
 
           try {
-            final streamedResponse = await httpClient.send(abortableRequest);
-            return await _bufferPrivateResponse(
-              streamedResponse,
+            return await privateAgentInspectionTransport(
               abortableRequest,
+              () async {
+                final streamedResponse = await httpClient.send(
+                  abortableRequest,
+                );
+                return _bufferPrivateResponse(
+                  streamedResponse,
+                  abortableRequest,
+                );
+              },
             );
           } on http.RequestAbortedException catch (e) {
             // Convert http package's abort exception to our AbortedException
@@ -194,8 +202,10 @@ class InterceptorChain {
           }
         } else {
           // No abort trigger - normal execution
-          final streamedResponse = await httpClient.send(requestToSend);
-          return _bufferPrivateResponse(streamedResponse, requestToSend);
+          return privateAgentInspectionTransport(requestToSend, () async {
+            final streamedResponse = await httpClient.send(requestToSend);
+            return _bufferPrivateResponse(streamedResponse, requestToSend);
+          });
         }
       }
 
@@ -237,7 +247,8 @@ Future<http.Response> _bufferPrivateResponse(
   http.BaseRequest sentRequest,
 ) async {
   final response = await http.Response.fromStream(streamed);
-  if (response.request != null || !isPrivateAudioRequest(sentRequest)) {
+  if (!isAgentSessionSubagentRequest(sentRequest) &&
+      (response.request != null || !isPrivateAudioRequest(sentRequest))) {
     return response;
   }
   // Some injected transports omit request context. Retain the actual sent

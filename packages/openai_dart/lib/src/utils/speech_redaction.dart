@@ -69,7 +69,11 @@ bool isAgentSessionRequest(http.BaseRequest? request) {
               segments[segments.length - 5] == 'sessions' &&
               segments[segments.length - 3] == 'turns' &&
               segments.last == 'items'));
-  return collection || item || events || history;
+  return collection ||
+      item ||
+      events ||
+      history ||
+      isAgentSessionSubagentRequest(request);
 }
 
 /// Identifies the five saved-agent operations, including custom base paths.
@@ -213,4 +217,25 @@ bool isAgentFileRequest(http.BaseRequest? request) {
       s[s.length - 3] == 'artifacts' &&
       s.last == 'content' &&
       request.method == 'GET';
+}
+
+/// Six implemented child inspection routes, including custom bases and IDs.
+bool isAgentSessionSubagentRequest(http.BaseRequest? request) {
+  if (request == null) return false;
+  if (request.method != 'GET') return false;
+  final s = request.url.pathSegments;
+  for (final tail in [4, 5, 6, 7, 8]) {
+    final offset = s.length - tail;
+    if (offset < 0 ||
+        s[offset] != 'agents' ||
+        s[offset + 1] != 'sessions' ||
+        s[offset + 3] != 'subagents') {
+      continue;
+    }
+    if (tail == 4 || tail == 5) return true;
+    if (tail == 6 && const {'items', 'turns'}.contains(s.last)) return true;
+    if (tail == 7 && s[offset + 5] == 'turns') return true;
+    if (tail == 8 && s[offset + 5] == 'turns' && s.last == 'items') return true;
+  }
+  return false;
 }

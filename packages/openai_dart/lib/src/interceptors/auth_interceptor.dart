@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 
 import '../auth/auth_provider.dart';
+import '../utils/private_agent_inspection_http.dart';
 import '../utils/speech_redaction.dart';
 import 'interceptor.dart';
 
@@ -32,7 +33,10 @@ class AuthInterceptor implements Interceptor {
     InterceptorNext next,
   ) {
     // Get auth headers from provider
-    final providerHeaders = authProvider.getHeaders();
+    final providerHeaders = privateAgentInspectionExternal(
+      context.request,
+      authProvider.getHeaders,
+    );
 
     // Private resources select their required media headers at the boundary.
     // Keep those request-level values when refreshing provider credentials.

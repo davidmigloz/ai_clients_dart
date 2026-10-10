@@ -32,11 +32,12 @@ Root/turn history and traces merged in
 after both published content/CI approvals and all 14 completed contexts.
 Merged in [PR #403](https://github.com/davidmigloz/ai_clients_dart/pull/403) at `9a31d51ddaf59f4a415cdea08c914accd5f255dd` on `2026-10-09T20:38:41Z` after both independent published content/CI approvals and all 14 exact-head contexts completed (13 successes/standard skip). Reviewed head: `01a72bd5ca439dafe180bf84d1fef570fe0eecec`.
 Merged in [PR #404](https://github.com/davidmigloz/ai_clients_dart/pull/404) at `435b4cf04155b665ebe8a8a6909dc8bce364a49b` on `2026-10-09T21:15:29Z` after both independent published content/CI approvals and all 14 exact-head contexts completed (13 successes/standard skip). Reviewed head: `48ac187f104e29644a28da8825bafe21fe3c4a05`.
-There are now 37 merged implementations, two remaining core issues (#390–391)
+Merged in [PR #405](https://github.com/davidmigloz/ai_clients_dart/pull/405) at `7fcfb3f797347e16165f14eabd6381fc5c3ca07b` on `2026-10-10T07:34:16Z` after both independent published content/CI approvals and all 14 exact-head contexts completed (13 successes/standard skip). Reviewed head: `92f7cb3acc32737eb98758f503bf4f405f791146`.
+There are now 38 merged implementations, one remaining core issue (#391)
 and evaluation #399. The user has now bounded the finish line to seven core Agents/Vaults tickets on the audited snapshot plus one expressly approved HTTP/2 evaluation. Parent #317 stays open until those seven and the evaluation are accepted; optional helpers and later parity phases are deferred inventory.
 
 Tracking parent: [GitHub issue #317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
-This parent tracks the bounded milestone; it can close after its two remaining core tickets and one approved HTTP/2 evaluation are accepted, without claiming full parity or requiring a transport migration.
+This parent tracks the bounded milestone; it can close after its one remaining core ticket and one approved HTTP/2 evaluation are accepted, without claiming full parity or requiring a transport migration.
 The [progress history](progress-history.md) preserves every earlier parent-issue
 receipt through the Live WebSocket merge; current work remains in this roadmap.
 

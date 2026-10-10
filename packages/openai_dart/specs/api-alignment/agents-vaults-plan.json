@@ -691,7 +691,7 @@
       "ticket": 38,
       "document": "tickets/38-files-artifacts.md",
       "title": "Live environment files and published artifacts",
-      "status": "implemented locally; published-head reviews/CI and user-authorized merge pending",
+      "status": "merged in PR #405 after independent published-head reviews and green CI",
       "github_issue": {
         "number": 390,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/390"
@@ -728,13 +728,22 @@
       "milestone_scope": "active",
       "tracking_parent_issue": 317,
       "implementation_review": "reviews/38-files-artifacts.md",
-      "acceptance_record": "reviews/38-files-artifacts.md"
+      "acceptance_record": "reviews/38-files-artifacts.md",
+      "merge_receipt": {
+        "headRefOid": "92f7cb3acc32737eb98758f503bf4f405f791146",
+        "mergeCommit": {
+          "oid": "7fcfb3f797347e16165f14eabd6381fc5c3ca07b"
+        },
+        "mergedAt": "2026-10-10T07:34:16Z",
+        "state": "MERGED",
+        "url": "https://github.com/davidmigloz/ai_clients_dart/pull/405"
+      }
     },
     {
       "ticket": 39,
       "document": "tickets/39-subagents.md",
       "title": "Subagent inspection and history",
-      "status": "active bounded milestone; implementation acceptance pending",
+      "status": "implemented locally; published-head reviews/CI and user-authorized merge pending",
       "github_issue": {
         "number": 391,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/391"
@@ -820,7 +829,9 @@
         "WebSearchCallItemResource"
       ],
       "milestone_scope": "active",
-      "tracking_parent_issue": 317
+      "tracking_parent_issue": 317,
+      "implementation_review": "reviews/39-subagents.md",
+      "acceptance_record": "reviews/39-subagents.md"
     },
     {
       "ticket": 40,

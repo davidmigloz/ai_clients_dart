@@ -75,7 +75,11 @@
     "agentEnvironments": "agent_environments_example",
     "agentEnvironmentTemplates": "agent_environments_example",
     "agentEnvironmentFiles": "agent_files_artifacts_example",
-    "agentSessionArtifacts": "agent_files_artifacts_example"
+    "agentSessionArtifacts": "agent_files_artifacts_example",
+    "agentSessionSubagents": "agent_subagents_example",
+    "agentSessionSubagentItems": "agent_subagents_example",
+    "agentSessionSubagentTurns": "agent_subagents_example",
+    "agentSessionSubagentTurnItems": "agent_subagents_example"
   },
   "excluded_from_examples": [],
   "drift_patterns": [

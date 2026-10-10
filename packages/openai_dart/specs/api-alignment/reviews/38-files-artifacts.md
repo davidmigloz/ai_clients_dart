@@ -1,6 +1,6 @@
 # Live environment files and published artifacts acceptance
 
-Status: local implementation for [#390](https://github.com/davidmigloz/ai_clients_dart/issues/390), [ticket 38](../tickets/38-files-artifacts.md). Independent published-head reviews, exact-head CI and the next user-authorized merge remain separate gates.
+Status: local implementation for [#390](https://github.com/davidmigloz/ai_clients_dart/issues/390), [ticket 38](../tickets/38-files-artifacts.md). Independent published-head reviews, exact-head CI and the user-authorized merge are complete.
 
 ## Frozen sources and delivered scope
 
@@ -37,3 +37,9 @@ The runnable [offline example](../../../example/agent_files_artifacts_example.da
 All 1,398 prior manifest entries remain unchanged; six real mappings bring the total to 1,404. No new exclusion, skip or verifier relaxation is introduced. Toolkit diagnostics remain visible: implementation 984 errors / 126 warnings / 278 infos and 115 consistency warnings. Every prior finding identity remains; the sole addition is the scalar-wrapper scanner's `No spec fields found for EnvironmentFilePageObjectResource`. The actual Dart string wrapper and container validation have independent canonical/runtime coverage. Docs, README and exports checks have no errors.
 
 Audit directory: `/tmp/openai-alignment-audit/38-files-artifacts`. Independent local approvals bind final inventory bytes; remote GitHub blob/head/tree reviews and CI are subsequent immutable receipts. No future publication, CI or merge is fabricated here.
+
+## Published acceptance and merge
+
+Merged in [PR #405](https://github.com/davidmigloz/ai_clients_dart/pull/405) at `7fcfb3f797347e16165f14eabd6381fc5c3ca07b` on `2026-10-10T07:34:16Z` after both independent published content/CI approvals and all 14 exact-head contexts completed (13 successes/standard skip). Reviewed head: `92f7cb3acc32737eb98758f503bf4f405f791146`.
+
+Published requirements/engineering content receipts: `cf2f5bf7d38b8d4ec22d10064fc51a3ef421840c94a90b609b11ff92e51c7a43` / `979513fd695b0bbad6b9e9a2a6a5a3cd99dd384fa0244624a11c866880a6c840`. CI supplements: `b39c5d2bc7fc04de027316d2e7aee47a15618d1f7316f0e84c9e3cadf0a5d5a2` / `4d7cfa51dcf54430dd63a78a81a487c74b412f785a264ab058afc190b9e40310`. Root immutable CI receipt: `9a40fcf243f2a68ea23150394b22dd3bd6ea98dff561d462ae38313b7d4a2fad`.

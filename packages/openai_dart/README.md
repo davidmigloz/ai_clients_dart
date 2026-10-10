@@ -240,8 +240,7 @@ Injected HTTP clients remain caller-owned. Durable sessions, root/turn history
 and published traces are available through `client.agents.sessions`; Vaults and
 write-only credentials use `client.vaults`. Owned environments and templates use
 `client.agents.environments` and `.templates`; live files use `.files` and
-published artifacts use `client.agents.sessions.artifacts`. Subagent inspection
-remains in the bounded implementation queue. The runnable example exercises all six saved tool types,
+published artifacts use `client.agents.sessions.artifacts`. Subagent state and child item/turn history use `client.agents.sessions.subagents`. The runnable example exercises all six saved tool types,
 pagination, replacement, clear/reset and deletion with seven mock requests and
 explicit transport cleanup, without an API key or paid API call.
 
@@ -470,6 +469,58 @@ chosen as local destinations. Deleting an artifact leaves the live file intact.
 → [Offline files and artifacts example](example/agent_files_artifacts_example.dart)
 — stages input, pages live files and downloads exact bytes after mocked expiry,
 with all six endpoints, no API key or paid execution ($0).
+
+### Agent session subagents
+
+Inspect service-owned children separately from the root coordinator's history:
+
+```dart
+final subagents = client.agents.sessions.subagents;
+final children = await subagents.list(sessionId, limit: 20);
+final child = await subagents.retrieve(sessionId, children.data.first.id);
+final rootItems = await client.agents.sessions.items.list(sessionId);
+final childItems = await subagents.items.list(sessionId, child.id,
+  limit: 20, order: AgentListOrder.asc);
+if (childItems.lastId != null) {
+  await subagents.items.list(sessionId, child.id,
+    limit: 20, order: AgentListOrder.asc, after: childItems.lastId);
+}
+final turns = await subagents.turns.list(sessionId, child.id,
+  limit: 20, order: AgentListOrder.asc);
+final turn = await subagents.turns.retrieve(sessionId, child.id, turns.data.first.id);
+final turnItems = await subagents.turns.items.list(sessionId, child.id, turn.id);
+```
+
+All six methods are inspection GETs, using ordinary auth/project/HTTP policy and
+forced `OpenAI-Beta: agents=v1`. Known IDs are independently callable: no new
+coordinator turn or local worker process is required. The child list has a typed
+`AgentSessionSubagentList` envelope for the actual inline response. Every list
+uses exclusive ID `after` pagination with limit 1–100, order and required nullable
+first/last boundaries. Keep the same order and parent IDs between pages; null
+query arguments are omitted. Opaque IDs are encoded separately at every level;
+empty and exact dot segments are rejected as local URI safeguards.
+
+Child `name`, `instructions` and `closedAt` are required nullable received fields.
+Instructions preserve output-text/encrypted-content branches; text may include
+service-provided placeholders for image/audio previews. No missing content is
+reconstructed. A closed child may later resume: its original `openedAt` remains
+unchanged and `closedAt` becomes null. These are service-owned state transitions;
+a GET does not trigger them. Child turns retain their own IDs, nullable
+start/completion/error/usage, and canonical creation-time ordering.
+
+Root coordinator interactions and child history are separate collections. Child
+history reuses all 17 canonical item branches and the complete shared turn shape,
+including browser-safe history and finite private future values. Reading a past
+tool, approval or subagent-call item grants no permission to replay it. This
+resource has no child create, resume, interrupt or close HTTP action, and does
+not start independent workers/providers. Private instructions, content and
+metadata stay out of default diagnostics; explicit fields and `toJson()` remain
+caller-readable. Borrowed transport ownership and local request abort behavior
+follow the ordinary client policy.
+
+→ [Offline subagent inspection example](example/agent_subagents_example.dart) —
+all six inspection routes, root versus child history, separate turn items and
+received closed/resumed state using nine mock GETs, with no key or paid execution ($0).
 
 ### Vaults and write-only credentials
 
@@ -3258,7 +3309,7 @@ See the [example/](example/) directory for complete examples:
 
 | API | Status |
 |-----|--------|
-| Agents | Saved agent CRUD and durable session CRUD, JSON/SSE creation, persistent event observation and manual inputs; root/turn history and published OTLP traces; owned hosted environments and template CRUD; subagent inspection pending |
+| Agents | Saved agent CRUD and durable session CRUD, JSON/SSE creation, persistent event observation and manual inputs; root/turn history and published OTLP traces; owned hosted environments and template CRUD; live files and published artifacts; child inspection and item/turn history |
 | Vaults | Vault CRUD and write-only OAuth, bearer and hosted environment-variable credential management |
 | Chat Completions | Supported; stored-completion management pending |
 | Responses API | Supported with persistent WebSockets, mid-turn steering, opt-in recovery and beta tool-result injection; additional tool/configuration details pending |
