@@ -600,7 +600,7 @@
       "ticket": 37,
       "document": "tickets/37-environments-templates.md",
       "title": "Owned hosted environments and templates",
-      "status": "implemented locally; published-head reviews/CI and user-authorized merge pending",
+      "status": "merged in PR #404 after independent published-head reviews and green CI",
       "github_issue": {
         "number": 389,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/389"
@@ -676,13 +676,22 @@
       "milestone_scope": "active",
       "tracking_parent_issue": 317,
       "implementation_review": "reviews/37-environments-templates.md",
-      "acceptance_record": "reviews/37-environments-templates.md"
+      "acceptance_record": "reviews/37-environments-templates.md",
+      "merge_receipt": {
+        "headRefOid": "48ac187f104e29644a28da8825bafe21fe3c4a05",
+        "mergeCommit": {
+          "oid": "435b4cf04155b665ebe8a8a6909dc8bce364a49b"
+        },
+        "mergedAt": "2026-10-09T21:15:29Z",
+        "state": "MERGED",
+        "url": "https://github.com/davidmigloz/ai_clients_dart/pull/404"
+      }
     },
     {
       "ticket": 38,
       "document": "tickets/38-files-artifacts.md",
       "title": "Live environment files and published artifacts",
-      "status": "active bounded milestone; implementation acceptance pending",
+      "status": "implemented locally; published-head reviews/CI and user-authorized merge pending",
       "github_issue": {
         "number": 390,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/390"
@@ -717,7 +726,9 @@
         "SessionArtifactResource"
       ],
       "milestone_scope": "active",
-      "tracking_parent_issue": 317
+      "tracking_parent_issue": 317,
+      "implementation_review": "reviews/38-files-artifacts.md",
+      "acceptance_record": "reviews/38-files-artifacts.md"
     },
     {
       "ticket": 39,

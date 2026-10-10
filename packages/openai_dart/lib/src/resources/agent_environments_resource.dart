@@ -6,12 +6,27 @@ import '../errors/exceptions.dart';
 import '../models/agents/agent_json_helpers.dart';
 import '../models/agents/agents.dart';
 import '../utils/private_audio_http.dart';
+import 'agent_environment_files_resource.dart';
 import 'base_resource.dart';
 
 /// Owned hosted environments; prewarming requires service beta eligibility.
 /// Session, environment, provider and artifact lifetimes are independent.
 /// Status values do not imply suspend/resume/reset/delete methods.
 class AgentEnvironmentsResource extends ResourceBase with _EnvironmentHttp {
+  AgentEnvironmentFilesResource? _files;
+
+  /// Mutable live files on a connected hosted environment.
+  AgentEnvironmentFilesResource get files {
+    ensureNotClosed?.call();
+    return _files ??= AgentEnvironmentFilesResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+  }
+
   /// Shares the client's authenticated project and borrowed transport.
   AgentEnvironmentsResource({
     required super.config,

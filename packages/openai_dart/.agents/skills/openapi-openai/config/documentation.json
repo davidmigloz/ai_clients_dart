@@ -73,7 +73,9 @@
     "vaults": "vaults_example",
     "vaultCredentials": "vaults_example",
     "agentEnvironments": "agent_environments_example",
-    "agentEnvironmentTemplates": "agent_environments_example"
+    "agentEnvironmentTemplates": "agent_environments_example",
+    "agentEnvironmentFiles": "agent_files_artifacts_example",
+    "agentSessionArtifacts": "agent_files_artifacts_example"
   },
   "excluded_from_examples": [],
   "drift_patterns": [

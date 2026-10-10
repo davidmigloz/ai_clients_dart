@@ -1,6 +1,6 @@
 # Live environment files and published artifacts
 
-Status: active bounded milestone; implementation acceptance pending.
+Status: implemented locally; published-head reviews/CI and user-authorized merge pending.
 GitHub: [#390](https://github.com/davidmigloz/ai_clients_dart/issues/390).
 Primary requirements: `AGENTS-FILES-01`.
 Native GitHub blockers: [#386](https://github.com/davidmigloz/ai_clients_dart/issues/386), [#389](https://github.com/davidmigloz/ai_clients_dart/issues/389).
@@ -56,3 +56,7 @@ Wire authority is immutable OpenAPI [`0ef225c4f701046f8fe88cae9d29d0df4d1a9fa9`]
 All tests and examples default to deterministic mock HTTP/SSE, local servers or pure fixtures, with no live API calls, API key or paid hosted execution required ($0). Schema-only planning witnesses do not satisfy runtime acceptance. The implementation PR must record actual canonical assertions, supported-platform checks, independent review and retained toolkit diagnostics; this planning ticket claims none of those checks have already passed for a future implementation.
 
 Portable Files API upload orchestration, local filesystem safety adapters, output-result artifact matching/download convenience and partial-upload cleanup are ticket 45. No automatic directory synchronization, unpublished-output retention or local destination selection is added here. No release/version bump is part of this ticket.
+
+## Implementation record
+
+[Acceptance evidence](../reviews/38-files-artifacts.md) records delivered exported file/artifact resources, source/runtime checks and offline documentation. Published-head reviews and exact-head CI remain separate gates; this commit does not claim a future merge.

@@ -239,8 +239,9 @@ explicit properties and `toJson()` remain available to the caller.
 Injected HTTP clients remain caller-owned. Durable sessions, root/turn history
 and published traces are available through `client.agents.sessions`; Vaults and
 write-only credentials use `client.vaults`. Owned environments and templates use
-`client.agents.environments` and `.templates`; live environment files/artifacts
-and subagent inspection remain in the bounded implementation queue. The runnable example exercises all six saved tool types,
+`client.agents.environments` and `.templates`; live files use `.files` and
+published artifacts use `client.agents.sessions.artifacts`. Subagent inspection
+remains in the bounded implementation queue. The runnable example exercises all six saved tool types,
 pagination, replacement, clear/reset and deletion with seven mock requests and
 explicit transport cleanup, without an API key or paid API call.
 
@@ -406,6 +407,69 @@ template deletion does not promise cleanup of sessions, environments or artifact
 
 → [Offline environments example](example/agent_environments_example.dart) — all eight
 operations with mock HTTP, no API key or paid prewarming ($0).
+
+### Agent environment files and published artifacts
+
+Live workspace files require a connected hosted environment. Copy an existing
+Files API file ID or standard-base64 bytes into a hosted path:
+
+```dart
+final files = client.agents.environments.files;
+await files.create(environmentId, AgentSessionHostedEnvironmentFileConfig.fileId(
+  fileId: existingFileId, path: '/workspace/input.bin'));
+await files.create(environmentId, AgentSessionHostedEnvironmentFileConfig.inline(
+  data: base64Encode(inputBytes), path: '/workspace/another.bin'));
+final page = await files.list(environmentId, path: '/workspace', limit: 20,
+  order: AgentListOrder.asc);
+if (page.next != null) {
+  await files.list(environmentId, path: '/workspace', limit: 20,
+    order: AgentListOrder.asc, page: page.next);
+}
+final artifacts = client.agents.sessions.artifacts;
+final published = await artifacts.list(sessionId, environmentId: environmentId);
+final artifact = await artifacts.retrieve(sessionId, published.data.first.id);
+final bytes = await artifacts.download(sessionId, artifact.id);
+await for (final chunk in artifacts.downloadStream(sessionId, artifact.id)) {
+  // Consume exact binary chunks in the application.
+}
+await artifacts.delete(sessionId, artifact.id);
+```
+
+Import `dart:convert` for `base64Encode`. Inline files accept standard base64,
+including empty data, and at most 5 MiB decoded per file; this field does not
+accept a data URL. File destinations are absolute POSIX paths under `/workspace`.
+The service checks existing destinations, symlinks, component lengths and the
+50 MiB limit for Files API references. The client does not read a local path or
+upload a local file automatically. After an uncertain copy, check the destination
+before retrying; copying is a side effect and has no local deduplication cache.
+
+Live pages use `object: page`, opaque `next`/`page` tokens and required nullable
+`next`. Keep directory, limit and order consistent between pages. Artifact pages
+instead use `firstId`/`lastId`, and advance with `after: page.lastId`, retaining
+order and environment filter. Null query arguments are omitted. Empty pages keep
+null boundary values. File metadata has environment/path/size; artifact metadata
+also has immutable ID, session and completed-turn ownership, and publication time.
+
+Outputs under `/workspace/outputs` are published as immutable artifacts when a
+hosted turn completes. Published copies survive environment expiry; unpublished
+outputs are not guaranteed to survive cancellation or session deletion. Download
+anything to retain before deleting the session. Self-hosted files use the
+provider's filesystem API. Service limits are 200 MiB per artifact and 500 MiB
+per co-publication; metadata sizes have no client-imposed upper limit.
+
+Downloads preserve arbitrary bytes, including NUL and non-UTF-8 data, with no
+JSON/text decoding. `download` buffers in memory; `downloadStream` is incremental
+and uses the existing private byte transport without replay or interceptors.
+Both force Agents beta and octet-stream Accept, preserve auth/project context,
+and apply header/active-read timeouts. Pause suspends the body idle deadline.
+Abort or subscription cancellation releases this local download only; it does
+not delete an artifact or cancel a turn. Injected HTTP clients remain borrowed;
+a distinct `streamClientFactory` client is operation-owned. Hosted paths are never
+chosen as local destinations. Deleting an artifact leaves the live file intact.
+
+→ [Offline files and artifacts example](example/agent_files_artifacts_example.dart)
+— stages input, pages live files and downloads exact bytes after mocked expiry,
+with all six endpoints, no API key or paid execution ($0).
 
 ### Vaults and write-only credentials
 
