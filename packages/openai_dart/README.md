@@ -117,6 +117,8 @@ import 'package:openai_dart/openai_dart_realtime.dart' as realtime;
 
 ## Configuration
 
+The [HTTP/2 transport evaluation](specs/api-alignment/reviews/46-http2.md) recommends deferring `http2` 3.1.0 adoption: local multiplexing saves connections, but cancellation, buffering and repeated SSE compatibility prevent a general recommendation. The existing default transport and client injection API remain unchanged.
+
 <details>
 <summary><b>Configure auth, retries, and custom endpoints</b></summary>
 

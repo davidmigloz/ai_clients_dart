@@ -1,6 +1,6 @@
 {
   "format_version": 1,
-  "status": "bounded planning milestone; seven core HTTP tickets plus one authorized evaluation; acceptance pending",
+  "status": "seven core HTTP tickets merged; final authorized HTTP2 evaluation locally completed with defer recommendation, final review/CI/merge pending",
   "parent_issue": 317,
   "repository_base_commit": "08f9594dc73703e521aae4cb070a0be34509642a",
   "reviewed_at_utc": "2026-10-09T12:36:45.060428+00:00",
@@ -743,7 +743,7 @@
       "ticket": 39,
       "document": "tickets/39-subagents.md",
       "title": "Subagent inspection and history",
-      "status": "implemented locally; published-head reviews/CI and user-authorized merge pending",
+      "status": "merged in PR #406; issue #391 closed",
       "github_issue": {
         "number": 391,
         "url": "https://github.com/davidmigloz/ai_clients_dart/issues/391"
@@ -831,7 +831,13 @@
       "milestone_scope": "active",
       "tracking_parent_issue": 317,
       "implementation_review": "reviews/39-subagents.md",
-      "acceptance_record": "reviews/39-subagents.md"
+      "acceptance_record": "reviews/39-subagents.md",
+      "implementation_merge": {
+        "pull_request": 406,
+        "commit": "750a4f4582ebd5dc2e3e568c26bd708bd5fc33ae",
+        "merged_at_utc": "2026-10-10T09:59:51Z",
+        "reviewed_head": "f1a6e93d1507af668b68ac0d8d00be3232ea58ac"
+      }
     },
     {
       "ticket": 40,
@@ -5018,7 +5024,7 @@
         "document": "tickets/46-http2-evaluation.md",
         "specification": "http2-evaluation.md",
         "title": "Evaluate optional HTTP/2 transport support",
-        "status": "active bounded evaluation; decision and measurements pending",
+        "status": "local evaluation complete; defer recommended; final published-head review/CI/user merge pending",
         "github_issue": {
           "number": 399,
           "url": "https://github.com/davidmigloz/ai_clients_dart/issues/399"
@@ -5039,8 +5045,24 @@
           "defer recommendation with recorded blockers/measurements"
         ],
         "production_migration_authorized": false,
-        "automatic_follow_on_work_authorized": false
+        "automatic_follow_on_work_authorized": false,
+        "evaluation_report": "reviews/46-http2.md",
+        "decision": "defer",
+        "raw_measurements": "http2/measurements.json",
+        "API_cost_USD": 0
       }
+    ],
+    "remaining_github_issues": [
+      399
+    ],
+    "merged_core_tickets": [
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39
     ]
   }
 }
