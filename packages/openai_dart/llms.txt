@@ -4,7 +4,9 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~33.2k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [HTTP/2 transport evaluation](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/specs/api-alignment/reviews/46-http2.md) (~3.1k tokens): Local TLS compatibility and matched benchmark evidence; defer experimental native adapter adoption, with no production transport change.
+
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~33.3k tokens): Primary package documentation with installation, configuration, and usage examples.
 - [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/CHANGELOG.md) (~21.7k tokens): Release history and version-by-version changes.
 - [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/MIGRATION.md) (~22.2k tokens): Upgrade notes and breaking-change guidance.
 - [Monitoring failures](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md#how-do-i-inspect-monitoring-failures): Shared passive HTTP/failed Response/WS details, flat nullable SSE errors, scoped investigation and migration boundaries.
@@ -145,4 +147,4 @@ client.agents.sessions.subagents.list/retrieve, .items.list, .turns.list/retriev
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~159k tokens**
+**Total: ~162k tokens**

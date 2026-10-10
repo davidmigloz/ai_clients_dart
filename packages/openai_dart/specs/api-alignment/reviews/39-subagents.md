@@ -1,6 +1,6 @@
 # Subagent inspection and history acceptance
 
-Status: local implementation for [#391](https://github.com/davidmigloz/ai_clients_dart/issues/391), [ticket 39](../tickets/39-subagents.md). Published-head reviews, exact-head CI and the next user-authorized merge remain separate gates.
+Status: merged in [PR #406](https://github.com/davidmigloz/ai_clients_dart/pull/406) for [#391](https://github.com/davidmigloz/ai_clients_dart/issues/391), [ticket 39](../tickets/39-subagents.md). Both independent published-head/CI reviews approved; all 14 contexts completed (13 successes/standard skip) before the user-authorized merge.
 
 ## Frozen source and delivered scope
 
@@ -34,4 +34,8 @@ The literal README executes eight mock calls covering all six routes plus root s
 
 All 1,404 prior manifest entries are unchanged; one actual inline extension brings the count to 1,405, with no new named canonical component. Toolkit diagnostic identities are exactly unchanged: implementation 984 errors / 126 warnings / 278 infos and 115 consistency warnings; docs/README/exports have no errors. All existing findings remain visible, with no new exclusion, skip, rule relaxation or fabricated schema mapping.
 
-Audit directory: `/tmp/openai-alignment-audit/39-subagents`. Independent combined approvals bind final source/documentation bytes before publication. GitHub blob/head/tree reviews and exact-head CI are later immutable receipts; this document does not fabricate future approval or merge results. Parent #317 stays open for the one approved HTTP/2 evaluation after the core merge; deferred helpers/later parity remain outside this milestone.
+Audit directory: `/tmp/openai-alignment-audit/39-subagents`. Independent combined approvals bound final source/documentation bytes before publication. GitHub blob/head/tree reviews and exact-head CI passed; the immutable receipt hashes and actual merge are recorded below. Parent #317 stays open for the one approved HTTP/2 evaluation after the core merge; deferred helpers/later parity remain outside this milestone.
+
+## Actual merge receipt
+
+Merged `2026-10-10T09:59:51Z`, squash `750a4f4582ebd5dc2e3e568c26bd708bd5fc33ae`; reviewed head `f1a6e93d1507af668b68ac0d8d00be3232ea58ac`, tree `0b10bd26cc00a6d22e4c7179441b4765788e3163`. Published requirements/engineering receipt SHA256: `ae938788e80456ca1047d5ed56c607447b3d2808fd38cb5412aa300980c7ea16` / `8f1cbef9d9f6cc8cf5d215f41e740c6b15340a2e243f140c32faf2bf719fbc28`. Exact-head CI receipt `7bf4242d0b4c2f309be2bb29f1071d6a9597a2728e0e21d94ca349182f6d3009`; independent CI-gate supplements `7ce2f7ee2cb71cf0f8ff8917011aaa517b63cf6106b8f0d941edb8a93b591a74` / `07d4acf040c33ca6acee1051c6d4f9015f82a2e30e58dbe4a462c48767073f0b`.

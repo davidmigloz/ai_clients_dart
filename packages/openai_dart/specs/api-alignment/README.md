@@ -33,11 +33,11 @@ after both published content/CI approvals and all 14 completed contexts.
 Merged in [PR #403](https://github.com/davidmigloz/ai_clients_dart/pull/403) at `9a31d51ddaf59f4a415cdea08c914accd5f255dd` on `2026-10-09T20:38:41Z` after both independent published content/CI approvals and all 14 exact-head contexts completed (13 successes/standard skip). Reviewed head: `01a72bd5ca439dafe180bf84d1fef570fe0eecec`.
 Merged in [PR #404](https://github.com/davidmigloz/ai_clients_dart/pull/404) at `435b4cf04155b665ebe8a8a6909dc8bce364a49b` on `2026-10-09T21:15:29Z` after both independent published content/CI approvals and all 14 exact-head contexts completed (13 successes/standard skip). Reviewed head: `48ac187f104e29644a28da8825bafe21fe3c4a05`.
 Merged in [PR #405](https://github.com/davidmigloz/ai_clients_dart/pull/405) at `7fcfb3f797347e16165f14eabd6381fc5c3ca07b` on `2026-10-10T07:34:16Z` after both independent published content/CI approvals and all 14 exact-head contexts completed (13 successes/standard skip). Reviewed head: `92f7cb3acc32737eb98758f503bf4f405f791146`.
-There are now 38 merged implementations, one remaining core issue (#391)
-and evaluation #399. The user has now bounded the finish line to seven core Agents/Vaults tickets on the audited snapshot plus one expressly approved HTTP/2 evaluation. Parent #317 stays open until those seven and the evaluation are accepted; optional helpers and later parity phases are deferred inventory.
+Subagent inspection/history merged in [PR #406](https://github.com/davidmigloz/ai_clients_dart/pull/406) at `750a4f4582ebd5dc2e3e568c26bd708bd5fc33ae` on `2026-10-10T09:59:51Z` after both independent published content/CI approvals and all 14 exact-head contexts completed (13 successes/standard skip). Reviewed head: `f1a6e93d1507af668b68ac0d8d00be3232ea58ac`.
+There are now 39 merged implementations and no remaining core issue; only evaluation #399 remains. Its [local evidence report](reviews/46-http2.md) recommends **defer**, with final publication/CI/user merge still pending. The user has now bounded the finish line to seven core Agents/Vaults tickets on the audited snapshot plus one expressly approved HTTP/2 evaluation. Parent #317 stays open until those seven and the evaluation are accepted; optional helpers and later parity phases are deferred inventory.
 
 Tracking parent: [GitHub issue #317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
-This parent tracks the bounded milestone; it can close after its one remaining core ticket and one approved HTTP/2 evaluation are accepted, without claiming full parity or requiring a transport migration.
+This parent tracks the bounded milestone; it can close after its one approved HTTP/2 evaluation is accepted, without claiming full parity or requiring a transport migration.
 The [progress history](progress-history.md) preserves every earlier parent-issue
 receipt through the Live WebSocket merge; current work remains in this roadmap.
 
@@ -366,7 +366,7 @@ management #368, custom voice creation #369 and Live HTTP #370 are merged.
 Live WebSockets #371 and stored fork/transcript #372 are merged, completing
 Phase 5 and all 30 original implementation tickets. The Decisions image URL
 follow-up #381 merged in #383 and Safety explanations #382 merged in #384.
-All 32 previously specified implementation tickets are closed. Seven core Phase6 tickets plus one authorized HTTP/2 evaluation remain in the bounded milestone; the rest is deferred inventory. Keep audited gaps visible without treating them as an automatic work queue.
+All 32 earlier implementation tickets and all seven core Phase6 tickets are merged. Only the authorized HTTP/2 evaluation remains in the bounded milestone; the rest is deferred inventory. Keep audited gaps visible without treating them as an automatic work queue.
 
 | Phase | Demonstrable outcomes | Dependencies and scope notes |
 | --- | --- | --- |

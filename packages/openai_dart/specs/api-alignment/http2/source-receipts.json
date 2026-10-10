@@ -1,0 +1,28 @@
+{
+  "archive_url": "https://pub.dev/api/archives/http2-3.1.0.tar.gz",
+  "archive_sha256": "480bf904908b4e4ec4fac8117f69f5ff54cf48c12b1761f0a192e1e10196ee7b",
+  "tag": "http2-v3.1.0",
+  "tag_commit": "286037b57bcd0cb353ed98be8a508e753221e661",
+  "adapter_sha256": "6b1698059e602fa6cf429d7c8a242ad672e8e481033de0117d119afdfccb12d8",
+  "tagged_adapter_sha256": "6b1698059e602fa6cf429d7c8a242ad672e8e481033de0117d119afdfccb12d8",
+  "dependency_scope": "exact development dependency only",
+  "production_dependencies_API_source_version_unchanged": true,
+  "runtime": {
+    "observed_at_utc": "2026-10-10T10:34:41.439057Z",
+    "platform": "macos",
+    "os_version": "Version 26.6.2 (Build 25G83)",
+    "dart": "3.12.2 (stable) (Tue Jun 9 01:11:39 2026 -0700) on \"macos_arm64\"",
+    "node": "v26.3.1",
+    "openssl": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+    "http": "1.6.0",
+    "http2": "3.1.0"
+  },
+  "measurement_sha256": "f635f3302c66668308d5a38391f3568e5caf7b7ee41495babfdcdeaf3db64013",
+  "fixture_sources": {
+    "test/unit/fixtures/http2/peer.cjs": "eb07230587cf54b1a876d15877185e7bd43e83c0229b415785fa3564eec1bcdf",
+    "test/unit/fixtures/http2/loopback_peer.dart": "b91196e076fd4ab75593fd5273785fe4f7d2ab180a38056179e76d38a1aad1ee",
+    "benchmark/http2/transport_benchmark.dart": "ebd635ef30c7f7f8fed16186b83009b69952a294df8ff5b35a56f02ae983dc47"
+  },
+  "live_API_requests": 0,
+  "API_cost_USD": 0
+}
