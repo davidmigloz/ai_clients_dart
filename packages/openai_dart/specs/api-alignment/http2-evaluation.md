@@ -1,6 +1,6 @@
 # Bounded optional HTTP/2 transport evaluation
 
-Status: planned; no benchmark, adoption or runtime compatibility claim yet.
+Status: evaluated locally; **defer** recommended in the [evidence report](reviews/46-http2.md). Final independent published-head review/CI and user-authorized merge remain gates.
 GitHub: [#399](https://github.com/davidmigloz/ai_clients_dart/issues/399).
 Tracking: [parent #317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
 Ticket: [46 — HTTP/2 evaluation](tickets/46-http2-evaluation.md).
@@ -27,7 +27,7 @@ Published archive SHA256:
 `480bf904908b4e4ec4fac8117f69f5ff54cf48c12b1761f0a192e1e10196ee7b`.
 Adapter SHA256, identical in archive and tag:
 `6b1698059e602fa6cf429d7c8a242ad672e8e481033de0117d119afdfccb12d8`.
-These sources were inspected, not benchmarked. The OpenAPI/Python/Node core pins
+The planning assessment inspected these sources. The linked report now records local runtime checks and matched measurements against these exact pins. The OpenAPI/Python/Node core pins
 remain unchanged; this evaluation does not add canonical operations or schemas.
 
 Confirmed adapter properties, to exercise rather than conceal in the report:

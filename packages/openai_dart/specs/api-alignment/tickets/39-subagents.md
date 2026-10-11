@@ -1,6 +1,6 @@
 # Subagent inspection and history
 
-Status: implemented locally; published-head reviews/CI and user-authorized merge pending.
+Status: merged in [PR #406](https://github.com/davidmigloz/ai_clients_dart/pull/406); issue #391 closed.
 GitHub: [#391](https://github.com/davidmigloz/ai_clients_dart/issues/391).
 Primary requirements: `AGENTS-SUBAGENT-01`.
 Native GitHub blockers: [#386](https://github.com/davidmigloz/ai_clients_dart/issues/386), [#387](https://github.com/davidmigloz/ai_clients_dart/issues/387).
@@ -40,13 +40,13 @@ This ticket owns these 6 operations and their complete request/response/paramete
 
 ## Acceptance criteria
 
-- [ ] Public mock GETs cover all six operations, exact nested ID paths, headers/auth context, nonempty/empty typed inline subagent list pages and every child history pagination placement.
-- [ ] Active/closed/resumed fixtures retain required nullable name/instructions/closed_at and stable opened_at; every reused history branch and turn nullable field has valid/malformed/ownership/private-diagnostic evidence.
-- [ ] A runnable offline example inspects a coordinator's child list, retrieves child state and pages its items/turns/turn-items while showing root and child history separately; README/llms avoid invented action endpoints or automatic replay.
-- [ ] Public request bodies/parameters are captured through the exported client and validated against the pinned canonical contracts; the feature assertions fail against base `08f9594dc73703e521aae4cb070a0be34509642a`, rather than merely mirroring model implementation.
-- [ ] Constructor/parser/copy tests cover all owned discriminator variants, required-nullable/optional-nonnull/tri-state values, nested ownership, equality/hash with the same fields, safe diagnostics, unknown-received fallback and malformed-known errors.
-- [ ] A runnable offline example, package README and regenerated llms documentation describe the real public capability and its limits; actual implemented types have honest manifest mappings and unchanged unrelated exclusions/verifier policy.
-- [ ] Required formatting/fixes/analysis, affected focused fixtures on VM/browser JavaScript/Wasm, and the package unit suite pass; independent requirements and engineering reviews approve the published final commit, and that exact head has green CI before a user-authorized merge.
+- [x] Public mock GETs cover all six operations, exact nested ID paths, headers/auth context, nonempty/empty typed inline subagent list pages and every child history pagination placement.
+- [x] Active/closed/resumed fixtures retain required nullable name/instructions/closed_at and stable opened_at; every reused history branch and turn nullable field has valid/malformed/ownership/private-diagnostic evidence.
+- [x] A runnable offline example inspects a coordinator's child list, retrieves child state and pages its items/turns/turn-items while showing root and child history separately; README/llms avoid invented action endpoints or automatic replay.
+- [x] Public request bodies/parameters are captured through the exported client and validated against the pinned canonical contracts; the feature assertions fail against base `08f9594dc73703e521aae4cb070a0be34509642a`, rather than merely mirroring model implementation.
+- [x] Constructor/parser/copy tests cover all owned discriminator variants, required-nullable/optional-nonnull/tri-state values, nested ownership, equality/hash with the same fields, safe diagnostics, unknown-received fallback and malformed-known errors.
+- [x] A runnable offline example, package README and regenerated llms documentation describe the real public capability and its limits; actual implemented types have honest manifest mappings and unchanged unrelated exclusions/verifier policy.
+- [x] Required formatting/fixes/analysis, affected focused fixtures on VM/browser JavaScript/Wasm, and the package unit suite pass; independent requirements and engineering reviews approve the published final commit, and that exact head has green CI before a user-authorized merge.
 
 ## Source and validation evidence
 
@@ -58,4 +58,8 @@ Coordinator multi-agent configuration and live events remain tickets 33/34. Loca
 
 ## Implementation record
 
-[Acceptance evidence](../reviews/39-subagents.md) records the six inspection GETs, exact inline list adapter, reused canonical models and actual source/public/runtime checks. Published-head reviews and exact-head CI remain separate final gates; this commit does not claim a future merge.
+[Acceptance evidence](../reviews/39-subagents.md) records the six inspection GETs, exact inline list adapter, reused canonical models and actual source/public/runtime checks. Both published-head reviews and exact-head CI passed before the user-authorized merge recorded below.
+
+## Merge acceptance
+
+Merged `2026-10-10T09:59:51Z` as `750a4f4582ebd5dc2e3e568c26bd708bd5fc33ae`, reviewed head `f1a6e93d1507af668b68ac0d8d00be3232ea58ac`, tree `0b10bd26cc00a6d22e4c7179441b4765788e3163`. Both independent published-content/CI gate reviews approved; all 14 contexts completed (13 successes/standard Test(all) skip), CLEAN before the user-authorized merge. Only approved HTTP/2 evaluation #399 remains for parent #317.

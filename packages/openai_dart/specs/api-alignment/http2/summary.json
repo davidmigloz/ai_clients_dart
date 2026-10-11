@@ -1,0 +1,936 @@
+{
+  "schema": 1,
+  "measurement_sha256": "f635f3302c66668308d5a38391f3568e5caf7b7ee41495babfdcdeaf3db64013",
+  "runtime": {
+    "observed_at_utc": "2026-10-10T10:34:41.439057Z",
+    "platform": "macos",
+    "os_version": "Version 26.6.2 (Build 25G83)",
+    "dart": "3.12.2 (stable) (Tue Jun 9 01:11:39 2026 -0700) on \"macos_arm64\"",
+    "node": "v26.3.1",
+    "openssl": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+    "http": "1.6.0",
+    "http2": "3.1.0"
+  },
+  "cells": [
+    {
+      "kind": "json",
+      "temperature": "cold",
+      "concurrency": 1,
+      "protocol": "h1",
+      "samples": 5,
+      "attempts": 40,
+      "successful": 40,
+      "failed": 0,
+      "warmup_failures": 0,
+      "eligible_complete_performance_comparison": true,
+      "batch_total_ms": {
+        "count": 5,
+        "median": 65.662,
+        "min": 63.875,
+        "max": 128.155
+      },
+      "new_connections": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "successful_requests_per_second": {
+        "count": 5,
+        "median": 121.83606956839573,
+        "min": 62.42440794350591,
+        "max": 125.24461839530332
+      },
+      "headers_ms": {
+        "count": 40,
+        "median": 6.8445,
+        "min": 6.259,
+        "max": 55.821
+      },
+      "first_body_byte_ms": {
+        "count": 40,
+        "median": 6.9175,
+        "min": 6.439,
+        "max": 57.475
+      },
+      "first_event_ms": {
+        "count": 40,
+        "median": 7.307,
+        "min": 6.808,
+        "max": 74.783
+      },
+      "latency_ms": {
+        "count": 40,
+        "median": 7.3125,
+        "min": 6.81,
+        "max": 74.788
+      }
+    },
+    {
+      "kind": "json",
+      "temperature": "cold",
+      "concurrency": 1,
+      "protocol": "h2",
+      "samples": 5,
+      "attempts": 40,
+      "successful": 40,
+      "failed": 0,
+      "warmup_failures": 0,
+      "eligible_complete_performance_comparison": true,
+      "batch_total_ms": {
+        "count": 5,
+        "median": 65.8,
+        "min": 64.584,
+        "max": 93.933
+      },
+      "new_connections": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "successful_requests_per_second": {
+        "count": 5,
+        "median": 121.580547112462,
+        "min": 85.16708717915961,
+        "max": 123.86968908708039
+      },
+      "headers_ms": {
+        "count": 40,
+        "median": 6.823,
+        "min": 5.508,
+        "max": 37.353
+      },
+      "first_body_byte_ms": {
+        "count": 40,
+        "median": 6.8555,
+        "min": 5.531,
+        "max": 37.471
+      },
+      "first_event_ms": {
+        "count": 40,
+        "median": 7.3405000000000005,
+        "min": 5.994,
+        "max": 40.634
+      },
+      "latency_ms": {
+        "count": 40,
+        "median": 7.343999999999999,
+        "min": 5.996,
+        "max": 40.642
+      }
+    },
+    {
+      "kind": "json",
+      "temperature": "cold",
+      "concurrency": 8,
+      "protocol": "h1",
+      "samples": 5,
+      "attempts": 40,
+      "successful": 40,
+      "failed": 0,
+      "warmup_failures": 0,
+      "eligible_complete_performance_comparison": true,
+      "batch_total_ms": {
+        "count": 5,
+        "median": 22.059,
+        "min": 19.109,
+        "max": 25.934
+      },
+      "new_connections": [
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "successful_requests_per_second": {
+        "count": 5,
+        "median": 362.6637653565438,
+        "min": 308.47536053057763,
+        "max": 418.65089748286147
+      },
+      "headers_ms": {
+        "count": 40,
+        "median": 18.7225,
+        "min": 12.71,
+        "max": 24.056
+      },
+      "first_body_byte_ms": {
+        "count": 40,
+        "median": 18.781,
+        "min": 12.792,
+        "max": 24.091
+      },
+      "first_event_ms": {
+        "count": 40,
+        "median": 18.982999999999997,
+        "min": 13.027,
+        "max": 24.244
+      },
+      "latency_ms": {
+        "count": 40,
+        "median": 18.985,
+        "min": 13.029,
+        "max": 24.246
+      }
+    },
+    {
+      "kind": "json",
+      "temperature": "cold",
+      "concurrency": 8,
+      "protocol": "h2",
+      "samples": 5,
+      "attempts": 40,
+      "successful": 40,
+      "failed": 0,
+      "warmup_failures": 0,
+      "eligible_complete_performance_comparison": true,
+      "batch_total_ms": {
+        "count": 5,
+        "median": 16.862,
+        "min": 14.033,
+        "max": 23.199
+      },
+      "new_connections": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "successful_requests_per_second": {
+        "count": 5,
+        "median": 474.4395682599929,
+        "min": 344.842450105608,
+        "max": 570.084800114017
+      },
+      "headers_ms": {
+        "count": 40,
+        "median": 14.288,
+        "min": 12.189,
+        "max": 20.466
+      },
+      "first_body_byte_ms": {
+        "count": 40,
+        "median": 14.6875,
+        "min": 12.217,
+        "max": 21.116
+      },
+      "first_event_ms": {
+        "count": 40,
+        "median": 15.5775,
+        "min": 13.184,
+        "max": 22.714
+      },
+      "latency_ms": {
+        "count": 40,
+        "median": 15.5795,
+        "min": 13.186,
+        "max": 22.724
+      }
+    },
+    {
+      "kind": "json",
+      "temperature": "warm",
+      "concurrency": 1,
+      "protocol": "h1",
+      "samples": 5,
+      "attempts": 40,
+      "successful": 40,
+      "failed": 0,
+      "warmup_failures": 0,
+      "eligible_complete_performance_comparison": true,
+      "batch_total_ms": {
+        "count": 5,
+        "median": 54.583,
+        "min": 53.728,
+        "max": 56.407
+      },
+      "new_connections": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "successful_requests_per_second": {
+        "count": 5,
+        "median": 146.56578055438507,
+        "min": 141.8263690676689,
+        "max": 148.89815366289457
+      },
+      "headers_ms": {
+        "count": 40,
+        "median": 6.577,
+        "min": 5.341,
+        "max": 7.782
+      },
+      "first_body_byte_ms": {
+        "count": 40,
+        "median": 6.621,
+        "min": 5.385,
+        "max": 7.891
+      },
+      "first_event_ms": {
+        "count": 40,
+        "median": 6.8995,
+        "min": 5.606,
+        "max": 8.321
+      },
+      "latency_ms": {
+        "count": 40,
+        "median": 6.901,
+        "min": 5.608,
+        "max": 8.324
+      }
+    },
+    {
+      "kind": "json",
+      "temperature": "warm",
+      "concurrency": 1,
+      "protocol": "h2",
+      "samples": 5,
+      "attempts": 40,
+      "successful": 40,
+      "failed": 0,
+      "warmup_failures": 0,
+      "eligible_complete_performance_comparison": true,
+      "batch_total_ms": {
+        "count": 5,
+        "median": 56.539,
+        "min": 54.122,
+        "max": 57.89
+      },
+      "new_connections": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "successful_requests_per_second": {
+        "count": 5,
+        "median": 141.4952510656361,
+        "min": 138.19312489203662,
+        "max": 147.81419755367503
+      },
+      "headers_ms": {
+        "count": 40,
+        "median": 6.6615,
+        "min": 6.133,
+        "max": 7.117
+      },
+      "first_body_byte_ms": {
+        "count": 40,
+        "median": 6.6855,
+        "min": 6.161,
+        "max": 7.148
+      },
+      "first_event_ms": {
+        "count": 40,
+        "median": 7.0440000000000005,
+        "min": 6.477,
+        "max": 7.577
+      },
+      "latency_ms": {
+        "count": 40,
+        "median": 7.047000000000001,
+        "min": 6.479,
+        "max": 7.579
+      }
+    },
+    {
+      "kind": "json",
+      "temperature": "warm",
+      "concurrency": 8,
+      "protocol": "h1",
+      "samples": 5,
+      "attempts": 40,
+      "successful": 40,
+      "failed": 0,
+      "warmup_failures": 0,
+      "eligible_complete_performance_comparison": true,
+      "batch_total_ms": {
+        "count": 5,
+        "median": 8.938,
+        "min": 8.065,
+        "max": 11.006
+      },
+      "new_connections": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "successful_requests_per_second": {
+        "count": 5,
+        "median": 895.0548221078541,
+        "min": 726.8762493185535,
+        "max": 991.9404835709857
+      },
+      "headers_ms": {
+        "count": 40,
+        "median": 7.875,
+        "min": 6.751,
+        "max": 10.138
+      },
+      "first_body_byte_ms": {
+        "count": 40,
+        "median": 7.888999999999999,
+        "min": 6.802,
+        "max": 10.15
+      },
+      "first_event_ms": {
+        "count": 40,
+        "median": 8.029,
+        "min": 6.919,
+        "max": 10.237
+      },
+      "latency_ms": {
+        "count": 40,
+        "median": 8.0305,
+        "min": 6.921,
+        "max": 10.238
+      }
+    },
+    {
+      "kind": "json",
+      "temperature": "warm",
+      "concurrency": 8,
+      "protocol": "h2",
+      "samples": 5,
+      "attempts": 40,
+      "successful": 40,
+      "failed": 0,
+      "warmup_failures": 0,
+      "eligible_complete_performance_comparison": true,
+      "batch_total_ms": {
+        "count": 5,
+        "median": 9.232,
+        "min": 8.802,
+        "max": 10.315
+      },
+      "new_connections": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "successful_requests_per_second": {
+        "count": 5,
+        "median": 866.5511265164645,
+        "min": 775.5695588948133,
+        "max": 908.8843444671666
+      },
+      "headers_ms": {
+        "count": 40,
+        "median": 7.85,
+        "min": 7.112,
+        "max": 8.877
+      },
+      "first_body_byte_ms": {
+        "count": 40,
+        "median": 8.1295,
+        "min": 7.535,
+        "max": 9.147
+      },
+      "first_event_ms": {
+        "count": 40,
+        "median": 8.7965,
+        "min": 8.198,
+        "max": 9.949
+      },
+      "latency_ms": {
+        "count": 40,
+        "median": 8.7975,
+        "min": 8.199,
+        "max": 9.953
+      }
+    },
+    {
+      "kind": "sse",
+      "temperature": "cold",
+      "concurrency": 1,
+      "protocol": "h1",
+      "samples": 5,
+      "attempts": 40,
+      "successful": 40,
+      "failed": 0,
+      "warmup_failures": 0,
+      "eligible_complete_performance_comparison": true,
+      "batch_total_ms": {
+        "count": 5,
+        "median": 843.619,
+        "min": 817.158,
+        "max": 943.931
+      },
+      "new_connections": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "successful_requests_per_second": {
+        "count": 5,
+        "median": 9.482953797863727,
+        "min": 8.47519575053685,
+        "max": 9.790028366607192
+      },
+      "headers_ms": {
+        "count": 40,
+        "median": 1.6265,
+        "min": 0.742,
+        "max": 11.189
+      },
+      "first_body_byte_ms": {
+        "count": 40,
+        "median": 1.7285,
+        "min": 0.793,
+        "max": 12.483
+      },
+      "first_event_ms": {
+        "count": 40,
+        "median": 2.1944999999999997,
+        "min": 1.007,
+        "max": 19.056
+      },
+      "latency_ms": {
+        "count": 40,
+        "median": 105.1755,
+        "min": 95.232,
+        "max": 137.483
+      }
+    },
+    {
+      "kind": "sse",
+      "temperature": "cold",
+      "concurrency": 1,
+      "protocol": "h2",
+      "samples": 5,
+      "attempts": 40,
+      "successful": 20,
+      "failed": 20,
+      "warmup_failures": 0,
+      "eligible_complete_performance_comparison": false,
+      "batch_total_ms": {
+        "count": 5,
+        "median": 457.163,
+        "min": 414.718,
+        "max": 479.219
+      },
+      "new_connections": [
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "successful_requests_per_second": {
+        "count": 5,
+        "median": 8.74961447011241,
+        "min": 8.346914458733899,
+        "max": 9.645108242227248
+      },
+      "headers_ms": {
+        "count": 40,
+        "median": 4.1675,
+        "min": 0.774,
+        "max": 13.484
+      },
+      "first_body_byte_ms": {
+        "count": 40,
+        "median": 4.2175,
+        "min": 0.831,
+        "max": 13.567
+      },
+      "first_event_ms": {
+        "count": 20,
+        "median": 6.528499999999999,
+        "min": 4.22,
+        "max": 13.802
+      },
+      "latency_ms": {
+        "count": 20,
+        "median": 106.3015,
+        "min": 98.38,
+        "max": 143.578
+      }
+    },
+    {
+      "kind": "sse",
+      "temperature": "cold",
+      "concurrency": 8,
+      "protocol": "h1",
+      "samples": 5,
+      "attempts": 40,
+      "successful": 40,
+      "failed": 0,
+      "warmup_failures": 0,
+      "eligible_complete_performance_comparison": true,
+      "batch_total_ms": {
+        "count": 5,
+        "median": 114.794,
+        "min": 110.686,
+        "max": 125.968
+      },
+      "new_connections": [
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "successful_requests_per_second": {
+        "count": 5,
+        "median": 69.69005348711605,
+        "min": 63.50819255683983,
+        "max": 72.27653000379452
+      },
+      "headers_ms": {
+        "count": 40,
+        "median": 14.943999999999999,
+        "min": 9.064,
+        "max": 25.029
+      },
+      "first_body_byte_ms": {
+        "count": 40,
+        "median": 14.983,
+        "min": 9.14,
+        "max": 25.147
+      },
+      "first_event_ms": {
+        "count": 40,
+        "median": 15.7075,
+        "min": 9.427,
+        "max": 26.073
+      },
+      "latency_ms": {
+        "count": 40,
+        "median": 113.98599999999999,
+        "min": 101.649,
+        "max": 125.797
+      }
+    },
+    {
+      "kind": "sse",
+      "temperature": "cold",
+      "concurrency": 8,
+      "protocol": "h2",
+      "samples": 5,
+      "attempts": 40,
+      "successful": 40,
+      "failed": 0,
+      "warmup_failures": 0,
+      "eligible_complete_performance_comparison": true,
+      "batch_total_ms": {
+        "count": 5,
+        "median": 110.501,
+        "min": 108.354,
+        "max": 121.19
+      },
+      "new_connections": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "successful_requests_per_second": {
+        "count": 5,
+        "median": 72.39753486393788,
+        "min": 66.01204719861374,
+        "max": 73.83206895915241
+      },
+      "headers_ms": {
+        "count": 40,
+        "median": 10.000499999999999,
+        "min": 7.795,
+        "max": 11.739
+      },
+      "first_body_byte_ms": {
+        "count": 40,
+        "median": 10.858,
+        "min": 8.169,
+        "max": 12.681
+      },
+      "first_event_ms": {
+        "count": 40,
+        "median": 11.2195,
+        "min": 8.456,
+        "max": 13.149
+      },
+      "latency_ms": {
+        "count": 40,
+        "median": 110.34450000000001,
+        "min": 108.152,
+        "max": 121.042
+      }
+    },
+    {
+      "kind": "sse",
+      "temperature": "warm",
+      "concurrency": 1,
+      "protocol": "h1",
+      "samples": 5,
+      "attempts": 40,
+      "successful": 40,
+      "failed": 0,
+      "warmup_failures": 0,
+      "eligible_complete_performance_comparison": true,
+      "batch_total_ms": {
+        "count": 5,
+        "median": 821.478,
+        "min": 779.672,
+        "max": 897.468
+      },
+      "new_connections": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "successful_requests_per_second": {
+        "count": 5,
+        "median": 9.738544428457,
+        "min": 8.913966848957289,
+        "max": 10.260725022830114
+      },
+      "headers_ms": {
+        "count": 40,
+        "median": 0.9115,
+        "min": 0.6,
+        "max": 3.056
+      },
+      "first_body_byte_ms": {
+        "count": 40,
+        "median": 0.9795,
+        "min": 0.647,
+        "max": 3.214
+      },
+      "first_event_ms": {
+        "count": 40,
+        "median": 1.192,
+        "min": 0.828,
+        "max": 4.459
+      },
+      "latency_ms": {
+        "count": 40,
+        "median": 104.4765,
+        "min": 94.651,
+        "max": 122.029
+      }
+    },
+    {
+      "kind": "sse",
+      "temperature": "warm",
+      "concurrency": 1,
+      "protocol": "h2",
+      "samples": 5,
+      "attempts": 40,
+      "successful": 20,
+      "failed": 20,
+      "warmup_failures": 20,
+      "eligible_complete_performance_comparison": false,
+      "batch_total_ms": {
+        "count": 5,
+        "median": 461.197,
+        "min": 438.248,
+        "max": 478.305
+      },
+      "new_connections": [
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "successful_requests_per_second": {
+        "count": 5,
+        "median": 8.673083302796853,
+        "min": 8.362864699302746,
+        "max": 9.127252149467882
+      },
+      "headers_ms": {
+        "count": 40,
+        "median": 3.2125000000000004,
+        "min": 0.587,
+        "max": 9.231
+      },
+      "first_body_byte_ms": {
+        "count": 40,
+        "median": 3.278,
+        "min": 0.642,
+        "max": 9.38
+      },
+      "first_event_ms": {
+        "count": 20,
+        "median": 5.3205,
+        "min": 3.858,
+        "max": 9.629
+      },
+      "latency_ms": {
+        "count": 20,
+        "median": 111.245,
+        "min": 102.195,
+        "max": 146.681
+      }
+    },
+    {
+      "kind": "sse",
+      "temperature": "warm",
+      "concurrency": 8,
+      "protocol": "h1",
+      "samples": 5,
+      "attempts": 40,
+      "successful": 40,
+      "failed": 0,
+      "warmup_failures": 0,
+      "eligible_complete_performance_comparison": true,
+      "batch_total_ms": {
+        "count": 5,
+        "median": 105.558,
+        "min": 103.161,
+        "max": 108.687
+      },
+      "new_connections": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "successful_requests_per_second": {
+        "count": 5,
+        "median": 75.78771860020083,
+        "min": 73.6058590263785,
+        "max": 77.54868603445101
+      },
+      "headers_ms": {
+        "count": 40,
+        "median": 1.815,
+        "min": 1.079,
+        "max": 2.382
+      },
+      "first_body_byte_ms": {
+        "count": 40,
+        "median": 1.823,
+        "min": 1.132,
+        "max": 2.395
+      },
+      "first_event_ms": {
+        "count": 40,
+        "median": 2.1905,
+        "min": 1.426,
+        "max": 2.76
+      },
+      "latency_ms": {
+        "count": 40,
+        "median": 105.32849999999999,
+        "min": 102.732,
+        "max": 108.597
+      }
+    },
+    {
+      "kind": "sse",
+      "temperature": "warm",
+      "concurrency": 8,
+      "protocol": "h2",
+      "samples": 5,
+      "attempts": 40,
+      "successful": 0,
+      "failed": 40,
+      "warmup_failures": 0,
+      "eligible_complete_performance_comparison": false,
+      "batch_total_ms": {
+        "count": 5,
+        "median": 1.328,
+        "min": 1.024,
+        "max": 1.843
+      },
+      "new_connections": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "successful_requests_per_second": {
+        "count": 5,
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "headers_ms": {
+        "count": 0
+      },
+      "first_body_byte_ms": {
+        "count": 0
+      },
+      "first_event_ms": {
+        "count": 0
+      },
+      "latency_ms": {
+        "count": 0
+      }
+    }
+  ],
+  "memory_cases": [
+    {
+      "protocol": "h1",
+      "case": "public_multipart_4MiB",
+      "payload_bytes": 4194304,
+      "wire_bytes": 4194703,
+      "RSS_start": 375439360,
+      "RSS_sampled_peak": 379781120,
+      "RSS_end": 379781120,
+      "RSS_sampled_delta": 4341760
+    },
+    {
+      "protocol": "h1",
+      "case": "paused_raw_response_4MiB",
+      "pause_ms": 300,
+      "peer_sent_while_paused": 851968,
+      "peer_finished_while_paused": false,
+      "received_after_resume": 4194304,
+      "RSS_start": 379781120,
+      "RSS_sampled_peak": 380698624,
+      "RSS_end": 380698624,
+      "RSS_sampled_delta": 917504
+    },
+    {
+      "protocol": "h2",
+      "case": "public_multipart_4MiB",
+      "payload_bytes": 4194304,
+      "wire_bytes": 4194703,
+      "RSS_start": 380878848,
+      "RSS_sampled_peak": 393822208,
+      "RSS_end": 393822208,
+      "RSS_sampled_delta": 12943360
+    },
+    {
+      "protocol": "h2",
+      "case": "paused_raw_response_4MiB",
+      "pause_ms": 300,
+      "peer_sent_while_paused": 4194304,
+      "peer_finished_while_paused": true,
+      "received_after_resume": 4194304,
+      "RSS_start": 393822208,
+      "RSS_sampled_peak": 394461184,
+      "RSS_end": 393822208,
+      "RSS_sampled_delta": 638976
+    }
+  ],
+  "limitations": [
+    "Only local peer and sampled process RSS; no model inference/API rate-limit benefit claimed",
+    "Failed/incomplete or failed-warmup cells are not eligible latency comparisons",
+    "JSON first_event_ms is completion, not first body byte; first_body_byte_ms separately measured",
+    "Peer sent counters mean writes/enqueued bytes, not exact resident Dart buffers"
+  ]
+}
