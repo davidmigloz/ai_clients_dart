@@ -1,3 +1,9 @@
+## 11.0.1
+
+Simplified the README with collapsible usage topics, common Responses API examples first, and an updated example index.
+
+- **FIX**: Support collapsible README topics and simplify OpenAI docs ([#409](https://github.com/davidmigloz/ai_clients_dart/issues/409)). ([d5b5db9a](https://github.com/davidmigloz/ai_clients_dart/commit/d5b5db9ac4e4ad900f5b5cd9898440eb2c386883))
+
 ## 11.0.0
 
 > [!CAUTION]

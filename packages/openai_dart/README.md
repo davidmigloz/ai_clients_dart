@@ -57,7 +57,7 @@ Requires Dart 3.12 or later and works with Dart and Flutter. Set `OPENAI_API_KEY
 
 ```yaml
 dependencies:
-  openai_dart: ^11.0.0
+  openai_dart: ^11.0.1
 ```
 
 ```dart
