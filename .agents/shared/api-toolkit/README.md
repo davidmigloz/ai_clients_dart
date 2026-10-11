@@ -20,7 +20,13 @@ Commands:
 - `review` - diff canonical vs candidate specs and report implementation gaps
 - `describe` - introspect config, specs, and manifest state
 - `scaffold` - generate schema, enum, message, config, or barrel scaffolds
-- `verify` - run implementation, export, docs, or combined verification
+- `verify` - run implementation, export, docs, README, or combined verification
+
+### README verification
+
+`verify --checks readme` follows the [shared README template](../readme-template.md). Usage topics can be flat `<details>` disclosures or grouped under H3 category headings. The legacy H3 task heading followed by `<details>` is also supported. The reported `usage_subsections` count measures topics, rather than category headings.
+
+Each topic needs a nonempty summary, a closing `</details>` tag, and a link to an existing Dart example. Inline code is optional: a concise explanation plus a full example link is enough for an advanced workflow. Expanded topics and disclosures with an `open` attribute receive warnings. Every example link is checked independently; another topic's valid link cannot cover a missing link or file. Markup and links inside code or HTML comments do not count as topics or examples.
 
 ## Config Contract
 

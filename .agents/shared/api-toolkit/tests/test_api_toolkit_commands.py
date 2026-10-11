@@ -143,10 +143,13 @@ class ApiToolkitCommandTests(unittest.TestCase):
                 "</details>\n\n",
                 "## Usage\n\n"
                 "### How do I make my first request?\n\n"
+                "<details>\n"
+                "<summary><b>Show example</b></summary>\n\n"
                 "```dart\n"
                 "Future<void> main() async {}\n"
                 "```\n\n"
-                "→ [Full example](example/example.dart)\n\n",
+                "→ [Full example](example/example.dart)\n\n"
+                "</details>\n\n",
                 "## Error Handling\n\n"
                 "```dart\n"
                 "Future<void> main() async {}\n"

@@ -14,6 +14,7 @@ import time
 from collections import defaultdict
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -2404,8 +2405,134 @@ def _section_has_code_block(section: str) -> bool:
     return bool(README_CODE_BLOCK_RE.search(section))
 
 
+def _mask_readme_matches(pattern: str, markdown: str) -> str:
+    return re.sub(pattern, lambda match: re.sub(r"[^\n]", " ", match.group()), markdown)
+
+
+def _strip_readme_comments(markdown: str) -> str:
+    return _mask_readme_matches(r"<!--[\s\S]*?-->", markdown)
+
+
+def _strip_readme_code_spans(markdown: str) -> str:
+    return _mask_readme_matches(r"(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)", markdown)
+
+
 def _readme_example_links(section: str) -> list[str]:
-    return [match.group(1).removeprefix("./") for match in README_EXAMPLE_LINK_RE.finditer(section)]
+    content = _strip_readme_code_spans(_strip_readme_comments(_strip_fenced_code_blocks(section)))
+    return [match.group(1).removeprefix("./") for match in README_EXAMPLE_LINK_RE.finditer(content)]
+
+
+class _ReadmeDetailsParser(HTMLParser):
+    """Locate disclosures without treating examples or HTML comments as markup."""
+
+    def __init__(self, markdown: str) -> None:
+        super().__init__(convert_charrefs=True)
+        self.markdown = markdown
+        self.line_offsets = [0]
+        for line in markdown.splitlines(keepends=True):
+            self.line_offsets.append(self.line_offsets[-1] + len(line))
+        self.blocks: list[dict[str, Any]] = []
+        self.stack: list[dict[str, Any]] = []
+        self.summary: dict[str, Any] | None = None
+        self.unmatched_closings: list[int] = []
+
+    def _offset(self) -> int:
+        line, column = self.getpos()
+        return self.line_offsets[line - 1] + column
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag == "details":
+            if self.stack:
+                self.stack[-1]["has_children"] = True
+            block = {
+                "start": self._offset(),
+                "end": len(self.markdown),
+                "title": "",
+                "open": any(name == "open" for name, _ in attrs),
+                "closed": False,
+                "has_summary": False,
+                "summary_closed": False,
+                "has_children": False,
+            }
+            self.blocks.append(block)
+            self.stack.append(block)
+        elif tag == "summary" and self.stack:
+            self.summary = self.stack[-1]
+            self.summary["has_summary"] = True
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "summary":
+            if self.summary is not None:
+                self.summary["summary_closed"] = True
+            self.summary = None
+        elif tag == "details":
+            if not self.stack:
+                self.unmatched_closings.append(self.getpos()[0])
+                return
+            block = self.stack.pop()
+            block["end"] = self.markdown.index(">", self._offset()) + 1
+            block["closed"] = True
+            if self.summary is block:
+                self.summary = None
+
+    def handle_data(self, data: str) -> None:
+        if self.summary is not None:
+            self.summary["title"] += data
+
+
+def _readme_usage_topics(section: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Support summary topics, H3 groups, and the legacy H3 + disclosure layout."""
+    parser = _ReadmeDetailsParser(section)
+    parser.feed(_strip_readme_code_spans(_strip_fenced_code_blocks(section)))
+    parser.close()
+    issues: list[dict[str, Any]] = []
+    topics: list[dict[str, Any]] = []
+    offsets = parser.line_offsets
+    headings = [
+        heading for heading in _readme_headings(_strip_readme_comments(section))
+        if heading["level"] == 3
+        and not any(
+            block["start"] <= offsets[heading["line"] - 1] < block["end"]
+            for block in parser.blocks
+        )
+    ]
+
+    for block in parser.blocks:
+        title = re.sub(r"\s+", " ", block["title"]).strip()
+        preceding = [h for h in headings if offsets[h["line"] - 1] < block["start"]]
+        if not title or title.lower() == "show example":
+            title = preceding[-1]["title"] if preceding else "Usage"
+        for condition, message in (
+            (not block["has_summary"] or not block["title"].strip(), "Usage disclosure should have a nonempty summary"),
+            (block["has_summary"] and not block["summary_closed"], "Usage disclosure is missing its closing </summary> tag"),
+            (not block["closed"], "Usage disclosure is missing its closing </details> tag"),
+            (block["open"], "Usage disclosure should be collapsed by default (remove the open attribute)"),
+        ):
+            if condition:
+                issues.append(_type_issue("warning", title, message, file="README.md"))
+        if not block["has_children"]:
+            topics.append({"title": title, "body": section[block["start"] : block["end"]]})
+
+    for line in parser.unmatched_closings:
+        issues.append(_type_issue("warning", "Usage", f"Unmatched </details> tag on Usage line {line}", file="README.md"))
+
+    # Mask disclosures so category intros are not mistaken for topics, while
+    # examples left expanded before/between/after disclosures are still checked.
+    visible = list(_strip_readme_comments(section))
+    for block in parser.blocks:
+        for index in range(block["start"], block["end"]):
+            if visible[index] != "\n":
+                visible[index] = " "
+    visible_text = "".join(visible)
+    boundaries = [("Usage", 0)] + [(h["title"], offsets[h["line"] - 1]) for h in headings]
+    for index, (title, start) in enumerate(boundaries):
+        end = boundaries[index + 1][1] if index + 1 < len(boundaries) else len(section)
+        body = visible_text[start:end]
+        has_disclosure = any(start <= block["start"] < end for block in parser.blocks)
+        if _section_has_code_block(body) or _readme_example_links(body) or (index > 0 and not has_disclosure):
+            topics.append({"title": title, "body": body})
+            issues.append(_type_issue("warning", title, "Usage topic should be collapsible inside <details>", file="README.md"))
+    return topics, issues
 
 
 def _readme_top_matter(markdown: str, headings: list[dict[str, Any]], *, before_h2_titles: tuple[str, ...]) -> str:
@@ -2576,43 +2703,16 @@ def _verify_readme(config: ToolkitConfig) -> tuple[int, dict[str, Any]]:
             )
         )
 
-    usage_h3_headings: list[dict[str, Any]] = []
-    in_usage = False
-    for heading in headings:
-        if heading["level"] == 2:
-            in_usage = heading["title"] == "Usage"
-            continue
-        if in_usage and heading["level"] == 3:
-            usage_h3_headings.append(heading)
-
-    lines = readme.splitlines()
-    for index, heading in enumerate(usage_h3_headings):
-        end_line = len(lines) + 1
-        for next_heading in usage_h3_headings[index + 1 :]:
-            if next_heading["line"] > heading["line"]:
-                end_line = next_heading["line"]
-                break
-        for next_h2 in headings:
-            if next_h2["level"] == 2 and next_h2["line"] > heading["line"]:
-                end_line = min(end_line, next_h2["line"])
-                break
-        subsection = "\n".join(lines[heading["line"] - 1 : end_line - 1])
-        if not _section_has_code_block(subsection):
-            issues.append(
-                _type_issue(
-                    "warning",
-                    heading["title"],
-                    "Usage subsection should contain a code block",
-                    file="README.md",
-                )
-            )
-        example_links = _readme_example_links(subsection)
+    usage_topics, usage_issues = _readme_usage_topics(_section_from_heading(readme, headings, "Usage"))
+    issues.extend(usage_issues)
+    for topic in usage_topics:
+        example_links = _readme_example_links(topic["body"])
         if not example_links:
             issues.append(
                 _type_issue(
                     "warning",
-                    heading["title"],
-                    "Usage subsection should link to an example file",
+                    topic["title"],
+                    "Usage topic should link to an example file",
                     file="README.md",
                 )
             )
@@ -2622,12 +2722,11 @@ def _verify_readme(config: ToolkitConfig) -> tuple[int, dict[str, Any]]:
                     issues.append(
                         _type_issue(
                             "error",
-                            heading["title"],
-                            f"Usage subsection links to missing example file '{example_link}'",
+                            topic["title"],
+                            f"Usage topic links to missing example file '{example_link}'",
                             file="README.md",
                         )
                     )
-                    break
 
     exit_code = EXIT_FAILURE if any(issue["level"] == "error" for issue in issues) else EXIT_SUCCESS
     return exit_code, {
@@ -2638,7 +2737,7 @@ def _verify_readme(config: ToolkitConfig) -> tuple[int, dict[str, Any]]:
             "errors": sum(1 for issue in issues if issue["level"] == "error"),
             "warnings": sum(1 for issue in issues if issue["level"] == "warning"),
             "headings": len(headings),
-            "usage_subsections": len(usage_h3_headings),
+            "usage_subsections": len(usage_topics),
         },
     }
 
@@ -4344,9 +4443,10 @@ def _render_readme_scaffold(
         "Document environment variables, base URLs, auth providers, and retry settings here.\n\n"
         "</details>\n\n"
         "## Usage\n\n"
-        "### How do I make my first request?\n\n"
+        "### Common tasks\n\n"
         "<details>\n"
-        "<summary><b>Show example</b></summary>\n\n"
+        "<summary><b>How do I make my first request?</b></summary>\n\n"
+        "Briefly explain the primary request and how to read its result.\n\n"
         "```dart\n"
         f"import 'package:{package_name}/{package_name}.dart';\n\n"
         "Future<void> main() async {\n"

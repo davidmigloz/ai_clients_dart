@@ -48,7 +48,7 @@ Required H2 sections:
 2. Mention `Dart` and `Flutter` in the opening paragraph, Features section, and Quickstart section.
 3. Keep the install snippet and the first working code block adjacent in `Quickstart`.
 4. Make every code block standalone: imports, `Future<void> main() async`, and explicit cleanup when needed.
-5. Prefer question-form H3 headings in `Usage`.
+5. Use H3 headings to group related usage topics. Put each task's question or descriptive title in a collapsible `<summary>`; the existing H3 task heading followed by `<details>` layout is also supported.
 6. Use one term consistently for one concept. Prefer `tool calling`, `streaming`, `realtime`, and `client`.
 7. Keep paragraphs short. Two to four sentences per paragraph is the target.
 8. Include explicit comparison content in `Why choose this client?`.
@@ -68,6 +68,10 @@ Required H2 sections:
 - For packages covered by `verify --checks docs`, keep literal `client.<resource>` mentions for every non-excluded documented resource and preserve required tool/live-feature phrases from `documentation.json`.
 - Prefer a compact API-surface bullet or short sentence with inline code identifiers instead of restoring large legacy coverage sections just to satisfy verifier terms.
 - Keep `Table of Contents`, `Configuration`, `Error Handling`, and each `Usage` subsection collapsible.
+- Order usage topics by relevance: the primary API call and reading its result first, then streaming, conversations, structured output, and tools where applicable. Put specialized, administrative, and advanced workflows later.
+- Keep each topic to a short explanation and a complete example link. Include a standalone code block when it helps a common task; advanced topics can link to a full example without duplicating its implementation.
+- Put the task title in `<summary>` so both the title and content form one disclosure. H3 category headings are optional; they do not need their own code blocks or example links.
+- Close every `<details>` block and omit the `open` attribute so topics start collapsed. Optional collapsible groups in `Examples` and `API Coverage` can keep long tables readable.
 - Keep `Features`, `Why choose this client?`, and `Quickstart` expanded.
 - End each usage subsection with a `→ [Full example](example/foo.dart)` link.
 - Add a short llms.txt callout just above the Table of Contents (or before `## Features` when there is no ToC) so agents see it in the first chunk of the document.
@@ -167,10 +171,10 @@ Future<void> main() async {
 
 ## Usage
 
-### How do I {primary task}?
+### {Primary API or workflow}
 
 <details>
-<summary><b>Show example</b></summary>
+<summary><b>How do I {primary task}?</b></summary>
 
 Short answer-first paragraph. Mention any relevant extension methods inline.
 
@@ -189,6 +193,17 @@ Future<void> main() async {
 ```
 
 → [Full example](example/{example_file}.dart)
+
+</details>
+
+### Advanced workflows
+
+<details>
+<summary><b>How do I {advanced task}?</b></summary>
+
+Explain when to use this workflow in one or two sentences. Keep detailed lifecycle rules and implementation steps in the linked example or reference documentation.
+
+→ [Full example](example/{advanced_example_file}.dart)
 
 </details>
 
