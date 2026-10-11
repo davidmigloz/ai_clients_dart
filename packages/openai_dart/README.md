@@ -75,7 +75,7 @@ Requires Dart 3.12 or later. See the [Migration Guide](MIGRATION.md) for upgrade
 
 ```yaml
 dependencies:
-  openai_dart: ^10.0.1
+  openai_dart: ^11.0.0
 ```
 
 ```dart
@@ -673,7 +673,7 @@ The current memory tiers are `gb1`, `gb4`, `gb16`, and `gb64`, which emit `1g`, 
 
 Standalone creation also supports `ContainerSkill.reference(skillId: ..., version: 'latest')` and inline skills whose `ContainerSkillSource.base64(data: ...)` contains an already encoded ZIP bundle. Returned memory/network settings and expiration members can be absent; check them before use. Filter listing with `client.containers.list(name: 'my-container')`.
 
-See the [migration guide](MIGRATION.md#upcoming-container-configuration-corrections) for changes to integer memory values, `allowedHosts`, required names, response expiration, and const construction.
+See the [migration guide](MIGRATION.md#19-container-configuration-corrections) for changes to integer memory values, `allowedHosts`, required names, response expiration, and const construction.
 
 → [Full example](example/containers_example.dart)
 
@@ -823,7 +823,7 @@ are available.
 warm-up, two lanes, incremental continuation and awaited cleanup for $0.
 
 The shared annotation-added event accepts its required nullable annotation value.
-See the [migration guide](MIGRATION.md#upcoming-nullable-streaming-annotations)
+See the [migration guide](MIGRATION.md#6-nullable-streaming-annotations)
 before dereferencing `OutputTextAnnotationAddedEvent.annotation`.
 
 </details>
@@ -933,7 +933,7 @@ disconnect leaves the outcome unknown; no frame is automatically replayed.
 → [Runnable offline steering example](example/responses_steering_example.dart)
 demonstrates automatic continuation and two pending submissions sharing one saved
 tool result, with exactly one continuation create and awaited cleanup for $0.
-See [migration guidance](MIGRATION.md#upcoming-typed-steering-events) for exhaustive
+See [migration guidance](MIGRATION.md#5-typed-steering-events) for exhaustive
 WebSocket event switches and the [official steering guide](https://developers.openai.com/api/docs/guides/steering).
 
 </details>
@@ -1182,7 +1182,7 @@ not trigger replay. Opt-in recovery queues only newly unsent frames as described
 above.
 
 Injection acknowledgments add two sealed WebSocket variants; the SSE dispatcher
-is unchanged. See the [migration guide](MIGRATION.md#upcoming-typed-injection-events)
+is unchanged. See the [migration guide](MIGRATION.md#4-typed-injection-events)
 for exhaustive switches, the raw failed-input getter, and stricter known-frame
 validation.
 
@@ -1286,7 +1286,7 @@ requires nullable keys that some guide examples omit.
 
 → [Runnable offline example](example/tool_search_example.dart), demonstrating two
 local requests, the original call ID and complete discovered definitions without
-an API key or tool execution. See the [migration guide](MIGRATION.md#upcoming-tool-search-fidelity)
+an API key or tool execution. See the [migration guide](MIGRATION.md#7-tool-search-fidelity)
 for required constructor arguments and new `Item` variants.
 
 </details>
@@ -1376,7 +1376,7 @@ explicit triggers and encrypted replay remain available; future event types stil
 use `UnknownEvent`.
 
 → [Runnable offline example](example/compaction_progress_example.dart), with no API
-key or large context. See the [migration guide](MIGRATION.md#upcoming-compaction-progress)
+key or large context. See the [migration guide](MIGRATION.md#8-compaction-progress)
 when updating exhaustive switches or manual unknown-event handlers.
 
 </details>
@@ -1460,7 +1460,7 @@ items while omitting returned-only creator metadata.
 → [Runnable offline example](example/shell_tools_example.dart), with hosted
 configuration, local continuation and typed stream events. It requires no API key,
 creates no containers and executes no proposed commands. See
-[migration guidance](MIGRATION.md#upcoming-shell-alignment) for corrected required
+[migration guidance](MIGRATION.md#9-shell-alignment) for corrected required
 nullable returned keys and distinct writable DTOs.
 
 </details>
@@ -1523,7 +1523,7 @@ GA image controls/results, and forced GA choice follow the guide ahead of the
 canonical schema; these differences stay visible in verification evidence.
 
 → [Runnable local REST/SSE example](example/web_search_controls_example.dart),
-without an API key or charges. See [migration guidance](MIGRATION.md#upcoming-ga-web-search-alignment)
+without an API key or charges. See [migration guidance](MIGRATION.md#10-ga-web-search-alignment)
 for the GA default and status type changes.
 
 </details>
@@ -1791,7 +1791,7 @@ marin/cedar), `AudioVoice.named('provider-voice-name')`, or
 project access. `ChatAudioFormat.aac` is supported by the canonical request;
 Chat PCM uses `pcm16`, while Speech uses `pcm`. See the
 [offline voice/file-audio example](example/existing_audio_example.dart) and
-[migration notes](MIGRATION.md#upcoming-chat-voices-and-file-audio-corrections).
+[migration notes](MIGRATION.md#1-chat-voices-and-file-audio-corrections).
 
 Stream with PCM16 output and pass events to `ChatStreamAccumulator`. Each
 `ChatDelta.audio` is an independent partial update. `accumulator.audio` and each
@@ -2080,7 +2080,7 @@ Custom voices require eligible project access and an existing voice.
 [sample-derived voice creation](#how-do-i-create-a-custom-voice) uses an explicit
 consent and audio sample.
 `SpeechVoice` stays an enum, including the original six constants and seven new
-ones. See the [migration guide](MIGRATION.md#upcoming-speech-options-and-streaming)
+ones. See the [migration guide](MIGRATION.md#2-speech-options-and-streaming)
 for the widened `SpeechRequest.voice` type and exhaustive-switch updates.
 
 An explicitly incompatible `streamFormat` is rejected before dispatch. Buffered
@@ -3101,7 +3101,7 @@ Flat SSE `ErrorEvent` keeps nullable `code`/`param` and sequence presence; it do
 not declare typed misalignment or headers. Failed `ResponseError` keeps its
 distinct code/message/misalignment shape and emits no invented legacy type/param.
 Legacy input/const constructor compatibility and the targeted output corrections
-are described in the [migration guide](MIGRATION.md#upcoming-structured-monitoring-errors).
+are described in the [migration guide](MIGRATION.md#3-structured-monitoring-errors).
 
 A policy 403 is not retried. Inspect failures without automatic reconnect,
 replay, tool execution or continuation; one blocked WS response does not close

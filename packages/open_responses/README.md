@@ -71,7 +71,7 @@ Requires Dart 3.12 or later. See the [Migration Guide](MIGRATION.md) for upgrade
 
 ```yaml
 dependencies:
-  open_responses: ^0.5.0
+  open_responses: ^0.6.0
 ```
 
 ```dart

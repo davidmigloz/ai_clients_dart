@@ -1,3 +1,122 @@
+## 11.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+### What changed
+
+This release adds typed [Decisions](https://developers.openai.com/api/docs/guides/decisions), persistent [Responses WebSockets](https://developers.openai.com/api/docs/guides/websocket-mode), Live sessions, signed webhooks and Safety retrieval, plus the core saved-agent, durable-session, hosted-environment and Vault workflows. It also corrects request/response contracts across containers, caching, Chat audio, tools and file audio, so applications must review the migration guidance for the APIs they use. The minimum Dart SDK remains 3.12; existing HTTP/SSE and Realtime entry points remain available.
+
+### Decisions: classification and scoring
+
+Use `client.decisions.create(...)` to ask multiple typed questions about shared input and receive ordered predicate, choice, score or refusal answers. Inputs can be text, inline image bytes/data URLs, or publicly accessible HTTP(S) image references; string and boolean choices remain distinct, and scores can be fractional. Image references are preserved without a client-side download or normalization; the service checks validity and accessibility.
+
+Responses expose cache-write usage for this workflow. Decisions have no model-event streaming mode, and tools, file IDs and audio are outside the supported input shape. See the [Decisions example](example/decisions_example.dart) and [remote/inline image example](example/decision_image_urls_example.dart).
+
+### Responses: persistent connections and explicit orchestration
+
+`client.responses.connect()` opens a persistent WebSocket connection with a default lane and named `streamId` lanes. Applications can warm state, continue from an actual returned response ID, interleave lane-aware events and await explicit connection cleanup. `streamId` selects routing; `previousResponseId` selects ancestry. Existing HTTP and SSE calls continue to work.
+
+[Mid-turn steering](https://developers.openai.com/api/docs/guides/steering) sends corrections with typed accepted/pending/failed acknowledgments. Beta tool-result injection returns developer-owned results and distinguishes committed from uncommitted outcomes. Opt-in recovery requires a preparation callback, refreshes authentication and queues only newly unsent frames within a bounded UTF-8 byte budget; submitted or attempted work is never automatically replayed. The application remains responsible for deciding how to continue work whose outcome is unknown.
+
+Native connections support configured authentication headers. Browser connections require an explicit headerless configuration and an authenticated backend WebSocket proxy because browsers cannot send custom handshake headers. Examples cover [persistent connections](example/responses_websocket_example.dart), [steering](example/responses_steering_example.dart), [recovery](example/responses_recovery_example.dart) and [multi-agent injection](example/responses_injection_example.dart).
+
+### Responses tools, reasoning and cache controls
+
+[Async function/custom tools](https://developers.openai.com/api/docs/guides/async-tool-calling) retain their execution flags and call metadata through returned calls, streams, conversations and replay. Typed custom-call input supports faithful continuation. [Reasoning configuration updates](https://developers.openai.com/api/docs/guides/reasoning#change-reasoning-mid-conversation) change subsequent effort through input history while keeping request-level settings stable.
+
+GA web search becomes the default for the web-search factories, with domain filters, external-access settings, result budgets, image controls and exact includes. Explicit preview tools retain their wire values; use an explicit preview type if the application depends on preview behavior. Hosted, local and existing-container shell configurations gain typed calls/results, skills, writable replay models and command/output stream events with independent stdout/stderr fragments.
+
+Compaction-in-progress events now have a typed variant. Access-program selection and effective response metadata are exposed without changing omitted-field behavior. Tool-search records preserve arbitrary returned arguments and nullable hosted IDs, while writable definitions and returned records enforce their separate contracts.
+
+Responses cache options add prewarming/comparison controls and typed diagnostics; Chat and compaction retain their narrower options type. `PromptCacheRetention.inMemory` now serializes as `in_memory`, while legacy `in-memory` input remains readable. Retention and TTL describe different policies and are not interchangeable. See the [cache example](example/prompt_cache_example.dart) and the migration guide for the Responses options type change.
+
+### Chat, images and container correctness
+
+Chat completions now preserve audio output, replay assistant audio by ID, and accumulate audio fragments independently per choice. Detailed cache-write, image and text token counters survive ordinary and usage-only stream responses. Obfuscation remains metadata and does not enter accumulated output. Value equality, hashing and copies include the documented fields, so same-ID snapshots can compare differently when their contents differ.
+
+Image generation and multipart image editing now require an explicit model, including their streaming variants. Raw model IDs remain supported; JSON image editing retains its separate optional-model/server-default contract. Container memory uses typed `1g`/`4g`/`16g`/`64g` values, network allowlists use `allowed_domains`, creation requires a name, and returned expiration/network information has distinct response types. Collection-bearing container models own immutable snapshots.
+
+Structured permanent billing/spend/quota failures stop automatic replay. Valid server retry hints are minimum delays; a hint beyond the automatic wait bound returns the original error instead of retrying early. Transient/unknown-provider 429 behavior remains available. The [retry example](example/retry_guidance_example.dart) demonstrates the behavior locally.
+
+### Speech, file audio, custom voices and Live
+
+Speech supports instructions, typed named/custom voice references and built-in voice conveniences, plus raw byte streaming and typed SSE audio/usage alongside buffered generation. Chat voices use the same `AudioVoice` interface, with marin/cedar and AAC conveniences; Chat `pcm16` remains distinct from Speech `pcm`.
+
+File-audio requests/responses retain strict parsing and immutable collection snapshots. Buffered methods support cancellation, and translation has explicit verbose and raw-output methods that preserve subtitle whitespace. Collection/byte/JSON-bearing constructors lose `const`; scalar-only constructors remain const. Voice-consent CRUD and custom voice creation preserve original recordings, enforce the documented limits and protect private sample/consent data in automatic diagnostics. Custom voice use still depends on service eligibility and permissions; the client does not provide microphone capture or invent consent.
+
+`client.live.sessions` adds HTTP signaling and explicit WebRTC/SIP call controls, recording downloads and REST forks. Primary and sideband WebSockets expose typed events and role-safe commands. Stored-session forks use a separate connection, transcript helpers group captions with SDK timing semantics, and typed media data channels borrow caller media. Application task restoration, tool execution and media/hardware ownership remain explicit; forks do not automatically replay audio or side effects. See the [README Live workflows](README.md#how-do-i-signal-live-sessions-and-control-calls).
+
+### Signed webhooks, Safety and monitoring
+
+Verify original webhook strings/bytes locally through the standalone verifier or `client.webhooks`, without an API key or HTTP request. The parser covers 26 published received event variants and preserves future event/metadata JSON. Project endpoint management includes CRUD, rotation, testing and event-type discovery; revealed signing secrets remain caller-readable while built-in diagnostics redact them.
+
+`client.safety` retrieves project alerts and organization cases referenced by verified notifications, including nullable detailed explanations. Shared monitoring details survive HTTP failures, failed Responses and WebSocket errors without changing the original failure or triggering continuation. Canonical SSE errors serialize as flat nullable fields, with documented legacy input compatibility. These are retrieval and inspection APIs, not automatic remediation workflows.
+
+### Agents, durable sessions, environments and Vaults
+
+`client.agents` provides saved-agent CRUD with persisted function, MCP, web-search and computer-use configuration. Durable sessions support JSON/SSE creation, persistent typed observation and explicit submission of messages, function results, browser approvals and cancellation. HTTP acceptance, observer closure and execution completion remain distinct. Root-session items, turns and turn items are readable; currently published OTLP traces use root-turn pagination. Subagent inspection and child history keep coordinator and child timelines separate, including closed children that resume.
+
+Hosted environments can be prewarmed from reusable templates. File methods copy Files API references or bounded inline bytes into connected environments and page live workspace files; session artifacts are separately published immutable snapshots that can be downloaded incrementally, including after environment expiry. Inline configuration limits are 5 MiB per decoded file and 10 MiB per configuration.
+
+`client.vaults` provides Vault CRUD and write-only credential creation/rotation, with safe returned authentication metadata. Secret writes and readable metadata use distinct models. No local function executor, automatic session runner/result collector, portable file convenience layer or environment-lifecycle webhook helper is added in this release. The implemented core HTTP operations remain usable directly, and the [README](README.md#how-do-i-save-and-update-an-agent-configuration) contains offline workflows.
+
+### Compatibility and upgrade priorities
+
+Upgrade the dependency to `openai_dart: ^11.0.0`, then run the analyzer and application tests. The [v10.x → v11.0.0 migration guide](MIGRATION.md#migrating-from-v10x-to-v1100) preserves detailed before/after examples for every reviewed contract correction, including:
+
+- Required explicit image models, container names and returned nullable fields.
+- Typed/open audio voices, nullable translation task/annotations/error fields, and explicit raw/verbose translation output methods.
+- The Responses cache-options type split and canonical cache-retention spelling.
+- GA web-search default selection, complete shell/tool-search returned contracts and request replay boundaries.
+- New sealed variants for custom-call inputs, reasoning-update items, compaction, steering and injection; update exhaustive switches rather than treating these known events as unknown fallbacks.
+- Immutable collection-bearing models, wider value equality/hash contracts, stricter malformed-known JSON rejection and changed retry timing/classification.
+
+HTTP/2 adoption is **deferred**. The local evaluation demonstrated concurrent connection savings, but cancellation, buffering/backpressure and repeated SSE compatibility blocked a general recommendation; it did not change the production transport or demonstrate faster OpenAI inference. Follow-up [#408](https://github.com/davidmigloz/ai_clients_dart/issues/408) waits for released fixes and runtime evidence. Deferred Agents conveniences, Admin/legacy parity and runtime configuration changes also remain outside this release; completing the bounded milestone is not a claim of full API/SDK parity.
+
+### Commits
+
+- **BREAKING** **FEAT**: add speech voices and byte/SSE streaming ([#374](https://github.com/davidmigloz/ai_clients_dart/issues/374)). ([f76a2e8c](https://github.com/davidmigloz/ai_clients_dart/commit/f76a2e8cbb8de0469310c4c0c0f31fc1ad13bbeb))
+- **BREAKING** **FEAT**: add beta WebSocket tool-result injection ([#356](https://github.com/davidmigloz/ai_clients_dart/issues/356)). ([1e63d6b9](https://github.com/davidmigloz/ai_clients_dart/commit/1e63d6b93bdf0028eb6925d45371b1f36deb5d7b))
+- **BREAKING** **FEAT**: add mid-turn Responses steering ([#354](https://github.com/davidmigloz/ai_clients_dart/issues/354)). ([eeaa8e7b](https://github.com/davidmigloz/ai_clients_dart/commit/eeaa8e7b1b8e821fc518287167c5fb06b549cdd8))
+- **BREAKING** **FEAT**: add persistent Responses WebSocket transport ([#353](https://github.com/davidmigloz/ai_clients_dart/issues/353)). ([b1c7b023](https://github.com/davidmigloz/ai_clients_dart/commit/b1c7b0238921b25be1f3592f5f4b1cd9cc2479d6))
+- **BREAKING** **FEAT**: add typed compaction progress events ([#350](https://github.com/davidmigloz/ai_clients_dart/issues/350)). ([4110c174](https://github.com/davidmigloz/ai_clients_dart/commit/4110c174b6b84947cd609f59a0104cacc8b6373c))
+- **BREAKING** **FEAT**: add hosted shell, replay and stream events ([#349](https://github.com/davidmigloz/ai_clients_dart/issues/349)). ([9e0b572b](https://github.com/davidmigloz/ai_clients_dart/commit/9e0b572b823f70056401e4bcdc87a1d716a62d11))
+- **BREAKING** **FEAT**: add GA web search controls and results ([#348](https://github.com/davidmigloz/ai_clients_dart/issues/348)). ([43b826f3](https://github.com/davidmigloz/ai_clients_dart/commit/43b826f31c0629f588861a867ff9b997c63ec58e))
+- **BREAKING** **FEAT**: add persistent reasoning updates ([#347](https://github.com/davidmigloz/ai_clients_dart/issues/347)). ([6b0a66f3](https://github.com/davidmigloz/ai_clients_dart/commit/6b0a66f32d0cc2384d909f4e86f25237fb7cd11a))
+- **BREAKING** **FEAT**: support async function and custom tools ([#346](https://github.com/davidmigloz/ai_clients_dart/issues/346)). ([433cca33](https://github.com/davidmigloz/ai_clients_dart/commit/433cca3317abc4f1eabc89885798fb33f3a80065))
+- **BREAKING** **FEAT**: support Chat audio output, replay, and streams ([#331](https://github.com/davidmigloz/ai_clients_dart/issues/331)). ([82232226](https://github.com/davidmigloz/ai_clients_dart/commit/82232226ec94ba7d37080f8a1b792ff86252e503))
+- **BREAKING** **FEAT**: preserve Chat usage and stream obfuscation ([#330](https://github.com/davidmigloz/ai_clients_dart/issues/330)). ([c65f3e96](https://github.com/davidmigloz/ai_clients_dart/commit/c65f3e96a91d4a4045068bb31f1197bb2f011f3d))
+- **BREAKING** **FEAT**: add cache controls and diagnostics ([#329](https://github.com/davidmigloz/ai_clients_dart/issues/329)). ([7da31335](https://github.com/davidmigloz/ai_clients_dart/commit/7da3133539b1e60cdd2a2fbaedbad566cbb6f764))
+- **BREAKING** **FIX**: correct Chat voices and file audio contracts ([#375](https://github.com/davidmigloz/ai_clients_dart/issues/375)). ([98e67ac9](https://github.com/davidmigloz/ai_clients_dart/commit/98e67ac93bc524a6a40a49ffb04a3c38c00f89ec))
+- **BREAKING** **FIX**: preserve monitoring errors and flat SSE ([#365](https://github.com/davidmigloz/ai_clients_dart/issues/365)). ([fca1a3f4](https://github.com/davidmigloz/ai_clients_dart/commit/fca1a3f4e453d88caed9ffa573d4ec665126c3cb))
+- **BREAKING** **FIX**: preserve tool-search calls and definitions ([#352](https://github.com/davidmigloz/ai_clients_dart/issues/352)). ([9944b421](https://github.com/davidmigloz/ai_clients_dart/commit/9944b421e7bad565e0be20bc04e314e4571dd50e))
+- **BREAKING** **FIX**: require generation and multipart image models ([#333](https://github.com/davidmigloz/ai_clients_dart/issues/333)). ([5eae6db7](https://github.com/davidmigloz/ai_clients_dart/commit/5eae6db755775d904cfe19df3f22e1bd26dedb73))
+- **BREAKING** **FIX**: honor quota failures and server retry hints ([#332](https://github.com/davidmigloz/ai_clients_dart/issues/332)). ([aa6ebfaa](https://github.com/davidmigloz/ai_clients_dart/commit/aa6ebfaaa34192fa18985d5816cd846bd3dfbe95))
+- **BREAKING** **FIX**: correct container configuration contracts ([#327](https://github.com/davidmigloz/ai_clients_dart/issues/327)). ([d92ab258](https://github.com/davidmigloz/ai_clients_dart/commit/d92ab258243f74390ac1e1111b7fc7032648771f))
+- **FEAT**: add subagent inspection and history ([#406](https://github.com/davidmigloz/ai_clients_dart/issues/406)). ([750a4f45](https://github.com/davidmigloz/ai_clients_dart/commit/750a4f4582ebd5dc2e3e568c26bd708bd5fc33ae))
+- **FEAT**: add environment files and session artifacts ([#405](https://github.com/davidmigloz/ai_clients_dart/issues/405)). ([7fcfb3f7](https://github.com/davidmigloz/ai_clients_dart/commit/7fcfb3f797347e16165f14eabd6381fc5c3ca07b))
+- **FEAT**: add hosted environments and templates ([#404](https://github.com/davidmigloz/ai_clients_dart/issues/404)). ([435b4cf0](https://github.com/davidmigloz/ai_clients_dart/commit/435b4cf04155b665ebe8a8a6909dc8bce364a49b))
+- **FEAT**: add Vaults and write-only credentials ([#403](https://github.com/davidmigloz/ai_clients_dart/issues/403)). ([9a31d51d](https://github.com/davidmigloz/ai_clients_dart/commit/9a31d51ddaf59f4a415cdea08c914accd5f255dd))
+- **FEAT**: add session history and OTLP traces ([#402](https://github.com/davidmigloz/ai_clients_dart/issues/402)). ([c3a31911](https://github.com/davidmigloz/ai_clients_dart/commit/c3a3191121f3c32b760189801cb6ecb0cfe69753))
+- **FEAT**: add durable sessions and raw event streams ([#401](https://github.com/davidmigloz/ai_clients_dart/issues/401)). ([7893afa2](https://github.com/davidmigloz/ai_clients_dart/commit/7893afa2ab07014dbeddd19e4bc017b5d6e507c2))
+- **FEAT**: add saved agent CRUD and configuration ([#400](https://github.com/davidmigloz/ai_clients_dart/issues/400)). ([c1df2019](https://github.com/davidmigloz/ai_clients_dart/commit/c1df20199dd450c80a7ecb8ae65eb74f6afeb184))
+- **FEAT**: expose Safety alert explanations ([#384](https://github.com/davidmigloz/ai_clients_dart/issues/384)). ([08f9594d](https://github.com/davidmigloz/ai_clients_dart/commit/08f9594dc73703e521aae4cb070a0be34509642a))
+- **FEAT**: accept HTTP(S) Decisions image URLs ([#383](https://github.com/davidmigloz/ai_clients_dart/issues/383)). ([bc89ad9a](https://github.com/davidmigloz/ai_clients_dart/commit/bc89ad9a8fb79d889e7945030fa9f6524d73d781))
+- **FEAT**: add Live forks and transcript helpers ([#380](https://github.com/davidmigloz/ai_clients_dart/issues/380)). ([a7907e4d](https://github.com/davidmigloz/ai_clients_dart/commit/a7907e4dc747190cc6ec36ede27b53fda9acb1c5))
+- **FEAT**: add primary and sideband Live WebSockets ([#379](https://github.com/davidmigloz/ai_clients_dart/issues/379)). ([d00ee5cf](https://github.com/davidmigloz/ai_clients_dart/commit/d00ee5cfc4a61df04b4e7c59c6ea4e8e34c79648))
+- **FEAT**: Live HTTP sessions and call controls ([#378](https://github.com/davidmigloz/ai_clients_dart/issues/378)). ([98b32e69](https://github.com/davidmigloz/ai_clients_dart/commit/98b32e699bd61532c948a910ad9869e91fb23a73))
+- **FEAT**: add custom voice creation ([#377](https://github.com/davidmigloz/ai_clients_dart/issues/377)). ([3e2b488e](https://github.com/davidmigloz/ai_clients_dart/commit/3e2b488e896f820118b575108c50586ae08ec867))
+- **FEAT**: add voice consent management ([#376](https://github.com/davidmigloz/ai_clients_dart/issues/376)). ([2856c21e](https://github.com/davidmigloz/ai_clients_dart/commit/2856c21eed697b7ec24a79e70e66800fe5ec0b79))
+- **FEAT**: retrieve safety alerts and organization cases ([#364](https://github.com/davidmigloz/ai_clients_dart/issues/364)). ([a466e850](https://github.com/davidmigloz/ai_clients_dart/commit/a466e8500aae91347f9c2d004a0854c969c6e779))
+- **FEAT**: manage project webhook endpoints ([#363](https://github.com/davidmigloz/ai_clients_dart/issues/363)). ([b5159171](https://github.com/davidmigloz/ai_clients_dart/commit/b5159171218e8feb9f720c5db7d1d82ea3cf1a80))
+- **FEAT**: verify and parse signed webhook events ([#362](https://github.com/davidmigloz/ai_clients_dart/issues/362)). ([eea142bf](https://github.com/davidmigloz/ai_clients_dart/commit/eea142bf9b100448f5216572e4db2d50a7ad0f5b))
+- **FEAT**: add opt-in Responses WebSocket recovery ([#355](https://github.com/davidmigloz/ai_clients_dart/issues/355)). ([22b8cfda](https://github.com/davidmigloz/ai_clients_dart/commit/22b8cfdace42edd8dbe54e88de0341ee2b73426a))
+- **FEAT**: add Responses access-program selection ([#351](https://github.com/davidmigloz/ai_clients_dart/issues/351)). ([f5b8d085](https://github.com/davidmigloz/ai_clients_dart/commit/f5b8d0857ddbb765bea8a7b00b5fd7b28a9f8a88))
+- **FEAT**: add Decisions API ([#319](https://github.com/davidmigloz/ai_clients_dart/issues/319)). ([0d852337](https://github.com/davidmigloz/ai_clients_dart/commit/0d85233700ba5f585e0a80ff1045957703e22eb4))
+- **FIX**: use canonical cache retention wire values ([#328](https://github.com/davidmigloz/ai_clients_dart/issues/328)). ([6d378a0c](https://github.com/davidmigloz/ai_clients_dart/commit/6d378a0cb46c03b8c3c36fad92d13c6af7fba24c))
+- **CHORE**: evaluate HTTP/2 transport compatibility ([#407](https://github.com/davidmigloz/ai_clients_dart/issues/407)). ([c23f36a8](https://github.com/davidmigloz/ai_clients_dart/commit/c23f36a8c9b9288bd9469a75198e6b1b5c8a4e08))
+
 ## 10.0.1
 
 Fixes Responses parsing for compatible providers such as Agnes that return `prompt_tokens` and `completion_tokens`, preserving their reported counts and cached/reasoning token details. Standard Responses fields take precedence when present, and serialization continues to use standard Responses field names.

@@ -6,7 +6,15 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
-## Upcoming annotation event nullability correction
+<a id="upcoming-annotation-event-nullability-correction"></a>
+
+## Migrating from v0.5.x to v0.6.0
+
+v0.6.0 corrects the required nullable annotation field on streaming events.
+The minimum Dart SDK remains 3.12; HTTP/streaming entry points and existing
+provider defaults for omitted index fields remain available.
+
+### 1) Handle nullable annotations
 
 `OutputTextAnnotationAddedEvent.annotation` is now `Annotation?`, matching the
 published required nullable wire member. Check for null before using it. The
@@ -22,6 +30,18 @@ final annotationJson = event.annotation.toJson();
 // After
 final annotationJson = event.annotation?.toJson();
 ```
+
+### 2) Update your dependency
+
+```yaml
+dependencies:
+  open_responses: ^0.6.0
+```
+
+Run `dart pub get` and your analyzer/tests after updating. Flutter applications
+should use `flutter pub get` and their normal Flutter validation workflow.
+
+---
 
 ## Migrating from v0.4.x to v0.5.0
 

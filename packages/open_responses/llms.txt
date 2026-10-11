@@ -4,9 +4,9 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/README.md) (~3.2k tokens): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/CHANGELOG.md) (~3k tokens): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/MIGRATION.md) (~423 tokens): Upgrade notes and breaking-change guidance.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/README.md) (~3.3k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/CHANGELOG.md) (~4.6k tokens): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/MIGRATION.md) (~1.2k tokens): Upgrade notes and breaking-change guidance.
 
 ## Examples
 
@@ -24,4 +24,4 @@
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/open_responses): Source tree, pubspec, and package-local files.
 
-**Total: ~13.4k tokens**
+**Total: ~15.9k tokens**

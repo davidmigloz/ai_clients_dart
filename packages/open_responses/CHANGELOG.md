@@ -1,3 +1,12 @@
+## 0.6.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Corrects `OutputTextAnnotationAddedEvent.annotation` to `Annotation?`, matching the required nullable wire member. Guard annotation dereferences; explicit null is emitted, a missing/malformed member fails contextually, and `copyWith(annotation: null)` clears the value while retaining the key. Existing provider defaults for omitted sequence/index fields remain compatible; the HTTP transport and other API entry points are unchanged.
+
+- **BREAKING** **FEAT**: Correct streaming annotation nullability ([#353](https://github.com/davidmigloz/ai_clients_dart/issues/353)). ([b1c7b023](https://github.com/davidmigloz/ai_clients_dart/commit/b1c7b0238921b25be1f3592f5f4b1cd9cc2479d6))
+
 ## 0.5.0
 
 > [!CAUTION]

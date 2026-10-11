@@ -6,7 +6,66 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
-## Upcoming Chat voices and file audio corrections
+## Migrating from v10.x to v11.0.0
+
+v11.0.0 adds Decisions, persistent Responses WebSockets, Live sessions, signed
+webhooks, Safety retrieval, and the core Agents/Vaults APIs. It also corrects
+request and response contracts that were previously too permissive or discarded
+wire data. The minimum Dart SDK remains 3.12; existing HTTP/SSE and Realtime
+entry points remain available.
+
+### Upgrade checklist
+
+1. Update the dependency and run `dart pub get` (or `flutter pub get`):
+
+   ```yaml
+   dependencies:
+     openai_dart: ^11.0.0
+   ```
+
+2. Check the sections below for APIs your application uses. In particular,
+   supply explicit image models and required container/returned-item fields;
+   update narrowed audio voice types and exhaustive event/enum switches;
+   and handle required nullable annotations and monitoring fields.
+3. Replace collection mutation with `copyWith` where models now own immutable
+   snapshots. Review ID-only equality assumptions, stored JSON assertions and
+   custom serializers against the documented contracts.
+4. Review retry handling and the GA web-search default. Run your application's
+   analyzer and tests before deploying; WebSocket steering, beta-only injection
+   and browser proxy configuration have explicit boundaries in the README.
+
+The sections below retain the detailed before/after examples from each reviewed
+API change. Additive reasoning and async-tool guidance is included alongside the
+breaking changes so request replay and serialization remain consistent.
+
+### Exhaustive-switch compatibility
+
+Adding variants to an existing sealed class can break an otherwise unchanged
+exhaustive switch. The following classes are new relative to v10.0.1; extend
+switches over the existing bases with the relevant arms. A wildcard branch is
+appropriate only when your application deliberately accepts unhandled/future
+values. Unknown received variants preserve forward-compatible data; their presence
+does not make them writable request variants.
+
+| Existing sealed base | New variants to handle |
+| --- | --- |
+| `CodeInterpreterContainer` | `UnknownCodeInterpreterContainer` |
+| `ContainerNetworkPolicy` | `UnknownContainerNetworkPolicy` |
+| `ConversationItem` | `ConversationConfigurationUpdateItem`, `ConversationShellCallItem`, `ConversationShellCallOutputItem` |
+| `Item` | `WebSearchCallItem`, `ConfigurationUpdateItem`, `ConfigurationUpdateItemResponse`, `CustomToolCallInputItem`, `ToolSearchCallResourceItem`, `ToolSearchOutputResourceItem`, `ShellCallResourceItem`, `ShellCallOutputResourceItem`, `ShellCallInputItem`, `ShellCallOutputInputItem` |
+| `ResponseStreamEvent` | `ResponseCompactionCompactingEvent`, `ResponseShellCallCommandAddedEvent`, `ResponseShellCallCommandDeltaEvent`, `ResponseShellCallCommandDoneEvent`, `ResponseShellCallOutputContentDeltaEvent`, `ResponseShellCallOutputContentDoneEvent` |
+| `ResponseToolChoice` | `ResponseToolChoiceShell`, `ResponseToolChoiceWebSearch` |
+| `ShellCallOutcome` | `UnknownShellCallOutcome` |
+| `ShellEnvironment` | `UnknownShellEnvironment` |
+
+The new Responses WebSocket event hierarchy also gains typed steering and
+injection acknowledgments within this release; their complete switch examples
+are in sections 4 and 5. Update exhaustive enum switches for appended speech/Chat
+voice and audio-format cases as described in sections 1 and 2.
+
+<a id="upcoming-chat-voices-and-file-audio-corrections"></a>
+
+### 1) Chat voices and file audio corrections
 
 `ChatAudioConfig.voice` now accepts the shared typed `AudioVoice` interface.
 Existing const configs and `ChatAudioVoice` constants still work. Update code
@@ -113,7 +172,9 @@ until a supported replacement fits their output requirements; do not substitute
 one model string across every mode. See the [offline example](example/existing_audio_example.dart)
 and [official sunset notice](https://developers.openai.com/api/docs/deprecations).
 
-## Upcoming speech options and streaming
+<a id="upcoming-speech-options-and-streaming"></a>
+
+### 2) speech options and streaming
 
 `SpeechRequest.voice` now has the typed `AudioVoice` interface, accepting the
 existing `SpeechVoice` enum, open named voices and a closed custom ID reference.
@@ -173,7 +234,9 @@ Audio/Realtime/transcription snapshot sunset is a separate family-specific
 migration. The February 26, 2027 file-transcription sunset has its own specialist
 output/translation constraints.
 
-## Upcoming structured monitoring errors
+<a id="upcoming-structured-monitoring-errors"></a>
+
+### 3) structured monitoring errors
 
 `ErrorEvent.code` is now `String?`, matching the nullable OpenAI SSE field.
 Update code that assumes every streamed error has a code:
@@ -237,7 +300,9 @@ original fields remain readable. Review tokens and steer messages are passive
 investigation data: they do not trigger retry, replay, tool execution or a
 continuation. See the [offline monitoring example](example/monitoring_errors_example.dart).
 
-## Upcoming typed injection events
+<a id="upcoming-typed-injection-events"></a>
+
+### 4) typed injection events
 
 `response.inject.created` and `response.inject.failed` now produce
 `ResponseInjectCreatedEvent` and `ResponseInjectFailedEvent` from the sealed
@@ -323,7 +388,9 @@ supplied parent `rawJson` override retains priority.
 query behavior, SSE dispatcher and connection send/create/steer signatures remain
 available. No automatic tool runner, continuation or replay is introduced.
 
-## Upcoming typed steering events
+<a id="upcoming-typed-steering-events"></a>
+
+### 5) typed steering events
 
 `ResponsesServerEvent.fromJson` now dispatches `response.steer.accepted`,
 `response.steer.pending` and `response.steer.failed` to their typed variants.
@@ -359,7 +426,9 @@ The additive `steer` and `sendSteer` methods do not change the existing `send` o
 `create` signatures. No automatic continuation create, tool execution or replay
 is introduced.
 
-## Upcoming nullable streaming annotations
+<a id="upcoming-nullable-streaming-annotations"></a>
+
+### 6) nullable streaming annotations
 
 `OutputTextAnnotationAddedEvent.annotation` is now required nullable, matching
 the canonical event schema. A supplied JSON null is valid and remains emitted;
@@ -381,7 +450,9 @@ correction applies to Responses SSE and the new WebSocket envelopes. The sibling
 migration guide. Persistent WebSocket connections themselves are additive; existing
 HTTP, SSE and Realtime entry points remain available.
 
-## Upcoming tool-search fidelity
+<a id="upcoming-tool-search-fidelity"></a>
+
+### 7) tool-search fidelity
 
 Tool-search request and returned records now enforce their distinct wire
 contracts. Writable calls require nonnull object arguments. Returned calls,
@@ -482,10 +553,12 @@ New value/copy contracts preserve all fields, and search diagnostics summarize
 arguments, schemas and actor metadata without printing their payloads.
 
 See the [README](README.md#how-do-i-return-client-discovered-tools) and
-[offline example](example/tool_search_example.dart). This is an unreleased
-correction; no package version is changed here.
+[offline example](example/tool_search_example.dart). This correction is
+included in v11.0.0.
 
-## Upcoming compaction progress
+<a id="upcoming-compaction-progress"></a>
+
+### 8) compaction progress
 
 `response.compaction.compacting` now decodes to
 `ResponseCompactionCompactingEvent`. Update handlers that previously identified
@@ -519,7 +592,9 @@ See the [README](README.md#how-do-i-observe-compaction-progress) and
 [offline example](example/compaction_progress_example.dart). The offline example
 runs without an API key, large context or encrypted payload logs.
 
-## Upcoming shell alignment
+<a id="upcoming-shell-alignment"></a>
+
+### 9) shell alignment
 
 Returned shell DTOs now follow their required nullable keys. `ShellCallAction`
 requires `timeoutMs` and `maxOutputLength` constructor arguments, and serializes
@@ -592,7 +667,9 @@ forced choice. See the [README](README.md#how-do-i-configure-hosted-shell-and-re
 and [offline example](example/shell_tools_example.dart) for hosted settings, local
 results and all five typed stream events without API calls or command execution.
 
-## Upcoming GA web-search alignment
+<a id="upcoming-ga-web-search-alignment"></a>
+
+### 10) GA web-search alignment
 
 `ResponseTool.webSearch()` and `WebSearchTool()` now default to GA
 `web_search`. Existing explicit preview types keep their wire values. Select
@@ -656,7 +733,9 @@ Future actions/results retain immutable raw JSON. See the
 limitations and the [local REST/SSE example](example/web_search_controls_example.dart)
 for a runnable demonstration without API calls.
 
-## Upcoming Responses reasoning configuration updates
+<a id="upcoming-responses-reasoning-configuration-updates"></a>
+
+### 11) Responses reasoning configuration updates
 
 This addition keeps existing `ReasoningConfig` requests unchanged. Use
 `ConfigurationUpdateItem(reasoning: ConfigurationUpdateReasoning(...))` in the
@@ -674,9 +753,33 @@ An empty reasoning object remains `{}`.
 See the [README](README.md#how-do-i-change-reasoning-effort-during-a-conversation)
 for supported modes and history restrictions, and the
 [local example](example/configuration_updates_example.dart) for successive updates
-without API calls. No existing call-site migration is required.
+without API calls. Existing request construction remains valid, but exhaustive
+switches over `Item` and `ConversationItem` must handle the new variants.
 
-## Upcoming Responses async-tool alignment
+The reasoning update types add variants to existing sealed hierarchies.
+Exhaustive `Item` switches must handle both `ConfigurationUpdateItem` and
+`ConfigurationUpdateItemResponse`; exhaustive `ConversationItem` switches must
+handle `ConversationConfigurationUpdateItem`. Add the corresponding arms, or an
+intentional default branch when the application supports future item types:
+
+```dart
+String describeItem(Item item) => switch (item) {
+  ConfigurationUpdateItem() => 'reasoning update input',
+  ConfigurationUpdateItemResponse() => 'returned reasoning update',
+  _ => 'other item',
+};
+
+String describeStoredItem(ConversationItem item) => switch (item) {
+  ConversationConfigurationUpdateItem() => 'stored reasoning update',
+  _ => 'other stored item',
+};
+```
+
+---
+
+<a id="upcoming-responses-async-tool-alignment"></a>
+
+### 12) Responses async-tool alignment
 
 Function/custom definitions, their calls and conversation call items now support
 optional `async`. Existing construction remains valid. Omitting the flag preserves
@@ -717,7 +820,23 @@ or external requests.
 
 ---
 
-## Upcoming image model selection alignment
+`CustomToolCallInputItem` adds another variant to the pre-existing sealed `Item`
+hierarchy. Add a case to exhaustive input/replay switches; the existing returned
+`CustomToolCallItem` remains a distinct output type. A default branch is an
+alternative when your application deliberately accepts other item types:
+
+```dart
+String describeCustomInput(Item item) => switch (item) {
+  CustomToolCallInputItem() => 'custom tool call input',
+  _ => 'other item',
+};
+```
+
+---
+
+<a id="upcoming-image-model-selection-alignment"></a>
+
+### 13) image model selection alignment
 
 `ImageGenerationRequest` and multipart `ImageEditRequest` now require a nonnull
 `model`. Pass an explicit model to generation, multipart editing, and their
@@ -773,7 +892,9 @@ which runs without a key, network access, or API cost.
 
 ---
 
-## Upcoming retry guidance alignment
+<a id="upcoming-retry-guidance-alignment"></a>
+
+### 14) retry guidance alignment
 
 Structured HTTP 429 billing, spend, and quota errors now stop automatic retries:
 `credit_balance_exhausted`, `organization_spend_limit_exceeded`,
@@ -819,7 +940,9 @@ without API access or cost.
 
 ---
 
-## Upcoming Chat audio alignment
+<a id="upcoming-chat-audio-alignment"></a>
+
+### 15) Chat audio alignment
 
 Assistant messages gain optional `audio`, with distinct `ChatAudioReference`
 (ID-only request reference) and `ChatCompletionAudio` (required ID, base64 data,
@@ -877,12 +1000,13 @@ Compare IDs explicitly if identifier-only equality is needed. Accumulated choice
 tool-call, reasoning, and logprob lists are readonly captured snapshots; use
 `copyWith` or copy a list before modifying it.
 
-See [the runnable example](example/chat_audio_example.dart). Package versioning
-and release remain separate.
+See [the runnable example](example/chat_audio_example.dart).
 
 ---
 
-## Upcoming Chat usage and stream-obfuscation alignment
+<a id="upcoming-chat-usage-and-stream-obfuscation-alignment"></a>
+
+### 16) Chat usage and stream-obfuscation alignment
 
 Chat usage gains optional prompt `cacheWriteTokens`, `imageTokens`, and
 `textTokens`, plus completion `textTokens`. Streams preserve these on the final
@@ -911,12 +1035,13 @@ constructors remain available, and caller-owned collections stay mutable; avoid
 mutating a model used as a map/set key. New copies support explicit nullable
 clearing and empty list replacements.
 
-See [the streaming example](example/streaming_example.dart). Package versioning
-and release remain separate.
+See [the streaming example](example/streaming_example.dart).
 
 ---
 
-## Upcoming cache-controls and diagnostics alignment
+<a id="upcoming-cache-controls-and-diagnostics-alignment"></a>
+
+### 17) cache-controls and diagnostics alignment
 
 Responses creation now uses the distinct `ResponsePromptCacheOptionsParam`,
 which adds `comparisonResponseId` and `prewarm` alongside mode/TTL. Replace the
@@ -971,12 +1096,13 @@ order. Existing const constructors remain available; caller-owned collections
 remain mutable, so avoid mutating a model used as a map/set key. Only unknown
 cache diagnostic payloads take recursively immutable snapshots.
 
-See [the runnable example](example/prompt_cache_example.dart). The package
-version will be assigned by the release workflow.
+See [the runnable example](example/prompt_cache_example.dart).
 
 ---
 
-## Upcoming cache-retention wire correction
+<a id="upcoming-cache-retention-wire-correction"></a>
+
+### 18) cache-retention wire correction
 
 `PromptCacheRetention.inMemory.value` and `toJson()` now return `in_memory`,
 matching the current API. Enum names and constructors are unchanged. Both
@@ -1005,8 +1131,7 @@ final isInMemory = retention == PromptCacheRetention.inMemory;
 Chat requests, returned Responses, and compaction use the same shared mapping.
 Responses creation now also accepts this deprecated control; modern cache
 controls and diagnostics are described above. Use `h24` for GPT-5.5 and newer models; their
-documented retention policy does not support `inMemory`. The package version is
-assigned by the release workflow.
+documented retention policy does not support `inMemory`.
 
 The API marks this existing retention control deprecated in favor of
 `prompt_cache_options.ttl`; modern controls are implemented in
@@ -1016,13 +1141,14 @@ one for the other automatically. This correction preserves the existing control.
 
 ---
 
-## Upcoming container configuration corrections
+<a id="upcoming-container-configuration-corrections"></a>
+
+### 19) container configuration corrections
 
 These targeted breaking fixes align container configuration with the current API.
-The package version will be assigned by the release workflow; the minimum Dart
-SDK remains 3.12.
+The minimum Dart SDK remains 3.12.
 
-### Replace integer memory values and allowed-host names
+#### Replace integer memory values and allowed-host names
 
 Before:
 
@@ -1057,7 +1183,7 @@ using the `allowedHosts` constructor parameter/property. Positional
 `ContainerNetworkPolicy.allowlist(['api.example.com'])` calls remain valid.
 Optional `domainSecrets` use typed `ContainerNetworkPolicyDomainSecret` values.
 
-### Supply a name and handle response expiration separately
+#### Supply a name and handle response expiration separately
 
 `CreateContainerRequest` requires `name`. It gains optional memory, network policy,
 and typed skills. Request expiration still uses `ContainerExpiration` with required
@@ -1080,7 +1206,7 @@ JSON parsing rejects malformed required fields, unexpected list object types,
 and expiration anchors other than `last_active_at`. Optional response expiration
 members may be omitted independently, including an empty object.
 
-### Replace const collection models and identity-based comparisons
+#### Replace const collection models and identity-based comparisons
 
 Creation requests, automatic configurations, allowlists, and container lists now
 snapshot their supplied lists, so their constructors are nonconst. Remove outer
@@ -1093,6 +1219,7 @@ name, or list length. Use `container.id` explicitly when application logic needs
 identity across different snapshots of the same container.
 
 ---
+
 
 ## Migrating from v9.x to v10.0.0
 
