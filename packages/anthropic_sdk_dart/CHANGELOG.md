@@ -1,3 +1,9 @@
+## 9.0.1
+
+Prevents Messages response deserialization from failing when `usage.service_tier` is empty or unrecognized. These values now deserialize to `null`, while known service tiers retain their existing behavior.
+
+- **FIX**: tolerate unknown service_tier values in responses ([#412](https://github.com/davidmigloz/ai_clients_dart/issues/412)). ([67cb0bdc](https://github.com/davidmigloz/ai_clients_dart/commit/67cb0bdcaa2112ab944eaf642f58e9aca723e324))
+
 ## 9.0.0
 
 > [!CAUTION]

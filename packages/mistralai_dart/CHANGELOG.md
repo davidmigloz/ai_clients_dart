@@ -1,3 +1,9 @@
+## 8.2.0
+
+Restores cached prompt-token details on `UsageInfo` for [prompt-cache](https://docs.mistral.ai/studio/conversations/advanced/prompt-caching) and cost accounting, and adds `CompletionTokensDetails` for reasoning-token usage. All added fields are optional.
+
+- **FEAT**: restore prompt and completion token details on UsageInfo ([#410](https://github.com/davidmigloz/ai_clients_dart/issues/410)). ([4b979ec9](https://github.com/davidmigloz/ai_clients_dart/commit/4b979ec93da34859e88a39a3f5a2a70fb43ea8d8))
+
 ## 8.1.0
 
 Fixes Flutter Web and dart2wasm requests blocked by Mistral CORS by omitting the `X-Request-ID` header by default. Request IDs remain available for logging and error correlation; enable `MistralConfig.sendRequestIdHeader` when using a proxy that accepts the header. Explicit caller-supplied headers are preserved.

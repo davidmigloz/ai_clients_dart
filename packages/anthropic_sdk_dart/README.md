@@ -71,7 +71,7 @@ Requires Dart 3.12 or later. See the [Migration Guide](MIGRATION.md) for upgrade
 
 ```yaml
 dependencies:
-  anthropic_sdk_dart: ^9.0.0
+  anthropic_sdk_dart: ^9.0.1
 ```
 
 ```dart
