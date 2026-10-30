@@ -196,6 +196,7 @@ export 'src/models/libraries/sharing_response.dart';
 export 'src/models/libraries/update_document_request.dart';
 export 'src/models/libraries/update_library_request.dart';
 // --- Models: Metadata ---
+export 'src/models/metadata/completion_tokens_details.dart';
 export 'src/models/metadata/finish_reason.dart';
 export 'src/models/metadata/prediction.dart';
 export 'src/models/metadata/prompt_mode.dart';
