@@ -173,6 +173,26 @@ void main() {
       expect(message.stopReason, StopReason.modelContextWindowExceeded);
     });
 
+    test('fromJson tolerates an empty usage.service_tier', () {
+      final json = {
+        'id': 'msg_tier',
+        'type': 'message',
+        'role': 'assistant',
+        'model': 'claude-sonnet-4-6',
+        'content': [
+          {'type': 'text', 'text': 'Hello!'},
+        ],
+        'stop_reason': 'end_turn',
+        'stop_sequence': null,
+        'usage': {'input_tokens': 10, 'output_tokens': 5, 'service_tier': ''},
+      };
+
+      final message = Message.fromJson(json);
+
+      expect((message.content.first as TextBlock).text, 'Hello!');
+      expect(message.usage.serviceTier, isNull);
+    });
+
     test('toJson produces valid JSON', () {
       const message = Message(
         id: 'msg_test',

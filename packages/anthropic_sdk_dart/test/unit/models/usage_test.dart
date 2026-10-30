@@ -325,6 +325,57 @@ void main() {
     });
   });
 
+  group('Usage.serviceTier', () {
+    test('parses and round-trips known service tiers', () {
+      const expected = {
+        'standard': ServiceTier.standard,
+        'priority': ServiceTier.priority,
+        'batch': ServiceTier.batch,
+      };
+
+      for (final entry in expected.entries) {
+        final json = {
+          'input_tokens': 10,
+          'output_tokens': 5,
+          'service_tier': entry.key,
+        };
+        final usage = Usage.fromJson(json);
+        expect(usage.serviceTier, entry.value, reason: entry.key);
+        expect(usage.toJson(), json, reason: entry.key);
+      }
+    });
+
+    test('maps an empty service_tier to null', () {
+      final json = {'input_tokens': 10, 'output_tokens': 5, 'service_tier': ''};
+      final usage = Usage.fromJson(json);
+      expect(usage.inputTokens, 10);
+      expect(usage.outputTokens, 5);
+      expect(usage.serviceTier, isNull);
+    });
+
+    test('maps an unrecognized service_tier to null', () {
+      final json = {
+        'input_tokens': 10,
+        'output_tokens': 5,
+        'service_tier': 'flex',
+      };
+      final usage = Usage.fromJson(json);
+      expect(usage.serviceTier, isNull);
+      expect(usage.toJson().containsKey('service_tier'), isFalse);
+    });
+
+    test('leaves serviceTier null when absent or null', () {
+      final absent = {'input_tokens': 10, 'output_tokens': 5};
+      final explicitNull = {
+        'input_tokens': 10,
+        'output_tokens': 5,
+        'service_tier': null,
+      };
+      expect(Usage.fromJson(absent).serviceTier, isNull);
+      expect(Usage.fromJson(explicitNull).serviceTier, isNull);
+    });
+  });
+
   group('MessageDeltaUsage.fallbackCredit', () {
     test('parses and round-trips fallbackCredit', () {
       final json = {

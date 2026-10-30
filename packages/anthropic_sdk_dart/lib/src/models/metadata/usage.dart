@@ -329,6 +329,16 @@ enum ServiceTier {
   String toJson() => name;
 }
 
+/// Parses `usage.service_tier` leniently.
+///
+/// Servers or Anthropic-compatible proxies may send values this SDK version
+/// doesn't know (including an empty string). `service_tier` is optional
+/// metadata, so an unrecognized value maps to `null` instead of failing the
+/// whole response. Matches on [ServiceTier.name], the same wire value
+/// [ServiceTier.toJson] writes.
+ServiceTier? _serviceTierFromJson(String? value) =>
+    value == null ? null : ServiceTier.values.asNameMap()[value];
+
 /// Breakdown of output tokens by category.
 ///
 /// `outputTokens` remains the inclusive, authoritative total used for billing;
@@ -465,9 +475,7 @@ class Usage {
               json['server_tool_use'] as Map<String, dynamic>,
             )
           : null,
-      serviceTier: json['service_tier'] != null
-          ? ServiceTier.fromJson(json['service_tier'] as String)
-          : null,
+      serviceTier: _serviceTierFromJson(json['service_tier'] as String?),
       inferenceGeo: json['inference_geo'] as String?,
       iterations: (json['iterations'] as List?)
           ?.map((e) => IterationUsage.fromJson(e as Map<String, dynamic>))
