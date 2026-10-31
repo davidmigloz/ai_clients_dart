@@ -1,0 +1,151 @@
+{
+  "parent": 413,
+  "verified_children": 23,
+  "dependencies": [
+    {
+      "issue": 419,
+      "blocked_by": 414
+    },
+    {
+      "issue": 423,
+      "blocked_by": 422
+    },
+    {
+      "issue": 425,
+      "blocked_by": 316
+    },
+    {
+      "issue": 427,
+      "blocked_by": 414
+    },
+    {
+      "issue": 427,
+      "blocked_by": 415
+    },
+    {
+      "issue": 427,
+      "blocked_by": 416
+    },
+    {
+      "issue": 427,
+      "blocked_by": 417
+    },
+    {
+      "issue": 427,
+      "blocked_by": 418
+    },
+    {
+      "issue": 427,
+      "blocked_by": 419
+    },
+    {
+      "issue": 427,
+      "blocked_by": 420
+    },
+    {
+      "issue": 427,
+      "blocked_by": 421
+    },
+    {
+      "issue": 427,
+      "blocked_by": 422
+    },
+    {
+      "issue": 427,
+      "blocked_by": 423
+    },
+    {
+      "issue": 427,
+      "blocked_by": 424
+    },
+    {
+      "issue": 427,
+      "blocked_by": 425
+    },
+    {
+      "issue": 427,
+      "blocked_by": 426
+    },
+    {
+      "issue": 427,
+      "blocked_by": 392
+    },
+    {
+      "issue": 427,
+      "blocked_by": 393
+    },
+    {
+      "issue": 427,
+      "blocked_by": 394
+    },
+    {
+      "issue": 427,
+      "blocked_by": 395
+    },
+    {
+      "issue": 427,
+      "blocked_by": 396
+    },
+    {
+      "issue": 427,
+      "blocked_by": 397
+    },
+    {
+      "issue": 427,
+      "blocked_by": 316
+    },
+    {
+      "issue": 427,
+      "blocked_by": 246
+    },
+    {
+      "issue": 393,
+      "blocked_by": 422
+    },
+    {
+      "issue": 394,
+      "blocked_by": 422
+    },
+    {
+      "issue": 395,
+      "blocked_by": 394
+    },
+    {
+      "issue": 396,
+      "blocked_by": 394
+    },
+    {
+      "issue": 396,
+      "blocked_by": 395
+    },
+    {
+      "issue": 397,
+      "blocked_by": 396
+    }
+  ],
+  "children": [
+    246,
+    316,
+    392,
+    393,
+    394,
+    395,
+    396,
+    397,
+    408,
+    414,
+    415,
+    416,
+    417,
+    418,
+    419,
+    420,
+    421,
+    422,
+    423,
+    424,
+    425,
+    426,
+    427
+  ]
+}

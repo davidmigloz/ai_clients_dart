@@ -1,5 +1,10 @@
 # OpenAI API alignment
 
+> Historical roadmap for completed [#317](https://github.com/davidmigloz/ai_clients_dart/issues/317).
+> The progress statements below preserve that round's planning history. New API
+> changes and carried-over work are tracked in [#413](https://github.com/davidmigloz/ai_clients_dart/issues/413)
+> and the [October 31 alignment plan](../api-alignment-2026-10-31/README.md).
+
 Planning started October 7, 2026. Status: Decisions, container configuration,
 cache retention, cache controls/diagnostics, and Chat usage/obfuscation merged.
 Chat audio merged in [PR #331](https://github.com/davidmigloz/ai_clients_dart/pull/331).
