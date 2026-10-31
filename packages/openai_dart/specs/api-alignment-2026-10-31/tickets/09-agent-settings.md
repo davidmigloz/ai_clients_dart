@@ -16,7 +16,7 @@ Dependencies: None.
 ## Acceptance criteria
 
 - [ ] Add compaction.async and experimental.time_awareness across create/update/receive paths, including nullable override/default semantics.
-- [ ] Replace removed spend_control contracts with current review values none/auto_review on session create/update/receive; publish a targeted migration and do not silently send removed fields.
+- [ ] Stop sending removed spend_control fields and add independent review values none/auto_review on session create/update/receive. Migration guidance must distinguish action review from spending limits; never automatically translate one into the other.
 - [ ] Permit ultrafast in every Agent request enum/validator; the current receive enum already supports it. Audit duplicated generated request validators, not just the enum declaration.
 - [ ] Encode session metadata filters exactly as specified and allow session-agent tool updates with correct clear/omit behavior.
 - [ ] Public HTTP/SSE fixtures, round-trip/ownership/equality and migration examples cover each changed path. Document hosted Artifact SDK availability/prewarming as server capabilities, adding no fictitious client endpoint.

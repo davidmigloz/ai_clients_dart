@@ -17,7 +17,7 @@ Dependencies: None.
 
 - [ ] Expose prompt/name/script_hint/model with exact discriminator and omission behavior, supporting documented JSON and multipart encodings without breaking audio_sample plus consent creation.
 - [ ] Decode optional original prompt and prompt/audio_sample type, and implement the deletion response and identifier encoding.
-- [ ] Cover input length/blank validation, multipart headers, request encoding, response copies/equality and public create/retrieve/list/delete mock fixtures.
+- [ ] Cover input length/blank validation, multipart headers, request encoding, response copies/equality and public prompt/audio-sample create and delete mock fixtures.
 - [ ] Audit all nine newly announced named voices against existing Dart support; add only missing names while preserving future/custom voice IDs.
 - [ ] Add an explicit create/use/delete example. Document that prompt voices work in Live; do not advertise them for Speech/Chat audio. No voice creation or billed playback is required for default tests.
 
