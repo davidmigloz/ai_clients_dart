@@ -1,0 +1,25 @@
+{
+  "new_tickets": 14,
+  "existing_issues": 9,
+  "active_work_items": 22,
+  "gated_followups": 1,
+  "added_operations_accounted": 18,
+  "schema_changes_accounted": 297,
+  "dependency_graph": "acyclic",
+  "local_links": "valid",
+  "sdk_source_paths": "valid",
+  "official_guides": "14 valid",
+  "runtime_changes": false,
+  "toolkit_review": {
+    "changed_type_count": 233,
+    "error_count": 665,
+    "missing_manifest_count": 183,
+    "warning_count": 76
+  },
+  "candidate_equals_pinned_source": true,
+  "canonical_spec_promoted": false,
+  "canonical_metadata_changed": false,
+  "new_parent": 413,
+  "github_children_verified": 23,
+  "github_dependencies_recorded": 30
+}

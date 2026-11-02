@@ -1,0 +1,1912 @@
+{
+  "format_version": 1,
+  "cutoff_date": "2026-10-31",
+  "repository_baseline": "d95c9ef8ee990ce654c647bbb08c60f804a8a519",
+  "package_version": "11.0.1",
+  "canonical_openapi": "0ef225c4f701046f8fe88cae9d29d0df4d1a9fa9",
+  "source_pins": {
+    "openapi": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+    "python": "0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f",
+    "node": "c717857c3151bde92e07e4d396301a9c67163e68"
+  },
+  "source_receipts": [
+    {
+      "repo": "openai-python",
+      "sha": "0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f",
+      "files": 2570,
+      "archive_sha256": "e8e8f51060cf65d867047e519c5784b08f9ed5972a5bdac1a6d89af4f92061c2"
+    },
+    {
+      "repo": "openai-node",
+      "sha": "c717857c3151bde92e07e4d396301a9c67163e68",
+      "files": 1156,
+      "archive_sha256": "f2e0e0063464b3a708026c4ef79442b2f08111eb254628a99bd71ddfc2650a9e"
+    },
+    {
+      "repo": "openai-openapi",
+      "sha": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+      "sha256": "73d582b052d0e86f222717799377a73c7f5023ea7e50333e3e893b91bb51e3bc"
+    },
+    {
+      "doc": "changelog",
+      "url": "https://developers.openai.com/api/docs/changelog.md",
+      "bytes": 79261
+    },
+    {
+      "doc": "guides/decisions",
+      "url": "https://developers.openai.com/api/docs/guides/decisions.md",
+      "bytes": 37326
+    },
+    {
+      "doc": "guides/custom-voices",
+      "url": "https://developers.openai.com/api/docs/guides/custom-voices.md",
+      "bytes": 20568
+    },
+    {
+      "doc": "guides/decisions-voice",
+      "url": "https://developers.openai.com/api/docs/guides/decisions-voice.md",
+      "bytes": 13529
+    },
+    {
+      "doc": "guides/prompt-caching",
+      "url": "https://developers.openai.com/api/docs/guides/prompt-caching.md",
+      "bytes": 56625
+    },
+    {
+      "doc": "deprecations",
+      "url": "https://developers.openai.com/api/docs/deprecations.md",
+      "bytes": 41574
+    },
+    {
+      "doc": "guides/agents",
+      "url": "https://developers.openai.com/api/docs/guides/agents.md",
+      "bytes": 5432
+    },
+    {
+      "doc": "guides/ultrafast-mode",
+      "url": "https://developers.openai.com/api/docs/guides/ultrafast-mode.md",
+      "bytes": 11934
+    }
+  ],
+  "counts": {
+    "old_operations": 358,
+    "new_operations": 376,
+    "added_operations": 18,
+    "old_schemas": 2039,
+    "new_schemas": 2206,
+    "added_schemas": 170,
+    "modified_schemas": 124,
+    "removed_schemas": 3
+  },
+  "operations": [
+    {
+      "method": "DELETE",
+      "path": "/audio/voices/{voice_id}",
+      "operation_id": "deleteVoice",
+      "primary_ticket": "05-custom-voices"
+    },
+    {
+      "method": "POST",
+      "path": "/organization/projects/{project_id}/api_keys/{api_key_id}",
+      "operation_id": "update-project-api-key",
+      "primary_ticket": "13-admin-delta"
+    },
+    {
+      "method": "GET",
+      "path": "/organization/external_keys",
+      "operation_id": "Listtheexternalkeyconfigsregisteredontheuser'sorganization",
+      "primary_ticket": "13-admin-delta"
+    },
+    {
+      "method": "POST",
+      "path": "/organization/external_keys",
+      "operation_id": "Addanexternalkeyconfigforanorganization",
+      "primary_ticket": "13-admin-delta"
+    },
+    {
+      "method": "GET",
+      "path": "/organization/external_keys/{external_key_id}",
+      "operation_id": "Retrieveanexternalkeyregistration",
+      "primary_ticket": "13-admin-delta"
+    },
+    {
+      "method": "DELETE",
+      "path": "/organization/external_keys/{external_key_id}",
+      "operation_id": "Deleteanexternalkeyconfigfortheuser'sorganization",
+      "primary_ticket": "13-admin-delta"
+    },
+    {
+      "method": "POST",
+      "path": "/organization/external_keys/{external_key_id}/validate",
+      "operation_id": "Validateanexternalkeyconfigfortheuser'sorganization",
+      "primary_ticket": "13-admin-delta"
+    },
+    {
+      "method": "GET",
+      "path": "/organization/usage/decisions",
+      "operation_id": "OrganizationDecisionsusage",
+      "primary_ticket": "13-admin-delta"
+    },
+    {
+      "method": "GET",
+      "path": "/agents/automations",
+      "operation_id": "listAgentAutomations",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "method": "POST",
+      "path": "/agents/automations",
+      "operation_id": "createAgentAutomation",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "method": "GET",
+      "path": "/agents/automations/{automation_id}",
+      "operation_id": "getAgentAutomation",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "method": "POST",
+      "path": "/agents/automations/{automation_id}",
+      "operation_id": "updateAgentAutomation",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "method": "DELETE",
+      "path": "/agents/automations/{automation_id}",
+      "operation_id": "deleteAgentAutomation",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "method": "POST",
+      "path": "/agents/automations/{automation_id}/pause",
+      "operation_id": "pauseAgentAutomation",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "method": "POST",
+      "path": "/agents/automations/{automation_id}/resume",
+      "operation_id": "resumeAgentAutomation",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "method": "GET",
+      "path": "/agents/automations/{automation_id}/invocations",
+      "operation_id": "listAgentAutomationInvocations",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "method": "POST",
+      "path": "/agents/automations/{automation_id}/invocations",
+      "operation_id": "createAgentAutomationInvocation",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "method": "GET",
+      "path": "/agents/automations/{automation_id}/invocations/{invocation_id}",
+      "operation_id": "getAgentAutomationInvocation",
+      "primary_ticket": "10-agent-automations"
+    }
+  ],
+  "schemas": [
+    {
+      "schema": "AgentResource",
+      "change": "modified",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "AgentToolConfigParam",
+      "change": "modified",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "AgentToolConfigParamAutomations",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AgentToolResource",
+      "change": "modified",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "AgentToolResourceAutomations",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AssistantSupportedModels",
+      "change": "modified",
+      "primary_ticket": "14-docs-verification"
+    },
+    {
+      "schema": "AudioTranscription",
+      "change": "modified",
+      "primary_ticket": "14-docs-verification"
+    },
+    {
+      "schema": "AudioTranscriptionResponse",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "AutomationAgentConfigResource",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationCreatedByResource",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationCreatedByResourceAgent",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationCreatedByResourceDeveloper",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationEnvironmentResource",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationEnvironmentResourceNone",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationEnvironmentResourceOpenaiHosted",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationEnvironmentResourceSelfHosted",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationInvocationErrorResource",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationInvocationResource",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationInvocationSourceResource",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationInvocationSourceResourceAutomation",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationInvocationSourceResourceManual",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationInvocationStatusResource",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationResource",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationResourceOnce",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationResourcePeriodic",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationTargetParam",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationTargetParamExistingSession",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationTargetParamNewSession",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationTargetResource",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationTargetResourceExistingSession",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AutomationTargetResourceNewSession",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "AwsExternalKeyParams",
+      "change": "added",
+      "primary_ticket": "13-admin-delta"
+    },
+    {
+      "schema": "AzureExternalKeyParams",
+      "change": "added",
+      "primary_ticket": "13-admin-delta"
+    },
+    {
+      "schema": "BetaCachedUsageDetails",
+      "change": "added",
+      "primary_ticket": "02-responses-cache-usage"
+    },
+    {
+      "schema": "BetaImageGenInputUsageDetails",
+      "change": "added",
+      "primary_ticket": "02-responses-cache-usage"
+    },
+    {
+      "schema": "BetaImageGenOutputTokensDetails",
+      "change": "added",
+      "primary_ticket": "11-image-contracts"
+    },
+    {
+      "schema": "BetaImageGenTool",
+      "change": "modified",
+      "primary_ticket": "11-image-contracts"
+    },
+    {
+      "schema": "BetaImageGenToolCall",
+      "change": "modified",
+      "primary_ticket": "11-image-contracts"
+    },
+    {
+      "schema": "BetaImageGenToolCallError",
+      "change": "added",
+      "primary_ticket": "11-image-contracts"
+    },
+    {
+      "schema": "BetaImageGenToolCallModerationDetails",
+      "change": "added",
+      "primary_ticket": "11-image-contracts"
+    },
+    {
+      "schema": "BetaImageGenToolUsage",
+      "change": "added",
+      "primary_ticket": "02-responses-cache-usage"
+    },
+    {
+      "schema": "BetaInputFidelity",
+      "change": "modified",
+      "primary_ticket": "11-image-contracts"
+    },
+    {
+      "schema": "BetaModelIdsShared",
+      "change": "modified",
+      "primary_ticket": "14-docs-verification"
+    },
+    {
+      "schema": "BetaPromptCacheBreakpointConfig",
+      "change": "modified",
+      "primary_ticket": "02-responses-cache-usage"
+    },
+    {
+      "schema": "BetaPromptCacheBreakpointParam",
+      "change": "modified",
+      "primary_ticket": "02-responses-cache-usage"
+    },
+    {
+      "schema": "BetaResponse",
+      "change": "modified",
+      "primary_ticket": "02-responses-cache-usage"
+    },
+    {
+      "schema": "BetaResponseConfigurationUpdate",
+      "change": "modified",
+      "primary_ticket": "03-responses-websocket-workflows"
+    },
+    {
+      "schema": "BetaResponseConfigurationUpdateItemParam",
+      "change": "modified",
+      "primary_ticket": "03-responses-websocket-workflows"
+    },
+    {
+      "schema": "BetaResponseError",
+      "change": "modified",
+      "primary_ticket": "02-responses-cache-usage"
+    },
+    {
+      "schema": "BetaResponseToolUsage",
+      "change": "added",
+      "primary_ticket": "02-responses-cache-usage"
+    },
+    {
+      "schema": "BetaResponsesClientEventResponseCreate",
+      "change": "modified",
+      "primary_ticket": "03-responses-websocket-workflows"
+    },
+    {
+      "schema": "BetaTextResponseFormatConfiguration",
+      "change": "modified",
+      "primary_ticket": "03-responses-websocket-workflows"
+    },
+    {
+      "schema": "BetaWebSearchActionFind",
+      "change": "modified",
+      "primary_ticket": "02-responses-cache-usage"
+    },
+    {
+      "schema": "BetaWebSearchUsage",
+      "change": "added",
+      "primary_ticket": "02-responses-cache-usage"
+    },
+    {
+      "schema": "CachedUsageDetails",
+      "change": "added",
+      "primary_ticket": "02-responses-cache-usage"
+    },
+    {
+      "schema": "CloseSubagentCallItemResource",
+      "change": "modified",
+      "primary_ticket": "14-docs-verification"
+    },
+    {
+      "schema": "CompactionParam",
+      "change": "added",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "CompactionResource",
+      "change": "added",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "CreateAgentParams",
+      "change": "modified",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "CreateAgentSessionParams",
+      "change": "modified",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "CreateAutomationParams",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "CreateAutomationParamsOnce",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "CreateAutomationParamsPeriodic",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "CreateChatCompletionRequest",
+      "change": "modified",
+      "primary_ticket": "14-docs-verification"
+    },
+    {
+      "schema": "CreateImageEditRequest",
+      "change": "modified",
+      "primary_ticket": "11-image-contracts"
+    },
+    {
+      "schema": "CreateImageRequest",
+      "change": "modified",
+      "primary_ticket": "11-image-contracts"
+    },
+    {
+      "schema": "CreateModerationRequest",
+      "change": "modified",
+      "primary_ticket": "14-docs-verification"
+    },
+    {
+      "schema": "CreateSpeechRequest",
+      "change": "modified",
+      "primary_ticket": "14-docs-verification"
+    },
+    {
+      "schema": "CreateSubagentCallItemResource",
+      "change": "modified",
+      "primary_ticket": "14-docs-verification"
+    },
+    {
+      "schema": "CreateThreadAndRunRequest",
+      "change": "modified",
+      "primary_ticket": "14-docs-verification"
+    },
+    {
+      "schema": "CreateTranscriptionRequest",
+      "change": "modified",
+      "primary_ticket": "14-docs-verification"
+    },
+    {
+      "schema": "CreateVoicePromptRequest",
+      "change": "added",
+      "primary_ticket": "05-custom-voices"
+    },
+    {
+      "schema": "CreateVoiceRequest",
+      "change": "modified",
+      "primary_ticket": "05-custom-voices"
+    },
+    {
+      "schema": "DecisionInput",
+      "change": "modified",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputAssistantContent",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputAssistantContentParts",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputAssistantMessage",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputContent",
+      "change": "modified",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputContentParts",
+      "change": "modified",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputCustomToolCall",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputCustomToolCallOutput",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputDeveloperContent",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputDeveloperContentParts",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputDeveloperMessage",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputFunctionCall",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputFunctionCallOutput",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputImage",
+      "change": "modified",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputJson",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputMessage",
+      "change": "modified",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputOutputText",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputRefusal",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputSystemMessage",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputText",
+      "change": "modified",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputToolOutputContent",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputToolOutputContentParts",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionInputUserMessage",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionQuestionInputImage",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionQuestionInputPart",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionQuestionInputText",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionRequest",
+      "change": "modified",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionResponse",
+      "change": "modified",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionsUsageApiSource",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionsUsageBucket",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionsUsageBucketWidth",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionsUsageErrorDetails",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionsUsageErrorResponse",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionsUsageGroupBy",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionsUsagePermissionErrorResponse",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DecisionsUsageResult",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "DeletedAutomationResource",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "EditImageBodyJsonParam",
+      "change": "modified",
+      "primary_ticket": "11-image-contracts"
+    },
+    {
+      "schema": "Error-2",
+      "change": "modified",
+      "primary_ticket": "02-responses-cache-usage"
+    },
+    {
+      "schema": "ExperimentalConfigOverridesParam",
+      "change": "added",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "ExperimentalConfigParam",
+      "change": "added",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "ExperimentalConfigResource",
+      "change": "added",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "ExternalKeyPurpose",
+      "change": "added",
+      "primary_ticket": "13-admin-delta"
+    },
+    {
+      "schema": "ExternalKeyResource",
+      "change": "added",
+      "primary_ticket": "13-admin-delta"
+    },
+    {
+      "schema": "ExternalStorageStatus",
+      "change": "modified",
+      "primary_ticket": "13-admin-delta"
+    },
+    {
+      "schema": "FunctionCallStatusParam",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "GcpExternalKeyParams",
+      "change": "added",
+      "primary_ticket": "13-admin-delta"
+    },
+    {
+      "schema": "ImageEditCompletedEvent",
+      "change": "modified",
+      "primary_ticket": "11-image-contracts"
+    },
+    {
+      "schema": "ImageGenCompletedEvent",
+      "change": "modified",
+      "primary_ticket": "11-image-contracts"
+    },
+    {
+      "schema": "ImageGenTool",
+      "change": "modified",
+      "primary_ticket": "11-image-contracts"
+    },
+    {
+      "schema": "ImageGenToolCall",
+      "change": "modified",
+      "primary_ticket": "11-image-contracts"
+    },
+    {
+      "schema": "ImageGenToolCallError",
+      "change": "added",
+      "primary_ticket": "11-image-contracts"
+    },
+    {
+      "schema": "ImageGenToolCallModerationDetails",
+      "change": "added",
+      "primary_ticket": "11-image-contracts"
+    },
+    {
+      "schema": "ImageGenToolUsage",
+      "change": "added",
+      "primary_ticket": "02-responses-cache-usage"
+    },
+    {
+      "schema": "ImagesResponse",
+      "change": "modified",
+      "primary_ticket": "11-image-contracts"
+    },
+    {
+      "schema": "InlineCapabilitySourceParamBase64",
+      "change": "modified",
+      "primary_ticket": "14-docs-verification"
+    },
+    {
+      "schema": "InputFidelity",
+      "change": "modified",
+      "primary_ticket": "11-image-contracts"
+    },
+    {
+      "schema": "InputMessageResource-2",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "InterruptSubagentCallItemResource",
+      "change": "modified",
+      "primary_ticket": "14-docs-verification"
+    },
+    {
+      "schema": "ListExternalKeysResource",
+      "change": "added",
+      "primary_ticket": "13-admin-delta"
+    },
+    {
+      "schema": "LiveCallAcceptSession",
+      "change": "modified",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveClientDelegationParam",
+      "change": "modified",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveClientEvent",
+      "change": "modified",
+      "primary_ticket": "07-live-media"
+    },
+    {
+      "schema": "LiveCommentaryAppendParam",
+      "change": "modified",
+      "primary_ticket": "07-live-media"
+    },
+    {
+      "schema": "LiveDecisionAssistantMessageParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionChoiceParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionChoiceQuestionParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionCompleted",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionCreateParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionCustomToolCallOutputParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionCustomToolCallParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionDeveloperMessageParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionEvent",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionFunctionCallOutputParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionFunctionCallParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionInputImageParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionInputItemParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionInputJsonParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionInputTextParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionItemCreateParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionItemCreated",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionItemDeleteParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionItemDeleted",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionJsonObject",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionOutputTextParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionPredicateQuestionParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionQuestion",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionQuestionsInputParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionRefusalParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionScoreLevelParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionScoreQuestionParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionStoredAssistantMessageParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionStoredCustomToolCallOutputParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionStoredCustomToolCallParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionStoredDeveloperMessageParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionStoredFunctionCallOutputParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionStoredFunctionCallParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionStoredInputItemParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionStoredSystemMessageParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionStoredUserMessageParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionSystemMessageParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionTriggerInputParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionUserInputImageParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionUserInputTextParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionUserMessageParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionsDelegationParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionsDelegationUpdateParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionsSettingsInputParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDecisionsSettingsUpdateParam",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDelegationCreated",
+      "change": "modified",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDelegationItem",
+      "change": "modified",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveDetailEnum",
+      "change": "added",
+      "primary_ticket": "07-live-media"
+    },
+    {
+      "schema": "LiveForkClientEvent",
+      "change": "modified",
+      "primary_ticket": "07-live-media"
+    },
+    {
+      "schema": "LiveFunctionCallItemStatus",
+      "change": "added",
+      "primary_ticket": "07-live-media"
+    },
+    {
+      "schema": "LiveInputAudioMuted",
+      "change": "modified",
+      "primary_ticket": "07-live-media"
+    },
+    {
+      "schema": "LiveInputAudioUnmuteParam",
+      "change": "modified",
+      "primary_ticket": "07-live-media"
+    },
+    {
+      "schema": "LiveInputAudioUnmuted",
+      "change": "modified",
+      "primary_ticket": "07-live-media"
+    },
+    {
+      "schema": "LiveInstructionsAppendParam",
+      "change": "modified",
+      "primary_ticket": "07-live-media"
+    },
+    {
+      "schema": "LiveMediaSessionCreateParams",
+      "change": "modified",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveMessagePhase",
+      "change": "added",
+      "primary_ticket": "07-live-media"
+    },
+    {
+      "schema": "LiveOutputAudioFixturePlayParam",
+      "change": "added",
+      "primary_ticket": "07-live-media"
+    },
+    {
+      "schema": "LiveOutputAudioFixturePlayed",
+      "change": "added",
+      "primary_ticket": "07-live-media"
+    },
+    {
+      "schema": "LiveOutputAudioFixturePlaying",
+      "change": "added",
+      "primary_ticket": "07-live-media"
+    },
+    {
+      "schema": "LiveResponsesDelegationParam",
+      "change": "modified",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveResponsesDelegationUpdateParam",
+      "change": "modified",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveServerEvent-2",
+      "change": "modified",
+      "primary_ticket": "07-live-media"
+    },
+    {
+      "schema": "LiveSessionCreateParams",
+      "change": "modified",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveSessionResourceParam",
+      "change": "modified",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveSessionUpdateParam",
+      "change": "modified",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveSessionUpdateParams",
+      "change": "modified",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "LiveSidebandClientEvent",
+      "change": "modified",
+      "primary_ticket": "07-live-media"
+    },
+    {
+      "schema": "LiveSidebandServerEvent",
+      "change": "modified",
+      "primary_ticket": "07-live-media"
+    },
+    {
+      "schema": "LiveThinkingAppendParam",
+      "change": "modified",
+      "primary_ticket": "07-live-media"
+    },
+    {
+      "schema": "LiveTransportDTMFSend",
+      "change": "removed",
+      "primary_ticket": "07-live-media"
+    },
+    {
+      "schema": "LiveTransportDTMFSendParam",
+      "change": "added",
+      "primary_ticket": "07-live-media"
+    },
+    {
+      "schema": "LiveTransportDTMFSent",
+      "change": "added",
+      "primary_ticket": "07-live-media"
+    },
+    {
+      "schema": "MessagePhaseParam",
+      "change": "added",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "ModelIdsShared",
+      "change": "modified",
+      "primary_ticket": "14-docs-verification"
+    },
+    {
+      "schema": "OnceAutomationStatusResource",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "PeriodicAutomationStatusResource",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "PersistedAgentToolConfigParam",
+      "change": "modified",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "PersistedAgentToolConfigParamAutomations",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "PersistedAgentToolResource",
+      "change": "modified",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "PersistedAgentToolResourceAutomations",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "PromptCacheBreakpointConfig",
+      "change": "modified",
+      "primary_ticket": "02-responses-cache-usage"
+    },
+    {
+      "schema": "PromptCacheBreakpointParam",
+      "change": "modified",
+      "primary_ticket": "02-responses-cache-usage"
+    },
+    {
+      "schema": "PublicDecisionsUsageResponseResource",
+      "change": "added",
+      "primary_ticket": "13-admin-delta"
+    },
+    {
+      "schema": "PublicProjectResidency",
+      "change": "modified",
+      "primary_ticket": "12-vertex-residency"
+    },
+    {
+      "schema": "QuestionParamChoice",
+      "change": "modified",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "QuestionParamPredicate",
+      "change": "modified",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "QuestionParamScore",
+      "change": "modified",
+      "primary_ticket": "01-decisions-ga"
+    },
+    {
+      "schema": "RealtimeBetaResponse",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeBetaResponseCreateParams",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeClientEventResponseCreate",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeConnectDocumentationParams",
+      "change": "added",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeConnectParams",
+      "change": "added",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeNoiseReductionStrength",
+      "change": "added",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeResponse",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeResponseCreateParams",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeResponseInputAudio",
+      "change": "added",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeResponseInputFunctionCall",
+      "change": "added",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeResponseInputFunctionCallOutput",
+      "change": "added",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeResponseInputImage",
+      "change": "added",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeResponseInputItem",
+      "change": "added",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeResponseInputMessage",
+      "change": "added",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeResponseInputMessageAssistant",
+      "change": "added",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeResponseInputMessageDeveloper",
+      "change": "added",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeResponseInputMessageFields",
+      "change": "added",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeResponseInputMessageSystem",
+      "change": "added",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeResponseInputMessageUser",
+      "change": "added",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeResponseInputText",
+      "change": "added",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeResponseItemReference",
+      "change": "added",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeServerEventConversationItemInputAudioTranscriptionDelta",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeServerEventConversationItemRetrieved",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeServerEventError",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeServerEventInputAudioBufferDtmfEventReceived",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeServerEventResponseCreated",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeServerEventResponseOutputItemDone",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeServerEventSessionCreated",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeServerEventSessionUpdated",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeSession",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeSessionCreateRequest",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeSessionCreateRequestGA",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeSessionCreateResponseGA",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeTranscriptionSessionCreateRequestGA",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeTranscriptionSessionCreateResponseGA",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeTranslationConnectParams",
+      "change": "added",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeTranslationSession",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeTranslationSessionCreateRequest",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "RealtimeTranslationSessionUpdateRequest",
+      "change": "modified",
+      "primary_ticket": "08-realtime-audio"
+    },
+    {
+      "schema": "Response",
+      "change": "modified",
+      "primary_ticket": "02-responses-cache-usage"
+    },
+    {
+      "schema": "ResponseConfigurationUpdate",
+      "change": "modified",
+      "primary_ticket": "03-responses-websocket-workflows"
+    },
+    {
+      "schema": "ResponseConfigurationUpdateItemParam",
+      "change": "modified",
+      "primary_ticket": "03-responses-websocket-workflows"
+    },
+    {
+      "schema": "ResponseError",
+      "change": "modified",
+      "primary_ticket": "02-responses-cache-usage"
+    },
+    {
+      "schema": "ResponseToolUsage",
+      "change": "added",
+      "primary_ticket": "02-responses-cache-usage"
+    },
+    {
+      "schema": "ResponsesClientEventResponseCreate",
+      "change": "modified",
+      "primary_ticket": "03-responses-websocket-workflows"
+    },
+    {
+      "schema": "ResumeSubagentCallItemResource",
+      "change": "modified",
+      "primary_ticket": "14-docs-verification"
+    },
+    {
+      "schema": "SendSubagentInputCallItemResource",
+      "change": "modified",
+      "primary_ticket": "14-docs-verification"
+    },
+    {
+      "schema": "ServiceTierParam",
+      "change": "modified",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "SessionAgentConfigParam",
+      "change": "modified",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "SessionAgentResource",
+      "change": "modified",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "SessionResource",
+      "change": "modified",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "SessionReviewParam",
+      "change": "added",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "SessionReviewResource",
+      "change": "added",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "SessionSpendControlParam",
+      "change": "removed",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "SessionSpendControlResource",
+      "change": "removed",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "TextResponseFormatConfiguration",
+      "change": "modified",
+      "primary_ticket": "03-responses-websocket-workflows"
+    },
+    {
+      "schema": "UpdateAgentParams",
+      "change": "modified",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "UpdateAgentSessionParams",
+      "change": "modified",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "UpdateAutomationParams",
+      "change": "added",
+      "primary_ticket": "10-agent-automations"
+    },
+    {
+      "schema": "UpdateProjectApiKeyBody",
+      "change": "added",
+      "primary_ticket": "13-admin-delta"
+    },
+    {
+      "schema": "UpdateSessionAgentParam",
+      "change": "modified",
+      "primary_ticket": "09-agent-settings"
+    },
+    {
+      "schema": "UsageCompletionsResult",
+      "change": "modified",
+      "primary_ticket": "13-admin-delta"
+    },
+    {
+      "schema": "V1OrganizationExternalKeysPostRequest",
+      "change": "added",
+      "primary_ticket": "13-admin-delta"
+    },
+    {
+      "schema": "ValidateExternalKeyResource",
+      "change": "added",
+      "primary_ticket": "13-admin-delta"
+    },
+    {
+      "schema": "VoiceDeletedResource",
+      "change": "added",
+      "primary_ticket": "05-custom-voices"
+    },
+    {
+      "schema": "VoiceResource",
+      "change": "modified",
+      "primary_ticket": "05-custom-voices"
+    },
+    {
+      "schema": "WaitForSubagentsCallItemResource",
+      "change": "modified",
+      "primary_ticket": "14-docs-verification"
+    },
+    {
+      "schema": "WebSearchActionFind",
+      "change": "modified",
+      "primary_ticket": "02-responses-cache-usage"
+    },
+    {
+      "schema": "WebSearchUsage",
+      "change": "added",
+      "primary_ticket": "02-responses-cache-usage"
+    },
+    {
+      "schema": "delegation",
+      "change": "modified",
+      "primary_ticket": "06-live-decisions"
+    },
+    {
+      "schema": "input",
+      "change": "modified",
+      "primary_ticket": "14-docs-verification"
+    },
+    {
+      "schema": "markup",
+      "change": "added",
+      "primary_ticket": "11-image-contracts"
+    },
+    {
+      "schema": "triggers",
+      "change": "added",
+      "primary_ticket": "06-live-decisions"
+    }
+  ],
+  "carry_over": [
+    {
+      "number": 392,
+      "role": "active carry-over",
+      "dependencies": []
+    },
+    {
+      "number": 393,
+      "role": "active carry-over",
+      "dependencies": [
+        "09-agent-settings"
+      ]
+    },
+    {
+      "number": 394,
+      "role": "active carry-over",
+      "dependencies": [
+        "09-agent-settings"
+      ]
+    },
+    {
+      "number": 395,
+      "role": "active carry-over",
+      "dependencies": [
+        "#394"
+      ]
+    },
+    {
+      "number": 396,
+      "role": "active carry-over",
+      "dependencies": [
+        "#394",
+        "#395"
+      ]
+    },
+    {
+      "number": 397,
+      "role": "active carry-over",
+      "dependencies": [
+        "#396"
+      ]
+    },
+    {
+      "number": 316,
+      "role": "active carry-over",
+      "dependencies": []
+    },
+    {
+      "number": 246,
+      "role": "supporting tooling",
+      "dependencies": []
+    },
+    {
+      "number": 408,
+      "role": "gated follow-up",
+      "dependencies": []
+    }
+  ],
+  "issues": {
+    "parent": {
+      "number": 413,
+      "url": "https://github.com/davidmigloz/ai_clients_dart/issues/413"
+    },
+    "01-decisions-ga": {
+      "number": 414,
+      "url": "https://github.com/davidmigloz/ai_clients_dart/issues/414"
+    },
+    "02-responses-cache-usage": {
+      "number": 415,
+      "url": "https://github.com/davidmigloz/ai_clients_dart/issues/415"
+    },
+    "03-responses-websocket-workflows": {
+      "number": 416,
+      "url": "https://github.com/davidmigloz/ai_clients_dart/issues/416"
+    },
+    "04-websocket-recovery": {
+      "number": 417,
+      "url": "https://github.com/davidmigloz/ai_clients_dart/issues/417"
+    },
+    "05-custom-voices": {
+      "number": 418,
+      "url": "https://github.com/davidmigloz/ai_clients_dart/issues/418"
+    },
+    "06-live-decisions": {
+      "number": 419,
+      "url": "https://github.com/davidmigloz/ai_clients_dart/issues/419"
+    },
+    "07-live-media": {
+      "number": 420,
+      "url": "https://github.com/davidmigloz/ai_clients_dart/issues/420"
+    },
+    "08-realtime-audio": {
+      "number": 421,
+      "url": "https://github.com/davidmigloz/ai_clients_dart/issues/421"
+    },
+    "09-agent-settings": {
+      "number": 422,
+      "url": "https://github.com/davidmigloz/ai_clients_dart/issues/422"
+    },
+    "10-agent-automations": {
+      "number": 423,
+      "url": "https://github.com/davidmigloz/ai_clients_dart/issues/423"
+    },
+    "11-image-contracts": {
+      "number": 424,
+      "url": "https://github.com/davidmigloz/ai_clients_dart/issues/424"
+    },
+    "12-vertex-residency": {
+      "number": 425,
+      "url": "https://github.com/davidmigloz/ai_clients_dart/issues/425"
+    },
+    "13-admin-delta": {
+      "number": 426,
+      "url": "https://github.com/davidmigloz/ai_clients_dart/issues/426"
+    },
+    "14-docs-verification": {
+      "number": 427,
+      "url": "https://github.com/davidmigloz/ai_clients_dart/issues/427"
+    }
+  },
+  "tickets": [
+    {
+      "key": "01-decisions-ga",
+      "title": "feat(openai_dart): align Decisions GA inputs and caching",
+      "outcome": "Evaluate structured evidence and conversation/tool history with the generally available Decisions API, including up to 400 questions.",
+      "dependencies": []
+    },
+    {
+      "key": "02-responses-cache-usage",
+      "title": "feat(openai_dart): preserve cache TTLs and hosted tool usage",
+      "outcome": "Control each Responses cache breakpoint lifetime and inspect billable hosted-tool usage and error diagnostics.",
+      "dependencies": []
+    },
+    {
+      "key": "03-responses-websocket-workflows",
+      "title": "feat(openai_dart): add Responses WebSocket warmup and sessions",
+      "outcome": "Warm up a Responses connection, change output formats mid-session, and consume bounded per-lane final results.",
+      "dependencies": []
+    },
+    {
+      "key": "04-websocket-recovery",
+      "title": "fix(openai_dart): align WebSocket recovery and delivery reporting",
+      "outcome": "Recover supported WebSocket connections explicitly and report uncertain or unsent delivery without replaying attempted work.",
+      "dependencies": []
+    },
+    {
+      "key": "05-custom-voices",
+      "title": "feat(openai_dart): create prompt voices and delete saved voices",
+      "outcome": "Create a saved voice from a text description, inspect its metadata, and explicitly delete it.",
+      "dependencies": []
+    },
+    {
+      "key": "06-live-decisions",
+      "title": "feat(openai_dart): integrate Decisions with Live sessions",
+      "outcome": "Delegate from Live to Decisions, evaluate transcript triggers, and manage shared decision items.",
+      "dependencies": [
+        "01-decisions-ga"
+      ]
+    },
+    {
+      "key": "07-live-media",
+      "title": "feat(openai_dart): align Live audio fixtures and SIP DTMF",
+      "outcome": "Play a bounded audio fixture and distinguish SIP DTMF commands from delivery notifications.",
+      "dependencies": []
+    },
+    {
+      "key": "08-realtime-audio",
+      "title": "feat(openai_dart): align Realtime references and audio controls",
+      "outcome": "Use current Realtime input references/noise controls and the official Translation WebSocket flow.",
+      "dependencies": []
+    },
+    {
+      "key": "09-agent-settings",
+      "title": "feat(openai_dart): align Agent review and context settings",
+      "outcome": "Configure current Agent/session context and review behavior, and use ultrafast requests successfully.",
+      "dependencies": []
+    },
+    {
+      "key": "10-agent-automations",
+      "title": "feat(openai_dart): add Agent automations and invocations",
+      "outcome": "Create, pause, resume and inspect scheduled Agent work and its invocations.",
+      "dependencies": [
+        "09-agent-settings"
+      ]
+    },
+    {
+      "key": "11-image-contracts",
+      "title": "feat(openai_dart): align image safety identifiers and edit markup",
+      "outcome": "Attach image safety identifiers, inspect tool moderation errors, and guide edits with markup overlays.",
+      "dependencies": []
+    },
+    {
+      "key": "12-vertex-residency",
+      "title": "feat(openai_dart): support Vertex Responses and regional routing",
+      "outcome": "Route Responses through Vertex using request-scoped Google credentials and current regional endpoints.",
+      "dependencies": [
+        "#316"
+      ]
+    },
+    {
+      "key": "13-admin-delta",
+      "title": "feat(openai_dart): add bounded Admin key usage and storage APIs",
+      "outcome": "Use the new Admin key/Decisions-usage operations and inspect current external-storage providers/statuses.",
+      "dependencies": []
+    },
+    {
+      "key": "14-docs-verification",
+      "title": "docs(openai_dart): close October alignment with verified coverage",
+      "outcome": "Finish this fixed round with accurate API coverage, current examples, source receipts and explicit remaining limits.",
+      "dependencies": [
+        "01-decisions-ga",
+        "02-responses-cache-usage",
+        "03-responses-websocket-workflows",
+        "04-websocket-recovery",
+        "05-custom-voices",
+        "06-live-decisions",
+        "07-live-media",
+        "08-realtime-audio",
+        "09-agent-settings",
+        "10-agent-automations",
+        "11-image-contracts",
+        "12-vertex-residency",
+        "13-admin-delta",
+        "#392",
+        "#393",
+        "#394",
+        "#395",
+        "#396",
+        "#397",
+        "#316",
+        "#246"
+      ]
+    }
+  ]
+}
