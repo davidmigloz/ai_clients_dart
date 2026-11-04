@@ -3,6 +3,8 @@ import 'package:meta/meta.dart';
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../../common/json_helpers.dart';
+import '../../images/image_common.dart'
+    show ImageInputFidelity, ImageModerationLevel;
 import '../config/search_content_type.dart';
 import '../config/tool_search_execution_type.dart';
 import '../config/web_search_return_token_budget.dart';
@@ -194,17 +196,21 @@ sealed class ResponseTool {
 
   /// Creates an image generation tool.
   static ImageGenerationTool imageGeneration({
+    String? action,
     String? background,
-    String? inputImageMask,
+    ImageInputFidelity? inputFidelity,
+    ImageGenerationMask? inputImageMask,
     String? model,
-    bool? moderation,
-    String? outputCompression,
+    ImageModerationLevel? moderation,
+    int? outputCompression,
     String? outputFormat,
     int? partialImages,
     String? quality,
     String? size,
   }) => ImageGenerationTool(
+    action: action,
     background: background,
+    inputFidelity: inputFidelity,
     inputImageMask: inputImageMask,
     model: model,
     moderation: moderation,
@@ -1121,20 +1127,26 @@ class ComputerUseTool extends ResponseTool {
 /// Image generation tool for creating images.
 @immutable
 class ImageGenerationTool extends ResponseTool {
+  /// Whether to generate, edit, or automatically select an image action.
+  final String? action;
+
+  /// How closely supported image models should follow the input image.
+  final ImageInputFidelity? inputFidelity;
+
   /// The background color for generated images.
   final String? background;
 
   /// The input image mask for inpainting.
-  final String? inputImageMask;
+  final ImageGenerationMask? inputImageMask;
 
   /// The model to use for image generation.
   final String? model;
 
-  /// Whether to apply content moderation.
-  final bool? moderation;
+  /// Moderation level for generated images (`auto` or `low`).
+  final ImageModerationLevel? moderation;
 
   /// The compression level for output images.
-  final String? outputCompression;
+  final int? outputCompression;
 
   /// The format for output images.
   final String? outputFormat;
@@ -1150,6 +1162,8 @@ class ImageGenerationTool extends ResponseTool {
 
   /// Creates an [ImageGenerationTool].
   const ImageGenerationTool({
+    this.action,
+    this.inputFidelity,
     this.background,
     this.inputImageMask,
     this.model,
@@ -1163,12 +1177,54 @@ class ImageGenerationTool extends ResponseTool {
 
   /// Creates an [ImageGenerationTool] from JSON.
   factory ImageGenerationTool.fromJson(Map<String, dynamic> json) {
+    requireJsonType(json, 'image_generation', 'ImageGenerationTool');
+    final moderation = json['moderation'] == null
+        ? null
+        : ImageModerationLevel.fromJson(
+            requireJsonString(
+              json['moderation'],
+              'ImageGenerationTool.moderation',
+            ),
+          );
+    final fidelity = json['input_fidelity'] == null
+        ? null
+        : ImageInputFidelity.fromJson(
+            requireJsonString(
+              json['input_fidelity'],
+              'ImageGenerationTool.input_fidelity',
+            ),
+          );
+    if (moderation == ImageModerationLevel.unknown ||
+        fidelity == ImageInputFidelity.unknown) {
+      throw const FormatException(
+        'ImageGenerationTool: unknown moderation or input_fidelity request value',
+      );
+    }
     return ImageGenerationTool(
+      action: optionalJsonString(
+        json,
+        'action',
+        'ImageGenerationTool',
+        nullable: true,
+      ),
+      inputFidelity: fidelity,
       background: json['background'] as String?,
-      inputImageMask: json['input_image_mask'] as String?,
+      inputImageMask: json['input_image_mask'] == null
+          ? null
+          : ImageGenerationMask.fromJson(
+              requireJsonObject(
+                json['input_image_mask'],
+                'ImageGenerationTool.input_image_mask',
+              ),
+            ),
       model: json['model'] as String?,
-      moderation: json['moderation'] as bool?,
-      outputCompression: json['output_compression'] as String?,
+      moderation: moderation,
+      outputCompression: json['output_compression'] == null
+          ? null
+          : requireJsonInt(
+              json['output_compression'],
+              'ImageGenerationTool.output_compression',
+            ),
       outputFormat: json['output_format'] as String?,
       partialImages: json['partial_images'] as int?,
       quality: json['quality'] as String?,
@@ -1177,24 +1233,36 @@ class ImageGenerationTool extends ResponseTool {
   }
 
   @override
-  Map<String, dynamic> toJson() => {
-    'type': 'image_generation',
-    if (background != null) 'background': background,
-    if (inputImageMask != null) 'input_image_mask': inputImageMask,
-    if (model != null) 'model': model,
-    if (moderation != null) 'moderation': moderation,
-    if (outputCompression != null) 'output_compression': outputCompression,
-    if (outputFormat != null) 'output_format': outputFormat,
-    if (partialImages != null) 'partial_images': partialImages,
-    if (quality != null) 'quality': quality,
-    if (size != null) 'size': size,
-  };
+  Map<String, dynamic> toJson() {
+    if (moderation == ImageModerationLevel.unknown ||
+        inputFidelity == ImageInputFidelity.unknown) {
+      throw ArgumentError(
+        'Unknown image request enum values cannot be serialized.',
+      );
+    }
+    return {
+      'type': 'image_generation',
+      if (action != null) 'action': action,
+      if (inputFidelity != null) 'input_fidelity': inputFidelity!.toJson(),
+      if (background != null) 'background': background,
+      if (inputImageMask != null) 'input_image_mask': inputImageMask!.toJson(),
+      if (model != null) 'model': model,
+      if (moderation != null) 'moderation': moderation!.toJson(),
+      if (outputCompression != null) 'output_compression': outputCompression,
+      if (outputFormat != null) 'output_format': outputFormat,
+      if (partialImages != null) 'partial_images': partialImages,
+      if (quality != null) 'quality': quality,
+      if (size != null) 'size': size,
+    };
+  }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ImageGenerationTool &&
           runtimeType == other.runtimeType &&
+          action == other.action &&
+          inputFidelity == other.inputFidelity &&
           background == other.background &&
           inputImageMask == other.inputImageMask &&
           model == other.model &&
@@ -1207,6 +1275,8 @@ class ImageGenerationTool extends ResponseTool {
 
   @override
   int get hashCode => Object.hash(
+    action,
+    inputFidelity,
     background,
     inputImageMask,
     model,
@@ -1220,7 +1290,46 @@ class ImageGenerationTool extends ResponseTool {
 
   @override
   String toString() =>
-      'ImageGenerationTool(background: $background, inputImageMask: $inputImageMask, model: $model, moderation: $moderation, outputCompression: $outputCompression, outputFormat: $outputFormat, partialImages: $partialImages, quality: $quality, size: $size)';
+      'ImageGenerationTool(action: $action, inputFidelity: $inputFidelity, background: $background, inputImageMask: $inputImageMask, model: $model, moderation: $moderation, outputCompression: $outputCompression, outputFormat: $outputFormat, partialImages: $partialImages, quality: $quality, size: $size)';
+}
+
+/// Mask reference for the Responses image-generation tool.
+///
+/// The wire schema makes both fields optional; the service validates combinations.
+@immutable
+class ImageGenerationMask {
+  /// Base64-encoded mask image.
+  final String? imageUrl;
+
+  /// Uploaded mask file identifier.
+  final String? fileId;
+
+  /// Creates a mask reference, leaving combinations to service validation.
+  const ImageGenerationMask({this.imageUrl, this.fileId});
+
+  /// Creates a mask reference from JSON.
+  factory ImageGenerationMask.fromJson(Map<String, dynamic> json) =>
+      ImageGenerationMask(
+        imageUrl: optionalJsonString(json, 'image_url', 'ImageGenerationMask'),
+        fileId: optionalJsonString(json, 'file_id', 'ImageGenerationMask'),
+      );
+
+  /// Converts this mask reference to JSON.
+  Map<String, dynamic> toJson() => {
+    if (imageUrl != null) 'image_url': imageUrl,
+    if (fileId != null) 'file_id': fileId,
+  };
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ImageGenerationMask &&
+          imageUrl == other.imageUrl &&
+          fileId == other.fileId;
+  @override
+  int get hashCode => Object.hash(imageUrl, fileId);
+  @override
+  String toString() =>
+      'ImageGenerationMask(imageUrl: $imageUrl, fileId: $fileId)';
 }
 
 /// Model Context Protocol (MCP) tool.
