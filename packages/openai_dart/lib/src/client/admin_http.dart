@@ -8,6 +8,7 @@ import '../errors/exceptions.dart';
 import '../interceptors/error_interceptor.dart';
 import '../interceptors/interceptor.dart';
 import '../interceptors/logging_interceptor.dart';
+import '../platform/http_utils.dart';
 import '../utils/private_audio_http.dart';
 import 'admin_config.dart';
 import 'config.dart';
@@ -183,6 +184,9 @@ final class _AdminTransport extends http.BaseClient {
     } on http.RequestAbortedException {
       rethrow;
     } catch (error) {
+      // Preserve the existing retry classifier. The private logger never prints
+      // native network failures; sendPrivateAudioRequest redacts the final one.
+      if (error is http.ClientException || isSocketException(error)) rethrow;
       throw ConnectionException(
         message: 'Admin transport failed.',
         cause: error,
@@ -199,6 +203,7 @@ final class _AdminTransport extends http.BaseClient {
     } on http.RequestAbortedException {
       rethrow;
     } catch (error) {
+      if (error is http.ClientException || isSocketException(error)) rethrow;
       throw ConnectionException(
         message: 'Admin response stream failed.',
         cause: error,

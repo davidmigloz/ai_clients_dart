@@ -33,7 +33,9 @@ policies in its own interceptor chain. Redirects are disabled before credential
 attachment and before transport dispatch. Borrowed transports stay caller-owned;
 closing the logical client prevents new requests. Provider/send/body-stream
 errors are guarded at their external origin even when callbacks throw a typed
-OpenAIException containing private text. Original causes remain explicitly
+OpenAIException containing private text. Known native network exceptions retain
+the shared retry classifier and receive final private error conversion.
+Original causes remain explicitly
 readable while automatic diagnostics hide key/provider metadata, identifiers,
 usage filters and response/error bodies. Actual sent request context is retained
 when injected transports omit or mislabel it. The shared logger gains only the
@@ -96,14 +98,16 @@ endpoint and does not graft Admin aggregates onto Chat `CompletionUsage`.
 ## Validation and review
 
 - Package format/fix/analyze: clean.
-- Focused synthetic model/public HTTP fixtures: 76 tests pass on VM and Chrome.
+- Focused synthetic model/public HTTP fixtures: 77 tests pass on VM and Chrome.
 - Local VM transport tests: two pass (real redirect isolation and environment
   project-key fallback rejection). These are unit fixtures, not live API tests.
 - Offline example: five MockClient requests complete; no real credentials,
   cloud registration, billing access, version bump or publication.
 - DTD discovery found no running debug app; the library example runs in a fresh
   CLI process, with no app to hot reload.
-- Required GitHub CI and independent engineering/requirements review gate merge.
+- Independent model review passes 32 model tests plus 149 canonical-derived
+  required/nullability assertions across 25 concrete parsers.
+- Required GitHub CI and independent HTTP/auth engineering review gate merge.
   A complete integrated local unit run is coordinated by the parent after all
   isolated lanes land, avoiding concurrent heavy HTTP/2 fixtures.
 

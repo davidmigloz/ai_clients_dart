@@ -453,6 +453,60 @@ void main() {
   );
 
   test(
+    'native GET network retries remain eligible and final failures redact',
+    () async {
+      for (final inStream in [false, true]) {
+        var attempts = 0;
+        final transport = _Transport((_) async {
+          if (++attempts == 1) {
+            if (!inStream) throw http.ClientException(_private);
+            return http.StreamedResponse(
+              Stream.error(http.ClientException(_private)),
+              200,
+            );
+          }
+          return _response('keys.list');
+        });
+        final client = OpenAIAdminClient(
+          config: OpenAIAdminConfig(
+            authProvider: _Auth(),
+            retryPolicy: const RetryPolicy(
+              maxRetries: 1,
+              initialDelay: Duration.zero,
+              jitter: 0,
+            ),
+          ),
+          httpClient: transport,
+        );
+        try {
+          await client.organization.externalKeys.list();
+          expect(attempts, 2);
+        } finally {
+          client.close();
+        }
+      }
+      final cause = http.ClientException(_private);
+      final client = _client(_Transport((_) async => throw cause));
+      try {
+        await expectLater(
+          client.organization.externalKeys.list(),
+          throwsA(
+            isA<ConnectionException>()
+                .having((e) => e.cause, 'cause', same(cause))
+                .having(
+                  (e) => e.toString(),
+                  'private',
+                  isNot(contains('PRIVATE')),
+                ),
+          ),
+        );
+      } finally {
+        client.close();
+      }
+    },
+  );
+
+  test(
     'native abort and ordinary per-attempt timeout preserve their classes',
     () async {
       final abort = Completer<void>();
