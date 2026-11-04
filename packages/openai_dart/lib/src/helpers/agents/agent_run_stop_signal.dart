@@ -29,15 +29,17 @@ final class AgentRunStopSignal {
     } else {
       _listeners.add(stop);
     }
-    operation.then<void>(
-      (value) {
-        _listeners.remove(stop);
-        if (!result.isCompleted) result.complete(value);
-      },
-      onError: (Object error, StackTrace stack) {
-        _listeners.remove(stop);
-        if (!result.isCompleted) result.completeError(error, stack);
-      },
+    unawaited(
+      operation.then<void>(
+        (value) {
+          _listeners.remove(stop);
+          if (!result.isCompleted) result.complete(value);
+        },
+        onError: (Object error, StackTrace stack) {
+          _listeners.remove(stop);
+          if (!result.isCompleted) result.completeError(error, stack);
+        },
+      ),
     );
     return result.future;
   }
