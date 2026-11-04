@@ -7,10 +7,15 @@ import '../../errors/exceptions.dart';
 import '../../models/live/live_client_events.dart';
 import '../../models/live/live_config.dart';
 import '../../models/live/live_server_events.dart';
+import '../responses/responses_recovering_websocket.dart';
+import '../websocket_recovery.dart';
 import 'live_data_channel.dart';
+import 'live_recovery.dart';
 import 'websocket_connector_common.dart';
 
+export '../websocket_recovery.dart';
 export 'live_data_channel.dart';
+export 'live_recovery.dart';
 export 'websocket_connector.dart';
 
 /// A malformed incoming frame or invalid outgoing command.
@@ -72,8 +77,74 @@ class LiveUnconfirmedCloseException implements Exception {
 /// One reader broadcasts received events to concurrent application taps. Early
 /// events/errors are retained for the first listener only. Later listeners see
 /// future events, with no history replay. A server error remains an ordinary
-/// event. There is no reconnect, startup, audio, command or external action replay.
+/// event. Explicit socket recovery never restores startup or previously attempted
+/// audio, commands or external actions.
 sealed class LiveConnection {
+  /// Wraps an owned socket with explicit recovery and a guarded pending queue.
+  ///
+  /// Reopening never repeats startup. Call primary/fork `start` again, await
+  /// its fresh acknowledgment, reconcile application state, then flush pending
+  /// commands deliberately. The supplied factory rebuilds each handshake.
+  factory LiveConnection.recovering(
+    WebSocket socket, {
+    required LiveReconnectOptions options,
+    required Future<WebSocket> Function(WebSocketReconnectDecision) reconnect,
+    bool sideband = false,
+    bool fork = false,
+    int maxBufferedEvents = 1024,
+    Future<void>? abortTrigger,
+    String? correlationId,
+  }) {
+    if (sideband && fork) throw ArgumentError('A fork is not a sideband.');
+    LiveConnection? connection;
+    final logicalSocket = ResponsesRecoveringWebSocket(
+      socket,
+      options: options.copyWith(
+        onReconnecting: (context) {
+          if (connection?._canRecover == false) {
+            return const WebSocketReconnectDecision.abort();
+          }
+          return options.onReconnecting(context);
+        },
+      ),
+      reconnect: (decision) {
+        if (connection?._canRecover == false) {
+          throw StateError('Live session ended before replacement handshake.');
+        }
+        return reconnect(decision);
+      },
+      manualQueue: true,
+      onDisconnect: () => connection?._prepareForReconnect(),
+      beforeFlush: () => connection?._ensurePendingFlush(),
+    );
+    try {
+      connection = fork
+          ? LiveForkConnection(
+              logicalSocket,
+              maxBufferedEvents: maxBufferedEvents,
+              abortTrigger: abortTrigger,
+              correlationId: correlationId,
+            )
+          : sideband
+          ? LiveSidebandConnection(
+              logicalSocket,
+              maxBufferedEvents: maxBufferedEvents,
+              abortTrigger: abortTrigger,
+              correlationId: correlationId,
+            )
+          : LivePrimaryConnection(
+              logicalSocket,
+              maxBufferedEvents: maxBufferedEvents,
+              abortTrigger: abortTrigger,
+              correlationId: correlationId,
+            );
+      return connection;
+    } catch (_) {
+      unawaited(logicalSocket.close(1000).catchError((Object _) {}));
+      rethrow;
+    }
+  }
+
   /// Wraps a primary socket or a caller-authored data-channel adapter.
   ///
   /// With [ownsSocket] false, cleanup detaches this reader without closing the
@@ -158,7 +229,9 @@ sealed class LiveConnection {
     required this.maxBufferedEvents,
     LiveSessionResourceParam? initialSession,
     Future<void>? abortTrigger,
-  }) {
+  }) : recovery = _socket is ResponsesRecoveringWebSocket
+           ? _socket.recovery
+           : null {
     if (!maxBufferedEvents.isFinite || maxBufferedEvents < 1) {
       throw ArgumentError('maxBufferedEvents must be positive.');
     }
@@ -184,6 +257,18 @@ sealed class LiveConnection {
   final String _channel;
   final String? _correlationId;
 
+  /// Opted-in recovery state and detached terminal delivery report, if enabled.
+  final WebSocketRecovery? recovery;
+
+  /// Detaches commands whose writes have never been attempted.
+  List<WebSocketUnsentMessage> takePending() =>
+      recovery?.takePending() ?? const [];
+
+  /// Sends retained commands after fresh startup and explicit reconciliation.
+  ///
+  /// Calling the recovery handle directly enforces the same startup barrier.
+  void flushPending() => recovery?.flushPending();
+
   /// Whether cleanup owns and closes this socket.
   final bool ownsSocket;
 
@@ -193,8 +278,10 @@ sealed class LiveConnection {
   StreamSubscription<WebSocketEvent>? _reader;
   final List<_BufferedLiveEvent> _opening = [];
   final Completer<void> _done = Completer();
-  final Completer<void> _startedSignal = Completer();
-  final Completer<void> _finalSignal = Completer();
+  Completer<void> _startedSignal = Completer();
+  Completer<void> _finalSignal = Completer();
+  int _generation = 0;
+  bool _canRetainDuringRecovery = false;
   LiveSessionStarted? _started;
   LiveSessionResourceParam? _session;
   LiveSessionCreateParams? _startupConfiguration;
@@ -239,6 +326,42 @@ sealed class LiveConnection {
 
   bool get _canFinalize => true;
 
+  bool get _canRecover => !_closed && !_closingSession && _final == null;
+
+  void _resetStartup() {}
+
+  void _prepareForReconnect() {
+    if (!_canRecover) return;
+    _canRetainDuringRecovery = _canFinalize;
+    ++_generation;
+    // Settle waits belonging to the interrupted socket before installing a new
+    // barrier. Their generation check keeps a later acknowledgment unrelated.
+    if (!_startedSignal.isCompleted) _startedSignal.complete();
+    if (!_finalSignal.isCompleted) _finalSignal.complete();
+    _startedSignal = Completer();
+    _finalSignal = Completer();
+    _started = null;
+    _session = null;
+    _startupConfiguration = null;
+    _latestSeconds = null;
+    _closeCode = null;
+    _closeReason = null;
+    _resetStartup();
+  }
+
+  void _ensurePendingFlush() {
+    _ensureWritable();
+    if (!_canFinalize) {
+      throw StateError('Live pending commands require fresh session startup.');
+    }
+  }
+
+  void _ensureGeneration(int generation, String operation) {
+    if (generation != _generation) {
+      throw LiveTransportException(operation: '${operation}_interrupted');
+    }
+  }
+
   /// Actual peer close code, if a close frame was observed.
   int? get closeCode => _closeCode;
 
@@ -280,13 +403,16 @@ sealed class LiveConnection {
           );
           return;
         }
-        if (event is LiveSessionStarted) {
+        if (event is LiveSessionStarted && !(recovery?.isRecovering ?? false)) {
           _started = event;
           _session = event.session;
           if (!_startedSignal.isCompleted) _startedSignal.complete();
         }
-        if (event is LiveSessionUpdated) _session = event.session;
-        if (event is LiveSessionUsageUpdated) {
+        if (event is LiveSessionUpdated && !(recovery?.isRecovering ?? false)) {
+          _session = event.session;
+        }
+        if (event is LiveSessionUsageUpdated &&
+            !(recovery?.isRecovering ?? false)) {
           _latestSeconds = event.usage.seconds;
         }
         if (event is LiveSessionClosed) {
@@ -383,6 +509,11 @@ sealed class LiveConnection {
 
   void _write(LiveClientEvent command, {bool allowClosing = false}) {
     _ensureWritable(allowClosing: allowClosing);
+    if (command is LiveSessionCloseParam && (recovery?.isRecovering ?? false)) {
+      throw StateError(
+        'Cannot finalize an interrupted Live session; use close for local cleanup.',
+      );
+    }
     final String text;
     try {
       command.validate();
@@ -392,9 +523,13 @@ sealed class LiveConnection {
       throw LiveProtocolException(kind: 'invalid_command', cause: error);
     }
     // Track closure before sendText, which may synchronously emit session.closed.
+    final closingBeforeWrite = _closingSession;
     if (command is LiveSessionCloseParam) _closingSession = true;
     try {
       _socket.sendText(text);
+    } on WebSocketSendQueueOverflowException {
+      _closingSession = closingBeforeWrite;
+      rethrow;
     } catch (error) {
       _beginCleanup(closeSocket: true);
       throw LiveTransportException(operation: 'send', cause: error);
@@ -455,6 +590,11 @@ sealed class LiveConnection {
   }) {
     _validateTimeout(timeout);
     if (_closeSessionFuture case final future?) return future;
+    if (_final == null && (recovery?.isRecovering ?? false)) {
+      throw StateError(
+        'Cannot finalize an interrupted Live session; use close for local cleanup.',
+      );
+    }
     if (_final == null && !_canFinalize) {
       throw StateError(
         'Live session has not started; use close for local cleanup.',
@@ -517,7 +657,11 @@ sealed class LiveConnection {
     _closed = true;
     if (!_startedSignal.isCompleted) _startedSignal.complete();
     if (!_finalSignal.isCompleted) _finalSignal.complete();
-    return _shutdownFuture = _cleanup(closeSocket, code, reason, timeout);
+    // A custom stream may emit close/error inside listen, before that call
+    // returns its subscription. Cleanup must see the installed reader.
+    return _shutdownFuture = Future<void>.microtask(
+      () => _cleanup(closeSocket, code, reason, timeout),
+    );
   }
 
   Future<void> _cleanup(
@@ -593,8 +737,13 @@ final class LivePrimaryConnection extends LiveConnection {
 
   bool _startupSent = false;
 
-  /// Writes one of the 11 primary commands. Startup is sent exactly once;
-  /// ordinary work waits for the session.started acknowledgment.
+  @override
+  void _resetStartup() => _startupSent = false;
+
+  /// Writes one of the 11 primary commands. Startup is sent once per physical
+  /// socket; ordinary work waits for its session.started acknowledgment.
+  /// During recovery, newly unsent commands can be retained only if the prior
+  /// session was started and an explicit pending-byte budget was configured.
   void send(LiveClientEvent event) {
     _ensureWritable();
     if (sessionAlreadyStarted && event is LiveInputAudioAppendEvent) {
@@ -604,6 +753,11 @@ final class LivePrimaryConnection extends LiveConnection {
       throw const LiveProtocolException(kind: 'fork_start_on_primary');
     }
     if (event is LiveSessionStartEvent) {
+      if (recovery?.isRecovering ?? false) {
+        throw StateError(
+          'Wait for the replacement Live socket before startup.',
+        );
+      }
       if (_startupSent || sessionAlreadyStarted) {
         throw StateError(
           'Live startup was already sent or media session already started.',
@@ -614,30 +768,36 @@ final class LivePrimaryConnection extends LiveConnection {
       _write(event);
       return;
     }
-    if (!sessionAlreadyStarted && (!_startupSent || _started == null)) {
+    if (!sessionAlreadyStarted &&
+        !((recovery?.isRecovering ?? false) && _canRetainDuringRecovery) &&
+        (!_startupSent || _started == null)) {
       throw StateError('Live session has not started.');
     }
     _write(event);
   }
 
   /// Explicitly sends session.start and waits for session.started before work.
+  /// A socket interruption fails this wait; a replacement needs a new call.
   Future<LiveSessionStarted> start(
     LiveSessionStartEvent event, {
     Duration timeout = const Duration(seconds: 30),
     Future<void>? abortTrigger,
   }) async {
     _validateTimeout(timeout);
+    final generation = _generation;
     try {
       await _checkAbort(abortTrigger);
+      _ensureGeneration(generation, 'startup');
       send(event);
       await _wait(_startedSignal.future, timeout, abortTrigger, 'startup');
+      _ensureGeneration(generation, 'startup');
       return _started ??
           (throw const LiveTransportException(operation: 'startup_closed'));
     } on AbortedException {
-      await close();
+      if (generation == _generation) await close();
       rethrow;
     } on LiveTransportException {
-      await close();
+      if (generation == _generation) await close();
       rethrow;
     }
   }
@@ -659,6 +819,9 @@ final class LiveForkConnection extends LiveConnection {
   }) : super._(socket, 'fork', correlationId);
 
   bool _startupSent = false;
+
+  @override
+  void _resetStartup() => _startupSent = false;
   @override
   bool get _canFinalize => _startupSent && _started != null;
 
@@ -669,6 +832,11 @@ final class LiveForkConnection extends LiveConnection {
       throw const LiveProtocolException(kind: 'primary_start_on_fork');
     }
     if (event is LiveForkSessionStartEvent) {
+      if (recovery?.isRecovering ?? false) {
+        throw StateError(
+          'Wait for the replacement Live socket before startup.',
+        );
+      }
       if (_startupSent) throw StateError('Live fork startup was already sent.');
       event.validate();
       final overrides = event.session.toJson();
@@ -688,7 +856,8 @@ final class LiveForkConnection extends LiveConnection {
       _write(event);
       return;
     }
-    if (!_startupSent || _started == null) {
+    if (!((recovery?.isRecovering ?? false) && _canRetainDuringRecovery) &&
+        (!_startupSent || _started == null)) {
       throw StateError('Live fork session has not started.');
     }
     _write(event);
@@ -701,19 +870,22 @@ final class LiveForkConnection extends LiveConnection {
     Future<void>? abortTrigger,
   }) async {
     _validateTimeout(timeout);
+    final generation = _generation;
     try {
       await _checkAbort(abortTrigger);
+      _ensureGeneration(generation, 'fork_startup');
       send(event);
       await _wait(_startedSignal.future, timeout, abortTrigger, 'fork_startup');
+      _ensureGeneration(generation, 'fork_startup');
       return _started ??
           (throw const LiveTransportException(
             operation: 'fork_startup_closed',
           ));
     } on AbortedException {
-      await close();
+      if (generation == _generation) await close();
       rethrow;
     } on LiveTransportException {
-      await close();
+      if (generation == _generation) await close();
       rethrow;
     }
   }

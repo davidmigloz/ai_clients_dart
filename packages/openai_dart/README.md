@@ -1091,6 +1091,20 @@ Future<void> main() async {
 
 </details>
 
+<a id="how-do-i-recover-live-and-realtime-websockets"></a>
+<details>
+<summary><b>How do I recover Live and Realtime WebSockets?</b></summary>
+
+Enable `LiveReconnectOptions` or `RealtimeReconnectOptions` explicitly. Both default to rejecting sends during recovery; set `maxQueueBytes` to retain new, never-attempted frames. After reconnecting, restore application state and call `connection.flushPending()`, or retrieve frames with `connection.takePending()`.
+
+Live primary and fork connections require a fresh explicit `start(...)` acknowledgment before pending work can flush. Realtime and Translation configuration, history, and audio are never restored automatically. Finalize only while the session is connected. Attempted writes are never replayed; inspect `connection.recovery!.done` for the final unsent report.
+
+Browser WebSockets reject custom headers. Use WebRTC or an authenticated backend proxy.
+
+→ [Local example, no API charges](example/websocket_recovery_example.dart)
+
+</details>
+
 <a id="how-do-i-signal-live-sessions-and-control-calls"></a>
 <details>
 <summary><b>How do I signal Live sessions and control calls?</b></summary>
@@ -1334,6 +1348,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [responses_websocket_session_example.dart](example/responses_websocket_session_example.dart) | **Offline.** bounded sessions, manual tool continuation, fork barrier and compact replay |
 | [responses_steering_example.dart](example/responses_steering_example.dart) | **Offline.** steer a running Responses request |
 | [responses_recovery_example.dart](example/responses_recovery_example.dart) | **Offline.** recover a Responses WebSocket |
+| [websocket_recovery_example.dart](example/websocket_recovery_example.dart) | **Local peer.** reconcile a Realtime session before flushing pending work |
 | [async_tools_example.dart](example/async_tools_example.dart) | Local async function/custom jobs, original call IDs and latest-response continuation |
 | [tool_search_example.dart](example/tool_search_example.dart) | **Offline.** client tool-search continuation with the original call ID and complete discovered definitions |
 | [web_search_controls_example.dart](example/web_search_controls_example.dart) | Local GA filters, image results, sources, and REST/SSE parsing without API calls |
@@ -1382,8 +1397,8 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | Images | Generation, editing, and streaming |
 | Audio | Speech, transcription, translation, voice consents, and custom voices; consent phrase lookup remains untyped |
 | Videos | Generation, editing, extension, and downloads |
-| Realtime | WebSocket and WebRTC sessions through a separate import |
-| Live | HTTP call controls, recordings, WebSockets, forks, and transcript helpers; some media/reconnect conveniences remain deferred |
+| Realtime | WebSocket and WebRTC sessions, opt-in recovery with explicit pending delivery |
+| Live | HTTP call controls, recordings, WebSockets, forks, transcript helpers, and opt-in recovery with fresh startup gating; some media conveniences remain deferred |
 | Files and Uploads | File management and large multipart uploads |
 | Batches | Asynchronous batch processing |
 | Models | Listing and retrieval |

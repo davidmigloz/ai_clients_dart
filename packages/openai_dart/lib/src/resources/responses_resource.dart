@@ -162,55 +162,56 @@ class ResponsesResource extends ResourceBase with StreamingResource {
       additionalHeaders: initialHeaders,
       timeout: timeout,
     );
-    // Splitting opening from the connection wrapper adds an await boundary.
-    // Preserve the eager admission rule and dispose a socket if the client
-    // closes between the raw opening and the wrapper's construction.
+    // Ownership transfers only once every connection wrapper is ready. A
+    // custom socket can fail while exposing its protocol or event stream.
+    var ownedSocket = socket;
     try {
       ensureNotClosed?.call();
-    } catch (_) {
-      await _disposeLateSocket(socket.close);
-      rethrow;
-    }
-    if (reconnect == null) {
-      return ResponsesConnection(
+      if (reconnect == null) {
+        return ResponsesConnection(
+          socket,
+          beta: beta,
+          maxBufferedEvents: maxBufferedEvents,
+        );
+      }
+
+      var currentHeaders = initialHeaders;
+      Map<String, String>? currentQuery;
+      final recoveryOptions = reconnect.copyWith(
+        onReconnecting: (context) {
+          ensureNotClosed?.call();
+          return reconnect.onReconnecting(context);
+        },
+      );
+      final recoveringSocket = ResponsesRecoveringWebSocket(
         socket,
+        options: recoveryOptions,
+        reconnect: (decision) {
+          ensureNotClosed?.call();
+          if (decision.headers != null) currentHeaders = decision.headers;
+          if (decision.queryParameters != null) {
+            currentQuery = decision.queryParameters;
+          }
+          return _openWebSocket(
+            beta: beta,
+            connector: connector,
+            additionalHeaders: currentHeaders,
+            queryParameters: currentQuery,
+            timeout: timeout,
+          );
+        },
+      );
+      ownedSocket = recoveringSocket;
+      return ResponsesConnection(
+        recoveringSocket,
+        recovery: recoveringSocket.recovery,
         beta: beta,
         maxBufferedEvents: maxBufferedEvents,
       );
+    } catch (_) {
+      await _disposeLateSocket(ownedSocket.close);
+      rethrow;
     }
-
-    var currentHeaders = initialHeaders;
-    Map<String, String>? currentQuery;
-    final recoveryOptions = reconnect.copyWith(
-      onReconnecting: (context) {
-        ensureNotClosed?.call();
-        return reconnect.onReconnecting(context);
-      },
-    );
-    final recoveringSocket = ResponsesRecoveringWebSocket(
-      socket,
-      options: recoveryOptions,
-      reconnect: (decision) {
-        ensureNotClosed?.call();
-        if (decision.headers != null) currentHeaders = decision.headers;
-        if (decision.queryParameters != null) {
-          currentQuery = decision.queryParameters;
-        }
-        return _openWebSocket(
-          beta: beta,
-          connector: connector,
-          additionalHeaders: currentHeaders,
-          queryParameters: currentQuery,
-          timeout: timeout,
-        );
-      },
-    );
-    return ResponsesConnection(
-      recoveringSocket,
-      recovery: recoveringSocket.recovery,
-      beta: beta,
-      maxBufferedEvents: maxBufferedEvents,
-    );
   }
 
   Future<WebSocket> _openWebSocket({

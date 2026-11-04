@@ -25,6 +25,31 @@ ResponsesReconnectOptions _options({
 );
 
 void main() {
+  for (final recovery in [false, true]) {
+    for (final cleanupFails in [false, true]) {
+      test('setup failure disposes the socket and preserves the error '
+          '(recovery=$recovery, cleanupFails=$cleanupFails)', () async {
+        final client = OpenAIClient();
+        addTearDown(client.close);
+        final failure = StateError('synthetic setup failure');
+        final socket = _Socket()
+          ..eventsFailure = recovery ? null : failure
+          ..protocolFailure = recovery ? failure : null
+          ..closeFailure = cleanupFails
+              ? StateError('synthetic cleanup failure')
+              : null;
+        await expectLater(
+          client.responses.connect(
+            reconnect: recovery ? _options() : null,
+            connector: (uri, {headers}) async => socket,
+          ),
+          throwsA(same(failure)),
+        );
+        expect(socket.closeCalls, 1);
+      });
+    }
+  }
+
   test('default public connection never reconnects', () async {
     final client = OpenAIClient();
     final socket = _Socket();
@@ -502,13 +527,24 @@ class _Socket implements ws.WebSocket {
   final StreamController<ws.WebSocketEvent> _events = StreamController();
   final List<String> sent = [];
   int closeCalls = 0;
+  Error? eventsFailure;
+  Error? protocolFailure;
+  Error? closeFailure;
 
   void peerClose(int? code, [String reason = '']) =>
       _events.add(ws.CloseReceived(code, reason));
   @override
-  Stream<ws.WebSocketEvent> get events => _events.stream;
+  Stream<ws.WebSocketEvent> get events {
+    if (eventsFailure case final failure?) throw failure;
+    return _events.stream;
+  }
+
   @override
-  String get protocol => '';
+  String get protocol {
+    if (protocolFailure case final failure?) throw failure;
+    return '';
+  }
+
   @override
   void sendText(String text) => sent.add(text);
   @override
@@ -521,5 +557,6 @@ class _Socket implements ws.WebSocket {
       _events.add(ws.CloseReceived(code ?? 1000, reason ?? ''));
       unawaited(_events.close());
     }
+    if (closeFailure case final failure?) throw failure;
   }
 }

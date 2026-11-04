@@ -8,13 +8,20 @@ import '../../errors/exceptions.dart';
 import 'websocket_connector_common.dart';
 
 /// Opens a native Responses WebSocket with custom handshake header support.
+///
+/// Compression is disabled, following the official SDK's native default.
+/// The native implementation does not impose a message-size limit.
 Future<WebSocket> connectResponsesWebSocket(
   Uri uri, {
   Map<String, String>? headers,
 }) async {
   validateResponsesWebSocketUri(uri);
   try {
-    final socket = await io.WebSocket.connect(uri.toString(), headers: headers);
+    final socket = await io.WebSocket.connect(
+      uri.toString(),
+      headers: headers,
+      compression: io.CompressionOptions.compressionOff,
+    );
     return _ResponsesNativeWebSocket(socket);
   } catch (_) {
     throw ConnectionException(

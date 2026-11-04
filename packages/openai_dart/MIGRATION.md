@@ -6,6 +6,66 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming release: WebSocket recovery budgets
+
+Opt-in Responses recovery now also limits pending frames to
+`maxQueueMessages: 1024`, including empty text or binary frames. This closes an
+unbounded-memory path in the byte-only queue. If your application deliberately
+retains more frames within its byte budget, configure both finite limits:
+
+```dart
+// Before: only the byte budget bounded outgoing pending data.
+final before = ResponsesReconnectOptions(onReconnecting: prepare);
+
+// After: choose an explicit frame count for larger backlogs.
+final after = ResponsesReconnectOptions(
+  onReconnecting: prepare,
+  maxQueueBytes: 2 * 1024 * 1024,
+  maxQueueMessages: 4096,
+);
+```
+
+Realtime/Translation protocol and transport failures now use payload-redacted
+`RealtimeProtocolException` and `RealtimeTransportException` values. Update
+exception-specific handlers that previously caught raw socket errors:
+
+```dart
+// Before
+try {
+  connection.send(command);
+} on WebSocketException {
+  handleTransportFailure();
+}
+
+// After
+try {
+  connection.send(command);
+} on RealtimeTransportException {
+  handleTransportFailure();
+} on WebSocketDeliveryUnknownException {
+  reconcileUncertainDelivery();
+}
+```
+
+Retry delays above 2,147,483,647 milliseconds are now rejected, matching the
+official Node client and preventing browser timers from wrapping to immediate
+retries.
+
+Native WebSockets now disable compression by default. Supply a custom connector
+that captures your native WebSocket options when you deliberately require it.
+Responses lane session helpers still require recovery to be disabled; after a
+physical interruption, create a fresh connection/helper and reconcile each lane
+explicitly. No lane state or previously attempted request is replayed.
+
+Live, Realtime and Translation recovery is additive and disabled by default.
+Their default zero-byte pending budget rejects disconnected sends. If enabled,
+restore the fresh session explicitly before flushing pending work; Live primary
+and fork sockets require a fresh `start(...)` acknowledgment. Finalization commands
+are rejected while recovering; finalize only a known active session. A failed attempted
+write is reported as uncertain and is excluded from the final unsent list.
+
+---
+
 ## Upcoming release: Typed reasoning replay
 
 `Item.fromJson` now recognizes `type: 'reasoning'` as `ReasoningInputItem`, and
