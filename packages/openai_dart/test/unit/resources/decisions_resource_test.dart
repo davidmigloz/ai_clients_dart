@@ -156,6 +156,205 @@ void main() {
       expect(response.answers.single, isA<PredicateDecisionAnswer>());
     });
 
+    test(
+      'posts all GA history variants, 400 multimodal questions and cache controls',
+      () async {
+        final history = <Map<String, dynamic>>[
+          {'role': 'system', 'content': 'Classify captured evidence.'},
+          {
+            'role': 'developer',
+            'content': [
+              {
+                'type': 'input_text',
+                'text': 'Shared policy',
+                'prompt_cache_breakpoint': {'mode': 'explicit'},
+              },
+            ],
+          },
+          {
+            'role': 'user',
+            'content': [
+              {
+                'type': 'input_json',
+                'data': [
+                  {'order': 1, 'damaged': true},
+                ],
+              },
+              {
+                'type': 'input_image',
+                'image_url': 'https://example.invalid/photo.png',
+                'prompt_cache_breakpoint': {'mode': 'explicit'},
+              },
+            ],
+          },
+          {
+            'role': 'assistant',
+            'content': [
+              {'type': 'output_text', 'text': 'Checking'},
+              {'type': 'refusal', 'refusal': 'Cannot infer identity'},
+            ],
+            'phase': 'commentary',
+          },
+          {
+            'type': 'function_call',
+            'call_id': 'f',
+            'name': 'order.lookup',
+            'arguments': '{}',
+            'namespace': 'orders',
+            'id': 'item_f',
+            'status': 'completed',
+          },
+          {
+            'type': 'function_call_output',
+            'call_id': 'f',
+            'output': [
+              {'type': 'input_text', 'text': 'Delivered'},
+              {
+                'type': 'input_image',
+                'image_url': 'https://example.invalid/receipt.png',
+              },
+            ],
+            'id': 'output_f',
+            'status': 'completed',
+          },
+          {
+            'type': 'custom_tool_call',
+            'call_id': 'c',
+            'name': 'check',
+            'input': 'order 1',
+            'namespace': 'orders',
+            'id': 'item_c',
+            'status': 'completed',
+          },
+          {
+            'type': 'custom_tool_call_output',
+            'call_id': 'c',
+            'output': 'Confirmed',
+            'id': 'output_c',
+            'status': 'completed',
+          },
+        ];
+        final questions = List<Map<String, dynamic>>.generate(
+          400,
+          (i) => {
+            'type': i % 3 == 0
+                ? 'predicate'
+                : i % 3 == 1
+                ? 'choice'
+                : 'score',
+            'name': 'q$i',
+            'instructions': [
+              {'type': 'input_text', 'text': 'Compare evidence'},
+              {
+                'type': 'input_image',
+                'image_url': 'https://example.invalid/reference.png',
+              },
+              {
+                'type': 'input_json',
+                'data': {'threshold': 2},
+              },
+            ],
+            if (i % 3 == 1)
+              'choices': [
+                {'value': true},
+                {'value': false},
+              ],
+            if (i % 3 == 2)
+              'levels': [
+                {'label': 'low'},
+                {'label': 'high'},
+              ],
+          },
+        );
+        final fixture = <String, dynamic>{
+          'model': 'gpt-6-luna',
+          'input': history,
+          'questions': questions,
+          'prompt_cache_key': 'tenant-1',
+          'prompt_cache_options': {'ttl': '30m', 'mode': 'explicit'},
+        };
+        final responseJson = <String, dynamic>{
+          ..._responseFixture(),
+          'model': 'gpt-6-luna',
+          'answers': List<Map<String, dynamic>>.generate(
+            400,
+            (i) => {
+              'type': i == 399
+                  ? 'refusal'
+                  : i % 3 == 0
+                  ? 'predicate'
+                  : i % 3 == 1
+                  ? 'choice'
+                  : 'score',
+              'name': 'q$i',
+              if (i != 399 && i % 3 == 0) 'probability': 0.9,
+              if (i != 399 && i % 3 != 0) ...{
+                'confidence': 0.9,
+                'probabilities': i % 3 == 1
+                    ? [
+                        {'value': true, 'probability': 0.9},
+                        {'value': false, 'probability': 0.1},
+                      ]
+                    : [
+                        {'value': 0, 'label': 'low', 'probability': 0.1},
+                        {'value': 1, 'label': 'high', 'probability': 0.9},
+                      ],
+                if (i % 3 == 1) 'choice': true,
+                if (i % 3 == 2) 'score': 0.9,
+              },
+            },
+          ),
+        };
+        var sends = 0;
+        final transport = MockClient((request) async {
+          sends++;
+          expect(request.method, 'POST');
+          expect(request.url.toString(), 'https://api.openai.com/v1/decisions');
+          expect(
+            request.headers['authorization'],
+            'Bearer synthetic-decisions-key',
+          );
+          expect(request.headers.containsKey('openai-beta'), isFalse);
+          final body = jsonDecode(request.body) as Map<String, dynamic>;
+          expect(body, {
+            ...fixture,
+            'input': history
+                .map(
+                  (item) => {
+                    if (item.containsKey('role')) 'type': 'message',
+                    ...item,
+                  },
+                )
+                .toList(),
+          });
+          return http.Response(jsonEncode(responseJson), 200);
+        });
+        final client = OpenAIClient(
+          config: const OpenAIConfig(
+            authProvider: ApiKeyProvider('synthetic-decisions-key'),
+          ),
+          httpClient: transport,
+        );
+        addTearDown(transport.close);
+        addTearDown(client.close);
+        final response = await client.decisions.create(
+          DecisionRequest.fromJson(fixture),
+        );
+        expect(sends, 1);
+        expect(response.toJson(), responseJson);
+        expect(response.answers, hasLength(400));
+        expect(response.answers.first, isA<PredicateDecisionAnswer>());
+        expect(response.answers[1], isA<ChoiceDecisionAnswer>());
+        expect(response.answers[2], isA<ScoreDecisionAnswer>());
+        expect(response.answers.last, isA<RefusalDecisionAnswer>());
+        expect(
+          response.answers.map((a) => a.name),
+          List.generate(400, (i) => 'q$i'),
+        );
+        expect(response.usage.inputTokensDetails!.cacheWriteTokens, 0);
+      },
+    );
+
     test('surfaces typed HTTP 400 errors with metadata', () async {
       final body = <String, dynamic>{
         'error': {

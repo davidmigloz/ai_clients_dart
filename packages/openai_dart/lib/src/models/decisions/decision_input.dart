@@ -5,13 +5,16 @@ import 'package:meta/meta.dart';
 import '../chat/content_part.dart' show ImageDetail;
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import 'decision_cache.dart';
 import 'decision_helpers.dart';
 
-/// Shared text or image evidence for a Decisions request.
+part 'decision_history.dart';
+part 'decision_json.dart';
+
+/// Shared text, images, JSON, messages, and tool history for Decisions.
 ///
-/// Only user messages with text and data URL or publicly accessible HTTP(S)
-/// images are supported. Empty text, message lists, and part lists are valid
-/// representations.
+/// Variants are [TextDecisionInput] and [MessagesDecisionInput]. Empty text,
+/// history lists, and message part lists are valid representations.
 @immutable
 sealed class DecisionInput {
   const DecisionInput();
@@ -19,18 +22,22 @@ sealed class DecisionInput {
   /// Creates simple text input.
   const factory DecisionInput.text(String text) = TextDecisionInput;
 
-  /// Creates input from user messages, copying the supplied list.
-  factory DecisionInput.messages(List<DecisionInputMessage> messages) =
+  /// Creates input from messages and tool history, copying the supplied list.
+  factory DecisionInput.messages(List<DecisionInputItem> messages) =
       MessagesDecisionInput;
 
-  /// Reads a string or an array of Decisions user messages.
+  /// Creates ordered conversation and tool history.
+  factory DecisionInput.items(List<DecisionInputItem> items) =
+      MessagesDecisionInput;
+
+  /// Reads a string or an array of Decisions input items.
   factory DecisionInput.fromJson(Object? json) {
     if (json is String) return TextDecisionInput(json);
     if (json is List) {
       return MessagesDecisionInput(
         parseDecisionObjects(
           json,
-          DecisionInputMessage.fromJson,
+          DecisionInputItem.fromJson,
           'DecisionInput.messages',
         ),
       );
@@ -76,21 +83,24 @@ class TextDecisionInput extends DecisionInput {
   String toString() => 'TextDecisionInput(text: ${text.length} chars)';
 }
 
-/// User-message input for Decisions.
+/// Ordered message and tool-history input for Decisions.
 @immutable
 class MessagesDecisionInput extends DecisionInput {
   /// Creates message input with an unmodifiable copy of [messages].
-  MessagesDecisionInput(List<DecisionInputMessage> messages)
+  MessagesDecisionInput(List<DecisionInputItem> messages)
     : messages = List.unmodifiable(messages);
 
-  /// The ordered user messages.
-  final List<DecisionInputMessage> messages;
+  /// The ordered messages and tool-history items.
+  final List<DecisionInputItem> messages;
+
+  /// The ordered history, also available under the legacy [messages] name.
+  List<DecisionInputItem> get items => messages;
 
   /// Reads message input from JSON.
   factory MessagesDecisionInput.fromJson(Object? json) => MessagesDecisionInput(
     parseDecisionObjects(
       json,
-      DecisionInputMessage.fromJson,
+      DecisionInputItem.fromJson,
       'MessagesDecisionInput.messages',
     ),
   );
@@ -101,7 +111,7 @@ class MessagesDecisionInput extends DecisionInput {
   ];
 
   /// Creates a copy with replaced messages.
-  MessagesDecisionInput copyWith({List<DecisionInputMessage>? messages}) =>
+  MessagesDecisionInput copyWith({List<DecisionInputItem>? messages}) =>
       MessagesDecisionInput(messages ?? this.messages);
 
   @override
@@ -119,9 +129,9 @@ class MessagesDecisionInput extends DecisionInput {
       'MessagesDecisionInput(messages: ${messages.length} items)';
 }
 
-/// A Decisions user message containing text or image parts.
+/// A Decisions user message containing text, image, or JSON parts.
 @immutable
-class DecisionInputMessage {
+class DecisionInputMessage extends DecisionInputItem {
   /// Creates a message with the fixed `user` role and `message` type.
   const DecisionInputMessage({required this.content});
 
@@ -136,6 +146,7 @@ class DecisionInputMessage {
   String get role => 'user';
 
   /// The type. Always `message`.
+  @override
   String get type => 'message';
 
   /// Reads a user message, rejecting unsupported roles and types.
@@ -155,6 +166,7 @@ class DecisionInputMessage {
   }
 
   /// Converts the message to JSON, including its fixed role and type.
+  @override
   Map<String, dynamic> toJson() => {
     'type': type,
     'role': role,
@@ -180,7 +192,7 @@ class DecisionInputMessage {
       'DecisionInputMessage(type: $type, role: $role, content: $content)';
 }
 
-/// String or ordered text/image content in a Decisions user message.
+/// String or ordered text/image/JSON content in a Decisions user message.
 @immutable
 sealed class DecisionContent {
   const DecisionContent();
@@ -288,13 +300,22 @@ class PartsDecisionContent extends DecisionContent {
   String toString() => 'PartsDecisionContent(parts: ${parts.length} items)';
 }
 
-/// Text or image evidence in a Decisions message.
+/// Text, image, or JSON evidence in a Decisions user message.
+///
+/// [DecisionEvidencePart] contains [TextDecisionInputPart] and
+/// [ImageDecisionInputPart]; [JsonDecisionInputPart] holds structured evidence.
 @immutable
 sealed class DecisionInputPart {
   const DecisionInputPart();
 
   /// Creates an `input_text` part.
-  const factory DecisionInputPart.text(String text) = TextDecisionInputPart;
+  const factory DecisionInputPart.text(
+    String text, {
+    DecisionPromptCacheBreakpoint? promptCacheBreakpoint,
+  }) = TextDecisionInputPart;
+
+  /// Creates finite structured JSON evidence, taking an immutable snapshot.
+  factory DecisionInputPart.json(Object data) = JsonDecisionInputPart;
 
   /// Creates an image from a data URL or publicly accessible HTTP(S) URL.
   ///
@@ -305,6 +326,7 @@ sealed class DecisionInputPart {
   factory DecisionInputPart.image({
     required String imageUrl,
     ImageDetail? detail,
+    DecisionPromptCacheBreakpoint? promptCacheBreakpoint,
   }) = ImageDecisionInputPart;
 
   /// Creates an inline image data URL from [bytes] and its MIME [mediaType].
@@ -312,18 +334,21 @@ sealed class DecisionInputPart {
     List<int> bytes, {
     required String mediaType,
     ImageDetail? detail,
+    DecisionPromptCacheBreakpoint? promptCacheBreakpoint,
   }) => ImageDecisionInputPart(
     imageUrl: 'data:$mediaType;base64,${base64Encode(bytes)}',
     detail: detail,
+    promptCacheBreakpoint: promptCacheBreakpoint,
   );
 
-  /// Reads a supported text/image part, rejecting unknown discriminators.
+  /// Reads a supported text/image/JSON part, rejecting unknown discriminators.
   factory DecisionInputPart.fromJson(Map<String, dynamic> json) =>
       switch (json['type']) {
         'input_text' => TextDecisionInputPart.fromJson(json),
         'input_image' => ImageDecisionInputPart.fromJson(json),
+        'input_json' => JsonDecisionInputPart.fromJson(json),
         _ => throw const FormatException(
-          'DecisionInputPart: expected type "input_text" or "input_image"',
+          'DecisionInputPart: expected input_text, input_image, or input_json',
         ),
       };
 
@@ -336,12 +361,15 @@ sealed class DecisionInputPart {
 
 /// An `input_text` Decisions part.
 @immutable
-class TextDecisionInputPart extends DecisionInputPart {
+class TextDecisionInputPart extends DecisionEvidencePart {
   /// Creates a text part.
-  const TextDecisionInputPart(this.text);
+  const TextDecisionInputPart(this.text, {this.promptCacheBreakpoint});
 
   /// The text evidence.
   final String text;
+
+  /// An optional explicit shared-input cache boundary.
+  final DecisionPromptCacheBreakpoint? promptCacheBreakpoint;
 
   @override
   String get type => 'input_text';
@@ -351,46 +379,73 @@ class TextDecisionInputPart extends DecisionInputPart {
     requireDecisionType(json, 'input_text', 'TextDecisionInputPart');
     return TextDecisionInputPart(
       requireDecisionString(json['text'], 'TextDecisionInputPart.text'),
+      promptCacheBreakpoint: json['prompt_cache_breakpoint'] == null
+          ? null
+          : DecisionPromptCacheBreakpoint.fromJson(
+              requireDecisionMap(
+                json['prompt_cache_breakpoint'],
+                'TextDecisionInputPart.prompt_cache_breakpoint',
+              ),
+            ),
     );
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': type, 'text': text};
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'text': text,
+    if (promptCacheBreakpoint != null)
+      'prompt_cache_breakpoint': promptCacheBreakpoint!.toJson(),
+  };
 
   /// Creates a copy with replaced text.
-  TextDecisionInputPart copyWith({String? text}) =>
-      TextDecisionInputPart(text ?? this.text);
+  TextDecisionInputPart copyWith({
+    String? text,
+    Object? promptCacheBreakpoint = unsetCopyWithValue,
+  }) => TextDecisionInputPart(
+    text ?? this.text,
+    promptCacheBreakpoint: identical(promptCacheBreakpoint, unsetCopyWithValue)
+        ? this.promptCacheBreakpoint
+        : promptCacheBreakpoint as DecisionPromptCacheBreakpoint?,
+  );
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is TextDecisionInputPart &&
           runtimeType == other.runtimeType &&
-          text == other.text;
+          text == other.text &&
+          promptCacheBreakpoint == other.promptCacheBreakpoint;
 
   @override
-  int get hashCode => Object.hash(runtimeType, text);
+  int get hashCode => Object.hash(runtimeType, text, promptCacheBreakpoint);
 
   @override
   String toString() =>
-      'TextDecisionInputPart(type: $type, text: ${text.length} chars)';
+      'TextDecisionInputPart(type: $type, text: ${text.length} chars, promptCacheBreakpoint: $promptCacheBreakpoint)';
 }
 
 /// An `input_image` Decisions part containing a data URL or public HTTP(S) URL.
 @immutable
-class ImageDecisionInputPart extends DecisionInputPart {
+class ImageDecisionInputPart extends DecisionEvidencePart {
   /// Creates an image part, requiring a supported URL prefix at runtime.
   ///
   /// Supports `data:`, `http://`, and `https://` without normalizing their
   /// contents. The server validates image data and public URL accessibility.
-  ImageDecisionInputPart({required String imageUrl, this.detail})
-    : imageUrl = _validateImageUrl(imageUrl);
+  ImageDecisionInputPart({
+    required String imageUrl,
+    this.detail,
+    this.promptCacheBreakpoint,
+  }) : imageUrl = _validateImageUrl(imageUrl);
 
   /// A base64-encoded image in a data URL or a public HTTP(S) image URL.
   final String imageUrl;
 
   /// The image detail level; omitted or null uses the server's `auto` default.
   final ImageDetail? detail;
+
+  /// An optional explicit shared-input cache boundary.
+  final DecisionPromptCacheBreakpoint? promptCacheBreakpoint;
 
   @override
   String get type => 'input_image';
@@ -410,6 +465,14 @@ class ImageDecisionInputPart extends DecisionInputPart {
     final detail = json['detail'];
     return ImageDecisionInputPart(
       imageUrl: imageUrl,
+      promptCacheBreakpoint: json['prompt_cache_breakpoint'] == null
+          ? null
+          : DecisionPromptCacheBreakpoint.fromJson(
+              requireDecisionMap(
+                json['prompt_cache_breakpoint'],
+                'ImageDecisionInputPart.prompt_cache_breakpoint',
+              ),
+            ),
       detail: detail == null
           ? null
           : ImageDetail.fromJson(
@@ -437,6 +500,8 @@ class ImageDecisionInputPart extends DecisionInputPart {
     'type': type,
     'image_url': imageUrl,
     if (detail != null) 'detail': detail!.toJson(),
+    if (promptCacheBreakpoint != null)
+      'prompt_cache_breakpoint': promptCacheBreakpoint!.toJson(),
   };
 
   /// Creates a copy with a replaced image URL or detail.
@@ -445,8 +510,12 @@ class ImageDecisionInputPart extends DecisionInputPart {
   ImageDecisionInputPart copyWith({
     String? imageUrl,
     Object? detail = unsetCopyWithValue,
+    Object? promptCacheBreakpoint = unsetCopyWithValue,
   }) => ImageDecisionInputPart(
     imageUrl: imageUrl ?? this.imageUrl,
+    promptCacheBreakpoint: identical(promptCacheBreakpoint, unsetCopyWithValue)
+        ? this.promptCacheBreakpoint
+        : promptCacheBreakpoint as DecisionPromptCacheBreakpoint?,
     detail: identical(detail, unsetCopyWithValue)
         ? this.detail
         : detail as ImageDetail?,
@@ -458,13 +527,30 @@ class ImageDecisionInputPart extends DecisionInputPart {
       other is ImageDecisionInputPart &&
           runtimeType == other.runtimeType &&
           imageUrl == other.imageUrl &&
-          detail == other.detail;
+          detail == other.detail &&
+          promptCacheBreakpoint == other.promptCacheBreakpoint;
 
   @override
-  int get hashCode => Object.hash(runtimeType, imageUrl, detail);
+  int get hashCode =>
+      Object.hash(runtimeType, imageUrl, detail, promptCacheBreakpoint);
 
   @override
   String toString() =>
       'ImageDecisionInputPart(type: $type, '
-      'imageUrl: [${imageUrl.length} chars], detail: $detail)';
+      'imageUrl: [${imageUrl.length} chars], detail: $detail, promptCacheBreakpoint: $promptCacheBreakpoint)';
+}
+
+/// Text or image parts permitted in tool outputs as well as shared user input.
+///
+/// Variants are [TextDecisionInputPart] and [ImageDecisionInputPart].
+@immutable
+sealed class DecisionEvidencePart extends DecisionInputPart {
+  const DecisionEvidencePart();
+
+  /// Reads an evidence part, rejecting user-only JSON parts.
+  factory DecisionEvidencePart.fromJson(Map<String, dynamic> json) {
+    final part = DecisionInputPart.fromJson(json);
+    if (part is DecisionEvidencePart) return part;
+    throw const FormatException('DecisionEvidencePart: expected text or image');
+  }
 }

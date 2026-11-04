@@ -1,13 +1,17 @@
 import 'package:meta/meta.dart';
 
+import '../chat/content_part.dart' show ImageDetail;
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import 'decision_choice_value.dart';
 import 'decision_helpers.dart';
+import 'decision_input.dart';
+
+part 'decision_instructions.dart';
 
 /// A predicate, fixed-choice classification, or ordered scoring question.
 ///
-/// A Decisions request accepts 1–200 questions. Optional names correlate answers
+/// A Decisions request accepts 1–400 questions. Optional names correlate answers
 /// with questions; unnamed questions are allowed.
 @immutable
 sealed class DecisionQuestion {
@@ -33,6 +37,26 @@ sealed class DecisionQuestion {
     String? name,
   }) = ScoreDecisionQuestion;
 
+  /// Creates a predicate from text or multimodal instructions.
+  const factory DecisionQuestion.predicateWithInstructions({
+    required DecisionInstructions instructions,
+    String? name,
+  }) = PredicateDecisionQuestion.withInstructions;
+
+  /// Creates a classification from text or multimodal instructions.
+  factory DecisionQuestion.choiceWithInstructions({
+    required DecisionInstructions instructions,
+    required List<DecisionChoiceOption> choices,
+    String? name,
+  }) = ChoiceDecisionQuestion.withInstructions;
+
+  /// Creates a scoring question from text or multimodal instructions.
+  factory DecisionQuestion.scoreWithInstructions({
+    required DecisionInstructions instructions,
+    required List<DecisionScoreLevel> levels,
+    String? name,
+  }) = ScoreDecisionQuestion.withInstructions;
+
   /// Reads a supported question, rejecting unknown request discriminators.
   factory DecisionQuestion.fromJson(Map<String, dynamic> json) =>
       switch (json['type']) {
@@ -48,7 +72,7 @@ sealed class DecisionQuestion {
   String get type;
 
   /// The criteria to evaluate against the shared input.
-  String get instructions;
+  DecisionInstructions get instructions;
 
   /// The optional correlation name echoed in the corresponding answer.
   String? get name;
@@ -61,10 +85,22 @@ sealed class DecisionQuestion {
 @immutable
 class PredicateDecisionQuestion extends DecisionQuestion {
   /// Creates a predicate question.
-  const PredicateDecisionQuestion({required this.instructions, this.name});
+  const PredicateDecisionQuestion({required String instructions, this.name})
+    : _textInstructions = instructions,
+      _instructions = null;
+
+  /// Creates a predicate from typed text or multimodal instructions.
+  const PredicateDecisionQuestion.withInstructions({
+    required DecisionInstructions this._instructions,
+    this.name,
+  }) : _textInstructions = null;
+
+  final String? _textInstructions;
+  final DecisionInstructions? _instructions;
 
   @override
-  final String instructions;
+  DecisionInstructions get instructions =>
+      _instructions ?? TextDecisionInstructions(_textInstructions!);
 
   @override
   final String? name;
@@ -75,11 +111,8 @@ class PredicateDecisionQuestion extends DecisionQuestion {
   /// Reads a predicate question with a required discriminator and instructions.
   factory PredicateDecisionQuestion.fromJson(Map<String, dynamic> json) {
     requireDecisionType(json, 'predicate', 'PredicateDecisionQuestion');
-    return PredicateDecisionQuestion(
-      instructions: requireDecisionString(
-        json['instructions'],
-        'PredicateDecisionQuestion.instructions',
-      ),
+    return PredicateDecisionQuestion.withInstructions(
+      instructions: DecisionInstructions.fromJson(json['instructions']),
       name: optionalDecisionString(json, 'name', 'PredicateDecisionQuestion'),
     );
   }
@@ -87,15 +120,15 @@ class PredicateDecisionQuestion extends DecisionQuestion {
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
-    'instructions': instructions,
+    'instructions': instructions.toJson(),
     if (name != null) 'name': name,
   };
 
   /// Creates a copy, allowing [name] to be explicitly cleared with null.
   PredicateDecisionQuestion copyWith({
-    String? instructions,
+    DecisionInstructions? instructions,
     Object? name = unsetCopyWithValue,
-  }) => PredicateDecisionQuestion(
+  }) => PredicateDecisionQuestion.withInstructions(
     instructions: instructions ?? this.instructions,
     name: identical(name, unsetCopyWithValue) ? this.name : name as String?,
   );
@@ -122,13 +155,21 @@ class PredicateDecisionQuestion extends DecisionQuestion {
 class ChoiceDecisionQuestion extends DecisionQuestion {
   /// Creates a choice question with an unmodifiable copy of [choices].
   ChoiceDecisionQuestion({
+    required String instructions,
+    required List<DecisionChoiceOption> choices,
+    this.name,
+  }) : instructions = TextDecisionInstructions(instructions),
+       choices = List.unmodifiable(choices);
+
+  /// Creates a question from typed text or multimodal instructions.
+  ChoiceDecisionQuestion.withInstructions({
     required this.instructions,
     required List<DecisionChoiceOption> choices,
     this.name,
   }) : choices = List.unmodifiable(choices);
 
   @override
-  final String instructions;
+  final DecisionInstructions instructions;
 
   /// The ordered classification options. The API accepts 2–255 choices.
   final List<DecisionChoiceOption> choices;
@@ -142,11 +183,8 @@ class ChoiceDecisionQuestion extends DecisionQuestion {
   /// Reads a choice question with required instructions and choices.
   factory ChoiceDecisionQuestion.fromJson(Map<String, dynamic> json) {
     requireDecisionType(json, 'choice', 'ChoiceDecisionQuestion');
-    return ChoiceDecisionQuestion(
-      instructions: requireDecisionString(
-        json['instructions'],
-        'ChoiceDecisionQuestion.instructions',
-      ),
+    return ChoiceDecisionQuestion.withInstructions(
+      instructions: DecisionInstructions.fromJson(json['instructions']),
       choices: parseDecisionObjects(
         json['choices'],
         DecisionChoiceOption.fromJson,
@@ -159,17 +197,17 @@ class ChoiceDecisionQuestion extends DecisionQuestion {
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
-    'instructions': instructions,
+    'instructions': instructions.toJson(),
     'choices': [for (final choice in choices) choice.toJson()],
     if (name != null) 'name': name,
   };
 
   /// Creates a copy, allowing [name] to be explicitly cleared with null.
   ChoiceDecisionQuestion copyWith({
-    String? instructions,
+    DecisionInstructions? instructions,
     List<DecisionChoiceOption>? choices,
     Object? name = unsetCopyWithValue,
-  }) => ChoiceDecisionQuestion(
+  }) => ChoiceDecisionQuestion.withInstructions(
     instructions: instructions ?? this.instructions,
     choices: choices ?? this.choices,
     name: identical(name, unsetCopyWithValue) ? this.name : name as String?,
@@ -199,13 +237,21 @@ class ChoiceDecisionQuestion extends DecisionQuestion {
 class ScoreDecisionQuestion extends DecisionQuestion {
   /// Creates a score question with an unmodifiable copy of [levels].
   ScoreDecisionQuestion({
+    required String instructions,
+    required List<DecisionScoreLevel> levels,
+    this.name,
+  }) : instructions = TextDecisionInstructions(instructions),
+       levels = List.unmodifiable(levels);
+
+  /// Creates a question from typed text or multimodal instructions.
+  ScoreDecisionQuestion.withInstructions({
     required this.instructions,
     required List<DecisionScoreLevel> levels,
     this.name,
   }) : levels = List.unmodifiable(levels);
 
   @override
-  final String instructions;
+  final DecisionInstructions instructions;
 
   /// Ordered levels from lowest to highest. The API accepts 2–10 levels.
   ///
@@ -221,11 +267,8 @@ class ScoreDecisionQuestion extends DecisionQuestion {
   /// Reads a score question with required instructions and levels.
   factory ScoreDecisionQuestion.fromJson(Map<String, dynamic> json) {
     requireDecisionType(json, 'score', 'ScoreDecisionQuestion');
-    return ScoreDecisionQuestion(
-      instructions: requireDecisionString(
-        json['instructions'],
-        'ScoreDecisionQuestion.instructions',
-      ),
+    return ScoreDecisionQuestion.withInstructions(
+      instructions: DecisionInstructions.fromJson(json['instructions']),
       levels: parseDecisionObjects(
         json['levels'],
         DecisionScoreLevel.fromJson,
@@ -238,17 +281,17 @@ class ScoreDecisionQuestion extends DecisionQuestion {
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
-    'instructions': instructions,
+    'instructions': instructions.toJson(),
     'levels': [for (final level in levels) level.toJson()],
     if (name != null) 'name': name,
   };
 
   /// Creates a copy, allowing [name] to be explicitly cleared with null.
   ScoreDecisionQuestion copyWith({
-    String? instructions,
+    DecisionInstructions? instructions,
     List<DecisionScoreLevel>? levels,
     Object? name = unsetCopyWithValue,
-  }) => ScoreDecisionQuestion(
+  }) => ScoreDecisionQuestion.withInstructions(
     instructions: instructions ?? this.instructions,
     levels: levels ?? this.levels,
     name: identical(name, unsetCopyWithValue) ? this.name : name as String?,
