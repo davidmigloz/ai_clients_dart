@@ -116,14 +116,12 @@ Future<void> main() async {
     await observer.cancel(); // Local observer only; no backend cancellation.
     await sessions.update(
       session.id,
-      UpdateAgentSessionRequest(
-        spendControl: AgentSessionSpendControlConfig(limit: 100),
-      ),
+      UpdateAgentSessionRequest(review: SessionReviewParam.autoReview),
     );
     await sessions.update(
       session.id,
-      UpdateAgentSessionRequest(clearSpendControl: true),
-    ); // Does not reset recorded spend.
+      UpdateAgentSessionRequest(review: SessionReviewParam.none),
+    ); // Review affects new root turns; spending limits are configured separately.
     await sessions.list(limit: 10, order: AgentListOrder.desc);
     await sessions.events.create(
       session.id,

@@ -168,12 +168,20 @@ class AgentSessionsResource extends ResourceBase with _AgentSessionHttp {
     );
   }
 
-  /// Lists one page, retaining the same order/agent filter when advancing.
+  /// Lists one page, retaining the same order, agent and metadata filters when
+  /// advancing with [after].
+  ///
+  /// [metadata] requires exact string matches for every supplied pair and is
+  /// encoded as `metadata[key]=value`. At most 16 pairs are accepted; keys are
+  /// 1–64 characters and values at most 512 characters. Keys and values must be
+  /// valid Unicode. An omitted or empty map adds no metadata filters. New
+  /// sessions and metadata updates may take time to appear in filtered results.
   Future<AgentSessionList> list({
     int? limit,
     AgentListOrder? order,
     String? after,
     String? agentId,
+    Map<String, String>? metadata,
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
   }) {
@@ -193,6 +201,32 @@ class AgentSessionsResource extends ResourceBase with _AgentSessionHttp {
     if (agentId != null) {
       validateAgentLength(agentId, 'Sessions list.agentId', max: 1048576);
     }
+    if (metadata != null) {
+      validateAgentCount(metadata.length, 'Sessions list.metadata', max: 16);
+      for (final entry in metadata.entries) {
+        validateAgentLength(
+          entry.key,
+          'Sessions list.metadata key',
+          min: 1,
+          max: 64,
+        );
+        validateAgentLength(
+          entry.value,
+          'Sessions list.metadata value',
+          max: 512,
+        );
+        // URI encoding replaces lone UTF-16 surrogates with U+FFFD. Exact
+        // metadata matching must reject values that cannot round-trip intact.
+        if (Uri.decodeQueryComponent(Uri.encodeQueryComponent(entry.key)) !=
+                entry.key ||
+            Uri.decodeQueryComponent(Uri.encodeQueryComponent(entry.value)) !=
+                entry.value) {
+          throw const FormatException(
+            'Sessions list.metadata: expected valid Unicode keys and values',
+          );
+        }
+      }
+    }
     return _json(
       'GET',
       '/agents/sessions',
@@ -202,6 +236,8 @@ class AgentSessionsResource extends ResourceBase with _AgentSessionHttp {
         if (order != null) 'order': order.value,
         'after': ?after,
         'agent_id': ?agentId,
+        for (final entry in metadata?.entries ?? <MapEntry<String, String>>[])
+          'metadata[${entry.key}]': entry.value,
       },
       additionalHeaders: additionalHeaders,
       abortTrigger: abortTrigger,
@@ -224,11 +260,12 @@ class AgentSessionsResource extends ResourceBase with _AgentSessionHttp {
     );
   }
 
-  /// Updates metadata, subsequent-turn model settings and spending control.
+  /// Updates metadata, subsequent-turn agent settings and action review.
   ///
   /// Omission retains state. Metadata replaces the full map; explicit null clears
-  /// it. Spend-control null or a nullable `limit` removes the cap without resetting
-  /// recorded spend. This cap is independent of organization usage tiers/limits.
+  /// it. Agent tools may be omitted, replaced, or cleared with null/an empty list.
+  /// Review applies to new root turns; existing turns and their subagents keep
+  /// their review mode. Action review does not configure spending limits.
   Future<AgentSession> update(
     String sessionId,
     UpdateAgentSessionRequest request, {

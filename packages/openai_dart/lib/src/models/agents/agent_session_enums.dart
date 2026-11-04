@@ -1,5 +1,83 @@
 part of 'agent_session_models.dart';
 
+/// Action review for eligible actions in a session, independent of spending.
+///
+/// Request parents reject future values before dispatch. Updating the default
+/// applies to new root turns; existing turns and their subagents retain theirs.
+final class SessionReviewParam extends AgentJsonModel {
+  const SessionReviewParam._(this.value);
+
+  /// Keeps execution behavior without automatic action review.
+  static const SessionReviewParam none = SessionReviewParam._('none');
+
+  /// Automatically reviews eligible actions and denies manual approval fallbacks.
+  static const SessionReviewParam autoReview = SessionReviewParam._(
+    'auto_review',
+  );
+
+  /// Exact wire value.
+  final String value;
+
+  /// Parses a string; request parents validate its writable enum membership.
+  factory SessionReviewParam.fromJson(Object? json) {
+    final value = requireAgentString(json, 'SessionReviewParam');
+    return switch (value) {
+      'none' => none,
+      'auto_review' => autoReview,
+      _ => SessionReviewParam._(value),
+    };
+  }
+
+  /// Whether this is a value in the frozen request contract.
+  bool get isKnown => const ['none', 'auto_review'].contains(value);
+
+  /// Copies the exact wire value.
+  SessionReviewParam copyWith({String? value}) =>
+      SessionReviewParam.fromJson(value ?? this.value);
+
+  @override
+  String toJson() => value;
+}
+
+/// Effective action review received for a session.
+///
+/// Future values remain readable. An omitted session field means none without
+/// inserting a default into its original wire representation.
+final class SessionReviewResource extends AgentJsonModel {
+  const SessionReviewResource._(this.value);
+
+  /// No automatic action review is enabled.
+  static const SessionReviewResource none = SessionReviewResource._('none');
+
+  /// Automatic eligible-action review is enabled.
+  static const SessionReviewResource autoReview = SessionReviewResource._(
+    'auto_review',
+  );
+
+  /// Exact received wire value.
+  final String value;
+
+  /// Parses a known or future string without normalization.
+  factory SessionReviewResource.fromJson(Object? json) {
+    final value = requireAgentString(json, 'SessionReviewResource');
+    return switch (value) {
+      'none' => none,
+      'auto_review' => autoReview,
+      _ => SessionReviewResource._(value),
+    };
+  }
+
+  /// Whether this is a value in the frozen receive contract.
+  bool get isKnown => const ['none', 'auto_review'].contains(value);
+
+  /// Copies the exact received value, including a future value.
+  SessionReviewResource copyWith({String? value}) =>
+      SessionReviewResource.fromJson(value ?? this.value);
+
+  @override
+  String toJson() => value;
+}
+
 /// The user's decision for a browser origin access request.
 ///
 /// Future received values retain their original string. Request models reject

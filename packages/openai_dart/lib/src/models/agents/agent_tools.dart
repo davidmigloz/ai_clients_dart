@@ -6,13 +6,14 @@ import 'agent_mcp_transport.dart';
 
 /// A tool that can be stored on a reusable agent without session credentials.
 ///
-/// Variants: [AgentComputerUseTool], [AgentFunctionTool], [AgentMcpTool], [AgentProgrammaticToolCallingTool], [AgentToolSearchTool], [AgentWebSearchTool] and [UnknownAgentTool].
+/// Variants: [AgentAutomationsTool], [AgentComputerUseTool], [AgentFunctionTool], [AgentMcpTool], [AgentProgrammaticToolCallingTool], [AgentToolSearchTool], [AgentWebSearchTool] and [UnknownAgentTool].
 sealed class AgentTool extends AgentJsonModel {
   const AgentTool();
 
   /// Parses known variants strictly and retains future received variants.
   factory AgentTool.fromJson(Map<String, dynamic> json) =>
       switch (requireAgentString(json['type'], 'AgentTool.type')) {
+        'automations' => AgentAutomationsTool.fromJson(json),
         'computer_use' => AgentComputerUseTool.fromJson(json),
         'function' => AgentFunctionTool.fromJson(json),
         'mcp' => AgentMcpTool.fromJson(json),
@@ -28,6 +29,9 @@ sealed class AgentTool extends AgentJsonModel {
 
   @override
   Map<String, dynamic> toJson();
+
+  /// Creates the scheduled-wakeup capability (not an HTTP automation action).
+  const factory AgentTool.automations() = AgentAutomationsTool;
 
   /// Creates the `computer_use` variant.
   factory AgentTool.computerUse({bool? includeScreenshots}) =
@@ -85,6 +89,7 @@ final class UnknownAgentTool extends AgentTool {
   factory UnknownAgentTool.fromJson(Map<String, dynamic> json) {
     final type = requireAgentString(json['type'], 'UnknownAgentTool.type');
     if (const [
+      'automations',
       'computer_use',
       'function',
       'mcp',
@@ -900,13 +905,14 @@ final class AgentWebSearchTool extends AgentTool {
 
 /// A credential-free tool available to a reusable agent.
 ///
-/// Variants: [AgentComputerUseToolResource], [AgentFunctionToolResource], [AgentMcpToolResource], [AgentProgrammaticToolCallingToolResource], [AgentToolSearchToolResource], [AgentWebSearchToolResource] and [UnknownAgentToolResource].
+/// Variants: [AgentAutomationsToolResource], [AgentComputerUseToolResource], [AgentFunctionToolResource], [AgentMcpToolResource], [AgentProgrammaticToolCallingToolResource], [AgentToolSearchToolResource], [AgentWebSearchToolResource] and [UnknownAgentToolResource].
 sealed class AgentToolResource extends AgentJsonModel {
   const AgentToolResource();
 
   /// Parses known variants strictly and retains future received variants.
   factory AgentToolResource.fromJson(Map<String, dynamic> json) =>
       switch (requireAgentString(json['type'], 'AgentToolResource.type')) {
+        'automations' => AgentAutomationsToolResource.fromJson(json),
         'computer_use' => AgentComputerUseToolResource.fromJson(json),
         'function' => AgentFunctionToolResource.fromJson(json),
         'mcp' => AgentMcpToolResource.fromJson(json),
@@ -922,6 +928,10 @@ sealed class AgentToolResource extends AgentJsonModel {
 
   @override
   Map<String, dynamic> toJson();
+
+  /// Creates the resolved scheduled-wakeup capability.
+  factory AgentToolResource.automations({Map<String, dynamic> rawJson}) =
+      AgentAutomationsToolResource;
 
   /// Creates the `computer_use` variant.
   factory AgentToolResource.computerUse({
@@ -982,6 +992,7 @@ final class UnknownAgentToolResource extends AgentToolResource {
       'UnknownAgentToolResource.type',
     );
     if (const [
+      'automations',
       'computer_use',
       'function',
       'mcp',
@@ -1684,4 +1695,62 @@ final class AgentWebSearchToolResource extends AgentToolResource {
     mode: mode ?? this.mode,
     rawJson: rawJson ?? this.rawJson,
   );
+}
+
+/// Allows an agent to manage its own scheduled wakeups.
+///
+/// This is a tool configuration only; it does not schedule an HTTP operation.
+final class AgentAutomationsTool extends AgentTool {
+  /// Creates the fixed automations capability.
+  const AgentAutomationsTool();
+
+  /// Parses only the closed native type discriminator.
+  factory AgentAutomationsTool.fromJson(Map<String, dynamic> json) {
+    requireClosedAgentJson(json, const ['type'], 'AgentAutomationsTool');
+    requireAgentTag(json, 'type', 'automations', 'AgentAutomationsTool');
+    return const AgentAutomationsTool();
+  }
+  @override
+  String get type => 'automations';
+  @override
+  Map<String, dynamic> toJson() => {'type': type};
+
+  /// Copies the fixed capability.
+  AgentAutomationsTool copyWith() => const AgentAutomationsTool();
+}
+
+/// Resolved scheduled-wakeup capability, retaining future resource metadata.
+final class AgentAutomationsToolResource extends AgentToolResource {
+  /// Snapshots finite received extras without permitting a type override.
+  AgentAutomationsToolResource({Map<String, dynamic> rawJson = const {}})
+    : rawJson = agentExtras(rawJson, const [
+        'type',
+      ], 'AgentAutomationsToolResource');
+
+  /// Parses the required native type and finite future received metadata.
+  factory AgentAutomationsToolResource.fromJson(Map<String, dynamic> json) {
+    requireAgentTag(
+      json,
+      'type',
+      'automations',
+      'AgentAutomationsToolResource',
+    );
+    return AgentAutomationsToolResource(
+      rawJson: {
+        for (final entry in json.entries)
+          if (entry.key != 'type') entry.key: entry.value,
+      },
+    );
+  }
+
+  /// Detached immutable metadata subordinate to typed fields.
+  final Map<String, dynamic> rawJson;
+  @override
+  String get type => 'automations';
+  @override
+  Map<String, dynamic> toJson() => {...rawJson, 'type': type};
+
+  /// Copies finite received metadata.
+  AgentAutomationsToolResource copyWith({Map<String, dynamic>? rawJson}) =>
+      AgentAutomationsToolResource(rawJson: rawJson ?? this.rawJson);
 }

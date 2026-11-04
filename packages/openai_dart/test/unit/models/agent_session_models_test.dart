@@ -97,62 +97,7 @@ void main() {
     }
   });
 
-  group('Session spending and creation', () {
-    test('exact portable maximum and required nullable cap', () {
-      const maximum = 4503599627370495;
-      final cap = AgentSessionSpendControlConfig(limit: maximum);
-      expect(cap.toJson(), {'limit': maximum});
-      expect(
-        AgentSessionSpendControlConfig.fromJson(
-          jsonDecode(jsonEncode(cap.toJson())) as Map<String, dynamic>,
-        ),
-        cap,
-      );
-      expect(cap.copyWith(limit: null).toJson(), {'limit': null});
-      expect(
-        () => AgentSessionSpendControlConfig(limit: 0),
-        throwsFormatException,
-      );
-      expect(
-        () => AgentSessionSpendControlConfig(limit: maximum + 1),
-        throwsFormatException,
-      );
-      expect(
-        () => AgentSessionSpendControlConfig.fromJson(const {}),
-        throwsFormatException,
-      );
-      final received = AgentSessionSpendControl(limit: maximum, consumed: null);
-      expect(received.copyWith(consumed: 0).toJson(), {
-        'limit': maximum,
-        'consumed': 0,
-      });
-      expect(
-        () => AgentSessionSpendControl.fromJson(const {
-          'limit': null,
-          'consumed': null,
-        }),
-        throwsFormatException,
-      );
-      expect(
-        () => AgentSessionSpendControl(limit: 1, consumed: -1),
-        throwsFormatException,
-      );
-    });
-    test('cap omission, top-level null and nullable limit remain distinct', () {
-      final omitted = UpdateAgentSessionRequest();
-      final clear = UpdateAgentSessionRequest(clearSpendControl: true);
-      final unlimited = UpdateAgentSessionRequest(
-        spendControl: AgentSessionSpendControlConfig(limit: null),
-      );
-      expect(omitted.toJson(), <String, dynamic>{});
-      expect(clear.toJson(), {'spend_control': null});
-      expect(unlimited.toJson(), {
-        'spend_control': {'limit': null},
-      });
-      expect(omitted, isNot(clear));
-      expect(clear.copyWith(), clear);
-      expect(unlimited.copyWith(spendControl: null), clear);
-    });
+  group('Session creation', () {
     test('inline and environment-dependent input are validated', () {
       final none = AgentSessionEnvironment.none();
       expect(

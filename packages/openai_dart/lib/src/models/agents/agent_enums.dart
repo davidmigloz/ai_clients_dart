@@ -381,6 +381,11 @@ final class AgentServiceTierParam extends AgentJsonModel {
   /// The `fast` wire value.
   static const AgentServiceTierParam fast = AgentServiceTierParam._('fast');
 
+  /// The `ultrafast` wire value.
+  static const AgentServiceTierParam ultrafast = AgentServiceTierParam._(
+    'ultrafast',
+  );
+
   /// The exact wire value.
   final String value;
 
@@ -393,13 +398,20 @@ final class AgentServiceTierParam extends AgentJsonModel {
       'flex' => flex,
       'priority' => priority,
       'fast' => fast,
+      'ultrafast' => ultrafast,
       _ => AgentServiceTierParam._(value),
     };
   }
 
   /// Whether the value belongs to the pinned source enum.
-  bool get isKnown =>
-      const ['auto', 'default', 'flex', 'priority', 'fast'].contains(value);
+  bool get isKnown => const [
+    'auto',
+    'default',
+    'flex',
+    'priority',
+    'fast',
+    'ultrafast',
+  ].contains(value);
 
   /// Copies the exact string, including a future received value.
   AgentServiceTierParam copyWith({String? value}) =>

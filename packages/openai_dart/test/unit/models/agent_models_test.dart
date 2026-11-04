@@ -450,7 +450,7 @@ void main() {
     expect(
       () => CreateAgentRequest(
         model: 'model',
-        serviceTier: AgentServiceTierParam.fromJson('ultrafast'),
+        serviceTier: AgentServiceTierParam.fromJson('future-tier'),
       ),
       throwsA(isA<FormatException>()),
     );

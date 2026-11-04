@@ -1209,7 +1209,7 @@ Fork a stored Live session and use transcript helpers to group captions. The exa
 <details>
 <summary><b>How do I save and update an agent configuration?</b></summary>
 
-Use `client.agents` to save reusable model, instruction, and tool configuration. Creating an agent stores configuration without starting a session; updates replace supplied fields, while `clearX` flags reset nullable fields.
+Use `client.agents` to save reusable model, instruction, and tool configuration. Creating an agent stores configuration without starting a session; updates preserve omitted fields, while `clearX` flags reset nullable settings.
 
 ```dart
 import 'package:openai_dart/openai_dart.dart';
@@ -1250,6 +1250,20 @@ Use `client.agents.sessions` to create sessions, observe events, and submit func
 
 </details>
 
+<a id="how-do-i-configure-agent-context-and-action-review"></a>
+<details>
+<summary><b>How do I configure Agent context and action review?</b></summary>
+
+Use `AgentCompactionConfig(async: false)` for blocking compaction and `AgentExperimentalConfig(timeAwareness: true)` for periodic current-time reminders. Compaction updates replace the configuration; null or `{}` restores background compaction. Experimental updates merge supplied keys, preserving omitted values. Request `AgentServiceTierParam.ultrafast` with a supported model when appropriate.
+
+Set session `review` to `SessionReviewParam.autoReview` to review eligible actions automatically, or `.none` for existing execution behavior. Updates apply to new root turns; existing turns and their subagents keep their mode. Action review is independent of spending limits. Replace session tools through `AgentSessionAgentUpdate`; omission keeps them, while null or `[]` clears them. Function/MCP changes apply on the next model call, and built-in changes by the next turn.
+
+Filter session lists with `metadata: {'project': 'demo'}`; all pairs must match, and updates may take time to appear in filtered results. Keep the same filters when advancing a cursor.
+
+→ [Offline settings and metadata-filter example](example/agent_settings_example.dart)
+
+</details>
+
 <a id="session-history-and-traces"></a>
 <details>
 <summary><b>Session history and traces</b></summary>
@@ -1274,7 +1288,7 @@ Inspect child state and item/turn history through `client.agents.sessions.subage
 <details>
 <summary><b>Agent environments and templates</b></summary>
 
-Use `client.agents.environments` and `.templates` to save hosted setup and prewarm eligible environments. Environment and session lifetimes are independent; deleting a template does not stop a session.
+Use `client.agents.environments` and `.templates` to save hosted setup and prewarm eligible environments. Environment and session lifetimes are independent; deleting a template does not stop a session. Eligible hosted sandboxes include the Artifact SDK and document skills inside the environment; prewarming uses the existing environment creation flow.
 
 → [Full example](example/agent_environments_example.dart)
 
@@ -1442,7 +1456,8 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 
 | Example | Description |
 | --- | --- |
-| [saved_agents_example.dart](example/saved_agents_example.dart) | **Offline.** saved-agent CRUD, all six persisted tools, pagination, replacement and clear/reset |
+| [saved_agents_example.dart](example/saved_agents_example.dart) | **Offline.** saved-agent CRUD, tool configuration, pagination, replacement and clear/reset |
+| [agent_settings_example.dart](example/agent_settings_example.dart) | **Offline.** compaction, time awareness, session review/tools, ultrafast and exact metadata filters |
 | [agent_sessions_example.dart](example/agent_sessions_example.dart) | **Offline.** durable sessions, persistent observation, manual function result and explicit cancellation |
 | [agent_session_history_example.dart](example/agent_session_history_example.dart) | **Offline.** root/turn history and published OTLP trace pagination |
 | [agent_subagents_example.dart](example/agent_subagents_example.dart) | **Offline.** Agent session subagents |
@@ -1483,7 +1498,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | Content Provenance Checks | C2PA and SynthID inspection |
 | Webhooks | Local signed verification and project endpoint management |
 | Safety | Read-only project alerts, organization cases, and typed monitoring details |
-| Agents | Saved agents, durable sessions, root/child history, published traces, hosted environments, templates, files, and artifacts |
+| Agents | Saved agents, context settings, action review, durable sessions, metadata filters, root/child history, hosted environments, files, and artifacts |
 | Vaults | Vault management and write-only credentials |
 | ChatKit Beta and Skills | Sessions/threads and skills management |
 | Assistants, Threads, Messages, Runs, and Vector Stores | Deprecated; separate Assistants import |

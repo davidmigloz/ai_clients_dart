@@ -6,6 +6,7 @@ import '../common/copy_with_sentinel.dart';
 import 'agent_config.dart';
 import 'agent_enums.dart';
 import 'agent_json_helpers.dart';
+import 'agent_settings.dart';
 
 part 'agent_session_approvals.dart';
 part 'agent_session_core.dart';

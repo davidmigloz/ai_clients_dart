@@ -9,5 +9,6 @@ export 'agent_file_models.dart';
 export 'agent_json_helpers.dart' show AgentJsonModel;
 export 'agent_mcp_transport.dart';
 export 'agent_session_models.dart';
+export 'agent_settings.dart';
 export 'agent_subagent_list.dart';
 export 'agent_tools.dart';

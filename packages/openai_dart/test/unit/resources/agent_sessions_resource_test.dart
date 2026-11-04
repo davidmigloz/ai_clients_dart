@@ -125,13 +125,9 @@ void main() {
       await sessions.retrieve(id);
       for (final request in [
         UpdateAgentSessionRequest(),
-        UpdateAgentSessionRequest(clearSpendControl: true, clearMetadata: true),
-        UpdateAgentSessionRequest(
-          spendControl: AgentSessionSpendControlConfig(limit: null),
-        ),
-        UpdateAgentSessionRequest(
-          spendControl: AgentSessionSpendControlConfig(limit: 4503599627370495),
-        ),
+        UpdateAgentSessionRequest(clearMetadata: true),
+        UpdateAgentSessionRequest(review: SessionReviewParam.none),
+        UpdateAgentSessionRequest(review: SessionReviewParam.autoReview),
       ]) {
         await sessions.update(id, request);
         expect(

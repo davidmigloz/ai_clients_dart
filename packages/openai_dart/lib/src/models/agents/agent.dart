@@ -2,6 +2,7 @@ import '../common/copy_with_sentinel.dart';
 import 'agent_config.dart';
 import 'agent_enums.dart';
 import 'agent_json_helpers.dart';
+import 'agent_settings.dart';
 import 'agent_tools.dart';
 
 /// A page of Agents API resources, with IDs for retrieving additional pages.
@@ -137,6 +138,8 @@ final class AgentList extends AgentJsonModel {
 final class Agent extends AgentJsonModel {
   /// Creates a validated [Agent].
   Agent({
+    this.compaction,
+    this.experimental,
     required this.createdAt,
     required this.id,
     required this.instructions,
@@ -153,6 +156,8 @@ final class Agent extends AgentJsonModel {
   }) : metadata = Map<String, String>.unmodifiable(metadata),
        tools = List.unmodifiable(tools),
        rawJson = agentExtras(rawJson, const [
+         'compaction',
+         'experimental',
          'created_at',
          'id',
          'instructions',
@@ -169,6 +174,12 @@ final class Agent extends AgentJsonModel {
        ], 'Agent') {
     validate();
   }
+
+  /// Effective optional compaction settings; absent on older resources.
+  final AgentCompaction? compaction;
+
+  /// Effective optional experimental settings; absent on older resources.
+  final AgentExperimental? experimental;
 
   /// The Unix timestamp, in seconds, when the agent was created.
   final int createdAt;
@@ -216,6 +227,22 @@ final class Agent extends AgentJsonModel {
   factory Agent.fromJson(Map<String, dynamic> json) {
     requireAgentTag(json, 'object', 'agent', 'Agent');
     return Agent(
+      compaction: optionalAgentValue(
+        json,
+        'compaction',
+        'Agent.compaction',
+        (value, context) =>
+            AgentCompaction.fromJson(requireAgentObject(value, context)),
+        nullable: false,
+      ),
+      experimental: optionalAgentValue(
+        json,
+        'experimental',
+        'Agent.experimental',
+        (value, context) =>
+            AgentExperimental.fromJson(requireAgentObject(value, context)),
+        nullable: false,
+      ),
       createdAt: requiredAgentValue(
         json,
         'created_at',
@@ -312,6 +339,8 @@ final class Agent extends AgentJsonModel {
       rawJson: {
         for (final entry in json.entries)
           if (!const [
+            'compaction',
+            'experimental',
             'created_at',
             'id',
             'instructions',
@@ -332,6 +361,8 @@ final class Agent extends AgentJsonModel {
   }
   @override
   void validate() {
+    compaction?.validate();
+    experimental?.validate();
     validateAgentInt(createdAt, 'Agent.createdAt');
     validateAgentLength(id, 'Agent.id', min: 0);
     if (instructions != null) {
@@ -361,6 +392,8 @@ final class Agent extends AgentJsonModel {
   @override
   Map<String, dynamic> toJson() => {
     ...rawJson,
+    if (compaction != null) 'compaction': compaction!.toJson(),
+    if (experimental != null) 'experimental': experimental!.toJson(),
     'created_at': createdAt,
     'id': id,
     'instructions': instructions,
@@ -378,6 +411,8 @@ final class Agent extends AgentJsonModel {
 
   /// Copies values; omitted arguments retain their values and null presence.
   Agent copyWith({
+    Object? compaction = unsetCopyWithValue,
+    Object? experimental = unsetCopyWithValue,
     int? createdAt,
     String? id,
     Object? instructions = unsetCopyWithValue,
@@ -392,6 +427,16 @@ final class Agent extends AgentJsonModel {
     int? updatedAt,
     Map<String, dynamic>? rawJson,
   }) => Agent(
+    compaction: copyAgentValue<AgentCompaction>(
+      compaction,
+      this.compaction,
+      'Agent.compaction',
+    ),
+    experimental: copyAgentValue<AgentExperimental>(
+      experimental,
+      this.experimental,
+      'Agent.experimental',
+    ),
     createdAt: createdAt ?? this.createdAt,
     id: id ?? this.id,
     instructions: copyAgentValue<String>(
@@ -420,6 +465,9 @@ final class Agent extends AgentJsonModel {
 final class CreateAgentRequest extends AgentJsonModel {
   /// Creates a validated [CreateAgentRequest].
   CreateAgentRequest({
+    AgentCompactionConfig? compaction,
+    bool clearCompaction = false,
+    this.experimental,
     String? instructions,
     bool clearInstructions = false,
     Map<String, String>? metadata,
@@ -437,7 +485,9 @@ final class CreateAgentRequest extends AgentJsonModel {
     bool clearText = false,
     List<AgentTool>? tools,
     bool clearTools = false,
-  }) : clearInstructions = clearInstructions,
+  }) : compaction = clearCompaction ? null : compaction,
+       clearCompaction = clearCompaction,
+       clearInstructions = clearInstructions,
        instructions = clearInstructions ? null : instructions,
        clearMetadata = clearMetadata,
        metadata = ownAgentValue<Map<String, String>>(
@@ -461,6 +511,17 @@ final class CreateAgentRequest extends AgentJsonModel {
        ) {
     validate();
   }
+
+  /// Optional compaction object. Updates replace it; omitted updates keep it.
+  /// Null or an empty object enables background compaction without a client default.
+  final AgentCompactionConfig? compaction;
+
+  /// Sends compaction:null rather than omitting the setting.
+  final bool clearCompaction;
+
+  /// Experimental settings. Creation uses service defaults; updates merge by key.
+  /// This optional object is nonnullable on the wire; null in Dart omits it.
+  final AgentExperimentalConfig? experimental;
 
   /// Additional instructions appended to the agent's default base instructions. Omit or set to null to add no custom instructions.
   final String? instructions;
@@ -516,6 +577,8 @@ final class CreateAgentRequest extends AgentJsonModel {
   /// Parses [CreateAgentRequest] with contextual, payload-free errors.
   factory CreateAgentRequest.fromJson(Map<String, dynamic> json) {
     requireClosedAgentJson(json, const [
+      'compaction',
+      'experimental',
       'instructions',
       'metadata',
       'model',
@@ -527,6 +590,25 @@ final class CreateAgentRequest extends AgentJsonModel {
       'tools',
     ], 'CreateAgentRequest');
     return CreateAgentRequest(
+      compaction: optionalAgentValue(
+        json,
+        'compaction',
+        'CreateAgentRequest.compaction',
+        (value, context) =>
+            AgentCompactionConfig.fromJson(requireAgentObject(value, context)),
+        nullable: true,
+      ),
+      clearCompaction:
+          json.containsKey('compaction') && json['compaction'] == null,
+      experimental: optionalAgentValue(
+        json,
+        'experimental',
+        'CreateAgentRequest.experimental',
+        (value, context) => AgentExperimentalConfig.fromJson(
+          requireAgentObject(value, context),
+        ),
+        nullable: false,
+      ),
       instructions: optionalAgentValue(
         json,
         'instructions',
@@ -613,6 +695,8 @@ final class CreateAgentRequest extends AgentJsonModel {
   }
   @override
   void validate() {
+    compaction?.validate();
+    experimental?.validate();
     if (instructions != null) {
       validateAgentLength(
         instructions!,
@@ -667,6 +751,7 @@ final class CreateAgentRequest extends AgentJsonModel {
         'flex',
         'priority',
         'fast',
+        'ultrafast',
       ], 'CreateAgentRequest.serviceTier');
     }
     if (text != null) {
@@ -690,6 +775,11 @@ final class CreateAgentRequest extends AgentJsonModel {
 
   @override
   Map<String, dynamic> toJson() => {
+    if (clearCompaction)
+      'compaction': null
+    else if (compaction != null)
+      'compaction': compaction!.toJson(),
+    if (experimental != null) 'experimental': experimental!.toJson(),
     if (clearInstructions)
       'instructions': null
     else
@@ -718,6 +808,9 @@ final class CreateAgentRequest extends AgentJsonModel {
 
   /// Copies values; omitted arguments retain their values and null presence.
   CreateAgentRequest copyWith({
+    Object? compaction = unsetCopyWithValue,
+    bool? clearCompaction,
+    Object? experimental = unsetCopyWithValue,
     Object? instructions = unsetCopyWithValue,
     bool? clearInstructions,
     Object? metadata = unsetCopyWithValue,
@@ -736,6 +829,21 @@ final class CreateAgentRequest extends AgentJsonModel {
     Object? tools = unsetCopyWithValue,
     bool? clearTools,
   }) => CreateAgentRequest(
+    compaction: copyAgentValue<AgentCompactionConfig>(
+      compaction,
+      this.compaction,
+      'CreateAgentRequest.compaction',
+    ),
+    clearCompaction:
+        clearCompaction ??
+        (identical(compaction, unsetCopyWithValue)
+            ? this.clearCompaction
+            : compaction == null),
+    experimental: copyAgentValue<AgentExperimentalConfig>(
+      experimental,
+      this.experimental,
+      'CreateAgentRequest.experimental',
+    ),
     instructions: copyAgentValue<String>(
       instructions,
       this.instructions,
@@ -1060,6 +1168,9 @@ final class AgentErrorResponse extends AgentJsonModel {
 final class UpdateAgentRequest extends AgentJsonModel {
   /// Creates a validated [UpdateAgentRequest].
   UpdateAgentRequest({
+    AgentCompactionConfig? compaction,
+    bool clearCompaction = false,
+    this.experimental,
     String? instructions,
     bool clearInstructions = false,
     Map<String, String>? metadata,
@@ -1077,7 +1188,9 @@ final class UpdateAgentRequest extends AgentJsonModel {
     bool clearText = false,
     List<AgentTool>? tools,
     bool clearTools = false,
-  }) : clearInstructions = clearInstructions,
+  }) : compaction = clearCompaction ? null : compaction,
+       clearCompaction = clearCompaction,
+       clearInstructions = clearInstructions,
        instructions = clearInstructions ? null : instructions,
        clearMetadata = clearMetadata,
        metadata = ownAgentValue<Map<String, String>>(
@@ -1101,6 +1214,17 @@ final class UpdateAgentRequest extends AgentJsonModel {
        ) {
     validate();
   }
+
+  /// Optional compaction object. Updates replace it; omitted updates keep it.
+  /// Null or an empty object enables background compaction without a client default.
+  final AgentCompactionConfig? compaction;
+
+  /// Sends compaction:null rather than omitting the setting.
+  final bool clearCompaction;
+
+  /// Experimental settings. Creation uses service defaults; updates merge by key.
+  /// This optional object is nonnullable on the wire; null in Dart omits it.
+  final AgentExperimentalOverridesConfig? experimental;
 
   /// Additional instructions appended to the agent's default base instructions. Omit to leave unchanged.
   final String? instructions;
@@ -1156,6 +1280,8 @@ final class UpdateAgentRequest extends AgentJsonModel {
   /// Parses [UpdateAgentRequest] with contextual, payload-free errors.
   factory UpdateAgentRequest.fromJson(Map<String, dynamic> json) {
     requireClosedAgentJson(json, const [
+      'compaction',
+      'experimental',
       'instructions',
       'metadata',
       'model',
@@ -1167,6 +1293,25 @@ final class UpdateAgentRequest extends AgentJsonModel {
       'tools',
     ], 'UpdateAgentRequest');
     return UpdateAgentRequest(
+      compaction: optionalAgentValue(
+        json,
+        'compaction',
+        'UpdateAgentRequest.compaction',
+        (value, context) =>
+            AgentCompactionConfig.fromJson(requireAgentObject(value, context)),
+        nullable: true,
+      ),
+      clearCompaction:
+          json.containsKey('compaction') && json['compaction'] == null,
+      experimental: optionalAgentValue(
+        json,
+        'experimental',
+        'UpdateAgentRequest.experimental',
+        (value, context) => AgentExperimentalOverridesConfig.fromJson(
+          requireAgentObject(value, context),
+        ),
+        nullable: false,
+      ),
       instructions: optionalAgentValue(
         json,
         'instructions',
@@ -1253,6 +1398,8 @@ final class UpdateAgentRequest extends AgentJsonModel {
   }
   @override
   void validate() {
+    compaction?.validate();
+    experimental?.validate();
     if (instructions != null) {
       validateAgentLength(
         instructions!,
@@ -1309,6 +1456,7 @@ final class UpdateAgentRequest extends AgentJsonModel {
         'flex',
         'priority',
         'fast',
+        'ultrafast',
       ], 'UpdateAgentRequest.serviceTier');
     }
     if (text != null) {
@@ -1332,6 +1480,11 @@ final class UpdateAgentRequest extends AgentJsonModel {
 
   @override
   Map<String, dynamic> toJson() => {
+    if (clearCompaction)
+      'compaction': null
+    else if (compaction != null)
+      'compaction': compaction!.toJson(),
+    if (experimental != null) 'experimental': experimental!.toJson(),
     if (clearInstructions)
       'instructions': null
     else
@@ -1360,6 +1513,9 @@ final class UpdateAgentRequest extends AgentJsonModel {
 
   /// Copies values; omitted arguments retain their values and null presence.
   UpdateAgentRequest copyWith({
+    Object? compaction = unsetCopyWithValue,
+    bool? clearCompaction,
+    Object? experimental = unsetCopyWithValue,
     Object? instructions = unsetCopyWithValue,
     bool? clearInstructions,
     Object? metadata = unsetCopyWithValue,
@@ -1378,6 +1534,21 @@ final class UpdateAgentRequest extends AgentJsonModel {
     Object? tools = unsetCopyWithValue,
     bool? clearTools,
   }) => UpdateAgentRequest(
+    compaction: copyAgentValue<AgentCompactionConfig>(
+      compaction,
+      this.compaction,
+      'UpdateAgentRequest.compaction',
+    ),
+    clearCompaction:
+        clearCompaction ??
+        (identical(compaction, unsetCopyWithValue)
+            ? this.clearCompaction
+            : compaction == null),
+    experimental: copyAgentValue<AgentExperimentalOverridesConfig>(
+      experimental,
+      this.experimental,
+      'UpdateAgentRequest.experimental',
+    ),
     instructions: copyAgentValue<String>(
       instructions,
       this.instructions,
