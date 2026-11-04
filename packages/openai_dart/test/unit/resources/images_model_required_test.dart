@@ -39,7 +39,10 @@ void main() {
               sends++;
               _expectHeaders(request, '/images/generations', streaming);
               expect(request, isA<http.Request>());
-              expect(request.headers['content-type'], 'application/json');
+              expect(
+                request.headers['content-type'],
+                'application/json; charset=utf-8',
+              );
               expect(jsonDecode(await body.bytesToString()), expected);
               return _response(streaming, 'image_generation');
             });
@@ -211,7 +214,10 @@ void main() {
             sends++;
             _expectHeaders(request, '/images/edits', streaming);
             expect(request, isA<http.Request>());
-            expect(request.headers['content-type'], 'application/json');
+            expect(
+              request.headers['content-type'],
+              'application/json; charset=utf-8',
+            );
             expect(jsonDecode(await body.bytesToString()), expected);
             return _response(streaming, 'image_edit');
           });
@@ -296,7 +302,10 @@ void _expectHeaders(http.BaseRequest request, String path, bool streaming) {
   expect(request.headers['openai-organization'], 'org-fixture');
   expect(request.headers['openai-project'], 'proj-fixture');
   expect(request.headers['x-request-id'], isNotEmpty);
-  expect(request.headers['accept'], streaming ? 'text/event-stream' : isNull);
+  expect(
+    request.headers['accept'],
+    streaming ? 'text/event-stream' : 'application/json',
+  );
 }
 
 void _expectMultipartField(String wire, String field, String value) => expect(
