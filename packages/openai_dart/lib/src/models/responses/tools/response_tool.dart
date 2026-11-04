@@ -1329,7 +1329,9 @@ class ImageGenerationMask {
   int get hashCode => Object.hash(imageUrl, fileId);
   @override
   String toString() =>
-      'ImageGenerationMask(imageUrl: $imageUrl, fileId: $fileId)';
+      'ImageGenerationMask('
+      'imageUrl: ${imageUrl == null ? null : '[${imageUrl!.length} chars]'}, '
+      'fileId: ${fileId == null ? null : '[${fileId!.length} chars]'})';
 }
 
 /// Model Context Protocol (MCP) tool.

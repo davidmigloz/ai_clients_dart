@@ -125,6 +125,62 @@ void main() {
       expect(base.toString(), contains('inputFidelity:'));
       expect(base.toString(), contains('action: generate'));
     });
+    for (final imageUrl in [
+      'data:image/png;base64,cHJpdmF0ZS1tYXNr',
+      'https://example.invalid/mask.png?api_key=private-mask-key&access_token=private-mask-token',
+    ]) {
+      test(
+        'mask and tool diagnostics redact ${imageUrl.startsWith('data:') ? 'inline data' : 'URL credentials'}',
+        () {
+          final mask = ImageGenerationMask(
+            imageUrl: imageUrl,
+            fileId: 'private-mask-file',
+          );
+          final tool = ResponseTool.imageGeneration(inputImageMask: mask);
+          final original = mask.toJson();
+
+          for (final diagnostic in [mask.toString(), tool.toString()]) {
+            expect(diagnostic, contains('imageUrl:'));
+            expect(diagnostic, contains('fileId:'));
+            for (final privateValue in [
+              imageUrl,
+              'cHJpdmF0ZS1tYXNr',
+              'private-mask-key',
+              'private-mask-token',
+              'private-mask-file',
+            ]) {
+              expect(diagnostic, isNot(contains(privateValue)));
+            }
+          }
+
+          expect(mask.toJson(), original);
+          expect(original, {
+            'image_url': imageUrl,
+            'file_id': 'private-mask-file',
+          });
+          expect(tool.toJson()['input_image_mask'], original);
+          expect(ImageGenerationMask.fromJson(original), mask);
+          expect(ResponseTool.fromJson(tool.toJson()), tool);
+        },
+      );
+    }
+    test('const mask diagnostics distinguish absent and empty references', () {
+      const absent = ImageGenerationMask();
+      const empty = ImageGenerationMask(imageUrl: '', fileId: '');
+      const tool = ImageGenerationTool(inputImageMask: absent);
+
+      expect(
+        absent.toString(),
+        'ImageGenerationMask(imageUrl: null, fileId: null)',
+      );
+      expect(
+        empty.toString(),
+        'ImageGenerationMask(imageUrl: [0 chars], fileId: [0 chars])',
+      );
+      expect(tool.toString(), contains(absent.toString()));
+      expect(absent.toJson(), isEmpty);
+      expect(empty.toJson(), {'image_url': '', 'file_id': ''});
+    });
     test(
       'mask optional fields follow Responses rather than Images edit constraints',
       () {
