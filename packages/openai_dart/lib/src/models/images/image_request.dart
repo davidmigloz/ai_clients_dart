@@ -6,6 +6,7 @@ import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../common/json_helpers.dart';
 import 'image_common.dart';
+import 'image_json_helpers.dart';
 
 /// A request to generate images from a text prompt.
 ///
@@ -34,7 +35,8 @@ class ImageGenerationRequest {
     this.responseFormat,
     this.size,
     this.style,
-    this.user,
+    @Deprecated('Use safetyIdentifier instead.') this.user,
+    this.safetyIdentifier,
     this.background,
     this.moderation,
     this.outputFormat,
@@ -65,6 +67,11 @@ class ImageGenerationRequest {
           ? ImageStyle.fromJson(json['style'] as String)
           : null,
       user: json['user'] as String?,
+      safetyIdentifier: readImageSafetyIdentifier(
+        json,
+        'ImageGenerationRequest',
+        validateLength: true,
+      ),
       background: json['background'] != null
           ? ImageBackground.fromJson(json['background'] as String)
           : null,
@@ -97,6 +104,8 @@ class ImageGenerationRequest {
   /// - `gpt-image-2` and its `2026-04-21` snapshot
   /// - `gpt-image-1.5`, `gpt-image-1`, `gpt-image-1-mini`
   /// - `dall-e-3`, `dall-e-2` (legacy identifiers; retired May 12, 2026)
+  ///
+  /// `gpt-image-1` shut down October 23, 2026. Select a supported model explicitly.
   final String model;
 
   /// The number of images to generate.
@@ -127,8 +136,13 @@ class ImageGenerationRequest {
   /// Only supported for DALL-E 3.
   final ImageStyle? style;
 
-  /// A unique identifier representing your end-user.
+  /// Legacy end-user identifier. A nonempty safetyIdentifier takes precedence.
+  @Deprecated('Use safetyIdentifier instead.')
   final String? user;
+
+  /// Stable privacy-preserving end-user identifier, at most 128 code points.
+  /// Omission, null or an empty string permits the legacy user fallback.
+  final String? safetyIdentifier;
 
   /// Transparency of the background.
   ///
@@ -162,22 +176,29 @@ class ImageGenerationRequest {
   final int? partialImages;
 
   /// Converts to JSON.
-  Map<String, dynamic> toJson() => {
-    'prompt': prompt,
-    'model': model,
-    if (n != null) 'n': n,
-    if (quality != null) 'quality': quality!.toJson(),
-    if (responseFormat != null) 'response_format': responseFormat!.toJson(),
-    if (size != null) 'size': size!.toJson(),
-    if (style != null) 'style': style!.toJson(),
-    if (user != null) 'user': user,
-    if (background != null) 'background': background!.toJson(),
-    if (moderation != null) 'moderation': moderation!.toJson(),
-    if (outputFormat != null) 'output_format': outputFormat!.toJson(),
-    if (outputCompression != null) 'output_compression': outputCompression,
-    if (stream != null) 'stream': stream,
-    if (partialImages != null) 'partial_images': partialImages,
-  };
+  Map<String, dynamic> toJson() {
+    validate();
+    return {
+      'prompt': prompt,
+      'model': model,
+      if (n != null) 'n': n,
+      if (quality != null) 'quality': quality!.toJson(),
+      if (responseFormat != null) 'response_format': responseFormat!.toJson(),
+      if (size != null) 'size': size!.toJson(),
+      if (style != null) 'style': style!.toJson(),
+      if (user != null) 'user': user,
+      if (safetyIdentifier != null) 'safety_identifier': safetyIdentifier,
+      if (background != null) 'background': background!.toJson(),
+      if (moderation != null) 'moderation': moderation!.toJson(),
+      if (outputFormat != null) 'output_format': outputFormat!.toJson(),
+      if (outputCompression != null) 'output_compression': outputCompression,
+      if (stream != null) 'stream': stream,
+      if (partialImages != null) 'partial_images': partialImages,
+    };
+  }
+
+  /// Validates new safety settings before authentication or dispatch.
+  void validate() => validateImageSafetyIdentifier(safetyIdentifier);
 
   /// Creates a copy with the given fields replaced.
   ///
@@ -192,6 +213,7 @@ class ImageGenerationRequest {
     Object? size = unsetCopyWithValue,
     Object? style = unsetCopyWithValue,
     Object? user = unsetCopyWithValue,
+    Object? safetyIdentifier = unsetCopyWithValue,
     Object? background = unsetCopyWithValue,
     Object? moderation = unsetCopyWithValue,
     Object? outputFormat = unsetCopyWithValue,
@@ -212,6 +234,11 @@ class ImageGenerationRequest {
       size: size == unsetCopyWithValue ? this.size : size as ImageSize?,
       style: style == unsetCopyWithValue ? this.style : style as ImageStyle?,
       user: user == unsetCopyWithValue ? this.user : user as String?,
+      safetyIdentifier: copyImageValue<String>(
+        safetyIdentifier,
+        this.safetyIdentifier,
+        'safetyIdentifier',
+      ),
       background: background == unsetCopyWithValue
           ? this.background
           : background as ImageBackground?,
@@ -244,6 +271,7 @@ class ImageGenerationRequest {
           size == other.size &&
           style == other.style &&
           user == other.user &&
+          safetyIdentifier == other.safetyIdentifier &&
           background == other.background &&
           moderation == other.moderation &&
           outputFormat == other.outputFormat &&
@@ -261,6 +289,7 @@ class ImageGenerationRequest {
     size,
     style,
     user,
+    safetyIdentifier,
     background,
     moderation,
     outputFormat,
@@ -273,7 +302,7 @@ class ImageGenerationRequest {
   String toString() =>
       'ImageGenerationRequest(prompt: ${prompt.length} chars, model: $model, '
       'n: $n, size: $size, quality: $quality, responseFormat: $responseFormat, '
-      'style: $style, user: ${user == null ? 'null' : '[REDACTED]'}, background: $background, '
+      'safetyIdentifier: ${imageIdentifierSummary(safetyIdentifier)}, style: $style, user: ${user == null ? 'null' : '[REDACTED]'}, background: $background, '
       'moderation: $moderation, outputFormat: $outputFormat, '
       'outputCompression: $outputCompression, stream: $stream, '
       'partialImages: $partialImages)';
@@ -299,17 +328,20 @@ class ImageGenerationRequest {
 @immutable
 class ImageEditRequest {
   /// Creates an [ImageEditRequest].
-  const ImageEditRequest({
-    required this.image,
+  ImageEditRequest({
+    required Uint8List image,
     required this.imageFilename,
     required this.prompt,
-    this.mask,
+    Uint8List? mask,
     this.maskFilename,
+    Uint8List? markup,
+    this.markupFilename,
     required this.model,
     this.n,
     this.size,
     this.responseFormat,
-    this.user,
+    @Deprecated('Use safetyIdentifier instead.') this.user,
+    this.safetyIdentifier,
     this.background,
     this.inputFidelity,
     this.quality,
@@ -318,7 +350,15 @@ class ImageEditRequest {
     this.moderation,
     this.stream,
     this.partialImages,
-  });
+  }) : image = Uint8List.fromList(image).asUnmodifiableView(),
+       mask = mask == null
+           ? null
+           : Uint8List.fromList(mask).asUnmodifiableView(),
+       markup = markup == null
+           ? null
+           : Uint8List.fromList(markup).asUnmodifiableView() {
+    validate();
+  }
 
   /// The image to edit.
   ///
@@ -342,6 +382,13 @@ class ImageEditRequest {
   /// The filename of the mask image.
   final String? maskFilename;
 
+  /// Transparent PNG overlay for the first image. Mutually exclusive with mask.
+  /// Dimensions must match after orientation; service checks transparency.
+  final Uint8List? markup;
+
+  /// Filename for markup; defaults to markup.png on upload.
+  final String? markupFilename;
+
   /// The model to use.
   ///
   /// Examples: `gpt-image-2.5-sunburst`, `gpt-image-2.5-flare`, their
@@ -360,8 +407,13 @@ class ImageEditRequest {
   /// Only supported for DALL-E 2.
   final ImageResponseFormat? responseFormat;
 
-  /// A unique identifier representing your end-user.
+  /// Legacy end-user identifier. A nonempty safetyIdentifier takes precedence.
+  @Deprecated('Use safetyIdentifier instead.')
   final String? user;
+
+  /// Stable privacy-preserving end-user identifier, at most 128 code points.
+  /// Omission, null or an empty string permits the legacy user fallback.
+  final String? safetyIdentifier;
 
   /// Transparency of the background. GPT image models only.
   final ImageBackground? background;
@@ -387,6 +439,21 @@ class ImageEditRequest {
   /// Number of partial images to emit while streaming. GPT image models only.
   final int? partialImages;
 
+  /// Validates mutually exclusive overlays and the safety identifier.
+  void validate() {
+    validateImageSafetyIdentifier(safetyIdentifier);
+    if (inputFidelity == ImageInputFidelity.unknown) {
+      throw const FormatException(
+        'ImageEditRequest.inputFidelity: unsupported request value',
+      );
+    }
+    if (mask != null && markup != null) {
+      throw const FormatException(
+        'ImageEditRequest: mask and markup are mutually exclusive',
+      );
+    }
+  }
+
   /// Creates a copy with the given fields replaced.
   ///
   /// Nullable fields can be explicitly set to `null` to clear them. The
@@ -398,11 +465,14 @@ class ImageEditRequest {
     String? prompt,
     Object? mask = unsetCopyWithValue,
     Object? maskFilename = unsetCopyWithValue,
+    Object? markup = unsetCopyWithValue,
+    Object? markupFilename = unsetCopyWithValue,
     String? model,
     Object? n = unsetCopyWithValue,
     Object? size = unsetCopyWithValue,
     Object? responseFormat = unsetCopyWithValue,
     Object? user = unsetCopyWithValue,
+    Object? safetyIdentifier = unsetCopyWithValue,
     Object? background = unsetCopyWithValue,
     Object? inputFidelity = unsetCopyWithValue,
     Object? quality = unsetCopyWithValue,
@@ -420,6 +490,16 @@ class ImageEditRequest {
       maskFilename: maskFilename == unsetCopyWithValue
           ? this.maskFilename
           : maskFilename as String?,
+      markup: copyImageValue<Uint8List>(
+        markup,
+        this.markup,
+        'ImageEditRequest.markup',
+      ),
+      markupFilename: copyImageValue<String>(
+        markupFilename,
+        this.markupFilename,
+        'ImageEditRequest.markupFilename',
+      ),
       model: model ?? this.model,
       n: n == unsetCopyWithValue ? this.n : n as int?,
       size: size == unsetCopyWithValue ? this.size : size as ImageSize?,
@@ -427,6 +507,11 @@ class ImageEditRequest {
           ? this.responseFormat
           : responseFormat as ImageResponseFormat?,
       user: user == unsetCopyWithValue ? this.user : user as String?,
+      safetyIdentifier: copyImageValue<String>(
+        safetyIdentifier,
+        this.safetyIdentifier,
+        'safetyIdentifier',
+      ),
       background: background == unsetCopyWithValue
           ? this.background
           : background as ImageBackground?,
@@ -461,12 +546,15 @@ class ImageEditRequest {
           imageFilename == other.imageFilename &&
           listsEqual(mask, other.mask) &&
           maskFilename == other.maskFilename &&
+          listsEqual(markup, other.markup) &&
+          markupFilename == other.markupFilename &&
           prompt == other.prompt &&
           model == other.model &&
           n == other.n &&
           size == other.size &&
           responseFormat == other.responseFormat &&
           user == other.user &&
+          safetyIdentifier == other.safetyIdentifier &&
           background == other.background &&
           inputFidelity == other.inputFidelity &&
           quality == other.quality &&
@@ -477,17 +565,20 @@ class ImageEditRequest {
           partialImages == other.partialImages;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     listHash(image),
     imageFilename,
     listHash(mask),
     maskFilename,
+    listHash(markup),
+    markupFilename,
     prompt,
     model,
     n,
     size,
     responseFormat,
     user,
+    safetyIdentifier,
     background,
     inputFidelity,
     quality,
@@ -496,15 +587,15 @@ class ImageEditRequest {
     moderation,
     stream,
     partialImages,
-  );
+  ]);
 
   @override
   String toString() =>
       'ImageEditRequest(image: ${image.length} bytes, imageFilename: ${imageFilename.length} chars, '
       'prompt: ${prompt.length} chars, mask: ${mask == null ? 'null' : '${mask!.length} bytes'}, '
       'maskFilename: ${maskFilename == null ? 'null' : '${maskFilename!.length} chars'}, '
-      'model: $model, n: $n, size: $size, responseFormat: $responseFormat, '
-      'user: ${user == null ? 'null' : '[REDACTED]'}, background: $background, '
+      'markup: ${markup == null ? 'null' : '${markup!.length} bytes'}, markupFilename: ${imageIdentifierSummary(markupFilename)}, model: $model, n: $n, size: $size, responseFormat: $responseFormat, '
+      'safetyIdentifier: ${imageIdentifierSummary(safetyIdentifier)}, user: ${user == null ? 'null' : '[REDACTED]'}, background: $background, '
       'inputFidelity: $inputFidelity, quality: $quality, outputFormat: $outputFormat, '
       'outputCompression: $outputCompression, moderation: $moderation, '
       'stream: $stream, partialImages: $partialImages)';

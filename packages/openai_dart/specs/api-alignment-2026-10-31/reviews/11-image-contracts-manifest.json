@@ -1,0 +1,214 @@
+{
+  "issue": 424,
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "promotion_owner": 427,
+  "types": {
+    "BetaImageGenOutputTokensDetails": {
+      "spec": "main",
+      "schema": "BetaImageGenOutputTokensDetails",
+      "kind": "object",
+      "dart_class": "ImagesUsageOutputTokensDetails",
+      "file": "lib/src/models/images/image_response.dart",
+      "note": "Reuses the identical GA output-token detail object; no duplicate class or accounting change."
+    },
+    "BetaImageGenTool": {
+      "spec": "main",
+      "schema": "BetaImageGenTool",
+      "kind": "sealed_variant",
+      "dart_class": "ImageGenerationTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "parent": "ResponseTool",
+      "note": "GA and beta share the existing image-generation tool configuration; model-scoped input fidelity documentation is current."
+    },
+    "ImageGenTool": {
+      "spec": "main",
+      "schema": "ImageGenTool",
+      "kind": "sealed_variant",
+      "dart_class": "ImageGenerationTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "parent": "ResponseTool",
+      "note": "GA and beta share the existing image-generation tool configuration; model-scoped input fidelity documentation is current."
+    },
+    "BetaImageGenToolCall": {
+      "spec": "main",
+      "schema": "BetaImageGenToolCall",
+      "kind": "sealed_variant",
+      "dart_class": "ImageGenerationCallOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "parent": "OutputItem",
+      "note": "Canonical required status and nullable result; complete GA/beta optional metadata and error details. Shared exact-string status preserves future values."
+    },
+    "ImageGenToolCall": {
+      "spec": "main",
+      "schema": "ImageGenToolCall",
+      "kind": "sealed_variant",
+      "dart_class": "ImageGenerationCallOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "parent": "OutputItem",
+      "note": "Canonical required status and nullable result; complete GA/beta optional metadata and error details. Shared exact-string status preserves future values."
+    },
+    "BetaImageGenToolCallError": {
+      "spec": "main",
+      "schema": "BetaImageGenToolCallError",
+      "kind": "object",
+      "dart_class": "ImageGenerationCallError",
+      "file": "lib/src/models/images/image_tool_error.dart"
+    },
+    "ImageGenToolCallError": {
+      "spec": "main",
+      "schema": "ImageGenToolCallError",
+      "kind": "object",
+      "dart_class": "ImageGenerationCallError",
+      "file": "lib/src/models/images/image_tool_error.dart"
+    },
+    "BetaImageGenToolCallModerationDetails": {
+      "spec": "main",
+      "schema": "BetaImageGenToolCallModerationDetails",
+      "kind": "object",
+      "dart_class": "ImageGenerationModerationDetails",
+      "file": "lib/src/models/images/image_tool_error.dart"
+    },
+    "ImageGenToolCallModerationDetails": {
+      "spec": "main",
+      "schema": "ImageGenToolCallModerationDetails",
+      "kind": "object",
+      "dart_class": "ImageGenerationModerationDetails",
+      "file": "lib/src/models/images/image_tool_error.dart"
+    },
+    "BetaInputFidelity": {
+      "spec": "main",
+      "schema": "BetaInputFidelity",
+      "kind": "enum",
+      "dart_class": "ImageInputFidelity",
+      "file": "lib/src/models/images/image_common.dart",
+      "note": "Identical high/low wire enum, reused with existing unknown fallback. Request writes reject fallback values."
+    },
+    "InputFidelity": {
+      "spec": "main",
+      "schema": "InputFidelity",
+      "kind": "enum",
+      "dart_class": "ImageInputFidelity",
+      "file": "lib/src/models/images/image_common.dart",
+      "note": "Identical high/low wire enum, reused with existing unknown fallback. Request writes reject fallback values."
+    },
+    "CreateImageEditRequest": {
+      "spec": "main",
+      "schema": "CreateImageEditRequest",
+      "kind": "object",
+      "dart_class": "ImageEditRequest",
+      "file": "lib/src/models/images/image_request.dart",
+      "note": "Multipart bytes are serialized by ImagesResource; owned immutable image/mask/markup buffers and PNG markup content type. No fabricated JSON byte field."
+    },
+    "CreateImageRequest": {
+      "spec": "main",
+      "schema": "CreateImageRequest",
+      "kind": "object",
+      "dart_class": "ImageGenerationRequest",
+      "file": "lib/src/models/images/image_request.dart"
+    },
+    "EditImageBodyJsonParam": {
+      "spec": "main",
+      "schema": "EditImageBodyJsonParam",
+      "kind": "object",
+      "dart_class": "ImageEditJsonRequest",
+      "file": "lib/src/models/images/image_edit_json_request.dart",
+      "note": "JSON references remain distinct from multipart. Optional nullable model and safety ID preserve service defaults; mask/markup are mutually exclusive."
+    },
+    "ImageEditCompletedEvent": {
+      "spec": "main",
+      "schema": "ImageEditCompletedEvent",
+      "kind": "sealed_variant",
+      "dart_class": "ImageEditCompletedEvent",
+      "file": "lib/src/models/images/image_stream_event.dart",
+      "parent": "ImageEditStreamEvent"
+    },
+    "ImageGenCompletedEvent": {
+      "spec": "main",
+      "schema": "ImageGenCompletedEvent",
+      "kind": "sealed_variant",
+      "dart_class": "ImageGenCompletedEvent",
+      "file": "lib/src/models/images/image_stream_event.dart",
+      "parent": "ImageGenStreamEvent"
+    },
+    "ImagesResponse": {
+      "spec": "main",
+      "schema": "ImagesResponse",
+      "kind": "object",
+      "dart_class": "ImageResponse",
+      "file": "lib/src/models/images/image_response.dart",
+      "note": "Nullable safety ID plus canonical optional data. hasData retains missing versus present empty list without changing the data getter type."
+    }
+  },
+  "contextual_bindings": [
+    {
+      "schema": "markup",
+      "file": "lib/src/models/images/image_request.dart",
+      "dart_class": "ImageEditRequest",
+      "property": "markup",
+      "representation": "Uint8List?",
+      "serializer": "lib/src/resources/images_resource.dart",
+      "note": "Real scalar type:string format:binary component; maps to optional multipart PNG part, not a standalone DTO. JSON markup uses the inline ImageReference context."
+    }
+  ],
+  "operations": [],
+  "source_receipts": [
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/resources/images.py",
+      "sha256": "211377871db5f2d21633f93122a131023174ea093828c7a957cd0ece49a03b76"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/image_generate_params.py",
+      "sha256": "6196d5bd543cbc62ed4f0e64a06b78c5291d4babfde07fd8a58105f4531d614c"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/image_edit_params.py",
+      "sha256": "a08fc3c5d22c14b3eb969fa91891e3d3dd7088f9e46749aa5bd59c4e5c558df3"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/images_response.py",
+      "sha256": "07b223269f452e7e06d7d037b3c4cb867f52d3f4f3a32d7cfe1160ceea0a2c1b"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/image_gen_completed_event.py",
+      "sha256": "422fc133a90e049156c0bc20fdbdfc9010e5ac5a861ae38f27f6ba988c0250ac"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/image_edit_completed_event.py",
+      "sha256": "8d288f7293dadacb3617c3dd90e3edfba15a04604910318ae4e4cab1f788ddb1"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/responses/response_output_item.py",
+      "sha256": "814e4128695ae3c61d81d67bcc66d8e6dab30227fe99ccb10b1ec2b86575bc3c"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/beta/beta_response_output_item.py",
+      "sha256": "2f2ba65faffd931ceb62b95346e8a0b42212060fd08c2dd4f150495b4d660bc2"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/resources/images.ts",
+      "sha256": "1d179793d833912eb104aaa6b39b9aec016ddd442ea2efde5cf5eba61b343fb2"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/resources/responses/responses.ts",
+      "sha256": "f84e394bf08d71403c054ccb4d41d278861f2d19db3ea426e7aec789f3eb5dbb"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/resources/beta/responses/responses.ts",
+      "sha256": "9b497c011b35ac9380f7c8fc2694f5a49fc71d115b0a40739b9e92e584bd0a92"
+    }
+  ],
+  "guide_receipts": [
+    {
+      "url": "https://developers.openai.com/api/docs/guides/image-generation",
+      "sha256": "83fd1d8b5257e48902b21b5f07237fcb6862dccd4b98b9e1bd68795b8374875a",
+      "note": "Frozen-cutoff workflow receipt; guide recheck does not add new API scope."
+    }
+  ],
+  "inventory_coverage": {
+    "assigned_schemas": 18,
+    "type_bindings": 17,
+    "scalar_context_bindings": 1,
+    "new_operations": 0,
+    "unassigned": []
+  }
+}

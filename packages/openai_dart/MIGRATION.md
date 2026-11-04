@@ -104,6 +104,57 @@ new/updated sessions may take time to appear in filtered results.
 
 See [the offline settings example](example/agent_settings_example.dart).
 
+## Upcoming release: Image safety identifiers and markup
+
+Image edit/request response collections now own immutable snapshots:
+`ImageEditRequest` copies image, mask and markup bytes; `ImageEditJsonRequest`
+and `ImageResponse` copy their lists. Remove `const` from these constructors and
+use `copyWith` to replace values instead of mutating caller-owned buffers:
+
+```dart
+// Before
+const request = ImageEditJsonRequest(
+  images: [ImageReference.file('file_original')], prompt: 'Edit the image',
+);
+
+// After
+final request = ImageEditJsonRequest(
+  images: const [ImageReference.file('file_original')], prompt: 'Edit the image',
+);
+final changed = request.copyWith(markup: const ImageReference.file('file_overlay'));
+```
+
+`ImageGenerationCallOutputItem.status` now uses image-specific
+`ImageGenerationCallStatus`, preserving `generating`, `failed` and future strings
+without changing unrelated item-status enums. Its required nullable `result`
+always has a wire key. Update direct construction and status comparisons:
+
+```dart
+// Before
+const call = ImageGenerationCallOutputItem(
+  id: 'call', status: ItemStatus.completed,
+);
+
+// After
+const call = ImageGenerationCallOutputItem(
+  id: 'call', status: ImageGenerationCallStatus.completed, result: null,
+);
+```
+
+Image responses accept omitted optional `data`; `hasData` preserves that absence
+while the existing `data` getter remains an empty list. Explicit wire null for
+`data` is invalid. Model/type failures retain typed errors with private diagnostics.
+
+Prefer image `safetyIdentifier` to deprecated `user`, using at most 128 Unicode
+code points. A nonempty safety identifier wins; omitted/null/empty still permits
+the service's legacy user fallback. Markup PNG bytes/references are mutually
+exclusive with mask and must match the first image after orientation, including
+transparent pixels. The service checks image contents and model support.
+
+GPT Image 1 shut down October 23, 2026. Select an explicitly supported replacement
+such as GPT Image 2.5; the client keeps string IDs open for compatible providers.
+See [the offline edit example](example/image_markup_example.dart).
+
 ## Upcoming release: Realtime response input and audio controls
 
 `InputAudioTranscriptionDeltaEvent.contentIndex` and `delta` are now nullable:

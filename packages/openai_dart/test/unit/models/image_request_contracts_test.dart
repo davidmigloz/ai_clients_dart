@@ -359,7 +359,7 @@ void main() {
       expect(cleared, isNot(cleared.copyWith(mask: Uint8List(0))));
       expect(full.copyWith(image: Uint8List(0)).image, isEmpty);
     });
-    test('constructor and copy retain caller-owned buffers', () {
+    test('constructor and copy own immutable input buffers', () {
       final image = Uint8List.fromList([1, 2]);
       final mask = Uint8List.fromList([3, 4]);
       final request = ImageEditRequest(
@@ -369,18 +369,20 @@ void main() {
         model: '',
         mask: mask,
       );
-      expect(request.image, same(image));
-      expect(request.mask, same(mask));
-      expect(request.copyWith().image, same(image));
-      expect(request.copyWith().mask, same(mask));
+      expect(request.image, [1, 2]);
+      expect(request.mask, [3, 4]);
+      expect(request.copyWith(), request);
       final replacement = Uint8List.fromList([5]);
       final copy = request.copyWith(image: replacement, mask: replacement);
-      expect(copy.image, same(replacement));
-      expect(copy.mask, same(replacement));
+      replacement[0] = 9;
       image[0] = 9;
       mask[0] = 8;
-      expect(request.image, [9, 2]);
-      expect(request.mask, [8, 4]);
+      expect(request.image, [1, 2]);
+      expect(request.mask, [3, 4]);
+      expect(copy.image, [5]);
+      expect(copy.mask, [5]);
+      expect(() => request.image[0] = 7, throwsUnsupportedError);
+      expect(() => request.mask![0] = 7, throwsUnsupportedError);
     });
     test('diagnostics count opaque input bytes/names/text and redact user', () {
       final diagnostic = full.toString();
@@ -405,8 +407,8 @@ void main() {
   test(
     'JSON editing and legacy variation keep optional model contracts (IMG-03)',
     () {
-      const jsonEdit = ImageEditJsonRequest(
-        images: [ImageReference.file('file-fixture')],
+      final jsonEdit = ImageEditJsonRequest(
+        images: const [ImageReference.file('file-fixture')],
         prompt: 'Hello',
       );
       expect(jsonEdit.model, isNull);

@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 /// Reads a string with a contextual error instead of coercing malformed JSON.
 String requireJsonString(Object? value, String field) {
   if (value is! String) throw FormatException('$field: expected a string');
@@ -66,3 +68,40 @@ Object? _freezeJsonValue(Object? value) => switch (value) {
   ),
   _ => value,
 };
+
+/// Owns finite, acyclic JSON while rejecting non-JSON caller objects privately.
+Map<String, dynamic> freezeFiniteJsonObject(
+  Map<String, dynamic> json,
+  String context,
+) {
+  void check(Object? value, Set<Object> ancestors) {
+    if (value == null || value is String || value is bool) return;
+    if (value is num && value.isFinite) return;
+    if (value is Map || value is List) {
+      if (!ancestors.add(value)) {
+        throw FormatException('$context: expected acyclic JSON');
+      }
+      try {
+        if (value is Map) {
+          for (final entry in value.entries) {
+            if (entry.key is! String) {
+              throw FormatException('$context: expected string object keys');
+            }
+            check(entry.value, ancestors);
+          }
+        } else if (value is List) {
+          for (final item in value) {
+            check(item, ancestors);
+          }
+        }
+      } finally {
+        ancestors.remove(value);
+      }
+      return;
+    }
+    throw FormatException('$context: expected finite JSON');
+  }
+
+  check(json, HashSet<Object>.identity());
+  return freezeJsonObject(json);
+}

@@ -29,6 +29,7 @@
 - [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/embeddings_example.dart) (~837 tokens): Text embeddings with dimension control.
 - [images_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/images_example.dart) (~1.2k tokens): GPT Image generation.
 - [image_model_selection_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/image_model_selection_example.dart) (~554 tokens): Local generation/multipart/JSON-edit model contracts without API calls.
+- [image_markup_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/image_markup_example.dart): Offline JSON and multipart PNG overlays, stable safety identifiers and completed edit events; no API charges.
 - [audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/audio_example.dart) (~1k tokens): Text-to-speech and transcription.
 - [speech_streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/speech_streaming_example.dart) (~1k tokens): Offline buffered, raw-byte and typed SSE speech, open/custom voice references, immutable events and terminal usage.
 - [existing_audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/existing_audio_example.dart) (~1.1k tokens): Offline modern transcription fields, English verbose/raw translation, open/custom Chat voices and AAC; five mock requests, no API cost.
@@ -83,6 +84,14 @@
 - [skills_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/skills_example.dart) (~346 tokens): Skills management.
 - [assistants_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/assistants_example.dart) (~1.3k tokens): Assistants API (deprecated).
 - [completions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/completions_example.dart) (~327 tokens): Legacy completions API.
+
+## Image safety identifiers and edit overlays
+
+ImageGenerationRequest, ImageEditRequest and ImageEditJsonRequest accept safetyIdentifier (optional nullable, at most 128 Unicode code points). A nonempty value takes precedence over deprecated user; omit/null/empty delegates the legacy fallback to the service without local substitution. ImageResponse and completed image generation/edit events expose the effective identifier without request-only length caps. Private model, HTTP, SSE and callback diagnostics redact image inputs and identifiers; JSON image bodies always encode UTF-8, including when providers supply conflicting charset headers.
+
+Multipart markup is transparent PNG bytes plus optional markupFilename; JSON markup is ImageReference.file/url, including a PNG data URL. It overlays the first input image, must match its dimensions after orientation, and cannot coexist with mask. The service validates transparency, image contents and model eligibility. ImageEditRequest snapshots image/mask/markup bytes; ImageEditJsonRequest and ImageResponse own their lists, so their constructors no longer support const. ImageResponse.hasData preserves absent optional data separately from an empty list.
+
+ImageGenerationCallOutputItem.status now uses ImageGenerationCallStatus with in_progress/generating/completed/failed and exact future strings. Required nullable result always emits its key. GA and beta calls share ImageGenerationCallError with required nullable code/param and optional nonnull ImageGenerationModerationDetails; stages and future public categories remain available, with finite immutable extras. Keep image token/tool accounting separate from top-level Responses tokens. GPT Image 1 shut down October 23, 2026; choose supported explicit models. inputFidelity supports high/low on gpt-image-1.5, low on gpt-image-1-mini; omit for gpt-image-2.
 
 ## Voice consent management
 

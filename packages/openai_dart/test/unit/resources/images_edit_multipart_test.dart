@@ -179,8 +179,8 @@ void main() {
 
       await expectLater(
         client.images.editJson(
-          const ImageEditJsonRequest(
-            images: [ImageReference.url('https://example.com/x.png')],
+          ImageEditJsonRequest(
+            images: const [ImageReference.url('https://example.com/x.png')],
             prompt: 'edit',
             stream: true,
           ),

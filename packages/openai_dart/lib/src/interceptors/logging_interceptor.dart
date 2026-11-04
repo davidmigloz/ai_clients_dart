@@ -63,7 +63,8 @@ class LoggingInterceptor implements Interceptor {
         isCustomVoiceRequest(request) ||
         isLiveRequest(request) ||
         savedAgentRequest ||
-        isAdminRequest(request);
+        isAdminRequest(request) ||
+        isImagesRequest(request);
     final diagnosticUrl = privateVoiceRequest
         ? '[REDACTED]'
         : request.url.toString();

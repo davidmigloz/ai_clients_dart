@@ -289,8 +289,8 @@ void main() {
       );
 
       await client.images.editJson(
-        const ImageEditJsonRequest(
-          images: [ImageReference.file('file_123')],
+        ImageEditJsonRequest(
+          images: const [ImageReference.file('file_123')],
           prompt: 'Add a hat',
         ),
       );

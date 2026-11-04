@@ -312,21 +312,24 @@ void main() {
       expect(parsed.data.first.revisedPrompt, isNull);
     });
 
-    test('fromJson throws FormatException when data is missing', () {
-      expect(
-        () => ImageResponse.fromJson(const {'created': 0}),
-        throwsA(isA<FormatException>()),
-      );
-    });
+    test(
+      'fromJson preserves omitted optional data without inventing a wire key',
+      () {
+        final response = ImageResponse.fromJson(const {'created': 0});
+        expect(response.data, isEmpty);
+        expect(response.hasData, isFalse);
+        expect(response.toJson(), {'created': 0});
+      },
+    );
 
     test('ImageResponse == compares data contents, not just length', () {
-      const a = ImageResponse(
+      final a = ImageResponse(
         created: 1,
-        data: [GeneratedImage(b64Json: 'AAAA')],
+        data: const [GeneratedImage(b64Json: 'AAAA')],
       );
-      const b = ImageResponse(
+      final b = ImageResponse(
         created: 1,
-        data: [GeneratedImage(b64Json: 'BBBB')],
+        data: const [GeneratedImage(b64Json: 'BBBB')],
       );
       expect(a, isNot(equals(b)));
       expect(a.hashCode, isNot(equals(b.hashCode)));
@@ -394,9 +397,9 @@ void main() {
 
   group('ImageEditJsonRequest', () {
     test('serializes JSON edit payload', () {
-      const request = ImageEditJsonRequest(
+      final request = ImageEditJsonRequest(
         model: 'gpt-image-1.5',
-        images: [ImageReference.url('https://example.com/source.png')],
+        images: const [ImageReference.url('https://example.com/source.png')],
         prompt: 'Add a watercolor effect',
         quality: ImageEditJsonQuality.high,
         size: ImageEditJsonSize.size1024x1024,

@@ -6,3 +6,4 @@ export 'image_edit_json_request.dart';
 export 'image_request.dart';
 export 'image_response.dart';
 export 'image_stream_event.dart';
+export 'image_tool_error.dart';

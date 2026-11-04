@@ -1131,6 +1131,8 @@ class ImageGenerationTool extends ResponseTool {
   final String? action;
 
   /// How closely supported image models should follow the input image.
+  /// High/low are supported on gpt-image-1.5, low on gpt-image-1-mini; omit
+  /// for gpt-image-2. The service validates model-specific support.
   final ImageInputFidelity? inputFidelity;
 
   /// The background color for generated images.

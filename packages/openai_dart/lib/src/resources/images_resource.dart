@@ -6,6 +6,8 @@ import 'package:http_parser/http_parser.dart';
 
 import '../errors/exceptions.dart';
 import '../models/images/images.dart';
+import '../utils/private_agent_inspection_http.dart';
+import '../utils/private_audio_http.dart';
 import 'base_resource.dart';
 import 'streaming_resource.dart';
 
@@ -83,6 +85,7 @@ class ImagesResource extends ResourceBase with StreamingResource {
   /// ```
   Future<ImageResponse> generate(ImageGenerationRequest request) async {
     ensureNotClosed?.call();
+    request.validate();
     if (request.stream ?? false) {
       throw ArgumentError(
         'generate() does not support stream: true. The server returns SSE '
@@ -91,13 +94,22 @@ class ImagesResource extends ResourceBase with StreamingResource {
       );
     }
     final url = requestBuilder.buildUrl(_generateEndpoint);
-    final headers = requestBuilder.buildHeaders();
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
-    final response = await interceptorChain.execute(httpRequest);
-    return ImageResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
+    final httpRequest = http.Request('POST', url);
+    httpRequest.headers.addAll(
+      privateAgentInspectionExternal(httpRequest, requestBuilder.buildHeaders),
+    );
+    httpRequest.headers['content-type'] = 'application/json; charset=utf-8';
+    httpRequest.headers['accept'] = 'application/json';
+    httpRequest.bodyBytes = utf8.encode(jsonEncode(request.toJson()));
+    final response = await sendPrivateAudioRequest(
+      httpRequest,
+      interceptorChain: interceptorChain,
+      context: 'Images',
+    );
+    return parsePrivateAudioResponse(
+      response,
+      ImageResponse.fromJson,
+      'Images',
     );
   }
 
@@ -143,21 +155,21 @@ class ImagesResource extends ResourceBase with StreamingResource {
       final sseEvent = json['_event'] as String?;
       final error = json['error'];
       if (sseEvent == 'error' || error != null) {
-        throwInlineStreamError(json, sseEvent, error);
+        throwInlineStreamError(json, sseEvent, error, redactDiagnostics: true);
       }
       try {
         return ImageGenStreamEvent.fromJson(json);
-      } on FormatException catch (e) {
+      } on FormatException {
         throw ParseException(
-          message: 'Failed to parse image generation stream event: $e',
-          responseBody: json.toString(),
-          cause: e,
+          message: 'Failed to parse image generation stream event.',
+          responseBody: jsonEncode(json),
+          cause: const FormatException('A known image event field is invalid.'),
         );
-      } on TypeError catch (e) {
+      } on TypeError {
         throw ParseException(
-          message: 'Failed to parse image generation stream event: $e',
-          responseBody: json.toString(),
-          cause: e,
+          message: 'Failed to parse image generation stream event.',
+          responseBody: jsonEncode(json),
+          cause: const FormatException('A known image event field is invalid.'),
         );
       }
     });
@@ -201,10 +213,23 @@ class ImagesResource extends ResourceBase with StreamingResource {
       );
     }
     final httpRequest = _createEditMultipartRequest(request);
-    httpRequest.headers.addAll(requestBuilder.buildMultipartHeaders());
-    final response = await interceptorChain.execute(httpRequest);
-    final json = jsonDecode(response.body) as Map<String, dynamic>;
-    return ImageResponse.fromJson(json);
+    httpRequest.headers.addAll(
+      privateAgentInspectionExternal(
+        httpRequest,
+        requestBuilder.buildMultipartHeaders,
+      ),
+    );
+    httpRequest.headers['accept'] = 'application/json';
+    final response = await sendPrivateAudioRequest(
+      httpRequest,
+      interceptorChain: interceptorChain,
+      context: 'Images',
+    );
+    return parsePrivateAudioResponse(
+      response,
+      ImageResponse.fromJson,
+      'Images',
+    );
   }
 
   /// Creates edited images using JSON payload references.
@@ -213,6 +238,7 @@ class ImagesResource extends ResourceBase with StreamingResource {
   /// editing workflows where images are referenced by URL or File ID.
   Future<ImageResponse> editJson(ImageEditJsonRequest request) async {
     ensureNotClosed?.call();
+    request.validate();
     if (request.stream ?? false) {
       throw ArgumentError(
         'editJson() does not support stream: true. Use editJsonStream() '
@@ -220,13 +246,22 @@ class ImagesResource extends ResourceBase with StreamingResource {
       );
     }
     final url = requestBuilder.buildUrl(_editEndpoint);
-    final headers = requestBuilder.buildHeaders();
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
-    final response = await interceptorChain.execute(httpRequest);
-    return ImageResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
+    final httpRequest = http.Request('POST', url);
+    httpRequest.headers.addAll(
+      privateAgentInspectionExternal(httpRequest, requestBuilder.buildHeaders),
+    );
+    httpRequest.headers['content-type'] = 'application/json; charset=utf-8';
+    httpRequest.headers['accept'] = 'application/json';
+    httpRequest.bodyBytes = utf8.encode(jsonEncode(request.toJson()));
+    final response = await sendPrivateAudioRequest(
+      httpRequest,
+      interceptorChain: interceptorChain,
+      context: 'Images',
+    );
+    return parsePrivateAudioResponse(
+      response,
+      ImageResponse.fromJson,
+      'Images',
     );
   }
 
@@ -299,21 +334,21 @@ class ImagesResource extends ResourceBase with StreamingResource {
     final sseEvent = json['_event'] as String?;
     final error = json['error'];
     if (sseEvent == 'error' || error != null) {
-      throwInlineStreamError(json, sseEvent, error);
+      throwInlineStreamError(json, sseEvent, error, redactDiagnostics: true);
     }
     try {
       return ImageEditStreamEvent.fromJson(json);
-    } on FormatException catch (e) {
+    } on FormatException {
       throw ParseException(
-        message: 'Failed to parse image edit stream event: $e',
-        responseBody: json.toString(),
-        cause: e,
+        message: 'Failed to parse image edit stream event.',
+        responseBody: jsonEncode(json),
+        cause: const FormatException('A known image event field is invalid.'),
       );
-    } on TypeError catch (e) {
+    } on TypeError {
       throw ParseException(
-        message: 'Failed to parse image edit stream event: $e',
-        responseBody: json.toString(),
-        cause: e,
+        message: 'Failed to parse image edit stream event.',
+        responseBody: jsonEncode(json),
+        cause: const FormatException('A known image event field is invalid.'),
       );
     }
   }
@@ -348,13 +383,27 @@ class ImagesResource extends ResourceBase with StreamingResource {
   Future<ImageResponse> createVariation(ImageVariationRequest request) async {
     ensureNotClosed?.call();
     final httpRequest = _createVariationMultipartRequest(request);
-    httpRequest.headers.addAll(requestBuilder.buildMultipartHeaders());
-    final response = await interceptorChain.execute(httpRequest);
-    final json = jsonDecode(response.body) as Map<String, dynamic>;
-    return ImageResponse.fromJson(json);
+    httpRequest.headers.addAll(
+      privateAgentInspectionExternal(
+        httpRequest,
+        requestBuilder.buildMultipartHeaders,
+      ),
+    );
+    httpRequest.headers['accept'] = 'application/json';
+    final response = await sendPrivateAudioRequest(
+      httpRequest,
+      interceptorChain: interceptorChain,
+      context: 'image variation',
+    );
+    return parsePrivateAudioResponse(
+      response,
+      ImageResponse.fromJson,
+      'image variation',
+    );
   }
 
   http.MultipartRequest _createEditMultipartRequest(ImageEditRequest request) {
+    request.validate();
     final url = requestBuilder.buildUrl(_editEndpoint);
     final httpRequest = http.MultipartRequest('POST', url);
 
@@ -384,6 +433,17 @@ class ImagesResource extends ResourceBase with StreamingResource {
       );
     }
 
+    if (request.markup != null) {
+      httpRequest.files.add(
+        http.MultipartFile.fromBytes(
+          'markup',
+          request.markup!,
+          filename: request.markupFilename ?? 'markup.png',
+          contentType: MediaType('image', 'png'),
+        ),
+      );
+    }
+
     // Add required fields
     httpRequest.fields['prompt'] = request.prompt;
     httpRequest.fields['model'] = request.model;
@@ -400,6 +460,9 @@ class ImagesResource extends ResourceBase with StreamingResource {
     }
     if (request.user != null) {
       httpRequest.fields['user'] = request.user!;
+    }
+    if (request.safetyIdentifier != null) {
+      httpRequest.fields['safety_identifier'] = request.safetyIdentifier!;
     }
     if (request.background != null) {
       httpRequest.fields['background'] = request.background!.toJson();

@@ -239,7 +239,9 @@ enum ImageBackground {
 
 /// Input fidelity for GPT image edits.
 ///
-/// Controls how closely the edit follows the input image.
+/// Controls how closely the edit follows the input image. Supports high/low on
+/// gpt-image-1.5; gpt-image-1-mini supports low only. Omit for gpt-image-2;
+/// model eligibility remains service-owned rather than locally inferred.
 enum ImageInputFidelity {
   /// Unknown fidelity — forward-compat fallback for unrecognized values.
   unknown._('unknown'),
