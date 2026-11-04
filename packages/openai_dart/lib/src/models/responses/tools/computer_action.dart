@@ -112,6 +112,8 @@ class DoubleClickAction extends ComputerAction {
   final int y;
 
   /// The keys being held while performing the action.
+  ///
+  /// This required nullable wire field is emitted as null when no keys are set.
   final List<String>? keys;
 
   /// Creates a [DoubleClickAction].
@@ -131,7 +133,7 @@ class DoubleClickAction extends ComputerAction {
     'type': 'double_click',
     'x': x,
     'y': y,
-    if (keys != null) 'keys': keys,
+    'keys': keys,
   };
 
   @override
