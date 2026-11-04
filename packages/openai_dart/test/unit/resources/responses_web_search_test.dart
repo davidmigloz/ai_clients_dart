@@ -1034,10 +1034,10 @@ Map<String, (Map<String, dynamic>, String)> _malformedCalls() {
       },
       '.action.url',
     ),
-    'missing find URL': (
+    'invalid find URL type': (
       {
         ...base,
-        'action': {'type': 'find_in_page', 'pattern': 'query'},
+        'action': {'type': 'find_in_page', 'url': 42, 'pattern': 'query'},
       },
       '.action.url',
     ),

@@ -313,7 +313,7 @@ void main() {
   group('Failed ResponseError canonical and legacy input', () {
     test('canonical shape omits invented legacy type and parameter', () {
       final value = ResponseError.fromJson(_failure());
-      expect(value.type, 'error');
+      expect(value.type, isNull);
       expect(value.hasType, isFalse);
       expect(value.hasCode, isTrue);
       expect(value.hasParam, isFalse);
@@ -371,7 +371,7 @@ void main() {
             'type': null,
             'message': 'legacy',
           }).type,
-          'error',
+          isNull,
         );
       },
     );

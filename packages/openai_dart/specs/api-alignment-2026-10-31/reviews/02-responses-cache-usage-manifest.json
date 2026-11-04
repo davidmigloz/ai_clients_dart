@@ -1,0 +1,232 @@
+{
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "issue": 415,
+  "promotion_owner": 427,
+  "types": {
+    "Response": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Response",
+      "file": "lib/src/models/responses/response.dart",
+      "schema": "Response",
+      "note": "Real allOf parent mapping. Access programs have complete public GA/beta fixtures; returned outer omission/null tolerance follows Python and existing Dart conventions. Other pre-existing parent gaps stay visible."
+    },
+    "PromptCacheBreakpointConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PromptCacheBreakpointConfig",
+      "file": "lib/src/models/common/prompt_cache_breakpoint.dart",
+      "schema": "PromptCacheBreakpointConfig",
+      "note": "Fixed explicit mode; optional dedicated 30m/12h breakpoint TTL, distinct from 30m-only top-level TTL enum; shared GA/beta Param/Config."
+    },
+    "WebSearchActionSearch": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchActionSearch",
+      "file": "lib/src/models/responses/items/web_search_action.dart",
+      "schema": "WebSearchActionSearch",
+      "parent": "WebSearchAction"
+    },
+    "WebSearchActionOpenPage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchActionOpenPage",
+      "file": "lib/src/models/responses/items/web_search_action.dart",
+      "schema": "WebSearchActionOpenPage",
+      "parent": "WebSearchAction"
+    },
+    "WebSearchActionFind": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchActionFind",
+      "file": "lib/src/models/responses/items/web_search_action.dart",
+      "schema": "WebSearchActionFind",
+      "parent": "WebSearchAction"
+    },
+    "BetaWebSearchActionSearch": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchActionSearch",
+      "file": "lib/src/models/responses/items/web_search_action.dart",
+      "schema": "BetaWebSearchActionSearch",
+      "parent": "WebSearchAction"
+    },
+    "BetaWebSearchActionOpenPage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchActionOpenPage",
+      "file": "lib/src/models/responses/items/web_search_action.dart",
+      "schema": "BetaWebSearchActionOpenPage",
+      "parent": "WebSearchAction"
+    },
+    "BetaWebSearchActionFind": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchActionFind",
+      "file": "lib/src/models/responses/items/web_search_action.dart",
+      "schema": "BetaWebSearchActionFind",
+      "parent": "WebSearchAction"
+    },
+    "WebSearchAction": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "WebSearchAction",
+      "file": "lib/src/models/responses/items/web_search_action.dart",
+      "schema": null,
+      "note": "Responses call action union is inline with three real GA/beta branches mapped above."
+    },
+    "WebSearchActionSource": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "WebSearchActionSource",
+      "file": "lib/src/models/responses/items/web_search_action.dart",
+      "schema": null,
+      "note": "Real source object is inline in WebSearchActionSearch.sources; fixed URL discriminator and required URL are fixture-verified."
+    },
+    "UnknownWebSearchAction": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownWebSearchAction",
+      "file": "lib/src/models/responses/items/web_search_action.dart",
+      "schema": null,
+      "parent": "WebSearchAction",
+      "note": "Future action fallback snapshots recursively immutable raw JSON; no named schema."
+    },
+    "BetaResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Response",
+      "file": "lib/src/models/responses/response.dart",
+      "schema": "BetaResponse",
+      "note": "Real allOf parent mapping. Access programs have complete public GA/beta fixtures; returned outer omission/null tolerance follows Python and existing Dart conventions. Other pre-existing parent gaps stay visible."
+    },
+    "ResponseError": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseError",
+      "file": "lib/src/models/responses/response_error.dart",
+      "schema": "ResponseError",
+      "note": "Required code/message with canonical optional nullable type/param, immutable parsed overflow and passive misalignment. Legacy omitted/nullable code tolerance retained; actual original type stays unknown when absent/null."
+    },
+    "BetaResponseError": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseError",
+      "file": "lib/src/models/responses/response_error.dart",
+      "schema": "BetaResponseError",
+      "note": "Required code/message with canonical optional nullable type/param, immutable parsed overflow and passive misalignment. Legacy omitted/nullable code tolerance retained; actual original type stays unknown when absent/null."
+    },
+    "ResponseToolUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseToolUsage",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "ResponseToolUsage",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "BetaResponseToolUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseToolUsage",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "BetaResponseToolUsage",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "WebSearchUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WebSearchUsage",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "WebSearchUsage",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "BetaWebSearchUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WebSearchUsage",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "BetaWebSearchUsage",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "ImageGenToolUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ImageGenToolUsage",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "ImageGenToolUsage",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "BetaImageGenToolUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ImageGenToolUsage",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "BetaImageGenToolUsage",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "ImageGenInputUsageDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ImageGenInputUsageDetails",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "ImageGenInputUsageDetails",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "BetaImageGenInputUsageDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ImageGenInputUsageDetails",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "BetaImageGenInputUsageDetails",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "ImageGenOutputTokensDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ImageGenOutputTokensDetails",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "ImageGenOutputTokensDetails",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "BetaImageGenOutputTokensDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ImageGenOutputTokensDetails",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "BetaImageGenOutputTokensDetails",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "CachedUsageDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CachedUsageDetails",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "CachedUsageDetails",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "BetaCachedUsageDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CachedUsageDetails",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "BetaCachedUsageDetails",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "PromptCacheBreakpointTtl": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "PromptCacheBreakpointTtl",
+      "file": "lib/src/models/common/prompt_cache_breakpoint.dart",
+      "schema": null,
+      "note": "Inline PromptCacheBreakpointConfig/Param ttl enum and Beta twins, 30m/12h. Do not widen PromptCacheTTLEnum or Decisions."
+    },
+    "Error-2": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VideoError",
+      "file": "lib/src/models/videos/video.dart",
+      "schema": "Error-2",
+      "note": "VideoResource.error closure; retain legacy optional message/code compatibility, exact nullable type/param, headers and review metadata."
+    }
+  }
+}

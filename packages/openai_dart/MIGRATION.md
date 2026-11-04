@@ -6,6 +6,46 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming release: Responses cache and error corrections
+
+`ResponseError.type` is now `String?`: unavailable provider error types remain
+null instead of becoming `'error'`. `copyWith(type: null)` preserves an explicit
+nullable key; also set `hasType: false` to omit it. Code, message, parameter,
+misalignment details and future metadata remain available.
+
+```dart
+// Before
+final String type = response.error!.type;
+
+// After
+final String? type = response.error!.type;
+final label = type ?? 'Type not recorded';
+```
+
+`WebSearchActionFind.url` is now `String?` and optional in construction. Handle a
+missing page URL before navigation or display. `copyWith(url: null)` clears it.
+The URL and pattern remain separate fields; the pattern is still required.
+
+```dart
+// Before
+final page = Uri.parse(action.url);
+
+// After (action is WebSearchActionFind)
+final page = action.url == null ? null : Uri.parse(action.url!);
+```
+
+Cache breakpoint `fromJson` now validates `mode: 'explicit'` instead of silently
+accepting invalid/missing modes. Breakpoint lifetimes use the separate
+`PromptCacheBreakpointTtl` enum (`30m`/`12h`); top-level `PromptCacheTtl` remains
+unchanged. New hosted-tool counts live in `Response.toolUsage`, separately from
+base-model `usage`. An omitted tool-usage object or cache count stays unknown.
+`VideoError` also retains nullable type/param, recorded retry headers and review
+details from the pinned `Error-2` schema. No automatic continuation is performed.
+
+See the [offline example](example/responses_cache_usage_example.dart).
+
+---
+
 ## Upcoming release: Decisions GA
 
 Existing string question constructors (including const predicates), user messages,

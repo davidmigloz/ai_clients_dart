@@ -228,14 +228,14 @@ class WebSearchActionFind extends WebSearchAction {
   @override
   String get type => 'find_in_page';
 
-  /// The page URL.
-  final String url;
+  /// The page URL, when available. Omitted/null URLs both read as null.
+  final String? url;
 
   /// The pattern or text searched for in the page.
   final String pattern;
 
   /// Creates a page-search action.
-  const WebSearchActionFind({required this.url, required this.pattern});
+  const WebSearchActionFind({this.url, required this.pattern});
 
   /// Creates a [WebSearchActionFind] from JSON.
   factory WebSearchActionFind.fromJson(
@@ -244,7 +244,7 @@ class WebSearchActionFind extends WebSearchAction {
   }) {
     requireJsonType(json, 'find_in_page', context);
     return WebSearchActionFind(
-      url: requireJsonString(json['url'], '$context.url'),
+      url: optionalJsonString(json, 'url', context, nullable: true),
       pattern: requireJsonString(json['pattern'], '$context.pattern'),
     );
   }
@@ -252,16 +252,18 @@ class WebSearchActionFind extends WebSearchAction {
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
-    'url': url,
+    if (url != null) 'url': url,
     'pattern': pattern,
   };
 
   /// Copies every field.
-  WebSearchActionFind copyWith({String? url, String? pattern}) =>
-      WebSearchActionFind(
-        url: url ?? this.url,
-        pattern: pattern ?? this.pattern,
-      );
+  WebSearchActionFind copyWith({
+    Object? url = unsetCopyWithValue,
+    String? pattern,
+  }) => WebSearchActionFind(
+    url: identical(url, unsetCopyWithValue) ? this.url : url as String?,
+    pattern: pattern ?? this.pattern,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -276,7 +278,7 @@ class WebSearchActionFind extends WebSearchAction {
 
   @override
   String toString() =>
-      'WebSearchActionFind(type: $type, url: ${url.length} chars, pattern: ${pattern.length} chars)';
+      'WebSearchActionFind(type: $type, url: ${url == null ? null : "${url!.length} chars"}, pattern: ${pattern.length} chars)';
 }
 
 /// A future action preserved without interpreting its JSON fields.

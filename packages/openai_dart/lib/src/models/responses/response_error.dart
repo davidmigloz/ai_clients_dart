@@ -11,9 +11,9 @@ export 'misalignment_details.dart';
 /// Error details for a failed Responses API response.
 ///
 /// The canonical shape requires `code` and `message`, and optionally supplies
-/// [misalignment]. It does not declare `type`, `param`, or response headers.
-/// For compatibility, parsing and const construction retain the older optional
-/// `type`/`param` and omitted or nullable `code` behavior. Unknown code strings
+/// [misalignment] and nullable `type`/`param`. Explicit null stays null.
+/// For compatibility, parsing and const construction retain omitted or nullable
+/// `code` behavior. Unknown code strings
 /// also survive as receive-only tolerance for future provider classifications;
 /// these legacy shapes are not claims of exact canonical admission.
 ///
@@ -22,10 +22,10 @@ export 'misalignment_details.dart';
 /// including presence and future metadata. Diagnostics redact sensitive content.
 @immutable
 class ResponseError {
-  /// Legacy error type, defaulting to `'error'` when omitted or null on input.
+  /// The original error type, or null when unavailable.
   ///
-  /// Serialized only when [hasType] is true. Canonical responses omit this key.
-  final String type;
+  /// Serialized only when [hasType] is true, including explicit null.
+  final String? type;
 
   /// Error code. Legacy input may omit it or return explicit null.
   final String? code;
@@ -33,16 +33,16 @@ class ResponseError {
   /// Human-readable error text, which can contain sensitive user data.
   final String message;
 
-  /// Legacy nullable parameter associated with the error.
+  /// Nullable parameter associated with the error.
   final String? param;
 
-  /// Whether the legacy `type` key is emitted.
+  /// Whether the nullable `type` key is emitted.
   final bool hasType;
 
   /// Whether `code` is present, including explicit legacy null.
   final bool hasCode;
 
-  /// Whether legacy `param` is present, including explicit null.
+  /// Whether `param` is present, including explicit null.
   final bool hasParam;
 
   /// Optional passive review/block metadata shared with HTTP and WebSocket errors.
@@ -57,7 +57,7 @@ class ResponseError {
   /// Presence flags can explicitly distinguish omission from nullable legacy
   /// values. Collection ownership remains with the caller for const compatibility.
   const ResponseError({
-    String? type,
+    this.type,
     this.code,
     required this.message,
     this.param,
@@ -66,8 +66,7 @@ class ResponseError {
     bool? hasParam,
     this.misalignment,
     this.rawJson = const {},
-  }) : type = type ?? 'error',
-       hasType = hasType ?? type != null,
+  }) : hasType = hasType ?? type != null,
        hasCode = (hasCode ?? false) || code != null,
        hasParam = (hasParam ?? false) || param != null;
 
@@ -143,12 +142,12 @@ class ResponseError {
     },
   );
 
-  /// Copies all fields. Explicit null emits nullable legacy code/param; clear
+  /// Copies all fields. Explicit null emits nullable type/code/param; clear
   /// their presence flag too to restore omission. `misalignment: null` omits
   /// that nonnullable optional object. Fresh children replace their metadata;
   /// an explicit [rawJson] override keeps its caller-supplied future fields.
   ResponseError copyWith({
-    String? type,
+    Object? type = unsetCopyWithValue,
     Object? code = unsetCopyWithValue,
     String? message,
     Object? param = unsetCopyWithValue,
@@ -174,13 +173,14 @@ class ResponseError {
             {if (details != null) 'misalignment': details.toJson()},
           );
     return ResponseError(
-      type: type ?? this.type,
+      type: identical(type, unsetCopyWithValue) ? this.type : type as String?,
       code: identical(code, unsetCopyWithValue) ? this.code : code as String?,
       message: message ?? this.message,
       param: identical(param, unsetCopyWithValue)
           ? this.param
           : param as String?,
-      hasType: hasType ?? (type != null || this.hasType),
+      hasType:
+          hasType ?? (!identical(type, unsetCopyWithValue) || this.hasType),
       hasCode:
           hasCode ?? (!identical(code, unsetCopyWithValue) || this.hasCode),
       hasParam:

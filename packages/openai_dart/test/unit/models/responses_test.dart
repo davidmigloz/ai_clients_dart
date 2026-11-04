@@ -4546,11 +4546,11 @@ void main() {
       expect(error.param, 'model');
     });
 
-    test('fromJson defaults type to error when missing', () {
+    test('fromJson keeps type unknown when missing', () {
       final error = ResponseError.fromJson(const {
         'message': 'Something went wrong',
       });
-      expect(error.type, 'error');
+      expect(error.type, isNull);
       expect(error.code, isNull);
       expect(error.param, isNull);
     });
