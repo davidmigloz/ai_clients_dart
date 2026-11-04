@@ -68,6 +68,14 @@ class TestResource extends ResourceBase with StreamingResource {
 }
 
 const deadline = Duration(seconds: 2);
+const endpoints = {
+  'chat': '/api/chat',
+  'generate': '/api/generate',
+  'create': '/api/create',
+  'pull': '/api/pull',
+  'push': '/api/push',
+};
+
 Stream<dynamic> startStream(
   OllamaClient client,
   String endpoint, {
@@ -92,10 +100,11 @@ Stream<dynamic> startStream(
     request: const PullRequest(model: 'test'),
     abortTrigger: abortTrigger,
   ),
-  _ => client.models.pushStream(
+  'push' => client.models.pushStream(
     request: const PushRequest(model: 'test'),
     abortTrigger: abortTrigger,
   ),
+  _ => throw ArgumentError.value(endpoint, 'endpoint', 'Unknown streaming API'),
 };
 
 void main() {
@@ -110,13 +119,7 @@ void main() {
     await transport.dispose();
   });
 
-  for (final endpoint in [
-    'chat',
-    'dynamic',
-    'tuned',
-    'interaction',
-    'resume',
-  ]) {
+  for (final endpoint in endpoints.keys) {
     test(
       '$endpoint aborts before headers without closing a borrowed client',
       () async {
@@ -128,6 +131,7 @@ void main() {
           abortTrigger: abort.future,
         ).toList();
         final pending = await sent;
+        expect(pending.request.url.path, endpoints[endpoint]);
         final nativeAbort = (pending.request as http.Abortable).abortTrigger!;
         final aborted = expectLater(result, throwsA(isA<AbortedException>()));
         abort.complete();
@@ -137,19 +141,38 @@ void main() {
       },
     );
 
-    test(
-      '$endpoint idle listener cancellation reaches the transport',
-      () async {
-        final sent = transport.sent.stream.first;
-        final subscription = startStream(client, endpoint).listen((_) {});
-        final pending = await sent;
-        await subscription.cancel().timeout(deadline);
-        await (pending.request as http.Abortable).abortTrigger!.timeout(
-          deadline,
-        );
-        expect(transport.closeCount, 0);
-      },
-    );
+    for (final headersReceived in [false, true]) {
+      test(
+        '$endpoint idle listener cancellation reaches the transport (headers=$headersReceived)',
+        () async {
+          final sent = transport.sent.stream.first;
+          final subscription = startStream(client, endpoint).listen((_) {});
+          final pending = await sent;
+          expect(pending.request.url.path, endpoints[endpoint]);
+          final started = Completer<void>();
+          final canceled = Completer<void>();
+          final body = StreamController<List<int>>(
+            onListen: started.complete,
+            onCancel: canceled.complete,
+          );
+          if (headersReceived) {
+            pending.response.complete(http.StreamedResponse(body.stream, 200));
+            await started.future.timeout(deadline);
+            body.add(utf8.encode('{"incomplete":'));
+          }
+          await subscription.cancel().timeout(deadline);
+          await (pending.request as http.Abortable).abortTrigger!.timeout(
+            deadline,
+          );
+          if (!headersReceived) {
+            pending.response.complete(http.StreamedResponse(body.stream, 200));
+          }
+          await canceled.future.timeout(deadline);
+          await body.close();
+          expect(transport.closeCount, 0);
+        },
+      );
+    }
   }
 
   for (final status in [200, 400]) {
@@ -322,7 +345,7 @@ void main() {
     },
   );
 
-  for (final endpoint in ['chat', 'generate', 'create', 'pull', 'push']) {
+  for (final endpoint in endpoints.keys) {
     test('$endpoint normal completion does not signal native abort', () async {
       final sent = transport.sent.stream.first;
       final result = startStream(client, endpoint).toList();
