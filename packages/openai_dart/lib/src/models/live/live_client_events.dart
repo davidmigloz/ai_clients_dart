@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:meta/meta.dart';
 
 import 'live_config.dart';
@@ -13,7 +16,8 @@ import 'live_json_helpers.dart';
 /// [LiveThinkingAppendParam], [LiveCommentaryAppendParam],
 /// [LiveResponseItemCreateParam], [LiveResponseCreateParam], and
 /// [LiveSessionCloseParam], plus [LiveDecisionCreateParam],
-/// [LiveDecisionItemCreateParam], and [LiveDecisionItemDeleteParam].
+/// [LiveDecisionItemCreateParam], [LiveDecisionItemDeleteParam], and
+/// [LiveOutputAudioFixturePlayParam].
 /// [LiveForkSessionStartEvent] is the distinct stored
 /// fork startup codec and is accepted only by [LiveClientEvent.fromForkJson].
 /// These models never send commands or replay audio themselves.
@@ -42,6 +46,8 @@ sealed class LiveClientEvent extends LiveJsonModel {
       'session.input_audio.append' => LiveInputAudioAppendEvent.fromJson(json),
       'session.input_audio.mute' => LiveInputAudioMuteParam.fromJson(json),
       'session.input_audio.unmute' => LiveInputAudioUnmuteParam.fromJson(json),
+      'session.output_audio.fixture.play' =>
+        LiveOutputAudioFixturePlayParam.fromJson(json),
       'session.instructions.append' => LiveInstructionsAppendParam.fromJson(
         json,
       ),
@@ -87,7 +93,8 @@ sealed class LiveClientEvent extends LiveJsonModel {
 /// [LiveResponseItemCreateParam], [LiveResponseCreateParam], and
 /// [LiveSessionCloseParam], [LiveDecisionCreateParam],
 /// [LiveDecisionItemCreateParam], and [LiveDecisionItemDeleteParam].
-/// Primary/fork startup and audio append are excluded.
+/// Also admits [LiveOutputAudioFixturePlayParam] and the SIP-only
+/// [LiveTransportDTMFSendParam]. Primary/fork startup and audio append are excluded.
 @immutable
 sealed class LiveSidebandClientEvent extends LiveClientEvent {
   /// Creates an optional command correlation value.
@@ -103,6 +110,8 @@ sealed class LiveSidebandClientEvent extends LiveClientEvent {
       'session.update' => LiveSessionUpdateParam.fromJson(json),
       'session.input_audio.mute' => LiveInputAudioMuteParam.fromJson(json),
       'session.input_audio.unmute' => LiveInputAudioUnmuteParam.fromJson(json),
+      'session.output_audio.fixture.play' =>
+        LiveOutputAudioFixturePlayParam.fromJson(json),
       'session.instructions.append' => LiveInstructionsAppendParam.fromJson(
         json,
       ),
@@ -113,6 +122,7 @@ sealed class LiveSidebandClientEvent extends LiveClientEvent {
       'decision.create' => LiveDecisionCreateParam.fromJson(json),
       'decision.item.create' => LiveDecisionItemCreateParam.fromJson(json),
       'decision.item.delete' => LiveDecisionItemDeleteParam.fromJson(json),
+      'transport.dtmf.send' => LiveTransportDTMFSendParam.fromJson(json),
       'session.close' => LiveSessionCloseParam.fromJson(json),
       _ => throw const FormatException(
         'LiveSidebandClientEvent.type: unsupported command',
@@ -401,7 +411,9 @@ final class LiveSessionUpdateParam extends LiveSidebandClientEvent {
       'rawJson: [REDACTED])';
 }
 
-/// Send audio to a Live session over its primary WebSocket. WebRTC and SIP sessions send audio over their media transport.
+/// Send audio to a Live session over its primary WebSocket. WebRTC and SIP sessions
+/// send audio over their media transport. Input arriving during fixture playback
+/// is dropped by the server and is not replayed. Appends have no acknowledgment.
 @immutable
 final class LiveInputAudioAppendEvent extends LiveClientEvent {
   /// Creates the canonical `session.input_audio.append` command.
@@ -571,7 +583,8 @@ final class LiveInputAudioMuteParam extends LiveSidebandClientEvent {
       'rawJson: [REDACTED])';
 }
 
-/// Resume audio input to a Live model after muting it. The server acknowledges with `session.input_audio.unmuted`.
+/// Resume independently muted input, acknowledged with session.input_audio.unmuted.
+/// An active audio fixture still pauses inference until playback finishes.
 @immutable
 final class LiveInputAudioUnmuteParam extends LiveSidebandClientEvent {
   /// Creates the canonical `session.input_audio.unmute` command.
@@ -647,7 +660,8 @@ final class LiveInputAudioUnmuteParam extends LiveSidebandClientEvent {
       'rawJson: [REDACTED])';
 }
 
-/// Append instructions to the Live conversation while it is running, optionally associating them with an existing client delegation.
+/// Append instructions to the Live conversation while it is running, optionally associating them with an existing delegation.
+/// The server rejects this command while an audio fixture is active.
 @immutable
 final class LiveInstructionsAppendParam extends LiveSidebandClientEvent {
   /// Creates the canonical `session.instructions.append` command.
@@ -764,7 +778,8 @@ final class LiveInstructionsAppendParam extends LiveSidebandClientEvent {
       'rawJson: [REDACTED])';
 }
 
-/// Provide silent reasoning or progress context to the Live model, optionally for an existing client delegation.
+/// Provide silent reasoning or progress context to the Live model, optionally for an existing delegation.
+/// The server rejects this command while an audio fixture is active.
 @immutable
 final class LiveThinkingAppendParam extends LiveSidebandClientEvent {
   /// Creates the canonical `session.thinking.append` command.
@@ -877,7 +892,8 @@ final class LiveThinkingAppendParam extends LiveSidebandClientEvent {
       'rawJson: [REDACTED])';
 }
 
-/// Provide context the Live model can communicate to the user, optionally for an existing client delegation.
+/// Provide context the Live model can communicate to the user, optionally for an existing delegation.
+/// The server rejects this command while an audio fixture is active.
 @immutable
 final class LiveCommentaryAppendParam extends LiveSidebandClientEvent {
   /// Creates the canonical `session.commentary.append` command.
@@ -1510,4 +1526,272 @@ String? _requiredNullableClientString(
   }
   final value = json[key];
   return value == null ? null : requireLiveString(value, '$context.$key');
+}
+
+/// Plays one complete fixture on a primary/fork WebSocket or server sideband.
+///
+/// Supply raw mono PCM16 little-endian audio at 24 kHz, independently of the
+/// session's negotiated audio format. Structural validation checks base64,
+/// sample alignment, size and recognized WAV headers; headerless bytes cannot
+/// prove their channel count, sample rate or byte order.
+///
+/// The server validates the entire fixture before interrupting speech and
+/// dropping input during playback. Only one fixture may be active. The playing
+/// event acknowledges acceptance; played reports server mixer drain, without
+/// proving listener-side completion. Explicit input mute state remains separate.
+@immutable
+final class LiveOutputAudioFixturePlayParam extends LiveSidebandClientEvent {
+  /// Captures a validated fixture and optional nullable correlation identifier.
+  LiveOutputAudioFixturePlayParam({
+    required this.audio,
+    super.eventId,
+    super.hasEventId,
+    Map<String, dynamic> rawJson = const {},
+  }) : rawJson = snapshotLiveJson(
+         rawJson,
+         'LiveOutputAudioFixturePlayParam',
+         knownKeys: _knownKeys,
+       ) {
+    validate();
+  }
+
+  /// Maximum raw duration: 30 seconds at 24,000 mono 16-bit samples per second.
+  static const maxAudioBytes = 1440000;
+
+  /// Canonical maximum base64 string length.
+  static const maxEncodedAudioLength = 1920000;
+
+  static const _knownKeys = {'type', 'audio', 'event_id'};
+
+  /// Original validated standard base64 text, preserved exactly.
+  final String audio;
+
+  /// Immutable finite future metadata; typed values control known wire keys.
+  final Map<String, dynamic> rawJson;
+
+  @override
+  String get type => 'session.output_audio.fixture.play';
+
+  /// Encodes a caller-supplied view of raw mono PCM16LE audio at 24 kHz.
+  ///
+  /// This snapshots only the view's bytes and does not remove headers, transcode,
+  /// resample or convert channels. Invalid raw bytes fail before encoding.
+  factory LiveOutputAudioFixturePlayParam.fromBytes(
+    Uint8List audio, {
+    String? eventId,
+    bool hasEventId = false,
+    Map<String, dynamic> rawJson = const {},
+  }) {
+    _validateLiveFixtureBytes(audio);
+    return LiveOutputAudioFixturePlayParam(
+      audio: base64Encode(audio),
+      eventId: eventId,
+      hasEventId: hasEventId,
+      rawJson: rawJson,
+    );
+  }
+
+  /// Parses required fixture fields and exact correlation presence.
+  factory LiveOutputAudioFixturePlayParam.fromJson(Map<String, dynamic> json) {
+    const context = 'LiveOutputAudioFixturePlayParam';
+    requireLiveType(json, 'session.output_audio.fixture.play', context);
+    return LiveOutputAudioFixturePlayParam(
+      audio: requireLiveString(json['audio'], '$context.audio'),
+      eventId: optionalLiveValue(
+        json,
+        'event_id',
+        context,
+        requireLiveString,
+        nullable: true,
+      ),
+      hasEventId: json.containsKey('event_id'),
+      rawJson: json,
+    );
+  }
+
+  @override
+  void validate() {
+    super.validate();
+    _validateLiveFixtureAudio(audio);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    'type': type,
+    'audio': audio,
+    if (hasEventId) 'event_id': eventId,
+  });
+
+  /// Copies fields; null writes event_id null and clearEventId omits the key.
+  LiveOutputAudioFixturePlayParam copyWith({
+    String? audio,
+    Object? eventId = liveUnset,
+    bool clearEventId = false,
+    Map<String, dynamic>? rawJson,
+  }) => LiveOutputAudioFixturePlayParam(
+    audio: audio ?? this.audio,
+    eventId: clearEventId
+        ? null
+        : copyLiveValue<String>(
+            eventId,
+            this.eventId,
+            'LiveOutputAudioFixturePlayParam.event_id',
+          ),
+    hasEventId: !clearEventId && (!identical(eventId, liveUnset) || hasEventId),
+    rawJson: rawJson ?? this.rawJson,
+  );
+
+  @override
+  String toString() =>
+      'LiveOutputAudioFixturePlayParam(type: $type, audio: [REDACTED], '
+      'eventId: ${livePresence(eventId)}, hasEventId: $hasEventId, '
+      'rawJson: [REDACTED])';
+}
+
+/// Sends one SIP keypress through an already-started server sideband connection.
+///
+/// SIP eligibility is enforced by the service. A successful send produces a
+/// transport.dtmf.sent notification, with client_event_id when provided. Failure
+/// uses error.client_event_id. This command neither sends multiple keys nor
+/// claims delivery before the service notification.
+@immutable
+final class LiveTransportDTMFSendParam extends LiveSidebandClientEvent {
+  /// Creates one uppercase canonical DTMF key without normalizing caller input.
+  LiveTransportDTMFSendParam({
+    required this.event,
+    super.eventId,
+    super.hasEventId,
+    Map<String, dynamic> rawJson = const {},
+  }) : rawJson = snapshotLiveJson(
+         rawJson,
+         'LiveTransportDTMFSendParam',
+         knownKeys: _knownKeys,
+       ) {
+    validate();
+  }
+
+  static const _knownKeys = {'type', 'event', 'event_id'};
+
+  /// One of 0–9, A–D, * or #, without spaces or multi-key sequences.
+  final String event;
+
+  /// Immutable finite future metadata; typed values control known wire keys.
+  final Map<String, dynamic> rawJson;
+
+  @override
+  String get type => 'transport.dtmf.send';
+
+  /// Parses a sideband command without confusing sent/received notifications.
+  factory LiveTransportDTMFSendParam.fromJson(Map<String, dynamic> json) {
+    const context = 'LiveTransportDTMFSendParam';
+    requireLiveType(json, 'transport.dtmf.send', context);
+    return LiveTransportDTMFSendParam(
+      event: requireLiveString(json['event'], '$context.event'),
+      eventId: optionalLiveValue(
+        json,
+        'event_id',
+        context,
+        requireLiveString,
+        nullable: true,
+      ),
+      hasEventId: json.containsKey('event_id'),
+      rawJson: json,
+    );
+  }
+
+  @override
+  void validate() {
+    super.validate();
+    if (event.length != 1 || !'0123456789ABCD*#'.contains(event)) {
+      throw const FormatException(
+        'LiveTransportDTMFSendParam.event: expected one canonical DTMF key',
+      );
+    }
+  }
+
+  @override
+  Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    'type': type,
+    'event': event,
+    if (hasEventId) 'event_id': eventId,
+  });
+
+  /// Copies fields; null writes event_id null and clearEventId omits it.
+  LiveTransportDTMFSendParam copyWith({
+    String? event,
+    Object? eventId = liveUnset,
+    bool clearEventId = false,
+    Map<String, dynamic>? rawJson,
+  }) => LiveTransportDTMFSendParam(
+    event: event ?? this.event,
+    eventId: clearEventId
+        ? null
+        : copyLiveValue<String>(
+            eventId,
+            this.eventId,
+            'LiveTransportDTMFSendParam.event_id',
+          ),
+    hasEventId: !clearEventId && (!identical(eventId, liveUnset) || hasEventId),
+    rawJson: rawJson ?? this.rawJson,
+  );
+
+  @override
+  String toString() =>
+      'LiveTransportDTMFSendParam(type: $type, event: [REDACTED], '
+      'eventId: ${livePresence(eventId)}, hasEventId: $hasEventId, '
+      'rawJson: [REDACTED])';
+}
+
+void _validateLiveFixtureAudio(String audio) {
+  const context = 'LiveOutputAudioFixturePlayParam.audio';
+  if (audio.isEmpty ||
+      audio.length > LiveOutputAudioFixturePlayParam.maxEncodedAudioLength) {
+    throw const FormatException('$context: expected a bounded base64 fixture');
+  }
+  var padding = 0;
+  for (final unit in audio.codeUnits) {
+    if (unit == 0x3d) {
+      padding++;
+      if (padding <= 2) continue;
+    } else if (padding == 0 &&
+        ((unit >= 0x41 && unit <= 0x5a) ||
+            (unit >= 0x61 && unit <= 0x7a) ||
+            (unit >= 0x30 && unit <= 0x39) ||
+            unit == 0x2b ||
+            unit == 0x2f)) {
+      continue;
+    }
+    throw const FormatException('$context: expected standard base64 audio');
+  }
+  final Uint8List bytes;
+  try {
+    bytes = base64Decode(audio);
+  } on FormatException {
+    // Platform decoder diagnostics may include the original audio source.
+    throw const FormatException('$context: expected valid base64 audio');
+  }
+  _validateLiveFixtureBytes(bytes);
+}
+
+void _validateLiveFixtureBytes(Uint8List bytes) {
+  const context = 'LiveOutputAudioFixturePlayParam.audio';
+  if (bytes.isEmpty ||
+      bytes.length.isOdd ||
+      bytes.length > LiveOutputAudioFixturePlayParam.maxAudioBytes) {
+    throw const FormatException(
+      '$context: expected nonempty PCM16 samples lasting at most 30 seconds',
+    );
+  }
+  if (bytes.length >= 12 &&
+      const {0x52494646, 0x52494658, 0x52463634, 0x42573634}.contains(
+        (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3],
+      ) &&
+      bytes[8] == 0x57 &&
+      bytes[9] == 0x41 &&
+      bytes[10] == 0x56 &&
+      bytes[11] == 0x45) {
+    throw const FormatException(
+      '$context: raw PCM16 audio must omit WAV headers',
+    );
+  }
 }
