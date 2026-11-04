@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 import 'package:test/test.dart';
 
@@ -80,6 +82,33 @@ Map<String, dynamic> _inputJsonDelta(String j) => {
 // ---------------------------------------------------------------------------
 
 void main() {
+  final helpers =
+      <String, Stream<Object?> Function(Stream<MessageStreamEvent>)>{
+        'textDeltas': (source) => source.textDeltas(),
+        'thinkingDeltas': (source) => source.thinkingDeltas(),
+        'inputJsonDeltas': (source) => source.inputJsonDeltas(),
+        'accumulate': (source) => source.accumulate(),
+      };
+  for (final helper in helpers.entries) {
+    test('${helper.key} terminates and cancels its source on error', () async {
+      final canceled = Completer<void>();
+      final source = StreamController<MessageStreamEvent>(
+        onCancel: canceled.complete,
+      );
+      final errors = <Object>[];
+      final done = Completer<void>();
+      helper
+          .value(source.stream)
+          .listen((_) {}, onError: errors.add, onDone: done.complete);
+      final failure = StateError('source failed');
+      source.addError(failure);
+      await done.future.timeout(const Duration(seconds: 2));
+      await canceled.future.timeout(const Duration(seconds: 2));
+      expect(errors, [same(failure)]);
+      await source.close();
+    });
+  }
+
   group('MessageStreamExtension', () {
     test('collectText returns concatenated text', () async {
       final stream = _streamFrom([

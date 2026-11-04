@@ -19,29 +19,36 @@ extension MessageStreamExtension on Stream<MessageStreamEvent> {
   }
 
   /// Yields individual text delta strings as they arrive.
-  Stream<String> textDeltas() => where(
-    (event) => event is ContentBlockDeltaEvent && event.delta is TextDelta,
-  ).map((event) => ((event as ContentBlockDeltaEvent).delta as TextDelta).text);
+  Stream<String> textDeltas() => transform(
+    _deltaStrings(
+      (event) => switch (event) {
+        ContentBlockDeltaEvent(delta: TextDelta(:final text)) => text,
+        _ => null,
+      },
+    ),
+  );
 
   /// Yields individual thinking delta strings as they arrive.
-  Stream<String> thinkingDeltas() =>
-      where(
-        (event) =>
-            event is ContentBlockDeltaEvent && event.delta is ThinkingDelta,
-      ).map(
-        (event) =>
-            ((event as ContentBlockDeltaEvent).delta as ThinkingDelta).thinking,
-      );
+  Stream<String> thinkingDeltas() => transform(
+    _deltaStrings(
+      (event) => switch (event) {
+        ContentBlockDeltaEvent(delta: ThinkingDelta(:final thinking)) =>
+          thinking,
+        _ => null,
+      },
+    ),
+  );
 
   /// Yields individual input JSON delta strings as they arrive (for tool use).
-  Stream<String> inputJsonDeltas() =>
-      where(
-        (event) =>
-            event is ContentBlockDeltaEvent && event.delta is InputJsonDelta,
-      ).map(
-        (event) => ((event as ContentBlockDeltaEvent).delta as InputJsonDelta)
-            .partialJson,
-      );
+  Stream<String> inputJsonDeltas() => transform(
+    _deltaStrings(
+      (event) => switch (event) {
+        ContentBlockDeltaEvent(delta: InputJsonDelta(:final partialJson)) =>
+          partialJson,
+        _ => null,
+      },
+    ),
+  );
 
   /// Accumulates events, yielding the accumulator after each event.
   ///
@@ -68,6 +75,20 @@ extension MessageStreamExtension on Stream<MessageStreamEvent> {
     return result;
   }
 }
+
+StreamTransformer<MessageStreamEvent, String> _deltaStrings(
+  String? Function(MessageStreamEvent) select,
+) => StreamTransformer<MessageStreamEvent, String>.fromHandlers(
+  handleData: (event, sink) {
+    final delta = select(event);
+    if (delta != null) sink.add(delta);
+  },
+  handleError: (error, stackTrace, sink) {
+    sink
+      ..addError(error, stackTrace)
+      ..close();
+  },
+);
 
 class _AccumulatorSink implements EventSink<MessageStreamEvent> {
   final EventSink<MessageStreamAccumulator> _output;
