@@ -68,12 +68,16 @@ mixin StreamingResource on ResourceBase {
   AnthropicException _createStreamException(
     int statusCode,
     String body,
-    String correlationId,
+    ResponseMetadata responseMetadata,
   ) {
     final (message, details) = _parseErrorBody(body);
 
     if (statusCode == 401) {
-      return AuthenticationException(message: message);
+      return AuthenticationException(
+        message: message,
+        details: details,
+        responseMetadata: responseMetadata,
+      );
     }
 
     if (statusCode == 429) {
@@ -81,6 +85,8 @@ mixin StreamingResource on ResourceBase {
         statusCode: statusCode,
         message: message,
         details: details,
+        responseMetadata: responseMetadata,
+        retryAfter: _retryAfter(responseMetadata.headers),
       );
     }
 
@@ -88,7 +94,25 @@ mixin StreamingResource on ResourceBase {
       statusCode: statusCode,
       message: message,
       details: details,
+      responseMetadata: responseMetadata,
     );
+  }
+
+  DateTime? _retryAfter(Map<String, String> headers) {
+    final value = headers['retry-after']?.trim();
+    if (value == null) return null;
+    if (!RegExp(r'^-?\d+$').hasMatch(value)) {
+      return DateTime.tryParse(value);
+    }
+    final seconds = int.tryParse(value);
+    if (seconds == null || seconds < 0) return null;
+    final duration = Duration(seconds: seconds);
+    if (duration.inSeconds != seconds) return null;
+    try {
+      return DateTime.now().add(duration);
+    } on ArgumentError {
+      return null;
+    }
   }
 
   /// Parses error message and details from response body.
@@ -192,7 +216,9 @@ mixin StreamingResource on ResourceBase {
         await _applyAuthentication(request);
         if (stopped) return;
         correlationId = request.headers['X-Request-ID'] ?? correlationId;
+        final stopwatch = Stopwatch()..start();
         final response = await httpClient.send(request);
+        stopwatch.stop();
         if (stopped) {
           await response.stream.listen(null).cancel();
           return;
@@ -213,7 +239,19 @@ mixin StreamingResource on ResourceBase {
                         _createStreamException(
                           response.statusCode,
                           responseBody.toString(),
-                          correlationId,
+                          ResponseMetadata(
+                            statusCode: response.statusCode,
+                            headers: Map.unmodifiable({
+                              for (final entry in response.headers.entries)
+                                if (const {
+                                  'request-id',
+                                  'retry-after',
+                                }.contains(entry.key.toLowerCase()))
+                                  entry.key.toLowerCase(): entry.value,
+                            }),
+                            bodyExcerpt: '',
+                            latency: stopwatch.elapsed,
+                          ),
                         ),
                   );
                 },

@@ -34,10 +34,10 @@ class ResponseMetadata {
   /// HTTP status code.
   final int statusCode;
 
-  /// Response headers.
+  /// Response headers. Streaming errors retain only request-id and retry-after.
   final Map<String, String> headers;
 
-  /// Excerpt of response body (first 200 chars, redacted).
+  /// Excerpt of response body. Streaming errors omit this to protect secrets.
   final String bodyExcerpt;
 
   /// Request latency.
@@ -99,6 +99,16 @@ class ApiException extends AnthropicException {
 
   @override
   final Exception? cause;
+
+  /// The server-provided request ID, distinct from the client correlation ID.
+  String? get requestId {
+    for (final entry
+        in responseMetadata?.headers.entries ??
+            const <MapEntry<String, String>>[]) {
+      if (entry.key.toLowerCase() == 'request-id') return entry.value;
+    }
+    return null;
+  }
 
   /// Creates an [ApiException].
   const ApiException({
