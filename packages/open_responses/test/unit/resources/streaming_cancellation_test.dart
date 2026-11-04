@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:open_responses/open_responses.dart';
+import 'package:open_responses/src/utils/sse_parser.dart';
 import 'package:test/test.dart';
 
 const _deadline = Duration(seconds: 1);
@@ -372,4 +373,90 @@ void main() {
       }
     }
   }
+  for (final status in [200, 500]) {
+    for (final collect in [false, true]) {
+      test(
+        '$status body failure preserves primary error when cleanup fails (collect=$collect)',
+        () async {
+          final listened = Completer<void>();
+          final cleanupStarted = Completer<void>();
+          final primary = StateError('body failed');
+          final body = StreamController<List<int>>(
+            onListen: listened.complete,
+            onCancel: () {
+              cleanupStarted.complete();
+              return Future<void>.error(StateError('cleanup failed'));
+            },
+          );
+          final abort = Completer<void>();
+          final stream = client.responses.createStream(
+            _request,
+            abortTrigger: abort.future,
+          );
+          final errors = <Object>[];
+          final done = Completer<void>();
+          StreamSubscription<StreamingEvent>? subscription;
+          Future<void>? collected;
+          if (collect) {
+            collected = expectLater(stream.toList(), throwsA(same(primary)));
+          } else {
+            subscription = stream.listen(
+              (_) {},
+              onError: (Object error) {
+                errors.add(error);
+                abort
+                    .complete(); // A late abort must not add a second terminal error.
+              },
+              onDone: done.complete,
+            );
+          }
+          await transport.waitForRequests(1);
+          transport.responses.single.complete(
+            http.StreamedResponse(body.stream, status),
+          );
+          await listened.future;
+          body.addError(primary);
+          if (collect) {
+            await collected!.timeout(_deadline);
+          } else {
+            await done.future.timeout(_deadline);
+            expect(errors, [same(primary)]);
+          }
+          await cleanupStarted.future.timeout(_deadline);
+          await _tick(); // Surface any uncaught automatic-cancellation Future errors.
+          await subscription?.cancel();
+          await body.close();
+        },
+      );
+    }
+  }
+
+  test(
+    'SSE parser preserves source error when byte subscription cleanup fails',
+    () async {
+      final listened = Completer<void>();
+      final cleanupStarted = Completer<void>();
+      final body = StreamController<List<int>>(
+        onListen: listened.complete,
+        onCancel: () {
+          cleanupStarted.complete();
+          return Future<void>.error(StateError('parser cleanup failed'));
+        },
+      );
+      final primary = StateError('source failed');
+      final errors = <Object>[];
+      final done = Completer<void>();
+      final subscription = SseParser()
+          .parse(body.stream)
+          .listen((_) {}, onError: errors.add, onDone: done.complete);
+      await listened.future;
+      body.addError(primary);
+      await done.future.timeout(_deadline);
+      await cleanupStarted.future.timeout(_deadline);
+      expect(errors, [same(primary)]);
+      await _tick();
+      await subscription.cancel();
+      await body.close();
+    },
+  );
 }

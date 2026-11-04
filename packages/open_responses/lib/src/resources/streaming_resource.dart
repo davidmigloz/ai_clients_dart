@@ -95,7 +95,6 @@ mixin StreamingResource on ResourceBase {
                     body.toString(),
                   ),
                 ),
-                cancelOnError: true,
               );
         } else {
           subscription = SseParser()
@@ -111,7 +110,6 @@ mixin StreamingResource on ResourceBase {
                 },
                 onError: finish,
                 onDone: finish,
-                cancelOnError: true,
               );
         }
         if (finished) {

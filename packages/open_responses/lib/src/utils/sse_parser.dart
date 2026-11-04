@@ -23,16 +23,11 @@ class SseParser {
         subscription = bytes
             .transform(utf8.decoder)
             .transform(const LineSplitter())
-            .listen(
-              sink.add,
-              onError: sink.addError,
-              onDone: sink.close,
-              cancelOnError: true,
-            );
+            .listen(sink.add, onError: sink.addError, onDone: sink.close);
       },
       onPause: () => subscription?.pause(),
       onResume: () => subscription?.resume(),
-      onCancel: () => subscription?.cancel(),
+      onCancel: () => subscription?.cancel().ignore(),
     );
     return controller.stream;
   }
