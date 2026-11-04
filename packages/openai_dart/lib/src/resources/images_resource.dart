@@ -6,7 +6,6 @@ import 'package:http_parser/http_parser.dart';
 
 import '../errors/exceptions.dart';
 import '../models/images/images.dart';
-import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
 import 'streaming_resource.dart';
 
@@ -271,39 +270,29 @@ class ImagesResource extends ResourceBase with StreamingResource {
   Stream<ImageEditStreamEvent> _editStreamImpl(
     ImageEditRequest request, {
     Future<void>? abortTrigger,
-  }) async* {
+  }) {
     final multipart = _createEditMultipartRequest(
       request.copyWith(stream: true),
     );
-
-    // Route through sendStream so abortTrigger closes the underlying client
-    // and terminates the in-flight connection, matching the JSON streaming
-    // paths above. sendStream adds auth/org/project + Accept via
-    // buildStreamingHeaders and drops the JSON content-type for multipart,
-    // so there's no need to pre-apply buildMultipartHeaders here.
-    final response = await sendStream(
+    return streamSseEventsForRequest(
       request: multipart,
       abortTrigger: abortTrigger,
+    ).transform(
+      StreamTransformer<
+        Map<String, dynamic>,
+        ImageEditStreamEvent
+      >.fromHandlers(
+        handleData: (json, sink) {
+          try {
+            sink.add(_mapEditEvent(json));
+          } catch (error, stackTrace) {
+            sink
+              ..addError(error, stackTrace)
+              ..close();
+          }
+        },
+      ),
     );
-    final requestId =
-        response.headers['x-request-id'] ??
-        response.request?.headers['X-Request-ID'] ??
-        'unknown';
-
-    if (response.statusCode >= 400) {
-      final body = await response.stream.bytesToString();
-      throw parseStreamError(
-        response.statusCode,
-        body,
-        requestId,
-        headers: response.headers,
-      );
-    }
-
-    const parser = SseParser();
-    await for (final json in parser.parse(response.stream)) {
-      yield _mapEditEvent(json);
-    }
   }
 
   ImageEditStreamEvent _mapEditEvent(Map<String, dynamic> json) {

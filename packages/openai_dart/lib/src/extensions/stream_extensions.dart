@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../models/common/finish_reason.dart';
 import '../models/streaming/streaming.dart';
 
@@ -52,12 +54,11 @@ extension ChatStreamExtension on Stream<ChatStreamEvent> {
   ///   print('Total content so far: ${accumulator.content}');
   /// }
   /// ```
-  Stream<ChatStreamAccumulator> accumulate() async* {
-    final accumulator = ChatStreamAccumulator();
-    await for (final event in this) {
-      accumulator.add(event);
-      yield accumulator;
-    }
+  Stream<ChatStreamAccumulator> accumulate() {
+    return Stream<ChatStreamAccumulator>.eventTransformed(
+      this,
+      _ChatAccumulatorSink.new,
+    );
   }
 
   /// Maps each event to its text delta content.
@@ -77,17 +78,20 @@ extension ChatStreamExtension on Stream<ChatStreamEvent> {
   ///   stdout.write(text);
   /// }
   /// ```
-  Stream<String> textDeltas() async* {
-    await for (final event in this) {
-      final choices = event.choices;
-      if (choices == null) continue;
-      for (final choice in choices) {
-        if (choice.delta.content case final content?) {
-          yield content;
+  Stream<String> textDeltas() => transform(
+    StreamTransformer<ChatStreamEvent, String>.fromHandlers(
+      handleData: (event, sink) {
+        for (final choice in event.choices ?? const <ChatStreamChoice>[]) {
+          if (choice.delta.content case final content?) sink.add(content);
         }
-      }
-    }
-  }
+      },
+      handleError: (error, stackTrace, sink) {
+        sink
+          ..addError(error, stackTrace)
+          ..close();
+      },
+    ),
+  );
 
   /// Returns the last non-null finish reason from the stream.
   ///
@@ -132,4 +136,31 @@ extension ListPageSizeHeuristicsExtension<T> on List<T> {
     }
     return length >= pageSize;
   }
+}
+
+class _ChatAccumulatorSink implements EventSink<ChatStreamEvent> {
+  _ChatAccumulatorSink(this._sink);
+
+  final EventSink<ChatStreamAccumulator> _sink;
+  final _accumulator = ChatStreamAccumulator();
+
+  @override
+  void add(ChatStreamEvent event) {
+    try {
+      _accumulator.add(event);
+      _sink.add(_accumulator);
+    } catch (error, stackTrace) {
+      addError(error, stackTrace);
+    }
+  }
+
+  @override
+  void addError(Object error, [StackTrace? stackTrace]) {
+    _sink
+      ..addError(error, stackTrace)
+      ..close();
+  }
+
+  @override
+  void close() => _sink.close();
 }

@@ -129,7 +129,7 @@ void main() {
     });
   }
   test(
-    'Responses SSE abort closes dedicated client but does not release h2 stream',
+    'Responses SSE abort terminates locally despite h2 shutdown ignoring reset',
     () async {
       final shared = candidate();
       final dedicated = candidate();
@@ -142,6 +142,7 @@ void main() {
       final first = Completer<void>();
       final done = Completer<void>();
       final events = <ResponseStreamEvent>[];
+      final errors = <Object>[];
       final subscription = api.responses
           .createStream(fixtureRequest(), abortTrigger: abort.future)
           .listen(
@@ -150,22 +151,19 @@ void main() {
               if (!first.isCompleted) first.complete();
             },
             onDone: done.complete,
-            onError: done.completeError,
+            onError: errors.add,
           );
       await first.future;
       abort.complete();
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      expect(done.isCompleted, isFalse);
+      await done.future.timeout(const Duration(seconds: 2));
+      expect(errors, [isA<AbortedException>()]);
+      await dedicated.closed.timeout(const Duration(seconds: 2));
       expect(
         requestRecords(await peer.command('stats')).single['reset'],
         isFalse,
       );
       await peer.command('release');
-      await done.future;
-      expect(
-        events,
-        hasLength(2),
-      ); // Data still delivered after requested abortion.
+      expect(events, hasLength(1));
       await subscription.cancel();
       await dedicated.closed.timeout(const Duration(seconds: 2));
       expect(
@@ -333,7 +331,7 @@ void main() {
   );
 
   test(
-    'Responses SSE abort before headers leaves request active until peer release',
+    'Responses SSE abort before headers closes locally when transport ignores abort',
     () async {
       final transport = candidate();
       final dedicated = candidate();
@@ -345,6 +343,7 @@ void main() {
       final abort = Completer<void>();
       final done = Completer<void>();
       var events = 0;
+      final errors = <Object>[];
       final subscription = api.responses
           .createStream(fixtureRequest(), abortTrigger: abort.future)
           .listen(
@@ -352,22 +351,21 @@ void main() {
               events++;
             },
             onDone: done.complete,
-            onError: done.completeError,
+            onError: errors.add,
           );
       await _records(peer, (records) => records.isNotEmpty);
       abort.complete();
-      await Future<void>.delayed(const Duration(milliseconds: 80));
+      await done.future.timeout(const Duration(seconds: 2));
       expect(events, 0);
-      expect(done.isCompleted, isFalse);
+      expect(errors, [isA<AbortedException>()]);
       expect(
         requestRecords(await peer.command('stats')).single['reset'],
         isFalse,
       );
       await peer.command('release');
-      await done.future;
-      expect(events, 1);
+      expect(events, 0);
       await subscription.cancel();
-      await dedicated.closed;
+      await dedicated.closed.timeout(const Duration(seconds: 2));
       api.close();
     },
   );

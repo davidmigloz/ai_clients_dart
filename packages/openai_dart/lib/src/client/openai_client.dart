@@ -135,7 +135,7 @@ class OpenAIClient {
     http.Client Function()? streamClientFactory,
   }) : _config = config ?? const OpenAIConfig(),
        _httpClient = httpClient ?? http.Client(),
-       _streamClientFactory = streamClientFactory ?? http.Client.new,
+       _streamClientFactory = streamClientFactory,
        _audioStreamClientFactory =
            streamClientFactory ?? (httpClient == null ? http.Client.new : null),
        _ownsHttpClient = httpClient == null {
@@ -198,7 +198,7 @@ class OpenAIClient {
 
   final OpenAIConfig _config;
   final http.Client _httpClient;
-  final http.Client Function() _streamClientFactory;
+  final http.Client Function()? _streamClientFactory;
   // Private binary streams borrow an injected client unless its caller supplies a
   // dedicated factory. Production streams still own one client per request.
   final http.Client Function()? _audioStreamClientFactory;

@@ -1,4 +1,4 @@
-import 'dart:async' show StreamController, StreamSubscription, unawaited;
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -13,164 +13,150 @@ import 'base_resource.dart';
 /// Mixin that adds streaming capabilities to a [ResourceBase].
 ///
 /// Provides [sendStream] for making SSE streaming requests with
-/// proper abort support, dedicated HTTP client per stream, and cleanup
-/// on completion, error, and subscription cancellation.
+/// request-scoped abort support and cleanup on completion, error, and
+/// subscription cancellation.
 mixin StreamingResource on ResourceBase {
-  /// Sends a streaming POST request and yields parsed SSE JSON events.
+  /// Sends a streaming request with request-scoped transport cancellation.
   ///
-  /// Creates a dedicated HTTP client per stream for abort support.
-  /// The [abortTrigger] parameter allows canceling the request. When the
-  /// future completes, the underlying HTTP connection is closed, which
-  /// terminates the stream.
+  /// A configured [streamClientFactory] creates an owned client
+  /// when [abortTrigger] is supplied. Otherwise the shared client is borrowed
+  /// and is never closed by a streaming request.
   ///
-  /// Returns the raw [http.StreamedResponse] for resources that need
-  /// custom SSE parsing (e.g., typed event deserialization).
-  ///
-  /// Note: Streaming requests are NOT retried (non-idempotent, body consumed).
-  /// The interceptor chain is bypassed since streaming requires low-level
-  /// access to the response stream.
+  /// Streaming requests bypass interceptors and are not retried. Transport
+  /// cancellation requires support from the supplied HTTP client.
   Future<http.StreamedResponse> sendStream({
     required http.BaseRequest request,
     String? jsonBody,
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
+  }) => _sendStream(
+    request: request,
+    jsonBody: jsonBody,
+    additionalHeaders: additionalHeaders,
+    abortTrigger: abortTrigger,
+    useDedicatedClient: abortTrigger != null && streamClientFactory != null,
+  );
+
+  Future<http.StreamedResponse> _sendStream({
+    required http.BaseRequest request,
+    String? jsonBody,
+    Map<String, String>? additionalHeaders,
+    Future<void>? abortTrigger,
+    required bool useDedicatedClient,
   }) async {
     ensureNotClosed?.call();
-
-    // Add streaming-specific headers
-    final streamHeaders = request is http.MultipartRequest
-        ? requestBuilder.buildMultipartHeaders(
-            additionalHeaders: {
-              ...?additionalHeaders,
-              'Accept': 'text/event-stream',
-            },
-          )
-        : requestBuilder.buildStreamingHeaders(
-            additionalHeaders: additionalHeaders,
-          );
-    request.headers.addAll(streamHeaders);
-
-    // Set body AFTER headers so body setter adds charset to Content-Type
-    // (e.g., application/json → application/json; charset=utf-8).
-    // `jsonBody` only applies to `http.Request`; multipart/stream callers
-    // configure their body on the request before calling sendStream.
+    request.headers.addAll(
+      request is http.MultipartRequest
+          ? requestBuilder.buildMultipartHeaders(
+              additionalHeaders: {
+                ...?additionalHeaders,
+                'Accept': 'text/event-stream',
+              },
+            )
+          : requestBuilder.buildStreamingHeaders(
+              additionalHeaders: additionalHeaders,
+            ),
+    );
     if (jsonBody != null) {
       if (request is! http.Request) {
-        throw ArgumentError(
-          'jsonBody is only supported for http.Request, '
-          'got ${request.runtimeType}',
-        );
+        throw ArgumentError('jsonBody requires http.Request');
       }
       request.body = jsonBody;
     }
-
-    // Log request if logging is enabled
     Logger('OpenAIClient').fine('Streaming ${request.method} ${request.url}');
 
-    // For abort support, create a dedicated HTTP client for this stream.
-    // When abortTrigger completes, we close the client which cancels
-    // the in-flight request and terminates the stream.
-    if (abortTrigger != null) {
-      final dedicatedClient = streamClientFactory?.call() ?? http.Client();
-      var aborted = false;
-      var clientClosed = false;
-
-      void closeClientOnce() {
-        if (!clientClosed) {
-          clientClosed = true;
-          dedicatedClient.close();
-        }
-      }
-
-      unawaited(
-        abortTrigger.then(
-          (_) {
-            aborted = true;
-            closeClientOnce();
-          },
-          onError: (_) {
-            // Treat any abort trigger error as an abort signal
-            aborted = true;
-            closeClientOnce();
-          },
-        ),
-      );
-
-      try {
-        final response = await dedicatedClient.send(request);
-
-        // Use StreamController to ensure client cleanup on ALL termination
-        // paths:
-        // - Normal completion (onDone)
-        // - Errors (onError)
-        // - Early subscription cancellation (onCancel)
-        //
-        // StreamTransformer.fromHandlers does NOT handle subscription
-        // cancellation, which would leak the client.
-        //
-        // IMPORTANT: We capture the subscription and cancel it in onCancel.
-        // Without this, the underlying subscription continues pushing data
-        // into the controller even when there are no listeners, causing a
-        // resource leak.
-        final controller = StreamController<List<int>>();
-        late final StreamSubscription<List<int>> subscription;
-        var controllerClosed = false;
-
-        void closeController() {
-          if (!controllerClosed) {
-            controllerClosed = true;
-            unawaited(controller.close());
-          }
-        }
-
-        subscription = response.stream.listen(
-          controller.add,
-          onError: (Object e, StackTrace st) {
-            closeClientOnce();
-            controller.addError(e, st);
-            unawaited(subscription.cancel());
-            closeController();
-          },
-          onDone: () {
-            closeClientOnce();
-            closeController();
-          },
-          cancelOnError: false,
-        );
-
-        controller.onCancel = () async {
-          closeClientOnce();
-          await subscription.cancel();
-          closeController();
-        };
-
-        return http.StreamedResponse(
-          controller.stream,
-          response.statusCode,
-          contentLength: response.contentLength,
-          request: response.request,
-          headers: response.headers,
-          isRedirect: response.isRedirect,
-          persistentConnection: response.persistentConnection,
-          reasonPhrase: response.reasonPhrase,
-        );
-      } catch (e) {
-        // If we were aborted, convert the exception to AbortedException
-        if (aborted) {
-          throw AbortedException.fromHttpException(
-            e,
-            stage: AbortionStage.duringStream,
-            correlationId: request.headers['X-Request-ID'],
-          );
-        }
-        // Close client on send() error too
-        closeClientOnce();
-        rethrow;
+    final transport = useDedicatedClient ? streamClientFactory!() : httpClient;
+    var closed = false;
+    var aborted = false;
+    void closeClient() {
+      if (useDedicatedClient && !closed) {
+        closed = true;
+        transport.close();
       }
     }
 
-    // No abort trigger - use the shared HTTP client
-    return httpClient.send(request);
+    final nativeAbort = Completer<void>();
+    void abort() {
+      aborted = true;
+      if (!nativeAbort.isCompleted) nativeAbort.complete();
+      closeClient();
+    }
+
+    unawaited(
+      abortTrigger?.then((_) => abort(), onError: (Object _) => abort()),
+    );
+    if (request is http.Abortable) {
+      unawaited(
+        request.abortTrigger?.then(
+          (_) => abort(),
+          onError: (Object _) => abort(),
+        ),
+      );
+    }
+
+    try {
+      // Let an already completed abort trigger prevent dispatch entirely.
+      await Future<void>.value();
+      if (aborted) {
+        throw const AbortedException(stage: AbortionStage.duringStream);
+      }
+      final response = await transport.send(
+        _abortableRequest(request, nativeAbort.future),
+      );
+      if (aborted) {
+        await response.stream.listen(null).cancel();
+        throw const AbortedException(stage: AbortionStage.duringStream);
+      }
+      if (!useDedicatedClient) return response;
+
+      StreamSubscription<List<int>>? subscription;
+      late StreamController<List<int>> controller;
+      var ended = false;
+      void finish([Object? error, StackTrace? stackTrace]) {
+        if (ended) return;
+        ended = true;
+        if (error != null) controller.addError(error, stackTrace);
+        closeClient();
+        subscription?.cancel().ignore();
+        unawaited(controller.close());
+      }
+
+      controller = StreamController<List<int>>(
+        onListen: () {
+          subscription = response.stream.listen(
+            controller.add,
+            onError: finish,
+            onDone: finish,
+          );
+        },
+        onPause: () => subscription?.pause(),
+        onResume: () => subscription?.resume(),
+        onCancel: () {
+          ended = true;
+          closeClient();
+          subscription?.cancel().ignore();
+        },
+      );
+      return http.StreamedResponse(
+        controller.stream,
+        response.statusCode,
+        contentLength: response.contentLength,
+        request: response.request,
+        headers: response.headers,
+        isRedirect: response.isRedirect,
+        persistentConnection: response.persistentConnection,
+        reasonPhrase: response.reasonPhrase,
+      );
+    } catch (_) {
+      closeClient();
+      if (aborted) {
+        throw AbortedException(
+          stage: AbortionStage.duringStream,
+          correlationId: request.headers['X-Request-ID'],
+        );
+      }
+      rethrow;
+    }
   }
 
   /// Parses an error response from a streaming request.
@@ -246,62 +232,124 @@ mixin StreamingResource on ResourceBase {
     Map<String, String>? queryParams,
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
-  }) async* {
-    final response = await sendStreamRequest(
-      endpoint: endpoint,
-      body: body,
-      queryParams: queryParams,
+  }) {
+    return _streamSseEvents(
+      () => http.Request(
+        'POST',
+        requestBuilder.buildUrl(endpoint, queryParams: queryParams),
+      ),
+      jsonBody: () => jsonEncode(body),
       additionalHeaders: additionalHeaders,
       abortTrigger: abortTrigger,
     );
-    yield* _consumeSseResponse(response);
   }
 
-  /// Streams SSE events from a pre-built [http.BaseRequest].
-  ///
-  /// Lower-level than [streamSseEvents] — the caller has already fully
-  /// configured the request (e.g. a multipart request with files/fields set),
-  /// so resources that can't express their body as a JSON map (like
-  /// multipart transcription streaming) can still reuse the same
-  /// abort-support and SSE-parsing/error-handling logic.
+  /// Streams SSE events from a pre-built request, including multipart bodies.
   Stream<Map<String, dynamic>> streamSseEventsForRequest({
     required http.BaseRequest request,
     Future<void>? abortTrigger,
-  }) async* {
-    final response = await sendStream(
-      request: request,
-      abortTrigger: abortTrigger,
-    );
-    yield* _consumeSseResponse(response);
-  }
+  }) => _streamSseEvents(() => request, abortTrigger: abortTrigger);
 
-  Stream<Map<String, dynamic>> _consumeSseResponse(
-    http.StreamedResponse response,
-  ) async* {
-    // Extract request ID from response headers for error reporting
-    final requestId =
-        response.headers['x-request-id'] ??
-        response.request?.headers['X-Request-ID'] ??
-        'unknown';
+  Stream<Map<String, dynamic>> _streamSseEvents(
+    http.BaseRequest Function() buildRequest, {
+    String Function()? jsonBody,
+    Map<String, String>? additionalHeaders,
+    Future<void>? abortTrigger,
+  }) {
+    final nativeAbort = Completer<void>();
+    StreamSubscription<Map<String, dynamic>>? subscription;
+    late StreamController<Map<String, dynamic>> controller;
+    var ended = false;
 
-    try {
-      if (response.statusCode >= 400) {
-        final responseBody = await response.stream.bytesToString();
-        throw parseStreamError(
-          response.statusCode,
-          responseBody,
-          requestId,
-          headers: response.headers,
-        );
-      }
-
-      const parser = SseParser();
-      await for (final json in parser.parse(response.stream)) {
-        yield json;
-      }
-    } on AbortedException {
-      rethrow;
+    void cleanup({required bool abort}) {
+      if (abort && !nativeAbort.isCompleted) nativeAbort.complete();
+      // Local termination must not wait for a custom transport's cleanup.
+      subscription?.cancel().ignore();
     }
+
+    void finish([Object? error, StackTrace? stackTrace]) {
+      if (ended) return;
+      ended = true;
+      if (error != null) controller.addError(error, stackTrace);
+      cleanup(abort: error != null);
+      unawaited(controller.close());
+    }
+
+    Future<void> run() async {
+      try {
+        // Register cancellation before starting authentication/header building.
+        await Future<void>.value();
+        if (ended) return;
+        final response = await _sendStream(
+          request: buildRequest(),
+          jsonBody: jsonBody?.call(),
+          additionalHeaders: additionalHeaders,
+          abortTrigger: nativeAbort.future,
+          useDedicatedClient:
+              abortTrigger != null && streamClientFactory != null,
+        );
+        if (ended) {
+          await response.stream.listen(null).cancel();
+          return;
+        }
+        final requestId =
+            response.headers['x-request-id'] ??
+            response.request?.headers['X-Request-ID'] ??
+            'unknown';
+        Stream<Map<String, dynamic>> events;
+        if (response.statusCode >= 400) {
+          final body = StringBuffer();
+          events = response.stream
+              .transform(utf8.decoder)
+              .transform(
+                StreamTransformer<String, Map<String, dynamic>>.fromHandlers(
+                  handleData: (data, sink) => body.write(data),
+                  handleDone: (sink) {
+                    sink
+                      ..addError(
+                        parseStreamError(
+                          response.statusCode,
+                          body.toString(),
+                          requestId,
+                          headers: response.headers,
+                        ),
+                      )
+                      ..close();
+                  },
+                ),
+              );
+        } else {
+          events = const SseParser().parse(response.stream);
+        }
+        subscription = events.listen(
+          controller.add,
+          onError: finish,
+          onDone: finish,
+        );
+        if (controller.isPaused) subscription!.pause();
+      } catch (error, stackTrace) {
+        finish(error, stackTrace);
+      }
+    }
+
+    controller = StreamController<Map<String, dynamic>>(
+      onListen: () {
+        void abort() =>
+            finish(const AbortedException(stage: AbortionStage.duringStream));
+        unawaited(
+          abortTrigger?.then((_) => abort(), onError: (Object _) => abort()),
+        );
+        unawaited(run());
+      },
+      onPause: () => subscription?.pause(),
+      onResume: () => subscription?.resume(),
+      onCancel: () {
+        final abort = !ended;
+        ended = true;
+        cleanup(abort: abort);
+      },
+    );
+    return controller.stream;
   }
 
   /// Checks for inline errors in SSE stream data and throws
@@ -350,3 +398,56 @@ mixin StreamingResource on ResourceBase {
 }
 
 String? _errorString(Object? value) => value is String ? value : null;
+
+/// Adds cancellation without buffering streamed or multipart request bodies.
+http.BaseRequest _abortableRequest(
+  http.BaseRequest source,
+  Future<void> abortTrigger,
+) {
+  final http.BaseRequest request;
+  if (source is http.Request) {
+    request =
+        http.AbortableRequest(
+            source.method,
+            source.url,
+            abortTrigger: abortTrigger,
+          )
+          ..encoding = source.encoding
+          ..bodyBytes = source.bodyBytes;
+  } else if (source is http.MultipartRequest) {
+    request =
+        http.AbortableMultipartRequest(
+            source.method,
+            source.url,
+            abortTrigger: abortTrigger,
+          )
+          ..fields.addAll(source.fields)
+          ..files.addAll(source.files);
+  } else {
+    request = _AbortableStreamRequest(source, abortTrigger);
+  }
+  return request
+    ..headers.addAll(source.headers)
+    ..followRedirects = source.followRedirects
+    ..maxRedirects = source.maxRedirects
+    ..persistentConnection = source.persistentConnection;
+}
+
+class _AbortableStreamRequest extends http.BaseRequest
+    implements http.Abortable {
+  _AbortableStreamRequest(this._source, this.abortTrigger)
+    : super(_source.method, _source.url) {
+    contentLength = _source.contentLength;
+  }
+
+  final http.BaseRequest _source;
+
+  @override
+  final Future<void> abortTrigger;
+
+  @override
+  http.ByteStream finalize() {
+    super.finalize();
+    return _source.finalize();
+  }
+}

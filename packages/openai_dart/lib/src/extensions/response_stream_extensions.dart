@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../models/responses/streaming/response_stream_accumulator.dart';
 import '../models/responses/streaming/response_stream_event.dart';
 
@@ -16,13 +18,18 @@ extension ResponseStreamExtension on Stream<ResponseStreamEvent> {
   ///   stdout.write(text);
   /// }
   /// ```
-  Stream<String> textDeltas() async* {
-    await for (final event in this) {
-      if (event is OutputTextDeltaEvent) {
-        yield event.delta;
-      }
-    }
-  }
+  Stream<String> textDeltas() => transform(
+    StreamTransformer<ResponseStreamEvent, String>.fromHandlers(
+      handleData: (event, sink) {
+        if (event is OutputTextDeltaEvent) sink.add(event.delta);
+      },
+      handleError: (error, stackTrace, sink) {
+        sink
+          ..addError(error, stackTrace)
+          ..close();
+      },
+    ),
+  );
 
   /// Collects all text deltas into a single string.
   ///
@@ -63,11 +70,37 @@ extension ResponseStreamExtension on Stream<ResponseStreamEvent> {
   ///   print('Current text: ${accumulator.text}');
   /// }
   /// ```
-  Stream<ResponseStreamAccumulator> accumulate() async* {
-    final accumulator = ResponseStreamAccumulator();
-    await for (final event in this) {
-      accumulator.add(event);
-      yield accumulator;
+  Stream<ResponseStreamAccumulator> accumulate() {
+    return Stream<ResponseStreamAccumulator>.eventTransformed(
+      this,
+      _ResponseAccumulatorSink.new,
+    );
+  }
+}
+
+class _ResponseAccumulatorSink implements EventSink<ResponseStreamEvent> {
+  _ResponseAccumulatorSink(this._sink);
+
+  final EventSink<ResponseStreamAccumulator> _sink;
+  final _accumulator = ResponseStreamAccumulator();
+
+  @override
+  void add(ResponseStreamEvent event) {
+    try {
+      _accumulator.add(event);
+      _sink.add(_accumulator);
+    } catch (error, stackTrace) {
+      addError(error, stackTrace);
     }
   }
+
+  @override
+  void addError(Object error, [StackTrace? stackTrace]) {
+    _sink
+      ..addError(error, stackTrace)
+      ..close();
+  }
+
+  @override
+  void close() => _sink.close();
 }
