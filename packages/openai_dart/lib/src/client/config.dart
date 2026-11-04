@@ -4,6 +4,8 @@ import 'package:meta/meta.dart';
 import '../auth/auth_provider.dart';
 import '../models/common/copy_with_sentinel.dart';
 import '../platform/environment.dart';
+import '../providers/vertex_provider.dart';
+import 'data_residency.dart';
 
 /// Retry policy configuration.
 @immutable
@@ -88,7 +90,61 @@ class OpenAIConfig {
     this.organization,
     this.project,
     this.webhookSecret,
+    this.vertexProvider,
   });
+
+  /// Configures the supported HTTP/SSE Responses lifecycle through Vertex.
+  ///
+  /// Authentication belongs to [provider]. OpenAI auth, organization and project
+  /// headers are intentionally absent. Native credential discovery is separate:
+  /// the application supplies a refreshing token callback on every platform.
+  factory OpenAIConfig.vertex({
+    required VertexProvider provider,
+    Duration timeout = const Duration(minutes: 10),
+    Duration connectTimeout = const Duration(seconds: 30),
+    RetryPolicy retryPolicy = RetryPolicy.defaultPolicy,
+    Level? logLevel,
+    Map<String, String> defaultHeaders = const {},
+  }) => OpenAIConfig(
+    vertexProvider: provider,
+    baseUrl: provider.baseUrl,
+    timeout: timeout,
+    connectTimeout: connectTimeout,
+    retryPolicy: retryPolicy,
+    logLevel: logLevel,
+    defaultHeaders: defaultHeaders,
+  );
+
+  /// Selects a named OpenAI endpoint from the pinned official SDK mapping.
+  ///
+  /// Endpoint selection does not configure project residency or guarantee that
+  /// a model/service supports regional processing. Google Vertex locations use
+  /// [OpenAIConfig.vertex] instead. A custom base URL is an explicit alternative.
+  factory OpenAIConfig.forDataResidency(
+    OpenAIDataResidency region, {
+    AuthProvider? authProvider,
+    Duration timeout = const Duration(minutes: 10),
+    Duration connectTimeout = const Duration(seconds: 30),
+    RetryPolicy retryPolicy = RetryPolicy.defaultPolicy,
+    Level? logLevel,
+    Map<String, String> defaultHeaders = const {},
+    String? apiVersion,
+    String? organization,
+    String? project,
+    String? webhookSecret,
+  }) => OpenAIConfig(
+    baseUrl: region.baseUrl,
+    authProvider: authProvider,
+    timeout: timeout,
+    connectTimeout: connectTimeout,
+    retryPolicy: retryPolicy,
+    logLevel: logLevel,
+    defaultHeaders: defaultHeaders,
+    apiVersion: apiVersion,
+    organization: organization,
+    project: project,
+    webhookSecret: webhookSecret,
+  );
 
   /// Creates an [OpenAIConfig] using runtime environment variables.
   ///
@@ -131,6 +187,14 @@ class OpenAIConfig {
   /// If not provided, you must set authentication headers manually
   /// using [defaultHeaders] or a custom interceptor.
   final AuthProvider? authProvider;
+
+  /// Optional Vertex routing/authentication definition.
+  ///
+  /// Prefer [OpenAIConfig.vertex]. When set, [baseUrl] must match its API root,
+  /// OpenAI auth/project/organization options and conflicting auth headers are
+  /// rejected before credentials are acquired. Only the documented Responses
+  /// HTTP/SSE lifecycle is supported; WebSocket and other resources are rejected.
+  final VertexProvider? vertexProvider;
 
   /// The base URL for the OpenAI API.
   ///
@@ -214,7 +278,11 @@ class OpenAIConfig {
   /// Creates a copy of this configuration with the given fields replaced.
   ///
   /// To clear a nullable field, pass `null` explicitly. Fields not provided
-  /// retain their current values.
+  /// retain their current values. Changing [vertexProvider] also selects its
+  /// API root unless [baseUrl] is explicitly supplied. Clearing it restores the
+  /// ordinary global OpenAI root. Other options are retained and validated when
+  /// a client installs the configuration; clear conflicting OpenAI credentials
+  /// explicitly when switching providers.
   OpenAIConfig copyWith({
     Object? authProvider = unsetCopyWithValue,
     String? baseUrl,
@@ -227,14 +295,25 @@ class OpenAIConfig {
     Object? organization = unsetCopyWithValue,
     Object? project = unsetCopyWithValue,
     Object? webhookSecret = unsetCopyWithValue,
+    Object? vertexProvider = unsetCopyWithValue,
   }) {
+    final nextVertex = _resolveField<VertexProvider>(
+      vertexProvider,
+      'vertexProvider',
+      this.vertexProvider,
+    );
     return OpenAIConfig(
+      vertexProvider: nextVertex,
       authProvider: _resolveField<AuthProvider>(
         authProvider,
         'authProvider',
         this.authProvider,
       ),
-      baseUrl: baseUrl ?? this.baseUrl,
+      baseUrl:
+          baseUrl ??
+          (identical(vertexProvider, unsetCopyWithValue)
+              ? this.baseUrl
+              : nextVertex?.baseUrl ?? 'https://api.openai.com/v1'),
       timeout: timeout ?? this.timeout,
       connectTimeout: connectTimeout ?? this.connectTimeout,
       retryPolicy: retryPolicy ?? this.retryPolicy,
@@ -285,6 +364,7 @@ class OpenAIConfig {
     if (identical(this, other)) return true;
     return other is OpenAIConfig &&
         other.authProvider == authProvider &&
+        other.vertexProvider == vertexProvider &&
         other.baseUrl == baseUrl &&
         other.timeout == timeout &&
         other.connectTimeout == connectTimeout &&
@@ -300,6 +380,7 @@ class OpenAIConfig {
   @override
   int get hashCode => Object.hash(
     authProvider,
+    vertexProvider,
     baseUrl,
     timeout,
     connectTimeout,

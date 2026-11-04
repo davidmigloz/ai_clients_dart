@@ -26,6 +26,9 @@ Future<LiveConnection> openLiveConnection({
   void Function()? ensureNotClosed,
 }) async {
   ensureNotClosed?.call();
+  if (config.vertexProvider != null) {
+    throw UnsupportedError('Vertex does not support Live connections.');
+  }
   if (sideband && fork) throw ArgumentError('A fork is not a sideband.');
   reconnect?.validate();
   final timeout = connectionTimeout ?? config.connectTimeout;
