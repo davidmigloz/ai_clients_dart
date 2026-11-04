@@ -1264,6 +1264,18 @@ Filter session lists with `metadata: {'project': 'demo'}`; all pairs must match,
 
 </details>
 
+<a id="how-do-i-schedule-work-with-agent-automations"></a>
+<details>
+<summary><b>How do I schedule work with Agent automations?</b></summary>
+
+Use `client.agents.automations` for one-time or cron schedules targeting a new session or an existing conversation. Creating, updating, pausing, and resuming a schedule do not invoke it immediately; call `.invocations.create(automationId)` explicitly for a manual delivery, including while paused.
+
+Inspect `.invocations.list` or `.retrieve` for delivery status and the session ID. A completed delivery means the session accepted the input; follow session events for the Agent's result. Pausing or deleting a schedule leaves accepted session work running. Enable `AgentTool.automations()` or `AgentSessionTool.automations()` to let an Agent schedule follow-ups itself.
+
+→ [Offline schedule and invocation example](example/agent_automations_example.dart)
+
+</details>
+
 <a id="session-history-and-traces"></a>
 <details>
 <summary><b>Session history and traces</b></summary>
@@ -1458,6 +1470,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | --- | --- |
 | [saved_agents_example.dart](example/saved_agents_example.dart) | **Offline.** saved-agent CRUD, tool configuration, pagination, replacement and clear/reset |
 | [agent_settings_example.dart](example/agent_settings_example.dart) | **Offline.** compaction, time awareness, session review/tools, ultrafast and exact metadata filters |
+| [agent_automations_example.dart](example/agent_automations_example.dart) | **Offline.** once/cron schedules, new/existing session targets, pause/resume, explicit invocation and delivery history |
 | [agent_sessions_example.dart](example/agent_sessions_example.dart) | **Offline.** durable sessions, persistent observation, manual function result and explicit cancellation |
 | [agent_session_history_example.dart](example/agent_session_history_example.dart) | **Offline.** root/turn history and published OTLP trace pagination |
 | [agent_subagents_example.dart](example/agent_subagents_example.dart) | **Offline.** Agent session subagents |
@@ -1498,7 +1511,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | Content Provenance Checks | C2PA and SynthID inspection |
 | Webhooks | Local signed verification and project endpoint management |
 | Safety | Read-only project alerts, organization cases, and typed monitoring details |
-| Agents | Saved agents, context settings, action review, durable sessions, metadata filters, root/child history, hosted environments, files, and artifacts |
+| Agents | Saved agents, context settings, action review, durable sessions, scheduled automations and invocations, metadata filters, root/child history, hosted environments, files, and artifacts |
 | Vaults | Vault management and write-only credentials |
 | ChatKit Beta and Skills | Sessions/threads and skills management |
 | Assistants, Threads, Messages, Runs, and Vector Stores | Deprecated; separate Assistants import |

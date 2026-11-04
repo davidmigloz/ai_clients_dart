@@ -29,10 +29,42 @@ bool isPrivateAudioRequest(http.BaseRequest? request) =>
 /// Identifies implemented Agents routes containing private configuration/input.
 bool isAgentsApiRequest(http.BaseRequest? request) =>
     isSavedAgentRequest(request) ||
+    isAgentAutomationRequest(request) ||
     isAgentSessionRequest(request) ||
     isVaultRequest(request) ||
     isAgentEnvironmentRequest(request) ||
     isAgentFileRequest(request);
+
+/// Identifies the ten automation and invocation routes, including custom bases.
+bool isAgentAutomationRequest(http.BaseRequest? request) {
+  if (request == null) return false;
+  final segments = request.url.pathSegments;
+  final collection =
+      segments.length >= 2 &&
+      segments[segments.length - 2] == 'agents' &&
+      segments.last == 'automations' &&
+      const {'GET', 'POST'}.contains(request.method);
+  final item =
+      segments.length >= 3 &&
+      segments[segments.length - 3] == 'agents' &&
+      segments[segments.length - 2] == 'automations' &&
+      const {'GET', 'POST', 'DELETE'}.contains(request.method);
+  final child =
+      segments.length >= 4 &&
+      segments[segments.length - 4] == 'agents' &&
+      segments[segments.length - 3] == 'automations' &&
+      ((const {'pause', 'resume'}.contains(segments.last) &&
+              request.method == 'POST') ||
+          (segments.last == 'invocations' &&
+              const {'GET', 'POST'}.contains(request.method)));
+  final invocation =
+      segments.length >= 5 &&
+      segments[segments.length - 5] == 'agents' &&
+      segments[segments.length - 4] == 'automations' &&
+      segments[segments.length - 2] == 'invocations' &&
+      request.method == 'GET';
+  return collection || item || child || invocation;
+}
 
 /// Identifies implemented raw session/event/history operations, including custom bases.
 bool isAgentSessionRequest(http.BaseRequest? request) {

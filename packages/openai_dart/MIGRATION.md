@@ -55,8 +55,8 @@ Context settings preserve their own update rules:
 The Agent tool sealed unions gain an automations variant; update exhaustive
 switches for `AgentAutomationsTool`, `AgentAutomationsToolResource`,
 `AgentSessionAutomationsTool`, and `AgentSessionAutomationsToolResource`.
-These variants configure a server tool; automation resource operations remain
-part of the next planned slice.
+These variants configure a server tool. Use `client.agents.automations` to manage
+schedules and inspect their invocations.
 
 Session list `metadata` filters use exact string pairs, all of which must match.
 The client encodes `metadata[key]=value`, preserving the same filters with cursors.

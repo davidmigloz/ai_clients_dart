@@ -1,0 +1,447 @@
+{
+  "issue": 423,
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "promotion_owner": 427,
+  "types": {
+    "AgentToolConfigParamAutomations": {
+      "spec": "main",
+      "schema": "AgentToolConfigParamAutomations",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionAutomationsTool",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "parent": "AgentSessionTool",
+      "note": "Reused automations wire leaf implemented in #422; this is its primary #423 inventory disposition. No duplicate class."
+    },
+    "AgentToolResourceAutomations": {
+      "spec": "main",
+      "schema": "AgentToolResourceAutomations",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionAutomationsToolResource",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "parent": "AgentSessionToolResource",
+      "note": "Reused automations wire leaf implemented in #422; this is its primary #423 inventory disposition. No duplicate class."
+    },
+    "AutomationAgentConfigResource": {
+      "spec": "main",
+      "schema": "AutomationAgentConfigResource",
+      "kind": "object",
+      "dart_class": "AgentAutomationAgentConfig",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    "AutomationCreatedByResource": {
+      "spec": "main",
+      "schema": "AutomationCreatedByResource",
+      "kind": "sealed_parent",
+      "dart_class": "AgentAutomationCreator",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    "AutomationCreatedByResourceAgent": {
+      "spec": "main",
+      "schema": "AutomationCreatedByResourceAgent",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationAgentCreator",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomationCreator"
+    },
+    "AutomationCreatedByResourceDeveloper": {
+      "spec": "main",
+      "schema": "AutomationCreatedByResourceDeveloper",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationDeveloperCreator",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomationCreator"
+    },
+    "AutomationEnvironmentResource": {
+      "spec": "main",
+      "schema": "AutomationEnvironmentResource",
+      "kind": "sealed_parent",
+      "dart_class": "AgentAutomationEnvironmentResource",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    "AutomationEnvironmentResourceNone": {
+      "spec": "main",
+      "schema": "AutomationEnvironmentResourceNone",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationNoneEnvironmentResource",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomationEnvironmentResource"
+    },
+    "AutomationEnvironmentResourceOpenaiHosted": {
+      "spec": "main",
+      "schema": "AutomationEnvironmentResourceOpenaiHosted",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationHostedEnvironmentResource",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomationEnvironmentResource"
+    },
+    "AutomationEnvironmentResourceSelfHosted": {
+      "spec": "main",
+      "schema": "AutomationEnvironmentResourceSelfHosted",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationSelfHostedEnvironmentResource",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomationEnvironmentResource"
+    },
+    "AutomationInvocationErrorResource": {
+      "spec": "main",
+      "schema": "AutomationInvocationErrorResource",
+      "kind": "object",
+      "dart_class": "AgentAutomationInvocationError",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    "AutomationInvocationResource": {
+      "spec": "main",
+      "schema": "AutomationInvocationResource",
+      "kind": "object",
+      "dart_class": "AgentAutomationInvocation",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    "AutomationInvocationSourceResource": {
+      "spec": "main",
+      "schema": "AutomationInvocationSourceResource",
+      "kind": "sealed_parent",
+      "dart_class": "AgentAutomationInvocationSource",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    "AutomationInvocationSourceResourceAutomation": {
+      "spec": "main",
+      "schema": "AutomationInvocationSourceResourceAutomation",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationScheduledInvocationSource",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomationInvocationSource"
+    },
+    "AutomationInvocationSourceResourceManual": {
+      "spec": "main",
+      "schema": "AutomationInvocationSourceResourceManual",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationManualInvocationSource",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomationInvocationSource"
+    },
+    "AutomationInvocationStatusResource": {
+      "spec": "main",
+      "schema": "AutomationInvocationStatusResource",
+      "kind": "enum",
+      "dart_class": "AgentAutomationInvocationStatus",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "note": "Exact-string receive value class intentionally preserves future status values rather than synthesizing a fallback."
+    },
+    "AutomationResource": {
+      "spec": "main",
+      "schema": "AutomationResource",
+      "kind": "sealed_parent",
+      "dart_class": "AgentAutomation",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    "AutomationResourceOnce": {
+      "spec": "main",
+      "schema": "AutomationResourceOnce",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationOnce",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomation"
+    },
+    "AutomationResourcePeriodic": {
+      "spec": "main",
+      "schema": "AutomationResourcePeriodic",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationPeriodic",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomation"
+    },
+    "AutomationTargetParam": {
+      "spec": "main",
+      "schema": "AutomationTargetParam",
+      "kind": "sealed_parent",
+      "dart_class": "AgentAutomationTarget",
+      "file": "lib/src/models/agents/agent_automation_requests.dart"
+    },
+    "AutomationTargetParamExistingSession": {
+      "spec": "main",
+      "schema": "AutomationTargetParamExistingSession",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationExistingSessionTarget",
+      "file": "lib/src/models/agents/agent_automation_requests.dart",
+      "parent": "AgentAutomationTarget"
+    },
+    "AutomationTargetParamNewSession": {
+      "spec": "main",
+      "schema": "AutomationTargetParamNewSession",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationNewSessionTarget",
+      "file": "lib/src/models/agents/agent_automation_requests.dart",
+      "parent": "AgentAutomationTarget"
+    },
+    "AutomationTargetResource": {
+      "spec": "main",
+      "schema": "AutomationTargetResource",
+      "kind": "sealed_parent",
+      "dart_class": "AgentAutomationTargetResource",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    "AutomationTargetResourceExistingSession": {
+      "spec": "main",
+      "schema": "AutomationTargetResourceExistingSession",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationExistingSessionTargetResource",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomationTargetResource"
+    },
+    "AutomationTargetResourceNewSession": {
+      "spec": "main",
+      "schema": "AutomationTargetResourceNewSession",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationNewSessionTargetResource",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomationTargetResource"
+    },
+    "CreateAutomationParams": {
+      "spec": "main",
+      "schema": "CreateAutomationParams",
+      "kind": "sealed_parent",
+      "dart_class": "CreateAgentAutomationRequest",
+      "file": "lib/src/models/agents/agent_automation_requests.dart"
+    },
+    "CreateAutomationParamsOnce": {
+      "spec": "main",
+      "schema": "CreateAutomationParamsOnce",
+      "kind": "sealed_variant",
+      "dart_class": "CreateAgentAutomationOnceRequest",
+      "file": "lib/src/models/agents/agent_automation_requests.dart",
+      "parent": "CreateAgentAutomationRequest"
+    },
+    "CreateAutomationParamsPeriodic": {
+      "spec": "main",
+      "schema": "CreateAutomationParamsPeriodic",
+      "kind": "sealed_variant",
+      "dart_class": "CreateAgentAutomationPeriodicRequest",
+      "file": "lib/src/models/agents/agent_automation_requests.dart",
+      "parent": "CreateAgentAutomationRequest"
+    },
+    "DeletedAutomationResource": {
+      "spec": "main",
+      "schema": "DeletedAutomationResource",
+      "kind": "object",
+      "dart_class": "DeletedAgentAutomation",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    "InputMessageResource-2": {
+      "spec": "main",
+      "schema": "InputMessageResource-2",
+      "kind": "object",
+      "dart_class": "AgentAutomationInputMessage",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    "OnceAutomationStatusResource": {
+      "spec": "main",
+      "schema": "OnceAutomationStatusResource",
+      "kind": "enum",
+      "dart_class": "AgentAutomationOnceStatus",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "note": "Exact-string receive value class intentionally preserves future status values rather than synthesizing a fallback."
+    },
+    "PeriodicAutomationStatusResource": {
+      "spec": "main",
+      "schema": "PeriodicAutomationStatusResource",
+      "kind": "enum",
+      "dart_class": "AgentAutomationPeriodicStatus",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "note": "Exact-string receive value class intentionally preserves future status values rather than synthesizing a fallback."
+    },
+    "PersistedAgentToolConfigParamAutomations": {
+      "spec": "main",
+      "schema": "PersistedAgentToolConfigParamAutomations",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationsTool",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "parent": "AgentTool",
+      "note": "Reused automations wire leaf implemented in #422; this is its primary #423 inventory disposition. No duplicate class."
+    },
+    "PersistedAgentToolResourceAutomations": {
+      "spec": "main",
+      "schema": "PersistedAgentToolResourceAutomations",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationsToolResource",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "parent": "AgentToolResource",
+      "note": "Reused automations wire leaf implemented in #422; this is its primary #423 inventory disposition. No duplicate class."
+    },
+    "UpdateAutomationParams": {
+      "spec": "main",
+      "schema": "UpdateAutomationParams",
+      "kind": "object",
+      "dart_class": "UpdateAgentAutomationRequest",
+      "file": "lib/src/models/agents/agent_automation_requests.dart"
+    }
+  },
+  "contextual_bindings": [
+    {
+      "dart_class": "AgentAutomationList",
+      "schema_context": "listAgentAutomations 200 inline list",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    {
+      "dart_class": "AgentAutomationInvocationList",
+      "schema_context": "listAgentAutomationInvocations 200 inline list",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    }
+  ],
+  "operations": [
+    {
+      "method": "GET",
+      "path": "/agents/automations",
+      "operation_id": "listAgentAutomations",
+      "dart_context": "AgentAutomationsResource.list",
+      "file": "lib/src/resources/agent_automations_resource.dart",
+      "success_status": 200,
+      "request_body": false
+    },
+    {
+      "method": "POST",
+      "path": "/agents/automations",
+      "operation_id": "createAgentAutomation",
+      "dart_context": "AgentAutomationsResource.create",
+      "file": "lib/src/resources/agent_automations_resource.dart",
+      "success_status": 201,
+      "request_body": true
+    },
+    {
+      "method": "GET",
+      "path": "/agents/automations/{automation_id}",
+      "operation_id": "getAgentAutomation",
+      "dart_context": "AgentAutomationsResource.retrieve",
+      "file": "lib/src/resources/agent_automations_resource.dart",
+      "success_status": 200,
+      "request_body": false
+    },
+    {
+      "method": "POST",
+      "path": "/agents/automations/{automation_id}",
+      "operation_id": "updateAgentAutomation",
+      "dart_context": "AgentAutomationsResource.update",
+      "file": "lib/src/resources/agent_automations_resource.dart",
+      "success_status": 200,
+      "request_body": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/agents/automations/{automation_id}",
+      "operation_id": "deleteAgentAutomation",
+      "dart_context": "AgentAutomationsResource.delete",
+      "file": "lib/src/resources/agent_automations_resource.dart",
+      "success_status": 200,
+      "request_body": false
+    },
+    {
+      "method": "POST",
+      "path": "/agents/automations/{automation_id}/pause",
+      "operation_id": "pauseAgentAutomation",
+      "dart_context": "AgentAutomationsResource.pause",
+      "file": "lib/src/resources/agent_automations_resource.dart",
+      "success_status": 200,
+      "request_body": false
+    },
+    {
+      "method": "POST",
+      "path": "/agents/automations/{automation_id}/resume",
+      "operation_id": "resumeAgentAutomation",
+      "dart_context": "AgentAutomationsResource.resume",
+      "file": "lib/src/resources/agent_automations_resource.dart",
+      "success_status": 200,
+      "request_body": false
+    },
+    {
+      "method": "GET",
+      "path": "/agents/automations/{automation_id}/invocations",
+      "operation_id": "listAgentAutomationInvocations",
+      "dart_context": "AgentAutomationInvocationsResource.list",
+      "file": "lib/src/resources/agent_automations_resource.dart",
+      "success_status": 200,
+      "request_body": false
+    },
+    {
+      "method": "POST",
+      "path": "/agents/automations/{automation_id}/invocations",
+      "operation_id": "createAgentAutomationInvocation",
+      "dart_context": "AgentAutomationInvocationsResource.create",
+      "file": "lib/src/resources/agent_automations_resource.dart",
+      "success_status": 200,
+      "request_body": false
+    },
+    {
+      "method": "GET",
+      "path": "/agents/automations/{automation_id}/invocations/{invocation_id}",
+      "operation_id": "getAgentAutomationInvocation",
+      "dart_context": "AgentAutomationInvocationsResource.retrieve",
+      "file": "lib/src/resources/agent_automations_resource.dart",
+      "success_status": 200,
+      "request_body": false
+    }
+  ],
+  "source_receipts": [
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/resources/beta/agents/automations/automations.py",
+      "sha256": "12667bf711a724fe02cb5afb5e70247bd13288d13dbc98f3fe4dc63ec67252ef"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/resources/beta/agents/automations/invocations.py",
+      "sha256": "9244fad74ffce90ef67b7904690ff7289bc1a53889957cfa0f5a2cb9e75b652f"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/beta/agents/automation_create_params.py",
+      "sha256": "5dd8f64b7943d9d1e4ae65df62e10ad909346454c463588b1968e767a4bb6200"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/beta/agents/automation_update_params.py",
+      "sha256": "35081349926baa822f87855ab84c4417881ff74b178852bb0c6ddea5b21d6728"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/beta/agents/automation.py",
+      "sha256": "edcce96fe1c6630a60a3cb7dc37af0d02a0bdf019c463a58747e62434500c6e6"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/beta/agents/automation_target.py",
+      "sha256": "1297dccb4b8d7e6538aa12ccdf7e2e6cd31c4e1b96d524d843203e1e6b78f75d"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/beta/agents/automation_environment.py",
+      "sha256": "ebdb84cac2846835eb13aa09aed2845826460965a3b46c355c2751eb089385d3"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/beta/agents/automations/automation_invocation.py",
+      "sha256": "e37d31a77350a83cfacf1abad551bab70b9fac092164f4c4004b8b4cc7b46368"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/pagination.py",
+      "sha256": "4cc7f0ee8de9a6b428dcf6dd371821c67acd5d47e01e85ff25f6050635df4e5b"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/resources/beta/agents/automations/automations.ts",
+      "sha256": "bbb27af99899c3bd4d289ec6b6f4b41762029e0668ffbbea61a362097fc6b188"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/resources/beta/agents/automations/invocations.ts",
+      "sha256": "5dd1cdfde23803e372609af76f768ba4c25422baf88fa8559bd4a255d4e6a125"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/core/pagination.ts",
+      "sha256": "9982e3f76b145841d466fe8c9a56e9eea08b869b3d5901d84fe600ea5c7e3da6"
+    }
+  ],
+  "guide_receipts": [
+    {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/sessions/automations.md",
+      "checked_at": "2026-11-04",
+      "sha256": "b6692b1ccea489763e2bdbb6e50dab4e9e951427f037800f43b7ee92f6d47313",
+      "note": "Workflow recheck only; source contract remains fixed October31."
+    }
+  ],
+  "inventory_coverage": {
+    "assigned_schemas": 35,
+    "type_bindings": 35,
+    "already_implemented_bindings": 4,
+    "new_operations": 10,
+    "unassigned": []
+  }
+}
