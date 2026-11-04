@@ -6,6 +6,66 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming release: Realtime response input and audio controls
+
+`InputAudioTranscriptionDeltaEvent.contentIndex` and `delta` are now nullable:
+current events can omit either field. Explicit wire null remains invalid for
+these optional nonnull fields. Its constructor is no longer `const`, so token
+logprobs and future metadata can be snapshotted immutably. Remove `const` at
+construction sites, and handle absence when consuming incremental text:
+
+```dart
+// Before
+String transcriptDelta(realtime.InputAudioTranscriptionDeltaEvent event) =>
+    event.delta;
+
+// After: choose your application's behavior for an absent delta.
+String transcriptDelta(realtime.InputAudioTranscriptionDeltaEvent event) =>
+    event.delta ?? '';
+```
+
+Likewise, use a supplied content index only when present. Nullable transcription
+logprobs and existing obfuscation fields are retained. Raw Realtime response
+status details preserve the server's error message; existing DTMF raw events
+retain their key and receive timestamp.
+
+The remaining additions preserve existing callers:
+
+- `createResponse(input: ...)` accepts the separate native
+  `RealtimeResponseInputItem` union: item references, role-specific messages,
+  function calls and outputs. It does not accept full conversation item objects.
+  Omit input for the default context, pass `[]` to clear response context, and
+  set `conversation: 'none'` for output outside the default conversation.
+- Set optional noise `strength` from 0 to 1. Omission on updates preserves the
+  current strength; `clearStrength` omits the field locally rather than resetting
+  the server to 1. Disable filtering with the wrapper's noise-reduction clear flag.
+  Invalid strength cannot be serialized, including when assertions are disabled.
+- `RealtimeAudioConfigOutput.voice` stays a named string. Use `voiceSelection`
+  with shared `AudioVoice` for an audio-sample custom voice, supplying only one
+  voice field. Prompt-created voices are supported only in Live.
+- `connect` accepts optional model, `callId` and documented `intent`. Existing
+  typed model values retain query precedence. Omit model for a secret-selected
+  or transcription session. Opt-in recovery keeps its existing model-session
+  boundary: no call-ID or intent connection recovery.
+
+Translation retains the dedicated `connectTranslation` flow, typed events,
+REST scoped-secret creation and explicit close/flush consumption. Browser
+WebSockets still require a backend proxy; browser media sessions use WebRTC.
+See [the offline input example](example/realtime_input_example.dart) and
+[translation example](example/realtime_translation_example.dart).
+
+### Announced audio shutdowns
+
+The [official schedule](https://developers.openai.com/api/docs/deprecations)
+includes legacy TTS on January 6, 2027; legacy Realtime/audio on January 20;
+and legacy Whisper/transcribe models plus `/audio/translations` on February 26.
+Migrate to the documented Realtime 2.1/mini speech workflow, Chat `gpt-audio-1.5`,
+`gpt-transcribe`/`gpt-live-transcribe`, or Realtime translation as appropriate.
+A replacement on another endpoint requires adapting the workflow, not passing
+its model name to a legacy endpoint. Realtime beta was removed on May 12, 2026;
+retained beta codecs support stored/compatible payloads only. Model IDs stay open
+strings so applications can choose supported replacements.
+
 ## Upcoming release: Live audio fixtures and SIP DTMF
 
 The old receive-only `LiveTransportDTMFSend` class is replaced by

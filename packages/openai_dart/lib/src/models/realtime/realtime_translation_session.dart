@@ -66,8 +66,11 @@ class RealtimeTranslationInputTranscription {
 /// field can be set to `null` on the wrapper to disable filtering.
 @immutable
 class RealtimeTranslationNoiseReduction {
-  /// Creates a [RealtimeTranslationNoiseReduction].
-  const RealtimeTranslationNoiseReduction({required this.type});
+  /// Creates a configuration, omitting [strength] when it is null.
+  ///
+  /// Invalid strengths cannot be serialized, including when assertions are off.
+  const RealtimeTranslationNoiseReduction({required this.type, this.strength})
+    : assert(strength == null || (strength >= 0 && strength <= 1));
 
   /// Creates from JSON.
   factory RealtimeTranslationNoiseReduction.fromJson(
@@ -80,31 +83,78 @@ class RealtimeTranslationNoiseReduction {
     }
     return RealtimeTranslationNoiseReduction(
       type: NoiseReductionType.fromJson(json['type'] as String),
-    );
+      strength: json.containsKey('strength')
+          ? _translationNoiseReductionStrength(json['strength'])
+          : null,
+    )..validate();
   }
 
   /// The noise-reduction profile.
   final NoiseReductionType type;
 
+  /// Input noise suppression strength, from 0 through 1 inclusive.
+  ///
+  /// The server defaults to 1 when first enabled. Omitting this field from an
+  /// update preserves the current strength.
+  final double? strength;
+
+  /// Validates the strength before serialization or dispatch.
+  void validate() {
+    if (strength != null) _translationNoiseReductionStrength(strength);
+  }
+
   /// Converts to JSON.
-  Map<String, dynamic> toJson() => {'type': type.toJson()};
+  Map<String, dynamic> toJson() {
+    validate();
+    return {'type': type.toJson(), if (strength != null) 'strength': strength};
+  }
 
   /// Returns a copy with the given fields replaced.
-  RealtimeTranslationNoiseReduction copyWith({NoiseReductionType? type}) =>
-      RealtimeTranslationNoiseReduction(type: type ?? this.type);
+  /// Pass [clearStrength] to omit the strength; explicit `strength: null` is
+  /// invalid because the wire field is nonnullable.
+  RealtimeTranslationNoiseReduction copyWith({
+    NoiseReductionType? type,
+    Object? strength = unsetCopyWithValue,
+    bool clearStrength = false,
+  }) {
+    if (clearStrength && !identical(strength, unsetCopyWithValue)) {
+      throw const FormatException(
+        'RealtimeTranslationNoiseReduction.strength: cannot set and clear together',
+      );
+    }
+    return RealtimeTranslationNoiseReduction(
+      type: type ?? this.type,
+      strength: clearStrength
+          ? null
+          : identical(strength, unsetCopyWithValue)
+          ? this.strength
+          : _translationNoiseReductionStrength(strength),
+    )..validate();
+  }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is RealtimeTranslationNoiseReduction &&
           runtimeType == other.runtimeType &&
-          type == other.type;
+          type == other.type &&
+          strength == other.strength;
 
   @override
-  int get hashCode => type.hashCode;
+  int get hashCode => Object.hash(type, strength);
 
   @override
-  String toString() => 'RealtimeTranslationNoiseReduction(type: $type)';
+  String toString() =>
+      'RealtimeTranslationNoiseReduction(type: $type, strength: $strength)';
+}
+
+double _translationNoiseReductionStrength(Object? value) {
+  if (value is! num || !value.isFinite || value < 0 || value > 1) {
+    throw const FormatException(
+      'RealtimeTranslationNoiseReduction.strength: expected a finite number from 0 to 1',
+    );
+  }
+  return value.toDouble();
 }
 
 // =============================================================================

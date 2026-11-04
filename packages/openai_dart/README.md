@@ -1067,7 +1067,7 @@ Future<void> main() async {
   final client = OpenAIClient.fromEnvironment();
 
   try {
-    final session = await client.realtime.connect(model: 'gpt-realtime-2');
+    final session = await client.realtime.connect(model: 'gpt-realtime-2.1');
     try {
       session.sendUserMessage('Say hello.', createResponse: false);
       session.createResponse(outputModalities: ['text']);
@@ -1090,6 +1090,48 @@ Future<void> main() async {
 ```
 
 → [Full example](example/realtime_example.dart)
+
+</details>
+
+<a id="how-do-i-select-realtime-response-input-and-noise-strength"></a>
+<details>
+<summary><b>How do I select Realtime response input and noise strength?</b></summary>
+
+Pass `RealtimeResponseInputItem` values to `connection.createResponse(input: ...)` to reference existing items or supply typed message/function-call history. Setting `input` creates a context for that response; `input: []` clears its context. References use existing server item IDs. Set `conversation: 'none'` to keep the response output out of the default conversation.
+
+Set `AudioInputNoiseReduction.strength` between 0 and 1. Omit strength on an update to preserve the current value; clearing the wrapper's noise reduction disables filtering. Use `RealtimeAudioConfigOutput.voiceSelection` for an audio-sample custom voice, or keep `voice` for a named voice. Prompt-generated custom voices support Live only.
+
+→ [Offline response input example](example/realtime_input_example.dart)
+
+</details>
+
+<a id="how-do-i-stream-realtime-translation"></a>
+<details>
+<summary><b>How do I stream Realtime translation?</b></summary>
+
+Use `client.realtime.connectTranslation(model: 'gpt-realtime-translate')` and consume typed source/output transcript and audio events. Translation runs continuously from raw 24 kHz PCM16 mono input; configure language, source transcription and noise reduction with `RealtimeTranslationSessionUpdateRequest`. Request `closeSession()` and keep reading through `RealtimeTranslationSessionClosedEvent` before local cleanup.
+
+Create scoped credentials with `client.realtimeSessions.translations.createClientSecret(...)`. Native/server WebSockets can use them; browsers use WebRTC or an authenticated backend proxy because browser WebSockets cannot set authentication headers. Your application owns audio capture and playback.
+
+→ [Offline translation example](example/realtime_translation_example.dart)
+
+</details>
+
+<a id="which-audio-models-need-migration"></a>
+<details>
+<summary><b>Which audio models need migration?</b></summary>
+
+The announced audio shutdowns require choosing the replacement workflow as well as a model:
+
+| Shutdown | Existing family or endpoint | Replacement |
+| --- | --- | --- |
+| January 6, 2027 | `tts-1`, `tts-1-hd`, `gpt-4o-mini-tts` | Realtime speech generation with `gpt-realtime-2.1-mini` |
+| January 20, 2027 | Legacy Realtime and audio families | `gpt-realtime-2.1` / `gpt-realtime-2.1-mini`, or Chat audio with `gpt-audio-1.5` |
+| February 26, 2027 | Legacy Whisper/transcribe families; `/audio/translations` | `gpt-transcribe` / `gpt-live-transcribe`, or Realtime translation |
+
+See the [official deprecation schedule](https://developers.openai.com/api/docs/deprecations) for affected snapshots and route-specific migration guidance. Realtime beta was already removed on May 12, 2026; its retained codecs are for compatibility, and new sessions use GA. Model identifiers remain open strings.
+
+→ [Realtime connection example](example/realtime_example.dart)
 
 </details>
 
@@ -1334,6 +1376,8 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [chat_audio_example.dart](example/chat_audio_example.dart) | Chat audio output, ID-only replay, and partial stream accumulation |
 | [videos_example.dart](example/videos_example.dart) | Sora video generation, editing, and extension |
 | [realtime_example.dart](example/realtime_example.dart) | Realtime API (WebSocket and WebRTC) |
+| [realtime_input_example.dart](example/realtime_input_example.dart) | **Offline.** acknowledged history references, typed new input and out-of-band response output |
+| [realtime_translation_example.dart](example/realtime_translation_example.dart) | **Offline.** scoped translation secret, noise strength, typed audio/transcripts and flush/close |
 | [live_http_example.dart](example/live_http_example.dart) | **Offline.** WebRTC/SIP signaling, explicit call controls, verified incoming notice, WAV downloads and REST fork |
 | [live_media_example.dart](example/live_media_example.dart) | **Offline.** raw audio fixture acceptance/drain, independent mute, and SIP DTMF directions |
 | [live_websocket_example.dart](example/live_websocket_example.dart) | **Offline.** primary/sideband Live, concurrent event taps, manual delegation and graceful finalization |
@@ -1426,7 +1470,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | Images | Generation, editing, and streaming |
 | Audio | Speech, transcription, translation, voice consents, prompt/sample voice creation, and saved voice deletion; consent phrase lookup remains untyped |
 | Videos | Generation, editing, extension, and downloads |
-| Realtime | WebSocket and WebRTC sessions, opt-in recovery with explicit pending delivery |
+| Realtime | WebSocket and WebRTC sessions, typed response input references, noise strength, Translation sockets, and opt-in recovery with explicit pending delivery |
 | Live | HTTP call controls, recordings, WebSockets, native Decisions delegation/triggers, audio fixtures, SIP DTMF, forks, transcript helpers, and opt-in recovery with fresh startup gating |
 | Files and Uploads | File management and large multipart uploads |
 | Batches | Asynchronous batch processing |

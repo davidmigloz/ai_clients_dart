@@ -1,0 +1,400 @@
+{
+  "issue": 421,
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "promotion_owner": 427,
+  "types": {
+    "RealtimeResponseInputAudio": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputAudio",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseInputAudio",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Frozen Realtime contract. Existing field/value semantics retained; typed fixture and source receipt cover assigned changes.",
+      "parent": "RealtimeResponseInputContentPart"
+    },
+    "RealtimeResponseInputFunctionCall": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputFunctionCall",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseInputFunctionCall",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Frozen Realtime contract. Existing field/value semantics retained; typed fixture and source receipt cover assigned changes.",
+      "parent": "RealtimeResponseInputItem"
+    },
+    "RealtimeResponseInputFunctionCallOutput": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputFunctionCallOutput",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseInputFunctionCallOutput",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Frozen Realtime contract. Existing field/value semantics retained; typed fixture and source receipt cover assigned changes.",
+      "parent": "RealtimeResponseInputItem"
+    },
+    "RealtimeResponseInputImage": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputImage",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseInputImage",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Frozen Realtime contract. Existing field/value semantics retained; typed fixture and source receipt cover assigned changes.",
+      "parent": "RealtimeResponseInputContentPart"
+    },
+    "RealtimeResponseInputText": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputText",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseInputText",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Frozen Realtime contract. Existing field/value semantics retained; typed fixture and source receipt cover assigned changes.",
+      "parent": "RealtimeResponseInputContentPart"
+    },
+    "RealtimeResponseItemReference": {
+      "spec": "main",
+      "schema": "RealtimeResponseItemReference",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseItemReference",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Frozen Realtime contract. Existing field/value semantics retained; typed fixture and source receipt cover assigned changes.",
+      "parent": "RealtimeResponseInputItem"
+    },
+    "RealtimeResponseInputItem": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputItem",
+      "kind": "sealed_parent",
+      "dart_class": "RealtimeResponseInputItem",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Frozen Realtime contract. Existing field/value semantics retained; typed fixture and source receipt cover assigned changes."
+    },
+    "RealtimeResponseInputMessage": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputMessage",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseInputMessage",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Role-aware native message model preserve exact allowed content, cardinality, optional/null ID/status and closed properties.",
+      "parent": "RealtimeResponseInputItem"
+    },
+    "RealtimeResponseInputMessageAssistant": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputMessageAssistant",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseInputMessage",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Role-aware native message model preserve exact allowed content, cardinality, optional/null ID/status and closed properties.",
+      "parent": "RealtimeResponseInputItem"
+    },
+    "RealtimeResponseInputMessageDeveloper": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputMessageDeveloper",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseInputMessage",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Role-aware native message model preserve exact allowed content, cardinality, optional/null ID/status and closed properties.",
+      "parent": "RealtimeResponseInputItem"
+    },
+    "RealtimeResponseInputMessageSystem": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputMessageSystem",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseInputMessage",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Role-aware native message model preserve exact allowed content, cardinality, optional/null ID/status and closed properties.",
+      "parent": "RealtimeResponseInputItem"
+    },
+    "RealtimeResponseInputMessageUser": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputMessageUser",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseInputMessage",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Role-aware native message model preserve exact allowed content, cardinality, optional/null ID/status and closed properties.",
+      "parent": "RealtimeResponseInputItem"
+    },
+    "AudioTranscriptionResponse": {
+      "spec": "main",
+      "schema": "AudioTranscriptionResponse",
+      "kind": "object",
+      "dart_class": "InputAudioTranscription",
+      "file": "lib/src/models/realtime/realtime_audio_config.dart",
+      "note": "Session transcription response configuration, not ordinary /audio transcription output. Existing open model/languages/keywords fields already align; returned keywords have regression fixtures."
+    },
+    "RealtimeSessionCreateRequestGA": {
+      "spec": "main",
+      "schema": "RealtimeSessionCreateRequestGA",
+      "kind": "object",
+      "dart_class": "RealtimeSessionCreateRequest",
+      "file": "lib/src/models/realtime/realtime_session_create.dart",
+      "note": "Existing session parent uses the shared GA or Translation noise leaf with optional finite strength0..1, preserving omission and explicit wrapper disable. Model identifiers remain open strings; custom voice leaf is additive where admitted."
+    },
+    "RealtimeSessionCreateResponseGA": {
+      "spec": "main",
+      "schema": "RealtimeSessionCreateResponseGA",
+      "kind": "object",
+      "dart_class": "RealtimeSessionCreateResponse",
+      "file": "lib/src/models/realtime/realtime_session_create.dart",
+      "note": "Existing session parent uses the shared GA or Translation noise leaf with optional finite strength0..1, preserving omission and explicit wrapper disable. Model identifiers remain open strings; custom voice leaf is additive where admitted."
+    },
+    "RealtimeTranscriptionSessionCreateRequestGA": {
+      "spec": "main",
+      "schema": "RealtimeTranscriptionSessionCreateRequestGA",
+      "kind": "object",
+      "dart_class": "RealtimeTranscriptionSessionCreateRequest",
+      "file": "lib/src/models/realtime/realtime_transcription_session.dart",
+      "note": "Existing session parent uses the shared GA or Translation noise leaf with optional finite strength0..1, preserving omission and explicit wrapper disable. Model identifiers remain open strings; custom voice leaf is additive where admitted."
+    },
+    "RealtimeTranscriptionSessionCreateResponseGA": {
+      "spec": "main",
+      "schema": "RealtimeTranscriptionSessionCreateResponseGA",
+      "kind": "object",
+      "dart_class": "RealtimeTranscriptionSessionCreateResponse",
+      "file": "lib/src/models/realtime/realtime_transcription_session.dart",
+      "note": "Existing session parent uses the shared GA or Translation noise leaf with optional finite strength0..1, preserving omission and explicit wrapper disable. Model identifiers remain open strings; custom voice leaf is additive where admitted."
+    },
+    "RealtimeTranslationSession": {
+      "spec": "main",
+      "schema": "RealtimeTranslationSession",
+      "kind": "object",
+      "dart_class": "RealtimeTranslationSession",
+      "file": "lib/src/models/realtime/realtime_translation_session.dart",
+      "note": "Existing session parent uses the shared GA or Translation noise leaf with optional finite strength0..1, preserving omission and explicit wrapper disable. Model identifiers remain open strings; custom voice leaf is additive where admitted."
+    },
+    "RealtimeTranslationSessionCreateRequest": {
+      "spec": "main",
+      "schema": "RealtimeTranslationSessionCreateRequest",
+      "kind": "object",
+      "dart_class": "RealtimeTranslationSessionCreateRequest",
+      "file": "lib/src/models/realtime/realtime_translation_session.dart",
+      "note": "Existing session parent uses the shared GA or Translation noise leaf with optional finite strength0..1, preserving omission and explicit wrapper disable. Model identifiers remain open strings; custom voice leaf is additive where admitted."
+    },
+    "RealtimeTranslationSessionUpdateRequest": {
+      "spec": "main",
+      "schema": "RealtimeTranslationSessionUpdateRequest",
+      "kind": "object",
+      "dart_class": "RealtimeTranslationSessionUpdateRequest",
+      "file": "lib/src/models/realtime/realtime_translation_session.dart",
+      "note": "Existing session parent uses the shared GA or Translation noise leaf with optional finite strength0..1, preserving omission and explicit wrapper disable. Model identifiers remain open strings; custom voice leaf is additive where admitted."
+    },
+    "RealtimeServerEventConversationItemInputAudioTranscriptionDelta": {
+      "spec": "main",
+      "schema": "RealtimeServerEventConversationItemInputAudioTranscriptionDelta",
+      "kind": "object",
+      "dart_class": "InputAudioTranscriptionDeltaEvent",
+      "file": "lib/src/models/realtime/realtime_event.dart",
+      "note": "Existing event binding; example/description-only changes retain wire shape. Transcription delta additionally supports optional nonnull contentIndex/delta, nullable typed logprobs and immutable future metadata."
+    },
+    "RealtimeServerEventError": {
+      "spec": "main",
+      "schema": "RealtimeServerEventError",
+      "kind": "object",
+      "dart_class": "ErrorEvent",
+      "file": "lib/src/models/realtime/realtime_event.dart",
+      "note": "Existing event binding; example/description-only changes retain wire shape. Transcription delta additionally supports optional nonnull contentIndex/delta, nullable typed logprobs and immutable future metadata."
+    },
+    "RealtimeServerEventResponseCreated": {
+      "spec": "main",
+      "schema": "RealtimeServerEventResponseCreated",
+      "kind": "object",
+      "dart_class": "ResponseCreatedEvent",
+      "file": "lib/src/models/realtime/realtime_event.dart",
+      "note": "Existing event binding; example/description-only changes retain wire shape. Transcription delta additionally supports optional nonnull contentIndex/delta, nullable typed logprobs and immutable future metadata."
+    },
+    "RealtimeServerEventResponseOutputItemDone": {
+      "spec": "main",
+      "schema": "RealtimeServerEventResponseOutputItemDone",
+      "kind": "object",
+      "dart_class": "ResponseOutputItemDoneEvent",
+      "file": "lib/src/models/realtime/realtime_event.dart",
+      "note": "Existing event binding; example/description-only changes retain wire shape. Transcription delta additionally supports optional nonnull contentIndex/delta, nullable typed logprobs and immutable future metadata."
+    },
+    "RealtimeServerEventSessionCreated": {
+      "spec": "main",
+      "schema": "RealtimeServerEventSessionCreated",
+      "kind": "object",
+      "dart_class": "SessionCreatedEvent",
+      "file": "lib/src/models/realtime/realtime_event.dart",
+      "note": "Existing event binding; example/description-only changes retain wire shape. Transcription delta additionally supports optional nonnull contentIndex/delta, nullable typed logprobs and immutable future metadata."
+    },
+    "RealtimeServerEventSessionUpdated": {
+      "spec": "main",
+      "schema": "RealtimeServerEventSessionUpdated",
+      "kind": "object",
+      "dart_class": "SessionUpdatedEvent",
+      "file": "lib/src/models/realtime/realtime_event.dart",
+      "note": "Existing event binding; example/description-only changes retain wire shape. Transcription delta additionally supports optional nonnull contentIndex/delta, nullable typed logprobs and immutable future metadata."
+    }
+  },
+  "contextual_schemas": {
+    "RealtimeResponseInputMessageFields": {
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "dart_context": "RealtimeResponseInputMessage common fields",
+      "note": "Actual common type/role/content/id/status contract, with role-specific cardinality/content enforced by the same model; no duplicate mixin DTO."
+    },
+    "RealtimeResponse": {
+      "file": "lib/src/models/realtime/realtime_event.dart",
+      "dart_context": "ResponseCreatedEvent.response / ResponseDoneEvent.response",
+      "note": "Existing raw response maps already preserve status_details.error.message for beta and GA. Public parser fixtures verify retention; no narrowing standalone response DTO."
+    },
+    "RealtimeBetaResponse": {
+      "file": "lib/src/models/realtime/realtime_event.dart",
+      "dart_context": "ResponseCreatedEvent.response / ResponseDoneEvent.response",
+      "note": "Existing raw response maps already preserve status_details.error.message for beta and GA. Public parser fixtures verify retention; no narrowing standalone response DTO."
+    },
+    "RealtimeBetaResponseCreateParams": {
+      "file": "lib/src/resources/realtime_resource.dart",
+      "dart_context": "RealtimeConnection.send raw beta response payload",
+      "note": "Frozen beta input still references broader conversation items; do not alias GA native input or revive the removed beta service. Changed voice documentation remains supported by explicit raw JSON."
+    },
+    "RealtimeResponseCreateParams": {
+      "file": "lib/src/resources/realtime_resource.dart",
+      "dart_context": "RealtimeConnection.createResponse",
+      "note": "Public typed GA helper covers native input and shared output audio/custom voice; omitted input remains omitted and [] clears response context. No fabricated request model."
+    },
+    "RealtimeClientEventResponseCreate": {
+      "file": "lib/src/resources/realtime_resource.dart",
+      "dart_context": "RealtimeConnection.createResponse / send",
+      "note": "Actual response.create envelope; assigned delta changes examples only. Public fixture verifies native input forwarding and event ID."
+    },
+    "RealtimeSessionCreateRequest": {
+      "file": "lib/src/resources/realtime_resource.dart",
+      "dart_context": "Retained legacy flat session JSON via send",
+      "note": "Legacy voice change is descriptive, with GA shared custom-voice support handled by the active session models. No beta HTTP endpoint or duplicate legacy request DTO introduced."
+    },
+    "RealtimeNoiseReductionStrength": {
+      "file": "lib/src/models/realtime/realtime_audio_config.dart",
+      "dart_context": "AudioInputNoiseReduction.strength and RealtimeTranslationNoiseReduction.strength",
+      "note": "Scalar finite number0..1 enforced before serialization and by parsers; const constructor preserves existing API, null constructor value omits. Omission update preserves server strength; no default1 insertion."
+    },
+    "RealtimeConnectParams": {
+      "file": "lib/src/resources/realtime_resource.dart",
+      "dart_context": "RealtimeResource.connect(model:, callId:)",
+      "note": "Real query arguments, not a JSON request body. Canonical optional model/call_id and documented intent stay additive; Translation model remains required. Existing model-session recovery admission remains explicit."
+    },
+    "RealtimeConnectDocumentationParams": {
+      "file": "lib/src/resources/realtime_resource.dart",
+      "dart_context": "RealtimeResource.connect(model:, callId:, intent:)",
+      "note": "Real query arguments, not a JSON request body. Canonical optional model/call_id and documented intent stay additive; Translation model remains required. Existing model-session recovery admission remains explicit."
+    },
+    "RealtimeTranslationConnectParams": {
+      "file": "lib/src/resources/realtime_resource.dart",
+      "dart_context": "RealtimeResource.connectTranslation(model:)",
+      "note": "Real query arguments, not a JSON request body. Canonical optional model/call_id and documented intent stay additive; Translation model remains required. Existing model-session recovery admission remains explicit."
+    },
+    "RealtimeServerEventConversationItemRetrieved": {
+      "file": "lib/src/models/realtime/realtime_event.dart",
+      "dart_context": "UnknownRealtimeEvent received JSON",
+      "note": "Assigned delta is example metadata only; existing raw codec retains item and event_id without fabricating a new typed event."
+    },
+    "RealtimeServerEventInputAudioBufferDtmfEventReceived": {
+      "file": "lib/src/models/realtime/realtime_event.dart",
+      "dart_context": "UnknownRealtimeEvent received JSON",
+      "note": "Assigned delta is example metadata only. Existing raw codec retains DTMF event/received_at; receipt tests prove preservation with no new sealed variant."
+    },
+    "RealtimeSession": {
+      "file": "lib/src/models/realtime/realtime_session.dart",
+      "dart_context": "RealtimeSession.model and retained legacy model strings through raw send",
+      "note": "Assigned delta changes only model names/descriptions. Current GA session view retains an open model string. Canonical RealtimeSession is a wider legacy flat shape; this is not a claim of implementing all its legacy properties or restoring beta service."
+    }
+  },
+  "supporting_types": {
+    "LogProbProperties": {
+      "spec": "main",
+      "schema": "LogProbProperties",
+      "kind": "object",
+      "dart_class": "RealtimeTranscriptionLogprob",
+      "file": "lib/src/models/realtime/realtime_event.dart",
+      "note": "Canonical required token/logprob/integer bytes fields; finite immutable data with no invented byte bounds."
+    },
+    "RealtimeResponseInputOutputText": {
+      "spec": "main",
+      "schema": null,
+      "kind": "extension",
+      "dart_class": "RealtimeResponseInputOutputText",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "parent": "RealtimeResponseInputContentPart",
+      "note": "Actual inline output_text part of RealtimeResponseInputMessageAssistant.properties.content.items; no standalone canonical component fabricated."
+    },
+    "RealtimeResponseInputContentPart": {
+      "spec": "main",
+      "schema": null,
+      "kind": "extension",
+      "dart_class": "RealtimeResponseInputContentPart",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Dart aggregate of the actual native role-specific content unions, validated again by owning role."
+    },
+    "AudioInputNoiseReduction": {
+      "spec": "main",
+      "schema": null,
+      "kind": "extension",
+      "dart_class": "AudioInputNoiseReduction",
+      "file": "lib/src/models/realtime/realtime_audio_config.dart",
+      "note": "Existing GA noise leaf shared by session/transcription create/receive. Optional type, optional nonnull finite strength0..1; no default insertion. Source inline pointer #/components/schemas/RealtimeSessionCreateRequestGA/properties/audio/properties/input/properties/noise_reduction."
+    },
+    "RealtimeTranslationNoiseReduction": {
+      "spec": "main",
+      "schema": null,
+      "kind": "extension",
+      "dart_class": "RealtimeTranslationNoiseReduction",
+      "file": "lib/src/models/realtime/realtime_translation_session.dart",
+      "note": "Existing Translation noise leaf shared by create/update/receive. Required type, optional nonnull finite strength0..1; nullable disable belongs to wrapper. Source inline pointer #/components/schemas/RealtimeTranslationSessionCreateRequest/properties/audio/properties/input/properties/noise_reduction."
+    },
+    "RealtimeAudioConfigOutput": {
+      "spec": "main",
+      "schema": null,
+      "kind": "extension",
+      "dart_class": "RealtimeAudioConfigOutput",
+      "file": "lib/src/models/realtime/realtime_audio_config.dart",
+      "note": "Actual shared output leaf: format and open named/custom voice union; additive voiceSelection retains named voice API. Session parents additionally support speed. Source inline pointer #/components/schemas/RealtimeResponseCreateParams/properties/audio/properties/output."
+    }
+  },
+  "source_receipts": [
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/resources/realtime/realtime.py",
+      "sha256": "57a32212a3d102145e054727e00c979b616b38d85a2802761dd2f6c2848a0db1"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/resources/realtime/translations/translations.py",
+      "sha256": "dd26ca4fe27aa6b23b9d0add6e5aa41d10379ee3c6fa8c22293a26da867ca90e"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/realtime/realtime_response_create_params_param.py",
+      "sha256": "d8b30f5cf2b34637790ca055cf95e50391346dcf72e5ff009f6b44afc4bcb547"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/realtime/conversation_item_input_audio_transcription_delta_event.py",
+      "sha256": "e0e955bb2d08d25f9217a2b3f48b2ac0a20328af2ac1765bfb94f616de9c1e7f"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/resources/realtime/realtime.ts",
+      "sha256": "487b535d66091309e6b071c40ea4479becba83b93043fb03035d97d78591b9f3"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/realtime/internal-base.ts",
+      "sha256": "ee59d97f9a6566bc380e83d98999f05a2beef8c762d3951f108d2b901d8a98e4"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/internal/realtime-recovery.ts",
+      "sha256": "9fb73903361f212c6d97b5ce7ce2f1acc2a07f3cde5629a0775deef61ea618de"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/realtime/translations/ws.ts",
+      "sha256": "2d0b345c742859da9ff7ecf623a57e5a73324d7a9825e3650ae5aa774207f8c2"
+    }
+  ],
+  "guide_receipts": [
+    {
+      "url": "https://developers.openai.com/api/docs/guides/realtime-translation",
+      "sha256": "20a1a779d801d22f863cb8f3d0f139ea21d838452fabd491bf8e1ec245e13b05"
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/deprecations",
+      "sha256": "3fddf4c625d689e43e559c236bcdd675de8a3b3d035070ba205827d8ad0a2fc2"
+    }
+  ],
+  "inventory_coverage": {
+    "assigned_schemas": 40,
+    "type_bindings": 26,
+    "contextual_shapes": 14,
+    "supporting_bindings": 6,
+    "unassigned": []
+  }
+}

@@ -101,7 +101,12 @@ class RealtimeResource extends ResourceBase {
   ///
   /// ## Parameters
   ///
-  /// - [model] - The model to use (e.g., 'gpt-realtime-2').
+  /// - [model] - The model to use (e.g., 'gpt-realtime-2'). Omit it when
+  ///   attaching with [callId], selecting transcription with [intent], or using
+  ///   the session type configured by a client secret.
+  /// - [callId] - Attach to an existing Realtime call over a sideband socket.
+  /// - [intent] - `transcription` starts a transcription-only session without a
+  ///   model; `realtime` explicitly selects a conversation session.
   /// - [config] - Optional session configuration applied via `session.update`
   ///   immediately after the connection opens.
   ///
@@ -119,6 +124,10 @@ class RealtimeResource extends ResourceBase {
   /// [connector] can capture caller native options for use on every attempt.
   /// [additionalHeaders] and [queryParameters] are snapshotted before opening;
   /// preparation callback overrides are layered over those original values.
+  /// Explicit [model], [callId] and [intent] values override the corresponding
+  /// query keys. Other query parameters remain unchanged. The service validates
+  /// combinations of connection targets. Recovery follows the model-session
+  /// policy and does not support an `intent` or `call_id` query.
   ///
   /// ## Platform Notes
   ///
@@ -148,7 +157,9 @@ class RealtimeResource extends ResourceBase {
   /// );
   /// ```
   Future<RealtimeConnection> connect({
-    required String model,
+    String? model,
+    String? callId,
+    String? intent,
     RealtimeSessionCreateRequest? config,
     RealtimeWebSocketConnector? connector,
     Map<String, String>? additionalHeaders,
@@ -157,7 +168,10 @@ class RealtimeResource extends ResourceBase {
     Future<void>? abortTrigger,
     RealtimeReconnectOptions? reconnect,
   }) async {
-    if (config != null && config.model != model) {
+    if (intent != null && intent != 'realtime' && intent != 'transcription') {
+      throw ArgumentError('intent must be realtime or transcription.');
+    }
+    if (config != null && model != null && config.model != model) {
       throw ArgumentError(
         'config.model must match the connect(model:) argument.',
       );
@@ -167,7 +181,11 @@ class RealtimeResource extends ResourceBase {
       model,
       connector: connector,
       additionalHeaders: additionalHeaders,
-      queryParameters: queryParameters,
+      queryParameters: {
+        ...?queryParameters,
+        'call_id': ?callId,
+        'intent': ?intent,
+      },
       connectionTimeout: connectionTimeout,
       abortTrigger: abortTrigger,
       reconnect: reconnect,
@@ -269,7 +287,7 @@ class RealtimeResource extends ResourceBase {
 
   Future<WebSocket> _connectSocket(
     String path,
-    String model, {
+    String? model, {
     required RealtimeWebSocketConnector? connector,
     required Map<String, String>? additionalHeaders,
     required Map<String, String>? queryParameters,
@@ -283,7 +301,9 @@ class RealtimeResource extends ResourceBase {
     if (!timeout.inMicroseconds.isFinite || timeout <= Duration.zero) {
       throw ArgumentError('connectionTimeout must be finite and positive.');
     }
-    if (model.isEmpty) throw ArgumentError('model must be nonempty.');
+    if (model != null && model.isEmpty) {
+      throw ArgumentError('model must be nonempty.');
+    }
     final initialHeaders = additionalHeaders == null
         ? null
         : Map<String, String>.unmodifiable(additionalHeaders);
@@ -292,15 +312,30 @@ class RealtimeResource extends ResourceBase {
         : Map<String, String>.unmodifiable(queryParameters);
     Map<String, String>? currentHeaders;
     Map<String, String>? currentQuery;
-    if (reconnect != null &&
-        (initialQuery?.containsKey('intent') == true ||
-            initialQuery?.containsKey('call_id') == true ||
-            Uri.parse(config.baseUrl).queryParameters.containsKey('intent') ||
-            Uri.parse(config.baseUrl).queryParameters.containsKey('call_id'))) {
-      throw ArgumentError(
-        'Automatic Realtime recovery requires a model session.',
-      );
+    var baseQuery = const <String, String>{};
+    if (reconnect != null) {
+      try {
+        baseQuery = Uri.parse(config.baseUrl).queryParameters;
+      } on FormatException {
+        throw ArgumentError('Realtime baseUrl must be a valid URL.');
+      }
     }
+    void validateRecoveryTarget(Map<String, String>? query) {
+      if (reconnect == null) return;
+      final effectiveModel = model ?? query?['model'] ?? baseQuery['model'];
+      if (effectiveModel == null ||
+          effectiveModel.isEmpty ||
+          query?.containsKey('intent') == true ||
+          query?.containsKey('call_id') == true ||
+          baseQuery.containsKey('intent') ||
+          baseQuery.containsKey('call_id')) {
+        throw ArgumentError(
+          'Automatic Realtime recovery requires a model session.',
+        );
+      }
+    }
+
+    validateRecoveryTarget(initialQuery);
     Future<WebSocket> open() => _openSocket(
       path,
       model,
@@ -332,12 +367,7 @@ class RealtimeResource extends ResourceBase {
           if (decision.queryParameters != null) {
             currentQuery = decision.queryParameters;
           }
-          if (currentQuery?.containsKey('intent') == true ||
-              currentQuery?.containsKey('call_id') == true) {
-            throw ArgumentError(
-              'Automatic Realtime recovery requires a model session.',
-            );
-          }
+          validateRecoveryTarget({...?initialQuery, ...?currentQuery});
           return open();
         },
       );
@@ -349,7 +379,7 @@ class RealtimeResource extends ResourceBase {
 
   Future<WebSocket> _openSocket(
     String path,
-    String model, {
+    String? model, {
     required RealtimeWebSocketConnector connector,
     required bool checkBrowserHeaders,
     required Map<String, String>? additionalHeaders,
@@ -363,7 +393,7 @@ class RealtimeResource extends ResourceBase {
     try {
       final uri = requestBuilder.buildUrl(
         path,
-        queryParams: {...?queryParameters, 'model': model},
+        queryParams: {...?queryParameters, 'model': ?model},
       );
       final scheme = switch (uri.scheme) {
         'https' || 'wss' => 'wss',
@@ -698,6 +728,9 @@ class RealtimeConnection extends _RealtimeConnection<RealtimeEvent> {
   ///
   /// - [outputModalities] - Response modality (`['text']` or `['audio']`).
   /// - [instructions] - Per-response instruction override.
+  /// - [input] - An explicit input context containing typed messages, function
+  ///   calls, outputs or references to existing conversation items. Omit it to
+  ///   use the conversation context; pass an empty list for an empty context.
   /// - [audio] - Per-response audio output config (format + voice).
   /// - [tools] - Tools available for this response.
   /// - [toolChoice] - The tool choice mode.
@@ -726,6 +759,7 @@ class RealtimeConnection extends _RealtimeConnection<RealtimeEvent> {
   void createResponse({
     List<String>? outputModalities,
     String? instructions,
+    List<RealtimeResponseInputItem>? input,
     RealtimeAudioConfigOutput? audio,
     List<RealtimeTool>? tools,
     Object? toolChoice,
@@ -739,6 +773,7 @@ class RealtimeConnection extends _RealtimeConnection<RealtimeEvent> {
     final response = <String, dynamic>{
       'output_modalities': ?outputModalities,
       'instructions': ?instructions,
+      'input': ?input?.map((item) => item.toJson()).toList(),
       'audio': ?(audio == null ? null : {'output': audio.toJson()}),
       'tools': ?tools?.map((t) => t.toJson()).toList(),
       'tool_choice': ?toolChoice,
@@ -837,9 +872,11 @@ class RealtimeTranslationConnection
   void appendAudioBytes(List<int> audioBytes, {String? eventId}) =>
       appendAudio(base64Encode(audioBytes), eventId: eventId);
 
-  /// Gracefully closes the translation session. The server flushes any
-  /// pending input audio and emits any remaining translated output before
-  /// closing the socket.
+  /// Requests a translation flush with `session.close`.
+  ///
+  /// Continue reading trailing output through `session.closed`, then call
+  /// [close] for local cleanup. This method sends the request without waiting
+  /// for the server acknowledgment or guaranteeing a flush after transport loss.
   void closeSession({String? eventId}) {
     send({'type': 'session.close', 'event_id': ?eventId});
   }
