@@ -394,9 +394,16 @@ class FunctionCallOutputItemResponse extends OutputItem {
       'FunctionCallOutputItemResponse(id: $id, agent: $agent, callId: $callId, name: $name, arguments: <redacted>, status: $status, namespace: $namespace, createdBy: $createdBy, caller: $caller, async: $async)';
 }
 
-/// A reasoning item from reasoning models.
+/// A reasoning item returned by a reasoning model.
+///
+/// Use [toInput] to replay a completed returned item in typed Responses history.
+/// Preserve the completed item's encrypted content rather than an unfinished
+/// `response.output_item.added` snapshot.
 @immutable
 class ReasoningItem extends OutputItem {
+  /// The fixed item discriminator.
+  String get type => 'reasoning';
+
   /// Unique identifier.
   final String id;
 
@@ -414,46 +421,108 @@ class ReasoningItem extends OutputItem {
   /// The reasoning summary content.
   final List<ReasoningSummaryContent> summary;
 
-  /// Encrypted reasoning content (if requested via include).
+  /// Opaque reasoning content returned for later replay, when available.
   final String? encryptedContent;
 
-  /// Creates a [ReasoningItem].
+  /// Whether the optional encrypted-content key was supplied, including null.
+  final bool hasEncryptedContent;
+
+  /// The returned item status, when supplied.
+  final ItemStatus? status;
+
+  /// Creates a [ReasoningItem], retaining existing const construction.
+  ///
+  /// Caller-owned collections must not be mutated after construction. Parsed
+  /// items and [copyWith] take immutable snapshots of their collections.
   const ReasoningItem({
     required this.id,
     this.agent,
     this.content,
     required this.summary,
     this.encryptedContent,
-  });
+    bool hasEncryptedContent = false,
+    this.status,
+  }) : hasEncryptedContent = hasEncryptedContent || encryptedContent != null;
 
   /// Creates a [ReasoningItem] from JSON.
   factory ReasoningItem.fromJson(Map<String, dynamic> json) {
+    const context = 'ReasoningItem';
+    requireJsonType(json, 'reasoning', context);
+    final snapshot = snapshotResponsesJson(json, context);
+    final rawSummary = snapshot['summary'];
+    if (rawSummary is! List) {
+      throw const FormatException('$context.summary: expected an array');
+    }
     return ReasoningItem(
-      id: json['id'] as String,
-      agent: json['agent'] != null
-          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
-          : null,
-      content: (json['content'] as List?)
-          ?.map((e) => e as Map<String, dynamic>)
-          .toList(),
-      summary: (json['summary'] as List)
-          .map(
-            (e) => ReasoningSummaryContent.fromJson(e as Map<String, dynamic>),
-          )
-          .toList(),
-      encryptedContent: json['encrypted_content'] as String?,
+      id: requireJsonString(snapshot['id'], '$context.id'),
+      agent: toolSearchJsonAgent(snapshot, context, nullable: true),
+      content: _reasoningOutputContent(snapshot['content']),
+      summary: List<ReasoningSummaryContent>.unmodifiable([
+        for (var index = 0; index < rawSummary.length; index++)
+          ReasoningSummaryContent.fromJson(
+            requireJsonObject(rawSummary[index], '$context.summary[$index]'),
+          ),
+      ]),
+      encryptedContent: optionalJsonString(
+        snapshot,
+        'encrypted_content',
+        context,
+        nullable: true,
+      ),
+      hasEncryptedContent: snapshot.containsKey('encrypted_content'),
+      status: toolSearchOptionalStatus(snapshot, context),
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'reasoning',
+    'type': type,
     'id': id,
     if (agent != null) 'agent': agent!.toJson(),
     if (content != null) 'content': content,
     'summary': summary.map((e) => e.toJson()).toList(),
-    if (encryptedContent != null) 'encrypted_content': encryptedContent,
+    if (encryptedContent != null || hasEncryptedContent)
+      'encrypted_content': encryptedContent,
+    if (status != null) 'status': status!.toJson(),
   };
+
+  /// Converts this returned item into independent, typed replay input.
+  ReasoningInputItem toInput() => ReasoningInputItem.fromJson(toJson());
+
+  /// Copies every field, snapshotting collections; explicit null clears optional
+  /// values. Clearing encrypted content retains an explicit null key; also set
+  /// [hasEncryptedContent] to false to restore omission. The required summary
+  /// cannot be cleared to null.
+  ReasoningItem copyWith({
+    String? id,
+    Object? agent = unsetCopyWithValue,
+    Object? content = unsetCopyWithValue,
+    List<ReasoningSummaryContent>? summary,
+    Object? encryptedContent = unsetCopyWithValue,
+    bool? hasEncryptedContent,
+    Object? status = unsetCopyWithValue,
+  }) => ReasoningItem(
+    id: id ?? this.id,
+    agent: identical(agent, unsetCopyWithValue)
+        ? this.agent
+        : agent as AgentTag?,
+    content: _reasoningOutputContent(
+      identical(content, unsetCopyWithValue) ? this.content : content,
+    ),
+    summary: List<ReasoningSummaryContent>.unmodifiable(
+      summary ?? this.summary,
+    ),
+    encryptedContent: identical(encryptedContent, unsetCopyWithValue)
+        ? this.encryptedContent
+        : encryptedContent as String?,
+    hasEncryptedContent:
+        hasEncryptedContent ??
+        (!identical(encryptedContent, unsetCopyWithValue) ||
+            this.hasEncryptedContent),
+    status: identical(status, unsetCopyWithValue)
+        ? this.status
+        : status as ItemStatus?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -462,21 +531,53 @@ class ReasoningItem extends OutputItem {
           runtimeType == other.runtimeType &&
           id == other.id &&
           agent == other.agent &&
+          listOfMapsDeepEqual(content, other.content) &&
           listsEqual(summary, other.summary) &&
-          encryptedContent == other.encryptedContent;
+          encryptedContent == other.encryptedContent &&
+          hasEncryptedContent == other.hasEncryptedContent &&
+          status == other.status;
 
   @override
-  int get hashCode =>
-      Object.hash(id, agent, Object.hashAll(summary), encryptedContent);
+  int get hashCode => Object.hash(
+    id,
+    agent,
+    listOfMapsHashCode(content),
+    Object.hashAll(summary),
+    encryptedContent,
+    hasEncryptedContent,
+    status,
+  );
 
   @override
   String toString() =>
-      'ReasoningItem(id: $id, agent: $agent, content: $content, summary: $summary, encryptedContent: $encryptedContent)';
+      'ReasoningItem(id: [${id.length} chars], agent: ${agent == null ? null : 'present'}, '
+      'content: ${content == null ? null : '${content!.length} parts'}, '
+      'summary: ${summary.length} parts, '
+      'encryptedContent: ${encryptedContent == null ? null : '[${encryptedContent!.length} chars]'}, '
+      'hasEncryptedContent: $hasEncryptedContent, '
+      'status: $status)';
+}
+
+List<Map<String, dynamic>>? _reasoningOutputContent(Object? value) {
+  if (value == null) return null;
+  const context = 'ReasoningItem.content';
+  if (value is! List) {
+    throw const FormatException('$context: expected an array');
+  }
+  final snapshot = snapshotResponsesJson({'content': value}, context);
+  final content = snapshot['content'] as List;
+  return List<Map<String, dynamic>>.unmodifiable([
+    for (var index = 0; index < content.length; index++)
+      freezeJsonObject(requireJsonObject(content[index], '$context[$index]')),
+  ]);
 }
 
 /// Content within a reasoning summary.
 @immutable
 class ReasoningSummaryContent {
+  /// The fixed content discriminator.
+  String get type => 'summary_text';
+
   /// The summary text.
   final String text;
 
@@ -485,11 +586,18 @@ class ReasoningSummaryContent {
 
   /// Creates a [ReasoningSummaryContent] from JSON.
   factory ReasoningSummaryContent.fromJson(Map<String, dynamic> json) {
-    return ReasoningSummaryContent(text: json['text'] as String);
+    requireJsonType(json, 'summary_text', 'ReasoningSummaryContent');
+    return ReasoningSummaryContent(
+      text: requireJsonString(json['text'], 'ReasoningSummaryContent.text'),
+    );
   }
 
   /// Converts to JSON.
-  Map<String, dynamic> toJson() => {'type': 'summary_text', 'text': text};
+  Map<String, dynamic> toJson() => {'type': type, 'text': text};
+
+  /// Copies the summary without exposing its contents in diagnostics.
+  ReasoningSummaryContent copyWith({String? text}) =>
+      ReasoningSummaryContent(text: text ?? this.text);
 
   @override
   bool operator ==(Object other) =>
@@ -502,7 +610,7 @@ class ReasoningSummaryContent {
   int get hashCode => text.hashCode;
 
   @override
-  String toString() => 'ReasoningSummaryContent(text: $text)';
+  String toString() => 'ReasoningSummaryContent(text: [${text.length} chars])';
 }
 
 /// A compaction item emitted by `responses.compact`.
