@@ -2,7 +2,7 @@ import 'package:meta/meta.dart';
 
 /// Source for document content.
 ///
-/// Documents can be provided as base64-encoded PDF data, plain text, or URLs.
+/// Documents can be provided as base64-encoded PDF data, plain text, URLs, or uploaded files.
 sealed class DocumentSource {
   const DocumentSource();
 
@@ -15,6 +15,9 @@ sealed class DocumentSource {
   /// Creates a URL-based PDF source.
   factory DocumentSource.url(String url) = UrlPdfSource;
 
+  /// Creates a source referencing an uploaded file.
+  factory DocumentSource.file(String fileId) = FileDocumentSource;
+
   /// Creates a [DocumentSource] from JSON.
   factory DocumentSource.fromJson(Map<String, dynamic> json) {
     final type = json['type'] as String;
@@ -22,6 +25,7 @@ sealed class DocumentSource {
       'base64' => Base64PdfSource.fromJson(json),
       'text' => PlainTextSource.fromJson(json),
       'url' => UrlPdfSource.fromJson(json),
+      'file' => FileDocumentSource.fromJson(json),
       _ => throw FormatException('Unknown DocumentSource type: $type'),
     };
   }
@@ -159,4 +163,43 @@ class UrlPdfSource extends DocumentSource {
 
   @override
   String toString() => 'UrlPdfSource(url: $url)';
+}
+
+/// Document source referencing a file uploaded through the Files API.
+@immutable
+class FileDocumentSource extends DocumentSource {
+  /// The source type, always 'file'.
+  String get type => 'file';
+
+  /// The uploaded file's ID.
+  final String fileId;
+
+  /// Creates a [FileDocumentSource].
+  const FileDocumentSource(this.fileId);
+
+  /// Creates a [FileDocumentSource] from JSON.
+  factory FileDocumentSource.fromJson(Map<String, dynamic> json) {
+    return FileDocumentSource(json['file_id'] as String);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': type, 'file_id': fileId};
+
+  /// Creates a copy with replaced values.
+  FileDocumentSource copyWith({String? fileId}) {
+    return FileDocumentSource(fileId ?? this.fileId);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FileDocumentSource &&
+          runtimeType == other.runtimeType &&
+          fileId == other.fileId;
+
+  @override
+  int get hashCode => fileId.hashCode;
+
+  @override
+  String toString() => 'FileDocumentSource(fileId: $fileId)';
 }
