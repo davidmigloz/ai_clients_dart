@@ -8,6 +8,7 @@ import '../../models/responses/response.dart';
 import '../../models/responses/streaming/response_stream_event.dart';
 import '../../models/responses/websocket/responses_create_event.dart';
 import '../../models/responses/websocket/responses_server_event.dart';
+import '../../models/responses/websocket/websocket_json_helpers.dart';
 import 'responses_connection.dart';
 
 /// Application-selected retention budgets, independent of service limits.
@@ -438,10 +439,20 @@ class ResponsesWebSocketLane {
     }
     final raw = envelope.rawJson['response'];
     final fill = raw is Map<String, dynamic> && raw['output'] == null;
+    // Connection events are broadcast and their legacy typed children may be
+    // mutable. Rebuild from the immutable wire snapshot so another observer (or
+    // a later edit to a delivered terminal) cannot change collected results.
+    final responseJson = raw is Map<String, dynamic>
+        ? raw
+        : snapshotResponsesJson(terminal.toJson(), 'WebSocket terminal');
+    final snapshot = Response.fromJson({
+      ...responseJson,
+      if (fill) 'output': const <dynamic>[],
+    });
     final indices = _output.keys.toList()..sort();
-    _finalResponse = terminal.copyWith(
+    _finalResponse = snapshot.copyWith(
       output: List<OutputItem>.unmodifiable(
-        fill ? indices.map((index) => _output[index]!) : terminal.output,
+        fill ? indices.map((index) => _output[index]!) : snapshot.output,
       ),
     );
     _output.clear();

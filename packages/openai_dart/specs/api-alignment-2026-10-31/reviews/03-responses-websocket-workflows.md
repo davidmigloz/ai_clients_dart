@@ -88,7 +88,8 @@ Engineering review checked immutable raw snapshots, schema ownership, nullable
 copy clearing, equality/hash consistency, public barrel consumption and redacted
 failure diagnostics. Separate final-output snapshots prevent caller edits to a
 delivered typed event from corrupting collection. Cancellation completion settles
-wait listeners after a reader exits; unexpected EOF releases partial accumulation;
+wait listeners after a reader exits; a pending or subsequent reader observing
+unexpected EOF releases partial accumulation;
 all budgets reject nonfinite values as well as nonpositive values. Session close
 removes its subscription without closing the caller-owned connection. No retry,
 tool execution or automatic response continuation is introduced.
@@ -147,3 +148,25 @@ bound the inline Live reasoning adapter to its entire parent component: it is
 now an extension for the actual `properties.reasoning` object. This accurately
 records the source structure rather than suppressing verifier diagnostics.
 Canonical/global reconciliation and remaining unrelated gaps stay with #427.
+
+## Additional pre-merge adversarial review
+
+A fresh review of PR #442 found two ownership/presence edge cases missed by the
+initial review. Both were reproduced with deterministic probes against head
+`20e352f7` before correction:
+
+- A low-level observer could edit the mutable typed terminal response before
+  collection, or a consumer could edit a delivered terminal's nested output
+  afterward, changing the cached final result. Collection now reconstructs the
+  terminal from the immutable wire snapshot, independently of delivered models.
+- Replacing a nested typed terminal event to edit an unrelated field could change
+  omitted/null output into explicit `[]`. Copies now retain the original presence
+  when the typed output still contains only its normalized empty placeholder.
+  Nonempty typed replacement and explicit raw JSON overrides stay authoritative.
+
+New regressions cover all three terminal statuses, edits before/after collection,
+unrelated event/response copies, null/omitted output, explicit overrides, and
+replacement response identities (which must discard the old presence/metadata).
+The final affected WebSocket/public HTTP selection passes **1,039 tests**.
+Full-package analysis with fatal infos, formatting, quick-fix checks and the
+offline session example pass. CI for the updated head is recorded in PR #442.

@@ -423,6 +423,53 @@ void main() {
       },
     );
 
+    for (final status in ['completed', 'failed', 'incomplete']) {
+      for (final beforeCollection in [true, false]) {
+        test(
+          '$status terminal edits ${beforeCollection ? 'before' : 'after'} collection cannot alter the final snapshot',
+          () async {
+            final fixture = await _fixture();
+            final lane = fixture.session.lane('main');
+            ResponsesStreamEvent? delivered;
+            if (beforeCollection) {
+              final observer = fixture.connection.events.listen((event) {
+                if (event is ResponsesStreamEvent &&
+                    event.type == 'response.$status') {
+                  delivered = event;
+                  _editTerminalCollections(_terminalResponse(event));
+                }
+              });
+              addTearDown(observer.cancel);
+            }
+            final wire = _response('response', status)
+              ..['output'] = [_message('Wire-authoritative output')]
+              ..['metadata'] = {'origin': 'wire'};
+            fixture.socket.frame({
+              'type': 'response.$status',
+              'stream_id': 'main',
+              'response': wire,
+            });
+            if (beforeCollection) {
+              await _pump();
+              expect(delivered, isNotNull);
+            } else {
+              delivered = await lane.receive() as ResponsesStreamEvent;
+              _editTerminalCollections(_terminalResponse(delivered!));
+            }
+            final finalResponse = await lane.getFinalResponse();
+            expect(finalResponse.outputText, 'Wire-authoritative output');
+            expect(finalResponse.metadata, {'origin': 'wire'});
+            expect(finalResponse.status.value, status);
+            expect(
+              ((delivered!.rawJson['response'] as Map)['output'] as List)
+                  .single,
+              _message('Wire-authoritative output'),
+            );
+          },
+        );
+      }
+    }
+
     test('lane IDs are validated and every reserved slot counts', () async {
       final fixture = await _fixture(limits: _limits(maxLanes: 2));
       for (final id in ['', 'with space', 'line\n', 'é', 'a' * 257]) {
@@ -616,6 +663,24 @@ TypeMatcher<ResponsesWebSocketSessionException> _kind(String kind) =>
       'kind',
       kind,
     );
+
+Response _terminalResponse(ResponsesStreamEvent event) => switch (event.event) {
+  ResponseCompletedEvent(:final response) => response,
+  ResponseFailedEvent(:final response) => response,
+  ResponseIncompleteEvent(:final response) => response,
+  _ => throw StateError('Expected terminal response'),
+};
+
+void _editTerminalCollections(Response response) {
+  (response.output.single as MessageOutputItem).content.clear();
+  // Parsed metadata may already be immutable. Either way, attempted edits must
+  // leave the separately collected final response's wire snapshot intact.
+  try {
+    response.metadata!['origin'] = 'edited';
+  } on UnsupportedError {
+    // The original parser's immutable metadata is equally safe.
+  }
+}
 
 ResponsesWebSocketLimits _limits({
   int maxLanes = 8,

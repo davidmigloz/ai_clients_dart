@@ -226,25 +226,60 @@ class ResponsesStreamEvent extends ResponsesServerEvent {
 
   /// Copies the envelope, retaining nested future metadata on typed edits and
   /// removing cleared known fields. A different event type replaces its payload.
+  /// A normalized empty terminal output retains original omission/null for the
+  /// same response ID; use [rawJson] to make it an authoritative empty array.
   ResponsesStreamEvent copyWith({
     ResponseStreamEvent? event,
     Object? streamId = unsetCopyWithValue,
     Map<String, dynamic>? rawJson,
   }) {
     final retainedRaw = rawJson ?? this.rawJson;
+    final before = event == null || rawJson != null
+        ? const <String, dynamic>{}
+        : this.event.toJson();
+    final after =
+        event == null ||
+            rawJson != null ||
+            event.runtimeType != this.event.runtimeType
+        ? null
+        : event.toJson();
     final newRaw = event == null || rawJson != null
         ? retainedRaw
         : event.runtimeType == this.event.runtimeType
-        ? replaceResponsesTypedJson(
-            retainedRaw,
-            this.event.toJson(),
-            event.toJson(),
-          )
+        ? replaceResponsesTypedJson(retainedRaw, before, after!)
         : {
             for (final entry in retainedRaw.entries)
-              if (!this.event.toJson().containsKey(entry.key))
-                entry.key: entry.value,
+              if (!before.containsKey(entry.key)) entry.key: entry.value,
           };
+    if (event != null &&
+        rawJson == null &&
+        event.runtimeType == this.event.runtimeType &&
+        _isTerminalType(type)) {
+      final originalResponse = retainedRaw['response'];
+      final beforeResponse = before['response'];
+      final afterResponse = after!['response'];
+      final copiedResponse = newRaw['response'];
+      if (originalResponse is Map<String, dynamic> &&
+          originalResponse['output'] == null &&
+          beforeResponse is Map<String, dynamic> &&
+          beforeResponse['output'] is List &&
+          (beforeResponse['output'] as List).isEmpty &&
+          afterResponse is Map<String, dynamic> &&
+          originalResponse['id'] == beforeResponse['id'] &&
+          beforeResponse['id'] == afterResponse['id'] &&
+          afterResponse['output'] is List &&
+          (afterResponse['output'] as List).isEmpty &&
+          copiedResponse is Map<String, dynamic>) {
+        // Both typed responses still contain the normalization placeholder.
+        // Editing another field must not turn missing/null output into an
+        // authoritative empty array. An explicit rawJson override can do that.
+        if (originalResponse.containsKey('output')) {
+          copiedResponse['output'] = null;
+        } else {
+          copiedResponse.remove('output');
+        }
+      }
+    }
     return ResponsesStreamEvent(
       event: event ?? this.event,
       streamId: identical(streamId, unsetCopyWithValue)
