@@ -9,7 +9,6 @@ import '../../models/workflows/deployment_log_record.dart';
 import '../../models/workflows/deployment_log_search_response.dart';
 import '../../models/workflows/managed_deployment_response.dart';
 import '../../models/workflows/update_deployment_request.dart';
-import '../../utils/streaming_parser.dart';
 import '../base_resource.dart';
 import '../streaming_resource.dart';
 
@@ -222,12 +221,15 @@ class DeploymentsResource extends ResourceBase with StreamingResource {
   ///
   /// - [workerName] filters logs by worker name.
   /// - [workflowName] filters logs by workflow name.
+  ///
+  /// The optional [abortTrigger] cancels the streaming request.
   Stream<DeploymentLogRecord> streamLogs({
     required String name,
     String? workerName,
     String? workflowName,
     String? after,
     String? lastEventId,
+    Future<void>? abortTrigger,
   }) {
     ensureNotClosed?.call();
     return _streamLogs(
@@ -236,6 +238,7 @@ class DeploymentsResource extends ResourceBase with StreamingResource {
       workflowName: workflowName,
       after: after,
       lastEventId: lastEventId,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -245,39 +248,29 @@ class DeploymentsResource extends ResourceBase with StreamingResource {
     String? workflowName,
     String? after,
     String? lastEventId,
-  }) async* {
-    final queryParams = <String, String>{};
-    if (workerName != null) queryParams['worker_name'] = workerName;
-    if (workflowName != null) queryParams['workflow_name'] = workflowName;
-    if (after != null) queryParams['after'] = after;
-    if (lastEventId != null) queryParams['last_event_id'] = lastEventId;
+    Future<void>? abortTrigger,
+  }) => streamRequest(
+    () {
+      final queryParams = <String, String>{};
+      if (workerName != null) queryParams['worker_name'] = workerName;
+      if (workflowName != null) queryParams['workflow_name'] = workflowName;
+      if (after != null) queryParams['after'] = after;
+      if (lastEventId != null) queryParams['last_event_id'] = lastEventId;
 
-    final url = requestBuilder.buildUrl(
-      '/v1/workflows/deployments/$name/logs/stream',
-      queryParams: queryParams,
-    );
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: lastEventId != null
-          ? {'Last-Event-ID': lastEventId}
-          : null,
-    );
+      final url = requestBuilder.buildUrl(
+        '/v1/workflows/deployments/$name/logs/stream',
+        queryParams: queryParams,
+      );
+      final headers = requestBuilder.buildHeaders(
+        additionalHeaders: lastEventId != null
+            ? {'Last-Event-ID': lastEventId}
+            : null,
+      );
 
-    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
-    final (preparedRequest, requestId) = await prepareStreamingRequest(
-      httpRequest,
-    );
-    final streamedResponse = await sendStreamingRequest(
-      preparedRequest,
-      requestId: requestId,
-    );
-
-    await for (final json in parseSSE(streamedResponse.stream)) {
-      final sseEvent = json['_event'] as String?;
-      final error = json['error'];
-      if (sseEvent == 'error' || error != null) {
-        throwInlineStreamError(json, sseEvent, error);
-      }
-      yield DeploymentLogRecord.fromJson(json);
-    }
-  }
+      final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+      return httpRequest;
+    },
+    DeploymentLogRecord.fromJson,
+    abortTrigger: abortTrigger,
+  );
 }

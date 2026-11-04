@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import '../models/chat/chat_completion_request.dart';
 import '../models/chat/chat_completion_response.dart';
 import '../models/chat/chat_completion_stream_response.dart';
-import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
 import 'streaming_resource.dart';
 
@@ -86,39 +85,28 @@ class ChatResource extends ResourceBase with StreamingResource {
   ///   }
   /// }
   /// ```
+  ///
+  /// The optional [abortTrigger] cancels the streaming request.
   Stream<ChatCompletionStreamResponse> createStream({
     required ChatCompletionRequest request,
-  }) async* {
-    final url = requestBuilder.buildUrl('/v1/chat/completions');
+    Future<void>? abortTrigger,
+  }) => streamRequest(
+    () {
+      final url = requestBuilder.buildUrl('/v1/chat/completions');
 
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
-    );
+      final headers = requestBuilder.buildHeaders(
+        additionalHeaders: {'Content-Type': 'application/json'},
+      );
 
-    // Ensure stream is true for streaming
-    final requestData = request.copyWith(stream: true);
+      // Ensure stream is true for streaming
+      final requestData = request.copyWith(stream: true);
 
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(requestData.toJson());
-
-    // Use mixin methods for streaming request handling
-    final (preparedRequest, requestId) = await prepareStreamingRequest(
-      httpRequest,
-    );
-    final streamedResponse = await sendStreamingRequest(
-      preparedRequest,
-      requestId: requestId,
-    );
-
-    // Parse SSE stream
-    await for (final json in parseSSE(streamedResponse.stream)) {
-      final sseEvent = json['_event'] as String?;
-      final error = json['error'];
-      if (sseEvent == 'error' || error != null) {
-        throwInlineStreamError(json, sseEvent, error);
-      }
-      yield ChatCompletionStreamResponse.fromJson(json);
-    }
-  }
+      final httpRequest = http.Request('POST', url)
+        ..headers.addAll(headers)
+        ..body = jsonEncode(requestData.toJson());
+      return httpRequest;
+    },
+    ChatCompletionStreamResponse.fromJson,
+    abortTrigger: abortTrigger,
+  );
 }

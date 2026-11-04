@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -6,6 +7,7 @@ import 'package:logging/logging.dart';
 import '../auth/auth_provider.dart';
 import '../errors/exceptions.dart';
 import '../utils/request_id.dart';
+import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
 
 /// Mixin providing streaming request capabilities for resources.
@@ -26,26 +28,6 @@ import 'base_resource.dart';
 /// 2. Send via [httpClient.send] to get [StreamedResponse]
 /// 3. Check status and map errors before consuming stream
 ///
-/// ## Usage
-///
-/// ```dart
-/// class ChatResource extends ResourceBase with StreamingResource {
-///   Stream<ChatCompletionStreamResponse> createStream({
-///     required ChatCompletionRequest request,
-///   }) async* {
-///     final httpRequest = http.Request('POST', url)...;
-///     final (preparedRequest, requestId) =
-///         await prepareStreamingRequest(httpRequest);
-///     final response = await sendStreamingRequest(
-///       preparedRequest,
-///       requestId: requestId,
-///     );
-///     await for (final json in parseSSE(response.stream)) {
-///       yield ChatCompletionStreamResponse.fromJson(json);
-///     }
-///   }
-/// }
-/// ```
 mixin StreamingResource on ResourceBase {
   /// Prepares a streaming request by applying auth and logging.
   ///
@@ -124,6 +106,180 @@ mixin StreamingResource on ResourceBase {
     return streamedResponse;
   }
 
+  /// Sends and parses a streaming request with request-scoped cancellation.
+  ///
+  /// The request is created on listen. Cancellation closes the local stream and
+  /// signals the transport without closing the shared HTTP client. Native
+  /// transport cancellation depends on support from the supplied HTTP client.
+  Stream<T> streamRequest<T>(
+    http.BaseRequest Function() createRequest,
+    T Function(Map<String, dynamic>) parseEvent, {
+    Future<void>? abortTrigger,
+    Stream<Map<String, dynamic>> Function(Stream<List<int>>) parseEvents =
+        parseSSE,
+    bool checkInlineErrors = true,
+  }) {
+    final nativeAbort = Completer<void>();
+    StreamSubscription<dynamic>? subscription;
+    Future<void>? cancellation;
+    var finished = false;
+    var stage = AbortionStage.beforeRequest;
+    var correlationId = generateRequestId();
+    late StreamController<T> controller;
+
+    Future<void> cancel({bool abortTransport = true}) {
+      finished = true;
+      if (abortTransport && !nativeAbort.isCompleted) nativeAbort.complete();
+      return cancellation ??= Future<void>.sync(() => subscription?.cancel());
+    }
+
+    void finish([Object? error, StackTrace? stackTrace]) {
+      if (finished) return;
+      finished = true;
+      if (error != null) {
+        _logStreamError(error, correlationId);
+        controller.addError(error, stackTrace);
+      }
+      // onCancel shares this cleanup future with subscription.cancel().
+      cancel(abortTransport: error != null).ignore();
+      unawaited(controller.close());
+    }
+
+    Future<void> run() async {
+      try {
+        ensureNotClosed?.call();
+        final request = createRequest();
+        final (preparedRequest, requestId) = switch (request) {
+          http.MultipartRequest() => await prepareStreamingMultipartRequest(
+            request,
+          ),
+          http.Request() => await prepareStreamingRequest(request),
+          _ => throw ArgumentError('Unsupported streaming request type'),
+        };
+        correlationId = requestId;
+        if (finished) return;
+        stage = AbortionStage.duringRequest;
+        final response = await httpClient.send(
+          _abortableRequest(preparedRequest, nativeAbort.future),
+        );
+        if (finished) {
+          await response.stream.listen(null).cancel();
+          return;
+        }
+        stage = AbortionStage.duringStream;
+        if (response.statusCode >= 400) {
+          final body = <int>[];
+          subscription = response.stream.listen(
+            body.addAll,
+            onError: finish,
+            onDone: () {
+              try {
+                finish(
+                  mapHttpError(
+                    http.Response.bytes(
+                      body,
+                      response.statusCode,
+                      headers: response.headers,
+                      request: response.request,
+                      reasonPhrase: response.reasonPhrase,
+                    ),
+                  ),
+                );
+              } catch (error, stackTrace) {
+                finish(error, stackTrace);
+              }
+            },
+            cancelOnError: true,
+          );
+        } else {
+          subscription = parseEvents(response.stream).listen(
+            (event) {
+              if (finished) return;
+              try {
+                if (checkInlineErrors) {
+                  final sseEvent = event['_event'] as String?;
+                  final error = event['error'];
+                  if (sseEvent == 'error' || error != null) {
+                    throwInlineStreamError(event, sseEvent, error);
+                  }
+                }
+                controller.add(parseEvent(event));
+              } catch (error, stackTrace) {
+                finish(error, stackTrace);
+              }
+            },
+            onError: finish,
+            onDone: finish,
+            cancelOnError: true,
+          );
+        }
+        if (finished) {
+          await subscription?.cancel();
+        } else if (controller.isPaused) {
+          subscription?.pause();
+        }
+      } catch (error, stackTrace) {
+        finish(error, stackTrace);
+      }
+    }
+
+    controller = StreamController<T>(
+      onListen: () {
+        unawaited(
+          abortTrigger?.then(
+            (_) => finish(
+              AbortedException(
+                message: 'Stream aborted by user',
+                correlationId: correlationId,
+                timestamp: DateTime.now(),
+                stage: stage,
+              ),
+            ),
+            onError: (Object _, StackTrace _) {},
+          ),
+        );
+        unawaited(run());
+      },
+      onPause: () => subscription?.pause(),
+      onResume: () => subscription?.resume(),
+      onCancel: () {
+        // Local cancellation must not wait for a supplied client's cleanup.
+        cancel(abortTransport: !finished).ignore();
+      },
+    );
+    return controller.stream;
+  }
+
+  http.BaseRequest _abortableRequest(
+    http.BaseRequest request,
+    Future<void> abortTrigger,
+  ) {
+    final http.BaseRequest abortable = switch (request) {
+      http.Request() =>
+        http.AbortableRequest(
+            request.method,
+            request.url,
+            abortTrigger: abortTrigger,
+          )
+          ..bodyBytes = request.bodyBytes
+          ..encoding = request.encoding,
+      http.MultipartRequest() =>
+        http.AbortableMultipartRequest(
+            request.method,
+            request.url,
+            abortTrigger: abortTrigger,
+          )
+          ..fields.addAll(request.fields)
+          ..files.addAll(request.files),
+      _ => throw ArgumentError('Unsupported streaming request type'),
+    };
+    return abortable
+      ..headers.addAll(request.headers)
+      ..followRedirects = request.followRedirects
+      ..maxRedirects = request.maxRedirects
+      ..persistentConnection = request.persistentConnection;
+  }
+
   /// Applies auth credentials to a request.
   http.Request _applyAuthToRequest(
     http.Request request,
@@ -169,9 +325,8 @@ mixin StreamingResource on ResourceBase {
   /// Logs an outgoing streaming request.
   void _logStreamRequest(http.BaseRequest request, String requestId) {
     if (config.logLevel.value <= Level.INFO.value) {
-      Logger(
-        'Mistral.HTTP',
-      ).info('REQUEST [$requestId] ${request.method} ${request.url}');
+      Logger('Mistral.HTTP')
+          .info('REQUEST [$requestId] ${request.method} ${request.url}');
     }
   }
 
