@@ -149,16 +149,22 @@ class ComputerCallInputItem extends Item {
   /// The call status.
   final ItemStatus status;
 
-  /// Creates a computer call input item.
-  const ComputerCallInputItem({
+  /// Creates a computer call input item, snapshotting actions and safety checks.
+  ComputerCallInputItem({
     required this.id,
     this.agent,
     required this.callId,
-    this.action,
-    this.actions,
-    required this.pendingSafetyChecks,
+    ComputerAction? action,
+    List<ComputerAction>? actions,
+    required List<Map<String, dynamic>> pendingSafetyChecks,
     required this.status,
-  });
+  }) : action = action == null ? null : _snapshotComputerAction(action),
+       actions = actions == null
+           ? null
+           : List.unmodifiable(actions.map(_snapshotComputerAction)),
+       pendingSafetyChecks = List.unmodifiable(
+         pendingSafetyChecks.map(freezeJsonObject),
+       );
 
   /// Parses a computer call input item.
   factory ComputerCallInputItem.fromJson(Map<String, dynamic> json) {
@@ -242,6 +248,20 @@ class ComputerCallInputItem extends Item {
   );
 }
 
+// Action constructors retain caller collections for const compatibility.
+// Snapshot through their codecs to detach nested keys and path coordinates;
+// DragAction's parser also creates a new outer path list that must be frozen.
+ComputerAction _snapshotComputerAction(ComputerAction action) {
+  final snapshot = ComputerAction.fromJson(freezeJsonObject(action.toJson()));
+  return switch (snapshot) {
+    DragAction(:final path, :final keys) => DragAction(
+      path: List.unmodifiable(path),
+      keys: keys,
+    ),
+    _ => snapshot,
+  };
+}
+
 /// A safety check acknowledged by the developer.
 @immutable
 class ComputerSafetyCheck {
@@ -319,15 +339,17 @@ class ComputerCallOutputInputItem extends Item {
   /// Status, when returned by the input-items resource.
   final ItemStatus? status;
 
-  /// Creates a computer call result.
-  const ComputerCallOutputInputItem({
+  /// Creates a computer call result, snapshotting acknowledged safety checks.
+  ComputerCallOutputInputItem({
     required this.callId,
     required this.output,
     this.agent,
     this.id,
-    this.acknowledgedSafetyChecks,
+    List<ComputerSafetyCheck>? acknowledgedSafetyChecks,
     this.status,
-  });
+  }) : acknowledgedSafetyChecks = acknowledgedSafetyChecks == null
+           ? null
+           : List.unmodifiable(acknowledgedSafetyChecks);
 
   /// Parses a computer call result.
   factory ComputerCallOutputInputItem.fromJson(Map<String, dynamic> json) {
@@ -443,16 +465,18 @@ class ComputerCallOutputResourceItem extends Item {
   /// Identifier of the actor that created the item.
   final String? createdBy;
 
-  /// Creates a stored computer call result.
-  const ComputerCallOutputResourceItem({
+  /// Creates a stored result, snapshotting acknowledged safety checks.
+  ComputerCallOutputResourceItem({
     required this.id,
     required this.callId,
     required this.output,
     required this.status,
     this.agent,
-    this.acknowledgedSafetyChecks,
+    List<ComputerSafetyCheck>? acknowledgedSafetyChecks,
     this.createdBy,
-  });
+  }) : acknowledgedSafetyChecks = acknowledgedSafetyChecks == null
+           ? null
+           : List.unmodifiable(acknowledgedSafetyChecks);
 
   /// Parses a stored computer call result.
   factory ComputerCallOutputResourceItem.fromJson(Map<String, dynamic> json) {
