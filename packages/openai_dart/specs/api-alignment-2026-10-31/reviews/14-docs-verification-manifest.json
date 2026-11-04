@@ -190,7 +190,8 @@
     "specs/api-alignment-2026-10-31/reviews/issue424-live-image-error-replay-manifest.json",
     "specs/api-alignment/reviews/42-idle-run-helper-manifest.json",
     "specs/api-alignment-2026-10-31/reviews/issue415-live-input-closure-manifest.json",
-    "specs/api-alignment/reviews/43-local-dispatch-manifest.json"
+    "specs/api-alignment/reviews/43-local-dispatch-manifest.json",
+    "specs/api-alignment/reviews/44-result-parser-manifest.json"
   ],
   "inventory_coverage": {
     "schemas": 297,
@@ -277,6 +278,11 @@
       "issue": 395,
       "pull_request": 465,
       "receipt": "specs/api-alignment/reviews/43-local-dispatch-manifest.json"
+    },
+    {
+      "issue": 396,
+      "pull_request": 466,
+      "receipt": "specs/api-alignment/reviews/44-result-parser-manifest.json"
     }
   ],
   "client_helper_contexts": [
@@ -300,6 +306,20 @@
       "file": "lib/src/resources/agent_sessions_resource.dart",
       "schema": null,
       "note": "Local request policy/readiness controls on unchanged canonical operations. Authentication cannot enable retries."
+    },
+    {
+      "receipt": "specs/api-alignment/reviews/44-result-parser-manifest.json",
+      "dart_context": "AgentSessionRun.withResultCollection / finalResult / withOutput",
+      "file": "lib/src/helpers/agents/agent_session_run.dart",
+      "schema": null,
+      "note": "One existing cursor/dispatcher; optional bounded retention and cached results, no new endpoint."
+    },
+    {
+      "receipt": "specs/api-alignment/reviews/44-result-parser-manifest.json",
+      "dart_context": "AgentSessionRunResult / AgentSessionParsedRunResult / AgentSessionOutputBinding / AgentSessionTypedRun / AgentSessionRunResultReason / AgentSessionRunResultException / AgentSessionOutputParseException / agentSessionMessagesText",
+      "file": "lib/src/helpers/agents/agent_session_run_result.dart",
+      "schema": null,
+      "note": "Local completed/partial results, private failures, pure projection and caller validator. No invented DTO fields or annotations."
     }
   ],
   "union_metadata_corrections": {
