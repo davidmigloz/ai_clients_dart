@@ -69,6 +69,8 @@
     "live": "live_http_example",
     "liveSessions": "live_http_example",
     "agents": "saved_agents_example",
+    "agentAutomations": "agent_automations_example",
+    "agentAutomationInvocations": "agent_automations_example",
     "agentSessions": "agent_sessions_example",
     "vaults": "vaults_example",
     "vaultCredentials": "vaults_example",

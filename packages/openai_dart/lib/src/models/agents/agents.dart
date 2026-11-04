@@ -2,6 +2,8 @@
 library;
 
 export 'agent.dart';
+export 'agent_automation_models.dart';
+export 'agent_automation_requests.dart';
 export 'agent_config.dart';
 export 'agent_enums.dart';
 export 'agent_environment_models.dart';

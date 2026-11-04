@@ -6,6 +6,7 @@ import '../errors/exceptions.dart';
 import '../models/agents/agent_json_helpers.dart';
 import '../models/agents/agents.dart';
 import '../utils/private_audio_http.dart';
+import 'agent_automations_resource.dart';
 import 'agent_environments_resource.dart';
 import 'agent_sessions_resource.dart';
 import 'base_resource.dart';
@@ -16,6 +17,20 @@ import 'base_resource.dart';
 /// after caller headers. This resource manages reusable configuration only;
 /// creation does not start a session, run a model or execute a configured tool.
 class AgentsResource extends ResourceBase {
+  AgentAutomationsResource? _automations;
+
+  /// Saved schedules and explicit delivery records, independent of local timers.
+  AgentAutomationsResource get automations {
+    ensureNotClosed?.call();
+    return _automations ??= AgentAutomationsResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+  }
+
   AgentEnvironmentsResource? _environments;
 
   /// Owned hosted prewarming and reusable environment templates.
@@ -140,10 +155,11 @@ class AgentsResource extends ResourceBase {
 
   /// Replaces supplied fields on an existing agent.
   ///
-  /// Omission leaves a field unchanged. Objects, lists and maps replace the
-  /// complete field, rather than merging it. For example, `clearReasoning: true`
-  /// sends `reasoning: null`, restoring the model's default effort. Use
-  /// `clearName`, `clearTools` or `clearMetadata` to clear those fields explicitly.
+  /// Omission leaves a field unchanged. Supplied objects, lists and maps replace
+  /// the complete field, except experimental settings merge supplied keys.
+  /// For example, `clearReasoning: true` sends `reasoning: null`, restoring the
+  /// model's default effort. Use `clearName`, `clearTools` or `clearMetadata` to
+  /// clear those fields explicitly.
   Future<Agent> update(
     String agentId,
     UpdateAgentRequest request, {
