@@ -156,8 +156,8 @@ void main() {
         throwsFormatException,
       );
       expect(
-        () => McpCallError.fromJson({'type': 'other'}),
-        throwsFormatException,
+        McpCallError.fromJson({'type': 'other'}),
+        isA<UnknownMcpCallError>(),
       );
     },
   );

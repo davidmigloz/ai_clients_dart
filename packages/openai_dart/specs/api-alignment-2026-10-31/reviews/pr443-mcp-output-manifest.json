@@ -1,0 +1,194 @@
+{
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "pull_request": 443,
+  "promotion_owner": 427,
+  "source_receipts": [
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/responses/response_output_item.py",
+      "sha256": "814e4128695ae3c61d81d67bcc66d8e6dab30227fe99ccb10b1ec2b86575bc3c"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/responses/mcp_tool_call_error.py",
+      "sha256": "94a182801284726ca637775f410f11cc679a535833015fd4edd945df712da279"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/resources/responses/responses.ts",
+      "sha256": "f84e394bf08d71403c054ccb4d41d278861f2d19db3ea426e7aec789f3eb5dbb"
+    }
+  ],
+  "types": {
+    "MCPToolCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpCallOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "MCPToolCall",
+      "parent": "OutputItem",
+      "note": "Native output call has no call_id. Required id/arguments/name/server_label; optional approval_request_id, structured error, output and status. Beta additionally supports producing agent metadata."
+    },
+    "BetaMCPToolCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpCallOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaMCPToolCall",
+      "parent": "OutputItem",
+      "note": "Native output call has no call_id. Required id/arguments/name/server_label; optional approval_request_id, structured error, output and status. Beta additionally supports producing agent metadata."
+    },
+    "MCPListTools": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpListToolsOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "MCPListTools",
+      "parent": "OutputItem"
+    },
+    "BetaMCPListTools": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpListToolsOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaMCPListTools",
+      "parent": "OutputItem"
+    },
+    "MCPApprovalRequest": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpApprovalRequestOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "MCPApprovalRequest",
+      "parent": "OutputItem"
+    },
+    "BetaMCPApprovalRequest": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpApprovalRequestOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaMCPApprovalRequest",
+      "parent": "OutputItem"
+    },
+    "MCPApprovalResponseResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpApprovalResponseOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "MCPApprovalResponseResource",
+      "parent": "OutputItem",
+      "note": "Output-resource context requires id. Pinned required includes undeclared request_id; Python/Node declarations omit that phantom field. This mapping does not claim typed writable MCPApprovalResponse input support."
+    },
+    "BetaMCPApprovalResponseResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpApprovalResponseOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaMCPApprovalResponseResource",
+      "parent": "OutputItem",
+      "note": "Output-resource context requires id. Pinned required includes undeclared request_id; Python/Node declarations omit that phantom field. This mapping does not claim typed writable MCPApprovalResponse input support."
+    },
+    "MCPListToolsTool": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "McpToolDescriptor",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "MCPListToolsTool",
+      "note": "Required input_schema and optional annotations preserve finite arbitrary JSON to match Python object/Node unknown receive types, broader than pinned OpenAPI object shape. Parsed snapshots are immutable; const caller-owned construction remains explicit."
+    },
+    "BetaMCPListToolsTool": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "McpToolDescriptor",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaMCPListToolsTool",
+      "note": "Required input_schema and optional annotations preserve finite arbitrary JSON to match Python object/Node unknown receive types, broader than pinned OpenAPI object shape. Parsed snapshots are immutable; const caller-owned construction remains explicit."
+    },
+    "MCPToolCallStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "McpCallStatus",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "MCPToolCallStatus",
+      "note": "Five native statuses plus local unknown fallback. Unknown returned strings are accepted but not retained verbatim."
+    },
+    "BetaMCPToolCallStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "McpCallStatus",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaMCPToolCallStatus",
+      "note": "Five native statuses plus local unknown fallback. Unknown returned strings are accepted but not retained verbatim."
+    },
+    "MCPToolCallError": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "McpCallError",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "MCPToolCallError",
+      "note": "Three native structured errors plus local raw-preserving unknown variant; malformed known variants remain rejected."
+    },
+    "BetaMCPToolCallError": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "McpCallError",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaMCPToolCallError",
+      "note": "Three native structured errors plus local raw-preserving unknown variant; malformed known variants remain rejected."
+    },
+    "MCPProtocolError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpProtocolError",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "MCPProtocolError",
+      "parent": "McpCallError"
+    },
+    "BetaMCPProtocolError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpProtocolError",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaMCPProtocolError",
+      "parent": "McpCallError"
+    },
+    "MCPToolExecutionError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpToolExecutionError",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "MCPToolExecutionError",
+      "parent": "McpCallError"
+    },
+    "BetaMCPToolExecutionError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpToolExecutionError",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaMCPToolExecutionError",
+      "parent": "McpCallError"
+    },
+    "HTTPError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpHttpError",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "HTTPError",
+      "parent": "McpCallError"
+    },
+    "BetaHTTPError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpHttpError",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaHTTPError",
+      "parent": "McpCallError"
+    },
+    "UnknownMcpCallError": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownMcpCallError",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": null,
+      "parent": "McpCallError",
+      "note": "Receive-only forward-compatibility fallback with required unknown string discriminator and immutable finite acyclic raw JSON. No upstream component is invented."
+    }
+  }
+}

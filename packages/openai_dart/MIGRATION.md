@@ -46,6 +46,45 @@ See the [offline example](example/responses_cache_usage_example.dart).
 
 ---
 
+## Upcoming release: Native MCP response output
+
+`McpCallOutputItem` now follows native Responses output: `callId` is removed;
+`arguments`, `name` and `serverLabel` are required. Use `id` for the returned
+item and `approvalRequestId` for approval correlation. `status` now uses
+`McpCallStatus`, including `calling` and `failed`; unknown returned strings map
+to `McpCallStatus.unknown` without retaining the original string.
+
+```dart
+// Before
+const call = McpCallOutputItem(
+  id: 'mcp_call_1',
+  callId: 'legacy_call_id',
+  status: ItemStatus.completed,
+);
+
+// After
+const call = McpCallOutputItem(
+  id: 'mcp_call_1',
+  arguments: '{}',
+  name: 'search',
+  serverLabel: 'docs',
+  status: McpCallStatus.completed,
+);
+```
+
+`error` now uses the sealed `McpCallError` family instead of a string. Handle
+protocol, HTTP and tool execution errors, plus `UnknownMcpCallError` for future
+variants. Unknown errors retain immutable raw JSON; malformed known errors still
+fail validation. Default diagnostics redact error payloads.
+
+Exhaustive `OutputItem` switches must handle `McpListToolsOutputItem`,
+`McpApprovalRequestOutputItem` and `McpApprovalResponseOutputItem`. These are
+returned output models; typed request `Item` parsing and conversation-resource
+MCP models are unchanged. Explicit approval input can still use
+`ResponseInput.fromOutputItems` with the native approval response fields.
+
+---
+
 ## Upcoming release: Decisions GA
 
 Existing string question constructors (including const predicates), user messages,

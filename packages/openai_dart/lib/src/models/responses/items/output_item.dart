@@ -19,6 +19,7 @@ import '../tools/computer_action.dart';
 import '../tools/response_tool.dart';
 import '../tools/shell_tool_environment.dart';
 import '../tools/tool_call_caller.dart';
+import '../websocket/websocket_json_helpers.dart';
 import 'item.dart';
 import 'shell_call_helpers.dart';
 import 'tool_search_item_helpers.dart';
@@ -2085,6 +2086,9 @@ class LocalShellCallOutputResultItem extends OutputItem {
 
 /// A status reported by an MCP call.
 enum McpCallStatus {
+  /// Fallback for an unrecognized returned status; the raw string is not kept.
+  unknown('unknown'),
+
   /// The call is in progress.
   inProgress('in_progress'),
 
@@ -2100,15 +2104,15 @@ enum McpCallStatus {
   /// The call failed.
   failed('failed');
 
-  /// Native JSON value.
+  /// Serialized value, including the local fallback sentinel.
   final String value;
   const McpCallStatus(this.value);
 
-  /// Parses a native value.
+  /// Parses a native value, returning [unknown] for future status strings.
   static McpCallStatus fromJson(String value) =>
       McpCallStatus.values.firstWhere(
         (status) => status.value == value,
-        orElse: () => throw FormatException('Unknown MCP call status: $value'),
+        orElse: () => McpCallStatus.unknown,
       );
 
   /// Returns the native value.
@@ -2116,21 +2120,80 @@ enum McpCallStatus {
 }
 
 /// An error returned by an MCP call.
+///
+/// Known variants are [McpProtocolError], [McpToolExecutionError] and
+/// [McpHttpError]. Future error types use [UnknownMcpCallError], preserving their
+/// raw JSON. Malformed known variants still fail validation.
 sealed class McpCallError {
   /// Creates an error.
   const McpCallError();
 
   /// Parses a native MCP error.
-  factory McpCallError.fromJson(Map<String, dynamic> json) =>
-      switch (json['type']) {
-        'mcp_protocol_error' => McpProtocolError.fromJson(json),
-        'mcp_tool_execution_error' => McpToolExecutionError.fromJson(json),
-        'http_error' => McpHttpError.fromJson(json),
-        _ => throw const FormatException('Unknown MCP call error type.'),
-      };
+  factory McpCallError.fromJson(Map<String, dynamic> json) {
+    final type = requireJsonString(json['type'], 'McpCallError.type');
+    return switch (type) {
+      'mcp_protocol_error' => McpProtocolError.fromJson(json),
+      'mcp_tool_execution_error' => McpToolExecutionError.fromJson(json),
+      'http_error' => McpHttpError.fromJson(json),
+      _ => UnknownMcpCallError.fromJson(json),
+    };
+  }
 
   /// Serializes the error.
   Map<String, dynamic> toJson();
+}
+
+/// A future MCP error with an immutable, lossless JSON snapshot.
+@immutable
+final class UnknownMcpCallError extends McpCallError {
+  /// Creates a future error, validating its discriminator and JSON payload.
+  factory UnknownMcpCallError({required Map<String, dynamic> rawJson}) =>
+      UnknownMcpCallError.fromJson(rawJson);
+
+  const UnknownMcpCallError._(this.rawJson);
+
+  /// Parses a future error without accepting malformed known variants.
+  factory UnknownMcpCallError.fromJson(Map<String, dynamic> json) {
+    const context = 'UnknownMcpCallError';
+    final type = requireJsonString(json['type'], '$context.type');
+    if (type.isEmpty ||
+        type == 'mcp_protocol_error' ||
+        type == 'mcp_tool_execution_error' ||
+        type == 'http_error') {
+      throw const FormatException(
+        '$context.type: expected an unrecognized nonempty type',
+      );
+    }
+    return UnknownMcpCallError._(snapshotResponsesJson(json, context));
+  }
+
+  /// The original future discriminator, preserved verbatim.
+  String get type => rawJson['type'] as String;
+
+  /// Recursively immutable JSON, including the discriminator and future fields.
+  final Map<String, dynamic> rawJson;
+
+  @override
+  Map<String, dynamic> toJson() => {...rawJson};
+
+  /// Copies raw metadata, with the typed [type] taking precedence over its key.
+  /// Omitted [type] retains this error's discriminator.
+  UnknownMcpCallError copyWith({String? type, Map<String, dynamic>? rawJson}) =>
+      UnknownMcpCallError(
+        rawJson: {...(rawJson ?? this.rawJson), 'type': type ?? this.type},
+      );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownMcpCallError && mapsDeepEqual(rawJson, other.rawJson);
+
+  @override
+  int get hashCode => mapDeepHashCode(rawJson);
+
+  @override
+  String toString() =>
+      'UnknownMcpCallError(type: [REDACTED], rawJson: ${rawJson.length} entries)';
 }
 
 Object? _requiredMcpValue(Map<String, dynamic> json, String key) {
