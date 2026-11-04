@@ -112,5 +112,3 @@ unchanged HTTP/2 paused-consumer observation fixture. Its isolated file reports
 this feature; parent #446's complete CI passed on both supported Dart versions.
 No HTTP/2 implementation/test is changed here. The PR records the failure
 explicitly and does not claim a green local full-suite result.
-
-
