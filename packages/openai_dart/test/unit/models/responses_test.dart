@@ -2129,12 +2129,10 @@ void main() {
       expect(json.containsKey('max_output_length'), isTrue);
       expect(json['max_output_length'], isNull);
     });
-
     test('deserializes McpCallOutputItem', () {
       final json = {
         'type': 'mcp_call',
         'id': 'mcp_123',
-        'call_id': 'call_456',
         'server_label': 'my_server',
         'name': 'read_file',
         'arguments': '{"path": "/tmp/file.txt"}',
@@ -2147,28 +2145,26 @@ void main() {
       expect(item, isA<McpCallOutputItem>());
       final mcpItem = item as McpCallOutputItem;
       expect(mcpItem.id, equals('mcp_123'));
-      expect(mcpItem.callId, equals('call_456'));
       expect(mcpItem.serverLabel, equals('my_server'));
       expect(mcpItem.name, equals('read_file'));
       expect(mcpItem.arguments, equals('{"path": "/tmp/file.txt"}'));
       expect(mcpItem.output, equals('file contents'));
-      expect(mcpItem.status, equals(ItemStatus.completed));
+      expect(mcpItem.status, equals(McpCallStatus.completed));
     });
 
     test('McpCallOutputItem serializes correctly', () {
       const item = McpCallOutputItem(
         id: 'mcp_123',
-        callId: 'call_456',
+        arguments: '{}',
         serverLabel: 'test_server',
         name: 'test_tool',
-        status: ItemStatus.inProgress,
+        status: McpCallStatus.inProgress,
       );
 
       final json = item.toJson();
 
       expect(json['type'], equals('mcp_call'));
       expect(json['id'], equals('mcp_123'));
-      expect(json['call_id'], equals('call_456'));
       expect(json['server_label'], equals('test_server'));
       expect(json['name'], equals('test_tool'));
     });
@@ -2177,8 +2173,14 @@ void main() {
       final json = {
         'type': 'mcp_call',
         'id': 'mcp_123',
-        'call_id': 'call_456',
-        'error': 'Connection refused',
+        'server_label': 'my_server',
+        'name': 'read_file',
+        'arguments': '{}',
+        'error': {
+          'type': 'http_error',
+          'code': 503,
+          'message': 'Connection refused',
+        },
         'status': 'incomplete',
       };
 
@@ -2186,8 +2188,11 @@ void main() {
 
       expect(item, isA<McpCallOutputItem>());
       final mcpItem = item as McpCallOutputItem;
-      expect(mcpItem.error, equals('Connection refused'));
-      expect(mcpItem.status, equals(ItemStatus.incomplete));
+      expect(
+        mcpItem.error,
+        const McpHttpError(code: 503, message: 'Connection refused'),
+      );
+      expect(mcpItem.status, equals(McpCallStatus.incomplete));
     });
   });
 
