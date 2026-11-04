@@ -8,6 +8,7 @@ sealed class AgentSessionTool extends AgentJsonModel {
   /// Parses a known contract or detached future received value.
   factory AgentSessionTool.fromJson(Map<String, dynamic> json) {
     return switch (requireAgentString(json['type'], 'AgentSessionTool.type')) {
+      'automations' => AgentSessionAutomationsTool.fromJson(json),
       'computer_use' => AgentSessionComputerUseTool.fromJson(json),
       'function' => AgentSessionFunctionTool.fromJson(json),
       'mcp' => AgentSessionMcpTool.fromJson(json),
@@ -23,6 +24,9 @@ sealed class AgentSessionTool extends AgentJsonModel {
   String get type;
   @override
   Map<String, dynamic> toJson();
+
+  /// Lets the agent manage its scheduled wakeups.
+  const factory AgentSessionTool.automations() = AgentSessionAutomationsTool;
 
   /// Builds the `computer_use` contract.
   factory AgentSessionTool.computerUse({bool? includeScreenshots}) =
@@ -82,6 +86,7 @@ final class UnknownAgentSessionTool extends AgentSessionTool {
       'UnknownAgentSessionTool.type',
     );
     if (const [
+      'automations',
       'computer_use',
       'function',
       'mcp',
@@ -112,6 +117,28 @@ final class UnknownAgentSessionTool extends AgentSessionTool {
   void validate() => throw const FormatException(
     'UnknownAgentSessionTool: future input is not writable',
   );
+}
+
+/// Lets a session agent manage its scheduled wakeups.
+final class AgentSessionAutomationsTool extends AgentSessionTool {
+  /// Creates the fixed automations tool configuration.
+  const AgentSessionAutomationsTool();
+
+  /// Parses the closed writable tool shape.
+  factory AgentSessionAutomationsTool.fromJson(Map<String, dynamic> json) {
+    requireClosedAgentJson(json, const ['type'], 'AgentSessionAutomationsTool');
+    requireAgentTag(json, 'type', 'automations', 'AgentSessionAutomationsTool');
+    return const AgentSessionAutomationsTool();
+  }
+
+  @override
+  String get type => 'automations';
+
+  @override
+  Map<String, dynamic> toJson() => {'type': type};
+
+  /// Copies the fixed configuration.
+  AgentSessionAutomationsTool copyWith() => const AgentSessionAutomationsTool();
 }
 
 /// Browser use in an OpenAI-hosted session.
@@ -923,6 +950,7 @@ sealed class AgentSessionToolResource extends AgentJsonModel {
       json['type'],
       'AgentSessionToolResource.type',
     )) {
+      'automations' => AgentSessionAutomationsToolResource.fromJson(json),
       'computer_use' => AgentSessionComputerUseToolResource.fromJson(json),
       'function' => AgentSessionFunctionToolResource.fromJson(json),
       'mcp' => AgentSessionMcpToolResource.fromJson(json),
@@ -937,6 +965,10 @@ sealed class AgentSessionToolResource extends AgentJsonModel {
   String get type;
   @override
   Map<String, dynamic> toJson();
+
+  /// Describes the effective scheduled-wakeups tool.
+  factory AgentSessionToolResource.automations({Map<String, dynamic> rawJson}) =
+      AgentSessionAutomationsToolResource;
 
   /// Builds the `computer_use` contract.
   factory AgentSessionToolResource.computerUse({
@@ -992,6 +1024,7 @@ final class UnknownAgentSessionToolResource extends AgentSessionToolResource {
       'UnknownAgentSessionToolResource.type',
     );
     if (const [
+      'automations',
       'computer_use',
       'function',
       'mcp',
@@ -1017,6 +1050,48 @@ final class UnknownAgentSessionToolResource extends AgentSessionToolResource {
   /// Replaces a received snapshot while retaining the unknown discriminator.
   UnknownAgentSessionToolResource copyWith({Map<String, dynamic>? rawJson}) =>
       UnknownAgentSessionToolResource.fromJson(rawJson ?? this.rawJson);
+}
+
+/// The effective scheduled-wakeups tool, preserving future received metadata.
+final class AgentSessionAutomationsToolResource
+    extends AgentSessionToolResource {
+  /// Creates a detached received resource.
+  AgentSessionAutomationsToolResource({Map<String, dynamic> rawJson = const {}})
+    : rawJson = agentExtras(rawJson, const [
+        'type',
+      ], 'AgentSessionAutomationsToolResource');
+
+  /// Parses the required fixed discriminator and snapshots future metadata.
+  factory AgentSessionAutomationsToolResource.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    requireAgentTag(
+      json,
+      'type',
+      'automations',
+      'AgentSessionAutomationsToolResource',
+    );
+    return AgentSessionAutomationsToolResource(
+      rawJson: {
+        for (final entry in json.entries)
+          if (entry.key != 'type') entry.key: entry.value,
+      },
+    );
+  }
+
+  /// Detached received extras; declared fields cannot be overridden.
+  final Map<String, dynamic> rawJson;
+
+  @override
+  String get type => 'automations';
+
+  @override
+  Map<String, dynamic> toJson() => {...rawJson, 'type': type};
+
+  /// Copies received extras with a fresh immutable snapshot.
+  AgentSessionAutomationsToolResource copyWith({
+    Map<String, dynamic>? rawJson,
+  }) => AgentSessionAutomationsToolResource(rawJson: rawJson ?? this.rawJson);
 }
 
 /// Browser use in an OpenAI-hosted session.

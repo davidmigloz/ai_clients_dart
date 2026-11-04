@@ -1588,46 +1588,6 @@ void main() {
     );
     expect(() => fixture.parse(body), throwsFormatException);
   });
-  test('SessionSpendControlParam.limit: canonical minimum boundary', () {
-    final fixture = agentSessionWireFixtures.singleWhere(
-      (f) => f.schema == 'SessionSpendControlParam',
-    );
-    final body = jsonDecode(jsonEncode(fixture.full)) as Map<String, dynamic>;
-    body['limit'] = 0;
-    expect(() => fixture.parse(body), throwsFormatException);
-  });
-  test('SessionSpendControlParam.limit: canonical maximum boundary', () {
-    final fixture = agentSessionWireFixtures.singleWhere(
-      (f) => f.schema == 'SessionSpendControlParam',
-    );
-    final body = jsonDecode(jsonEncode(fixture.full)) as Map<String, dynamic>;
-    body['limit'] = 4503599627370496;
-    expect(() => fixture.parse(body), throwsFormatException);
-  });
-  test('SessionSpendControlResource.consumed: canonical minimum boundary', () {
-    final fixture = agentSessionWireFixtures.singleWhere(
-      (f) => f.schema == 'SessionSpendControlResource',
-    );
-    final body = jsonDecode(jsonEncode(fixture.full)) as Map<String, dynamic>;
-    body['consumed'] = -1;
-    expect(() => fixture.parse(body), throwsFormatException);
-  });
-  test('SessionSpendControlResource.limit: canonical minimum boundary', () {
-    final fixture = agentSessionWireFixtures.singleWhere(
-      (f) => f.schema == 'SessionSpendControlResource',
-    );
-    final body = jsonDecode(jsonEncode(fixture.full)) as Map<String, dynamic>;
-    body['limit'] = 0;
-    expect(() => fixture.parse(body), throwsFormatException);
-  });
-  test('SessionSpendControlResource.limit: canonical maximum boundary', () {
-    final fixture = agentSessionWireFixtures.singleWhere(
-      (f) => f.schema == 'SessionSpendControlResource',
-    );
-    final body = jsonDecode(jsonEncode(fixture.full)) as Map<String, dynamic>;
-    body['limit'] = 4503599627370496;
-    expect(() => fixture.parse(body), throwsFormatException);
-  });
   test('SetupCommandParam.command: canonical maxLength boundary', () {
     final fixture = agentSessionWireFixtures.singleWhere(
       (f) => f.schema == 'SetupCommandParam',

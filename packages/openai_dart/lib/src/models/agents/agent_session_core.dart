@@ -15,8 +15,7 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
     bool clearInput = false,
     Map<String, String>? metadata,
     bool clearMetadata = false,
-    AgentSessionSpendControlConfig? spendControl,
-    bool clearSpendControl = false,
+    this.review,
     this.stream,
     List<String>? vaultIds,
     bool clearVaultIds = false,
@@ -27,8 +26,7 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
          clearMetadata ? null : metadata,
          Map<String, String>.unmodifiable,
        ),
-       clearSpendControl = clearSpendControl,
-       spendControl = clearSpendControl ? null : spendControl,
+
        clearVaultIds = clearVaultIds,
        vaultIds = ownAgentValue<List<String>>(
          clearVaultIds ? null : vaultIds,
@@ -58,11 +56,9 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
   /// Sends `metadata: null`, rather than omitting it.
   final bool clearMetadata;
 
-  /// Optional spending limit in USD cents. Omission or null creates an unlimited session.
-  final AgentSessionSpendControlConfig? spendControl;
-
-  /// Sends `spend_control: null`, rather than omitting it.
-  final bool clearSpendControl;
+  /// Action review mode. Omission preserves the current mode on update and
+  /// uses none when creating a session. This is independent of spending limits.
+  final SessionReviewParam? review;
 
   /// Whether to stream session events as server-sent events. Defaults to `false`.
   final bool? stream;
@@ -81,7 +77,7 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
       'environment',
       'input',
       'metadata',
-      'spend_control',
+      'review',
       'stream',
       'vault_ids',
     ], 'CreateAgentSessionRequest');
@@ -127,17 +123,13 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
         nullable: true,
       ),
       clearMetadata: json.containsKey('metadata') && json['metadata'] == null,
-      spendControl: optionalAgentValue(
+      review: optionalAgentValue(
         json,
-        'spend_control',
-        'CreateAgentSessionRequest.spendControl',
-        (value, context) => AgentSessionSpendControlConfig.fromJson(
-          requireAgentObject(value, context),
-        ),
-        nullable: true,
+        'review',
+        'CreateAgentSessionRequest.review',
+        (value, context) => SessionReviewParam.fromJson(value),
+        nullable: false,
       ),
-      clearSpendControl:
-          json.containsKey('spend_control') && json['spend_control'] == null,
       stream: optionalAgentValue(
         json,
         'stream',
@@ -207,8 +199,11 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
         );
       }
     }
-    if (spendControl != null) {
-      spendControl!.validate();
+    if (review != null) {
+      validateAgentEnum(review!.value, const [
+        'none',
+        'auto_review',
+      ], 'CreateAgentSessionRequest.review');
     }
     if (vaultIds != null) {
       validateAgentCount(
@@ -238,10 +233,7 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
     else if (input != null)
       'input': input!.toJson(),
     if (clearMetadata) 'metadata': null else 'metadata': ?metadata,
-    if (clearSpendControl)
-      'spend_control': null
-    else if (spendControl != null)
-      'spend_control': spendControl!.toJson(),
+    'review': ?review?.toJson(),
     'stream': ?stream,
     if (clearVaultIds)
       'vault_ids': null
@@ -258,8 +250,7 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
     bool? clearInput,
     Object? metadata = unsetCopyWithValue,
     bool? clearMetadata,
-    Object? spendControl = unsetCopyWithValue,
-    bool? clearSpendControl,
+    Object? review = unsetCopyWithValue,
     Object? stream = unsetCopyWithValue,
     Object? vaultIds = unsetCopyWithValue,
     bool? clearVaultIds,
@@ -295,16 +286,11 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
         (identical(metadata, unsetCopyWithValue)
             ? this.clearMetadata
             : metadata == null),
-    spendControl: copyAgentValue<AgentSessionSpendControlConfig>(
-      spendControl,
-      this.spendControl,
-      'CreateAgentSessionRequest.spendControl',
+    review: copyAgentValue<SessionReviewParam>(
+      review,
+      this.review,
+      'CreateAgentSessionRequest.review',
     ),
-    clearSpendControl:
-        clearSpendControl ??
-        (identical(spendControl, unsetCopyWithValue)
-            ? this.clearSpendControl
-            : spendControl == null),
     stream: copyAgentValue<bool>(
       stream,
       this.stream,
@@ -704,6 +690,9 @@ final class DeletedAgentSession extends AgentJsonModel {
 final class AgentSessionAgentConfig extends AgentJsonModel {
   /// Creates a validated [AgentSessionAgentConfig].
   AgentSessionAgentConfig({
+    AgentCompactionConfig? compaction,
+    bool clearCompaction = false,
+    this.experimental,
     String? instructions,
     bool clearInstructions = false,
     this.model,
@@ -717,7 +706,9 @@ final class AgentSessionAgentConfig extends AgentJsonModel {
     bool clearText = false,
     List<AgentSessionTool>? tools,
     bool clearTools = false,
-  }) : clearInstructions = clearInstructions,
+  }) : compaction = clearCompaction ? null : compaction,
+       clearCompaction = clearCompaction,
+       clearInstructions = clearInstructions,
        instructions = clearInstructions ? null : instructions,
        clearMultiAgent = clearMultiAgent,
        multiAgent = clearMultiAgent ? null : multiAgent,
@@ -734,6 +725,16 @@ final class AgentSessionAgentConfig extends AgentJsonModel {
        ) {
     validate();
   }
+
+  /// Context compaction settings. Omit to inherit; an object replaces them.
+  /// Null or an empty object enables background compaction.
+  final AgentCompactionConfig? compaction;
+
+  /// Sends explicit `compaction: null` instead of omitting the override.
+  final bool clearCompaction;
+
+  /// Experimental overrides merged by key; omitted keys keep current values.
+  final AgentExperimentalOverridesConfig? experimental;
 
   /// Additional instructions appended to the agent's default base instructions. Omit to leave unchanged.
   final String? instructions;
@@ -777,6 +778,8 @@ final class AgentSessionAgentConfig extends AgentJsonModel {
   /// Parses [AgentSessionAgentConfig] with contextual, payload-free errors.
   factory AgentSessionAgentConfig.fromJson(Map<String, dynamic> json) {
     requireClosedAgentJson(json, const [
+      'compaction',
+      'experimental',
       'instructions',
       'model',
       'multi_agent',
@@ -786,6 +789,25 @@ final class AgentSessionAgentConfig extends AgentJsonModel {
       'tools',
     ], 'AgentSessionAgentConfig');
     return AgentSessionAgentConfig(
+      compaction: optionalAgentValue(
+        json,
+        'compaction',
+        'AgentSessionAgentConfig.compaction',
+        (value, context) =>
+            AgentCompactionConfig.fromJson(requireAgentObject(value, context)),
+        nullable: true,
+      ),
+      clearCompaction:
+          json.containsKey('compaction') && json['compaction'] == null,
+      experimental: optionalAgentValue(
+        json,
+        'experimental',
+        'AgentSessionAgentConfig.experimental',
+        (value, context) => AgentExperimentalOverridesConfig.fromJson(
+          requireAgentObject(value, context),
+        ),
+        nullable: false,
+      ),
       instructions: optionalAgentValue(
         json,
         'instructions',
@@ -857,6 +879,8 @@ final class AgentSessionAgentConfig extends AgentJsonModel {
   }
   @override
   void validate() {
+    compaction?.validate();
+    experimental?.validate();
     if (tools != null) {
       validateAgentToolBudget(tools!.map((tool) => tool.toJson()).toList());
     }
@@ -889,6 +913,7 @@ final class AgentSessionAgentConfig extends AgentJsonModel {
         'flex',
         'priority',
         'fast',
+        'ultrafast',
       ], 'AgentSessionAgentConfig.serviceTier');
     }
     if (text != null) {
@@ -909,6 +934,11 @@ final class AgentSessionAgentConfig extends AgentJsonModel {
 
   @override
   Map<String, dynamic> toJson() => {
+    if (clearCompaction)
+      'compaction': null
+    else if (compaction != null)
+      'compaction': compaction!.toJson(),
+    if (experimental != null) 'experimental': experimental!.toJson(),
     if (clearInstructions)
       'instructions': null
     else
@@ -935,6 +965,9 @@ final class AgentSessionAgentConfig extends AgentJsonModel {
 
   /// Copies values; omitted arguments retain their values and null presence.
   AgentSessionAgentConfig copyWith({
+    Object? compaction = unsetCopyWithValue,
+    bool? clearCompaction,
+    Object? experimental = unsetCopyWithValue,
     Object? instructions = unsetCopyWithValue,
     bool? clearInstructions,
     Object? model = unsetCopyWithValue,
@@ -949,6 +982,21 @@ final class AgentSessionAgentConfig extends AgentJsonModel {
     Object? tools = unsetCopyWithValue,
     bool? clearTools,
   }) => AgentSessionAgentConfig(
+    compaction: copyAgentValue<AgentCompactionConfig>(
+      compaction,
+      this.compaction,
+      'AgentSessionAgentConfig.compaction',
+    ),
+    clearCompaction:
+        clearCompaction ??
+        (identical(compaction, unsetCopyWithValue)
+            ? this.clearCompaction
+            : compaction == null),
+    experimental: copyAgentValue<AgentExperimentalOverridesConfig>(
+      experimental,
+      this.experimental,
+      'AgentSessionAgentConfig.experimental',
+    ),
     instructions: copyAgentValue<String>(
       instructions,
       this.instructions,
@@ -1021,6 +1069,8 @@ final class AgentSessionAgentConfig extends AgentJsonModel {
 final class AgentSessionAgent extends AgentJsonModel {
   /// Creates a validated [AgentSessionAgent].
   AgentSessionAgent({
+    this.compaction,
+    this.experimental,
     required this.id,
     required this.instructions,
     required this.model,
@@ -1033,6 +1083,8 @@ final class AgentSessionAgent extends AgentJsonModel {
     Map<String, dynamic> rawJson = const {},
   }) : tools = List.unmodifiable(tools),
        rawJson = agentExtras(rawJson, const [
+         'compaction',
+         'experimental',
          'id',
          'instructions',
          'model',
@@ -1045,6 +1097,12 @@ final class AgentSessionAgent extends AgentJsonModel {
        ], 'AgentSessionAgent') {
     validate();
   }
+
+  /// Effective context compaction settings when supplied by the service.
+  final AgentCompaction? compaction;
+
+  /// Effective experimental settings when supplied by the service.
+  final AgentExperimental? experimental;
 
   /// The ID of the agent.
   final String id;
@@ -1079,6 +1137,22 @@ final class AgentSessionAgent extends AgentJsonModel {
   /// Parses [AgentSessionAgent] with contextual, payload-free errors.
   factory AgentSessionAgent.fromJson(Map<String, dynamic> json) {
     return AgentSessionAgent(
+      compaction: optionalAgentValue(
+        json,
+        'compaction',
+        'AgentSessionAgent.compaction',
+        (value, context) =>
+            AgentCompaction.fromJson(requireAgentObject(value, context)),
+        nullable: false,
+      ),
+      experimental: optionalAgentValue(
+        json,
+        'experimental',
+        'AgentSessionAgent.experimental',
+        (value, context) =>
+            AgentExperimental.fromJson(requireAgentObject(value, context)),
+        nullable: false,
+      ),
       id: requiredAgentValue(
         json,
         'id',
@@ -1154,6 +1228,8 @@ final class AgentSessionAgent extends AgentJsonModel {
       rawJson: {
         for (final entry in json.entries)
           if (!const [
+            'compaction',
+            'experimental',
             'id',
             'instructions',
             'model',
@@ -1170,6 +1246,8 @@ final class AgentSessionAgent extends AgentJsonModel {
   }
   @override
   void validate() {
+    compaction?.validate();
+    experimental?.validate();
     validateAgentLength(id, 'AgentSessionAgent.id', min: 0);
     if (instructions != null) {
       validateAgentLength(
@@ -1199,6 +1277,8 @@ final class AgentSessionAgent extends AgentJsonModel {
   @override
   Map<String, dynamic> toJson() => {
     ...rawJson,
+    if (compaction != null) 'compaction': compaction!.toJson(),
+    if (experimental != null) 'experimental': experimental!.toJson(),
     'id': id,
     'instructions': instructions,
     'model': model,
@@ -1212,6 +1292,8 @@ final class AgentSessionAgent extends AgentJsonModel {
 
   /// Copies values; omitted arguments retain their values and null presence.
   AgentSessionAgent copyWith({
+    Object? compaction = unsetCopyWithValue,
+    Object? experimental = unsetCopyWithValue,
     String? id,
     Object? instructions = unsetCopyWithValue,
     String? model,
@@ -1223,6 +1305,16 @@ final class AgentSessionAgent extends AgentJsonModel {
     List<AgentSessionToolResource>? tools,
     Map<String, dynamic>? rawJson,
   }) => AgentSessionAgent(
+    compaction: copyAgentValue<AgentCompaction>(
+      compaction,
+      this.compaction,
+      'AgentSessionAgent.compaction',
+    ),
+    experimental: copyAgentValue<AgentExperimental>(
+      experimental,
+      this.experimental,
+      'AgentSessionAgent.experimental',
+    ),
     id: id ?? this.id,
     instructions: copyAgentValue<String>(
       instructions,
@@ -2045,7 +2137,7 @@ final class AgentSession extends AgentJsonModel {
     required this.lastActiveAt,
     required Map<String, String> metadata,
     required List<AgentSessionRequiredAction> requiredActions,
-    this.spendControl,
+    this.review,
     required this.status,
     required this.usage,
     required List<String> vaultIds,
@@ -2063,7 +2155,7 @@ final class AgentSession extends AgentJsonModel {
          'metadata',
          'object',
          'required_actions',
-         'spend_control',
+         'review',
          'status',
          'usage',
          'vault_ids',
@@ -2098,8 +2190,8 @@ final class AgentSession extends AgentJsonModel {
   /// Actions that must be completed before the session can continue.
   final List<AgentSessionRequiredAction> requiredActions;
 
-  /// Configured spending limit and best-effort consumption, in USD cents. Unlimited sessions omit this object.
-  final AgentSessionSpendControl? spendControl;
+  /// Action review applied in this session. Omission means none.
+  final SessionReviewResource? review;
 
   /// The current status of the session.
   final AgentSessionStatusResource status;
@@ -2182,13 +2274,11 @@ final class AgentSession extends AgentJsonModel {
             .toList(),
         nullable: false,
       )!,
-      spendControl: optionalAgentValue(
+      review: optionalAgentValue(
         json,
-        'spend_control',
-        'AgentSession.spendControl',
-        (value, context) => AgentSessionSpendControl.fromJson(
-          requireAgentObject(value, context),
-        ),
+        'review',
+        'AgentSession.review',
+        (value, context) => SessionReviewResource.fromJson(value),
         nullable: false,
       ),
       status: requiredAgentValue(
@@ -2229,7 +2319,7 @@ final class AgentSession extends AgentJsonModel {
             'metadata',
             'object',
             'required_actions',
-            'spend_control',
+            'review',
             'status',
             'usage',
             'vault_ids',
@@ -2264,9 +2354,7 @@ final class AgentSession extends AgentJsonModel {
     for (final item in requiredActions) {
       item.validate();
     }
-    if (spendControl != null) {
-      spendControl!.validate();
-    }
+
     if (usage != null) {
       usage!.validate();
     }
@@ -2293,7 +2381,7 @@ final class AgentSession extends AgentJsonModel {
     'metadata': metadata,
     'object': object,
     'required_actions': requiredActions.map((value) => value.toJson()).toList(),
-    if (spendControl != null) 'spend_control': spendControl!.toJson(),
+    'review': ?review?.toJson(),
     'status': status.toJson(),
     'usage': usage?.toJson(),
     'vault_ids': vaultIds.map((value) => value).toList(),
@@ -2309,7 +2397,7 @@ final class AgentSession extends AgentJsonModel {
     int? lastActiveAt,
     Map<String, String>? metadata,
     List<AgentSessionRequiredAction>? requiredActions,
-    Object? spendControl = unsetCopyWithValue,
+    Object? review = unsetCopyWithValue,
     AgentSessionStatusResource? status,
     Object? usage = unsetCopyWithValue,
     List<String>? vaultIds,
@@ -2323,10 +2411,10 @@ final class AgentSession extends AgentJsonModel {
     lastActiveAt: lastActiveAt ?? this.lastActiveAt,
     metadata: metadata ?? this.metadata,
     requiredActions: requiredActions ?? this.requiredActions,
-    spendControl: copyAgentValue<AgentSessionSpendControl>(
-      spendControl,
-      this.spendControl,
-      'AgentSession.spendControl',
+    review: copyAgentValue<SessionReviewResource>(
+      review,
+      this.review,
+      'AgentSession.review',
     ),
     status: status ?? this.status,
     usage: copyAgentValue<AgentSessionTokenUsageResource>(
@@ -2339,150 +2427,7 @@ final class AgentSession extends AgentJsonModel {
   );
 }
 
-/// Sets the session-wide limit without changing recorded spend.
-///
-/// Diagnostics redact all payloads. Collections are detached and immutable.
-/// Optional nullable fields use `clearX: true` to send explicit JSON null.
-/// Clearing wins over a simultaneous value; copy omission retains presence.
-final class AgentSessionSpendControlConfig extends AgentJsonModel {
-  /// Creates a validated [AgentSessionSpendControlConfig].
-  AgentSessionSpendControlConfig({required this.limit}) {
-    validate();
-  }
-
-  /// Positive USD cents, or null to remove the limit.
-  final int? limit;
-
-  /// Parses [AgentSessionSpendControlConfig] with contextual, payload-free errors.
-  factory AgentSessionSpendControlConfig.fromJson(Map<String, dynamic> json) {
-    requireClosedAgentJson(json, const [
-      'limit',
-    ], 'AgentSessionSpendControlConfig');
-    return AgentSessionSpendControlConfig(
-      limit: requiredAgentValue(
-        json,
-        'limit',
-        'AgentSessionSpendControlConfig.limit',
-        requireAgentInt,
-        nullable: true,
-      ),
-    );
-  }
-  @override
-  void validate() {
-    if (limit != null) {
-      validateAgentInt(
-        limit!,
-        'AgentSessionSpendControlConfig.limit',
-        min: 1,
-        max: 4503599627370495,
-      );
-    }
-  }
-
-  @override
-  Map<String, dynamic> toJson() => {'limit': limit};
-
-  /// Copies values; omitted arguments retain their values and null presence.
-  AgentSessionSpendControlConfig copyWith({
-    Object? limit = unsetCopyWithValue,
-  }) => AgentSessionSpendControlConfig(
-    limit: copyAgentValue<int>(
-      limit,
-      this.limit,
-      'AgentSessionSpendControlConfig.limit',
-    ),
-  );
-}
-
-/// Session-wide spending control, present only when a limit is configured.
-///
-/// Diagnostics redact all payloads. Collections are detached and immutable.
-final class AgentSessionSpendControl extends AgentJsonModel {
-  /// Creates a validated [AgentSessionSpendControl].
-  AgentSessionSpendControl({
-    required this.consumed,
-    required this.limit,
-    Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
-         'consumed',
-         'limit',
-       ], 'AgentSessionSpendControl') {
-    validate();
-  }
-
-  /// Best-effort recorded spend floored to whole USD cents, or null when unavailable.
-  final int? consumed;
-
-  /// The configured positive limit in USD cents.
-  final int limit;
-
-  /// Detached received extras; declared fields cannot be overridden.
-  final Map<String, dynamic> rawJson;
-
-  /// Parses [AgentSessionSpendControl] with contextual, payload-free errors.
-  factory AgentSessionSpendControl.fromJson(Map<String, dynamic> json) {
-    return AgentSessionSpendControl(
-      consumed: requiredAgentValue(
-        json,
-        'consumed',
-        'AgentSessionSpendControl.consumed',
-        requireAgentInt,
-        nullable: true,
-      ),
-      limit: requiredAgentValue(
-        json,
-        'limit',
-        'AgentSessionSpendControl.limit',
-        requireAgentInt,
-        nullable: false,
-      )!,
-      rawJson: {
-        for (final entry in json.entries)
-          if (!const ['consumed', 'limit'].contains(entry.key))
-            entry.key: entry.value,
-      },
-    );
-  }
-  @override
-  void validate() {
-    if (consumed != null) {
-      validateAgentInt(consumed!, 'AgentSessionSpendControl.consumed', min: 0);
-    }
-    validateAgentInt(
-      limit,
-      'AgentSessionSpendControl.limit',
-      min: 1,
-      max: 4503599627370495,
-    );
-  }
-
-  @override
-  Map<String, dynamic> toJson() => {
-    ...rawJson,
-    'consumed': consumed,
-    'limit': limit,
-  };
-
-  /// Copies values; omitted arguments retain their values and null presence.
-  AgentSessionSpendControl copyWith({
-    Object? consumed = unsetCopyWithValue,
-    int? limit,
-    Map<String, dynamic>? rawJson,
-  }) => AgentSessionSpendControl(
-    consumed: copyAgentValue<int>(
-      consumed,
-      this.consumed,
-      'AgentSessionSpendControl.consumed',
-    ),
-    limit: limit ?? this.limit,
-    rawJson: rawJson ?? this.rawJson,
-  );
-}
-
-/// A customer-safe error describing why a session request failed.
-///
-/// Diagnostics redact all payloads. Collections are detached and immutable.
+/// An error reported for a session turn, with private diagnostics.
 final class AgentSessionTurnErrorResource extends AgentJsonModel {
   /// Creates a validated [AgentSessionTurnErrorResource].
   AgentSessionTurnErrorResource({
@@ -2848,15 +2793,12 @@ final class UpdateAgentSessionRequest extends AgentJsonModel {
     this.agent,
     Map<String, String>? metadata,
     bool clearMetadata = false,
-    AgentSessionSpendControlConfig? spendControl,
-    bool clearSpendControl = false,
+    this.review,
   }) : clearMetadata = clearMetadata,
        metadata = ownAgentValue<Map<String, String>>(
          clearMetadata ? null : metadata,
          Map<String, String>.unmodifiable,
-       ),
-       clearSpendControl = clearSpendControl,
-       spendControl = clearSpendControl ? null : spendControl {
+       ) {
     validate();
   }
 
@@ -2869,18 +2811,16 @@ final class UpdateAgentSessionRequest extends AgentJsonModel {
   /// Sends `metadata: null`, rather than omitting it.
   final bool clearMetadata;
 
-  /// Omit to retain the limit; null or a null limit removes it without resetting spend.
-  final AgentSessionSpendControlConfig? spendControl;
-
-  /// Sends `spend_control: null`, rather than omitting it.
-  final bool clearSpendControl;
+  /// Action review mode. Omission preserves the current mode on update and
+  /// uses none when creating a session. This is independent of spending limits.
+  final SessionReviewParam? review;
 
   /// Parses [UpdateAgentSessionRequest] with contextual, payload-free errors.
   factory UpdateAgentSessionRequest.fromJson(Map<String, dynamic> json) {
     requireClosedAgentJson(json, const [
       'agent',
       'metadata',
-      'spend_control',
+      'review',
     ], 'UpdateAgentSessionRequest');
     return UpdateAgentSessionRequest(
       agent: optionalAgentValue(
@@ -2900,17 +2840,13 @@ final class UpdateAgentSessionRequest extends AgentJsonModel {
         nullable: true,
       ),
       clearMetadata: json.containsKey('metadata') && json['metadata'] == null,
-      spendControl: optionalAgentValue(
+      review: optionalAgentValue(
         json,
-        'spend_control',
-        'UpdateAgentSessionRequest.spendControl',
-        (value, context) => AgentSessionSpendControlConfig.fromJson(
-          requireAgentObject(value, context),
-        ),
-        nullable: true,
+        'review',
+        'UpdateAgentSessionRequest.review',
+        (value, context) => SessionReviewParam.fromJson(value),
+        nullable: false,
       ),
-      clearSpendControl:
-          json.containsKey('spend_control') && json['spend_control'] == null,
     );
   }
   @override
@@ -2942,8 +2878,11 @@ final class UpdateAgentSessionRequest extends AgentJsonModel {
         );
       }
     }
-    if (spendControl != null) {
-      spendControl!.validate();
+    if (review != null) {
+      validateAgentEnum(review!.value, const [
+        'none',
+        'auto_review',
+      ], 'UpdateAgentSessionRequest.review');
     }
   }
 
@@ -2951,10 +2890,7 @@ final class UpdateAgentSessionRequest extends AgentJsonModel {
   Map<String, dynamic> toJson() => {
     if (agent != null) 'agent': agent!.toJson(),
     if (clearMetadata) 'metadata': null else 'metadata': ?metadata,
-    if (clearSpendControl)
-      'spend_control': null
-    else if (spendControl != null)
-      'spend_control': spendControl!.toJson(),
+    'review': ?review?.toJson(),
   };
 
   /// Copies values; omitted arguments retain their values and null presence.
@@ -2962,8 +2898,7 @@ final class UpdateAgentSessionRequest extends AgentJsonModel {
     Object? agent = unsetCopyWithValue,
     Object? metadata = unsetCopyWithValue,
     bool? clearMetadata,
-    Object? spendControl = unsetCopyWithValue,
-    bool? clearSpendControl,
+    Object? review = unsetCopyWithValue,
   }) => UpdateAgentSessionRequest(
     agent: copyAgentValue<AgentSessionAgentUpdate>(
       agent,
@@ -2980,16 +2915,11 @@ final class UpdateAgentSessionRequest extends AgentJsonModel {
         (identical(metadata, unsetCopyWithValue)
             ? this.clearMetadata
             : metadata == null),
-    spendControl: copyAgentValue<AgentSessionSpendControlConfig>(
-      spendControl,
-      this.spendControl,
-      'UpdateAgentSessionRequest.spendControl',
+    review: copyAgentValue<SessionReviewParam>(
+      review,
+      this.review,
+      'UpdateAgentSessionRequest.review',
     ),
-    clearSpendControl:
-        clearSpendControl ??
-        (identical(spendControl, unsetCopyWithValue)
-            ? this.clearSpendControl
-            : spendControl == null),
   );
 }
 
@@ -3001,14 +2931,28 @@ final class UpdateAgentSessionRequest extends AgentJsonModel {
 final class AgentSessionAgentUpdate extends AgentJsonModel {
   /// Creates a validated [AgentSessionAgentUpdate].
   AgentSessionAgentUpdate({
+    List<AgentSessionTool>? tools,
+    bool clearTools = false,
     this.model,
     this.reasoning,
     AgentServiceTierParam? serviceTier,
     bool clearServiceTier = false,
-  }) : clearServiceTier = clearServiceTier,
+  }) : clearTools = clearTools,
+       tools = ownAgentValue<List<AgentSessionTool>>(
+         clearTools ? null : tools,
+         List.unmodifiable,
+       ),
+       clearServiceTier = clearServiceTier,
        serviceTier = clearServiceTier ? null : serviceTier {
     validate();
   }
+
+  /// Replaces session tools. Functions and MCP change on the next model call;
+  /// built-in tools change by the next turn. Omit to retain, null or [] to clear.
+  final List<AgentSessionTool>? tools;
+
+  /// Sends explicit `tools: null` instead of omitting the update.
+  final bool clearTools;
 
   /// The model for subsequent turns. Omit to keep the current model.
   final String? model;
@@ -3025,11 +2969,25 @@ final class AgentSessionAgentUpdate extends AgentJsonModel {
   /// Parses [AgentSessionAgentUpdate] with contextual, payload-free errors.
   factory AgentSessionAgentUpdate.fromJson(Map<String, dynamic> json) {
     requireClosedAgentJson(json, const [
+      'tools',
       'model',
       'reasoning',
       'service_tier',
     ], 'AgentSessionAgentUpdate');
     return AgentSessionAgentUpdate(
+      tools: optionalAgentValue(
+        json,
+        'tools',
+        'AgentSessionAgentUpdate.tools',
+        (value, context) => requireAgentList(value, context)
+            .map(
+              (item) =>
+                  AgentSessionTool.fromJson(requireAgentObject(item, context)),
+            )
+            .toList(),
+        nullable: true,
+      ),
+      clearTools: json.containsKey('tools') && json['tools'] == null,
       model: optionalAgentValue(
         json,
         'model',
@@ -3059,6 +3017,17 @@ final class AgentSessionAgentUpdate extends AgentJsonModel {
   }
   @override
   void validate() {
+    if (tools != null) {
+      validateAgentCount(
+        tools!.length,
+        'AgentSessionAgentUpdate.tools',
+        min: 0,
+        max: 16384,
+      );
+      for (final tool in tools!) {
+        tool.validate();
+      }
+    }
     if (model != null) {
       validateAgentLength(
         model!,
@@ -3077,12 +3046,17 @@ final class AgentSessionAgentUpdate extends AgentJsonModel {
         'flex',
         'priority',
         'fast',
+        'ultrafast',
       ], 'AgentSessionAgentUpdate.serviceTier');
     }
   }
 
   @override
   Map<String, dynamic> toJson() => {
+    if (clearTools)
+      'tools': null
+    else if (tools != null)
+      'tools': tools!.map((tool) => tool.toJson()).toList(),
     'model': ?model,
     if (reasoning != null) 'reasoning': reasoning!.toJson(),
     if (clearServiceTier)
@@ -3093,11 +3067,19 @@ final class AgentSessionAgentUpdate extends AgentJsonModel {
 
   /// Copies values; omitted arguments retain their values and null presence.
   AgentSessionAgentUpdate copyWith({
+    Object? tools = unsetCopyWithValue,
+    bool? clearTools,
     Object? model = unsetCopyWithValue,
     Object? reasoning = unsetCopyWithValue,
     Object? serviceTier = unsetCopyWithValue,
     bool? clearServiceTier,
   }) => AgentSessionAgentUpdate(
+    tools: _copyAgentSessionUpdatedTools(tools, this.tools),
+    clearTools:
+        clearTools ??
+        (identical(tools, unsetCopyWithValue)
+            ? this.clearTools
+            : tools == null),
     model: copyAgentValue<String>(
       model,
       this.model,
@@ -3119,6 +3101,22 @@ final class AgentSessionAgentUpdate extends AgentJsonModel {
             ? this.clearServiceTier
             : serviceTier == null),
   );
+}
+
+List<AgentSessionTool>? _copyAgentSessionUpdatedTools(
+  Object? value,
+  List<AgentSessionTool>? current,
+) {
+  if (identical(value, unsetCopyWithValue)) return current;
+  if (value == null) return null;
+  return requireAgentList(value, 'AgentSessionAgentUpdate.tools').map((item) {
+    if (item is! AgentSessionTool) {
+      throw const FormatException(
+        'AgentSessionAgentUpdate.tools: expected a session tool',
+      );
+    }
+    return item;
+  }).toList();
 }
 
 /// Reasoning effort for subsequent turns. The reasoning summary stays unchanged.

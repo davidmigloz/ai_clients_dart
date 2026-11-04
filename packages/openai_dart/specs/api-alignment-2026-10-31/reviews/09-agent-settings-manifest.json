@@ -1,0 +1,290 @@
+{
+  "issue": 422,
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "promotion_owner": 427,
+  "types": {
+    "AgentResource": {
+      "spec": "main",
+      "schema": "AgentResource",
+      "kind": "object",
+      "dart_class": "Agent",
+      "file": "lib/src/models/agents/agent.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "CreateAgentParams": {
+      "spec": "main",
+      "schema": "CreateAgentParams",
+      "kind": "object",
+      "dart_class": "CreateAgentRequest",
+      "file": "lib/src/models/agents/agent.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "UpdateAgentParams": {
+      "spec": "main",
+      "schema": "UpdateAgentParams",
+      "kind": "object",
+      "dart_class": "UpdateAgentRequest",
+      "file": "lib/src/models/agents/agent.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "CreateAgentSessionParams": {
+      "spec": "main",
+      "schema": "CreateAgentSessionParams",
+      "kind": "object",
+      "dart_class": "CreateAgentSessionRequest",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "SessionAgentConfigParam": {
+      "spec": "main",
+      "schema": "SessionAgentConfigParam",
+      "kind": "object",
+      "dart_class": "AgentSessionAgentConfig",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "SessionAgentResource": {
+      "spec": "main",
+      "schema": "SessionAgentResource",
+      "kind": "object",
+      "dart_class": "AgentSessionAgent",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "SessionResource": {
+      "spec": "main",
+      "schema": "SessionResource",
+      "kind": "object",
+      "dart_class": "AgentSession",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "UpdateAgentSessionParams": {
+      "spec": "main",
+      "schema": "UpdateAgentSessionParams",
+      "kind": "object",
+      "dart_class": "UpdateAgentSessionRequest",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "UpdateSessionAgentParam": {
+      "spec": "main",
+      "schema": "UpdateSessionAgentParam",
+      "kind": "object",
+      "dart_class": "AgentSessionAgentUpdate",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "CompactionParam": {
+      "spec": "main",
+      "schema": "CompactionParam",
+      "kind": "object",
+      "dart_class": "AgentCompactionConfig",
+      "file": "lib/src/models/agents/agent_settings.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "CompactionResource": {
+      "spec": "main",
+      "schema": "CompactionResource",
+      "kind": "object",
+      "dart_class": "AgentCompaction",
+      "file": "lib/src/models/agents/agent_settings.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "ExperimentalConfigParam": {
+      "spec": "main",
+      "schema": "ExperimentalConfigParam",
+      "kind": "object",
+      "dart_class": "AgentExperimentalConfig",
+      "file": "lib/src/models/agents/agent_settings.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "ExperimentalConfigOverridesParam": {
+      "spec": "main",
+      "schema": "ExperimentalConfigOverridesParam",
+      "kind": "object",
+      "dart_class": "AgentExperimentalOverridesConfig",
+      "file": "lib/src/models/agents/agent_settings.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "ExperimentalConfigResource": {
+      "spec": "main",
+      "schema": "ExperimentalConfigResource",
+      "kind": "object",
+      "dart_class": "AgentExperimental",
+      "file": "lib/src/models/agents/agent_settings.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "ServiceTierParam": {
+      "spec": "main",
+      "schema": "ServiceTierParam",
+      "kind": "enum",
+      "dart_class": "AgentServiceTierParam",
+      "file": "lib/src/models/agents/agent_enums.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "SessionReviewParam": {
+      "spec": "main",
+      "schema": "SessionReviewParam",
+      "kind": "enum",
+      "dart_class": "SessionReviewParam",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "SessionReviewResource": {
+      "spec": "main",
+      "schema": "SessionReviewResource",
+      "kind": "enum",
+      "dart_class": "SessionReviewResource",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "AgentToolConfigParam": {
+      "spec": "main",
+      "schema": "AgentToolConfigParam",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionTool",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "note": "Actual session or persisted tool union now admits the frozen automations tool leaf. This is the #422 union prerequisite; automation operations remain #423-owned."
+    },
+    "AgentToolResource": {
+      "spec": "main",
+      "schema": "AgentToolResource",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionToolResource",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "note": "Actual session or persisted tool union now admits the frozen automations tool leaf. This is the #422 union prerequisite; automation operations remain #423-owned."
+    },
+    "PersistedAgentToolConfigParam": {
+      "spec": "main",
+      "schema": "PersistedAgentToolConfigParam",
+      "kind": "sealed_parent",
+      "dart_class": "AgentTool",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "note": "Actual session or persisted tool union now admits the frozen automations tool leaf. This is the #422 union prerequisite; automation operations remain #423-owned."
+    },
+    "PersistedAgentToolResource": {
+      "spec": "main",
+      "schema": "PersistedAgentToolResource",
+      "kind": "sealed_parent",
+      "dart_class": "AgentToolResource",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "note": "Actual session or persisted tool union now admits the frozen automations tool leaf. This is the #422 union prerequisite; automation operations remain #423-owned."
+    }
+  },
+  "supporting_types": {
+    "AgentToolConfigParamAutomations": {
+      "spec": "main",
+      "schema": "AgentToolConfigParamAutomations",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionAutomationsTool",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "parent": "AgentSessionTool",
+      "note": "One-field fixed type=automations wire leaf required by the #422 tool-union delta. Primary inventory owner remains #423; no scheduling/invocation API operation is implemented by this binding."
+    },
+    "AgentToolResourceAutomations": {
+      "spec": "main",
+      "schema": "AgentToolResourceAutomations",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionAutomationsToolResource",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "parent": "AgentSessionToolResource",
+      "note": "One-field fixed type=automations wire leaf required by the #422 tool-union delta. Primary inventory owner remains #423; no scheduling/invocation API operation is implemented by this binding."
+    },
+    "PersistedAgentToolConfigParamAutomations": {
+      "spec": "main",
+      "schema": "PersistedAgentToolConfigParamAutomations",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationsTool",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "parent": "AgentTool",
+      "note": "One-field fixed type=automations wire leaf required by the #422 tool-union delta. Primary inventory owner remains #423; no scheduling/invocation API operation is implemented by this binding."
+    },
+    "PersistedAgentToolResourceAutomations": {
+      "spec": "main",
+      "schema": "PersistedAgentToolResourceAutomations",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationsToolResource",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "parent": "AgentToolResource",
+      "note": "One-field fixed type=automations wire leaf required by the #422 tool-union delta. Primary inventory owner remains #423; no scheduling/invocation API operation is implemented by this binding."
+    }
+  },
+  "removed_schemas": {
+    "SessionSpendControlParam": {
+      "previous_dart_class": "AgentSessionSpendControlConfig",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "replacement_schema": null,
+      "note": "Removed from current canonical requests/resources. No spending-to-action-review translation. Historical received spending JSON remains opaque extras; closed request parsers reject spend_control."
+    },
+    "SessionSpendControlResource": {
+      "previous_dart_class": "AgentSessionSpendControl",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "replacement_schema": null,
+      "note": "Removed from current canonical requests/resources. No spending-to-action-review translation. Historical received spending JSON remains opaque extras; closed request parsers reject spend_control."
+    }
+  },
+  "modified_operations": [
+    {
+      "method": "GET",
+      "path": "/agents/sessions",
+      "operation_id": "listAgentSessions",
+      "dart_context": "AgentSessionsResource.list(metadata:)",
+      "file": "lib/src/resources/agent_sessions_resource.dart",
+      "note": "Canonical deepObject/explode=true metadata[key]=value exact-string AND filter; no new endpoint."
+    }
+  ],
+  "source_receipts": [
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/resources/beta/agents/sessions/sessions.py",
+      "sha256": "264c1c83bc479591e9b70166208a4384e7266c7176a3fea7971f1d876ef54294"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/beta/agent_create_params.py",
+      "sha256": "7e113690e45eca7d31a40c042a27a89a597fca373c39bafd8bb75f68c93f282b"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/beta/agent_update_params.py",
+      "sha256": "6bc4493187bd7c9ce15ce7cfa3efce0264fec0c4149e0dc4e94264b248b94a36"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/beta/agents/session_create_params.py",
+      "sha256": "89d1618c6a0a6ef4791ee9376bbd8fdd512b8f0c259eb551c0c27281cbf61170"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/beta/agents/session_update_params.py",
+      "sha256": "595ab57453c5678034088224417b1946dc37f4dd11e28c7f6df49d75d7dd3dd0"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/beta/agents/session_list_params.py",
+      "sha256": "2de32d51ce2cfdbcf2224acfa8b04a28234717d6c373a3d68ee66bac90f75d2d"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/resources/beta/agents/agents.ts",
+      "sha256": "03d26f89be2ce0137ef1326e8e196138c8a5a882af3c845cb05d6f6303dc19a2"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/resources/beta/agents/sessions/sessions.ts",
+      "sha256": "80ee2d0fdfcc6579e4b76f31b4401f88f65acd36b817e98eb7f3c979d5bb0cca"
+    }
+  ],
+  "guide_receipts": [
+    {
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/sessions",
+      "sha256": "36ca5b56d58474bd32df9ad0fe0d1403ae8724aef03f00d2a7c5c868b24ad740"
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/changelog",
+      "sha256": "f467827b1ceac790e6bf11056f9056cd1b4573eb041cb7d68474df1ce053f665"
+    }
+  ],
+  "inventory_coverage": {
+    "assigned_schemas": 23,
+    "type_bindings": 21,
+    "removed_schemas": 2,
+    "supporting_bindings": 4,
+    "supporting_owner": 423,
+    "modified_operations": 1,
+    "unassigned": []
+  }
+}

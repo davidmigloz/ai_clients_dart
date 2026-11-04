@@ -6,6 +6,65 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming release: Agent context settings and action review
+
+`spend_control` was removed from session create/update/resource schemas. The
+`spendControl`/`clearSpendControl` arguments and
+`AgentSessionSpendControlConfig`/`AgentSessionSpendControl` models are removed.
+Current request parsers reject the old field instead of sending it silently.
+Historical received spending data may remain opaque response extras.
+
+```dart
+// Before: this request field is no longer supported.
+final request = UpdateAgentSessionRequest(
+  spendControl: AgentSessionSpendControlConfig(limit: 100),
+);
+
+// After: submit only supported settings. Configure spending policy separately
+// in your application or account settings.
+final request = UpdateAgentSessionRequest();
+```
+
+Action review is a separate choice with no conversion from an old spending
+limit. Set `review: SessionReviewParam.autoReview` to review eligible actions
+automatically; this mode denies manual approval fallbacks. Set `.none` for the
+existing execution behavior. Omit on create to use none, or on update to retain
+the current mode. Updates affect new root turns; existing turns and their
+subagents retain their review mode. Received omission means none, without an
+invented serialized default.
+
+Context settings preserve their own update rules:
+
+- `AgentCompactionConfig(async: false)` selects blocking compaction. The nullable
+  `async` field is omitted by default; omission/null enables background behavior.
+  A supplied parent object replaces compaction settings. On update, omit the
+  parent to retain it, or use `clearCompaction`/an empty object to reset background
+  compaction. Background compaction may increase token usage.
+- `AgentExperimentalConfig` configures creation and
+  `AgentExperimentalOverridesConfig` changes supplied keys. Omitted
+  `timeAwareness` retains the current setting on update; null is invalid, and
+  explicit false disables reminders. Resolved leaf fields are required booleans.
+- `AgentSessionAgentUpdate.tools` replaces the list. Omission retains it;
+  `clearTools: true` sends null and `tools: []` also clears it. Functions/MCP
+  changes apply on the next model call, built-in changes by the next turn.
+  Compaction/experimental overrides belong to saved-Agent updates or session
+  creation, rather than this post-creation tools/model update object.
+- `AgentServiceTierParam.ultrafast` now passes all request validators. Model and
+  tier access remain service-controlled.
+
+The Agent tool sealed unions gain an automations variant; update exhaustive
+switches for `AgentAutomationsTool`, `AgentAutomationsToolResource`,
+`AgentSessionAutomationsTool`, and `AgentSessionAutomationsToolResource`.
+These variants configure a server tool; automation resource operations remain
+part of the next planned slice.
+
+Session list `metadata` filters use exact string pairs, all of which must match.
+The client encodes `metadata[key]=value`, preserving the same filters with cursors.
+There are at most 16 pairs, with 1–64-character keys and values up to 512 characters;
+new/updated sessions may take time to appear in filtered results.
+
+See [the offline settings example](example/agent_settings_example.dart).
+
 ## Upcoming release: Realtime response input and audio controls
 
 `InputAudioTranscriptionDeltaEvent.contentIndex` and `delta` are now nullable:
