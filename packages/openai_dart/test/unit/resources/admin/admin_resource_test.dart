@@ -570,6 +570,37 @@ void main() {
     },
   );
 
+  test('configured FINEST enables the Admin logger with root INFO', () async {
+    final rootLevel = Logger.root.level;
+    final logger = Logger('OpenAIAdminClient');
+    final oldLevel = logger.level;
+    final records = <String>[];
+    final subscription = logger.onRecord.listen((r) => records.add(r.message));
+    Logger.root.level = Level.INFO;
+    logger.level = null;
+    final client = OpenAIAdminClient(
+      config: OpenAIAdminConfig(
+        authProvider: _Auth(),
+        logLevel: Level.FINEST,
+        retryPolicy: const RetryPolicy(maxRetries: 0),
+      ),
+      httpClient: _Transport((_) async => _response('keys.retrieve')),
+    );
+    try {
+      await client.organization.externalKeys.retrieve(_private);
+      expect(logger.level, Level.FINEST);
+      expect(records, isNotEmpty);
+      expect(records.join(), contains('Body: [REDACTED'));
+      expect(records.join(), isNot(contains('PRIVATE')));
+      expect(records.join(), isNot(contains('synthetic_admin_only')));
+    } finally {
+      client.close();
+      await subscription.cancel();
+      logger.level = oldLevel;
+      Logger.root.level = rootLevel;
+    }
+  });
+
   test(
     'verbose logging never emits provider metadata, key IDs, usage filters or bodies',
     () async {

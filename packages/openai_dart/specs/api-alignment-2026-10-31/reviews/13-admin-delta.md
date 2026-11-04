@@ -97,8 +97,10 @@ endpoint and does not graft Admin aggregates onto Chat `CompletionUsage`.
 
 ## Validation and review
 
-- Package format/fix/analyze: clean.
-- Focused synthetic model/public HTTP fixtures: 77 tests pass on VM and Chrome.
+- Package format/fix/analyze: clean. Configured Admin logging level follows the
+  existing named-logger policy; a root-INFO/FINEST fixture verifies emission and
+  private values remain redacted.
+- Focused synthetic model/public HTTP fixtures: 78 tests pass on VM and Chrome.
 - Local VM transport tests: two pass (real redirect isolation and environment
   project-key fallback rejection). These are unit fixtures, not live API tests.
 - Offline example: five MockClient requests complete; no real credentials,

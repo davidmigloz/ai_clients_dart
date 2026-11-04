@@ -35,7 +35,7 @@ final class AdminHttp {
         _AdminAuth(config, ensureOpen),
         if (config.logLevel != null)
           LoggingInterceptor(
-            logger: Logger('OpenAIAdminClient'),
+            logger: Logger('OpenAIAdminClient')..level = config.logLevel,
             logRequestBody: config.logLevel == Level.FINEST,
             logResponseBody: config.logLevel == Level.FINEST,
           ),
