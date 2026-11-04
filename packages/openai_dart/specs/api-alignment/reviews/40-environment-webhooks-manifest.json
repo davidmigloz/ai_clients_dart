@@ -1,0 +1,83 @@
+{
+  "issue": 392,
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "promotion_owner": 427,
+  "http_operations": 0,
+  "types": {
+    "WebhookAgentEnvironmentReady": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentEnvironmentReadyWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "parent": "WebhookAgentSessionEnvelope",
+      "schema": "WebhookAgentEnvironmentReady",
+      "note": "Actual signed environment notification envelope; required id/object/created_at/type/data. Distinct from session SSE. Finite immutable metadata and typed id-only payload; raw-byte verification stays in the existing receiver."
+    },
+    "WebhookAgentEnvironmentFailed": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentEnvironmentFailedWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "parent": "WebhookAgentSessionEnvelope",
+      "schema": "WebhookAgentEnvironmentFailed",
+      "note": "Actual signed environment notification envelope; required id/object/created_at/type/data. Distinct from session SSE. Finite immutable metadata and typed id-only payload; raw-byte verification stays in the existing receiver."
+    },
+    "WebhookAgentEnvironmentSuspended": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentEnvironmentSuspendedWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "parent": "WebhookAgentSessionEnvelope",
+      "schema": "WebhookAgentEnvironmentSuspended",
+      "note": "Actual signed environment notification envelope; required id/object/created_at/type/data. Distinct from session SSE. Finite immutable metadata and typed id-only payload; raw-byte verification stays in the existing receiver."
+    },
+    "WebhookAgentEnvironmentExpired": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentEnvironmentExpiredWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "parent": "WebhookAgentSessionEnvelope",
+      "schema": "WebhookAgentEnvironmentExpired",
+      "note": "Actual signed environment notification envelope; required id/object/created_at/type/data. Distinct from session SSE. Finite immutable metadata and typed id-only payload; raw-byte verification stays in the existing receiver."
+    },
+    "WebhookAgentSessionEnvelope": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "WebhookAgentSessionEnvelope",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookAgentSessionEnvelope",
+      "note": "Actual required id/object/created_at envelope shared by five Agent session and four Agent environment notifications; each real sealed subtype supplies its canonical type/data. Not the session SSE envelope."
+    },
+    "AgentEnvironmentEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WebhookIdData",
+      "file": "lib/src/models/webhooks/webhook_payloads.dart",
+      "schema": "AgentEnvironmentEvent",
+      "note": "Exact wire reuse of the existing required-string id-only notification payload. Source minLength0 adds no stricter ID prefix/length or synthetic lifecycle state. Environment variants share the canonical envelope."
+    }
+  },
+  "source_receipts": [
+    {
+      "file": "openai-python/src/openai/types/webhooks/agent_environment_ready_webhook_event.py",
+      "sha256": "30999b824bd0a4f9a3a708a4051eaa411551bcd0beff49d53f5b60d80473e252"
+    },
+    {
+      "file": "openai-python/src/openai/types/webhooks/agent_environment_failed_webhook_event.py",
+      "sha256": "a8e2fc3a008bd50e3741083d2a57a2e1c4d2db5460b90bd959727769d68ae67a"
+    },
+    {
+      "file": "openai-python/src/openai/types/webhooks/agent_environment_suspended_webhook_event.py",
+      "sha256": "c08331c3f55b38cda8096a62159f4fd33790c974145162aae3af097e18d064b4"
+    },
+    {
+      "file": "openai-python/src/openai/types/webhooks/agent_environment_expired_webhook_event.py",
+      "sha256": "1d95dec5cdf0c9d4eb3940c0965fd31b99f3913f3e76e2a51b1f459d145a7447"
+    },
+    {
+      "file": "openai-node/src/resources/webhooks/webhooks.ts",
+      "sha256": "8bac95c85eeff231315c60c3ba34e297435dd7cbc7e349ebd23e583f8eccf1ad"
+    }
+  ],
+  "scope_note": "Four typed signed notification variants and endpoint subscription choices; exact existing shared envelope/id-only payload reuse. Signature transport and session SSE unchanged."
+}

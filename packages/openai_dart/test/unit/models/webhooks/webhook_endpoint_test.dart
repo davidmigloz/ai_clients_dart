@@ -1173,6 +1173,10 @@ void main() {
       'realtime.call.incoming',
       'video.completed',
       'video.failed',
+      'agent.environment.ready',
+      'agent.environment.failed',
+      'agent.environment.suspended',
+      'agent.environment.expired',
       'agent.session.created',
       'agent.session.action_required',
       'agent.session.in_progress',
@@ -1180,10 +1184,13 @@ void main() {
       'agent.session.failed',
       'safety.alert.created',
     ];
-    test('contains exactly all 23 canonical choices including video', () {
-      expect(WebhookEventType.values.map((value) => value.value), expected);
-      expect(WebhookEventType.values.length, 23);
-    });
+    test(
+      'contains exactly all 27 canonical choices including environment notifications',
+      () {
+        expect(WebhookEventType.values.map((value) => value.value), expected);
+        expect(WebhookEventType.values.length, 27);
+      },
+    );
     for (final wire in expected) {
       test('$wire enum/create/update/test round trips', () {
         final event = WebhookEventType.fromJson(wire);

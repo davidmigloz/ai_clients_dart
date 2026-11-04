@@ -793,6 +793,10 @@ Verify the original request bytes and headers with `WebhookVerifier.unwrapBytes`
 
 → [Full example](example/webhooks_example.dart)
 
+Environment notifications are typed for `agent.environment.ready`, `failed`, `suspended` and `expired`. Subscribe with the corresponding `WebhookEventType.agentEnvironment*` choices, verify the original delivery bytes, and retrieve the environment using the typed payload’s `id`. Ready/failed concern prewarm setup; suspended may resume from a snapshot, while expired cannot. Receivers own acknowledgment and deduplication.
+
+→ [Offline environment notification example](example/agent_environment_webhooks_example.dart)
+
 </details>
 
 <a id="how-do-i-manage-webhook-endpoints"></a>
@@ -1452,6 +1456,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [content_provenance_checks_example.dart](example/content_provenance_checks_example.dart) | Content provenance (C2PA/SynthID) detection |
 | [error_handling_example.dart](example/error_handling_example.dart) | Exception handling patterns |
 | [retry_guidance_example.dart](example/retry_guidance_example.dart) | Local transient, permanent-quota, and long-hint scenarios without API calls |
+| [agent_environment_webhooks_example.dart](example/agent_environment_webhooks_example.dart) | **Offline.** environment subscriptions, signed notifications, repeated-ID handling and safe retrieval |
 | [webhooks_example.dart](example/webhooks_example.dart) | **Offline.** signed receiver, acknowledgment and caller-owned deduplication |
 | [webhook_endpoints_example.dart](example/webhook_endpoints_example.dart) | **Offline.** project endpoint lifecycle, pagination, discovery, rotation and test status |
 | [safety_example.dart](example/safety_example.dart) | **Offline.** verified notifications and separately scoped alert/case retrieval |

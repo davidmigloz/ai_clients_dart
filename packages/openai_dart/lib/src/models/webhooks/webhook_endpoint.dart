@@ -64,6 +64,18 @@ enum WebhookEventType {
   /// The `video.failed` project notification.
   videoFailed('video.failed'),
 
+  /// The `agent.environment.ready` project notification.
+  agentEnvironmentReady('agent.environment.ready'),
+
+  /// The `agent.environment.failed` project notification.
+  agentEnvironmentFailed('agent.environment.failed'),
+
+  /// The `agent.environment.suspended` project notification.
+  agentEnvironmentSuspended('agent.environment.suspended'),
+
+  /// The `agent.environment.expired` project notification.
+  agentEnvironmentExpired('agent.environment.expired'),
+
   /// The `agent.session.created` project notification.
   agentSessionCreated('agent.session.created'),
 
@@ -106,6 +118,10 @@ enum WebhookEventType {
     'realtime.call.incoming' => WebhookEventType.realtimeCallIncoming,
     'video.completed' => WebhookEventType.videoCompleted,
     'video.failed' => WebhookEventType.videoFailed,
+    'agent.environment.ready' => WebhookEventType.agentEnvironmentReady,
+    'agent.environment.failed' => WebhookEventType.agentEnvironmentFailed,
+    'agent.environment.suspended' => WebhookEventType.agentEnvironmentSuspended,
+    'agent.environment.expired' => WebhookEventType.agentEnvironmentExpired,
     'agent.session.created' => WebhookEventType.agentSessionCreated,
     'agent.session.action_required' =>
       WebhookEventType.agentSessionActionRequired,

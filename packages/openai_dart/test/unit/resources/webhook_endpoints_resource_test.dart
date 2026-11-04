@@ -415,7 +415,7 @@ void main() {
     }
 
     test(
-      'create and update write the complete 23-choice subscription set',
+      'create and update write the complete 27-choice subscription set',
       () async {
         final requests = <http.Request>[];
         final client = _client((request) async {
@@ -440,7 +440,7 @@ void main() {
         final expected = WebhookEventType.values
             .map((value) => value.value)
             .toList();
-        expect(expected, hasLength(23));
+        expect(expected, hasLength(27));
         expect((jsonDecode(requests[0].body) as Map)['event_types'], expected);
         expect(jsonDecode(requests[1].body), {'event_types': expected});
         expect(

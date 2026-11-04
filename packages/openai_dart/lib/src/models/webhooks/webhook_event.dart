@@ -12,6 +12,10 @@ part 'webhook_json_helpers.dart';
 /// Received notification, parsed independently of signature verification.
 ///
 /// Subtypes:
+/// - [AgentEnvironmentReadyWebhookEvent]
+/// - [AgentEnvironmentFailedWebhookEvent]
+/// - [AgentEnvironmentSuspendedWebhookEvent]
+/// - [AgentEnvironmentExpiredWebhookEvent]
 /// - [AgentSessionActionRequiredWebhookEvent]
 /// - [AgentSessionCreatedWebhookEvent]
 /// - [AgentSessionFailedWebhookEvent]
@@ -67,6 +71,16 @@ sealed class WebhookEvent with _WebhookValue {
     final snapshot = _snapshotWebhookJson(json, 'WebhookEvent');
     final type = requireJsonString(snapshot['type'], 'WebhookEvent.type');
     return switch (type) {
+      'agent.environment.ready' => AgentEnvironmentReadyWebhookEvent.fromJson(
+        snapshot,
+      ),
+      'agent.environment.failed' => AgentEnvironmentFailedWebhookEvent.fromJson(
+        snapshot,
+      ),
+      'agent.environment.suspended' =>
+        AgentEnvironmentSuspendedWebhookEvent.fromJson(snapshot),
+      'agent.environment.expired' =>
+        AgentEnvironmentExpiredWebhookEvent.fromJson(snapshot),
       'agent.session.action_required' =>
         AgentSessionActionRequiredWebhookEvent.fromJson(snapshot),
       'agent.session.created' => AgentSessionCreatedWebhookEvent.fromJson(
@@ -121,11 +135,13 @@ sealed class WebhookEvent with _WebhookValue {
   }
 }
 
-/// Required envelope shared by canonical Agent session notifications.
+/// Required envelope shared by canonical Agent session/environment notifications.
 ///
 /// Its subtypes are [AgentSessionActionRequiredWebhookEvent],
 /// [AgentSessionCreatedWebhookEvent], [AgentSessionFailedWebhookEvent],
-/// [AgentSessionIdleWebhookEvent] and [AgentSessionInProgressWebhookEvent].
+/// [AgentSessionIdleWebhookEvent], [AgentSessionInProgressWebhookEvent],
+/// [AgentEnvironmentReadyWebhookEvent], [AgentEnvironmentFailedWebhookEvent],
+/// [AgentEnvironmentSuspendedWebhookEvent] and [AgentEnvironmentExpiredWebhookEvent].
 @immutable
 sealed class WebhookAgentSessionEnvelope extends WebhookEvent {
   /// Creates a canonical Agent session envelope.
@@ -458,6 +474,435 @@ class AgentSessionFailedWebhookEvent extends WebhookAgentSessionEnvelope {
   @override
   String toString() =>
       'AgentSessionFailedWebhookEvent(id: [REDACTED], createdAt: [REDACTED], data: [REDACTED], object: $object, rawJson: ${rawJson.length} entries)';
+}
+
+/// Received notification for `agent.environment.ready`.
+///
+/// Prewarmed hosted setup finished before session attachment.
+/// Future received metadata is preserved as a finite immutable JSON snapshot.
+/// Replacing a child uses that child's complete JSON; cleared metadata is not
+/// inherited from a prior parent snapshot. Diagnostics redact payload values.
+@immutable
+class AgentEnvironmentReadyWebhookEvent extends WebhookAgentSessionEnvelope {
+  /// id received from the provider.
+  @override
+  final String id;
+
+  /// created_at received from the provider.
+  @override
+  final int createdAt;
+
+  /// data received from the provider.
+  @override
+  final WebhookIdData data;
+  @override
+  String get type => 'agent.environment.ready';
+  @override
+  String get object => 'event';
+
+  /// Finite, deeply immutable received metadata.
+  @override
+  final Map<String, dynamic> rawJson;
+
+  /// Creates AgentEnvironmentReadyWebhookEvent.
+  AgentEnvironmentReadyWebhookEvent({
+    required this.id,
+    required this.createdAt,
+    required this.data,
+    Map<String, dynamic> rawJson = const {},
+  }) : rawJson = _snapshotWebhookJson(
+         rawJson,
+         'AgentEnvironmentReadyWebhookEvent.rawJson',
+       ) {
+    _snapshotWebhookJson(_valueJson(), 'AgentEnvironmentReadyWebhookEvent');
+  }
+
+  /// Parses a received AgentEnvironmentReadyWebhookEvent, without authenticating a signature.
+  factory AgentEnvironmentReadyWebhookEvent.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    final snapshot = _snapshotWebhookJson(
+      json,
+      'AgentEnvironmentReadyWebhookEvent',
+    );
+    requireJsonType(
+      snapshot,
+      'agent.environment.ready',
+      'AgentEnvironmentReadyWebhookEvent',
+    );
+    _requireEventObject(
+      snapshot,
+      'AgentEnvironmentReadyWebhookEvent',
+      required: true,
+    );
+    return AgentEnvironmentReadyWebhookEvent(
+      id: requireJsonString(
+        snapshot['id'],
+        'AgentEnvironmentReadyWebhookEvent.id',
+      ),
+      createdAt: requireJsonInt(
+        snapshot['created_at'],
+        'AgentEnvironmentReadyWebhookEvent.created_at',
+      ),
+      data: WebhookIdData.fromJson(
+        requireJsonObject(
+          snapshot['data'],
+          'AgentEnvironmentReadyWebhookEvent.data',
+        ),
+      ),
+      rawJson: snapshot,
+    );
+  }
+  @override
+  Map<String, dynamic> _valueJson() => _mergeWebhookJson(
+    rawJson,
+    {'id', 'created_at', 'data', 'type', 'object'},
+    {
+      'id': id,
+      'created_at': createdAt,
+      'data': data.toJson(),
+      'type': type,
+      'object': object,
+    },
+  );
+
+  /// Copies supplied fields; child replacement discards stale child metadata.
+  AgentEnvironmentReadyWebhookEvent copyWith({
+    String? id,
+    int? createdAt,
+    WebhookIdData? data,
+    Map<String, dynamic>? rawJson,
+  }) => AgentEnvironmentReadyWebhookEvent(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    data: data ?? this.data,
+    rawJson: rawJson ?? this.rawJson,
+  );
+  @override
+  String toString() =>
+      'AgentEnvironmentReadyWebhookEvent(id: [REDACTED], createdAt: [REDACTED], data: [REDACTED], object: $object, rawJson: ${rawJson.length} entries)';
+}
+
+/// Received notification for `agent.environment.failed`.
+///
+/// Prewarmed hosted setup failed before session attachment.
+/// Future received metadata is preserved as a finite immutable JSON snapshot.
+/// Replacing a child uses that child's complete JSON; cleared metadata is not
+/// inherited from a prior parent snapshot. Diagnostics redact payload values.
+@immutable
+class AgentEnvironmentFailedWebhookEvent extends WebhookAgentSessionEnvelope {
+  /// id received from the provider.
+  @override
+  final String id;
+
+  /// created_at received from the provider.
+  @override
+  final int createdAt;
+
+  /// data received from the provider.
+  @override
+  final WebhookIdData data;
+  @override
+  String get type => 'agent.environment.failed';
+  @override
+  String get object => 'event';
+
+  /// Finite, deeply immutable received metadata.
+  @override
+  final Map<String, dynamic> rawJson;
+
+  /// Creates AgentEnvironmentFailedWebhookEvent.
+  AgentEnvironmentFailedWebhookEvent({
+    required this.id,
+    required this.createdAt,
+    required this.data,
+    Map<String, dynamic> rawJson = const {},
+  }) : rawJson = _snapshotWebhookJson(
+         rawJson,
+         'AgentEnvironmentFailedWebhookEvent.rawJson',
+       ) {
+    _snapshotWebhookJson(_valueJson(), 'AgentEnvironmentFailedWebhookEvent');
+  }
+
+  /// Parses a received AgentEnvironmentFailedWebhookEvent, without authenticating a signature.
+  factory AgentEnvironmentFailedWebhookEvent.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    final snapshot = _snapshotWebhookJson(
+      json,
+      'AgentEnvironmentFailedWebhookEvent',
+    );
+    requireJsonType(
+      snapshot,
+      'agent.environment.failed',
+      'AgentEnvironmentFailedWebhookEvent',
+    );
+    _requireEventObject(
+      snapshot,
+      'AgentEnvironmentFailedWebhookEvent',
+      required: true,
+    );
+    return AgentEnvironmentFailedWebhookEvent(
+      id: requireJsonString(
+        snapshot['id'],
+        'AgentEnvironmentFailedWebhookEvent.id',
+      ),
+      createdAt: requireJsonInt(
+        snapshot['created_at'],
+        'AgentEnvironmentFailedWebhookEvent.created_at',
+      ),
+      data: WebhookIdData.fromJson(
+        requireJsonObject(
+          snapshot['data'],
+          'AgentEnvironmentFailedWebhookEvent.data',
+        ),
+      ),
+      rawJson: snapshot,
+    );
+  }
+  @override
+  Map<String, dynamic> _valueJson() => _mergeWebhookJson(
+    rawJson,
+    {'id', 'created_at', 'data', 'type', 'object'},
+    {
+      'id': id,
+      'created_at': createdAt,
+      'data': data.toJson(),
+      'type': type,
+      'object': object,
+    },
+  );
+
+  /// Copies supplied fields; child replacement discards stale child metadata.
+  AgentEnvironmentFailedWebhookEvent copyWith({
+    String? id,
+    int? createdAt,
+    WebhookIdData? data,
+    Map<String, dynamic>? rawJson,
+  }) => AgentEnvironmentFailedWebhookEvent(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    data: data ?? this.data,
+    rawJson: rawJson ?? this.rawJson,
+  );
+  @override
+  String toString() =>
+      'AgentEnvironmentFailedWebhookEvent(id: [REDACTED], createdAt: [REDACTED], data: [REDACTED], object: $object, rawJson: ${rawJson.length} entries)';
+}
+
+/// Received notification for `agent.environment.suspended`.
+///
+/// The environment is suspended and can resume from a snapshot.
+/// Future received metadata is preserved as a finite immutable JSON snapshot.
+/// Replacing a child uses that child's complete JSON; cleared metadata is not
+/// inherited from a prior parent snapshot. Diagnostics redact payload values.
+@immutable
+class AgentEnvironmentSuspendedWebhookEvent
+    extends WebhookAgentSessionEnvelope {
+  /// id received from the provider.
+  @override
+  final String id;
+
+  /// created_at received from the provider.
+  @override
+  final int createdAt;
+
+  /// data received from the provider.
+  @override
+  final WebhookIdData data;
+  @override
+  String get type => 'agent.environment.suspended';
+  @override
+  String get object => 'event';
+
+  /// Finite, deeply immutable received metadata.
+  @override
+  final Map<String, dynamic> rawJson;
+
+  /// Creates AgentEnvironmentSuspendedWebhookEvent.
+  AgentEnvironmentSuspendedWebhookEvent({
+    required this.id,
+    required this.createdAt,
+    required this.data,
+    Map<String, dynamic> rawJson = const {},
+  }) : rawJson = _snapshotWebhookJson(
+         rawJson,
+         'AgentEnvironmentSuspendedWebhookEvent.rawJson',
+       ) {
+    _snapshotWebhookJson(_valueJson(), 'AgentEnvironmentSuspendedWebhookEvent');
+  }
+
+  /// Parses a received AgentEnvironmentSuspendedWebhookEvent, without authenticating a signature.
+  factory AgentEnvironmentSuspendedWebhookEvent.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    final snapshot = _snapshotWebhookJson(
+      json,
+      'AgentEnvironmentSuspendedWebhookEvent',
+    );
+    requireJsonType(
+      snapshot,
+      'agent.environment.suspended',
+      'AgentEnvironmentSuspendedWebhookEvent',
+    );
+    _requireEventObject(
+      snapshot,
+      'AgentEnvironmentSuspendedWebhookEvent',
+      required: true,
+    );
+    return AgentEnvironmentSuspendedWebhookEvent(
+      id: requireJsonString(
+        snapshot['id'],
+        'AgentEnvironmentSuspendedWebhookEvent.id',
+      ),
+      createdAt: requireJsonInt(
+        snapshot['created_at'],
+        'AgentEnvironmentSuspendedWebhookEvent.created_at',
+      ),
+      data: WebhookIdData.fromJson(
+        requireJsonObject(
+          snapshot['data'],
+          'AgentEnvironmentSuspendedWebhookEvent.data',
+        ),
+      ),
+      rawJson: snapshot,
+    );
+  }
+  @override
+  Map<String, dynamic> _valueJson() => _mergeWebhookJson(
+    rawJson,
+    {'id', 'created_at', 'data', 'type', 'object'},
+    {
+      'id': id,
+      'created_at': createdAt,
+      'data': data.toJson(),
+      'type': type,
+      'object': object,
+    },
+  );
+
+  /// Copies supplied fields; child replacement discards stale child metadata.
+  AgentEnvironmentSuspendedWebhookEvent copyWith({
+    String? id,
+    int? createdAt,
+    WebhookIdData? data,
+    Map<String, dynamic>? rawJson,
+  }) => AgentEnvironmentSuspendedWebhookEvent(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    data: data ?? this.data,
+    rawJson: rawJson ?? this.rawJson,
+  );
+  @override
+  String toString() =>
+      'AgentEnvironmentSuspendedWebhookEvent(id: [REDACTED], createdAt: [REDACTED], data: [REDACTED], object: $object, rawJson: ${rawJson.length} entries)';
+}
+
+/// Received notification for `agent.environment.expired`.
+///
+/// The environment expired and cannot resume from a snapshot.
+/// Future received metadata is preserved as a finite immutable JSON snapshot.
+/// Replacing a child uses that child's complete JSON; cleared metadata is not
+/// inherited from a prior parent snapshot. Diagnostics redact payload values.
+@immutable
+class AgentEnvironmentExpiredWebhookEvent extends WebhookAgentSessionEnvelope {
+  /// id received from the provider.
+  @override
+  final String id;
+
+  /// created_at received from the provider.
+  @override
+  final int createdAt;
+
+  /// data received from the provider.
+  @override
+  final WebhookIdData data;
+  @override
+  String get type => 'agent.environment.expired';
+  @override
+  String get object => 'event';
+
+  /// Finite, deeply immutable received metadata.
+  @override
+  final Map<String, dynamic> rawJson;
+
+  /// Creates AgentEnvironmentExpiredWebhookEvent.
+  AgentEnvironmentExpiredWebhookEvent({
+    required this.id,
+    required this.createdAt,
+    required this.data,
+    Map<String, dynamic> rawJson = const {},
+  }) : rawJson = _snapshotWebhookJson(
+         rawJson,
+         'AgentEnvironmentExpiredWebhookEvent.rawJson',
+       ) {
+    _snapshotWebhookJson(_valueJson(), 'AgentEnvironmentExpiredWebhookEvent');
+  }
+
+  /// Parses a received AgentEnvironmentExpiredWebhookEvent, without authenticating a signature.
+  factory AgentEnvironmentExpiredWebhookEvent.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    final snapshot = _snapshotWebhookJson(
+      json,
+      'AgentEnvironmentExpiredWebhookEvent',
+    );
+    requireJsonType(
+      snapshot,
+      'agent.environment.expired',
+      'AgentEnvironmentExpiredWebhookEvent',
+    );
+    _requireEventObject(
+      snapshot,
+      'AgentEnvironmentExpiredWebhookEvent',
+      required: true,
+    );
+    return AgentEnvironmentExpiredWebhookEvent(
+      id: requireJsonString(
+        snapshot['id'],
+        'AgentEnvironmentExpiredWebhookEvent.id',
+      ),
+      createdAt: requireJsonInt(
+        snapshot['created_at'],
+        'AgentEnvironmentExpiredWebhookEvent.created_at',
+      ),
+      data: WebhookIdData.fromJson(
+        requireJsonObject(
+          snapshot['data'],
+          'AgentEnvironmentExpiredWebhookEvent.data',
+        ),
+      ),
+      rawJson: snapshot,
+    );
+  }
+  @override
+  Map<String, dynamic> _valueJson() => _mergeWebhookJson(
+    rawJson,
+    {'id', 'created_at', 'data', 'type', 'object'},
+    {
+      'id': id,
+      'created_at': createdAt,
+      'data': data.toJson(),
+      'type': type,
+      'object': object,
+    },
+  );
+
+  /// Copies supplied fields; child replacement discards stale child metadata.
+  AgentEnvironmentExpiredWebhookEvent copyWith({
+    String? id,
+    int? createdAt,
+    WebhookIdData? data,
+    Map<String, dynamic>? rawJson,
+  }) => AgentEnvironmentExpiredWebhookEvent(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    data: data ?? this.data,
+    rawJson: rawJson ?? this.rawJson,
+  );
+  @override
+  String toString() =>
+      'AgentEnvironmentExpiredWebhookEvent(id: [REDACTED], createdAt: [REDACTED], data: [REDACTED], object: $object, rawJson: ${rawJson.length} entries)';
 }
 
 /// Received notification for `agent.session.idle`.

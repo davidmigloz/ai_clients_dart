@@ -1,6 +1,6 @@
 # Environment lifecycle webhooks and subscriptions
 
-Status: deferred outside the bounded milestone; not implemented.
+Status: implementation prepared in #392; independent review and exact-head CI required before merge.
 GitHub: [#392](https://github.com/davidmigloz/ai_clients_dart/issues/392).
 Primary requirements: `AGENTS-WEBHOOK-01`.
 Native GitHub blockers: [#389](https://github.com/davidmigloz/ai_clients_dart/issues/389), [#357](https://github.com/davidmigloz/ai_clients_dart/issues/357), [#358](https://github.com/davidmigloz/ai_clients_dart/issues/358).
@@ -8,7 +8,7 @@ Original tracker: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/3
 Specification: [Agents and Vaults](../agents-vaults.md), AGENTS-WEBHOOK-01.
 Dependencies: [ticket 37](37-environments-templates.md); merged [#357](https://github.com/davidmigloz/ai_clients_dart/issues/357) and [#358](https://github.com/davidmigloz/ai_clients_dart/issues/358).
 
-Deferred backlog: retained for future explicit prioritization; this ticket does not block completion of #317. Its acceptance remains unchecked, and implementation will not start automatically.
+Reactivated by the user under #413. The current implementation and validation are recorded in [the review receipt](../reviews/40-environment-webhooks.md); #317 remains completed.
 
 ## User capability and scope
 
@@ -39,7 +39,7 @@ suspended allows later resumption, whereas expired cannot resume from a snapshot
 
 ## Evidence and validation plan
 
-Wire authority is immutable [OpenAPI `0ef225c4`](https://github.com/openai/openai-openapi/blob/0ef225c4f701046f8fe88cae9d29d0df4d1a9fa9/openapi.json).
+Wire authority for this reactivated slice is immutable [OpenAPI `2e9ebb36`](https://github.com/openai/openai-openapi/blob/2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce/openapi.json), revalidated against Python 3.42.0 and Node 7.47.0. Scoped mappings are handed to #427 for global manifest and canonical-spec promotion.
 Workflow context comes from the [webhook guide](https://developers.openai.com/api/docs/guides/agents-api/sessions/webhooks)
 and [environment lifecycle guide](https://developers.openai.com/api/docs/guides/agents-api/environments/lifecycle).
 The specification and [planning ledger](../agents-vaults-plan.json) retain source

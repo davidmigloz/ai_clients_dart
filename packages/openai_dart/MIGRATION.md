@@ -6,6 +6,20 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming release: Agent environment webhook notifications
+
+Environment notifications now decode to `AgentEnvironmentReadyWebhookEvent`,
+`AgentEnvironmentFailedWebhookEvent`, `AgentEnvironmentSuspendedWebhookEvent`
+and `AgentEnvironmentExpiredWebhookEvent`, with a typed `WebhookIdData` payload.
+Add the new cases to exhaustive switches over `WebhookEvent`,
+`WebhookAgentSessionEnvelope` or `WebhookEventType`. The shared envelope's existing
+name remains unchanged; its canonical fields also apply to environment events.
+
+Continue verifying original request bytes before handling deliveries. Receivers
+own acknowledgment and deduplication. Ready/failed concern prewarm setup;
+suspended may resume from a snapshot, whereas expired cannot. These notifications
+are separate from session SSE and grant no environment lifecycle-control route.
+
 ## Upcoming release: runtime configuration snapshots
 
 Clients now detach and freeze their default-header maps. Mutating the map passed
