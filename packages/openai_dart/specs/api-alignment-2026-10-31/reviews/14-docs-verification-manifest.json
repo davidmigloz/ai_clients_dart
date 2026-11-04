@@ -163,6 +163,11 @@
       "receipt": "specs/api-alignment-2026-10-31/reviews/11-image-contracts-manifest.json",
       "schema": "BetaImageGenOutputTokensDetails",
       "correction": "Use actual BetaImageGenToolUsage.output_tokens_details runtime binding to responses.ImageGenOutputTokensDetails from #415, rather than an equivalent ordinary Images usage object."
+    },
+    {
+      "kind": "inline_context_mapping",
+      "count": 10,
+      "note": "Ten proven Live image inline wrappers/branches are extensions with exact source pointers, rather than false whole-parent DTO aliases. Scalar LiveInputFidelity is a real enum codec. No skip/exclusion is introduced."
     }
   ],
   "promoted_receipts": [
@@ -188,5 +193,64 @@
     "operations": 18,
     "unaccounted": []
   },
-  "note": "All dispositions describe the bounded delta. Historical Administration/legacy exclusions and advisory scanner diagnostics remain visible; route filename presence is not method/field parity."
+  "note": "All dispositions describe the bounded delta. Historical Administration/legacy exclusions and advisory scanner diagnostics remain visible; route filename presence is not method/field parity.",
+  "reviewed_inline_contexts": {
+    "LiveInputImageGenToolInputImageMaskValue": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/input_image_mask",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolCallSizeValue": {
+      "schema": "ImageGenToolCall",
+      "source_pointer": "#/components/schemas/ImageGenToolCall/properties/size/anyOf/0",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolCallSizeValueBranch0": {
+      "schema": "ImageGenToolCall",
+      "source_pointer": "#/components/schemas/ImageGenToolCall/properties/size/anyOf/0/anyOf/0",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolCallSizeValueBranch1": {
+      "schema": "ImageGenToolCall",
+      "source_pointer": "#/components/schemas/ImageGenToolCall/properties/size/anyOf/0/anyOf/1",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolModelValue": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/model",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolModelValueBranch0": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/model/anyOf/0",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolModelValueBranch1": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/model/anyOf/1",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolSizeValue": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/size",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolSizeValueBranch0": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/size/anyOf/0",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolSizeValueBranch1": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/size/anyOf/1",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputFidelity": {
+      "schema": "InputFidelity",
+      "source_pointer": "#/components/schemas/InputFidelity",
+      "file": "lib/src/models/live/live_input_item.dart",
+      "wire_kind": "string",
+      "note": "Closed writable high/low value adapter, not an object DTO."
+    }
+  }
 }

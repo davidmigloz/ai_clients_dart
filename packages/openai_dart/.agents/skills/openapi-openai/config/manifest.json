@@ -7371,11 +7371,11 @@
     },
     "LiveInputFidelity": {
       "spec": "main",
-      "kind": "object",
+      "kind": "enum",
       "dart_class": "LiveInputFidelity",
       "file": "lib/src/models/live/live_input_item.dart",
       "schema": "InputFidelity",
-      "note": "Actual adopted canonical InputItem-closure component. Validating immutable typed adapter preserves every declared field, nullable/omitted presence and finite future metadata; known malformed values remain contextual safe errors. Serialized-value getter/copy/value contracts are public-fixture tested."
+      "note": "Actual closed writable scalar InputFidelity codec. Values high/low are validated by the frozen embedded registry; lexical enum checks cannot follow that generic registry. No object DTO or writable unknown value is fabricated."
     },
     "LiveInputFileContent": {
       "spec": "main",
@@ -8067,11 +8067,11 @@
     },
     "LiveInputImageGenToolInputImageMaskValue": {
       "spec": "main",
-      "kind": "object",
+      "kind": "extension",
       "dart_class": "LiveInputImageGenToolInputImageMaskValue",
       "file": "lib/src/models/live/live_input_item.dart",
-      "schema": "ImageGenTool",
-      "note": "Dart adapter for the actual inline payload at #/components/schemas/ImageGenTool/properties/input_image_mask; no invented schema component. Typed public fields/branches serialize this exact inline wire value with strict canonical validation and immutable finite ownership."
+      "schema": null,
+      "note": "Actual inline codec at #/components/schemas/ImageGenTool/properties/input_image_mask. This is not an object mapping for the whole enclosing component. Its exact pointer and validated wire shape remain in the #427 closure receipt; real parent ImageGenTool/ImageGenToolCall bindings remain checked."
     },
     "LiveInputWebSearchApproximateLocationBranch0Value": {
       "spec": "main",
@@ -8211,27 +8211,27 @@
     },
     "LiveInputImageGenToolCallSizeValue": {
       "spec": "main",
-      "kind": "sealed_parent",
+      "kind": "extension",
       "dart_class": "LiveInputImageGenToolCallSizeValue",
       "file": "lib/src/models/live/live_input_item.dart",
-      "schema": "ImageGenToolCall",
-      "note": "Dart adapter for the actual inline payload at #/components/schemas/ImageGenToolCall/properties/size/anyOf/0; no invented schema component. Typed public fields/branches serialize this exact inline wire value with strict canonical validation and immutable finite ownership."
+      "schema": null,
+      "note": "Actual inline codec at #/components/schemas/ImageGenToolCall/properties/size/anyOf/0. This is not an object mapping for the whole enclosing component. Its exact pointer and validated wire shape remain in the #427 closure receipt; real parent ImageGenTool/ImageGenToolCall bindings remain checked."
     },
     "LiveInputImageGenToolModelValue": {
       "spec": "main",
-      "kind": "sealed_parent",
+      "kind": "extension",
       "dart_class": "LiveInputImageGenToolModelValue",
       "file": "lib/src/models/live/live_input_item.dart",
-      "schema": "ImageGenTool",
-      "note": "Dart adapter for the actual inline payload at #/components/schemas/ImageGenTool/properties/model; no invented schema component. Typed public fields/branches serialize this exact inline wire value with strict canonical validation and immutable finite ownership."
+      "schema": null,
+      "note": "Actual inline codec at #/components/schemas/ImageGenTool/properties/model. This is not an object mapping for the whole enclosing component. Its exact pointer and validated wire shape remain in the #427 closure receipt; real parent ImageGenTool/ImageGenToolCall bindings remain checked."
     },
     "LiveInputImageGenToolSizeValue": {
       "spec": "main",
-      "kind": "sealed_parent",
+      "kind": "extension",
       "dart_class": "LiveInputImageGenToolSizeValue",
       "file": "lib/src/models/live/live_input_item.dart",
-      "schema": "ImageGenTool",
-      "note": "Dart adapter for the actual inline payload at #/components/schemas/ImageGenTool/properties/size; no invented schema component. Typed public fields/branches serialize this exact inline wire value with strict canonical validation and immutable finite ownership."
+      "schema": null,
+      "note": "Actual inline codec at #/components/schemas/ImageGenTool/properties/size. This is not an object mapping for the whole enclosing component. Its exact pointer and validated wire shape remain in the #427 closure receipt; real parent ImageGenTool/ImageGenToolCall bindings remain checked."
     },
     "LiveInputToolSearchOutputNamespaceToolParamToolsItemValue": {
       "spec": "main",
@@ -9473,57 +9473,57 @@
     },
     "LiveInputImageGenToolCallSizeValueBranch0": {
       "spec": "main",
-      "kind": "sealed_variant",
+      "kind": "extension",
       "dart_class": "LiveInputImageGenToolCallSizeValueBranch0",
       "file": "lib/src/models/live/live_input_item.dart",
-      "schema": "ImageGenToolCall",
+      "schema": null,
       "parent": "LiveInputImageGenToolCallSizeValue",
-      "note": "Typed value adapter for actual #/components/schemas/ImageGenToolCall/properties/size/anyOf/0/anyOf/0; the typed value property serializes directly as the canonical branch. This is a Dart union wrapper, not a fabricated component."
+      "note": "Actual inline codec at #/components/schemas/ImageGenToolCall/properties/size/anyOf/0/anyOf/0. This is not an object mapping for the whole enclosing component. Its exact pointer and validated wire shape remain in the #427 closure receipt; real parent ImageGenTool/ImageGenToolCall bindings remain checked."
     },
     "LiveInputImageGenToolCallSizeValueBranch1": {
       "spec": "main",
-      "kind": "sealed_variant",
+      "kind": "extension",
       "dart_class": "LiveInputImageGenToolCallSizeValueBranch1",
       "file": "lib/src/models/live/live_input_item.dart",
-      "schema": "ImageGenToolCall",
+      "schema": null,
       "parent": "LiveInputImageGenToolCallSizeValue",
-      "note": "Typed value adapter for actual #/components/schemas/ImageGenToolCall/properties/size/anyOf/0/anyOf/1; the typed value property serializes directly as the canonical branch. This is a Dart union wrapper, not a fabricated component."
+      "note": "Actual inline codec at #/components/schemas/ImageGenToolCall/properties/size/anyOf/0/anyOf/1. This is not an object mapping for the whole enclosing component. Its exact pointer and validated wire shape remain in the #427 closure receipt; real parent ImageGenTool/ImageGenToolCall bindings remain checked."
     },
     "LiveInputImageGenToolModelValueBranch0": {
       "spec": "main",
-      "kind": "sealed_variant",
+      "kind": "extension",
       "dart_class": "LiveInputImageGenToolModelValueBranch0",
       "file": "lib/src/models/live/live_input_item.dart",
-      "schema": "ImageGenTool",
+      "schema": null,
       "parent": "LiveInputImageGenToolModelValue",
-      "note": "Typed value adapter for actual #/components/schemas/ImageGenTool/properties/model/anyOf/0; the typed value property serializes directly as the canonical branch. This is a Dart union wrapper, not a fabricated component."
+      "note": "Actual inline codec at #/components/schemas/ImageGenTool/properties/model/anyOf/0. This is not an object mapping for the whole enclosing component. Its exact pointer and validated wire shape remain in the #427 closure receipt; real parent ImageGenTool/ImageGenToolCall bindings remain checked."
     },
     "LiveInputImageGenToolModelValueBranch1": {
       "spec": "main",
-      "kind": "sealed_variant",
+      "kind": "extension",
       "dart_class": "LiveInputImageGenToolModelValueBranch1",
       "file": "lib/src/models/live/live_input_item.dart",
-      "schema": "ImageGenTool",
+      "schema": null,
       "parent": "LiveInputImageGenToolModelValue",
-      "note": "Typed value adapter for actual #/components/schemas/ImageGenTool/properties/model/anyOf/1; the typed value property serializes directly as the canonical branch. This is a Dart union wrapper, not a fabricated component."
+      "note": "Actual inline codec at #/components/schemas/ImageGenTool/properties/model/anyOf/1. This is not an object mapping for the whole enclosing component. Its exact pointer and validated wire shape remain in the #427 closure receipt; real parent ImageGenTool/ImageGenToolCall bindings remain checked."
     },
     "LiveInputImageGenToolSizeValueBranch0": {
       "spec": "main",
-      "kind": "sealed_variant",
+      "kind": "extension",
       "dart_class": "LiveInputImageGenToolSizeValueBranch0",
       "file": "lib/src/models/live/live_input_item.dart",
-      "schema": "ImageGenTool",
+      "schema": null,
       "parent": "LiveInputImageGenToolSizeValue",
-      "note": "Typed value adapter for actual #/components/schemas/ImageGenTool/properties/size/anyOf/0; the typed value property serializes directly as the canonical branch. This is a Dart union wrapper, not a fabricated component."
+      "note": "Actual inline codec at #/components/schemas/ImageGenTool/properties/size/anyOf/0. This is not an object mapping for the whole enclosing component. Its exact pointer and validated wire shape remain in the #427 closure receipt; real parent ImageGenTool/ImageGenToolCall bindings remain checked."
     },
     "LiveInputImageGenToolSizeValueBranch1": {
       "spec": "main",
-      "kind": "sealed_variant",
+      "kind": "extension",
       "dart_class": "LiveInputImageGenToolSizeValueBranch1",
       "file": "lib/src/models/live/live_input_item.dart",
-      "schema": "ImageGenTool",
+      "schema": null,
       "parent": "LiveInputImageGenToolSizeValue",
-      "note": "Typed value adapter for actual #/components/schemas/ImageGenTool/properties/size/anyOf/1; the typed value property serializes directly as the canonical branch. This is a Dart union wrapper, not a fabricated component."
+      "note": "Actual inline codec at #/components/schemas/ImageGenTool/properties/size/anyOf/1. This is not an object mapping for the whole enclosing component. Its exact pointer and validated wire shape remain in the #427 closure receipt; real parent ImageGenTool/ImageGenToolCall bindings remain checked."
     },
     "LiveInputToolSearchOutputNamespaceToolParamToolsItemValueBranch0": {
       "spec": "main",

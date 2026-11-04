@@ -564,6 +564,8 @@ Model IDs are open strings, including `gpt-6.1-terra`. GPT-6 Rosalind requires t
 
 Paid usage tiers **Build, Launch, and Grow**, project service-tier permissions, and subscription API credits are managed by OpenAI. They are separate from a request's `serviceTier`. Review [rate limits](https://developers.openai.com/api/docs/guides/rate-limits) and [credit eligibility](https://developers.openai.com/api/docs/guides/chatgpt-api-credits); the client does not change account entitlements.
 
+→ [Responses model-call example](example/responses_example.dart)
+
 </details>
 
 ### Other model APIs

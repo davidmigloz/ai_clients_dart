@@ -2576,7 +2576,51 @@
             "file": "lib/src/models/responses/tools/response_tool.dart"
           }
         ],
-        "pull_request": 458
+        "pull_request": 458,
+        "additional_contexts": [
+          {
+            "manifest_key": "LiveInputImageGenToolInputImageMaskValue",
+            "schema": "ImageGenTool",
+            "source_pointer": "#/components/schemas/ImageGenTool/properties/input_image_mask",
+            "file": "lib/src/models/live/live_input_item.dart"
+          },
+          {
+            "manifest_key": "LiveInputImageGenToolModelValue",
+            "schema": "ImageGenTool",
+            "source_pointer": "#/components/schemas/ImageGenTool/properties/model",
+            "file": "lib/src/models/live/live_input_item.dart"
+          },
+          {
+            "manifest_key": "LiveInputImageGenToolModelValueBranch0",
+            "schema": "ImageGenTool",
+            "source_pointer": "#/components/schemas/ImageGenTool/properties/model/anyOf/0",
+            "file": "lib/src/models/live/live_input_item.dart"
+          },
+          {
+            "manifest_key": "LiveInputImageGenToolModelValueBranch1",
+            "schema": "ImageGenTool",
+            "source_pointer": "#/components/schemas/ImageGenTool/properties/model/anyOf/1",
+            "file": "lib/src/models/live/live_input_item.dart"
+          },
+          {
+            "manifest_key": "LiveInputImageGenToolSizeValue",
+            "schema": "ImageGenTool",
+            "source_pointer": "#/components/schemas/ImageGenTool/properties/size",
+            "file": "lib/src/models/live/live_input_item.dart"
+          },
+          {
+            "manifest_key": "LiveInputImageGenToolSizeValueBranch0",
+            "schema": "ImageGenTool",
+            "source_pointer": "#/components/schemas/ImageGenTool/properties/size/anyOf/0",
+            "file": "lib/src/models/live/live_input_item.dart"
+          },
+          {
+            "manifest_key": "LiveInputImageGenToolSizeValueBranch1",
+            "schema": "ImageGenTool",
+            "source_pointer": "#/components/schemas/ImageGenTool/properties/size/anyOf/1",
+            "file": "lib/src/models/live/live_input_item.dart"
+          }
+        ]
       }
     },
     {
@@ -2594,7 +2638,27 @@
             "file": "lib/src/models/responses/items/output_item.dart"
           }
         ],
-        "pull_request": 458
+        "pull_request": 458,
+        "additional_contexts": [
+          {
+            "manifest_key": "LiveInputImageGenToolCallSizeValue",
+            "schema": "ImageGenToolCall",
+            "source_pointer": "#/components/schemas/ImageGenToolCall/properties/size/anyOf/0",
+            "file": "lib/src/models/live/live_input_item.dart"
+          },
+          {
+            "manifest_key": "LiveInputImageGenToolCallSizeValueBranch0",
+            "schema": "ImageGenToolCall",
+            "source_pointer": "#/components/schemas/ImageGenToolCall/properties/size/anyOf/0/anyOf/0",
+            "file": "lib/src/models/live/live_input_item.dart"
+          },
+          {
+            "manifest_key": "LiveInputImageGenToolCallSizeValueBranch1",
+            "schema": "ImageGenToolCall",
+            "source_pointer": "#/components/schemas/ImageGenToolCall/properties/size/anyOf/0/anyOf/1",
+            "file": "lib/src/models/live/live_input_item.dart"
+          }
+        ]
       }
     },
     {
@@ -2696,7 +2760,17 @@
             "file": "lib/src/models/images/image_common.dart"
           }
         ],
-        "pull_request": 458
+        "pull_request": 458,
+        "additional_contexts": [
+          {
+            "manifest_key": "LiveInputFidelity",
+            "schema": "InputFidelity",
+            "source_pointer": "#/components/schemas/InputFidelity",
+            "file": "lib/src/models/live/live_input_item.dart",
+            "wire_kind": "string",
+            "note": "Closed writable high/low value adapter, not an object DTO."
+          }
+        ]
       }
     },
     {
