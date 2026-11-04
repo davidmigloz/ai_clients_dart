@@ -97,7 +97,7 @@ class MessagesResource extends ResourceBase with StreamingResource {
       abortTrigger: abortTrigger,
     );
 
-    return eventStream.map(MessageStreamEvent.fromJson);
+    return mapStream(eventStream, MessageStreamEvent.fromJson);
   }
 
   /// Counts the number of tokens in a message.

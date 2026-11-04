@@ -151,6 +151,6 @@ class SessionEventsResource extends ResourceBase with StreamingResource {
       abortTrigger: abortTrigger,
     );
 
-    return eventStream.map(SessionEvent.fromJson);
+    return mapStream(eventStream, SessionEvent.fromJson);
   }
 }

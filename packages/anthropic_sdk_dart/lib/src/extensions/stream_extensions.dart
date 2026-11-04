@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../models/metadata/stop_reason.dart';
 import '../models/streaming/content_block_delta.dart';
 import '../models/streaming/message_stream_accumulator.dart';
@@ -17,44 +19,40 @@ extension MessageStreamExtension on Stream<MessageStreamEvent> {
   }
 
   /// Yields individual text delta strings as they arrive.
-  Stream<String> textDeltas() async* {
-    await for (final event in this) {
-      if (event is ContentBlockDeltaEvent && event.delta is TextDelta) {
-        yield (event.delta as TextDelta).text;
-      }
-    }
-  }
+  Stream<String> textDeltas() => where(
+    (event) => event is ContentBlockDeltaEvent && event.delta is TextDelta,
+  ).map((event) => ((event as ContentBlockDeltaEvent).delta as TextDelta).text);
 
   /// Yields individual thinking delta strings as they arrive.
-  Stream<String> thinkingDeltas() async* {
-    await for (final event in this) {
-      if (event is ContentBlockDeltaEvent && event.delta is ThinkingDelta) {
-        yield (event.delta as ThinkingDelta).thinking;
-      }
-    }
-  }
+  Stream<String> thinkingDeltas() =>
+      where(
+        (event) =>
+            event is ContentBlockDeltaEvent && event.delta is ThinkingDelta,
+      ).map(
+        (event) =>
+            ((event as ContentBlockDeltaEvent).delta as ThinkingDelta).thinking,
+      );
 
   /// Yields individual input JSON delta strings as they arrive (for tool use).
-  Stream<String> inputJsonDeltas() async* {
-    await for (final event in this) {
-      if (event is ContentBlockDeltaEvent && event.delta is InputJsonDelta) {
-        yield (event.delta as InputJsonDelta).partialJson;
-      }
-    }
-  }
+  Stream<String> inputJsonDeltas() =>
+      where(
+        (event) =>
+            event is ContentBlockDeltaEvent && event.delta is InputJsonDelta,
+      ).map(
+        (event) => ((event as ContentBlockDeltaEvent).delta as InputJsonDelta)
+            .partialJson,
+      );
 
   /// Accumulates events, yielding the accumulator after each event.
   ///
   /// The same mutable [MessageStreamAccumulator] instance is yielded each
   /// time. Use [MessageStreamAccumulator.toMessage] to obtain an immutable
   /// snapshot at any point.
-  Stream<MessageStreamAccumulator> accumulate() async* {
-    final accumulator = MessageStreamAccumulator();
-    await for (final event in this) {
-      accumulator.add(event);
-      yield accumulator;
-    }
-  }
+  Stream<MessageStreamAccumulator> accumulate() =>
+      Stream<MessageStreamAccumulator>.eventTransformed(
+        this,
+        _AccumulatorSink.new,
+      );
 
   /// Consumes the entire stream and returns the last stop reason.
   ///
@@ -68,5 +66,38 @@ extension MessageStreamExtension on Stream<MessageStreamEvent> {
       }
     }
     return result;
+  }
+}
+
+class _AccumulatorSink implements EventSink<MessageStreamEvent> {
+  final EventSink<MessageStreamAccumulator> _output;
+  final _accumulator = MessageStreamAccumulator();
+  bool _closed = false;
+
+  _AccumulatorSink(this._output);
+
+  @override
+  void add(MessageStreamEvent event) {
+    if (_closed) return;
+    try {
+      _accumulator.add(event);
+      _output.add(_accumulator);
+    } catch (error, stackTrace) {
+      addError(error, stackTrace);
+    }
+  }
+
+  @override
+  void addError(Object error, [StackTrace? stackTrace]) {
+    if (_closed) return;
+    _output.addError(error, stackTrace);
+    close();
+  }
+
+  @override
+  void close() {
+    if (_closed) return;
+    _closed = true;
+    _output.close();
   }
 }

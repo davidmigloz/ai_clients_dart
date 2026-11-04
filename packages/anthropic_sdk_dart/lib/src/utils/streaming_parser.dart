@@ -3,108 +3,93 @@ import 'dart:convert';
 
 /// Parses Server-Sent Events (SSE) streams.
 ///
-/// Anthropic uses SSE format for streaming responses.
-/// Each event has the format:
-/// ```text
-/// event: <event_type>
-/// data: <json_data>
-///
-/// ```
+/// Cancellation and pause signals are forwarded to the byte stream, including
+/// while no events arrive.
 class SseParser {
   /// Parses a byte stream into SSE events.
   ///
   /// Returns a stream of parsed JSON objects from SSE data lines.
-  Stream<Map<String, dynamic>> parse(Stream<List<int>> bytes) async* {
-    final lines = bytes.transform(utf8.decoder).transform(const LineSplitter());
+  Stream<Map<String, dynamic>> parse(Stream<List<int>> bytes) {
+    StreamSubscription<String>? subscription;
+    late StreamController<Map<String, dynamic>> controller;
+    controller = StreamController<Map<String, dynamic>>(
+      onListen: () {
+        final sink = _SseSink(controller.sink);
+        subscription = bytes
+            .transform(utf8.decoder)
+            .transform(const LineSplitter())
+            .listen(
+              sink.add,
+              onError: sink.addError,
+              onDone: sink.close,
+              cancelOnError: true,
+            );
+      },
+      onPause: () => subscription?.pause(),
+      onResume: () => subscription?.resume(),
+      onCancel: () => subscription?.cancel(),
+    );
+    return controller.stream;
+  }
+}
 
-    String? currentEvent;
-    final dataBuffer = StringBuffer();
+class _SseSink implements EventSink<String> {
+  final EventSink<Map<String, dynamic>> _output;
+  final _data = StringBuffer();
+  String? _event;
+  bool _closed = false;
 
-    await for (final line in lines) {
-      if (line.startsWith('event:')) {
-        currentEvent = line.substring(6).trim();
-      } else if (line.startsWith('data:')) {
-        final data = line.substring(5).trim();
+  _SseSink(this._output);
 
-        // Check for end-of-stream marker — flush any buffered data first
-        if (data == '[DONE]') {
-          if (dataBuffer.isNotEmpty) {
-            final buffered = dataBuffer.toString();
-            dataBuffer.clear();
-            if (buffered.isNotEmpty) {
-              try {
-                final json = jsonDecode(buffered) as Map<String, dynamic>;
-                if (currentEvent != null) {
-                  json['_event'] = currentEvent;
-                }
-                yield json;
-              } catch (_) {
-                if (currentEvent == 'error') {
-                  yield <String, dynamic>{
-                    '_event': 'error',
-                    '_rawData': buffered,
-                    'type': 'error',
-                  };
-                }
-              }
-            }
-          }
-          return;
-        }
+  @override
+  void add(String line) {
+    if (_closed) return;
+    if (line.startsWith('event:')) {
+      _event = line.substring(6).trim();
+    } else if (line.startsWith('data:')) {
+      final data = line.substring(5).trim();
+      if (data == '[DONE]') {
+        close();
+        return;
+      }
+      if (_data.isNotEmpty) _data.write('\n');
+      _data.write(data);
+    } else if (line.isEmpty) {
+      _flush();
+      _event = null;
+    }
+  }
 
-        if (dataBuffer.isNotEmpty) dataBuffer.write('\n');
-        dataBuffer.write(data);
-      } else if (line.isEmpty) {
-        // Empty line signals end of event
-        if (dataBuffer.isNotEmpty) {
-          final data = dataBuffer.toString();
-          dataBuffer.clear();
-
-          if (data.isNotEmpty) {
-            try {
-              final json = jsonDecode(data) as Map<String, dynamic>;
-              // Include event type in parsed data if available
-              if (currentEvent != null) {
-                json['_event'] = currentEvent;
-              }
-              yield json;
-            } catch (_) {
-              if (currentEvent == 'error') {
-                yield <String, dynamic>{
-                  '_event': 'error',
-                  '_rawData': data,
-                  'type': 'error',
-                };
-              }
-            }
-          }
-        }
-
-        currentEvent = null;
+  void _flush() {
+    if (_data.isEmpty) return;
+    final data = _data.toString();
+    _data.clear();
+    try {
+      final json = jsonDecode(data) as Map<String, dynamic>;
+      if (_event != null) json['_event'] = _event;
+      _output.add(json);
+    } catch (_) {
+      if (_event == 'error') {
+        _output.add({'_event': 'error', '_rawData': data, 'type': 'error'});
       }
     }
+  }
 
-    // Handle any remaining data
-    if (dataBuffer.isNotEmpty) {
-      final data = dataBuffer.toString();
-      if (data.isNotEmpty) {
-        try {
-          final json = jsonDecode(data) as Map<String, dynamic>;
-          if (currentEvent != null) {
-            json['_event'] = currentEvent;
-          }
-          yield json;
-        } catch (_) {
-          if (currentEvent == 'error') {
-            yield <String, dynamic>{
-              '_event': 'error',
-              '_rawData': data,
-              'type': 'error',
-            };
-          }
-        }
-      }
-    }
+  @override
+  void addError(Object error, [StackTrace? stackTrace]) {
+    if (_closed) return;
+    _closed = true;
+    _output
+      ..addError(error, stackTrace)
+      ..close();
+  }
+
+  @override
+  void close() {
+    if (_closed) return;
+    _closed = true;
+    _flush();
+    _output.close();
   }
 }
 

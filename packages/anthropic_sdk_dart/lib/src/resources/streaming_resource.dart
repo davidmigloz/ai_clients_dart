@@ -13,6 +13,17 @@ import 'base_resource.dart';
 ///
 /// Handles SSE (Server-Sent Events) streaming for Anthropic API responses.
 mixin StreamingResource on ResourceBase {
+  /// Maps events while treating decoding failures as terminal stream errors.
+  ///
+  /// Unlike an async generator, this forwards listener cancellation while idle.
+  Stream<T> mapStream<T>(
+    Stream<Map<String, dynamic>> source,
+    T Function(Map<String, dynamic>) decode,
+  ) => Stream<T>.eventTransformed(
+    source,
+    (sink) => _MappedEventSink(sink, decode),
+  );
+
   /// Makes a streaming POST request.
   ///
   /// Returns a stream of parsed SSE events as JSON maps.
@@ -32,6 +43,25 @@ mixin StreamingResource on ResourceBase {
     queryParams: queryParams,
     headers: headers,
     abortTrigger: abortTrigger,
+  );
+
+  /// Makes a streaming GET request whose response contains JSON lines.
+  ///
+  /// Uses the same cancellation lifecycle as SSE requests.
+  Stream<Map<String, dynamic>> getJsonlStream(
+    String path, {
+    Future<void>? abortTrigger,
+    AnthropicException Function(int statusCode, String body)? errorFactory,
+  }) => _stream(
+    'GET',
+    path,
+    abortTrigger: abortTrigger,
+    errorFactory: errorFactory,
+    decode: (bytes) => bytes
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .where((line) => line.trim().isNotEmpty)
+        .map((line) => jsonDecode(line) as Map<String, dynamic>),
   );
 
   /// Creates an exception for streaming errors.
@@ -119,26 +149,30 @@ mixin StreamingResource on ResourceBase {
     Map<String, dynamic>? queryParams,
     Map<String, String>? headers,
     Future<void>? abortTrigger,
+    Stream<Map<String, dynamic>> Function(Stream<List<int>> bytes)? decode,
+    AnthropicException Function(int statusCode, String body)? errorFactory,
   }) {
     final requestAbort = Completer<void>();
     // Canceled by stop when the stream terminates or its listener cancels.
     // ignore: cancel_subscriptions
     StreamSubscription<dynamic>? subscription;
-    StreamSubscription<List<int>>? bodySubscription;
-    StreamController<List<int>>? bytesController;
     var correlationId = generateRequestId();
     var stopped = false;
     late StreamController<Map<String, dynamic>> controller;
 
-    void stop() {
+    void stop({bool abort = true}) {
+      if (stopped) return;
       stopped = true;
-      if (!requestAbort.isCompleted) requestAbort.complete();
+      if (abort && !requestAbort.isCompleted) requestAbort.complete();
       final current = subscription;
-      if (current != null) unawaited(current.cancel());
-      final body = bodySubscription;
-      if (body != null) unawaited(body.cancel());
-      final bytes = bytesController;
-      if (bytes != null && !bytes.isClosed) unawaited(bytes.close());
+      current?.cancel().ignore();
+    }
+
+    void finish([Object? error, StackTrace? stackTrace]) {
+      if (stopped) return;
+      stop(abort: error != null);
+      if (error != null) controller.addError(error, stackTrace);
+      unawaited(controller.close());
     }
 
     Future<void> run() async {
@@ -169,47 +203,33 @@ mixin StreamingResource on ResourceBase {
               .transform(utf8.decoder)
               .listen(
                 responseBody.write,
-                onError: controller.addError,
+                onError: finish,
                 onDone: () {
-                  controller.addError(
-                    _createStreamException(
-                      response.statusCode,
-                      responseBody.toString(),
-                      correlationId,
-                    ),
+                  finish(
+                    errorFactory?.call(
+                          response.statusCode,
+                          responseBody.toString(),
+                        ) ??
+                        _createStreamException(
+                          response.statusCode,
+                          responseBody.toString(),
+                          correlationId,
+                        ),
                   );
-                  unawaited(controller.close());
                 },
+                cancelOnError: true,
               );
         } else {
-          late StreamController<List<int>> bytes;
-          bytes = StreamController<List<int>>(
-            onListen: () {
-              bodySubscription = response.stream.listen(
-                bytes.add,
-                onError: bytes.addError,
-                onDone: () => unawaited(bytes.close()),
-              );
-            },
-            onPause: () => bodySubscription?.pause(),
-            onResume: () => bodySubscription?.resume(),
-            onCancel: () => bodySubscription?.cancel(),
+          subscription = (decode ?? SseParser().parse)(response.stream).listen(
+            controller.add,
+            onError: finish,
+            onDone: finish,
+            cancelOnError: true,
           );
-          bytesController = bytes;
-          subscription = SseParser()
-              .parse(bytes.stream)
-              .listen(
-                controller.add,
-                onError: controller.addError,
-                onDone: () => unawaited(controller.close()),
-              );
         }
         if (controller.isPaused) subscription?.pause();
       } catch (error, stackTrace) {
-        if (!stopped) {
-          controller.addError(error, stackTrace);
-          unawaited(controller.close());
-        }
+        finish(error, stackTrace);
       }
     }
 
@@ -217,9 +237,7 @@ mixin StreamingResource on ResourceBase {
       onListen: () {
         unawaited(
           abortTrigger?.then((_) {
-            if (stopped) return;
-            stop();
-            controller.addError(
+            finish(
               AbortedException(
                 message: 'Stream aborted by user',
                 correlationId: correlationId,
@@ -227,7 +245,6 @@ mixin StreamingResource on ResourceBase {
                 stage: AbortionStage.duringStream,
               ),
             );
-            unawaited(controller.close());
           }, onError: (Object _, StackTrace stackTrace) {}),
         );
         unawaited(run());
@@ -254,5 +271,39 @@ mixin StreamingResource on ResourceBase {
         // No authentication needed
         break;
     }
+  }
+}
+
+class _MappedEventSink<T> implements EventSink<Map<String, dynamic>> {
+  final EventSink<T> _output;
+  final T Function(Map<String, dynamic>) _decode;
+  bool _closed = false;
+
+  _MappedEventSink(this._output, this._decode);
+
+  @override
+  void add(Map<String, dynamic> event) {
+    if (_closed) return;
+    try {
+      _output.add(_decode(event));
+    } catch (error, stackTrace) {
+      addError(error, stackTrace);
+    }
+  }
+
+  @override
+  void addError(Object error, [StackTrace? stackTrace]) {
+    if (_closed) return;
+    _closed = true;
+    _output
+      ..addError(error, stackTrace)
+      ..close();
+  }
+
+  @override
+  void close() {
+    if (_closed) return;
+    _closed = true;
+    _output.close();
   }
 }
