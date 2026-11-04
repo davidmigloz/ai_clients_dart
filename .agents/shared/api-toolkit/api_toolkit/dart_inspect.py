@@ -19,12 +19,257 @@ CLASS_PATTERN = re.compile(r"(?:sealed\s+class|class|enum)\s+(\w+)")
 FROM_JSON_KEY_RE = re.compile(r"""\bjson\s*\[\s*(['"])([^'"]+)\1\s*\]""")
 
 
+@dataclass(slots=True)
+class DartDeclaration:
+    kind: str
+    code: str
+    literals: set[str]
+
+
+def _decode_dart_literal(value: str, raw: bool) -> str | None:
+    if raw:
+        return value
+    result: list[str] = []
+    index = 0
+    escapes = {"n": "\n", "r": "\r", "t": "\t", "b": "\b", "f": "\f", "v": "\v"}
+    while index < len(value):
+        char = value[index]
+        if char == "$" and index + 1 < len(value) and (value[index + 1] == "{" or re.match(r"[A-Za-z_]", value[index + 1])):
+            return None
+        if char != "\\":
+            result.append(char)
+            index += 1
+            continue
+        index += 1
+        if index >= len(value):
+            return None
+        escaped = value[index]
+        index += 1
+        if escaped == "u":
+            if index < len(value) and value[index] == "{":
+                end = value.find("}", index + 1)
+                if end == -1:
+                    return None
+                digits = value[index + 1:end]
+                index = end + 1
+            else:
+                digits = value[index:index + 4]
+                index += 4
+            try:
+                result.append(chr(int(digits, 16)))
+            except (ValueError, OverflowError):
+                return None
+        else:
+            result.append(escapes.get(escaped, escaped))
+    return "".join(result)
+
+
+def _dart_comment_end(content: str, start: int) -> int:
+    if content.startswith("//", start):
+        end = content.find("\n", start)
+        return len(content) if end == -1 else end
+    depth = 1
+    index = start + 2
+    while index < len(content) and depth:
+        if content.startswith("/*", index):
+            depth += 1
+            index += 2
+        elif content.startswith("*/", index):
+            depth -= 1
+            index += 2
+        else:
+            index += 1
+    return index
+
+
+def _dart_string_end(content: str, quote_index: int, raw: bool) -> tuple[int, int]:
+    quote = content[quote_index]
+    delimiter = quote * (3 if content.startswith(quote * 3, quote_index) else 1)
+    index = quote_index + len(delimiter)
+    while index < len(content):
+        if content.startswith(delimiter, index):
+            return index, index + len(delimiter)
+        if not raw and content[index] == "\\":
+            index += 2
+        elif not raw and content.startswith("${", index):
+            index = _dart_interpolation_end(content, index + 2)
+        else:
+            index += 1
+    return len(content), len(content)
+
+
+def _dart_interpolation_end(content: str, index: int) -> int:
+    depth = 1
+    while index < len(content) and depth:
+        if content.startswith(("//", "/*"), index):
+            index = _dart_comment_end(content, index)
+            continue
+        raw = content[index] == "r" and index + 1 < len(content) and content[index + 1] in "'\""
+        quote_index = index + 1 if raw else index
+        if content[quote_index] in "'\"":
+            _, index = _dart_string_end(content, quote_index, raw)
+        else:
+            depth += (content[index] == "{") - (content[index] == "}")
+            index += 1
+    return index
+
+
+def dart_enum_constant_names(code: str) -> set[str]:
+    """Read identifiers in the constant list, never fields/method parameters."""
+    opening = code.find("{")
+    if opening == -1:
+        return set()
+    segments: list[str] = []
+    start = opening + 1
+    parentheses = brackets = braces = angles = 0
+    for index in range(start, len(code)):
+        char = code[index]
+        if not (parentheses or brackets or braces or angles):
+            if char in ";}":
+                segments.append(code[start:index])
+                break
+            if char == ",":
+                segments.append(code[start:index])
+                start = index + 1
+                continue
+        parentheses += (char == "(") - (char == ")")
+        brackets += (char == "[") - (char == "]")
+        braces += (char == "{") - (char == "}")
+        if not (parentheses or brackets or braces):
+            angles += (char == "<") - (char == ">")
+    names = set()
+    for segment in segments:
+        # Constant metadata may precede the actual enum identifier. Its string
+        # arguments were already masked, and ordinary annotations are balanced.
+        rest = segment.strip()
+        while rest.startswith("@"):
+            annotation = re.match(r"@[\w.]+\s*", rest)
+            if annotation is None:
+                break
+            end = annotation.end()
+            if end < len(rest) and rest[end] == "(":
+                depth = 1
+                end += 1
+                while end < len(rest) and depth:
+                    depth += (rest[end] == "(") - (rest[end] == ")")
+                    end += 1
+            rest = rest[end:].lstrip()
+        match = re.match(r"[A-Za-z_]\w*", rest)
+        if match:
+            names.add(match.group())
+    return names
+
+
+def _dart_code_and_literals(content: str) -> tuple[str, list[tuple[int, str]]]:
+    """Mask comments/strings for boundaries and retain fixed wire literals.
+
+    This lexical scan is not a Dart parser. Comments, doc examples and braces
+    inside string literals cannot fabricate declarations or supply enum values.
+    """
+    masked = list(content)
+    literals: list[tuple[int, str]] = []
+    index = 0
+    while index < len(content):
+        start = index
+        if content.startswith(("//", "/*"), index):
+            index = _dart_comment_end(content, index)
+        else:
+            raw = content[index] == "r" and index + 1 < len(content) and content[index + 1] in "'\""
+            quote_index = index + 1 if raw else index
+            if content[quote_index] not in "'\"":
+                index += 1
+                continue
+            delimiter_size = 3 if content.startswith(content[quote_index] * 3, quote_index) else 1
+            value_start = quote_index + delimiter_size
+            value_end, index = _dart_string_end(content, quote_index, raw)
+            value = _decode_dart_literal(content[value_start:value_end], raw)
+            if value is not None:
+                literals.append((start, value))
+        for position in range(start, index):
+            if masked[position] != "\n":
+                masked[position] = " "
+    return "".join(masked), literals
+
+
+def _associated_codec_ranges(code: str, class_name: str) -> list[tuple[int, int]]:
+    """Find typed top-level codec functions/extensions for one declaration."""
+    depths = []
+    depth = 0
+    for char in code:
+        depths.append(depth)
+        depth += (char == "{") - (char == "}")
+    ranges: list[tuple[int, int]] = []
+
+    def block_end(start: int) -> int:
+        level = 0
+        for position in range(start, len(code)):
+            level += (code[position] == "{") - (code[position] == "}")
+            if level == 0:
+                return position + 1
+        return len(code)
+
+    for match in re.finditer(r"(?m)^[ \t]*(?:[\w<>?,.]+\s+)+\w+\s*\(", code):
+        if depths[match.start()] != 0:
+            continue
+        opening = code.find("(", match.start())
+        level = 1
+        closing = opening + 1
+        while closing < len(code) and level:
+            level += (code[closing] == "(") - (code[closing] == ")")
+            closing += 1
+        signature = code[match.start():closing]
+        if not re.search(rf"\b{re.escape(class_name)}\b", signature):
+            continue
+        body = re.match(r"\s*(?:async\*?\s*)?(=>|\{)", code[closing:])
+        if body is None:
+            continue
+        start = closing + body.start(1)
+        if body.group(1) == "{":
+            end = block_end(start)
+        else:
+            end = code.find(";", start)
+            end = len(code) if end == -1 else end + 1
+        ranges.append((match.start(), end))
+    for match in re.finditer(rf"\bextension(?:\s+\w+)?\s+on\s+{re.escape(class_name)}\s*\{{", code):
+        if depths[match.start()] == 0:
+            ranges.append((match.start(), block_end(code.find("{", match.start()))))
+    return ranges
+
+
+def extract_dart_declaration(content: str, class_name: str) -> DartDeclaration | None:
+    """Read only one actual class/enum's code and fixed string literals."""
+    code, literals = _dart_code_and_literals(content)
+    match = re.search(rf"\b(?:(sealed)\s+)?(class|enum)\s+{re.escape(class_name)}\b", code)
+    if not match:
+        return None
+    start = code.find("{", match.end())
+    if start == -1 or ";" in code[match.end():start]:
+        return None
+    depth = 0
+    end = len(code)
+    for position in range(start, len(code)):
+        if code[position] == "{":
+            depth += 1
+        elif code[position] == "}":
+            depth -= 1
+            if depth == 0:
+                end = position + 1
+                break
+    ranges = [(match.start(), end), *_associated_codec_ranges(code, class_name)]
+    return DartDeclaration(
+        kind="sealed" if match.group(1) else match.group(2),
+        code="\n".join(code[begin:finish] for begin, finish in ranges),
+        literals={value for position, value in literals if any(begin <= position < finish for begin, finish in ranges)},
+    )
+
+
 def read_text(path: Path) -> str:
     return path.read_text() if path.exists() else ""
 
 
 def find_declared_classes(path: Path) -> list[str]:
-    return CLASS_PATTERN.findall(read_text(path))
+    code, _ = _dart_code_and_literals(read_text(path))
+    return CLASS_PATTERN.findall(code)
 
 
 def extract_class_block(content: str, class_name: str) -> str:

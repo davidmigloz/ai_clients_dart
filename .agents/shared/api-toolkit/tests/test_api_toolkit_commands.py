@@ -2799,6 +2799,188 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertEqual(exit_code, 1)
             self.assertTrue(any("copyWith does not reference all expected fields" in issue["message"] for issue in payload["results"]["implementation"]["issues"]))
 
+    def _enum_audit_fixture(self, root: Path, schemas: dict, sources: dict[str, str], *, manifest_types: dict | None = None, aliases: dict | None = None, excluded: list | None = None) -> tuple[Path, Path]:
+        self._write_workspace(root)
+        self._write_repo_license(root)
+        package_root, config_dir = self._create_openapi_config(root)
+        spec = {"openapi": "3.1.0", "info": {"title": "Sample", "version": "1"}, "paths": {}, "components": {"schemas": schemas}}
+        (package_root / "specs/openapi.json").write_text(json.dumps(spec))
+        output = root / "tmp/sample"
+        output.mkdir(parents=True)
+        (output / "latest-main.json").write_text(json.dumps(spec))  # Unchanged by construction.
+        self._write_specs_and_manifest(config_dir, specs_payload={
+            "specs": {"main": {"name": "Sample", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json", "audit": {"schema_aliases": aliases or {}, "excluded_schemas": excluded or []}}},
+            "specs_dir": "packages/sample_dart/specs", "output_dir": str(output),
+        }, manifest_payload={"surface": "openapi", "type_mappings": {}, "placement": {}, "coverage": {}, "types": manifest_types or {}})
+        for name, content in sources.items():
+            file = package_root / "lib/src/models/common" / name
+            file.write_text(content)
+        return package_root, config_dir
+
+    def _verify_enum_audit(self, config_dir: Path, scope: str = "all", type_name: str | None = None):
+        return command_verify(SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope=scope, type_name=type_name, baseline=None, git_ref=None))
+
+    def test_verify_all_catches_unchanged_untracked_message_roles_without_mutation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            roles = ["unknown", "user", "assistant", "system", "critic", "discriminator", "developer", "tool"]
+            package, config = self._enum_audit_fixture(Path(tmp_dir), {"MessageRole": {"type": "string", "enum": roles}}, {
+                "roles.dart": "enum MessageRole { unknown, user, assistant, system, developer }",
+            })
+            manifest = (config / "manifest.json").read_text()
+            canonical = (package / "specs/openapi.json").read_text()
+            code, payload = self._verify_enum_audit(config)
+            issues = payload["results"]["implementation"]["issues"]
+            self.assertEqual(code, toolkit_config.EXIT_FAILURE)
+            for value in ["critic", "discriminator", "tool"]:
+                self.assertTrue(any(f"'{value}' not found" in issue["message"] for issue in issues))
+            self.assertEqual(payload["results"]["implementation"]["enum_discovery"]["checked_untracked_enums"], ["MessageRole"])
+            (package / "lib/src/models/common/roles.dart").write_text("enum MessageRole { " + ", ".join(roles) + " }")
+            self.assertEqual(self._verify_enum_audit(config)[0], toolkit_config.EXIT_SUCCESS)
+            self.assertEqual((config / "manifest.json").read_text(), manifest)
+            self.assertEqual((package / "specs/openapi.json").read_text(), canonical)
+
+    def test_verify_enum_discovery_does_not_expand_changed_or_critical_scope(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            _, config = self._enum_audit_fixture(Path(tmp_dir), {"Role": {"type": "string", "enum": ["user"]}}, {"roles.dart": "enum Role { unknown }"})
+            for scope in ["changed", "critical"]:
+                with patch("api_toolkit.operations._dart_class_index", side_effect=AssertionError("unrelated class scan")):
+                    code, payload = self._verify_enum_audit(config, scope)
+                self.assertEqual(code, toolkit_config.EXIT_SUCCESS)
+                self.assertEqual(payload["results"]["implementation"]["enum_discovery"], {})
+
+    def test_verify_exact_untracked_value_class_and_missing_constant(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            source = "class ServiceTier { const ServiceTier._(this.value); final String value; static const auto = ServiceTier._('auto'); static const fast = ServiceTier._('fast'); factory ServiceTier.fromJson(String value) => ServiceTier._(value); }"
+            package, config = self._enum_audit_fixture(Path(tmp_dir), {"ServiceTier": {"type": "string", "enum": ["auto", "fast"]}}, {"tiers.dart": source})
+            self.assertEqual(self._verify_enum_audit(config)[0], toolkit_config.EXIT_SUCCESS)
+            (package / "lib/src/models/common/tiers.dart").write_text(source.replace("static const fast = ServiceTier._('fast');", ""))
+            code, payload = self._verify_enum_audit(config)
+            self.assertEqual(code, toolkit_config.EXIT_FAILURE)
+            self.assertTrue(any("'fast' not found" in issue["message"] for issue in payload["results"]["implementation"]["issues"]))
+
+    def test_verify_sealed_enum_variants_in_other_files_and_exact_alias(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            _, config = self._enum_audit_fixture(Path(tmp_dir), {"NativeChoice": {"type": "string", "enum": ["none", "auto"]}}, {
+                "choice.dart": "sealed class Choice { const Choice(); }",
+                "none.dart": "final class None extends Choice { String toJson() => 'none'; }",
+                "auto.dart": "final class Auto extends Choice { String toJson() => 'auto'; }",
+            }, aliases={"NativeChoice": "Choice"})
+            self.assertEqual(self._verify_enum_audit(config)[0], toolkit_config.EXIT_SUCCESS)
+
+    def test_verify_tracked_enum_value_class_uses_same_exact_checker_once(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            _, config = self._enum_audit_fixture(Path(tmp_dir), {"NativeState": {"type": "string", "enum": ["active", "paused"]}}, {
+                "state.dart": "class State { static const active = 'active'; static const paused = 'paused'; }",
+            }, manifest_types={"MappedState": {"spec": "main", "kind": "enum", "schema": "NativeState", "dart_class": "State", "file": "lib/src/models/common/state.dart"}})
+            code, payload = self._verify_enum_audit(config)
+            self.assertEqual(code, toolkit_config.EXIT_SUCCESS)
+            self.assertEqual(payload["results"]["implementation"]["enum_discovery"]["checked_untracked_enums"], [])
+
+    def test_verify_missing_value_cannot_be_supplied_by_comments_other_class_or_substring(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            _, config = self._enum_audit_fixture(Path(tmp_dir), {"Role": {"type": "string", "enum": ["user", "critic", "tool"]}}, {
+                "roles.dart": "// user critic tool\n/* critic */\nenum Role { superuser, unknown }\nclass Other { static const wire = 'tool'; }",
+            })
+            code, payload = self._verify_enum_audit(config)
+            self.assertEqual(code, toolkit_config.EXIT_FAILURE)
+            issues = payload["results"]["implementation"]["issues"]
+            self.assertEqual(len([issue for issue in issues if "not found in file" in issue["message"]]), 3)
+
+    def test_verify_enum_ambiguity_and_no_match_are_reported_without_guessing(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            _, config = self._enum_audit_fixture(Path(tmp_dir), {
+                "Role": {"type": "string", "enum": ["user"]}, "Absent": {"type": "string", "enum": ["active"]},
+            }, {"a.dart": "enum Role { user, unknown }", "b.dart": "enum Role { unknown }"})
+            _, payload = self._verify_enum_audit(config)
+            result = payload["results"]["implementation"]
+            self.assertTrue(any("ambiguous" in issue["message"] for issue in result["issues"]))
+            self.assertEqual(result["enum_discovery"]["checked_untracked_enums"], [])
+            self.assertEqual(result["enum_discovery"]["unmatched_enum_schemas"], ["Absent"])
+
+    def test_verify_explicit_skips_exclusions_and_comment_declarations_are_not_overridden(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            _, config = self._enum_audit_fixture(Path(tmp_dir), {
+                name: {"type": "string", "enum": ["active"]} for name in ["Role", "Excluded", "CommentOnly"]
+            }, {"roles.dart": "enum Role { unknown }\nenum Excluded { unknown }\n// enum CommentOnly { active, unknown }"},
+                excluded=["Excluded"], manifest_types={"Role": {"spec": "main", "kind": "skip", "tags": ["acknowledged"], "schema": "Role", "dart_class": "Role", "file": "lib/src/models/common/roles.dart"}})
+            _, payload = self._verify_enum_audit(config)
+            result = payload["results"]["implementation"]
+            self.assertEqual(result["enum_discovery"]["explicit_skips"], ["Role"])
+            self.assertEqual(result["enum_discovery"]["checked_untracked_enums"], [])
+            self.assertEqual(result["enum_discovery"]["unmatched_enum_schemas"], ["CommentOnly"])
+
+    def test_verify_enum_uses_typed_top_level_codecs_and_extensions_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            _, config = self._enum_audit_fixture(Path(tmp_dir), {"Role": {"type": "string", "enum": ["ROLE_USER", "ROLE_TOOL"]}}, {
+                "roles.dart": "enum Role { user, tool, unknown }\nRole roleFromString(String s) { return switch(s) { 'ROLE_USER' => Role.user, _ => Role.unknown }; }\nextension RoleWire on Role { String toJson() => switch(this) { Role.tool => 'ROLE_TOOL', _ => 'ROLE_USER' }; }\nclass Other { static const missing = 'ROLE_CRITIC'; }",
+            })
+            self.assertEqual(self._verify_enum_audit(config)[0], toolkit_config.EXIT_SUCCESS)
+            spec_file = config.parents[3] / "specs/openapi.json"
+            # A literal on another declaration still cannot cover a missing role.
+            data = json.loads(spec_file.read_text())
+            data["components"]["schemas"]["Role"]["enum"].append("ROLE_CRITIC")
+            spec_file.write_text(json.dumps(data))
+            self.assertEqual(self._verify_enum_audit(config)[0], toolkit_config.EXIT_FAILURE)
+
+    def test_untracked_request_enum_completeness_does_not_impose_unknown_policy(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            _, config = self._enum_audit_fixture(Path(tmp_dir), {"Include": {"type": "string", "enum": ["documents", "embeddings"]}}, {
+                "include.dart": "enum Include { documents('documents'), embeddings('embeddings'); const Include(this.value); final String value; }",
+            })
+            self.assertEqual(self._verify_enum_audit(config)[0], toolkit_config.EXIT_SUCCESS)
+
+    def test_verify_discovery_honors_alias_target_skip_and_implicit_string_type(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            _, config = self._enum_audit_fixture(Path(tmp_dir), {
+                "NativeRole": {"type": "string", "enum": ["user"]},
+                "Implicit": {"enum": ["active"]},
+            }, {"roles.dart": "enum Role { unknown }\nenum Implicit { active }"},
+                aliases={"NativeRole": "Intentional"}, manifest_types={
+                    "Intentional": {"spec": "main", "kind": "skip", "tags": ["acknowledged"], "dart_class": "Role", "file": "lib/src/models/common/roles.dart"},
+                })
+            _, payload = self._verify_enum_audit(config)
+            discovery = payload["results"]["implementation"]["enum_discovery"]
+            self.assertEqual(discovery["explicit_skips"], ["NativeRole"])
+            self.assertEqual(discovery["checked_untracked_enums"], ["Implicit"])
+
+    def test_verify_type_accepts_mapped_sealed_enum_codec_closure(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            _, config = self._enum_audit_fixture(Path(tmp_dir), {"NativeChoice": {"type": "string", "enum": ["none", "auto"]}}, {
+                "choice.dart": "sealed class Choice { const Choice(); }",
+                "none.dart": "final class None extends Choice { String toJson() => 'none'; }",
+                "auto.dart": "final class Auto extends Choice { String toJson() => 'auto'; }",
+            }, manifest_types={"Choice": {"spec": "main", "kind": "enum", "schema": "NativeChoice", "dart_class": "Choice", "file": "lib/src/models/common/choice.dart"}})
+            self.assertEqual(self._verify_enum_audit(config, "type", "Choice")[0], toolkit_config.EXIT_SUCCESS)
+
+    def test_implicit_enum_values_are_constant_names_not_method_parameters(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            _, config = self._enum_audit_fixture(Path(tmp_dir), {"Role": {"type": "string", "enum": ["user", "critic"]}}, {
+                "role.dart": "enum Role { user; bool ignored(String critic) => false; }",
+            })
+            code, payload = self._verify_enum_audit(config)
+            self.assertEqual(code, toolkit_config.EXIT_FAILURE)
+            self.assertTrue(any("'critic' not found" in issue["message"] for issue in payload["results"]["implementation"]["issues"]))
+
+    def test_sealed_evidence_does_not_include_generic_arguments_or_bounds(self) -> None:
+        for unrelated in ["class Noise implements Container<Role>", "class Noise<T extends Role>"]:
+            with self.subTest(unrelated=unrelated), tempfile.TemporaryDirectory() as tmp_dir:
+                _, config = self._enum_audit_fixture(Path(tmp_dir), {"Role": {"type": "string", "enum": ["user", "critic"]}}, {
+                    "role.dart": "sealed class Role {}\nclass User extends Role { String toJson() => 'user'; }",
+                    "noise.dart": unrelated + " { String toJson() => 'critic'; }",
+                })
+                code, payload = self._verify_enum_audit(config)
+                self.assertEqual(code, toolkit_config.EXIT_FAILURE)
+                self.assertTrue(any("'critic' not found" in issue["message"] for issue in payload["results"]["implementation"]["issues"]))
+
+    def test_method_parameter_cannot_supply_tracked_enum_fallback(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            _, config = self._enum_audit_fixture(Path(tmp_dir), {"State": {"type": "string", "enum": ["active"]}}, {
+                "state.dart": "enum State { active; bool ignored(String unknown) => false; }",
+            }, manifest_types={"State": {"spec": "main", "kind": "enum", "schema": "State", "dart_class": "State", "file": "lib/src/models/common/state.dart"}})
+            code, payload = self._verify_enum_audit(config)
+            self.assertEqual(code, toolkit_config.EXIT_FAILURE)
+            self.assertTrue(any("Enum fallback value" in issue["message"] for issue in payload["results"]["implementation"]["issues"]))
+
     def test_verify_enum_missing_fallback_is_blocking(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)

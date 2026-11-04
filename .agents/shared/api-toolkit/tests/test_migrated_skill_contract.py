@@ -696,10 +696,45 @@ class MigratedSkillContractTests(unittest.TestCase):
                 }
         self.assertEqual(actual, EXPECTED_DOC_EXCLUSIONS)
 
+    def _assert_google_untracked_enum_gap(self, exit_code: int, payload: dict) -> None:
+        # #246 now exposes this pre-existing API omission rather than passing
+        # solely because the unchanged schema has no manifest enum entry.
+        self.assertEqual(exit_code, 1)
+        self.assertEqual(payload["summary"]["failing_checks"], ["implementation"])
+        errors = [issue for issue in payload["results"]["implementation"]["issues"] if issue["level"] == "error"]
+        self.assertEqual(errors, [{
+            "file": "lib/src/models/live/enums/activity_handling.dart",
+            "level": "error",
+            "message": "Enum value 'ACTIVITY_HANDLING_UNSPECIFIED' not found in file",
+            "name": "ActivityHandling",
+        }])
+
+    def _assert_mistral_untracked_enum_gap(self, exit_code: int, payload: dict) -> None:
+        self.assertEqual(exit_code, 1)
+        self.assertEqual(payload["summary"]["failing_checks"], ["implementation"])
+        errors = [issue for issue in payload["results"]["implementation"]["issues"] if issue["level"] == "error"]
+        self.assertEqual(errors, [{
+            "file": "lib/src/models/batch/batch_job_status.dart",
+            "level": "error",
+            "message": "Enum value 'TIMEOUT_EXCEEDED' not found in file",
+            "name": "BatchJobStatus",
+        }])
+
+    def _assert_anthropic_type_scoped_fallback_gap(self, exit_code: int, payload: dict) -> None:
+        self.assertEqual(exit_code, 1)
+        self.assertEqual(payload["summary"]["failing_checks"], ["implementation"])
+        errors = [issue for issue in payload["results"]["implementation"]["issues"] if issue["level"] == "error"]
+        self.assertEqual(errors, [{
+            "file": "lib/src/models/metadata/stop_reason.dart",
+            "level": "error",
+            "message": "Enum fallback value ('unknown' or 'unspecified') not found",
+            "name": "StopReason",
+        }])
+
     def test_real_implementation_verify_reports_skip_summary(self) -> None:
         for config_dir in CONFIG_DIRS:
             label = _config_label(config_dir)
-            if label in self._KNOWN_VERIFY_FAILURES:
+            if label in self._KNOWN_VERIFY_FAILURES and label != "anthropic_sdk_dart/openapi-anthropic":
                 continue
             exit_code, payload = command_verify(
                 type(
@@ -716,7 +751,14 @@ class MigratedSkillContractTests(unittest.TestCase):
                     },
                 )()
             )
-            self.assertEqual(exit_code, 0, msg=f"{config_dir}: {payload['summary']}")
+            if label == "googleai_dart/openapi-googleai":
+                self._assert_google_untracked_enum_gap(exit_code, payload)
+            elif label == "mistralai_dart/openapi-mistral":
+                self._assert_mistral_untracked_enum_gap(exit_code, payload)
+            elif label == "anthropic_sdk_dart/openapi-anthropic":
+                self._assert_anthropic_type_scoped_fallback_gap(exit_code, payload)
+            else:
+                self.assertEqual(exit_code, 0, msg=f"{config_dir}: {payload['summary']}")
             result = payload["results"]["implementation"]
             config = load_toolkit_config(config_dir)
             selected_spec = config.get_spec(None)[0]
@@ -790,7 +832,13 @@ class MigratedSkillContractTests(unittest.TestCase):
                     },
                 )()
             )
-            if label in self._KNOWN_VERIFY_FAILURES:
+            if label == "googleai_dart/openapi-googleai":
+                self._assert_google_untracked_enum_gap(exit_code, payload)
+            elif label == "mistralai_dart/openapi-mistral":
+                self._assert_mistral_untracked_enum_gap(exit_code, payload)
+            elif label == "anthropic_sdk_dart/openapi-anthropic":
+                self._assert_anthropic_type_scoped_fallback_gap(exit_code, payload)
+            elif label in self._KNOWN_VERIFY_FAILURES:
                 self.assertNotEqual(exit_code, 0, msg=f"{label}: expected known failure but verify passed — remove from _KNOWN_VERIFY_FAILURES")
             else:
                 self.assertEqual(exit_code, 0, msg=f"{config_dir}: {payload['summary']}")
@@ -815,7 +863,9 @@ class MigratedSkillContractTests(unittest.TestCase):
                     },
                 )()
             )
-            if spec_name in known_failing_specs:
+            if spec_name == "main":
+                self._assert_google_untracked_enum_gap(exit_code, payload)
+            elif spec_name in known_failing_specs:
                 self.assertNotEqual(exit_code, 0, msg=f"{spec_name}: expected known failure but verify passed — remove from known_failing_specs")
             else:
                 self.assertEqual(exit_code, 0, msg=f"{spec_name}: {payload['summary']}")
