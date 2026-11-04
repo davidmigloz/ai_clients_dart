@@ -217,15 +217,11 @@ mixin StreamingResource on ResourceBase {
                         ),
                   );
                 },
-                cancelOnError: true,
               );
         } else {
-          subscription = (decode ?? SseParser().parse)(response.stream).listen(
-            controller.add,
-            onError: finish,
-            onDone: finish,
-            cancelOnError: true,
-          );
+          subscription = (decode ?? SseParser().parse)(
+            response.stream,
+          ).listen(controller.add, onError: finish, onDone: finish);
         }
         if (controller.isPaused) subscription?.pause();
       } catch (error, stackTrace) {

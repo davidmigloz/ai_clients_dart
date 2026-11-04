@@ -254,6 +254,38 @@ void main() {
     });
   }
 
+  for (final status in [200, 400]) {
+    test(
+      '$status body failure keeps original error when cleanup fails',
+      () async {
+        final transport = fixture.Transport();
+        final body = StreamController<List<int>>(
+          onCancel: () => Future<void>.error(StateError('cleanup failed')),
+        );
+        final errors = <Object>[];
+        final done = Completer<void>();
+        final subscription =
+            fixture.Resource(transport, const AnthropicConfig())
+                .getStream('/test')
+                .listen((_) {}, onError: errors.add, onDone: done.complete);
+        addTearDown(() async {
+          subscription.cancel().ignore();
+          await body.close();
+          await transport.sent.close();
+        });
+        await _tick();
+        transport.responses.single.complete(
+          http.StreamedResponse(body.stream, status),
+        );
+        await _tick();
+        final original = StateError('read failed');
+        body.addError(original);
+        await done.future.timeout(_deadline);
+        expect(errors, [same(original)]);
+      },
+    );
+  }
+
   test('listener cancellation consumes response cleanup failures', () async {
     final transport = fixture.Transport();
     final body = StreamController<List<int>>(
