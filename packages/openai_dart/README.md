@@ -1139,6 +1139,18 @@ Append shared context with `LiveDecisionItemCreateParam`, evaluate explicitly wi
 
 </details>
 
+<a id="how-do-i-play-live-audio-fixtures-and-send-sip-dtmf"></a>
+<details>
+<summary><b>How do I play Live audio fixtures and send SIP DTMF?</b></summary>
+
+Send `LiveOutputAudioFixturePlayParam.fromBytes(...)` with up to 30 seconds of raw mono PCM16 little-endian audio at 24 kHz. Wait for `LiveOutputAudioFixturePlaying` (accepted), then `LiveOutputAudioFixturePlayed` (server mixer drained); transport audio may still be buffered. Input is dropped and instruction/thinking/commentary appends are rejected during playback. Independent input mute remains separate.
+
+For SIP calls, send one key with `LiveTransportDTMFSendParam(event: '#', eventId: ...)` on the server sideband. `LiveTransportDTMFSent` confirms sending to the SIP trunk; `LiveTransportDTMFReceived` carries caller keypresses. Match optional client correlation IDs and handle server errors explicitly.
+
+→ [Offline audio fixture and DTMF example](example/live_media_example.dart)
+
+</details>
+
 <a id="how-do-i-fork-stored-live-sessions-and-group-captions"></a>
 <details>
 <summary><b>How do I fork stored Live sessions and group captions?</b></summary>
@@ -1323,6 +1335,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [videos_example.dart](example/videos_example.dart) | Sora video generation, editing, and extension |
 | [realtime_example.dart](example/realtime_example.dart) | Realtime API (WebSocket and WebRTC) |
 | [live_http_example.dart](example/live_http_example.dart) | **Offline.** WebRTC/SIP signaling, explicit call controls, verified incoming notice, WAV downloads and REST fork |
+| [live_media_example.dart](example/live_media_example.dart) | **Offline.** raw audio fixture acceptance/drain, independent mute, and SIP DTMF directions |
 | [live_websocket_example.dart](example/live_websocket_example.dart) | **Offline.** primary/sideband Live, concurrent event taps, manual delegation and graceful finalization |
 | [live_decisions_example.dart](example/live_decisions_example.dart) | **Offline.** native Decisions delegation, shared items, and a correlated transcript trigger |
 | [live_workflows_example.dart](example/live_workflows_example.dart) | **Offline.** stored forks, inherited state, compact Responses, caption grouping and borrowed-channel cleanup |
@@ -1414,7 +1427,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | Audio | Speech, transcription, translation, voice consents, prompt/sample voice creation, and saved voice deletion; consent phrase lookup remains untyped |
 | Videos | Generation, editing, extension, and downloads |
 | Realtime | WebSocket and WebRTC sessions, opt-in recovery with explicit pending delivery |
-| Live | HTTP call controls, recordings, WebSockets, native Decisions delegation/triggers, forks, transcript helpers, and opt-in recovery with fresh startup gating; some media conveniences remain deferred |
+| Live | HTTP call controls, recordings, WebSockets, native Decisions delegation/triggers, audio fixtures, SIP DTMF, forks, transcript helpers, and opt-in recovery with fresh startup gating |
 | Files and Uploads | File management and large multipart uploads |
 | Batches | Asynchronous batch processing |
 | Models | Listing and retrieval |

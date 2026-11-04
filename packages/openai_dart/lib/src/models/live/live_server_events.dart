@@ -5,7 +5,8 @@ import 'live_json_helpers.dart';
 
 /// Complete Live events received on primary and trusted sideband connections.
 ///
-/// Known variants are [LiveSessionStarted], [LiveSessionUpdated], [LiveInputAudioMuted], [LiveInputAudioUnmuted], [LiveInstructionsAppended], [LiveThinkingAppended], [LiveCommentaryAppended], [LiveInputAudioAppend], [LiveOutputAudioDelta], [LiveInputTranscriptDelta], [LiveOutputTranscriptDelta], [LiveDelegationCreated], [LiveResponseEvent], [LiveSessionUsageUpdated], [LiveSessionClosed], [LiveErrorEvent], [LiveInfoEvent], [LiveTransportDTMFReceived], [LiveTransportDTMFSend], [LiveTransportRinging], [LiveTransportAnswered], [LiveTransportFailed].
+/// Known variants are [LiveSessionStarted], [LiveSessionUpdated], [LiveInputAudioMuted], [LiveInputAudioUnmuted], [LiveInstructionsAppended], [LiveThinkingAppended], [LiveCommentaryAppended], [LiveInputAudioAppend], [LiveOutputAudioDelta], [LiveInputTranscriptDelta], [LiveOutputTranscriptDelta], [LiveDelegationCreated], [LiveResponseEvent], [LiveSessionUsageUpdated], [LiveSessionClosed], [LiveErrorEvent], [LiveInfoEvent], [LiveTransportDTMFReceived], [LiveTransportDTMFSent], [LiveTransportRinging], [LiveTransportAnswered], [LiveTransportFailed].
+/// Fixture variants are [LiveOutputAudioFixturePlaying] and [LiveOutputAudioFixturePlayed].
 /// Decisions variants are [LiveDecisionEvent], [LiveDecisionItemCreated], and
 /// [LiveDecisionItemDeleted]. Future event types use [UnknownLiveServerEvent];
 /// known malformed events fail.
@@ -21,6 +22,10 @@ sealed class LiveServerEvent extends LiveJsonModel {
       'session.updated' => LiveSessionUpdated.fromJson(json),
       'session.input_audio.muted' => LiveInputAudioMuted.fromJson(json),
       'session.input_audio.unmuted' => LiveInputAudioUnmuted.fromJson(json),
+      'session.output_audio.fixture.playing' =>
+        LiveOutputAudioFixturePlaying.fromJson(json),
+      'session.output_audio.fixture.played' =>
+        LiveOutputAudioFixturePlayed.fromJson(json),
       'session.instructions.appended' => LiveInstructionsAppended.fromJson(
         json,
       ),
@@ -44,7 +49,7 @@ sealed class LiveServerEvent extends LiveJsonModel {
       'error' => LiveErrorEvent.fromJson(json),
       'info' => LiveInfoEvent.fromJson(json),
       'transport.dtmf.received' => LiveTransportDTMFReceived.fromJson(json),
-      'transport.dtmf.send' => LiveTransportDTMFSend.fromJson(json),
+      'transport.dtmf.sent' => LiveTransportDTMFSent.fromJson(json),
       'transport.ringing' => LiveTransportRinging.fromJson(json),
       'transport.answered' => LiveTransportAnswered.fromJson(json),
       'transport.failed' => LiveTransportFailed.fromJson(json),
@@ -69,7 +74,7 @@ sealed class LiveServerEvent extends LiveJsonModel {
 
   /// Checks channel-specific reflected audio contracts without altering wire data.
   ///
-  /// Both channels accept every known event. Reflected sideband audio is raw
+  /// SIP keypad notifications are sideband-only. Reflected sideband audio is raw
   /// mono PCM16LE at 24 kHz. Primary output uses its negotiated format and omits
   /// reflected timestamps; sideband output requires both timestamps. Audio bytes
   /// and timeline gaps remain caller-owned; codecs do not decode or reorder them.
@@ -88,6 +93,8 @@ const _knownServerEventTypes = <String>{
   'session.updated',
   'session.input_audio.muted',
   'session.input_audio.unmuted',
+  'session.output_audio.fixture.playing',
+  'session.output_audio.fixture.played',
   'session.instructions.appended',
   'session.thinking.appended',
   'session.commentary.appended',
@@ -105,7 +112,7 @@ const _knownServerEventTypes = <String>{
   'error',
   'info',
   'transport.dtmf.received',
-  'transport.dtmf.send',
+  'transport.dtmf.sent',
   'transport.ringing',
   'transport.answered',
   'transport.failed',
@@ -331,7 +338,197 @@ final class LiveSessionUpdated extends LiveServerEvent {
   );
 }
 
-/// Returned when a session.input_audio.mute command is accepted. Input audio is no longer sent to the model; sideband audio reflection continues.
+/// The playback path accepted a complete validated audio fixture.
+///
+/// This acknowledgment does not identify when the listener receives or hears
+/// its first sample. It echoes the play command only when correlation was sent.
+final class LiveOutputAudioFixturePlaying extends LiveServerEvent {
+  /// Creates LiveOutputAudioFixturePlaying with canonical received fields.
+  LiveOutputAudioFixturePlaying({
+    Object? clientEventId = liveUnset,
+    required this.eventId,
+    Map<String, dynamic> rawJson = const {},
+  }) : clientEventId = _serverOptional<String>(
+         clientEventId,
+         'LiveOutputAudioFixturePlaying.client_event_id',
+         nullable: false,
+       ),
+       rawJson = snapshotLiveJson(
+         rawJson,
+         'LiveOutputAudioFixturePlaying',
+         knownKeys: _knownKeys,
+       ) {
+    validate();
+  }
+
+  static const _knownKeys = <String>{'client_event_id', 'event_id', 'type'};
+
+  @override
+  String get type => 'session.output_audio.fixture.playing';
+
+  /// The event_id of the client command associated with this server event, when supplied.
+  final String? clientEventId;
+
+  /// The unique ID of the Live server event.
+  @override
+  final String eventId;
+
+  /// Immutable finite original data; typed fields control known wire members.
+  @override
+  final Map<String, dynamic> rawJson;
+
+  /// Parses LiveOutputAudioFixturePlaying; wrong or missing known fields fail safely.
+  factory LiveOutputAudioFixturePlaying.fromJson(Map<String, dynamic> json) {
+    requireLiveType(
+      json,
+      'session.output_audio.fixture.playing',
+      'LiveOutputAudioFixturePlaying',
+      key: 'type',
+    );
+    return LiveOutputAudioFixturePlaying(
+      clientEventId: json.containsKey('client_event_id')
+          ? requireLiveString(
+              json['client_event_id'],
+              'LiveOutputAudioFixturePlaying.client_event_id',
+            )
+          : liveUnset,
+      eventId: requireLiveString(
+        json['event_id'],
+        'LiveOutputAudioFixturePlaying.event_id',
+      ),
+      rawJson: json,
+    );
+  }
+
+  @override
+  void validate() {}
+
+  @override
+  Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    'type': type,
+    if (clientEventId != null) 'client_event_id': clientEventId,
+    'event_id': eventId,
+  });
+
+  /// Copies all fields. Explicit null is retained only where canonical receive permits it.
+  /// Clear flags omit optional nonnull fields or remove nullable-field presence.
+  LiveOutputAudioFixturePlaying copyWith({
+    Object? clientEventId = liveUnset,
+    bool clearClientEventId = false,
+    Object? eventId = liveUnset,
+    Object? rawJson = liveUnset,
+  }) => LiveOutputAudioFixturePlaying(
+    clientEventId: clearClientEventId
+        ? liveUnset
+        : (identical(clientEventId, liveUnset)
+              ? (this.clientEventId ?? liveUnset)
+              : clientEventId),
+    eventId: identical(eventId, liveUnset)
+        ? this.eventId
+        : requireLiveString(eventId, 'LiveOutputAudioFixturePlaying.event_id'),
+    rawJson: identical(rawJson, liveUnset)
+        ? this.rawJson
+        : requireLiveObject(rawJson, 'LiveOutputAudioFixturePlaying.rawJson'),
+  );
+}
+
+/// The complete fixture drained from the server mixer.
+///
+/// The normal inference path resumes, subject to any independent input mute.
+/// Transport buffers may still contain audio; this is not listener completion.
+/// Canceled or failed playback does not emit this event.
+final class LiveOutputAudioFixturePlayed extends LiveServerEvent {
+  /// Creates LiveOutputAudioFixturePlayed with canonical received fields.
+  LiveOutputAudioFixturePlayed({
+    Object? clientEventId = liveUnset,
+    required this.eventId,
+    Map<String, dynamic> rawJson = const {},
+  }) : clientEventId = _serverOptional<String>(
+         clientEventId,
+         'LiveOutputAudioFixturePlayed.client_event_id',
+         nullable: false,
+       ),
+       rawJson = snapshotLiveJson(
+         rawJson,
+         'LiveOutputAudioFixturePlayed',
+         knownKeys: _knownKeys,
+       ) {
+    validate();
+  }
+
+  static const _knownKeys = <String>{'client_event_id', 'event_id', 'type'};
+
+  @override
+  String get type => 'session.output_audio.fixture.played';
+
+  /// The event_id of the client command associated with this server event, when supplied.
+  final String? clientEventId;
+
+  /// The unique ID of the Live server event.
+  @override
+  final String eventId;
+
+  /// Immutable finite original data; typed fields control known wire members.
+  @override
+  final Map<String, dynamic> rawJson;
+
+  /// Parses LiveOutputAudioFixturePlayed; wrong or missing known fields fail safely.
+  factory LiveOutputAudioFixturePlayed.fromJson(Map<String, dynamic> json) {
+    requireLiveType(
+      json,
+      'session.output_audio.fixture.played',
+      'LiveOutputAudioFixturePlayed',
+      key: 'type',
+    );
+    return LiveOutputAudioFixturePlayed(
+      clientEventId: json.containsKey('client_event_id')
+          ? requireLiveString(
+              json['client_event_id'],
+              'LiveOutputAudioFixturePlayed.client_event_id',
+            )
+          : liveUnset,
+      eventId: requireLiveString(
+        json['event_id'],
+        'LiveOutputAudioFixturePlayed.event_id',
+      ),
+      rawJson: json,
+    );
+  }
+
+  @override
+  void validate() {}
+
+  @override
+  Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    'type': type,
+    if (clientEventId != null) 'client_event_id': clientEventId,
+    'event_id': eventId,
+  });
+
+  /// Copies all fields. Explicit null is retained only where canonical receive permits it.
+  /// Clear flags omit optional nonnull fields or remove nullable-field presence.
+  LiveOutputAudioFixturePlayed copyWith({
+    Object? clientEventId = liveUnset,
+    bool clearClientEventId = false,
+    Object? eventId = liveUnset,
+    Object? rawJson = liveUnset,
+  }) => LiveOutputAudioFixturePlayed(
+    clientEventId: clearClientEventId
+        ? liveUnset
+        : (identical(clientEventId, liveUnset)
+              ? (this.clientEventId ?? liveUnset)
+              : clientEventId),
+    eventId: identical(eventId, liveUnset)
+        ? this.eventId
+        : requireLiveString(eventId, 'LiveOutputAudioFixturePlayed.event_id'),
+    rawJson: identical(rawJson, liveUnset)
+        ? this.rawJson
+        : requireLiveObject(rawJson, 'LiveOutputAudioFixturePlayed.rawJson'),
+  );
+}
+
+/// Acknowledges an independent input mute, which sends silence to the model.
+/// Sideband reflection continues. Audio fixture playback emits no mute event.
 final class LiveInputAudioMuted extends LiveServerEvent {
   /// Creates LiveInputAudioMuted with canonical received fields.
   LiveInputAudioMuted({
@@ -422,7 +619,8 @@ final class LiveInputAudioMuted extends LiveServerEvent {
   );
 }
 
-/// Returned when a session.input_audio.unmute command is accepted. Input audio is sent to the model again.
+/// Acknowledges removal of the independent input mute. An active audio fixture
+/// still pauses inference until playback finishes; it emits no unmute event.
 final class LiveInputAudioUnmuted extends LiveServerEvent {
   /// Creates LiveInputAudioUnmuted with canonical received fields.
   LiveInputAudioUnmuted({
@@ -2181,6 +2379,17 @@ final class LiveTransportDTMFReceived extends LiveServerEvent {
     }
   }
 
+  /// SIP keypad notifications are delivered only to a sideband observer.
+  @override
+  void validateForChannel(String channel) {
+    super.validateForChannel(channel);
+    if (channel != 'sideband') {
+      throw const FormatException(
+        'LiveTransportDTMFReceived.channel: sideband required',
+      );
+    }
+  }
+
   @override
   Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
     'type': type,
@@ -2208,21 +2417,21 @@ final class LiveTransportDTMFReceived extends LiveServerEvent {
 }
 
 /// A SIP DTMF keypress successfully sent to the SIP trunk. Delivered only to sideband observers; this is not a client command.
-final class LiveTransportDTMFSend extends LiveServerEvent {
-  /// Creates LiveTransportDTMFSend with canonical received fields.
-  LiveTransportDTMFSend({
+final class LiveTransportDTMFSent extends LiveServerEvent {
+  /// Creates LiveTransportDTMFSent with canonical received fields.
+  LiveTransportDTMFSent({
     Object? clientEventId = liveUnset,
     required this.event,
     required this.eventId,
     Map<String, dynamic> rawJson = const {},
   }) : clientEventId = _serverOptional<String>(
          clientEventId,
-         'LiveTransportDTMFSend.client_event_id',
+         'LiveTransportDTMFSent.client_event_id',
          nullable: false,
        ),
        rawJson = snapshotLiveJson(
          rawJson,
-         'LiveTransportDTMFSend',
+         'LiveTransportDTMFSent',
          knownKeys: _knownKeys,
        ) {
     validate();
@@ -2236,7 +2445,7 @@ final class LiveTransportDTMFSend extends LiveServerEvent {
   };
 
   @override
-  String get type => 'transport.dtmf.send';
+  String get type => 'transport.dtmf.sent';
 
   /// The event_id of the client command, when supplied.
   final String? clientEventId;
@@ -2252,25 +2461,25 @@ final class LiveTransportDTMFSend extends LiveServerEvent {
   @override
   final Map<String, dynamic> rawJson;
 
-  /// Parses LiveTransportDTMFSend; wrong or missing known fields fail safely.
-  factory LiveTransportDTMFSend.fromJson(Map<String, dynamic> json) {
+  /// Parses LiveTransportDTMFSent; wrong or missing known fields fail safely.
+  factory LiveTransportDTMFSent.fromJson(Map<String, dynamic> json) {
     requireLiveType(
       json,
-      'transport.dtmf.send',
-      'LiveTransportDTMFSend',
+      'transport.dtmf.sent',
+      'LiveTransportDTMFSent',
       key: 'type',
     );
-    return LiveTransportDTMFSend(
+    return LiveTransportDTMFSent(
       clientEventId: json.containsKey('client_event_id')
           ? requireLiveString(
               json['client_event_id'],
-              'LiveTransportDTMFSend.client_event_id',
+              'LiveTransportDTMFSent.client_event_id',
             )
           : liveUnset,
-      event: requireLiveString(json['event'], 'LiveTransportDTMFSend.event'),
+      event: requireLiveString(json['event'], 'LiveTransportDTMFSent.event'),
       eventId: requireLiveString(
         json['event_id'],
-        'LiveTransportDTMFSend.event_id',
+        'LiveTransportDTMFSent.event_id',
       ),
       rawJson: json,
     );
@@ -2278,10 +2487,21 @@ final class LiveTransportDTMFSend extends LiveServerEvent {
 
   @override
   void validate() {
-    validateLiveLength(event, 'LiveTransportDTMFSend.event', min: 1, max: 1);
+    validateLiveLength(event, 'LiveTransportDTMFSent.event', min: 1, max: 1);
     if (!RegExp(r'^[0-9A-D*#]$').hasMatch(event)) {
       throw const FormatException(
-        'LiveTransportDTMFSend.event: expected one canonical DTMF character',
+        'LiveTransportDTMFSent.event: expected one canonical DTMF character',
+      );
+    }
+  }
+
+  /// SIP keypad notifications are delivered only to a sideband observer.
+  @override
+  void validateForChannel(String channel) {
+    super.validateForChannel(channel);
+    if (channel != 'sideband') {
+      throw const FormatException(
+        'LiveTransportDTMFSent.channel: sideband required',
       );
     }
   }
@@ -2296,13 +2516,13 @@ final class LiveTransportDTMFSend extends LiveServerEvent {
 
   /// Copies all fields. Explicit null is retained only where canonical receive permits it.
   /// Clear flags omit optional nonnull fields or remove nullable-field presence.
-  LiveTransportDTMFSend copyWith({
+  LiveTransportDTMFSent copyWith({
     Object? clientEventId = liveUnset,
     bool clearClientEventId = false,
     Object? event = liveUnset,
     Object? eventId = liveUnset,
     Object? rawJson = liveUnset,
-  }) => LiveTransportDTMFSend(
+  }) => LiveTransportDTMFSent(
     clientEventId: clearClientEventId
         ? liveUnset
         : (identical(clientEventId, liveUnset)
@@ -2310,13 +2530,13 @@ final class LiveTransportDTMFSend extends LiveServerEvent {
               : clientEventId),
     event: identical(event, liveUnset)
         ? this.event
-        : requireLiveString(event, 'LiveTransportDTMFSend.event'),
+        : requireLiveString(event, 'LiveTransportDTMFSent.event'),
     eventId: identical(eventId, liveUnset)
         ? this.eventId
-        : requireLiveString(eventId, 'LiveTransportDTMFSend.event_id'),
+        : requireLiveString(eventId, 'LiveTransportDTMFSent.event_id'),
     rawJson: identical(rawJson, liveUnset)
         ? this.rawJson
-        : requireLiveObject(rawJson, 'LiveTransportDTMFSend.rawJson'),
+        : requireLiveObject(rawJson, 'LiveTransportDTMFSent.rawJson'),
   );
 }
 

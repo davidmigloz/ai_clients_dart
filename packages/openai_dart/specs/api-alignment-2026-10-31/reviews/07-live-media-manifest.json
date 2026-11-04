@@ -1,0 +1,217 @@
+{
+  "issue": 420,
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "promotion_owner": 427,
+  "types": {
+    "LiveCommentaryAppendParam": {
+      "spec": "main",
+      "schema": "LiveCommentaryAppendParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveCommentaryAppendParam",
+      "file": "lib/src/models/live/live_client_events.dart",
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveSidebandClientEvent"
+    },
+    "LiveInputAudioUnmuteParam": {
+      "spec": "main",
+      "schema": "LiveInputAudioUnmuteParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveInputAudioUnmuteParam",
+      "file": "lib/src/models/live/live_client_events.dart",
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveSidebandClientEvent"
+    },
+    "LiveInstructionsAppendParam": {
+      "spec": "main",
+      "schema": "LiveInstructionsAppendParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveInstructionsAppendParam",
+      "file": "lib/src/models/live/live_client_events.dart",
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveSidebandClientEvent"
+    },
+    "LiveThinkingAppendParam": {
+      "spec": "main",
+      "schema": "LiveThinkingAppendParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveThinkingAppendParam",
+      "file": "lib/src/models/live/live_client_events.dart",
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveSidebandClientEvent"
+    },
+    "LiveOutputAudioFixturePlayParam": {
+      "spec": "main",
+      "schema": "LiveOutputAudioFixturePlayParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveOutputAudioFixturePlayParam",
+      "file": "lib/src/models/live/live_client_events.dart",
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveSidebandClientEvent"
+    },
+    "LiveTransportDTMFSendParam": {
+      "spec": "main",
+      "schema": "LiveTransportDTMFSendParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveTransportDTMFSendParam",
+      "file": "lib/src/models/live/live_client_events.dart",
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveSidebandClientEvent"
+    },
+    "LiveInputAudioMuted": {
+      "spec": "main",
+      "schema": "LiveInputAudioMuted",
+      "kind": "sealed_variant",
+      "dart_class": "LiveInputAudioMuted",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveServerEvent"
+    },
+    "LiveInputAudioUnmuted": {
+      "spec": "main",
+      "schema": "LiveInputAudioUnmuted",
+      "kind": "sealed_variant",
+      "dart_class": "LiveInputAudioUnmuted",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveServerEvent"
+    },
+    "LiveOutputAudioFixturePlayed": {
+      "spec": "main",
+      "schema": "LiveOutputAudioFixturePlayed",
+      "kind": "sealed_variant",
+      "dart_class": "LiveOutputAudioFixturePlayed",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveServerEvent"
+    },
+    "LiveOutputAudioFixturePlaying": {
+      "spec": "main",
+      "schema": "LiveOutputAudioFixturePlaying",
+      "kind": "sealed_variant",
+      "dart_class": "LiveOutputAudioFixturePlaying",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveServerEvent"
+    },
+    "LiveTransportDTMFSent": {
+      "spec": "main",
+      "schema": "LiveTransportDTMFSent",
+      "kind": "sealed_variant",
+      "dart_class": "LiveTransportDTMFSent",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveServerEvent"
+    },
+    "LiveClientEvent": {
+      "spec": "main",
+      "schema": "LiveClientEvent",
+      "kind": "sealed_parent",
+      "dart_class": "LiveClientEvent",
+      "file": "lib/src/models/live/live_client_events.dart",
+      "note": "Canonical channel command union implemented by primary/fromForkJson/sideband factories; fixture admitted on all WebSockets, DTMF only sideband. Runtime writers close the inheritance admission hole."
+    },
+    "LiveForkClientEvent": {
+      "spec": "main",
+      "schema": "LiveForkClientEvent",
+      "kind": "sealed_parent",
+      "dart_class": "LiveClientEvent",
+      "file": "lib/src/models/live/live_client_events.dart",
+      "note": "Canonical channel command union implemented by primary/fromForkJson/sideband factories; fixture admitted on all WebSockets, DTMF only sideband. Runtime writers close the inheritance admission hole."
+    },
+    "LiveSidebandClientEvent": {
+      "spec": "main",
+      "schema": "LiveSidebandClientEvent",
+      "kind": "sealed_parent",
+      "dart_class": "LiveSidebandClientEvent",
+      "file": "lib/src/models/live/live_client_events.dart",
+      "note": "Canonical channel command union implemented by primary/fromForkJson/sideband factories; fixture admitted on all WebSockets, DTMF only sideband. Runtime writers close the inheritance admission hole."
+    },
+    "LiveServerEvent-2": {
+      "spec": "main",
+      "schema": "LiveServerEvent-2",
+      "kind": "sealed_parent",
+      "dart_class": "LiveServerEvent",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Shared received codec with per-event channel validation; received/sent DTMF sideband-only. Preserve audio reflection per individual canonical descriptions, both SDK ConnectServerEvent unions and SIP guide despite narrow canonical sideband alias."
+    },
+    "LiveSidebandServerEvent": {
+      "spec": "main",
+      "schema": "LiveSidebandServerEvent",
+      "kind": "sealed_parent",
+      "dart_class": "LiveServerEvent",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Shared received codec with per-event channel validation; received/sent DTMF sideband-only. Preserve audio reflection per individual canonical descriptions, both SDK ConnectServerEvent unions and SIP guide despite narrow canonical sideband alias."
+    }
+  },
+  "contextual_schemas": {
+    "LiveDetailEnum": {
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "dart_context": "LiveDecisionInputImageParam.detail",
+      "note": "Existing #419 string validator covers low/high/auto/original with nullable native image detail. No duplicate public enum."
+    },
+    "LiveFunctionCallItemStatus": {
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "dart_context": "LiveDecisionFunctionCallParam.status",
+      "note": "Existing #419 contextual string validator covers in_progress/completed/incomplete."
+    },
+    "LiveMessagePhase": {
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "dart_context": "LiveDecisionMessageParam.phase for assistant role",
+      "note": "Existing #419 contextual string validator covers commentary/final_answer with nullable native phase."
+    }
+  },
+  "removed_schemas": {
+    "LiveTransportDTMFSend": {
+      "previous_dart_class": "LiveTransportDTMFSend",
+      "replacement_schema": "LiveTransportDTMFSent",
+      "replacement_dart_class": "LiveTransportDTMFSent",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Removed canonical receive .send; both SDKs retain legacy compatibility alias. This bounded ticket follows canonical direction correction. Saved .send stays finite UnknownLiveServerEvent, never command reinterpretation."
+    }
+  },
+  "source_receipts": [
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/resources/live/sideband.py",
+      "sha256": "57b9f15595dc68614203c5c0fa4c92f309e27a90f927a0cf8e46542cfa3eb79b"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/live/output_audio_fixture_play_event_param.py",
+      "sha256": "6fd16b8663e5ffc560df78550489b083f03a744f5980136d20aef4a6a1dd4aa0"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/live/output_audio_fixture_playing_event.py",
+      "sha256": "f8f27b30010005dd94fd13c89a98da136b60540ec7c4468cbce8506439f6b892"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/live/output_audio_fixture_played_event.py",
+      "sha256": "02eaabd42046f14f0bfde268c09784987ceffba1e63a74233b58b0fa64d1d743"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/live/connect_client_event_param.py",
+      "sha256": "348e243ff821cf55dd0c1a5f04aa5c83ee12221b033913314c7c25ffb47101da"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/live/connect_server_event.py",
+      "sha256": "0ea5b662cd3893671b1ed1f89cc49852a8db23a4591ef6694a5a789e8aa253ed"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/resources/live/live.ts",
+      "sha256": "5a333e33f6a449288c0d6fcc156cb73b5a154e25d470f08edfe089c3f2353df9"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/resources/live/sideband/sideband.ts",
+      "sha256": "7427d197611427644800e40965e1f954e987dc3df40ac62de914e66b0f9df726"
+    }
+  ],
+  "guide_receipt": {
+    "url": "https://developers.openai.com/api/docs/guides/voice-sip",
+    "sha256": "acddfefafc1678dd561a1f8107d898a1a1b54118668f61bec3010945cc77fd4d"
+  },
+  "inventory_coverage": {
+    "assigned_schemas": 20,
+    "type_bindings": 16,
+    "contextual_shapes": 3,
+    "removed_schemas": 1,
+    "unassigned": []
+  }
+}

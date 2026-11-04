@@ -223,12 +223,16 @@ void main() {
         },
       );
       test(
-        '${fixture.schema} dispatches and remains accepted on both channels',
+        '${fixture.schema} dispatches and respects its channel contract',
         () {
           final event = LiveServerEvent.fromJson(fixture.complete);
           expect(event, fixture.parse(fixture.complete));
           expect(event.rawJson, fixture.complete);
-          if (event is LiveOutputAudioDelta) {
+          if (event is LiveTransportDTMFReceived ||
+              event is LiveTransportDTMFSent) {
+            event.validateForChannel('sideband');
+            _safeFailure(() => event.validateForChannel('primary'), 'channel');
+          } else if (event is LiveOutputAudioDelta) {
             event.validateForChannel('sideband');
             event
                 .copyWith(clearStartMs: true, clearEndMs: true)
@@ -600,14 +604,14 @@ void main() {
     });
     for (final digit in '0123456789ABCD*#'.split('')) {
       test(
-        'DTMF $digit received/send reflection exactly one canonical character',
+        'DTMF $digit received/sent notification exactly one canonical character',
         () {
           expect(
             LiveTransportDTMFReceived(eventId: _secret, event: digit).event,
             digit,
           );
           expect(
-            LiveTransportDTMFSend(eventId: _secret, event: digit).event,
+            LiveTransportDTMFSent(eventId: _secret, event: digit).event,
             digit,
           );
         },
@@ -620,7 +624,7 @@ void main() {
           'event',
         );
         _safeFailure(
-          () => LiveTransportDTMFSend(eventId: _secret, event: invalid),
+          () => LiveTransportDTMFSent(eventId: _secret, event: invalid),
           'event',
         );
       });
@@ -1786,17 +1790,17 @@ final _fixtures = <_Fixture>[
     isEvent: true,
   ),
   _Fixture(
-    schema: 'LiveTransportDTMFSend',
+    schema: 'LiveTransportDTMFSent',
     minimal: {
       'event': 'A',
       'event_id': 'PRIVATE-LIVE-SERVER-CONTENT',
-      'type': 'transport.dtmf.send',
+      'type': 'transport.dtmf.sent',
     },
     complete: {
       'client_event_id': 'PRIVATE-LIVE-SERVER-CONTENT',
       'event': 'A',
       'event_id': 'PRIVATE-LIVE-SERVER-CONTENT',
-      'type': 'transport.dtmf.send',
+      'type': 'transport.dtmf.sent',
     },
     required: <String>{'type', 'event_id', 'event'},
     fields: <String>{'client_event_id', 'event', 'event_id'},
@@ -1807,33 +1811,33 @@ final _fixtures = <_Fixture>[
     numbers: <String>{},
     objects: <String>{},
     closed: <String>{'event'},
-    parse: LiveTransportDTMFSend.fromJson,
-    create: (json) => LiveTransportDTMFSend(
+    parse: LiveTransportDTMFSent.fromJson,
+    create: (json) => LiveTransportDTMFSent(
       clientEventId: json['client_event_id'],
       event: json['event'],
       eventId: json['event_id'],
       rawJson: json,
     ),
-    copy: (value) => (value as LiveTransportDTMFSend).copyWith(),
+    copy: (value) => (value as LiveTransportDTMFSent).copyWith(),
     replace: (value, key, replacement) => switch (key) {
-      'client_event_id' => (value as LiveTransportDTMFSend).copyWith(
+      'client_event_id' => (value as LiveTransportDTMFSent).copyWith(
         clientEventId: replacement,
       ),
-      'event' => (value as LiveTransportDTMFSend).copyWith(event: replacement),
-      'event_id' => (value as LiveTransportDTMFSend).copyWith(
+      'event' => (value as LiveTransportDTMFSent).copyWith(event: replacement),
+      'event_id' => (value as LiveTransportDTMFSent).copyWith(
         eventId: replacement,
       ),
       _ => throw StateError('Unexpected fixture field'),
     },
     clear: (value, key) => switch (key) {
-      'client_event_id' => (value as LiveTransportDTMFSend).copyWith(
+      'client_event_id' => (value as LiveTransportDTMFSent).copyWith(
         clearClientEventId: true,
       ),
       _ => throw StateError('Unexpected optional fixture field'),
     },
     copyRaw: (value, raw) =>
-        (value as LiveTransportDTMFSend).copyWith(rawJson: raw),
-    raw: (value) => (value as LiveTransportDTMFSend).rawJson,
+        (value as LiveTransportDTMFSent).copyWith(rawJson: raw),
+    raw: (value) => (value as LiveTransportDTMFSent).rawJson,
     isEvent: true,
   ),
   _Fixture(

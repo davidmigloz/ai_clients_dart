@@ -2492,27 +2492,20 @@ void main() {
         expect(model.item.toJson()['content'], 'original');
       },
     );
-    test(
-      'unknown/Realtime/DTMF command tags never become writable fallbacks',
-      () {
-        for (final type in [
-          _private,
-          'input_audio_buffer.commit',
-          'transport.dtmf.send',
-        ]) {
-          final wire = <String, dynamic>{'type': type};
-          expect(() => LiveClientEvent.fromJson(wire), throwsA(_safe('type')));
-          expect(
-            () => LiveClientEvent.fromForkJson(wire),
-            throwsA(_safe('type')),
-          );
-          expect(
-            () => LiveSidebandClientEvent.fromJson(wire),
-            throwsA(_safe('type')),
-          );
-        }
-      },
-    );
+    test('unknown/Realtime command tags never become writable fallbacks', () {
+      for (final type in [_private, 'input_audio_buffer.commit']) {
+        final wire = <String, dynamic>{'type': type};
+        expect(() => LiveClientEvent.fromJson(wire), throwsA(_safe('type')));
+        expect(
+          () => LiveClientEvent.fromForkJson(wire),
+          throwsA(_safe('type')),
+        );
+        expect(
+          () => LiveSidebandClientEvent.fromJson(wire),
+          throwsA(_safe('type')),
+        );
+      }
+    });
     test(
       'all appends require nullable delegation ID, preserve plain content, do not count tokens',
       () {

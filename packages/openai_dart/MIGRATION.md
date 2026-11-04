@@ -6,6 +6,47 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming release: Live audio fixtures and SIP DTMF
+
+The old receive-only `LiveTransportDTMFSend` class is replaced by
+`LiveTransportDTMFSent` with wire type `transport.dtmf.sent`. Sending is a separate
+`LiveTransportDTMFSendParam` command, allowed only on a SIP server sideband.
+Both sent and received DTMF notifications are sideband-only.
+
+```dart
+// Before: old server notification.
+if (event is LiveTransportDTMFSend) {
+  print(event.event);
+}
+
+// After: current server confirmation. Correlate your command when ID is present.
+if (event is LiveTransportDTMFSent) {
+  print(event.clientEventId);
+}
+sideband.send(LiveTransportDTMFSendParam(event: '#', eventId: 'send_key'));
+```
+
+Saved server frames whose type is `transport.dtmf.send` now decode as
+`UnknownLiveServerEvent`; their finite JSON is retained without treating them as
+an outbound command or changing their recorded type. Update exhaustive switches
+for the renamed server branch, new `LiveOutputAudioFixturePlaying/Played` events,
+and `LiveOutputAudioFixturePlayParam`/`LiveTransportDTMFSendParam` commands.
+Primary/fork parsers and writers reject DTMF; actual SIP eligibility is checked by
+the service. A send confirmation does not prove remote IVR success.
+
+Fixtures require raw mono PCM16 little-endian at 24 kHz, up to 30 seconds,
+independently of session audio format. Use `fromBytes` or standard base64; WAV
+containers are rejected. Fixture playback is available over primary/fork
+WebSockets and server sidebands, with no borrowed WebRTC data-channel admission.
+`playing` means acceptance; `played` means server mixer drain, with possible
+transport buffering afterward. Neither marks an exact listener delivery boundary.
+During playback input is dropped and instructions/thinking/commentary appends are
+rejected by the service. Explicit input mute stays independent, and failures or
+close never synthesize a successful drain event. Ordinary input-audio appends
+retain their session-selected format and do not inherit the fixture limit.
+
+See [the offline media example](example/live_media_example.dart).
+
 ## Upcoming release: Native Live Decisions
 
 Live delegation, client-command and server-event sealed unions gain Decisions

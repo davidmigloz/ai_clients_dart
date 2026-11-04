@@ -509,6 +509,13 @@ sealed class LiveConnection {
 
   void _write(LiveClientEvent command, {bool allowClosing = false}) {
     _ensureWritable(allowClosing: allowClosing);
+    if (command is LiveTransportDTMFSendParam && _channel != 'sideband') {
+      throw const LiveProtocolException(kind: 'dtmf_requires_sideband');
+    }
+    if (command is LiveOutputAudioFixturePlayParam &&
+        _socket is LiveDataChannelSocket) {
+      throw const LiveProtocolException(kind: 'fixture_requires_websocket');
+    }
     if (command is LiveSessionCloseParam && (recovery?.isRecovering ?? false)) {
       throw StateError(
         'Cannot finalize an interrupted Live session; use close for local cleanup.',
@@ -740,7 +747,7 @@ final class LivePrimaryConnection extends LiveConnection {
   @override
   void _resetStartup() => _startupSent = false;
 
-  /// Writes one of the 11 primary commands. Startup is sent once per physical
+  /// Writes a primary command. Startup is sent once per physical
   /// socket; ordinary work waits for its session.started acknowledgment.
   /// During recovery, newly unsent commands can be retained only if the prior
   /// session was started and an explicit pending-byte budget was configured.
@@ -825,7 +832,7 @@ final class LiveForkConnection extends LiveConnection {
   @override
   bool get _canFinalize => _startupSent && _started != null;
 
-  /// Sends one of the 11 fork commands; a primary startup is always rejected.
+  /// Sends a fork command; a primary startup is always rejected.
   void send(LiveClientEvent event) {
     _ensureWritable();
     if (event is LiveSessionStartEvent) {
