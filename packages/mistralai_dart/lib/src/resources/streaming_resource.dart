@@ -189,7 +189,6 @@ mixin StreamingResource on ResourceBase {
                 finish(error, stackTrace);
               }
             },
-            cancelOnError: true,
           );
         } else {
           subscription = parseEvents(response.stream).listen(
@@ -210,7 +209,6 @@ mixin StreamingResource on ResourceBase {
             },
             onError: finish,
             onDone: finish,
-            cancelOnError: true,
           );
         }
         if (finished) {
@@ -325,8 +323,9 @@ mixin StreamingResource on ResourceBase {
   /// Logs an outgoing streaming request.
   void _logStreamRequest(http.BaseRequest request, String requestId) {
     if (config.logLevel.value <= Level.INFO.value) {
-      Logger('Mistral.HTTP')
-          .info('REQUEST [$requestId] ${request.method} ${request.url}');
+      Logger(
+        'Mistral.HTTP',
+      ).info('REQUEST [$requestId] ${request.method} ${request.url}');
     }
   }
 

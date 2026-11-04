@@ -357,6 +357,33 @@ void main() {
     );
   }
 
+  for (final status in [200, 500]) {
+    test('$status body read error survives failed transport cleanup', () async {
+      final listened = Completer<void>();
+      final body = StreamController<List<int>>(
+        onListen: listened.complete,
+        onCancel: () => Future<void>.error(StateError('cleanup failed')),
+      );
+      final errors = <Object>[];
+      final done = Completer<void>();
+      _routes['chat']!(
+        client,
+        null,
+      ).listen((_) {}, onError: errors.add, onDone: done.complete);
+      await transport.waitForRequests(1);
+      transport.responses.single.complete(
+        http.StreamedResponse(body.stream, status),
+      );
+      await listened.future;
+      final failure = StateError('primary read error');
+      body.addError(failure);
+      await done.future.timeout(_deadline);
+      await body.close();
+      await _tick();
+      expect(errors, [same(failure)]);
+    });
+  }
+
   test('malformed UTF-8 HTTP error body terminates with one error', () async {
     final done = Completer<void>();
     final errors = <Object>[];

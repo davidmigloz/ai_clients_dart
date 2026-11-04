@@ -28,16 +28,15 @@ Stream<Map<String, dynamic>> _parseLines(
   controller = StreamController<Map<String, dynamic>>(
     onListen: () {
       final sink = createSink(controller.sink);
-      subscription = bytesToLines(byteStream).listen(
-        sink.add,
-        onError: sink.addError,
-        onDone: sink.close,
-        cancelOnError: true,
-      );
+      subscription = bytesToLines(
+        byteStream,
+      ).listen(sink.add, onError: sink.addError, onDone: sink.close);
     },
     onPause: () => subscription?.pause(),
     onResume: () => subscription?.resume(),
-    onCancel: () => subscription?.cancel(),
+    onCancel: () {
+      Future<void>.sync(() => subscription?.cancel()).ignore();
+    },
   );
   return controller.stream;
 }
