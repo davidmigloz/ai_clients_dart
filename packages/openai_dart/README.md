@@ -132,6 +132,27 @@ For Azure, set the deployment URL and use `AzureApiKeyProvider`. See [Error Hand
 
 </details>
 
+<a id="runtime-configuration"></a>
+<details>
+<summary><b>Update configuration and rotate credentials</b></summary>
+
+Use `client.updateConfig(...)` or `client.updateAuthProvider(...)`, then acquire a fresh resource handle. Previously obtained handles keep their original configuration, including child resources, retries, streams, and WebSocket recovery. An update shares the existing HTTP pool and leaves active work running.
+
+```dart
+client.updateConfig(
+  authProvider: ApiKeyProvider('NEW_API_KEY'),
+  timeout: const Duration(seconds: 60),
+  organization: null, // Explicit null clears this optional setting.
+);
+final responses = client.responses; // Uses the updated settings.
+```
+
+Omitted options retain their values; `defaultHeaders: {}` clears global headers. Header maps are copied. For credential rotation used by retained handles, supply an `AuthProvider` that returns a fresh map for each request. Providers and custom interceptors keep their application-owned state. Logging body policy follows the handle; the package logger's filtering level remains shared.
+
+→ [Offline runtime configuration example](example/runtime_config_example.dart)
+
+</details>
+
 <details>
 <summary><b>Imports for Realtime and deprecated Assistants APIs</b></summary>
 
@@ -1373,6 +1394,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 
 | Example | Description |
 | --- | --- |
+| [runtime_config_example.dart](example/runtime_config_example.dart) | **Offline.** configuration snapshots, refreshed handles and request-local credential rotation |
 | [responses_example.dart](example/responses_example.dart) | Responses API with built-in tools |
 | [openai_dart_example.dart](example/openai_dart_example.dart) | Quick-start overview |
 | [web_search_example.dart](example/web_search_example.dart) | Web search with Responses API |
