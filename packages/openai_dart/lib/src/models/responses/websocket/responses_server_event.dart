@@ -86,7 +86,20 @@ sealed class ResponsesServerEvent {
     }
     ResponseStreamEvent event;
     try {
-      event = ResponseStreamEvent.fromJson(snapshot);
+      // SDK session collectors tolerate terminal frames whose output is absent
+      // or null, falling back to accumulated output items. Keep that tolerance
+      // local to WebSocket parsing and retain exact presence in rawJson.
+      final response = snapshot['response'];
+      final parsed =
+          _isTerminalType(type) &&
+              response is Map<String, dynamic> &&
+              response['output'] == null
+          ? {
+              ...snapshot,
+              'response': {...response, 'output': const <dynamic>[]},
+            }
+          : snapshot;
+      event = ResponseStreamEvent.fromJson(parsed);
     } on FormatException {
       throw const FormatException(
         'ResponsesServerEvent.event: malformed shared Responses event',
@@ -117,7 +130,11 @@ sealed class ResponsesServerEvent {
 /// An ordinary shared Responses stream event with WebSocket lane metadata.
 @immutable
 class ResponsesStreamEvent extends ResponsesServerEvent {
-  /// The shared typed event; its existing SSE contract remains unchanged.
+  /// The shared typed event. SSE parsing retains its existing strict contract.
+  ///
+  /// For terminal WebSocket frames with omitted or null output, the typed
+  /// response has an empty output list. [rawJson] preserves the original
+  /// presence so collectors can fall back to previously accumulated items.
   final ResponseStreamEvent event;
 
   @override
@@ -167,6 +184,17 @@ class ResponsesStreamEvent extends ResponsesServerEvent {
     if (typedResponse is Map<String, dynamic> &&
         json['response'] is Map<String, dynamic>) {
       final response = json['response'] as Map<String, dynamic>;
+      if (_isTerminalType(type) &&
+          originalResponse is Map<String, dynamic> &&
+          originalResponse['output'] == null &&
+          typedResponse['output'] is List &&
+          (typedResponse['output'] as List).isEmpty) {
+        if (originalResponse.containsKey('output')) {
+          response['output'] = null;
+        } else {
+          response.remove('output');
+        }
+      }
       final originalError = originalResponse is Map<String, dynamic>
           ? originalResponse['error']
           : null;
@@ -198,25 +226,60 @@ class ResponsesStreamEvent extends ResponsesServerEvent {
 
   /// Copies the envelope, retaining nested future metadata on typed edits and
   /// removing cleared known fields. A different event type replaces its payload.
+  /// A normalized empty terminal output retains original omission/null for the
+  /// same response ID; use [rawJson] to make it an authoritative empty array.
   ResponsesStreamEvent copyWith({
     ResponseStreamEvent? event,
     Object? streamId = unsetCopyWithValue,
     Map<String, dynamic>? rawJson,
   }) {
     final retainedRaw = rawJson ?? this.rawJson;
+    final before = event == null || rawJson != null
+        ? const <String, dynamic>{}
+        : this.event.toJson();
+    final after =
+        event == null ||
+            rawJson != null ||
+            event.runtimeType != this.event.runtimeType
+        ? null
+        : event.toJson();
     final newRaw = event == null || rawJson != null
         ? retainedRaw
         : event.runtimeType == this.event.runtimeType
-        ? replaceResponsesTypedJson(
-            retainedRaw,
-            this.event.toJson(),
-            event.toJson(),
-          )
+        ? replaceResponsesTypedJson(retainedRaw, before, after!)
         : {
             for (final entry in retainedRaw.entries)
-              if (!this.event.toJson().containsKey(entry.key))
-                entry.key: entry.value,
+              if (!before.containsKey(entry.key)) entry.key: entry.value,
           };
+    if (event != null &&
+        rawJson == null &&
+        event.runtimeType == this.event.runtimeType &&
+        _isTerminalType(type)) {
+      final originalResponse = retainedRaw['response'];
+      final beforeResponse = before['response'];
+      final afterResponse = after!['response'];
+      final copiedResponse = newRaw['response'];
+      if (originalResponse is Map<String, dynamic> &&
+          originalResponse['output'] == null &&
+          beforeResponse is Map<String, dynamic> &&
+          beforeResponse['output'] is List &&
+          (beforeResponse['output'] as List).isEmpty &&
+          afterResponse is Map<String, dynamic> &&
+          originalResponse['id'] == beforeResponse['id'] &&
+          beforeResponse['id'] == afterResponse['id'] &&
+          afterResponse['output'] is List &&
+          (afterResponse['output'] as List).isEmpty &&
+          copiedResponse is Map<String, dynamic>) {
+        // Both typed responses still contain the normalization placeholder.
+        // Editing another field must not turn missing/null output into an
+        // authoritative empty array. An explicit rawJson override can do that.
+        if (originalResponse.containsKey('output')) {
+          copiedResponse['output'] = null;
+        } else {
+          copiedResponse.remove('output');
+        }
+      }
+    }
     return ResponsesStreamEvent(
       event: event ?? this.event,
       streamId: identical(streamId, unsetCopyWithValue)
@@ -760,3 +823,8 @@ const _sharedEventTypes = <String>{
   'response.custom_tool_call_input.delta',
   'response.custom_tool_call_input.done',
 };
+
+bool _isTerminalType(String type) =>
+    type == 'response.completed' ||
+    type == 'response.failed' ||
+    type == 'response.incomplete';

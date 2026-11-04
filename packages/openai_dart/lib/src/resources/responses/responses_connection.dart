@@ -15,6 +15,7 @@ import 'websocket_connector_common.dart';
 
 export 'responses_recovering_websocket.dart';
 export 'responses_recovery.dart';
+export 'responses_websocket_session.dart';
 export 'websocket_connector.dart';
 
 /// A malformed incoming or unserializable outgoing Responses WebSocket frame.

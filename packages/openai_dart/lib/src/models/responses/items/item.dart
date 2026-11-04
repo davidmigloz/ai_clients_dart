@@ -7,6 +7,7 @@ import '../../common/equality_helpers.dart';
 import '../../common/json_helpers.dart';
 import '../config/computer_call_output_status.dart';
 import '../config/configuration_update_reasoning.dart';
+import '../config/configuration_update_text.dart';
 import '../config/function_call_output_status.dart';
 import '../config/function_call_status.dart';
 import '../config/item_status.dart';
@@ -58,7 +59,7 @@ import 'web_search_result.dart';
 /// - [CompactionTriggerItem] - Triggers compaction of the current context
 /// - [AdditionalToolsItemParam] - Additional tool definitions made available
 ///   mid-conversation
-/// - [ConfigurationUpdateItem] - Reasoning configuration for subsequent responses
+/// - [ConfigurationUpdateItem] - Reasoning and text configuration for subsequent responses
 /// - [ConfigurationUpdateItemResponse] - A stored configuration update returned
 ///   by the Responses input-items resource
 /// - [ProgramItem] - Programmatic tool calling source code
@@ -739,7 +740,7 @@ class WebSearchCallItem extends Item {
       'WebSearchCallItem(type: $type, id: $id, agent: $agent, status: $status, action: $action, results: ${results == null ? 'null' : '${results!.length} items'})';
 }
 
-/// Changes reasoning configuration for subsequent responses in a conversation.
+/// Changes reasoning and text configuration for subsequent responses in a conversation.
 ///
 /// Keep request-level reasoning stable when changing effort with this item to
 /// preserve the cached prefix. Persistence is managed by the server and currently
@@ -755,6 +756,9 @@ class ConfigurationUpdateItem extends Item {
   /// Reasoning fields to update. When supplied, the JSON object must be nonnull.
   final ConfigurationUpdateReasoning? reasoning;
 
+  /// Text output format to use until a subsequent update replaces it.
+  final ConfigurationUpdateText? text;
+
   /// Agent metadata on the beta multi-agent protocol.
   ///
   /// Retained for contextual replay. Configuration persistence is currently
@@ -762,7 +766,12 @@ class ConfigurationUpdateItem extends Item {
   final AgentTag? agent;
 
   /// Creates a [ConfigurationUpdateItem].
-  const ConfigurationUpdateItem({this.id, this.reasoning, this.agent});
+  const ConfigurationUpdateItem({
+    this.id,
+    this.reasoning,
+    this.text,
+    this.agent,
+  });
 
   /// Creates a [ConfigurationUpdateItem] from JSON.
   factory ConfigurationUpdateItem.fromJson(Map<String, dynamic> json) {
@@ -777,6 +786,12 @@ class ConfigurationUpdateItem extends Item {
           ? ConfigurationUpdateReasoning.fromJson(
               requireJsonObject(json['reasoning'], '$context.reasoning'),
               context: '$context.reasoning',
+            )
+          : null,
+      text: json.containsKey('text')
+          ? ConfigurationUpdateText.fromJson(
+              requireJsonObject(json['text'], '$context.text'),
+              context: '$context.text',
             )
           : null,
       agent: agent == null
@@ -795,6 +810,7 @@ class ConfigurationUpdateItem extends Item {
     'type': type,
     if (id != null) 'id': id,
     if (reasoning != null) 'reasoning': reasoning!.toJson(),
+    if (text != null) 'text': text!.toJson(),
     if (agent != null) 'agent': agent!.toJson(),
   };
 
@@ -802,12 +818,16 @@ class ConfigurationUpdateItem extends Item {
   ConfigurationUpdateItem copyWith({
     Object? id = unsetCopyWithValue,
     Object? reasoning = unsetCopyWithValue,
+    Object? text = unsetCopyWithValue,
     Object? agent = unsetCopyWithValue,
   }) => ConfigurationUpdateItem(
     id: id == unsetCopyWithValue ? this.id : id as String?,
     reasoning: reasoning == unsetCopyWithValue
         ? this.reasoning
         : reasoning as ConfigurationUpdateReasoning?,
+    text: text == unsetCopyWithValue
+        ? this.text
+        : text as ConfigurationUpdateText?,
     agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
   );
 
@@ -818,14 +838,15 @@ class ConfigurationUpdateItem extends Item {
           runtimeType == other.runtimeType &&
           id == other.id &&
           reasoning == other.reasoning &&
+          text == other.text &&
           agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(id, reasoning, agent);
+  int get hashCode => Object.hash(id, reasoning, text, agent);
 
   @override
   String toString() =>
-      'ConfigurationUpdateItem(type: $type, id: $id, reasoning: $reasoning, agent: $agent)';
+      'ConfigurationUpdateItem(type: $type, id: $id, reasoning: $reasoning, text: $text, agent: $agent)';
 }
 
 /// A stored configuration update returned by the Responses input-items resource.
@@ -843,6 +864,9 @@ class ConfigurationUpdateItemResponse extends Item {
   /// The reasoning update, when supplied.
   final ConfigurationUpdateReasoning? reasoning;
 
+  /// Text output format to use until a subsequent update replaces it.
+  final ConfigurationUpdateText? text;
+
   /// Agent metadata on the beta multi-agent protocol.
   final AgentTag? agent;
 
@@ -850,6 +874,7 @@ class ConfigurationUpdateItemResponse extends Item {
   const ConfigurationUpdateItemResponse({
     required this.id,
     this.reasoning,
+    this.text,
     this.agent,
   });
 
@@ -868,6 +893,12 @@ class ConfigurationUpdateItemResponse extends Item {
               context: '$context.reasoning',
             )
           : null,
+      text: json.containsKey('text')
+          ? ConfigurationUpdateText.fromJson(
+              requireJsonObject(json['text'], '$context.text'),
+              context: '$context.text',
+            )
+          : null,
       agent: agent == null
           ? null
           : AgentTag(
@@ -884,23 +915,33 @@ class ConfigurationUpdateItemResponse extends Item {
     'type': type,
     'id': id,
     if (reasoning != null) 'reasoning': reasoning!.toJson(),
+    if (text != null) 'text': text!.toJson(),
     if (agent != null) 'agent': agent!.toJson(),
   };
 
   /// Converts to request input while preserving every input-supported field.
   ConfigurationUpdateItem toConfigurationUpdateItem() =>
-      ConfigurationUpdateItem(id: id, reasoning: reasoning, agent: agent);
+      ConfigurationUpdateItem(
+        id: id,
+        reasoning: reasoning,
+        text: text,
+        agent: agent,
+      );
 
   /// Copies every field; explicit null clears an optional value.
   ConfigurationUpdateItemResponse copyWith({
     String? id,
     Object? reasoning = unsetCopyWithValue,
+    Object? text = unsetCopyWithValue,
     Object? agent = unsetCopyWithValue,
   }) => ConfigurationUpdateItemResponse(
     id: id ?? this.id,
     reasoning: reasoning == unsetCopyWithValue
         ? this.reasoning
         : reasoning as ConfigurationUpdateReasoning?,
+    text: text == unsetCopyWithValue
+        ? this.text
+        : text as ConfigurationUpdateText?,
     agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
   );
 
@@ -911,14 +952,15 @@ class ConfigurationUpdateItemResponse extends Item {
           runtimeType == other.runtimeType &&
           id == other.id &&
           reasoning == other.reasoning &&
+          text == other.text &&
           agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(id, reasoning, agent);
+  int get hashCode => Object.hash(id, reasoning, text, agent);
 
   @override
   String toString() =>
-      'ConfigurationUpdateItemResponse(type: $type, id: $id, reasoning: $reasoning, agent: $agent)';
+      'ConfigurationUpdateItemResponse(type: $type, id: $id, reasoning: $reasoning, text: $text, agent: $agent)';
 }
 
 /// A message item in a conversation.

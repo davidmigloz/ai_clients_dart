@@ -1,0 +1,260 @@
+{
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "issue": 416,
+  "promotion_owner": 427,
+  "source_receipts": [
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/lib/responses_websocket/_session.py",
+      "sha256": "794bea06f8083a0f54035358d747531311aaccc0f0d314418aa0dc7a22bd0275"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/lib/responses/responses-websocket-session.ts",
+      "sha256": "4b3b6dae43ffdb196694a90e53a1a76e04e5b646dd3591ba8738e6a32149e083"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/lib/responses/responses-websocket-lane.ts",
+      "sha256": "884e929ab0561a17f0a89462fe7cdd59b868e4c784c61c8b19f3a84315e48da6"
+    }
+  ],
+  "types": {
+    "ResponseConfigurationUpdateItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ConfigurationUpdateItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "ResponseConfigurationUpdateItemParam",
+      "parent": "Item",
+      "note": "Input configuration update: optional nullable id normalizes to omission; optional nonnull reasoning and text. Inline text requires format, restricted to text/json_schema with immutable schema snapshot. Beta alone permits agent metadata."
+    },
+    "BetaResponseConfigurationUpdateItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ConfigurationUpdateItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "BetaResponseConfigurationUpdateItemParam",
+      "parent": "Item",
+      "note": "Input configuration update: optional nullable id normalizes to omission; optional nonnull reasoning and text. Inline text requires format, restricted to text/json_schema with immutable schema snapshot. Beta alone permits agent metadata."
+    },
+    "ResponseConfigurationUpdate": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ConfigurationUpdateItemResponse",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "ResponseConfigurationUpdate",
+      "parent": "Item",
+      "note": "Returned configuration update requires id. Optional nonnull text has required text/json_schema format; contextual Responses input-list parsing preserves GA/beta agent rules and typed replay."
+    },
+    "BetaResponseConfigurationUpdate": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ConfigurationUpdateItemResponse",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "BetaResponseConfigurationUpdate",
+      "parent": "Item",
+      "note": "Returned configuration update requires id. Optional nonnull text has required text/json_schema format; contextual Responses input-list parsing preserves GA/beta agent rules and typed replay."
+    },
+    "ConversationResponseConfigurationUpdate": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ConversationConfigurationUpdateItem",
+      "file": "lib/src/models/conversations/conversation_item.dart",
+      "schema": "ResponseConfigurationUpdate",
+      "parent": "ConversationItem",
+      "note": "Contextual stored conversation mapping requires id, preserves GA/beta metadata and optional nonnull text format; converts to typed request replay."
+    },
+    "ConversationBetaResponseConfigurationUpdate": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ConversationConfigurationUpdateItem",
+      "file": "lib/src/models/conversations/conversation_item.dart",
+      "schema": "BetaResponseConfigurationUpdate",
+      "parent": "ConversationItem",
+      "note": "Contextual stored conversation mapping requires id, preserves GA/beta metadata and optional nonnull text format; converts to typed request replay."
+    },
+    "ResponsesClientEventResponseCreate": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponsesCreateEvent",
+      "file": "lib/src/models/responses/websocket/responses_create_event.dart",
+      "schema": "ResponsesClientEventResponseCreate",
+      "note": "Composes HTTP CreateResponseRequest with canonical generate flag and stream_id routing; omits HTTP-only stream/background on the wire, rejects background:true as before. Warmup retains returned terminal response ID for explicit continuation."
+    },
+    "BetaResponsesClientEventResponseCreate": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponsesCreateEvent",
+      "file": "lib/src/models/responses/websocket/responses_create_event.dart",
+      "schema": "BetaResponsesClientEventResponseCreate",
+      "note": "Composes HTTP CreateResponseRequest with canonical generate flag and stream_id routing; omits HTTP-only stream/background on the wire, rejects background:true as before. Warmup retains returned terminal response ID for explicit continuation."
+    },
+    "ResponsesServerEvent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ResponsesServerEvent",
+      "file": "lib/src/models/responses/websocket/responses_server_event.dart",
+      "schema": "ResponsesServerEvent",
+      "note": "Lossless envelope over GA/beta shared events, errors and steering/injection messages. WebSocket-only terminal completed/failed/incomplete output omission/null tolerance preserves raw presence; final lane collection fills from finalized items without changing strict HTTP/SSE Response parsing."
+    },
+    "BetaResponsesServerEvent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ResponsesServerEvent",
+      "file": "lib/src/models/responses/websocket/responses_server_event.dart",
+      "schema": "BetaResponsesServerEvent",
+      "note": "Lossless envelope over GA/beta shared events, errors and steering/injection messages. WebSocket-only terminal completed/failed/incomplete output omission/null tolerance preserves raw presence; final lane collection fills from finalized items without changing strict HTTP/SSE Response parsing."
+    },
+    "ResponsesStreamEvent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesStreamEvent",
+      "file": "lib/src/models/responses/websocket/responses_server_event.dart",
+      "schema": null,
+      "note": "Dart shared-event/lossless future envelope extension; no invented upstream leaf schema.",
+      "parent": "ResponsesServerEvent"
+    },
+    "UnknownResponsesServerEvent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownResponsesServerEvent",
+      "file": "lib/src/models/responses/websocket/responses_server_event.dart",
+      "schema": null,
+      "note": "Dart shared-event/lossless future envelope extension; no invented upstream leaf schema.",
+      "parent": "ResponsesServerEvent"
+    },
+    "ConfigurationUpdateText": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ConfigurationUpdateText",
+      "file": "lib/src/models/responses/config/configuration_update_text.dart",
+      "schema": null,
+      "note": "Actual inline text object at ResponseConfigurationUpdate{,ItemParam}.properties.text and Beta siblings; required format restricted to ResponseFormatText/TextResponseFormatJsonSchema. Distinct from general TextConfig, which additionally permits json_object and verbosity. No fabricated component."
+    },
+    "TextResponseFormatConfiguration": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "TextFormat",
+      "file": "lib/src/models/responses/config/text_config.dart",
+      "schema": "TextResponseFormatConfiguration",
+      "note": "Existing three-way general Responses text-format union: text/json_schema/json_object. Descriptive upstream delta only. ConfigurationUpdateText deliberately admits only its narrower two-branch union."
+    },
+    "BetaTextResponseFormatConfiguration": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "TextFormat",
+      "file": "lib/src/models/responses/config/text_config.dart",
+      "schema": "BetaTextResponseFormatConfiguration",
+      "note": "Existing three-way general Responses text-format union: text/json_schema/json_object. Descriptive upstream delta only. ConfigurationUpdateText deliberately admits only its narrower two-branch union."
+    },
+    "ResponsesResponseFormatText": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "PlainTextFormat",
+      "file": "lib/src/models/responses/config/text_config.dart",
+      "schema": "ResponseFormatText",
+      "parent": "TextFormat",
+      "note": "Contextual Responses format mapping; shared Chat/Common formats retain their existing manifest entries. ConfigurationUpdateText snapshots/validates JSON schema before retaining this existing value type."
+    },
+    "BetaResponsesResponseFormatText": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "PlainTextFormat",
+      "file": "lib/src/models/responses/config/text_config.dart",
+      "schema": "BetaResponseFormatText",
+      "parent": "TextFormat",
+      "note": "Contextual Responses format mapping; shared Chat/Common formats retain their existing manifest entries. ConfigurationUpdateText snapshots/validates JSON schema before retaining this existing value type."
+    },
+    "ResponsesTextResponseFormatJsonSchema": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "JsonSchemaFormat",
+      "file": "lib/src/models/responses/config/text_config.dart",
+      "schema": "TextResponseFormatJsonSchema",
+      "parent": "TextFormat",
+      "note": "Contextual Responses format mapping; shared Chat/Common formats retain their existing manifest entries. ConfigurationUpdateText snapshots/validates JSON schema before retaining this existing value type."
+    },
+    "BetaResponsesTextResponseFormatJsonSchema": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "JsonSchemaFormat",
+      "file": "lib/src/models/responses/config/text_config.dart",
+      "schema": "BetaTextResponseFormatJsonSchema",
+      "parent": "TextFormat",
+      "note": "Contextual Responses format mapping; shared Chat/Common formats retain their existing manifest entries. ConfigurationUpdateText snapshots/validates JSON schema before retaining this existing value type."
+    },
+    "ResponsesResponseFormatJsonObject": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "JsonObjectFormat",
+      "file": "lib/src/models/responses/config/text_config.dart",
+      "schema": "ResponseFormatJsonObject",
+      "parent": "TextFormat",
+      "note": "Contextual Responses format mapping; shared Chat/Common formats retain their existing manifest entries. ConfigurationUpdateText snapshots/validates JSON schema before retaining this existing value type."
+    },
+    "BetaResponsesResponseFormatJsonObject": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "JsonObjectFormat",
+      "file": "lib/src/models/responses/config/text_config.dart",
+      "schema": "BetaResponseFormatJsonObject",
+      "parent": "TextFormat",
+      "note": "Contextual Responses format mapping; shared Chat/Common formats retain their existing manifest entries. ConfigurationUpdateText snapshots/validates JSON schema before retaining this existing value type."
+    },
+    "ResponsesWebSocketLimits": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesWebSocketLimits",
+      "file": "lib/src/resources/responses/responses_websocket_session.dart",
+      "schema": null,
+      "note": "Local opt-in bounded workflow helper based on pinned official SDK semantics; no corresponding wire schema and no API operation. Local retention/cancellation/ownership controls never enter API JSON."
+    },
+    "ResponsesWebSocketSessionException": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesWebSocketSessionException",
+      "file": "lib/src/resources/responses/responses_websocket_session.dart",
+      "schema": null,
+      "note": "Local opt-in bounded workflow helper based on pinned official SDK semantics; no corresponding wire schema and no API operation. Local retention/cancellation/ownership controls never enter API JSON."
+    },
+    "ResponsesWebSocketSession": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesWebSocketSession",
+      "file": "lib/src/resources/responses/responses_websocket_session.dart",
+      "schema": null,
+      "note": "Local opt-in bounded workflow helper based on pinned official SDK semantics; no corresponding wire schema and no API operation. Local retention/cancellation/ownership controls never enter API JSON."
+    },
+    "ResponsesWebSocketLane": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesWebSocketLane",
+      "file": "lib/src/resources/responses/responses_websocket_session.dart",
+      "schema": null,
+      "note": "Local opt-in bounded workflow helper based on pinned official SDK semantics; no corresponding wire schema and no API operation. Local retention/cancellation/ownership controls never enter API JSON."
+    },
+    "LiveInputResponseConfigurationUpdateItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveInputResponseConfigurationUpdateItemParam",
+      "file": "lib/src/models/live/live_input_item.dart",
+      "schema": "ResponseConfigurationUpdateItemParam",
+      "note": "Existing same-schema contextual Live input adapter now exposes typed ConfigurationUpdateText, hasText and copy/clear, preserves original finite immutable future metadata, and validates optional nonnull text and required text/json_schema format through its embedded canonical schema. No unrelated Live contract refresh.",
+      "parent": "LiveInputItem"
+    },
+    "LiveInputResponseConfigurationUpdateItemParamReasoningValue": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "LiveInputResponseConfigurationUpdateItemParamReasoningValue",
+      "file": "lib/src/models/live/live_input_item.dart",
+      "schema": null,
+      "note": "Existing adapter for the actual inline ResponseConfigurationUpdateItemParam.properties.reasoning value, with effort only. Corrects the inherited whole-parent schema binding in the #427 handoff; it is not a separate named canonical component."
+    },
+    "LiveCompactResponse": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "LiveCompactResponse",
+      "file": "lib/src/models/live/live_response_events.dart",
+      "schema": null,
+      "note": "Existing sparse lifecycle snapshot projection; embedded ResponseConfigurationUpdateItemParam validator is updated for the same canonical text field, including compact history. No independent schema or full Response requiredness is claimed. Future receive-only format discriminators remain finite raw metadata after known fields validate."
+    }
+  }
+}
