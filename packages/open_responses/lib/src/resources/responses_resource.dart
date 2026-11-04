@@ -59,33 +59,27 @@ class ResponsesResource extends ResourceBase with StreamingResource {
   Stream<StreamingEvent> createStream(
     CreateResponseRequest request, {
     Future<void>? abortTrigger,
-  }) async* {
-    ensureNotClosed?.call();
-    // Ensure stream is true
-    final requestToSend = request.stream != true
-        ? request.copyWith(stream: true)
-        : request;
-
-    final uri = requestBuilder.buildUrl('/responses');
-    final httpRequest = http.Request('POST', uri)
-      ..headers.addAll(requestBuilder.buildHeaders())
-      ..body = jsonEncode(requestToSend.toJson());
-
-    // Apply authentication and send streaming request
-    await prepareStreamingRequest(httpRequest);
-    final streamedResponse = await sendStreamingRequest(httpRequest);
-
-    final parser = SseParser();
-    await for (final json in parser.parse(streamedResponse.stream)) {
+  }) => streamRequest(
+    (nativeAbort) {
+      final requestToSend = request.stream != true
+          ? request.copyWith(stream: true)
+          : request;
+      return http.AbortableRequest(
+          'POST',
+          requestBuilder.buildUrl('/responses'),
+          abortTrigger: nativeAbort,
+        )
+        ..headers.addAll(requestBuilder.buildHeaders())
+        ..body = jsonEncode(requestToSend.toJson());
+    },
+    (json) {
       final cleaned = json.withoutEventType();
-      // Use event type from SSE or fall back to type field
       final eventType = json.sseEventType ?? cleaned['type'] as String?;
-      if (eventType != null) {
-        cleaned['type'] = eventType;
-      }
-      yield StreamingEvent.fromJson(cleaned);
-    }
-  }
+      if (eventType != null) cleaned['type'] = eventType;
+      return StreamingEvent.fromJson(cleaned);
+    },
+    abortTrigger: abortTrigger,
+  );
 
   /// Creates a streaming response with builder pattern.
   ///
