@@ -417,6 +417,8 @@ Future<void> main() async {
 }
 ```
 
+For failed responses and nested stream errors, inspect `error.type` as `String?`. Provider-supplied null type/code/param values are preserved; absence is tracked by `hasType`, `hasCode`, and `hasParam`.
+
 → [Full example](example/error_handling_example.dart)
 
 </details>
