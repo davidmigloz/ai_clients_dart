@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
 import '../auth/auth_provider.dart';
 import '../errors/exceptions.dart';
+import '../utils/request_id.dart';
+import '../utils/sse_parser.dart';
 import 'base_resource.dart';
 
 /// Mixin providing streaming HTTP request capabilities.
@@ -29,6 +32,119 @@ mixin StreamingResource on ResourceBase {
       throw mapHttpErrorForStreaming(streamedResponse.statusCode, body);
     }
     return streamedResponse;
+  }
+
+  /// Sends and parses a streaming request with request-scoped cancellation.
+  ///
+  /// The request is created on listen. Cancellation closes the local stream and
+  /// signals the transport without closing the shared HTTP client. Native
+  /// transport cancellation depends on support from the supplied HTTP client.
+  Stream<T> streamRequest<T>(
+    http.AbortableRequest Function(Future<void> abortTrigger) createRequest,
+    T Function(Map<String, dynamic>) parseEvent, {
+    Future<void>? abortTrigger,
+  }) {
+    final nativeAbort = Completer<void>();
+    StreamSubscription<dynamic>? subscription;
+    Future<void>? cancellation;
+    var finished = false;
+    var stage = AbortionStage.beforeRequest;
+    var correlationId = generateRequestId();
+    late StreamController<T> controller;
+
+    Future<void> cancel() {
+      finished = true;
+      if (!nativeAbort.isCompleted) nativeAbort.complete();
+      return cancellation ??= Future<void>.sync(() => subscription?.cancel());
+    }
+
+    void finish([Object? error, StackTrace? stackTrace]) {
+      if (finished) return;
+      finished = true;
+      if (error != null) controller.addError(error, stackTrace);
+      // onCancel shares this cleanup future with subscription.cancel().
+      cancel().ignore();
+      unawaited(controller.close());
+    }
+
+    Future<void> run() async {
+      try {
+        ensureNotClosed?.call();
+        final request = createRequest(nativeAbort.future);
+        correlationId = request.headers['X-Request-ID'] ?? correlationId;
+        await prepareStreamingRequest(request);
+        if (finished) return;
+        stage = AbortionStage.duringRequest;
+        final response = await httpClient.send(request);
+        if (finished) {
+          await response.stream.listen(null).cancel();
+          return;
+        }
+        stage = AbortionStage.duringStream;
+        if (response.statusCode >= 400) {
+          final body = StringBuffer();
+          subscription = response.stream
+              .transform(utf8.decoder)
+              .listen(
+                body.write,
+                onError: finish,
+                onDone: () => finish(
+                  mapHttpErrorForStreaming(
+                    response.statusCode,
+                    body.toString(),
+                  ),
+                ),
+                cancelOnError: true,
+              );
+        } else {
+          subscription = SseParser()
+              .parse(response.stream)
+              .listen(
+                (event) {
+                  if (finished) return;
+                  try {
+                    controller.add(parseEvent(event));
+                  } catch (error, stackTrace) {
+                    finish(error, stackTrace);
+                  }
+                },
+                onError: finish,
+                onDone: finish,
+                cancelOnError: true,
+              );
+        }
+        if (finished) {
+          await subscription?.cancel();
+        } else if (controller.isPaused) {
+          subscription?.pause();
+        }
+      } catch (error, stackTrace) {
+        finish(error, stackTrace);
+      }
+    }
+
+    controller = StreamController<T>(
+      onListen: () {
+        unawaited(
+          abortTrigger?.then(
+            (_) => finish(
+              AbortedException(
+                message: 'Stream aborted by user',
+                correlationId: correlationId,
+                timestamp: DateTime.now(),
+                stage: stage,
+              ),
+            ),
+            onError: (Object _, StackTrace _) {},
+          ),
+        );
+        unawaited(run());
+      },
+      onPause: () => subscription?.pause(),
+      onResume: () => subscription?.resume(),
+      onCancel: cancel,
+    );
+    return controller.stream;
   }
 
   /// Applies authentication to a request.

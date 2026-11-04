@@ -53,48 +53,66 @@ class ResponseStream {
   }
 
   /// Iterate through all events while executing callbacks.
-  Stream<StreamingEvent> asStream() async* {
-    if (_consumed) {
-      throw StateError('Stream has already been consumed');
-    }
-    _consumed = true;
-
-    await for (final event in _stream) {
-      // Execute general callbacks
-      for (final cb in _eventCallbacks) {
-        cb(event);
-      }
-
-      // Handle text deltas
-      if (event is OutputTextDeltaEvent) {
-        _textBuffer.write(event.delta);
-        for (final cb in _textDeltaCallbacks) {
-          cb(event.delta);
+  Stream<StreamingEvent> asStream() =>
+      Stream<StreamingEvent>.multi((controller) {
+        if (_consumed) {
+          controller
+            ..addErrorSync(StateError('Stream has already been consumed'))
+            ..closeSync();
+          return;
         }
-      }
+        _consumed = true;
+        final subscription = _stream
+            .map((event) {
+              // Execute general callbacks
+              for (final cb in _eventCallbacks) {
+                cb(event);
+              }
 
-      // Handle function call argument deltas
-      if (event is FunctionCallArgumentsDeltaEvent) {
-        for (final cb in _functionCallDeltaCallbacks) {
-          cb(event.delta);
-        }
-      }
+              // Handle text deltas
+              if (event is OutputTextDeltaEvent) {
+                _textBuffer.write(event.delta);
+                for (final cb in _textDeltaCallbacks) {
+                  cb(event.delta);
+                }
+              }
 
-      // Handle reasoning deltas
-      if (event is ReasoningDeltaEvent) {
-        for (final cb in _reasoningDeltaCallbacks) {
-          cb(event.delta);
-        }
-      }
+              // Handle function call argument deltas
+              if (event is FunctionCallArgumentsDeltaEvent) {
+                for (final cb in _functionCallDeltaCallbacks) {
+                  cb(event.delta);
+                }
+              }
 
-      // Capture final response
-      if (event is ResponseCompletedEvent) {
-        _finalResponse = event.response;
-      }
+              // Handle reasoning deltas
+              if (event is ReasoningDeltaEvent) {
+                for (final cb in _reasoningDeltaCallbacks) {
+                  cb(event.delta);
+                }
+              }
 
-      yield event;
-    }
-  }
+              // Capture final response
+              if (event is ResponseCompletedEvent) {
+                _finalResponse = event.response;
+              }
+
+              return event;
+            })
+            .listen(
+              controller.addSync,
+              onError: (Object error, StackTrace stackTrace) {
+                controller
+                  ..addErrorSync(error, stackTrace)
+                  ..closeSync();
+              },
+              onDone: controller.closeSync,
+              cancelOnError: true,
+            );
+        controller
+          ..onCancel = subscription.cancel
+          ..onPause = subscription.pause
+          ..onResume = subscription.resume;
+      });
 
   /// Get the final completed response after stream completes.
   ///
