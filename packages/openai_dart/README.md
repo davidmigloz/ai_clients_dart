@@ -1388,6 +1388,32 @@ Inspect `.invocations.list` or `.retrieve` for delivery status and the session I
 
 </details>
 
+<a id="follow-one-turn-on-an-idle-agent-session"></a>
+<details>
+<summary><b>Follow one turn on an idle Agent session</b></summary>
+
+Use this lazy helper with one application input writer. It retrieves idle state, subscribes before input, then observes the selected root turn through its terminal event and session idle. Raw `sessions.events` remains available for active-session steering and manual actions.
+
+```dart
+final run = client.agents.sessions.stream(
+  sessionId,
+  input: AgentSessionInitialInput.text('Continue the task.'),
+);
+try {
+  await for (final event in run.events) {
+    print(event.type);
+  }
+} finally {
+  await run.close();
+}
+```
+
+For sequential pulls that pause and continue, use `run.nextEvent()` instead of the Stream adapter. Stream break/close/abort stops only local observation; backend cancellation is a separate explicit raw input. Progress queues have bounded count/byte retention and fail on overflow.
+
+→ [Offline idle-run example](example/agent_session_run_example.dart)
+
+</details>
+
 <a id="session-history-and-traces"></a>
 <details>
 <summary><b>Session history and traces</b></summary>
@@ -1617,6 +1643,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [agent_sessions_example.dart](example/agent_sessions_example.dart) | **Offline.** durable sessions, persistent observation, manual function result and explicit cancellation |
 | [agent_browser_actions_example.dart](example/agent_browser_actions_example.dart) | **Offline.** explicit origin decisions, private authentication and observed acceptance |
 | [agent_session_recovery_example.dart](example/agent_session_recovery_example.dart) | **Offline.** subscribe/buffer, current-state/history reconciliation and local observer cleanup |
+| [agent_session_run_example.dart](example/agent_session_run_example.dart) | **Offline.** lazy idle follow-up, selected root boundary, controlled pulls and separate cancellation |
 | [agent_session_history_example.dart](example/agent_session_history_example.dart) | **Offline.** root/turn history and published OTLP trace pagination |
 | [agent_subagents_example.dart](example/agent_subagents_example.dart) | **Offline.** Agent session subagents |
 | [agent_environments_example.dart](example/agent_environments_example.dart) | **Offline.** template CRUD and owned hosted environment prewarming, pagination and safe inspection |

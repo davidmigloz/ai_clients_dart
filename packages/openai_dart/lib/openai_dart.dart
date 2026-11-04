@@ -40,6 +40,8 @@ export 'src/client/retry_wrapper.dart';
 export 'src/errors/exceptions.dart';
 // Extensions
 export 'src/extensions/extensions.dart';
+// Durable Agent session helpers
+export 'src/helpers/agents/agent_session_run.dart';
 // Live transcript helpers
 export 'src/helpers/live/live_transcript_grouper.dart';
 export 'src/helpers/live/live_transcript_grouping.dart';

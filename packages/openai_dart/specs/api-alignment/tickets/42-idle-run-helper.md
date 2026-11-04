@@ -1,6 +1,6 @@
 # Optional idle-session run observation
 
-Status: deferred outside the bounded milestone; not implemented.
+Status: implementation prepared in #394; independent review and exact-head CI required before merge.
 GitHub: [#394](https://github.com/davidmigloz/ai_clients_dart/issues/394).
 Primary requirements: `AGENTS-HELPER-01`, `AGENTS-HELPER-02`, `AGENTS-HELPER-03`, `AGENTS-HELPER-04`.
 Native GitHub blockers: [#386](https://github.com/davidmigloz/ai_clients_dart/issues/386).
@@ -9,7 +9,7 @@ Specification: [Agents and Vaults](../agents-vaults.md), AGENTS-HELPER-01–04.
 Dependency: [ticket 34](34-durable-sessions.md).
 Shared reference: input-key portion of AGENTS-HELPER-08, primarily owned by [ticket 43](43-local-dispatch.md).
 
-Deferred backlog: retained for future explicit prioritization; this ticket does not block completion of #317. Its acceptance remains unchecked, and implementation will not start automatically.
+Reactivated by the user under #413. Current implementation and local validation are recorded in [the review receipt](../reviews/42-idle-run-helper.md); #317 remains completed.
 
 ## User capability and scope
 
@@ -38,8 +38,8 @@ event, and this terminal-then-idle helper as distinct consumption modes.
 
 ## Evidence and validation plan
 
-Helper behavior comes from pinned [Python streams](https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/lib/streaming/agents/_streams.py)
-and [Node session streams](https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c5d51870dd38964e156/src/lib/agents/agent-session-stream.ts),
+Helper behavior comes from pinned [Python streams](https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/lib/streaming/agents/_streams.py)
+and [Node session streams](https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/lib/agents/agent-session-stream.ts),
 cross-checked against the [session guide](https://developers.openai.com/api/docs/guides/agents-api/sessions).
 Deep input capture is an explicit Dart design choice; do not claim both SDKs
 deep-copy user input arrays. Canonical wire contracts remain owned by ticket 34.
