@@ -7726,19 +7726,19 @@
     },
     "LiveInputPromptCacheBreakpointConfig": {
       "spec": "main",
-      "kind": "object",
-      "dart_class": "LiveInputPromptCacheBreakpointConfig",
-      "file": "lib/src/models/live/live_input_item.dart",
       "schema": "PromptCacheBreakpointConfig",
-      "note": "Actual adopted canonical InputItem-closure component. Validating immutable typed adapter preserves every declared field, nullable/omitted presence and finite future metadata; known malformed values remain contextual safe errors. Serialized-value getter/copy/value contracts are public-fixture tested."
+      "dart_class": "LiveInputPromptCacheBreakpointConfig",
+      "kind": "object",
+      "file": "lib/src/models/live/live_input_item.dart",
+      "note": "Actual existing Live InputItem closure component; current typed fields, presence/copy and canonical writable validation."
     },
     "LiveInputPromptCacheBreakpointParam": {
       "spec": "main",
-      "kind": "object",
-      "dart_class": "LiveInputPromptCacheBreakpointParam",
-      "file": "lib/src/models/live/live_input_item.dart",
       "schema": "PromptCacheBreakpointParam",
-      "note": "Actual adopted canonical InputItem-closure component. Validating immutable typed adapter preserves every declared field, nullable/omitted presence and finite future metadata; known malformed values remain contextual safe errors. Serialized-value getter/copy/value contracts are public-fixture tested."
+      "dart_class": "LiveInputPromptCacheBreakpointParam",
+      "kind": "object",
+      "file": "lib/src/models/live/live_input_item.dart",
+      "note": "Actual existing Live InputItem closure component; current typed fields, presence/copy and canonical writable validation."
     },
     "LiveInputRankerVersionType": {
       "spec": "main",
@@ -7970,11 +7970,11 @@
     },
     "LiveInputWebSearchActionFind": {
       "spec": "main",
-      "kind": "object",
-      "dart_class": "LiveInputWebSearchActionFind",
-      "file": "lib/src/models/live/live_input_item.dart",
       "schema": "WebSearchActionFind",
-      "note": "Actual adopted canonical InputItem-closure component. Validating immutable typed adapter preserves every declared field, nullable/omitted presence and finite future metadata; known malformed values remain contextual safe errors. Serialized-value getter/copy/value contracts are public-fixture tested."
+      "dart_class": "LiveInputWebSearchActionFind",
+      "kind": "object",
+      "file": "lib/src/models/live/live_input_item.dart",
+      "note": "Actual existing Live InputItem closure component; current typed fields, presence/copy and canonical writable validation."
     },
     "LiveInputWebSearchActionOpenPage": {
       "spec": "main",

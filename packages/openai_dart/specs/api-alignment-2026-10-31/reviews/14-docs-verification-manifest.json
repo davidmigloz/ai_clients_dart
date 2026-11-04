@@ -188,7 +188,9 @@
     "specs/api-alignment/reviews/40-environment-webhooks-manifest.json",
     "specs/api-alignment/reviews/41-browser-recovery-manifest.json",
     "specs/api-alignment-2026-10-31/reviews/issue424-live-image-error-replay-manifest.json",
-    "specs/api-alignment/reviews/42-idle-run-helper-manifest.json"
+    "specs/api-alignment/reviews/42-idle-run-helper-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/issue415-live-input-closure-manifest.json",
+    "specs/api-alignment/reviews/43-local-dispatch-manifest.json"
   ],
   "inventory_coverage": {
     "schemas": 297,
@@ -265,6 +267,39 @@
       "issue": 394,
       "pull_request": 463,
       "receipt": "specs/api-alignment/reviews/42-idle-run-helper-manifest.json"
+    },
+    {
+      "issue": 415,
+      "pull_request": 464,
+      "receipt": "specs/api-alignment-2026-10-31/reviews/issue415-live-input-closure-manifest.json"
+    },
+    {
+      "issue": 395,
+      "pull_request": 465,
+      "receipt": "specs/api-alignment/reviews/43-local-dispatch-manifest.json"
+    }
+  ],
+  "client_helper_contexts": [
+    {
+      "receipt": "specs/api-alignment/reviews/43-local-dispatch-manifest.json",
+      "dart_context": "AgentSessionRun.create / AgentSessionsResource.createRun",
+      "file": "lib/src/helpers/agents/agent_session_run.dart",
+      "schema": null,
+      "note": "Lazy captured streamed creation sharing the same single cursor/checkpoints. Explicit stream:false rejects locally; canonical session.created establishes identity."
+    },
+    {
+      "receipt": "specs/api-alignment/reviews/43-local-dispatch-manifest.json",
+      "dart_context": "AgentToolHandler / AgentToolErrorObserver / AgentToolErrorStage / AgentToolError",
+      "file": "lib/src/helpers/agents/agent_tool_dispatcher.dart",
+      "schema": null,
+      "note": "Opt-in application callbacks and private error metadata; never serialized as tools or wire request fields."
+    },
+    {
+      "receipt": "specs/api-alignment/reviews/43-local-dispatch-manifest.json",
+      "dart_context": "AgentSessionEventsResource.create.allowRetries / AgentSessionsResource.createStream.onReady",
+      "file": "lib/src/resources/agent_sessions_resource.dart",
+      "schema": null,
+      "note": "Local request policy/readiness controls on unchanged canonical operations. Authentication cannot enable retries."
     }
   ]
 }

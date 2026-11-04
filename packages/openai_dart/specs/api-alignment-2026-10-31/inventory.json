@@ -4353,9 +4353,21 @@
             "receipt": "specs/api-alignment-2026-10-31/reviews/02-responses-cache-usage-manifest.json",
             "dart_class": "PromptCacheBreakpointConfig",
             "file": "lib/src/models/common/prompt_cache_breakpoint.dart"
+          },
+          {
+            "manifest_key": "LiveInputPromptCacheBreakpointConfig",
+            "receipt": "specs/api-alignment-2026-10-31/reviews/issue415-live-input-closure-manifest.json",
+            "dart_class": "LiveInputPromptCacheBreakpointConfig",
+            "file": "lib/src/models/live/live_input_item.dart"
           }
         ],
-        "pull_request": 440
+        "pull_request": 440,
+        "completion_evidence": [
+          {
+            "pull_request": 464,
+            "receipt": "specs/api-alignment-2026-10-31/reviews/issue415-live-input-closure-manifest.json"
+          }
+        ]
       }
     },
     {
@@ -4371,9 +4383,21 @@
             "receipt": "specs/api-alignment-2026-10-31/reviews/14-docs-verification-manifest.json",
             "dart_class": "PromptCacheBreakpointConfig",
             "file": "lib/src/models/common/prompt_cache_breakpoint.dart"
+          },
+          {
+            "manifest_key": "LiveInputPromptCacheBreakpointParam",
+            "receipt": "specs/api-alignment-2026-10-31/reviews/issue415-live-input-closure-manifest.json",
+            "dart_class": "LiveInputPromptCacheBreakpointParam",
+            "file": "lib/src/models/live/live_input_item.dart"
           }
         ],
-        "pull_request": 440
+        "pull_request": 440,
+        "completion_evidence": [
+          {
+            "pull_request": 464,
+            "receipt": "specs/api-alignment-2026-10-31/reviews/issue415-live-input-closure-manifest.json"
+          }
+        ]
       }
     },
     {
@@ -5641,9 +5665,21 @@
             "receipt": "specs/api-alignment-2026-10-31/reviews/02-responses-cache-usage-manifest.json",
             "dart_class": "WebSearchActionFind",
             "file": "lib/src/models/responses/items/web_search_action.dart"
+          },
+          {
+            "manifest_key": "LiveInputWebSearchActionFind",
+            "receipt": "specs/api-alignment-2026-10-31/reviews/issue415-live-input-closure-manifest.json",
+            "dart_class": "LiveInputWebSearchActionFind",
+            "file": "lib/src/models/live/live_input_item.dart"
           }
         ],
-        "pull_request": 440
+        "pull_request": 440,
+        "completion_evidence": [
+          {
+            "pull_request": 464,
+            "receipt": "specs/api-alignment-2026-10-31/reviews/issue415-live-input-closure-manifest.json"
+          }
+        ]
       }
     },
     {
