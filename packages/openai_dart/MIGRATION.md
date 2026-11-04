@@ -6,6 +6,24 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming release: Live find-action URLs
+
+`LiveInputWebSearchActionFind.url` is now `String?`, matching the API's optional
+nullable URL. Handle missing URLs before passing the value to a nonnullable API:
+
+```dart
+// Before
+final page = Uri.parse(action.url);
+
+// After
+final url = action.url;
+final page = url == null ? null : Uri.parse(url);
+```
+
+`hasUrl` distinguishes omission from an explicit wire null. In `copyWith`,
+`url: null` emits null and `clearUrl: true` removes the key. Existing JSON
+constructors and nonnull URL copies remain available.
+
 ## Upcoming release: Agent environment webhook notifications
 
 Environment notifications now decode to `AgentEnvironmentReadyWebhookEvent`,

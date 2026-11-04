@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'package:meta/meta.dart';
 import '../common/equality_helpers.dart';
+import '../common/prompt_cache_breakpoint.dart' show PromptCacheBreakpointTtl;
 import '../images/image_tool_error.dart';
 import '../responses/config/configuration_update_text.dart';
 import '../responses/items/item.dart' show Item;
@@ -7954,13 +7955,21 @@ final class LiveInputPromptCacheBreakpointConfig extends LiveInputValue {
       ) {
     validate();
   }
-  static const Set<String> _knownKeys = {'mode'};
+  static const Set<String> _knownKeys = {'mode', 'ttl'};
 
   /// Complete immutable wire object; all declared fields below are typed.
   final Map<String, dynamic> rawJson;
 
   /// Canonical `mode` value.
   String get mode => rawJson['mode'] as String;
+
+  /// Optional breakpoint lifetime; omission inherits the request TTL.
+  PromptCacheBreakpointTtl? get ttl => hasTtl
+      ? PromptCacheBreakpointTtl.fromJson(rawJson['ttl'] as String)
+      : null;
+
+  /// Whether the optional nonnull `ttl` member is present.
+  bool get hasTtl => rawJson.containsKey('ttl');
   @override
   void validate() => _validateInputComponent(
     'PromptCacheBreakpointConfig',
@@ -7972,6 +7981,8 @@ final class LiveInputPromptCacheBreakpointConfig extends LiveInputValue {
 
   /// Copies typed members; null is explicit and clear flags remove optional keys.
   LiveInputPromptCacheBreakpointConfig copyWith({
+    Object? ttl = liveUnset,
+    bool clearTtl = false,
     Map<String, dynamic>? rawJson,
 
     /// Parses and validates the canonical value.
@@ -7980,14 +7991,14 @@ final class LiveInputPromptCacheBreakpointConfig extends LiveInputValue {
       this.rawJson,
       _knownKeys,
       rawJson,
-      {},
-      <String>{},
+      {'ttl': ttl},
+      <String>{if (clearTtl) 'ttl'},
       'LiveInputPromptCacheBreakpointConfig',
     ),
   );
   @override
   String toString() =>
-      'LiveInputPromptCacheBreakpointConfig(mode: [REDACTED], rawJson: [REDACTED])';
+      'LiveInputPromptCacheBreakpointConfig(mode: [REDACTED], ttl: [REDACTED], rawJson: [REDACTED])';
 }
 
 /// Immutable typed adapter for PromptCacheBreakpointParam.
@@ -8002,13 +8013,21 @@ final class LiveInputPromptCacheBreakpointParam extends LiveInputValue {
       ) {
     validate();
   }
-  static const Set<String> _knownKeys = {'mode'};
+  static const Set<String> _knownKeys = {'mode', 'ttl'};
 
   /// Complete immutable wire object; all declared fields below are typed.
   final Map<String, dynamic> rawJson;
 
   /// Canonical `mode` value.
   String get mode => rawJson['mode'] as String;
+
+  /// Optional breakpoint lifetime; omission inherits the request TTL.
+  PromptCacheBreakpointTtl? get ttl => hasTtl
+      ? PromptCacheBreakpointTtl.fromJson(rawJson['ttl'] as String)
+      : null;
+
+  /// Whether the optional nonnull `ttl` member is present.
+  bool get hasTtl => rawJson.containsKey('ttl');
   @override
   void validate() => _validateInputComponent(
     'PromptCacheBreakpointParam',
@@ -8020,6 +8039,8 @@ final class LiveInputPromptCacheBreakpointParam extends LiveInputValue {
 
   /// Copies typed members; null is explicit and clear flags remove optional keys.
   LiveInputPromptCacheBreakpointParam copyWith({
+    Object? ttl = liveUnset,
+    bool clearTtl = false,
     Map<String, dynamic>? rawJson,
 
     /// Parses and validates the canonical value.
@@ -8028,14 +8049,14 @@ final class LiveInputPromptCacheBreakpointParam extends LiveInputValue {
       this.rawJson,
       _knownKeys,
       rawJson,
-      {},
-      <String>{},
+      {'ttl': ttl},
+      <String>{if (clearTtl) 'ttl'},
       'LiveInputPromptCacheBreakpointParam',
     ),
   );
   @override
   String toString() =>
-      'LiveInputPromptCacheBreakpointParam(mode: [REDACTED], rawJson: [REDACTED])';
+      'LiveInputPromptCacheBreakpointParam(mode: [REDACTED], ttl: [REDACTED], rawJson: [REDACTED])';
 }
 
 /// Immutable typed adapter for RankingOptions.
@@ -9669,7 +9690,10 @@ final class LiveInputWebSearchActionFind extends LiveInputValue {
   String get type => rawJson['type'] as String;
 
   /// Canonical `url` value.
-  String get url => rawJson['url'] as String;
+  String? get url => rawJson['url'] as String?;
+
+  /// Distinguishes an omitted URL from an explicit null.
+  bool get hasUrl => rawJson.containsKey('url');
   @override
   void validate() => _validateInputComponent(
     'WebSearchActionFind',
@@ -9683,6 +9707,7 @@ final class LiveInputWebSearchActionFind extends LiveInputValue {
   LiveInputWebSearchActionFind copyWith({
     Object? pattern = liveUnset,
     Object? url = liveUnset,
+    bool clearUrl = false,
     Map<String, dynamic>? rawJson,
 
     /// Parses and validates the canonical value.
@@ -9692,7 +9717,7 @@ final class LiveInputWebSearchActionFind extends LiveInputValue {
       _knownKeys,
       rawJson,
       {'pattern': pattern, 'url': url},
-      <String>{},
+      <String>{if (clearUrl) 'url'},
       'LiveInputWebSearchActionFind',
     ),
   );
@@ -19743,6 +19768,7 @@ Object? _inputWire(
   if (value is LiveInputValue) return value.toJson();
   if (value is LiveJsonModel) return value.toJson();
   if (value is ImageGenerationCallError) return value.toJson();
+  if (value is PromptCacheBreakpointTtl) return value.toJson();
   final seen = ancestors ?? HashSet<Object>.identity();
   if (value is List || value is Map) {
     if (!seen.add(value!)) {
@@ -22430,6 +22456,10 @@ const Map<String, dynamic> _inputSchemas = {
         'enum': ['explicit'],
         'type': 'string',
       },
+      'ttl': {
+        'enum': ['30m', '12h'],
+        'type': 'string',
+      },
     },
     'required': ['mode'],
     'type': 'object',
@@ -22438,6 +22468,10 @@ const Map<String, dynamic> _inputSchemas = {
     'properties': {
       'mode': {
         'enum': ['explicit'],
+        'type': 'string',
+      },
+      'ttl': {
+        'enum': ['30m', '12h'],
         'type': 'string',
       },
     },
@@ -22936,9 +22970,14 @@ const Map<String, dynamic> _inputSchemas = {
         'enum': ['find_in_page'],
         'type': 'string',
       },
-      'url': {'format': 'uri', 'type': 'string'},
+      'url': {
+        'anyOf': [
+          {'format': 'uri', 'type': 'string'},
+          {'type': 'null'},
+        ],
+      },
     },
-    'required': ['type', 'url', 'pattern'],
+    'required': ['type', 'pattern'],
     'type': 'object',
   },
   'WebSearchActionOpenPage': {

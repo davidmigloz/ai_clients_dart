@@ -21899,13 +21899,13 @@ void main() {
         throwsA(_safe('type')),
       );
     });
-    test('required url absence fails contextually', () {
+    test('optional find URL absence is preserved', () {
       final wire = Map<String, dynamic>.from(_clone(full)! as Map)
         ..remove('url');
-      expect(
-        () => LiveInputWebSearchActionFind.fromJson(wire),
-        throwsA(_safe('url')),
-      );
+      final model = LiveInputWebSearchActionFind.fromJson(wire);
+      expect(model.hasUrl, isFalse);
+      expect(model.url, isNull);
+      expect(model.toJson(), wire);
     });
     test('known url wrong value cannot become overflow', () {
       final wire = Map<String, dynamic>.from(_clone(full)! as Map);
