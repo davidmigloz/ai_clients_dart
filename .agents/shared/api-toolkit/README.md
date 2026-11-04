@@ -22,6 +22,14 @@ Commands:
 - `scaffold` - generate schema, enum, message, config, or barrel scaffolds
 - `verify` - run implementation, export, docs, README, or combined verification
 
+### Named enum verification
+
+`verify --checks implementation --scope all` also checks unchanged named string-enum schemas against uniquely matched Dart declarations, even when no manifest entry exists. Explicit manifest mappings, schema aliases and skips retain precedence; discovery never writes the manifest. The result includes `enum_discovery` with inferred checks, unmatched schemas and explicit skips. Ambiguous matches receive a warning instead of an arbitrary selection.
+
+Checks use exact values from the selected enum/value class, its typed top-level codecs/extensions, or actual sealed variants. Comments, unrelated types and substrings cannot supply missing wire values. Raw-string-preserving value classes need no invented `unknown` wire value; existing explicit enum entries retain their fallback checks. Automatic discovery checks completeness without imposing new unknown-value parsing behavior. Integer and manually mapped inline enums retain their existing checks.
+
+Discovery is limited to `--scope all`; changed/critical/type scopes remain local. This is static representation evidence, not proof of parser control flow or full schema coverage. Reverse enum drift, automatic inline enum discovery and unrelated API repairs remain separate work.
+
 ### README verification
 
 `verify --checks readme` follows the [shared README template](../readme-template.md). Usage topics can be flat `<details>` disclosures or grouped under H3 category headings. The legacy H3 task heading followed by `<details>` is also supported. The reported `usage_subsections` count measures topics, rather than category headings.

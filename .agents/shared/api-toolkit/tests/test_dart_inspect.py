@@ -12,6 +12,8 @@ if str(ROOT) not in os.sys.path:
 from api_toolkit.dart_inspect import (
     camel_case,
     extract_class_block,
+    extract_dart_declaration,
+    find_declared_classes,
     extract_fields,
     extract_from_json_keys,
     extract_method_body,
@@ -21,6 +23,51 @@ from api_toolkit.dart_inspect import (
 
 
 class DartInspectTests(unittest.TestCase):
+    def test_exact_declaration_literals_ignore_comments_and_other_types(self) -> None:
+        source = "// class Role { static const fake = 'critic'; }\nclass Role { static const user = 'user'; /* 'critic' */ }\nclass Other { static const tool = 'tool'; }"
+        value = extract_dart_declaration(source, "Role")
+        self.assertIsNotNone(value)
+        self.assertEqual(value.literals, {"user"})
+        self.assertNotIn("Other", value.code)
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / "types.dart"
+            path.write_text(source + '\nconst example = "enum Fake { unknown }";')
+            self.assertEqual(find_declared_classes(path), ["Role", "Other"])
+
+    def test_declaration_boundary_ignores_raw_triple_and_escaped_braces(self) -> None:
+        source = r'''class Values {
+          static const a = r'url://host/}';
+          static const b = "can't";
+          static const c = '\u{1F680}';
+          static const d = """multiline } /* not a comment */""";
+          static const e = '\$literal';
+          static const dynamicValue = '$runtimeType';
+        }
+        class Other { static const unrelated = 'unrelated'; }
+        '''
+        value = extract_dart_declaration(source, "Values")
+        self.assertIsNotNone(value)
+        self.assertEqual(value.literals, {"url://host/}", "can't", "🚀", "multiline } /* not a comment */", "$literal"})
+        self.assertNotIn("unrelated", value.literals)
+        self.assertNotIn("Other", value.code)
+
+    def test_nested_interpolation_quotes_stay_masked_as_one_string(self) -> None:
+        source = "enum Role { user; String label(Map json) => 'prefix ${json['class Fake {}']}'; }"
+        value = extract_dart_declaration(source, "Role")
+        self.assertNotIn("Fake", value.code)
+        self.assertEqual(value.literals, set())
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / "roles.dart"
+            path.write_text(source)
+            self.assertEqual(find_declared_classes(path), ["Role"])
+
+    def test_nested_dart_comments_do_not_create_enum_members(self) -> None:
+        source = "enum Role { user, /* outer /* nested */ critic */ unknown }"
+        value = extract_dart_declaration(source, "Role")
+        self.assertEqual(value.kind, "enum")
+        self.assertNotIn("critic", value.code)
+        self.assertIn("user", value.code)
+
     def test_camel_case_does_not_uppercase_letter_after_digit(self) -> None:
         # A digit must not act as a word boundary: "1h"/"5m" stay lowercase so the
         # result matches Dart fields like `ephemeral1hInputTokens`.

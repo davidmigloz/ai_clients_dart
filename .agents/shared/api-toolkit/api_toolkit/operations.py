@@ -52,8 +52,10 @@ from .config import (
 from .dart_inspect import (
     DartField,
     camel_case,
+    dart_enum_constant_names,
     contains_all_names,
     extract_class_block,
+    extract_dart_declaration,
     extract_fields,
     extract_from_json_keys,
     extract_method_body,
@@ -1448,23 +1450,103 @@ def _verify_object_entry(config: ToolkitConfig, spec_payload: dict[str, Any], en
     return issues
 
 
-def _verify_enum_entry(config: ToolkitConfig, spec_payload: dict[str, Any], entry: ManifestEntry) -> list[dict[str, Any]]:
+def _direct_dart_supertypes(header: str) -> set[str]:
+    # Generic arguments and type-parameter bounds are not direct supertypes.
+    masked = []
+    depth = 0
+    for char in header:
+        if char == "<":
+            depth += 1
+            masked.append(" ")
+        elif char == ">":
+            depth -= 1
+            masked.append(" ")
+        else:
+            masked.append(" " if depth else char)
+    header = "".join(masked)
+    parents: set[str] = set()
+    for match in re.finditer(r"\b(?:extends|implements)\s+(.+?)(?=\b(?:with|implements|extends|on)\b|$)", header):
+        start = 0
+        depth = 0
+        segment = match.group(1)
+        for index, char in enumerate(segment + ","):
+            depth += (char == "<") - (char == ">")
+            if char == "," and depth == 0:
+                name = re.match(r"\s*([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)", segment[start:index])
+                if name:
+                    parents.add(name.group(1))
+                start = index + 1
+    return parents
+
+
+def _enum_declaration_evidence(
+    config: ToolkitConfig,
+    entry: ManifestEntry,
+    path: Path,
+    class_index: dict[str, list[Path]],
+    cache: dict[tuple[Path, str], Any],
+) -> tuple[str, str, set[str]] | None:
+    def declaration(name: str, file: Path):
+        key = (file, name)
+        if key not in cache:
+            cache[key] = extract_dart_declaration(read_text(file), name)
+        return cache[key]
+
+    root = declaration(entry.dart_class, path)
+    if root is None:
+        return None
+    code = [root.code]
+    literals = set(root.literals)
+    if root.kind == "sealed":
+        if not class_index:
+            class_index = _dart_class_index(config)
+        # A sealed representation may put its fixed wire getters in separate
+        # variant files. Only actual extends/implements relationships contribute.
+        pending = [entry.dart_class]
+        seen = set(pending)
+        while pending:
+            parent = pending.pop()
+            for name, files in class_index.items():
+                if name in seen:
+                    continue
+                for file in files:
+                    child = declaration(name, file)
+                    if child is None:
+                        continue
+                    header = child.code.split("{", 1)[0]
+                    if parent not in _direct_dart_supertypes(header):
+                        continue
+                    seen.add(name)
+                    pending.append(name)
+                    code.append(child.code)
+                    literals.update(child.literals)
+    return root.kind, "\n".join(code), literals
+
+
+def _verify_enum_entry(
+    config: ToolkitConfig,
+    spec_payload: dict[str, Any],
+    entry: ManifestEntry,
+    *,
+    schema_records: dict[str, Any] | None = None,
+    class_index: dict[str, list[Path]] | None = None,
+    declaration_cache: dict[tuple[Path, str], Any] | None = None,
+    require_fallback: bool = True,
+) -> list[dict[str, Any]]:
     file_path = config.resolve_package_path(entry.file)
     if not file_path.exists():
         return [_type_issue("error", entry.key, f"Missing Dart enum file: {entry.file}", file=entry.file)]
-
-    content = read_text(file_path)
-    if "enum " not in content:
-        return [_type_issue("error", entry.key, "Expected enum declaration", file=entry.file)]
-
-    values: list[Any]
+    evidence = _enum_declaration_evidence(
+        config, entry, file_path, class_index or {}, declaration_cache if declaration_cache is not None else {},
+    )
+    if evidence is None:
+        return [_type_issue("error", entry.key, f"Expected Dart declaration '{entry.dart_class}'", file=entry.file)]
+    kind, code, literals = evidence
     if config.manifest.surface == "openapi":
-        values = _extract_openapi_schemas(spec_payload).get(entry.schema_name, {}).get("enum_values", [])
+        records = schema_records if schema_records is not None else _extract_openapi_schemas(spec_payload)
+        values = records.get(entry.schema_name, {}).get("enum_values", [])
     else:
         values = spec_payload.get("enums", {}).get(entry.schema_name, {}).get("values", [])
-
-    # Fall back to manifest-provided enum_values for inline enums that
-    # don't have a top-level spec schema.
     if not values and entry.enum_values:
         values = entry.enum_values
 
@@ -1472,23 +1554,77 @@ def _verify_enum_entry(config: ToolkitConfig, spec_payload: dict[str, Any], entr
     if not values:
         issues.append(_type_issue("error", entry.key, f"No enum values found in spec for '{entry.schema_name}'", file=entry.file))
     for value in values:
-        # OpenAPI enums may be strings OR integers (e.g. int-coded state enums).
-        # For ints, use a digit-boundary regex so `1` doesn't falsely match
-        # inside `10`/`21`; for strings, keep the original substring behavior
-        # (string enum values live in quotes in Dart source, so substring
-        # matching rarely collides).
         if isinstance(value, int) and not isinstance(value, bool):
-            found = (
-                re.search(rf"(?<!\d){re.escape(str(value))}(?!\d)", content)
-                is not None
-            )
+            found = re.search(rf"(?<!\d){re.escape(str(value))}(?!\d)", code) is not None
         else:
-            found = str(value) in content
+            # Values must be exact literals in this representation. Actual Dart
+            # enums can also serialize an implicit member name via .name.
+            found = value in literals or (
+                kind == "enum" and isinstance(value, str)
+                and re.fullmatch(r"[A-Za-z_]\w*", value) is not None
+                and value in dart_enum_constant_names(code)
+            )
         if not found:
             issues.append(_type_issue("error", entry.key, f"Enum value '{value}' not found in file", file=entry.file))
-    if not any(fallback in content for fallback in UNKNOWN_ENUM_FALLBACKS):
+    # Value wrappers may preserve future raw strings and sealed request choices
+    # need not invent an 'unknown' wire value. Keep true-enum fallback policy.
+    if kind == "enum" and require_fallback and not any(
+        fallback in literals or fallback in dart_enum_constant_names(code)
+        for fallback in UNKNOWN_ENUM_FALLBACKS
+    ):
         issues.append(_type_issue("error", entry.key, "Enum fallback value ('unknown' or 'unspecified') not found", file=entry.file))
     return issues
+
+
+def _discover_untracked_string_enums(
+    config: ToolkitConfig,
+    spec_name: str,
+    spec_payload: dict[str, Any],
+    class_index: dict[str, list[Path]],
+) -> tuple[list[ManifestEntry], list[dict[str, Any]], dict[str, Any]]:
+    entries = _entries_for_spec(config, spec_name)
+    excluded = set(config.get_spec(spec_name)[1].audit.excluded_schemas)
+    aliases = config.get_spec(spec_name)[1].audit.schema_aliases
+    discovered: list[ManifestEntry] = []
+    issues: list[dict[str, Any]] = []
+    unmatched: list[str] = []
+    acknowledged: list[str] = []
+    for name, schema in sorted(spec_payload.get("components", {}).get("schemas", {}).items()):
+        values = schema.get("enum")
+        if not values or not all(isinstance(value, str) for value in values):
+            continue
+        if schema.get("type") not in (None, "string", ["string", "null"], ["null", "string"]):
+            continue
+        if name in excluded:
+            continue
+        mapped = [entry for entry in entries if entry.schema_name == name or entry.key == name]
+        if mapped:
+            # Explicit mappings (including intentional skips/contextual types)
+            # have authority; never silently replace them with a guessed type.
+            if any(entry.kind == "skip" for entry in mapped):
+                acknowledged.append(name)
+            continue
+        target = aliases.get(name) or config.manifest.type_mappings.get(name) or name
+        status, mapped_entry, class_name, path, _ = _resolve_schema_alias_match(config, spec_name, target, class_index)
+        if mapped_entry is not None and mapped_entry.kind == "skip":
+            acknowledged.append(name)
+            continue
+        if status == "ambiguous":
+            issues.append(_type_issue("warning", name, "Enum declaration is ambiguous; add an explicit manifest mapping"))
+            continue
+        if status != "matched" or path is None or class_name is None:
+            unmatched.append(name)
+            continue
+        discovered.append(ManifestEntry(
+            key=name, spec=spec_name, kind="enum", dart_class=class_name,
+            file=str(path.relative_to(config.package_root)), schema=name,
+            note="Automatically discovered unchanged/untracked named string enum; no manifest mutation.",
+        ))
+    return discovered, issues, {
+        "checked_untracked_enums": [entry.key for entry in discovered],
+        "unmatched_enum_schemas": unmatched,
+        "explicit_skips": acknowledged,
+    }
 
 
 def _discriminator_value_for_variant(mapping: dict[str, Any], variant: ManifestEntry) -> str | None:
@@ -1739,6 +1875,11 @@ def _verify_implementation(
         if parent and parent.key in parent_keys and entry.key != parent.key:
             by_parent[parent.key].append(entry)
 
+    needs_enum_records = scope == "all" or any(entry.kind == "enum" for entry in selected)
+    schema_records = _extract_openapi_schemas(spec_payload) if config.manifest.surface == "openapi" and needs_enum_records else None
+    class_index = _dart_class_index(config) if scope == "all" and config.manifest.surface == "openapi" else {}
+    declaration_cache: dict[tuple[Path, str], Any] = {}
+    enum_discovery: dict[str, Any] = {}
     for entry in selected:
         if entry.kind == "skip":
             # Skip entries bypass full verification but still run type checks
@@ -1747,7 +1888,7 @@ def _verify_implementation(
                 issues.extend(_verify_field_types(config, spec_payload, entry))
             continue
         if entry.kind == "enum":
-            issues.extend(_verify_enum_entry(config, spec_payload, entry))
+            issues.extend(_verify_enum_entry(config, spec_payload, entry, schema_records=schema_records, class_index=class_index, declaration_cache=declaration_cache))
         elif entry.kind == "sealed_parent":
             continue
         elif entry.kind == "extension" and not entry.schema:
@@ -1773,6 +1914,12 @@ def _verify_implementation(
             if entry.kind == "skip" and entry.key not in selected_keys and entry.schema:
                 issues.extend(_verify_field_types(config, spec_payload, entry))
 
+    if scope == "all" and config.manifest.surface == "openapi":
+        inferred, inference_issues, enum_discovery = _discover_untracked_string_enums(config, spec_name, spec_payload, class_index)
+        issues.extend(inference_issues)
+        for entry in inferred:
+            issues.extend(_verify_enum_entry(config, spec_payload, entry, schema_records=schema_records, class_index=class_index, declaration_cache=declaration_cache, require_fallback=False))
+
     for parent in parents:
         issues.extend(_verify_sealed_parent(config, parent, by_parent.get(parent.key, [])))
         issues.extend(_verify_sealed_parent_variant_coverage(parent, spec_payload, by_parent.get(parent.key, []), all_types=config.manifest.types))
@@ -1796,6 +1943,7 @@ def _verify_implementation(
         "check": "implementation",
         "scope": scope,
         "selected_types": [entry.key for entry in selected],
+        "enum_discovery": enum_discovery,
         "coverage_gaps": coverage_gaps,
         "endpoint_action_mismatches": endpoint_action_mismatches,
         "coverage_summary": coverage_summary,
