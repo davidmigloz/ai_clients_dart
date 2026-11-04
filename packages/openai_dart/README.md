@@ -1127,6 +1127,18 @@ Connect primary or sideband Live WebSockets to observe typed events and control 
 
 </details>
 
+<a id="how-do-i-connect-live-to-decisions"></a>
+<details>
+<summary><b>How do I connect Live to Decisions?</b></summary>
+
+Configure `LiveDecisionsDelegationParam` for native delegation, or add input/output transcript triggers with `LiveDecisionTriggerInputParam`. Live question groups allow up to 64 questions; use `LiveDecisionQuestion` for their distinct content rules.
+
+Append shared context with `LiveDecisionItemCreateParam`, evaluate explicitly with a unique `LiveDecisionCreateParam.eventId`, and read `LiveDecisionEvent.typedDecision`. Wait for configuration/item acknowledgments before using new state. Trigger results identify their source transcript delta and can arrive out of order; your application decides which result to apply and performs any actions. When filtering WebRTC events, allow `decision.event` and each configured source transcript event.
+
+→ [Offline delegation and transcript-trigger example](example/live_decisions_example.dart)
+
+</details>
+
 <a id="how-do-i-fork-stored-live-sessions-and-group-captions"></a>
 <details>
 <summary><b>How do I fork stored Live sessions and group captions?</b></summary>
@@ -1312,6 +1324,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [realtime_example.dart](example/realtime_example.dart) | Realtime API (WebSocket and WebRTC) |
 | [live_http_example.dart](example/live_http_example.dart) | **Offline.** WebRTC/SIP signaling, explicit call controls, verified incoming notice, WAV downloads and REST fork |
 | [live_websocket_example.dart](example/live_websocket_example.dart) | **Offline.** primary/sideband Live, concurrent event taps, manual delegation and graceful finalization |
+| [live_decisions_example.dart](example/live_decisions_example.dart) | **Offline.** native Decisions delegation, shared items, and a correlated transcript trigger |
 | [live_workflows_example.dart](example/live_workflows_example.dart) | **Offline.** stored forks, inherited state, compact Responses, caption grouping and borrowed-channel cleanup |
 | [voice_consents_example.dart](example/voice_consents_example.dart) | **Offline.** upload/list/retrieve/rename/delete consent lifecycle and explicit pagination |
 | [voices_example.dart](example/voices_example.dart) | **Offline.** explicit consent and sample upload, then caller-selected custom voice reference |
@@ -1401,7 +1414,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | Audio | Speech, transcription, translation, voice consents, prompt/sample voice creation, and saved voice deletion; consent phrase lookup remains untyped |
 | Videos | Generation, editing, extension, and downloads |
 | Realtime | WebSocket and WebRTC sessions, opt-in recovery with explicit pending delivery |
-| Live | HTTP call controls, recordings, WebSockets, forks, transcript helpers, and opt-in recovery with fresh startup gating; some media conveniences remain deferred |
+| Live | HTTP call controls, recordings, WebSockets, native Decisions delegation/triggers, forks, transcript helpers, and opt-in recovery with fresh startup gating; some media conveniences remain deferred |
 | Files and Uploads | File management and large multipart uploads |
 | Batches | Asynchronous batch processing |
 | Models | Listing and retrieval |

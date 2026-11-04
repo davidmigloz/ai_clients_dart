@@ -260,6 +260,7 @@ class LiveClientConfigParam extends LiveJsonModel {
 class LiveSessionCreateParams extends LiveJsonModel {
   /// Creates LiveSessionCreateParams.
   LiveSessionCreateParams({
+    List<LiveDecisionTriggerInputParam>? triggers,
     this.audio,
     this.client,
     this.delegation,
@@ -270,7 +271,8 @@ class LiveSessionCreateParams extends LiveJsonModel {
     required this.model,
     this.store,
     Map<String, dynamic> rawJson = const {},
-  }) : hasDelegation = hasDelegation || delegation != null,
+  }) : triggers = triggers == null ? null : List.unmodifiable(triggers),
+       hasDelegation = hasDelegation || delegation != null,
        input = input == null ? null : List.unmodifiable(input),
        hasInstructions = hasInstructions || instructions != null,
        rawJson = snapshotLiveJson(
@@ -282,6 +284,7 @@ class LiveSessionCreateParams extends LiveJsonModel {
   }
 
   static const _knownKeys = {
+    'triggers',
     'audio',
     'client',
     'delegation',
@@ -291,13 +294,17 @@ class LiveSessionCreateParams extends LiveJsonModel {
     'store',
   };
 
+  /// Independent transcript Decisions triggers, with at most one per event type.
+  /// Omission preserves configuration on update; an empty list disables them.
+  final List<LiveDecisionTriggerInputParam>? triggers;
+
   /// Startup audio configuration. Only primary WebSockets accept audio.format; WebRTC and SIP negotiate their media format. Voice and format are immutable after startup.
   final LiveInitialSessionAudioParam? audio;
 
   /// Startup-only capabilities for an untrusted frontend attached to a unified WebRTC session. Trusted sideband connections are unaffected.
   final LiveClientConfigParam? client;
 
-  /// Who handles tasks delegated by the Live model. Omitted or null selects your application; use `responses` to let the API manage a Responses backend.
+  /// Who handles tasks delegated by the Live model. Omitted or null selects your application; use `responses` or `decisions` for API-managed delegation.
   final LiveDelegation? delegation;
 
   /// Distinguishes omission from explicit null for delegation.
@@ -324,6 +331,13 @@ class LiveSessionCreateParams extends LiveJsonModel {
   /// Parses LiveSessionCreateParams with contextual validation.
   factory LiveSessionCreateParams.fromJson(Map<String, dynamic> json) {
     return LiveSessionCreateParams(
+      triggers: optionalLiveValue(
+        json,
+        'triggers',
+        'LiveSessionCreateParams',
+        _liveTriggersFromJson,
+        nullable: false,
+      ),
       audio: optionalLiveValue(
         json,
         'audio',
@@ -384,6 +398,7 @@ class LiveSessionCreateParams extends LiveJsonModel {
 
   @override
   void validate() {
+    _validateLiveTriggers(triggers, 'LiveSessionCreateParams.triggers');
     validateLiveLength(model, 'LiveSessionCreateParams.model', min: 1);
     audio?.validate();
     client?.validate();
@@ -418,6 +433,8 @@ class LiveSessionCreateParams extends LiveJsonModel {
 
   @override
   Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    if (triggers != null)
+      'triggers': triggers!.map((trigger) => trigger.toJson()).toList(),
     if (audio != null) 'audio': audio!.toJson(),
     if (client != null) 'client': client!.toJson(),
     if (hasDelegation) 'delegation': delegation?.toJson(),
@@ -430,6 +447,7 @@ class LiveSessionCreateParams extends LiveJsonModel {
   /// Copies fields; explicit null clears optional values.
   /// For nullable fields, clear flags remove the key rather than emit null.
   LiveSessionCreateParams copyWith({
+    Object? triggers = liveUnset,
     Object? audio = liveUnset,
     Object? client = liveUnset,
     Object? delegation = liveUnset,
@@ -441,6 +459,11 @@ class LiveSessionCreateParams extends LiveJsonModel {
     Object? store = liveUnset,
     Map<String, dynamic>? rawJson,
   }) => LiveSessionCreateParams(
+    triggers: _copyLiveTriggers(
+      triggers,
+      this.triggers,
+      'LiveSessionCreateParams.triggers',
+    ),
     audio: copyLiveValue<LiveInitialSessionAudioParam>(
       audio,
       this.audio,
@@ -488,6 +511,7 @@ class LiveSessionCreateParams extends LiveJsonModel {
   @override
   String toString() =>
       'LiveSessionCreateParams('
+      'triggers: ${livePresence(triggers)}, '
       'audio: ${livePresence(audio)}, '
       'client: ${livePresence(client)}, '
       'delegation: ${livePresence(delegation)}, '
@@ -505,6 +529,7 @@ class LiveSessionCreateParams extends LiveJsonModel {
 class LiveSessionResourceParam extends LiveJsonModel {
   /// Creates LiveSessionResourceParam.
   LiveSessionResourceParam({
+    List<LiveDecisionTriggerInputParam>? triggers,
     this.audio,
     this.client,
     this.delegation,
@@ -517,7 +542,8 @@ class LiveSessionResourceParam extends LiveJsonModel {
     required this.model,
     this.store,
     Map<String, dynamic> rawJson = const {},
-  }) : hasDelegation = hasDelegation || delegation != null,
+  }) : triggers = triggers == null ? null : List.unmodifiable(triggers),
+       hasDelegation = hasDelegation || delegation != null,
        input = input == null ? null : List.unmodifiable(input),
        hasInstructions = hasInstructions || instructions != null,
        rawJson = snapshotLiveJson(
@@ -529,6 +555,7 @@ class LiveSessionResourceParam extends LiveJsonModel {
   }
 
   static const _knownKeys = {
+    'triggers',
     'audio',
     'client',
     'delegation',
@@ -541,13 +568,17 @@ class LiveSessionResourceParam extends LiveJsonModel {
     'store',
   };
 
+  /// Independent transcript Decisions triggers, with at most one per event type.
+  /// Omission preserves configuration on update; an empty list disables them.
+  final List<LiveDecisionTriggerInputParam>? triggers;
+
   /// Startup audio configuration. Only primary WebSockets accept audio.format; WebRTC and SIP negotiate their media format. Voice and format are immutable after startup.
   final LiveInitialSessionAudioParam? audio;
 
   /// Startup-only capabilities for an untrusted frontend attached to a unified WebRTC session. Trusted sideband connections are unaffected.
   final LiveClientConfigParam? client;
 
-  /// Who handles tasks delegated by the Live model. Omitted or null selects your application; use `responses` to let the API manage a Responses backend.
+  /// Who handles tasks delegated by the Live model. Omitted or null selects your application; use `responses` or `decisions` for API-managed delegation.
   final LiveDelegation? delegation;
 
   /// Distinguishes omission from explicit null for delegation.
@@ -590,6 +621,13 @@ class LiveSessionResourceParam extends LiveJsonModel {
       required: true,
     );
     return LiveSessionResourceParam(
+      triggers: optionalLiveValue(
+        json,
+        'triggers',
+        'LiveSessionResourceParam',
+        _liveTriggersFromJson,
+        nullable: false,
+      ),
       audio: optionalLiveValue(
         json,
         'audio',
@@ -655,6 +693,7 @@ class LiveSessionResourceParam extends LiveJsonModel {
 
   @override
   void validate() {
+    _validateLiveTriggers(triggers, 'LiveSessionResourceParam.triggers');
     requireLiveInt(expiresAt, 'LiveSessionResourceParam.expires_at');
     validateLiveLength(model, 'LiveSessionResourceParam.model', min: 1);
     audio?.validate();
@@ -690,6 +729,8 @@ class LiveSessionResourceParam extends LiveJsonModel {
 
   @override
   Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    if (triggers != null)
+      'triggers': triggers!.map((trigger) => trigger.toJson()).toList(),
     if (audio != null) 'audio': audio!.toJson(),
     if (client != null) 'client': client!.toJson(),
     if (hasDelegation) 'delegation': delegation?.toJson(),
@@ -705,6 +746,7 @@ class LiveSessionResourceParam extends LiveJsonModel {
   /// Copies fields; explicit null clears optional values.
   /// For nullable fields, clear flags remove the key rather than emit null.
   LiveSessionResourceParam copyWith({
+    Object? triggers = liveUnset,
     Object? audio = liveUnset,
     Object? client = liveUnset,
     Object? delegation = liveUnset,
@@ -718,6 +760,11 @@ class LiveSessionResourceParam extends LiveJsonModel {
     Object? store = liveUnset,
     Map<String, dynamic>? rawJson,
   }) => LiveSessionResourceParam(
+    triggers: _copyLiveTriggers(
+      triggers,
+      this.triggers,
+      'LiveSessionResourceParam.triggers',
+    ),
     audio: copyLiveValue<LiveInitialSessionAudioParam>(
       audio,
       this.audio,
@@ -767,6 +814,7 @@ class LiveSessionResourceParam extends LiveJsonModel {
   @override
   String toString() =>
       'LiveSessionResourceParam('
+      'triggers: ${livePresence(triggers)}, '
       'audio: ${livePresence(audio)}, '
       'client: ${livePresence(client)}, '
       'delegation: ${livePresence(delegation)}, '
@@ -782,15 +830,17 @@ class LiveSessionResourceParam extends LiveJsonModel {
       'rawJson: [REDACTED])';
 }
 
-/// Changes to an active Live session. Only delegation backend settings can be updated after startup.
+/// Changes to an active Live session. Delegation backend settings and transcript triggers can be updated after startup.
 @immutable
 class LiveSessionUpdateParams extends LiveJsonModel {
   /// Creates LiveSessionUpdateParams.
   LiveSessionUpdateParams({
+    List<LiveDecisionTriggerInputParam>? triggers,
     this.delegation,
     bool hasDelegation = false,
     Map<String, dynamic> rawJson = const {},
-  }) : hasDelegation = hasDelegation || delegation != null,
+  }) : triggers = triggers == null ? null : List.unmodifiable(triggers),
+       hasDelegation = hasDelegation || delegation != null,
        rawJson = snapshotLiveJson(
          rawJson,
          'LiveSessionUpdateParams',
@@ -799,7 +849,11 @@ class LiveSessionUpdateParams extends LiveJsonModel {
     validate();
   }
 
-  static const _knownKeys = {'delegation'};
+  static const _knownKeys = {'triggers', 'delegation'};
+
+  /// Independent transcript Decisions triggers, with at most one per event type.
+  /// Omission preserves configuration on update; an empty list disables them.
+  final List<LiveDecisionTriggerInputParam>? triggers;
 
   /// Delegation settings to update. The delegation type must match the current session; omitted settings retain their values.
   final LiveDelegationUpdate? delegation;
@@ -813,6 +867,13 @@ class LiveSessionUpdateParams extends LiveJsonModel {
   /// Parses LiveSessionUpdateParams with contextual validation.
   factory LiveSessionUpdateParams.fromJson(Map<String, dynamic> json) {
     return LiveSessionUpdateParams(
+      triggers: optionalLiveValue(
+        json,
+        'triggers',
+        'LiveSessionUpdateParams',
+        _liveTriggersFromJson,
+        nullable: false,
+      ),
       delegation: optionalLiveValue(
         json,
         'delegation',
@@ -828,6 +889,7 @@ class LiveSessionUpdateParams extends LiveJsonModel {
 
   @override
   void validate() {
+    _validateLiveTriggers(triggers, 'LiveSessionUpdateParams.triggers');
     delegation?.validate();
     if (rawJson.keys.any(_immutableStartupFields.contains)) {
       throw const FormatException(
@@ -851,16 +913,24 @@ class LiveSessionUpdateParams extends LiveJsonModel {
 
   @override
   Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    if (triggers != null)
+      'triggers': triggers!.map((trigger) => trigger.toJson()).toList(),
     if (hasDelegation) 'delegation': delegation?.toJson(),
   });
 
   /// Copies fields; explicit null clears optional values.
   /// For nullable fields, clear flags remove the key rather than emit null.
   LiveSessionUpdateParams copyWith({
+    Object? triggers = liveUnset,
     Object? delegation = liveUnset,
     bool clearDelegation = false,
     Map<String, dynamic>? rawJson,
   }) => LiveSessionUpdateParams(
+    triggers: _copyLiveTriggers(
+      triggers,
+      this.triggers,
+      'LiveSessionUpdateParams.triggers',
+    ),
     delegation: clearDelegation
         ? null
         : copyLiveValue<LiveDelegationUpdate>(
@@ -877,6 +947,7 @@ class LiveSessionUpdateParams extends LiveJsonModel {
   @override
   String toString() =>
       'LiveSessionUpdateParams('
+      'triggers: ${livePresence(triggers)}, '
       'delegation: ${livePresence(delegation)}, '
       'hasDelegation: $hasDelegation, '
       'rawJson: [REDACTED])';
@@ -887,6 +958,7 @@ class LiveSessionUpdateParams extends LiveJsonModel {
 class LiveMediaSessionCreateParams extends LiveJsonModel {
   /// Creates LiveMediaSessionCreateParams.
   LiveMediaSessionCreateParams({
+    List<LiveDecisionTriggerInputParam>? triggers,
     this.audio,
     this.client,
     this.delegation,
@@ -897,7 +969,8 @@ class LiveMediaSessionCreateParams extends LiveJsonModel {
     required this.model,
     this.store,
     Map<String, dynamic> rawJson = const {},
-  }) : hasDelegation = hasDelegation || delegation != null,
+  }) : triggers = triggers == null ? null : List.unmodifiable(triggers),
+       hasDelegation = hasDelegation || delegation != null,
        input = input == null ? null : List.unmodifiable(input),
        hasInstructions = hasInstructions || instructions != null,
        rawJson = snapshotLiveJson(
@@ -909,6 +982,7 @@ class LiveMediaSessionCreateParams extends LiveJsonModel {
   }
 
   static const _knownKeys = {
+    'triggers',
     'audio',
     'client',
     'delegation',
@@ -918,13 +992,17 @@ class LiveMediaSessionCreateParams extends LiveJsonModel {
     'store',
   };
 
+  /// Independent transcript Decisions triggers, with at most one per event type.
+  /// Omission preserves configuration on update; an empty list disables them.
+  final List<LiveDecisionTriggerInputParam>? triggers;
+
   /// Startup audio configuration. WebRTC and SIP negotiate their audio format on the media transport.
   final LiveMediaSessionAudioParam? audio;
 
   /// The canonical client field.
   final LiveClientConfigParam? client;
 
-  /// Who handles tasks delegated by the Live model. Omitted or null selects your application; use `responses` to let the API manage a Responses backend.
+  /// Who handles tasks delegated by the Live model. Omitted or null selects your application; use `responses` or `decisions` for API-managed delegation.
   final LiveDelegation? delegation;
 
   /// Distinguishes omission from explicit null for delegation.
@@ -952,6 +1030,13 @@ class LiveMediaSessionCreateParams extends LiveJsonModel {
   factory LiveMediaSessionCreateParams.fromJson(Map<String, dynamic> json) {
     requireClosedLiveJson(json, _knownKeys, 'LiveMediaSessionCreateParams');
     return LiveMediaSessionCreateParams(
+      triggers: optionalLiveValue(
+        json,
+        'triggers',
+        'LiveMediaSessionCreateParams',
+        _liveTriggersFromJson,
+        nullable: false,
+      ),
       audio: optionalLiveValue(
         json,
         'audio',
@@ -1015,6 +1100,7 @@ class LiveMediaSessionCreateParams extends LiveJsonModel {
 
   @override
   void validate() {
+    _validateLiveTriggers(triggers, 'LiveMediaSessionCreateParams.triggers');
     validateLiveLength(model, 'LiveMediaSessionCreateParams.model', min: 1);
     requireClosedLiveJson(rawJson, _knownKeys, 'LiveMediaSessionCreateParams');
     audio?.validate();
@@ -1050,6 +1136,8 @@ class LiveMediaSessionCreateParams extends LiveJsonModel {
 
   @override
   Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    if (triggers != null)
+      'triggers': triggers!.map((trigger) => trigger.toJson()).toList(),
     if (audio != null) 'audio': audio!.toJson(),
     if (client != null) 'client': client!.toJson(),
     if (hasDelegation) 'delegation': delegation?.toJson(),
@@ -1062,6 +1150,7 @@ class LiveMediaSessionCreateParams extends LiveJsonModel {
   /// Copies fields; explicit null clears optional values.
   /// For nullable fields, clear flags remove the key rather than emit null.
   LiveMediaSessionCreateParams copyWith({
+    Object? triggers = liveUnset,
     Object? audio = liveUnset,
     Object? client = liveUnset,
     Object? delegation = liveUnset,
@@ -1073,6 +1162,11 @@ class LiveMediaSessionCreateParams extends LiveJsonModel {
     Object? store = liveUnset,
     Map<String, dynamic>? rawJson,
   }) => LiveMediaSessionCreateParams(
+    triggers: _copyLiveTriggers(
+      triggers,
+      this.triggers,
+      'LiveMediaSessionCreateParams.triggers',
+    ),
     audio: copyLiveValue<LiveMediaSessionAudioParam>(
       audio,
       this.audio,
@@ -1120,6 +1214,7 @@ class LiveMediaSessionCreateParams extends LiveJsonModel {
   @override
   String toString() =>
       'LiveMediaSessionCreateParams('
+      'triggers: ${livePresence(triggers)}, '
       'audio: ${livePresence(audio)}, '
       'client: ${livePresence(client)}, '
       'delegation: ${livePresence(delegation)}, '
@@ -1259,6 +1354,7 @@ class LiveMediaSessionForkParams extends LiveJsonModel {
 class LiveCallAcceptSession extends LiveJsonModel {
   /// Creates LiveCallAcceptSession.
   LiveCallAcceptSession({
+    List<LiveDecisionTriggerInputParam>? triggers,
     this.audio,
     this.delegation,
     bool hasDelegation = false,
@@ -1268,7 +1364,8 @@ class LiveCallAcceptSession extends LiveJsonModel {
     required this.model,
     this.store,
     Map<String, dynamic> rawJson = const {},
-  }) : hasDelegation = hasDelegation || delegation != null,
+  }) : triggers = triggers == null ? null : List.unmodifiable(triggers),
+       hasDelegation = hasDelegation || delegation != null,
        input = input == null ? null : List.unmodifiable(input),
        hasInstructions = hasInstructions || instructions != null,
        rawJson = snapshotLiveJson(
@@ -1280,6 +1377,7 @@ class LiveCallAcceptSession extends LiveJsonModel {
   }
 
   static const _knownKeys = {
+    'triggers',
     'audio',
     'delegation',
     'input',
@@ -1289,10 +1387,14 @@ class LiveCallAcceptSession extends LiveJsonModel {
     'type',
   };
 
+  /// Independent transcript Decisions triggers, with at most one per event type.
+  /// Omission preserves configuration on update; an empty list disables them.
+  final List<LiveDecisionTriggerInputParam>? triggers;
+
   /// Startup audio output configuration. SIP negotiates the media format; audio.format is only accepted for primary WebSockets. Voice cannot change after startup.
   final LiveMediaSessionAudioParam? audio;
 
-  /// Who handles tasks delegated by the Live model. Omitted or null selects your application; use `responses` to let the API manage a Responses backend.
+  /// Who handles tasks delegated by the Live model. Omitted or null selects your application; use `responses` or `decisions` for API-managed delegation.
   final LiveDelegation? delegation;
 
   /// Distinguishes omission from explicit null for delegation.
@@ -1330,6 +1432,13 @@ class LiveCallAcceptSession extends LiveJsonModel {
       required: true,
     );
     return LiveCallAcceptSession(
+      triggers: optionalLiveValue(
+        json,
+        'triggers',
+        'LiveCallAcceptSession',
+        _liveTriggersFromJson,
+        nullable: false,
+      ),
       audio: optionalLiveValue(
         json,
         'audio',
@@ -1382,6 +1491,7 @@ class LiveCallAcceptSession extends LiveJsonModel {
 
   @override
   void validate() {
+    _validateLiveTriggers(triggers, 'LiveCallAcceptSession.triggers');
     validateLiveLength(model, 'LiveCallAcceptSession.model', min: 1);
     requireClosedLiveJson(rawJson, _knownKeys, 'LiveCallAcceptSession');
     audio?.validate();
@@ -1401,6 +1511,8 @@ class LiveCallAcceptSession extends LiveJsonModel {
 
   @override
   Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    if (triggers != null)
+      'triggers': triggers!.map((trigger) => trigger.toJson()).toList(),
     if (audio != null) 'audio': audio!.toJson(),
     if (hasDelegation) 'delegation': delegation?.toJson(),
     if (input != null) 'input': input!.map((item) => item.toJson()).toList(),
@@ -1413,6 +1525,7 @@ class LiveCallAcceptSession extends LiveJsonModel {
   /// Copies fields; explicit null clears optional values.
   /// For nullable fields, clear flags remove the key rather than emit null.
   LiveCallAcceptSession copyWith({
+    Object? triggers = liveUnset,
     Object? audio = liveUnset,
     Object? delegation = liveUnset,
     bool clearDelegation = false,
@@ -1423,6 +1536,11 @@ class LiveCallAcceptSession extends LiveJsonModel {
     Object? store = liveUnset,
     Map<String, dynamic>? rawJson,
   }) => LiveCallAcceptSession(
+    triggers: _copyLiveTriggers(
+      triggers,
+      this.triggers,
+      'LiveCallAcceptSession.triggers',
+    ),
     audio: copyLiveValue<LiveMediaSessionAudioParam>(
       audio,
       this.audio,
@@ -1465,6 +1583,7 @@ class LiveCallAcceptSession extends LiveJsonModel {
   @override
   String toString() =>
       'LiveCallAcceptSession('
+      'triggers: ${livePresence(triggers)}, '
       'audio: ${livePresence(audio)}, '
       'delegation: ${livePresence(delegation)}, '
       'hasDelegation: $hasDelegation, '
@@ -1659,6 +1778,7 @@ const _immutableStartupFields = {
 };
 
 const _immutableForkStartupFields = {
+  'triggers',
   'model',
   'voice',
   'input',
@@ -1828,4 +1948,48 @@ class LiveSelectedServerEvents extends LiveAllowedServerEvents {
 
   @override
   String toString() => 'LiveSelectedServerEvents(events: [REDACTED])';
+}
+
+List<LiveDecisionTriggerInputParam> _liveTriggersFromJson(
+  Object? value,
+  String context,
+) => [
+  for (final trigger in requireLiveList(value, context))
+    LiveDecisionTriggerInputParam.fromJson(requireLiveObject(trigger, context)),
+];
+
+List<LiveDecisionTriggerInputParam>? _copyLiveTriggers(
+  Object? value,
+  List<LiveDecisionTriggerInputParam>? previous,
+  String context,
+) {
+  if (identical(value, liveUnset)) return previous;
+  if (value == null) return null;
+  if (value is! List) {
+    throw FormatException('$context: expected a list of Live triggers');
+  }
+  return [
+    for (final trigger in value)
+      if (trigger is LiveDecisionTriggerInputParam)
+        trigger
+      else
+        throw FormatException('$context: expected a Live trigger'),
+  ];
+}
+
+void _validateLiveTriggers(
+  List<LiveDecisionTriggerInputParam>? triggers,
+  String context,
+) {
+  if (triggers == null) return;
+  if (triggers.length > 2) {
+    throw FormatException('$context: expected at most two triggers');
+  }
+  final eventTypes = <String>{};
+  for (final trigger in triggers) {
+    trigger.validate();
+    if (!eventTypes.add(trigger.eventType)) {
+      throw FormatException('$context: expected one trigger per event type');
+    }
+  }
 }

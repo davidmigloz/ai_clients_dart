@@ -556,7 +556,7 @@ sealed class LiveConnection {
         );
       }
     }
-    if (mode == 'client' &&
+    if (mode != 'responses' &&
         (command is LiveResponseCreateParam ||
             command is LiveResponseItemCreateParam)) {
       throw const FormatException(

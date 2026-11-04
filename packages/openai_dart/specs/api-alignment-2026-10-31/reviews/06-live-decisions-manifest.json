@@ -1,0 +1,532 @@
+{
+  "issue": 419,
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "promotion_owner": 427,
+  "types": {
+    "LiveCallAcceptSession": {
+      "spec": "main",
+      "schema": "LiveCallAcceptSession",
+      "kind": "object",
+      "dart_class": "LiveCallAcceptSession",
+      "file": "lib/src/models/live/live_config.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveClientDelegationParam": {
+      "spec": "main",
+      "schema": "LiveClientDelegationParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveClientDelegationParam",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDelegation"
+    },
+    "LiveDecisionAssistantMessageParam": {
+      "spec": "main",
+      "schema": "LiveDecisionAssistantMessageParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionMessageParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Role-specific canonical alias implemented by one role-aware message class with named role factories; content/phase/ID/optional type validated per role.",
+      "parent": "LiveDecisionInputItemParam"
+    },
+    "LiveDecisionChoiceParam": {
+      "spec": "main",
+      "schema": "LiveDecisionChoiceParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionChoiceParam",
+      "file": "lib/src/models/live/live_decision_questions.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveDecisionChoiceQuestionParam": {
+      "spec": "main",
+      "schema": "LiveDecisionChoiceQuestionParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionChoiceQuestionParam",
+      "file": "lib/src/models/live/live_decision_questions.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionQuestion"
+    },
+    "LiveDecisionCompleted": {
+      "spec": "main",
+      "schema": "LiveDecisionCompleted",
+      "kind": "object",
+      "dart_class": "LiveDecisionCompleted",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveDecisionCreateParam": {
+      "spec": "main",
+      "schema": "LiveDecisionCreateParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionCreateParam",
+      "file": "lib/src/models/live/live_client_events.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveSidebandClientEvent"
+    },
+    "LiveDecisionCustomToolCallOutputParam": {
+      "spec": "main",
+      "schema": "LiveDecisionCustomToolCallOutputParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionCustomToolCallOutputParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionInputItemParam"
+    },
+    "LiveDecisionCustomToolCallParam": {
+      "spec": "main",
+      "schema": "LiveDecisionCustomToolCallParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionCustomToolCallParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionInputItemParam"
+    },
+    "LiveDecisionDeveloperMessageParam": {
+      "spec": "main",
+      "schema": "LiveDecisionDeveloperMessageParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionMessageParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Role-specific canonical alias implemented by one role-aware message class with named role factories; content/phase/ID/optional type validated per role.",
+      "parent": "LiveDecisionInputItemParam"
+    },
+    "LiveDecisionEvent": {
+      "spec": "main",
+      "schema": "LiveDecisionEvent",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionEvent",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveServerEvent"
+    },
+    "LiveDecisionFunctionCallOutputParam": {
+      "spec": "main",
+      "schema": "LiveDecisionFunctionCallOutputParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionFunctionCallOutputParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionInputItemParam"
+    },
+    "LiveDecisionFunctionCallParam": {
+      "spec": "main",
+      "schema": "LiveDecisionFunctionCallParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionFunctionCallParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionInputItemParam"
+    },
+    "LiveDecisionInputImageParam": {
+      "spec": "main",
+      "schema": "LiveDecisionInputImageParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionInputImageParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionContentPart"
+    },
+    "LiveDecisionInputItemParam": {
+      "spec": "main",
+      "schema": "LiveDecisionInputItemParam",
+      "kind": "sealed_parent",
+      "dart_class": "LiveDecisionInputItemParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveDecisionInputJsonParam": {
+      "spec": "main",
+      "schema": "LiveDecisionInputJsonParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionInputJsonParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionContentPart"
+    },
+    "LiveDecisionInputTextParam": {
+      "spec": "main",
+      "schema": "LiveDecisionInputTextParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionInputTextParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionContentPart"
+    },
+    "LiveDecisionItemCreateParam": {
+      "spec": "main",
+      "schema": "LiveDecisionItemCreateParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionItemCreateParam",
+      "file": "lib/src/models/live/live_client_events.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveSidebandClientEvent"
+    },
+    "LiveDecisionItemCreated": {
+      "spec": "main",
+      "schema": "LiveDecisionItemCreated",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionItemCreated",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveServerEvent"
+    },
+    "LiveDecisionItemDeleteParam": {
+      "spec": "main",
+      "schema": "LiveDecisionItemDeleteParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionItemDeleteParam",
+      "file": "lib/src/models/live/live_client_events.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveSidebandClientEvent"
+    },
+    "LiveDecisionItemDeleted": {
+      "spec": "main",
+      "schema": "LiveDecisionItemDeleted",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionItemDeleted",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveServerEvent"
+    },
+    "LiveDecisionOutputTextParam": {
+      "spec": "main",
+      "schema": "LiveDecisionOutputTextParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionOutputTextParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionContentPart"
+    },
+    "LiveDecisionPredicateQuestionParam": {
+      "spec": "main",
+      "schema": "LiveDecisionPredicateQuestionParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionPredicateQuestionParam",
+      "file": "lib/src/models/live/live_decision_questions.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionQuestion"
+    },
+    "LiveDecisionQuestion": {
+      "spec": "main",
+      "schema": "LiveDecisionQuestion",
+      "kind": "sealed_parent",
+      "dart_class": "LiveDecisionQuestion",
+      "file": "lib/src/models/live/live_decision_questions.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveDecisionQuestionsInputParam": {
+      "spec": "main",
+      "schema": "LiveDecisionQuestionsInputParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionQuestionsInputParam",
+      "file": "lib/src/models/live/live_decision_questions.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveDecisionRefusalParam": {
+      "spec": "main",
+      "schema": "LiveDecisionRefusalParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionRefusalParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionContentPart"
+    },
+    "LiveDecisionScoreLevelParam": {
+      "spec": "main",
+      "schema": "LiveDecisionScoreLevelParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionScoreLevelParam",
+      "file": "lib/src/models/live/live_decision_questions.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveDecisionScoreQuestionParam": {
+      "spec": "main",
+      "schema": "LiveDecisionScoreQuestionParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionScoreQuestionParam",
+      "file": "lib/src/models/live/live_decision_questions.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionQuestion"
+    },
+    "LiveDecisionStoredAssistantMessageParam": {
+      "spec": "main",
+      "schema": "LiveDecisionStoredAssistantMessageParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionStoredInputItemParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Contextual stored alias: one wrapper requires a nonnull ID and delegates native role/tool validation to its typed item, preserving the flat wire shape without eight duplicate stored classes."
+    },
+    "LiveDecisionStoredCustomToolCallOutputParam": {
+      "spec": "main",
+      "schema": "LiveDecisionStoredCustomToolCallOutputParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionStoredInputItemParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Contextual stored alias: one wrapper requires a nonnull ID and delegates native role/tool validation to its typed item, preserving the flat wire shape without eight duplicate stored classes."
+    },
+    "LiveDecisionStoredCustomToolCallParam": {
+      "spec": "main",
+      "schema": "LiveDecisionStoredCustomToolCallParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionStoredInputItemParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Contextual stored alias: one wrapper requires a nonnull ID and delegates native role/tool validation to its typed item, preserving the flat wire shape without eight duplicate stored classes."
+    },
+    "LiveDecisionStoredDeveloperMessageParam": {
+      "spec": "main",
+      "schema": "LiveDecisionStoredDeveloperMessageParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionStoredInputItemParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Contextual stored alias: one wrapper requires a nonnull ID and delegates native role/tool validation to its typed item, preserving the flat wire shape without eight duplicate stored classes."
+    },
+    "LiveDecisionStoredFunctionCallOutputParam": {
+      "spec": "main",
+      "schema": "LiveDecisionStoredFunctionCallOutputParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionStoredInputItemParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Contextual stored alias: one wrapper requires a nonnull ID and delegates native role/tool validation to its typed item, preserving the flat wire shape without eight duplicate stored classes."
+    },
+    "LiveDecisionStoredFunctionCallParam": {
+      "spec": "main",
+      "schema": "LiveDecisionStoredFunctionCallParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionStoredInputItemParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Contextual stored alias: one wrapper requires a nonnull ID and delegates native role/tool validation to its typed item, preserving the flat wire shape without eight duplicate stored classes."
+    },
+    "LiveDecisionStoredInputItemParam": {
+      "spec": "main",
+      "schema": "LiveDecisionStoredInputItemParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionStoredInputItemParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Contextual stored alias: one wrapper requires a nonnull ID and delegates native role/tool validation to its typed item, preserving the flat wire shape without eight duplicate stored classes."
+    },
+    "LiveDecisionStoredSystemMessageParam": {
+      "spec": "main",
+      "schema": "LiveDecisionStoredSystemMessageParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionStoredInputItemParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Contextual stored alias: one wrapper requires a nonnull ID and delegates native role/tool validation to its typed item, preserving the flat wire shape without eight duplicate stored classes."
+    },
+    "LiveDecisionStoredUserMessageParam": {
+      "spec": "main",
+      "schema": "LiveDecisionStoredUserMessageParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionStoredInputItemParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Contextual stored alias: one wrapper requires a nonnull ID and delegates native role/tool validation to its typed item, preserving the flat wire shape without eight duplicate stored classes."
+    },
+    "LiveDecisionSystemMessageParam": {
+      "spec": "main",
+      "schema": "LiveDecisionSystemMessageParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionMessageParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Role-specific canonical alias implemented by one role-aware message class with named role factories; content/phase/ID/optional type validated per role.",
+      "parent": "LiveDecisionInputItemParam"
+    },
+    "LiveDecisionTriggerInputParam": {
+      "spec": "main",
+      "schema": "LiveDecisionTriggerInputParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionTriggerInputParam",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveDecisionUserInputImageParam": {
+      "spec": "main",
+      "schema": "LiveDecisionUserInputImageParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionInputImageParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Identical native user/question part aliases; retain Live-specific limits, nullable detail and future metadata.",
+      "parent": "LiveDecisionContentPart"
+    },
+    "LiveDecisionUserInputTextParam": {
+      "spec": "main",
+      "schema": "LiveDecisionUserInputTextParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionInputTextParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Identical native user/question part aliases; retain Live-specific limits, nullable detail and future metadata.",
+      "parent": "LiveDecisionContentPart"
+    },
+    "LiveDecisionUserMessageParam": {
+      "spec": "main",
+      "schema": "LiveDecisionUserMessageParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionMessageParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Role-specific canonical alias implemented by one role-aware message class with named role factories; content/phase/ID/optional type validated per role.",
+      "parent": "LiveDecisionInputItemParam"
+    },
+    "LiveDecisionsDelegationParam": {
+      "spec": "main",
+      "schema": "LiveDecisionsDelegationParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionsDelegationParam",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDelegation"
+    },
+    "LiveDecisionsDelegationUpdateParam": {
+      "spec": "main",
+      "schema": "LiveDecisionsDelegationUpdateParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionsDelegationUpdateParam",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveDecisionsSettingsInputParam": {
+      "spec": "main",
+      "schema": "LiveDecisionsSettingsInputParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionsSettingsInputParam",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveDecisionsSettingsUpdateParam": {
+      "spec": "main",
+      "schema": "LiveDecisionsSettingsUpdateParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionsSettingsUpdateParam",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveDelegationCreated": {
+      "spec": "main",
+      "schema": "LiveDelegationCreated",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDelegationCreated",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveServerEvent"
+    },
+    "LiveDelegationItem": {
+      "spec": "main",
+      "schema": "LiveDelegationItem",
+      "kind": "object",
+      "dart_class": "LiveDelegationItem",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveMediaSessionCreateParams": {
+      "spec": "main",
+      "schema": "LiveMediaSessionCreateParams",
+      "kind": "object",
+      "dart_class": "LiveMediaSessionCreateParams",
+      "file": "lib/src/models/live/live_config.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveResponsesDelegationParam": {
+      "spec": "main",
+      "schema": "LiveResponsesDelegationParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveResponsesDelegationParam",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDelegation"
+    },
+    "LiveResponsesDelegationUpdateParam": {
+      "spec": "main",
+      "schema": "LiveResponsesDelegationUpdateParam",
+      "kind": "object",
+      "dart_class": "LiveResponsesDelegationUpdateParam",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveSessionCreateParams": {
+      "spec": "main",
+      "schema": "LiveSessionCreateParams",
+      "kind": "object",
+      "dart_class": "LiveSessionCreateParams",
+      "file": "lib/src/models/live/live_config.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveSessionResourceParam": {
+      "spec": "main",
+      "schema": "LiveSessionResourceParam",
+      "kind": "object",
+      "dart_class": "LiveSessionResourceParam",
+      "file": "lib/src/models/live/live_config.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveSessionUpdateParam": {
+      "spec": "main",
+      "schema": "LiveSessionUpdateParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveSessionUpdateParam",
+      "file": "lib/src/models/live/live_client_events.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveSidebandClientEvent"
+    },
+    "LiveSessionUpdateParams": {
+      "spec": "main",
+      "schema": "LiveSessionUpdateParams",
+      "kind": "object",
+      "dart_class": "LiveSessionUpdateParams",
+      "file": "lib/src/models/live/live_config.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "delegation": {
+      "spec": "main",
+      "schema": "delegation",
+      "kind": "sealed_parent",
+      "dart_class": "LiveDelegation",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "note": "Actual nullable startup delegation union; null/default client is represented by parent field presence while the Dart union models three nonnull branches."
+    }
+  },
+  "contextual_schemas": {
+    "LiveDecisionJsonObject": {
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "dart_context": "LiveDecisionInputJsonParam.data",
+      "note": "Open JSON object/object array, validated and deeply immutable; no extra DTO or standalone JSON quotas."
+    },
+    "triggers": {
+      "file": "lib/src/models/live/live_config.dart",
+      "dart_context": "session.triggers: List<LiveDecisionTriggerInputParam>",
+      "note": "Canonical 0\u20132 trigger array integrated in all five eligible parent session models; distinct nonnull omission/empty semantics and one per event type."
+    }
+  },
+  "source_receipts": [
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/live/decision_event.py",
+      "sha256": "245033736fa8307752233cc1dd4665ad549050edf6d2ae48bc8a886b1a6050f3"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/live/decision_question_param.py",
+      "sha256": "a68af72b5cb2b1cfbfd0ac210be5b4a0f6ffa1f6cde2d382aacb6e2b0cebcce4"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/live/decision_trigger_param.py",
+      "sha256": "241efd8413f2aedfc0537b0451512a6d76127958746f7a03035c0b6af553bedb"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/live/decisions_delegation_config_param.py",
+      "sha256": "aea4801c6d09d523695feaa9eceb10707e5ec105701662a5304d9bcf85314c86"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/resources/live/live.ts",
+      "sha256": "5a333e33f6a449288c0d6fcc156cb73b5a154e25d470f08edfe089c3f2353df9"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/resources/live/sessions.ts",
+      "sha256": "458b39453858e732e11d87227cb97de52f980ef833aae1c2d0510dae2a1d7486"
+    }
+  ],
+  "guide_receipt": {
+    "url": "https://developers.openai.com/api/docs/guides/decisions-voice",
+    "sha256": "1898af78aa4b82c0fc4307e1d5753f438f20b11b1282b82bcdda584518777123"
+  },
+  "inventory_coverage": {
+    "assigned_schemas": 58,
+    "type_bindings": 56,
+    "contextual_shapes": 2,
+    "unassigned": []
+  }
+}

@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import 'live_decision_questions.dart';
 import 'live_json_helpers.dart';
 import 'live_tools.dart';
 
@@ -176,16 +177,23 @@ enum LiveToolChoiceEnum {
 class LiveClientDelegationParam extends LiveDelegation
     implements LiveDelegationUpdate {
   /// Creates LiveClientDelegationParam.
-  LiveClientDelegationParam({Map<String, dynamic> rawJson = const {}})
-    : rawJson = snapshotLiveJson(
-        rawJson,
-        'LiveClientDelegationParam',
-        knownKeys: _knownKeys,
-      ) {
+  LiveClientDelegationParam({
+    this.acknowledgementDelayMs,
+    Map<String, dynamic> rawJson = const {},
+  }) : rawJson = snapshotLiveJson(
+         rawJson,
+         'LiveClientDelegationParam',
+         knownKeys: _knownKeys,
+       ) {
     validate();
   }
 
-  static const _knownKeys = {'type'};
+  static const _knownKeys = {'acknowledgement_delay_ms', 'type'};
+
+  /// Milliseconds before requesting an automatic spoken acknowledgment (0–800).
+  /// Omission keeps the service default or the current update value.
+  /// Commentary/thinking cancels pending acknowledgments across delegations.
+  final int? acknowledgementDelayMs;
 
   /// The delegation owner. Always `client` for tasks handled by your application.
   @override
@@ -203,24 +211,51 @@ class LiveClientDelegationParam extends LiveDelegation
       key: 'type',
       required: true,
     );
-    return LiveClientDelegationParam(rawJson: json);
+    return LiveClientDelegationParam(
+      acknowledgementDelayMs: optionalLiveValue(
+        json,
+        'acknowledgement_delay_ms',
+        'LiveClientDelegationParam',
+        requireLiveInt,
+        nullable: false,
+      ),
+      rawJson: json,
+    );
   }
 
   @override
-  void validate() {}
+  void validate() {
+    _validateAcknowledgementDelay(
+      acknowledgementDelayMs,
+      'LiveClientDelegationParam.acknowledgement_delay_ms',
+    );
+  }
 
   @override
-  Map<String, dynamic> toJson() =>
-      mergeLiveJson(rawJson, _knownKeys, {'type': type});
+  Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    if (acknowledgementDelayMs != null)
+      'acknowledgement_delay_ms': acknowledgementDelayMs,
+    'type': type,
+  });
 
   /// Copies fields; explicit null clears optional values.
   /// For nullable fields, clear flags remove the key rather than emit null.
-  LiveClientDelegationParam copyWith({Map<String, dynamic>? rawJson}) =>
-      LiveClientDelegationParam(rawJson: rawJson ?? this.rawJson);
+  LiveClientDelegationParam copyWith({
+    Object? acknowledgementDelayMs = liveUnset,
+    Map<String, dynamic>? rawJson,
+  }) => LiveClientDelegationParam(
+    acknowledgementDelayMs: copyLiveValue<int>(
+      acknowledgementDelayMs,
+      this.acknowledgementDelayMs,
+      'LiveClientDelegationParam.acknowledgement_delay_ms',
+    ),
+    rawJson: rawJson ?? this.rawJson,
+  );
 
   @override
   String toString() =>
       'LiveClientDelegationParam('
+      'acknowledgementDelayMs: ${livePresence(acknowledgementDelayMs)}, '
       'type: $type, '
       'rawJson: [REDACTED])';
 }
@@ -230,6 +265,7 @@ class LiveClientDelegationParam extends LiveDelegation
 class LiveResponsesDelegationParam extends LiveDelegation {
   /// Creates LiveResponsesDelegationParam.
   LiveResponsesDelegationParam({
+    this.acknowledgementDelayMs,
     required this.responses,
     Map<String, dynamic> rawJson = const {},
   }) : rawJson = snapshotLiveJson(
@@ -240,7 +276,12 @@ class LiveResponsesDelegationParam extends LiveDelegation {
     validate();
   }
 
-  static const _knownKeys = {'responses', 'type'};
+  static const _knownKeys = {'acknowledgement_delay_ms', 'responses', 'type'};
+
+  /// Milliseconds before requesting an automatic spoken acknowledgment (0–800).
+  /// Omission keeps the service default or the current update value.
+  /// Commentary/thinking cancels pending acknowledgments across delegations.
+  final int? acknowledgementDelayMs;
 
   /// Backend model, prompt, and tools used when the Live session delegates a task to Responses.
   final LiveResponsesDelegationSettingsInputParam responses;
@@ -262,6 +303,13 @@ class LiveResponsesDelegationParam extends LiveDelegation {
       required: true,
     );
     return LiveResponsesDelegationParam(
+      acknowledgementDelayMs: optionalLiveValue(
+        json,
+        'acknowledgement_delay_ms',
+        'LiveResponsesDelegationParam',
+        requireLiveInt,
+        nullable: false,
+      ),
       responses: LiveResponsesDelegationSettingsInputParam.fromJson(
         requireLiveObject(
           json['responses'],
@@ -274,11 +322,17 @@ class LiveResponsesDelegationParam extends LiveDelegation {
 
   @override
   void validate() {
+    _validateAcknowledgementDelay(
+      acknowledgementDelayMs,
+      'LiveResponsesDelegationParam.acknowledgement_delay_ms',
+    );
     responses.validate();
   }
 
   @override
   Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    if (acknowledgementDelayMs != null)
+      'acknowledgement_delay_ms': acknowledgementDelayMs,
     'responses': responses.toJson(),
     'type': type,
   });
@@ -286,9 +340,15 @@ class LiveResponsesDelegationParam extends LiveDelegation {
   /// Copies fields; explicit null clears optional values.
   /// For nullable fields, clear flags remove the key rather than emit null.
   LiveResponsesDelegationParam copyWith({
+    Object? acknowledgementDelayMs = liveUnset,
     LiveResponsesDelegationSettingsInputParam? responses,
     Map<String, dynamic>? rawJson,
   }) => LiveResponsesDelegationParam(
+    acknowledgementDelayMs: copyLiveValue<int>(
+      acknowledgementDelayMs,
+      this.acknowledgementDelayMs,
+      'LiveResponsesDelegationParam.acknowledgement_delay_ms',
+    ),
     responses: responses ?? this.responses,
     rawJson: rawJson ?? this.rawJson,
   );
@@ -296,6 +356,7 @@ class LiveResponsesDelegationParam extends LiveDelegation {
   @override
   String toString() =>
       'LiveResponsesDelegationParam('
+      'acknowledgementDelayMs: ${livePresence(acknowledgementDelayMs)}, '
       'responses: ${livePresence(responses)}, '
       'type: $type, '
       'rawJson: [REDACTED])';
@@ -307,6 +368,7 @@ class LiveResponsesDelegationUpdateParam extends LiveJsonModel
     implements LiveDelegationUpdate {
   /// Creates LiveResponsesDelegationUpdateParam.
   LiveResponsesDelegationUpdateParam({
+    this.acknowledgementDelayMs,
     this.responses,
     Map<String, dynamic> rawJson = const {},
   }) : rawJson = snapshotLiveJson(
@@ -317,7 +379,12 @@ class LiveResponsesDelegationUpdateParam extends LiveJsonModel
     validate();
   }
 
-  static const _knownKeys = {'responses', 'type'};
+  static const _knownKeys = {'acknowledgement_delay_ms', 'responses', 'type'};
+
+  /// Milliseconds before requesting an automatic spoken acknowledgment (0–800).
+  /// Omission keeps the service default or the current update value.
+  /// Commentary/thinking cancels pending acknowledgments across delegations.
+  final int? acknowledgementDelayMs;
 
   /// Responses backend settings to update. Omitted settings keep their existing values.
   final LiveResponsesDelegationSettingsUpdateInputParam? responses;
@@ -341,6 +408,13 @@ class LiveResponsesDelegationUpdateParam extends LiveJsonModel
       required: true,
     );
     return LiveResponsesDelegationUpdateParam(
+      acknowledgementDelayMs: optionalLiveValue(
+        json,
+        'acknowledgement_delay_ms',
+        'LiveResponsesDelegationUpdateParam',
+        requireLiveInt,
+        nullable: false,
+      ),
       responses: optionalLiveValue(
         json,
         'responses',
@@ -357,11 +431,17 @@ class LiveResponsesDelegationUpdateParam extends LiveJsonModel
 
   @override
   void validate() {
+    _validateAcknowledgementDelay(
+      acknowledgementDelayMs,
+      'LiveResponsesDelegationUpdateParam.acknowledgement_delay_ms',
+    );
     responses?.validate();
   }
 
   @override
   Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    if (acknowledgementDelayMs != null)
+      'acknowledgement_delay_ms': acknowledgementDelayMs,
     if (responses != null) 'responses': responses!.toJson(),
     'type': type,
   });
@@ -369,9 +449,15 @@ class LiveResponsesDelegationUpdateParam extends LiveJsonModel
   /// Copies fields; explicit null clears optional values.
   /// For nullable fields, clear flags remove the key rather than emit null.
   LiveResponsesDelegationUpdateParam copyWith({
+    Object? acknowledgementDelayMs = liveUnset,
     Object? responses = liveUnset,
     Map<String, dynamic>? rawJson,
   }) => LiveResponsesDelegationUpdateParam(
+    acknowledgementDelayMs: copyLiveValue<int>(
+      acknowledgementDelayMs,
+      this.acknowledgementDelayMs,
+      'LiveResponsesDelegationUpdateParam.acknowledgement_delay_ms',
+    ),
     responses: copyLiveValue<LiveResponsesDelegationSettingsUpdateInputParam>(
       responses,
       this.responses,
@@ -383,6 +469,7 @@ class LiveResponsesDelegationUpdateParam extends LiveJsonModel
   @override
   String toString() =>
       'LiveResponsesDelegationUpdateParam('
+      'acknowledgementDelayMs: ${livePresence(acknowledgementDelayMs)}, '
       'responses: ${livePresence(responses)}, '
       'type: $type, '
       'rawJson: [REDACTED])';
@@ -1227,7 +1314,7 @@ class LiveResponsesDelegationSettingsUpdateInputParam extends LiveJsonModel {
       'rawJson: [REDACTED])';
 }
 
-/// Startup delegation owner: the caller's application or Responses.
+/// Startup delegation owner: the caller's application, Responses or Decisions.
 sealed class LiveDelegation extends LiveJsonModel {
   /// Creates a startup delegation value.
   const LiveDelegation();
@@ -1235,11 +1322,12 @@ sealed class LiveDelegation extends LiveJsonModel {
   /// The fixed delegation owner.
   String get type;
 
-  /// Parses the two canonical startup branches.
+  /// Parses the three canonical startup branches.
   static LiveDelegation fromJson(Map<String, dynamic> json) =>
       switch (json['type']) {
         'client' => LiveClientDelegationParam.fromJson(json),
         'responses' => LiveResponsesDelegationParam.fromJson(json),
+        'decisions' => LiveDecisionsDelegationParam.fromJson(json),
         _ => throw const FormatException(
           'LiveDelegation.type: unsupported delegation owner',
         ),
@@ -1260,13 +1348,491 @@ sealed class LiveDelegationUpdate {
   /// The fixed delegation owner.
   String get type;
 
-  /// Parses client or Responses updates using the distinct update settings.
+  /// Parses all three owners using distinct startup and update settings.
   static LiveDelegationUpdate fromJson(Map<String, dynamic> json) =>
       switch (json['type']) {
         'client' => LiveClientDelegationParam.fromJson(json),
         'responses' => LiveResponsesDelegationUpdateParam.fromJson(json),
+        'decisions' => LiveDecisionsDelegationUpdateParam.fromJson(json),
         _ => throw const FormatException(
           'LiveDelegationUpdate.type: unsupported delegation owner',
         ),
       };
+}
+
+void _validateAcknowledgementDelay(int? value, String context) {
+  if (value == null) return;
+  requireLiveInt(value, context);
+  if (value < 0 || value > 800) {
+    throw FormatException('$context: expected 0–800 milliseconds');
+  }
+}
+
+/// Model and native questions for Decisions-owned Live delegations.
+///
+/// Live evaluates one to 64 questions together. This bound is separate from
+/// standalone Decisions requests. No model or question defaults are inserted.
+@immutable
+class LiveDecisionsSettingsInputParam extends LiveJsonModel {
+  /// Creates required Decisions backend settings with an owned question list.
+  LiveDecisionsSettingsInputParam({
+    required this.model,
+    required List<LiveDecisionQuestion> questions,
+    Map<String, dynamic> rawJson = const {},
+  }) : questions = List.unmodifiable(questions),
+       rawJson = snapshotLiveJson(
+         rawJson,
+         'LiveDecisionsSettingsInputParam',
+         knownKeys: _knownKeys,
+       ) {
+    validate();
+  }
+
+  static const _knownKeys = {'model', 'questions'};
+
+  /// Nonempty Decisions backend model name; future names remain supported.
+  final String model;
+
+  /// Ordered native questions evaluated together, with a Live-specific limit.
+  final List<LiveDecisionQuestion> questions;
+
+  /// Immutable finite future metadata; typed fields control known keys.
+  final Map<String, dynamic> rawJson;
+
+  /// Parses required model and question fields without coercion.
+  factory LiveDecisionsSettingsInputParam.fromJson(Map<String, dynamic> json) =>
+      LiveDecisionsSettingsInputParam(
+        model: requireLiveString(
+          json['model'],
+          'LiveDecisionsSettingsInputParam.model',
+        ),
+        questions: _liveDecisionQuestionsFromJson(
+          json['questions'],
+          'LiveDecisionsSettingsInputParam.questions',
+        ),
+        rawJson: json,
+      );
+
+  @override
+  void validate() {
+    validateLiveLength(model, 'LiveDecisionsSettingsInputParam.model', min: 1);
+    validateLiveDecisionQuestions(
+      questions,
+      'LiveDecisionsSettingsInputParam.questions',
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    'model': model,
+    'questions': questions.map((question) => question.toJson()).toList(),
+  });
+
+  /// Copies every field and snapshots the supplied question collection.
+  LiveDecisionsSettingsInputParam copyWith({
+    String? model,
+    List<LiveDecisionQuestion>? questions,
+    Map<String, dynamic>? rawJson,
+  }) => LiveDecisionsSettingsInputParam(
+    model: model ?? this.model,
+    questions: questions ?? this.questions,
+    rawJson: rawJson ?? this.rawJson,
+  );
+
+  @override
+  String toString() =>
+      'LiveDecisionsSettingsInputParam(model: [REDACTED], questions: [REDACTED], rawJson: [REDACTED])';
+}
+
+/// Partial Decisions backend changes; omitted fields retain current values.
+@immutable
+class LiveDecisionsSettingsUpdateParam extends LiveJsonModel {
+  /// Creates optional nonnullable-on-wire backend updates.
+  LiveDecisionsSettingsUpdateParam({
+    this.model,
+    List<LiveDecisionQuestion>? questions,
+    Map<String, dynamic> rawJson = const {},
+  }) : questions = questions == null ? null : List.unmodifiable(questions),
+       rawJson = snapshotLiveJson(
+         rawJson,
+         'LiveDecisionsSettingsUpdateParam',
+         knownKeys: _knownKeys,
+       ) {
+    validate();
+  }
+
+  static const _knownKeys = {'model', 'questions'};
+
+  /// New nonempty model, or omitted to retain the existing model.
+  final String? model;
+
+  /// Replacement one-to-64-question group, or omitted to retain existing ones.
+  final List<LiveDecisionQuestion>? questions;
+
+  /// Immutable finite future metadata; typed fields control known keys.
+  final Map<String, dynamic> rawJson;
+
+  /// Parses partial settings and rejects explicit null for known fields.
+  factory LiveDecisionsSettingsUpdateParam.fromJson(
+    Map<String, dynamic> json,
+  ) => LiveDecisionsSettingsUpdateParam(
+    model: optionalLiveValue(
+      json,
+      'model',
+      'LiveDecisionsSettingsUpdateParam',
+      requireLiveString,
+    ),
+    questions: optionalLiveValue(
+      json,
+      'questions',
+      'LiveDecisionsSettingsUpdateParam',
+      _liveDecisionQuestionsFromJson,
+    ),
+    rawJson: json,
+  );
+
+  @override
+  void validate() {
+    if (model != null) {
+      validateLiveLength(
+        model!,
+        'LiveDecisionsSettingsUpdateParam.model',
+        min: 1,
+      );
+    }
+    if (questions != null) {
+      validateLiveDecisionQuestions(
+        questions!,
+        'LiveDecisionsSettingsUpdateParam.questions',
+      );
+    }
+  }
+
+  @override
+  Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    if (model != null) 'model': model,
+    if (questions != null)
+      'questions': questions!.map((question) => question.toJson()).toList(),
+  });
+
+  /// Copies every field; explicit null clears an optional update, omitting it.
+  LiveDecisionsSettingsUpdateParam copyWith({
+    Object? model = liveUnset,
+    Object? questions = liveUnset,
+    Map<String, dynamic>? rawJson,
+  }) => LiveDecisionsSettingsUpdateParam(
+    model: copyLiveValue<String>(
+      model,
+      this.model,
+      'LiveDecisionsSettingsUpdateParam.model',
+    ),
+    questions: _copyLiveDecisionQuestions(
+      questions,
+      this.questions,
+      'LiveDecisionsSettingsUpdateParam.questions',
+    ),
+    rawJson: rawJson ?? this.rawJson,
+  );
+
+  @override
+  String toString() =>
+      'LiveDecisionsSettingsUpdateParam(model: ${livePresence(model)}, questions: ${livePresence(questions)}, rawJson: [REDACTED])';
+}
+
+/// Delegates Live work to a Decisions backend without client-side evaluation.
+@immutable
+class LiveDecisionsDelegationParam extends LiveDelegation {
+  /// Creates required Decisions startup settings and optional acknowledgment delay.
+  LiveDecisionsDelegationParam({
+    required this.decisions,
+    this.acknowledgementDelayMs,
+    Map<String, dynamic> rawJson = const {},
+  }) : rawJson = snapshotLiveJson(
+         rawJson,
+         'LiveDecisionsDelegationParam',
+         knownKeys: _knownKeys,
+       ) {
+    validate();
+  }
+
+  static const _knownKeys = {'type', 'decisions', 'acknowledgement_delay_ms'};
+
+  /// Required backend model and native question group.
+  final LiveDecisionsSettingsInputParam decisions;
+
+  /// Delay before automatic acknowledgment, from zero to 800 milliseconds.
+  /// Omission leaves the service's Decisions default of 400 milliseconds.
+  final int? acknowledgementDelayMs;
+
+  @override
+  String get type => 'decisions';
+
+  /// Immutable finite future metadata; typed fields control known keys.
+  final Map<String, dynamic> rawJson;
+
+  /// Parses fixed startup delegation and required backend settings.
+  factory LiveDecisionsDelegationParam.fromJson(Map<String, dynamic> json) {
+    requireLiveType(json, 'decisions', 'LiveDecisionsDelegationParam');
+    return LiveDecisionsDelegationParam(
+      decisions: LiveDecisionsSettingsInputParam.fromJson(
+        requireLiveObject(
+          json['decisions'],
+          'LiveDecisionsDelegationParam.decisions',
+        ),
+      ),
+      acknowledgementDelayMs: optionalLiveValue(
+        json,
+        'acknowledgement_delay_ms',
+        'LiveDecisionsDelegationParam',
+        requireLiveInt,
+      ),
+      rawJson: json,
+    );
+  }
+
+  @override
+  void validate() {
+    decisions.validate();
+    _validateAcknowledgementDelay(
+      acknowledgementDelayMs,
+      'LiveDecisionsDelegationParam.acknowledgement_delay_ms',
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    'type': type,
+    'decisions': decisions.toJson(),
+    if (acknowledgementDelayMs != null)
+      'acknowledgement_delay_ms': acknowledgementDelayMs,
+  });
+
+  /// Copies fields; null delay omits it rather than emitting JSON null.
+  LiveDecisionsDelegationParam copyWith({
+    LiveDecisionsSettingsInputParam? decisions,
+    Object? acknowledgementDelayMs = liveUnset,
+    Map<String, dynamic>? rawJson,
+  }) => LiveDecisionsDelegationParam(
+    decisions: decisions ?? this.decisions,
+    acknowledgementDelayMs: copyLiveValue<int>(
+      acknowledgementDelayMs,
+      this.acknowledgementDelayMs,
+      'LiveDecisionsDelegationParam.acknowledgement_delay_ms',
+    ),
+    rawJson: rawJson ?? this.rawJson,
+  );
+
+  @override
+  String toString() =>
+      'LiveDecisionsDelegationParam(type: $type, decisions: [REDACTED], acknowledgementDelayMs: ${livePresence(acknowledgementDelayMs)}, rawJson: [REDACTED])';
+}
+
+/// Updates Decisions settings without changing the session's delegation owner.
+@immutable
+class LiveDecisionsDelegationUpdateParam extends LiveJsonModel
+    implements LiveDelegationUpdate {
+  /// Creates a partial backend update with optional acknowledgment delay.
+  LiveDecisionsDelegationUpdateParam({
+    this.decisions,
+    this.acknowledgementDelayMs,
+    Map<String, dynamic> rawJson = const {},
+  }) : rawJson = snapshotLiveJson(
+         rawJson,
+         'LiveDecisionsDelegationUpdateParam',
+         knownKeys: _knownKeys,
+       ) {
+    validate();
+  }
+
+  static const _knownKeys = {'type', 'decisions', 'acknowledgement_delay_ms'};
+
+  /// Optional replacement fields within the current Decisions backend settings.
+  final LiveDecisionsSettingsUpdateParam? decisions;
+
+  /// Delay for subsequent delegations; omission retains the current value.
+  final int? acknowledgementDelayMs;
+
+  @override
+  String get type => 'decisions';
+
+  /// Immutable finite future metadata; typed fields control known keys.
+  final Map<String, dynamic> rawJson;
+
+  /// Parses update-only settings; explicit null is not a wire reset operation.
+  factory LiveDecisionsDelegationUpdateParam.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    requireLiveType(json, 'decisions', 'LiveDecisionsDelegationUpdateParam');
+    return LiveDecisionsDelegationUpdateParam(
+      decisions: optionalLiveValue(
+        json,
+        'decisions',
+        'LiveDecisionsDelegationUpdateParam',
+        (value, context) => LiveDecisionsSettingsUpdateParam.fromJson(
+          requireLiveObject(value, context),
+        ),
+      ),
+      acknowledgementDelayMs: optionalLiveValue(
+        json,
+        'acknowledgement_delay_ms',
+        'LiveDecisionsDelegationUpdateParam',
+        requireLiveInt,
+      ),
+      rawJson: json,
+    );
+  }
+
+  @override
+  void validate() {
+    decisions?.validate();
+    _validateAcknowledgementDelay(
+      acknowledgementDelayMs,
+      'LiveDecisionsDelegationUpdateParam.acknowledgement_delay_ms',
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    'type': type,
+    if (decisions != null) 'decisions': decisions!.toJson(),
+    if (acknowledgementDelayMs != null)
+      'acknowledgement_delay_ms': acknowledgementDelayMs,
+  });
+
+  /// Copies fields; null clears an optional field and omits its wire key.
+  LiveDecisionsDelegationUpdateParam copyWith({
+    Object? decisions = liveUnset,
+    Object? acknowledgementDelayMs = liveUnset,
+    Map<String, dynamic>? rawJson,
+  }) => LiveDecisionsDelegationUpdateParam(
+    decisions: copyLiveValue<LiveDecisionsSettingsUpdateParam>(
+      decisions,
+      this.decisions,
+      'LiveDecisionsDelegationUpdateParam.decisions',
+    ),
+    acknowledgementDelayMs: copyLiveValue<int>(
+      acknowledgementDelayMs,
+      this.acknowledgementDelayMs,
+      'LiveDecisionsDelegationUpdateParam.acknowledgement_delay_ms',
+    ),
+    rawJson: rawJson ?? this.rawJson,
+  );
+
+  @override
+  String toString() =>
+      'LiveDecisionsDelegationUpdateParam(type: $type, decisions: ${livePresence(decisions)}, acknowledgementDelayMs: ${livePresence(acknowledgementDelayMs)}, rawJson: [REDACTED])';
+}
+
+/// Independently evaluates native questions after one transcript delta source.
+///
+/// Trigger evaluation uses shared decision items and the current transcript;
+/// it does not require Decisions-owned delegation or a caller-created ID.
+@immutable
+class LiveDecisionTriggerInputParam extends LiveJsonModel {
+  /// Creates a fixed Decisions trigger for an input or output transcript event.
+  LiveDecisionTriggerInputParam({
+    required this.eventType,
+    required this.decisions,
+    Map<String, dynamic> rawJson = const {},
+  }) : rawJson = snapshotLiveJson(
+         rawJson,
+         'LiveDecisionTriggerInputParam',
+         knownKeys: _knownKeys,
+       ) {
+    validate();
+  }
+
+  static const _knownKeys = {'type', 'event_type', 'decisions'};
+
+  /// Canonical input/output transcript delta event type.
+  final String eventType;
+
+  /// One to 64 native questions evaluated together for this trigger.
+  final LiveDecisionQuestionsInputParam decisions;
+
+  /// Fixed trigger kind.
+  String get type => 'decisions';
+
+  /// Immutable finite JSON snapshot; this canonical writable object is closed.
+  final Map<String, dynamic> rawJson;
+
+  /// Parses all required fields and rejects undeclared writable properties.
+  factory LiveDecisionTriggerInputParam.fromJson(Map<String, dynamic> json) {
+    requireClosedLiveJson(json, _knownKeys, 'LiveDecisionTriggerInputParam');
+    requireLiveType(json, 'decisions', 'LiveDecisionTriggerInputParam');
+    return LiveDecisionTriggerInputParam(
+      eventType: requireLiveString(
+        json['event_type'],
+        'LiveDecisionTriggerInputParam.event_type',
+      ),
+      decisions: LiveDecisionQuestionsInputParam.fromJson(
+        requireLiveObject(
+          json['decisions'],
+          'LiveDecisionTriggerInputParam.decisions',
+        ),
+      ),
+      rawJson: json,
+    );
+  }
+
+  @override
+  void validate() {
+    requireClosedLiveJson(rawJson, _knownKeys, 'LiveDecisionTriggerInputParam');
+    if (eventType != 'session.input_transcript.delta' &&
+        eventType != 'session.output_transcript.delta') {
+      throw const FormatException(
+        'LiveDecisionTriggerInputParam.event_type: expected an input or output transcript delta',
+      );
+    }
+    decisions.validate();
+  }
+
+  @override
+  Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    'type': type,
+    'event_type': eventType,
+    'decisions': decisions.toJson(),
+  });
+
+  /// Copies every field, preserving fixed kind and private payload ownership.
+  LiveDecisionTriggerInputParam copyWith({
+    String? eventType,
+    LiveDecisionQuestionsInputParam? decisions,
+    Map<String, dynamic>? rawJson,
+  }) => LiveDecisionTriggerInputParam(
+    eventType: eventType ?? this.eventType,
+    decisions: decisions ?? this.decisions,
+    rawJson: rawJson ?? this.rawJson,
+  );
+
+  @override
+  String toString() =>
+      'LiveDecisionTriggerInputParam(type: $type, eventType: $eventType, decisions: [REDACTED], rawJson: [REDACTED])';
+}
+
+List<LiveDecisionQuestion> _liveDecisionQuestionsFromJson(
+  Object? value,
+  String context,
+) => [
+  for (final question in requireLiveList(value, context))
+    LiveDecisionQuestion.fromJson(requireLiveObject(question, context)),
+];
+
+List<LiveDecisionQuestion>? _copyLiveDecisionQuestions(
+  Object? value,
+  List<LiveDecisionQuestion>? previous,
+  String context,
+) {
+  if (identical(value, liveUnset)) return previous;
+  if (value == null) return null;
+  if (value is! List) {
+    throw FormatException('$context: expected native Live questions');
+  }
+  return [
+    for (final question in value)
+      if (question is LiveDecisionQuestion)
+        question
+      else
+        throw FormatException('$context: expected a native Live question'),
+  ];
 }

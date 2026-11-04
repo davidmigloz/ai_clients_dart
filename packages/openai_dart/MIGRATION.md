@@ -6,6 +6,59 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming release: Native Live Decisions
+
+Live delegation, client-command and server-event sealed unions gain Decisions
+variants. Update exhaustive switches to handle the new variants, including
+LiveDecisionsDelegationParam/UpdateParam, LiveDecisionCreateParam,
+LiveDecisionItemCreateParam/DeleteParam and LiveDecisionEvent/ItemCreated/ItemDeleted.
+For example, a delegation switch now includes the native Decisions owner:
+
+```dart
+// Before
+String owner(LiveDelegation? value) => switch (value) {
+  null || LiveClientDelegationParam() => 'client',
+  LiveResponsesDelegationParam() => 'responses',
+};
+
+// After
+String owner(LiveDelegation? value) => switch (value) {
+  null || LiveClientDelegationParam() => 'client',
+  LiveResponsesDelegationParam() => 'responses',
+  LiveDecisionsDelegationParam() => 'decisions',
+};
+```
+
+Native Live questions use LiveDecisionQuestion/Instructions and a 1–64 question
+group limit. Standalone DecisionRequest retains its 1–400 limit and separate
+content constraints. Use LiveDecisionQuestion.fromDecisionQuestion to adapt
+existing standalone criteria; native decoding does not pass through the narrower
+standalone request models.
+
+Fork startup overrides inherit their source configuration and do not accept
+`triggers`, including through rawJson. Configure triggers explicitly after the
+new session starts:
+
+```dart
+// Before: unsupported fork startup override
+LiveForkSessionConfigParam(rawJson: {'triggers': []});
+
+// After: update the running fork and wait for session.updated
+connection.send(LiveSessionUpdateParam(
+  session: LiveSessionUpdateParams(triggers: []),
+));
+```
+
+Native decision.event payloads require all four nullable correlation keys
+(delegation_id, trigger_id, source_event_type, source_event_id). Include nulls in
+synthetic fixtures rather than copying abbreviated guide snippets. Unknown outer
+server events continue to retain raw data. Results keep arrival order; correlate
+source IDs in the application and explicitly confirm actions before reporting
+results to Live. No application action, history reconciliation or event replay
+is automatic.
+
+---
+
 ## Upcoming release: WebSocket recovery budgets
 
 Opt-in Responses recovery now also limits pending frames to
