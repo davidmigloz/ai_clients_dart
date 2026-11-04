@@ -77,12 +77,14 @@ final _paths =
       (
         name: 'response text',
         stream: (client) => _responses(client).textDeltas(),
-        event: 'data: {"type":"response.output_text.delta","output_index":0,"content_index":0,"delta":"Hi"}\n\n',
+        event:
+            'data: {"type":"response.output_text.delta","output_index":0,"content_index":0,"delta":"Hi"}\n\n',
       ),
       (
         name: 'response accumulator',
         stream: (client) => _responses(client).accumulate(),
-        event: 'data: {"type":"response.output_text.delta","output_index":0,"content_index":0,"delta":"Hi"}\n\n',
+        event:
+            'data: {"type":"response.output_text.delta","output_index":0,"content_index":0,"delta":"Hi"}\n\n',
       ),
     ];
 
