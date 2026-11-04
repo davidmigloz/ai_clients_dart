@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../errors/exceptions.dart';
+import '../helpers/agents/agent_session_run.dart';
 import '../models/agents/agent_enums.dart';
 import '../models/agents/agent_json_helpers.dart';
 import '../models/agents/agent_session_models.dart';
@@ -114,6 +115,36 @@ class AgentSessionsResource extends ResourceBase with _AgentSessionHttp {
       interceptorChain: interceptorChain,
       requestBuilder: requestBuilder,
       ensureNotClosed: ensureNotClosed,
+    );
+  }
+
+  /// Lazily follows one new root turn on an idle durable session.
+  ///
+  /// Requires one application input writer. Readiness precedes input submission;
+  /// initial idle and child terminals cannot finish it. Use the returned run's
+  /// nextEvent() for controlled pulls, or events for single Stream consumption.
+  /// Breaking/canceling observation does not cancel/delete backend work. Raw
+  /// events.create remains available for active-session steering and actions.
+  AgentSessionRun stream(
+    String sessionId, {
+    required AgentSessionInitialInput input,
+    String? idempotencyKey,
+    Map<String, String>? additionalHeaders,
+    Future<void>? abortTrigger,
+    int maxBufferedEvents = 256,
+    int maxBufferedBytes = 1024 * 1024,
+  }) {
+    ensureNotClosed?.call();
+    _sessionPath(sessionId);
+    return AgentSessionRun(
+      sessions: this,
+      sessionId: sessionId,
+      input: input,
+      idempotencyKey: idempotencyKey,
+      additionalHeaders: additionalHeaders,
+      abortTrigger: abortTrigger,
+      maxBufferedEvents: maxBufferedEvents,
+      maxBufferedBytes: maxBufferedBytes,
     );
   }
 
