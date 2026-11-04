@@ -12,6 +12,8 @@
 
 ## Examples
 
+- [admin_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/admin_example.dart): Offline separate Admin credentials, AWS key validation, OCI storage, project key scopes/expiry, and Decisions usage; five mock requests, no cloud or billing access.
+
 - [responses_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/responses_example.dart) (~870 tokens): Responses API with built-in tools.
 - [openai_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/openai_dart_example.dart) (~577 tokens): Quick-start overview.
 - [web_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/web_search_example.dart) (~1.1k tokens): Web search with Responses API.

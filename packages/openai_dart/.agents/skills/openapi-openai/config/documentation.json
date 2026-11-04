@@ -81,7 +81,8 @@
     "agentSessionSubagents": "agent_subagents_example",
     "agentSessionSubagentItems": "agent_subagents_example",
     "agentSessionSubagentTurns": "agent_subagents_example",
-    "agentSessionSubagentTurnItems": "agent_subagents_example"
+    "agentSessionSubagentTurnItems": "agent_subagents_example",
+    "organization": "admin_example"
   },
   "excluded_from_examples": [],
   "drift_patterns": [

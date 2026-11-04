@@ -27,6 +27,7 @@
 /// ```
 library;
 
+export 'openai_dart_admin.dart';
 // Auth
 export 'src/auth/auth_provider.dart';
 // Client
