@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'package:meta/meta.dart';
 import '../common/equality_helpers.dart';
+import '../images/image_tool_error.dart';
 import '../responses/config/configuration_update_text.dart';
 import '../responses/items/item.dart' show Item;
 import '../responses/items/output_item.dart' show OutputItem;
@@ -5440,6 +5441,7 @@ final class LiveInputImageGenToolCall extends LiveInputItem {
   static const Set<String> _knownKeys = {
     'action',
     'background',
+    'error',
     'id',
     'output_format',
     'quality',
@@ -5468,6 +5470,22 @@ final class LiveInputImageGenToolCall extends LiveInputItem {
 
   /// Distinguishes absent `background` from an explicit null.
   bool get hasBackground => rawJson.containsKey('background');
+
+  /// Image generation failure details, when supplied.
+  ///
+  /// This writable Live item validates the canonical moderation stages before
+  /// replay. The shared received error model also preserves future metadata.
+  ImageGenerationCallError? get error => hasError
+      ? ImageGenerationCallError.fromJson(
+          requireLiveObject(
+            rawJson['error'],
+            'LiveInputImageGenToolCall.error',
+          ),
+        )
+      : null;
+
+  /// Whether the optional nonnull `error` member is present.
+  bool get hasError => rawJson.containsKey('error');
 
   /// Canonical `id` value.
   String get id => rawJson['id'] as String;
@@ -5528,6 +5546,8 @@ final class LiveInputImageGenToolCall extends LiveInputItem {
     bool clearAction = false,
     Object? background = liveUnset,
     bool clearBackground = false,
+    Object? error = liveUnset,
+    bool clearError = false,
     Object? id = liveUnset,
     Object? outputFormat = liveUnset,
     bool clearOutputFormat = false,
@@ -5550,6 +5570,7 @@ final class LiveInputImageGenToolCall extends LiveInputItem {
       {
         'action': action,
         'background': background,
+        'error': error,
         'id': id,
         'output_format': outputFormat,
         'quality': quality,
@@ -5561,6 +5582,7 @@ final class LiveInputImageGenToolCall extends LiveInputItem {
       <String>{
         if (clearAction) 'action',
         if (clearBackground) 'background',
+        if (clearError) 'error',
         if (clearOutputFormat) 'output_format',
         if (clearQuality) 'quality',
         if (clearRevisedPrompt) 'revised_prompt',
@@ -5571,7 +5593,7 @@ final class LiveInputImageGenToolCall extends LiveInputItem {
   );
   @override
   String toString() =>
-      'LiveInputImageGenToolCall(action: [REDACTED], background: [REDACTED], id: [REDACTED], output_format: [REDACTED], quality: [REDACTED], result: [REDACTED], revised_prompt: [REDACTED], size: [REDACTED], status: [REDACTED], type: [REDACTED], rawJson: [REDACTED])';
+      'LiveInputImageGenToolCall(action: [REDACTED], background: [REDACTED], error: [REDACTED], id: [REDACTED], output_format: [REDACTED], quality: [REDACTED], result: [REDACTED], revised_prompt: [REDACTED], size: [REDACTED], status: [REDACTED], type: [REDACTED], rawJson: [REDACTED])';
 }
 
 /// Immutable typed adapter for the canonical inline payload.
@@ -19720,6 +19742,7 @@ Object? _inputWire(
 }) {
   if (value is LiveInputValue) return value.toJson();
   if (value is LiveJsonModel) return value.toJson();
+  if (value is ImageGenerationCallError) return value.toJson();
   final seen = ancestors ?? HashSet<Object>.identity();
   if (value is List || value is Map) {
     if (!seen.add(value!)) {
@@ -21475,6 +21498,7 @@ const Map<String, dynamic> _inputSchemas = {
           {'type': 'null'},
         ],
       },
+      'error': {r'$ref': '#/components/schemas/ImageGenToolCallError'},
       'id': {'type': 'string'},
       'output_format': {
         'anyOf': [
@@ -21527,6 +21551,43 @@ const Map<String, dynamic> _inputSchemas = {
       },
     },
     'required': ['type', 'id', 'status', 'result'],
+    'type': 'object',
+  },
+  'ImageGenToolCallError': {
+    'properties': {
+      'code': {
+        'anyOf': [
+          {'type': 'string'},
+          {'type': 'null'},
+        ],
+      },
+      'message': {'type': 'string'},
+      'moderation_details': {
+        r'$ref': '#/components/schemas/ImageGenToolCallModerationDetails',
+      },
+      'param': {
+        'anyOf': [
+          {'type': 'string'},
+          {'type': 'null'},
+        ],
+      },
+      'type': {'type': 'string'},
+    },
+    'required': ['code', 'type', 'message', 'param'],
+    'type': 'object',
+  },
+  'ImageGenToolCallModerationDetails': {
+    'properties': {
+      'categories': {
+        'items': {'type': 'string'},
+        'type': 'array',
+      },
+      'moderation_stage': {
+        'enum': ['input', 'output', 'unknown'],
+        'type': 'string',
+      },
+    },
+    'required': ['moderation_stage', 'categories'],
     'type': 'object',
   },
   'ImageOutputFormat': {
