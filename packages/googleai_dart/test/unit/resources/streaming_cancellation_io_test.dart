@@ -9,6 +9,46 @@ import 'package:googleai_dart/googleai_dart.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('successful chunked SSE requests reuse their connection', () async {
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    final ports = <int>[];
+    final serverSubscription = server.listen((request) async {
+      ports.add(request.connectionInfo!.remotePort);
+      await request.drain<void>();
+      request.response
+        ..headers.contentType = ContentType('text', 'event-stream')
+        ..write('data: {}\n\n');
+      await request.response.flush();
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      request.response.write('data: [DONE]\n\n');
+      await request.response.close();
+    });
+    final client = GoogleAIClient(
+      config: GoogleAIConfig(baseUrl: 'http://127.0.0.1:${server.port}'),
+    );
+    addTearDown(() async {
+      client.close();
+      await serverSubscription.cancel();
+      await server.close(force: true);
+    });
+    for (var i = 0; i < 2; i++) {
+      expect(
+        await client.models
+            .streamGenerateContent(
+              model: 'test',
+              request: const GenerateContentRequest(
+                contents: [
+                  Content(parts: [TextPart('Hi')], role: 'user'),
+                ],
+              ),
+            )
+            .toList(),
+        hasLength(1),
+      );
+    }
+    expect(ports, hasLength(2));
+    expect(ports.first, ports.last);
+  });
   for (final sendHeaders in [false, true]) {
     test('native abort closes the request socket (headers=$sendHeaders)', () async {
       final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);

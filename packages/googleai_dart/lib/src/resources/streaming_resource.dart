@@ -98,10 +98,10 @@ mixin StreamingResource on ResourceBase {
     var stopped = false;
     var requestId = generateRequestId();
 
-    void stop() {
+    void stop({bool abort = true}) {
       if (stopped) return;
       stopped = true;
-      if (!requestAbort.isCompleted) requestAbort.complete();
+      if (abort && !requestAbort.isCompleted) requestAbort.complete();
       // Parser cancellation can wait for an incomplete SSE event. Cancel its
       // byte source separately and unblock it, without delaying local closure.
       bodySubscription?.cancel().ignore();
@@ -112,7 +112,7 @@ mixin StreamingResource on ResourceBase {
     void finish([Object? error, StackTrace? stackTrace]) {
       if (stopped) return;
       if (error != null) controller.addError(error, stackTrace);
-      stop();
+      stop(abort: error != null);
       unawaited(controller.close());
     }
 
@@ -180,7 +180,6 @@ mixin StreamingResource on ResourceBase {
           },
           onCancel: () {
             // A parser terminator such as [DONE] must also release the body.
-            if (!requestAbort.isCompleted) requestAbort.complete();
             bodySubscription?.cancel().ignore();
           },
         );

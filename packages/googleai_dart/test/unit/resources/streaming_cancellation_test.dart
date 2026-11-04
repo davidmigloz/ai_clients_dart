@@ -494,12 +494,19 @@ void main() {
         abortTrigger: signal.future,
       ).toList();
       final pending = await sent;
+      var nativeAborted = false;
+      unawaited(
+        (pending.request as http.Abortable).abortTrigger!.then((_) {
+          nativeAborted = true;
+        }),
+      );
       pending.response.complete(
         http.StreamedResponse(Stream.value(utf8.encode('data: {}\n\n')), 200),
       );
       expect(await result.timeout(deadline), hasLength(1));
       signal.complete();
       await Future<void>.delayed(Duration.zero);
+      expect(nativeAborted, isFalse);
     },
   );
 }
