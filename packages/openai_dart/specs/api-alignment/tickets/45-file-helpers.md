@@ -1,6 +1,6 @@
 # Portable file and artifact convenience
 
-Status: deferred outside the bounded milestone; not implemented.
+Status: implemented under renewed explicit authorization; package/browser checks and independent reviews pass. Exact-head CI remains the merge gate.
 GitHub: [#397](https://github.com/davidmigloz/ai_clients_dart/issues/397).
 Primary requirements: `AGENTS-FILE-HELPER-01`, `AGENTS-FILE-HELPER-02`, `AGENTS-FILE-HELPER-03`.
 Native GitHub blockers: [#390](https://github.com/davidmigloz/ai_clients_dart/issues/390), [#396](https://github.com/davidmigloz/ai_clients_dart/issues/396).
@@ -8,7 +8,7 @@ Original tracker: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/3
 Specification: [Agents and Vaults](../agents-vaults.md), AGENTS-FILE-HELPER-01–03.
 Dependencies: [ticket 38](38-files-artifacts.md) and [ticket 44](44-result-parser.md).
 
-Deferred backlog: retained for future explicit prioritization; this ticket does not block completion of #317. Its acceptance remains unchecked, and implementation will not start automatically.
+The earlier deferred disposition was superseded by explicit authorization to complete the remaining bounded work. #317 stays closed; this delivery belongs to the renewed alignment plan.
 
 ## User capability and scope
 
@@ -26,24 +26,23 @@ promised recovery or persistence.
 
 ## Acceptance criteria
 
-- [ ] Explicit selected data uploads through the existing Files API with purpose=user_data, then maps returned file IDs to caller-selected /workspace destinations. Validate all destinations before uploads; ordering is deterministic and no directory synchronization or automatic deletion occurs.
-- [ ] Upload/staging failure and cancellation expose detached IDs of uploads actually observed as successful so the caller can clean them up. Never fabricate an ID after uncertain delivery or delete files automatically; private bytes/path metadata stay out of printable errors.
-- [ ] Artifact lookup matches the exact session, completed turn and hosted path across all pages, rejecting zero or multiple matches. Wrong-turn/path candidates and page-two matches have actual public mock fixtures.
-- [ ] Preserve opaque artifact last_id cursors, including nullable legacy item IDs, and reject repeated/nonadvancing pagination instead of looping. Do not substitute the separate live-file page/next pagination contract.
-- [ ] Portable binary download/sink methods preserve non-UTF8 bytes and release sources on sink failure or abort. A hosted artifact path never chooses the local output destination.
-- [ ] The optional filesystem adapter accepts only explicit caller-selected regular files/destinations and verifies symlink, replacement/identity and size-change cases. It documents stable application-owned directories as an operational requirement, without claiming a filesystem sandbox.
-- [ ] Before implementation, explicitly choose and document Dart overwrite behavior. Test parent/destination type, symlink and overwrite cases; do not claim Node's verified regular-file overwrite policy and Python's delegated stream_to_file behavior are identical.
-- [ ] Portable model ownership/copy/equality/hash and diagnostic privacy cover filenames, staged IDs, partial failures and artifact selections; filesystem implementation and tests stay isolated from the browser entrypoint.
-- [ ] A public offline example stages selected bytes, collects a completed result, finds its uniquely matched artifact and downloads to an explicit sink. README/llms and exports distinguish portable helpers, optional IO and caller cleanup.
+- [x] Explicit selected data uploads through the existing Files API with purpose=user_data, then maps returned file IDs to caller-selected /workspace destinations. Validate all destinations before uploads; ordering is deterministic and no directory synchronization or automatic deletion occurs.
+- [x] Upload/staging failure and cancellation expose detached IDs of uploads actually observed as successful so the caller can clean them up. Never fabricate an ID after uncertain delivery or delete files automatically; private bytes/path metadata stay out of printable errors.
+- [x] Artifact lookup matches the exact session, completed turn and hosted path across all pages, rejecting zero or multiple matches. Wrong-turn/path candidates and page-two matches have actual public mock fixtures.
+- [x] Preserve opaque artifact last_id cursors, including nullable legacy item IDs, and reject repeated/nonadvancing pagination instead of looping. Do not substitute the separate live-file page/next pagination contract.
+- [x] Portable binary download/sink methods preserve non-UTF8 bytes and release sources on sink failure or abort. A hosted artifact path never chooses the local output destination.
+- [x] The optional filesystem adapter accepts only explicit caller-selected regular files/destinations and verifies symlink, replacement/identity and size-change cases. It documents stable application-owned directories as an operational requirement, without claiming a filesystem sandbox.
+- [x] Before implementation, explicitly choose and document Dart overwrite behavior. Test parent/destination type, symlink and overwrite cases; do not claim Node's verified regular-file overwrite policy and Python's delegated stream_to_file behavior are identical.
+- [x] Portable model ownership/copy/equality/hash and diagnostic privacy cover filenames, staged IDs, partial failures and artifact selections; filesystem implementation and tests stay isolated from the browser entrypoint.
+- [x] A public offline example stages selected bytes, collects a completed result, finds its uniquely matched artifact and downloads to an explicit sink. README/llms and exports distinguish portable helpers, optional IO and caller cleanup.
 - [ ] Portable fixtures pass on VM, actual Chrome JavaScript and Wasm; optional IO fixtures run on VM only. Appropriate package checks, independent requirements/engineering reviews and exact final-head CI pass before user-authorized merge.
 
 ## Evidence and validation plan
 
-Sources are pinned [Python file helpers](https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/lib/beta/agents/_files.py),
-[Node file helpers](https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c5d51870dd38964e156/src/lib/beta/agents/files.ts),
-[Python artifact lookup](https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/lib/beta/agents/_artifacts.py),
-[Node artifact lookup](https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c5d51870dd38964e156/src/lib/beta/agents/result-artifacts.ts)
-and [Node filesystem helpers](https://github.com/openai/openai-node/blob/37af8fc9c78bd5c4d2979c5d51870dd38964e156/src/helpers/beta/agents/filesystem.ts).
+Sources and current frozen OpenAPI/Python3.42/Node7.47 receipts are documented in
+[the implementation review](../reviews/45-file-helpers.md) and its
+[scoped handoff](../reviews/45-file-helpers-manifest.json). Earlier planning helper
+pins remain historical context, not a wider source refresh.
 Wire authority remains the raw ticket's canonical OpenAPI mappings.
 
 Default validation uses synthetic bytes, public mocks and temporary local files:

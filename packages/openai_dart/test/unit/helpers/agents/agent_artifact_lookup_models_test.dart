@@ -42,7 +42,7 @@ void main() {
         expect(candidate.id, isNull);
         expect(candidate.hasId, !missing);
         expect(candidate.toJson(), json);
-        expect(() => candidate.requireArtifact(), throwsFormatException);
+        expect(candidate.requireArtifact, throwsFormatException);
         expect(candidate.copyWith().toJson(), json);
         expect(candidate.copyWith().hashCode, candidate.hashCode);
         expect(candidate.toString(), isNot(contains('artifact_private')));
@@ -69,7 +69,7 @@ void main() {
     () {
       final original = AgentArtifactLookupCandidate.fromJson({
         ..._row(),
-        'future': {
+        'future': const {
           'values': [1],
         },
       });
@@ -120,14 +120,14 @@ void main() {
       };
       final json = {..._row(), 'future': future};
       final candidate = AgentArtifactLookupCandidate.fromJson(json);
-      (future['values']! as List<Object?>).add(2);
+      (future['values']!).add(2);
       json['path'] = 'changed';
       expect(candidate.path, '/workspace/outputs/private.bin');
       expect(candidate.rawJson['future'], {
         'values': [1],
       });
       expect(
-        () => (candidate.rawJson['future'] as Map)['values'].add(9),
+        () => ((candidate.rawJson['future'] as Map)['values'] as List).add(9),
         throwsUnsupportedError,
       );
       final exported = candidate.toJson()..['id'] = 'changed';
@@ -203,7 +203,7 @@ void main() {
       expect(page.copyWith(lastId: null).toJson()['last_id'], isNull);
       expect(page.copyWith(lastId: null).copyWith().lastId, isNull);
       expect(page.toString(), isNot(contains('opaque')));
-      expect(() => page.data.clear(), throwsUnsupportedError);
+      expect(page.data.clear, throwsUnsupportedError);
       expect(() => page.copyWith(lastId: 7), throwsFormatException);
     },
   );

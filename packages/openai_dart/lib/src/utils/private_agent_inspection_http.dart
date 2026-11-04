@@ -2,6 +2,7 @@ import 'package:http/http.dart' as http;
 
 import '../errors/exceptions.dart';
 import '../platform/http_utils.dart';
+import '../providers/vertex_provider.dart';
 import 'speech_redaction.dart';
 
 /// Guards caller callbacks for child inspection, automations and image routes.
@@ -49,7 +50,9 @@ Future<T> privateAgentInspectionTransport<T>(
   } catch (error) {
     if (error is http.RequestAbortedException) rethrow;
     if (redactDiagnostics) {
-      if (error is AbortedException || error is RequestTimeoutException) {
+      if (error is AbortedException ||
+          error is RequestTimeoutException ||
+          error is VertexAuthenticationException) {
         rethrow;
       }
       if (error is http.ClientException || isSocketException(error)) {

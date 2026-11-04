@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/files/files.dart';
-import '../utils/private_audio_http.dart';
 import '../utils/private_agent_inspection_http.dart';
+import '../utils/private_audio_http.dart';
 import 'base_resource.dart';
 
 /// Resource for file operations.

@@ -1,7 +1,7 @@
 import 'package:http/http.dart' as http;
 
-import '../utils/http_error_response.dart';
 import '../utils/diagnostic_label.dart';
+import '../utils/http_error_response.dart';
 import 'interceptor.dart';
 
 /// Interceptor that handles error responses from the API.

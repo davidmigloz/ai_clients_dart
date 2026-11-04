@@ -51,12 +51,13 @@ final class AgentFileAbortGate {
 
   /// Throws before opening a source or starting the next upload.
   void check() {
-    if (_aborted)
+    if (_aborted) {
       throw const AbortedException(
         message: 'Agent file preparation aborted',
         redactDiagnostics: true,
         stage: AbortionStage.beforeRequest,
       );
+    }
   }
 
   /// Binds a fresh native abort Future to only one HTTP attempt's lifetime.

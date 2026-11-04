@@ -44,22 +44,32 @@ http.StreamedResponse _page(
   headers: {'content-type': 'application/json; charset=utf-8'},
 );
 OpenAIClient _client(_Client transport) => OpenAIClient(
-  config: OpenAIConfig(
+  config: const OpenAIConfig(
     baseUrl: 'https://fixture.invalid/proxy/v1',
-    authProvider: const ApiKeyProvider('fixture'),
-    timeout: const Duration(seconds: 5),
-    retryPolicy: const RetryPolicy(maxRetries: 0),
+    authProvider: ApiKeyProvider('fixture'),
+    timeout: Duration(seconds: 5),
+    retryPolicy: RetryPolicy(maxRetries: 0),
   ),
   httpClient: transport,
 );
-// The production constructor binds a validated completed result; this package
-// adapter exercises the same public-resource lookup/stream pipeline in isolation.
+AgentSessionRunResult _result() => AgentSessionRunResult(
+  turn: AgentSessionTurn.fromJson(const {
+    'object': 'agent.session.turn',
+    'id': _turn,
+    'session_id': _session,
+    'agent_id': 'agent_fixture',
+    'subagent_id': null,
+    'created_at': 0,
+    'started_at': 0,
+    'completed_at': 1,
+    'status': 'completed',
+    'error': null,
+    'usage': null,
+  }),
+  messages: const [],
+);
 AgentResultArtifacts _artifacts(OpenAIClient client) =>
-    AgentResultArtifacts.forTurn(
-      resource: client.agents.sessions.artifacts,
-      sessionId: _session,
-      turnId: _turn,
-    );
+    AgentResultArtifacts(client: client, result: _result());
 Matcher _failure(AgentArtifactSelectionFailure reason) =>
     isA<AgentArtifactSelectionException>().having(
       (error) => error.reason,
@@ -69,6 +79,82 @@ Matcher _failure(AgentArtifactSelectionFailure reason) =>
 
 void main() {
   test(
+    'lossy opaque query cursors fail before a second page without inventing path restrictions',
+    () async {
+      for (final invalid in ['\ud800', '\udfff']) {
+        final transport = _Client(
+          (_) async => _page([], more: true, cursor: invalid),
+        );
+        final client = _client(transport);
+        await expectLater(
+          _artifacts(client).find(_path),
+          throwsA(_failure(AgentArtifactSelectionFailure.pagination)),
+        );
+        expect(transport.sends, 1);
+        client.close();
+      }
+      var requests = 0;
+      final client = _client(
+        _Client((request) async {
+          if (++requests == 1) return _page([], more: true, cursor: '..');
+          expect(request.url.queryParameters['after'], '..');
+          return _page([_row()]);
+        }),
+      );
+      await _artifacts(client).find(_path);
+      client.close();
+    },
+  );
+
+  test(
+    'lossy result session IDs reject before lookup and malformed observed artifact IDs never route content',
+    () async {
+      for (final invalid in ['\ud800', '\udfff']) {
+        final transport = _Client((_) async => _page([_row(id: invalid)]));
+        final client = _client(transport);
+        expect(
+          () => AgentResultArtifacts(
+            client: client,
+            result: AgentSessionRunResult(
+              turn: _result().turn.copyWith(sessionId: invalid),
+              messages: const [],
+            ),
+          ),
+          throwsFormatException,
+        );
+        expect(transport.sends, 0);
+        await expectLater(
+          _artifacts(client).downloadTo(_path, sink: (_) {}),
+          throwsFormatException,
+        );
+        expect(transport.sends, 1);
+        client.close();
+      }
+    },
+  );
+
+  test(
+    'public completed-result adapter captures actual identity and resource generation',
+    () async {
+      final requests = <http.BaseRequest>[];
+      final client = _client(
+        _Client((request) async {
+          requests.add(request);
+          return _page([_row()]);
+        }),
+      );
+      final artifacts = AgentResultArtifacts(client: client, result: _result());
+      client.updateConfig(defaultHeaders: {'x-future': 'new-generation'});
+      expect(artifacts.sessionId, _session);
+      expect(artifacts.turnId, _turn);
+      await artifacts.find(_path);
+      expect(requests.single.headers.containsKey('x-future'), isFalse);
+      expect(artifacts.toString(), isNot(contains(_session)));
+      client.close();
+    },
+  );
+
+  test(
     'every page uses actual opaque cursor and exact turn/session/path without environment filter',
     () async {
       final requests = <http.BaseRequest>[];
@@ -76,7 +162,7 @@ void main() {
       final client = _client(
         _Client((request) async {
           requests.add(request);
-          if (requests.length == 1)
+          if (requests.length == 1) {
             return _page(
               [
                 _row(id: null, turn: 'other'),
@@ -86,6 +172,7 @@ void main() {
               more: true,
               cursor: cursor,
             );
+          }
           return _page([_row()]);
         }),
       );

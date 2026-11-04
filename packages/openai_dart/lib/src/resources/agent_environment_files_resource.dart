@@ -149,8 +149,9 @@ class AgentSessionArtifactsResource extends ResourceBase with _AgentFileHttp {
     ensureNotClosed?.call();
     final path = _artifactsPath(sessionId);
     _validatePage(limit, order);
-    if (after != null)
+    if (after != null) {
       validateAgentLength(after, 'Artifact lookup after', max: 1048576);
+    }
     return _json(
       'GET',
       path,

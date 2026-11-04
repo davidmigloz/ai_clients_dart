@@ -1,7 +1,7 @@
 import 'package:http/http.dart' as http;
 
-import '../../client/openai_client.dart';
 import '../../client/interceptor_chain.dart';
+import '../../client/openai_client.dart';
 import '../../client/request_builder.dart';
 import '../../errors/exceptions.dart';
 import '../../interceptors/interceptor.dart';
@@ -10,8 +10,8 @@ import '../../models/files/file_object.dart';
 import '../../resources/agent_environment_files_resource.dart';
 import '../../resources/files_resource.dart';
 import '../../utils/private_agent_inspection_http.dart';
-import 'agent_file_inputs.dart';
 import 'agent_file_abort.dart';
+import 'agent_file_inputs.dart';
 import 'agent_file_materialization.dart';
 import 'agent_file_preparation.dart';
 
@@ -192,8 +192,9 @@ void _preflight(
     }
     var node = root;
     for (final part in file.destination.split('/').skip(1)) {
-      if (node.isFile)
+      if (node.isFile) {
         throw const FormatException('Agent file destinations conflict.');
+      }
       node = node.children.putIfAbsent(part, _FilePathNode.new);
     }
     if (node.isFile || node.children.isNotEmpty) {

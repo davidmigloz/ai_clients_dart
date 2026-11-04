@@ -168,8 +168,9 @@ void main() {
           expect((error.cause! as http.Response).body, jsonEncode(payload));
           expect(error.toString(), isNot(contains(_name)));
           expect(error.toString(), isNot(contains(_id)));
-          if (error is RateLimitException)
+          if (error is RateLimitException) {
             expect(error.retryAfter, const Duration(milliseconds: 10));
+          }
         }
         await Future<void>.delayed(Duration.zero);
         expect(
@@ -225,8 +226,9 @@ void main() {
       final sdk = client(
         MockClient((_) async {
           sends++;
-          if (sends == 1)
+          if (sends == 1) {
             throw http.ClientException(_name, Uri.parse('$_url/files'));
+          }
           return http.Response('{}', 200);
         }),
         retryPolicy: const RetryPolicy(
@@ -297,7 +299,7 @@ void main() {
   test(
     'custom HTTP errors keep identity and sticky diagnostics before outer loggers',
     () async {
-      final original = BadRequestException(message: _name, code: _id);
+      const original = BadRequestException(message: _name, code: _id);
       final observed = <Object>[];
       final sdk = client(MockClient((_) async => http.Response('{}', 200)));
       sdk.interceptorChain.interceptors.add(
@@ -342,9 +344,7 @@ void main() {
       final original = StateError(_name);
       final sdk = client(MockClient((_) async => http.Response('{}', 200)));
       sdk.interceptorChain.interceptors.add(
-        _Callback((context, next) async {
-          throw original;
-        }),
+        _Callback((context, next) => Future.error(original)),
       );
       try {
         await sdk.interceptorChain.execute(
@@ -365,7 +365,7 @@ void main() {
     'provider errors are classified at origin and never become replayable HTTP errors',
     () async {
       for (final failAt in [1, 2]) {
-        final original = BadRequestException(message: _name);
+        const original = BadRequestException(message: _name);
         final auth = _Provider(failAt, original);
         var sends = 0;
         final sdk = client(
@@ -374,7 +374,7 @@ void main() {
             return http.Response('{}', 200);
           }),
           auth: auth,
-          retryPolicy: const RetryPolicy(maxRetries: 3),
+          retryPolicy: RetryPolicy.defaultPolicy,
         );
         try {
           await sdk.files.upload(
@@ -399,12 +399,12 @@ void main() {
   test(
     'transport-origin forged HTTP errors remain typed connection failures with their cause',
     () async {
-      final original = BadRequestException(message: _name);
+      const original = BadRequestException(message: _name);
       var sends = 0;
       final sdk = client(
-        MockClient((_) async {
+        MockClient((_) {
           sends++;
-          throw original;
+          return Future.error(original);
         }),
       );
       try {
@@ -426,18 +426,60 @@ void main() {
   );
 
   test(
+    'private policy preserves safe Vertex authentication failures without retry',
+    () async {
+      var tokens = 0;
+      var sends = 0;
+      final sdk = OpenAIClient(
+        config: OpenAIConfig.vertex(
+          provider: VertexProvider(
+            baseUrl: 'https://vertex.invalid/projects/p/locations/l/openai/v1',
+            tokenProvider: () {
+              tokens++;
+              throw StateError('private credential material');
+            },
+          ),
+          retryPolicy: const RetryPolicy(maxRetries: 2),
+          logLevel: Level.FINEST,
+        ),
+        httpClient: MockClient((_) async {
+          sends++;
+          return http.Response('{}', 200);
+        }),
+      );
+      await expectLater(
+        sdk.interceptorChain.execute(
+          http.Request(
+            'GET',
+            Uri.parse('${sdk.config.baseUrl}/responses/fixture'),
+          ),
+          redactDiagnostics: true,
+        ),
+        throwsA(isA<VertexAuthenticationException>()),
+      );
+      expect(tokens, 1);
+      expect(sends, 0);
+      expect(
+        records.map((record) => record.message).join(),
+        isNot(contains('private credential material')),
+      );
+      sdk.close();
+    },
+  );
+
+  test(
     'private GET does not make arbitrary or forged origin failures replayable',
     () async {
       for (final original in <Object>[
         StateError(_name),
-        FormatException(_name),
-        BadRequestException(message: _name),
+        const FormatException(_name),
+        const BadRequestException(message: _name),
       ]) {
         var sends = 0;
         final sdk = client(
-          MockClient((_) async {
+          MockClient((_) {
             sends++;
-            throw original;
+            return Future.error(original);
           }),
           retryPolicy: const RetryPolicy(
             maxRetries: 3,
@@ -472,9 +514,9 @@ void main() {
       ]) {
         var sends = 0;
         final sdk = client(
-          MockClient((_) async {
+          MockClient((_) {
             sends++;
-            throw control;
+            return Future.error(control);
           }),
           retryPolicy: const RetryPolicy(
             maxRetries: 1,
@@ -565,15 +607,13 @@ void main() {
       await transport.started.future;
       abort.complete();
       await assertion;
-      final timeout = RequestTimeoutException(
+      const timeout = RequestTimeoutException(
         message: _name,
-        timeout: const Duration(seconds: 1),
+        timeout: Duration(seconds: 1),
       );
       sdk.interceptorChain.interceptors.insert(
         0,
-        _Callback((context, next) async {
-          throw timeout;
-        }),
+        _Callback((context, next) => Future.error(timeout)),
       );
       try {
         await sdk.interceptorChain.execute(
@@ -612,7 +652,8 @@ class _Provider implements AuthProvider {
   @override
   Map<String, String> getHeaders() {
     calls++;
-    if (calls == failAt) throw error;
+    // This fixture deliberately accepts provider failures from either family.
+    if (calls == failAt) Error.throwWithStackTrace(error, StackTrace.current);
     return {'Authorization': 'Bearer fixture-auth'};
   }
 }

@@ -61,10 +61,11 @@ final class PreparedAgentFiles {
 final class StagedAgentFile {
   /// Creates an immutable observation; staging never transfers upload ownership.
   StagedAgentFile({required this.uploadedFileId, required this.file}) {
-    if (uploadedFileId.isEmpty)
+    if (uploadedFileId.isEmpty) {
       throw const FormatException(
         'Staged agent file: expected an observed upload ID.',
       );
+    }
     file.validate();
   }
 

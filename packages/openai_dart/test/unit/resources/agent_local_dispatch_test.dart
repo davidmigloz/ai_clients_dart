@@ -871,6 +871,42 @@ void main() {
       },
     );
   }
+  for (final entry in {'high': 0xd800, 'low': 0xdc00}.entries) {
+    test(
+      'creation lone-surrogate ${entry.key} identity rejects before local effects',
+      () async {
+        final id = String.fromCharCode(entry.value);
+        final t = _Peer()
+          ..creation = true
+          ..creationSessionId = id
+          ..events = [_call('call', session: id)];
+        final c = _client(t);
+        var invoked = 0;
+        final run = c.agents.sessions.createRun(
+          CreateAgentSessionRequest(
+            agentId: 'agent',
+            environment: AgentSessionEnvironment.none(),
+            input: AgentSessionInitialInput.text('go'),
+          ),
+          toolHandlers: {
+            'local': (_) {
+              invoked++;
+              return null;
+            },
+          },
+        );
+        await expectLater(_drain(run), throwsA(isA<StreamException>()));
+        expect(invoked, 0);
+        expect(t.results, isEmpty);
+        expect(run.observedSessionId, isNull);
+        expect(t.requests.length, 1);
+        expect(t.requests.single.url.path, '/v1/agents/sessions');
+        await run.close();
+        c.close();
+        t.dispose();
+      },
+    );
+  }
 }
 
 Future<void> _drain(AgentSessionRun run) async {

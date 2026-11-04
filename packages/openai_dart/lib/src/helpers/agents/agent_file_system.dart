@@ -35,6 +35,8 @@ final class AgentFileSystemException implements Exception {
 /// System aliases above the root are resolved once. Relative selections contain
 /// no empty, dot, parent, backslash or colon-bearing components. The stricter
 /// colon policy also prevents Windows drive-relative/alternate-stream names.
+/// Roots and relative paths reject unpaired UTF-16 surrogates before filesystem
+/// access, preserving the caller's exact Unicode selection.
 ///
 /// This is not a filesystem sandbox. Public `dart:io` has no handle-level
 /// inode/device metadata or atomic no-follow/open-at operation. Canonical paths,
@@ -57,6 +59,7 @@ final class AgentFileSystem {
     return _io('open_root', supplied, () async {
       if (supplied.isEmpty ||
           supplied.contains('\u0000') ||
+          _hasUnpairedSurrogate(supplied) ||
           supplied.split(RegExp(r'[/\\]')).contains('..')) {
         throw AgentFileSystemException(operation: 'open_root', path: supplied);
       }
@@ -324,6 +327,7 @@ final class _FileObservation {
 List<String> _relativeParts(String path) {
   final parts = path.split('/');
   if (path.contains('\u0000') ||
+      _hasUnpairedSurrogate(path) ||
       path.contains(r'\') ||
       path.contains(':') ||
       parts.any((part) => part.isEmpty || part == '.' || part == '..')) {
@@ -331,6 +335,9 @@ List<String> _relativeParts(String path) {
   }
   return List.unmodifiable(parts);
 }
+
+bool _hasUnpairedSurrogate(String value) =>
+    value.runes.any((rune) => rune >= 0xD800 && rune <= 0xDFFF);
 
 String _trimTrailingSeparators(String path) {
   var result = path;

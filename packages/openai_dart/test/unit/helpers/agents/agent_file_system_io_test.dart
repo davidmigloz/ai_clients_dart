@@ -78,10 +78,24 @@ AgentResultArtifacts _artifacts(_ArtifactsTransport transport) {
     httpClient: transport,
   );
   addTearDown(client.close);
-  return AgentResultArtifacts.forTurn(
-    resource: client.agents.sessions.artifacts,
-    sessionId: 'session_$_private',
-    turnId: 'turn_$_private',
+  return AgentResultArtifacts(
+    client: client,
+    result: AgentSessionRunResult(
+      turn: AgentSessionTurn.fromJson(const {
+        'object': 'agent.session.turn',
+        'id': 'turn_$_private',
+        'session_id': 'session_$_private',
+        'agent_id': 'agent_fixture',
+        'subagent_id': null,
+        'created_at': 0,
+        'started_at': 0,
+        'completed_at': 1,
+        'status': 'completed',
+        'error': null,
+        'usage': null,
+      }),
+      messages: const [],
+    ),
   );
 }
 
@@ -95,6 +109,86 @@ void main() {
   tearDown(() async {
     if (root.existsSync()) await root.delete(recursive: true);
   });
+
+  for (final entry in {'high': '\ud800', 'low': '\udfff'}.entries) {
+    test(
+      'invalid ${entry.key} surrogate output creates no differently named file',
+      () async {
+        final transport = _ArtifactsTransport();
+        await expectLater(
+          system.downloadFile(
+            _artifacts(transport),
+            path: _hosted,
+            destination: 'selected-${entry.value}',
+          ),
+          throwsA(_privateFailure()),
+        );
+        expect(root.listSync(), isEmpty);
+        expect(transport.requests, isEmpty);
+      },
+    );
+    test(
+      'invalid ${entry.key} surrogate source fails before inspecting a replacement name',
+      () async {
+        final real = await File(
+          '${root.path}/selected-\ufffd',
+        ).writeAsBytes([1, 2]);
+        await expectLater(
+          system.selectFile(
+            'selected-${entry.value}',
+            destination: '/workspace/input',
+          ),
+          throwsA(
+            isA<AgentFileSystemException>().having(
+              (error) => error.operation,
+              'pre-filesystem rejection',
+              'select_path',
+            ),
+          ),
+        );
+        expect(await real.readAsBytes(), [1, 2]);
+      },
+    );
+    test(
+      'invalid ${entry.key} surrogate root cannot select an existing replacement root',
+      () async {
+        final actual = await Directory('${root.path}/selected-\ufffd').create();
+        await expectLater(
+          AgentFileSystem.open(
+            Directory('${root.path}/selected-${entry.value}'),
+          ),
+          throwsA(_privateFailure()),
+        );
+        expect(actual.listSync(), isEmpty);
+        expect(root.listSync(), hasLength(1));
+      },
+    );
+  }
+
+  test(
+    'valid non-ASCII root and surrogate-pair file names remain exact',
+    () async {
+      final appRoot = await Directory('${root.path}/日本語-🚀').create();
+      final unicode = await AgentFileSystem.open(appRoot);
+      await File('${appRoot.path}/入力-🚀.bin').writeAsBytes([0, 255]);
+      final selected = await unicode.selectFile(
+        '入力-🚀.bin',
+        destination: '/workspace/input',
+      );
+      expect(selected.filename, '入力-🚀.bin');
+      expect(await _bytes(selected), [0, 255]);
+      final transport = _ArtifactsTransport();
+      await unicode.downloadFile(
+        _artifacts(transport),
+        path: _hosted,
+        destination: '出力-🚀.bin',
+      );
+      expect(
+        await File('${appRoot.path}/出力-🚀.bin').readAsBytes(),
+        transport.bytes,
+      );
+    },
+  );
 
   test(
     'selects exact binary bytes, filename, hosted destination and size',

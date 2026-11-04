@@ -356,8 +356,9 @@ class RequestTimeoutException extends OpenAIException {
 
   @override
   String toString() {
-    if (hasPrivateDiagnostics(this))
+    if (hasPrivateDiagnostics(this)) {
       return 'RequestTimeoutException: [REDACTED]';
+    }
     if (timeout case final duration?) {
       return 'RequestTimeoutException: $message (after ${duration.inSeconds}s)';
     }

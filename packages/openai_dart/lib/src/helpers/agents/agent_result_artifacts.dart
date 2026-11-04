@@ -3,11 +3,13 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
+import '../../client/openai_client.dart';
 import '../../errors/exceptions.dart';
 import '../../models/agents/agents.dart';
 import '../../resources/agent_environment_files_resource.dart';
 import '../../utils/diagnostic_label.dart';
 import 'agent_file_abort.dart';
+import 'agent_session_run.dart';
 
 /// An awaited portable binary sink; each chunk is detached and read-only.
 ///
@@ -87,20 +89,31 @@ final class AgentArtifactSelectionException implements Exception {
 /// irrelevant. No tool execution, directory sync, remote deletion or automatic
 /// local destination selection occurs.
 final class AgentResultArtifacts {
-  /// Package adapter/test seam; public construction binds a completed run result.
-  /// This does not independently assert server turn completion from an ID.
-  @internal
-  AgentResultArtifacts.forTurn({
-    required AgentSessionArtifactsResource resource,
-    required this.sessionId,
-    required this.turnId,
-  }) : _resource = resource {
-    if (sessionId.isEmpty || turnId.isEmpty) {
+  /// Captures a client's resource generation and the actual completed root turn.
+  /// Raw and parsed run results share this contract; parsing does not change
+  /// artifact identity. No session or environment lookup is performed here.
+  factory AgentResultArtifacts({
+    required OpenAIClient client,
+    required AgentSessionRunResult result,
+  }) {
+    final turn = AgentSessionTurn.fromJson(result.turn.toJson());
+    if (turn.status.value != 'completed' ||
+        turn.subagentId != null ||
+        turn.sessionId.isEmpty ||
+        turn.id.isEmpty) {
       throw const FormatException(
-        'Artifact lookup requires an identified session and completed turn.',
+        'Artifact lookup requires an identified completed root turn.',
       );
     }
+    _validateArtifactRoutingId(turn.sessionId);
+    return AgentResultArtifacts._(
+      client.agents.sessions.artifacts,
+      turn.sessionId,
+      turn.id,
+    );
   }
+
+  AgentResultArtifacts._(this._resource, this.sessionId, this.turnId);
   final AgentSessionArtifactsResource _resource;
 
   /// Captured owning session ID, not printed by diagnostics.
@@ -160,23 +173,29 @@ final class AgentResultArtifacts {
           if (row.sessionId == sessionId &&
               row.turnId == turnId &&
               row.path == path) {
-            if (selected != null)
+            if (selected != null) {
               throw _failure(AgentArtifactSelectionFailure.multiple, path);
+            }
             selected = row;
           }
         }
         if (!page.hasMore) break;
         final cursor = page.lastId;
-        if (cursor == null || cursor.isEmpty || !cursors.add(cursor)) {
+        if (cursor == null ||
+            cursor.isEmpty ||
+            !_isLosslessArtifactCursor(cursor) ||
+            !cursors.add(cursor)) {
           throw _failure(AgentArtifactSelectionFailure.pagination, path);
         }
         after = cursor;
       }
-      if (selected == null)
+      if (selected == null) {
         throw _failure(AgentArtifactSelectionFailure.notFound, path);
+      }
       if (selected.id == null || selected.id!.isEmpty) {
         throw _failure(AgentArtifactSelectionFailure.missingIdentifier, path);
       }
+      _validateArtifactRoutingId(selected.id!);
       return selected.requireArtifact();
     } finally {
       gate.dispose();
@@ -279,6 +298,8 @@ final class AgentResultArtifacts {
             }, onError: (Object error) => fail(error, fromSink: true)),
           );
         },
+        // Optional named arguments on fail are not a Stream error-handler type.
+        // ignore: unnecessary_lambdas
         onError: (Object error) => fail(error),
         onDone: () {
           if (ended) return;
@@ -299,4 +320,23 @@ final class AgentResultArtifacts {
 
   @override
   String toString() => 'AgentResultArtifacts([REDACTED])';
+}
+
+void _validateArtifactRoutingId(String id) {
+  try {
+    if (Uri.decodeComponent(Uri.encodeComponent(id)) == id) return;
+  } on ArgumentError {
+    // Report no received identifier or URI text.
+  }
+  throw const FormatException(
+    'Artifact lookup requires a losslessly encodable identifier.',
+  );
+}
+
+bool _isLosslessArtifactCursor(String cursor) {
+  try {
+    return Uri.decodeQueryComponent(Uri.encodeQueryComponent(cursor)) == cursor;
+  } on ArgumentError {
+    return false;
+  }
 }

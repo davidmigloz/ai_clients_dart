@@ -2,8 +2,9 @@ import 'package:http/http.dart' as http;
 
 import '../errors/exceptions.dart';
 import '../interceptors/interceptor.dart';
-import '../utils/private_agent_inspection_http.dart';
+import '../providers/vertex_provider.dart';
 import '../utils/diagnostic_label.dart';
+import '../utils/private_agent_inspection_http.dart';
 import '../utils/request_id.dart';
 import '../utils/speech_redaction.dart';
 import 'retry_wrapper.dart';
@@ -117,8 +118,8 @@ class InterceptorChain {
     try {
       return await callback();
     } catch (error, stackTrace) {
-      if (error is OpenAIException) {
-        markPrivateDiagnostics(error);
+      if (error is OpenAIException || error is VertexAuthenticationException) {
+        if (error is OpenAIException) markPrivateDiagnostics(error);
         Error.throwWithStackTrace(error, stackTrace);
       }
       throw ConnectionException(

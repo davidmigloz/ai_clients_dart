@@ -98,7 +98,7 @@ void main() {
           '/workspace/a/./b',
           '/workspace/a/../b',
           '/workspace/../a',
-          '/workspace/a\\b',
+          r'/workspace/a\b',
           '/workspace/\u0000a',
           '/workspace/.codex/a',
           '/workspace/.managed-agents/a',
@@ -124,7 +124,7 @@ void main() {
         ]) {
           expect(
             () => AgentFileInput.bytes(
-              bytes: [],
+              bytes: const [],
               filename: name,
               destination: '/workspace/a',
             ),
@@ -154,8 +154,8 @@ void main() {
         ids.clear();
         expect(prepared.files, hasLength(1));
         expect(prepared.uploadedFileIds, ['file_private']);
-        expect(() => prepared.files.clear(), throwsUnsupportedError);
-        expect(() => prepared.uploadedFileIds.clear(), throwsUnsupportedError);
+        expect(prepared.files.clear, throwsUnsupportedError);
+        expect(prepared.uploadedFileIds.clear, throwsUnsupportedError);
         expect(prepared.copyWith(), prepared);
         expect(prepared.copyWith().hashCode, prepared.hashCode);
         expect(prepared.copyWith(files: []), isNot(prepared));
@@ -163,7 +163,7 @@ void main() {
           prepared.copyWith(uploadedFileIds: ['different']),
           isNot(prepared),
         );
-        final cause = const AbortedException(message: 'private-failure');
+        const cause = AbortedException(message: 'private-failure');
         final error = AgentFilePreparationException(
           prepared: prepared,
           cause: cause,
@@ -575,8 +575,9 @@ void main() {
         final sdk = _client(MockClient((_) async => _uploaded(++sends)));
         Stream<List<int>> source() {
           if (mode == 'open-error') throw StateError('private-source-path');
-          if (mode == 'stream-error')
+          if (mode == 'stream-error') {
             return Stream.error(StateError('private-source-path'));
+          }
           return Stream.value(
             mode == 'long'
                 ? [1, 2, 3]
