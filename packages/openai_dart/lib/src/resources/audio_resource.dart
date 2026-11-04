@@ -98,7 +98,7 @@ class AudioResource extends ResourceBase {
         ensureNotClosed: ensureNotClosed,
       );
 
-  /// Access to sample-derived custom voice creation.
+  /// Access to prompt/sample voice creation and saved voice deletion.
   VoicesResource get voices => _voices ??= VoicesResource(
     config: config,
     httpClient: httpClient,
