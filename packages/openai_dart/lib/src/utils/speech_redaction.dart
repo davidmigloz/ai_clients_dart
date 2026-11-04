@@ -120,11 +120,21 @@ bool isLiveRequest(http.BaseRequest? request) {
             }.contains(segments.last);
 }
 
-/// Identifies the single custom voice creation operation.
-bool isCustomVoiceRequest(http.BaseRequest? request) =>
-    request != null &&
-    request.method == 'POST' &&
-    request.url.path.endsWith('/audio/voices');
+/// Identifies voice creation and deletion, including opaque encoded IDs.
+bool isCustomVoiceRequest(http.BaseRequest? request) {
+  if (request == null) return false;
+  final segments = request.url.pathSegments;
+  final collection =
+      segments.length >= 2 &&
+      segments[segments.length - 2] == 'audio' &&
+      segments.last == 'voices';
+  final item =
+      segments.length >= 3 &&
+      segments[segments.length - 3] == 'audio' &&
+      segments[segments.length - 2] == 'voices';
+  return (collection && request.method == 'POST') ||
+      (item && request.method == 'DELETE');
+}
 
 /// Identifies the five consent operations, including opaque encoded IDs.
 bool isVoiceConsentRequest(http.BaseRequest? request) {

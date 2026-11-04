@@ -1,0 +1,79 @@
+{
+  "issue": 418,
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "promotion_owner": 427,
+  "types": {
+    "CreateVoiceRequest": {
+      "spec": "main",
+      "schema": "CreateVoiceRequest",
+      "file": "lib/src/models/audio/custom_voice.dart",
+      "kind": "sealed_parent",
+      "dart_class": "VoiceCreateRequest",
+      "note": "Multipart request union preserving the existing binary upload DTO. No fabricated JSON encoding or parser for binary files; public create fixtures verify branch dispatch/encoding."
+    },
+    "CreateVoiceFromConsentRequest": {
+      "spec": "main",
+      "schema": "CreateVoiceFromConsentRequest",
+      "file": "lib/src/models/audio/custom_voice.dart",
+      "kind": "sealed_variant",
+      "dart_class": "CustomVoiceCreateRequest",
+      "parent": "VoiceCreateRequest",
+      "note": "Existing consent/sample multipart DTO; omitted type remains omitted. Binary fields and MIME metadata verified at actual multipart boundary."
+    },
+    "CreateVoicePromptRequest": {
+      "spec": "main",
+      "schema": "CreateVoicePromptRequest",
+      "file": "lib/src/models/audio/custom_voice.dart",
+      "kind": "sealed_variant",
+      "dart_class": "PromptVoiceCreateRequest",
+      "parent": "VoiceCreateRequest",
+      "note": "Closed prompt request with fixed prompt type; canonical JSON and explicit multipart encodings; exact omission and string validation."
+    },
+    "VoiceResource": {
+      "spec": "main",
+      "schema": "VoiceResource",
+      "file": "lib/src/models/audio/custom_voice.dart",
+      "kind": "object",
+      "dart_class": "CustomVoice",
+      "note": "Required audio.voice object/type; audio_sample or prompt type, optional nonnull original prompt; strict known fields and immutable future receive-only metadata."
+    },
+    "VoiceDeletedResource": {
+      "spec": "main",
+      "schema": "VoiceDeletedResource",
+      "file": "lib/src/models/audio/custom_voice.dart",
+      "kind": "object",
+      "dart_class": "CustomVoiceDeleted",
+      "note": "Required id/object/deleted; fixed audio.voice.deleted object, deleted false retained; immutable receive-only future metadata."
+    }
+  },
+  "source_receipts": [
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/resources/audio/voices.py",
+      "sha256": "da2533258e202da4969be1843a50bfcdc0a637dbbc6c75194f96d2e90d955150"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/audio/voice_create_params.py",
+      "sha256": "4ac1fa687ed2615dbcf1a16324b56bb2e85e13d7d901f00b47987defed0e59d3"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/audio/voice.py",
+      "sha256": "ed71fb7590405ac01f5664486c6f3c8b23f5eaf39f5ce8ca9a6a3a0aba981cc5"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/audio/voice_deleted.py",
+      "sha256": "27147936aea24eee30b50374421299dc26c656a90ff95c075c0cc62c7897514b"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/live/built_in_voice.py",
+      "sha256": "7681de0cd5d1012e98c25dfebceed7876867d7697e3b97568f66b86639b94aa1"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/resources/audio/voices.ts",
+      "sha256": "c6a233088632dd5820a53e14c27de571b450d6ab05b960c2089697ec098cc603"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/resources/live/live.ts",
+      "sha256": "5a333e33f6a449288c0d6fcc156cb73b5a154e25d470f08edfe089c3f2353df9"
+    }
+  ]
+}

@@ -691,9 +691,11 @@ Use `client.audio.voiceConsents` to upload and manage consent recordings before 
 <details>
 <summary><b>How do I create a custom voice?</b></summary>
 
-Use `client.audio.voices` with a consent ID and an audio sample. Pass the returned voice ID to speech requests as a custom voice reference.
+Create a saved voice with `PromptVoiceCreateRequest(name: ..., prompt: ...)`, then select its ID with `LiveVoice.custom(id: voice.id)` at Live startup. Prompt voices work only in Live. Delete a saved voice explicitly with `client.audio.voices.delete(voice.id)`.
 
-→ [Full example](example/voices_example.dart)
+For a recording-based voice, keep using `CustomVoiceCreateRequest` with a consent ID and audio sample. Prompt requests default to JSON; set `encoding: VoiceCreateEncoding.multipart` when needed.
+
+→ [Prompt create/use/delete example](example/prompt_voices_example.dart) · [Consented sample example](example/voices_example.dart)
 
 </details>
 
@@ -1313,6 +1315,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [live_workflows_example.dart](example/live_workflows_example.dart) | **Offline.** stored forks, inherited state, compact Responses, caption grouping and borrowed-channel cleanup |
 | [voice_consents_example.dart](example/voice_consents_example.dart) | **Offline.** upload/list/retrieve/rename/delete consent lifecycle and explicit pagination |
 | [voices_example.dart](example/voices_example.dart) | **Offline.** explicit consent and sample upload, then caller-selected custom voice reference |
+| [prompt_voices_example.dart](example/prompt_voices_example.dart) | **Offline.** create a prompt voice, select it for Live, and explicitly delete it |
 
 </details>
 
@@ -1395,7 +1398,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | Decisions | Predicate, choice, and score questions |
 | Embeddings | Text vectors with dimension control |
 | Images | Generation, editing, and streaming |
-| Audio | Speech, transcription, translation, voice consents, and custom voices; consent phrase lookup remains untyped |
+| Audio | Speech, transcription, translation, voice consents, prompt/sample voice creation, and saved voice deletion; consent phrase lookup remains untyped |
 | Videos | Generation, editing, extension, and downloads |
 | Realtime | WebSocket and WebRTC sessions, opt-in recovery with explicit pending delivery |
 | Live | HTTP call controls, recordings, WebSockets, forks, transcript helpers, and opt-in recovery with fresh startup gating; some media conveniences remain deferred |
