@@ -1165,6 +1165,9 @@ class CharLocationCitation extends Citation {
   /// The document title.
   final String? documentTitle;
 
+  /// File identifier, when the citation refers to an uploaded document.
+  final String? fileId;
+
   /// Start character offset.
   final int startCharIndex;
 
@@ -1176,6 +1179,7 @@ class CharLocationCitation extends Citation {
     required this.citedText,
     required this.documentIndex,
     this.documentTitle,
+    this.fileId,
     required this.startCharIndex,
     required this.endCharIndex,
   });
@@ -1186,6 +1190,7 @@ class CharLocationCitation extends Citation {
       citedText: json['cited_text'] as String,
       documentIndex: json['document_index'] as int,
       documentTitle: json['document_title'] as String?,
+      fileId: json['file_id'] as String?,
       startCharIndex: json['start_char_index'] as int,
       endCharIndex: json['end_char_index'] as int,
     );
@@ -1197,6 +1202,7 @@ class CharLocationCitation extends Citation {
     'cited_text': citedText,
     'document_index': documentIndex,
     if (documentTitle != null) 'document_title': documentTitle,
+    if (fileId != null) 'file_id': fileId,
     'start_char_index': startCharIndex,
     'end_char_index': endCharIndex,
   };
@@ -1206,6 +1212,7 @@ class CharLocationCitation extends Citation {
     String? citedText,
     int? documentIndex,
     Object? documentTitle = unsetCopyWithValue,
+    Object? fileId = unsetCopyWithValue,
     int? startCharIndex,
     int? endCharIndex,
   }) {
@@ -1215,6 +1222,7 @@ class CharLocationCitation extends Citation {
       documentTitle: documentTitle == unsetCopyWithValue
           ? this.documentTitle
           : documentTitle as String?,
+      fileId: fileId == unsetCopyWithValue ? this.fileId : fileId as String?,
       startCharIndex: startCharIndex ?? this.startCharIndex,
       endCharIndex: endCharIndex ?? this.endCharIndex,
     );
@@ -1228,6 +1236,7 @@ class CharLocationCitation extends Citation {
           citedText == other.citedText &&
           documentIndex == other.documentIndex &&
           documentTitle == other.documentTitle &&
+          fileId == other.fileId &&
           startCharIndex == other.startCharIndex &&
           endCharIndex == other.endCharIndex;
 
@@ -1236,6 +1245,7 @@ class CharLocationCitation extends Citation {
     citedText,
     documentIndex,
     documentTitle,
+    fileId,
     startCharIndex,
     endCharIndex,
   );
@@ -1244,6 +1254,7 @@ class CharLocationCitation extends Citation {
   String toString() =>
       'CharLocationCitation(citedText: [${citedText.length} chars], '
       'documentIndex: $documentIndex, documentTitle: $documentTitle, '
+      'fileId: ${fileId == null ? null : '[redacted]'}, '
       'startCharIndex: $startCharIndex, endCharIndex: $endCharIndex)';
 }
 
@@ -1259,6 +1270,9 @@ class PageLocationCitation extends Citation {
   /// The document title.
   final String? documentTitle;
 
+  /// File identifier, when the citation refers to an uploaded document.
+  final String? fileId;
+
   /// Start page number.
   final int startPageNumber;
 
@@ -1270,6 +1284,7 @@ class PageLocationCitation extends Citation {
     required this.citedText,
     required this.documentIndex,
     this.documentTitle,
+    this.fileId,
     required this.startPageNumber,
     required this.endPageNumber,
   });
@@ -1280,6 +1295,7 @@ class PageLocationCitation extends Citation {
       citedText: json['cited_text'] as String,
       documentIndex: json['document_index'] as int,
       documentTitle: json['document_title'] as String?,
+      fileId: json['file_id'] as String?,
       startPageNumber: json['start_page_number'] as int,
       endPageNumber: json['end_page_number'] as int,
     );
@@ -1291,6 +1307,7 @@ class PageLocationCitation extends Citation {
     'cited_text': citedText,
     'document_index': documentIndex,
     if (documentTitle != null) 'document_title': documentTitle,
+    if (fileId != null) 'file_id': fileId,
     'start_page_number': startPageNumber,
     'end_page_number': endPageNumber,
   };
@@ -1300,6 +1317,7 @@ class PageLocationCitation extends Citation {
     String? citedText,
     int? documentIndex,
     Object? documentTitle = unsetCopyWithValue,
+    Object? fileId = unsetCopyWithValue,
     int? startPageNumber,
     int? endPageNumber,
   }) {
@@ -1309,6 +1327,7 @@ class PageLocationCitation extends Citation {
       documentTitle: documentTitle == unsetCopyWithValue
           ? this.documentTitle
           : documentTitle as String?,
+      fileId: fileId == unsetCopyWithValue ? this.fileId : fileId as String?,
       startPageNumber: startPageNumber ?? this.startPageNumber,
       endPageNumber: endPageNumber ?? this.endPageNumber,
     );
@@ -1322,6 +1341,7 @@ class PageLocationCitation extends Citation {
           citedText == other.citedText &&
           documentIndex == other.documentIndex &&
           documentTitle == other.documentTitle &&
+          fileId == other.fileId &&
           startPageNumber == other.startPageNumber &&
           endPageNumber == other.endPageNumber;
 
@@ -1330,6 +1350,7 @@ class PageLocationCitation extends Citation {
     citedText,
     documentIndex,
     documentTitle,
+    fileId,
     startPageNumber,
     endPageNumber,
   );
@@ -1338,6 +1359,7 @@ class PageLocationCitation extends Citation {
   String toString() =>
       'PageLocationCitation(citedText: [${citedText.length} chars], '
       'documentIndex: $documentIndex, documentTitle: $documentTitle, '
+      'fileId: ${fileId == null ? null : '[redacted]'}, '
       'startPageNumber: $startPageNumber, endPageNumber: $endPageNumber)';
 }
 
@@ -1353,6 +1375,9 @@ class ContentBlockLocationCitation extends Citation {
   /// The document title.
   final String? documentTitle;
 
+  /// File identifier, when the citation refers to an uploaded document.
+  final String? fileId;
+
   /// Start content block index.
   final int startBlockIndex;
 
@@ -1364,6 +1389,7 @@ class ContentBlockLocationCitation extends Citation {
     required this.citedText,
     required this.documentIndex,
     this.documentTitle,
+    this.fileId,
     required this.startBlockIndex,
     required this.endBlockIndex,
   });
@@ -1374,6 +1400,7 @@ class ContentBlockLocationCitation extends Citation {
       citedText: json['cited_text'] as String,
       documentIndex: json['document_index'] as int,
       documentTitle: json['document_title'] as String?,
+      fileId: json['file_id'] as String?,
       startBlockIndex: json['start_block_index'] as int,
       endBlockIndex: json['end_block_index'] as int,
     );
@@ -1385,6 +1412,7 @@ class ContentBlockLocationCitation extends Citation {
     'cited_text': citedText,
     'document_index': documentIndex,
     if (documentTitle != null) 'document_title': documentTitle,
+    if (fileId != null) 'file_id': fileId,
     'start_block_index': startBlockIndex,
     'end_block_index': endBlockIndex,
   };
@@ -1394,6 +1422,7 @@ class ContentBlockLocationCitation extends Citation {
     String? citedText,
     int? documentIndex,
     Object? documentTitle = unsetCopyWithValue,
+    Object? fileId = unsetCopyWithValue,
     int? startBlockIndex,
     int? endBlockIndex,
   }) {
@@ -1403,6 +1432,7 @@ class ContentBlockLocationCitation extends Citation {
       documentTitle: documentTitle == unsetCopyWithValue
           ? this.documentTitle
           : documentTitle as String?,
+      fileId: fileId == unsetCopyWithValue ? this.fileId : fileId as String?,
       startBlockIndex: startBlockIndex ?? this.startBlockIndex,
       endBlockIndex: endBlockIndex ?? this.endBlockIndex,
     );
@@ -1416,6 +1446,7 @@ class ContentBlockLocationCitation extends Citation {
           citedText == other.citedText &&
           documentIndex == other.documentIndex &&
           documentTitle == other.documentTitle &&
+          fileId == other.fileId &&
           startBlockIndex == other.startBlockIndex &&
           endBlockIndex == other.endBlockIndex;
 
@@ -1424,6 +1455,7 @@ class ContentBlockLocationCitation extends Citation {
     citedText,
     documentIndex,
     documentTitle,
+    fileId,
     startBlockIndex,
     endBlockIndex,
   );
@@ -1432,6 +1464,7 @@ class ContentBlockLocationCitation extends Citation {
   String toString() =>
       'ContentBlockLocationCitation(citedText: [${citedText.length} chars], '
       'documentIndex: $documentIndex, documentTitle: $documentTitle, '
+      'fileId: ${fileId == null ? null : '[redacted]'}, '
       'startBlockIndex: $startBlockIndex, endBlockIndex: $endBlockIndex)';
 }
 
