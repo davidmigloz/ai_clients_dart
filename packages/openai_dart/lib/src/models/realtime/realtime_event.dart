@@ -1,12 +1,15 @@
 import 'package:meta/meta.dart';
 
+import '../audio/audio_json_helpers.dart';
 import '../audio/transcription.dart'
     show
         TranscriptTextUsageDuration,
         TranscriptTextUsageTokens,
         TranscriptUsage,
         TranscriptionLanguage;
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import '../common/json_helpers.dart';
 import 'realtime_session.dart';
 
 // Re-exported so importers of `openai_dart_realtime.dart` alone can name
@@ -539,73 +542,277 @@ class ConversationItemTruncatedEvent implements RealtimeEvent {
   String toString() => 'ConversationItemTruncatedEvent(itemId: $itemId)';
 }
 
-/// Input audio transcription delta event.
+/// One token's log probability in a Realtime input transcription delta.
 ///
-/// Sent when a transcription delta is available for input audio.
+/// All three native fields are required. Future finite JSON metadata is retained.
 @immutable
-class InputAudioTranscriptionDeltaEvent implements RealtimeEvent {
-  /// Creates an [InputAudioTranscriptionDeltaEvent].
-  const InputAudioTranscriptionDeltaEvent({
-    required this.eventId,
-    required this.itemId,
-    required this.contentIndex,
-    required this.delta,
-    this.obfuscation,
-  });
+final class RealtimeTranscriptionLogprob {
+  /// Snapshots token bytes and optional future provider metadata.
+  RealtimeTranscriptionLogprob({
+    required this.token,
+    required this.logprob,
+    required List<int> bytes,
+    Map<String, dynamic> rawJson = const {},
+  }) : bytes = List<int>.unmodifiable(bytes),
+       rawJson = snapshotAudioJson(rawJson, 'RealtimeTranscriptionLogprob') {
+    if (!logprob.isFinite || this.bytes.any((byte) => !byte.isFinite)) {
+      throw const FormatException(
+        'RealtimeTranscriptionLogprob: expected finite numbers',
+      );
+    }
+  }
 
-  /// Creates an [InputAudioTranscriptionDeltaEvent] from JSON.
-  factory InputAudioTranscriptionDeltaEvent.fromJson(
-    Map<String, dynamic> json,
-  ) {
-    return InputAudioTranscriptionDeltaEvent(
-      eventId: json['event_id'] as String,
-      itemId: json['item_id'] as String,
-      contentIndex: json['content_index'] as int,
-      delta: json['delta'] as String,
-      obfuscation: json['obfuscation'] as String?,
+  /// Parses required native fields without coercion or rounding.
+  factory RealtimeTranscriptionLogprob.fromJson(Map<String, dynamic> json) {
+    final snapshot = snapshotAudioJson(json, 'RealtimeTranscriptionLogprob');
+    final bytes = snapshot['bytes'];
+    if (bytes is! List) {
+      throw const FormatException(
+        'RealtimeTranscriptionLogprob.bytes: expected an array',
+      );
+    }
+    return RealtimeTranscriptionLogprob(
+      token: requireJsonString(
+        snapshot['token'],
+        'RealtimeTranscriptionLogprob.token',
+      ),
+      logprob: requireAudioNumber(
+        snapshot['logprob'],
+        'RealtimeTranscriptionLogprob.logprob',
+      ),
+      bytes: [
+        for (final byte in bytes)
+          requireAudioInt(byte, 'RealtimeTranscriptionLogprob.bytes'),
+      ],
+      rawJson: snapshot,
     );
   }
 
+  /// Exact token text.
+  final String token;
+
+  /// Finite log probability.
+  final double logprob;
+
+  /// Exact integer byte array; the schema imposes no byte bounds.
+  final List<int> bytes;
+
+  /// Immutable future provider metadata; typed fields are authoritative.
+  final Map<String, dynamic> rawJson;
+
+  /// Emits typed fields and preserved future JSON.
+  Map<String, dynamic> toJson() => mergeAudioJson(
+    rawJson,
+    const {'token', 'logprob', 'bytes'},
+    {'token': token, 'logprob': logprob, 'bytes': bytes},
+  );
+
+  /// Copies values while retaining future metadata.
+  RealtimeTranscriptionLogprob copyWith({
+    String? token,
+    double? logprob,
+    List<int>? bytes,
+  }) => RealtimeTranscriptionLogprob(
+    token: token ?? this.token,
+    logprob: logprob ?? this.logprob,
+    bytes: bytes ?? this.bytes,
+    rawJson: rawJson,
+  );
+  @override
+  bool operator ==(Object other) =>
+      other is RealtimeTranscriptionLogprob &&
+      mapsDeepEqual(toJson(), other.toJson());
+  @override
+  int get hashCode => mapDeepHashCode(toJson());
+  @override
+  String toString() => 'RealtimeTranscriptionLogprob([REDACTED])';
+}
+
+/// Input audio transcription delta event.
+///
+/// Content index and delta may be absent, but their wire values cannot be null.
+/// Log probabilities may be absent, null, empty, or populated independently.
+@immutable
+class InputAudioTranscriptionDeltaEvent implements RealtimeEvent {
+  /// Snapshots optional log probabilities and future provider metadata.
+  InputAudioTranscriptionDeltaEvent({
+    required this.eventId,
+    required this.itemId,
+    this.contentIndex,
+    this.delta,
+    this.obfuscation,
+    List<RealtimeTranscriptionLogprob>? logprobs,
+    bool hasLogprobs = false,
+    Map<String, dynamic> rawJson = const {},
+  }) : logprobs = logprobs == null
+           ? null
+           : List<RealtimeTranscriptionLogprob>.unmodifiable(logprobs),
+       hasLogprobs = hasLogprobs || logprobs != null,
+       rawJson = snapshotAudioJson(
+         rawJson,
+         'InputAudioTranscriptionDeltaEvent',
+       ) {
+    if (contentIndex != null && !contentIndex!.isFinite) {
+      throw const FormatException(
+        'InputAudioTranscriptionDeltaEvent.contentIndex: expected a finite integer',
+      );
+    }
+  }
+
+  /// Parses the required IDs and optional native fields.
+  factory InputAudioTranscriptionDeltaEvent.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    const context = 'InputAudioTranscriptionDeltaEvent';
+    final snapshot = snapshotAudioJson(json, context);
+    requireJsonType(
+      snapshot,
+      'conversation.item.input_audio_transcription.delta',
+      context,
+    );
+    final logprobs = snapshot['logprobs'];
+    if (logprobs != null && logprobs is! List) {
+      throw const FormatException(
+        '$context.logprobs: expected an array or null',
+      );
+    }
+    return InputAudioTranscriptionDeltaEvent(
+      eventId: requireJsonString(snapshot['event_id'], '$context.event_id'),
+      itemId: requireJsonString(snapshot['item_id'], '$context.item_id'),
+      contentIndex: snapshot.containsKey('content_index')
+          ? requireAudioInt(snapshot['content_index'], '$context.content_index')
+          : null,
+      delta: optionalJsonString(snapshot, 'delta', context),
+      obfuscation: optionalJsonString(
+        snapshot,
+        'obfuscation',
+        context,
+        nullable: true,
+      ),
+      logprobs: logprobs == null
+          ? null
+          : [
+              for (final value in logprobs as List)
+                RealtimeTranscriptionLogprob.fromJson(
+                  requireJsonObject(value, '$context.logprobs'),
+                ),
+            ],
+      hasLogprobs: snapshot.containsKey('logprobs'),
+      rawJson: snapshot,
+    );
+  }
   @override
   String get type => 'conversation.item.input_audio_transcription.delta';
-
   @override
   final String eventId;
 
   /// The item ID.
   final String itemId;
 
-  /// The content index.
-  final int contentIndex;
+  /// Optional content index. Absence is represented by null.
+  final int? contentIndex;
 
-  /// The transcription delta.
-  final String delta;
+  /// Optional transcription delta. Absence is represented by null.
+  final String? delta;
 
-  /// The obfuscation string (if present).
+  /// Optional legacy obfuscation string, retained for compatibility.
   final String? obfuscation;
 
-  @override
-  Map<String, dynamic> toJson() => {
-    'type': type,
-    'event_id': eventId,
-    'item_id': itemId,
-    'content_index': contentIndex,
-    'delta': delta,
-    if (obfuscation != null) 'obfuscation': obfuscation,
-  };
+  /// Optional nullable per-token log probabilities.
+  final List<RealtimeTranscriptionLogprob>? logprobs;
 
+  /// Distinguishes omitted [logprobs] from explicit null.
+  final bool hasLogprobs;
+
+  /// Immutable future provider metadata; typed fields are authoritative.
+  final Map<String, dynamic> rawJson;
+  @override
+  Map<String, dynamic> toJson() => mergeAudioJson(
+    rawJson,
+    const {
+      'type',
+      'event_id',
+      'item_id',
+      'content_index',
+      'delta',
+      'obfuscation',
+      'logprobs',
+    },
+    {
+      'type': type,
+      'event_id': eventId,
+      'item_id': itemId,
+      if (contentIndex != null) 'content_index': contentIndex,
+      if (delta != null) 'delta': delta,
+      if (obfuscation != null) 'obfuscation': obfuscation,
+      if (hasLogprobs)
+        'logprobs': logprobs?.map((value) => value.toJson()).toList(),
+    },
+  );
+
+  /// Copies optional fields; clearing logprobs omits its wire key.
+  InputAudioTranscriptionDeltaEvent copyWith({
+    String? eventId,
+    String? itemId,
+    Object? contentIndex = unsetCopyWithValue,
+    Object? delta = unsetCopyWithValue,
+    Object? obfuscation = unsetCopyWithValue,
+    Object? logprobs = unsetCopyWithValue,
+    bool clearLogprobs = false,
+  }) => InputAudioTranscriptionDeltaEvent(
+    eventId: eventId ?? this.eventId,
+    itemId: itemId ?? this.itemId,
+    contentIndex: identical(contentIndex, unsetCopyWithValue)
+        ? this.contentIndex
+        : contentIndex == null
+        ? null
+        : requireAudioInt(
+            contentIndex,
+            'InputAudioTranscriptionDeltaEvent.contentIndex',
+          ),
+    delta: identical(delta, unsetCopyWithValue)
+        ? this.delta
+        : delta == null
+        ? null
+        : requireJsonString(delta, 'InputAudioTranscriptionDeltaEvent.delta'),
+    obfuscation: identical(obfuscation, unsetCopyWithValue)
+        ? this.obfuscation
+        : obfuscation == null
+        ? null
+        : requireJsonString(
+            obfuscation,
+            'InputAudioTranscriptionDeltaEvent.obfuscation',
+          ),
+    logprobs: clearLogprobs
+        ? null
+        : identical(logprobs, unsetCopyWithValue)
+        ? this.logprobs
+        : _copyRealtimeLogprobs(logprobs),
+    hasLogprobs:
+        !clearLogprobs &&
+        (!identical(logprobs, unsetCopyWithValue) || hasLogprobs),
+    rawJson: rawJson,
+  );
   @override
   bool operator ==(Object other) =>
-      identical(this, other) ||
       other is InputAudioTranscriptionDeltaEvent &&
-          runtimeType == other.runtimeType &&
-          eventId == other.eventId;
-
+      runtimeType == other.runtimeType &&
+      mapsDeepEqual(toJson(), other.toJson());
   @override
-  int get hashCode => eventId.hashCode;
-
+  int get hashCode => mapDeepHashCode(toJson());
   @override
-  String toString() => 'InputAudioTranscriptionDeltaEvent(delta: $delta)';
+  String toString() => 'InputAudioTranscriptionDeltaEvent([REDACTED])';
+}
+
+List<RealtimeTranscriptionLogprob>? _copyRealtimeLogprobs(Object? value) {
+  if (value == null) return null;
+  if (value is! List ||
+      value.any((item) => item is! RealtimeTranscriptionLogprob)) {
+    throw const FormatException(
+      'InputAudioTranscriptionDeltaEvent.logprobs: expected token log probabilities',
+    );
+  }
+  return value.cast<RealtimeTranscriptionLogprob>();
 }
 
 /// Input audio transcription completed event.

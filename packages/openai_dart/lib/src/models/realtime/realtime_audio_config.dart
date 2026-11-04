@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../audio/audio_voice.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import 'realtime_audio_formats.dart';
@@ -12,11 +13,15 @@ import 'realtime_enums.dart';
 
 /// Noise reduction configuration for the input audio buffer.
 ///
-/// `null` (the field omitted) disables noise reduction.
+/// Set the enclosing audio input's `noise_reduction` field to `null` to disable
+/// filtering. Omitting that field from an update preserves its current setting.
 @immutable
 class AudioInputNoiseReduction {
-  /// Creates an [AudioInputNoiseReduction].
-  const AudioInputNoiseReduction({this.type});
+  /// Creates a configuration, omitting [strength] when it is null.
+  ///
+  /// Invalid strengths cannot be serialized, including when assertions are off.
+  const AudioInputNoiseReduction({this.type, this.strength})
+    : assert(strength == null || (strength >= 0 && strength <= 1));
 
   /// Creates from JSON.
   factory AudioInputNoiseReduction.fromJson(Map<String, dynamic> json) {
@@ -24,36 +29,84 @@ class AudioInputNoiseReduction {
       type: json['type'] != null
           ? NoiseReductionType.fromJson(json['type'] as String)
           : null,
-    );
+      strength: json.containsKey('strength')
+          ? _noiseReductionStrength(json['strength'])
+          : null,
+    )..validate();
   }
 
   /// The noise-reduction profile.
   final NoiseReductionType? type;
 
+  /// Input noise suppression strength, from 0 through 1 inclusive.
+  ///
+  /// The server defaults to 1 when noise reduction is first enabled. Omitting
+  /// this field from a session update preserves the current strength.
+  final double? strength;
+
+  /// Validates the strength before serialization or dispatch.
+  void validate() {
+    if (strength != null) _noiseReductionStrength(strength);
+  }
+
   /// Converts to JSON.
-  Map<String, dynamic> toJson() => {if (type != null) 'type': type!.toJson()};
+  Map<String, dynamic> toJson() {
+    validate();
+    return {
+      if (type != null) 'type': type!.toJson(),
+      if (strength != null) 'strength': strength,
+    };
+  }
 
   /// Returns a copy of this [AudioInputNoiseReduction] with the given fields
   /// replaced. Pass `null` for [type] to clear the existing value.
-  AudioInputNoiseReduction copyWith({Object? type = unsetCopyWithValue}) =>
-      AudioInputNoiseReduction(
-        type: identical(type, unsetCopyWithValue)
-            ? this.type
-            : type as NoiseReductionType?,
+  /// Pass [clearStrength] to omit the strength; explicit `strength: null` is
+  /// invalid because the wire field is nonnullable.
+  AudioInputNoiseReduction copyWith({
+    Object? type = unsetCopyWithValue,
+    Object? strength = unsetCopyWithValue,
+    bool clearStrength = false,
+  }) {
+    if (clearStrength && !identical(strength, unsetCopyWithValue)) {
+      throw const FormatException(
+        'AudioInputNoiseReduction.strength: cannot set and clear together',
       );
+    }
+    return AudioInputNoiseReduction(
+      type: identical(type, unsetCopyWithValue)
+          ? this.type
+          : type as NoiseReductionType?,
+      strength: clearStrength
+          ? null
+          : identical(strength, unsetCopyWithValue)
+          ? this.strength
+          : _noiseReductionStrength(strength),
+    )..validate();
+  }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is AudioInputNoiseReduction &&
           runtimeType == other.runtimeType &&
-          type == other.type;
+          type == other.type &&
+          strength == other.strength;
 
   @override
-  int get hashCode => type.hashCode;
+  int get hashCode => Object.hash(type, strength);
 
   @override
-  String toString() => 'AudioInputNoiseReduction(type: $type)';
+  String toString() =>
+      'AudioInputNoiseReduction(type: $type, strength: $strength)';
+}
+
+double _noiseReductionStrength(Object? value) {
+  if (value is! num || !value.isFinite || value < 0 || value > 1) {
+    throw const FormatException(
+      'AudioInputNoiseReduction.strength: expected a finite number from 0 to 1',
+    );
+  }
+  return value.toDouble();
 }
 
 // =============================================================================
@@ -373,17 +426,28 @@ class RealtimeAudioConfigInput {
 @immutable
 class RealtimeAudioConfigOutput {
   /// Creates a [RealtimeAudioConfigOutput].
-  const RealtimeAudioConfigOutput({this.format, this.voice, this.speed});
+  ///
+  /// Select either the existing named [voice] or typed [voiceSelection].
+  const RealtimeAudioConfigOutput({
+    this.format,
+    this.voice,
+    this.voiceSelection,
+    this.speed,
+  }) : assert(voice == null || voiceSelection == null);
 
   /// Creates from JSON.
   factory RealtimeAudioConfigOutput.fromJson(Map<String, dynamic> json) {
+    final voice = json.containsKey('voice')
+        ? AudioVoice.fromJson(json['voice'])
+        : null;
     return RealtimeAudioConfigOutput(
       format: json['format'] != null
           ? RealtimeAudioFormats.fromJson(
               json['format'] as Map<String, dynamic>,
             )
           : null,
-      voice: json['voice'] as String?,
+      voice: voice is NamedAudioVoice ? voice.name : null,
+      voiceSelection: voice is NamedAudioVoice ? null : voice,
       speed: (json['speed'] as num?)?.toDouble(),
     );
   }
@@ -391,33 +455,55 @@ class RealtimeAudioConfigOutput {
   /// Output audio format.
   final RealtimeAudioFormats? format;
 
-  /// Voice identifier or custom voice name (e.g. `'alloy'`, `'cedar'`).
+  /// Open named voice (e.g. `'alloy'`, `'cedar'`).
   ///
-  /// Modeled as an open `String` to match the spec's `VoiceIdsOrCustomVoice`
-  /// union (built-in voices + custom strings).
+  /// Use [voiceSelection] to select a custom voice by ID instead.
   final String? voice;
+
+  /// A typed open name or reference to an existing custom voice.
+  ///
+  /// Custom voices created from an audio sample are eligible for Realtime when
+  /// enabled by the service. Prompt-created voices are currently Live-only.
+  /// Cannot be combined with [voice].
+  final AudioVoice? voiceSelection;
 
   /// Speech speed multiplier (0.25–1.5; default `1.0`).
   final double? speed;
 
   /// Converts to JSON.
-  Map<String, dynamic> toJson() => {
-    if (format != null) 'format': format!.toJson(),
-    if (voice != null) 'voice': voice,
-    if (speed != null) 'speed': speed,
-  };
+  Map<String, dynamic> toJson() {
+    if (voice != null && voiceSelection != null) {
+      throw const FormatException(
+        'RealtimeAudioConfigOutput.voice: select one voice representation',
+      );
+    }
+    return {
+      if (format != null) 'format': format!.toJson(),
+      if (voice != null) 'voice': voice,
+      if (voiceSelection != null)
+        'voice': AudioVoice.fromJson(voiceSelection!.toJson()).toJson(),
+      if (speed != null) 'speed': speed,
+    };
+  }
 
   /// Returns a copy of this [RealtimeAudioConfigOutput] with the given fields
   /// replaced. Pass `null` for any field to clear the existing value.
+  ///
+  /// To switch representations, clear the previous field in the same call:
+  /// `copyWith(voice: null, voiceSelection: AudioVoice.custom('voice_id'))`.
   RealtimeAudioConfigOutput copyWith({
     Object? format = unsetCopyWithValue,
     Object? voice = unsetCopyWithValue,
+    Object? voiceSelection = unsetCopyWithValue,
     Object? speed = unsetCopyWithValue,
   }) => RealtimeAudioConfigOutput(
     format: identical(format, unsetCopyWithValue)
         ? this.format
         : format as RealtimeAudioFormats?,
     voice: identical(voice, unsetCopyWithValue) ? this.voice : voice as String?,
+    voiceSelection: identical(voiceSelection, unsetCopyWithValue)
+        ? this.voiceSelection
+        : voiceSelection as AudioVoice?,
     speed: identical(speed, unsetCopyWithValue) ? this.speed : speed as double?,
   );
 
@@ -426,16 +512,16 @@ class RealtimeAudioConfigOutput {
       identical(this, other) ||
       other is RealtimeAudioConfigOutput &&
           runtimeType == other.runtimeType &&
-          format == other.format &&
-          voice == other.voice &&
-          speed == other.speed;
+          mapsDeepEqual(toJson(), other.toJson());
 
   @override
-  int get hashCode => Object.hash(format, voice, speed);
+  int get hashCode => Object.hash(runtimeType, mapDeepHashCode(toJson()));
 
   @override
   String toString() =>
-      'RealtimeAudioConfigOutput(format: $format, voice: $voice, speed: $speed)';
+      'RealtimeAudioConfigOutput(format: $format, voice: [REDACTED], '
+      'voiceSelection: ${voiceSelection == null ? 'absent' : '[REDACTED]'}, '
+      'speed: $speed)';
 }
 
 // =============================================================================

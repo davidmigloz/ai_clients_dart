@@ -21,9 +21,9 @@ Future<void> main() async {
     // Connect to a realtime session via WebSocket using the main API key.
     // This is suitable for server-side (Dart VM) usage.
     final ws = await client.realtime.connect(
-      model: 'gpt-realtime-2',
+      model: 'gpt-realtime-2.1',
       config: const realtime.RealtimeSessionCreateRequest(
-        model: 'gpt-realtime-2',
+        model: 'gpt-realtime-2.1',
         audio: realtime.RealtimeAudioConfig(
           output: realtime.RealtimeAudioConfigOutput(voice: 'alloy'),
         ),
@@ -72,7 +72,7 @@ Future<void> main() async {
     final secretResponse = await client.realtimeSessions.createClientSecret(
       const realtime.RealtimeClientSecretCreateRequest(
         session: realtime.RealtimeSessionCreateRequest(
-          model: 'gpt-realtime-2',
+          model: 'gpt-realtime-2.1',
           audio: realtime.RealtimeAudioConfig(
             input: realtime.RealtimeAudioConfigInput(
               turnDetection:
@@ -86,7 +86,6 @@ Future<void> main() async {
     );
 
     print('Session ID: ${secretResponse.session.id}');
-    print('Client secret: ${secretResponse.value}');
     print('Expires at: ${secretResponse.expiresAt}');
 
     // --- WebRTC: Create call with SDP exchange ---
@@ -106,7 +105,7 @@ Future<void> main() async {
     //   realtime.RealtimeCallCreateRequest(
     //     sdp: offer.sdp!,
     //     session: realtime.RealtimeSessionCreateRequest(
-    //       model: 'gpt-realtime-2',
+    //       model: 'gpt-realtime-2.1',
     //       audio: realtime.RealtimeAudioConfig(
     //         output: realtime.RealtimeAudioConfigOutput(voice: 'alloy'),
     //       ),
@@ -132,7 +131,7 @@ Future<void> main() async {
     // await client.realtimeSessions.calls.accept(
     //   callId,
     //   request: const realtime.RealtimeSessionCreateRequest(
-    //     model: 'gpt-realtime-2',
+    //     model: 'gpt-realtime-2.1',
     //     audio: realtime.RealtimeAudioConfig(
     //       output: realtime.RealtimeAudioConfigOutput(voice: 'alloy'),
     //     ),
