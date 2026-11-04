@@ -1416,6 +1416,42 @@ For sequential pulls that pause and continue, use `run.nextEvent()` instead of t
 
 <a id="session-history-and-traces"></a>
 <details>
+<summary><b>Handle local functions during an Agent turn</b></summary>
+
+Keep canonical tool definitions in the saved Agent or creation request, then opt
+into local implementations separately. The original call event arrives before
+its handler runs; advancing the same cursor executes registered calls sequentially.
+
+```dart
+final run = client.agents.sessions.stream(
+  sessionId,
+  input: AgentSessionInitialInput.text('Double 2.'),
+  toolHandlers: {
+    'double_number': (args) => {'answer': (args['number']! as int) * 2},
+  },
+);
+try {
+  await for (final event in run.events) {
+    // Render progress; unknown functions stay manual.
+  }
+} finally {
+  await run.close();
+}
+```
+
+Use `sessions.createRun(request, toolHandlers: ...)` for lazy streamed creation;
+explicit `stream: false` rejects locally. Callbacks stay out of wire JSON. Calls
+are deduplicated for the entire run, with a configurable 1,024-call budget that
+fails on overflow. Arguments must be JSON objects; failures send only
+`Tool handler failed.`. Optional `onToolError` receives private local details.
+Closing or aborting stops further submission; application side effects already
+performed are not undone. No executor, browser authentication or sandbox is added.
+
+→ [Offline local-tools example](example/agent_local_tools_example.dart), with `--create` for creation
+
+</details>
+
+<details>
 <summary><b>Session history and traces</b></summary>
 
 Read session items, turns, and published OTLP traces through `client.agents.sessions`. Trace reads require organization export settings and permissions; a page contains only traces published when it is read.
@@ -1644,6 +1680,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [agent_browser_actions_example.dart](example/agent_browser_actions_example.dart) | **Offline.** explicit origin decisions, private authentication and observed acceptance |
 | [agent_session_recovery_example.dart](example/agent_session_recovery_example.dart) | **Offline.** subscribe/buffer, current-state/history reconciliation and local observer cleanup |
 | [agent_session_run_example.dart](example/agent_session_run_example.dart) | **Offline.** lazy idle follow-up, selected root boundary, controlled pulls and separate cancellation |
+| [agent_local_tools_example.dart](example/agent_local_tools_example.dart) | **Offline.** opt-in sequential function dispatch for streamed creation or idle follow-up |
 | [agent_session_history_example.dart](example/agent_session_history_example.dart) | **Offline.** root/turn history and published OTLP trace pagination |
 | [agent_subagents_example.dart](example/agent_subagents_example.dart) | **Offline.** Agent session subagents |
 | [agent_environments_example.dart](example/agent_environments_example.dart) | **Offline.** template CRUD and owned hosted environment prewarming, pagination and safe inspection |

@@ -75,6 +75,8 @@ Stream<Uint8List> openSpeechByteStream({
 /// before any bytes are delivered. Non-success bodies use [parseError] instead.
 /// [onReady] runs synchronously after successful header validation, before bytes
 /// are subscribed. Throwing rejects the observation and releases its response.
+/// [idempotencyKey], when supplied by a private operation, overrides constructed
+/// headers after provider/default merging. It never enables request replay.
 Stream<Uint8List> openPrivateByteStream({
   required http.Client httpClient,
   required http.Client Function()? streamClientFactory,
@@ -84,6 +86,7 @@ Stream<Uint8List> openPrivateByteStream({
   Map<String, dynamic>? body,
   Map<String, String>? additionalHeaders,
   String? betaFeature,
+  String? idempotencyKey,
   required String accept,
   required Duration timeout,
   required String context,
@@ -104,6 +107,7 @@ Stream<Uint8List> openPrivateByteStream({
   body: body,
   additionalHeaders: additionalHeaders,
   betaFeature: betaFeature,
+  idempotencyKey: idempotencyKey,
   accept: accept,
   timeout: timeout,
   parseError: parseError,
@@ -313,6 +317,7 @@ class _PrivateByteOperation {
     this.sanitizeConnectorErrors = false,
     Map<String, String>? additionalHeaders,
     this.betaFeature,
+    this.idempotencyKey,
   }) : additionalHeaders = additionalHeaders == null
            ? null
            : Map<String, String>.unmodifiable(additionalHeaders) {
@@ -341,6 +346,7 @@ class _PrivateByteOperation {
   final Map<String, dynamic>? body;
   final Map<String, String>? additionalHeaders;
   final String? betaFeature;
+  final String? idempotencyKey;
   final String accept;
   final Duration timeout;
   final ApiException Function(http.Response response) parseError;
@@ -405,6 +411,11 @@ class _PrivateByteOperation {
               ..headers['Content-Type'] = 'application/json',
       );
       if (betaFeature != null) request.headers['openai-beta'] = betaFeature!;
+      // Explicit operation-level keys win even when case-sensitive provider and
+      // default maps retained a differently cased key later in insertion order.
+      if (idempotencyKey != null) {
+        request.headers['idempotency-key'] = idempotencyKey!;
+      }
       if (body != null) {
         request
           ..headers['content-type'] = 'application/json; charset=utf-8'
