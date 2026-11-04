@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -6,6 +7,7 @@ import 'package:logging/logging.dart';
 import '../auth/auth_provider.dart';
 import '../errors/exceptions.dart';
 import '../utils/request_id.dart';
+import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
 
 /// Mixin providing streaming request capabilities for resources.
@@ -28,10 +30,8 @@ import 'base_resource.dart';
 ///
 /// ## Resource implementation
 ///
-/// Call [prepareStreamingRequest] to obtain the request and correlation ID,
-/// then pass both to [sendStreamingRequest]. Consume the unbuffered response
-/// with the NDJSON parser, checking inline error objects before decoding each
-/// event. The public chat and completion resources implement this sequence.
+/// Delegate NDJSON requests to [streamRequest] so cancellation reaches both
+/// pending transport requests and the active body subscription.
 mixin StreamingResource on ResourceBase {
   /// Prepares a streaming request by applying auth and logging.
   ///
@@ -80,6 +80,137 @@ mixin StreamingResource on ResourceBase {
     }
 
     return streamedResponse;
+  }
+
+  /// Sends and parses an NDJSON request with request-scoped cancellation.
+  ///
+  /// Cancellation closes the local stream promptly while credentials, headers,
+  /// or response data are pending. Native transport cancellation depends on the
+  /// supplied client's [http.AbortableRequest] support.
+  Stream<T> streamRequest<T>({
+    required http.Request Function() createRequest,
+    required T Function(Map<String, dynamic>) fromJson,
+    Future<void>? abortTrigger,
+  }) {
+    final requestAbort = Completer<void>();
+    StreamSubscription<dynamic>? subscription;
+    late StreamController<T> controller;
+    var stopped = false;
+    var requestId = generateRequestId();
+
+    void stop({bool abort = true}) {
+      if (stopped) return;
+      stopped = true;
+      if (abort && !requestAbort.isCompleted) requestAbort.complete();
+      // The parser uses forwarding transformations, so canceling this
+      // subscription reaches the body even when no complete line is available.
+      subscription?.cancel().ignore();
+    }
+
+    void finish([Object? error, StackTrace? trace]) {
+      if (stopped) return;
+      if (error != null) controller.addError(error, trace);
+      stop(abort: error != null);
+      unawaited(controller.close());
+    }
+
+    Future<void> run() async {
+      try {
+        ensureNotClosed?.call();
+        final request = createRequest();
+        requestId = request.headers['X-Request-ID'] ?? requestId;
+        final (prepared, correlationId) = await prepareStreamingRequest(
+          request,
+        );
+        if (stopped) return;
+        requestId = correlationId;
+        final abortable =
+            http.AbortableRequest(
+                prepared.method,
+                prepared.url,
+                abortTrigger: requestAbort.future,
+              )
+              ..headers.addAll(prepared.headers)
+              ..bodyBytes = prepared.bodyBytes
+              ..followRedirects = prepared.followRedirects
+              ..maxRedirects = prepared.maxRedirects
+              ..persistentConnection = prepared.persistentConnection;
+        final response = await httpClient.send(abortable);
+        if (stopped) {
+          // A custom client may ignore native abort and return a response later.
+          response.stream.listen(null).cancel().ignore();
+          return;
+        }
+        if (response.statusCode >= 400) {
+          final errorBytes = <int>[];
+          subscription = response.stream.listen(
+            errorBytes.addAll,
+            onError: finish,
+            onDone: () {
+              if (stopped) return;
+              try {
+                finish(
+                  mapHttpError(
+                    http.Response.bytes(
+                      errorBytes,
+                      response.statusCode,
+                      headers: response.headers,
+                      request: response.request,
+                    ),
+                  ),
+                );
+              } catch (error, trace) {
+                finish(error, trace);
+              }
+            },
+          );
+        } else {
+          subscription = parseNDJSON(response.stream).listen(
+            (json) {
+              if (stopped) return;
+              try {
+                if (json['error'] != null) throwInlineStreamError(json);
+                controller.add(fromJson(json));
+              } catch (error, trace) {
+                finish(error, trace);
+              }
+            },
+            onError: finish,
+            onDone: finish,
+          );
+        }
+        if (controller.isPaused) subscription?.pause();
+      } catch (error, trace) {
+        if (!stopped) {
+          _logStreamError(error, requestId);
+          finish(error, trace);
+        }
+      }
+    }
+
+    controller = StreamController<T>(
+      onListen: () {
+        if (abortTrigger != null) {
+          unawaited(
+            abortTrigger.then((_) {
+              finish(
+                AbortedException(
+                  message: 'Request aborted by user',
+                  correlationId: requestId,
+                  timestamp: DateTime.now(),
+                  stage: AbortionStage.duringStream,
+                ),
+              );
+            }, onError: (Object _, StackTrace _) {}),
+          );
+        }
+        unawaited(run());
+      },
+      onPause: () => subscription?.pause(),
+      onResume: () => subscription?.resume(),
+      onCancel: stop,
+    );
+    return controller.stream;
   }
 
   /// Applies auth credentials to a request.

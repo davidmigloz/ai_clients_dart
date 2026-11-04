@@ -13,7 +13,6 @@ import '../models/models/show_request.dart';
 import '../models/models/show_response.dart';
 import '../models/models/status_event.dart';
 import '../models/models/status_response.dart';
-import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
 import 'streaming_resource.dart';
 
@@ -114,35 +113,30 @@ class ModelsResource extends ResourceBase with StreamingResource {
   /// The [request] contains the model configuration.
   ///
   /// Returns a stream of [StatusEvent] progress updates.
-  Stream<StatusEvent> createStream({required CreateRequest request}) async* {
-    final url = requestBuilder.buildUrl('/api/create');
+  /// The optional [abortTrigger] cancels the request and response stream.
+  Stream<StatusEvent> createStream({
+    required CreateRequest request,
+    Future<void>? abortTrigger,
+  }) {
+    return streamRequest(
+      createRequest: () {
+        final url = requestBuilder.buildUrl('/api/create');
 
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
+        final headers = requestBuilder.buildHeaders(
+          additionalHeaders: {'Content-Type': 'application/json'},
+        );
+
+        // Ensure stream is true for streaming
+        final requestData = request.copyWith(stream: true);
+
+        final httpRequest = http.Request('POST', url)
+          ..headers.addAll(headers)
+          ..body = jsonEncode(requestData.toJson());
+        return httpRequest;
+      },
+      abortTrigger: abortTrigger,
+      fromJson: StatusEvent.fromJson,
     );
-
-    // Ensure stream is true for streaming
-    final requestData = request.copyWith(stream: true);
-
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(requestData.toJson());
-
-    // Use mixin methods for streaming request handling
-    final (preparedRequest, requestId) = await prepareStreamingRequest(
-      httpRequest,
-    );
-    final streamedResponse = await sendStreamingRequest(
-      preparedRequest,
-      requestId: requestId,
-    );
-
-    await for (final json in parseNDJSON(streamedResponse.stream)) {
-      if (json['error'] != null) {
-        throwInlineStreamError(json);
-      }
-      yield StatusEvent.fromJson(json);
-    }
   }
 
   /// Copies a model.
@@ -209,35 +203,30 @@ class ModelsResource extends ResourceBase with StreamingResource {
   /// The [request] contains the model name and options.
   ///
   /// Returns a stream of [StatusEvent] progress updates.
-  Stream<StatusEvent> pullStream({required PullRequest request}) async* {
-    final url = requestBuilder.buildUrl('/api/pull');
+  /// The optional [abortTrigger] cancels the request and response stream.
+  Stream<StatusEvent> pullStream({
+    required PullRequest request,
+    Future<void>? abortTrigger,
+  }) {
+    return streamRequest(
+      createRequest: () {
+        final url = requestBuilder.buildUrl('/api/pull');
 
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
+        final headers = requestBuilder.buildHeaders(
+          additionalHeaders: {'Content-Type': 'application/json'},
+        );
+
+        // Ensure stream is true for streaming
+        final requestData = request.copyWith(stream: true);
+
+        final httpRequest = http.Request('POST', url)
+          ..headers.addAll(headers)
+          ..body = jsonEncode(requestData.toJson());
+        return httpRequest;
+      },
+      abortTrigger: abortTrigger,
+      fromJson: StatusEvent.fromJson,
     );
-
-    // Ensure stream is true for streaming
-    final requestData = request.copyWith(stream: true);
-
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(requestData.toJson());
-
-    // Use mixin methods for streaming request handling
-    final (preparedRequest, requestId) = await prepareStreamingRequest(
-      httpRequest,
-    );
-    final streamedResponse = await sendStreamingRequest(
-      preparedRequest,
-      requestId: requestId,
-    );
-
-    await for (final json in parseNDJSON(streamedResponse.stream)) {
-      if (json['error'] != null) {
-        throwInlineStreamError(json);
-      }
-      yield StatusEvent.fromJson(json);
-    }
   }
 
   /// Pushes a model to the registry.
@@ -270,34 +259,29 @@ class ModelsResource extends ResourceBase with StreamingResource {
   /// The [request] contains the model name and options.
   ///
   /// Returns a stream of [StatusEvent] progress updates.
-  Stream<StatusEvent> pushStream({required PushRequest request}) async* {
-    final url = requestBuilder.buildUrl('/api/push');
+  /// The optional [abortTrigger] cancels the request and response stream.
+  Stream<StatusEvent> pushStream({
+    required PushRequest request,
+    Future<void>? abortTrigger,
+  }) {
+    return streamRequest(
+      createRequest: () {
+        final url = requestBuilder.buildUrl('/api/push');
 
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
+        final headers = requestBuilder.buildHeaders(
+          additionalHeaders: {'Content-Type': 'application/json'},
+        );
+
+        // Ensure stream is true for streaming
+        final requestData = request.copyWith(stream: true);
+
+        final httpRequest = http.Request('POST', url)
+          ..headers.addAll(headers)
+          ..body = jsonEncode(requestData.toJson());
+        return httpRequest;
+      },
+      abortTrigger: abortTrigger,
+      fromJson: StatusEvent.fromJson,
     );
-
-    // Ensure stream is true for streaming
-    final requestData = request.copyWith(stream: true);
-
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(requestData.toJson());
-
-    // Use mixin methods for streaming request handling
-    final (preparedRequest, requestId) = await prepareStreamingRequest(
-      httpRequest,
-    );
-    final streamedResponse = await sendStreamingRequest(
-      preparedRequest,
-      requestId: requestId,
-    );
-
-    await for (final json in parseNDJSON(streamedResponse.stream)) {
-      if (json['error'] != null) {
-        throwInlineStreamError(json);
-      }
-      yield StatusEvent.fromJson(json);
-    }
   }
 }
