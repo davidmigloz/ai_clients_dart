@@ -78,6 +78,8 @@ final class _AgentToolDispatcher {
   AgentToolErrorObserver? observer;
   final calls = <(String, String)>{};
 
+  bool canHandle(String name) => handlers.containsKey(name);
+
   Future<void> Function()? prepare(AgentSessionEvent event) {
     if (event is! AgentSessionTurnItemAddedEvent ||
         event.item is! AgentSessionFunctionCallItemResource) {
