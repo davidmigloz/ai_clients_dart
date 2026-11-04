@@ -2,43 +2,64 @@ import 'package:openai_dart/openai_dart.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test(
-    'response input union replays computer calls and screenshot results',
-    () {
-      final history = <Map<String, dynamic>>[
-        {
-          'type': 'computer_call',
-          'id': 'cu_1',
-          'call_id': 'call_1',
-          'actions': [
-            {'type': 'screenshot'},
+  test('resource statuses round-trip and map only valid input values', () {
+    final base = {
+      'type': 'computer_call_output',
+      'id': 'out_1',
+      'call_id': 'call_1',
+      'output': {'type': 'computer_screenshot', 'file_id': 'file_1'},
+    };
+    for (final status in ['in_progress', 'completed', 'incomplete']) {
+      final json = {...base, 'status': status};
+      final item =
+          Item.fromResourceJson(json) as ComputerCallOutputResourceItem;
+      expect(item.toJson(), json);
+      expect(item.toInputItem().toJson()['status'], status);
+    }
+    final failed =
+        Item.fromResourceJson({...base, 'status': 'failed'})
+            as ComputerCallOutputResourceItem;
+    expect(failed.toJson()['status'], 'failed');
+    expect(failed.toInputItem, throwsStateError);
+    expect(
+      failed.copyWith(status: ComputerCallOutputStatus.unknown).toInputItem,
+      throwsStateError,
+    );
+  });
+
+  test('round-trips complete computer history in a response request', () {
+    const request = CreateResponseRequest(
+      model: 'computer-model',
+      input: ResponseInput.items([
+        ComputerCallInputItem(
+          id: 'cu_1',
+          callId: 'call_1',
+          pendingSafetyChecks: [
+            {'id': 'check_1', 'code': 'warning'},
           ],
-          'pending_safety_checks': <Object?>[],
-          'status': 'completed',
-        },
-        {
-          'type': 'computer_call_output',
-          'call_id': 'call_1',
-          'output': {
-            'type': 'computer_screenshot',
-            'image_url': 'data:image/png;base64,AA==',
-          },
-          'acknowledged_safety_checks': [
-            {'id': 'check_1', 'code': 'warning', 'message': 'Confirmed'},
+          status: ItemStatus.completed,
+          actions: [
+            ScreenshotAction(),
+            TypeAction(text: 'hello'),
           ],
-        },
-      ];
-      final request = CreateResponseRequest.fromJson({
-        'model': 'fixture',
-        'input': history,
-      });
-      expect(request.toJson()['input'], history);
-      expect(
-        CreateResponseRequest.fromJson(request.toJson()).toJson(),
-        request.toJson(),
-      );
-    },
-  );
+        ),
+        ComputerCallOutputInputItem(
+          callId: 'call_1',
+          output: ComputerScreenshotContent.url(
+            'data:image/png;base64,AA==',
+            detail: ImageDetail.original,
+            promptCacheBreakpoint: PromptCacheBreakpointConfig(),
+          ),
+          acknowledgedSafetyChecks: [
+            ComputerSafetyCheck(id: 'check_1', code: 'warning'),
+          ],
+        ),
+      ]),
+    );
+    final json = request.toJson();
+    expect(CreateResponseRequest.fromJson(json).toJson(), json);
+  });
+
   test('replays legacy and batched computer calls', () {
     for (final action in [
       {
@@ -131,6 +152,7 @@ void main() {
       'agent_name': 'worker',
     });
     expect(replayable.toInputItem().output.fileId, 'file_1');
+    expect(replayable.toInputItem().id, replayable.id);
     expect(ComputerScreenshotContent.new, throwsA(isA<AssertionError>()));
     expect(
       const ComputerSafetyCheck(

@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../../common/json_helpers.dart';
+import '../config/computer_call_output_status.dart';
 import '../config/configuration_update_reasoning.dart';
 import '../config/function_call_output_status.dart';
 import '../config/function_call_status.dart';
@@ -434,7 +435,7 @@ class ComputerCallOutputResourceItem extends Item {
   final ComputerScreenshotOutputContent output;
 
   /// Status of the stored item.
-  final ItemStatus status;
+  final ComputerCallOutputStatus status;
 
   /// Safety checks acknowledged by the developer.
   final List<ComputerSafetyCheck>? acknowledgedSafetyChecks;
@@ -473,7 +474,7 @@ class ComputerCallOutputResourceItem extends Item {
       agent: json['agent'] == null
           ? null
           : AgentTag.fromJson(json['agent'] as Map<String, dynamic>),
-      status: ItemStatus.fromJson(json['status'] as String),
+      status: ComputerCallOutputStatus.fromJson(json['status'] as String),
       acknowledgedSafetyChecks: (json['acknowledged_safety_checks'] as List?)
           ?.map((e) => ComputerSafetyCheck.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -483,8 +484,17 @@ class ComputerCallOutputResourceItem extends Item {
 
   /// Converts the stored result to writable input.
   ///
-  /// Throws [StateError] when the returned screenshot has no asset reference.
+  /// Throws [StateError] for a failed or unknown status or a redacted screenshot.
   ComputerCallOutputInputItem toInputItem() {
+    final inputStatus = switch (status) {
+      ComputerCallOutputStatus.inProgress => ItemStatus.inProgress,
+      ComputerCallOutputStatus.completed => ItemStatus.completed,
+      ComputerCallOutputStatus.incomplete => ItemStatus.incomplete,
+      ComputerCallOutputStatus.failed ||
+      ComputerCallOutputStatus.unknown => throw StateError(
+        'Cannot replay a computer call output with status ${status.value}',
+      ),
+    };
     if (output.imageUrl == null && output.fileId == null) {
       throw StateError(
         'Cannot replay a computer screenshot without an image URL or file ID',
@@ -500,6 +510,7 @@ class ComputerCallOutputResourceItem extends Item {
         promptCacheBreakpoint: output.promptCacheBreakpoint,
       ),
       agent: agent,
+      status: inputStatus,
       acknowledgedSafetyChecks: acknowledgedSafetyChecks,
     );
   }
@@ -524,7 +535,7 @@ class ComputerCallOutputResourceItem extends Item {
     String? id,
     String? callId,
     ComputerScreenshotOutputContent? output,
-    ItemStatus? status,
+    ComputerCallOutputStatus? status,
     Object? agent = unsetCopyWithValue,
     Object? acknowledgedSafetyChecks = unsetCopyWithValue,
     Object? createdBy = unsetCopyWithValue,
