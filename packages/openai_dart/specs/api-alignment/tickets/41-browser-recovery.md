@@ -1,6 +1,6 @@
 # Browser approvals and current-state recovery
 
-Status: deferred outside the bounded milestone; not implemented.
+Status: implementation prepared in #393; independent review and exact-head CI required before merge.
 GitHub: [#393](https://github.com/davidmigloz/ai_clients_dart/issues/393).
 Primary requirements: `AGENTS-FLOW-01`, `AGENTS-FLOW-02`.
 Native GitHub blockers: [#386](https://github.com/davidmigloz/ai_clients_dart/issues/386), [#387](https://github.com/davidmigloz/ai_clients_dart/issues/387), [#389](https://github.com/davidmigloz/ai_clients_dart/issues/389).
@@ -8,7 +8,7 @@ Original tracker: [#317](https://github.com/davidmigloz/ai_clients_dart/issues/3
 Specification: [Agents and Vaults](../agents-vaults.md), AGENTS-FLOW-01–02.
 Dependencies: [ticket 34](34-durable-sessions.md), [ticket 35](35-history-traces.md) and [ticket 37](37-environments-templates.md).
 
-Deferred backlog: retained for future explicit prioritization; this ticket does not block completion of #317. Its acceptance remains unchecked, and implementation will not start automatically.
+Reactivated by the user under #413. The current implementation and local validation are recorded in [the review receipt](../reviews/41-browser-recovery.md); #317 remains completed.
 
 ## User capability and scope
 
@@ -39,10 +39,10 @@ never automatically resend an earlier user task, approval or authentication.
 
 ## Evidence and validation plan
 
-Wire authority is [OpenAPI `0ef225c4`](https://github.com/openai/openai-openapi/blob/0ef225c4f701046f8fe88cae9d29d0df4d1a9fa9/openapi.json).
+Wire authority is the current frozen [OpenAPI `2e9ebb36`](https://github.com/openai/openai-openapi/blob/2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce/openapi.json), revalidated against Python 3.42.0 and Node 7.47.0. No new schema or HTTP operation is introduced.
 Workflow evidence is the official [session events guide](https://developers.openai.com/api/docs/guides/agents-api/sessions/events)
 and [computer-use guide](https://developers.openai.com/api/docs/guides/agents-api/tools/computer-use).
-The [pinned Python authentication-submit contract](https://github.com/openai/openai-python/blob/c511a77159bc870f31c34388311b7cc62ef15f08/src/openai/types/beta/agent_browser_authentication_submit_param.py)
+The [pinned Python authentication-submit contract](https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/beta/agent_browser_authentication_submit_param.py)
 provides an additional SDK cross-check; canonical fields remain authoritative.
 
 Use synthetic values and a controlled mock server: **no API key, live call or
