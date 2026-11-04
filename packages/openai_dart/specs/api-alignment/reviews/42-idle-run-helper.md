@@ -27,9 +27,9 @@ Abort/close cancels only local requests and observation, wakes readiness/pulls, 
 ## Validation and closure
 
 - 39 deterministic public-resource/cursor fixtures passed on VM, actual Chrome JavaScript and Chrome Wasm.
-- Cases cover lazy capture, readiness order/no first-event dependency, non-idle admission, raw-shape preservation, normalized input/key precedence, shared429 retry with exact key/body, root/child/terminal selection, EOF, recent-ID eviction, exact UTF8 byte bounds, overflow, sequential/concurrent drivers, pause, setup/input aborts/late completion, borrowed/owned HTTP, closed-client admission, typed provider privacy and source-boundary/input-error races.
+- Cases cover lazy capture, readiness order/no first-event dependency, non-idle admission, raw-shape preservation, normalized input/key precedence, shared 429 retry with exact key/body, root/child/terminal selection, EOF, recent-ID eviction, exact UTF8 byte bounds, overflow, sequential/concurrent drivers, pause, setup/input aborts/late completion, borrowed/owned HTTP, closed-client admission, typed provider privacy and source-boundary/input-error races.
 - Offline example passed in normal completion and explicit `--cancel-active` modes. Both use only synthetic HTTP/SSE. The optional raw cancellation is an explicit application flag, separate from local observer closure.
-- Scoped formatting/fixes, read-only package analysis and toolkit docs/README checks passed; no unrelated formatter/fixer mutation was needed. README contains 62 collapsible usage topics.
+- Scoped formatting/fixes, read-only package analysis and toolkit docs/README checks passed; no unrelated formatter/fixer mutation was needed. README contains 64 collapsible usage topics after integrating merged main.
 - Root reviewed the full engine/cursor/key/subscription design and requested the origin-specific boundary probes, which now pass. Final exact-head review/CI remain required before merge.
 
 Local deep capture, bounded queues, controlled pull API and private wrapper errors are explicit Dart policies. Dispatch/streamed-creation callbacks (#395), result collection/parsing (#396) and file adapters (#397) retain separate ownership. No release/version/changelog or global source promotion is included.
