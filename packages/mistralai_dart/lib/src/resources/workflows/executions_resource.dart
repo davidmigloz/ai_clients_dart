@@ -20,7 +20,6 @@ import '../../models/workflows/workflow_execution_response.dart';
 import '../../models/workflows/workflow_execution_trace_events_response.dart';
 import '../../models/workflows/workflow_execution_trace_o_tel_response.dart';
 import '../../models/workflows/workflow_execution_trace_summary_response.dart';
-import '../../utils/streaming_parser.dart';
 import '../base_resource.dart';
 import '../streaming_resource.dart';
 
@@ -55,42 +54,34 @@ class ExecutionsResource extends ResourceBase with StreamingResource {
   ///
   /// Returns a stream of [StreamEventSsePayload] containing real-time
   /// workflow execution events.
+  ///
+  /// The optional [abortTrigger] cancels the streaming request.
   Stream<StreamEventSsePayload> stream({
     required String executionId,
     EventSource? eventSource,
     String? lastEventId,
-  }) async* {
-    ensureNotClosed?.call();
-    final queryParams = <String, String>{};
-    if (eventSource != null) {
-      queryParams['event_source'] = eventSource.toJson();
-    }
-    if (lastEventId != null) queryParams['last_event_id'] = lastEventId;
-
-    final url = requestBuilder.buildUrl(
-      '/v1/workflows/executions/$executionId/stream',
-      queryParams: queryParams,
-    );
-    final headers = requestBuilder.buildHeaders();
-
-    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
-    final (preparedRequest, requestId) = await prepareStreamingRequest(
-      httpRequest,
-    );
-    final streamedResponse = await sendStreamingRequest(
-      preparedRequest,
-      requestId: requestId,
-    );
-
-    await for (final json in parseSSE(streamedResponse.stream)) {
-      final sseEvent = json['_event'] as String?;
-      final error = json['error'];
-      if (sseEvent == 'error' || error != null) {
-        throwInlineStreamError(json, sseEvent, error);
+    Future<void>? abortTrigger,
+  }) => streamRequest(
+    () {
+      ensureNotClosed?.call();
+      final queryParams = <String, String>{};
+      if (eventSource != null) {
+        queryParams['event_source'] = eventSource.toJson();
       }
-      yield StreamEventSsePayload.fromJson(json);
-    }
-  }
+      if (lastEventId != null) queryParams['last_event_id'] = lastEventId;
+
+      final url = requestBuilder.buildUrl(
+        '/v1/workflows/executions/$executionId/stream',
+        queryParams: queryParams,
+      );
+      final headers = requestBuilder.buildHeaders();
+
+      final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+      return httpRequest;
+    },
+    StreamEventSsePayload.fromJson,
+    abortTrigger: abortTrigger,
+  );
 
   /// Gets logs for a workflow execution.
   ///
@@ -156,12 +147,15 @@ class ExecutionsResource extends ResourceBase with StreamingResource {
   ///
   /// - [runId] filters logs by workflow run ID.
   /// - [activityId] filters logs by activity ID.
+  ///
+  /// The optional [abortTrigger] cancels the streaming request.
   Stream<ExecutionLogRecord> streamLogs({
     required String executionId,
     String? runId,
     String? activityId,
     String? after,
     String? lastEventId,
+    Future<void>? abortTrigger,
   }) {
     ensureNotClosed?.call();
     return _streamLogs(
@@ -170,6 +164,7 @@ class ExecutionsResource extends ResourceBase with StreamingResource {
       activityId: activityId,
       after: after,
       lastEventId: lastEventId,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -179,41 +174,31 @@ class ExecutionsResource extends ResourceBase with StreamingResource {
     String? activityId,
     String? after,
     String? lastEventId,
-  }) async* {
-    final queryParams = <String, String>{};
-    if (runId != null) queryParams['run_id'] = runId;
-    if (activityId != null) queryParams['activity_id'] = activityId;
-    if (after != null) queryParams['after'] = after;
-    if (lastEventId != null) queryParams['last_event_id'] = lastEventId;
+    Future<void>? abortTrigger,
+  }) => streamRequest(
+    () {
+      final queryParams = <String, String>{};
+      if (runId != null) queryParams['run_id'] = runId;
+      if (activityId != null) queryParams['activity_id'] = activityId;
+      if (after != null) queryParams['after'] = after;
+      if (lastEventId != null) queryParams['last_event_id'] = lastEventId;
 
-    final url = requestBuilder.buildUrl(
-      '/v1/workflows/executions/$executionId/logs/stream',
-      queryParams: queryParams,
-    );
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: lastEventId != null
-          ? {'Last-Event-ID': lastEventId}
-          : null,
-    );
+      final url = requestBuilder.buildUrl(
+        '/v1/workflows/executions/$executionId/logs/stream',
+        queryParams: queryParams,
+      );
+      final headers = requestBuilder.buildHeaders(
+        additionalHeaders: lastEventId != null
+            ? {'Last-Event-ID': lastEventId}
+            : null,
+      );
 
-    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
-    final (preparedRequest, requestId) = await prepareStreamingRequest(
-      httpRequest,
-    );
-    final streamedResponse = await sendStreamingRequest(
-      preparedRequest,
-      requestId: requestId,
-    );
-
-    await for (final json in parseSSE(streamedResponse.stream)) {
-      final sseEvent = json['_event'] as String?;
-      final error = json['error'];
-      if (sseEvent == 'error' || error != null) {
-        throwInlineStreamError(json, sseEvent, error);
-      }
-      yield ExecutionLogRecord.fromJson(json);
-    }
-  }
+      final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+      return httpRequest;
+    },
+    ExecutionLogRecord.fromJson,
+    abortTrigger: abortTrigger,
+  );
 
   /// Cancels a single workflow execution.
   Future<void> cancel({required String executionId}) async {

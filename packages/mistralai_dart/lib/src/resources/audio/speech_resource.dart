@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import '../../models/audio/speech_request.dart';
 import '../../models/audio/speech_response.dart';
 import '../../models/audio/speech_stream_event.dart';
-import '../../utils/streaming_parser.dart';
 import '../base_resource.dart';
 import '../streaming_resource.dart';
 
@@ -78,39 +77,31 @@ class SpeechResource extends ResourceBase with StreamingResource {
   /// The [request] contains the input text, model, and options.
   ///
   /// Returns a stream of [SpeechStreamEvent] chunks as the audio is generated.
+  ///
+  /// The optional [abortTrigger] cancels the streaming request.
   Stream<SpeechStreamEvent> createStream({
     required SpeechRequest request,
-  }) async* {
-    final url = requestBuilder.buildUrl('/v1/audio/speech');
+    Future<void>? abortTrigger,
+  }) => streamRequest(
+    () {
+      final url = requestBuilder.buildUrl('/v1/audio/speech');
 
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
-    );
+      final headers = requestBuilder.buildHeaders(
+        additionalHeaders: {'Content-Type': 'application/json'},
+      );
 
-    // Add stream: true to the request
-    final requestData = <String, dynamic>{...request.toJson(), 'stream': true};
+      // Add stream: true to the request
+      final requestData = <String, dynamic>{
+        ...request.toJson(),
+        'stream': true,
+      };
 
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(requestData);
-
-    // Use mixin methods for streaming request handling
-    final (preparedRequest, requestId) = await prepareStreamingRequest(
-      httpRequest,
-    );
-    final streamedResponse = await sendStreamingRequest(
-      preparedRequest,
-      requestId: requestId,
-    );
-
-    // Parse SSE stream
-    await for (final json in parseSSE(streamedResponse.stream)) {
-      final sseEvent = json['_event'] as String?;
-      final error = json['error'];
-      if (sseEvent == 'error' || error != null) {
-        throwInlineStreamError(json, sseEvent, error);
-      }
-      yield SpeechStreamEvent.fromJson(json);
-    }
-  }
+      final httpRequest = http.Request('POST', url)
+        ..headers.addAll(headers)
+        ..body = jsonEncode(requestData);
+      return httpRequest;
+    },
+    SpeechStreamEvent.fromJson,
+    abortTrigger: abortTrigger,
+  );
 }

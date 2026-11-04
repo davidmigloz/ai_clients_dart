@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import '../../models/workflows/list_workflow_event_response.dart';
 import '../../models/workflows/stream_event_sse_payload.dart';
 import '../../models/workflows/workflow_event_type.dart';
-import '../../utils/streaming_parser.dart';
 import '../base_resource.dart';
 import '../streaming_resource.dart';
 
@@ -62,6 +61,8 @@ class EventsResource extends ResourceBase with StreamingResource {
   ///
   /// Returns a stream of [StreamEventSsePayload] for live workflow events.
   /// Multiple filter parameters can be combined.
+  ///
+  /// The optional [abortTrigger] cancels the streaming request.
   Stream<StreamEventSsePayload> stream({
     String? scope,
     String? activityName,
@@ -75,63 +76,53 @@ class EventsResource extends ResourceBase with StreamingResource {
     String? metadataFilters,
     List<WorkflowEventType>? workflowEventTypes,
     String? lastEventId,
-  }) async* {
-    ensureNotClosed?.call();
-    final queryParams = <String, String>{};
-    if (scope != null) queryParams['scope'] = scope;
-    if (activityName != null) queryParams['activity_name'] = activityName;
-    if (activityId != null) queryParams['activity_id'] = activityId;
-    if (workflowName != null) queryParams['workflow_name'] = workflowName;
-    if (workflowExecId != null) {
-      queryParams['workflow_exec_id'] = workflowExecId;
-    }
-    if (rootWorkflowExecId != null) {
-      queryParams['root_workflow_exec_id'] = rootWorkflowExecId;
-    }
-    if (parentWorkflowExecId != null) {
-      queryParams['parent_workflow_exec_id'] = parentWorkflowExecId;
-    }
-    if (streamName != null) queryParams['stream'] = streamName;
-    if (startSeq != null) queryParams['start_seq'] = startSeq.toString();
-    if (metadataFilters != null) {
-      queryParams['metadata_filters'] = metadataFilters;
-    }
-    if (workflowEventTypes != null && workflowEventTypes.isNotEmpty) {
-      queryParams['workflow_event_types'] = workflowEventTypes
-          .map((e) => e.toJson())
-          .join(',');
-    }
-
-    final url = requestBuilder.buildUrl(
-      '/v1/workflows/events/stream',
-      queryParams: queryParams,
-    );
-
-    final additionalHeaders = <String, String>{};
-    if (lastEventId != null) {
-      additionalHeaders['last-event-id'] = lastEventId;
-    }
-
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: additionalHeaders,
-    );
-
-    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
-    final (preparedRequest, requestId) = await prepareStreamingRequest(
-      httpRequest,
-    );
-    final streamedResponse = await sendStreamingRequest(
-      preparedRequest,
-      requestId: requestId,
-    );
-
-    await for (final json in parseSSE(streamedResponse.stream)) {
-      final sseEvent = json['_event'] as String?;
-      final error = json['error'];
-      if (sseEvent == 'error' || error != null) {
-        throwInlineStreamError(json, sseEvent, error);
+    Future<void>? abortTrigger,
+  }) => streamRequest(
+    () {
+      ensureNotClosed?.call();
+      final queryParams = <String, String>{};
+      if (scope != null) queryParams['scope'] = scope;
+      if (activityName != null) queryParams['activity_name'] = activityName;
+      if (activityId != null) queryParams['activity_id'] = activityId;
+      if (workflowName != null) queryParams['workflow_name'] = workflowName;
+      if (workflowExecId != null) {
+        queryParams['workflow_exec_id'] = workflowExecId;
       }
-      yield StreamEventSsePayload.fromJson(json);
-    }
-  }
+      if (rootWorkflowExecId != null) {
+        queryParams['root_workflow_exec_id'] = rootWorkflowExecId;
+      }
+      if (parentWorkflowExecId != null) {
+        queryParams['parent_workflow_exec_id'] = parentWorkflowExecId;
+      }
+      if (streamName != null) queryParams['stream'] = streamName;
+      if (startSeq != null) queryParams['start_seq'] = startSeq.toString();
+      if (metadataFilters != null) {
+        queryParams['metadata_filters'] = metadataFilters;
+      }
+      if (workflowEventTypes != null && workflowEventTypes.isNotEmpty) {
+        queryParams['workflow_event_types'] = workflowEventTypes
+            .map((e) => e.toJson())
+            .join(',');
+      }
+
+      final url = requestBuilder.buildUrl(
+        '/v1/workflows/events/stream',
+        queryParams: queryParams,
+      );
+
+      final additionalHeaders = <String, String>{};
+      if (lastEventId != null) {
+        additionalHeaders['last-event-id'] = lastEventId;
+      }
+
+      final headers = requestBuilder.buildHeaders(
+        additionalHeaders: additionalHeaders,
+      );
+
+      final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+      return httpRequest;
+    },
+    StreamEventSsePayload.fromJson,
+    abortTrigger: abortTrigger,
+  );
 }

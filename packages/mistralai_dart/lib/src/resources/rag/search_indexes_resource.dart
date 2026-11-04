@@ -271,36 +271,40 @@ class SearchIndexesResource extends ResourceBase with StreamingResource {
   ///
   /// Maps to the official `generate_index_summary`
   /// (`POST /v1/rag/indexes/index/{index_id}/summary_field/{language}`).
+  ///
+  /// The optional [abortTrigger] cancels the streaming request.
   Stream<SummaryStreamEvent> generateSummary({
     required String indexId,
     required SummaryLanguage language,
+    Future<void>? abortTrigger,
   }) {
     ensureNotClosed?.call();
-    return _generateSummaryImpl(indexId: indexId, language: language);
+    return _generateSummaryImpl(
+      indexId: indexId,
+      language: language,
+      abortTrigger: abortTrigger,
+    );
   }
 
   Stream<SummaryStreamEvent> _generateSummaryImpl({
     required String indexId,
     required SummaryLanguage language,
-  }) async* {
-    final url = requestBuilder.buildUrl(
-      '/v1/rag/indexes/index/$indexId/summary_field/${language.toJson()}',
-    );
-    final headers = requestBuilder.buildHeaders();
+    Future<void>? abortTrigger,
+  }) => streamRequest(
+    () {
+      final url = requestBuilder.buildUrl(
+        '/v1/rag/indexes/index/$indexId/summary_field/${language.toJson()}',
+      );
+      final headers = requestBuilder.buildHeaders();
 
-    final httpRequest = http.Request('POST', url)..headers.addAll(headers);
-    final (preparedRequest, requestId) = await prepareStreamingRequest(
-      httpRequest,
-    );
-    final streamedResponse = await sendStreamingRequest(
-      preparedRequest,
-      requestId: requestId,
-    );
-
-    await for (final json in parseNDJSON(streamedResponse.stream)) {
-      yield SummaryStreamEvent.fromJson(json);
-    }
-  }
+      final httpRequest = http.Request('POST', url)..headers.addAll(headers);
+      return httpRequest;
+    },
+    SummaryStreamEvent.fromJson,
+    abortTrigger: abortTrigger,
+    parseEvents: parseNDJSON,
+    checkInlineErrors: false,
+  );
 
   /// Sets the summary field of a search index.
   ///
@@ -353,16 +357,20 @@ class SearchIndexesResource extends ResourceBase with StreamingResource {
   ///
   /// Maps to the official `generate_schema_summary_post`
   /// (`POST /v1/rag/indexes/index/{index_id}/schemas/schema/{schema_id}/summary_field/{language}`).
+  ///
+  /// The optional [abortTrigger] cancels the streaming request.
   Stream<SummaryStreamEvent> generateSchemaSummary({
     required String indexId,
     required String schemaId,
     required SummaryLanguage language,
+    Future<void>? abortTrigger,
   }) {
     ensureNotClosed?.call();
     return _generateSchemaSummaryImpl(
       indexId: indexId,
       schemaId: schemaId,
       language: language,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -370,26 +378,23 @@ class SearchIndexesResource extends ResourceBase with StreamingResource {
     required String indexId,
     required String schemaId,
     required SummaryLanguage language,
-  }) async* {
-    final url = requestBuilder.buildUrl(
-      '/v1/rag/indexes/index/$indexId/schemas/schema/$schemaId'
-      '/summary_field/${language.toJson()}',
-    );
-    final headers = requestBuilder.buildHeaders();
+    Future<void>? abortTrigger,
+  }) => streamRequest(
+    () {
+      final url = requestBuilder.buildUrl(
+        '/v1/rag/indexes/index/$indexId/schemas/schema/$schemaId'
+        '/summary_field/${language.toJson()}',
+      );
+      final headers = requestBuilder.buildHeaders();
 
-    final httpRequest = http.Request('POST', url)..headers.addAll(headers);
-    final (preparedRequest, requestId) = await prepareStreamingRequest(
-      httpRequest,
-    );
-    final streamedResponse = await sendStreamingRequest(
-      preparedRequest,
-      requestId: requestId,
-    );
-
-    await for (final json in parseNDJSON(streamedResponse.stream)) {
-      yield SummaryStreamEvent.fromJson(json);
-    }
-  }
+      final httpRequest = http.Request('POST', url)..headers.addAll(headers);
+      return httpRequest;
+    },
+    SummaryStreamEvent.fromJson,
+    abortTrigger: abortTrigger,
+    parseEvents: parseNDJSON,
+    checkInlineErrors: false,
+  );
 
   /// Sets the summary field of a search index schema.
   ///

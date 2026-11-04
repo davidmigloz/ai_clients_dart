@@ -6,7 +6,6 @@ import '../../errors/exceptions.dart';
 import '../../models/audio/transcription_request.dart';
 import '../../models/audio/transcription_response.dart';
 import '../../models/audio/transcription_stream_event.dart';
-import '../../utils/streaming_parser.dart';
 import '../base_resource.dart';
 import '../streaming_resource.dart';
 
@@ -101,30 +100,19 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
   ///   }
   /// }
   /// ```
+  ///
+  /// The optional [abortTrigger] cancels the streaming request.
   Stream<TranscriptionStreamEvent> createStream({
     required TranscriptionRequest request,
-  }) async* {
-    final httpRequest = _buildRequest(request, stream: true);
-
-    // Use mixin methods for streaming request handling
-    final (preparedRequest, requestId) = await prepareStreamingMultipartRequest(
-      httpRequest,
-    );
-    final streamedResponse = await sendStreamingRequest(
-      preparedRequest,
-      requestId: requestId,
-    );
-
-    // Parse SSE stream
-    await for (final json in parseSSE(streamedResponse.stream)) {
-      final sseEvent = json['_event'] as String?;
-      final error = json['error'];
-      if (sseEvent == 'error' || error != null) {
-        throwInlineStreamError(json, sseEvent, error);
-      }
-      yield TranscriptionStreamEvent.fromJson(json);
-    }
-  }
+    Future<void>? abortTrigger,
+  }) => streamRequest(
+    () {
+      final httpRequest = _buildRequest(request, stream: true);
+      return httpRequest;
+    },
+    TranscriptionStreamEvent.fromJson,
+    abortTrigger: abortTrigger,
+  );
 
   http.MultipartRequest _buildRequest(
     TranscriptionRequest request, {
