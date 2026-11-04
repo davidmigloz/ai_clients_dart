@@ -1,0 +1,553 @@
+{
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "issue": 414,
+  "promotion_owner": 427,
+  "types": {
+    "DecisionRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DecisionRequest",
+      "file": "lib/src/models/decisions/decision_request.dart",
+      "schema": "DecisionRequest"
+    },
+    "DecisionResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DecisionResponse",
+      "file": "lib/src/models/decisions/decision_response.dart",
+      "schema": "DecisionResponse"
+    },
+    "DecisionInput": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionInput",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": "DecisionInput",
+      "note": "String or ordered message/tool-history array; frozen October 31 contract."
+    },
+    "DecisionInput:TextDecisionInput": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "TextDecisionInput",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": null,
+      "parent": "DecisionInput",
+      "note": "Dart wrapper for the string member."
+    },
+    "DecisionInput:MessagesDecisionInput": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "MessagesDecisionInput",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": null,
+      "parent": "DecisionInput",
+      "note": "Wrapper for the ordered message/tool-history array."
+    },
+    "DecisionInputMessage": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionInputItem",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputMessage",
+      "note": "Role union dispatches to four message classes on DecisionInputItem; that synthetic parent also represents tool-history variants from DecisionInput.items."
+    },
+    "DecisionInputContent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionContent",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": "DecisionInputContent",
+      "note": "String-or-content-array union dispatched by JSON shape."
+    },
+    "DecisionInputContent:TextDecisionContent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "TextDecisionContent",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": null,
+      "parent": "DecisionInputContent",
+      "note": "Dart wrapper for the string member."
+    },
+    "DecisionInputContentParts": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "PartsDecisionContent",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": null,
+      "parent": "DecisionInputContent",
+      "note": "Array schema represented by a Dart wrapper; serializes a bare list of DecisionInputPart objects. Exact shape tested at the public boundary."
+    },
+    "DecisionInputPart": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionInputPart",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "TextDecisionInputPart": "input_text",
+          "ImageDecisionInputPart": "input_image",
+          "JsonDecisionInputPart": "input_json"
+        }
+      },
+      "note": "User text/image/JSON parts; evidence subtype limits tool outputs to text/images."
+    },
+    "DecisionInputText": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TextDecisionInputPart",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": "DecisionInputText",
+      "parent": "DecisionEvidencePart"
+    },
+    "DecisionInputImage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ImageDecisionInputPart",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": "DecisionInputImage",
+      "parent": "DecisionEvidencePart"
+    },
+    "QuestionParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionQuestion",
+      "file": "lib/src/models/decisions/decision_question.dart",
+      "schema": "QuestionParam",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "PredicateDecisionQuestion": "predicate",
+          "ChoiceDecisionQuestion": "choice",
+          "ScoreDecisionQuestion": "score"
+        }
+      }
+    },
+    "QuestionParamPredicate": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "PredicateDecisionQuestion",
+      "file": "lib/src/models/decisions/decision_question.dart",
+      "schema": "QuestionParamPredicate",
+      "parent": "QuestionParam"
+    },
+    "QuestionParamChoice": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ChoiceDecisionQuestion",
+      "file": "lib/src/models/decisions/decision_question.dart",
+      "schema": "QuestionParamChoice",
+      "parent": "QuestionParam"
+    },
+    "QuestionParamScore": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ScoreDecisionQuestion",
+      "file": "lib/src/models/decisions/decision_question.dart",
+      "schema": "QuestionParamScore",
+      "parent": "QuestionParam"
+    },
+    "ChoiceOptionParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DecisionChoiceOption",
+      "file": "lib/src/models/decisions/decision_question.dart",
+      "schema": "ChoiceOptionParam"
+    },
+    "ScoreLevelParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DecisionScoreLevel",
+      "file": "lib/src/models/decisions/decision_question.dart",
+      "schema": "ScoreLevelParam"
+    },
+    "ChoiceValueParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionChoiceValue",
+      "file": "lib/src/models/decisions/decision_choice_value.dart",
+      "schema": "ChoiceValueParam",
+      "note": "String-or-boolean primitive union. Both parameter and resource schemas share the same type without coercion."
+    },
+    "ChoiceValueResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionChoiceValue",
+      "file": "lib/src/models/decisions/decision_choice_value.dart",
+      "schema": "ChoiceValueResource",
+      "note": "String-or-boolean primitive union. Both parameter and resource schemas share the same type without coercion."
+    },
+    "ChoiceValueParam:StringDecisionChoiceValue": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "StringDecisionChoiceValue",
+      "file": "lib/src/models/decisions/decision_choice_value.dart",
+      "schema": null,
+      "parent": "ChoiceValueParam",
+      "note": "Dart wrapper for a primitive JSON union member."
+    },
+    "ChoiceValueParam:BooleanDecisionChoiceValue": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "BooleanDecisionChoiceValue",
+      "file": "lib/src/models/decisions/decision_choice_value.dart",
+      "schema": null,
+      "parent": "ChoiceValueParam",
+      "note": "Dart wrapper for a primitive JSON union member."
+    },
+    "AnswerResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionAnswer",
+      "file": "lib/src/models/decisions/decision_answer.dart",
+      "schema": "AnswerResource",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "PredicateDecisionAnswer": "predicate",
+          "ChoiceDecisionAnswer": "choice",
+          "ScoreDecisionAnswer": "score",
+          "RefusalDecisionAnswer": "refusal"
+        }
+      }
+    },
+    "AnswerResourcePredicate": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "PredicateDecisionAnswer",
+      "file": "lib/src/models/decisions/decision_answer.dart",
+      "schema": "AnswerResourcePredicate",
+      "parent": "AnswerResource"
+    },
+    "AnswerResourceChoice": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ChoiceDecisionAnswer",
+      "file": "lib/src/models/decisions/decision_answer.dart",
+      "schema": "AnswerResourceChoice",
+      "parent": "AnswerResource"
+    },
+    "AnswerResourceScore": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ScoreDecisionAnswer",
+      "file": "lib/src/models/decisions/decision_answer.dart",
+      "schema": "AnswerResourceScore",
+      "parent": "AnswerResource"
+    },
+    "AnswerResourceRefusal": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "RefusalDecisionAnswer",
+      "file": "lib/src/models/decisions/decision_answer.dart",
+      "schema": "AnswerResourceRefusal",
+      "parent": "AnswerResource"
+    },
+    "AnswerResource:UnknownDecisionAnswer": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownDecisionAnswer",
+      "file": "lib/src/models/decisions/decision_answer.dart",
+      "schema": null,
+      "parent": "AnswerResource",
+      "note": "Forward-compatible response fallback preserving a recursively immutable raw JSON snapshot."
+    },
+    "ChoiceProbabilityResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DecisionChoiceProbability",
+      "file": "lib/src/models/decisions/decision_answer.dart",
+      "schema": "ChoiceProbabilityResource"
+    },
+    "ScoreProbabilityResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DecisionScoreProbability",
+      "file": "lib/src/models/decisions/decision_answer.dart",
+      "schema": "ScoreProbabilityResource"
+    },
+    "DecisionInputUserMessage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DecisionInputMessage",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": "DecisionInputUserMessage"
+    },
+    "DecisionInputJson": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "JsonDecisionInputPart",
+      "file": "lib/src/models/decisions/decision_json.dart",
+      "schema": "DecisionInputJson",
+      "parent": "DecisionInputPart"
+    },
+    "DecisionEvidencePart": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionEvidencePart",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": null,
+      "note": "Synthetic text/image evidence union for tool outputs and user content."
+    },
+    "DecisionInputDeveloperMessage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DeveloperDecisionInputMessage",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputDeveloperMessage",
+      "parent": "DecisionInputMessage"
+    },
+    "DecisionInputSystemMessage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SystemDecisionInputMessage",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputSystemMessage",
+      "parent": "DecisionInputMessage"
+    },
+    "DecisionInputAssistantMessage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AssistantDecisionInputMessage",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputAssistantMessage",
+      "parent": "DecisionInputMessage"
+    },
+    "DecisionInputFunctionCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DecisionFunctionCall",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputFunctionCall",
+      "parent": "DecisionInputMessage"
+    },
+    "DecisionInputFunctionCallOutput": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DecisionFunctionCallOutput",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputFunctionCallOutput",
+      "parent": "DecisionInputMessage"
+    },
+    "DecisionInputCustomToolCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DecisionCustomToolCall",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputCustomToolCall",
+      "parent": "DecisionInputMessage"
+    },
+    "DecisionInputCustomToolCallOutput": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DecisionCustomToolCallOutput",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputCustomToolCallOutput",
+      "parent": "DecisionInputMessage"
+    },
+    "DecisionInputDeveloperContent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionDeveloperContent",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputDeveloperContent"
+    },
+    "DecisionInputDeveloperContent:TextDecisionDeveloperContent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "TextDecisionDeveloperContent",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": null,
+      "parent": "DecisionInputDeveloperContent",
+      "note": "Wrapper for string or ordered bare-array union member."
+    },
+    "DecisionInputDeveloperContent:PartsDecisionDeveloperContent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "PartsDecisionDeveloperContent",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": null,
+      "parent": "DecisionInputDeveloperContent",
+      "note": "Wrapper for string or ordered bare-array union member."
+    },
+    "DecisionInputAssistantContent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionAssistantContent",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputAssistantContent"
+    },
+    "DecisionInputAssistantContent:TextDecisionAssistantContent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "TextDecisionAssistantContent",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": null,
+      "parent": "DecisionInputAssistantContent",
+      "note": "Wrapper for string or ordered bare-array union member."
+    },
+    "DecisionInputAssistantContent:PartsDecisionAssistantContent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "PartsDecisionAssistantContent",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": null,
+      "parent": "DecisionInputAssistantContent",
+      "note": "Wrapper for string or ordered bare-array union member."
+    },
+    "DecisionInputToolOutputContent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionToolOutput",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputToolOutputContent"
+    },
+    "DecisionInputToolOutputContent:TextDecisionToolOutput": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "TextDecisionToolOutput",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": null,
+      "parent": "DecisionInputToolOutputContent",
+      "note": "Wrapper for string or ordered bare-array union member."
+    },
+    "DecisionInputToolOutputContent:PartsDecisionToolOutput": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "PartsDecisionToolOutput",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": null,
+      "parent": "DecisionInputToolOutputContent",
+      "note": "Wrapper for string or ordered bare-array union member."
+    },
+    "DecisionAssistantPart": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionAssistantPart",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": null,
+      "note": "Synthetic union of DecisionInputOutputText and DecisionInputRefusal."
+    },
+    "DecisionInputOutputText": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OutputTextDecisionPart",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputOutputText",
+      "parent": "DecisionAssistantPart"
+    },
+    "DecisionInputRefusal": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "RefusalDecisionPart",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputRefusal",
+      "parent": "DecisionAssistantPart"
+    },
+    "DecisionToolStatus": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "DecisionToolStatus",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": null,
+      "note": "Request enum modeled from the corresponding status/phase fields; strict request parsing."
+    },
+    "DecisionMessagePhase": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "DecisionMessagePhase",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": null,
+      "note": "Request enum modeled from the corresponding status/phase fields; strict request parsing."
+    },
+    "DecisionInstructions": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "DecisionInstructions",
+      "file": "lib/src/models/decisions/decision_instructions.dart",
+      "schema": null,
+      "note": "Inline QuestionParam*.instructions string-or-parts contract."
+    },
+    "TextDecisionInstructions": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "TextDecisionInstructions",
+      "file": "lib/src/models/decisions/decision_instructions.dart",
+      "schema": null,
+      "note": "Inline QuestionParam*.instructions string-or-parts contract."
+    },
+    "PartsDecisionInstructions": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "PartsDecisionInstructions",
+      "file": "lib/src/models/decisions/decision_instructions.dart",
+      "schema": null,
+      "note": "Inline QuestionParam*.instructions string-or-parts contract."
+    },
+    "DecisionQuestionInputPart": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionQuestionPart",
+      "file": "lib/src/models/decisions/decision_instructions.dart",
+      "schema": "DecisionQuestionInputPart"
+    },
+    "DecisionQuestionInputText": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TextDecisionQuestionPart",
+      "file": "lib/src/models/decisions/decision_instructions.dart",
+      "schema": "DecisionQuestionInputText",
+      "parent": "DecisionQuestionInputPart"
+    },
+    "DecisionQuestionInputImage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ImageDecisionQuestionPart",
+      "file": "lib/src/models/decisions/decision_instructions.dart",
+      "schema": "DecisionQuestionInputImage",
+      "parent": "DecisionQuestionInputPart"
+    },
+    "DecisionQuestionInputPart:JsonDecisionQuestionPart": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "JsonDecisionQuestionPart",
+      "file": "lib/src/models/decisions/decision_instructions.dart",
+      "schema": null,
+      "parent": "DecisionQuestionInputPart",
+      "note": "Question wrapper for DecisionInputJson; no cache controls."
+    },
+    "DecisionPromptCacheOptions": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "DecisionPromptCacheOptions",
+      "file": "lib/src/models/decisions/decision_cache.dart",
+      "schema": null,
+      "note": "Inline Decisions-only cache contract; source paths are DecisionRequest.properties.prompt_cache_options and DecisionInputText/Image.properties.prompt_cache_breakpoint. Do not bind to Responses PromptCacheOptions."
+    },
+    "DecisionPromptCacheBreakpoint": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "DecisionPromptCacheBreakpoint",
+      "file": "lib/src/models/decisions/decision_cache.dart",
+      "schema": null,
+      "note": "Inline Decisions-only cache contract; source paths are DecisionRequest.properties.prompt_cache_options and DecisionInputText/Image.properties.prompt_cache_breakpoint. Do not bind to Responses PromptCacheOptions."
+    },
+    "DecisionCacheTtl": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "DecisionCacheTtl",
+      "file": "lib/src/models/decisions/decision_cache.dart",
+      "schema": null,
+      "note": "Inline Decisions-only cache contract; source paths are DecisionRequest.properties.prompt_cache_options and DecisionInputText/Image.properties.prompt_cache_breakpoint. Do not bind to Responses PromptCacheOptions."
+    },
+    "DecisionCacheMode": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "DecisionCacheMode",
+      "file": "lib/src/models/decisions/decision_cache.dart",
+      "schema": null,
+      "note": "Inline Decisions-only cache contract; source paths are DecisionRequest.properties.prompt_cache_options and DecisionInputText/Image.properties.prompt_cache_breakpoint. Do not bind to Responses PromptCacheOptions."
+    }
+  }
+}

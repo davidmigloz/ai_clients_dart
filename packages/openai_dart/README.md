@@ -515,7 +515,7 @@ Use `client.chat.completions.createStream` with `textDeltas()` or `ChatStreamAcc
 <details>
 <summary><b>How do I classify or score shared input?</b></summary>
 
-Use `client.decisions.create` for typed predicate, choice, and score questions. Answers can include refusals; input supports text and HTTP(S) or data URL images.
+Use `client.decisions.create` for typed predicate, choice, and score questions. Answers can include refusals. Shared input supports text, JSON, images, and conversation/tool history; each request accepts up to 400 questions. Use `DecisionInstructions.parts` with the `*WithInstructions` question factories for question-specific text, images, and JSON. Optional cache controls apply to shared input only; Decisions supports a `30m` TTL.
 
 ```dart
 import 'package:openai_dart/openai_dart.dart';
@@ -549,7 +549,7 @@ Future<void> main() async {
 }
 ```
 
-→ [Full example](example/decisions_example.dart) · [Image input example](example/decision_image_urls_example.dart)
+→ [Full example](example/decisions_example.dart) · [GA inputs and caching (offline)](example/decisions_ga_example.dart) · [Image input example](example/decision_image_urls_example.dart)
 
 </details>
 
@@ -1244,6 +1244,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [tool_calling_example.dart](example/tool_calling_example.dart) | Function calling with tool definitions |
 | [vision_example.dart](example/vision_example.dart) | Image analysis with vision models |
 | [decisions_example.dart](example/decisions_example.dart) | Typed Decisions questions, refusals, usage, and inline images |
+| [decisions_ga_example.dart](example/decisions_ga_example.dart) | Offline JSON evidence, tool history, multimodal questions, and shared-input caching |
 | [decision_image_urls_example.dart](example/decision_image_urls_example.dart) | **Offline.** HTTP(S)/data image references, exact mixed input and one mock POST |
 | [embeddings_example.dart](example/embeddings_example.dart) | Text embeddings with dimension control |
 

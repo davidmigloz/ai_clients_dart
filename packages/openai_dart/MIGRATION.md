@@ -6,6 +6,54 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming release: Decisions GA
+
+Existing string question constructors (including const predicates), user messages,
+and text/image input calls continue to work. Two read/copy APIs broaden to
+represent GA content:
+
+- `DecisionQuestion.instructions` returns `DecisionInstructions` instead of
+  `String`. Use `TextDecisionInstructions.text` for a text-only consumer or
+  handle `PartsDecisionInstructions.parts` for multimodal criteria.
+- Question `copyWith(instructions: ...)` takes `DecisionInstructions`.
+- `MessagesDecisionInput.messages` now contains `DecisionInputItem`, including
+  developer/system/assistant messages and function/custom tool history. The
+  `items` getter aliases that list. Match a message variant before reading its
+  role-specific content.
+
+```dart
+// Before
+final String criteria = question.instructions;
+final updated = question.copyWith(instructions: 'Is it damaged?');
+final content = input.messages.first.content;
+
+// After (question is a PredicateDecisionQuestion; input is MessagesDecisionInput)
+final criteria = switch (question.instructions) {
+  TextDecisionInstructions(:final text) => text,
+  PartsDecisionInstructions() => 'Multimodal criteria',
+};
+final updated = question.copyWith(
+  instructions: const DecisionInstructions.text('Is it damaged?'),
+);
+final content = switch (input.items.first) {
+  DecisionInputMessage(:final content) => content,
+  _ => null, // Handle the other roles/tool items as your application requires.
+};
+```
+
+Update exhaustive switches over `DecisionInputPart` for `JsonDecisionInputPart`
+and the new `DecisionEvidencePart` branch (text/image). Sealed instruction and
+history unions expose role-specific types to prevent invalid request content.
+Their parsers reject unsupported request variants; received answer variants
+continue to preserve unknown data. Shared-input text/image parts accept explicit
+cache breakpoints, while question parts do not. Decisions cache TTL is `30m`;
+Responses' `12h` option is not valid here. Optional null cache fields are omitted.
+
+See the [offline GA example](example/decisions_ga_example.dart) for complete
+construction through the public client.
+
+---
+
 ## Migrating from v10.x to v11.0.0
 
 v11.0.0 adds Decisions, persistent Responses WebSockets, Live sessions, signed

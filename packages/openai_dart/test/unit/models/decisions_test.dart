@@ -455,7 +455,7 @@ void main() {
     }
 
     test('rejects unsupported message roles and request content types', () {
-      for (final role in ['assistant', 'system', 'developer', 'tool']) {
+      for (final role in ['tool', 'future']) {
         expect(
           () => DecisionInput.fromJson([
             {'role': role, 'content': 'Hello'},

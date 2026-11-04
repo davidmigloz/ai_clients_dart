@@ -1,3 +1,14 @@
+/// Rejects fields outside a closed request object without echoing private data.
+void requireDecisionKeys(
+  Map<String, dynamic> json,
+  Set<String> keys,
+  String context,
+) {
+  if (json.keys.any((key) => !keys.contains(key))) {
+    throw FormatException('$context: unsupported field');
+  }
+}
+
 /// Reads a required string without coercing invalid JSON values.
 String requireDecisionString(Object? value, String field) {
   if (value is! String) {
