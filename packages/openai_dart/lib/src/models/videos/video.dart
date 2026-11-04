@@ -1,5 +1,11 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
+import '../common/json_helpers.dart';
+import '../responses/misalignment_details.dart';
+import '../responses/websocket/websocket_json_helpers.dart';
+
 /// A generated video job.
 ///
 /// Structured information describing a generated video job from Sora.
@@ -265,39 +271,226 @@ class DeleteVideoResponse {
   String toString() => 'DeleteVideoResponse(id: $id, deleted: $deleted)';
 }
 
-/// Error information for a failed video generation.
+/// Error information for a failed video generation (OpenAPI Error-2).
+///
+/// Errors with details snapshot finite metadata and headers. Legacy optional
+/// scalar message/code construction remains available as a const constructor.
 @immutable
 class VideoError {
-  /// Creates a [VideoError].
-  const VideoError({this.message, this.type, this.code});
+  /// Creates a legacy scalar error, preserving existing const calls.
+  const VideoError({
+    this.message,
+    this.type,
+    this.code,
+    this.param,
+    bool? hasType,
+    bool? hasParam,
+  }) : hasType = hasType ?? type != null,
+       hasParam = hasParam ?? param != null,
+       headers = null,
+       misalignment = null,
+       rawJson = const {};
 
-  /// Creates a [VideoError] from JSON.
-  factory VideoError.fromJson(Map<String, dynamic> json) {
-    return VideoError(
-      message: json['message'] as String?,
-      type: json['type'] as String?,
-      code: json['code'] as String?,
-    );
-  }
+  /// Creates an error with deeply owned metadata and immutable retry headers.
+  factory VideoError.withDetails({
+    String? message,
+    String? type,
+    String? code,
+    String? param,
+    Map<String, String>? headers,
+    ResponsesMisalignmentDetails? misalignment,
+    bool? hasType,
+    bool? hasParam,
+    Map<String, dynamic> rawJson = const {},
+  }) => VideoError._(
+    message: message,
+    type: type,
+    code: code,
+    param: param,
+    headers: headers == null ? null : Map<String, String>.unmodifiable(headers),
+    misalignment: misalignment == null
+        ? null
+        : ResponsesMisalignmentDetails.fromJson(misalignment.toJson()),
+    hasType: hasType ?? type != null,
+    hasParam: hasParam ?? param != null,
+    rawJson: snapshotResponsesJson(rawJson, 'VideoError.rawJson'),
+  );
 
-  /// The error message.
+  const VideoError._({
+    required this.message,
+    required this.type,
+    required this.code,
+    required this.param,
+    required this.headers,
+    required this.misalignment,
+    required this.hasType,
+    required this.hasParam,
+    required this.rawJson,
+  });
+
+  /// The error message, absent on legacy incomplete objects.
   final String? message;
 
-  /// The error type.
+  /// The original error type, or null when unavailable.
   final String? type;
 
   /// The error code.
   final String? code;
 
-  /// Converts to JSON.
-  Map<String, dynamic> toJson() => {
-    if (message != null) 'message': message,
-    if (type != null) 'type': type,
-    if (code != null) 'code': code,
-  };
+  /// The associated parameter, or null when unavailable.
+  final String? param;
+
+  /// Retry headers recorded with the original error.
+  final Map<String, String>? headers;
+
+  /// Passive review details, when supplied.
+  final ResponsesMisalignmentDetails? misalignment;
+
+  /// Whether the nullable type field was supplied.
+  final bool hasType;
+
+  /// Whether the nullable param field was supplied.
+  final bool hasParam;
+
+  /// Original finite immutable metadata after parsing.
+  final Map<String, dynamic> rawJson;
+
+  /// Parses diagnostics while preserving explicit null type/param and metadata.
+  factory VideoError.fromJson(Map<String, dynamic> json) {
+    final snapshot = snapshotResponsesJson(json, 'VideoError');
+    Map<String, String>? headers;
+    if (snapshot.containsKey('headers')) {
+      final object = requireJsonObject(
+        snapshot['headers'],
+        'VideoError.headers',
+      );
+      headers = Map<String, String>.unmodifiable({
+        for (final e in object.entries)
+          e.key: requireJsonString(e.value, 'VideoError.headers value'),
+      });
+    }
+    return VideoError.withDetails(
+      message: optionalJsonString(
+        snapshot,
+        'message',
+        'VideoError',
+        nullable: true,
+      ),
+      type: optionalJsonString(snapshot, 'type', 'VideoError', nullable: true),
+      code: optionalJsonString(snapshot, 'code', 'VideoError', nullable: true),
+      param: optionalJsonString(
+        snapshot,
+        'param',
+        'VideoError',
+        nullable: true,
+      ),
+      hasType: snapshot.containsKey('type'),
+      hasParam: snapshot.containsKey('param'),
+      headers: headers,
+      misalignment: snapshot.containsKey('misalignment')
+          ? ResponsesMisalignmentDetails.fromJson(
+              requireJsonObject(
+                snapshot['misalignment'],
+                'VideoError.misalignment',
+              ),
+            )
+          : null,
+      rawJson: snapshot,
+    );
+  }
+
+  /// Converts effective fields to JSON, retaining future metadata.
+  Map<String, dynamic> toJson() {
+    snapshotResponsesJson(rawJson, 'VideoError.rawJson');
+    return mergeResponsesJson(
+      rawJson,
+      const {'message', 'code', 'type', 'param', 'headers', 'misalignment'},
+      {
+        if (message != null) 'message': message,
+        if (code != null) 'code': code,
+        if (hasType) 'type': type,
+        if (hasParam) 'param': param,
+        if (headers != null) 'headers': Map<String, String>.from(headers!),
+        if (misalignment != null)
+          'misalignment': mergeResponsesModelJson(
+            rawJson['misalignment'],
+            misalignment!.toJson(),
+            const {
+              'detailed_explanation',
+              'error_type',
+              'review_target',
+              'steer',
+            },
+            childKeys: const {
+              'steer': {'message'},
+            },
+          ),
+      },
+    );
+  }
+
+  /// Copies fields; explicit null preserves nullable type/param. Clear their
+  /// presence flags as well to omit them. Fresh children replace old metadata.
+  VideoError copyWith({
+    Object? message = unsetCopyWithValue,
+    Object? type = unsetCopyWithValue,
+    Object? code = unsetCopyWithValue,
+    Object? param = unsetCopyWithValue,
+    Object? headers = unsetCopyWithValue,
+    Object? misalignment = unsetCopyWithValue,
+    bool? hasType,
+    bool? hasParam,
+    Map<String, dynamic>? rawJson,
+  }) {
+    final newHeaders = identical(headers, unsetCopyWithValue)
+        ? this.headers
+        : headers as Map<String, String>?;
+    final details = identical(misalignment, unsetCopyWithValue)
+        ? this.misalignment
+        : misalignment as ResponsesMisalignmentDetails?;
+    final retained = rawJson ?? this.rawJson;
+    final replaced =
+        identical(misalignment, unsetCopyWithValue) || rawJson != null
+        ? retained
+        : replaceResponsesTypedJson(
+            retained,
+            {
+              if (this.misalignment != null)
+                'misalignment': toJson()['misalignment'],
+            },
+            {if (details != null) 'misalignment': details.toJson()},
+          );
+    return VideoError.withDetails(
+      message: identical(message, unsetCopyWithValue)
+          ? this.message
+          : message as String?,
+      type: identical(type, unsetCopyWithValue) ? this.type : type as String?,
+      code: identical(code, unsetCopyWithValue) ? this.code : code as String?,
+      param: identical(param, unsetCopyWithValue)
+          ? this.param
+          : param as String?,
+      headers: newHeaders == null
+          ? null
+          : Map<String, String>.unmodifiable(newHeaders),
+      misalignment: details,
+      hasType:
+          hasType ?? (!identical(type, unsetCopyWithValue) || this.hasType),
+      hasParam:
+          hasParam ?? (!identical(param, unsetCopyWithValue) || this.hasParam),
+      rawJson: snapshotResponsesJson(replaced, 'VideoError.rawJson'),
+    );
+  }
 
   @override
-  String toString() => 'VideoError(message: $message)';
+  bool operator ==(Object other) =>
+      other is VideoError &&
+      runtimeType == other.runtimeType &&
+      mapsDeepEqual(toJson(), other.toJson());
+  @override
+  int get hashCode => Object.hash(runtimeType, mapDeepHashCode(toJson()));
+  @override
+  String toString() =>
+      'VideoError(message: [REDACTED], type: [REDACTED], code: [REDACTED], param: [REDACTED], headers: ${headers == null ? null : "${headers!.length} entries"}, misalignment: ${responsesPresence(misalignment)}, hasType: $hasType, hasParam: $hasParam, rawJson: ${rawJson.length} entries)';
 }
 
 /// A video character created from an uploaded video.

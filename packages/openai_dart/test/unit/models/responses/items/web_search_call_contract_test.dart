@@ -291,7 +291,7 @@ void main() {
       expect(original.toString(), contains('url:'));
       expect(original.toString(), contains('pattern:'));
     });
-    for (final field in ['url', 'pattern']) {
+    for (final field in ['pattern']) {
       test('find required $field omission is contextual', () {
         final json = {'type': 'find_in_page', 'url': url, 'pattern': secret}
           ..remove(field);

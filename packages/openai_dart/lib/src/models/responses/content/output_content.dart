@@ -238,29 +238,57 @@ class InputTextOutputContent extends OutputContent {
   /// The text content.
   final String text;
 
+  /// Optional explicit cache boundary echoed with the text.
+  final PromptCacheBreakpointConfig? promptCacheBreakpoint;
+
   /// Creates an [InputTextOutputContent].
-  const InputTextOutputContent(this.text);
+  const InputTextOutputContent(this.text, {this.promptCacheBreakpoint});
 
   /// Creates an [InputTextOutputContent] from JSON.
   factory InputTextOutputContent.fromJson(Map<String, dynamic> json) {
-    return InputTextOutputContent(json['text'] as String);
+    return InputTextOutputContent(
+      json['text'] as String,
+      promptCacheBreakpoint: json['prompt_cache_breakpoint'] == null
+          ? null
+          : PromptCacheBreakpointConfig.fromJson(
+              json['prompt_cache_breakpoint'] as Map<String, dynamic>,
+            ),
+    );
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'input_text', 'text': text};
+  Map<String, dynamic> toJson() => {
+    'type': 'input_text',
+    'text': text,
+    if (promptCacheBreakpoint != null)
+      'prompt_cache_breakpoint': promptCacheBreakpoint!.toJson(),
+  };
+
+  /// Copies text and cache controls; explicit null clears the boundary.
+  InputTextOutputContent copyWith({
+    String? text,
+    Object? promptCacheBreakpoint = unsetCopyWithValue,
+  }) => InputTextOutputContent(
+    text ?? this.text,
+    promptCacheBreakpoint: identical(promptCacheBreakpoint, unsetCopyWithValue)
+        ? this.promptCacheBreakpoint
+        : promptCacheBreakpoint as PromptCacheBreakpointConfig?,
+  );
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is InputTextOutputContent &&
           runtimeType == other.runtimeType &&
-          text == other.text;
+          text == other.text &&
+          promptCacheBreakpoint == other.promptCacheBreakpoint;
 
   @override
-  int get hashCode => text.hashCode;
+  int get hashCode => Object.hash(text, promptCacheBreakpoint);
 
   @override
-  String toString() => 'InputTextOutputContent(text: $text)';
+  String toString() =>
+      'InputTextOutputContent(text: [${text.length} chars], promptCacheBreakpoint: $promptCacheBreakpoint)';
 }
 
 /// Plain text content.

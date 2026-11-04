@@ -961,7 +961,11 @@ Insert a `ConfigurationUpdateItem` before the next user input to change subseque
 
 Use `ResponsePromptCacheOptionsParam` for Responses prewarming, TTL, and comparison diagnostics. Chat uses the narrower `PromptCacheOptionsParam`; returned usage counters report actual cached tokens.
 
-→ [Full example](example/prompt_cache_example.dart)
+Set `PromptCacheBreakpointConfig(ttl: PromptCacheBreakpointTtl.hours12)` on stable shared content for a 12-hour boundary. Omit `ttl` to inherit the request. The pinned top-level `PromptCacheTtl` still permits only `30m`; Decisions uses separate cache controls.
+
+Read `response.toolUsage` separately from `response.usage` for hosted image-generation tokens and billable web searches. Missing tool usage or cached counts mean unknown, not zero.
+
+→ [Full example](example/prompt_cache_example.dart) · [Breakpoint TTLs and tool usage (offline)](example/responses_cache_usage_example.dart)
 
 </details>
 
@@ -1307,6 +1311,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [web_search_controls_example.dart](example/web_search_controls_example.dart) | Local GA filters, image results, sources, and REST/SSE parsing without API calls |
 | [configuration_updates_example.dart](example/configuration_updates_example.dart) | **Offline.** change reasoning effort during a conversation |
 | [prompt_cache_example.dart](example/prompt_cache_example.dart) | Responses prewarming, comparison diagnostics, and narrow Chat cache options |
+| [responses_cache_usage_example.dart](example/responses_cache_usage_example.dart) | Offline 30m/12h cache boundaries and separate hosted-tool usage |
 | [containers_example.dart](example/containers_example.dart) | Container memory/network configuration, Code Interpreter IDs, and files |
 | [shell_tools_example.dart](example/shell_tools_example.dart) | **Offline.** hosted configuration, synthetic local continuation, and typed shell stream events |
 | [compaction_progress_example.dart](example/compaction_progress_example.dart) | **Offline.** nonterminal compaction progress and opaque final output preservation |

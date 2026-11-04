@@ -6,6 +6,34 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming release: nullable provider error types
+
+`ErrorPayload.type` is now `String?` so an OpenAI-compatible provider's explicit
+null is retained instead of becoming `'error'`. This provider tolerance does not
+change OpenResponses' canonical streaming contract, which still requires a string
+type. A missing type retains the legacy `'error'` read default, with
+`hasType == false`; serialization no longer invents the key. Parsed explicit null
+code/param values also survive round trips. Copies can explicitly clear nullable
+values; clear their presence flags too to omit the corresponding key.
+
+```dart
+// Before
+final String type = error.type;
+
+// After (error is ErrorPayload)
+final String? type = error.type;
+final label = type ?? 'Type not recorded';
+final cleared = error.copyWith(type: null);
+final omitted = error.copyWith(type: null, hasType: false);
+```
+
+Parsed/copied header maps are immutable snapshots. Const constructor calls remain
+available; their caller-supplied maps retain the existing ownership contract.
+The OpenAI-specific hosted-tool usage and cache lifetimes are not added to the
+OpenResponses wire contract.
+
+---
+
 <a id="upcoming-annotation-event-nullability-correction"></a>
 
 ## Migrating from v0.5.x to v0.6.0

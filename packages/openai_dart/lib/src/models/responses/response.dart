@@ -16,6 +16,7 @@ import 'content/output_content.dart';
 import 'incomplete_details.dart';
 import 'items/output_item.dart';
 import 'response_error.dart';
+import 'response_tool_usage.dart';
 import 'response_usage.dart';
 
 /// A response from the Responses API.
@@ -40,6 +41,9 @@ class Response {
 
   /// Token usage statistics.
   final ResponseUsage? usage;
+
+  /// Hosted-tool usage, separate from base-model [usage]. Null means unavailable.
+  final ResponseToolUsage? toolUsage;
 
   /// Error details if the response failed.
   final ResponseError? error;
@@ -124,6 +128,7 @@ class Response {
     required this.status,
     required this.output,
     this.usage,
+    this.toolUsage,
     this.error,
     this.incompleteDetails,
     this.model,
@@ -187,6 +192,11 @@ class Response {
       usage: json['usage'] != null
           ? ResponseUsage.fromJson(json['usage'] as Map<String, dynamic>)
           : null,
+      toolUsage: json.containsKey('tool_usage')
+          ? ResponseToolUsage.fromJson(
+              requireJsonObject(json['tool_usage'], 'Response.tool_usage'),
+            )
+          : null,
       error: json['error'] != null
           ? ResponseError.fromJson(
               requireJsonObject(json['error'], 'Response.error'),
@@ -242,6 +252,7 @@ class Response {
     'status': status.toJson(),
     'output': output.map((e) => e.toJson()).toList(),
     if (usage != null) 'usage': usage!.toJson(),
+    if (toolUsage != null) 'tool_usage': toolUsage!.toJson(),
     if (error != null) 'error': error!.toJson(),
     if (incompleteDetails != null)
       'incomplete_details': incompleteDetails!.toJson(),
@@ -278,6 +289,7 @@ class Response {
     ResponseStatus? status,
     List<OutputItem>? output,
     Object? usage = unsetCopyWithValue,
+    Object? toolUsage = unsetCopyWithValue,
     Object? error = unsetCopyWithValue,
     Object? incompleteDetails = unsetCopyWithValue,
     Object? model = unsetCopyWithValue,
@@ -305,6 +317,9 @@ class Response {
     status: status ?? this.status,
     output: output ?? this.output,
     usage: usage == unsetCopyWithValue ? this.usage : usage as ResponseUsage?,
+    toolUsage: identical(toolUsage, unsetCopyWithValue)
+        ? this.toolUsage
+        : toolUsage as ResponseToolUsage?,
     error: error == unsetCopyWithValue ? this.error : error as ResponseError?,
     incompleteDetails: incompleteDetails == unsetCopyWithValue
         ? this.incompleteDetails
@@ -482,6 +497,7 @@ class Response {
           status == other.status &&
           listsEqual(output, other.output) &&
           usage == other.usage &&
+          toolUsage == other.toolUsage &&
           error == other.error &&
           incompleteDetails == other.incompleteDetails &&
           model == other.model &&
@@ -511,6 +527,7 @@ class Response {
     status,
     Object.hashAll(output),
     usage,
+    toolUsage,
     error,
     incompleteDetails,
     model,
@@ -539,7 +556,7 @@ class Response {
         error?.misalignment != null ||
         error?.code == 'misalignment_policy_violation';
     return 'Response(id: ${redact ? '[REDACTED]' : id}, object: ${redact ? '[REDACTED]' : object}, createdAt: $createdAt, status: $status, '
-        'output: ${output.length} items, usage: $usage, '
+        'output: ${output.length} items, usage: $usage, toolUsage: $toolUsage, '
         'error: ${_presenceSummary(error)}, '
         'incompleteDetails: ${_presenceSummary(incompleteDetails)}, '
         'model: ${redact ? '[REDACTED]' : model}, instructions: ${redact ? '[REDACTED]' : _textSummary(instructions)}, '

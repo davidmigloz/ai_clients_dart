@@ -82,6 +82,7 @@ export 'response.dart';
 export 'response_compaction.dart';
 export 'response_error.dart';
 export 'response_input.dart';
+export 'response_tool_usage.dart';
 export 'response_usage.dart';
 export 'streaming/streaming.dart';
 export 'tools/tools.dart';
