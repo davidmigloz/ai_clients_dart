@@ -131,6 +131,9 @@ class AgentSessionsResource extends ResourceBase with _AgentSessionHttp {
     String? idempotencyKey,
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
+    Map<String, AgentToolHandler> toolHandlers = const {},
+    AgentToolErrorObserver? onToolError,
+    int maxToolCalls = 1024,
     int maxBufferedEvents = 256,
     int maxBufferedBytes = 1024 * 1024,
   }) {
@@ -143,6 +146,38 @@ class AgentSessionsResource extends ResourceBase with _AgentSessionHttp {
       idempotencyKey: idempotencyKey,
       additionalHeaders: additionalHeaders,
       abortTrigger: abortTrigger,
+      toolHandlers: toolHandlers,
+      onToolError: onToolError,
+      maxToolCalls: maxToolCalls,
+      maxBufferedEvents: maxBufferedEvents,
+      maxBufferedBytes: maxBufferedBytes,
+    );
+  }
+
+  /// Lazily creates and follows one initial root turn with optional local tools.
+  /// Omitted/true stream selects SSE; explicit false rejects before HTTP.
+  /// Tool callbacks remain separate from canonical wire definitions.
+  AgentSessionRun createRun(
+    CreateAgentSessionRequest request, {
+    Map<String, AgentToolHandler> toolHandlers = const {},
+    AgentToolErrorObserver? onToolError,
+    String? idempotencyKey,
+    Map<String, String>? additionalHeaders,
+    Future<void>? abortTrigger,
+    int maxToolCalls = 1024,
+    int maxBufferedEvents = 256,
+    int maxBufferedBytes = 1024 * 1024,
+  }) {
+    ensureNotClosed?.call();
+    return AgentSessionRun.create(
+      sessions: this,
+      request: request,
+      toolHandlers: toolHandlers,
+      onToolError: onToolError,
+      idempotencyKey: idempotencyKey,
+      additionalHeaders: additionalHeaders,
+      abortTrigger: abortTrigger,
+      maxToolCalls: maxToolCalls,
       maxBufferedEvents: maxBufferedEvents,
       maxBufferedBytes: maxBufferedBytes,
     );
@@ -186,6 +221,7 @@ class AgentSessionsResource extends ResourceBase with _AgentSessionHttp {
     CreateAgentSessionRequest request, {
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
+    void Function()? onReady,
   }) {
     ensureNotClosed?.call();
     final streamed = request.copyWith(stream: true)..validate();
@@ -196,6 +232,7 @@ class AgentSessionsResource extends ResourceBase with _AgentSessionHttp {
       body: streamed.toJson(),
       additionalHeaders: additionalHeaders,
       abortTrigger: abortTrigger,
+      onReady: onReady,
     );
   }
 
@@ -383,12 +420,15 @@ class AgentSessionEventsResource extends ResourceBase with _AgentSessionHttp {
   /// interceptors try to retry. After uncertain delivery, retrieve current required
   /// actions before choosing another submission. The client never saves form
   /// values to a local history or calls an approval/tool callback automatically.
+  /// Set [allowRetries] false for a caller-owned once-only submission policy;
+  /// true never enables retries for authentication values.
   Future<void> create(
     String sessionId,
     CreateAgentSessionEventsRequest request, {
     String? idempotencyKey,
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
+    bool allowRetries = true,
   }) {
     ensureNotClosed?.call();
     final path = '${_sessionPath(sessionId)}/events';
@@ -428,7 +468,7 @@ class AgentSessionEventsResource extends ResourceBase with _AgentSessionHttp {
       body: request.toJson(),
       additionalHeaders: headers,
       abortTrigger: abortTrigger,
-      allowRetries: !containsAuthentication,
+      allowRetries: allowRetries && !containsAuthentication,
       validateIdempotencyKey: true,
     ).then<void>((_) {});
   }
@@ -556,35 +596,51 @@ mixin _AgentSessionHttp on ResourceBase {
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
     void Function()? onReady,
-  }) => decodeAgentSessionEvents(
-    openPrivateByteStream(
-      httpClient: httpClient,
-      streamClientFactory: streamClientFactory,
-      requestBuilder: requestBuilder,
-      method: method,
-      endpoint: path,
-      body: body,
-      additionalHeaders: additionalHeaders,
-      betaFeature: 'agents=v1',
-      accept: 'text/event-stream',
-      timeout: config.timeout,
-      context: 'Agents session observation',
-      parseError: (response) =>
-          parseHttpErrorResponse(response, request: response.request!),
-      validateResponse: (response) {
-        if (response.statusCode != expectedStatus) {
-          throw ParseException(
-            message:
-                'Unexpected Agents session SSE status; expected $expectedStatus.',
-          );
-        }
-      },
-      onReady: onReady,
-      ensureNotClosed: ensureNotClosed,
-      abortTrigger: abortTrigger,
-      timeoutResponseBody: false,
-    ),
-  );
+  }) {
+    String? callerKey;
+    for (final entry
+        in additionalHeaders?.entries ?? const <MapEntry<String, String>>[]) {
+      if (entry.key.toLowerCase() == 'idempotency-key') callerKey = entry.value;
+    }
+    if (callerKey != null) {
+      validateAgentLength(
+        callerKey,
+        'Session observation idempotencyKey',
+        min: 1,
+        max: 256,
+      );
+    }
+    return decodeAgentSessionEvents(
+      openPrivateByteStream(
+        httpClient: httpClient,
+        streamClientFactory: streamClientFactory,
+        requestBuilder: requestBuilder,
+        method: method,
+        endpoint: path,
+        body: body,
+        additionalHeaders: additionalHeaders,
+        idempotencyKey: callerKey,
+        betaFeature: 'agents=v1',
+        accept: 'text/event-stream',
+        timeout: config.timeout,
+        context: 'Agents session observation',
+        parseError: (response) =>
+            parseHttpErrorResponse(response, request: response.request!),
+        validateResponse: (response) {
+          if (response.statusCode != expectedStatus) {
+            throw ParseException(
+              message:
+                  'Unexpected Agents session SSE status; expected $expectedStatus.',
+            );
+          }
+        },
+        onReady: onReady,
+        ensureNotClosed: ensureNotClosed,
+        abortTrigger: abortTrigger,
+        timeoutResponseBody: false,
+      ),
+    );
+  }
 }
 
 /// ID cursors are exclusive in the selected order. These are persisted root-agent records; each child has a separate history. They are not authority to replay old tool or approval actions.

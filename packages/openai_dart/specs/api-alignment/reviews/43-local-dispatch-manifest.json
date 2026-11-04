@@ -1,0 +1,112 @@
+{
+  "issue": 395,
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "promotion_owner": 427,
+  "http_operations_added": 0,
+  "schemas_added": 0,
+  "reused_types": {
+    "CreateAgentSessionParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateAgentSessionRequest",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "CreateAgentSessionParams",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "FunctionCallItemResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionFunctionCallItemResource",
+      "file": "lib/src/models/agents/agent_session_items.dart",
+      "schema": "FunctionCallItemResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionOutputItem"
+    },
+    "FunctionCallOutputParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionFunctionOutput",
+      "file": "lib/src/models/agents/agent_session_inputs.dart",
+      "schema": "FunctionCallOutputParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "SessionEventAgentSessionCreated": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionCreatedEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionCreated",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionEventAgentSessionTurnItemAdded": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionTurnItemAddedEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionTurnItemAdded",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionEvent"
+    },
+    "SessionInputParamAgentSessionInputToolResult": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionToolResultInput",
+      "file": "lib/src/models/agents/agent_session_inputs.dart",
+      "schema": "SessionInputParamAgentSessionInputToolResult",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionInput"
+    }
+  },
+  "client_only_extensions": [
+    {
+      "dart_context": "AgentSessionRun.create / AgentSessionsResource.createRun",
+      "file": "lib/src/helpers/agents/agent_session_run.dart",
+      "schema": null,
+      "note": "Lazy captured streamed creation sharing the same single cursor/checkpoints. Explicit stream:false rejects locally; canonical session.created establishes identity."
+    },
+    {
+      "dart_context": "AgentToolHandler / AgentToolErrorObserver / AgentToolErrorStage / AgentToolError",
+      "file": "lib/src/helpers/agents/agent_tool_dispatcher.dart",
+      "schema": null,
+      "note": "Opt-in application callbacks and private error metadata; never serialized as tools or wire request fields."
+    },
+    {
+      "dart_context": "AgentSessionEventsResource.create.allowRetries / AgentSessionsResource.createStream.onReady",
+      "file": "lib/src/resources/agent_sessions_resource.dart",
+      "schema": null,
+      "note": "Local request policy/readiness controls on unchanged canonical operations. Authentication cannot enable retries."
+    }
+  ],
+  "source_receipts": [
+    {
+      "file": "openai-python/src/openai/lib/streaming/agents/_dispatch.py",
+      "sha256": "7a4e1fa7968a5e13d9337cad45daf82b77276c4313c82fdfd369976870b820bf"
+    },
+    {
+      "file": "openai-python/src/openai/lib/streaming/agents/_tools.py",
+      "sha256": "4b5c44416fd57d1b1e6b63cb6b771d31294c3f780689eb74f4f3c1f2afacfd69"
+    },
+    {
+      "file": "openai-node/src/lib/beta/agents/tool-dispatcher.ts",
+      "sha256": "26b3f0e04d3f90d972ace6bf0685dc8ccce82837708e6dd8e743e675383046d0"
+    },
+    {
+      "file": "openai-node/src/lib/beta/agents/agent-session-create-stream.ts",
+      "sha256": "3eae8a69c259c68abbf33702fced04fd9ed339c390cd9a2371707d70ab261b44"
+    },
+    {
+      "file": "openai-node/src/lib/agents/turn-state.ts",
+      "sha256": "b20aa8aa58d176dcc15136e9d3effcbd68660c1c7e31a497d4498e83591587ec"
+    }
+  ],
+  "dart_policies": [
+    "Deep detached typed request/options and handler registration capture.",
+    "Dart creation helper forces stream for null/true and rejects explicit false; raw APIs stay manual.",
+    "Full-run registered call dedup with explicit 1024-call default budget; overflow fails, never evicts/reruns.",
+    "Generic transport retries disabled for logical results; only exact pending-call400 race permits initial+3 attempts at100/300/600ms with stable result key/body.",
+    "Private callback observer details and run exceptions preserve explicit causes but never default-print secrets.",
+    "A single cursor supports after-yield dispatch; Stream cancellation before resumption never executes that pending call."
+  ],
+  "scope_note": "AGENTS-HELPER05\u201308; zero new wire schemas/HTTP operations. Result collection/parsing and file adapters remain396/397."
+}

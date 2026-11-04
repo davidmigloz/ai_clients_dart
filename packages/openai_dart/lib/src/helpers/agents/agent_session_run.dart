@@ -4,8 +4,12 @@ import 'dart:convert';
 import 'dart:math';
 
 import '../../errors/exceptions.dart';
+import '../../models/agents/agent_json_helpers.dart' show validateAgentLength;
 import '../../models/agents/agent_session_models.dart';
 import '../../resources/agent_sessions_resource.dart';
+import 'agent_run_stop_signal.dart';
+
+part 'agent_tool_dispatcher.dart';
 
 /// One lazy follow-up observation on an idle durable session.
 ///
@@ -38,17 +42,25 @@ final class AgentSessionRun {
   /// retention limits, not wire limits or a limit on durable server history.
   AgentSessionRun({
     required this._sessions,
-    required this.sessionId,
+    required String sessionId,
     required AgentSessionInitialInput input,
     String? idempotencyKey,
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
+    Map<String, AgentToolHandler> toolHandlers = const {},
+    AgentToolErrorObserver? onToolError,
+    this.maxToolCalls = 1024,
     this.maxBufferedEvents = 256,
     this.maxBufferedBytes = 1024 * 1024,
-  }) : _headers = Map<String, String>.unmodifiable(
+    // Keep the public follow-up identity nonnullable while creation is unknown.
+    // ignore: prefer_initializing_formals
+  }) : _sessionId = sessionId,
+       _creation = null,
+       _headers = Map<String, String>.unmodifiable(
          additionalHeaders ?? const {},
        ) {
     inputKey = _inputKey(_headers, idempotencyKey);
+    _configureDispatcher(toolHandlers, onToolError);
     if (!maxBufferedEvents.isFinite ||
         !maxBufferedBytes.isFinite ||
         maxBufferedEvents < 1 ||
@@ -79,6 +91,50 @@ final class AgentSessionRun {
         if (entry.key.toLowerCase() != 'idempotency-key')
           entry.key: entry.value,
     });
+    _watchAbort(abortTrigger);
+  }
+
+  /// Captures one streamed creation. Explicit stream:false rejects before HTTP.
+  /// Handlers and observers are local metadata and never enter the request JSON.
+  AgentSessionRun.create({
+    required this._sessions,
+    required CreateAgentSessionRequest request,
+    Map<String, AgentToolHandler> toolHandlers = const {},
+    AgentToolErrorObserver? onToolError,
+    String? idempotencyKey,
+    Map<String, String>? additionalHeaders,
+    Future<void>? abortTrigger,
+    this.maxToolCalls = 1024,
+    this.maxBufferedEvents = 256,
+    this.maxBufferedBytes = 1024 * 1024,
+  }) : _sessionId = null,
+       _headers = Map<String, String>.unmodifiable(
+         additionalHeaders ?? const {},
+       ) {
+    if (request.stream == false) {
+      throw const FormatException(
+        'Local creation helpers require streamed mode',
+      );
+    }
+    _creation = CreateAgentSessionRequest.fromJson(
+      request.copyWith(stream: true).toJson(),
+    );
+    if (maxBufferedEvents < 1 || maxBufferedBytes < 1) {
+      throw const FormatException(
+        'Agent session run buffer limits must be positive',
+      );
+    }
+    inputKey = _inputKey(_headers, idempotencyKey);
+    _configureDispatcher(toolHandlers, onToolError);
+    _headers = Map<String, String>.unmodifiable({
+      for (final entry in _headers.entries)
+        if (entry.key.toLowerCase() != 'idempotency-key')
+          entry.key: entry.value,
+    });
+    _watchAbort(abortTrigger);
+  }
+
+  void _watchAbort(Future<void>? abortTrigger) {
     if (abortTrigger != null) {
       unawaited(
         abortTrigger.then<void>(
@@ -92,7 +148,20 @@ final class AgentSessionRun {
   final AgentSessionsResource _sessions;
 
   /// The selected durable session; never printed automatically.
-  final String sessionId;
+  String get sessionId =>
+      _sessionId ??
+      (throw StateError('Session identity has not been observed yet'));
+
+  /// Creation identity from the canonical session.created event, or null before it.
+  String? get observedSessionId => _sessionId;
+  String? _sessionId;
+  CreateAgentSessionRequest? _creation;
+
+  /// Maximum distinct registered calls captured for this invocation.
+  /// Overflow fails locally; call identities are never evicted and rerun.
+  final int maxToolCalls;
+  late final _AgentToolDispatcher _dispatcher;
+  Future<void> Function()? _pendingDispatch;
 
   /// The stable key for this input submission only, distinct from tool results.
   late final String inputKey;
@@ -108,7 +177,7 @@ final class AgentSessionRun {
   final _queue = Queue<_RunDelivery>();
   final _recentIds = <String>{};
   final _abortSignal = Completer<void>();
-  final _stopped = Completer<void>();
+  final _stopped = AgentRunStopSignal();
   Completer<void>? _changed;
   Completer<void>? _ready;
   Future<void>? _startFuture;
@@ -182,52 +251,63 @@ final class AgentSessionRun {
     try {
       _throwFailure();
       _requestStarted = true;
-      final current = await _race(
-        _sessions.retrieve(
-          sessionId,
-          additionalHeaders: _headers,
-          abortTrigger: _abortSignal.future,
-        ),
-      );
-      _throwFailure();
-      if (current.status.value != 'idle') {
-        throw StateError(
-          'sessions.stream requires an idle session; use sessions.events.stream for active work',
-        );
-      }
-      _ready = Completer<void>();
-      _subscribed = true;
-      _subscription = _sessions.events
-          .stream(
+      if (_creation == null) {
+        final current = await _race(
+          _sessions.retrieve(
             sessionId,
             additionalHeaders: _headers,
             abortTrigger: _abortSignal.future,
-            onReady: () {
-              if (!_ready!.isCompleted) _ready!.complete();
-            },
-          )
-          .listen(
-            _accept,
-            onError: _sourceError,
-            onDone: () {
-              if (!_boundarySeen && _failure == null) {
-                _fail(
-                  const StreamException(
-                    message:
-                        'Session observation ended before the selected turn reached idle or failed',
-                    redactDiagnostics: true,
-                  ),
-                  StackTrace.current,
-                );
-              }
-            },
+          ),
+        );
+        _throwFailure();
+        if (current.status.value != 'idle') {
+          throw StateError(
+            'sessions.stream requires an idle session; use sessions.events.stream for active work',
           );
+        }
+      }
+      _ready = Completer<void>();
+      _subscribed = true;
+      final creation = _creation;
+      final source = creation == null
+          ? _sessions.events.stream(
+              sessionId,
+              additionalHeaders: _headers,
+              abortTrigger: _abortSignal.future,
+              onReady: _markReady,
+            )
+          : _sessions.createStream(
+              creation,
+              additionalHeaders: {..._headers, 'Idempotency-Key': inputKey},
+              abortTrigger: _abortSignal.future,
+              onReady: _markReady,
+            );
+      _subscription = source.listen(
+        _accept,
+        onError: _sourceError,
+        onDone: () {
+          if (!_boundarySeen && _failure == null) {
+            _fail(
+              const StreamException(
+                message:
+                    'Session observation ended before the selected turn reached idle or failed',
+                redactDiagnostics: true,
+              ),
+              StackTrace.current,
+            );
+          }
+        },
+      );
       for (var pause = 0; pause < _pauseDepth; pause++) {
         _subscription!.pause();
       }
       if (_cancelRequested) unawaited(_cleanup());
       await _race(_ready!.future);
       _throwFailure();
+      if (creation != null) {
+        _creation = null;
+        return;
+      }
       await _race(
         _sessions.events.create(
           sessionId,
@@ -246,21 +326,56 @@ final class AgentSessionRun {
     }
   }
 
-  Future<T> _race<T>(Future<T> operation) => Future.any([
+  void _markReady() {
+    if (!_ready!.isCompleted) _ready!.complete();
+  }
+
+  void _configureDispatcher(
+    Map<String, AgentToolHandler> handlers,
+    AgentToolErrorObserver? observer,
+  ) {
+    if (maxToolCalls < 1) {
+      throw const FormatException('Agent tool call limit must be positive');
+    }
+    _dispatcher = _AgentToolDispatcher(this, handlers, observer);
+  }
+
+  Future<T> _race<T>(Future<T> operation) => _stopped.race(
     operation,
-    _stopped.future.then<T>((_) {
+    onStop: () {
       _throwFailure();
       throw const StreamException(
         message: 'Agent session observation stopped during setup',
         redactDiagnostics: true,
       );
-    }),
-  ]);
+    },
+  );
 
   void _accept(AgentSessionEvent event) {
     if (_failure != null || _boundarySeen || _closed) return;
     try {
       final json = event.toJson();
+      if (event is AgentSessionCreatedEvent) {
+        // Match the raw resource path admission before local side effects run.
+        final id = event.session.id;
+        validateAgentLength(id, 'Agent session run sessionId', max: 1048576);
+        if (id.isEmpty || id == '.' || id == '..') {
+          throw const FormatException(
+            'Agent session run requires an opaque session ID',
+          );
+        }
+        try {
+          Uri.encodeComponent(id);
+        } on ArgumentError {
+          throw const FormatException(
+            'Agent session run requires an encodable session ID',
+          );
+        }
+        if (_sessionId != null && _sessionId != event.session.id) {
+          throw StateError('Observed session identity changed');
+        }
+        _sessionId = event.session.id;
+      }
       final eventId = json['event_id'];
       if (eventId is String) {
         if (_recentIds.contains(eventId)) return;
@@ -292,7 +407,10 @@ final class AgentSessionRun {
       final terminal =
           event is AgentSessionFailedEvent ||
           (event is AgentSessionIdleEvent && _turnEnded);
-      _queue.add(_RunDelivery(event, bytes, terminal: terminal));
+      final dispatch = _dispatcher.prepare(event);
+      _queue.add(
+        _RunDelivery(event, bytes, terminal: terminal, dispatch: dispatch),
+      );
       _queueBytes += bytes;
       if (terminal) {
         _boundarySeen = true;
@@ -305,6 +423,19 @@ final class AgentSessionRun {
   }
 
   Future<AgentSessionEvent?> _advance() async {
+    final dispatch = _pendingDispatch;
+    _pendingDispatch = null;
+    if (dispatch != null) {
+      try {
+        _throwFailure();
+        await dispatch();
+        _throwFailure();
+      } catch (error, stack) {
+        _fail(error, stack);
+        _discardQueue();
+        _throwFailure();
+      }
+    }
     if (_cursorPaused) {
       _cursorPaused = false;
       _resumeSource();
@@ -321,6 +452,7 @@ final class AgentSessionRun {
         final next = _queue.removeFirst();
         _queueBytes -= next.bytes;
         _terminalDelivered = next.terminal;
+        _pendingDispatch = next.dispatch;
         return next.event;
       }
       _throwFailure();
@@ -354,7 +486,7 @@ final class AgentSessionRun {
             redactDiagnostics: true,
           );
     _failureStack = stack;
-    if (!_stopped.isCompleted) _stopped.complete();
+    _stopped.stop();
     if (!_abortSignal.isCompleted) _abortSignal.complete();
     if (_ready != null && !_ready!.isCompleted) _ready!.complete();
     _releaseCapturedState();
@@ -392,7 +524,7 @@ final class AgentSessionRun {
       _failureStack = StackTrace.current;
     }
     _closed = true;
-    if (!_stopped.isCompleted) _stopped.complete();
+    _stopped.stop();
     if (!_abortSignal.isCompleted) _abortSignal.complete();
     if (_ready != null && !_ready!.isCompleted) _ready!.complete();
     _discardQueue();
@@ -415,6 +547,9 @@ final class AgentSessionRun {
 
   void _releaseCapturedState() {
     _input = null;
+    _creation = null;
+    _pendingDispatch = null;
+    _dispatcher.clear();
     _headers = const {};
     _recentIds.clear();
   }
@@ -478,7 +613,13 @@ final class AgentSessionRun {
 }
 
 final class _RunDelivery {
-  const _RunDelivery(this.event, this.bytes, {required this.terminal});
+  const _RunDelivery(
+    this.event,
+    this.bytes, {
+    required this.terminal,
+    this.dispatch,
+  });
+  final Future<void> Function()? dispatch;
   final AgentSessionEvent event;
   final int bytes;
   final bool terminal;

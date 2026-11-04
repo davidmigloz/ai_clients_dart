@@ -1123,6 +1123,7 @@ final class _PendingInputEvents extends AgentSessionEventsResource {
     String? idempotencyKey,
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
+    bool allowRetries = true,
   }) {
     inputs++;
     inputEntered.complete();
