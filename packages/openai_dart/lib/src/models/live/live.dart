@@ -4,6 +4,8 @@ library;
 export 'live_audio.dart';
 export 'live_client_events.dart';
 export 'live_config.dart';
+export 'live_decision_items.dart';
+export 'live_decision_questions.dart';
 export 'live_delegation.dart';
 export 'live_history.dart';
 export 'live_http.dart';

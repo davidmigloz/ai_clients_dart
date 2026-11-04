@@ -1,15 +1,19 @@
+import '../decisions/decision_response.dart';
 import 'live_config.dart';
+import 'live_decision_items.dart';
 import 'live_json_helpers.dart';
 
 /// Complete Live events received on primary and trusted sideband connections.
 ///
 /// Known variants are [LiveSessionStarted], [LiveSessionUpdated], [LiveInputAudioMuted], [LiveInputAudioUnmuted], [LiveInstructionsAppended], [LiveThinkingAppended], [LiveCommentaryAppended], [LiveInputAudioAppend], [LiveOutputAudioDelta], [LiveInputTranscriptDelta], [LiveOutputTranscriptDelta], [LiveDelegationCreated], [LiveResponseEvent], [LiveSessionUsageUpdated], [LiveSessionClosed], [LiveErrorEvent], [LiveInfoEvent], [LiveTransportDTMFReceived], [LiveTransportDTMFSend], [LiveTransportRinging], [LiveTransportAnswered], [LiveTransportFailed].
-/// Future event types use [UnknownLiveServerEvent]; known malformed events fail.
+/// Decisions variants are [LiveDecisionEvent], [LiveDecisionItemCreated], and
+/// [LiveDecisionItemDeleted]. Future event types use [UnknownLiveServerEvent];
+/// known malformed events fail.
 sealed class LiveServerEvent extends LiveJsonModel {
   /// Creates a received Live event.
   const LiveServerEvent();
 
-  /// Parses all 22 canonical variants, independently of narrower sideband aliases.
+  /// Parses known received variants, independently of narrower sideband aliases.
   static LiveServerEvent fromJson(Map<String, dynamic> json) {
     final type = requireLiveString(json['type'], 'LiveServerEvent.type');
     return switch (type) {
@@ -32,6 +36,9 @@ sealed class LiveServerEvent extends LiveJsonModel {
       ),
       'session.delegation.created' => LiveDelegationCreated.fromJson(json),
       'response.event' => LiveResponseEvent.fromJson(json),
+      'decision.event' => LiveDecisionEvent.fromJson(json),
+      'decision.item.created' => LiveDecisionItemCreated.fromJson(json),
+      'decision.item.deleted' => LiveDecisionItemDeleted.fromJson(json),
       'session.usage.updated' => LiveSessionUsageUpdated.fromJson(json),
       'session.closed' => LiveSessionClosed.fromJson(json),
       'error' => LiveErrorEvent.fromJson(json),
@@ -90,6 +97,9 @@ const _knownServerEventTypes = <String>{
   'session.output_transcript.delta',
   'session.delegation.created',
   'response.event',
+  'decision.event',
+  'decision.item.created',
+  'decision.item.deleted',
   'session.usage.updated',
   'session.closed',
   'error',
@@ -3005,6 +3015,422 @@ final class LiveTransportCallError extends LiveJsonModel {
         ? this.rawJson
         : requireLiveObject(rawJson, 'LiveTransportCallError.rawJson'),
   );
+}
+
+/// A native Decisions completion nested within a Live decision.event envelope.
+///
+/// The immutable wire snapshot retains future native fields. Each [decision]
+/// view is parsed independently, so consumer mutations cannot alter that source.
+final class LiveDecisionCompleted extends LiveJsonModel {
+  /// Creates a completion from native answers and usage plus future metadata.
+  LiveDecisionCompleted({
+    required DecisionResponse decision,
+    Map<String, dynamic> rawJson = const {},
+  }) : this.fromJson(
+         mergeLiveJson(rawJson, _knownKeys, {
+           'type': 'decision.completed',
+           'decision': decision.toJson(),
+         }),
+       );
+
+  /// Parses the fixed completion discriminator and native Decision response.
+  LiveDecisionCompleted.fromJson(Map<String, dynamic> json)
+    : rawJson = snapshotLiveJson(
+        json,
+        'LiveDecisionCompleted',
+        knownKeys: _knownKeys,
+      ) {
+    validate();
+  }
+
+  static const _knownKeys = {'type', 'decision'};
+
+  /// Complete immutable completion data, including future native metadata.
+  final Map<String, dynamic> rawJson;
+
+  /// The fixed native completion type.
+  String get type => 'decision.completed';
+
+  /// A detached native Decision response with ordered answers and token usage.
+  DecisionResponse get decision => _serverModel(
+    rawJson['decision'],
+    'LiveDecisionCompleted.decision',
+    DecisionResponse.fromJson,
+  );
+
+  @override
+  void validate() {
+    requireLiveType(rawJson, type, 'LiveDecisionCompleted');
+    // Native required counters/answer variants are checked by the existing codec.
+    decision;
+  }
+
+  @override
+  Map<String, dynamic> toJson() => rawJson;
+
+  /// Copies metadata or replaces the native response deliberately.
+  /// With no replacement, unknown native fields remain in the exact snapshot.
+  LiveDecisionCompleted copyWith({
+    DecisionResponse? decision,
+    Map<String, dynamic>? rawJson,
+  }) => LiveDecisionCompleted.fromJson(
+    mergeLiveJson(rawJson ?? this.rawJson, _knownKeys, {
+      'type': type,
+      'decision': decision?.toJson() ?? this.rawJson['decision'],
+    }),
+  );
+}
+
+/// A native Decision response for a delegation or a transcript trigger.
+///
+/// The four correlation keys are always present and may be null. No identifier
+/// is inferred from the nested response. Trigger results can arrive out of order;
+/// use sourceEventId to associate them with the original transcript fragment.
+final class LiveDecisionEvent extends LiveServerEvent {
+  /// Creates a received event with explicitly supplied nullable correlations.
+  LiveDecisionEvent({
+    required this.eventId,
+    required this.event,
+    required this.delegationId,
+    required this.triggerId,
+    required this.sourceEventType,
+    required this.sourceEventId,
+    Map<String, dynamic> rawJson = const {},
+  }) : rawJson = snapshotLiveJson(
+         rawJson,
+         'LiveDecisionEvent',
+         knownKeys: _knownKeys,
+       ) {
+    validate();
+  }
+
+  static const _knownKeys = {
+    'type',
+    'event_id',
+    'event',
+    'delegation_id',
+    'trigger_id',
+    'source_event_type',
+    'source_event_id',
+  };
+
+  @override
+  String get type => 'decision.event';
+
+  @override
+  final String eventId;
+
+  /// The typed native completion, retaining its original immutable wire data.
+  final LiveDecisionCompleted event;
+
+  /// The delegation identifier, or null for a transcript trigger.
+  final String? delegationId;
+
+  /// Live-assigned trigger firing ID, or null for a delegation.
+  final String? triggerId;
+
+  /// Input/output transcript event type, or null for a delegation.
+  final String? sourceEventType;
+
+  /// Original transcript event ID, or null for a delegation.
+  final String? sourceEventId;
+
+  @override
+  final Map<String, dynamic> rawJson;
+
+  /// A detached view of the native Decision model, ordered answers and usage.
+  DecisionResponse get typedDecision => event.decision;
+
+  /// Parses every required nullable correlation key without inventing values.
+  factory LiveDecisionEvent.fromJson(Map<String, dynamic> json) {
+    requireLiveType(json, 'decision.event', 'LiveDecisionEvent');
+    return LiveDecisionEvent(
+      eventId: requireLiveString(
+        json['event_id'],
+        'LiveDecisionEvent.event_id',
+      ),
+      event: _serverModel(
+        json['event'],
+        'LiveDecisionEvent.event',
+        LiveDecisionCompleted.fromJson,
+      ),
+      delegationId: _requiredNullableDecisionEventString(json, 'delegation_id'),
+      triggerId: _requiredNullableDecisionEventString(json, 'trigger_id'),
+      sourceEventType: _requiredNullableDecisionEventString(
+        json,
+        'source_event_type',
+      ),
+      sourceEventId: _requiredNullableDecisionEventString(
+        json,
+        'source_event_id',
+      ),
+      rawJson: json,
+    );
+  }
+
+  @override
+  void validate() {
+    event.validate();
+    if (sourceEventType != null &&
+        sourceEventType != 'session.input_transcript.delta' &&
+        sourceEventType != 'session.output_transcript.delta') {
+      throw const FormatException(
+        'LiveDecisionEvent.source_event_type: unsupported transcript event',
+      );
+    }
+  }
+
+  @override
+  Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    'type': type,
+    'event_id': eventId,
+    'event': event.toJson(),
+    'delegation_id': delegationId,
+    'trigger_id': triggerId,
+    'source_event_type': sourceEventType,
+    'source_event_id': sourceEventId,
+  });
+
+  /// Copies every field; explicit null retains required nullable correlations.
+  LiveDecisionEvent copyWith({
+    Object? eventId = liveUnset,
+    LiveDecisionCompleted? event,
+    Object? delegationId = liveUnset,
+    Object? triggerId = liveUnset,
+    Object? sourceEventType = liveUnset,
+    Object? sourceEventId = liveUnset,
+    Map<String, dynamic>? rawJson,
+  }) => LiveDecisionEvent(
+    eventId: identical(eventId, liveUnset)
+        ? this.eventId
+        : requireLiveString(eventId, 'LiveDecisionEvent.event_id'),
+    event: event ?? this.event,
+    delegationId: identical(delegationId, liveUnset)
+        ? this.delegationId
+        : _serverOptional<String>(
+            delegationId,
+            'LiveDecisionEvent.delegation_id',
+            nullable: true,
+          ),
+    triggerId: identical(triggerId, liveUnset)
+        ? this.triggerId
+        : _serverOptional<String>(
+            triggerId,
+            'LiveDecisionEvent.trigger_id',
+            nullable: true,
+          ),
+    sourceEventType: identical(sourceEventType, liveUnset)
+        ? this.sourceEventType
+        : _serverOptional<String>(
+            sourceEventType,
+            'LiveDecisionEvent.source_event_type',
+            nullable: true,
+          ),
+    sourceEventId: identical(sourceEventId, liveUnset)
+        ? this.sourceEventId
+        : _serverOptional<String>(
+            sourceEventId,
+            'LiveDecisionEvent.source_event_id',
+            nullable: true,
+          ),
+    rawJson: rawJson ?? this.rawJson,
+  );
+}
+
+/// Confirms that an item was appended to future Decision context.
+final class LiveDecisionItemCreated extends LiveServerEvent {
+  /// Creates an acknowledgment; optional client correlation cannot be null.
+  LiveDecisionItemCreated({
+    required this.eventId,
+    required this.item,
+    Object? clientEventId = liveUnset,
+    Map<String, dynamic> rawJson = const {},
+  }) : clientEventId = _serverOptional<String>(
+         clientEventId,
+         'LiveDecisionItemCreated.client_event_id',
+         nullable: false,
+       ),
+       rawJson = snapshotLiveJson(
+         rawJson,
+         'LiveDecisionItemCreated',
+         knownKeys: _knownKeys,
+       ) {
+    validate();
+  }
+
+  static const _knownKeys = {'type', 'event_id', 'client_event_id', 'item'};
+
+  @override
+  String get type => 'decision.item.created';
+
+  @override
+  final String eventId;
+
+  /// The stored item, including its server-required local ID.
+  final LiveDecisionStoredInputItemParam item;
+
+  /// Original command correlation, when the service supplied it.
+  final String? clientEventId;
+
+  @override
+  final Map<String, dynamic> rawJson;
+
+  /// Parses the stored item and optional nonnull client correlation.
+  factory LiveDecisionItemCreated.fromJson(Map<String, dynamic> json) {
+    requireLiveType(json, 'decision.item.created', 'LiveDecisionItemCreated');
+    return LiveDecisionItemCreated(
+      eventId: requireLiveString(
+        json['event_id'],
+        'LiveDecisionItemCreated.event_id',
+      ),
+      item: _serverModel(
+        json['item'],
+        'LiveDecisionItemCreated.item',
+        LiveDecisionStoredInputItemParam.fromJson,
+      ),
+      clientEventId: json.containsKey('client_event_id')
+          ? requireLiveString(
+              json['client_event_id'],
+              'LiveDecisionItemCreated.client_event_id',
+            )
+          : liveUnset,
+      rawJson: json,
+    );
+  }
+
+  @override
+  void validate() => item.validate();
+
+  @override
+  Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    'type': type,
+    'event_id': eventId,
+    if (clientEventId != null) 'client_event_id': clientEventId,
+    'item': item.toJson(),
+  });
+
+  /// Copies every field; clearClientEventId omits optional client correlation.
+  LiveDecisionItemCreated copyWith({
+    Object? eventId = liveUnset,
+    LiveDecisionStoredInputItemParam? item,
+    Object? clientEventId = liveUnset,
+    bool clearClientEventId = false,
+    Map<String, dynamic>? rawJson,
+  }) => LiveDecisionItemCreated(
+    eventId: identical(eventId, liveUnset)
+        ? this.eventId
+        : requireLiveString(eventId, 'LiveDecisionItemCreated.event_id'),
+    item: item ?? this.item,
+    clientEventId: clearClientEventId
+        ? liveUnset
+        : (identical(clientEventId, liveUnset)
+              ? (this.clientEventId ?? liveUnset)
+              : clientEventId),
+    rawJson: rawJson ?? this.rawJson,
+  );
+}
+
+/// Confirms that an item was removed from future Decision context.
+final class LiveDecisionItemDeleted extends LiveServerEvent {
+  /// Creates an acknowledgment; optional client correlation cannot be null.
+  LiveDecisionItemDeleted({
+    required this.eventId,
+    required this.itemId,
+    Object? clientEventId = liveUnset,
+    Map<String, dynamic> rawJson = const {},
+  }) : clientEventId = _serverOptional<String>(
+         clientEventId,
+         'LiveDecisionItemDeleted.client_event_id',
+         nullable: false,
+       ),
+       rawJson = snapshotLiveJson(
+         rawJson,
+         'LiveDecisionItemDeleted',
+         knownKeys: _knownKeys,
+       ) {
+    validate();
+  }
+
+  static const _knownKeys = {'type', 'event_id', 'client_event_id', 'item_id'};
+
+  @override
+  String get type => 'decision.item.deleted';
+
+  @override
+  final String eventId;
+
+  /// The local removed item ID, without imposing request-only ID constraints.
+  final String itemId;
+
+  /// Original command correlation, when the service supplied it.
+  final String? clientEventId;
+
+  @override
+  final Map<String, dynamic> rawJson;
+
+  /// Parses the acknowledgment without inventing a missing client event ID.
+  factory LiveDecisionItemDeleted.fromJson(Map<String, dynamic> json) {
+    requireLiveType(json, 'decision.item.deleted', 'LiveDecisionItemDeleted');
+    return LiveDecisionItemDeleted(
+      eventId: requireLiveString(
+        json['event_id'],
+        'LiveDecisionItemDeleted.event_id',
+      ),
+      itemId: requireLiveString(
+        json['item_id'],
+        'LiveDecisionItemDeleted.item_id',
+      ),
+      clientEventId: json.containsKey('client_event_id')
+          ? requireLiveString(
+              json['client_event_id'],
+              'LiveDecisionItemDeleted.client_event_id',
+            )
+          : liveUnset,
+      rawJson: json,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    'type': type,
+    'event_id': eventId,
+    if (clientEventId != null) 'client_event_id': clientEventId,
+    'item_id': itemId,
+  });
+
+  /// Copies every field; clearClientEventId omits optional client correlation.
+  LiveDecisionItemDeleted copyWith({
+    Object? eventId = liveUnset,
+    Object? itemId = liveUnset,
+    Object? clientEventId = liveUnset,
+    bool clearClientEventId = false,
+    Map<String, dynamic>? rawJson,
+  }) => LiveDecisionItemDeleted(
+    eventId: identical(eventId, liveUnset)
+        ? this.eventId
+        : requireLiveString(eventId, 'LiveDecisionItemDeleted.event_id'),
+    itemId: identical(itemId, liveUnset)
+        ? this.itemId
+        : requireLiveString(itemId, 'LiveDecisionItemDeleted.item_id'),
+    clientEventId: clearClientEventId
+        ? liveUnset
+        : (identical(clientEventId, liveUnset)
+              ? (this.clientEventId ?? liveUnset)
+              : clientEventId),
+    rawJson: rawJson ?? this.rawJson,
+  );
+}
+
+String? _requiredNullableDecisionEventString(
+  Map<String, dynamic> json,
+  String key,
+) {
+  if (!json.containsKey(key)) {
+    throw FormatException('LiveDecisionEvent.$key: required nullable field');
+  }
+  return json[key] == null
+      ? null
+      : requireLiveString(json[key], 'LiveDecisionEvent.$key');
 }
 
 /// Immutable receive-only fallback for an unfamiliar event discriminator.

@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import 'live_config.dart';
+import 'live_decision_items.dart';
 import 'live_input_item.dart';
 import 'live_json_helpers.dart';
 
@@ -11,7 +12,9 @@ import 'live_json_helpers.dart';
 /// [LiveInputAudioUnmuteParam], [LiveInstructionsAppendParam],
 /// [LiveThinkingAppendParam], [LiveCommentaryAppendParam],
 /// [LiveResponseItemCreateParam], [LiveResponseCreateParam], and
-/// [LiveSessionCloseParam]. [LiveForkSessionStartEvent] is the distinct stored
+/// [LiveSessionCloseParam], plus [LiveDecisionCreateParam],
+/// [LiveDecisionItemCreateParam], and [LiveDecisionItemDeleteParam].
+/// [LiveForkSessionStartEvent] is the distinct stored
 /// fork startup codec and is accepted only by [LiveClientEvent.fromForkJson].
 /// These models never send commands or replay audio themselves.
 @immutable
@@ -30,7 +33,7 @@ sealed class LiveClientEvent extends LiveJsonModel {
   /// The fixed canonical command discriminator.
   String get type;
 
-  /// Parses the eleven commands accepted by a primary Live WebSocket.
+  /// Parses the supported commands accepted by a primary Live WebSocket.
   factory LiveClientEvent.fromJson(Map<String, dynamic> json) {
     final type = requireLiveString(json['type'], 'LiveClientEvent.type');
     return switch (type) {
@@ -46,6 +49,9 @@ sealed class LiveClientEvent extends LiveJsonModel {
       'session.commentary.append' => LiveCommentaryAppendParam.fromJson(json),
       'response.item.create' => LiveResponseItemCreateParam.fromJson(json),
       'response.create' => LiveResponseCreateParam.fromJson(json),
+      'decision.create' => LiveDecisionCreateParam.fromJson(json),
+      'decision.item.create' => LiveDecisionItemCreateParam.fromJson(json),
+      'decision.item.delete' => LiveDecisionItemDeleteParam.fromJson(json),
       'session.close' => LiveSessionCloseParam.fromJson(json),
       _ => throw const FormatException(
         'LiveClientEvent.type: unsupported command',
@@ -73,13 +79,15 @@ sealed class LiveClientEvent extends LiveJsonModel {
   Map<String, dynamic> toJson();
 }
 
-/// The nine commands supported by an already-started sideband session.
+/// Commands supported by an already-started sideband session.
 ///
 /// Includes [LiveSessionUpdateParam], [LiveInputAudioMuteParam],
 /// [LiveInputAudioUnmuteParam], [LiveInstructionsAppendParam],
 /// [LiveThinkingAppendParam], [LiveCommentaryAppendParam],
 /// [LiveResponseItemCreateParam], [LiveResponseCreateParam], and
-/// [LiveSessionCloseParam]. Primary/fork startup and audio append are excluded.
+/// [LiveSessionCloseParam], [LiveDecisionCreateParam],
+/// [LiveDecisionItemCreateParam], and [LiveDecisionItemDeleteParam].
+/// Primary/fork startup and audio append are excluded.
 @immutable
 sealed class LiveSidebandClientEvent extends LiveClientEvent {
   /// Creates an optional command correlation value.
@@ -102,6 +110,9 @@ sealed class LiveSidebandClientEvent extends LiveClientEvent {
       'session.commentary.append' => LiveCommentaryAppendParam.fromJson(json),
       'response.item.create' => LiveResponseItemCreateParam.fromJson(json),
       'response.create' => LiveResponseCreateParam.fromJson(json),
+      'decision.create' => LiveDecisionCreateParam.fromJson(json),
+      'decision.item.create' => LiveDecisionItemCreateParam.fromJson(json),
+      'decision.item.delete' => LiveDecisionItemDeleteParam.fromJson(json),
       'session.close' => LiveSessionCloseParam.fromJson(json),
       _ => throw const FormatException(
         'LiveSidebandClientEvent.type: unsupported command',
@@ -1222,6 +1233,250 @@ final class LiveSessionCloseParam extends LiveSidebandClientEvent {
       'eventId: ${livePresence(eventId)}, '
       'hasEventId: $hasEventId, '
       'rawJson: [REDACTED])';
+}
+
+/// Evaluates configured questions against the conversation and Decision inputs.
+///
+/// The service rejects a reused event ID for the session lifetime. This command
+/// does not supply new questions or automatically replay an earlier evaluation.
+@immutable
+final class LiveDecisionCreateParam extends LiveSidebandClientEvent {
+  /// Creates an evaluation with a caller-selected nonempty correlation ID.
+  LiveDecisionCreateParam({
+    required String eventId,
+    Map<String, dynamic> rawJson = const {},
+  }) : rawJson = snapshotLiveJson(
+         rawJson,
+         'LiveDecisionCreateParam',
+         knownKeys: _knownKeys,
+       ),
+       super(eventId: eventId, hasEventId: true) {
+    validate();
+  }
+
+  static const _knownKeys = {'type', 'event_id'};
+
+  /// Immutable future metadata, with typed fields authoritative.
+  final Map<String, dynamic> rawJson;
+
+  @override
+  String get type => 'decision.create';
+
+  /// Required evaluation correlation, limited to 1–256 Unicode code points.
+  @override
+  String get eventId => super.eventId!;
+
+  /// Parses the required nonnull evaluation ID without synthesizing one.
+  factory LiveDecisionCreateParam.fromJson(Map<String, dynamic> json) {
+    requireLiveType(json, 'decision.create', 'LiveDecisionCreateParam');
+    return LiveDecisionCreateParam(
+      eventId: requireLiveString(
+        json['event_id'],
+        'LiveDecisionCreateParam.event_id',
+      ),
+      rawJson: json,
+    );
+  }
+
+  @override
+  void validate() {
+    super.validate();
+    validateLiveLength(
+      eventId,
+      'LiveDecisionCreateParam.event_id',
+      min: 1,
+      max: 256,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() =>
+      mergeLiveJson(rawJson, _knownKeys, {'type': type, 'event_id': eventId});
+
+  /// Copies the required ID and future metadata; explicit null is rejected.
+  LiveDecisionCreateParam copyWith({
+    Object? eventId = liveUnset,
+    Map<String, dynamic>? rawJson,
+  }) => LiveDecisionCreateParam(
+    eventId: identical(eventId, liveUnset)
+        ? this.eventId
+        : requireLiveString(eventId, 'LiveDecisionCreateParam.event_id'),
+    rawJson: rawJson ?? this.rawJson,
+  );
+}
+
+/// Appends shared Decision context without evaluating or changing voice context.
+@immutable
+final class LiveDecisionItemCreateParam extends LiveSidebandClientEvent {
+  /// Creates an append command with optional nullable client correlation.
+  LiveDecisionItemCreateParam({
+    required this.item,
+    super.eventId,
+    super.hasEventId,
+    Map<String, dynamic> rawJson = const {},
+  }) : rawJson = snapshotLiveJson(
+         rawJson,
+         'LiveDecisionItemCreateParam',
+         knownKeys: _knownKeys,
+       ) {
+    validate();
+  }
+
+  static const _knownKeys = {'type', 'event_id', 'item'};
+
+  /// A Decision-specific message or function/custom-tool history item.
+  final LiveDecisionInputItemParam item;
+
+  /// Immutable future metadata, with typed fields authoritative.
+  final Map<String, dynamic> rawJson;
+
+  @override
+  String get type => 'decision.item.create';
+
+  /// Parses the append command and its direction-specific input item.
+  factory LiveDecisionItemCreateParam.fromJson(Map<String, dynamic> json) {
+    requireLiveType(
+      json,
+      'decision.item.create',
+      'LiveDecisionItemCreateParam',
+    );
+    return LiveDecisionItemCreateParam(
+      item: _requiredClientField(
+        json,
+        'item',
+        'LiveDecisionItemCreateParam',
+        (value, context) => LiveDecisionInputItemParam.fromJson(
+          requireLiveObject(value, context),
+        ),
+      ),
+      eventId: optionalLiveValue(
+        json,
+        'event_id',
+        'LiveDecisionItemCreateParam',
+        requireLiveString,
+        nullable: true,
+      ),
+      hasEventId: json.containsKey('event_id'),
+      rawJson: json,
+    );
+  }
+
+  @override
+  void validate() {
+    super.validate();
+    item.validate();
+  }
+
+  @override
+  Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    'type': type,
+    if (hasEventId) 'event_id': eventId,
+    'item': item.toJson(),
+  });
+
+  /// Copies all fields; null emits null and clearEventId omits correlation.
+  LiveDecisionItemCreateParam copyWith({
+    LiveDecisionInputItemParam? item,
+    Object? eventId = liveUnset,
+    bool clearEventId = false,
+    Map<String, dynamic>? rawJson,
+  }) => LiveDecisionItemCreateParam(
+    item: item ?? this.item,
+    eventId: clearEventId
+        ? null
+        : copyLiveValue<String>(
+            eventId,
+            this.eventId,
+            'LiveDecisionItemCreateParam.event_id',
+          ),
+    hasEventId: !clearEventId && (!identical(eventId, liveUnset) || hasEventId),
+    rawJson: rawJson ?? this.rawJson,
+  );
+}
+
+/// Removes shared Decision context without evaluating or changing voice context.
+@immutable
+final class LiveDecisionItemDeleteParam extends LiveSidebandClientEvent {
+  /// Creates a removal command with a nonempty local Decision item ID.
+  LiveDecisionItemDeleteParam({
+    required this.itemId,
+    super.eventId,
+    super.hasEventId,
+    Map<String, dynamic> rawJson = const {},
+  }) : rawJson = snapshotLiveJson(
+         rawJson,
+         'LiveDecisionItemDeleteParam',
+         knownKeys: _knownKeys,
+       ) {
+    validate();
+  }
+
+  static const _knownKeys = {'type', 'event_id', 'item_id'};
+
+  /// The local Decision item to remove from future evaluations.
+  final String itemId;
+
+  /// Immutable future metadata, with typed fields authoritative.
+  final Map<String, dynamic> rawJson;
+
+  @override
+  String get type => 'decision.item.delete';
+
+  /// Parses a removal command, preserving optional nullable correlation.
+  factory LiveDecisionItemDeleteParam.fromJson(Map<String, dynamic> json) {
+    requireLiveType(
+      json,
+      'decision.item.delete',
+      'LiveDecisionItemDeleteParam',
+    );
+    return LiveDecisionItemDeleteParam(
+      itemId: requireLiveString(
+        json['item_id'],
+        'LiveDecisionItemDeleteParam.item_id',
+      ),
+      eventId: optionalLiveValue(
+        json,
+        'event_id',
+        'LiveDecisionItemDeleteParam',
+        requireLiveString,
+        nullable: true,
+      ),
+      hasEventId: json.containsKey('event_id'),
+      rawJson: json,
+    );
+  }
+
+  @override
+  void validate() {
+    super.validate();
+    validateLiveLength(itemId, 'LiveDecisionItemDeleteParam.item_id', min: 1);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => mergeLiveJson(rawJson, _knownKeys, {
+    'type': type,
+    if (hasEventId) 'event_id': eventId,
+    'item_id': itemId,
+  });
+
+  /// Copies all fields; null emits null and clearEventId omits correlation.
+  LiveDecisionItemDeleteParam copyWith({
+    String? itemId,
+    Object? eventId = liveUnset,
+    bool clearEventId = false,
+    Map<String, dynamic>? rawJson,
+  }) => LiveDecisionItemDeleteParam(
+    itemId: itemId ?? this.itemId,
+    eventId: clearEventId
+        ? null
+        : copyLiveValue<String>(
+            eventId,
+            this.eventId,
+            'LiveDecisionItemDeleteParam.event_id',
+          ),
+    hasEventId: !clearEventId && (!identical(eventId, liveUnset) || hasEventId),
+    rawJson: rawJson ?? this.rawJson,
+  );
 }
 
 T _requiredClientField<T>(
