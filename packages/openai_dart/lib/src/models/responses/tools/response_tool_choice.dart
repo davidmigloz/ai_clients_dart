@@ -85,6 +85,7 @@ class SpecificFunctionChoice extends SpecificToolChoice {
 /// Controls how the model selects which tools to use.
 /// Variants are [ResponseToolChoiceNone], [ResponseToolChoiceAuto],
 /// [ResponseToolChoiceRequired], [ResponseToolChoiceFunction],
+/// [ResponseToolChoiceCustom],
 /// [ResponseToolChoiceAllowedTools], [ResponseToolChoiceWebSearch],
 /// [ResponseToolChoiceShell], and [ResponseToolChoiceProgrammatic]. Web search
 /// selects GA or an explicit preview.
@@ -107,6 +108,7 @@ sealed class ResponseToolChoice {
       final type = requireJsonString(json['type'], 'ResponseToolChoice.type');
       return switch (type) {
         'function' => ResponseToolChoiceFunction.fromJson(json),
+        'custom' => ResponseToolChoiceCustom.fromJson(json),
         'allowed_tools' => ResponseToolChoiceAllowedTools.fromJson(json),
         'shell' => ResponseToolChoiceShell.fromJson(json),
         'web_search' ||
@@ -137,6 +139,10 @@ sealed class ResponseToolChoice {
   /// Creates a function choice - model must call the specified function.
   static ResponseToolChoiceFunction function({required String name}) =>
       ResponseToolChoiceFunction(name: name);
+
+  /// Forces the model to call the named custom tool.
+  static ResponseToolChoiceCustom custom({required String name}) =>
+      ResponseToolChoiceCustom(name: name);
 
   /// Selects GA web search, or an explicitly requested preview type.
   static ResponseToolChoiceWebSearch webSearch({String type = 'web_search'}) =>
@@ -343,6 +349,47 @@ class ResponseToolChoiceFunction extends ResponseToolChoice {
 
   @override
   String toString() => 'ResponseToolChoiceFunction(name: $name)';
+}
+
+/// Model must call the specified custom tool.
+@immutable
+class ResponseToolChoiceCustom extends ResponseToolChoice {
+  /// The name of the custom tool to call.
+  final String name;
+
+  /// The fixed custom tool discriminator.
+  String get type => 'custom';
+
+  /// Creates a [ResponseToolChoiceCustom].
+  const ResponseToolChoiceCustom({required this.name});
+
+  /// Creates a [ResponseToolChoiceCustom] from JSON.
+  factory ResponseToolChoiceCustom.fromJson(Map<String, dynamic> json) {
+    requireJsonType(json, 'custom', 'ResponseToolChoiceCustom');
+    return ResponseToolChoiceCustom(
+      name: requireJsonString(json['name'], 'ResponseToolChoiceCustom.name'),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': type, 'name': name};
+
+  /// Creates a copy with an optionally replaced name.
+  ResponseToolChoiceCustom copyWith({String? name}) =>
+      ResponseToolChoiceCustom(name: name ?? this.name);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ResponseToolChoiceCustom &&
+          runtimeType == other.runtimeType &&
+          name == other.name;
+
+  @override
+  int get hashCode => name.hashCode;
+
+  @override
+  String toString() => 'ResponseToolChoiceCustom(name: $name)';
 }
 
 /// Model can only call the specified tools.
