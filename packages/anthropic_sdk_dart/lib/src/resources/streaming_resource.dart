@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import '../auth/auth_provider.dart';
 import '../errors/exceptions.dart';
+import '../errors/response_error.dart';
 import '../utils/request_id.dart';
 import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
@@ -48,15 +49,27 @@ mixin StreamingResource on ResourceBase {
   /// Makes a streaming GET request whose response contains JSON lines.
   ///
   /// Uses the same cancellation lifecycle as SSE requests.
+  ///
+  /// [errorFactoryWithMetadata] receives safe response metadata and takes
+  /// precedence over [errorFactory] when both are provided. The legacy
+  /// [errorFactory] receives only the status and body; its exception is returned
+  /// unchanged, so that factory remains responsible for its own metadata.
   Stream<Map<String, dynamic>> getJsonlStream(
     String path, {
     Future<void>? abortTrigger,
     AnthropicException Function(int statusCode, String body)? errorFactory,
+    AnthropicException Function(
+      int statusCode,
+      String body,
+      ResponseMetadata responseMetadata,
+    )?
+    errorFactoryWithMetadata,
   }) => _stream(
     'GET',
     path,
     abortTrigger: abortTrigger,
     errorFactory: errorFactory,
+    errorFactoryWithMetadata: errorFactoryWithMetadata,
     decode: (bytes) => bytes
         .transform(utf8.decoder)
         .transform(const LineSplitter())
@@ -86,7 +99,7 @@ mixin StreamingResource on ResourceBase {
         message: message,
         details: details,
         responseMetadata: responseMetadata,
-        retryAfter: _retryAfter(responseMetadata.headers),
+        retryAfter: parseRetryAfter(responseMetadata.headers),
       );
     }
 
@@ -96,23 +109,6 @@ mixin StreamingResource on ResourceBase {
       details: details,
       responseMetadata: responseMetadata,
     );
-  }
-
-  DateTime? _retryAfter(Map<String, String> headers) {
-    final value = headers['retry-after']?.trim();
-    if (value == null) return null;
-    if (!RegExp(r'^-?\d+$').hasMatch(value)) {
-      return DateTime.tryParse(value);
-    }
-    final seconds = int.tryParse(value);
-    if (seconds == null || seconds < 0) return null;
-    final duration = Duration(seconds: seconds);
-    if (duration.inSeconds != seconds) return null;
-    try {
-      return DateTime.now().add(duration);
-    } on ArgumentError {
-      return null;
-    }
   }
 
   /// Parses error message and details from response body.
@@ -175,6 +171,12 @@ mixin StreamingResource on ResourceBase {
     Future<void>? abortTrigger,
     Stream<Map<String, dynamic>> Function(Stream<List<int>> bytes)? decode,
     AnthropicException Function(int statusCode, String body)? errorFactory,
+    AnthropicException Function(
+      int statusCode,
+      String body,
+      ResponseMetadata responseMetadata,
+    )?
+    errorFactoryWithMetadata,
   }) {
     final requestAbort = Completer<void>();
     // Canceled by stop when the stream terminates or its listener cancels.
@@ -231,27 +233,23 @@ mixin StreamingResource on ResourceBase {
                 responseBody.write,
                 onError: finish,
                 onDone: () {
+                  final responseMetadata = createSafeResponseMetadata(
+                    statusCode: response.statusCode,
+                    headers: response.headers,
+                    latency: stopwatch.elapsed,
+                  );
+                  final body = responseBody.toString();
                   finish(
-                    errorFactory?.call(
+                    errorFactoryWithMetadata?.call(
                           response.statusCode,
-                          responseBody.toString(),
+                          body,
+                          responseMetadata,
                         ) ??
+                        errorFactory?.call(response.statusCode, body) ??
                         _createStreamException(
                           response.statusCode,
-                          responseBody.toString(),
-                          ResponseMetadata(
-                            statusCode: response.statusCode,
-                            headers: Map.unmodifiable({
-                              for (final entry in response.headers.entries)
-                                if (const {
-                                  'request-id',
-                                  'retry-after',
-                                }.contains(entry.key.toLowerCase()))
-                                  entry.key.toLowerCase(): entry.value,
-                            }),
-                            bodyExcerpt: '',
-                            latency: stopwatch.elapsed,
-                          ),
+                          body,
+                          responseMetadata,
                         ),
                   );
                 },

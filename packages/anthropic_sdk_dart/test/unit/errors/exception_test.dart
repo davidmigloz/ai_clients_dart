@@ -120,6 +120,36 @@ void main() {
   });
 
   group('ValidationException', () {
+    test('client validation has no server metadata or request ID', () {
+      const exception = ValidationException(
+        message: 'Invalid input',
+        fieldErrors: {},
+      );
+
+      expect(exception.responseMetadata, isNull);
+      expect(exception.requestId, isNull);
+    });
+
+    test(
+      'server validation reads the response request ID case-insensitively',
+      () {
+        const metadata = ResponseMetadata(
+          statusCode: 400,
+          headers: {'ReQuEsT-Id': 'server-request'},
+          bodyExcerpt: '',
+          latency: Duration.zero,
+        );
+        const exception = ValidationException(
+          message: 'Invalid input',
+          fieldErrors: {},
+          responseMetadata: metadata,
+        );
+
+        expect(exception.responseMetadata, same(metadata));
+        expect(exception.requestId, 'server-request');
+      },
+    );
+
     test('stores message and field errors', () {
       const exception = ValidationException(
         message: 'Validation failed',

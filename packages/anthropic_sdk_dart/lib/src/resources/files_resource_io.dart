@@ -5,12 +5,12 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 import '../auth/auth_provider.dart';
-import '../errors/exceptions.dart';
 import '../models/files/file_delete_response.dart';
 import '../models/files/file_list_response.dart';
 import '../models/files/file_metadata.dart';
 import 'base_resource.dart';
 import 'media_type.dart';
+import 'resource_request.dart';
 
 /// Resource for the Files API (IO implementation).
 ///
@@ -132,12 +132,7 @@ class FilesResource extends ResourceBase {
     // Add authentication header
     await _applyAuthentication(request);
 
-    final streamedResponse = await httpClient.send(request);
-    final response = await http.Response.fromStream(streamedResponse);
-
-    if (response.statusCode >= 400) {
-      _throwError(response);
-    }
+    final response = await sendResourceRequest(httpClient, request);
 
     final json = jsonDecode(response.body) as Map<String, dynamic>;
     return FileMetadata.fromJson(json);
@@ -264,12 +259,7 @@ class FilesResource extends ResourceBase {
     // Apply authentication before sending (bypasses interceptor chain)
     await _applyAuthentication(request);
 
-    final streamedResponse = await httpClient.send(request);
-    final response = await http.Response.fromStream(streamedResponse);
-
-    if (response.statusCode >= 400) {
-      _throwError(response);
-    }
+    final response = await sendResourceRequest(httpClient, request);
 
     return response.bodyBytes;
   }
@@ -295,32 +285,6 @@ class FilesResource extends ResourceBase {
       'webm' => 'video/webm',
       _ => 'application/octet-stream',
     };
-  }
-
-  /// Throws an appropriate error from an HTTP response.
-  Never _throwError(http.Response response) {
-    String message;
-    try {
-      final json = jsonDecode(response.body) as Map<String, dynamic>;
-      final error = json['error'] as Map<String, dynamic>?;
-      message = error?['message'] as String? ?? response.body;
-    } catch (_) {
-      message = response.body;
-    }
-
-    switch (response.statusCode) {
-      case 401:
-        throw AuthenticationException(message: message);
-      case 429:
-        throw RateLimitException(
-          statusCode: response.statusCode,
-          message: message,
-        );
-      case 400:
-        throw ValidationException(message: message, fieldErrors: const {});
-      default:
-        throw ApiException(statusCode: response.statusCode, message: message);
-    }
   }
 
   /// Applies authentication to a request.
