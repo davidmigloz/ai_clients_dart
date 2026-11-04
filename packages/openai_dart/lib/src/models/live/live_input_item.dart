@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'package:meta/meta.dart';
 import '../common/equality_helpers.dart';
+import '../responses/config/configuration_update_text.dart';
 import '../responses/items/item.dart' show Item;
 import '../responses/items/output_item.dart' show OutputItem;
 import 'live_json_helpers.dart';
@@ -8331,7 +8332,7 @@ final class LiveInputResponseConfigurationUpdateItemParam
       ) {
     validate();
   }
-  static const Set<String> _knownKeys = {'id', 'reasoning', 'type'};
+  static const Set<String> _knownKeys = {'id', 'reasoning', 'text', 'type'};
 
   /// Complete immutable wire object; all declared fields below are typed.
   final Map<String, dynamic> rawJson;
@@ -8353,6 +8354,21 @@ final class LiveInputResponseConfigurationUpdateItemParam
   /// Distinguishes absent `reasoning` from an explicit null.
   bool get hasReasoning => rawJson.containsKey('reasoning');
 
+  /// Canonical text output update with a required plain text or JSON Schema format.
+  /// The original wire object, including future text metadata, stays in [rawJson].
+  ConfigurationUpdateText? get text => !hasText
+      ? null
+      : ConfigurationUpdateText.fromJson(
+          requireLiveObject(
+            rawJson['text'],
+            'LiveInputResponseConfigurationUpdateItemParam.text',
+          ),
+          context: 'LiveInputResponseConfigurationUpdateItemParam.text',
+        );
+
+  /// Whether the optional, nonnullable text update was supplied.
+  bool get hasText => rawJson.containsKey('text');
+
   /// Canonical `type` value.
   String get type => rawJson['type'] as String;
   @override
@@ -8370,6 +8386,8 @@ final class LiveInputResponseConfigurationUpdateItemParam
     bool clearId = false,
     Object? reasoning = liveUnset,
     bool clearReasoning = false,
+    Object? text = liveUnset,
+    bool clearText = false,
     Map<String, dynamic>? rawJson,
 
     /// Parses and validates the canonical value.
@@ -8378,14 +8396,22 @@ final class LiveInputResponseConfigurationUpdateItemParam
       this.rawJson,
       _knownKeys,
       rawJson,
-      {'id': id, 'reasoning': reasoning},
-      <String>{if (clearId) 'id', if (clearReasoning) 'reasoning'},
+      {
+        'id': id,
+        'reasoning': reasoning,
+        'text': text is ConfigurationUpdateText ? text.toJson() : text,
+      },
+      <String>{
+        if (clearId) 'id',
+        if (clearReasoning) 'reasoning',
+        if (clearText) 'text',
+      },
       'LiveInputResponseConfigurationUpdateItemParam',
     ),
   );
   @override
   String toString() =>
-      'LiveInputResponseConfigurationUpdateItemParam(id: [REDACTED], reasoning: [REDACTED], type: [REDACTED], rawJson: [REDACTED])';
+      'LiveInputResponseConfigurationUpdateItemParam(id: [REDACTED], reasoning: [REDACTED], text: [REDACTED], type: [REDACTED], rawJson: [REDACTED])';
 }
 
 /// Immutable typed adapter for the canonical inline payload.
@@ -22432,6 +22458,45 @@ const Map<String, dynamic> _inputSchemas = {
   },
   'ResponseConfigurationUpdateItemParam': {
     'properties': {
+      'text': {
+        'type': 'object',
+        'properties': {
+          'format': {
+            'oneOf': [
+              {
+                'type': 'object',
+                'properties': {
+                  'type': {
+                    'type': 'string',
+                    'enum': ['text'],
+                  },
+                },
+                'required': ['type'],
+              },
+              {
+                'type': 'object',
+                'properties': {
+                  'type': {
+                    'type': 'string',
+                    'enum': ['json_schema'],
+                  },
+                  'name': {'type': 'string'},
+                  'schema': {'type': 'object'},
+                  'description': {'type': 'string'},
+                  'strict': {
+                    'anyOf': [
+                      {'type': 'boolean'},
+                      {'type': 'null'},
+                    ],
+                  },
+                },
+                'required': ['type', 'name', 'schema'],
+              },
+            ],
+          },
+        },
+        'required': ['format'],
+      },
       'id': {
         'anyOf': [
           {'type': 'string'},

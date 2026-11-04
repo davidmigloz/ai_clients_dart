@@ -28,8 +28,9 @@ class ResponsesCreateEvent {
 
   /// Whether the server should generate output; false requests a warm-up.
   ///
-  /// This guide-supported WebSocket extension is absent from the canonical
-  /// create schema and does not change the HTTP request model.
+  /// This WebSocket-only option prepares request state without model output.
+  /// The terminal response ID can be used as `previous_response_id` later;
+  /// it does not change the HTTP request model.
   final bool? generate;
 
   /// Creates a [ResponsesCreateEvent].

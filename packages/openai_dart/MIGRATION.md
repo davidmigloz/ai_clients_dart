@@ -6,6 +6,35 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming release: Responses WebSocket sessions
+
+Existing direct `connection.create()` and `connection.events` use remains available.
+To collect routed final responses, attach `ResponsesWebSocketSession` with explicit
+`ResponsesWebSocketLimits` and register lanes before sending. Consume one response
+per lane before sending its next create. No tool execution or history replay is
+automatic. The helper currently rejects recovery-enabled connections.
+
+Session close releases its reader and buffers; close the caller-owned connection
+separately. Lane detach keeps its stream ID reserved on that physical connection,
+including across helper recreation. Cancelled waits retain partial output for a
+subsequent wait on the same lane. Failed/incomplete terminal events return their
+response; request-level errors throw `ResponsesWebSocketSessionException` and
+end that local lane. Restore context on a new lane or connection explicitly.
+
+Terminal WebSocket output may be omitted or null: the envelope retains exact raw
+presence while its shared typed response uses an empty list. The session collector
+fills this from finalized output items; an explicit empty list stays empty. HTTP
+and SSE response parsing retain their existing contracts.
+
+Configuration updates gain optional `text`: omit it to keep the format, send
+`ConfigurationUpdateText(format: JsonSchemaFormat(...))` to change it, or use
+`const ConfigurationUpdateText.plainText()` to reset. Explicit null and JSON object
+mode are rejected. Schemas are snapshotted; parser/output-type metadata stays local.
+
+See the [offline session example](example/responses_websocket_session_example.dart).
+
+---
+
 ## Upcoming release: Responses cache and error corrections
 
 `ResponseError.type` is now `String?`: unavailable provider error types remain

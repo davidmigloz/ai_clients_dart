@@ -4,6 +4,7 @@ import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../common/json_helpers.dart';
 import '../responses/config/configuration_update_reasoning.dart';
+import '../responses/config/configuration_update_text.dart';
 import '../responses/config/function_call_status.dart';
 import '../responses/config/item_status.dart';
 import '../responses/config/message_phase.dart';
@@ -34,7 +35,7 @@ import 'conversation_message.dart';
 /// This sealed class hierarchy represents the different types of items
 /// that can be stored in a conversation, including output item types
 /// from the Responses API and conversation-specific types.
-/// [ConversationConfigurationUpdateItem] represents a stored reasoning update.
+/// [ConversationConfigurationUpdateItem] represents a stored reasoning or text update.
 /// [ConversationShellCallItem] and [ConversationShellCallOutputItem] retain
 /// returned shell calls and results with writable input conversion helpers.
 sealed class ConversationItem {
@@ -94,7 +95,7 @@ sealed class ConversationItem {
   Map<String, dynamic> toJson();
 }
 
-/// A stored reasoning configuration update in a conversation.
+/// A stored reasoning or text configuration update in a conversation.
 ///
 /// Persistence is managed by the server for subsequent responses in a
 /// single-agent conversation.
@@ -109,6 +110,9 @@ class ConversationConfigurationUpdateItem extends ConversationItem {
   /// The reasoning update, when supplied.
   final ConfigurationUpdateReasoning? reasoning;
 
+  /// Text output format to use until a subsequent update replaces it.
+  final ConfigurationUpdateText? text;
+
   /// Agent metadata on the beta multi-agent protocol.
   final AgentTag? agent;
 
@@ -116,6 +120,7 @@ class ConversationConfigurationUpdateItem extends ConversationItem {
   const ConversationConfigurationUpdateItem({
     required this.id,
     this.reasoning,
+    this.text,
     this.agent,
   });
 
@@ -136,6 +141,12 @@ class ConversationConfigurationUpdateItem extends ConversationItem {
               context: '$context.reasoning',
             )
           : null,
+      text: json.containsKey('text')
+          ? ConfigurationUpdateText.fromJson(
+              requireJsonObject(json['text'], '$context.text'),
+              context: '$context.text',
+            )
+          : null,
       agent: agent == null
           ? null
           : AgentTag(
@@ -152,23 +163,33 @@ class ConversationConfigurationUpdateItem extends ConversationItem {
     'type': type,
     'id': id,
     if (reasoning != null) 'reasoning': reasoning!.toJson(),
+    if (text != null) 'text': text!.toJson(),
     if (agent != null) 'agent': agent!.toJson(),
   };
 
   /// Converts to request input while preserving every input-supported field.
   ConfigurationUpdateItem toConfigurationUpdateItem() =>
-      ConfigurationUpdateItem(id: id, reasoning: reasoning, agent: agent);
+      ConfigurationUpdateItem(
+        id: id,
+        reasoning: reasoning,
+        text: text,
+        agent: agent,
+      );
 
   /// Copies every field; explicit null clears an optional value.
   ConversationConfigurationUpdateItem copyWith({
     String? id,
     Object? reasoning = unsetCopyWithValue,
+    Object? text = unsetCopyWithValue,
     Object? agent = unsetCopyWithValue,
   }) => ConversationConfigurationUpdateItem(
     id: id ?? this.id,
     reasoning: reasoning == unsetCopyWithValue
         ? this.reasoning
         : reasoning as ConfigurationUpdateReasoning?,
+    text: text == unsetCopyWithValue
+        ? this.text
+        : text as ConfigurationUpdateText?,
     agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
   );
 
@@ -179,14 +200,15 @@ class ConversationConfigurationUpdateItem extends ConversationItem {
           runtimeType == other.runtimeType &&
           id == other.id &&
           reasoning == other.reasoning &&
+          text == other.text &&
           agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(id, reasoning, agent);
+  int get hashCode => Object.hash(id, reasoning, text, agent);
 
   @override
   String toString() =>
-      'ConversationConfigurationUpdateItem(type: $type, id: $id, reasoning: $reasoning, agent: $agent)';
+      'ConversationConfigurationUpdateItem(type: $type, id: $id, reasoning: $reasoning, text: $text, agent: $agent)';
 }
 
 /// A message item in a conversation.

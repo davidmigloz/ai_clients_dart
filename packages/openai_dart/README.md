@@ -845,53 +845,46 @@ Use `client.contentProvenanceChecks.create` to inspect an image or audio file fo
 <details>
 <summary><b>How do I use persistent Responses WebSockets?</b></summary>
 
-Use `client.responses.connect()` for a persistent connection with named response lanes. Continue with returned response IDs and await connection cleanup; browser connections require an authenticated backend proxy because WebSockets cannot send API-key headers.
+Use `client.responses.connect()` for persistent requests. Add an opt-in session to route parallel lanes and collect final responses within explicit local budgets. Browser connections require an authenticated backend proxy because WebSockets cannot send API-key headers.
 
 ```dart
-import 'dart:io';
-
-import 'package:openai_dart/openai_dart.dart';
-
-Future<void> main() async {
-  final client = OpenAIClient.fromEnvironment();
-
-  try {
-    final connection = await client.responses.connect();
-    try {
-      connection.create(
-        const CreateResponseRequest(
-          model: 'gpt-5.5',
-          input: ResponseInput.text('Tell me a short joke.'),
-        ),
-      );
-      await for (final message in connection.events) {
-        if (message case ResponsesStreamEvent(
-          event: OutputTextDeltaEvent(:final delta),
-        )) {
-          stdout.write(delta);
-        } else if (message case ResponsesStreamEvent(
-          event: ResponseCompletedEvent(),
-        )) {
-          break;
-        } else if (message case ResponsesStreamEvent(
-          event: ResponseFailedEvent() || ResponseIncompleteEvent(),
-        )) {
-          throw StateError('The response did not complete.');
-        } else if (message is ResponsesErrorEvent) {
-          throw StateError('Response failed: ${message.error.code}');
-        }
-      }
-    } finally {
-      await connection.close();
-      await connection.done;
-    }
-  } finally {
-    client.close();
-  }
+final connection = await client.responses.connect();
+final session = ResponsesWebSocketSession(
+  connection,
+  limits: const ResponsesWebSocketLimits(
+    maxLanes: 4,
+    maxEventsPerLane: 1024,
+    maxEvents: 2048,
+    maxBytesPerLane: 4 * 1024 * 1024,
+    maxBytes: 8 * 1024 * 1024,
+    maxResponseBytes: 8 * 1024 * 1024,
+  ),
+);
+try {
+  final planner = session.lane('planner');
+  planner.create(const CreateResponseRequest(
+    model: 'gpt-6-sol',
+    input: ResponseInput.text('Prepare the planner context.'),
+  ), generate: false);
+  final warmup = await planner.getFinalResponse();
+  planner.create(CreateResponseRequest(
+    model: 'gpt-6-sol',
+    previousResponseId: warmup.id,
+    input: const ResponseInput.text('Draft a short plan.'),
+  ));
+  final response = await planner.getFinalResponse();
+  print(response.outputText);
+} finally {
+  await session.close(); // Detaches the helper.
+  await connection.close();
 }
 ```
 
-→ [Full example](example/responses_websocket_example.dart)
+`streamId` routes a lane; `previousResponseId` selects conversation history. `getFinalResponse()` also returns failed/incomplete responses, so inspect `status`. Use `lane.receive()` for individual events. Cancel a wait with `abortTrigger` and resume on the same lane; `lane.close()` releases its retained state. Detached IDs remain reserved on that connection. Session helpers currently require recovery to be disabled.
+
+To change output format mid-session, include `ConfigurationUpdateItem(text: ConfigurationUpdateText(format: JsonSchemaFormat(...)))` in the next request's input. Use `const ConfigurationUpdateText.plainText()` to reset; omitting `text` leaves it alone. JSON object mode and explicit null updates are unsupported.
+
+→ [Offline session example](example/responses_websocket_session_example.dart): manual tool continuation, fork barrier, and compacted-history replay. [Low-level example](example/responses_websocket_example.dart) retains direct connection use.
 
 </details>
 
@@ -1303,7 +1296,8 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 
 | Example | Description |
 | --- | --- |
-| [responses_websocket_example.dart](example/responses_websocket_example.dart) | **Offline.** warm-up, two persistent lanes and incremental continuation with awaited cleanup |
+| [responses_websocket_example.dart](example/responses_websocket_example.dart) | **Offline.** low-level warmup, two persistent lanes and incremental continuation |
+| [responses_websocket_session_example.dart](example/responses_websocket_session_example.dart) | **Offline.** bounded sessions, manual tool continuation, fork barrier and compact replay |
 | [responses_steering_example.dart](example/responses_steering_example.dart) | **Offline.** steer a running Responses request |
 | [responses_recovery_example.dart](example/responses_recovery_example.dart) | **Offline.** recover a Responses WebSocket |
 | [async_tools_example.dart](example/async_tools_example.dart) | Local async function/custom jobs, original call IDs and latest-response continuation |
@@ -1346,7 +1340,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 
 | API | Support |
 | --- | --- |
-| Responses | HTTP and SSE, persistent WebSockets, steering, opt-in recovery, and beta tool-result injection |
+| Responses | HTTP and SSE, persistent WebSockets, bounded lane sessions, steering, opt-in connection recovery, and beta tool-result injection |
 | Chat Completions | Generation and streaming; stored-completion management pending |
 | Decisions | Predicate, choice, and score questions |
 | Embeddings | Text vectors with dimension control |

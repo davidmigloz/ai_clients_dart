@@ -4661,6 +4661,45 @@ const Map<String, dynamic> _responseSchemas = {
   'ResponseConfigurationUpdateItemParam': {
     'type': 'object',
     'properties': {
+      'text': {
+        'type': 'object',
+        'properties': {
+          'format': {
+            'oneOf': [
+              {
+                'type': 'object',
+                'properties': {
+                  'type': {
+                    'type': 'string',
+                    'enum': ['text'],
+                  },
+                },
+                'required': ['type'],
+              },
+              {
+                'type': 'object',
+                'properties': {
+                  'type': {
+                    'type': 'string',
+                    'enum': ['json_schema'],
+                  },
+                  'name': {'type': 'string'},
+                  'schema': {'type': 'object'},
+                  'description': {'type': 'string'},
+                  'strict': {
+                    'anyOf': [
+                      {'type': 'boolean'},
+                      {'type': 'null'},
+                    ],
+                  },
+                },
+                'required': ['type', 'name', 'schema'],
+              },
+            ],
+          },
+        },
+        'required': ['format'],
+      },
       'id': {
         'anyOf': [
           {'type': 'string'},
