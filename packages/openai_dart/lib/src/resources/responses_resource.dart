@@ -127,6 +127,11 @@ class ResponsesResource extends ResourceBase with StreamingResource {
     ResponsesReconnectOptions? reconnect,
   }) {
     ensureNotClosed?.call();
+    if (config.vertexProvider != null) {
+      throw UnsupportedError(
+        'Vertex Responses supports HTTP/SSE, not WebSocket.',
+      );
+    }
     reconnect?.validate();
     final timeout = connectionTimeout ?? config.connectTimeout;
     if (timeout <= Duration.zero) {

@@ -296,6 +296,9 @@ class RealtimeResource extends ResourceBase {
     required RealtimeReconnectOptions? reconnect,
   }) async {
     ensureNotClosed?.call();
+    if (config.vertexProvider != null) {
+      throw UnsupportedError('Vertex does not support Realtime connections.');
+    }
     reconnect?.validate();
     final timeout = connectionTimeout ?? config.connectTimeout;
     if (!timeout.inMicroseconds.isFinite || timeout <= Duration.zero) {

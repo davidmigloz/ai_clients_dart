@@ -32,6 +32,7 @@ export 'openai_dart_admin.dart';
 export 'src/auth/auth_provider.dart';
 // Client
 export 'src/client/config.dart';
+export 'src/client/data_residency.dart';
 export 'src/client/interceptor_chain.dart';
 export 'src/client/openai_client.dart';
 export 'src/client/retry_wrapper.dart';
@@ -102,6 +103,8 @@ export 'src/models/videos/videos.dart';
 export 'src/models/webhooks/webhook_endpoint.dart';
 // Webhook received events
 export 'src/models/webhooks/webhook_event.dart';
+// Providers
+export 'src/providers/vertex_provider.dart';
 // Resources
 export 'src/resources/resources.dart';
 export 'src/resources/websocket_recovery.dart';

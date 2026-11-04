@@ -160,6 +160,75 @@ The main import is `package:openai_dart/openai_dart.dart`. Realtime uses `packag
 
 </details>
 
+<a id="vertex-responses"></a>
+<details>
+<summary><b>How do I use Responses through Google Vertex?</b></summary>
+
+Inject a Google token callback; your application owns credential refresh/caching.
+The provider acquires a token for each HTTP attempt, including retries.
+
+```dart
+final provider = VertexProvider(
+  project: 'my-google-project',
+  location: 'global',
+  tokenProvider: () async => googleCredentials.accessToken(),
+);
+final client = OpenAIClient(config: OpenAIConfig.vertex(provider: provider));
+```
+
+Use the regular `client.responses` create, retrieve, cancel, delete, input-items
+and compact methods, plus `createStream` for SSE. A complete `baseUrl` on
+`VertexProvider` can replace project/location for a trusted proxy. Other resources,
+Responses listing/token counting and WebSockets are unsupported and fail locally.
+Do not supply OpenAI auth, organization/project or custom auth headers.
+
+The request timeout includes token acquisition and response headers; buffered HTTP
+also retains its normal body timeout. SSE has no whole-stream deadline: use an
+abort trigger or cancel its subscription. Late timed-out/aborted token results
+cannot dispatch a request; the application still owns cancellation of any work
+inside its callback. Redirect following is disabled. Closing the client promptly aborts provider work,
+including unresolved token waits, while callback-owned work remains application-owned.
+Borrowed HTTP pools remain
+caller-owned; a dedicated stream factory retains its normal close-on-completion
+policy. Provider updates use `updateConfig(vertexProvider: replacement)` and the
+same retained-resource snapshot rules described above.
+
+The portable callback path uses no Google dependency or automatic ADC discovery.
+`VertexProvider.fromEnvironment` reads Google project/location on native Dart and
+still requires an injected callback. Browser/Wasm use explicit routing; endpoint
+CORS, access permissions and model availability remain service-controlled.
+
+→ [Runnable offline Vertex example](example/vertex_responses_example.dart)
+
+</details>
+
+<a id="regional-endpoints"></a>
+<details>
+<summary><b>How do I select an OpenAI regional endpoint?</b></summary>
+
+```dart
+final client = OpenAIClient(
+  config: OpenAIConfig.forDataResidency(
+    OpenAIDataResidency.eu,
+    authProvider: ApiKeyProvider(euProjectApiKey),
+  ),
+);
+```
+
+The named SDK mapping supports `global`, `us`, `eu` and `ae`. US/EU support eligible
+regional processing; UAE processing is limited to supported model/service
+combinations. The official guide also lists storage-only regional endpoints
+(Australia, Canada, Japan, India, Singapore, South Korea and the UK); select their
+complete root through ordinary `OpenAIConfig(baseUrl: ...)` when applicable.
+Regional storage does not imply regional processing. A matching project, approved
+account settings and eligible models/features are still required; endpoint or
+credential selection alone provides no residency guarantee. Google Vertex
+locations are a separate provider setting.
+
+→ [Official data controls and regional support](https://developers.openai.com/api/docs/guides/your-data)
+
+</details>
+
 ## Usage
 
 Start with the Responses API for a model call and its output. Expand a topic for a short example or a link to a complete workflow.
@@ -1443,6 +1512,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 
 | Example | Description |
 | --- | --- |
+| [vertex_responses_example.dart](example/vertex_responses_example.dart) | **Offline.** injected Google tokens, exact Vertex root and all six Responses lifecycle paths |
 | [runtime_config_example.dart](example/runtime_config_example.dart) | **Offline.** configuration snapshots, refreshed handles and request-local credential rotation |
 | [responses_example.dart](example/responses_example.dart) | Responses API with built-in tools |
 | [openai_dart_example.dart](example/openai_dart_example.dart) | Quick-start overview |

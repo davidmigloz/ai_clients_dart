@@ -7,6 +7,7 @@ import '../interceptors/error_interceptor.dart';
 import '../interceptors/interceptor.dart';
 import '../interceptors/logging_interceptor.dart';
 import '../models/common/copy_with_sentinel.dart';
+import '../providers/vertex_http_client.dart';
 import '../resources/agents_resource.dart';
 import '../resources/audio_resource.dart';
 import '../resources/batches_resource.dart';
@@ -205,6 +206,7 @@ class OpenAIClient {
   final http.Client Function()? _audioStreamClientFactory;
   final bool _ownsHttpClient;
   bool _closed = false;
+  final Set<VertexHttpClient> _providerTransports = {};
   Logger? _logger;
   late InterceptorChain _interceptorChain;
   Map<Interceptor, _ManagedInterceptor> _managedInterceptors = Map.identity();
@@ -245,6 +247,9 @@ class OpenAIClient {
   /// Omitted fields retain their value. Explicit null clears nullable fields;
   /// use an empty [defaultHeaders] map to clear global headers. Header maps are
   /// copied, while providers/interceptors retain their application-owned state.
+  /// [vertexProvider] is also generation-local. Supplying a new provider selects
+  /// its root; clearing it restores the global OpenAI root. Clear incompatible
+  /// auth/org/project/header options explicitly when switching to Vertex.
   /// Custom interceptor instances and ordering are retained; managed auth,
   /// logging and error interceptors are rebuilt from configuration.
   ///
@@ -265,6 +270,7 @@ class OpenAIClient {
     Object? organization = unsetCopyWithValue,
     Object? project = unsetCopyWithValue,
     Object? webhookSecret = unsetCopyWithValue,
+    Object? vertexProvider = unsetCopyWithValue,
   }) {
     _ensureNotClosed();
     final candidate = _snapshotConfig(
@@ -280,6 +286,7 @@ class OpenAIClient {
         organization: organization,
         project: project,
         webhookSecret: webhookSecret,
+        vertexProvider: vertexProvider,
       ),
     );
     final logger = candidate.logLevel == null
@@ -310,19 +317,23 @@ class OpenAIClient {
   void updateAuthProvider(AuthProvider? provider) =>
       updateConfig(authProvider: provider);
 
-  static OpenAIConfig _snapshotConfig(OpenAIConfig value) => OpenAIConfig(
-    authProvider: value.authProvider,
-    baseUrl: value.baseUrl,
-    timeout: value.timeout,
-    connectTimeout: value.connectTimeout,
-    retryPolicy: value.retryPolicy,
-    logLevel: value.logLevel,
-    defaultHeaders: Map<String, String>.unmodifiable(value.defaultHeaders),
-    apiVersion: value.apiVersion,
-    organization: value.organization,
-    project: value.project,
-    webhookSecret: value.webhookSecret,
-  );
+  static OpenAIConfig _snapshotConfig(OpenAIConfig value) {
+    validateVertexConfig(value);
+    return OpenAIConfig(
+      authProvider: value.authProvider,
+      baseUrl: value.baseUrl,
+      timeout: value.timeout,
+      connectTimeout: value.connectTimeout,
+      retryPolicy: value.retryPolicy,
+      logLevel: value.logLevel,
+      defaultHeaders: Map<String, String>.unmodifiable(value.defaultHeaders),
+      apiVersion: value.apiVersion,
+      organization: value.organization,
+      project: value.project,
+      webhookSecret: value.webhookSecret,
+      vertexProvider: value.vertexProvider,
+    );
+  }
 
   _ClientRuntime _buildRuntime(
     OpenAIConfig config,
@@ -380,7 +391,9 @@ class OpenAIClient {
     return _ClientRuntime(
       InterceptorChain(
         interceptors: interceptors,
-        httpClient: _httpClient,
+        httpClient: config.vertexProvider == null
+            ? _httpClient
+            : _vertexTransport(config, _httpClient),
         retryWrapper: config.retryPolicy.maxRetries > 0
             ? RetryWrapper(config: config)
             : null,
@@ -389,6 +402,51 @@ class OpenAIClient {
       ),
       managed,
     );
+  }
+
+  http.Client _resourceHttpClient(String resource) {
+    if (_config.vertexProvider != null && resource != 'responses') {
+      throw UnsupportedError(
+        'Vertex supports only the documented Responses HTTP/SSE lifecycle.',
+      );
+    }
+    return _interceptorChain.httpClient;
+  }
+
+  VertexHttpClient _vertexTransport(
+    OpenAIConfig config,
+    http.Client inner, {
+    bool ownsInner = false,
+  }) {
+    late final VertexHttpClient transport;
+    transport = VertexHttpClient(
+      inner: inner,
+      provider: config.vertexProvider!,
+      timeout: config.timeout,
+      ensureNotClosed: _ensureNotClosed,
+      ownsInner: ownsInner,
+      onClose: () => _providerTransports.remove(transport),
+    );
+    _providerTransports.add(transport);
+    return transport;
+  }
+
+  http.Client Function()? _generationStreamFactory(
+    http.Client Function()? factory,
+  ) {
+    if (_config.vertexProvider == null || factory == null) return factory;
+    final config = _config;
+    return () {
+      _ensureNotClosed();
+      final inner = factory();
+      return _vertexTransport(
+        config,
+        inner,
+        // A caller may return the borrowed shared pool from its factory. Closing
+        // this request-scoped wrapper must never close that shared transport.
+        ownsInner: !identical(inner, _httpClient),
+      );
+    };
   }
 
   void _invalidateResourceCaches() {
@@ -434,11 +492,11 @@ class OpenAIClient {
   /// The resource uses this client's project, authentication and HTTP policy.
   AgentsResource get agents => _agents ??= AgentsResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('agents'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
-    streamClientFactory: _audioStreamClientFactory,
+    streamClientFactory: _generationStreamFactory(_audioStreamClientFactory),
   );
 
   VaultsResource? _vaults;
@@ -449,7 +507,7 @@ class OpenAIClient {
     _ensureNotClosed();
     return _vaults ??= VaultsResource(
       config: config,
-      httpClient: _httpClient,
+      httpClient: _resourceHttpClient('vaults'),
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
       ensureNotClosed: _ensureNotClosed,
@@ -475,11 +533,11 @@ class OpenAIClient {
   /// ```
   ChatResource get chat => _chat ??= ChatResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('chat'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
-    streamClientFactory: _streamClientFactory,
+    streamClientFactory: _generationStreamFactory(_streamClientFactory),
   );
 
   CompletionsResource? _completions;
@@ -501,11 +559,11 @@ class OpenAIClient {
   /// ```
   CompletionsResource get completions => _completions ??= CompletionsResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('completions'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
-    streamClientFactory: _streamClientFactory,
+    streamClientFactory: _generationStreamFactory(_streamClientFactory),
   );
 
   EmbeddingsResource? _embeddings;
@@ -528,7 +586,7 @@ class OpenAIClient {
   /// ```
   EmbeddingsResource get embeddings => _embeddings ??= EmbeddingsResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('embeddings'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
@@ -563,11 +621,11 @@ class OpenAIClient {
   /// ```
   AudioResource get audio => _audio ??= AudioResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('audio'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
-    streamClientFactory: _audioStreamClientFactory,
+    streamClientFactory: _generationStreamFactory(_audioStreamClientFactory),
   );
 
   LiveResource? _live;
@@ -579,11 +637,11 @@ class OpenAIClient {
   /// call action. Creating an outbound SIP session initializes the call.
   LiveResource get live => _live ??= LiveResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('live'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
-    streamClientFactory: _audioStreamClientFactory,
+    streamClientFactory: _generationStreamFactory(_audioStreamClientFactory),
   );
 
   ImagesResource? _images;
@@ -606,11 +664,11 @@ class OpenAIClient {
   /// ```
   ImagesResource get images => _images ??= ImagesResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('images'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
-    streamClientFactory: _streamClientFactory,
+    streamClientFactory: _generationStreamFactory(_streamClientFactory),
   );
 
   FilesResource? _files;
@@ -630,7 +688,7 @@ class OpenAIClient {
   /// ```
   FilesResource get files => _files ??= FilesResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('files'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
@@ -656,7 +714,7 @@ class OpenAIClient {
   /// ```
   UploadsResource get uploads => _uploads ??= UploadsResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('uploads'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
@@ -681,7 +739,7 @@ class OpenAIClient {
   /// ```
   BatchesResource get batches => _batches ??= BatchesResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('batches'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
@@ -703,7 +761,7 @@ class OpenAIClient {
   /// ```
   ModelsResource get models => _models ??= ModelsResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('models'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
@@ -727,7 +785,7 @@ class OpenAIClient {
   /// ```
   ModerationsResource get moderations => _moderations ??= ModerationsResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('moderations'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
@@ -741,7 +799,7 @@ class OpenAIClient {
   /// inline-image input. Individual answers can also be refusals.
   DecisionsResource get decisions => _decisions ??= DecisionsResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('decisions'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
@@ -765,7 +823,7 @@ class OpenAIClient {
   /// ```
   FineTuningResource get fineTuning => _fineTuning ??= FineTuningResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('fineTuning'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
@@ -814,7 +872,7 @@ class OpenAIClient {
   /// ```
   EvalsResource get evals => _evals ??= EvalsResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('evals'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
@@ -850,11 +908,11 @@ class OpenAIClient {
   /// ```
   BetaResource get beta => _beta ??= BetaResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('beta'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
-    streamClientFactory: _streamClientFactory,
+    streamClientFactory: _generationStreamFactory(_streamClientFactory),
   );
 
   RealtimeResource? _realtime;
@@ -880,7 +938,7 @@ class OpenAIClient {
   /// ```
   RealtimeResource get realtime => _realtime ??= RealtimeResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('realtime'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
@@ -914,7 +972,7 @@ class OpenAIClient {
   RealtimeSessionsResource get realtimeSessions =>
       _realtimeSessions ??= RealtimeSessionsResource(
         config: config,
-        httpClient: _httpClient,
+        httpClient: _resourceHttpClient('realtimeSessions'),
         interceptorChain: _interceptorChain,
         requestBuilder: _requestBuilder,
         ensureNotClosed: _ensureNotClosed,
@@ -955,11 +1013,11 @@ class OpenAIClient {
   /// ```
   ResponsesResource get responses => _responses ??= ResponsesResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('responses'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
-    streamClientFactory: _streamClientFactory,
+    streamClientFactory: _generationStreamFactory(_streamClientFactory),
   );
 
   SkillsResource? _skills;
@@ -969,7 +1027,7 @@ class OpenAIClient {
   /// Use this to create, list, retrieve, version, and delete skill bundles.
   SkillsResource get skills => _skills ??= SkillsResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('skills'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
@@ -1016,7 +1074,7 @@ class OpenAIClient {
   ConversationsResource get conversations =>
       _conversations ??= ConversationsResource(
         config: config,
-        httpClient: _httpClient,
+        httpClient: _resourceHttpClient('conversations'),
         interceptorChain: _interceptorChain,
         requestBuilder: _requestBuilder,
         ensureNotClosed: _ensureNotClosed,
@@ -1052,7 +1110,7 @@ class OpenAIClient {
   /// ```
   VideosResource get videos => _videos ??= VideosResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('videos'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
@@ -1084,7 +1142,7 @@ class OpenAIClient {
   /// ```
   ContainersResource get containers => _containers ??= ContainersResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('containers'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
@@ -1116,7 +1174,7 @@ class OpenAIClient {
   /// ```
   ChatkitResource get chatkit => _chatkit ??= ChatkitResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('chatkit'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
@@ -1131,7 +1189,7 @@ class OpenAIClient {
   ContentProvenanceChecksResource get contentProvenanceChecks =>
       _contentProvenanceChecks ??= ContentProvenanceChecksResource(
         config: config,
-        httpClient: _httpClient,
+        httpClient: _resourceHttpClient('contentProvenanceChecks'),
         interceptorChain: _interceptorChain,
         requestBuilder: _requestBuilder,
         ensureNotClosed: _ensureNotClosed,
@@ -1145,7 +1203,7 @@ class OpenAIClient {
   /// methods need no API key and remain usable after the client is closed.
   WebhooksResource get webhooks => _webhooks ??= WebhooksResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('webhooks'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
@@ -1160,7 +1218,7 @@ class OpenAIClient {
   /// Callers select the appropriate client explicitly after verifying a notice.
   SafetyResource get safety => _safety ??= SafetyResource(
     config: config,
-    httpClient: _httpClient,
+    httpClient: _resourceHttpClient('safety'),
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
@@ -1179,11 +1237,20 @@ class OpenAIClient {
   /// times safely.
   ///
   /// If a custom [http.Client] was provided to the constructor,
-  /// it will not be closed by this method.
+  /// it will not be closed by this method. Vertex adapters are logically
+  /// closed to cancel pending token acquisition and provider requests promptly;
+  /// callback-owned work is not forcibly cancelled, and the borrowed pool stays
+  /// open. Dedicated provider stream transports retain their own close policy.
   void close() {
     if (_closed) return;
     _closed = true;
 
+    // Updates keep prior generations alive; logical close ends all provider
+    // work promptly, even when an application token future never completes.
+    // Shared adapters borrow the pool; dedicated stream adapters own theirs.
+    for (final transport in List<VertexHttpClient>.of(_providerTransports)) {
+      transport.close();
+    }
     if (_ownsHttpClient) {
       _httpClient.close();
     }
