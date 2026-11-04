@@ -365,7 +365,7 @@
       "dart_class": "ResponsesCreateEvent",
       "file": "lib/src/models/responses/websocket/responses_create_event.dart",
       "schema": "ResponsesClientEventResponseCreate",
-      "note": "Composes CreateResponseRequest; WebSocket lane and guide generate extension; omit stream/background and retain stream_options. Replaces obsolete Realtime skip. Public wire fixtures verify complete supported request fields."
+      "note": "Composes HTTP CreateResponseRequest with canonical generate flag and stream_id routing; omits HTTP-only stream/background on the wire, rejects background:true as before. Warmup retains returned terminal response ID for explicit continuation."
     },
     "PersonalityEnum": {
       "spec": "main",
@@ -579,11 +579,10 @@
     },
     "CreateImageRequest": {
       "spec": "main",
+      "schema": "CreateImageRequest",
       "kind": "object",
       "dart_class": "ImageGenerationRequest",
-      "file": "lib/src/models/images/image_request.dart",
-      "schema": "CreateImageRequest",
-      "note": "Generation requires explicit nonnull model/prompt; arbitrary IDs retained, no client default. Full model and public generate/generateStream fixtures verify canonical JSON and copy/value contracts."
+      "file": "lib/src/models/images/image_request.dart"
     },
     "CreateSpeechRequest": {
       "spec": "main",
@@ -1839,7 +1838,7 @@
       "dart_class": "PromptCacheBreakpointConfig",
       "file": "lib/src/models/common/prompt_cache_breakpoint.dart",
       "schema": "PromptCacheBreakpointConfig",
-      "note": "Single const field mode='explicit' (getter). One class serves PromptCacheBreakpointConfig, PromptCacheBreakpointParam, and Beta twins."
+      "note": "Fixed explicit mode; optional dedicated 30m/12h breakpoint TTL, distinct from 30m-only top-level TTL enum; shared GA/beta Param/Config."
     },
     "ReasoningModeEnum": {
       "spec": "main",
@@ -1968,7 +1967,7 @@
       "dart_class": "DecisionInput",
       "file": "lib/src/models/decisions/decision_input.dart",
       "schema": "DecisionInput",
-      "note": "String-or-user-message-array union dispatched by JSON shape."
+      "note": "String or ordered message/tool-history array; frozen October 31 contract."
     },
     "DecisionInput:TextDecisionInput": {
       "spec": "main",
@@ -1986,14 +1985,15 @@
       "file": "lib/src/models/decisions/decision_input.dart",
       "schema": null,
       "parent": "DecisionInput",
-      "note": "Dart wrapper for the user-message-array member."
+      "note": "Wrapper for the ordered message/tool-history array."
     },
     "DecisionInputMessage": {
       "spec": "main",
-      "kind": "object",
-      "dart_class": "DecisionInputMessage",
-      "file": "lib/src/models/decisions/decision_input.dart",
-      "schema": "DecisionInputMessage"
+      "kind": "sealed_parent",
+      "dart_class": "DecisionInputItem",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputMessage",
+      "note": "Role union dispatches to four message classes on DecisionInputItem; that synthetic parent also represents tool-history variants from DecisionInput.items."
     },
     "DecisionInputContent": {
       "spec": "main",
@@ -2031,10 +2031,11 @@
         "field": "type",
         "mapping": {
           "TextDecisionInputPart": "input_text",
-          "ImageDecisionInputPart": "input_image"
+          "ImageDecisionInputPart": "input_image",
+          "JsonDecisionInputPart": "input_json"
         }
       },
-      "note": "Synthetic union from DecisionInputContentParts.items; restricted to text and data URL/public HTTP(S) images."
+      "note": "User text/image/JSON parts; evidence subtype limits tool outputs to text/images."
     },
     "DecisionInputText": {
       "spec": "main",
@@ -2042,7 +2043,7 @@
       "dart_class": "TextDecisionInputPart",
       "file": "lib/src/models/decisions/decision_input.dart",
       "schema": "DecisionInputText",
-      "parent": "DecisionInputPart"
+      "parent": "DecisionEvidencePart"
     },
     "DecisionInputImage": {
       "spec": "main",
@@ -2050,7 +2051,7 @@
       "dart_class": "ImageDecisionInputPart",
       "file": "lib/src/models/decisions/decision_input.dart",
       "schema": "DecisionInputImage",
-      "parent": "DecisionInputPart"
+      "parent": "DecisionEvidencePart"
     },
     "QuestionParam": {
       "spec": "main",
@@ -2783,19 +2784,19 @@
     },
     "CreateImageEditRequest": {
       "spec": "main",
+      "schema": "CreateImageEditRequest",
       "kind": "object",
       "dart_class": "ImageEditRequest",
       "file": "lib/src/models/images/image_request.dart",
-      "schema": "CreateImageEditRequest",
-      "note": "Multipart edit requires explicit nonnull model/image/prompt. Serialization lives in ImagesResource, not invented JSON bytes/fromJson methods. Uint8List source/mask use byte-content value contracts, with caller ownership preserved. Filenames and legacy moderation extension are existing Dart extras; representation limitations and wider diagnostics remain visible."
+      "note": "Multipart bytes are serialized by ImagesResource; owned immutable image/mask/markup buffers and PNG markup content type. No fabricated JSON byte field."
     },
     "EditImageBodyJsonParam": {
       "spec": "main",
+      "schema": "EditImageBodyJsonParam",
       "kind": "object",
       "dart_class": "ImageEditJsonRequest",
       "file": "lib/src/models/images/image_edit_json_request.dart",
-      "schema": "EditImageBodyJsonParam",
-      "note": "Distinct JSON edit contract: optional nullable model is omitted when null, retaining documented server default gpt-image-2.5-sunburst; public editJson/editJsonStream fixtures verify omission and arbitrary explicit IDs. Existing missing copy/value/diagnostic methods remain a separate parity gap; no model behavior changed in this slice."
+      "note": "JSON references remain distinct from multipart. Optional nullable model and safety ID preserve service defaults; mask/markup are mutually exclusive."
     },
     "FunctionTool": {
       "spec": "main",
@@ -2881,7 +2882,7 @@
       "file": "lib/src/models/responses/items/item.dart",
       "schema": "ResponseConfigurationUpdateItemParam",
       "parent": "Item",
-      "note": "Input update: optional nullable id, optional nonnull narrow reasoning. Nullable effort/id normalize null to omission."
+      "note": "Input configuration update: optional nullable id normalizes to omission; optional nonnull reasoning and text. Inline text requires format, restricted to text/json_schema with immutable schema snapshot. Beta alone permits agent metadata."
     },
     "BetaResponseConfigurationUpdateItemParam": {
       "spec": "main",
@@ -2890,7 +2891,7 @@
       "file": "lib/src/models/responses/items/item.dart",
       "schema": "BetaResponseConfigurationUpdateItemParam",
       "parent": "Item",
-      "note": "Beta input adds optional nullable agent metadata; preservation does not claim multi-agent runtime support."
+      "note": "Input configuration update: optional nullable id normalizes to omission; optional nonnull reasoning and text. Inline text requires format, restricted to text/json_schema with immutable schema snapshot. Beta alone permits agent metadata."
     },
     "ResponseConfigurationUpdate": {
       "spec": "main",
@@ -2899,7 +2900,7 @@
       "file": "lib/src/models/responses/items/item.dart",
       "schema": "ResponseConfigurationUpdate",
       "parent": "Item",
-      "note": "Returned Responses input-list shape requires id. Item.fromResourceJson selects this contextual parser; not an OutputItem."
+      "note": "Returned configuration update requires id. Optional nonnull text has required text/json_schema format; contextual Responses input-list parsing preserves GA/beta agent rules and typed replay."
     },
     "BetaResponseConfigurationUpdate": {
       "spec": "main",
@@ -2908,7 +2909,7 @@
       "file": "lib/src/models/responses/items/item.dart",
       "schema": "BetaResponseConfigurationUpdate",
       "parent": "Item",
-      "note": "Returned beta shape requires id and validates supplied nonnull agent metadata."
+      "note": "Returned configuration update requires id. Optional nonnull text has required text/json_schema format; contextual Responses input-list parsing preserves GA/beta agent rules and typed replay."
     },
     "ConversationResponseConfigurationUpdate": {
       "spec": "main",
@@ -2917,7 +2918,7 @@
       "file": "lib/src/models/conversations/conversation_item.dart",
       "schema": "ResponseConfigurationUpdate",
       "parent": "ConversationItem",
-      "note": "Stored conversation shape requires id and supports typed input replay."
+      "note": "Contextual stored conversation mapping requires id, preserves GA/beta metadata and optional nonnull text format; converts to typed request replay."
     },
     "ConversationBetaResponseConfigurationUpdate": {
       "spec": "main",
@@ -2926,7 +2927,7 @@
       "file": "lib/src/models/conversations/conversation_item.dart",
       "schema": "BetaResponseConfigurationUpdate",
       "parent": "ConversationItem",
-      "note": "Contextual beta conversation mapping retains supplied agent metadata without widening reasoning."
+      "note": "Contextual stored conversation mapping requires id, preserves GA/beta metadata and optional nonnull text format; converts to typed request replay."
     },
     "ConfigurationUpdateReasoning": {
       "spec": "main",
@@ -4116,7 +4117,7 @@
       "dart_class": "ResponsesServerEvent",
       "file": "lib/src/models/responses/websocket/responses_server_event.dart",
       "schema": "ResponsesServerEvent",
-      "note": "Persistent envelope reuses all 58 ordinary shared event codecs; WS errors retain complete metadata; steering and beta injection acknowledgments are typed, with immutable future metadata. Unknown discriminators remain lossless raw variants."
+      "note": "Lossless envelope over GA/beta shared events, errors and steering/injection messages. WebSocket-only terminal completed/failed/incomplete output omission/null tolerance preserves raw presence; final lane collection fills from finalized items without changing strict HTTP/SSE Response parsing."
     },
     "ResponseWsError": {
       "spec": "main",
@@ -4157,7 +4158,7 @@
       "dart_class": "ResponsesCreateEvent",
       "file": "lib/src/models/responses/websocket/responses_create_event.dart",
       "schema": "BetaResponsesClientEventResponseCreate",
-      "note": "Composes CreateResponseRequest; WebSocket lane and guide generate extension; omit stream/background and retain stream_options. Replaces obsolete Realtime skip. Public wire fixtures verify complete supported request fields."
+      "note": "Composes HTTP CreateResponseRequest with canonical generate flag and stream_id routing; omits HTTP-only stream/background on the wire, rejects background:true as before. Warmup retains returned terminal response ID for explicit continuation."
     },
     "BetaResponsesServerEvent": {
       "spec": "main",
@@ -4165,7 +4166,7 @@
       "dart_class": "ResponsesServerEvent",
       "file": "lib/src/models/responses/websocket/responses_server_event.dart",
       "schema": "BetaResponsesServerEvent",
-      "note": "Persistent envelope reuses all 58 ordinary shared event codecs; WS errors retain complete metadata; steering and beta injection acknowledgments are typed, with immutable future metadata. Unknown discriminators remain lossless raw variants."
+      "note": "Lossless envelope over GA/beta shared events, errors and steering/injection messages. WebSocket-only terminal completed/failed/incomplete output omission/null tolerance preserves raw presence; final lane collection fills from finalized items without changing strict HTTP/SSE Response parsing."
     },
     "BetaResponseWsError": {
       "spec": "main",
@@ -5003,7 +5004,8 @@
       "kind": "sealed_parent",
       "dart_class": "WebhookAgentSessionEnvelope",
       "file": "lib/src/models/webhooks/webhook_event.dart",
-      "schema": "WebhookAgentSessionEnvelope"
+      "schema": "WebhookAgentSessionEnvelope",
+      "note": "Actual required id/object/created_at envelope shared by five Agent session and four Agent environment notifications; each real sealed subtype supplies its canonical type/data. Not the session SSE envelope."
     },
     "WebhookEvent": {
       "spec": "main",
@@ -5219,7 +5221,7 @@
       "dart_class": "ResponseError",
       "file": "lib/src/models/responses/response_error.dart",
       "schema": "ResponseError",
-      "note": "Distinct failed-response code/message plus optional shared misalignment; canonical code nonnull closed enum. Legacy type/param, omitted/null code and unknown strings remain explicitly receive-only. No declared headers. Effective raw metadata/replacement/value contracts tested."
+      "note": "Required code/message with canonical optional nullable type/param, immutable parsed overflow and passive misalignment. Legacy omitted/nullable code tolerance retained; actual original type stays unknown when absent/null."
     },
     "BetaResponseError": {
       "spec": "main",
@@ -5227,7 +5229,7 @@
       "dart_class": "ResponseError",
       "file": "lib/src/models/responses/response_error.dart",
       "schema": "BetaResponseError",
-      "note": "Identical canonical beta failed-response component; shares ResponseError. Distinct failed-response code/message plus optional shared misalignment; canonical code nonnull closed enum. Legacy type/param, omitted/null code and unknown strings remain explicitly receive-only. No declared headers. Effective raw metadata/replacement/value contracts tested."
+      "note": "Required code/message with canonical optional nullable type/param, immutable parsed overflow and passive misalignment. Legacy omitted/nullable code tolerance retained; actual original type stays unknown when absent/null."
     },
     "CreateSpeechResponseStreamEvent": {
       "spec": "main",
@@ -5337,27 +5339,28 @@
     },
     "CreateVoiceRequest": {
       "spec": "main",
-      "kind": "object",
-      "dart_class": "CustomVoiceCreateRequest",
-      "file": "lib/src/models/audio/custom_voice.dart",
       "schema": "CreateVoiceRequest",
-      "note": "Actual single-branch request union mapped to its concrete multipart DTO, matching canonical and both SDK aliases. No invented prompt variant or sealed hierarchy. Binary-only create has no fabricated JSON representation; scanner limitations remain visible with real public multipart fixtures, no new skips/tags/exclusions."
+      "file": "lib/src/models/audio/custom_voice.dart",
+      "kind": "sealed_parent",
+      "dart_class": "VoiceCreateRequest",
+      "note": "Multipart request union preserving the existing binary upload DTO. No fabricated JSON encoding or parser for binary files; public create fixtures verify branch dispatch/encoding."
     },
     "CreateVoiceFromConsentRequest": {
       "spec": "main",
-      "kind": "object",
-      "dart_class": "CustomVoiceCreateRequest",
-      "file": "lib/src/models/audio/custom_voice.dart",
       "schema": "CreateVoiceFromConsentRequest",
-      "note": "Actual closed multipart object: required name/audio_sample/consent and optional fixed audio_sample type. Unicode name 1\u2013256, original immutable file bytes/filename, eight normalized MIME bases and10MiB verified through actual multipart; omitted type remains omitted. No invented JSON binary factory or diagnostic exclusion."
+      "file": "lib/src/models/audio/custom_voice.dart",
+      "kind": "sealed_variant",
+      "dart_class": "CustomVoiceCreateRequest",
+      "parent": "VoiceCreateRequest",
+      "note": "Existing consent/sample multipart DTO; omitted type remains omitted. Binary fields and MIME metadata verified at actual multipart boundary."
     },
     "VoiceResource": {
       "spec": "main",
+      "schema": "VoiceResource",
+      "file": "lib/src/models/audio/custom_voice.dart",
       "kind": "object",
       "dart_class": "CustomVoice",
-      "file": "lib/src/models/audio/custom_voice.dart",
-      "schema": "VoiceResource",
-      "note": "Actual closed response: fixed audio.voice object and fixed audio_sample creation type; strict known fields, finite immutable receive-only future JSON, complete effective copy/value/hash contracts and private diagnostics. Unknown known-field type values are rejected, distinct from receive-only extra-field compatibility."
+      "note": "Required audio.voice object/type; audio_sample or prompt type, optional nonnull original prompt; strict known fields and immutable future receive-only metadata."
     },
     "LiveAllowedServerEventParam": {
       "spec": "main",
@@ -5393,11 +5396,11 @@
     },
     "LiveCallAcceptSession": {
       "spec": "main",
+      "schema": "LiveCallAcceptSession",
       "kind": "object",
       "dart_class": "LiveCallAcceptSession",
       "file": "lib/src/models/live/live_config.dart",
-      "schema": "LiveCallAcceptSession",
-      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
     },
     "LiveCallReferRequest": {
       "spec": "main",
@@ -5425,12 +5428,12 @@
     },
     "LiveClientDelegationParam": {
       "spec": "main",
+      "schema": "LiveClientDelegationParam",
       "kind": "sealed_variant",
       "dart_class": "LiveClientDelegationParam",
       "file": "lib/src/models/live/live_delegation.dart",
-      "schema": "LiveClientDelegationParam",
-      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
-      "parent": "delegation"
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDelegation"
     },
     "LiveContainerMemoryLimit": {
       "spec": "main",
@@ -5618,11 +5621,11 @@
     },
     "LiveMediaSessionCreateParams": {
       "spec": "main",
+      "schema": "LiveMediaSessionCreateParams",
       "kind": "object",
       "dart_class": "LiveMediaSessionCreateParams",
       "file": "lib/src/models/live/live_config.dart",
-      "schema": "LiveMediaSessionCreateParams",
-      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
     },
     "LiveMediaSessionForkParams": {
       "spec": "main",
@@ -5663,12 +5666,12 @@
     },
     "LiveResponsesDelegationParam": {
       "spec": "main",
+      "schema": "LiveResponsesDelegationParam",
       "kind": "sealed_variant",
       "dart_class": "LiveResponsesDelegationParam",
       "file": "lib/src/models/live/live_delegation.dart",
-      "schema": "LiveResponsesDelegationParam",
-      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
-      "parent": "delegation"
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDelegation"
     },
     "LiveResponsesDelegationSettingsInputParam": {
       "spec": "main",
@@ -5688,11 +5691,11 @@
     },
     "LiveResponsesDelegationUpdateParam": {
       "spec": "main",
+      "schema": "LiveResponsesDelegationUpdateParam",
       "kind": "object",
       "dart_class": "LiveResponsesDelegationUpdateParam",
       "file": "lib/src/models/live/live_delegation.dart",
-      "schema": "LiveResponsesDelegationUpdateParam",
-      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
     },
     "LiveResponsesServiceTier": {
       "spec": "main",
@@ -5764,11 +5767,11 @@
     },
     "LiveSessionCreateParams": {
       "spec": "main",
+      "schema": "LiveSessionCreateParams",
       "kind": "object",
       "dart_class": "LiveSessionCreateParams",
       "file": "lib/src/models/live/live_config.dart",
-      "schema": "LiveSessionCreateParams",
-      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
     },
     "LiveSessionCreateRequest": {
       "spec": "main",
@@ -5788,19 +5791,19 @@
     },
     "LiveSessionResourceParam": {
       "spec": "main",
+      "schema": "LiveSessionResourceParam",
       "kind": "object",
       "dart_class": "LiveSessionResourceParam",
       "file": "lib/src/models/live/live_config.dart",
-      "schema": "LiveSessionResourceParam",
-      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
     },
     "LiveSessionUpdateParams": {
       "spec": "main",
+      "schema": "LiveSessionUpdateParams",
       "kind": "object",
       "dart_class": "LiveSessionUpdateParams",
       "file": "lib/src/models/live/live_config.dart",
-      "schema": "LiveSessionUpdateParams",
-      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures."
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
     },
     "LiveTextVerbosity": {
       "spec": "main",
@@ -6173,18 +6176,11 @@
     },
     "delegation": {
       "spec": "main",
+      "schema": "delegation",
       "kind": "sealed_parent",
       "dart_class": "LiveDelegation",
       "file": "lib/src/models/live/live_delegation.dart",
-      "schema": "delegation",
-      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
-      "discriminator": {
-        "field": "type",
-        "mapping": {
-          "LiveClientDelegationParam": "client",
-          "LiveResponsesDelegationParam": "responses"
-        }
-      }
+      "note": "Actual nullable startup delegation union; null/default client is represented by parent field presence while the Dart union models three nonnull branches."
     },
     "LiveTransport": {
       "spec": "main",
@@ -6391,23 +6387,21 @@
     },
     "LiveInputAudioMuted": {
       "spec": "main",
+      "schema": "LiveInputAudioMuted",
       "kind": "sealed_variant",
       "dart_class": "LiveInputAudioMuted",
       "file": "lib/src/models/live/live_server_events.dart",
-      "schema": "LiveInputAudioMuted",
-      "note": "Actual f6 received Live component with typed declared fields, immutable finite wire metadata, presence/copy/value contracts and private diagnostics. Known malformed fields fail; LiveLiveError alone admits required-present code:null as documented receive compatibility.",
-      "parent": "LiveServerEvent",
-      "discriminator_value": "session.input_audio.muted"
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveServerEvent"
     },
     "LiveInputAudioUnmuted": {
       "spec": "main",
+      "schema": "LiveInputAudioUnmuted",
       "kind": "sealed_variant",
       "dart_class": "LiveInputAudioUnmuted",
       "file": "lib/src/models/live/live_server_events.dart",
-      "schema": "LiveInputAudioUnmuted",
-      "note": "Actual f6 received Live component with typed declared fields, immutable finite wire metadata, presence/copy/value contracts and private diagnostics. Known malformed fields fail; LiveLiveError alone admits required-present code:null as documented receive compatibility.",
-      "parent": "LiveServerEvent",
-      "discriminator_value": "session.input_audio.unmuted"
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveServerEvent"
     },
     "LiveInstructionsAppended": {
       "spec": "main",
@@ -6481,13 +6475,12 @@
     },
     "LiveDelegationCreated": {
       "spec": "main",
+      "schema": "LiveDelegationCreated",
       "kind": "sealed_variant",
       "dart_class": "LiveDelegationCreated",
       "file": "lib/src/models/live/live_server_events.dart",
-      "schema": "LiveDelegationCreated",
-      "note": "Actual f6 received Live component with typed declared fields, immutable finite wire metadata, presence/copy/value contracts and private diagnostics. Known malformed fields fail; LiveLiveError alone admits required-present code:null as documented receive compatibility.",
-      "parent": "LiveServerEvent",
-      "discriminator_value": "session.delegation.created"
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveServerEvent"
     },
     "LiveResponseEvent": {
       "spec": "main",
@@ -6549,16 +6542,6 @@
       "parent": "LiveServerEvent",
       "discriminator_value": "transport.dtmf.received"
     },
-    "LiveTransportDTMFSend": {
-      "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "LiveTransportDTMFSend",
-      "file": "lib/src/models/live/live_server_events.dart",
-      "schema": "LiveTransportDTMFSend",
-      "note": "Actual f6 received Live component with typed declared fields, immutable finite wire metadata, presence/copy/value contracts and private diagnostics. Known malformed fields fail; LiveLiveError alone admits required-present code:null as documented receive compatibility.",
-      "parent": "LiveServerEvent",
-      "discriminator_value": "transport.dtmf.send"
-    },
     "LiveTransportRinging": {
       "spec": "main",
       "kind": "sealed_variant",
@@ -6615,11 +6598,11 @@
     },
     "LiveDelegationItem": {
       "spec": "main",
+      "schema": "LiveDelegationItem",
       "kind": "object",
       "dart_class": "LiveDelegationItem",
       "file": "lib/src/models/live/live_server_events.dart",
-      "schema": "LiveDelegationItem",
-      "note": "Actual f6 received Live component with typed declared fields, immutable finite wire metadata, presence/copy/value contracts and private diagnostics. Known malformed fields fail; LiveLiveError alone admits required-present code:null as documented receive compatibility."
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
     },
     "LiveTransportCallError": {
       "spec": "main",
@@ -7812,7 +7795,7 @@
       "dart_class": "LiveInputResponseConfigurationUpdateItemParam",
       "file": "lib/src/models/live/live_input_item.dart",
       "schema": "ResponseConfigurationUpdateItemParam",
-      "note": "Actual adopted canonical InputItem-closure component. Validating immutable typed adapter preserves every declared field, nullable/omitted presence and finite future metadata; known malformed values remain contextual safe errors. Serialized-value getter/copy/value contracts are public-fixture tested.",
+      "note": "Existing same-schema contextual Live input adapter now exposes typed ConfigurationUpdateText, hasText and copy/clear, preserves original finite immutable future metadata, and validates optional nonnull text and required text/json_schema format through its embedded canonical schema. No unrelated Live contract refresh.",
       "parent": "LiveInputItem"
     },
     "LiveInputScreenshotParam": {
@@ -8060,11 +8043,11 @@
     },
     "LiveInputResponseConfigurationUpdateItemParamReasoningValue": {
       "spec": "main",
-      "kind": "object",
+      "kind": "extension",
       "dart_class": "LiveInputResponseConfigurationUpdateItemParamReasoningValue",
       "file": "lib/src/models/live/live_input_item.dart",
-      "schema": "ResponseConfigurationUpdateItemParam",
-      "note": "Dart adapter for the actual inline payload at #/components/schemas/ResponseConfigurationUpdateItemParam/properties/reasoning; no invented schema component. Typed public fields/branches serialize this exact inline wire value with strict canonical validation and immutable finite ownership."
+      "schema": null,
+      "note": "Existing adapter for the actual inline ResponseConfigurationUpdateItemParam.properties.reasoning value, with effort only. Corrects the inherited whole-parent schema binding in the #427 handoff; it is not a separate named canonical component."
     },
     "LiveInputWebSearchActionSearchSourcesItemValue": {
       "spec": "main",
@@ -9651,12 +9634,12 @@
     },
     "LiveSessionUpdateParam": {
       "spec": "main",
+      "schema": "LiveSessionUpdateParam",
       "kind": "sealed_variant",
       "dart_class": "LiveSessionUpdateParam",
       "file": "lib/src/models/live/live_client_events.dart",
-      "schema": "LiveSessionUpdateParam",
-      "parent": "LiveSidebandClientEvent",
-      "note": "Actual canonical writable command. Strict fixed type and role factories; immutable finite canonical future metadata; nullable event_id presence/copy/clear, known payload constraints and safe diagnostics. Fork startup codec is shared without a fork connection."
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveSidebandClientEvent"
     },
     "LiveInputAudioAppendEvent": {
       "spec": "main",
@@ -9678,39 +9661,39 @@
     },
     "LiveInputAudioUnmuteParam": {
       "spec": "main",
+      "schema": "LiveInputAudioUnmuteParam",
       "kind": "sealed_variant",
       "dart_class": "LiveInputAudioUnmuteParam",
       "file": "lib/src/models/live/live_client_events.dart",
-      "schema": "LiveInputAudioUnmuteParam",
-      "parent": "LiveSidebandClientEvent",
-      "note": "Actual canonical writable command. Strict fixed type and role factories; immutable finite canonical future metadata; nullable event_id presence/copy/clear, known payload constraints and safe diagnostics. Fork startup codec is shared without a fork connection."
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveSidebandClientEvent"
     },
     "LiveInstructionsAppendParam": {
       "spec": "main",
+      "schema": "LiveInstructionsAppendParam",
       "kind": "sealed_variant",
       "dart_class": "LiveInstructionsAppendParam",
       "file": "lib/src/models/live/live_client_events.dart",
-      "schema": "LiveInstructionsAppendParam",
-      "parent": "LiveSidebandClientEvent",
-      "note": "Actual canonical writable command. Strict fixed type and role factories; immutable finite canonical future metadata; nullable event_id presence/copy/clear, known payload constraints and safe diagnostics. Fork startup codec is shared without a fork connection."
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveSidebandClientEvent"
     },
     "LiveThinkingAppendParam": {
       "spec": "main",
+      "schema": "LiveThinkingAppendParam",
       "kind": "sealed_variant",
       "dart_class": "LiveThinkingAppendParam",
       "file": "lib/src/models/live/live_client_events.dart",
-      "schema": "LiveThinkingAppendParam",
-      "parent": "LiveSidebandClientEvent",
-      "note": "Actual canonical writable command. Strict fixed type and role factories; immutable finite canonical future metadata; nullable event_id presence/copy/clear, known payload constraints and safe diagnostics. Fork startup codec is shared without a fork connection."
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveSidebandClientEvent"
     },
     "LiveCommentaryAppendParam": {
       "spec": "main",
+      "schema": "LiveCommentaryAppendParam",
       "kind": "sealed_variant",
       "dart_class": "LiveCommentaryAppendParam",
       "file": "lib/src/models/live/live_client_events.dart",
-      "schema": "LiveCommentaryAppendParam",
-      "parent": "LiveSidebandClientEvent",
-      "note": "Actual canonical writable command. Strict fixed type and role factories; immutable finite canonical future metadata; nullable event_id presence/copy/clear, known payload constraints and safe diagnostics. Fork startup codec is shared without a fork connection."
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveSidebandClientEvent"
     },
     "LiveResponseItemCreateParam": {
       "spec": "main",
@@ -9741,28 +9724,27 @@
     },
     "LiveClientEvent": {
       "spec": "main",
+      "schema": "LiveClientEvent",
       "kind": "sealed_parent",
       "dart_class": "LiveClientEvent",
       "file": "lib/src/models/live/live_client_events.dart",
-      "schema": "LiveClientEvent",
-      "note": "Actual canonical command union: primary11, sideband9, fork11. Fork union reuses LiveClientEvent.fromForkJson with distinct startup; primary and sideband factories remain role strict."
+      "note": "Canonical channel command union implemented by primary/fromForkJson/sideband factories; fixture admitted on all WebSockets, DTMF only sideband. Runtime writers close the inheritance admission hole."
     },
     "LiveSidebandClientEvent": {
       "spec": "main",
+      "schema": "LiveSidebandClientEvent",
       "kind": "sealed_parent",
       "dart_class": "LiveSidebandClientEvent",
       "file": "lib/src/models/live/live_client_events.dart",
-      "schema": "LiveSidebandClientEvent",
-      "note": "Actual canonical command union: primary11, sideband9, fork11. Fork union reuses LiveClientEvent.fromForkJson with distinct startup; primary and sideband factories remain role strict.",
-      "parent": "LiveClientEvent"
+      "note": "Canonical channel command union implemented by primary/fromForkJson/sideband factories; fixture admitted on all WebSockets, DTMF only sideband. Runtime writers close the inheritance admission hole."
     },
     "LiveForkClientEvent": {
       "spec": "main",
+      "schema": "LiveForkClientEvent",
       "kind": "sealed_parent",
       "dart_class": "LiveClientEvent",
       "file": "lib/src/models/live/live_client_events.dart",
-      "schema": "LiveForkClientEvent",
-      "note": "Actual canonical command union: primary11, sideband9, fork11. Fork union reuses LiveClientEvent.fromForkJson with distinct startup; primary and sideband factories remain role strict."
+      "note": "Canonical channel command union implemented by primary/fromForkJson/sideband factories; fixture admitted on all WebSockets, DTMF only sideband. Runtime writers close the inheritance admission hole."
     },
     "LiveResponsesEvent": {
       "spec": "main",
@@ -9802,7 +9784,7 @@
       "dart_class": "LiveCompactResponse",
       "file": "lib/src/models/live/live_response_events.dart",
       "schema": null,
-      "note": "Genuine SDK sparse lifecycle snapshot projection: all present known Response fields validated, omission/null/future finite JSON retained. No formal independent schema, full Response requiredness or fabricated canonical component is claimed."
+      "note": "Existing sparse lifecycle snapshot projection; embedded ResponseConfigurationUpdateItemParam validator is updated for the same canonical text field, including compact history. No independent schema or full Response requiredness is claimed. Future receive-only format discriminators remain finite raw metadata after known fields validate."
     },
     "LiveTranscriptOptions": {
       "spec": "main",
@@ -9870,19 +9852,19 @@
     },
     "AgentResource": {
       "spec": "main",
+      "schema": "AgentResource",
       "kind": "object",
       "dart_class": "Agent",
       "file": "lib/src/models/agents/agent.dart",
-      "schema": "AgentResource",
-      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
     },
     "CreateAgentParams": {
       "spec": "main",
+      "schema": "CreateAgentParams",
       "kind": "object",
       "dart_class": "CreateAgentRequest",
       "file": "lib/src/models/agents/agent.dart",
-      "schema": "CreateAgentParams",
-      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
     },
     "DeletedAgentResource": {
       "spec": "main",
@@ -9950,11 +9932,11 @@
     },
     "PersistedAgentToolConfigParam": {
       "spec": "main",
+      "schema": "PersistedAgentToolConfigParam",
       "kind": "sealed_parent",
       "dart_class": "AgentTool",
       "file": "lib/src/models/agents/agent_tools.dart",
-      "schema": "PersistedAgentToolConfigParam",
-      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+      "note": "Actual session or persisted tool union now admits the frozen automations tool leaf. This is the #422 union prerequisite; automation operations remain #423-owned."
     },
     "PersistedAgentToolConfigParamComputerUse": {
       "spec": "main",
@@ -10012,11 +9994,11 @@
     },
     "PersistedAgentToolResource": {
       "spec": "main",
+      "schema": "PersistedAgentToolResource",
       "kind": "sealed_parent",
       "dart_class": "AgentToolResource",
       "file": "lib/src/models/agents/agent_tools.dart",
-      "schema": "PersistedAgentToolResource",
-      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+      "note": "Actual session or persisted tool union now admits the frozen automations tool leaf. This is the #422 union prerequisite; automation operations remain #423-owned."
     },
     "PersistedAgentToolResourceComputerUse": {
       "spec": "main",
@@ -10174,11 +10156,11 @@
     },
     "ServiceTierParam": {
       "spec": "main",
-      "kind": "object",
+      "schema": "ServiceTierParam",
+      "kind": "enum",
       "dart_class": "AgentServiceTierParam",
       "file": "lib/src/models/agents/agent_enums.dart",
-      "schema": "ServiceTierParam",
-      "note": "Actual string-valued Agents class wrapper, not a Dart enum: retains future received strings exactly; request fields validate the pinned closed set. Public canonical fixtures cover all enum members and request rejection."
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
     },
     "ServiceTierResource": {
       "spec": "main",
@@ -10258,11 +10240,11 @@
     },
     "UpdateAgentParams": {
       "spec": "main",
+      "schema": "UpdateAgentParams",
       "kind": "object",
       "dart_class": "UpdateAgentRequest",
       "file": "lib/src/models/agents/agent.dart",
-      "schema": "UpdateAgentParams",
-      "note": "Actual frozen Agents CRUD contract. Separate persisted request/received shapes; Unicode/collection limits, finite immutable JSON, explicit null presence and private diagnostics. Public canonical fixtures verify serialization and requests."
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
     },
     "VerbosityParam": {
       "spec": "main",
@@ -10355,11 +10337,11 @@
     },
     "AgentToolConfigParam": {
       "spec": "main",
+      "schema": "AgentToolConfigParam",
       "kind": "sealed_parent",
       "dart_class": "AgentSessionTool",
       "file": "lib/src/models/agents/agent_session_tools.dart",
-      "schema": "AgentToolConfigParam",
-      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+      "note": "Actual session or persisted tool union now admits the frozen automations tool leaf. This is the #422 union prerequisite; automation operations remain #423-owned."
     },
     "AgentToolConfigParamComputerUse": {
       "spec": "main",
@@ -10417,11 +10399,11 @@
     },
     "AgentToolResource": {
       "spec": "main",
+      "schema": "AgentToolResource",
       "kind": "sealed_parent",
       "dart_class": "AgentSessionToolResource",
       "file": "lib/src/models/agents/agent_session_tools.dart",
-      "schema": "AgentToolResource",
-      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+      "note": "Actual session or persisted tool union now admits the frozen automations tool leaf. This is the #422 union prerequisite; automation operations remain #423-owned."
     },
     "AgentToolResourceComputerUse": {
       "spec": "main",
@@ -10693,11 +10675,11 @@
     },
     "CreateAgentSessionParams": {
       "spec": "main",
+      "schema": "CreateAgentSessionParams",
       "kind": "object",
       "dart_class": "CreateAgentSessionRequest",
       "file": "lib/src/models/agents/agent_session_core.dart",
-      "schema": "CreateAgentSessionParams",
-      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
     },
     "CreateSessionEventsParams": {
       "spec": "main",
@@ -11316,19 +11298,19 @@
     },
     "SessionAgentConfigParam": {
       "spec": "main",
+      "schema": "SessionAgentConfigParam",
       "kind": "object",
       "dart_class": "AgentSessionAgentConfig",
       "file": "lib/src/models/agents/agent_session_core.dart",
-      "schema": "SessionAgentConfigParam",
-      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
     },
     "SessionAgentResource": {
       "spec": "main",
+      "schema": "SessionAgentResource",
       "kind": "object",
       "dart_class": "AgentSessionAgent",
       "file": "lib/src/models/agents/agent_session_core.dart",
-      "schema": "SessionAgentResource",
-      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
     },
     "SessionEnvironmentErrorResource": {
       "spec": "main",
@@ -11764,27 +11746,11 @@
     },
     "SessionResource": {
       "spec": "main",
+      "schema": "SessionResource",
       "kind": "object",
       "dart_class": "AgentSession",
       "file": "lib/src/models/agents/agent_session_core.dart",
-      "schema": "SessionResource",
-      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
-    },
-    "SessionSpendControlParam": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "AgentSessionSpendControlConfig",
-      "file": "lib/src/models/agents/agent_session_core.dart",
-      "schema": "SessionSpendControlParam",
-      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
-    },
-    "SessionSpendControlResource": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "AgentSessionSpendControl",
-      "file": "lib/src/models/agents/agent_session_core.dart",
-      "schema": "SessionSpendControlResource",
-      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
     },
     "SessionStatusResource": {
       "spec": "main",
@@ -11892,19 +11858,19 @@
     },
     "UpdateAgentSessionParams": {
       "spec": "main",
+      "schema": "UpdateAgentSessionParams",
       "kind": "object",
       "dart_class": "UpdateAgentSessionRequest",
       "file": "lib/src/models/agents/agent_session_core.dart",
-      "schema": "UpdateAgentSessionParams",
-      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
     },
     "UpdateSessionAgentParam": {
       "spec": "main",
+      "schema": "UpdateSessionAgentParam",
       "kind": "object",
       "dart_class": "AgentSessionAgentUpdate",
       "file": "lib/src/models/agents/agent_session_core.dart",
-      "schema": "UpdateSessionAgentParam",
-      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
     },
     "UpdateSessionReasoningParam": {
       "spec": "main",
@@ -12611,6 +12577,2240 @@
       "schema": "BetaToolChoiceCustom",
       "parent": "ResponseToolChoice",
       "note": "Named Responses custom-tool selector. GA and beta schemas share the exact required flat type=custom/name string contract; distinct from the nested Chat Completions selector."
+    },
+    "DecisionInputUserMessage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DecisionInputMessage",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": "DecisionInputUserMessage"
+    },
+    "DecisionInputJson": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "JsonDecisionInputPart",
+      "file": "lib/src/models/decisions/decision_json.dart",
+      "schema": "DecisionInputJson",
+      "parent": "DecisionInputPart"
+    },
+    "DecisionEvidencePart": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionEvidencePart",
+      "file": "lib/src/models/decisions/decision_input.dart",
+      "schema": null,
+      "note": "Synthetic text/image evidence union for tool outputs and user content."
+    },
+    "DecisionInputDeveloperMessage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DeveloperDecisionInputMessage",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputDeveloperMessage",
+      "parent": "DecisionInputMessage"
+    },
+    "DecisionInputSystemMessage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SystemDecisionInputMessage",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputSystemMessage",
+      "parent": "DecisionInputMessage"
+    },
+    "DecisionInputAssistantMessage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AssistantDecisionInputMessage",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputAssistantMessage",
+      "parent": "DecisionInputMessage"
+    },
+    "DecisionInputFunctionCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DecisionFunctionCall",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputFunctionCall",
+      "parent": "DecisionInputMessage"
+    },
+    "DecisionInputFunctionCallOutput": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DecisionFunctionCallOutput",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputFunctionCallOutput",
+      "parent": "DecisionInputMessage"
+    },
+    "DecisionInputCustomToolCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DecisionCustomToolCall",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputCustomToolCall",
+      "parent": "DecisionInputMessage"
+    },
+    "DecisionInputCustomToolCallOutput": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DecisionCustomToolCallOutput",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputCustomToolCallOutput",
+      "parent": "DecisionInputMessage"
+    },
+    "DecisionInputDeveloperContent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionDeveloperContent",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputDeveloperContent"
+    },
+    "DecisionInputDeveloperContent:TextDecisionDeveloperContent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "TextDecisionDeveloperContent",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": null,
+      "parent": "DecisionInputDeveloperContent",
+      "note": "Wrapper for string or ordered bare-array union member."
+    },
+    "DecisionInputDeveloperContent:PartsDecisionDeveloperContent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "PartsDecisionDeveloperContent",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": null,
+      "parent": "DecisionInputDeveloperContent",
+      "note": "Wrapper for string or ordered bare-array union member."
+    },
+    "DecisionInputAssistantContent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionAssistantContent",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputAssistantContent"
+    },
+    "DecisionInputAssistantContent:TextDecisionAssistantContent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "TextDecisionAssistantContent",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": null,
+      "parent": "DecisionInputAssistantContent",
+      "note": "Wrapper for string or ordered bare-array union member."
+    },
+    "DecisionInputAssistantContent:PartsDecisionAssistantContent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "PartsDecisionAssistantContent",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": null,
+      "parent": "DecisionInputAssistantContent",
+      "note": "Wrapper for string or ordered bare-array union member."
+    },
+    "DecisionInputToolOutputContent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionToolOutput",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputToolOutputContent"
+    },
+    "DecisionInputToolOutputContent:TextDecisionToolOutput": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "TextDecisionToolOutput",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": null,
+      "parent": "DecisionInputToolOutputContent",
+      "note": "Wrapper for string or ordered bare-array union member."
+    },
+    "DecisionInputToolOutputContent:PartsDecisionToolOutput": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "PartsDecisionToolOutput",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": null,
+      "parent": "DecisionInputToolOutputContent",
+      "note": "Wrapper for string or ordered bare-array union member."
+    },
+    "DecisionAssistantPart": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionAssistantPart",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": null,
+      "note": "Synthetic union of DecisionInputOutputText and DecisionInputRefusal."
+    },
+    "DecisionInputOutputText": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OutputTextDecisionPart",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputOutputText",
+      "parent": "DecisionAssistantPart"
+    },
+    "DecisionInputRefusal": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "RefusalDecisionPart",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": "DecisionInputRefusal",
+      "parent": "DecisionAssistantPart"
+    },
+    "DecisionToolStatus": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "DecisionToolStatus",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": null,
+      "note": "Request enum modeled from the corresponding status/phase fields; strict request parsing."
+    },
+    "DecisionMessagePhase": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "DecisionMessagePhase",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "schema": null,
+      "note": "Request enum modeled from the corresponding status/phase fields; strict request parsing."
+    },
+    "DecisionInstructions": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "DecisionInstructions",
+      "file": "lib/src/models/decisions/decision_instructions.dart",
+      "schema": null,
+      "note": "Inline QuestionParam*.instructions string-or-parts contract."
+    },
+    "TextDecisionInstructions": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "TextDecisionInstructions",
+      "file": "lib/src/models/decisions/decision_instructions.dart",
+      "schema": null,
+      "note": "Inline QuestionParam*.instructions string-or-parts contract."
+    },
+    "PartsDecisionInstructions": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "PartsDecisionInstructions",
+      "file": "lib/src/models/decisions/decision_instructions.dart",
+      "schema": null,
+      "note": "Inline QuestionParam*.instructions string-or-parts contract."
+    },
+    "DecisionQuestionInputPart": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DecisionQuestionPart",
+      "file": "lib/src/models/decisions/decision_instructions.dart",
+      "schema": "DecisionQuestionInputPart"
+    },
+    "DecisionQuestionInputText": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TextDecisionQuestionPart",
+      "file": "lib/src/models/decisions/decision_instructions.dart",
+      "schema": "DecisionQuestionInputText",
+      "parent": "DecisionQuestionInputPart"
+    },
+    "DecisionQuestionInputImage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ImageDecisionQuestionPart",
+      "file": "lib/src/models/decisions/decision_instructions.dart",
+      "schema": "DecisionQuestionInputImage",
+      "parent": "DecisionQuestionInputPart"
+    },
+    "DecisionQuestionInputPart:JsonDecisionQuestionPart": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "JsonDecisionQuestionPart",
+      "file": "lib/src/models/decisions/decision_instructions.dart",
+      "schema": null,
+      "parent": "DecisionQuestionInputPart",
+      "note": "Question wrapper for DecisionInputJson; no cache controls."
+    },
+    "DecisionPromptCacheOptions": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "DecisionPromptCacheOptions",
+      "file": "lib/src/models/decisions/decision_cache.dart",
+      "schema": null,
+      "note": "Inline Decisions-only cache contract; source paths are DecisionRequest.properties.prompt_cache_options and DecisionInputText/Image.properties.prompt_cache_breakpoint. Do not bind to Responses PromptCacheOptions."
+    },
+    "DecisionPromptCacheBreakpoint": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "DecisionPromptCacheBreakpoint",
+      "file": "lib/src/models/decisions/decision_cache.dart",
+      "schema": null,
+      "note": "Inline Decisions-only cache contract; source paths are DecisionRequest.properties.prompt_cache_options and DecisionInputText/Image.properties.prompt_cache_breakpoint. Do not bind to Responses PromptCacheOptions."
+    },
+    "DecisionCacheTtl": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "DecisionCacheTtl",
+      "file": "lib/src/models/decisions/decision_cache.dart",
+      "schema": null,
+      "note": "Inline Decisions-only cache contract; source paths are DecisionRequest.properties.prompt_cache_options and DecisionInputText/Image.properties.prompt_cache_breakpoint. Do not bind to Responses PromptCacheOptions."
+    },
+    "DecisionCacheMode": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "DecisionCacheMode",
+      "file": "lib/src/models/decisions/decision_cache.dart",
+      "schema": null,
+      "note": "Inline Decisions-only cache contract; source paths are DecisionRequest.properties.prompt_cache_options and DecisionInputText/Image.properties.prompt_cache_breakpoint. Do not bind to Responses PromptCacheOptions."
+    },
+    "ResponseToolUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseToolUsage",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "ResponseToolUsage",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "BetaResponseToolUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseToolUsage",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "BetaResponseToolUsage",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "WebSearchUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WebSearchUsage",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "WebSearchUsage",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "BetaWebSearchUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WebSearchUsage",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "BetaWebSearchUsage",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "ImageGenToolUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ImageGenToolUsage",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "ImageGenToolUsage",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "BetaImageGenToolUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ImageGenToolUsage",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "BetaImageGenToolUsage",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "ImageGenInputUsageDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ImageGenInputUsageDetails",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "ImageGenInputUsageDetails",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "BetaImageGenInputUsageDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ImageGenInputUsageDetails",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "BetaImageGenInputUsageDetails",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "ImageGenOutputTokensDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ImageGenOutputTokensDetails",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "ImageGenOutputTokensDetails",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "BetaImageGenOutputTokensDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ImageGenOutputTokensDetails",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "BetaImageGenOutputTokensDetails",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "CachedUsageDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CachedUsageDetails",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "CachedUsageDetails",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "BetaCachedUsageDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CachedUsageDetails",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "BetaCachedUsageDetails",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
+    },
+    "PromptCacheBreakpointTtl": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "PromptCacheBreakpointTtl",
+      "file": "lib/src/models/common/prompt_cache_breakpoint.dart",
+      "schema": null,
+      "note": "Inline PromptCacheBreakpointConfig/Param ttl enum and Beta twins, 30m/12h. Do not widen PromptCacheTTLEnum or Decisions."
+    },
+    "Error-2": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VideoError",
+      "file": "lib/src/models/videos/video.dart",
+      "schema": "Error-2",
+      "note": "VideoResource.error closure; retain legacy optional message/code compatibility, exact nullable type/param, headers and review metadata."
+    },
+    "ConfigurationUpdateText": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ConfigurationUpdateText",
+      "file": "lib/src/models/responses/config/configuration_update_text.dart",
+      "schema": null,
+      "note": "Actual inline text object at ResponseConfigurationUpdate{,ItemParam}.properties.text and Beta siblings; required format restricted to ResponseFormatText/TextResponseFormatJsonSchema. Distinct from general TextConfig, which additionally permits json_object and verbosity. No fabricated component."
+    },
+    "TextResponseFormatConfiguration": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "TextFormat",
+      "file": "lib/src/models/responses/config/text_config.dart",
+      "schema": "TextResponseFormatConfiguration",
+      "note": "Existing three-way general Responses text-format union: text/json_schema/json_object. Descriptive upstream delta only. ConfigurationUpdateText deliberately admits only its narrower two-branch union."
+    },
+    "BetaTextResponseFormatConfiguration": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "TextFormat",
+      "file": "lib/src/models/responses/config/text_config.dart",
+      "schema": "BetaTextResponseFormatConfiguration",
+      "note": "Existing three-way general Responses text-format union: text/json_schema/json_object. Descriptive upstream delta only. ConfigurationUpdateText deliberately admits only its narrower two-branch union."
+    },
+    "ResponsesResponseFormatText": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "PlainTextFormat",
+      "file": "lib/src/models/responses/config/text_config.dart",
+      "schema": "ResponseFormatText",
+      "parent": "TextFormat",
+      "note": "Contextual Responses format mapping; shared Chat/Common formats retain their existing manifest entries. ConfigurationUpdateText snapshots/validates JSON schema before retaining this existing value type."
+    },
+    "BetaResponsesResponseFormatText": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "PlainTextFormat",
+      "file": "lib/src/models/responses/config/text_config.dart",
+      "schema": "BetaResponseFormatText",
+      "parent": "TextFormat",
+      "note": "Contextual Responses format mapping; shared Chat/Common formats retain their existing manifest entries. ConfigurationUpdateText snapshots/validates JSON schema before retaining this existing value type."
+    },
+    "ResponsesTextResponseFormatJsonSchema": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "JsonSchemaFormat",
+      "file": "lib/src/models/responses/config/text_config.dart",
+      "schema": "TextResponseFormatJsonSchema",
+      "parent": "TextFormat",
+      "note": "Contextual Responses format mapping; shared Chat/Common formats retain their existing manifest entries. ConfigurationUpdateText snapshots/validates JSON schema before retaining this existing value type."
+    },
+    "BetaResponsesTextResponseFormatJsonSchema": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "JsonSchemaFormat",
+      "file": "lib/src/models/responses/config/text_config.dart",
+      "schema": "BetaTextResponseFormatJsonSchema",
+      "parent": "TextFormat",
+      "note": "Contextual Responses format mapping; shared Chat/Common formats retain their existing manifest entries. ConfigurationUpdateText snapshots/validates JSON schema before retaining this existing value type."
+    },
+    "ResponsesResponseFormatJsonObject": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "JsonObjectFormat",
+      "file": "lib/src/models/responses/config/text_config.dart",
+      "schema": "ResponseFormatJsonObject",
+      "parent": "TextFormat",
+      "note": "Contextual Responses format mapping; shared Chat/Common formats retain their existing manifest entries. ConfigurationUpdateText snapshots/validates JSON schema before retaining this existing value type."
+    },
+    "BetaResponsesResponseFormatJsonObject": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "JsonObjectFormat",
+      "file": "lib/src/models/responses/config/text_config.dart",
+      "schema": "BetaResponseFormatJsonObject",
+      "parent": "TextFormat",
+      "note": "Contextual Responses format mapping; shared Chat/Common formats retain their existing manifest entries. ConfigurationUpdateText snapshots/validates JSON schema before retaining this existing value type."
+    },
+    "ResponsesWebSocketLimits": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesWebSocketLimits",
+      "file": "lib/src/resources/responses/responses_websocket_session.dart",
+      "schema": null,
+      "note": "Local opt-in bounded workflow helper based on pinned official SDK semantics; no corresponding wire schema and no API operation. Local retention/cancellation/ownership controls never enter API JSON."
+    },
+    "ResponsesWebSocketSessionException": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesWebSocketSessionException",
+      "file": "lib/src/resources/responses/responses_websocket_session.dart",
+      "schema": null,
+      "note": "Local opt-in bounded workflow helper based on pinned official SDK semantics; no corresponding wire schema and no API operation. Local retention/cancellation/ownership controls never enter API JSON."
+    },
+    "ResponsesWebSocketSession": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesWebSocketSession",
+      "file": "lib/src/resources/responses/responses_websocket_session.dart",
+      "schema": null,
+      "note": "Local opt-in bounded workflow helper based on pinned official SDK semantics; no corresponding wire schema and no API operation. Local retention/cancellation/ownership controls never enter API JSON."
+    },
+    "ResponsesWebSocketLane": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponsesWebSocketLane",
+      "file": "lib/src/resources/responses/responses_websocket_session.dart",
+      "schema": null,
+      "note": "Local opt-in bounded workflow helper based on pinned official SDK semantics; no corresponding wire schema and no API operation. Local retention/cancellation/ownership controls never enter API JSON."
+    },
+    "CreateVoicePromptRequest": {
+      "spec": "main",
+      "schema": "CreateVoicePromptRequest",
+      "file": "lib/src/models/audio/custom_voice.dart",
+      "kind": "sealed_variant",
+      "dart_class": "PromptVoiceCreateRequest",
+      "parent": "VoiceCreateRequest",
+      "note": "Closed prompt request with fixed prompt type; canonical JSON and explicit multipart encodings; exact omission and string validation."
+    },
+    "VoiceDeletedResource": {
+      "spec": "main",
+      "schema": "VoiceDeletedResource",
+      "file": "lib/src/models/audio/custom_voice.dart",
+      "kind": "object",
+      "dart_class": "CustomVoiceDeleted",
+      "note": "Required id/object/deleted; fixed audio.voice.deleted object, deleted false retained; immutable receive-only future metadata."
+    },
+    "LiveDecisionAssistantMessageParam": {
+      "spec": "main",
+      "schema": "LiveDecisionAssistantMessageParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionMessageParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Role-specific canonical alias implemented by one role-aware message class with named role factories; content/phase/ID/optional type validated per role.",
+      "parent": "LiveDecisionInputItemParam"
+    },
+    "LiveDecisionChoiceParam": {
+      "spec": "main",
+      "schema": "LiveDecisionChoiceParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionChoiceParam",
+      "file": "lib/src/models/live/live_decision_questions.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveDecisionChoiceQuestionParam": {
+      "spec": "main",
+      "schema": "LiveDecisionChoiceQuestionParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionChoiceQuestionParam",
+      "file": "lib/src/models/live/live_decision_questions.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionQuestion"
+    },
+    "LiveDecisionCompleted": {
+      "spec": "main",
+      "schema": "LiveDecisionCompleted",
+      "kind": "object",
+      "dart_class": "LiveDecisionCompleted",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveDecisionCreateParam": {
+      "spec": "main",
+      "schema": "LiveDecisionCreateParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionCreateParam",
+      "file": "lib/src/models/live/live_client_events.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveSidebandClientEvent"
+    },
+    "LiveDecisionCustomToolCallOutputParam": {
+      "spec": "main",
+      "schema": "LiveDecisionCustomToolCallOutputParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionCustomToolCallOutputParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionInputItemParam"
+    },
+    "LiveDecisionCustomToolCallParam": {
+      "spec": "main",
+      "schema": "LiveDecisionCustomToolCallParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionCustomToolCallParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionInputItemParam"
+    },
+    "LiveDecisionDeveloperMessageParam": {
+      "spec": "main",
+      "schema": "LiveDecisionDeveloperMessageParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionMessageParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Role-specific canonical alias implemented by one role-aware message class with named role factories; content/phase/ID/optional type validated per role.",
+      "parent": "LiveDecisionInputItemParam"
+    },
+    "LiveDecisionEvent": {
+      "spec": "main",
+      "schema": "LiveDecisionEvent",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionEvent",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveServerEvent"
+    },
+    "LiveDecisionFunctionCallOutputParam": {
+      "spec": "main",
+      "schema": "LiveDecisionFunctionCallOutputParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionFunctionCallOutputParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionInputItemParam"
+    },
+    "LiveDecisionFunctionCallParam": {
+      "spec": "main",
+      "schema": "LiveDecisionFunctionCallParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionFunctionCallParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionInputItemParam"
+    },
+    "LiveDecisionInputImageParam": {
+      "spec": "main",
+      "schema": "LiveDecisionInputImageParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionInputImageParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionContentPart"
+    },
+    "LiveDecisionInputItemParam": {
+      "spec": "main",
+      "schema": "LiveDecisionInputItemParam",
+      "kind": "sealed_parent",
+      "dart_class": "LiveDecisionInputItemParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveDecisionInputJsonParam": {
+      "spec": "main",
+      "schema": "LiveDecisionInputJsonParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionInputJsonParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionContentPart"
+    },
+    "LiveDecisionInputTextParam": {
+      "spec": "main",
+      "schema": "LiveDecisionInputTextParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionInputTextParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionContentPart"
+    },
+    "LiveDecisionItemCreateParam": {
+      "spec": "main",
+      "schema": "LiveDecisionItemCreateParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionItemCreateParam",
+      "file": "lib/src/models/live/live_client_events.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveSidebandClientEvent"
+    },
+    "LiveDecisionItemCreated": {
+      "spec": "main",
+      "schema": "LiveDecisionItemCreated",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionItemCreated",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveServerEvent"
+    },
+    "LiveDecisionItemDeleteParam": {
+      "spec": "main",
+      "schema": "LiveDecisionItemDeleteParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionItemDeleteParam",
+      "file": "lib/src/models/live/live_client_events.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveSidebandClientEvent"
+    },
+    "LiveDecisionItemDeleted": {
+      "spec": "main",
+      "schema": "LiveDecisionItemDeleted",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionItemDeleted",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveServerEvent"
+    },
+    "LiveDecisionOutputTextParam": {
+      "spec": "main",
+      "schema": "LiveDecisionOutputTextParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionOutputTextParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionContentPart"
+    },
+    "LiveDecisionPredicateQuestionParam": {
+      "spec": "main",
+      "schema": "LiveDecisionPredicateQuestionParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionPredicateQuestionParam",
+      "file": "lib/src/models/live/live_decision_questions.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionQuestion"
+    },
+    "LiveDecisionQuestion": {
+      "spec": "main",
+      "schema": "LiveDecisionQuestion",
+      "kind": "sealed_parent",
+      "dart_class": "LiveDecisionQuestion",
+      "file": "lib/src/models/live/live_decision_questions.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveDecisionQuestionsInputParam": {
+      "spec": "main",
+      "schema": "LiveDecisionQuestionsInputParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionQuestionsInputParam",
+      "file": "lib/src/models/live/live_decision_questions.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveDecisionRefusalParam": {
+      "spec": "main",
+      "schema": "LiveDecisionRefusalParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionRefusalParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionContentPart"
+    },
+    "LiveDecisionScoreLevelParam": {
+      "spec": "main",
+      "schema": "LiveDecisionScoreLevelParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionScoreLevelParam",
+      "file": "lib/src/models/live/live_decision_questions.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveDecisionScoreQuestionParam": {
+      "spec": "main",
+      "schema": "LiveDecisionScoreQuestionParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionScoreQuestionParam",
+      "file": "lib/src/models/live/live_decision_questions.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDecisionQuestion"
+    },
+    "LiveDecisionStoredAssistantMessageParam": {
+      "spec": "main",
+      "schema": "LiveDecisionStoredAssistantMessageParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionStoredInputItemParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Contextual stored alias: one wrapper requires a nonnull ID and delegates native role/tool validation to its typed item, preserving the flat wire shape without eight duplicate stored classes."
+    },
+    "LiveDecisionStoredCustomToolCallOutputParam": {
+      "spec": "main",
+      "schema": "LiveDecisionStoredCustomToolCallOutputParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionStoredInputItemParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Contextual stored alias: one wrapper requires a nonnull ID and delegates native role/tool validation to its typed item, preserving the flat wire shape without eight duplicate stored classes."
+    },
+    "LiveDecisionStoredCustomToolCallParam": {
+      "spec": "main",
+      "schema": "LiveDecisionStoredCustomToolCallParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionStoredInputItemParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Contextual stored alias: one wrapper requires a nonnull ID and delegates native role/tool validation to its typed item, preserving the flat wire shape without eight duplicate stored classes."
+    },
+    "LiveDecisionStoredDeveloperMessageParam": {
+      "spec": "main",
+      "schema": "LiveDecisionStoredDeveloperMessageParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionStoredInputItemParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Contextual stored alias: one wrapper requires a nonnull ID and delegates native role/tool validation to its typed item, preserving the flat wire shape without eight duplicate stored classes."
+    },
+    "LiveDecisionStoredFunctionCallOutputParam": {
+      "spec": "main",
+      "schema": "LiveDecisionStoredFunctionCallOutputParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionStoredInputItemParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Contextual stored alias: one wrapper requires a nonnull ID and delegates native role/tool validation to its typed item, preserving the flat wire shape without eight duplicate stored classes."
+    },
+    "LiveDecisionStoredFunctionCallParam": {
+      "spec": "main",
+      "schema": "LiveDecisionStoredFunctionCallParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionStoredInputItemParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Contextual stored alias: one wrapper requires a nonnull ID and delegates native role/tool validation to its typed item, preserving the flat wire shape without eight duplicate stored classes."
+    },
+    "LiveDecisionStoredInputItemParam": {
+      "spec": "main",
+      "schema": "LiveDecisionStoredInputItemParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionStoredInputItemParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Contextual stored alias: one wrapper requires a nonnull ID and delegates native role/tool validation to its typed item, preserving the flat wire shape without eight duplicate stored classes."
+    },
+    "LiveDecisionStoredSystemMessageParam": {
+      "spec": "main",
+      "schema": "LiveDecisionStoredSystemMessageParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionStoredInputItemParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Contextual stored alias: one wrapper requires a nonnull ID and delegates native role/tool validation to its typed item, preserving the flat wire shape without eight duplicate stored classes."
+    },
+    "LiveDecisionStoredUserMessageParam": {
+      "spec": "main",
+      "schema": "LiveDecisionStoredUserMessageParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionStoredInputItemParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Contextual stored alias: one wrapper requires a nonnull ID and delegates native role/tool validation to its typed item, preserving the flat wire shape without eight duplicate stored classes."
+    },
+    "LiveDecisionSystemMessageParam": {
+      "spec": "main",
+      "schema": "LiveDecisionSystemMessageParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionMessageParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Role-specific canonical alias implemented by one role-aware message class with named role factories; content/phase/ID/optional type validated per role.",
+      "parent": "LiveDecisionInputItemParam"
+    },
+    "LiveDecisionTriggerInputParam": {
+      "spec": "main",
+      "schema": "LiveDecisionTriggerInputParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionTriggerInputParam",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveDecisionUserInputImageParam": {
+      "spec": "main",
+      "schema": "LiveDecisionUserInputImageParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionInputImageParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Identical native user/question part aliases; retain Live-specific limits, nullable detail and future metadata.",
+      "parent": "LiveDecisionContentPart"
+    },
+    "LiveDecisionUserInputTextParam": {
+      "spec": "main",
+      "schema": "LiveDecisionUserInputTextParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionInputTextParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Identical native user/question part aliases; retain Live-specific limits, nullable detail and future metadata.",
+      "parent": "LiveDecisionContentPart"
+    },
+    "LiveDecisionUserMessageParam": {
+      "spec": "main",
+      "schema": "LiveDecisionUserMessageParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionMessageParam",
+      "file": "lib/src/models/live/live_decision_items.dart",
+      "note": "Role-specific canonical alias implemented by one role-aware message class with named role factories; content/phase/ID/optional type validated per role.",
+      "parent": "LiveDecisionInputItemParam"
+    },
+    "LiveDecisionsDelegationParam": {
+      "spec": "main",
+      "schema": "LiveDecisionsDelegationParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveDecisionsDelegationParam",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs.",
+      "parent": "LiveDelegation"
+    },
+    "LiveDecisionsDelegationUpdateParam": {
+      "spec": "main",
+      "schema": "LiveDecisionsDelegationUpdateParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionsDelegationUpdateParam",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveDecisionsSettingsInputParam": {
+      "spec": "main",
+      "schema": "LiveDecisionsSettingsInputParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionsSettingsInputParam",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveDecisionsSettingsUpdateParam": {
+      "spec": "main",
+      "schema": "LiveDecisionsSettingsUpdateParam",
+      "kind": "object",
+      "dart_class": "LiveDecisionsSettingsUpdateParam",
+      "file": "lib/src/models/live/live_delegation.dart",
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+    },
+    "LiveOutputAudioFixturePlayParam": {
+      "spec": "main",
+      "schema": "LiveOutputAudioFixturePlayParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveOutputAudioFixturePlayParam",
+      "file": "lib/src/models/live/live_client_events.dart",
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveSidebandClientEvent"
+    },
+    "LiveTransportDTMFSendParam": {
+      "spec": "main",
+      "schema": "LiveTransportDTMFSendParam",
+      "kind": "sealed_variant",
+      "dart_class": "LiveTransportDTMFSendParam",
+      "file": "lib/src/models/live/live_client_events.dart",
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveSidebandClientEvent"
+    },
+    "LiveOutputAudioFixturePlayed": {
+      "spec": "main",
+      "schema": "LiveOutputAudioFixturePlayed",
+      "kind": "sealed_variant",
+      "dart_class": "LiveOutputAudioFixturePlayed",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveServerEvent"
+    },
+    "LiveOutputAudioFixturePlaying": {
+      "spec": "main",
+      "schema": "LiveOutputAudioFixturePlaying",
+      "kind": "sealed_variant",
+      "dart_class": "LiveOutputAudioFixturePlaying",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveServerEvent"
+    },
+    "LiveTransportDTMFSent": {
+      "spec": "main",
+      "schema": "LiveTransportDTMFSent",
+      "kind": "sealed_variant",
+      "dart_class": "LiveTransportDTMFSent",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Frozen Live media contract: typed fields, immutable finite metadata, exact null/copy/value semantics and channel-aware public codecs.",
+      "parent": "LiveServerEvent"
+    },
+    "LiveServerEvent-2": {
+      "spec": "main",
+      "schema": "LiveServerEvent-2",
+      "kind": "sealed_parent",
+      "dart_class": "LiveServerEvent",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Shared received codec with per-event channel validation; received/sent DTMF sideband-only. Preserve audio reflection per individual canonical descriptions, both SDK ConnectServerEvent unions and SIP guide despite narrow canonical sideband alias."
+    },
+    "LiveSidebandServerEvent": {
+      "spec": "main",
+      "schema": "LiveSidebandServerEvent",
+      "kind": "sealed_parent",
+      "dart_class": "LiveServerEvent",
+      "file": "lib/src/models/live/live_server_events.dart",
+      "note": "Shared received codec with per-event channel validation; received/sent DTMF sideband-only. Preserve audio reflection per individual canonical descriptions, both SDK ConnectServerEvent unions and SIP guide despite narrow canonical sideband alias."
+    },
+    "RealtimeResponseInputAudio": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputAudio",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseInputAudio",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Frozen Realtime contract. Existing field/value semantics retained; typed fixture and source receipt cover assigned changes.",
+      "parent": "RealtimeResponseInputContentPart"
+    },
+    "RealtimeResponseInputFunctionCall": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputFunctionCall",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseInputFunctionCall",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Frozen Realtime contract. Existing field/value semantics retained; typed fixture and source receipt cover assigned changes.",
+      "parent": "RealtimeResponseInputItem"
+    },
+    "RealtimeResponseInputFunctionCallOutput": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputFunctionCallOutput",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseInputFunctionCallOutput",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Frozen Realtime contract. Existing field/value semantics retained; typed fixture and source receipt cover assigned changes.",
+      "parent": "RealtimeResponseInputItem"
+    },
+    "RealtimeResponseInputImage": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputImage",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseInputImage",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Frozen Realtime contract. Existing field/value semantics retained; typed fixture and source receipt cover assigned changes.",
+      "parent": "RealtimeResponseInputContentPart"
+    },
+    "RealtimeResponseInputText": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputText",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseInputText",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Frozen Realtime contract. Existing field/value semantics retained; typed fixture and source receipt cover assigned changes.",
+      "parent": "RealtimeResponseInputContentPart"
+    },
+    "RealtimeResponseItemReference": {
+      "spec": "main",
+      "schema": "RealtimeResponseItemReference",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseItemReference",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Frozen Realtime contract. Existing field/value semantics retained; typed fixture and source receipt cover assigned changes.",
+      "parent": "RealtimeResponseInputItem"
+    },
+    "RealtimeResponseInputItem": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputItem",
+      "kind": "sealed_parent",
+      "dart_class": "RealtimeResponseInputItem",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Frozen Realtime contract. Existing field/value semantics retained; typed fixture and source receipt cover assigned changes."
+    },
+    "RealtimeResponseInputMessage": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputMessage",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseInputMessage",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Role-aware native message model preserve exact allowed content, cardinality, optional/null ID/status and closed properties.",
+      "parent": "RealtimeResponseInputItem"
+    },
+    "RealtimeResponseInputMessageAssistant": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputMessageAssistant",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseInputMessage",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Role-aware native message model preserve exact allowed content, cardinality, optional/null ID/status and closed properties.",
+      "parent": "RealtimeResponseInputItem"
+    },
+    "RealtimeResponseInputMessageDeveloper": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputMessageDeveloper",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseInputMessage",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Role-aware native message model preserve exact allowed content, cardinality, optional/null ID/status and closed properties.",
+      "parent": "RealtimeResponseInputItem"
+    },
+    "RealtimeResponseInputMessageSystem": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputMessageSystem",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseInputMessage",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Role-aware native message model preserve exact allowed content, cardinality, optional/null ID/status and closed properties.",
+      "parent": "RealtimeResponseInputItem"
+    },
+    "RealtimeResponseInputMessageUser": {
+      "spec": "main",
+      "schema": "RealtimeResponseInputMessageUser",
+      "kind": "sealed_variant",
+      "dart_class": "RealtimeResponseInputMessage",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Role-aware native message model preserve exact allowed content, cardinality, optional/null ID/status and closed properties.",
+      "parent": "RealtimeResponseInputItem"
+    },
+    "AudioTranscriptionResponse": {
+      "spec": "main",
+      "schema": "AudioTranscriptionResponse",
+      "kind": "object",
+      "dart_class": "InputAudioTranscription",
+      "file": "lib/src/models/realtime/realtime_audio_config.dart",
+      "note": "Session transcription response configuration, not ordinary /audio transcription output. Existing open model/languages/keywords fields already align; returned keywords have regression fixtures."
+    },
+    "RealtimeSessionCreateRequestGA": {
+      "spec": "main",
+      "schema": "RealtimeSessionCreateRequestGA",
+      "kind": "object",
+      "dart_class": "RealtimeSessionCreateRequest",
+      "file": "lib/src/models/realtime/realtime_session_create.dart",
+      "note": "Existing session parent uses the shared GA or Translation noise leaf with optional finite strength0..1, preserving omission and explicit wrapper disable. Model identifiers remain open strings; custom voice leaf is additive where admitted."
+    },
+    "RealtimeSessionCreateResponseGA": {
+      "spec": "main",
+      "schema": "RealtimeSessionCreateResponseGA",
+      "kind": "object",
+      "dart_class": "RealtimeSessionCreateResponse",
+      "file": "lib/src/models/realtime/realtime_session_create.dart",
+      "note": "Existing session parent uses the shared GA or Translation noise leaf with optional finite strength0..1, preserving omission and explicit wrapper disable. Model identifiers remain open strings; custom voice leaf is additive where admitted."
+    },
+    "RealtimeTranscriptionSessionCreateRequestGA": {
+      "spec": "main",
+      "schema": "RealtimeTranscriptionSessionCreateRequestGA",
+      "kind": "object",
+      "dart_class": "RealtimeTranscriptionSessionCreateRequest",
+      "file": "lib/src/models/realtime/realtime_transcription_session.dart",
+      "note": "Existing session parent uses the shared GA or Translation noise leaf with optional finite strength0..1, preserving omission and explicit wrapper disable. Model identifiers remain open strings; custom voice leaf is additive where admitted."
+    },
+    "RealtimeTranscriptionSessionCreateResponseGA": {
+      "spec": "main",
+      "schema": "RealtimeTranscriptionSessionCreateResponseGA",
+      "kind": "object",
+      "dart_class": "RealtimeTranscriptionSessionCreateResponse",
+      "file": "lib/src/models/realtime/realtime_transcription_session.dart",
+      "note": "Existing session parent uses the shared GA or Translation noise leaf with optional finite strength0..1, preserving omission and explicit wrapper disable. Model identifiers remain open strings; custom voice leaf is additive where admitted."
+    },
+    "RealtimeTranslationSession": {
+      "spec": "main",
+      "schema": "RealtimeTranslationSession",
+      "kind": "object",
+      "dart_class": "RealtimeTranslationSession",
+      "file": "lib/src/models/realtime/realtime_translation_session.dart",
+      "note": "Existing session parent uses the shared GA or Translation noise leaf with optional finite strength0..1, preserving omission and explicit wrapper disable. Model identifiers remain open strings; custom voice leaf is additive where admitted."
+    },
+    "RealtimeTranslationSessionCreateRequest": {
+      "spec": "main",
+      "schema": "RealtimeTranslationSessionCreateRequest",
+      "kind": "object",
+      "dart_class": "RealtimeTranslationSessionCreateRequest",
+      "file": "lib/src/models/realtime/realtime_translation_session.dart",
+      "note": "Existing session parent uses the shared GA or Translation noise leaf with optional finite strength0..1, preserving omission and explicit wrapper disable. Model identifiers remain open strings; custom voice leaf is additive where admitted."
+    },
+    "RealtimeTranslationSessionUpdateRequest": {
+      "spec": "main",
+      "schema": "RealtimeTranslationSessionUpdateRequest",
+      "kind": "object",
+      "dart_class": "RealtimeTranslationSessionUpdateRequest",
+      "file": "lib/src/models/realtime/realtime_translation_session.dart",
+      "note": "Existing session parent uses the shared GA or Translation noise leaf with optional finite strength0..1, preserving omission and explicit wrapper disable. Model identifiers remain open strings; custom voice leaf is additive where admitted."
+    },
+    "RealtimeServerEventConversationItemInputAudioTranscriptionDelta": {
+      "spec": "main",
+      "schema": "RealtimeServerEventConversationItemInputAudioTranscriptionDelta",
+      "kind": "object",
+      "dart_class": "InputAudioTranscriptionDeltaEvent",
+      "file": "lib/src/models/realtime/realtime_event.dart",
+      "note": "Existing event binding; example/description-only changes retain wire shape. Transcription delta additionally supports optional nonnull contentIndex/delta, nullable typed logprobs and immutable future metadata."
+    },
+    "RealtimeServerEventError": {
+      "spec": "main",
+      "schema": "RealtimeServerEventError",
+      "kind": "object",
+      "dart_class": "ErrorEvent",
+      "file": "lib/src/models/realtime/realtime_event.dart",
+      "note": "Existing event binding; example/description-only changes retain wire shape. Transcription delta additionally supports optional nonnull contentIndex/delta, nullable typed logprobs and immutable future metadata."
+    },
+    "RealtimeServerEventResponseCreated": {
+      "spec": "main",
+      "schema": "RealtimeServerEventResponseCreated",
+      "kind": "object",
+      "dart_class": "ResponseCreatedEvent",
+      "file": "lib/src/models/realtime/realtime_event.dart",
+      "note": "Existing event binding; example/description-only changes retain wire shape. Transcription delta additionally supports optional nonnull contentIndex/delta, nullable typed logprobs and immutable future metadata."
+    },
+    "RealtimeServerEventResponseOutputItemDone": {
+      "spec": "main",
+      "schema": "RealtimeServerEventResponseOutputItemDone",
+      "kind": "object",
+      "dart_class": "ResponseOutputItemDoneEvent",
+      "file": "lib/src/models/realtime/realtime_event.dart",
+      "note": "Existing event binding; example/description-only changes retain wire shape. Transcription delta additionally supports optional nonnull contentIndex/delta, nullable typed logprobs and immutable future metadata."
+    },
+    "RealtimeServerEventSessionCreated": {
+      "spec": "main",
+      "schema": "RealtimeServerEventSessionCreated",
+      "kind": "object",
+      "dart_class": "SessionCreatedEvent",
+      "file": "lib/src/models/realtime/realtime_event.dart",
+      "note": "Existing event binding; example/description-only changes retain wire shape. Transcription delta additionally supports optional nonnull contentIndex/delta, nullable typed logprobs and immutable future metadata."
+    },
+    "RealtimeServerEventSessionUpdated": {
+      "spec": "main",
+      "schema": "RealtimeServerEventSessionUpdated",
+      "kind": "object",
+      "dart_class": "SessionUpdatedEvent",
+      "file": "lib/src/models/realtime/realtime_event.dart",
+      "note": "Existing event binding; example/description-only changes retain wire shape. Transcription delta additionally supports optional nonnull contentIndex/delta, nullable typed logprobs and immutable future metadata."
+    },
+    "LogProbProperties": {
+      "spec": "main",
+      "schema": "LogProbProperties",
+      "kind": "object",
+      "dart_class": "RealtimeTranscriptionLogprob",
+      "file": "lib/src/models/realtime/realtime_event.dart",
+      "note": "Canonical required token/logprob/integer bytes fields; finite immutable data with no invented byte bounds."
+    },
+    "RealtimeResponseInputOutputText": {
+      "spec": "main",
+      "schema": null,
+      "kind": "extension",
+      "dart_class": "RealtimeResponseInputOutputText",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "parent": "RealtimeResponseInputContentPart",
+      "note": "Actual inline output_text part of RealtimeResponseInputMessageAssistant.properties.content.items; no standalone canonical component fabricated."
+    },
+    "RealtimeResponseInputContentPart": {
+      "spec": "main",
+      "schema": null,
+      "kind": "extension",
+      "dart_class": "RealtimeResponseInputContentPart",
+      "file": "lib/src/models/realtime/realtime_response_input.dart",
+      "note": "Dart aggregate of the actual native role-specific content unions, validated again by owning role."
+    },
+    "AudioInputNoiseReduction": {
+      "spec": "main",
+      "schema": null,
+      "kind": "extension",
+      "dart_class": "AudioInputNoiseReduction",
+      "file": "lib/src/models/realtime/realtime_audio_config.dart",
+      "note": "Existing GA noise leaf shared by session/transcription create/receive. Optional type, optional nonnull finite strength0..1; no default insertion. Source inline pointer #/components/schemas/RealtimeSessionCreateRequestGA/properties/audio/properties/input/properties/noise_reduction."
+    },
+    "RealtimeTranslationNoiseReduction": {
+      "spec": "main",
+      "schema": null,
+      "kind": "extension",
+      "dart_class": "RealtimeTranslationNoiseReduction",
+      "file": "lib/src/models/realtime/realtime_translation_session.dart",
+      "note": "Existing Translation noise leaf shared by create/update/receive. Required type, optional nonnull finite strength0..1; nullable disable belongs to wrapper. Source inline pointer #/components/schemas/RealtimeTranslationSessionCreateRequest/properties/audio/properties/input/properties/noise_reduction."
+    },
+    "RealtimeAudioConfigOutput": {
+      "spec": "main",
+      "schema": null,
+      "kind": "extension",
+      "dart_class": "RealtimeAudioConfigOutput",
+      "file": "lib/src/models/realtime/realtime_audio_config.dart",
+      "note": "Actual shared output leaf: format and open named/custom voice union; additive voiceSelection retains named voice API. Session parents additionally support speed. Source inline pointer #/components/schemas/RealtimeResponseCreateParams/properties/audio/properties/output."
+    },
+    "CompactionParam": {
+      "spec": "main",
+      "schema": "CompactionParam",
+      "kind": "object",
+      "dart_class": "AgentCompactionConfig",
+      "file": "lib/src/models/agents/agent_settings.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "CompactionResource": {
+      "spec": "main",
+      "schema": "CompactionResource",
+      "kind": "object",
+      "dart_class": "AgentCompaction",
+      "file": "lib/src/models/agents/agent_settings.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "ExperimentalConfigParam": {
+      "spec": "main",
+      "schema": "ExperimentalConfigParam",
+      "kind": "object",
+      "dart_class": "AgentExperimentalConfig",
+      "file": "lib/src/models/agents/agent_settings.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "ExperimentalConfigOverridesParam": {
+      "spec": "main",
+      "schema": "ExperimentalConfigOverridesParam",
+      "kind": "object",
+      "dart_class": "AgentExperimentalOverridesConfig",
+      "file": "lib/src/models/agents/agent_settings.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "ExperimentalConfigResource": {
+      "spec": "main",
+      "schema": "ExperimentalConfigResource",
+      "kind": "object",
+      "dart_class": "AgentExperimental",
+      "file": "lib/src/models/agents/agent_settings.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "SessionReviewParam": {
+      "spec": "main",
+      "schema": "SessionReviewParam",
+      "kind": "enum",
+      "dart_class": "SessionReviewParam",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "SessionReviewResource": {
+      "spec": "main",
+      "schema": "SessionReviewResource",
+      "kind": "enum",
+      "dart_class": "SessionReviewResource",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+    },
+    "AgentToolConfigParamAutomations": {
+      "spec": "main",
+      "schema": "AgentToolConfigParamAutomations",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionAutomationsTool",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "parent": "AgentSessionTool",
+      "note": "Reused automations wire leaf implemented in #422; this is its primary #423 inventory disposition. No duplicate class."
+    },
+    "AgentToolResourceAutomations": {
+      "spec": "main",
+      "schema": "AgentToolResourceAutomations",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionAutomationsToolResource",
+      "file": "lib/src/models/agents/agent_session_tools.dart",
+      "parent": "AgentSessionToolResource",
+      "note": "Reused automations wire leaf implemented in #422; this is its primary #423 inventory disposition. No duplicate class."
+    },
+    "PersistedAgentToolConfigParamAutomations": {
+      "spec": "main",
+      "schema": "PersistedAgentToolConfigParamAutomations",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationsTool",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "parent": "AgentTool",
+      "note": "Reused automations wire leaf implemented in #422; this is its primary #423 inventory disposition. No duplicate class."
+    },
+    "PersistedAgentToolResourceAutomations": {
+      "spec": "main",
+      "schema": "PersistedAgentToolResourceAutomations",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationsToolResource",
+      "file": "lib/src/models/agents/agent_tools.dart",
+      "parent": "AgentToolResource",
+      "note": "Reused automations wire leaf implemented in #422; this is its primary #423 inventory disposition. No duplicate class."
+    },
+    "AutomationAgentConfigResource": {
+      "spec": "main",
+      "schema": "AutomationAgentConfigResource",
+      "kind": "object",
+      "dart_class": "AgentAutomationAgentConfig",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    "AutomationCreatedByResource": {
+      "spec": "main",
+      "schema": "AutomationCreatedByResource",
+      "kind": "sealed_parent",
+      "dart_class": "AgentAutomationCreator",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    "AutomationCreatedByResourceAgent": {
+      "spec": "main",
+      "schema": "AutomationCreatedByResourceAgent",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationAgentCreator",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomationCreator"
+    },
+    "AutomationCreatedByResourceDeveloper": {
+      "spec": "main",
+      "schema": "AutomationCreatedByResourceDeveloper",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationDeveloperCreator",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomationCreator"
+    },
+    "AutomationEnvironmentResource": {
+      "spec": "main",
+      "schema": "AutomationEnvironmentResource",
+      "kind": "sealed_parent",
+      "dart_class": "AgentAutomationEnvironmentResource",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    "AutomationEnvironmentResourceNone": {
+      "spec": "main",
+      "schema": "AutomationEnvironmentResourceNone",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationNoneEnvironmentResource",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomationEnvironmentResource"
+    },
+    "AutomationEnvironmentResourceOpenaiHosted": {
+      "spec": "main",
+      "schema": "AutomationEnvironmentResourceOpenaiHosted",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationHostedEnvironmentResource",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomationEnvironmentResource"
+    },
+    "AutomationEnvironmentResourceSelfHosted": {
+      "spec": "main",
+      "schema": "AutomationEnvironmentResourceSelfHosted",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationSelfHostedEnvironmentResource",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomationEnvironmentResource"
+    },
+    "AutomationInvocationErrorResource": {
+      "spec": "main",
+      "schema": "AutomationInvocationErrorResource",
+      "kind": "object",
+      "dart_class": "AgentAutomationInvocationError",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    "AutomationInvocationResource": {
+      "spec": "main",
+      "schema": "AutomationInvocationResource",
+      "kind": "object",
+      "dart_class": "AgentAutomationInvocation",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    "AutomationInvocationSourceResource": {
+      "spec": "main",
+      "schema": "AutomationInvocationSourceResource",
+      "kind": "sealed_parent",
+      "dart_class": "AgentAutomationInvocationSource",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    "AutomationInvocationSourceResourceAutomation": {
+      "spec": "main",
+      "schema": "AutomationInvocationSourceResourceAutomation",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationScheduledInvocationSource",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomationInvocationSource"
+    },
+    "AutomationInvocationSourceResourceManual": {
+      "spec": "main",
+      "schema": "AutomationInvocationSourceResourceManual",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationManualInvocationSource",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomationInvocationSource"
+    },
+    "AutomationInvocationStatusResource": {
+      "spec": "main",
+      "schema": "AutomationInvocationStatusResource",
+      "kind": "enum",
+      "dart_class": "AgentAutomationInvocationStatus",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "note": "Exact-string receive value class intentionally preserves future status values rather than synthesizing a fallback."
+    },
+    "AutomationResource": {
+      "spec": "main",
+      "schema": "AutomationResource",
+      "kind": "sealed_parent",
+      "dart_class": "AgentAutomation",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    "AutomationResourceOnce": {
+      "spec": "main",
+      "schema": "AutomationResourceOnce",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationOnce",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomation"
+    },
+    "AutomationResourcePeriodic": {
+      "spec": "main",
+      "schema": "AutomationResourcePeriodic",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationPeriodic",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomation"
+    },
+    "AutomationTargetParam": {
+      "spec": "main",
+      "schema": "AutomationTargetParam",
+      "kind": "sealed_parent",
+      "dart_class": "AgentAutomationTarget",
+      "file": "lib/src/models/agents/agent_automation_requests.dart"
+    },
+    "AutomationTargetParamExistingSession": {
+      "spec": "main",
+      "schema": "AutomationTargetParamExistingSession",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationExistingSessionTarget",
+      "file": "lib/src/models/agents/agent_automation_requests.dart",
+      "parent": "AgentAutomationTarget"
+    },
+    "AutomationTargetParamNewSession": {
+      "spec": "main",
+      "schema": "AutomationTargetParamNewSession",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationNewSessionTarget",
+      "file": "lib/src/models/agents/agent_automation_requests.dart",
+      "parent": "AgentAutomationTarget"
+    },
+    "AutomationTargetResource": {
+      "spec": "main",
+      "schema": "AutomationTargetResource",
+      "kind": "sealed_parent",
+      "dart_class": "AgentAutomationTargetResource",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    "AutomationTargetResourceExistingSession": {
+      "spec": "main",
+      "schema": "AutomationTargetResourceExistingSession",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationExistingSessionTargetResource",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomationTargetResource"
+    },
+    "AutomationTargetResourceNewSession": {
+      "spec": "main",
+      "schema": "AutomationTargetResourceNewSession",
+      "kind": "sealed_variant",
+      "dart_class": "AgentAutomationNewSessionTargetResource",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "parent": "AgentAutomationTargetResource"
+    },
+    "CreateAutomationParams": {
+      "spec": "main",
+      "schema": "CreateAutomationParams",
+      "kind": "sealed_parent",
+      "dart_class": "CreateAgentAutomationRequest",
+      "file": "lib/src/models/agents/agent_automation_requests.dart"
+    },
+    "CreateAutomationParamsOnce": {
+      "spec": "main",
+      "schema": "CreateAutomationParamsOnce",
+      "kind": "sealed_variant",
+      "dart_class": "CreateAgentAutomationOnceRequest",
+      "file": "lib/src/models/agents/agent_automation_requests.dart",
+      "parent": "CreateAgentAutomationRequest"
+    },
+    "CreateAutomationParamsPeriodic": {
+      "spec": "main",
+      "schema": "CreateAutomationParamsPeriodic",
+      "kind": "sealed_variant",
+      "dart_class": "CreateAgentAutomationPeriodicRequest",
+      "file": "lib/src/models/agents/agent_automation_requests.dart",
+      "parent": "CreateAgentAutomationRequest"
+    },
+    "DeletedAutomationResource": {
+      "spec": "main",
+      "schema": "DeletedAutomationResource",
+      "kind": "object",
+      "dart_class": "DeletedAgentAutomation",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    "InputMessageResource-2": {
+      "spec": "main",
+      "schema": "InputMessageResource-2",
+      "kind": "object",
+      "dart_class": "AgentAutomationInputMessage",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    "OnceAutomationStatusResource": {
+      "spec": "main",
+      "schema": "OnceAutomationStatusResource",
+      "kind": "enum",
+      "dart_class": "AgentAutomationOnceStatus",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "note": "Exact-string receive value class intentionally preserves future status values rather than synthesizing a fallback."
+    },
+    "PeriodicAutomationStatusResource": {
+      "spec": "main",
+      "schema": "PeriodicAutomationStatusResource",
+      "kind": "enum",
+      "dart_class": "AgentAutomationPeriodicStatus",
+      "file": "lib/src/models/agents/agent_automation_models.dart",
+      "note": "Exact-string receive value class intentionally preserves future status values rather than synthesizing a fallback."
+    },
+    "UpdateAutomationParams": {
+      "spec": "main",
+      "schema": "UpdateAutomationParams",
+      "kind": "object",
+      "dart_class": "UpdateAgentAutomationRequest",
+      "file": "lib/src/models/agents/agent_automation_requests.dart"
+    },
+    "BetaImageGenTool": {
+      "spec": "main",
+      "schema": "BetaImageGenTool",
+      "kind": "sealed_variant",
+      "dart_class": "ImageGenerationTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "parent": "ResponseTool",
+      "note": "GA and beta share the existing image-generation tool configuration; model-scoped input fidelity documentation is current."
+    },
+    "ImageGenTool": {
+      "spec": "main",
+      "schema": "ImageGenTool",
+      "kind": "sealed_variant",
+      "dart_class": "ImageGenerationTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "parent": "ResponseTool",
+      "note": "GA and beta share the existing image-generation tool configuration; model-scoped input fidelity documentation is current."
+    },
+    "BetaImageGenToolCall": {
+      "spec": "main",
+      "schema": "BetaImageGenToolCall",
+      "kind": "sealed_variant",
+      "dart_class": "ImageGenerationCallOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "parent": "OutputItem",
+      "note": "Canonical required status and nullable result; complete GA/beta optional metadata and error details. Shared exact-string status preserves future values."
+    },
+    "ImageGenToolCall": {
+      "spec": "main",
+      "schema": "ImageGenToolCall",
+      "kind": "sealed_variant",
+      "dart_class": "ImageGenerationCallOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "parent": "OutputItem",
+      "note": "Canonical required status and nullable result; complete GA/beta optional metadata and error details. Shared exact-string status preserves future values."
+    },
+    "BetaImageGenToolCallError": {
+      "spec": "main",
+      "schema": "BetaImageGenToolCallError",
+      "kind": "object",
+      "dart_class": "ImageGenerationCallError",
+      "file": "lib/src/models/images/image_tool_error.dart"
+    },
+    "ImageGenToolCallError": {
+      "spec": "main",
+      "schema": "ImageGenToolCallError",
+      "kind": "object",
+      "dart_class": "ImageGenerationCallError",
+      "file": "lib/src/models/images/image_tool_error.dart"
+    },
+    "BetaImageGenToolCallModerationDetails": {
+      "spec": "main",
+      "schema": "BetaImageGenToolCallModerationDetails",
+      "kind": "object",
+      "dart_class": "ImageGenerationModerationDetails",
+      "file": "lib/src/models/images/image_tool_error.dart"
+    },
+    "ImageGenToolCallModerationDetails": {
+      "spec": "main",
+      "schema": "ImageGenToolCallModerationDetails",
+      "kind": "object",
+      "dart_class": "ImageGenerationModerationDetails",
+      "file": "lib/src/models/images/image_tool_error.dart"
+    },
+    "BetaInputFidelity": {
+      "spec": "main",
+      "schema": "BetaInputFidelity",
+      "kind": "enum",
+      "dart_class": "ImageInputFidelity",
+      "file": "lib/src/models/images/image_common.dart",
+      "note": "Identical high/low wire enum, reused with existing unknown fallback. Request writes reject fallback values."
+    },
+    "InputFidelity": {
+      "spec": "main",
+      "schema": "InputFidelity",
+      "kind": "enum",
+      "dart_class": "ImageInputFidelity",
+      "file": "lib/src/models/images/image_common.dart",
+      "note": "Identical high/low wire enum, reused with existing unknown fallback. Request writes reject fallback values."
+    },
+    "ImageEditCompletedEvent": {
+      "spec": "main",
+      "schema": "ImageEditCompletedEvent",
+      "kind": "sealed_variant",
+      "dart_class": "ImageEditCompletedEvent",
+      "file": "lib/src/models/images/image_stream_event.dart",
+      "parent": "ImageEditStreamEvent"
+    },
+    "ImageGenCompletedEvent": {
+      "spec": "main",
+      "schema": "ImageGenCompletedEvent",
+      "kind": "sealed_variant",
+      "dart_class": "ImageGenCompletedEvent",
+      "file": "lib/src/models/images/image_stream_event.dart",
+      "parent": "ImageGenStreamEvent"
+    },
+    "ImagesResponse": {
+      "spec": "main",
+      "schema": "ImagesResponse",
+      "kind": "object",
+      "dart_class": "ImageResponse",
+      "file": "lib/src/models/images/image_response.dart",
+      "note": "Nullable safety ID plus canonical optional data. hasData retains missing versus present empty list without changing the data getter type."
+    },
+    "AwsExternalKeyParams": {
+      "spec": "main",
+      "schema": "AwsExternalKeyParams",
+      "kind": "sealed_variant",
+      "dart_class": "AwsExternalKeyParams",
+      "file": "lib/src/models/admin/external_keys.dart",
+      "parent": "V1OrganizationExternalKeysPostRequest"
+    },
+    "AwsExternalStorageProviderParams": {
+      "spec": "main",
+      "schema": "AwsExternalStorageProviderParams",
+      "kind": "object",
+      "dart_class": "AwsExternalStorageProviderParams",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "AwsExternalStorageProviderResponse": {
+      "spec": "main",
+      "schema": "AwsExternalStorageProviderResponse",
+      "kind": "object",
+      "dart_class": "AwsExternalStorageProviderResponse",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "AzureExternalKeyParams": {
+      "spec": "main",
+      "schema": "AzureExternalKeyParams",
+      "kind": "sealed_variant",
+      "dart_class": "AzureExternalKeyParams",
+      "file": "lib/src/models/admin/external_keys.dart",
+      "parent": "V1OrganizationExternalKeysPostRequest"
+    },
+    "AzureExternalStorageProviderParams": {
+      "spec": "main",
+      "schema": "AzureExternalStorageProviderParams",
+      "kind": "object",
+      "dart_class": "AzureExternalStorageProviderParams",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "AzureExternalStorageProviderResponse": {
+      "spec": "main",
+      "schema": "AzureExternalStorageProviderResponse",
+      "kind": "object",
+      "dart_class": "AzureExternalStorageProviderResponse",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "CreateExternalStorageBody": {
+      "spec": "main",
+      "schema": "CreateExternalStorageBody",
+      "kind": "object",
+      "dart_class": "CreateExternalStorageRequest",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "DecisionsUsageApiSource": {
+      "spec": "main",
+      "schema": "DecisionsUsageApiSource",
+      "kind": "enum",
+      "dart_class": "DecisionsUsageApiSource",
+      "file": "lib/src/models/admin/admin_enums.dart",
+      "note": "Value class deliberately preserves unknown received strings; request contexts require known values. ExternalStorageOrder and OrderEnum share identical AdminListOrder wire values."
+    },
+    "DecisionsUsageBucket": {
+      "spec": "main",
+      "schema": "DecisionsUsageBucket",
+      "kind": "object",
+      "dart_class": "DecisionsUsageBucket",
+      "file": "lib/src/models/admin/decisions_usage.dart"
+    },
+    "DecisionsUsageBucketWidth": {
+      "spec": "main",
+      "schema": "DecisionsUsageBucketWidth",
+      "kind": "enum",
+      "dart_class": "DecisionsUsageBucketWidth",
+      "file": "lib/src/models/admin/admin_enums.dart",
+      "note": "Value class deliberately preserves unknown received strings; request contexts require known values. ExternalStorageOrder and OrderEnum share identical AdminListOrder wire values."
+    },
+    "DecisionsUsageGroupBy": {
+      "spec": "main",
+      "schema": "DecisionsUsageGroupBy",
+      "kind": "enum",
+      "dart_class": "DecisionsUsageGroupBy",
+      "file": "lib/src/models/admin/admin_enums.dart",
+      "note": "Value class deliberately preserves unknown received strings; request contexts require known values. ExternalStorageOrder and OrderEnum share identical AdminListOrder wire values."
+    },
+    "DecisionsUsageResult": {
+      "spec": "main",
+      "schema": "DecisionsUsageResult",
+      "kind": "object",
+      "dart_class": "DecisionsUsageResult",
+      "file": "lib/src/models/admin/decisions_usage.dart"
+    },
+    "ExternalKeyPurpose": {
+      "spec": "main",
+      "schema": "ExternalKeyPurpose",
+      "kind": "enum",
+      "dart_class": "ExternalKeyPurpose",
+      "file": "lib/src/models/admin/admin_enums.dart",
+      "note": "Value class deliberately preserves unknown received strings; request contexts require known values. ExternalStorageOrder and OrderEnum share identical AdminListOrder wire values."
+    },
+    "ExternalKeyResource": {
+      "spec": "main",
+      "schema": "ExternalKeyResource",
+      "kind": "object",
+      "dart_class": "ExternalKey",
+      "file": "lib/src/models/admin/external_keys.dart"
+    },
+    "ExternalStorageDeletedResource": {
+      "spec": "main",
+      "schema": "ExternalStorageDeletedResource",
+      "kind": "object",
+      "dart_class": "DeletedExternalStorage",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "ExternalStorageListResource": {
+      "spec": "main",
+      "schema": "ExternalStorageListResource",
+      "kind": "object",
+      "dart_class": "ExternalStorageList",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "ExternalStorageOrder": {
+      "spec": "main",
+      "schema": "ExternalStorageOrder",
+      "kind": "enum",
+      "dart_class": "AdminListOrder",
+      "file": "lib/src/models/admin/admin_enums.dart",
+      "note": "Value class deliberately preserves unknown received strings; request contexts require known values. ExternalStorageOrder and OrderEnum share identical AdminListOrder wire values."
+    },
+    "ExternalStorageResponse": {
+      "spec": "main",
+      "schema": "ExternalStorageResponse",
+      "kind": "object",
+      "dart_class": "ExternalStorage",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "ExternalStorageStatus": {
+      "spec": "main",
+      "schema": "ExternalStorageStatus",
+      "kind": "enum",
+      "dart_class": "ExternalStorageStatus",
+      "file": "lib/src/models/admin/admin_enums.dart",
+      "note": "Value class deliberately preserves unknown received strings; request contexts require known values. ExternalStorageOrder and OrderEnum share identical AdminListOrder wire values."
+    },
+    "GcpExternalKeyParams": {
+      "spec": "main",
+      "schema": "GcpExternalKeyParams",
+      "kind": "sealed_variant",
+      "dart_class": "GcpExternalKeyParams",
+      "file": "lib/src/models/admin/external_keys.dart",
+      "parent": "V1OrganizationExternalKeysPostRequest"
+    },
+    "GcpExternalStorageProviderParams": {
+      "spec": "main",
+      "schema": "GcpExternalStorageProviderParams",
+      "kind": "object",
+      "dart_class": "GcpExternalStorageProviderParams",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "GcpExternalStorageProviderResponse": {
+      "spec": "main",
+      "schema": "GcpExternalStorageProviderResponse",
+      "kind": "object",
+      "dart_class": "GcpExternalStorageProviderResponse",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "ListExternalKeysResource": {
+      "spec": "main",
+      "schema": "ListExternalKeysResource",
+      "kind": "object",
+      "dart_class": "ExternalKeyList",
+      "file": "lib/src/models/admin/external_keys.dart"
+    },
+    "OciExternalStorageProviderParams": {
+      "spec": "main",
+      "schema": "OciExternalStorageProviderParams",
+      "kind": "object",
+      "dart_class": "OciExternalStorageProviderParams",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "OciExternalStorageProviderResponse": {
+      "spec": "main",
+      "schema": "OciExternalStorageProviderResponse",
+      "kind": "object",
+      "dart_class": "OciExternalStorageProviderResponse",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "OrderEnum": {
+      "spec": "main",
+      "schema": "OrderEnum",
+      "kind": "enum",
+      "dart_class": "AdminListOrder",
+      "file": "lib/src/models/admin/admin_enums.dart",
+      "note": "Value class deliberately preserves unknown received strings; request contexts require known values. ExternalStorageOrder and OrderEnum share identical AdminListOrder wire values."
+    },
+    "ProjectApiKey": {
+      "spec": "main",
+      "schema": "ProjectApiKey",
+      "kind": "object",
+      "dart_class": "ProjectApiKey",
+      "file": "lib/src/models/admin/project_api_key.dart"
+    },
+    "ProjectApiKeyOwnerServiceAccount": {
+      "spec": "main",
+      "schema": "ProjectApiKeyOwnerServiceAccount",
+      "kind": "object",
+      "dart_class": "ProjectApiKeyOwnerServiceAccount",
+      "file": "lib/src/models/admin/project_api_key.dart"
+    },
+    "ProjectApiKeyOwnerUser": {
+      "spec": "main",
+      "schema": "ProjectApiKeyOwnerUser",
+      "kind": "object",
+      "dart_class": "ProjectApiKeyOwnerUser",
+      "file": "lib/src/models/admin/project_api_key.dart"
+    },
+    "PublicDecisionsUsageResponseResource": {
+      "spec": "main",
+      "schema": "PublicDecisionsUsageResponseResource",
+      "kind": "object",
+      "dart_class": "DecisionsUsagePage",
+      "file": "lib/src/models/admin/decisions_usage.dart"
+    },
+    "UpdateProjectApiKeyBody": {
+      "spec": "main",
+      "schema": "UpdateProjectApiKeyBody",
+      "kind": "object",
+      "dart_class": "UpdateProjectApiKeyRequest",
+      "file": "lib/src/models/admin/project_api_key.dart"
+    },
+    "V1OrganizationExternalKeysPostRequest": {
+      "spec": "main",
+      "schema": "V1OrganizationExternalKeysPostRequest",
+      "kind": "sealed_parent",
+      "dart_class": "ExternalKeyParams",
+      "file": "lib/src/models/admin/external_keys.dart",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "AwsExternalKeyParams": "aws",
+          "AzureExternalKeyParams": "azure",
+          "GcpExternalKeyParams": "gcp"
+        }
+      }
+    },
+    "ValidateExternalKeyResource": {
+      "spec": "main",
+      "schema": "ValidateExternalKeyResource",
+      "kind": "object",
+      "dart_class": "ExternalKeyValidation",
+      "file": "lib/src/models/admin/external_keys.dart"
+    },
+    "ResponsesReasoningInputItem": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ReasoningInputItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "ReasoningItem",
+      "note": "Canonical typed replay requires id and summary; optional reasoning_text content, encrypted_content, status and beta agent metadata. Dispatches from Item.fromJson and ResponseInput.items. Reasoning remains a distinct item rather than assistant text.",
+      "parent": "Item"
+    },
+    "ResponsesReasoningOutputItem": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ReasoningItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "ReasoningItem",
+      "note": "Existing output model gains typed input conversion and preserves returned status. Existing const construction remains; replay conversion snapshots caller-owned content and summary. Full content equality/hash and redacted diagnostics are checked.",
+      "parent": "OutputItem"
+    },
+    "ResponsesReasoningSummaryContent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ReasoningSummaryContent",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "SummaryTextContent",
+      "note": "Existing summary scalar value reused for canonical reasoning replay; type summary_text and text string remain distinct from reasoning_text."
+    },
+    "ResponsesReasoningTextContent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ReasoningTextContent",
+      "file": "lib/src/models/responses/content/output_content.dart",
+      "schema": "ReasoningTextContent",
+      "note": "Existing public OutputContent reasoning_text value model. Reasoning replay uses validated raw-map content with the same required type/text fields, preserving future metadata keys rather than flattening it into assistant text.",
+      "parent": "OutputContent"
+    },
+    "BetaResponsesReasoningInputItem": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ReasoningInputItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "BetaReasoningItem",
+      "note": "Canonical typed replay requires id and summary; optional reasoning_text content, encrypted_content, status and beta agent metadata. Dispatches from Item.fromJson and ResponseInput.items. Reasoning remains a distinct item rather than assistant text.",
+      "parent": "Item"
+    },
+    "BetaResponsesReasoningOutputItem": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ReasoningItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaReasoningItem",
+      "note": "Existing output model gains typed input conversion and preserves returned status. Existing const construction remains; replay conversion snapshots caller-owned content and summary. Full content equality/hash and redacted diagnostics are checked.",
+      "parent": "OutputItem"
+    },
+    "BetaResponsesReasoningSummaryContent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ReasoningSummaryContent",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaSummaryTextContent",
+      "note": "Existing summary scalar value reused for canonical reasoning replay; type summary_text and text string remain distinct from reasoning_text."
+    },
+    "BetaResponsesReasoningTextContent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ReasoningTextContent",
+      "file": "lib/src/models/responses/content/output_content.dart",
+      "schema": "BetaReasoningTextContent",
+      "note": "Existing public OutputContent reasoning_text value model. Reasoning replay uses validated raw-map content with the same required type/text fields, preserving future metadata keys rather than flattening it into assistant text.",
+      "parent": "OutputContent"
+    },
+    "MCPToolCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpCallOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "MCPToolCall",
+      "parent": "OutputItem",
+      "note": "Native output call has no call_id. Required id/arguments/name/server_label; optional approval_request_id, structured error, output and status. Beta additionally supports producing agent metadata."
+    },
+    "BetaMCPToolCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpCallOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaMCPToolCall",
+      "parent": "OutputItem",
+      "note": "Native output call has no call_id. Required id/arguments/name/server_label; optional approval_request_id, structured error, output and status. Beta additionally supports producing agent metadata."
+    },
+    "MCPListTools": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpListToolsOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "MCPListTools",
+      "parent": "OutputItem"
+    },
+    "BetaMCPListTools": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpListToolsOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaMCPListTools",
+      "parent": "OutputItem"
+    },
+    "MCPApprovalRequest": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpApprovalRequestOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "MCPApprovalRequest",
+      "parent": "OutputItem"
+    },
+    "BetaMCPApprovalRequest": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpApprovalRequestOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaMCPApprovalRequest",
+      "parent": "OutputItem"
+    },
+    "MCPApprovalResponseResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpApprovalResponseOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "MCPApprovalResponseResource",
+      "parent": "OutputItem",
+      "note": "Output-resource context requires id. Pinned required includes undeclared request_id; Python/Node declarations omit that phantom field. This mapping does not claim typed writable MCPApprovalResponse input support."
+    },
+    "BetaMCPApprovalResponseResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpApprovalResponseOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaMCPApprovalResponseResource",
+      "parent": "OutputItem",
+      "note": "Output-resource context requires id. Pinned required includes undeclared request_id; Python/Node declarations omit that phantom field. This mapping does not claim typed writable MCPApprovalResponse input support."
+    },
+    "MCPListToolsTool": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "McpToolDescriptor",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "MCPListToolsTool",
+      "note": "Required input_schema and optional annotations preserve finite arbitrary JSON to match Python object/Node unknown receive types, broader than pinned OpenAPI object shape. Parsed snapshots are immutable; const caller-owned construction remains explicit."
+    },
+    "BetaMCPListToolsTool": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "McpToolDescriptor",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaMCPListToolsTool",
+      "note": "Required input_schema and optional annotations preserve finite arbitrary JSON to match Python object/Node unknown receive types, broader than pinned OpenAPI object shape. Parsed snapshots are immutable; const caller-owned construction remains explicit."
+    },
+    "MCPToolCallStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "McpCallStatus",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "MCPToolCallStatus",
+      "note": "Five native statuses plus local unknown fallback. Unknown returned strings are accepted but not retained verbatim."
+    },
+    "BetaMCPToolCallStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "McpCallStatus",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaMCPToolCallStatus",
+      "note": "Five native statuses plus local unknown fallback. Unknown returned strings are accepted but not retained verbatim."
+    },
+    "MCPToolCallError": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "McpCallError",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "MCPToolCallError",
+      "note": "Three native structured errors plus local raw-preserving unknown variant; malformed known variants remain rejected."
+    },
+    "BetaMCPToolCallError": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "McpCallError",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaMCPToolCallError",
+      "note": "Three native structured errors plus local raw-preserving unknown variant; malformed known variants remain rejected."
+    },
+    "MCPProtocolError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpProtocolError",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "MCPProtocolError",
+      "parent": "McpCallError"
+    },
+    "BetaMCPProtocolError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpProtocolError",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaMCPProtocolError",
+      "parent": "McpCallError"
+    },
+    "MCPToolExecutionError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpToolExecutionError",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "MCPToolExecutionError",
+      "parent": "McpCallError"
+    },
+    "BetaMCPToolExecutionError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpToolExecutionError",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaMCPToolExecutionError",
+      "parent": "McpCallError"
+    },
+    "HTTPError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpHttpError",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "HTTPError",
+      "parent": "McpCallError"
+    },
+    "BetaHTTPError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpHttpError",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaHTTPError",
+      "parent": "McpCallError"
+    },
+    "UnknownMcpCallError": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownMcpCallError",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": null,
+      "parent": "McpCallError",
+      "note": "Receive-only forward-compatibility fallback with required unknown string discriminator and immutable finite acyclic raw JSON. No upstream component is invented."
+    },
+    "WebhookAgentEnvironmentReady": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentEnvironmentReadyWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "parent": "WebhookAgentSessionEnvelope",
+      "schema": "WebhookAgentEnvironmentReady",
+      "note": "Actual signed environment notification envelope; required id/object/created_at/type/data. Distinct from session SSE. Finite immutable metadata and typed id-only payload; raw-byte verification stays in the existing receiver."
+    },
+    "WebhookAgentEnvironmentFailed": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentEnvironmentFailedWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "parent": "WebhookAgentSessionEnvelope",
+      "schema": "WebhookAgentEnvironmentFailed",
+      "note": "Actual signed environment notification envelope; required id/object/created_at/type/data. Distinct from session SSE. Finite immutable metadata and typed id-only payload; raw-byte verification stays in the existing receiver."
+    },
+    "WebhookAgentEnvironmentSuspended": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentEnvironmentSuspendedWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "parent": "WebhookAgentSessionEnvelope",
+      "schema": "WebhookAgentEnvironmentSuspended",
+      "note": "Actual signed environment notification envelope; required id/object/created_at/type/data. Distinct from session SSE. Finite immutable metadata and typed id-only payload; raw-byte verification stays in the existing receiver."
+    },
+    "WebhookAgentEnvironmentExpired": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentEnvironmentExpiredWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "parent": "WebhookAgentSessionEnvelope",
+      "schema": "WebhookAgentEnvironmentExpired",
+      "note": "Actual signed environment notification envelope; required id/object/created_at/type/data. Distinct from session SSE. Finite immutable metadata and typed id-only payload; raw-byte verification stays in the existing receiver."
+    },
+    "AgentEnvironmentEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WebhookIdData",
+      "file": "lib/src/models/webhooks/webhook_payloads.dart",
+      "schema": "AgentEnvironmentEvent",
+      "note": "Exact wire reuse of the existing required-string id-only notification payload. Source minLength0 adds no stricter ID prefix/length or synthetic lifecycle state. Environment variants share the canonical envelope."
+    },
+    "BetaPromptCacheBreakpointConfig": {
+      "spec": "main",
+      "kind": "object",
+      "schema": "BetaPromptCacheBreakpointConfig",
+      "dart_class": "PromptCacheBreakpointConfig",
+      "file": "lib/src/models/common/prompt_cache_breakpoint.dart",
+      "note": "Actual shared GA/beta request/receive breakpoint object; fixed explicit mode and optional 30m/12h override, as implemented/tested in #415. Not a top-level cache-options alias."
+    },
+    "BetaPromptCacheBreakpointParam": {
+      "spec": "main",
+      "kind": "object",
+      "schema": "BetaPromptCacheBreakpointParam",
+      "dart_class": "PromptCacheBreakpointConfig",
+      "file": "lib/src/models/common/prompt_cache_breakpoint.dart",
+      "note": "Actual shared GA/beta request/receive breakpoint object; fixed explicit mode and optional 30m/12h override, as implemented/tested in #415. Not a top-level cache-options alias."
+    },
+    "PromptCacheBreakpointParam": {
+      "spec": "main",
+      "kind": "object",
+      "schema": "PromptCacheBreakpointParam",
+      "dart_class": "PromptCacheBreakpointConfig",
+      "file": "lib/src/models/common/prompt_cache_breakpoint.dart",
+      "note": "Actual shared GA/beta request/receive breakpoint object; fixed explicit mode and optional 30m/12h override, as implemented/tested in #415. Not a top-level cache-options alias."
+    },
+    "FunctionCallStatusParam": {
+      "spec": "main",
+      "kind": "enum",
+      "schema": "FunctionCallStatusParam",
+      "dart_class": "DecisionToolStatus",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "note": "Actual closed writable Decisions history enum. Unknown request strings reject instead of introducing a writable unknown sentinel. Generic Responses counterpart remains separate."
+    },
+    "MessagePhaseParam": {
+      "spec": "main",
+      "kind": "enum",
+      "schema": "MessagePhaseParam",
+      "dart_class": "DecisionMessagePhase",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "note": "Actual closed writable Decisions history enum. Unknown request strings reject instead of introducing a writable unknown sentinel. Generic Responses counterpart remains separate."
     }
   }
 }

@@ -1,0 +1,192 @@
+{
+  "issue": 427,
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "types": {
+    "BetaPromptCacheBreakpointConfig": {
+      "spec": "main",
+      "kind": "object",
+      "schema": "BetaPromptCacheBreakpointConfig",
+      "dart_class": "PromptCacheBreakpointConfig",
+      "file": "lib/src/models/common/prompt_cache_breakpoint.dart",
+      "note": "Actual shared GA/beta request/receive breakpoint object; fixed explicit mode and optional 30m/12h override, as implemented/tested in #415. Not a top-level cache-options alias."
+    },
+    "BetaPromptCacheBreakpointParam": {
+      "spec": "main",
+      "kind": "object",
+      "schema": "BetaPromptCacheBreakpointParam",
+      "dart_class": "PromptCacheBreakpointConfig",
+      "file": "lib/src/models/common/prompt_cache_breakpoint.dart",
+      "note": "Actual shared GA/beta request/receive breakpoint object; fixed explicit mode and optional 30m/12h override, as implemented/tested in #415. Not a top-level cache-options alias."
+    },
+    "PromptCacheBreakpointParam": {
+      "spec": "main",
+      "kind": "object",
+      "schema": "PromptCacheBreakpointParam",
+      "dart_class": "PromptCacheBreakpointConfig",
+      "file": "lib/src/models/common/prompt_cache_breakpoint.dart",
+      "note": "Actual shared GA/beta request/receive breakpoint object; fixed explicit mode and optional 30m/12h override, as implemented/tested in #415. Not a top-level cache-options alias."
+    },
+    "FunctionCallStatusParam": {
+      "spec": "main",
+      "kind": "enum",
+      "schema": "FunctionCallStatusParam",
+      "dart_class": "DecisionToolStatus",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "note": "Actual closed writable Decisions history enum. Unknown request strings reject instead of introducing a writable unknown sentinel. Generic Responses counterpart remains separate."
+    },
+    "MessagePhaseParam": {
+      "spec": "main",
+      "kind": "enum",
+      "schema": "MessagePhaseParam",
+      "dart_class": "DecisionMessagePhase",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "note": "Actual closed writable Decisions history enum. Unknown request strings reject instead of introducing a writable unknown sentinel. Generic Responses counterpart remains separate."
+    }
+  },
+  "contextual_bindings": [
+    {
+      "schema": "DecisionInputAssistantContentParts",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "dart_context": "PartsDecisionAssistantContent.parts / toJson list",
+      "representation": "Typed immutable array branch, not an invented object DTO. Canonical item unions retained; aggregate request bounds remain service-owned as recorded in #414.",
+      "receipt": "specs/api-alignment-2026-10-31/reviews/14-docs-verification-manifest.json"
+    },
+    {
+      "schema": "DecisionInputDeveloperContentParts",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "dart_context": "PartsDecisionDeveloperContent.parts / toJson list",
+      "representation": "Typed immutable array branch, not an invented object DTO. Canonical item unions retained; aggregate request bounds remain service-owned as recorded in #414.",
+      "receipt": "specs/api-alignment-2026-10-31/reviews/14-docs-verification-manifest.json"
+    },
+    {
+      "schema": "DecisionInputToolOutputContentParts",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "dart_context": "PartsDecisionToolOutput.parts / toJson list",
+      "representation": "Typed immutable array branch, not an invented object DTO. Canonical item unions retained; aggregate request bounds remain service-owned as recorded in #414.",
+      "receipt": "specs/api-alignment-2026-10-31/reviews/14-docs-verification-manifest.json"
+    },
+    {
+      "schema": "DecisionsUsageErrorDetails",
+      "file": "lib/src/utils/http_error_response.dart",
+      "dart_context": "parseHttpErrorResponse / ApiException",
+      "representation": "Error response envelope for GET /organization/usage/decisions, implemented by #426 using the shared concrete HTTP-error layer. Required nullable code/param, message/type, error object or permission string remain caller-readable via fields/raw body. No standalone success/request DTO or strict error-admission parser is invented.",
+      "receipt": "specs/api-alignment-2026-10-31/reviews/14-docs-verification-manifest.json",
+      "cross_ticket_implementation": 457
+    },
+    {
+      "schema": "DecisionsUsageErrorResponse",
+      "file": "lib/src/utils/http_error_response.dart",
+      "dart_context": "parseHttpErrorResponse / ApiException",
+      "representation": "Error response envelope for GET /organization/usage/decisions, implemented by #426 using the shared concrete HTTP-error layer. Required nullable code/param, message/type, error object or permission string remain caller-readable via fields/raw body. No standalone success/request DTO or strict error-admission parser is invented.",
+      "receipt": "specs/api-alignment-2026-10-31/reviews/14-docs-verification-manifest.json",
+      "cross_ticket_implementation": 457
+    },
+    {
+      "schema": "DecisionsUsagePermissionErrorResponse",
+      "file": "lib/src/utils/http_error_response.dart",
+      "dart_context": "parseHttpErrorResponse / ApiException",
+      "representation": "Error response envelope for GET /organization/usage/decisions, implemented by #426 using the shared concrete HTTP-error layer. Required nullable code/param, message/type, error object or permission string remain caller-readable via fields/raw body. No standalone success/request DTO or strict error-admission parser is invented.",
+      "receipt": "specs/api-alignment-2026-10-31/reviews/14-docs-verification-manifest.json",
+      "cross_ticket_implementation": 457
+    },
+    {
+      "schema": "PublicProjectResidency",
+      "disposition": "intentional_exclusion",
+      "reason": "Fifteen project storage/processing settings; project CRUD remains excluded. Four named runtime OpenAI URL choices are not a mapping for this enum.",
+      "receipt": "specs/api-alignment-2026-10-31/reviews/14-docs-verification-manifest.json"
+    },
+    {
+      "schema": "UsageCompletionsResult",
+      "disposition": "intentional_exclusion",
+      "reason": "Conditional older Admin completion-usage change is not applicable: no existing supported completion-usage model or endpoint. Decisions usage implements its own canonical 30-minute write count. Historical Admin remains excluded.",
+      "receipt": "specs/api-alignment-2026-10-31/reviews/14-docs-verification-manifest.json"
+    }
+  ],
+  "inline_contexts": [
+    {
+      "receipt": "specs/api-alignment-2026-10-31/reviews/10-agent-automations-manifest.json",
+      "dart_class": "AgentAutomationList",
+      "schema_context": "listAgentAutomations 200 inline list",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    {
+      "receipt": "specs/api-alignment-2026-10-31/reviews/10-agent-automations-manifest.json",
+      "dart_class": "AgentAutomationInvocationList",
+      "schema_context": "listAgentAutomationInvocations 200 inline list",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    {
+      "receipt": "specs/api-alignment-2026-10-31/reviews/13-admin-delta-manifest.json",
+      "dart_class": "ExternalStorageProviderParams",
+      "schema_context": "CreateExternalStorageBody.provider",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    {
+      "receipt": "specs/api-alignment-2026-10-31/reviews/13-admin-delta-manifest.json",
+      "dart_class": "ExternalStorageProvider",
+      "schema_context": "ExternalStorageResponse.provider",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    {
+      "receipt": "specs/api-alignment-2026-10-31/reviews/13-admin-delta-manifest.json",
+      "dart_class": "ProjectApiKeyOwner",
+      "schema_context": "ProjectApiKey.owner inline optional members",
+      "file": "lib/src/models/admin/project_api_key.dart"
+    }
+  ],
+  "metadata_only_schemas": [
+    "AssistantSupportedModels",
+    "AudioTranscription",
+    "BetaModelIdsShared",
+    "CloseSubagentCallItemResource",
+    "CreateChatCompletionRequest",
+    "CreateModerationRequest",
+    "CreateSpeechRequest",
+    "CreateSubagentCallItemResource",
+    "CreateThreadAndRunRequest",
+    "CreateTranscriptionRequest",
+    "InlineCapabilitySourceParamBase64",
+    "InterruptSubagentCallItemResource",
+    "ModelIdsShared",
+    "ResumeSubagentCallItemResource",
+    "SendSubagentInputCallItemResource",
+    "WaitForSubagentsCallItemResource",
+    "input"
+  ],
+  "removed_manifest_keys": [
+    "LiveTransportDTMFSend",
+    "SessionSpendControlParam",
+    "SessionSpendControlResource"
+  ],
+  "receipt_corrections": [
+    {
+      "receipt": "specs/api-alignment-2026-10-31/reviews/11-image-contracts-manifest.json",
+      "schema": "BetaImageGenOutputTokensDetails",
+      "correction": "Use actual BetaImageGenToolUsage.output_tokens_details runtime binding to responses.ImageGenOutputTokensDetails from #415, rather than an equivalent ordinary Images usage object."
+    }
+  ],
+  "promoted_receipts": [
+    "specs/api-alignment-2026-10-31/reviews/01-decisions-ga-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/02-responses-cache-usage-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/03-responses-websocket-workflows-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/04-websocket-recovery-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/05-custom-voices-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/06-live-decisions-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/07-live-media-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/08-realtime-audio-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/09-agent-settings-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/10-agent-automations-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/11-image-contracts-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/13-admin-delta-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/issue429-reasoning-replay-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/pr443-mcp-output-manifest.json",
+    "specs/api-alignment/reviews/40-environment-webhooks-manifest.json",
+    "specs/api-alignment/reviews/41-browser-recovery-manifest.json"
+  ],
+  "inventory_coverage": {
+    "schemas": 297,
+    "operations": 18,
+    "unaccounted": []
+  },
+  "note": "All dispositions describe the bounded delta. Historical Administration/legacy exclusions and advisory scanner diagnostics remain visible; route filename presence is not method/field parity."
+}

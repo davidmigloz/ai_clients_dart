@@ -24,6 +24,12 @@ final page = url == null ? null : Uri.parse(url);
 `url: null` emits null and `clearUrl: true` removes the key. Existing JSON
 constructors and nonnull URL copies remain available.
 
+## Upcoming release: service and model availability
+
+Review the [README availability guidance](README.md#which-model-ids-and-account-settings-can-i-use)
+and retained API notices before deploying. Library type compatibility does not
+restore a retired service. Model access and account permissions remain server-owned.
+
 ## Upcoming release: Agent environment webhook notifications
 
 Environment notifications now decode to `AgentEnvironmentReadyWebhookEvent`,

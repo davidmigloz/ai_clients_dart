@@ -6,21 +6,23 @@ import 'package:openai_dart/openai_dart.dart';
 
 /// Example demonstrating the Videos API (Sora) for video generation.
 ///
-/// The Videos API allows you to:
+/// The former Videos API supported:
 /// - Generate videos from text prompts using Sora
 /// - Poll for video completion status
 /// - Download video content, thumbnails, and spritesheets
 /// - Remix existing videos with new prompts
 ///
-/// **Note**: Sora access requires special permissions on your OpenAI account.
-/// Video generation can take several minutes and incurs usage costs.
+/// Historical reference: this endpoint is retired. Running this file prints a
+/// notice and makes no API calls.
 ///
-/// To run this example, set the OPENAI_API_KEY environment variable:
-/// ```bash
-/// export OPENAI_API_KEY=your-api-key
-/// dart run example/videos_example.dart
-/// ```
+/// Retained helpers below document the former API for compatibility.
 Future<void> main() async {
+  print('Historical Videos example: this API retired on September 24, 2026.');
+  print('See https://developers.openai.com/api/docs/deprecations.');
+}
+
+/// Historical workflow retained for source reference; not an active endpoint.
+Future<void> historicalVideoWorkflow() async {
   // Create client from environment variables
   final client = OpenAIClient.fromEnvironment();
 

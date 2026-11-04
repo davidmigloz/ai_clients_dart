@@ -1,6 +1,6 @@
-/// Deprecated Assistants API for OpenAI.
+/// Historical Assistants types and independently available Vector Stores.
 ///
-/// **DEPRECATED**: The Assistants API is being phased out by OpenAI.
+/// Assistants, Threads, Messages and Runs retired on August 26, 2026.
 /// Use the Responses API instead: `import 'package:openai_dart/openai_dart.dart'`
 ///
 /// This entry point provides access to:
