@@ -2,6 +2,7 @@
 library;
 
 export 'agent.dart';
+export 'agent_artifact_lookup.dart';
 export 'agent_automation_models.dart';
 export 'agent_automation_requests.dart';
 export 'agent_config.dart';

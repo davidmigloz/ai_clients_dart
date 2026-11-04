@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../models/responses/misalignment_details.dart';
+import '../utils/diagnostic_label.dart';
 import '../utils/monitoring_error_redaction.dart';
 import '../utils/speech_redaction.dart';
 import '../utils/webhooks/signing_secret_redaction.dart';
@@ -80,7 +81,8 @@ class ApiException extends OpenAIException {
   ResponsesMisalignmentDetails? get misalignment =>
       _misalignment ?? _parseMisalignment(body);
 
-  String? _diagnosticField(String? value) => isPrivateAudioResponse(cause)
+  String? _diagnosticField(String? value) =>
+      hasPrivateDiagnostics(this) || isPrivateAudioResponse(cause)
       ? (value == null ? null : '[REDACTED]')
       : redactMonitoringErrorValue(
           redactWebhookSecretErrorValue(value, body),
@@ -354,6 +356,8 @@ class RequestTimeoutException extends OpenAIException {
 
   @override
   String toString() {
+    if (hasPrivateDiagnostics(this))
+      return 'RequestTimeoutException: [REDACTED]';
     if (timeout case final duration?) {
       return 'RequestTimeoutException: $message (after ${duration.inSeconds}s)';
     }
@@ -442,7 +446,9 @@ class AbortedException extends OpenAIException {
 
   @override
   String toString() {
-    if (redactDiagnostics) return 'AbortedException: [REDACTED]';
+    if (redactDiagnostics || hasPrivateDiagnostics(this)) {
+      return 'AbortedException: [REDACTED]';
+    }
     final buffer = StringBuffer('AbortedException: $message');
     final details = <String>[];
     if (stage != null) details.add('stage: ${stage!.name}');
@@ -476,7 +482,9 @@ class ConnectionException extends OpenAIException {
 
   @override
   String toString() {
-    if (redactDiagnostics) return 'ConnectionException: [REDACTED]';
+    if (redactDiagnostics || hasPrivateDiagnostics(this)) {
+      return 'ConnectionException: [REDACTED]';
+    }
     if (url case final u?) {
       return 'ConnectionException: $message (url: $u)';
     }
@@ -501,7 +509,9 @@ class ParseException extends OpenAIException {
   final String? responseBody;
 
   @override
-  String toString() => 'ParseException: $message';
+  String toString() => hasPrivateDiagnostics(this)
+      ? 'ParseException: [REDACTED]'
+      : 'ParseException: $message';
 }
 
 /// Exception thrown when streaming fails.
@@ -526,7 +536,7 @@ class StreamException extends OpenAIException {
 
   @override
   String toString() =>
-      'StreamException: ${redactMonitoringErrorValue(message, null, redact: redactDiagnostics || (partialData != null && redactMonitoringErrorBody(partialData!) != partialData))}';
+      'StreamException: ${redactMonitoringErrorValue(message, null, redact: redactDiagnostics || hasPrivateDiagnostics(this) || (partialData != null && redactMonitoringErrorBody(partialData!) != partialData))}';
 }
 
 /// Creates the appropriate exception based on HTTP status code.

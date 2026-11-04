@@ -42,6 +42,11 @@ export 'src/errors/exceptions.dart';
 export 'src/extensions/extensions.dart';
 // Durable Agent session helpers
 export 'src/helpers/agents/agent_session_run.dart';
+// Agents file helpers
+export 'src/helpers/agents/agent_file_inputs.dart';
+export 'src/helpers/agents/agent_file_preparation.dart';
+export 'src/helpers/agents/agent_files.dart';
+export 'src/helpers/agents/agent_result_artifacts.dart';
 // Live transcript helpers
 export 'src/helpers/live/live_transcript_grouper.dart';
 export 'src/helpers/live/live_transcript_grouping.dart';
