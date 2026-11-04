@@ -2487,10 +2487,7 @@ class ComputerCallOutputItem extends OutputItem {
     this.pendingSafetyChecks,
     this.status,
     this.createdBy,
-  }) : assert(
-         action == null || actions == null,
-         'Only one of action or actions may be set, not both.',
-       );
+  });
 
   /// Creates a [ComputerCallOutputItem] from JSON.
   factory ComputerCallOutputItem.fromJson(Map<String, dynamic> json) {
@@ -2501,7 +2498,7 @@ class ComputerCallOutputItem extends OutputItem {
           ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
           : null,
       callId: json['call_id'] as String,
-      action: !hasActions && json['action'] != null
+      action: json['action'] != null
           ? ComputerAction.fromJson(json['action'] as Map<String, dynamic>)
           : null,
       actions: hasActions

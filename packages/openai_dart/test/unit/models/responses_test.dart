@@ -3900,19 +3900,7 @@ void main() {
       expect(a.hashCode, equals(b.hashCode));
     });
 
-    test('assert fires when both action and actions are set', () {
-      expect(
-        () => ComputerCallOutputItem(
-          id: 'cc_bad',
-          callId: 'call_bad',
-          action: const ClickAction(button: ClickButton.left, x: 0, y: 0),
-          actions: const [ClickAction(button: ClickButton.right, x: 1, y: 1)],
-        ),
-        throwsA(isA<AssertionError>()),
-      );
-    });
-
-    test('fromJson prefers actions over action when both are present', () {
+    test('round-trips both action formats when present', () {
       final json = {
         'type': 'computer_call',
         'id': 'cc_4',
@@ -3921,10 +3909,10 @@ void main() {
         'actions': [
           {'type': 'screenshot'},
         ],
+        'agent': {'agent_name': 'worker'},
+        'created_by': 'actor_1',
       };
-      final item = OutputItem.fromJson(json) as ComputerCallOutputItem;
-      expect(item.action, isNull);
-      expect(item.actions, hasLength(1));
+      expect(OutputItem.fromJson(json).toJson(), json);
     });
   });
 

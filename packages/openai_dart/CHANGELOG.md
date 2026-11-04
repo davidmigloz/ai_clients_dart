@@ -1,3 +1,7 @@
+## Unreleased
+
+- Add Responses computer call input replay and screenshot outputs with safety acknowledgments.
+
 ## 11.0.1
 
 Simplified the README with collapsible usage topics, common Responses API examples first, and an updated example index.

@@ -18,6 +18,7 @@ import '../content/input_content.dart';
 import '../content/output_content.dart';
 import '../multi_agent/agent_tag.dart';
 import '../multi_agent/multi_agent_action.dart';
+import '../tools/computer_action.dart';
 import '../tools/response_tool.dart';
 import '../tools/shell_tool_environment.dart';
 import '../tools/tool_call_caller.dart';
@@ -36,6 +37,8 @@ import 'web_search_result.dart';
 ///
 /// ## Supported Item Types
 ///
+/// - [ComputerCallInputItem] - A computer call replayed as input
+/// - [ComputerCallOutputInputItem] - A computer call screenshot result
 /// - [MessageItem] - A message from a user or assistant
 /// - [FunctionCallItem] - A function call from the model
 /// - [CustomToolCallInputItem] - A custom tool call replayed as input
@@ -71,6 +74,8 @@ sealed class Item {
   factory Item.fromJson(Map<String, dynamic> json) {
     final type = json['type'] as String;
     return switch (type) {
+      'computer_call' => ComputerCallInputItem.fromJson(json),
+      'computer_call_output' => ComputerCallOutputInputItem.fromJson(json),
       'message' => MessageItem.fromJson(json),
       'function_call' => FunctionCallItem.fromJson(json),
       'custom_tool_call' => CustomToolCallInputItem.fromJson(json),
@@ -101,6 +106,7 @@ sealed class Item {
   /// raw output replay for arbitrary returned search arguments.
   factory Item.fromResourceJson(Map<String, dynamic> json) =>
       switch (json['type']) {
+        'computer_call_output' => ComputerCallOutputResourceItem.fromJson(json),
         'configuration_update' => ConfigurationUpdateItemResponse.fromJson(
           json,
         ),
@@ -113,6 +119,455 @@ sealed class Item {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson();
+}
+
+/// A computer call replayed in Responses input history.
+@immutable
+class ComputerCallInputItem extends Item {
+  /// The fixed item discriminator.
+  String get type => 'computer_call';
+
+  /// Agent metadata on the beta multi-agent protocol.
+  final AgentTag? agent;
+
+  /// The call item ID.
+  final String id;
+
+  /// The ID used to associate the result with this call.
+  final String callId;
+
+  /// The legacy single action, when present.
+  final ComputerAction? action;
+
+  /// Ordered batched actions, when present.
+  final List<ComputerAction>? actions;
+
+  /// Safety checks returned with the call.
+  final List<Map<String, dynamic>> pendingSafetyChecks;
+
+  /// The call status.
+  final ItemStatus status;
+
+  /// Creates a computer call input item.
+  const ComputerCallInputItem({
+    required this.id,
+    this.agent,
+    required this.callId,
+    this.action,
+    this.actions,
+    required this.pendingSafetyChecks,
+    required this.status,
+  });
+
+  /// Parses a computer call input item.
+  factory ComputerCallInputItem.fromJson(Map<String, dynamic> json) {
+    requireJsonType(json, 'computer_call', 'ComputerCallInputItem');
+    return ComputerCallInputItem(
+      id: json['id'] as String,
+      agent: json['agent'] == null
+          ? null
+          : AgentTag.fromJson(json['agent'] as Map<String, dynamic>),
+      callId: json['call_id'] as String,
+      action: json['action'] == null
+          ? null
+          : ComputerAction.fromJson(json['action'] as Map<String, dynamic>),
+      actions: (json['actions'] as List?)
+          ?.map((e) => ComputerAction.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      pendingSafetyChecks: (json['pending_safety_checks'] as List)
+          .map((e) => e as Map<String, dynamic>)
+          .toList(),
+      status: ItemStatus.fromJson(json['status'] as String),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    if (agent != null) 'agent': agent!.toJson(),
+    'call_id': callId,
+    if (action != null) 'action': action!.toJson(),
+    if (actions != null) 'actions': actions!.map((e) => e.toJson()).toList(),
+    'pending_safety_checks': pendingSafetyChecks,
+    'status': status.toJson(),
+  };
+
+  /// Copies the item; explicit null clears optional fields.
+  ComputerCallInputItem copyWith({
+    String? id,
+    Object? agent = unsetCopyWithValue,
+    String? callId,
+    Object? action = unsetCopyWithValue,
+    Object? actions = unsetCopyWithValue,
+    List<Map<String, dynamic>>? pendingSafetyChecks,
+    ItemStatus? status,
+  }) => ComputerCallInputItem(
+    id: id ?? this.id,
+    agent: identical(agent, unsetCopyWithValue)
+        ? this.agent
+        : agent as AgentTag?,
+    callId: callId ?? this.callId,
+    action: identical(action, unsetCopyWithValue)
+        ? this.action
+        : action as ComputerAction?,
+    actions: identical(actions, unsetCopyWithValue)
+        ? this.actions
+        : actions as List<ComputerAction>?,
+    pendingSafetyChecks: pendingSafetyChecks ?? this.pendingSafetyChecks,
+    status: status ?? this.status,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ComputerCallInputItem &&
+          id == other.id &&
+          agent == other.agent &&
+          callId == other.callId &&
+          action == other.action &&
+          listsEqual(actions, other.actions) &&
+          listOfMapsDeepEqual(pendingSafetyChecks, other.pendingSafetyChecks) &&
+          status == other.status;
+  @override
+  int get hashCode => Object.hash(
+    id,
+    agent,
+    callId,
+    action,
+    listHash(actions),
+    listOfMapsHashCode(pendingSafetyChecks),
+    status,
+  );
+}
+
+/// A safety check acknowledged by the developer.
+@immutable
+class ComputerSafetyCheck {
+  /// The ID of the safety check.
+  final String id;
+
+  /// The type of safety check.
+  final String? code;
+
+  /// Details about the safety check.
+  final String? message;
+
+  /// Creates a safety check.
+  const ComputerSafetyCheck({required this.id, this.code, this.message});
+
+  /// Parses a safety check.
+  factory ComputerSafetyCheck.fromJson(Map<String, dynamic> json) =>
+      ComputerSafetyCheck(
+        id: json['id'] as String,
+        code: json['code'] as String?,
+        message: json['message'] as String?,
+      );
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    if (code != null) 'code': code,
+    if (message != null) 'message': message,
+  };
+
+  /// Copies the check; explicit null clears optional fields.
+  ComputerSafetyCheck copyWith({
+    String? id,
+    Object? code = unsetCopyWithValue,
+    Object? message = unsetCopyWithValue,
+  }) => ComputerSafetyCheck(
+    id: id ?? this.id,
+    code: identical(code, unsetCopyWithValue) ? this.code : code as String?,
+    message: identical(message, unsetCopyWithValue)
+        ? this.message
+        : message as String?,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ComputerSafetyCheck &&
+          id == other.id &&
+          code == other.code &&
+          message == other.message;
+  @override
+  int get hashCode => Object.hash(id, code, message);
+}
+
+/// A screenshot result for a computer call.
+@immutable
+class ComputerCallOutputInputItem extends Item {
+  /// The fixed item discriminator.
+  String get type => 'computer_call_output';
+
+  /// Agent metadata on the beta multi-agent protocol.
+  final AgentTag? agent;
+
+  /// The ID of the call being answered.
+  final String callId;
+
+  /// The screenshot captured after the actions.
+  final ComputerScreenshotContent output;
+
+  /// Optional item ID.
+  final String? id;
+
+  /// Safety checks acknowledged by the developer.
+  final List<ComputerSafetyCheck>? acknowledgedSafetyChecks;
+
+  /// Status, when returned by the input-items resource.
+  final ItemStatus? status;
+
+  /// Creates a computer call result.
+  const ComputerCallOutputInputItem({
+    required this.callId,
+    required this.output,
+    this.agent,
+    this.id,
+    this.acknowledgedSafetyChecks,
+    this.status,
+  });
+
+  /// Parses a computer call result.
+  factory ComputerCallOutputInputItem.fromJson(Map<String, dynamic> json) {
+    requireJsonType(
+      json,
+      'computer_call_output',
+      'ComputerCallOutputInputItem',
+    );
+    final output = json['output'] as Map<String, dynamic>;
+    requireJsonType(
+      output,
+      'computer_screenshot',
+      'ComputerCallOutputInputItem.output',
+    );
+    return ComputerCallOutputInputItem(
+      callId: json['call_id'] as String,
+      output: ComputerScreenshotContent.fromJson(output),
+      agent: json['agent'] == null
+          ? null
+          : AgentTag.fromJson(json['agent'] as Map<String, dynamic>),
+      id: json['id'] as String?,
+      acknowledgedSafetyChecks: (json['acknowledged_safety_checks'] as List?)
+          ?.map((e) => ComputerSafetyCheck.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      status: json['status'] == null
+          ? null
+          : ItemStatus.fromJson(json['status'] as String),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'call_id': callId,
+    if (agent != null) 'agent': agent!.toJson(),
+    'output': output.toJson(),
+    if (id != null) 'id': id,
+    if (acknowledgedSafetyChecks != null)
+      'acknowledged_safety_checks': acknowledgedSafetyChecks!
+          .map((e) => e.toJson())
+          .toList(),
+    if (status != null) 'status': status!.toJson(),
+  };
+
+  /// Copies the item; explicit null clears optional fields.
+  ComputerCallOutputInputItem copyWith({
+    String? callId,
+    ComputerScreenshotContent? output,
+    Object? id = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
+    Object? acknowledgedSafetyChecks = unsetCopyWithValue,
+    Object? status = unsetCopyWithValue,
+  }) => ComputerCallOutputInputItem(
+    callId: callId ?? this.callId,
+    output: output ?? this.output,
+    id: identical(id, unsetCopyWithValue) ? this.id : id as String?,
+    agent: identical(agent, unsetCopyWithValue)
+        ? this.agent
+        : agent as AgentTag?,
+    acknowledgedSafetyChecks:
+        identical(acknowledgedSafetyChecks, unsetCopyWithValue)
+        ? this.acknowledgedSafetyChecks
+        : acknowledgedSafetyChecks as List<ComputerSafetyCheck>?,
+    status: identical(status, unsetCopyWithValue)
+        ? this.status
+        : status as ItemStatus?,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ComputerCallOutputInputItem &&
+          callId == other.callId &&
+          output == other.output &&
+          id == other.id &&
+          agent == other.agent &&
+          listsEqual(
+            acknowledgedSafetyChecks,
+            other.acknowledgedSafetyChecks,
+          ) &&
+          status == other.status;
+  @override
+  int get hashCode => Object.hash(
+    callId,
+    output,
+    id,
+    agent,
+    listHash(acknowledgedSafetyChecks),
+    status,
+  );
+}
+
+/// A computer call output returned by the input-items resource.
+@immutable
+class ComputerCallOutputResourceItem extends Item {
+  /// Agent metadata on the beta multi-agent protocol.
+  final AgentTag? agent;
+
+  /// ID of the stored output item.
+  final String id;
+
+  /// ID of the call being answered.
+  final String callId;
+
+  /// Screenshot captured after the actions.
+  final ComputerScreenshotOutputContent output;
+
+  /// Status of the stored item.
+  final ItemStatus status;
+
+  /// Safety checks acknowledged by the developer.
+  final List<ComputerSafetyCheck>? acknowledgedSafetyChecks;
+
+  /// Identifier of the actor that created the item.
+  final String? createdBy;
+
+  /// Creates a stored computer call result.
+  const ComputerCallOutputResourceItem({
+    required this.id,
+    required this.callId,
+    required this.output,
+    required this.status,
+    this.agent,
+    this.acknowledgedSafetyChecks,
+    this.createdBy,
+  });
+
+  /// Parses a stored computer call result.
+  factory ComputerCallOutputResourceItem.fromJson(Map<String, dynamic> json) {
+    requireJsonType(
+      json,
+      'computer_call_output',
+      'ComputerCallOutputResourceItem',
+    );
+    final output = json['output'] as Map<String, dynamic>;
+    requireJsonType(
+      output,
+      'computer_screenshot',
+      'ComputerCallOutputResourceItem.output',
+    );
+    return ComputerCallOutputResourceItem(
+      id: json['id'] as String,
+      callId: json['call_id'] as String,
+      output: ComputerScreenshotOutputContent.fromJson(output),
+      agent: json['agent'] == null
+          ? null
+          : AgentTag.fromJson(json['agent'] as Map<String, dynamic>),
+      status: ItemStatus.fromJson(json['status'] as String),
+      acknowledgedSafetyChecks: (json['acknowledged_safety_checks'] as List?)
+          ?.map((e) => ComputerSafetyCheck.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      createdBy: json['created_by'] as String?,
+    );
+  }
+
+  /// Converts the stored result to writable input.
+  ///
+  /// Throws [StateError] when the returned screenshot has no asset reference.
+  ComputerCallOutputInputItem toInputItem() {
+    if (output.imageUrl == null && output.fileId == null) {
+      throw StateError(
+        'Cannot replay a computer screenshot without an image URL or file ID',
+      );
+    }
+    return ComputerCallOutputInputItem(
+      id: id,
+      callId: callId,
+      output: ComputerScreenshotContent(
+        imageUrl: output.imageUrl,
+        fileId: output.fileId,
+        detail: output.detail,
+        promptCacheBreakpoint: output.promptCacheBreakpoint,
+      ),
+      agent: agent,
+      acknowledgedSafetyChecks: acknowledgedSafetyChecks,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'computer_call_output',
+    'id': id,
+    'call_id': callId,
+    'output': output.toJson(),
+    'status': status.toJson(),
+    if (agent != null) 'agent': agent!.toJson(),
+    if (acknowledgedSafetyChecks != null)
+      'acknowledged_safety_checks': acknowledgedSafetyChecks!
+          .map((e) => e.toJson())
+          .toList(),
+    if (createdBy != null) 'created_by': createdBy,
+  };
+
+  /// Copies the item; explicit null clears optional metadata.
+  ComputerCallOutputResourceItem copyWith({
+    String? id,
+    String? callId,
+    ComputerScreenshotOutputContent? output,
+    ItemStatus? status,
+    Object? agent = unsetCopyWithValue,
+    Object? acknowledgedSafetyChecks = unsetCopyWithValue,
+    Object? createdBy = unsetCopyWithValue,
+  }) => ComputerCallOutputResourceItem(
+    id: id ?? this.id,
+    callId: callId ?? this.callId,
+    output: output ?? this.output,
+    status: status ?? this.status,
+    agent: identical(agent, unsetCopyWithValue)
+        ? this.agent
+        : agent as AgentTag?,
+    acknowledgedSafetyChecks:
+        identical(acknowledgedSafetyChecks, unsetCopyWithValue)
+        ? this.acknowledgedSafetyChecks
+        : acknowledgedSafetyChecks as List<ComputerSafetyCheck>?,
+    createdBy: identical(createdBy, unsetCopyWithValue)
+        ? this.createdBy
+        : createdBy as String?,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ComputerCallOutputResourceItem &&
+          id == other.id &&
+          callId == other.callId &&
+          output == other.output &&
+          status == other.status &&
+          agent == other.agent &&
+          listsEqual(
+            acknowledgedSafetyChecks,
+            other.acknowledgedSafetyChecks,
+          ) &&
+          createdBy == other.createdBy;
+  @override
+  int get hashCode => Object.hash(
+    id,
+    callId,
+    output,
+    status,
+    agent,
+    listHash(acknowledgedSafetyChecks),
+    createdBy,
+  );
 }
 
 /// A web search call retained in Responses input history.

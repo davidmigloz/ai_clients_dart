@@ -9,6 +9,9 @@ enum ItemStatus {
   /// Item is completed.
   completed('completed'),
 
+  /// Item failed.
+  failed('failed'),
+
   /// Item is incomplete.
   incomplete('incomplete');
 
