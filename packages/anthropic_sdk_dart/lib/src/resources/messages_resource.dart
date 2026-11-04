@@ -86,7 +86,7 @@ class MessagesResource extends ResourceBase with StreamingResource {
     Future<void>? abortTrigger,
     List<String> betas = const [],
     String? userProfileId,
-  }) async* {
+  }) {
     final body = request.toJson();
     body['stream'] = true;
 
@@ -97,9 +97,7 @@ class MessagesResource extends ResourceBase with StreamingResource {
       abortTrigger: abortTrigger,
     );
 
-    await for (final event in eventStream) {
-      yield MessageStreamEvent.fromJson(event);
-    }
+    return eventStream.map(MessageStreamEvent.fromJson);
   }
 
   /// Counts the number of tokens in a message.

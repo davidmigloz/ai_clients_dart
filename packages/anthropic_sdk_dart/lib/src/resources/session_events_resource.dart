@@ -138,7 +138,7 @@ class SessionEventsResource extends ResourceBase with StreamingResource {
     String? lastEventId,
     List<String>? eventDeltas,
     Future<void>? abortTrigger,
-  }) async* {
+  }) {
     final queryParams = <String, dynamic>{
       'last_event_id': ?lastEventId,
       'event_deltas[]': ?eventDeltas,
@@ -151,8 +151,6 @@ class SessionEventsResource extends ResourceBase with StreamingResource {
       abortTrigger: abortTrigger,
     );
 
-    await for (final event in eventStream) {
-      yield SessionEvent.fromJson(event);
-    }
+    return eventStream.map(SessionEvent.fromJson);
   }
 }

@@ -16,67 +16,23 @@ mixin StreamingResource on ResourceBase {
   /// Makes a streaming POST request.
   ///
   /// Returns a stream of parsed SSE events as JSON maps.
-  /// The optional [abortTrigger] allows canceling the stream.
+  /// The optional [abortTrigger] cancels the request and closes the stream.
+  /// Transport cancellation depends on support from the supplied HTTP client;
+  /// it does not guarantee the server has stopped processing the request.
   Stream<Map<String, dynamic>> postStream(
     String path, {
     required Map<String, dynamic> body,
     Map<String, dynamic>? queryParams,
     Map<String, String>? headers,
     Future<void>? abortTrigger,
-  }) async* {
-    ensureNotClosed?.call();
-    final uri = requestBuilder.buildUrl(path, queryParams: queryParams);
-    final request = http.Request('POST', uri)
-      ..headers.addAll(requestBuilder.buildHeaders(additionalHeaders: headers))
-      ..body = jsonEncode(body);
-
-    // Add authentication header if auth provider is configured
-    await _applyAuthentication(request);
-
-    final correlationId =
-        request.headers['X-Request-ID'] ?? generateRequestId();
-
-    // Send the request
-    final streamedResponse = await httpClient.send(request);
-
-    // Check for errors
-    if (streamedResponse.statusCode >= 400) {
-      final responseBody = await streamedResponse.stream.bytesToString();
-      throw _createStreamException(
-        streamedResponse.statusCode,
-        responseBody,
-        correlationId,
-      );
-    }
-
-    // Parse SSE stream
-    final parser = SseParser();
-    final eventStream = parser.parse(streamedResponse.stream);
-
-    // Handle abort during streaming
-    if (abortTrigger != null) {
-      var aborted = false;
-
-      // Listen for abort signal
-      abortTrigger.then((_) {
-        aborted = true;
-      }).ignore();
-
-      await for (final event in eventStream) {
-        if (aborted) {
-          throw AbortedException(
-            message: 'Stream aborted by user',
-            correlationId: correlationId,
-            timestamp: DateTime.now(),
-            stage: AbortionStage.duringStream,
-          );
-        }
-        yield event;
-      }
-    } else {
-      yield* eventStream;
-    }
-  }
+  }) => _stream(
+    'POST',
+    path,
+    body: body,
+    queryParams: queryParams,
+    headers: headers,
+    abortTrigger: abortTrigger,
+  );
 
   /// Creates an exception for streaming errors.
   AnthropicException _createStreamException(
@@ -140,64 +96,147 @@ mixin StreamingResource on ResourceBase {
   /// Makes a streaming GET request.
   ///
   /// Returns a stream of parsed SSE events as JSON maps.
-  /// The optional [abortTrigger] allows canceling the stream.
+  /// The optional [abortTrigger] cancels the request and closes the stream.
+  /// Transport cancellation depends on support from the supplied HTTP client;
+  /// it does not guarantee the server has stopped processing the request.
   Stream<Map<String, dynamic>> getStream(
     String path, {
     Map<String, dynamic>? queryParams,
     Map<String, String>? headers,
     Future<void>? abortTrigger,
-  }) async* {
-    ensureNotClosed?.call();
-    final uri = requestBuilder.buildUrl(path, queryParams: queryParams);
-    final request = http.Request('GET', uri)
-      ..headers.addAll(requestBuilder.buildHeaders(additionalHeaders: headers));
+  }) => _stream(
+    'GET',
+    path,
+    queryParams: queryParams,
+    headers: headers,
+    abortTrigger: abortTrigger,
+  );
 
-    // Add authentication header if auth provider is configured
-    await _applyAuthentication(request);
+  Stream<Map<String, dynamic>> _stream(
+    String method,
+    String path, {
+    Map<String, dynamic>? body,
+    Map<String, dynamic>? queryParams,
+    Map<String, String>? headers,
+    Future<void>? abortTrigger,
+  }) {
+    final requestAbort = Completer<void>();
+    // Canceled by stop when the stream terminates or its listener cancels.
+    // ignore: cancel_subscriptions
+    StreamSubscription<dynamic>? subscription;
+    StreamSubscription<List<int>>? bodySubscription;
+    StreamController<List<int>>? bytesController;
+    var correlationId = generateRequestId();
+    var stopped = false;
+    late StreamController<Map<String, dynamic>> controller;
 
-    final correlationId =
-        request.headers['X-Request-ID'] ?? generateRequestId();
-
-    // Send the request
-    final streamedResponse = await httpClient.send(request);
-
-    // Check for errors
-    if (streamedResponse.statusCode >= 400) {
-      final responseBody = await streamedResponse.stream.bytesToString();
-      throw _createStreamException(
-        streamedResponse.statusCode,
-        responseBody,
-        correlationId,
-      );
+    void stop() {
+      stopped = true;
+      if (!requestAbort.isCompleted) requestAbort.complete();
+      final current = subscription;
+      if (current != null) unawaited(current.cancel());
+      final body = bodySubscription;
+      if (body != null) unawaited(body.cancel());
+      final bytes = bytesController;
+      if (bytes != null && !bytes.isClosed) unawaited(bytes.close());
     }
 
-    // Parse SSE stream
-    final parser = SseParser();
-    final eventStream = parser.parse(streamedResponse.stream);
-
-    // Handle abort during streaming
-    if (abortTrigger != null) {
-      var aborted = false;
-
-      // Listen for abort signal
-      abortTrigger.then((_) {
-        aborted = true;
-      }).ignore();
-
-      await for (final event in eventStream) {
-        if (aborted) {
-          throw AbortedException(
-            message: 'Stream aborted by user',
-            correlationId: correlationId,
-            timestamp: DateTime.now(),
-            stage: AbortionStage.duringStream,
-          );
+    Future<void> run() async {
+      try {
+        ensureNotClosed?.call();
+        final uri = requestBuilder.buildUrl(path, queryParams: queryParams);
+        final request =
+            http.AbortableRequest(
+                method,
+                uri,
+                abortTrigger: requestAbort.future,
+              )
+              ..headers.addAll(
+                requestBuilder.buildHeaders(additionalHeaders: headers),
+              );
+        if (body != null) request.body = jsonEncode(body);
+        await _applyAuthentication(request);
+        if (stopped) return;
+        correlationId = request.headers['X-Request-ID'] ?? correlationId;
+        final response = await httpClient.send(request);
+        if (stopped) {
+          await response.stream.listen(null).cancel();
+          return;
         }
-        yield event;
+        if (response.statusCode >= 400) {
+          final responseBody = StringBuffer();
+          subscription = response.stream
+              .transform(utf8.decoder)
+              .listen(
+                responseBody.write,
+                onError: controller.addError,
+                onDone: () {
+                  controller.addError(
+                    _createStreamException(
+                      response.statusCode,
+                      responseBody.toString(),
+                      correlationId,
+                    ),
+                  );
+                  unawaited(controller.close());
+                },
+              );
+        } else {
+          late StreamController<List<int>> bytes;
+          bytes = StreamController<List<int>>(
+            onListen: () {
+              bodySubscription = response.stream.listen(
+                bytes.add,
+                onError: bytes.addError,
+                onDone: () => unawaited(bytes.close()),
+              );
+            },
+            onPause: () => bodySubscription?.pause(),
+            onResume: () => bodySubscription?.resume(),
+            onCancel: () => bodySubscription?.cancel(),
+          );
+          bytesController = bytes;
+          subscription = SseParser()
+              .parse(bytes.stream)
+              .listen(
+                controller.add,
+                onError: controller.addError,
+                onDone: () => unawaited(controller.close()),
+              );
+        }
+        if (controller.isPaused) subscription?.pause();
+      } catch (error, stackTrace) {
+        if (!stopped) {
+          controller.addError(error, stackTrace);
+          unawaited(controller.close());
+        }
       }
-    } else {
-      yield* eventStream;
     }
+
+    controller = StreamController<Map<String, dynamic>>(
+      onListen: () {
+        unawaited(
+          abortTrigger?.then((_) {
+            if (stopped) return;
+            stop();
+            controller.addError(
+              AbortedException(
+                message: 'Stream aborted by user',
+                correlationId: correlationId,
+                timestamp: DateTime.now(),
+                stage: AbortionStage.duringStream,
+              ),
+            );
+            unawaited(controller.close());
+          }, onError: (Object _, StackTrace stackTrace) {}),
+        );
+        unawaited(run());
+      },
+      onPause: () => subscription?.pause(),
+      onResume: () => subscription?.resume(),
+      onCancel: stop,
+    );
+    return controller.stream;
   }
 
   /// Applies authentication to a request.
