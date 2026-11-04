@@ -12,7 +12,6 @@ import '../models/interactions/response_formats/response_formats.dart';
 import '../models/interactions/response_modality.dart';
 import '../models/interactions/tools/tools.dart';
 import '../models/interactions/webhook_config.dart';
-import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
 import 'streaming_resource.dart';
 
@@ -207,6 +206,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   /// Creates a streaming interaction.
   ///
   /// Returns a stream of [InteractionEvent]s as the model generates the response.
+  /// The optional [abortTrigger] allows canceling the request and response stream.
   Stream<InteractionEvent> createStream({
     required String model,
     InteractionInput? input,
@@ -218,80 +218,78 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     InteractionResponseFormatConfig? responseFormat,
     String? previousInteractionId,
     EnvironmentConfigOrId? environment,
-  }) async* {
-    final url = requestBuilder.buildUrl(
-      '/{version}/interactions',
-      queryParams: {'alt': 'sse'},
+    Future<void>? abortTrigger,
+  }) {
+    return streamRequest(
+      createRequest: () {
+        final url = requestBuilder.buildUrl(
+          '/{version}/interactions',
+          queryParams: {'alt': 'sse'},
+        );
+
+        final headers = _buildHeaders(const {
+          'Content-Type': 'application/json',
+        });
+
+        final body = <String, dynamic>{
+          'model': model,
+          'stream': true,
+          if (input != null) 'input': input.toJson(),
+          'system_instruction': ?systemInstruction,
+          if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
+          if (generationConfig != null)
+            'generation_config': generationConfig.toJson(),
+          if (responseModalities != null)
+            'response_modalities': responseModalities
+                .map(interactionResponseModalityToString)
+                .toList(),
+          'response_mime_type': ?responseMimeType,
+          if (responseFormat != null)
+            'response_format': responseFormat.toJson(),
+          'previous_interaction_id': ?previousInteractionId,
+          if (environment != null) 'environment': environment.toJson(),
+        };
+
+        final httpRequest = http.Request('POST', url)
+          ..headers.addAll(headers)
+          ..body = jsonEncode(body);
+        return httpRequest;
+      },
+      abortTrigger: abortTrigger,
+      fromJson: InteractionEvent.fromJson,
     );
-
-    final headers = _buildHeaders(const {'Content-Type': 'application/json'});
-
-    final body = <String, dynamic>{
-      'model': model,
-      'stream': true,
-      if (input != null) 'input': input.toJson(),
-      'system_instruction': ?systemInstruction,
-      if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
-      if (generationConfig != null)
-        'generation_config': generationConfig.toJson(),
-      if (responseModalities != null)
-        'response_modalities': responseModalities
-            .map(interactionResponseModalityToString)
-            .toList(),
-      'response_mime_type': ?responseMimeType,
-      if (responseFormat != null) 'response_format': responseFormat.toJson(),
-      'previous_interaction_id': ?previousInteractionId,
-      if (environment != null) 'environment': environment.toJson(),
-    };
-
-    var httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(body);
-
-    // Use mixin methods for streaming request handling
-    httpRequest = await prepareStreamingRequest(httpRequest);
-    final streamedResponse = await sendStreamingRequest(httpRequest);
-
-    final lineStream = bytesToLines(streamedResponse.stream);
-    final jsonStream = parseSSE(lineStream);
-
-    await for (final json in jsonStream) {
-      yield InteractionEvent.fromJson(json);
-    }
   }
 
   /// Resumes a streaming interaction from a specific event.
   ///
   /// The [lastEventId] is used to resume from the next event after the one
-  /// with that ID.
+  /// with that ID. The optional [abortTrigger] allows canceling the request
+  /// and response stream.
   Stream<InteractionEvent> resumeStream(
     String id, {
     String? lastEventId,
-  }) async* {
-    final queryParams = <String, String>{
-      'stream': 'true',
-      'alt': 'sse',
-      'last_event_id': ?lastEventId,
-    };
+    Future<void>? abortTrigger,
+  }) {
+    return streamRequest(
+      createRequest: () {
+        final queryParams = <String, String>{
+          'stream': 'true',
+          'alt': 'sse',
+          'last_event_id': ?lastEventId,
+        };
 
-    final url = requestBuilder.buildUrl(
-      '/{version}/interactions/$id',
-      queryParams: queryParams,
+        final url = requestBuilder.buildUrl(
+          '/{version}/interactions/$id',
+          queryParams: queryParams,
+        );
+
+        final headers = _buildHeaders();
+
+        final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+        return httpRequest;
+      },
+      abortTrigger: abortTrigger,
+      fromJson: InteractionEvent.fromJson,
     );
-
-    final headers = _buildHeaders();
-
-    var httpRequest = http.Request('GET', url)..headers.addAll(headers);
-
-    // Use mixin methods for streaming request handling
-    httpRequest = await prepareStreamingRequest(httpRequest);
-    final streamedResponse = await sendStreamingRequest(httpRequest);
-
-    final lineStream = bytesToLines(streamedResponse.stream);
-    final jsonStream = parseSSE(lineStream);
-
-    await for (final json in jsonStream) {
-      yield InteractionEvent.fromJson(json);
-    }
   }
 }

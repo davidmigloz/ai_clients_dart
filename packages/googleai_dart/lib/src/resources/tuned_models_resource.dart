@@ -10,8 +10,6 @@ import '../models/generation/generate_content_response.dart';
 import '../models/models/list_tuned_models_response.dart';
 import '../models/models/operation.dart';
 import '../models/models/tuned_model.dart';
-import '../utils/request_id.dart';
-import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
 import 'operations_resource.dart';
 import 'permissions_resource.dart';
@@ -101,60 +99,35 @@ class TunedModelsResource extends ResourceBase with StreamingResource {
     required String tunedModel,
     required GenerateContentRequest request,
     Future<void>? abortTrigger,
-  }) async* {
-    // Build URL and headers
-    final url = requestBuilder.buildUrl(
-      '/{version}/tunedModels/$tunedModel:streamGenerateContent',
-      queryParams: {'alt': 'sse'},
-    );
+  }) {
+    return streamRequest(
+      createRequest: () {
+        // Build URL and headers
+        final url = requestBuilder.buildUrl(
+          '/{version}/tunedModels/$tunedModel:streamGenerateContent',
+          queryParams: {'alt': 'sse'},
+        );
 
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
-    );
+        final headers = requestBuilder.buildHeaders(
+          additionalHeaders: {'Content-Type': 'application/json'},
+        );
 
-    // Create request
-    var httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
-
-    // Use mixin methods for streaming request handling
-    httpRequest = await prepareStreamingRequest(httpRequest);
-    final streamedResponse = await sendStreamingRequest(httpRequest);
-
-    // Parse SSE stream
-    final lineStream = bytesToLines(streamedResponse.stream);
-    final jsonStream = parseSSE(lineStream);
-
-    // Get request ID for abortion tracking
-    final requestId =
-        httpRequest.headers['X-Request-ID'] ?? generateRequestId();
-
-    if (abortTrigger != null) {
-      // Monitor abort trigger during streaming
-      yield* streamWithAbortMonitoring(
-        source: jsonStream,
-        abortTrigger: abortTrigger,
-        requestId: requestId,
-        fromJson: (json) {
-          final sseEvent = json['_event'] as String?;
-          final error = json['error'];
-          if (sseEvent == 'error' || error != null) {
-            throwInlineStreamError(json, sseEvent, error);
-          }
-          return GenerateContentResponse.fromJson(json);
-        },
-      );
-    } else {
-      // No abort trigger, stream normally
-      await for (final json in jsonStream) {
+        // Create request
+        final httpRequest = http.Request('POST', url)
+          ..headers.addAll(headers)
+          ..body = jsonEncode(request.toJson());
+        return httpRequest;
+      },
+      abortTrigger: abortTrigger,
+      fromJson: (json) {
         final sseEvent = json['_event'] as String?;
         final error = json['error'];
         if (sseEvent == 'error' || error != null) {
           throwInlineStreamError(json, sseEvent, error);
         }
-        yield GenerateContentResponse.fromJson(json);
-      }
-    }
+        return GenerateContentResponse.fromJson(json);
+      },
+    );
   }
 
   /// Creates a batch of generate content requests using a tuned model.
