@@ -1,0 +1,126 @@
+{
+  "issue": 415,
+  "completion_owner": 427,
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "types": {
+    "LiveInputPromptCacheBreakpointConfig": {
+      "spec": "main",
+      "schema": "PromptCacheBreakpointConfig",
+      "dart_class": "LiveInputPromptCacheBreakpointConfig",
+      "kind": "object",
+      "file": "lib/src/models/live/live_input_item.dart",
+      "note": "Actual existing Live InputItem closure component; current typed fields, presence/copy and canonical writable validation."
+    },
+    "LiveInputPromptCacheBreakpointParam": {
+      "spec": "main",
+      "schema": "PromptCacheBreakpointParam",
+      "dart_class": "LiveInputPromptCacheBreakpointParam",
+      "kind": "object",
+      "file": "lib/src/models/live/live_input_item.dart",
+      "note": "Actual existing Live InputItem closure component; current typed fields, presence/copy and canonical writable validation."
+    },
+    "LiveInputWebSearchActionFind": {
+      "spec": "main",
+      "schema": "WebSearchActionFind",
+      "dart_class": "LiveInputWebSearchActionFind",
+      "kind": "object",
+      "file": "lib/src/models/live/live_input_item.dart",
+      "note": "Actual existing Live InputItem closure component; current typed fields, presence/copy and canonical writable validation."
+    }
+  },
+  "canonical_component_sha256": {
+    "PromptCacheBreakpointConfig": "e5323af946f403f8c8031574818ac8d1defd0ce69e87fd62f1f3a274602ab6e6",
+    "PromptCacheBreakpointParam": "e5323af946f403f8c8031574818ac8d1defd0ce69e87fd62f1f3a274602ab6e6",
+    "WebSearchActionFind": "b271fa343af70b0229cf7c9a3627a3f0c9b8f8b3ffd38a550d536d5152c11244"
+  },
+  "sdk_sources": [
+    {
+      "sdk": "node",
+      "commit": "c717857c3151bde92e07e4d396301a9c67163e68",
+      "file": "src/resources/responses/responses.ts",
+      "sha256": "f84e394bf08d71403c054ccb4d41d278861f2d19db3ea426e7aec789f3eb5dbb"
+    },
+    {
+      "sdk": "python",
+      "commit": "0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f",
+      "file": "src/openai/types/responses/response_input_text.py",
+      "sha256": "fff0cfbde004cb1e530ec18fa2ab45f0bdb53cf12f17d94aeae77c990af65e9b"
+    },
+    {
+      "sdk": "python",
+      "commit": "0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f",
+      "file": "src/openai/types/responses/response_input_text_param.py",
+      "sha256": "e9619446166e7312ddbe46246dc054d781486a40cbef804bf4103ff2bb2a030c"
+    },
+    {
+      "sdk": "python",
+      "commit": "0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f",
+      "file": "src/openai/types/responses/response_function_web_search.py",
+      "sha256": "e774fa2fdbdd90914c202108e671c896021fe6b9d6c3b2d9822ee9390befe573"
+    }
+  ],
+  "sdk_discrepancy": "Pinned Node/Python ActionFind still require string url; fixed canonical explicitly makes it optional nullable. Canonical controls this existing Live context, matching the already aligned general Dart find action.",
+  "validation_closure_audit": [
+    {
+      "schema": "ImageGenTool",
+      "validation_shape_equivalent": true
+    },
+    {
+      "schema": "ImageGenToolCall",
+      "validation_shape_equivalent": true
+    },
+    {
+      "schema": "ImageGenToolCallError",
+      "validation_shape_equivalent": true
+    },
+    {
+      "schema": "ImageGenToolCallModerationDetails",
+      "validation_shape_equivalent": true
+    },
+    {
+      "schema": "InputFidelity",
+      "validation_shape_equivalent": true
+    },
+    {
+      "schema": "PromptCacheBreakpointConfig",
+      "validation_shape_equivalent": true
+    },
+    {
+      "schema": "PromptCacheBreakpointParam",
+      "validation_shape_equivalent": true
+    },
+    {
+      "schema": "ResponseConfigurationUpdateItemParam",
+      "validation_shape_equivalent": true
+    },
+    {
+      "schema": "WebSearchActionFind",
+      "validation_shape_equivalent": true
+    }
+  ],
+  "shape_normalization": "Resolve canonical refs; omit description/title/example/default/vendor/discriminator annotations; sort required lists; normalize omitted additionalProperties to its true default. All validation keywords remain.",
+  "public_path_tests": "test/unit/models/live_cache_breakpoint_replay_test.dart",
+  "new_skips": [],
+  "new_coverage_exclusions": [],
+  "toolkit_verification": {
+    "workflow": "Frozen local fetch/review and scratch-only promotion",
+    "scope": "type",
+    "implementation": {
+      "LiveInputPromptCacheBreakpointConfig": {
+        "errors": 0,
+        "infos": 1,
+        "warnings": 0
+      },
+      "LiveInputPromptCacheBreakpointParam": {
+        "errors": 0,
+        "infos": 1,
+        "warnings": 0
+      },
+      "LiveInputWebSearchActionFind": {
+        "errors": 0,
+        "infos": 0,
+        "warnings": 0
+      }
+    }
+  }
+}
