@@ -7330,12 +7330,12 @@
     },
     "LiveInputImageGenToolCall": {
       "spec": "main",
+      "schema": "ImageGenToolCall",
       "kind": "sealed_variant",
       "dart_class": "LiveInputImageGenToolCall",
       "file": "lib/src/models/live/live_input_item.dart",
-      "schema": "ImageGenToolCall",
-      "note": "Actual adopted canonical InputItem-closure component. Validating immutable typed adapter preserves every declared field, nullable/omitted presence and finite future metadata; known malformed values remain contextual safe errors. Serialized-value getter/copy/value contracts are public-fixture tested.",
-      "parent": "LiveInputItem"
+      "parent": "LiveInputItem",
+      "note": "Actual Live InputItem context; typed shared image error, presence/copy support, immutable full-wire ownership and canonical writable validation including error dependencies."
     },
     "LiveInputImageOutputFormat": {
       "spec": "main",
@@ -14811,6 +14811,14 @@
       "dart_class": "DecisionMessagePhase",
       "file": "lib/src/models/decisions/decision_history.dart",
       "note": "Actual closed writable Decisions history enum. Unknown request strings reject instead of introducing a writable unknown sentinel. Generic Responses counterpart remains separate."
+    },
+    "AgentSessionRun": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "AgentSessionRun",
+      "file": "lib/src/helpers/agents/agent_session_run.dart",
+      "schema": null,
+      "note": "Stateful Dart-only lazy follow-up/cursor, not a wire DTO or canonical operation. Public events/nextEvent/start/abort/close and explicit count/byte limits; no JSON serialization, model facade or backend action."
     }
   }
 }

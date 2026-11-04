@@ -2636,6 +2636,12 @@
             "receipt": "specs/api-alignment-2026-10-31/reviews/11-image-contracts-manifest.json",
             "dart_class": "ImageGenerationCallOutputItem",
             "file": "lib/src/models/responses/items/output_item.dart"
+          },
+          {
+            "manifest_key": "LiveInputImageGenToolCall",
+            "receipt": "specs/api-alignment-2026-10-31/reviews/issue424-live-image-error-replay-manifest.json",
+            "dart_class": "LiveInputImageGenToolCall",
+            "file": "lib/src/models/live/live_input_item.dart"
           }
         ],
         "pull_request": 458,
@@ -2657,6 +2663,12 @@
             "schema": "ImageGenToolCall",
             "source_pointer": "#/components/schemas/ImageGenToolCall/properties/size/anyOf/0/anyOf/1",
             "file": "lib/src/models/live/live_input_item.dart"
+          }
+        ],
+        "completion_evidence": [
+          {
+            "pull_request": 462,
+            "receipt": "specs/api-alignment-2026-10-31/reviews/issue424-live-image-error-replay-manifest.json"
           }
         ]
       }

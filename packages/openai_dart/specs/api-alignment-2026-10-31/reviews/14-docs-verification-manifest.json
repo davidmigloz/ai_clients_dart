@@ -186,7 +186,9 @@
     "specs/api-alignment-2026-10-31/reviews/issue429-reasoning-replay-manifest.json",
     "specs/api-alignment-2026-10-31/reviews/pr443-mcp-output-manifest.json",
     "specs/api-alignment/reviews/40-environment-webhooks-manifest.json",
-    "specs/api-alignment/reviews/41-browser-recovery-manifest.json"
+    "specs/api-alignment/reviews/41-browser-recovery-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/issue424-live-image-error-replay-manifest.json",
+    "specs/api-alignment/reviews/42-idle-run-helper-manifest.json"
   ],
   "inventory_coverage": {
     "schemas": 297,
@@ -252,5 +254,17 @@
       "wire_kind": "string",
       "note": "Closed writable high/low value adapter, not an object DTO."
     }
-  }
+  },
+  "merged_completion_receipts": [
+    {
+      "issue": 424,
+      "pull_request": 462,
+      "receipt": "specs/api-alignment-2026-10-31/reviews/issue424-live-image-error-replay-manifest.json"
+    },
+    {
+      "issue": 394,
+      "pull_request": 463,
+      "receipt": "specs/api-alignment/reviews/42-idle-run-helper-manifest.json"
+    }
+  ]
 }
