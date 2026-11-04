@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../errors/exceptions.dart';
 import 'speech_redaction.dart';
 
-/// Guards caller callbacks for child inspection and automation routes.
+/// Guards caller callbacks for child inspection, automations and image routes.
 /// Original external failures remain explicit causes; automatic diagnostics
 /// never render provider, connector or response-stream values.
 T privateAgentInspectionExternal<T>(
@@ -11,7 +11,8 @@ T privateAgentInspectionExternal<T>(
   T Function() callback,
 ) {
   if (!isAgentSessionSubagentRequest(request) &&
-      !isAgentAutomationRequest(request)) {
+      !isAgentAutomationRequest(request) &&
+      !isImagesRequest(request)) {
     return callback();
   }
   try {
@@ -32,7 +33,8 @@ Future<T> privateAgentInspectionTransport<T>(
   Future<T> Function() callback,
 ) async {
   if (!isAgentSessionSubagentRequest(request) &&
-      !isAgentAutomationRequest(request)) {
+      !isAgentAutomationRequest(request) &&
+      !isImagesRequest(request)) {
     return callback();
   }
   try {

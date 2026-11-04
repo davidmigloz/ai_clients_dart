@@ -7,6 +7,8 @@ import 'package:logging/logging.dart';
 import '../client/retry_after.dart';
 import '../errors/exceptions.dart';
 import '../utils/monitoring_error_redaction.dart';
+import '../utils/private_agent_inspection_http.dart';
+import '../utils/speech_redaction.dart';
 import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
 
@@ -46,26 +48,45 @@ mixin StreamingResource on ResourceBase {
   }) async {
     ensureNotClosed?.call();
     request.headers.addAll(
-      request is http.MultipartRequest
-          ? requestBuilder.buildMultipartHeaders(
-              additionalHeaders: {
-                ...?additionalHeaders,
-                'Accept': 'text/event-stream',
-              },
-            )
-          : requestBuilder.buildStreamingHeaders(
-              additionalHeaders: additionalHeaders,
-            ),
+      privateAgentInspectionExternal(
+        request,
+        () => request is http.MultipartRequest
+            ? requestBuilder.buildMultipartHeaders(
+                additionalHeaders: {
+                  ...?additionalHeaders,
+                  'Accept': 'text/event-stream',
+                },
+              )
+            : requestBuilder.buildStreamingHeaders(
+                additionalHeaders: additionalHeaders,
+              ),
+      ),
     );
+    if (isImagesRequest(request)) {
+      request.headers['accept'] = 'text/event-stream';
+      if (request is http.MultipartRequest) {
+        request.headers.remove('content-type');
+      } else if (jsonBody != null) {
+        request.headers['content-type'] = 'application/json; charset=utf-8';
+      }
+    }
     if (jsonBody != null) {
       if (request is! http.Request) {
         throw ArgumentError('jsonBody requires http.Request');
       }
-      request.body = jsonBody;
+      if (isImagesRequest(request)) {
+        request.bodyBytes = utf8.encode(jsonBody);
+      } else {
+        request.body = jsonBody;
+      }
     }
-    Logger('OpenAIClient').fine('Streaming ${request.method} ${request.url}');
+    Logger('OpenAIClient').fine(
+      'Streaming ${request.method} ${isImagesRequest(request) ? '[REDACTED]' : request.url}',
+    );
 
-    final transport = useDedicatedClient ? streamClientFactory!() : httpClient;
+    final transport = useDedicatedClient
+        ? privateAgentInspectionExternal(request, () => streamClientFactory!())
+        : httpClient;
     var closed = false;
     var aborted = false;
     void closeClient() {
@@ -100,8 +121,9 @@ mixin StreamingResource on ResourceBase {
       if (aborted) {
         throw const AbortedException(stage: AbortionStage.duringStream);
       }
-      final response = await transport.send(
-        _abortableRequest(request, nativeAbort.future),
+      final response = await privateAgentInspectionTransport(
+        request,
+        () => transport.send(_abortableRequest(request, nativeAbort.future)),
       );
       if (aborted) {
         await response.stream.listen(null).cancel();
@@ -280,8 +302,9 @@ mixin StreamingResource on ResourceBase {
         // Register cancellation before starting authentication/header building.
         await Future<void>.value();
         if (ended) return;
+        final builtRequest = buildRequest();
         final response = await _sendStream(
-          request: buildRequest(),
+          request: builtRequest,
           jsonBody: jsonBody?.call(),
           additionalHeaders: additionalHeaders,
           abortTrigger: nativeAbort.future,
@@ -296,10 +319,29 @@ mixin StreamingResource on ResourceBase {
             response.headers['x-request-id'] ??
             response.request?.headers['X-Request-ID'] ??
             'unknown';
+        final responseBytes = isImagesRequest(builtRequest)
+            ? response.stream.transform(
+                StreamTransformer<List<int>, List<int>>.fromHandlers(
+                  handleError:
+                      (
+                        Object error,
+                        StackTrace stack,
+                        EventSink<List<int>> sink,
+                      ) => sink.addError(
+                        ConnectionException(
+                          message: 'Image stream body failed.',
+                          cause: error,
+                          redactDiagnostics: true,
+                        ),
+                        stack,
+                      ),
+                ),
+              )
+            : response.stream;
         Stream<Map<String, dynamic>> events;
         if (response.statusCode >= 400) {
           final body = StringBuffer();
-          events = response.stream
+          events = responseBytes
               .transform(utf8.decoder)
               .transform(
                 StreamTransformer<String, Map<String, dynamic>>.fromHandlers(
@@ -312,6 +354,14 @@ mixin StreamingResource on ResourceBase {
                           body.toString(),
                           requestId,
                           headers: response.headers,
+                          cause: isImagesRequest(builtRequest)
+                              ? http.Response(
+                                  body.toString(),
+                                  response.statusCode,
+                                  headers: response.headers,
+                                  request: builtRequest,
+                                )
+                              : null,
                         ),
                       )
                       ..close();
@@ -319,7 +369,7 @@ mixin StreamingResource on ResourceBase {
                 ),
               );
         } else {
-          events = const SseParser().parse(response.stream);
+          events = const SseParser().parse(responseBytes);
         }
         subscription = events.listen(
           controller.add,
@@ -371,8 +421,9 @@ mixin StreamingResource on ResourceBase {
   Never throwInlineStreamError(
     Map<String, dynamic> json,
     String? sseEvent,
-    Object? error,
-  ) {
+    Object? error, {
+    bool redactDiagnostics = false,
+  }) {
     String message;
     if (error is Map<String, dynamic>) {
       message = (error['message'] ?? error['error'] ?? 'Unknown stream error')
@@ -386,14 +437,18 @@ mixin StreamingResource on ResourceBase {
     }
 
     Logger('OpenAIClient').warning(
-      'Inline stream error: ${redactMonitoringErrorValue(message, json)}',
+      'Inline stream error: ${redactMonitoringErrorValue(message, json, redact: redactDiagnostics)}',
     );
 
     // Strip internal `_event` field and encode as JSON for partialData
     final cleanJson = Map<String, dynamic>.from(json)
       ..remove('_event')
       ..remove('_rawData');
-    throw StreamException(message: message, partialData: jsonEncode(cleanJson));
+    throw StreamException(
+      message: message,
+      partialData: jsonEncode(cleanJson),
+      redactDiagnostics: redactDiagnostics,
+    );
   }
 }
 

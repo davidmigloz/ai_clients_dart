@@ -14,8 +14,8 @@ void main() {
       const ImageGenerationRequest(model: 'fixture-model', prompt: 'Hello'),
     ),
     'image edit JSON': (client) => client.images.editJsonStream(
-      const ImageEditJsonRequest(
-        images: [ImageReference.file('file-fixture')],
+      ImageEditJsonRequest(
+        images: const [ImageReference.file('file-fixture')],
         prompt: 'Hello',
       ),
     ),

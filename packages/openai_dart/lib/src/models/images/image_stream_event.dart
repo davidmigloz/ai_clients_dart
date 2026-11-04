@@ -1,7 +1,9 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import 'image_common.dart';
+import 'image_json_helpers.dart';
 import 'image_response.dart';
 
 /// A Server-Sent Event from a streaming image generation request.
@@ -149,6 +151,7 @@ class ImageGenCompletedEvent extends ImageGenStreamEvent {
     required this.background,
     required this.outputFormat,
     required this.usage,
+    this.safetyIdentifier,
   });
 
   /// Creates an [ImageGenCompletedEvent] from JSON.
@@ -159,6 +162,10 @@ class ImageGenCompletedEvent extends ImageGenStreamEvent {
       );
     }
     return ImageGenCompletedEvent(
+      safetyIdentifier: readImageSafetyIdentifier(
+        json,
+        'ImageGenCompletedEvent',
+      ),
       b64Json: json['b64_json'] as String,
       createdAt: json['created_at'] as int,
       size: ImageSize.fromJson(json['size'] as String),
@@ -171,6 +178,9 @@ class ImageGenCompletedEvent extends ImageGenStreamEvent {
 
   /// Base64-encoded final image data.
   final String b64Json;
+
+  /// Effective safety identifier, including user fallback; may be null.
+  final String? safetyIdentifier;
 
   /// Unix timestamp when the event was created.
   final int createdAt;
@@ -197,6 +207,7 @@ class ImageGenCompletedEvent extends ImageGenStreamEvent {
   Map<String, dynamic> toJson() => {
     'type': type,
     'b64_json': b64Json,
+    if (safetyIdentifier != null) 'safety_identifier': safetyIdentifier,
     'created_at': createdAt,
     'size': size.toJson(),
     'quality': quality.toJson(),
@@ -205,12 +216,38 @@ class ImageGenCompletedEvent extends ImageGenStreamEvent {
     'usage': usage.toJson(),
   };
 
+  /// Copies the completed event without exposing image or identifier data.
+  ImageGenCompletedEvent copyWith({
+    String? b64Json,
+    int? createdAt,
+    ImageSize? size,
+    ImageQuality? quality,
+    ImageBackground? background,
+    ImageOutputFormat? outputFormat,
+    ImagesUsage? usage,
+    Object? safetyIdentifier = unsetCopyWithValue,
+  }) => ImageGenCompletedEvent(
+    b64Json: b64Json ?? this.b64Json,
+    createdAt: createdAt ?? this.createdAt,
+    size: size ?? this.size,
+    quality: quality ?? this.quality,
+    background: background ?? this.background,
+    outputFormat: outputFormat ?? this.outputFormat,
+    usage: usage ?? this.usage,
+    safetyIdentifier: copyImageValue<String>(
+      safetyIdentifier,
+      this.safetyIdentifier,
+      'ImageGenCompletedEvent.safetyIdentifier',
+    ),
+  );
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ImageGenCompletedEvent &&
           runtimeType == other.runtimeType &&
           b64Json == other.b64Json &&
+          safetyIdentifier == other.safetyIdentifier &&
           createdAt == other.createdAt &&
           size == other.size &&
           quality == other.quality &&
@@ -221,6 +258,7 @@ class ImageGenCompletedEvent extends ImageGenStreamEvent {
   @override
   int get hashCode => Object.hash(
     b64Json,
+    safetyIdentifier,
     createdAt,
     size,
     quality,
@@ -231,7 +269,7 @@ class ImageGenCompletedEvent extends ImageGenStreamEvent {
 
   @override
   String toString() =>
-      'ImageGenCompletedEvent(b64: ${b64Json.length} chars, '
+      'ImageGenCompletedEvent(safetyIdentifier: ${imageIdentifierSummary(safetyIdentifier)}, b64: ${b64Json.length} chars, '
       'size: $size, usage: $usage)';
 }
 
@@ -413,6 +451,7 @@ class ImageEditCompletedEvent extends ImageEditStreamEvent {
     required this.background,
     required this.outputFormat,
     required this.usage,
+    this.safetyIdentifier,
   });
 
   /// Creates an [ImageEditCompletedEvent] from JSON.
@@ -423,6 +462,10 @@ class ImageEditCompletedEvent extends ImageEditStreamEvent {
       );
     }
     return ImageEditCompletedEvent(
+      safetyIdentifier: readImageSafetyIdentifier(
+        json,
+        'ImageEditCompletedEvent',
+      ),
       b64Json: json['b64_json'] as String,
       createdAt: json['created_at'] as int,
       size: ImageSize.fromJson(json['size'] as String),
@@ -435,6 +478,9 @@ class ImageEditCompletedEvent extends ImageEditStreamEvent {
 
   /// Base64-encoded final image data.
   final String b64Json;
+
+  /// Effective safety identifier, including user fallback; may be null.
+  final String? safetyIdentifier;
 
   /// Unix timestamp when the event was created.
   final int createdAt;
@@ -461,6 +507,7 @@ class ImageEditCompletedEvent extends ImageEditStreamEvent {
   Map<String, dynamic> toJson() => {
     'type': type,
     'b64_json': b64Json,
+    if (safetyIdentifier != null) 'safety_identifier': safetyIdentifier,
     'created_at': createdAt,
     'size': size.toJson(),
     'quality': quality.toJson(),
@@ -469,12 +516,38 @@ class ImageEditCompletedEvent extends ImageEditStreamEvent {
     'usage': usage.toJson(),
   };
 
+  /// Copies the completed event without exposing image or identifier data.
+  ImageEditCompletedEvent copyWith({
+    String? b64Json,
+    int? createdAt,
+    ImageSize? size,
+    ImageQuality? quality,
+    ImageBackground? background,
+    ImageOutputFormat? outputFormat,
+    ImagesUsage? usage,
+    Object? safetyIdentifier = unsetCopyWithValue,
+  }) => ImageEditCompletedEvent(
+    b64Json: b64Json ?? this.b64Json,
+    createdAt: createdAt ?? this.createdAt,
+    size: size ?? this.size,
+    quality: quality ?? this.quality,
+    background: background ?? this.background,
+    outputFormat: outputFormat ?? this.outputFormat,
+    usage: usage ?? this.usage,
+    safetyIdentifier: copyImageValue<String>(
+      safetyIdentifier,
+      this.safetyIdentifier,
+      'ImageEditCompletedEvent.safetyIdentifier',
+    ),
+  );
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ImageEditCompletedEvent &&
           runtimeType == other.runtimeType &&
           b64Json == other.b64Json &&
+          safetyIdentifier == other.safetyIdentifier &&
           createdAt == other.createdAt &&
           size == other.size &&
           quality == other.quality &&
@@ -485,6 +558,7 @@ class ImageEditCompletedEvent extends ImageEditStreamEvent {
   @override
   int get hashCode => Object.hash(
     b64Json,
+    safetyIdentifier,
     createdAt,
     size,
     quality,
@@ -495,7 +569,7 @@ class ImageEditCompletedEvent extends ImageEditStreamEvent {
 
   @override
   String toString() =>
-      'ImageEditCompletedEvent(b64: ${b64Json.length} chars, '
+      'ImageEditCompletedEvent(safetyIdentifier: ${imageIdentifierSummary(safetyIdentifier)}, b64: ${b64Json.length} chars, '
       'size: $size, usage: $usage)';
 }
 

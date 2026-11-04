@@ -27,7 +27,18 @@ bool isPrivateAudioRequest(http.BaseRequest? request) =>
     isCustomVoiceRequest(request) ||
     isLiveRequest(request) ||
     isAgentsApiRequest(request) ||
-    isAdminRequest(request);
+    isAdminRequest(request) ||
+    isImagesRequest(request);
+
+/// Image uploads, generations and edits carry private inputs and identifiers.
+bool isImagesRequest(http.BaseRequest? request) =>
+    request != null &&
+    request.method == 'POST' &&
+    const [
+      '/images/generations',
+      '/images/edits',
+      '/images/variations',
+    ].any(request.url.path.endsWith);
 
 /// Identifies implemented Agents routes containing private configuration/input.
 bool isAgentsApiRequest(http.BaseRequest? request) =>

@@ -644,6 +644,20 @@ Future<void> main() async {
 
 </details>
 
+<a id="how-do-i-guide-an-image-edit-with-markup"></a>
+<details>
+<summary><b>How do I guide an image edit with markup?</b></summary>
+
+Set `ImageEditRequest.markup` to PNG bytes for multipart uploads, or `ImageEditJsonRequest.markup` to an `ImageReference` for JSON edits. The overlay must include transparent pixels and match the first input image's dimensions after orientation. Markup and `mask` are mutually exclusive; the service validates image contents and model support.
+
+Pass a stable, privacy-preserving `safetyIdentifier` of at most 128 characters on each image request. A nonempty identifier takes precedence over deprecated `user`; omission, null, or an empty string leaves that fallback to the service. Ordinary responses and completed image events expose the effective identifier.
+
+Responses image-tool calls retain `ImageGenerationCallStatus.failed`/`.generating` and optional `error.moderationDetails`, including the stage and public categories. Use supported explicit image models; `gpt-image-1` shut down October 23, 2026.
+
+→ [Offline markup and safety-identifier example](example/image_markup_example.dart)
+
+</details>
+
 <a id="how-do-i-use-audio"></a>
 <details>
 <summary><b>How do I use audio?</b></summary>
@@ -1449,6 +1463,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | --- | --- |
 | [images_example.dart](example/images_example.dart) | GPT Image generation |
 | [image_model_selection_example.dart](example/image_model_selection_example.dart) | Local generation/multipart/JSON-edit model contracts without API calls |
+| [image_markup_example.dart](example/image_markup_example.dart) | **Offline.** PNG/reference overlays, safety identifiers and completed edit events |
 | [audio_example.dart](example/audio_example.dart) | Text-to-speech and transcription |
 | [speech_streaming_example.dart](example/speech_streaming_example.dart) | **Offline.** buffered/byte/SSE speech, voice references and usage |
 | [existing_audio_example.dart](example/existing_audio_example.dart) | **Offline.** modern file fields, verbose/raw translation, open/custom Chat voices and AAC |

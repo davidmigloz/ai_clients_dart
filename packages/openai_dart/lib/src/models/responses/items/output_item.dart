@@ -5,6 +5,9 @@ import 'package:meta/meta.dart';
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../../common/json_helpers.dart';
+import '../../images/image_common.dart';
+import '../../images/image_json_helpers.dart';
+import '../../images/image_tool_error.dart';
 import '../config/function_call_output_status.dart';
 import '../config/item_status.dart';
 import '../config/message_phase.dart';
@@ -1094,88 +1097,245 @@ class CodeInterpreterCallOutputItem extends OutputItem {
       'CodeInterpreterCallOutputItem(id: $id, agent: $agent, containerId: $containerId, code: $code, language: $language, outputs: $outputs, status: $status)';
 }
 
-/// An image generation call output item.
-///
-/// Returned when the model uses the [ImageGenerationTool].
+/// A GA/beta image-generation call with exact status and optional failure details.
 @immutable
 class ImageGenerationCallOutputItem extends OutputItem {
-  /// Unique identifier.
-  final String id;
-
-  /// The agent that produced this item.
-  ///
-  /// Only populated on the beta multi-agent protocol
-  /// (`OpenAI-Beta: responses_multi_agent=v1`).
-  final AgentTag? agent;
-
-  /// The original prompt used for generation.
-  final String? prompt;
-
-  /// The revised prompt (may be modified by the model).
-  final String? revisedPrompt;
-
-  /// The generated image result (base64 or URL depending on configuration).
-  final String? result;
-
-  /// Item status.
-  final ItemStatus? status;
-
-  /// Creates an [ImageGenerationCallOutputItem].
+  /// Creates the canonical required status/result fields, retaining const use.
   const ImageGenerationCallOutputItem({
     required this.id,
+    required this.status,
+    required this.result,
     this.agent,
     this.prompt,
     this.revisedPrompt,
-    this.result,
-    this.status,
+    this.error,
+    this.size,
+    this.quality,
+    this.action,
+    this.background,
+    this.outputFormat,
   });
 
-  /// Creates an [ImageGenerationCallOutputItem] from JSON.
+  /// Unique call identifier.
+  final String id;
+
+  /// Exact call status; failed and generating are distinct from generic item states.
+  final ImageGenerationCallStatus status;
+
+  /// Generated base64 data, or null when not available.
+  final String? result;
+
+  /// The beta multi-agent producer, when present.
+  final AgentTag? agent;
+
+  /// Legacy original prompt retained for compatible payloads.
+  final String? prompt;
+
+  /// Prompt after model rewriting, when supplied.
+  final String? revisedPrompt;
+
+  /// Optional nonnull failure details, including public moderation metadata.
+  final ImageGenerationCallError? error;
+
+  /// Generated dimensions, including custom size strings.
+  final ImageSize? size;
+
+  /// Generated image quality, when available.
+  final ImageQuality? quality;
+
+  /// The action used for image generation, when available.
+  final String? action;
+
+  /// The generated background setting.
+  final ImageBackground? background;
+
+  /// The generated image output format.
+  final ImageOutputFormat? outputFormat;
+
+  /// Parses the shared GA/beta contract, including required nullable result.
   factory ImageGenerationCallOutputItem.fromJson(Map<String, dynamic> json) {
+    requireJsonType(
+      json,
+      'image_generation_call',
+      'ImageGenerationCallOutputItem',
+    );
+    if (!json.containsKey('result')) {
+      throw const FormatException(
+        'ImageGenerationCallOutputItem.result: missing required field',
+      );
+    }
     return ImageGenerationCallOutputItem(
-      id: json['id'] as String,
-      agent: json['agent'] != null
-          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+      id: requireJsonString(json['id'], 'ImageGenerationCallOutputItem.id'),
+      status: ImageGenerationCallStatus.fromJson(json['status']),
+      result: optionalJsonString(
+        json,
+        'result',
+        'ImageGenerationCallOutputItem',
+        nullable: true,
+      ),
+      agent: json['agent'] == null
+          ? null
+          : AgentTag.fromJson(
+              requireJsonObject(
+                json['agent'],
+                'ImageGenerationCallOutputItem.agent',
+              ),
+            ),
+      prompt: optionalJsonString(
+        json,
+        'prompt',
+        'ImageGenerationCallOutputItem',
+        nullable: true,
+      ),
+      revisedPrompt: optionalJsonString(
+        json,
+        'revised_prompt',
+        'ImageGenerationCallOutputItem',
+        nullable: true,
+      ),
+      error: json.containsKey('error')
+          ? ImageGenerationCallError.fromJson(
+              requireJsonObject(
+                json['error'],
+                'ImageGenerationCallOutputItem.error',
+              ),
+            )
           : null,
-      prompt: json['prompt'] as String?,
-      revisedPrompt: json['revised_prompt'] as String?,
-      result: json['result'] as String?,
-      status: json['status'] != null
-          ? ItemStatus.fromJson(json['status'] as String)
-          : null,
+      size: json['size'] == null
+          ? null
+          : ImageSize.fromJson(
+              requireJsonString(
+                json['size'],
+                'ImageGenerationCallOutputItem.size',
+              ),
+            ),
+      quality: json['quality'] == null
+          ? null
+          : ImageQuality.fromJson(
+              requireJsonString(
+                json['quality'],
+                'ImageGenerationCallOutputItem.quality',
+              ),
+            ),
+      action: optionalJsonString(
+        json,
+        'action',
+        'ImageGenerationCallOutputItem',
+        nullable: true,
+      ),
+      background: json['background'] == null
+          ? null
+          : ImageBackground.fromJson(
+              requireJsonString(
+                json['background'],
+                'ImageGenerationCallOutputItem.background',
+              ),
+            ),
+      outputFormat: json['output_format'] == null
+          ? null
+          : ImageOutputFormat.fromJson(
+              requireJsonString(
+                json['output_format'],
+                'ImageGenerationCallOutputItem.outputFormat',
+              ),
+            ),
     );
   }
-
   @override
   Map<String, dynamic> toJson() => {
     'type': 'image_generation_call',
     'id': id,
+    'status': status.toJson(),
+    'result': result,
     if (agent != null) 'agent': agent!.toJson(),
     if (prompt != null) 'prompt': prompt,
     if (revisedPrompt != null) 'revised_prompt': revisedPrompt,
-    if (result != null) 'result': result,
-    if (status != null) 'status': status!.toJson(),
+    if (error != null) 'error': error!.toJson(),
+    if (size != null) 'size': size!.toJson(),
+    if (quality != null) 'quality': quality!.toJson(),
+    if (action != null) 'action': action,
+    if (background != null) 'background': background!.toJson(),
+    if (outputFormat != null) 'output_format': outputFormat!.toJson(),
   };
 
+  /// Copies all fields, clearing nullable values explicitly.
+  ImageGenerationCallOutputItem copyWith({
+    String? id,
+    ImageGenerationCallStatus? status,
+    Object? result = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
+    Object? prompt = unsetCopyWithValue,
+    Object? revisedPrompt = unsetCopyWithValue,
+    Object? error = unsetCopyWithValue,
+    Object? size = unsetCopyWithValue,
+    Object? quality = unsetCopyWithValue,
+    Object? action = unsetCopyWithValue,
+    Object? background = unsetCopyWithValue,
+    Object? outputFormat = unsetCopyWithValue,
+  }) => ImageGenerationCallOutputItem(
+    id: id ?? this.id,
+    status: status ?? this.status,
+    result: copyImageValue<String>(
+      result,
+      this.result,
+      'ImageGenerationCallOutputItem.result',
+    ),
+    agent: copyImageValue<AgentTag>(
+      agent,
+      this.agent,
+      'ImageGenerationCallOutputItem.agent',
+    ),
+    prompt: copyImageValue<String>(
+      prompt,
+      this.prompt,
+      'ImageGenerationCallOutputItem.prompt',
+    ),
+    revisedPrompt: copyImageValue<String>(
+      revisedPrompt,
+      this.revisedPrompt,
+      'ImageGenerationCallOutputItem.revisedPrompt',
+    ),
+    error: copyImageValue<ImageGenerationCallError>(
+      error,
+      this.error,
+      'ImageGenerationCallOutputItem.error',
+    ),
+    size: copyImageValue<ImageSize>(
+      size,
+      this.size,
+      'ImageGenerationCallOutputItem.size',
+    ),
+    quality: copyImageValue<ImageQuality>(
+      quality,
+      this.quality,
+      'ImageGenerationCallOutputItem.quality',
+    ),
+    action: copyImageValue<String>(
+      action,
+      this.action,
+      'ImageGenerationCallOutputItem.action',
+    ),
+    background: copyImageValue<ImageBackground>(
+      background,
+      this.background,
+      'ImageGenerationCallOutputItem.background',
+    ),
+    outputFormat: copyImageValue<ImageOutputFormat>(
+      outputFormat,
+      this.outputFormat,
+      'ImageGenerationCallOutputItem.outputFormat',
+    ),
+  );
   @override
   bool operator ==(Object other) =>
-      identical(this, other) ||
       other is ImageGenerationCallOutputItem &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          agent == other.agent &&
-          prompt == other.prompt &&
-          revisedPrompt == other.revisedPrompt &&
-          result == other.result &&
-          status == other.status;
-
+      runtimeType == other.runtimeType &&
+      mapsDeepEqual(toJson(), other.toJson());
   @override
-  int get hashCode =>
-      Object.hash(id, agent, prompt, revisedPrompt, result, status);
-
+  int get hashCode => mapDeepHashCode(toJson());
   @override
   String toString() =>
-      'ImageGenerationCallOutputItem(id: $id, agent: $agent, prompt: $prompt, revisedPrompt: $revisedPrompt, result: ${result != null ? "[${result!.length} chars]" : null}, status: $status)';
+      'ImageGenerationCallOutputItem(id: $id, agent: $agent, prompt: ${imageIdentifierSummary(prompt)}, revisedPrompt: ${imageIdentifierSummary(revisedPrompt)}, result: ${imageIdentifierSummary(result)}, status: $status, error: $error, size: $size, quality: $quality, action: $action, background: $background, outputFormat: $outputFormat)';
 }
 
 /// A local shell call output item.

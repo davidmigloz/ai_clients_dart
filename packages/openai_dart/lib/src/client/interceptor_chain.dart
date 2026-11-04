@@ -248,11 +248,12 @@ Future<http.Response> _bufferPrivateResponse(
 ) async {
   final response = await http.Response.fromStream(streamed);
   if (!isAgentSessionSubagentRequest(sentRequest) &&
+      !isImagesRequest(sentRequest) &&
       (response.request != null || !isPrivateAudioRequest(sentRequest))) {
     return response;
   }
-  // Some injected transports omit request context. Retain the actual sent
-  // auth/trace headers for all private response modes, including 1xx/3xx errors.
+  // Some injected transports omit or mislabel request context. Preserve the
+  // actual private route and auth/trace headers, including for 1xx/3xx errors.
   return http.Response.bytes(
     response.bodyBytes,
     response.statusCode,

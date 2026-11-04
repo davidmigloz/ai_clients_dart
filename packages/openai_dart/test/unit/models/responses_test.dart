@@ -1871,14 +1871,15 @@ void main() {
       expect(imgItem.prompt, equals('A cat'));
       expect(imgItem.revisedPrompt, equals('A cute cat sitting'));
       expect(imgItem.result, equals('base64data=='));
-      expect(imgItem.status, equals(ItemStatus.completed));
+      expect(imgItem.status, equals(ImageGenerationCallStatus.completed));
     });
 
     test('ImageGenerationCallOutputItem serializes correctly', () {
       const item = ImageGenerationCallOutputItem(
         id: 'img_123',
         prompt: 'A dog',
-        status: ItemStatus.inProgress,
+        status: ImageGenerationCallStatus.inProgress,
+        result: null,
       );
 
       final json = item.toJson();

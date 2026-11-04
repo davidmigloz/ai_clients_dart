@@ -56,16 +56,16 @@ Future<void> main() async {
     );
     // This model field is optional; the client sends no default itself.
     await client.images.editJson(
-      const ImageEditJsonRequest(
-        images: [ImageReference.file('file-source')],
+      ImageEditJsonRequest(
+        images: const [ImageReference.file('file-source')],
         prompt: 'Add a blue outline',
       ),
     );
     // Unknown/future model IDs are forwarded unchanged, even without a constant.
     await client.images.editJson(
-      const ImageEditJsonRequest(
+      ImageEditJsonRequest(
         model: 'custom-image-model',
-        images: [ImageReference.file('file-source')],
+        images: const [ImageReference.file('file-source')],
         prompt: 'Add a blue outline',
       ),
     );

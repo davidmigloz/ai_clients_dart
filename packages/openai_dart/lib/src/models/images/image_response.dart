@@ -1,7 +1,10 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import '../common/json_helpers.dart';
 import 'image_common.dart';
+import 'image_json_helpers.dart';
 
 /// A response from the images API.
 ///
@@ -26,29 +29,43 @@ import 'image_common.dart';
 @immutable
 class ImageResponse {
   /// Creates an [ImageResponse].
-  const ImageResponse({
+  ImageResponse({
     required this.created,
-    required this.data,
+    required List<GeneratedImage> data,
+    this.hasData = true,
     this.background,
     this.outputFormat,
     this.quality,
     this.size,
     this.usage,
-  });
+    this.safetyIdentifier,
+  }) : data = List<GeneratedImage>.unmodifiable(data) {
+    if (!hasData && data.isNotEmpty) {
+      throw const FormatException(
+        'ImageResponse: absent data cannot contain images',
+      );
+    }
+  }
 
   /// Creates an [ImageResponse] from JSON.
   factory ImageResponse.fromJson(Map<String, dynamic> json) {
     final dataJson = json['data'];
-    if (dataJson is! List) {
+    if (json.containsKey('data') && dataJson is! List) {
       throw FormatException(
-        'ImageResponse.data is required — expected a List, '
+        'ImageResponse.data: expected a List when present, '
         'got ${dataJson.runtimeType}',
       );
     }
     return ImageResponse(
-      created: json['created'] as int,
-      data: dataJson
-          .map((e) => GeneratedImage.fromJson(e as Map<String, dynamic>))
+      safetyIdentifier: readImageSafetyIdentifier(json, 'ImageResponse'),
+      created: requireJsonInt(json['created'], 'ImageResponse.created'),
+      hasData: json.containsKey('data'),
+      data: (dataJson as List? ?? const [])
+          .map(
+            (e) => GeneratedImage.fromJson(
+              requireJsonObject(e, 'ImageResponse.data'),
+            ),
+          )
           .toList(),
       background: json['background'] != null
           ? ImageBackground.fromJson(json['background'] as String)
@@ -71,8 +88,15 @@ class ImageResponse {
   /// The Unix timestamp when the images were created.
   final int created;
 
+  /// Effective safety identifier, including the legacy user fallback; may be null.
+  final String? safetyIdentifier;
+
   /// The list of generated images.
   final List<GeneratedImage> data;
+
+  /// Whether the optional data key was present; false keeps wire absence distinct
+  /// from an empty returned image list. The data getter is empty when absent.
+  final bool hasData;
 
   /// Background used (GPT image models only).
   final ImageBackground? background;
@@ -105,7 +129,8 @@ class ImageResponse {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'created': created,
-    'data': data.map((i) => i.toJson()).toList(),
+    if (safetyIdentifier != null) 'safety_identifier': safetyIdentifier,
+    if (hasData) 'data': data.map((i) => i.toJson()).toList(),
     if (background != null) 'background': background!.toJson(),
     if (outputFormat != null) 'output_format': outputFormat!.toJson(),
     if (quality != null) 'quality': quality!.toJson(),
@@ -113,13 +138,58 @@ class ImageResponse {
     if (usage != null) 'usage': usage!.toJson(),
   };
 
+  /// Copies the response; explicit null clears nullable fields locally.
+  ImageResponse copyWith({
+    int? created,
+    List<GeneratedImage>? data,
+    bool? hasData,
+    Object? safetyIdentifier = unsetCopyWithValue,
+    Object? background = unsetCopyWithValue,
+    Object? outputFormat = unsetCopyWithValue,
+    Object? quality = unsetCopyWithValue,
+    Object? size = unsetCopyWithValue,
+    Object? usage = unsetCopyWithValue,
+  }) => ImageResponse(
+    created: created ?? this.created,
+    data: data ?? this.data,
+    hasData: hasData ?? (!(data == null) || this.hasData),
+    safetyIdentifier: copyImageValue<String>(
+      safetyIdentifier,
+      this.safetyIdentifier,
+      'ImageResponse.safetyIdentifier',
+    ),
+    background: copyImageValue<ImageBackground>(
+      background,
+      this.background,
+      'ImageResponse.background',
+    ),
+    outputFormat: copyImageValue<ImageOutputFormat>(
+      outputFormat,
+      this.outputFormat,
+      'ImageResponse.outputFormat',
+    ),
+    quality: copyImageValue<ImageQuality>(
+      quality,
+      this.quality,
+      'ImageResponse.quality',
+    ),
+    size: copyImageValue<ImageSize>(size, this.size, 'ImageResponse.size'),
+    usage: copyImageValue<ImagesUsage>(
+      usage,
+      this.usage,
+      'ImageResponse.usage',
+    ),
+  );
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ImageResponse &&
           runtimeType == other.runtimeType &&
           created == other.created &&
+          safetyIdentifier == other.safetyIdentifier &&
           listsEqual(data, other.data) &&
+          hasData == other.hasData &&
           background == other.background &&
           outputFormat == other.outputFormat &&
           quality == other.quality &&
@@ -129,7 +199,9 @@ class ImageResponse {
   @override
   int get hashCode => Object.hash(
     created,
+    safetyIdentifier,
     listHash(data),
+    hasData,
     background,
     outputFormat,
     quality,
@@ -139,7 +211,7 @@ class ImageResponse {
 
   @override
   String toString() =>
-      'ImageResponse(created: $created, images: ${data.length}, '
+      'ImageResponse(safetyIdentifier: ${imageIdentifierSummary(safetyIdentifier)}, created: $created, hasData: $hasData, images: ${data.length}, '
       'size: $size, usage: $usage)';
 }
 
@@ -417,7 +489,7 @@ abstract final class ImageModels {
 
   /// GPT Image 1.
   @Deprecated(
-    'Deprecated by OpenAI on 2026-06-02 and scheduled for shutdown. '
+    'GPT Image 1 shut down on October 23, 2026. '
     'Use ImageModels.gptImage25Sunburst or ImageModels.gptImage25Flare instead.',
   )
   static const String gptImage1 = 'gpt-image-1';

@@ -289,8 +289,8 @@ void main() {
       );
 
       await client.images.editJson(
-        const ImageEditJsonRequest(
-          images: [ImageReference.file('file_123')],
+        ImageEditJsonRequest(
+          images: const [ImageReference.file('file_123')],
           prompt: 'Add a hat',
         ),
       );
@@ -302,7 +302,10 @@ void main() {
 
       expect(request.method, equals('POST'));
       expect(request.url.path, endsWith('/images/edits'));
-      expect(request.headers['Content-Type'], equals('application/json'));
+      expect(
+        request.headers['Content-Type'],
+        equals('application/json; charset=utf-8'),
+      );
       expect(firstImage['file_id'], equals('file_123'));
       expect(body['prompt'], equals('Add a hat'));
       expect(request.headers['Authorization'], equals('Bearer sk-test-key'));
