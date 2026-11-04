@@ -25,8 +25,6 @@ import '../models/prediction/predict_long_running_operation.dart';
 import '../models/prediction/predict_long_running_request.dart';
 import '../models/prediction/predict_request.dart';
 import '../models/prediction/predict_response.dart';
-import '../utils/request_id.dart';
-import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
 import 'operations_resource.dart';
 import 'streaming_resource.dart';
@@ -100,60 +98,35 @@ class ModelsResource extends ResourceBase with StreamingResource {
     required String model,
     required GenerateContentRequest request,
     Future<void>? abortTrigger,
-  }) async* {
-    // Build URL and headers (uses endpoint config precedence)
-    final url = requestBuilder.buildUrl(
-      '/{version}/models/$model:streamGenerateContent',
-      queryParams: {'alt': 'sse'},
-    );
+  }) {
+    return streamRequest(
+      createRequest: () {
+        // Build URL and headers (uses endpoint config precedence)
+        final url = requestBuilder.buildUrl(
+          '/{version}/models/$model:streamGenerateContent',
+          queryParams: {'alt': 'sse'},
+        );
 
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
-    );
+        final headers = requestBuilder.buildHeaders(
+          additionalHeaders: {'Content-Type': 'application/json'},
+        );
 
-    // Create request
-    var httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
-
-    // Use mixin methods for streaming request handling
-    httpRequest = await prepareStreamingRequest(httpRequest);
-    final streamedResponse = await sendStreamingRequest(httpRequest);
-
-    // Parse SSE stream
-    final lineStream = bytesToLines(streamedResponse.stream);
-    final jsonStream = parseSSE(lineStream);
-
-    // Get request ID for abortion tracking
-    final requestId =
-        httpRequest.headers['X-Request-ID'] ?? generateRequestId();
-
-    if (abortTrigger != null) {
-      // Monitor abort trigger during streaming
-      yield* streamWithAbortMonitoring(
-        source: jsonStream,
-        abortTrigger: abortTrigger,
-        requestId: requestId,
-        fromJson: (json) {
-          final sseEvent = json['_event'] as String?;
-          final error = json['error'];
-          if (sseEvent == 'error' || error != null) {
-            throwInlineStreamError(json, sseEvent, error);
-          }
-          return GenerateContentResponse.fromJson(json);
-        },
-      );
-    } else {
-      // No abort trigger, stream normally
-      await for (final json in jsonStream) {
+        // Create request
+        final httpRequest = http.Request('POST', url)
+          ..headers.addAll(headers)
+          ..body = jsonEncode(request.toJson());
+        return httpRequest;
+      },
+      abortTrigger: abortTrigger,
+      fromJson: (json) {
         final sseEvent = json['_event'] as String?;
         final error = json['error'];
         if (sseEvent == 'error' || error != null) {
           throwInlineStreamError(json, sseEvent, error);
         }
-        yield GenerateContentResponse.fromJson(json);
-      }
-    }
+        return GenerateContentResponse.fromJson(json);
+      },
+    );
   }
 
   /// Counts tokens in the provided content.
@@ -243,60 +216,35 @@ class ModelsResource extends ResourceBase with StreamingResource {
     required String dynamicId,
     required GenerateContentRequest request,
     Future<void>? abortTrigger,
-  }) async* {
-    // Build URL and headers
-    final url = requestBuilder.buildUrl(
-      '/{version}/dynamic/$dynamicId:streamGenerateContent',
-      queryParams: {'alt': 'sse'},
-    );
+  }) {
+    return streamRequest(
+      createRequest: () {
+        // Build URL and headers
+        final url = requestBuilder.buildUrl(
+          '/{version}/dynamic/$dynamicId:streamGenerateContent',
+          queryParams: {'alt': 'sse'},
+        );
 
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
-    );
+        final headers = requestBuilder.buildHeaders(
+          additionalHeaders: {'Content-Type': 'application/json'},
+        );
 
-    // Create request
-    var httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
-
-    // Use mixin methods for streaming request handling
-    httpRequest = await prepareStreamingRequest(httpRequest);
-    final streamedResponse = await sendStreamingRequest(httpRequest);
-
-    // Parse SSE stream
-    final lineStream = bytesToLines(streamedResponse.stream);
-    final jsonStream = parseSSE(lineStream);
-
-    // Get request ID for abortion tracking
-    final requestId =
-        httpRequest.headers['X-Request-ID'] ?? generateRequestId();
-
-    if (abortTrigger != null) {
-      // Monitor abort trigger during streaming
-      yield* streamWithAbortMonitoring(
-        source: jsonStream,
-        abortTrigger: abortTrigger,
-        requestId: requestId,
-        fromJson: (json) {
-          final sseEvent = json['_event'] as String?;
-          final error = json['error'];
-          if (sseEvent == 'error' || error != null) {
-            throwInlineStreamError(json, sseEvent, error);
-          }
-          return GenerateContentResponse.fromJson(json);
-        },
-      );
-    } else {
-      // No abort trigger, stream normally
-      await for (final json in jsonStream) {
+        // Create request
+        final httpRequest = http.Request('POST', url)
+          ..headers.addAll(headers)
+          ..body = jsonEncode(request.toJson());
+        return httpRequest;
+      },
+      abortTrigger: abortTrigger,
+      fromJson: (json) {
         final sseEvent = json['_event'] as String?;
         final error = json['error'];
         if (sseEvent == 'error' || error != null) {
           throwInlineStreamError(json, sseEvent, error);
         }
-        yield GenerateContentResponse.fromJson(json);
-      }
-    }
+        return GenerateContentResponse.fromJson(json);
+      },
+    );
   }
 
   /// Embeds content.
