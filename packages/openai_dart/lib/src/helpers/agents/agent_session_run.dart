@@ -3,15 +3,20 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:meta/meta.dart' show immutable;
+
 import '../../errors/exceptions.dart';
+import '../../models/agents/agent_config.dart';
 import '../../models/agents/agent_json_helpers.dart' show validateAgentLength;
 import '../../models/agents/agent_session_models.dart';
+import '../../models/common/equality_helpers.dart' show listsEqual;
 import '../../resources/agent_sessions_resource.dart';
 import 'agent_run_stop_signal.dart';
 
 part 'agent_tool_dispatcher.dart';
+part 'agent_session_run_result.dart';
 
-/// One lazy follow-up observation on an idle durable session.
+/// One lazy streamed creation or idle follow-up on a durable session.
 ///
 /// Prefer `client.agents.sessions.stream`. Exactly one input writer is required:
 /// the service's input acceptance does not return a selected turn ID or lock the
@@ -199,6 +204,140 @@ final class AgentSessionRun {
   var _pauseDepth = 0;
   var _cursorPaused = false;
 
+  _AgentRunCollector? _collector;
+  Future<AgentSessionRunResult>? _resultFuture;
+  Object? _binding;
+  late Object _typedRun;
+  bool _progressStarted = false;
+  bool _streamEnded = false;
+
+  /// Opts into bounded final-message collection before progress consumption.
+  /// `start()` alone is allowed; collection observes the same queued cursor.
+  /// Repeated opt-in keeps the limits selected by the first call.
+  AgentSessionRun withResultCollection({
+    int maxMessages = 1024,
+    int maxBytes = 4 * 1024 * 1024,
+  }) {
+    if (maxMessages < 1 || maxBytes < 1) {
+      throw const FormatException(
+        'Agent result retention limits must be positive',
+      );
+    }
+    // Fluent opt-in mirrors the official helper lifecycle.
+    // ignore: avoid_returning_this
+    if (_collector != null) return this;
+    if (_progressStarted) {
+      throw StateError('Enable result collection before consuming progress');
+    }
+    _collector = _AgentRunCollector(this, maxMessages, maxBytes);
+    // ignore: avoid_returning_this
+    return this;
+  }
+
+  /// Binds a local validator, sharing this cursor. Creation also binds the
+  /// canonical agent.text.format before HTTP; follow-up changes no stored state.
+  AgentSessionTypedRun<T> withOutput<T>(AgentSessionOutputBinding<T> binding) {
+    if (_binding != null) {
+      if (identical(_binding, binding)) {
+        return _typedRun as AgentSessionTypedRun<T>;
+      }
+      throw StateError('An Agent run already has a different output binding');
+    }
+    if (_startFuture != null || _progressStarted) {
+      throw StateError('Bind output before starting the run');
+    }
+    final creation = _creation;
+    if (creation != null) {
+      final agent = creation.agent ?? AgentSessionAgentConfig();
+      final text = agent.text ?? AgentTextConfig();
+      if (agent.clearText ||
+          text.clearFormat ||
+          (text.format != null && text.format != binding.format)) {
+        throw const FormatException(
+          'Creation output binding conflicts with agent.text.format',
+        );
+      }
+      _creation = creation.copyWith(
+        agent: agent.copyWith(
+          text: text.copyWith(format: binding.format, clearFormat: false),
+          clearText: false,
+        ),
+      );
+    }
+    withResultCollection();
+    _binding = binding;
+    final typed = AgentSessionTypedRun<T>._(this, binding);
+    _typedRun = typed;
+    return typed;
+  }
+
+  /// Drains this same cursor to a successful completed root turn and idle boundary.
+  /// Both successful and failed retrieval are cached, with no repeated I/O.
+  /// Stream break closes observation; use nextEvent for partial continuation.
+  Future<AgentSessionRunResult> finalResult() {
+    if (_resultFuture != null) return _resultFuture!;
+    if (_pulling || (_driver == 'stream' && !_streamEnded)) {
+      throw StateError('Do not collect concurrently with a progress driver');
+    }
+    withResultCollection();
+    return _resultFuture = _collectResult();
+  }
+
+  Future<AgentSessionRunResult> _collectResult() async {
+    if (_pulling || (_driver == 'stream' && !_streamEnded)) {
+      throw StateError('Do not collect concurrently with a progress driver');
+    }
+    withResultCollection();
+    final collector = _collector!;
+    _driver ??= 'pull';
+    _pulling = true;
+    int? actionCatchupRemaining;
+    try {
+      while (!collector.ready) {
+        _throwFailure();
+        if (collector.hasUnhandledAction) {
+          if (actionCatchupRemaining == null) {
+            // One bounded opportunity for already-buffered clearing state. Noise
+            // must not perpetually postpone an unresolved manual-action error.
+            if (_cursorPaused) {
+              _cursorPaused = false;
+              _resumeSource();
+            }
+            final available = Completer<void>();
+            final timer = Timer(Duration.zero, available.complete);
+            try {
+              await _race(available.future);
+            } finally {
+              timer.cancel();
+            }
+            _throwFailure();
+            actionCatchupRemaining = _queue.length;
+          }
+          collector.checkAction(
+            checkRequiredActions: actionCatchupRemaining == 0,
+          );
+          if (actionCatchupRemaining > 0) actionCatchupRemaining--;
+        } else {
+          actionCatchupRemaining = null;
+          collector.checkAction();
+        }
+        if (await _advance() == null) break;
+      }
+      _throwFailure();
+      return collector.finish();
+    } catch (error) {
+      if (error is AgentSessionRunResultException) rethrow;
+      throw collector.error(
+        AgentSessionRunResultReason.observationFailed,
+        error,
+      );
+    } finally {
+      _pulling = false;
+      await close();
+      collector.release();
+    }
+  }
+
   /// First coordinator turn observed by this invocation, or null before selection.
   String? get selectedTurnId => _selectedTurnId;
 
@@ -208,9 +347,10 @@ final class AgentSessionRun {
   /// Single-use Stream adapter. Break/take/cancel closes local observation.
   late final Stream<AgentSessionEvent> events = _RunEvents(this);
 
-  /// Deliberately starts retrieve -> subscribe-ready -> one normalized input.
+  /// Deliberately starts idle retrieval/ready observation/normalized input,
+  /// or the captured streamed creation request.
   ///
-  /// Completion means input acceptance, not turn completion. An externally
+  /// Completion means input acceptance or creation headers, not turn completion. An externally
   /// repeated start rejects; internal cursor advancement reuses the same setup.
   Future<void> start() {
     if (_startFuture != null) {
@@ -423,6 +563,7 @@ final class AgentSessionRun {
   }
 
   Future<AgentSessionEvent?> _advance() async {
+    _progressStarted = true;
     final dispatch = _pendingDispatch;
     _pendingDispatch = null;
     if (dispatch != null) {
@@ -451,6 +592,13 @@ final class AgentSessionRun {
       if (_queue.isNotEmpty) {
         final next = _queue.removeFirst();
         _queueBytes -= next.bytes;
+        try {
+          _collector?.accept(next.event);
+        } catch (error, stack) {
+          _fail(error, stack);
+          _discardQueue();
+          rethrow;
+        }
         _terminalDelivered = next.terminal;
         _pendingDispatch = next.dispatch;
         return next.event;
@@ -478,7 +626,8 @@ final class AgentSessionRun {
     if (_failure != null) return;
     _failure =
         error is StreamException && error.redactDiagnostics ||
-            error is AbortedException && error.redactDiagnostics
+            error is AbortedException && error.redactDiagnostics ||
+            error is AgentSessionRunResultException
         ? error
         : StreamException(
             message: 'Agent session run observation failed',
@@ -604,6 +753,7 @@ final class AgentSessionRun {
         yield event;
       }
     } finally {
+      _streamEnded = true;
       await close();
     }
   }

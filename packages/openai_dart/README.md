@@ -1452,6 +1452,47 @@ performed are not undone. No executor, browser authentication or sandbox is adde
 </details>
 
 <details>
+<summary><b>Collect or validate a completed Agent answer</b></summary>
+
+`finalResult()` on a fresh run drains the same observation and returns completed
+root-turn messages. To render some progress first, enable collection before
+consumption and use the controlled cursor:
+
+```dart
+final run = client.agents.sessions.stream(
+  sessionId,
+  input: AgentSessionInitialInput.text('Summarize the task.'),
+).withResultCollection();
+try {
+  final firstEvent = await run.nextEvent();
+  final result = await run.finalResult();
+  print(result.outputText);
+} on AgentSessionRunResultException catch (error) {
+  // Inspect error.reason, partial turn/messages/actions and cause explicitly.
+} finally {
+  await run.close();
+}
+```
+
+Collection defaults to 1,024 final messages and 4 MiB of retained snapshots;
+overflow fails explicitly. Default progress retains no collector history. A
+Stream break closes observation; `nextEvent()` supports partial continuation.
+Failed/cancelled turns, unresolved actions and incomplete observation return
+private typed errors. After a manual action, available canonical clearing events
+can be drained; HTTP 202 alone does not prove the action finished.
+
+Use `run.withOutput(AgentSessionOutputBinding(format: ..., parse: ...))` before
+starting for typed output. Supply an Agents JSON schema and a synchronous local
+validator. Creation binds `agent.text.format`; follow-ups change no session
+configuration. Every completed text block must validate, and a parse failure
+preserves the successful raw result. Parsed application values remain owned by
+the parser. Result Futures cache success and failure without replaying work.
+
+→ [Offline raw/typed result example](example/agent_session_result_example.dart), including creation and parse failure
+
+</details>
+
+<details>
 <summary><b>Session history and traces</b></summary>
 
 Read session items, turns, and published OTLP traces through `client.agents.sessions`. Trace reads require organization export settings and permissions; a page contains only traces published when it is read.
@@ -1681,6 +1722,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [agent_session_recovery_example.dart](example/agent_session_recovery_example.dart) | **Offline.** subscribe/buffer, current-state/history reconciliation and local observer cleanup |
 | [agent_session_run_example.dart](example/agent_session_run_example.dart) | **Offline.** lazy idle follow-up, selected root boundary, controlled pulls and separate cancellation |
 | [agent_local_tools_example.dart](example/agent_local_tools_example.dart) | **Offline.** opt-in sequential function dispatch for streamed creation or idle follow-up |
+| [agent_session_result_example.dart](example/agent_session_result_example.dart) | **Offline.** raw/typed completed results, partial cursor continuation and local parse failure |
 | [agent_session_history_example.dart](example/agent_session_history_example.dart) | **Offline.** root/turn history and published OTLP trace pagination |
 | [agent_subagents_example.dart](example/agent_subagents_example.dart) | **Offline.** Agent session subagents |
 | [agent_environments_example.dart](example/agent_environments_example.dart) | **Offline.** template CRUD and owned hosted environment prewarming, pagination and safe inspection |
