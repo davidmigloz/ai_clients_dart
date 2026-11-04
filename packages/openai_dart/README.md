@@ -1287,6 +1287,10 @@ Use `client.agents.sessions` to create sessions, observe events, and submit func
 
 → [Full example](example/agent_sessions_example.dart)
 
+For reconnecting observers, subscribe with `events.stream(..., onReady: ...)`, buffer updates, restore current session/history by item ID, then resume live handling. There is no replay cursor. Refresh `requiredActions` before an explicit browser decision; authentication values use only dedicated typed inputs with automatic retries disabled. An empty HTTP 202 confirms acceptance, so continue observing current state.
+
+→ Offline [browser actions](example/agent_browser_actions_example.dart) and [current-state recovery](example/agent_session_recovery_example.dart) examples
+
 </details>
 
 <a id="how-do-i-configure-agent-context-and-action-review"></a>
@@ -1541,6 +1545,8 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [agent_settings_example.dart](example/agent_settings_example.dart) | **Offline.** compaction, time awareness, session review/tools, ultrafast and exact metadata filters |
 | [agent_automations_example.dart](example/agent_automations_example.dart) | **Offline.** once/cron schedules, new/existing session targets, pause/resume, explicit invocation and delivery history |
 | [agent_sessions_example.dart](example/agent_sessions_example.dart) | **Offline.** durable sessions, persistent observation, manual function result and explicit cancellation |
+| [agent_browser_actions_example.dart](example/agent_browser_actions_example.dart) | **Offline.** explicit origin decisions, private authentication and observed acceptance |
+| [agent_session_recovery_example.dart](example/agent_session_recovery_example.dart) | **Offline.** subscribe/buffer, current-state/history reconciliation and local observer cleanup |
 | [agent_session_history_example.dart](example/agent_session_history_example.dart) | **Offline.** root/turn history and published OTLP trace pagination |
 | [agent_subagents_example.dart](example/agent_subagents_example.dart) | **Offline.** Agent session subagents |
 | [agent_environments_example.dart](example/agent_environments_example.dart) | **Offline.** template CRUD and owned hosted environment prewarming, pagination and safe inspection |

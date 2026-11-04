@@ -1,0 +1,119 @@
+{
+  "issue": 393,
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "promotion_owner": 427,
+  "http_operations_added": 0,
+  "schemas_added": 0,
+  "reused_types": {
+    "BrowserAuthenticationFieldValueParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionBrowserAuthenticationFieldValue",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "BrowserAuthenticationFieldValueParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "BrowserOriginAccessDecisionParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionBrowserOriginAccessDecision",
+      "file": "lib/src/models/agents/agent_session_enums.dart",
+      "schema": "BrowserOriginAccessDecisionParam",
+      "note": "Actual string-valued session wrapper class, not a Dart enum or object wire value. Preserves future strings; request validators enforce known canonical members. Source fixture and platform tests cover values; object inspection cannot extract scalar fields."
+    },
+    "ComputerUseApprovalResponseParamBrowserAuthenticationCancelParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionBrowserAuthenticationCancel",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "ComputerUseApprovalResponseParamBrowserAuthenticationCancelParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionBrowserAuthenticationResponse"
+    },
+    "ComputerUseApprovalResponseParamBrowserAuthenticationSubmitParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionBrowserAuthenticationSubmit",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "ComputerUseApprovalResponseParamBrowserAuthenticationSubmitParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionBrowserAuthenticationResponse"
+    },
+    "ComputerUseApprovalResponseParamBrowserOriginAccessParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionBrowserOriginAccessResponse",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "ComputerUseApprovalResponseParamBrowserOriginAccessParam",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionComputerUseApprovalResponse"
+    },
+    "SessionEvent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEvent",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "SessionInputParamAgentSessionInputComputerUseApprovalRequestResult": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionApprovalResultInput",
+      "file": "lib/src/models/agents/agent_session_approvals.dart",
+      "schema": "SessionInputParamAgentSessionInputComputerUseApprovalRequestResult",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape.",
+      "parent": "AgentSessionInput"
+    },
+    "SessionResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSession",
+      "file": "lib/src/models/agents/agent_session_core.dart",
+      "schema": "SessionResource",
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+    },
+    "SessionItemListResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionItemList",
+      "file": "lib/src/models/agents/agent_session_history.dart",
+      "schema": "SessionItemListResource",
+      "note": "Actual frozen root history/trace envelope. Required nullable page cursors, separate existing17-way history items, finite detached private OTLP JSON, immutable copies and equality/hash validated with canonical exported-client fixtures."
+    }
+  },
+  "client_only_extensions": [
+    {
+      "dart_context": "AgentSessionEventsResource.stream.onReady",
+      "file": "lib/src/resources/agent_sessions_resource.dart",
+      "semantics": "Synchronous successful-header readiness callback before event bytes; no wire field or replay guarantee."
+    }
+  ],
+  "source_receipts": [
+    {
+      "file": "openai-python/src/openai/types/beta/agent_browser_authentication_submit_param.py",
+      "sha256": "582e0230786f4490f0dcd338cf5bbd001ff9e12cd6a5e7a8130dd8af6de185cc"
+    },
+    {
+      "file": "openai-python/src/openai/types/beta/agent_browser_authentication_cancel_param.py",
+      "sha256": "db43d4eaf77d67eaa408391ccf5dd5cc1f61e4b5ea4d90a92ee82264ca02f8f7"
+    },
+    {
+      "file": "openai-python/src/openai/types/beta/agent_browser_origin_access_param.py",
+      "sha256": "60f281876b5d0d5d8764343aea7157a4d3a1617729a759cf947386467e948d47"
+    },
+    {
+      "file": "openai-python/src/openai/types/beta/agent_session_input_param.py",
+      "sha256": "1b82f05609c7997c5ec440774bb6eb19c70a7148b4500a660dc0fff163984992"
+    },
+    {
+      "file": "openai-node/src/resources/beta/agents/agents.ts",
+      "sha256": "03d26f89be2ce0137ef1326e8e196138c8a5a882af3c845cb05d6f6303dc19a2"
+    },
+    {
+      "file": "openai-node/src/resources/beta/agents/sessions/sessions.ts",
+      "sha256": "80ee2d0fdfcc6579e4b76f31b4401f88f65acd36b817e98eb7f3c979d5bb0cca"
+    }
+  ],
+  "scope_note": "Raw browser action/current-state recovery workflows, bounded application-owned examples and one readiness seam. Existing canonical wire models reused unchanged; no global manifest/spec promotion."
+}

@@ -73,6 +73,8 @@ Stream<Uint8List> openSpeechByteStream({
 /// A factory client is owned by this operation; an injected client is borrowed.
 /// No request is replayed. [validateResponse] checks successful response headers
 /// before any bytes are delivered. Non-success bodies use [parseError] instead.
+/// [onReady] runs synchronously after successful header validation, before bytes
+/// are subscribed. Throwing rejects the observation and releases its response.
 Stream<Uint8List> openPrivateByteStream({
   required http.Client httpClient,
   required http.Client Function()? streamClientFactory,
@@ -87,6 +89,7 @@ Stream<Uint8List> openPrivateByteStream({
   required String context,
   required ApiException Function(http.Response response) parseError,
   void Function(http.StreamedResponse response)? validateResponse,
+  void Function()? onReady,
   void Function()? ensureNotClosed,
   Future<void>? abortTrigger,
   bool timeoutResponseBody = true,
@@ -105,6 +108,7 @@ Stream<Uint8List> openPrivateByteStream({
   timeout: timeout,
   parseError: parseError,
   validateResponse: validateResponse,
+  onReady: onReady,
   ensureNotClosed: ensureNotClosed,
   abortTrigger: abortTrigger,
   timeoutResponseBody: timeoutResponseBody,
@@ -305,6 +309,7 @@ class _PrivateByteOperation {
     required this.timeoutResponseBody,
     required this.redactTransportErrors,
     this.validateResponse,
+    this.onReady,
     this.sanitizeConnectorErrors = false,
     Map<String, String>? additionalHeaders,
     this.betaFeature,
@@ -345,6 +350,7 @@ class _PrivateByteOperation {
   final bool redactTransportErrors;
   final bool sanitizeConnectorErrors;
   final void Function(http.StreamedResponse response)? validateResponse;
+  final void Function()? onReady;
 
   late final StreamController<Uint8List> _controller;
   final _cancelSignal = Completer<void>();
@@ -486,6 +492,32 @@ class _PrivateByteOperation {
                 '$context response media type does not match the selected mode',
           );
         }
+      }
+
+      if (!failed && onReady != null) {
+        try {
+          onReady!();
+        } catch (error) {
+          await discardResponse(response);
+          // Application callbacks can throw typed SDK errors with private text.
+          // Keep their explicit cause without bypassing this private operation's
+          // diagnostic policy. Native abort remains cancellation, as elsewhere.
+          if (redactTransportErrors && error is! http.RequestAbortedException) {
+            throw ConnectionException(
+              message: '$context readiness callback failed',
+              cause: error,
+              redactDiagnostics: true,
+            );
+          }
+          rethrow;
+        }
+      }
+
+      // Readiness callbacks can synchronously cancel their subscription. Do not
+      // attach a body listener after cancellation has already cleaned up setup.
+      if (_settled || _cancelled) {
+        await discardResponse(response);
+        return;
       }
 
       final errorBytes = BytesBuilder();

@@ -322,10 +322,17 @@ class AgentSessionEventsResource extends ResourceBase with _AgentSessionHttp {
   /// Subscribe before submitting work to receive early events. Idle, required
   /// action and turn completion are typed events and do not close observation.
   /// Cancel/abort releases only this observer; no cancel/delete input is sent.
+  /// [onReady] runs synchronously once successful SSE headers have been checked,
+  /// before event delivery. It does not wait for a first event or promise replay.
+  /// When awaiting readiness, also handle the stream's error/completion path;
+  /// failed or canceled setup never calls [onReady]. A callback failure closes
+  /// the observation with private diagnostics and the original explicit cause.
+  /// Its return is ignored; use it only to complete a local readiness signal.
   Stream<AgentSessionEvent> stream(
     String sessionId, {
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
+    void Function()? onReady,
   }) {
     ensureNotClosed?.call();
     return _observe(
@@ -333,6 +340,7 @@ class AgentSessionEventsResource extends ResourceBase with _AgentSessionHttp {
       '${_sessionPath(sessionId)}/events',
       additionalHeaders: additionalHeaders,
       abortTrigger: abortTrigger,
+      onReady: onReady,
     );
   }
 
@@ -516,6 +524,7 @@ mixin _AgentSessionHttp on ResourceBase {
     Map<String, dynamic>? body,
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
+    void Function()? onReady,
   }) => decodeAgentSessionEvents(
     openPrivateByteStream(
       httpClient: httpClient,
@@ -539,6 +548,7 @@ mixin _AgentSessionHttp on ResourceBase {
           );
         }
       },
+      onReady: onReady,
       ensureNotClosed: ensureNotClosed,
       abortTrigger: abortTrigger,
       timeoutResponseBody: false,
