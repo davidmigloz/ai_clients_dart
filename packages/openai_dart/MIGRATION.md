@@ -6,6 +6,31 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming release: runtime configuration snapshots
+
+Clients now detach and freeze their default-header maps. Mutating the map passed
+to the constructor no longer changes a client, and `client.config.defaultHeaders`
+is read-only. Use `updateConfig` with a replacement map instead:
+
+```dart
+// Before: changing a shared mutable map could affect active requests.
+headers['X-Mode'] = 'new';
+
+// After: install new settings, then acquire a fresh resource handle.
+client.updateConfig(defaultHeaders: {...client.config.defaultHeaders, 'X-Mode': 'new'});
+final responses = client.responses;
+```
+
+Retained resource handles, including later-created children, keep their original
+configuration. In-flight requests/retries, lazy or active streams, and WebSocket
+handshakes/recovery keep that handle's settings. Updating configuration does not
+close transports or migrate existing sessions. A retained provider can resolve
+rotating credentials through request-local header maps; changing provider identity
+requires a newly acquired handle. Nullable config fields use explicit null to
+clear, while omitted options are retained. Custom interceptor instances and
+transport ownership are preserved. See the
+[offline example](example/runtime_config_example.dart).
+
 ## Upcoming release: Agent context settings and action review
 
 `spend_control` was removed from session create/update/resource schemas. The

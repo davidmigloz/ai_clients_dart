@@ -6,6 +6,7 @@ import '../interceptors/auth_interceptor.dart';
 import '../interceptors/error_interceptor.dart';
 import '../interceptors/interceptor.dart';
 import '../interceptors/logging_interceptor.dart';
+import '../models/common/copy_with_sentinel.dart';
 import '../resources/agents_resource.dart';
 import '../resources/audio_resource.dart';
 import '../resources/batches_resource.dart';
@@ -133,7 +134,7 @@ class OpenAIClient {
     OpenAIConfig? config,
     http.Client? httpClient,
     http.Client Function()? streamClientFactory,
-  }) : _config = config ?? const OpenAIConfig(),
+  }) : _config = _snapshotConfig(config ?? const OpenAIConfig()),
        _httpClient = httpClient ?? http.Client(),
        _streamClientFactory = streamClientFactory,
        _audioStreamClientFactory =
@@ -196,7 +197,7 @@ class OpenAIClient {
     );
   }
 
-  final OpenAIConfig _config;
+  OpenAIConfig _config;
   final http.Client _httpClient;
   final http.Client Function()? _streamClientFactory;
   // Private binary streams borrow an injected client unless its caller supplies a
@@ -205,8 +206,9 @@ class OpenAIClient {
   final bool _ownsHttpClient;
   bool _closed = false;
   Logger? _logger;
-  late final InterceptorChain _interceptorChain;
-  late final RequestBuilder _requestBuilder;
+  late InterceptorChain _interceptorChain;
+  Map<Interceptor, _ManagedInterceptor> _managedInterceptors = Map.identity();
+  late RequestBuilder _requestBuilder;
 
   /// The configuration for this client.
   OpenAIConfig get config => _config;
@@ -227,42 +229,197 @@ class OpenAIClient {
   }
 
   void _initializeInterceptorChain() {
-    // Build the list of interceptors
-    final interceptors = <Interceptor>[];
+    final runtime = _buildRuntime(_config, _logger);
+    _interceptorChain = runtime.chain;
+    _managedInterceptors = runtime.managed;
+  }
 
-    // Add auth interceptor if auth provider is configured
-    if (_config.authProvider case final authProvider?) {
-      interceptors.add(AuthInterceptor(authProvider: authProvider));
-    }
+  /// Updates configuration for subsequently acquired resource handles.
+  ///
+  /// Existing handles, including their child resources, remain immutable
+  /// configuration snapshots. Reacquire `client.responses` (or another resource)
+  /// after an update to use the new settings. In-flight requests, retries,
+  /// streams, socket handshakes and established socket recovery retain their
+  /// original resource settings. Updating never closes or migrates a transport.
+  ///
+  /// Omitted fields retain their value. Explicit null clears nullable fields;
+  /// use an empty [defaultHeaders] map to clear global headers. Header maps are
+  /// copied, while providers/interceptors retain their application-owned state.
+  /// Custom interceptor instances and ordering are retained; managed auth,
+  /// logging and error interceptors are rebuilt from configuration.
+  ///
+  /// Logging body policy belongs to each resource snapshot. The named package
+  /// logger's filtering level remains shared, as with client construction.
+  /// `connectTimeout` still requires transport support for ordinary HTTP.
+  /// Throws [StateError] after [close], and leaves current settings intact when
+  /// an update argument is invalid.
+  void updateConfig({
+    Object? authProvider = unsetCopyWithValue,
+    String? baseUrl,
+    Duration? timeout,
+    Duration? connectTimeout,
+    RetryPolicy? retryPolicy,
+    Object? logLevel = unsetCopyWithValue,
+    Map<String, String>? defaultHeaders,
+    Object? apiVersion = unsetCopyWithValue,
+    Object? organization = unsetCopyWithValue,
+    Object? project = unsetCopyWithValue,
+    Object? webhookSecret = unsetCopyWithValue,
+  }) {
+    _ensureNotClosed();
+    final candidate = _snapshotConfig(
+      _config.copyWith(
+        authProvider: authProvider,
+        baseUrl: baseUrl,
+        timeout: timeout,
+        connectTimeout: connectTimeout,
+        retryPolicy: retryPolicy,
+        logLevel: logLevel,
+        defaultHeaders: defaultHeaders,
+        apiVersion: apiVersion,
+        organization: organization,
+        project: project,
+        webhookSecret: webhookSecret,
+      ),
+    );
+    final logger = candidate.logLevel == null
+        ? null
+        : (_logger ?? Logger('OpenAIClient'));
+    final runtime = _buildRuntime(
+      candidate,
+      logger,
+      previous: _interceptorChain.interceptors,
+      previousManaged: _managedInterceptors,
+    );
+    final builder = RequestBuilder(config: candidate);
+    // Everything above is synchronous and detached. Publish one complete
+    // generation only after validation/building has succeeded.
+    if (logger != null) logger.level = candidate.logLevel;
+    _config = candidate;
+    _logger = logger;
+    _interceptorChain = runtime.chain;
+    _managedInterceptors = runtime.managed;
+    _requestBuilder = builder;
+    _invalidateResourceCaches();
+  }
 
-    // Add logging interceptor if logging is enabled
-    if (_config.logLevel != null) {
-      _logger ??= Logger('OpenAIClient');
-      interceptors.add(
-        LoggingInterceptor(
-          logger: _logger!,
-          logRequestBody: _config.logLevel == Level.FINEST,
-          logResponseBody: _config.logLevel == Level.FINEST,
+  /// Updates authentication for newly acquired resource handles.
+  ///
+  /// Existing handles retain their provider. For short-lived credentials shared
+  /// with active handles, use a provider that resolves a fresh request-local map.
+  void updateAuthProvider(AuthProvider? provider) =>
+      updateConfig(authProvider: provider);
+
+  static OpenAIConfig _snapshotConfig(OpenAIConfig value) => OpenAIConfig(
+    authProvider: value.authProvider,
+    baseUrl: value.baseUrl,
+    timeout: value.timeout,
+    connectTimeout: value.connectTimeout,
+    retryPolicy: value.retryPolicy,
+    logLevel: value.logLevel,
+    defaultHeaders: Map<String, String>.unmodifiable(value.defaultHeaders),
+    apiVersion: value.apiVersion,
+    organization: value.organization,
+    project: value.project,
+    webhookSecret: value.webhookSecret,
+  );
+
+  _ClientRuntime _buildRuntime(
+    OpenAIConfig config,
+    Logger? logger, {
+    List<Interceptor>? previous,
+    Map<Interceptor, _ManagedInterceptor>? previousManaged,
+  }) {
+    final replacements = <_ManagedInterceptor, Interceptor>{
+      if (config.authProvider case final provider?)
+        _ManagedInterceptor.auth: AuthInterceptor(authProvider: provider),
+      if (logger != null)
+        _ManagedInterceptor.logging: LoggingInterceptor(
+          logger: logger,
+          logRequestBody: config.logLevel == Level.FINEST,
+          logResponseBody: config.logLevel == Level.FINEST,
         ),
+      _ManagedInterceptor.error: const ErrorInterceptor(),
+    };
+    final interceptors = <Interceptor>[];
+    final placed = <_ManagedInterceptor>{};
+    if (previous != null) {
+      for (final interceptor in List<Interceptor>.of(previous)) {
+        final kind = previousManaged?[interceptor];
+        if (kind == null) {
+          interceptors.add(interceptor);
+        } else {
+          placed.add(kind);
+          if (replacements[kind] case final replacement?) {
+            interceptors.add(replacement);
+          }
+        }
+      }
+    }
+    final auth = replacements[_ManagedInterceptor.auth];
+    if (auth != null && !placed.contains(_ManagedInterceptor.auth)) {
+      interceptors.insert(0, auth);
+    }
+    final logging = replacements[_ManagedInterceptor.logging];
+    if (logging != null && !placed.contains(_ManagedInterceptor.logging)) {
+      final errorIndex = interceptors.indexOf(
+        replacements[_ManagedInterceptor.error]!,
+      );
+      interceptors.insert(
+        errorIndex < 0 ? interceptors.length : errorIndex,
+        logging,
       );
     }
-
-    // Add error interceptor (always)
-    interceptors.add(const ErrorInterceptor());
-
-    // Create retry wrapper
-    final retryWrapper = _config.retryPolicy.maxRetries > 0
-        ? RetryWrapper(config: _config)
-        : null;
-
-    // Build the interceptor chain
-    _interceptorChain = InterceptorChain(
-      interceptors: interceptors,
-      httpClient: _httpClient,
-      retryWrapper: retryWrapper,
-      timeout: _config.timeout,
-      ensureNotClosed: _ensureNotClosed,
+    if (!placed.contains(_ManagedInterceptor.error)) {
+      interceptors.add(replacements[_ManagedInterceptor.error]!);
+    }
+    final managed = Map<Interceptor, _ManagedInterceptor>.identity();
+    for (final entry in replacements.entries) {
+      managed[entry.value] = entry.key;
+    }
+    return _ClientRuntime(
+      InterceptorChain(
+        interceptors: interceptors,
+        httpClient: _httpClient,
+        retryWrapper: config.retryPolicy.maxRetries > 0
+            ? RetryWrapper(config: config)
+            : null,
+        timeout: config.timeout,
+        ensureNotClosed: _ensureNotClosed,
+      ),
+      managed,
     );
+  }
+
+  void _invalidateResourceCaches() {
+    _agents = null;
+    _vaults = null;
+    _chat = null;
+    _completions = null;
+    _embeddings = null;
+    _audio = null;
+    _live = null;
+    _images = null;
+    _files = null;
+    _uploads = null;
+    _batches = null;
+    _models = null;
+    _moderations = null;
+    _decisions = null;
+    _fineTuning = null;
+    _evals = null;
+    _beta = null;
+    _realtime = null;
+    _realtimeSessions = null;
+    _responses = null;
+    _skills = null;
+    _conversations = null;
+    _videos = null;
+    _containers = null;
+    _chatkit = null;
+    _contentProvenanceChecks = null;
+    _webhooks = null;
+    _safety = null;
   }
 
   // ============================================================
@@ -1031,4 +1188,12 @@ class OpenAIClient {
       _httpClient.close();
     }
   }
+}
+
+enum _ManagedInterceptor { auth, logging, error }
+
+final class _ClientRuntime {
+  const _ClientRuntime(this.chain, this.managed);
+  final InterceptorChain chain;
+  final Map<Interceptor, _ManagedInterceptor> managed;
 }

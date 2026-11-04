@@ -2,18 +2,8 @@ import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 
 import '../auth/auth_provider.dart';
+import '../models/common/copy_with_sentinel.dart';
 import '../platform/environment.dart';
-
-/// Private sentinel class to distinguish "not provided" from "set to null".
-///
-/// Using a private class prevents callers from accidentally passing the sentinel
-/// value, unlike `const Object()` which is globally canonicalized.
-class _Unset {
-  const _Unset();
-}
-
-/// Sentinel value for copyWith to distinguish "not provided" from "set to null".
-const Object _unset = _Unset();
 
 /// Retry policy configuration.
 @immutable
@@ -226,17 +216,17 @@ class OpenAIConfig {
   /// To clear a nullable field, pass `null` explicitly. Fields not provided
   /// retain their current values.
   OpenAIConfig copyWith({
-    Object? authProvider = _unset,
+    Object? authProvider = unsetCopyWithValue,
     String? baseUrl,
     Duration? timeout,
     Duration? connectTimeout,
     RetryPolicy? retryPolicy,
-    Object? logLevel = _unset,
+    Object? logLevel = unsetCopyWithValue,
     Map<String, String>? defaultHeaders,
-    Object? apiVersion = _unset,
-    Object? organization = _unset,
-    Object? project = _unset,
-    Object? webhookSecret = _unset,
+    Object? apiVersion = unsetCopyWithValue,
+    Object? organization = unsetCopyWithValue,
+    Object? project = unsetCopyWithValue,
+    Object? webhookSecret = unsetCopyWithValue,
   }) {
     return OpenAIConfig(
       authProvider: _resolveField<AuthProvider>(
@@ -266,7 +256,7 @@ class OpenAIConfig {
   }
 
   String? _resolveWebhookSecret(Object? value) {
-    if (identical(value, _unset)) return webhookSecret;
+    if (identical(value, unsetCopyWithValue)) return webhookSecret;
     if (value == null || value is String) return value as String?;
     throw ArgumentError(
       'OpenAIConfig.copyWith: webhookSecret must be a String or null.',
@@ -279,16 +269,14 @@ class OpenAIConfig {
   /// that [value] is of type [T] and returns it. Throws [ArgumentError] with
   /// a clear message if the type is wrong.
   static T? _resolveField<T>(Object? value, String fieldName, T? currentValue) {
-    if (value == _unset) {
+    if (identical(value, unsetCopyWithValue)) {
       return currentValue;
     }
     if (value == null || value is T) {
       return value as T?;
     }
-    throw ArgumentError.value(
-      value,
-      fieldName,
-      'Expected $T?, but got ${value.runtimeType}',
+    throw ArgumentError(
+      'OpenAIConfig.copyWith: $fieldName must be $T or null.',
     );
   }
 
