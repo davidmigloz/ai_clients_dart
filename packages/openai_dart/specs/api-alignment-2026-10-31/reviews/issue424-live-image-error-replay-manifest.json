@@ -1,0 +1,138 @@
+{
+  "issue": 424,
+  "completion_owner": 427,
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "types": {
+    "LiveInputImageGenToolCall": {
+      "spec": "main",
+      "schema": "ImageGenToolCall",
+      "kind": "sealed_variant",
+      "dart_class": "LiveInputImageGenToolCall",
+      "file": "lib/src/models/live/live_input_item.dart",
+      "parent": "LiveInputItem",
+      "note": "Actual Live InputItem context; typed shared image error, presence/copy support, immutable full-wire ownership and canonical writable validation including error dependencies."
+    }
+  },
+  "shared_error_contexts": {
+    "ImageGenToolCallError": {
+      "dart_class": "ImageGenerationCallError",
+      "file": "lib/src/models/images/image_tool_error.dart",
+      "source_pointer": "#/components/schemas/ImageGenToolCall/properties/error",
+      "runtime_owner": "LiveInputImageGenToolCall.error"
+    },
+    "ImageGenToolCallModerationDetails": {
+      "dart_class": "ImageGenerationModerationDetails",
+      "file": "lib/src/models/images/image_tool_error.dart",
+      "source_pointer": "#/components/schemas/ImageGenToolCallError/properties/moderation_details",
+      "runtime_owner": "LiveInputImageGenToolCall.error.moderationDetails"
+    }
+  },
+  "canonical_component_sha256": {
+    "ImageGenToolCall": "e08c80b4f4048a55d701dbcb1484943d56bb22bf29eba23d48761e99a0a05dee",
+    "ImageGenToolCallError": "194881b7b82c3e8bc457d2ad3c008c5268ac6dda530775762f6bb59f9ba067d8",
+    "ImageGenToolCallModerationDetails": "765be48a766c3ed094d9a179260490bfe09ae83dfb2c120931484816d9d551e2"
+  },
+  "sdk_sources": [
+    {
+      "sdk": "node",
+      "commit": "c717857c3151bde92e07e4d396301a9c67163e68",
+      "file": "src/resources/responses/responses.ts",
+      "sha256": "f84e394bf08d71403c054ccb4d41d278861f2d19db3ea426e7aec789f3eb5dbb"
+    },
+    {
+      "sdk": "python",
+      "commit": "0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f",
+      "file": "src/openai/types/responses/response_output_item.py",
+      "sha256": "814e4128695ae3c61d81d67bcc66d8e6dab30227fe99ccb10b1ec2b86575bc3c"
+    }
+  ],
+  "existing_inline_contexts": {
+    "LiveInputImageGenToolInputImageMaskValue": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/input_image_mask",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolCallSizeValue": {
+      "schema": "ImageGenToolCall",
+      "source_pointer": "#/components/schemas/ImageGenToolCall/properties/size/anyOf/0",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolCallSizeValueBranch0": {
+      "schema": "ImageGenToolCall",
+      "source_pointer": "#/components/schemas/ImageGenToolCall/properties/size/anyOf/0/anyOf/0",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolCallSizeValueBranch1": {
+      "schema": "ImageGenToolCall",
+      "source_pointer": "#/components/schemas/ImageGenToolCall/properties/size/anyOf/0/anyOf/1",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolModelValue": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/model",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolModelValueBranch0": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/model/anyOf/0",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolModelValueBranch1": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/model/anyOf/1",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolSizeValue": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/size",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolSizeValueBranch0": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/size/anyOf/0",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolSizeValueBranch1": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/size/anyOf/1",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputFidelity": {
+      "schema": "InputFidelity",
+      "source_pointer": "#/components/schemas/InputFidelity",
+      "file": "lib/src/models/live/live_input_item.dart",
+      "wire_kind": "string",
+      "note": "Closed writable high/low value adapter, not an object DTO."
+    }
+  },
+  "tests": [
+    "test/unit/models/live_image_error_replay_test.dart",
+    "test/unit/models/live_input_item_test.dart",
+    "test/unit/models/live_input_item_regressions_test.dart",
+    "test/unit/models/live_input_alias_test.dart"
+  ],
+  "new_skips": [],
+  "new_coverage_exclusions": [],
+  "toolkit_verification": {
+    "source": "frozen local fetch/review; scratch canonical promotion only",
+    "scope": "type",
+    "implementation": {
+      "LiveInputImageGenToolCall": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 3
+      },
+      "ImageGenToolCallError": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 0
+      },
+      "ImageGenToolCallModerationDetails": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 1
+      }
+    },
+    "note": "Advisory type-name infos reflect existing Live enum wrappers and the received stage value class. Global historical/contextual diagnostics remain outside this narrow correction."
+  }
+}
