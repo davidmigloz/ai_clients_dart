@@ -3,17 +3,17 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../auth/auth_provider.dart';
 import '../errors/exceptions.dart';
 import '../models/batches/batch_request.dart';
 import '../models/batches/message_batch.dart';
 import 'base_resource.dart';
+import 'streaming_resource.dart';
 
 /// Resource for the Message Batches API.
 ///
 /// The Message Batches API allows you to process large volumes of
 /// Messages requests asynchronously.
-class MessageBatchesResource extends ResourceBase {
+class MessageBatchesResource extends ResourceBase with StreamingResource {
   /// Creates a [MessageBatchesResource].
   MessageBatchesResource({
     required super.config,
@@ -179,70 +179,33 @@ class MessageBatchesResource extends ResourceBase {
   ///
   /// Parameters:
   /// - [batchId]: The ID of the batch to get results for.
-  Stream<BatchIndividualResponse> results(String batchId) async* {
-    final uri = requestBuilder.buildUrl(
+  /// [abortTrigger] cancels the request even while no results arrive.
+  Stream<BatchIndividualResponse> results(
+    String batchId, {
+    Future<void>? abortTrigger,
+  }) => mapStream(
+    getJsonlStream(
       '/v1/messages/batches/$batchId/results',
-    );
-    final request = http.Request('GET', uri)
-      ..headers.addAll(requestBuilder.buildHeaders());
+      abortTrigger: abortTrigger,
+      errorFactory: _createResultsException,
+    ),
+    BatchIndividualResponse.fromJson,
+  );
 
-    // Apply authentication before sending (bypasses interceptor chain)
-    await _applyAuthentication(request);
-
-    final response = await httpClient.send(request);
-
-    if (response.statusCode >= 400) {
-      final body = await response.stream.bytesToString();
-      String message;
-      try {
-        final json = jsonDecode(body) as Map<String, dynamic>;
-        final error = json['error'] as Map<String, dynamic>?;
-        message = error?['message'] as String? ?? body;
-      } catch (_) {
-        message = body;
-      }
-
-      switch (response.statusCode) {
-        case 401:
-          throw AuthenticationException(message: message);
-        case 429:
-          throw RateLimitException(
-            statusCode: response.statusCode,
-            message: message,
-          );
-        case 400:
-          throw ValidationException(message: message, fieldErrors: const {});
-        default:
-          throw ApiException(statusCode: response.statusCode, message: message);
-      }
+  AnthropicException _createResultsException(int statusCode, String body) {
+    String message;
+    try {
+      final json = jsonDecode(body) as Map<String, dynamic>;
+      final error = json['error'] as Map<String, dynamic>?;
+      message = error?['message'] as String? ?? body;
+    } catch (_) {
+      message = body;
     }
-
-    // Parse JSONL stream
-    final lineStream = response.stream
-        .transform(utf8.decoder)
-        .transform(const LineSplitter());
-
-    await for (final line in lineStream) {
-      if (line.trim().isEmpty) continue;
-      final json = jsonDecode(line) as Map<String, dynamic>;
-      yield BatchIndividualResponse.fromJson(json);
-    }
-  }
-
-  /// Applies authentication to a request.
-  Future<void> _applyAuthentication(http.BaseRequest request) async {
-    final authProvider = config.authProvider;
-    if (authProvider == null) return;
-
-    final credentials = await authProvider.getCredentials();
-    switch (credentials) {
-      case ApiKeyCredentials(:final apiKey):
-        if (!request.headers.containsKey('x-api-key')) {
-          request.headers['x-api-key'] = apiKey;
-        }
-      case NoAuthCredentials():
-        // No authentication needed
-        break;
-    }
+    return switch (statusCode) {
+      401 => AuthenticationException(message: message),
+      429 => RateLimitException(statusCode: statusCode, message: message),
+      400 => ValidationException(message: message, fieldErrors: const {}),
+      _ => ApiException(statusCode: statusCode, message: message),
+    };
   }
 }
