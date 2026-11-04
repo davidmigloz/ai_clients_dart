@@ -19,6 +19,7 @@ import '../tools/computer_action.dart';
 import '../tools/response_tool.dart';
 import '../tools/shell_tool_environment.dart';
 import '../tools/tool_call_caller.dart';
+import '../websocket/websocket_json_helpers.dart';
 import 'item.dart';
 import 'shell_call_helpers.dart';
 import 'tool_search_item_helpers.dart';
@@ -44,6 +45,9 @@ import 'web_search_result.dart';
 /// - [ShellCallOutputItem] - Shell tool calls
 /// - [ShellCallOutputResultItem] - Shell tool call results
 /// - [McpCallOutputItem] - MCP (Model Context Protocol) tool calls
+/// - [McpListToolsOutputItem] - MCP tool discovery
+/// - [McpApprovalRequestOutputItem] - MCP approval requests
+/// - [McpApprovalResponseOutputItem] - MCP approval responses
 /// - [ToolSearchCallOutputItem] - Tool search calls
 /// - [ToolSearchOutputItem] - Tool search results
 /// - [ComputerCallOutputItem] - Computer use tool calls
@@ -83,6 +87,9 @@ sealed class OutputItem {
       'shell_call' => ShellCallOutputItem.fromJson(json),
       'shell_call_output' => ShellCallOutputResultItem.fromJson(json),
       'mcp_call' => McpCallOutputItem.fromJson(json),
+      'mcp_list_tools' => McpListToolsOutputItem.fromJson(json),
+      'mcp_approval_request' => McpApprovalRequestOutputItem.fromJson(json),
+      'mcp_approval_response' => McpApprovalResponseOutputItem.fromJson(json),
       'tool_search_call' => ToolSearchCallOutputItem.fromJson(json),
       'tool_search_output' => ToolSearchOutputItem.fromJson(json),
       'computer_call' => ComputerCallOutputItem.fromJson(json),
@@ -2077,118 +2084,775 @@ class LocalShellCallOutputResultItem extends OutputItem {
       'LocalShellCallOutputResultItem(id: $id, agent: $agent, callId: $callId, status: $status)';
 }
 
-/// An MCP (Model Context Protocol) call output item.
+/// A status reported by an MCP call.
+enum McpCallStatus {
+  /// Fallback for an unrecognized returned status; the raw string is not kept.
+  unknown('unknown'),
+
+  /// The call is in progress.
+  inProgress('in_progress'),
+
+  /// The server is executing the call.
+  calling('calling'),
+
+  /// The call completed.
+  completed('completed'),
+
+  /// The call did not complete.
+  incomplete('incomplete'),
+
+  /// The call failed.
+  failed('failed');
+
+  /// Serialized value, including the local fallback sentinel.
+  final String value;
+  const McpCallStatus(this.value);
+
+  /// Parses a native value, returning [unknown] for future status strings.
+  static McpCallStatus fromJson(String value) =>
+      McpCallStatus.values.firstWhere(
+        (status) => status.value == value,
+        orElse: () => McpCallStatus.unknown,
+      );
+
+  /// Returns the native value.
+  String toJson() => value;
+}
+
+/// An error returned by an MCP call.
 ///
-/// Returned when the model uses the [McpTool].
+/// Known variants are [McpProtocolError], [McpToolExecutionError] and
+/// [McpHttpError]. Future error types use [UnknownMcpCallError], preserving their
+/// raw JSON. Malformed known variants still fail validation.
+sealed class McpCallError {
+  /// Creates an error.
+  const McpCallError();
+
+  /// Parses a native MCP error.
+  factory McpCallError.fromJson(Map<String, dynamic> json) {
+    final type = requireJsonString(json['type'], 'McpCallError.type');
+    return switch (type) {
+      'mcp_protocol_error' => McpProtocolError.fromJson(json),
+      'mcp_tool_execution_error' => McpToolExecutionError.fromJson(json),
+      'http_error' => McpHttpError.fromJson(json),
+      _ => UnknownMcpCallError.fromJson(json),
+    };
+  }
+
+  /// Serializes the error.
+  Map<String, dynamic> toJson();
+}
+
+/// A future MCP error with an immutable, lossless JSON snapshot.
 @immutable
-class McpCallOutputItem extends OutputItem {
-  /// Unique identifier.
-  final String id;
+final class UnknownMcpCallError extends McpCallError {
+  /// Creates a future error, validating its discriminator and JSON payload.
+  factory UnknownMcpCallError({required Map<String, dynamic> rawJson}) =>
+      UnknownMcpCallError.fromJson(rawJson);
 
-  /// The agent that produced this item.
-  ///
-  /// Only populated on the beta multi-agent protocol
-  /// (`OpenAI-Beta: responses_multi_agent=v1`).
-  final AgentTag? agent;
+  const UnknownMcpCallError._(this.rawJson);
 
-  /// The call ID for this MCP call.
-  final String callId;
+  /// Parses a future error without accepting malformed known variants.
+  factory UnknownMcpCallError.fromJson(Map<String, dynamic> json) {
+    const context = 'UnknownMcpCallError';
+    final type = requireJsonString(json['type'], '$context.type');
+    if (type.isEmpty ||
+        type == 'mcp_protocol_error' ||
+        type == 'mcp_tool_execution_error' ||
+        type == 'http_error') {
+      throw const FormatException(
+        '$context.type: expected an unrecognized nonempty type',
+      );
+    }
+    return UnknownMcpCallError._(snapshotResponsesJson(json, context));
+  }
 
-  /// The server label identifying the MCP server.
-  final String? serverLabel;
+  /// The original future discriminator, preserved verbatim.
+  String get type => rawJson['type'] as String;
 
-  /// The name of the MCP tool called.
-  final String? name;
+  /// Recursively immutable JSON, including the discriminator and future fields.
+  final Map<String, dynamic> rawJson;
 
-  /// The arguments passed to the tool (JSON string).
-  final String? arguments;
+  @override
+  Map<String, dynamic> toJson() => {...rawJson};
 
-  /// The output from the tool call.
-  final String? output;
+  /// Copies raw metadata, with the typed [type] taking precedence over its key.
+  /// Omitted [type] retains this error's discriminator.
+  UnknownMcpCallError copyWith({String? type, Map<String, dynamic>? rawJson}) =>
+      UnknownMcpCallError(
+        rawJson: {...(rawJson ?? this.rawJson), 'type': type ?? this.type},
+      );
 
-  /// Error message if the call failed.
-  final String? error;
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownMcpCallError && mapsDeepEqual(rawJson, other.rawJson);
 
-  /// Item status.
-  final ItemStatus? status;
+  @override
+  int get hashCode => mapDeepHashCode(rawJson);
 
-  /// Creates an [McpCallOutputItem].
-  const McpCallOutputItem({
-    required this.id,
-    this.agent,
-    required this.callId,
-    this.serverLabel,
-    this.name,
-    this.arguments,
-    this.output,
-    this.error,
-    this.status,
-  });
+  @override
+  String toString() =>
+      'UnknownMcpCallError(type: [REDACTED], rawJson: ${rawJson.length} entries)';
+}
 
-  /// Creates an [McpCallOutputItem] from JSON.
-  factory McpCallOutputItem.fromJson(Map<String, dynamic> json) {
-    return McpCallOutputItem(
-      id: json['id'] as String,
-      agent: json['agent'] != null
-          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
-          : null,
-      callId: json['call_id'] as String,
-      serverLabel: json['server_label'] as String?,
-      name: json['name'] as String?,
-      arguments: json['arguments'] as String?,
-      output: json['output'] as String?,
-      error: json['error'] as String?,
-      status: json['status'] != null
-          ? ItemStatus.fromJson(json['status'] as String)
-          : null,
+Object? _requiredMcpValue(Map<String, dynamic> json, String key) {
+  if (!json.containsKey(key)) throw FormatException('Missing MCP field: $key');
+  return toolSearchReturnedArguments({'arguments': json[key]}, 'MCP.$key');
+}
+
+Object? _optionalMcpValue(Object? value) =>
+    toolSearchReturnedArguments({'arguments': value}, 'MCP');
+
+/// An MCP protocol error.
+@immutable
+class McpProtocolError extends McpCallError {
+  /// The native `code` field.
+  final int code;
+
+  /// The native `message` field.
+  final String message;
+
+  /// Creates a [McpProtocolError].
+  const McpProtocolError({required this.code, required this.message});
+
+  /// Parses native JSON.
+  factory McpProtocolError.fromJson(Map<String, dynamic> json) {
+    const context = 'McpProtocolError';
+    requireJsonType(json, 'mcp_protocol_error', context);
+
+    return McpProtocolError(
+      code: requireJsonInt(json['code'], '$context.code'),
+      message: requireJsonString(json['message'], '$context.message'),
     );
   }
 
+  /// Serializes native JSON.
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'mcp_protocol_error',
+    'code': code,
+    'message': message,
+  };
+
+  /// Copies this value with updated fields.
+  McpProtocolError copyWith({int? code, String? message}) => McpProtocolError(
+    code: code ?? this.code,
+    message: message ?? this.message,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is McpProtocolError &&
+          runtimeType == other.runtimeType &&
+          code == other.code &&
+          message == other.message;
+  @override
+  int get hashCode => Object.hashAll([code, message]);
+  @override
+  String toString() => 'McpProtocolError(code: $code)';
+}
+
+/// An HTTP error from an MCP server.
+@immutable
+class McpHttpError extends McpCallError {
+  /// The native `code` field.
+  final int code;
+
+  /// The native `message` field.
+  final String message;
+
+  /// Creates a [McpHttpError].
+  const McpHttpError({required this.code, required this.message});
+
+  /// Parses native JSON.
+  factory McpHttpError.fromJson(Map<String, dynamic> json) {
+    const context = 'McpHttpError';
+    requireJsonType(json, 'http_error', context);
+
+    return McpHttpError(
+      code: requireJsonInt(json['code'], '$context.code'),
+      message: requireJsonString(json['message'], '$context.message'),
+    );
+  }
+
+  /// Serializes native JSON.
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'http_error',
+    'code': code,
+    'message': message,
+  };
+
+  /// Copies this value with updated fields.
+  McpHttpError copyWith({int? code, String? message}) =>
+      McpHttpError(code: code ?? this.code, message: message ?? this.message);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is McpHttpError &&
+          runtimeType == other.runtimeType &&
+          code == other.code &&
+          message == other.message;
+  @override
+  int get hashCode => Object.hashAll([code, message]);
+  @override
+  String toString() => 'McpHttpError(code: $code)';
+}
+
+/// An MCP tool execution error.
+@immutable
+class McpToolExecutionError extends McpCallError {
+  /// The native `content` field.
+  final Object? content;
+
+  /// Creates a [McpToolExecutionError].
+  /// Caller-owned collections must not be mutated after construction.
+  /// Parsed JSON is an unmodifiable snapshot.
+  const McpToolExecutionError({required this.content});
+
+  /// Parses native JSON.
+  factory McpToolExecutionError.fromJson(Map<String, dynamic> json) {
+    const context = 'McpToolExecutionError';
+    requireJsonType(json, 'mcp_tool_execution_error', context);
+
+    return McpToolExecutionError(content: _requiredMcpValue(json, 'content'));
+  }
+
+  /// Serializes native JSON.
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'mcp_tool_execution_error',
+    'content': content,
+  };
+
+  /// Copies this value; nullable fields can be explicitly cleared.
+  McpToolExecutionError copyWith({Object? content = unsetCopyWithValue}) =>
+      McpToolExecutionError(
+        content: content == unsetCopyWithValue ? this.content : content,
+      );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is McpToolExecutionError &&
+          runtimeType == other.runtimeType &&
+          mapsDeepEqual({'v': content}, {'v': other.content});
+  @override
+  int get hashCode => Object.hashAll([
+    mapDeepHashCode({'v': content}),
+  ]);
+  @override
+  String toString() => 'McpToolExecutionError(hasContent: ${content != null})';
+}
+
+/// An MCP call returned by the Responses API.
+@immutable
+class McpCallOutputItem extends OutputItem {
+  /// The native `id` field.
+  final String id;
+
+  /// The native `arguments` field.
+  final String arguments;
+
+  /// The native `name` field.
+  final String name;
+
+  /// The native `server_label` field.
+  final String serverLabel;
+
+  /// The native `agent` field.
+  final AgentTag? agent;
+
+  /// The native `approval_request_id` field.
+  final String? approvalRequestId;
+
+  /// The native `error` field.
+  final McpCallError? error;
+
+  /// The native `output` field.
+  final String? output;
+
+  /// The native `status` field.
+  final McpCallStatus? status;
+
+  /// Creates a [McpCallOutputItem].
+  const McpCallOutputItem({
+    required this.id,
+    required this.arguments,
+    required this.name,
+    required this.serverLabel,
+    this.agent,
+    this.approvalRequestId,
+    this.error,
+    this.output,
+    this.status,
+  });
+
+  /// Parses native JSON.
+  factory McpCallOutputItem.fromJson(Map<String, dynamic> json) {
+    const context = 'McpCallOutputItem';
+    requireJsonType(json, 'mcp_call', context);
+
+    return McpCallOutputItem(
+      id: requireJsonString(json['id'], '$context.id'),
+      arguments: requireJsonString(json['arguments'], '$context.arguments'),
+      name: requireJsonString(json['name'], '$context.name'),
+      serverLabel: requireJsonString(
+        json['server_label'],
+        '$context.server_label',
+      ),
+      agent: toolSearchJsonAgent(json, context, nullable: true),
+      approvalRequestId: optionalJsonString(
+        json,
+        'approval_request_id',
+        context,
+        nullable: true,
+      ),
+      error: json['error'] == null
+          ? null
+          : McpCallError.fromJson(
+              requireJsonObject(json['error'], '$context.error'),
+            ),
+      output: optionalJsonString(json, 'output', context, nullable: true),
+      status: json['status'] == null
+          ? null
+          : McpCallStatus.fromJson(
+              requireJsonString(json['status'], '$context.status'),
+            ),
+    );
+  }
+
+  /// Serializes native JSON.
   @override
   Map<String, dynamic> toJson() => {
     'type': 'mcp_call',
     'id': id,
+    'arguments': arguments,
+    'name': name,
+    'server_label': serverLabel,
     if (agent != null) 'agent': agent!.toJson(),
-    'call_id': callId,
-    if (serverLabel != null) 'server_label': serverLabel,
-    if (name != null) 'name': name,
-    if (arguments != null) 'arguments': arguments,
+    if (approvalRequestId != null) 'approval_request_id': approvalRequestId,
+    if (error != null) 'error': error!.toJson(),
     if (output != null) 'output': output,
-    if (error != null) 'error': error,
     if (status != null) 'status': status!.toJson(),
   };
 
+  /// Copies this value; nullable fields can be explicitly cleared.
+  McpCallOutputItem copyWith({
+    String? id,
+    String? arguments,
+    String? name,
+    String? serverLabel,
+    Object? agent = unsetCopyWithValue,
+    Object? approvalRequestId = unsetCopyWithValue,
+    Object? error = unsetCopyWithValue,
+    Object? output = unsetCopyWithValue,
+    Object? status = unsetCopyWithValue,
+  }) => McpCallOutputItem(
+    id: id ?? this.id,
+    arguments: arguments ?? this.arguments,
+    name: name ?? this.name,
+    serverLabel: serverLabel ?? this.serverLabel,
+    agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
+    approvalRequestId: approvalRequestId == unsetCopyWithValue
+        ? this.approvalRequestId
+        : approvalRequestId as String?,
+    error: error == unsetCopyWithValue ? this.error : error as McpCallError?,
+    output: output == unsetCopyWithValue ? this.output : output as String?,
+    status: status == unsetCopyWithValue
+        ? this.status
+        : status as McpCallStatus?,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is McpCallOutputItem &&
           runtimeType == other.runtimeType &&
           id == other.id &&
-          agent == other.agent &&
-          callId == other.callId &&
-          serverLabel == other.serverLabel &&
-          name == other.name &&
           arguments == other.arguments &&
-          output == other.output &&
+          name == other.name &&
+          serverLabel == other.serverLabel &&
+          agent == other.agent &&
+          approvalRequestId == other.approvalRequestId &&
           error == other.error &&
+          output == other.output &&
           status == other.status;
-
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
-    agent,
-    callId,
-    serverLabel,
-    name,
     arguments,
-    output,
+    name,
+    serverLabel,
+    agent,
+    approvalRequestId,
     error,
+    output,
     status,
-  );
-
+  ]);
   @override
   String toString() =>
-      'McpCallOutputItem(id: $id, agent: $agent, callId: $callId, serverLabel: $serverLabel, name: $name, arguments: $arguments, output: $output, error: $error, status: $status)';
+      'McpCallOutputItem(status: $status, hasError: ${error != null})';
+}
+
+/// A discovered MCP tool and its input schema.
+@immutable
+class McpToolDescriptor {
+  /// The native `name` field.
+  final String name;
+
+  /// The native `input_schema` field.
+  final Object? inputSchema;
+
+  /// The native `annotations` field.
+  final Object? annotations;
+
+  /// The native `description` field.
+  final String? description;
+
+  /// Creates a [McpToolDescriptor].
+  /// Caller-owned collections must not be mutated after construction.
+  /// Parsed JSON is an unmodifiable snapshot.
+  const McpToolDescriptor({
+    required this.name,
+    required this.inputSchema,
+    this.annotations,
+    this.description,
+  });
+
+  /// Parses native JSON.
+  factory McpToolDescriptor.fromJson(Map<String, dynamic> json) {
+    const context = 'McpToolDescriptor';
+
+    return McpToolDescriptor(
+      name: requireJsonString(json['name'], '$context.name'),
+      inputSchema: _requiredMcpValue(json, 'input_schema'),
+      annotations: _optionalMcpValue(json['annotations']),
+      description: optionalJsonString(
+        json,
+        'description',
+        context,
+        nullable: true,
+      ),
+    );
+  }
+
+  /// Serializes native JSON.
+  Map<String, dynamic> toJson() => {
+    'name': name,
+    'input_schema': inputSchema,
+    if (annotations != null) 'annotations': annotations,
+    if (description != null) 'description': description,
+  };
+
+  /// Copies this value; nullable fields can be explicitly cleared.
+  McpToolDescriptor copyWith({
+    String? name,
+    Object? inputSchema = unsetCopyWithValue,
+    Object? annotations = unsetCopyWithValue,
+    Object? description = unsetCopyWithValue,
+  }) => McpToolDescriptor(
+    name: name ?? this.name,
+    inputSchema: inputSchema == unsetCopyWithValue
+        ? this.inputSchema
+        : inputSchema,
+    annotations: annotations == unsetCopyWithValue
+        ? this.annotations
+        : annotations,
+    description: description == unsetCopyWithValue
+        ? this.description
+        : description as String?,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is McpToolDescriptor &&
+          runtimeType == other.runtimeType &&
+          name == other.name &&
+          mapsDeepEqual({'v': inputSchema}, {'v': other.inputSchema}) &&
+          mapsDeepEqual({'v': annotations}, {'v': other.annotations}) &&
+          description == other.description;
+  @override
+  int get hashCode => Object.hashAll([
+    name,
+    mapDeepHashCode({'v': inputSchema}),
+    mapDeepHashCode({'v': annotations}),
+    description,
+  ]);
+  @override
+  String toString() =>
+      'McpToolDescriptor(hasDescription: ${description != null})';
+}
+
+/// A discovered list of MCP tools.
+@immutable
+class McpListToolsOutputItem extends OutputItem {
+  /// The native `id` field.
+  final String id;
+
+  /// The native `server_label` field.
+  final String serverLabel;
+
+  /// The native `tools` field.
+  final List<McpToolDescriptor> tools;
+
+  /// The native `agent` field.
+  final AgentTag? agent;
+
+  /// The native `error` field.
+  final String? error;
+
+  /// Creates a [McpListToolsOutputItem].
+  /// Caller-owned collections must not be mutated after construction.
+  /// Parsed JSON is an unmodifiable snapshot.
+  const McpListToolsOutputItem({
+    required this.id,
+    required this.serverLabel,
+    required this.tools,
+    this.agent,
+    this.error,
+  });
+
+  /// Parses native JSON.
+  factory McpListToolsOutputItem.fromJson(Map<String, dynamic> json) {
+    const context = 'McpListToolsOutputItem';
+    requireJsonType(json, 'mcp_list_tools', context);
+    final rawTools = json['tools'];
+    if (rawTools is! List) {
+      throw const FormatException('$context.tools: expected an array');
+    }
+    return McpListToolsOutputItem(
+      id: requireJsonString(json['id'], '$context.id'),
+      serverLabel: requireJsonString(
+        json['server_label'],
+        '$context.server_label',
+      ),
+      tools: List<McpToolDescriptor>.unmodifiable(
+        rawTools.map(
+          (e) => McpToolDescriptor.fromJson(
+            requireJsonObject(e, '$context.tools'),
+          ),
+        ),
+      ),
+      agent: toolSearchJsonAgent(json, context, nullable: true),
+      error: optionalJsonString(json, 'error', context, nullable: true),
+    );
+  }
+
+  /// Serializes native JSON.
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'mcp_list_tools',
+    'id': id,
+    'server_label': serverLabel,
+    'tools': tools.map((e) => e.toJson()).toList(),
+    if (agent != null) 'agent': agent!.toJson(),
+    if (error != null) 'error': error,
+  };
+
+  /// Copies this value; nullable fields can be explicitly cleared.
+  McpListToolsOutputItem copyWith({
+    String? id,
+    String? serverLabel,
+    List<McpToolDescriptor>? tools,
+    Object? agent = unsetCopyWithValue,
+    Object? error = unsetCopyWithValue,
+  }) => McpListToolsOutputItem(
+    id: id ?? this.id,
+    serverLabel: serverLabel ?? this.serverLabel,
+    tools: tools ?? this.tools,
+    agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
+    error: error == unsetCopyWithValue ? this.error : error as String?,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is McpListToolsOutputItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          serverLabel == other.serverLabel &&
+          listsEqual(tools, other.tools) &&
+          agent == other.agent &&
+          error == other.error;
+  @override
+  int get hashCode =>
+      Object.hashAll([id, serverLabel, listHash(tools), agent, error]);
+  @override
+  String toString() =>
+      'McpListToolsOutputItem(toolCount: ${tools.length}, hasError: ${error != null})';
+}
+
+/// A provider request for approval of an MCP tool call.
+@immutable
+class McpApprovalRequestOutputItem extends OutputItem {
+  /// The native `id` field.
+  final String id;
+
+  /// The native `arguments` field.
+  final String arguments;
+
+  /// The native `name` field.
+  final String name;
+
+  /// The native `server_label` field.
+  final String serverLabel;
+
+  /// The native `agent` field.
+  final AgentTag? agent;
+
+  /// Creates a [McpApprovalRequestOutputItem].
+  const McpApprovalRequestOutputItem({
+    required this.id,
+    required this.arguments,
+    required this.name,
+    required this.serverLabel,
+    this.agent,
+  });
+
+  /// Parses native JSON.
+  factory McpApprovalRequestOutputItem.fromJson(Map<String, dynamic> json) {
+    const context = 'McpApprovalRequestOutputItem';
+    requireJsonType(json, 'mcp_approval_request', context);
+
+    return McpApprovalRequestOutputItem(
+      id: requireJsonString(json['id'], '$context.id'),
+      arguments: requireJsonString(json['arguments'], '$context.arguments'),
+      name: requireJsonString(json['name'], '$context.name'),
+      serverLabel: requireJsonString(
+        json['server_label'],
+        '$context.server_label',
+      ),
+      agent: toolSearchJsonAgent(json, context, nullable: true),
+    );
+  }
+
+  /// Serializes native JSON.
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'mcp_approval_request',
+    'id': id,
+    'arguments': arguments,
+    'name': name,
+    'server_label': serverLabel,
+    if (agent != null) 'agent': agent!.toJson(),
+  };
+
+  /// Copies this value; nullable fields can be explicitly cleared.
+  McpApprovalRequestOutputItem copyWith({
+    String? id,
+    String? arguments,
+    String? name,
+    String? serverLabel,
+    Object? agent = unsetCopyWithValue,
+  }) => McpApprovalRequestOutputItem(
+    id: id ?? this.id,
+    arguments: arguments ?? this.arguments,
+    name: name ?? this.name,
+    serverLabel: serverLabel ?? this.serverLabel,
+    agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is McpApprovalRequestOutputItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          arguments == other.arguments &&
+          name == other.name &&
+          serverLabel == other.serverLabel &&
+          agent == other.agent;
+  @override
+  int get hashCode => Object.hashAll([id, arguments, name, serverLabel, agent]);
+  @override
+  String toString() => 'McpApprovalRequestOutputItem(pending: true)';
+}
+
+/// A provider echo of an MCP approval decision.
+@immutable
+class McpApprovalResponseOutputItem extends OutputItem {
+  /// The native `id` field.
+  final String id;
+
+  /// The native `approval_request_id` field.
+  final String approvalRequestId;
+
+  /// The native `approve` field.
+  final bool approve;
+
+  /// The native `agent` field.
+  final AgentTag? agent;
+
+  /// The native `reason` field.
+  final String? reason;
+
+  /// Creates a [McpApprovalResponseOutputItem].
+  const McpApprovalResponseOutputItem({
+    required this.id,
+    required this.approvalRequestId,
+    required this.approve,
+    this.agent,
+    this.reason,
+  });
+
+  /// Parses native JSON.
+  factory McpApprovalResponseOutputItem.fromJson(Map<String, dynamic> json) {
+    const context = 'McpApprovalResponseOutputItem';
+    requireJsonType(json, 'mcp_approval_response', context);
+    final approve = json['approve'];
+    if (approve is! bool) {
+      throw const FormatException('$context.approve: expected a boolean');
+    }
+    return McpApprovalResponseOutputItem(
+      id: requireJsonString(json['id'], '$context.id'),
+      approvalRequestId: requireJsonString(
+        json['approval_request_id'],
+        '$context.approval_request_id',
+      ),
+      approve: approve,
+      agent: toolSearchJsonAgent(json, context, nullable: true),
+      reason: optionalJsonString(json, 'reason', context, nullable: true),
+    );
+  }
+
+  /// Serializes native JSON.
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'mcp_approval_response',
+    'id': id,
+    'approval_request_id': approvalRequestId,
+    'approve': approve,
+    if (agent != null) 'agent': agent!.toJson(),
+    if (reason != null) 'reason': reason,
+  };
+
+  /// Copies this value; nullable fields can be explicitly cleared.
+  McpApprovalResponseOutputItem copyWith({
+    String? id,
+    String? approvalRequestId,
+    bool? approve,
+    Object? agent = unsetCopyWithValue,
+    Object? reason = unsetCopyWithValue,
+  }) => McpApprovalResponseOutputItem(
+    id: id ?? this.id,
+    approvalRequestId: approvalRequestId ?? this.approvalRequestId,
+    approve: approve ?? this.approve,
+    agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
+    reason: reason == unsetCopyWithValue ? this.reason : reason as String?,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is McpApprovalResponseOutputItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          approvalRequestId == other.approvalRequestId &&
+          approve == other.approve &&
+          agent == other.agent &&
+          reason == other.reason;
+  @override
+  int get hashCode =>
+      Object.hashAll([id, approvalRequestId, approve, agent, reason]);
+  @override
+  String toString() => 'McpApprovalResponseOutputItem(approved: $approve)';
 }
 
 /// A tool search call output item.
