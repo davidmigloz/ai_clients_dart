@@ -52,9 +52,10 @@ mixin StreamingResource on ResourceBase {
     var correlationId = generateRequestId();
     late StreamController<T> controller;
 
-    Future<void> cancel() {
+    Future<void> cancel({bool abort = true}) {
+      if (cancellation != null) return cancellation!;
       finished = true;
-      if (!nativeAbort.isCompleted) nativeAbort.complete();
+      if (abort && !nativeAbort.isCompleted) nativeAbort.complete();
       return cancellation ??= Future<void>.sync(() => subscription?.cancel());
     }
 
@@ -62,8 +63,8 @@ mixin StreamingResource on ResourceBase {
       if (finished) return;
       finished = true;
       if (error != null) controller.addError(error, stackTrace);
-      // onCancel shares this cleanup future with subscription.cancel().
-      cancel().ignore();
+      // Transport cleanup may outlive local completion for custom clients.
+      cancel(abort: error != null).ignore();
       unawaited(controller.close());
     }
 
@@ -142,7 +143,8 @@ mixin StreamingResource on ResourceBase {
       },
       onPause: () => subscription?.pause(),
       onResume: () => subscription?.resume(),
-      onCancel: cancel,
+      // Keep local cancellation prompt even if custom transport cleanup stalls.
+      onCancel: () => cancel().ignore(),
     );
     return controller.stream;
   }

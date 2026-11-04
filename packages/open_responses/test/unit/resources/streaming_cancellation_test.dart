@@ -259,12 +259,19 @@ void main() {
         .createStream(_request, abortTrigger: abort.future)
         .toList();
     await transport.waitForRequests(1);
+    var nativeAborted = false;
+    unawaited(
+      (transport.requests.single as http.Abortable).abortTrigger!.then((_) {
+        nativeAborted = true;
+      }),
+    );
     transport.responses.single.complete(
       http.StreamedResponse(const Stream.empty(), 200),
     );
     expect(await result, isEmpty);
     abort.complete();
     await _tick();
+    expect(nativeAborted, isFalse);
   });
 
   test('malformed event terminates and cancels the response body', () async {
@@ -303,4 +310,66 @@ void main() {
     await subscription.cancel();
     await body.close();
   });
+  for (final status in [200, 500]) {
+    for (final cancelListener in [false, true]) {
+      for (final cleanupFails in [false, true]) {
+        test(
+          '$status cancellation completes before delayed cleanup (listener=$cancelListener, failure=$cleanupFails)',
+          () async {
+            final listened = Completer<void>();
+            final cleanupStarted = Completer<void>();
+            final releaseCleanup = Completer<void>();
+            final body = StreamController<List<int>>(
+              onListen: listened.complete,
+              onCancel: () {
+                cleanupStarted.complete();
+                return releaseCleanup.future;
+              },
+            );
+            final abort = Completer<void>();
+            final stream = client.responses.createStream(
+              _request,
+              abortTrigger: abort.future,
+            );
+            StreamSubscription<StreamingEvent>? subscription;
+            Future<void>? aborted;
+            if (cancelListener) {
+              subscription = stream.listen((_) {});
+            } else {
+              aborted = expectLater(
+                stream.toList(),
+                throwsA(isA<AbortedException>()),
+              );
+            }
+            await transport.waitForRequests(1);
+            transport.responses.single.complete(
+              http.StreamedResponse(body.stream, status),
+            );
+            await listened.future;
+            try {
+              if (subscription != null) {
+                await subscription.cancel().timeout(_deadline);
+              } else {
+                abort.complete();
+                await aborted!.timeout(_deadline);
+              }
+              await cleanupStarted.future.timeout(_deadline);
+              expect(releaseCleanup.isCompleted, isFalse);
+              await (transport.requests.single as http.Abortable).abortTrigger!
+                  .timeout(_deadline);
+              expect(transport.closed, isFalse);
+            } finally {
+              if (cleanupFails) {
+                releaseCleanup.completeError(StateError('cleanup failed'));
+              } else {
+                releaseCleanup.complete();
+              }
+              await _tick();
+              await body.close();
+            }
+          },
+        );
+      }
+    }
+  }
 }

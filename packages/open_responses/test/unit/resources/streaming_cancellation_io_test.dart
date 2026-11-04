@@ -27,39 +27,80 @@ class _ObservedClient extends http.BaseClient {
 }
 
 void main() {
-  test('native request aborts before headers without closing the client', () async {
+  test('successful chunked SSE requests reuse their connection', () async {
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-    final received = Completer<HttpRequest>();
-    final serverSubscription = server.listen(received.complete);
-    final transport = _ObservedClient();
+    final ports = <int>[];
+    final serverSubscription = server.listen((request) async {
+      ports.add(request.connectionInfo!.remotePort);
+      await request.drain<void>();
+      request.response
+        ..headers.contentType = ContentType('text', 'event-stream')
+        ..write('data: {"type":"test"}\n\n');
+      await request.response.flush();
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      request.response.write('data: [DONE]\n\n');
+      await request.response.close();
+    });
     final client = OpenResponsesClient(
       config: OpenResponsesConfig(baseUrl: 'http://127.0.0.1:${server.port}'),
-      httpClient: transport,
     );
     addTearDown(() async {
       client.close();
-      transport.close();
       await serverSubscription.cancel();
       await server.close(force: true);
     });
-    final abort = Completer<void>();
-    final result = client.responses
-        .createStream(
-          const CreateResponseRequest(
-            model: 'test',
-            input: ResponseTextInput('Hi'),
-          ),
-          abortTrigger: abort.future,
-        )
-        .toList();
-    await received.future.timeout(const Duration(seconds: 2));
-    abort.complete();
-    await expectLater(result, throwsA(isA<AbortedException>()));
-    // This checks the real HTTP send, independently of the local stream error.
-    // Replacing AbortableRequest with Request must make this assertion fail.
-    expect(
-      await transport.failure.future.timeout(const Duration(seconds: 2)),
-      isA<http.RequestAbortedException>(),
-    );
+    for (var i = 0; i < 2; i++) {
+      expect(
+        await client.responses
+            .createStream(
+              const CreateResponseRequest(
+                model: 'test',
+                input: ResponseTextInput('Hi'),
+              ),
+            )
+            .toList(),
+        hasLength(1),
+      );
+    }
+    expect(ports, hasLength(2));
+    expect(ports.first, ports.last);
   });
+  test(
+    'native request aborts before headers without closing the client',
+    () async {
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final received = Completer<HttpRequest>();
+      final serverSubscription = server.listen(received.complete);
+      final transport = _ObservedClient();
+      final client = OpenResponsesClient(
+        config: OpenResponsesConfig(baseUrl: 'http://127.0.0.1:${server.port}'),
+        httpClient: transport,
+      );
+      addTearDown(() async {
+        client.close();
+        transport.close();
+        await serverSubscription.cancel();
+        await server.close(force: true);
+      });
+      final abort = Completer<void>();
+      final result = client.responses
+          .createStream(
+            const CreateResponseRequest(
+              model: 'test',
+              input: ResponseTextInput('Hi'),
+            ),
+            abortTrigger: abort.future,
+          )
+          .toList();
+      await received.future.timeout(const Duration(seconds: 2));
+      abort.complete();
+      await expectLater(result, throwsA(isA<AbortedException>()));
+      // This checks the real HTTP send, independently of the local stream error.
+      // Replacing AbortableRequest with Request must make this assertion fail.
+      expect(
+        await transport.failure.future.timeout(const Duration(seconds: 2)),
+        isA<http.RequestAbortedException>(),
+      );
+    },
+  );
 }

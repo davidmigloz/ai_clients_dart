@@ -14,11 +14,28 @@ class SseParser {
   /// Parses a byte stream into SSE events.
   ///
   /// Returns a stream of parsed JSON objects from SSE data lines.
-  Stream<Map<String, dynamic>> parse(Stream<List<int>> bytes) =>
-      Stream<Map<String, dynamic>>.eventTransformed(
-        bytes.transform(utf8.decoder).transform(const LineSplitter()),
-        _SseSink.new,
-      );
+  Stream<Map<String, dynamic>> parse(Stream<List<int>> bytes) {
+    StreamSubscription<String>? subscription;
+    late StreamController<Map<String, dynamic>> controller;
+    controller = StreamController<Map<String, dynamic>>(
+      onListen: () {
+        final sink = _SseSink(controller.sink);
+        subscription = bytes
+            .transform(utf8.decoder)
+            .transform(const LineSplitter())
+            .listen(
+              sink.add,
+              onError: sink.addError,
+              onDone: sink.close,
+              cancelOnError: true,
+            );
+      },
+      onPause: () => subscription?.pause(),
+      onResume: () => subscription?.resume(),
+      onCancel: () => subscription?.cancel(),
+    );
+    return controller.stream;
+  }
 }
 
 /// Per-subscription parser state with cancellation forwarded to the byte stream.
