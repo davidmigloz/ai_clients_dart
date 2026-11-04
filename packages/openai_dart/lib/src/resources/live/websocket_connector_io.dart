@@ -17,7 +17,11 @@ Future<WebSocket> connectLiveWebSocket(
 }) async {
   validateLiveWebSocketUri(uri);
   try {
-    final socket = await io.WebSocket.connect(uri.toString(), headers: headers);
+    final socket = await io.WebSocket.connect(
+      uri.toString(),
+      headers: headers,
+      compression: io.CompressionOptions.compressionOff,
+    );
     return _LiveNativeWebSocket(socket);
   } catch (error) {
     throw ConnectionException(

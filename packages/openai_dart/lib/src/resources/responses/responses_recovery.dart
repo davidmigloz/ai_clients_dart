@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
@@ -22,7 +23,8 @@ typedef ResponsesReconnectPreparation =
 /// state. Defaults follow the official SDK: five attempts, 500 ms exponential
 /// delay capped at eight seconds, with jitter between 0.75 and 1.0. The outgoing
 /// queue holds only newly unsent frames and strictly enforces its byte budget,
-/// including its first frame. Submitted work is never automatically replayed.
+/// including its first frame. A separate frame-count bound covers empty frames.
+/// Submitted work is never automatically replayed.
 @immutable
 class ResponsesReconnectOptions {
   /// Required preparation callback. Equality compares its identity.
@@ -32,15 +34,20 @@ class ResponsesReconnectOptions {
   final int maxAttempts;
 
   /// Initial delay before applying jitter; zero removes the initial delay.
-  /// Fractional milliseconds truncate before jitter is applied.
+  /// Fractional milliseconds truncate before jitter is applied. Values above
+  /// 2,147,483,647 ms are rejected to avoid browser timer overflow.
   final Duration initialDelay;
 
   /// Exponential delay cap; zero removes every retry delay.
-  /// Fractional milliseconds truncate before jitter is applied.
+  /// Fractional milliseconds truncate before jitter is applied. Values above
+  /// 2,147,483,647 ms are rejected to avoid browser timer overflow.
   final Duration maxDelay;
 
-  /// UTF-8 byte limit for newly unsent frames; zero disables queuing entirely.
+  /// Byte limit for newly unsent frames (UTF-8 for text); zero disables queuing.
   final int maxQueueBytes;
+
+  /// Frame-count budget, including empty frames; zero disables queuing.
+  final int maxQueueMessages;
 
   /// Creates const configuration, validated at connection setup.
   const ResponsesReconnectOptions({
@@ -49,6 +56,7 @@ class ResponsesReconnectOptions {
     this.initialDelay = const Duration(milliseconds: 500),
     this.maxDelay = const Duration(seconds: 8),
     this.maxQueueBytes = 1048576,
+    this.maxQueueMessages = 1024,
   });
 
   /// Rejects negative or nonfinite values in release builds as well as debug.
@@ -57,11 +65,20 @@ class ResponsesReconnectOptions {
     if (!maxAttempts.isFinite || maxAttempts < 0) {
       throw ArgumentError('maxAttempts must be a finite nonnegative integer.');
     }
+    const timerLimit = Duration(milliseconds: 2147483647);
+    if (initialDelay > timerLimit || maxDelay > timerLimit) {
+      throw ArgumentError(
+        'Retry delays must not exceed 2147483647 milliseconds.',
+      );
+    }
     if (!initialDelay.inMicroseconds.isFinite || initialDelay < Duration.zero) {
       throw ArgumentError('initialDelay must be finite and nonnegative.');
     }
     if (!maxDelay.inMicroseconds.isFinite || maxDelay < Duration.zero) {
       throw ArgumentError('maxDelay must be finite and nonnegative.');
+    }
+    if (!maxQueueMessages.isFinite || maxQueueMessages < 0) {
+      throw ArgumentError('maxQueueMessages must be finite and nonnegative.');
     }
     if (!maxQueueBytes.isFinite || maxQueueBytes < 0) {
       throw ArgumentError(
@@ -77,12 +94,14 @@ class ResponsesReconnectOptions {
     Duration? initialDelay,
     Duration? maxDelay,
     int? maxQueueBytes,
+    int? maxQueueMessages,
   }) => ResponsesReconnectOptions(
     onReconnecting: onReconnecting ?? this.onReconnecting,
     maxAttempts: maxAttempts ?? this.maxAttempts,
     initialDelay: initialDelay ?? this.initialDelay,
     maxDelay: maxDelay ?? this.maxDelay,
     maxQueueBytes: maxQueueBytes ?? this.maxQueueBytes,
+    maxQueueMessages: maxQueueMessages ?? this.maxQueueMessages,
   );
 
   @override
@@ -94,7 +113,8 @@ class ResponsesReconnectOptions {
           maxAttempts == other.maxAttempts &&
           initialDelay == other.initialDelay &&
           maxDelay == other.maxDelay &&
-          maxQueueBytes == other.maxQueueBytes;
+          maxQueueBytes == other.maxQueueBytes &&
+          maxQueueMessages == other.maxQueueMessages;
   @override
   int get hashCode => Object.hash(
     identityHashCode(onReconnecting),
@@ -102,10 +122,11 @@ class ResponsesReconnectOptions {
     initialDelay,
     maxDelay,
     maxQueueBytes,
+    maxQueueMessages,
   );
   @override
   String toString() =>
-      'ResponsesReconnectOptions(onReconnecting: [REDACTED], maxAttempts: $maxAttempts, initialDelay: $initialDelay, maxDelay: $maxDelay, maxQueueBytes: $maxQueueBytes)';
+      'ResponsesReconnectOptions(onReconnecting: [REDACTED], maxAttempts: $maxAttempts, initialDelay: $initialDelay, maxDelay: $maxDelay, maxQueueBytes: $maxQueueBytes, maxQueueMessages: $maxQueueMessages)';
 }
 
 /// Noncredential context for one reconnect preparation callback.
@@ -248,29 +269,42 @@ class ResponsesReconnectDecision {
       'ResponsesReconnectDecision(isAborted: $isAborted, queryParameters: ${queryParameters == null ? 'null' : '${queryParameters!.length} entries'}, headers: ${headers == null ? 'null' : '${headers!.length} entries'})';
 }
 
-/// Exact serialized text of a frame whose socket write was never attempted.
+/// Exact text or binary frame whose socket write was never attempted.
 ///
-/// Already-submitted frames and failed attempted writes are excluded. Inspect
-/// [text] deliberately: it can contain credentials or user input. Its exact UTF-8
-/// size is derived from the captured text and cannot diverge through mutation.
+/// Submitted frames and failed attempted writes are excluded. Inspect payloads
+/// deliberately: they can contain credentials or user input. Binary snapshots
+/// are immutable and retain their original frame kind during recovery.
 @immutable
 class ResponsesUnsentMessage {
-  /// Captured immutable wire text, without reserializing it during recovery.
-  final String text;
+  final String? _text;
+  final Uint8List? _bytes;
 
-  /// Exact UTF-8 byte length used for queue accounting.
+  /// Exact captured wire size, UTF-8 for text and byte length for binary.
   final int byteLength;
 
-  const ResponsesUnsentMessage._(this.text, this.byteLength);
+  const ResponsesUnsentMessage._(this._text, this._bytes, this.byteLength);
 
-  /// Captures wire text and computes its UTF-8 size.
+  /// Captures wire text without reserializing it during recovery.
   factory ResponsesUnsentMessage.fromText(String text) =>
-      ResponsesUnsentMessage._(text, utf8.encode(text).length);
+      ResponsesUnsentMessage._(text, null, utf8.encode(text).length);
 
-  /// Decodes a JSON-object message into a recursively immutable snapshot.
-  ///
-  /// Raw text remains available even when it is not JSON. Such text throws a
-  /// payload-redacted [FormatException] here rather than being coerced.
+  /// Detaches binary data immediately from the caller's mutable buffer.
+  factory ResponsesUnsentMessage.fromBytes(Uint8List bytes) {
+    final snapshot = Uint8List.fromList(bytes).asUnmodifiableView();
+    return ResponsesUnsentMessage._(null, snapshot, snapshot.length);
+  }
+
+  /// Whether this is a binary frame. Check before reading [text] or [message].
+  bool get isBinary => _bytes != null;
+
+  /// Captured wire text. Throws [StateError] for a binary frame.
+  String get text => _text ?? (throw StateError('Frame is binary.'));
+
+  /// Immutable binary bytes. Throws [StateError] for a text frame.
+  Uint8List get bytes => _bytes ?? (throw StateError('Frame is text.'));
+
+  /// Decodes a text JSON object into a recursively immutable snapshot.
+  /// Binary frames and malformed text throw a payload-redacted format error.
   Map<String, dynamic> get message {
     try {
       final value = jsonDecode(text);
@@ -285,21 +319,32 @@ class ResponsesUnsentMessage {
     );
   }
 
-  /// Replaces text and recalculates its byte length atomically.
-  ResponsesUnsentMessage copyWith({String? text}) =>
-      ResponsesUnsentMessage.fromText(text ?? this.text);
+  /// Replaces either payload and recalculates its size, or copies this frame.
+  /// Supplying both text and bytes is rejected.
+  ResponsesUnsentMessage copyWith({String? text, Uint8List? bytes}) {
+    if (text != null && bytes != null) {
+      throw ArgumentError('Supply either text or bytes.');
+    }
+    if (text != null) return ResponsesUnsentMessage.fromText(text);
+    if (bytes != null) return ResponsesUnsentMessage.fromBytes(bytes);
+    return isBinary
+        ? ResponsesUnsentMessage.fromBytes(this.bytes)
+        : ResponsesUnsentMessage.fromText(this.text);
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ResponsesUnsentMessage &&
           runtimeType == other.runtimeType &&
-          text == other.text &&
+          _text == other._text &&
+          listsEqual(_bytes, other._bytes) &&
           byteLength == other.byteLength;
   @override
-  int get hashCode => Object.hash(text, byteLength);
+  int get hashCode => Object.hash(_text, listHash(_bytes), byteLength);
   @override
   String toString() =>
-      'ResponsesUnsentMessage(text: [REDACTED], byteLength: $byteLength)';
+      'ResponsesUnsentMessage(payload: [REDACTED], isBinary: $isBinary, byteLength: $byteLength)';
 }
 
 /// SDK recovery lifecycle, separate from server response events.
@@ -335,6 +380,8 @@ sealed class ResponsesRecoveryEvent {
     required int frameBytes,
     required int maxQueueBytes,
     required int queuedBytes,
+    int? maxQueueMessages,
+    int? queuedMessages,
   }) = ResponsesRecoveryQueueOverflow;
 
   /// Reports an attempted write whose delivery cannot be determined.
@@ -426,7 +473,7 @@ class ResponsesRecoveryReconnected extends ResponsesRecoveryEvent {
 /// A newly unsent frame exceeded the strict queue budget and was rejected.
 @immutable
 class ResponsesRecoveryQueueOverflow extends ResponsesRecoveryEvent {
-  /// Exact UTF-8 byte length of the rejected or attempted frame.
+  /// Exact byte length of the rejected or attempted frame (UTF-8 for text).
   final int frameBytes;
 
   /// Configured strict byte budget for outgoing never-attempted frames.
@@ -435,11 +482,19 @@ class ResponsesRecoveryQueueOverflow extends ResponsesRecoveryEvent {
   /// Existing queued byte count when the new frame was rejected.
   final int queuedBytes;
 
+  /// Configured frame-count budget, when supplied by the recovery helper.
+  final int? maxQueueMessages;
+
+  /// Existing frame count at rejection, when known.
+  final int? queuedMessages;
+
   /// Creates an immutable record without retaining a payload or error cause.
   const ResponsesRecoveryQueueOverflow({
     required this.frameBytes,
     required this.maxQueueBytes,
     required this.queuedBytes,
+    this.maxQueueMessages,
+    this.queuedMessages,
   });
 
   /// Copies every field.
@@ -447,10 +502,18 @@ class ResponsesRecoveryQueueOverflow extends ResponsesRecoveryEvent {
     int? frameBytes,
     int? maxQueueBytes,
     int? queuedBytes,
+    Object? maxQueueMessages = unsetCopyWithValue,
+    Object? queuedMessages = unsetCopyWithValue,
   }) => ResponsesRecoveryQueueOverflow(
     frameBytes: frameBytes ?? this.frameBytes,
     maxQueueBytes: maxQueueBytes ?? this.maxQueueBytes,
     queuedBytes: queuedBytes ?? this.queuedBytes,
+    maxQueueMessages: identical(maxQueueMessages, unsetCopyWithValue)
+        ? this.maxQueueMessages
+        : maxQueueMessages as int?,
+    queuedMessages: identical(queuedMessages, unsetCopyWithValue)
+        ? this.queuedMessages
+        : queuedMessages as int?,
   );
   @override
   bool operator ==(Object other) =>
@@ -459,18 +522,26 @@ class ResponsesRecoveryQueueOverflow extends ResponsesRecoveryEvent {
           runtimeType == other.runtimeType &&
           frameBytes == other.frameBytes &&
           maxQueueBytes == other.maxQueueBytes &&
-          queuedBytes == other.queuedBytes;
+          queuedBytes == other.queuedBytes &&
+          maxQueueMessages == other.maxQueueMessages &&
+          queuedMessages == other.queuedMessages;
   @override
-  int get hashCode => Object.hashAll([frameBytes, maxQueueBytes, queuedBytes]);
+  int get hashCode => Object.hashAll([
+    frameBytes,
+    maxQueueBytes,
+    queuedBytes,
+    maxQueueMessages,
+    queuedMessages,
+  ]);
   @override
   String toString() =>
-      'ResponsesRecoveryQueueOverflow(frameBytes: $frameBytes, maxQueueBytes: $maxQueueBytes, queuedBytes: $queuedBytes)';
+      'ResponsesRecoveryQueueOverflow(frameBytes: $frameBytes, maxQueueBytes: $maxQueueBytes, queuedBytes: $queuedBytes, maxQueueMessages: $maxQueueMessages, queuedMessages: $queuedMessages)';
 }
 
 /// A socket write was attempted and failed; delivery is unknown.
 @immutable
 class ResponsesRecoveryDeliveryUnknown extends ResponsesRecoveryEvent {
-  /// Exact UTF-8 byte length of the rejected or attempted frame.
+  /// Exact byte length of the rejected or attempted frame (UTF-8 for text).
   final int frameBytes;
 
   /// Failed write operation, such as send or flush.
@@ -507,7 +578,7 @@ class ResponsesRecoveryDeliveryUnknown extends ResponsesRecoveryEvent {
 /// Observable nonfatal queue rejection, including an oversized first frame.
 @immutable
 class ResponsesSendQueueOverflowException implements Exception {
-  /// Exact UTF-8 byte length of the rejected or attempted frame.
+  /// Exact byte length of the rejected or attempted frame (UTF-8 for text).
   final int frameBytes;
 
   /// Configured strict byte budget for outgoing never-attempted frames.
@@ -516,11 +587,19 @@ class ResponsesSendQueueOverflowException implements Exception {
   /// Existing queued byte count when the new frame was rejected.
   final int queuedBytes;
 
+  /// Configured frame-count budget, when supplied by the recovery helper.
+  final int? maxQueueMessages;
+
+  /// Existing frame count at rejection, when known.
+  final int? queuedMessages;
+
   /// Creates an immutable record without retaining a payload or error cause.
   const ResponsesSendQueueOverflowException({
     required this.frameBytes,
     required this.maxQueueBytes,
     required this.queuedBytes,
+    this.maxQueueMessages,
+    this.queuedMessages,
   });
 
   /// Copies every field.
@@ -528,10 +607,18 @@ class ResponsesSendQueueOverflowException implements Exception {
     int? frameBytes,
     int? maxQueueBytes,
     int? queuedBytes,
+    Object? maxQueueMessages = unsetCopyWithValue,
+    Object? queuedMessages = unsetCopyWithValue,
   }) => ResponsesSendQueueOverflowException(
     frameBytes: frameBytes ?? this.frameBytes,
     maxQueueBytes: maxQueueBytes ?? this.maxQueueBytes,
     queuedBytes: queuedBytes ?? this.queuedBytes,
+    maxQueueMessages: identical(maxQueueMessages, unsetCopyWithValue)
+        ? this.maxQueueMessages
+        : maxQueueMessages as int?,
+    queuedMessages: identical(queuedMessages, unsetCopyWithValue)
+        ? this.queuedMessages
+        : queuedMessages as int?,
   );
   @override
   bool operator ==(Object other) =>
@@ -540,18 +627,26 @@ class ResponsesSendQueueOverflowException implements Exception {
           runtimeType == other.runtimeType &&
           frameBytes == other.frameBytes &&
           maxQueueBytes == other.maxQueueBytes &&
-          queuedBytes == other.queuedBytes;
+          queuedBytes == other.queuedBytes &&
+          maxQueueMessages == other.maxQueueMessages &&
+          queuedMessages == other.queuedMessages;
   @override
-  int get hashCode => Object.hashAll([frameBytes, maxQueueBytes, queuedBytes]);
+  int get hashCode => Object.hashAll([
+    frameBytes,
+    maxQueueBytes,
+    queuedBytes,
+    maxQueueMessages,
+    queuedMessages,
+  ]);
   @override
   String toString() =>
-      'ResponsesSendQueueOverflowException(frameBytes: $frameBytes, maxQueueBytes: $maxQueueBytes, queuedBytes: $queuedBytes)';
+      'ResponsesSendQueueOverflowException(frameBytes: $frameBytes, maxQueueBytes: $maxQueueBytes, queuedBytes: $queuedBytes, maxQueueMessages: $maxQueueMessages, queuedMessages: $queuedMessages)';
 }
 
 /// Terminal attempted-write failure; the frame must never be requeued.
 @immutable
 class ResponsesDeliveryUnknownException implements Exception {
-  /// Exact UTF-8 byte length of the rejected or attempted frame.
+  /// Exact byte length of the rejected or attempted frame (UTF-8 for text).
   final int frameBytes;
 
   /// Failed write operation, such as send or flush.

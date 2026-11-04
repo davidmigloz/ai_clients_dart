@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io' as io;
+import 'dart:typed_data';
 
 import 'package:openai_dart/src/errors/exceptions.dart';
 import 'package:openai_dart/src/resources/responses/websocket_connector_io.dart'
@@ -38,6 +39,10 @@ void main() {
         expect(requests.single.uri.path, '/proxy/responses');
         expect(requests.single.uri.queryParametersAll['route'], ['one', 'two']);
         expect(
+          requests.single.headers.value('sec-websocket-extensions'),
+          isNull,
+        );
+        expect(
           requests.single.headers.value('authorization'),
           'Bearer synthetic',
         );
@@ -66,6 +71,50 @@ void main() {
         await peerSubscription.cancel();
         await requestSubscription.cancel();
         await server.close(force: true);
+      },
+    );
+
+    test(
+      'supports native frames larger than one MiB in both directions',
+      () async {
+        final server = await io.HttpServer.bind(
+          io.InternetAddress.loopbackIPv4,
+          0,
+        );
+        addTearDown(() => server.close(force: true));
+        final upgraded = Completer<io.WebSocket>();
+        final requests = server.listen((request) async {
+          upgraded.complete(await io.WebSocketTransformer.upgrade(request));
+        });
+        addTearDown(requests.cancel);
+        final socket = await native.connectResponsesWebSocket(
+          Uri.parse('ws://127.0.0.1:${server.port}/responses'),
+        );
+        final peer = await upgraded.future;
+        addTearDown(peer.close);
+        addTearDown(socket.close);
+        final sent = <Object>[];
+        final peerSubscription = peer.listen(
+          (data) => sent.add(data as Object),
+        );
+        addTearDown(peerSubscription.cancel);
+        final received = <WebSocketEvent>[];
+        final subscription = socket.events.listen(received.add);
+        addTearDown(subscription.cancel);
+        final text = 'x' * (2 * 1024 * 1024);
+        final bytes = Uint8List(2 * 1024 * 1024)
+          ..fillRange(0, 2 * 1024 * 1024, 42);
+        socket
+          ..sendText(text)
+          ..sendBytes(bytes);
+        peer
+          ..add(text)
+          ..add(bytes);
+        await _waitUntil(() => sent.length == 2 && received.length == 2);
+        expect(sent[0], text);
+        expect(sent[1], bytes);
+        expect((received[0] as TextDataReceived).text, text);
+        expect((received[1] as BinaryDataReceived).data, bytes);
       },
     );
 

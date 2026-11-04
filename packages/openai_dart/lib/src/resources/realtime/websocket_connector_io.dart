@@ -4,126 +4,126 @@ import 'dart:typed_data';
 
 import 'package:web_socket/web_socket.dart';
 
-/// IO implementation that uses dart:io WebSocket with header support.
+import '../../errors/exceptions.dart';
+import 'websocket_connector_common.dart';
+
+/// Whether the platform default uses the browser WebSocket API.
+const isRealtimeBrowserWebSocket = false;
+
+/// Opens a native Realtime WebSocket with custom handshake header support.
 ///
-/// This allows OpenAI API tokens to be passed via Authorization header
-/// on native platforms (server, CLI, mobile).
+/// Compression is disabled, following the official SDK's native default.
+/// The native implementation does not impose a message-size limit.
 Future<WebSocket> connectWebSocket(
   Uri uri, {
   Map<String, String>? headers,
+  Iterable<String>? protocols,
+  io.CompressionOptions compression = io.CompressionOptions.compressionOff,
+  io.HttpClient? customClient,
 }) async {
-  if (!uri.isScheme('ws') && !uri.isScheme('wss')) {
-    throw ArgumentError.value(
-      uri,
-      'url',
-      'only ws: and wss: schemes are supported',
+  validateRealtimeWebSocketUri(uri);
+  try {
+    final socket = await io.WebSocket.connect(
+      uri.toString(),
+      headers: headers,
+      protocols: protocols,
+      compression: compression,
+      customClient: customClient,
+    );
+    return _RealtimeNativeWebSocket(socket);
+  } catch (_) {
+    throw const ConnectionException(
+      message: 'Realtime WebSocket handshake failed.',
     );
   }
-
-  final io.WebSocket ioSocket;
-  try {
-    // Use dart:io WebSocket which supports custom headers
-    ioSocket = await io.WebSocket.connect(uri.toString(), headers: headers);
-  } on io.WebSocketException catch (e) {
-    throw WebSocketException(e.message);
-  }
-
-  // Wrap in the platform-independent WebSocket interface
-  return _IOWebSocketWrapper(ioSocket);
 }
 
-/// Wrapper around dart:io WebSocket to implement the web_socket package interface.
-///
-/// This is needed because the web_socket package's IOWebSocket.connect() doesn't
-/// support custom headers, but dart:io WebSocket.connect() does.
-class _IOWebSocketWrapper implements WebSocket {
-  final io.WebSocket _webSocket;
-  final StreamController<WebSocketEvent> _events = StreamController();
-
-  _IOWebSocketWrapper(this._webSocket) {
-    _webSocket.listen(
-      (event) {
+class _RealtimeNativeWebSocket implements WebSocket {
+  _RealtimeNativeWebSocket(this._socket) {
+    _subscription = _socket.listen(
+      _handleData,
+      onError: (Object _, StackTrace stackTrace) {
         if (_events.isClosed) return;
-        switch (event) {
-          case final String e:
-            _events.add(TextDataReceived(e));
-          case final List<int> e:
-            _events.add(BinaryDataReceived(Uint8List.fromList(e)));
-        }
-      },
-      onError: (Object e, StackTrace st) {
-        if (_events.isClosed) return;
-        final wse = switch (e) {
-          io.WebSocketException(message: final message) => WebSocketException(
-            message,
-          ),
-          _ => WebSocketException(e.toString()),
-        };
-        _events.addError(wse, st);
-      },
-      onDone: () {
-        if (_events.isClosed) return;
-        _events.add(
-          CloseReceived(_webSocket.closeCode, _webSocket.closeReason ?? ''),
+        _events.addError(
+          WebSocketException('Realtime WebSocket transport failed.'),
+          stackTrace,
         );
-        unawaited(_events.close());
       },
+      onDone: _handleDone,
     );
+  }
+
+  final io.WebSocket _socket;
+  final StreamController<WebSocketEvent> _events = StreamController();
+  final Completer<void> _transportDone = Completer();
+  late final StreamSubscription<dynamic> _subscription;
+  bool _closed = false;
+  bool _closing = false;
+  Future<void>? _closeFuture;
+
+  void _handleData(dynamic data) {
+    if (_events.isClosed) return;
+    switch (data) {
+      case final String text:
+        _events.add(TextDataReceived(text));
+      case final List<int> bytes:
+        _events.add(BinaryDataReceived(Uint8List.fromList(bytes)));
+    }
+  }
+
+  void _handleDone() {
+    if (_closed) return;
+    _closed = true;
+    _events.add(CloseReceived(_socket.closeCode, _socket.closeReason ?? ''));
+    unawaited(_events.close());
+    _transportDone.complete();
+  }
+
+  void _ensureOpen() {
+    if (_closed || _closing) throw WebSocketConnectionClosed();
   }
 
   @override
   Stream<WebSocketEvent> get events => _events.stream;
 
   @override
-  String get protocol => _webSocket.protocol ?? '';
+  String get protocol => _socket.protocol ?? '';
 
   @override
-  void sendBytes(Uint8List b) {
-    if (_events.isClosed) {
-      throw WebSocketConnectionClosed();
-    }
-    _webSocket.add(b);
+  void sendBytes(Uint8List bytes) {
+    _ensureOpen();
+    _socket.add(bytes);
   }
 
   @override
-  void sendText(String s) {
-    if (_events.isClosed) {
-      throw WebSocketConnectionClosed();
-    }
-    _webSocket.add(s);
+  void sendText(String text) {
+    _ensureOpen();
+    _socket.add(text);
   }
 
   @override
-  Future<void> close([int? code, String? reason]) async {
-    if (_events.isClosed) {
-      throw WebSocketConnectionClosed();
-    }
+  Future<void> close([int? code, String? reason]) {
+    validateRealtimeClose(code, reason);
+    if (_closeFuture case final future?) return future;
+    if (_closed) return Future.value();
+    _closing = true;
+    return _closeFuture = _close(reason != null ? code ?? 1000 : code, reason);
+  }
 
-    // Validate close code (RFC 6455)
-    if (code != null) {
-      if (code != 1000 && !(code >= 3000 && code <= 4999)) {
-        throw ArgumentError.value(
-          code,
-          'code',
-          'must be 1000 or in range 3000-4999',
-        );
-      }
-    }
-
-    // Validate close reason (max 123 bytes when UTF-8 encoded)
-    if (reason != null && reason.length > 123) {
-      throw ArgumentError.value(
-        reason,
-        'reason',
-        'must be no longer than 123 bytes when encoded as UTF-8',
-      );
-    }
-
-    unawaited(_events.close());
+  Future<void> _close(int? code, String? reason) async {
     try {
-      await _webSocket.close(code, reason);
-    } on io.WebSocketException catch (e) {
-      throw WebSocketException(e.message);
+      await _socket.close(code, reason);
+      await _transportDone.future;
+    } catch (_) {
+      try {
+        await _subscription.cancel();
+      } catch (_) {
+        // The close failure below is redacted regardless of cancellation's
+        // platform-specific error. Terminal notification still happens.
+      } finally {
+        _handleDone();
+      }
+      throw WebSocketException('Realtime WebSocket close failed.');
     }
   }
 }

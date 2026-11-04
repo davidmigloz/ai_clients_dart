@@ -33,8 +33,12 @@ class LiveResource extends ResourceBase {
   /// for credentials. Use trusted backend signaling/caller media, or supply
   /// an explicitly authenticated proxy connector. Connections are caller-owned
   /// after opening; client closure does not close them.
+  /// [reconnect] enables bounded transport recovery. A new primary/fork socket
+  /// needs explicit startup; retained commands require an explicit flush.
   Future<LivePrimaryConnection> connect({
     LiveWebSocketConnector? connector,
+    LiveReconnectOptions? reconnect,
+    Map<String, String>? queryParameters,
     Map<String, String>? additionalHeaders,
     Duration? connectionTimeout,
     int maxBufferedEvents = 1024,
@@ -47,6 +51,8 @@ class LiveResource extends ResourceBase {
       sideband: false,
       endpoint: '/live/sessions',
       connector: connector,
+      reconnect: reconnect,
+      queryParameters: queryParameters,
       additionalHeaders: additionalHeaders,
       connectionTimeout: connectionTimeout,
       maxBufferedEvents: maxBufferedEvents,
@@ -65,6 +71,8 @@ class LiveResource extends ResourceBase {
     String sessionId, {
     bool? gracefulClose,
     LiveWebSocketConnector? connector,
+    LiveReconnectOptions? reconnect,
+    Map<String, String>? queryParameters,
     Map<String, String>? additionalHeaders,
     Duration? connectionTimeout,
     int maxBufferedEvents = 1024,
@@ -91,6 +99,8 @@ class LiveResource extends ResourceBase {
       endpoint: '/live/sessions/$encoded/attach',
       gracefulClose: gracefulClose,
       connector: connector,
+      reconnect: reconnect,
+      queryParameters: queryParameters,
       additionalHeaders: additionalHeaders,
       connectionTimeout: connectionTimeout,
       maxBufferedEvents: maxBufferedEvents,
@@ -108,6 +118,8 @@ class LiveResource extends ResourceBase {
   Future<LiveForkConnection> forkConnection(
     String sessionId, {
     LiveWebSocketConnector? connector,
+    LiveReconnectOptions? reconnect,
+    Map<String, String>? queryParameters,
     Map<String, String>? additionalHeaders,
     Duration? connectionTimeout,
     int maxBufferedEvents = 1024,
@@ -141,6 +153,8 @@ class LiveResource extends ResourceBase {
       fork: true,
       endpoint: '/live/sessions/$encoded/fork',
       connector: connector,
+      reconnect: reconnect,
+      queryParameters: queryParameters,
       additionalHeaders: additionalHeaders,
       connectionTimeout: connectionTimeout,
       maxBufferedEvents: maxBufferedEvents,

@@ -28,6 +28,17 @@ class ResponsesRecovery {
   ResponsesReconnectContext? _currentAttempt;
   ResponsesRecoveryEvent? _lastEvent;
   ResponsesRecoveryClosed? _closed;
+  late List<ResponsesUnsentMessage> Function() _takePending;
+  late void Function() _flushPending;
+
+  /// Detaches currently pending frames in FIFO order without attempting them.
+  /// The terminal [closed] report remains available independently.
+  List<ResponsesUnsentMessage> takePending() => _takePending();
+
+  /// Attempts pending frames once, after explicit application reconciliation.
+  /// Throws while disconnected, after closure, or if delivery becomes unknown.
+  /// New sends on an open socket are independent of the retained pending queue.
+  void flushPending() => _flushPending();
 
   /// Recovery changes, with no replay for later subscribers.
   Stream<ResponsesRecoveryEvent> get events => _events.stream;
@@ -38,7 +49,7 @@ class ResponsesRecovery {
   /// Whether this logical socket has permanently closed.
   bool get isClosed => _isClosed;
 
-  /// UTF-8 bytes of frames which have never been handed to a socket.
+  /// Bytes of frames never handed to a socket (UTF-8 for text).
   int get queuedBytes => _queuedBytes;
 
   /// Number of frames which have never been handed to a socket.
@@ -88,11 +99,12 @@ class ResponsesRecovery {
 
 /// An opt-in logical WebSocket that replaces interrupted physical sockets.
 ///
-/// Only newly unsent text frames queue during recovery. The queue is a strict
-/// UTF-8 byte bound, including its first frame. Every record is removed just
+/// Only newly unsent text or binary frames queue during recovery. The queue is a strict
+/// byte bound, including its first frame (UTF-8 for text). Every record is removed just
 /// before its one write attempt. A failed attempted write permanently closes
 /// this helper and reports unknown delivery separately from never-attempted
-/// frames. No submitted create, steer or injection frame is replayed.
+/// frames. No submitted create, steer, injection or audio frame is replayed.
+/// Manual queues require explicit application reconciliation and flushing.
 ///
 /// [reconnect] must return an open socket and refresh credentials for every call.
 /// It receives the preparation decision, whose maps are snapshotted before the
@@ -108,15 +120,38 @@ class ResponsesRecoveringWebSocket implements WebSocket {
     required this._reconnect,
     this._delay,
     double Function()? random,
+    this.manualQueue = false,
+    this.lifetimeRetries = false,
+    Set<int>? recoverableCloseCodes,
+    this._onDisconnect,
+    this._beforeFlush,
   }) : _socket = socket,
        _protocol = socket.protocol,
-       _random = random ?? Random().nextDouble {
+       _random = random ?? Random().nextDouble,
+       _recoverableCodes = Set.unmodifiable(
+         recoverableCloseCodes ??
+             const {1001, 1005, 1006, 1011, 1012, 1013, 1015},
+       ) {
     options.validate();
     _events = StreamController<WebSocketEvent>(onListen: _listenInitial);
+    recovery._takePending = _takePending;
+    recovery._flushPending = _flushPending;
   }
 
   /// Validated retry and strict queue limits.
   final ResponsesReconnectOptions options;
+
+  /// Retains newly unsent frames until an explicit flush or detach.
+  final bool manualQueue;
+
+  /// Applies the retry limit across the logical connection's whole lifetime.
+  final bool lifetimeRetries;
+
+  late final Set<int> _recoverableCodes;
+  final void Function()? _onDisconnect;
+  final void Function()? _beforeFlush;
+  int _totalAttempts = 0;
+  late ResponsesDeliveryUnknownException _lastDeliveryUnknown;
 
   /// Caller-observable recovery state and final never-attempted report.
   final ResponsesRecovery recovery = ResponsesRecovery._();
@@ -133,6 +168,7 @@ class ResponsesRecoveringWebSocket implements WebSocket {
   Timer? _timer;
   int _generation = 0;
   bool _listening = false;
+  bool _flushing = false;
   bool _closed = false;
   int _lastCloseCode = 1006;
   int? _lastPhysicalCloseCode;
@@ -149,7 +185,13 @@ class ResponsesRecoveringWebSocket implements WebSocket {
   void _listenInitial() {
     if (_listening || _closed) return;
     _listening = true;
-    if (_socket case final socket?) _bind(socket);
+    if (_socket case final socket?) {
+      try {
+        _bind(socket);
+      } catch (_) {
+        _finish(cause: 'setup_failed');
+      }
+    }
   }
 
   void _bind(WebSocket socket) {
@@ -192,7 +234,7 @@ class ResponsesRecoveringWebSocket implements WebSocket {
     _lastCloseCode = code ?? 1006;
     _lastCloseReason = reason;
     _retire(socket);
-    if (!_recoverable(_lastCloseCode)) {
+    if (!_recoverableCodes.contains(_lastCloseCode)) {
       _finish(code: code, reason: reason, cause: 'nonrecoverable_close');
       return;
     }
@@ -200,13 +242,16 @@ class ResponsesRecoveringWebSocket implements WebSocket {
       _finish(code: code, reason: reason, cause: 'reconnect_disabled');
       return;
     }
-    if (recovery.isRecovering) return;
+    final wasRecovering = recovery.isRecovering;
     recovery._isRecovering = true;
-    unawaited(_recover());
+    try {
+      _onDisconnect?.call();
+    } catch (_) {
+      _finish(code: code, reason: reason, cause: 'preparation_failed');
+      return;
+    }
+    if (!wasRecovering) unawaited(_recover());
   }
-
-  static bool _recoverable(int code) =>
-      const {1001, 1005, 1006, 1011, 1012, 1013, 1015}.contains(code);
 
   void _retire(WebSocket socket) {
     ++_generation;
@@ -220,8 +265,19 @@ class ResponsesRecoveringWebSocket implements WebSocket {
   Future<void> _recover() async {
     final cap = options.maxDelay.inMilliseconds;
     var baseDelay = min(options.initialDelay.inMilliseconds, cap);
-    for (var attempt = 1; attempt <= options.maxAttempts; attempt++) {
+    if (lifetimeRetries && baseDelay > 0) {
+      for (var i = 0; i < _totalAttempts && baseDelay < cap; i++) {
+        baseDelay = baseDelay > cap ~/ 2 ? cap : baseDelay * 2;
+      }
+    }
+    for (
+      var interruptionAttempt = 1;
+      interruptionAttempt <= options.maxAttempts;
+      interruptionAttempt++
+    ) {
       if (_closed) return;
+      if (lifetimeRetries && _totalAttempts >= options.maxAttempts) break;
+      final attempt = lifetimeRetries ? ++_totalAttempts : interruptionAttempt;
       final Duration plannedDelay;
       try {
         final jitter = _random();
@@ -235,7 +291,11 @@ class ResponsesRecoveringWebSocket implements WebSocket {
         // attempts must not encounter 0*Infinity or integer overflow.
         baseDelay = baseDelay > cap ~/ 2 ? cap : baseDelay * 2;
       } catch (_) {
-        _finish(cause: 'retry_configuration_failed');
+        _finish(
+          code: _lastPhysicalCloseCode,
+          reason: _lastCloseReason,
+          cause: 'retry_configuration_failed',
+        );
         return;
       }
       final context = ResponsesReconnectContext(
@@ -284,7 +344,13 @@ class ResponsesRecoveringWebSocket implements WebSocket {
         final waited = await _orClosed(_wait(plannedDelay));
         if (identical(waited, _cancelledSignal)) return;
       } catch (_) {
-        if (!_closed) _finish(cause: 'delay_failed');
+        if (!_closed) {
+          _finish(
+            code: _lastPhysicalCloseCode,
+            reason: _lastCloseReason,
+            cause: 'delay_failed',
+          );
+        }
         return;
       }
       if (_closed) return;
@@ -314,7 +380,7 @@ class ResponsesRecoveringWebSocket implements WebSocket {
         _bind(candidate);
         if (_closed) return;
         if (!identical(_socket, candidate)) continue;
-        if (!_flush(candidate)) return;
+        if (!manualQueue && !_flush(candidate)) return;
         if (_closed) return;
         if (!identical(_socket, candidate)) continue;
         recovery._isRecovering = false;
@@ -371,20 +437,24 @@ class ResponsesRecoveringWebSocket implements WebSocket {
     return completion.future;
   }
 
-  void _enqueue(String text) {
-    final message = ResponsesUnsentMessage.fromText(text);
+  void _enqueue(ResponsesUnsentMessage message) {
     if (options.maxQueueBytes == 0 ||
+        _queue.length >= options.maxQueueMessages ||
         recovery.queuedBytes + message.byteLength > options.maxQueueBytes) {
       final error = ResponsesSendQueueOverflowException(
         frameBytes: message.byteLength,
         maxQueueBytes: options.maxQueueBytes,
         queuedBytes: recovery.queuedBytes,
+        maxQueueMessages: options.maxQueueMessages,
+        queuedMessages: _queue.length,
       );
       recovery._emit(
         ResponsesRecoveryQueueOverflow(
           frameBytes: error.frameBytes,
           maxQueueBytes: error.maxQueueBytes,
           queuedBytes: error.queuedBytes,
+          maxQueueMessages: error.maxQueueMessages,
+          queuedMessages: error.queuedMessages,
         ),
       );
       throw error;
@@ -395,19 +465,28 @@ class ResponsesRecoveringWebSocket implements WebSocket {
   }
 
   bool _flush(WebSocket socket) {
-    while (!_closed && identical(_socket, socket) && _queue.isNotEmpty) {
-      // Keep the unattempted remainder charged even under a reentrant send.
-      final next = _queue.removeFirst();
-      recovery._queuedBytes -= next.byteLength;
-      recovery._queuedMessages = _queue.length;
-      try {
-        socket.sendText(next.text);
-      } catch (_) {
-        _deliveryUnknown(next.byteLength, 'flush');
-        return false;
+    _flushing = true;
+    try {
+      while (!_closed && identical(_socket, socket) && _queue.isNotEmpty) {
+        // Charge the never-attempted remainder even during a reentrant send.
+        final next = _queue.removeFirst();
+        recovery._queuedBytes -= next.byteLength;
+        recovery._queuedMessages = _queue.length;
+        try {
+          if (next.isBinary) {
+            socket.sendBytes(next.bytes);
+          } else {
+            socket.sendText(next.text);
+          }
+        } catch (_) {
+          _deliveryUnknown(next.byteLength, 'flush');
+          return false;
+        }
       }
+      return true;
+    } finally {
+      _flushing = false;
     }
-    return true;
   }
 
   ResponsesDeliveryUnknownException _deliveryUnknown(
@@ -418,6 +497,7 @@ class ResponsesRecoveringWebSocket implements WebSocket {
       frameBytes: bytes,
       operation: operation,
     );
+    _lastDeliveryUnknown = error;
     recovery._emit(
       ResponsesRecoveryDeliveryUnknown(frameBytes: bytes, operation: operation),
     );
@@ -428,8 +508,8 @@ class ResponsesRecoveringWebSocket implements WebSocket {
   @override
   void sendText(String text) {
     if (_closed) throw WebSocketConnectionClosed();
-    if (recovery.isRecovering) {
-      _enqueue(text);
+    if (recovery.isRecovering || _flushing) {
+      _enqueue(ResponsesUnsentMessage.fromText(text));
       return;
     }
     final socket = _socket;
@@ -445,8 +525,53 @@ class ResponsesRecoveringWebSocket implements WebSocket {
   }
 
   @override
-  void sendBytes(Uint8List bytes) =>
-      throw UnsupportedError('Responses recovery supports text frames only');
+  void sendBytes(Uint8List bytes) {
+    if (_closed) throw WebSocketConnectionClosed();
+    final frame = ResponsesUnsentMessage.fromBytes(bytes);
+    if (recovery.isRecovering || _flushing) {
+      _enqueue(frame);
+      return;
+    }
+    final socket = _socket;
+    if (socket == null) throw WebSocketConnectionClosed();
+    try {
+      socket.sendBytes(frame.bytes);
+    } catch (_) {
+      throw _deliveryUnknown(frame.byteLength, 'send');
+    }
+  }
+
+  List<ResponsesUnsentMessage> _takePending() {
+    final result = List<ResponsesUnsentMessage>.unmodifiable(_queue);
+    _queue.clear();
+    recovery._queuedBytes = 0;
+    recovery._queuedMessages = 0;
+    return result;
+  }
+
+  void _flushPending() {
+    if (_flushing) throw StateError('A pending flush is already in progress.');
+    if (_closed || recovery.isRecovering || _socket == null) {
+      throw StateError('Pending frames require an open connection.');
+    }
+    _beforeFlush?.call();
+    if (_closed || recovery.isRecovering || _socket == null) {
+      throw StateError('Connection changed during pending reconciliation.');
+    }
+    final socket = _socket!;
+    if (!_flush(socket)) {
+      final event = recovery.lastEvent;
+      if (recovery.closed?.cause == 'delivery_unknown') {
+        throw _lastDeliveryUnknown;
+      }
+      throw StateError(
+        'Connection closed during pending flush: ${event.runtimeType}.',
+      );
+    }
+    if (_closed || !identical(_socket, socket)) {
+      throw StateError('Connection changed during pending flush.');
+    }
+  }
 
   void _finish({int? code, String? reason, required String cause}) {
     if (_closed) return;

@@ -3,9 +3,58 @@ import 'dart:convert';
 
 import 'package:web_socket/web_socket.dart';
 
+import '../errors/exceptions.dart';
 import '../models/realtime/realtime.dart';
+import '../utils/private_audio_http.dart';
 import 'base_resource.dart';
 import 'realtime/websocket_connector.dart';
+import 'responses/responses_recovering_websocket.dart';
+import 'websocket_recovery.dart';
+
+export 'realtime/websocket_connector.dart';
+export 'websocket_recovery.dart';
+
+/// Opt-in Realtime transport recovery with explicit session restoration.
+///
+/// Reopening creates a new session. Submitted configuration, audio and actions
+/// are never replayed. By default disconnected sends are rejected; a positive
+/// [maxQueueBytes] retains only never-attempted frames until the application
+/// explicitly flushes or removes them after restoring the replacement session.
+class RealtimeReconnectOptions extends WebSocketReconnectOptions {
+  /// Uses a lifetime retry budget and disables pending-frame retention by default.
+  const RealtimeReconnectOptions({
+    required super.onReconnecting,
+    super.maxAttempts,
+    super.initialDelay,
+    super.maxDelay,
+    super.maxQueueBytes = 0,
+    super.maxQueueMessages,
+  });
+
+  @override
+  RealtimeReconnectOptions copyWith({
+    WebSocketReconnectPreparation? onReconnecting,
+    int? maxAttempts,
+    Duration? initialDelay,
+    Duration? maxDelay,
+    int? maxQueueBytes,
+    int? maxQueueMessages,
+  }) => RealtimeReconnectOptions(
+    onReconnecting: onReconnecting ?? this.onReconnecting,
+    maxAttempts: maxAttempts ?? this.maxAttempts,
+    initialDelay: initialDelay ?? this.initialDelay,
+    maxDelay: maxDelay ?? this.maxDelay,
+    maxQueueBytes: maxQueueBytes ?? this.maxQueueBytes,
+    maxQueueMessages: maxQueueMessages ?? this.maxQueueMessages,
+  );
+
+  @override
+  String toString() =>
+      'RealtimeReconnectOptions(onReconnecting: [REDACTED], '
+      'maxAttempts: $maxAttempts, initialDelay: $initialDelay, '
+      'maxDelay: $maxDelay, maxQueueBytes: $maxQueueBytes, '
+      'maxQueueMessages: $maxQueueMessages)';
+}
 
 /// Resource for Realtime API operations.
 ///
@@ -60,17 +109,29 @@ class RealtimeResource extends ResourceBase {
   ///
   /// A [RealtimeConnection] for sending and receiving events.
   ///
+  /// [reconnect] explicitly enables bounded transport recovery. Each replacement
+  /// socket creates a new session; the initial [config] is sent only once. Restore
+  /// session state after `recovery.events` reports a reconnected event, then call
+  /// `flushPending()` if disconnected retention was explicitly enabled. Audio,
+  /// tool actions and already-attempted writes are never automatically replayed.
+  /// [abortTrigger] cancels setup, retry waiting, or the established connection.
+  /// [connectionTimeout] bounds each dial, including replacement sockets.
+  /// [connector] can capture caller native options for use on every attempt.
+  /// [additionalHeaders] and [queryParameters] are snapshotted before opening;
+  /// preparation callback overrides are layered over those original values.
+  ///
   /// ## Platform Notes
   ///
   /// The browser WebSocket API does not allow custom headers, so the
-  /// Realtime WebSocket transport is supported on server / CLI / mobile
-  /// only — calling `connect(...)` from a browser raises
-  /// [ConnectionException]. For browser-based realtime, use the WebRTC
+  /// Realtime WebSocket transport can authenticate directly on server / CLI /
+  /// mobile. A browser connection with configured headers raises
+  /// [RealtimeBrowserHeadersException] before credential lookup. For browser-based realtime, use the WebRTC
   /// transport via `client.realtimeSessions.calls.create(...)` (open a
   /// peer connection client-side, POST the SDP offer, complete the
   /// handshake with the returned answer). Alternatively, route the
   /// WebSocket through a server-side proxy that can set the
   /// `Authorization` header.
+  /// A headerless configuration may connect to an authenticated backend proxy.
   ///
   /// ## Example
   ///
@@ -89,23 +150,41 @@ class RealtimeResource extends ResourceBase {
   Future<RealtimeConnection> connect({
     required String model,
     RealtimeSessionCreateRequest? config,
+    RealtimeWebSocketConnector? connector,
+    Map<String, String>? additionalHeaders,
+    Map<String, String>? queryParameters,
+    Duration? connectionTimeout,
+    Future<void>? abortTrigger,
+    RealtimeReconnectOptions? reconnect,
   }) async {
     if (config != null && config.model != model) {
-      throw ArgumentError.value(
-        config.model,
-        'config.model',
-        'must match the connect(model:) argument ("$model"): the WebSocket '
-            'is opened for the URL-query model and the embedded session.update '
-            'would target a different model, which the server may reject. '
-            'Pass the same value in both places.',
+      throw ArgumentError(
+        'config.model must match the connect(model:) argument.',
       );
     }
-    final socket = await _openSocket('/realtime', model);
-    final connection = RealtimeConnection._(socket);
-    if (config != null) {
-      connection.updateSession(config);
+    final socket = await _connectSocket(
+      '/realtime',
+      model,
+      connector: connector,
+      additionalHeaders: additionalHeaders,
+      queryParameters: queryParameters,
+      connectionTimeout: connectionTimeout,
+      abortTrigger: abortTrigger,
+      reconnect: reconnect,
+    );
+    RealtimeConnection? connection;
+    try {
+      connection = RealtimeConnection._(socket, abortTrigger: abortTrigger);
+      if (config != null) connection.updateSession(config);
+      return connection;
+    } catch (_) {
+      if (connection != null) {
+        await connection.close().catchError((Object _) {});
+      } else {
+        await _disposeSocket(socket);
+      }
+      rethrow;
     }
-    return connection;
   }
 
   /// Connects to a Realtime translation session.
@@ -114,6 +193,12 @@ class RealtimeResource extends ResourceBase {
   /// transcript deltas out continuously — there is no `response.create`
   /// lifecycle. The WebSocket lives at
   /// `wss://api.openai.com/v1/realtime/translations`.
+  ///
+  /// [reconnect] is opt-in and opens a new translation session. Configuration
+  /// and audio are not replayed. After restoring the new session, explicitly
+  /// flush or remove never-attempted pending frames; retention defaults to zero.
+  /// [connector], [additionalHeaders], [queryParameters], [connectionTimeout]
+  /// and [abortTrigger] follow the same setup and cleanup policy as [connect].
   ///
   /// ## Parameters
   ///
@@ -147,196 +232,268 @@ class RealtimeResource extends ResourceBase {
   Future<RealtimeTranslationConnection> connectTranslation({
     required String model,
     RealtimeTranslationSessionUpdateRequest? config,
+    RealtimeWebSocketConnector? connector,
+    Map<String, String>? additionalHeaders,
+    Map<String, String>? queryParameters,
+    Duration? connectionTimeout,
+    Future<void>? abortTrigger,
+    RealtimeReconnectOptions? reconnect,
   }) async {
-    final socket = await _openSocket('/realtime/translations', model);
-    final connection = RealtimeTranslationConnection._(socket);
-    if (config != null) {
-      connection.updateSession(config);
+    final socket = await _connectSocket(
+      '/realtime/translations',
+      model,
+      connector: connector,
+      additionalHeaders: additionalHeaders,
+      queryParameters: queryParameters,
+      connectionTimeout: connectionTimeout,
+      abortTrigger: abortTrigger,
+      reconnect: reconnect,
+    );
+    RealtimeTranslationConnection? connection;
+    try {
+      connection = RealtimeTranslationConnection._(
+        socket,
+        abortTrigger: abortTrigger,
+      );
+      if (config != null) connection.updateSession(config);
+      return connection;
+    } catch (_) {
+      if (connection != null) {
+        await connection.close().catchError((Object _) {});
+      } else {
+        await _disposeSocket(socket);
+      }
+      rethrow;
     }
-    return connection;
   }
 
-  Future<WebSocket> _openSocket(String path, String model) {
+  Future<WebSocket> _connectSocket(
+    String path,
+    String model, {
+    required RealtimeWebSocketConnector? connector,
+    required Map<String, String>? additionalHeaders,
+    required Map<String, String>? queryParameters,
+    required Duration? connectionTimeout,
+    required Future<void>? abortTrigger,
+    required RealtimeReconnectOptions? reconnect,
+  }) async {
     ensureNotClosed?.call();
-    final httpUrl = requestBuilder.buildUrl(
+    reconnect?.validate();
+    final timeout = connectionTimeout ?? config.connectTimeout;
+    if (!timeout.inMicroseconds.isFinite || timeout <= Duration.zero) {
+      throw ArgumentError('connectionTimeout must be finite and positive.');
+    }
+    if (model.isEmpty) throw ArgumentError('model must be nonempty.');
+    final initialHeaders = additionalHeaders == null
+        ? null
+        : Map<String, String>.unmodifiable(additionalHeaders);
+    final initialQuery = queryParameters == null
+        ? null
+        : Map<String, String>.unmodifiable(queryParameters);
+    Map<String, String>? currentHeaders;
+    Map<String, String>? currentQuery;
+    if (reconnect != null &&
+        (initialQuery?.containsKey('intent') == true ||
+            initialQuery?.containsKey('call_id') == true ||
+            Uri.parse(config.baseUrl).queryParameters.containsKey('intent') ||
+            Uri.parse(config.baseUrl).queryParameters.containsKey('call_id'))) {
+      throw ArgumentError(
+        'Automatic Realtime recovery requires a model session.',
+      );
+    }
+    Future<WebSocket> open() => _openSocket(
       path,
-      queryParams: {'model': model},
+      model,
+      connector: connector ?? connectWebSocket,
+      checkBrowserHeaders: connector == null,
+      additionalHeaders: {...?initialHeaders, ...?currentHeaders},
+      queryParameters: {...?initialQuery, ...?currentQuery},
+      timeout: timeout,
+      abortTrigger: abortTrigger,
     );
-    final wsUrl = httpUrl.replace(
-      scheme: httpUrl.scheme == 'https' ? 'wss' : 'ws',
-    );
-    // The Realtime API authenticates via the standard `Authorization`
-    // bearer token only — no `OpenAI-Beta` header is required (or
-    // accepted) on the WebSocket handshake.
-    final cfg = config;
-    final headers = <String, String>{...cfg.defaultHeaders};
-    if (cfg.authProvider case final authProvider?) {
-      headers.addAll(authProvider.getHeaders());
+    final socket = await open();
+    try {
+      await checkPrivateAudioAbort(abortTrigger, 'Realtime connection');
+      ensureNotClosed?.call();
+      if (reconnect == null) return socket;
+      return ResponsesRecoveringWebSocket(
+        socket,
+        options: reconnect.copyWith(
+          onReconnecting: (context) {
+            ensureNotClosed?.call();
+            return reconnect.onReconnecting(context);
+          },
+        ),
+        manualQueue: true,
+        lifetimeRetries: true,
+        recoverableCloseCodes: const {1001, 1005, 1006, 1011, 1012, 1013},
+        reconnect: (decision) {
+          if (decision.headers != null) currentHeaders = decision.headers;
+          if (decision.queryParameters != null) {
+            currentQuery = decision.queryParameters;
+          }
+          if (currentQuery?.containsKey('intent') == true ||
+              currentQuery?.containsKey('call_id') == true) {
+            throw ArgumentError(
+              'Automatic Realtime recovery requires a model session.',
+            );
+          }
+          return open();
+        },
+      );
+    } catch (_) {
+      await _disposeSocket(socket);
+      rethrow;
     }
-    if (cfg.organization case final org?) {
-      headers['OpenAI-Organization'] = org;
+  }
+
+  Future<WebSocket> _openSocket(
+    String path,
+    String model, {
+    required RealtimeWebSocketConnector connector,
+    required bool checkBrowserHeaders,
+    required Map<String, String>? additionalHeaders,
+    required Map<String, String>? queryParameters,
+    required Duration timeout,
+    required Future<void>? abortTrigger,
+  }) async {
+    await checkPrivateAudioAbort(abortTrigger, 'Realtime connection');
+    ensureNotClosed?.call();
+    final Uri wsUrl;
+    try {
+      final uri = requestBuilder.buildUrl(
+        path,
+        queryParams: {...?queryParameters, 'model': model},
+      );
+      final scheme = switch (uri.scheme) {
+        'https' || 'wss' => 'wss',
+        'http' || 'ws' => 'ws',
+        _ => throw const FormatException(),
+      };
+      if (uri.host.isEmpty || uri.hasFragment) throw const FormatException();
+      wsUrl = uri.replace(scheme: scheme);
+    } on FormatException {
+      throw ArgumentError(
+        'Realtime baseUrl must have a host, no fragment, and use http, https, ws or wss.',
+      );
     }
-    if (cfg.project case final proj?) {
-      headers['OpenAI-Project'] = proj;
+    if (checkBrowserHeaders && isRealtimeBrowserWebSocket) {
+      final names = <String>{
+        ...config.defaultHeaders.keys,
+        if (config.authProvider != null) 'auth-provider',
+        if (config.organization != null) 'openai-organization',
+        if (config.project != null) 'openai-project',
+        if (config.apiVersion != null) 'openai-version',
+        ...?additionalHeaders?.keys,
+      };
+      if (names.isNotEmpty) throw RealtimeBrowserHeadersException(names);
     }
-    if (cfg.apiVersion case final version?) {
-      headers['OpenAI-Version'] = version;
+    final headers = <String, String>{};
+    void merge(Map<String, String> values) {
+      for (final entry in values.entries) {
+        headers[entry.key.toLowerCase()] = entry.value;
+      }
     }
-    return connectWebSocket(wsUrl, headers: headers);
+
+    merge(config.defaultHeaders);
+    if (config.authProvider case final provider?) merge(provider.getHeaders());
+    merge({
+      'OpenAI-Organization': ?config.organization,
+      'OpenAI-Project': ?config.project,
+      'OpenAI-Version': ?config.apiVersion,
+    });
+    if (additionalHeaders != null) merge(additionalHeaders);
+    await checkPrivateAudioAbort(abortTrigger, 'Realtime connection');
+    ensureNotClosed?.call();
+    final cancelled = Completer<WebSocket>();
+    var abandoned = false;
+    if (abortTrigger != null) {
+      void abort() {
+        if (cancelled.isCompleted) return;
+        cancelled.completeError(
+          AbortedException(
+            message: 'Realtime connection aborted.',
+            stage: AbortionStage.duringRequest,
+            timestamp: DateTime.now(),
+            redactDiagnostics: true,
+          ),
+        );
+      }
+
+      unawaited(
+        abortTrigger.then<void>(
+          (_) => abort(),
+          onError: (Object _, StackTrace _) => abort(),
+        ),
+      );
+    }
+    final WebSocket socket;
+    try {
+      final opening = Future<WebSocket>.sync(
+        () => connector(wsUrl, headers: Map.unmodifiable(headers)),
+      );
+      unawaited(
+        opening.then<void>((socket) {
+          if (abandoned) unawaited(_disposeSocket(socket));
+        }, onError: (Object _, StackTrace _) {}),
+      );
+      socket = await Future.any<WebSocket>([
+        opening,
+        cancelled.future,
+      ]).timeout(timeout);
+    } on AbortedException {
+      abandoned = true;
+      rethrow;
+    } on RealtimeBrowserHeadersException {
+      abandoned = true;
+      rethrow;
+    } catch (error) {
+      abandoned = true;
+      throw ConnectionException(
+        message: error is TimeoutException
+            ? 'Realtime WebSocket handshake timed out.'
+            : 'Realtime WebSocket handshake failed.',
+        cause: error,
+        redactDiagnostics: true,
+      );
+    } finally {
+      // Release Future.any's losing listener after a successful dial/timeout.
+      // Otherwise the connection-lifetime abort future can retain the winning
+      // socket through its completed race until the eventual abort arrives.
+      if (!cancelled.isCompleted) {
+        cancelled.completeError(
+          const RealtimeTransportException(operation: 'settled_handshake'),
+        );
+      }
+    }
+    try {
+      await checkPrivateAudioAbort(abortTrigger, 'Realtime connection');
+      ensureNotClosed?.call();
+      return socket;
+    } catch (_) {
+      await _disposeSocket(socket);
+      rethrow;
+    }
+  }
+
+  static Future<void> _disposeSocket(WebSocket socket) async {
+    try {
+      await socket.close(1000).timeout(const Duration(seconds: 5));
+    } catch (_) {
+      // Cleanup of a late/abandoned handshake must not create another failure.
+    }
   }
 }
 
 /// A connection to a realtime session.
 ///
 /// Use this to send and receive events from the Realtime API.
-class RealtimeConnection {
-  RealtimeConnection._(this._socket) {
-    // Buffer events emitted before the first listener attaches; drain them
-    // when the broadcast stream gets its first subscriber. Without this,
-    // early frames from the server (notably `session.created`) get dropped
-    // because broadcast streams discard events when nobody is listening.
-    _eventController = StreamController<RealtimeEvent>.broadcast(
-      onListen: _drainBuffer,
-    );
-    _subscription = _socket.events.listen(
-      _handleEvent,
-      onError: _handleError,
-      onDone: _handleDone,
-    );
-  }
+class RealtimeConnection extends _RealtimeConnection<RealtimeEvent> {
+  RealtimeConnection._(super.socket, {super.abortTrigger});
 
-  final WebSocket _socket;
-  late final StreamSubscription<WebSocketEvent> _subscription;
-  late final StreamController<RealtimeEvent> _eventController;
-  final List<_BufferedEvent> _earlyEvents = [];
-  bool _drained = false;
-  bool _closed = false;
-
-  void _drainBuffer() {
-    if (_drained) return;
-    _drained = true;
-    // Guard against the race where the socket closes (and
-    // [_handleDone] closes the controller) before the first listener
-    // attaches. In that case `onListen` still fires when a late
-    // subscriber arrives — emitting into a closed controller would
-    // throw `StateError`. Clear the buffer instead.
-    if (_closed) {
-      _earlyEvents.clear();
-      return;
-    }
-    for (final buffered in _earlyEvents) {
-      if (buffered.error != null) {
-        _eventController.addError(buffered.error!);
-      } else {
-        _eventController.add(buffered.event!);
-      }
-    }
-    _earlyEvents.clear();
-  }
-
-  /// Maximum events buffered before the first listener attaches.
-  ///
-  /// Drops the oldest entry when full. Prevents unbounded memory growth
-  /// if a caller never attaches a listener to [events] (or attaches very
-  /// late in a long-running session). 1024 entries is large enough to
-  /// cover the realistic "session.created" race window and an opening
-  /// burst of frames; beyond that the loss is on partial early state
-  /// the consumer chose not to read.
-  static const int _maxBufferedEvents = 1024;
-
-  void _emitEvent(RealtimeEvent event) {
-    if (_closed) return;
-    if (_drained) {
-      _eventController.add(event);
-    } else {
-      if (_earlyEvents.length >= _maxBufferedEvents) {
-        _earlyEvents.removeAt(0);
-      }
-      _earlyEvents.add(_BufferedEvent.event(event));
-    }
-  }
-
-  void _emitError(Object error) {
-    if (_closed) return;
-    if (_drained) {
-      _eventController.addError(error);
-    } else {
-      if (_earlyEvents.length >= _maxBufferedEvents) {
-        _earlyEvents.removeAt(0);
-      }
-      _earlyEvents.add(_BufferedEvent.error(error));
-    }
-  }
-
-  /// Stream of events from the server.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// session.events.listen((event) {
-  ///   switch (event) {
-  ///     case SessionCreatedEvent(:final session):
-  ///       print('Session created: ${session.id}');
-  ///     case ResponseTextDeltaEvent(:final delta):
-  ///       stdout.write(delta);
-  ///     case ErrorEvent(:final error):
-  ///       print('Error: ${error.message}');
-  ///     default:
-  ///       // Handle other events
-  ///   }
-  /// });
-  /// ```
-  Stream<RealtimeEvent> get events => _eventController.stream;
-
-  /// Whether the connection is closed.
-  bool get isClosed => _closed;
-
-  void _handleEvent(WebSocketEvent event) {
-    switch (event) {
-      case TextDataReceived(:final text):
-        _handleMessage(text);
-      case BinaryDataReceived():
-        // Binary data not expected from OpenAI Realtime API
-        break;
-      case CloseReceived():
-        _handleDone();
-    }
-  }
-
-  void _handleMessage(String message) {
-    try {
-      final json = jsonDecode(message) as Map<String, dynamic>;
-      final event = RealtimeEvent.fromJson(json);
-      _emitEvent(event);
-    } catch (e) {
-      _emitError(e);
-    }
-  }
-
-  void _handleError(Object error) {
-    _emitError(error);
-  }
-
-  void _handleDone() {
-    // Idempotent: `_handleEvent` calls this on `CloseReceived`, and the
-    // socket subscription's `onDone` also fires it. Without the guard,
-    // `_eventController.close()` would run twice (the second call is a
-    // no-op on `StreamController` but the explicit short-circuit makes
-    // the contract clear and prevents future regressions).
-    if (_closed) return;
-    _closed = true;
-    unawaited(_eventController.close());
-  }
-
-  /// Sends a raw event to the server.
-  ///
-  /// ## Parameters
-  ///
-  /// - [event] - The event to send as JSON.
-  void send(Map<String, dynamic> event) {
-    _ensureNotClosed();
-    _socket.sendText(jsonEncode(event));
-  }
+  @override
+  RealtimeEvent _parse(Map<String, dynamic> json) =>
+      RealtimeEvent.fromJson(json);
 
   /// Updates the session configuration.
   ///
@@ -631,37 +788,6 @@ class RealtimeConnection {
       'output': output,
     }, eventId: eventId);
   }
-
-  void _ensureNotClosed() {
-    if (_closed) {
-      throw StateError('Connection has been closed');
-    }
-  }
-
-  /// Closes the connection.
-  ///
-  /// ## Parameters
-  ///
-  /// - [code] - Optional close code.
-  /// - [reason] - Optional close reason.
-  Future<void> close({int? code, String? reason}) async {
-    if (_closed) return;
-    _closed = true;
-
-    await _subscription.cancel();
-    await _socket.close(code, reason);
-    await _eventController.close();
-  }
-}
-
-/// Internal: buffered event/error pair used while no listener is yet
-/// attached to [RealtimeConnection.events].
-class _BufferedEvent {
-  _BufferedEvent.event(RealtimeEvent this.event) : error = null;
-  _BufferedEvent.error(Object this.error) : event = null;
-
-  final RealtimeEvent? event;
-  final Object? error;
 }
 
 /// A connection to a Realtime translation session.
@@ -670,133 +796,13 @@ class _BufferedEvent {
 /// transcript deltas out continuously. They use a different event surface
 /// from regular Realtime sessions — see [RealtimeTranslationServerEvent]
 /// for the event types you'll receive on [events].
-class RealtimeTranslationConnection {
-  RealtimeTranslationConnection._(this._socket) {
-    _eventController =
-        StreamController<RealtimeTranslationServerEvent>.broadcast(
-          onListen: _drainBuffer,
-        );
-    _subscription = _socket.events.listen(
-      _handleEvent,
-      onError: _handleError,
-      onDone: _handleDone,
-    );
-  }
+class RealtimeTranslationConnection
+    extends _RealtimeConnection<RealtimeTranslationServerEvent> {
+  RealtimeTranslationConnection._(super.socket, {super.abortTrigger});
 
-  final WebSocket _socket;
-  late final StreamSubscription<WebSocketEvent> _subscription;
-  late final StreamController<RealtimeTranslationServerEvent> _eventController;
-  final List<_BufferedTranslationEvent> _earlyEvents = [];
-  bool _drained = false;
-  bool _closed = false;
-
-  void _drainBuffer() {
-    if (_drained) return;
-    _drained = true;
-    // Guard against the race where the socket closes (and
-    // [_handleDone] closes the controller) before the first listener
-    // attaches. In that case `onListen` still fires when a late
-    // subscriber arrives — emitting into a closed controller would
-    // throw `StateError`. Clear the buffer instead.
-    if (_closed) {
-      _earlyEvents.clear();
-      return;
-    }
-    for (final buffered in _earlyEvents) {
-      if (buffered.error != null) {
-        _eventController.addError(buffered.error!);
-      } else {
-        _eventController.add(buffered.event!);
-      }
-    }
-    _earlyEvents.clear();
-  }
-
-  /// Maximum events buffered before the first listener attaches.
-  ///
-  /// Drops the oldest entry when full. Prevents unbounded memory growth
-  /// in long-lived translation sessions where a listener attaches late
-  /// (or never).
-  static const int _maxBufferedEvents = 1024;
-
-  void _emitEvent(RealtimeTranslationServerEvent event) {
-    if (_closed) return;
-    if (_drained) {
-      _eventController.add(event);
-    } else {
-      if (_earlyEvents.length >= _maxBufferedEvents) {
-        _earlyEvents.removeAt(0);
-      }
-      _earlyEvents.add(_BufferedTranslationEvent.event(event));
-    }
-  }
-
-  void _emitError(Object error) {
-    if (_closed) return;
-    if (_drained) {
-      _eventController.addError(error);
-    } else {
-      if (_earlyEvents.length >= _maxBufferedEvents) {
-        _earlyEvents.removeAt(0);
-      }
-      _earlyEvents.add(_BufferedTranslationEvent.error(error));
-    }
-  }
-
-  /// Stream of translation server events.
-  Stream<RealtimeTranslationServerEvent> get events => _eventController.stream;
-
-  /// Whether the connection is closed.
-  bool get isClosed => _closed;
-
-  void _handleEvent(WebSocketEvent event) {
-    switch (event) {
-      case TextDataReceived(:final text):
-        _handleMessage(text);
-      case BinaryDataReceived():
-        // Binary data not expected from OpenAI Realtime API
-        break;
-      case CloseReceived():
-        _handleDone();
-    }
-  }
-
-  void _handleMessage(String message) {
-    try {
-      final json = jsonDecode(message) as Map<String, dynamic>;
-      final event = RealtimeTranslationServerEvent.fromJson(json);
-      _emitEvent(event);
-    } catch (e) {
-      _emitError(e);
-    }
-  }
-
-  void _handleError(Object error) {
-    _emitError(error);
-  }
-
-  void _handleDone() {
-    // Idempotent: `_handleEvent` calls this on `CloseReceived`, and the
-    // socket subscription's `onDone` also fires it. Without the guard,
-    // `_eventController.close()` would run twice (the second call is a
-    // no-op on `StreamController` but the explicit short-circuit makes
-    // the contract clear and prevents future regressions).
-    if (_closed) return;
-    _closed = true;
-    unawaited(_eventController.close());
-  }
-
-  void _ensureNotClosed() {
-    if (_closed) {
-      throw StateError('RealtimeTranslationConnection is closed.');
-    }
-  }
-
-  /// Sends a raw client event to the server.
-  void send(Map<String, dynamic> event) {
-    _ensureNotClosed();
-    _socket.sendText(jsonEncode(event));
-  }
+  @override
+  RealtimeTranslationServerEvent _parse(Map<String, dynamic> json) =>
+      RealtimeTranslationServerEvent.fromJson(json);
 
   /// Updates the translation session's configuration.
   ///
@@ -837,22 +843,293 @@ class RealtimeTranslationConnection {
   void closeSession({String? eventId}) {
     send({'type': 'session.close', 'event_id': ?eventId});
   }
-
-  /// Closes the WebSocket connection.
-  Future<void> close({int? code, String? reason}) async {
-    if (_closed) return;
-    _closed = true;
-    await _subscription.cancel();
-    await _socket.close(code, reason);
-    await _eventController.close();
-  }
 }
 
-class _BufferedTranslationEvent {
-  _BufferedTranslationEvent.event(RealtimeTranslationServerEvent this.event)
-    : error = null;
-  _BufferedTranslationEvent.error(Object this.error) : event = null;
+/// A malformed incoming frame or invalid outgoing JSON command.
+class RealtimeProtocolException implements Exception {
+  /// Creates a diagnostic excluding event contents.
+  const RealtimeProtocolException({required this.kind, this.cause});
 
-  final RealtimeTranslationServerEvent? event;
+  /// Classification of the invalid frame or command.
+  final String kind;
+
+  /// Original failure, available explicitly and excluded from diagnostics.
+  final Object? cause;
+
+  @override
+  String toString() => 'RealtimeProtocolException: $kind';
+}
+
+/// A transport failure, distinct from an ordinary Realtime server error event.
+class RealtimeTransportException implements Exception {
+  /// Creates a value-safe transport diagnostic.
+  const RealtimeTransportException({required this.operation, this.cause});
+
+  /// Failed operation, without payload, header, URL or close-reason values.
+  final String operation;
+
+  /// Original failure, available explicitly and excluded from diagnostics.
+  final Object? cause;
+
+  @override
+  String toString() => 'RealtimeTransportException: $operation failed';
+}
+
+abstract class _RealtimeConnection<T> {
+  _RealtimeConnection(WebSocket socket, {Future<void>? abortTrigger})
+    : _socket = socket {
+    _events = StreamController<T>.broadcast(onListen: _drain);
+    _subscription = _socket.events.listen(
+      _receive,
+      onError: _receiveError,
+      onDone: _peerDone,
+    );
+    if (abortTrigger != null) {
+      unawaited(
+        abortTrigger.then<void>(
+          (_) => _abort(),
+          onError: (Object _, StackTrace _) => _abort(),
+        ),
+      );
+    }
+  }
+
+  final WebSocket _socket;
+  late final StreamController<T> _events;
+  StreamSubscription<WebSocketEvent>? _subscription;
+  final List<_BufferedRealtimeEvent<T>> _opening = [];
+  final Completer<void> _done = Completer();
+  Future<void>? _shutdownFuture;
+  bool _hasListened = false;
+  bool _closed = false;
+  bool _eventsClosed = false;
+  int? _closeCode;
+  String? _closeReason;
+
+  T _parse(Map<String, dynamic> json);
+
+  /// Broadcast events from the server. Opening events reach the first listener.
+  Stream<T> get events => _events.stream;
+
+  /// Whether this logical connection has permanently closed.
+  bool get isClosed => _closed;
+
+  /// Completes after transport and reader cleanup, independently of event taps.
+  Future<void> get done => _done.future;
+
+  /// Actual peer close code, when a close frame was received.
+  int? get closeCode => _closeCode;
+
+  /// Actual peer close reason; excluded from automatic diagnostics.
+  String? get closeReason => _closeReason;
+
+  /// Opt-in recovery state and final never-attempted delivery report.
+  WebSocketRecovery? get recovery =>
+      _socket is ResponsesRecoveringWebSocket ? _socket.recovery : null;
+
+  /// Removes retained frames without transmitting them.
+  List<WebSocketUnsentMessage> takePending() =>
+      recovery?.takePending() ?? const [];
+
+  /// Sends retained frames once, after the application restores the new session.
+  ///
+  /// The physical connection must be open. Submitted frames are removed before
+  /// each write and are never automatically replayed after an uncertain send.
+  void flushPending() => recovery?.flushPending();
+
+  void _receive(WebSocketEvent frame) {
+    if (frame case CloseReceived(:final code, :final reason)) {
+      _closeCode = code;
+      _closeReason = reason;
+      _peerDone();
+      return;
+    }
+    if (_closed) return;
+    switch (frame) {
+      case TextDataReceived(:final text):
+        try {
+          final json = jsonDecode(text);
+          if (json is! Map<String, dynamic>) {
+            throw const FormatException('Expected a JSON object.');
+          }
+          _emit(_BufferedRealtimeEvent.event(_parse(json)));
+        } catch (error) {
+          _emit(
+            _BufferedRealtimeEvent.error(
+              RealtimeProtocolException(kind: 'invalid_event', cause: error),
+            ),
+          );
+        }
+      case BinaryDataReceived():
+        _emit(
+          _BufferedRealtimeEvent.error(
+            const RealtimeProtocolException(kind: 'binary'),
+          ),
+        );
+      case CloseReceived():
+        break;
+    }
+  }
+
+  void _receiveError(Object error, StackTrace stackTrace) {
+    if (_closed) return;
+    _emit(
+      _BufferedRealtimeEvent.error(
+        RealtimeTransportException(operation: 'receive', cause: error),
+        stackTrace,
+      ),
+    );
+    _backgroundShutdown(closeSocket: true);
+  }
+
+  void _peerDone() => _backgroundShutdown(closeSocket: false);
+
+  void _abort() {
+    if (_closed) return;
+    _emit(
+      _BufferedRealtimeEvent.error(
+        AbortedException(
+          message: 'Realtime connection aborted.',
+          stage: AbortionStage.duringRequest,
+          timestamp: DateTime.now(),
+          redactDiagnostics: true,
+        ),
+      ),
+    );
+    _backgroundShutdown(closeSocket: true);
+  }
+
+  void _emit(_BufferedRealtimeEvent<T> entry) {
+    if (_eventsClosed) return;
+    if (_hasListened) {
+      _publish(entry);
+    } else {
+      // Preserve the existing bounded opening-buffer policy.
+      if (_opening.length >= 1024) _opening.removeAt(0);
+      _opening.add(entry);
+    }
+  }
+
+  void _publish(_BufferedRealtimeEvent<T> entry) {
+    if (entry.error case final error?) {
+      _events.addError(error, entry.stackTrace);
+    } else {
+      _events.add(entry.event as T);
+    }
+  }
+
+  void _drain() {
+    if (_hasListened || _eventsClosed) return;
+    _hasListened = true;
+    _opening
+      ..forEach(_publish)
+      ..clear();
+    if (_done.isCompleted) _finishEvents();
+  }
+
+  /// Serializes and sends a JSON command or retains it during opted-in recovery.
+  ///
+  /// Initial configuration is sent only by connect; reopening never replays it.
+  /// Disconnected retention is disabled unless maxQueueBytes is positive.
+  void send(Map<String, dynamic> event) {
+    if (_closed) throw StateError('Realtime connection is closed.');
+    final String text;
+    try {
+      text = jsonEncode(event);
+    } catch (error) {
+      throw RealtimeProtocolException(kind: 'invalid_command', cause: error);
+    }
+    try {
+      _socket.sendText(text);
+    } on WebSocketSendQueueOverflowException {
+      rethrow;
+    } on WebSocketDeliveryUnknownException {
+      _backgroundShutdown(closeSocket: true);
+      rethrow;
+    } catch (error) {
+      _backgroundShutdown(closeSocket: true);
+      throw RealtimeTransportException(operation: 'send', cause: error);
+    }
+  }
+
+  /// Releases the reader and owned socket without waiting for paused event taps.
+  Future<void> close({int? code, String? reason}) {
+    validateRealtimeClose(code, reason);
+    return _startShutdown(closeSocket: true, code: code, reason: reason);
+  }
+
+  void _backgroundShutdown({required bool closeSocket}) {
+    unawaited(
+      _startShutdown(closeSocket: closeSocket).catchError((Object _) {}),
+    );
+  }
+
+  Future<void> _startShutdown({
+    required bool closeSocket,
+    int? code,
+    String? reason,
+  }) {
+    if (_shutdownFuture case final future?) return future;
+    _closed = true;
+    final completion = Completer<void>();
+    _shutdownFuture = completion.future;
+    // A custom synchronous socket may close inside listen(). Defer cancellation
+    // until the returned subscription has been assigned.
+    unawaited(
+      Future<void>.microtask(
+        () => _cleanup(closeSocket, code, reason),
+      ).then(completion.complete, onError: completion.completeError),
+    );
+    return completion.future;
+  }
+
+  Future<void> _cleanup(bool closeSocket, int? code, String? reason) async {
+    Object? failure;
+    final clock = Stopwatch()..start();
+    Future<void> bounded(Future<void> operation) {
+      final remaining = const Duration(seconds: 5) - clock.elapsed;
+      if (remaining <= Duration.zero) {
+        unawaited(operation.catchError((Object _) {}));
+        return Future.error(TimeoutException('Realtime cleanup timed out.'));
+      }
+      return operation.timeout(remaining);
+    }
+
+    try {
+      if (closeSocket) await bounded(_socket.close(code, reason));
+    } catch (error) {
+      failure = error;
+    } finally {
+      try {
+        if (_subscription != null) await bounded(_subscription!.cancel());
+      } catch (error) {
+        failure ??= error;
+      } finally {
+        _subscription = null;
+        if (!_done.isCompleted) _done.complete();
+        if (_hasListened) _finishEvents();
+      }
+    }
+    if (failure != null) {
+      throw RealtimeTransportException(operation: 'close', cause: failure);
+    }
+  }
+
+  void _finishEvents() {
+    if (_eventsClosed) return;
+    _eventsClosed = true;
+    unawaited(_events.close());
+  }
+
+  @override
+  String toString() => '$runtimeType(isClosed: $isClosed)';
+}
+
+class _BufferedRealtimeEvent<T> {
+  _BufferedRealtimeEvent.event(T this.event) : error = null, stackTrace = null;
+  _BufferedRealtimeEvent.error(this.error, [this.stackTrace]) : event = null;
+
+  final T? event;
   final Object? error;
+  final StackTrace? stackTrace;
 }

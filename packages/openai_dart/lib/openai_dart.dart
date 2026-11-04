@@ -103,6 +103,7 @@ export 'src/models/webhooks/webhook_endpoint.dart';
 export 'src/models/webhooks/webhook_event.dart';
 // Resources
 export 'src/resources/resources.dart';
+export 'src/resources/websocket_recovery.dart';
 // Utils
 export 'src/utils/json_helpers.dart';
 export 'src/utils/request_id.dart';

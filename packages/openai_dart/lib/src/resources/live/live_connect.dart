@@ -8,7 +8,7 @@ import '../../errors/exceptions.dart';
 import '../../utils/private_audio_http.dart';
 import 'live_connection.dart';
 
-/// Opens one Live connection without retries, startup or replay.
+/// Opens a Live socket, optionally recovering transport without startup replay.
 Future<LiveConnection> openLiveConnection({
   required OpenAIConfig config,
   required RequestBuilder requestBuilder,
@@ -16,6 +16,8 @@ Future<LiveConnection> openLiveConnection({
   bool fork = false,
   required String endpoint,
   bool? gracefulClose,
+  LiveReconnectOptions? reconnect,
+  Map<String, String>? queryParameters,
   LiveWebSocketConnector? connector,
   Map<String, String>? additionalHeaders,
   Duration? connectionTimeout,
@@ -25,6 +27,7 @@ Future<LiveConnection> openLiveConnection({
 }) async {
   ensureNotClosed?.call();
   if (sideband && fork) throw ArgumentError('A fork is not a sideband.');
+  reconnect?.validate();
   final timeout = connectionTimeout ?? config.connectTimeout;
   if (!timeout.inMicroseconds.isFinite || timeout <= Duration.zero) {
     throw ArgumentError('connectionTimeout must be positive.');
@@ -32,126 +35,180 @@ Future<LiveConnection> openLiveConnection({
   if (!maxBufferedEvents.isFinite || maxBufferedEvents < 1) {
     throw ArgumentError('maxBufferedEvents must be positive.');
   }
-  final overrides = additionalHeaders == null
+  final initialQuery = queryParameters == null
+      ? null
+      : Map<String, String>.unmodifiable(queryParameters);
+  final initialHeaders = additionalHeaders == null
       ? null
       : Map<String, String>.unmodifiable(additionalHeaders);
-  final Uri url;
-  try {
-    final uri = requestBuilder.buildUrl(
-      endpoint,
-      queryParams: {
-        if (gracefulClose != null) 'graceful_close': gracefulClose.toString(),
-      },
-    );
-    final scheme = switch (uri.scheme) {
-      'https' || 'wss' => 'wss',
-      'http' || 'ws' => 'ws',
-      _ => throw const FormatException(),
-    };
-    if (uri.host.isEmpty || uri.hasFragment) throw const FormatException();
-    url = uri.replace(scheme: scheme);
-  } on FormatException {
-    throw ArgumentError(
-      'Live baseUrl must be an absolute http, https, ws or wss URL with a host and no fragment.',
-    );
-  }
-  await checkPrivateAudioAbort(abortTrigger, 'Live connection');
-  ensureNotClosed?.call();
-  // The browser default cannot carry provider authentication or any other
-  // handshake headers. Reject configured headers before asking for credentials.
-  if (connector == null && isLiveBrowserWebSocket) {
-    final names = <String>{
-      ...config.defaultHeaders.keys,
-      if (config.authProvider != null) 'auth-provider',
-      if (config.organization != null) 'openai-organization',
-      if (config.project != null) 'openai-project',
-      if (config.apiVersion != null) 'openai-version',
-      ...?overrides?.keys,
-    };
-    if (names.isNotEmpty) throw LiveBrowserHeadersException(names);
-  }
-  final headers = <String, String>{};
-  void merge(Map<String, String> values) {
-    for (final entry in values.entries) {
-      headers[entry.key.toLowerCase()] = entry.value;
+  Future<(WebSocket, String?)> openSocket(
+    Map<String, String>? query,
+    Map<String, String>? overrides,
+  ) async {
+    ensureNotClosed?.call();
+    final Uri url;
+    try {
+      final uri = requestBuilder.buildUrl(
+        endpoint,
+        queryParams: {
+          ...?query,
+          if (gracefulClose != null) 'graceful_close': gracefulClose.toString(),
+        },
+      );
+      final scheme = switch (uri.scheme) {
+        'https' || 'wss' => 'wss',
+        'http' || 'ws' => 'ws',
+        _ => throw const FormatException(),
+      };
+      if (uri.host.isEmpty || uri.hasFragment) throw const FormatException();
+      url = uri.replace(scheme: scheme);
+    } on FormatException {
+      throw ArgumentError(
+        'Live baseUrl must be an absolute http, https, ws or wss URL with a host and no fragment.',
+      );
     }
-  }
+    await checkPrivateAudioAbort(abortTrigger, 'Live connection');
+    ensureNotClosed?.call();
+    // The browser default cannot carry provider authentication or any other
+    // handshake headers. Reject configured headers before asking for credentials.
+    if (connector == null && isLiveBrowserWebSocket) {
+      final names = <String>{
+        ...config.defaultHeaders.keys,
+        if (config.authProvider != null) 'auth-provider',
+        if (config.organization != null) 'openai-organization',
+        if (config.project != null) 'openai-project',
+        if (config.apiVersion != null) 'openai-version',
+        ...?overrides?.keys,
+      };
+      if (names.isNotEmpty) throw LiveBrowserHeadersException(names);
+    }
+    final headers = <String, String>{};
+    void merge(Map<String, String> values) {
+      for (final entry in values.entries) {
+        headers[entry.key.toLowerCase()] = entry.value;
+      }
+    }
 
-  merge(config.defaultHeaders);
-  if (config.authProvider case final provider?) merge(provider.getHeaders());
-  merge({
-    'OpenAI-Organization': ?config.organization,
-    'OpenAI-Project': ?config.project,
-    'OpenAI-Version': ?config.apiVersion,
-  });
-  if (overrides != null) merge(overrides);
-  final trace = headers['x-request-id'] ?? headers['x-client-request-id'];
-  await checkPrivateAudioAbort(abortTrigger, 'Live connection');
-  ensureNotClosed?.call();
-  var abandoned = false;
-  final cancelled = Completer<WebSocket>();
-  if (abortTrigger != null) {
-    void abort() {
-      if (cancelled.isCompleted) return;
-      cancelled.completeError(
-        AbortedException(
-          message: 'Live connection aborted.',
-          stage: AbortionStage.duringRequest,
-          correlationId: trace,
-          timestamp: DateTime.now(),
-          redactDiagnostics: true,
+    merge(config.defaultHeaders);
+    if (config.authProvider case final provider?) merge(provider.getHeaders());
+    merge({
+      'OpenAI-Organization': ?config.organization,
+      'OpenAI-Project': ?config.project,
+      'OpenAI-Version': ?config.apiVersion,
+    });
+    if (overrides != null) merge(overrides);
+    final trace = headers['x-request-id'] ?? headers['x-client-request-id'];
+    await checkPrivateAudioAbort(abortTrigger, 'Live connection');
+    ensureNotClosed?.call();
+    var abandoned = false;
+    final cancelled = Completer<WebSocket>();
+    // Consume cancellation even when a synchronous connector failure prevents
+    // the dial race from being installed.
+    unawaited(
+      cancelled.future.then<void>((_) {}, onError: (Object _, StackTrace _) {}),
+    );
+    if (abortTrigger != null) {
+      void abort() {
+        if (cancelled.isCompleted) return;
+        cancelled.completeError(
+          AbortedException(
+            message: 'Live connection aborted.',
+            stage: AbortionStage.duringRequest,
+            correlationId: trace,
+            timestamp: DateTime.now(),
+            redactDiagnostics: true,
+          ),
+        );
+      }
+
+      unawaited(
+        abortTrigger.then<void>(
+          (_) => abort(),
+          onError: (Object _, StackTrace _) => abort(),
         ),
       );
     }
+    final WebSocket socket;
+    try {
+      final opening = (connector ?? connectLiveWebSocket)(
+        url,
+        headers: Map<String, String>.unmodifiable(headers),
+      );
+      unawaited(
+        opening.then<void>((socket) {
+          if (abandoned) unawaited(_dispose(socket));
+        }, onError: (Object _, StackTrace _) {}),
+      );
+      socket = await Future.any<WebSocket>([opening, cancelled.future]).timeout(
+        timeout,
+        onTimeout: () =>
+            throw TimeoutException('Live WebSocket handshake timed out.'),
+      );
+    } on AbortedException {
+      abandoned = true;
+      rethrow;
+    } on LiveBrowserHeadersException {
+      abandoned = true;
+      rethrow;
+    } catch (error) {
+      abandoned = true;
+      throw ConnectionException(
+        message: error is TimeoutException
+            ? 'Live WebSocket handshake timed out.'
+            : 'Live WebSocket handshake failed.',
+        url: url.toString(),
+        cause: error,
+        redactDiagnostics: true,
+      );
+    } finally {
+      // Settle the losing cancellation branch. Keeping it pending through a
+      // lifetime abort trigger would retain the successful socket via the race.
+      if (!cancelled.isCompleted) {
+        cancelled.completeError(StateError('Live handshake settled.'));
+      }
+    }
+    try {
+      await checkPrivateAudioAbort(abortTrigger, 'Live connection');
+      ensureNotClosed?.call();
+    } catch (_) {
+      await _dispose(socket);
+      rethrow;
+    }
+    return (socket, trace);
+  }
 
-    unawaited(
-      abortTrigger.then<void>(
-        (_) => abort(),
-        onError: (Object _, StackTrace _) => abort(),
-      ),
-    );
-  }
-  final WebSocket socket;
+  final (socket, trace) = await openSocket(initialQuery, initialHeaders);
   try {
-    final opening = (connector ?? connectLiveWebSocket)(
-      url,
-      headers: Map<String, String>.unmodifiable(headers),
-    );
-    unawaited(
-      opening.then<void>((socket) {
-        if (abandoned) unawaited(_dispose(socket));
-      }, onError: (Object _, StackTrace _) {}),
-    );
-    socket = await Future.any<WebSocket>([opening, cancelled.future]).timeout(
-      timeout,
-      onTimeout: () =>
-          throw TimeoutException('Live WebSocket handshake timed out.'),
-    );
-  } on AbortedException {
-    abandoned = true;
-    rethrow;
-  } on LiveBrowserHeadersException {
-    abandoned = true;
-    rethrow;
-  } catch (error) {
-    abandoned = true;
-    throw ConnectionException(
-      message: error is TimeoutException
-          ? 'Live WebSocket handshake timed out.'
-          : 'Live WebSocket handshake failed.',
-      url: url.toString(),
-      cause: error,
-      redactDiagnostics: true,
-    );
-  }
-  try {
-    await checkPrivateAudioAbort(abortTrigger, 'Live connection');
-    ensureNotClosed?.call();
-  } catch (_) {
-    await _dispose(socket);
-    rethrow;
-  }
-  try {
+    if (reconnect != null) {
+      Map<String, String>? currentHeaders;
+      Map<String, String>? currentQuery;
+      return LiveConnection.recovering(
+        socket,
+        options: reconnect.copyWith(
+          onReconnecting: (context) {
+            ensureNotClosed?.call();
+            return reconnect.onReconnecting(context);
+          },
+        ),
+        reconnect: (decision) async {
+          ensureNotClosed?.call();
+          if (decision.headers != null) currentHeaders = decision.headers;
+          if (decision.queryParameters != null) {
+            currentQuery = decision.queryParameters;
+          }
+          final (replacement, _) = await openSocket(
+            {...?initialQuery, ...?currentQuery},
+            {...?initialHeaders, ...?currentHeaders},
+          );
+          return replacement;
+        },
+        sideband: sideband,
+        fork: fork,
+        maxBufferedEvents: maxBufferedEvents,
+        abortTrigger: abortTrigger,
+        correlationId: trace,
+      );
+    }
     if (fork) {
       return LiveForkConnection(
         socket,
