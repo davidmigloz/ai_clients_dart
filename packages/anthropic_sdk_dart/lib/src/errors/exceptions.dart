@@ -34,10 +34,10 @@ class ResponseMetadata {
   /// HTTP status code.
   final int statusCode;
 
-  /// Response headers. Streaming errors retain only request-id and retry-after.
+  /// Response headers, which may be restricted to request-id and retry-after.
   final Map<String, String> headers;
 
-  /// Excerpt of response body. Streaming errors omit this to protect secrets.
+  /// Excerpt of response body, empty when omitted to protect secrets.
   final String bodyExcerpt;
 
   /// Request latency.
@@ -52,12 +52,20 @@ class ResponseMetadata {
   });
 }
 
+String? _responseRequestId(ResponseMetadata? metadata) {
+  for (final entry
+      in metadata?.headers.entries ?? const <MapEntry<String, String>>[]) {
+    if (entry.key.toLowerCase() == 'request-id') return entry.value;
+  }
+  return null;
+}
+
 /// Base sealed class for all Anthropic exceptions.
 ///
 /// Subtypes:
 /// - [ApiException] — HTTP/API errors (includes [AuthenticationException],
 ///   [RateLimitException])
-/// - [ValidationException] — Client-side validation errors
+/// - [ValidationException] — Client-side or server-side validation errors
 /// - [TimeoutException] — Request timeouts
 /// - [AbortedException] — Request cancellation
 sealed class AnthropicException implements Exception {
@@ -101,14 +109,7 @@ class ApiException extends AnthropicException {
   final Exception? cause;
 
   /// The server-provided request ID, distinct from the client correlation ID.
-  String? get requestId {
-    for (final entry
-        in responseMetadata?.headers.entries ??
-            const <MapEntry<String, String>>[]) {
-      if (entry.key.toLowerCase() == 'request-id') return entry.value;
-    }
-    return null;
-  }
+  String? get requestId => _responseRequestId(responseMetadata);
 
   /// Creates an [ApiException].
   const ApiException({
@@ -162,13 +163,19 @@ class AuthenticationException extends ApiException {
   String toString() => 'AuthenticationException: $message';
 }
 
-/// Exception for client-side validation errors.
+/// Exception for client-side or server-side validation errors.
 class ValidationException extends AnthropicException {
   @override
   final String message;
 
   /// Field-specific validation errors.
   final Map<String, List<String>> fieldErrors;
+
+  /// Response metadata when validation failed on the server.
+  final ResponseMetadata? responseMetadata;
+
+  /// The server-provided request ID, absent for client-side validation errors.
+  String? get requestId => _responseRequestId(responseMetadata);
 
   @override
   final StackTrace? stackTrace;
@@ -180,6 +187,7 @@ class ValidationException extends AnthropicException {
   const ValidationException({
     required this.message,
     required this.fieldErrors,
+    this.responseMetadata,
     this.stackTrace,
     this.cause,
   }) : super();

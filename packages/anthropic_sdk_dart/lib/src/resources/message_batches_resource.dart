@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../errors/exceptions.dart';
+import '../errors/response_error.dart';
 import '../models/batches/batch_request.dart';
 import '../models/batches/message_batch.dart';
 import 'base_resource.dart';
@@ -187,25 +187,8 @@ class MessageBatchesResource extends ResourceBase with StreamingResource {
     getJsonlStream(
       '/v1/messages/batches/$batchId/results',
       abortTrigger: abortTrigger,
-      errorFactory: _createResultsException,
+      errorFactoryWithMetadata: createResourceException,
     ),
     BatchIndividualResponse.fromJson,
   );
-
-  AnthropicException _createResultsException(int statusCode, String body) {
-    String message;
-    try {
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      final error = json['error'] as Map<String, dynamic>?;
-      message = error?['message'] as String? ?? body;
-    } catch (_) {
-      message = body;
-    }
-    return switch (statusCode) {
-      401 => AuthenticationException(message: message),
-      429 => RateLimitException(statusCode: statusCode, message: message),
-      400 => ValidationException(message: message, fieldErrors: const {}),
-      _ => ApiException(statusCode: statusCode, message: message),
-    };
-  }
 }
