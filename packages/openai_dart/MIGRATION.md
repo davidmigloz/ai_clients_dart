@@ -6,6 +6,56 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming release: Typed reasoning replay
+
+`Item.fromJson` now recognizes `type: 'reasoning'` as `ReasoningInputItem`, and
+`ResponseInput.items` accepts it alongside messages, function calls and tool
+results. Convert a returned `ReasoningItem` with `toInput()` instead of changing
+the history to raw JSON or flattening reasoning into assistant text:
+
+```dart
+final reasoning = response.output.whereType<ReasoningItem>().first;
+final ReasoningInputItem inputItem = reasoning.toInput();
+```
+
+Use the converted item in the complete history passed to `ResponseInput.items`,
+keeping assistant/tool-call items and results in their original order. OpenAI
+reasoning replay requires the returned `id` and `summary`. Preserve completed
+reasoning items and their encrypted content; do not replay an unfinished
+`output_item.added` snapshot.
+
+Existing `ReasoningItem` const construction remains available. Returned status,
+reasoning content, summary, encrypted content and beta agent metadata survive typed
+conversion. Content participates in equality/hash, and default diagnostics redact
+reasoning text and encrypted payloads. Exhaustive switches over sealed `Item` must
+handle `ReasoningInputItem`.
+
+Parsed reasoning lists and `copyWith` replacements are now immutable snapshots.
+Use a copy for local transformations, while replaying returned reasoning unchanged:
+
+```dart
+// Before
+reasoning.content!.add({'type': 'reasoning_text', 'text': 'Local note'});
+
+// After
+final updated = reasoning.copyWith(content: [
+  ...?reasoning.content,
+  {'type': 'reasoning_text', 'text': 'Local note'},
+]);
+```
+
+`ReasoningItem.fromJson` and `ReasoningSummaryContent.fromJson` now validate fixed
+`reasoning`/`summary_text` discriminators and required fields with contextual
+errors. Supply complete canonical JSON instead of relying on omitted types or
+malformed required values being accepted.
+
+DeepSeek's guide describes plain-text reasoning replay but does not support
+summary/encrypted-content semantics. This adds canonical typed OpenAI replay, not
+a provider-specific content-only constructor. Keep `ResponseInput.fromOutputItems`
+for provider-specific shapes that omit canonical required fields.
+
+---
+
 ## Upcoming release: Responses WebSocket sessions
 
 Existing direct `connection.create()` and `connection.events` use remains available.

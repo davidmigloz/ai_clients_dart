@@ -24,8 +24,10 @@ import '../tools/computer_action.dart';
 import '../tools/response_tool.dart';
 import '../tools/shell_tool_environment.dart';
 import '../tools/tool_call_caller.dart';
+import '../websocket/websocket_json_helpers.dart';
 import 'output_item.dart'
     show
+        ReasoningSummaryContent,
         ShellCallAction,
         ShellCallOutcome,
         ShellCallOutputContent,
@@ -43,6 +45,7 @@ import 'web_search_result.dart';
 /// - [ComputerCallOutputInputItem] - A computer call screenshot result
 /// - [MessageItem] - A message from a user or assistant
 /// - [FunctionCallItem] - A function call from the model
+/// - [ReasoningInputItem] - Reasoning replayed without converting it to a message
 /// - [CustomToolCallInputItem] - A custom tool call replayed as input
 /// - [WebSearchCallItem] - Web search actions and results retained in input history
 /// - [ShellCallInputItem] - Writable shell call history
@@ -80,6 +83,7 @@ sealed class Item {
       'computer_call_output' => ComputerCallOutputInputItem.fromJson(json),
       'message' => MessageItem.fromJson(json),
       'function_call' => FunctionCallItem.fromJson(json),
+      'reasoning' => ReasoningInputItem.fromJson(json),
       'custom_tool_call' => CustomToolCallInputItem.fromJson(json),
       'web_search_call' => WebSearchCallItem.fromJson(json),
       'shell_call' => ShellCallInputItem.fromJson(json),
@@ -121,6 +125,232 @@ sealed class Item {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson();
+}
+
+/// Reasoning replayed as typed Responses input.
+///
+/// Keep this item alongside the corresponding assistant/tool history, in its
+/// original order. Prefer converting a completed output with
+/// `ReasoningItem.toInput()`; encrypted data from an in-progress streaming item
+/// may be incomplete. This model follows OpenAI's required [id] and [summary]
+/// contract, including an empty summary list when no summary is available.
+/// Provider-specific shapes outside that contract can use raw response input.
+///
+/// Construction and copies snapshot collections. Content uses JSON maps like
+/// the output model, with validated `reasoning_text` parts and preserved extra
+/// metadata. Diagnostics exclude reasoning, summary and encrypted payloads.
+@immutable
+class ReasoningInputItem extends Item {
+  /// Creates typed input with owned immutable content and summary snapshots.
+  factory ReasoningInputItem({
+    required String id,
+    required List<ReasoningSummaryContent> summary,
+    List<Map<String, dynamic>>? content,
+    String? encryptedContent,
+    bool hasEncryptedContent = false,
+    ItemStatus? status,
+    AgentTag? agent,
+  }) => ReasoningInputItem.fromJson({
+    'type': 'reasoning',
+    'id': id,
+    'summary': summary.map((part) => part.toJson()).toList(),
+    'content': ?content,
+    if (encryptedContent != null || hasEncryptedContent)
+      'encrypted_content': encryptedContent,
+    if (status != null) 'status': status.toJson(),
+    if (agent != null) 'agent': agent.toJson(),
+  });
+
+  const ReasoningInputItem._({
+    required this.id,
+    required this.summary,
+    required this.content,
+    required this.encryptedContent,
+    required this.hasEncryptedContent,
+    required this.status,
+    required this.agent,
+  });
+
+  /// Parses canonical input, rejecting missing required or malformed fields.
+  factory ReasoningInputItem.fromJson(Map<String, dynamic> json) {
+    const context = 'ReasoningInputItem';
+    requireJsonType(json, 'reasoning', context);
+    final snapshot = snapshotResponsesJson(json, context);
+    final id = requireJsonString(snapshot['id'], '$context.id');
+    final rawSummary = snapshot['summary'];
+    if (rawSummary is! List) {
+      throw const FormatException('$context.summary: expected an array');
+    }
+    final summary = <ReasoningSummaryContent>[];
+    for (var index = 0; index < rawSummary.length; index++) {
+      final part = requireJsonObject(
+        rawSummary[index],
+        '$context.summary[$index]',
+      );
+      requireJsonType(part, 'summary_text', '$context.summary[$index]');
+      summary.add(
+        ReasoningSummaryContent(
+          text: requireJsonString(
+            part['text'],
+            '$context.summary[$index].text',
+          ),
+        ),
+      );
+    }
+    List<Map<String, dynamic>>? content;
+    if (snapshot.containsKey('content')) {
+      final rawContent = snapshot['content'];
+      if (rawContent is! List) {
+        throw const FormatException('$context.content: expected an array');
+      }
+      content = <Map<String, dynamic>>[];
+      for (var index = 0; index < rawContent.length; index++) {
+        final part = requireJsonObject(
+          rawContent[index],
+          '$context.content[$index]',
+        );
+        requireJsonType(part, 'reasoning_text', '$context.content[$index]');
+        requireJsonString(part['text'], '$context.content[$index].text');
+        content.add(freezeJsonObject(part));
+      }
+    }
+    final status = snapshot.containsKey('status')
+        ? ItemStatus.fromJson(
+            requireJsonString(snapshot['status'], '$context.status'),
+          )
+        : null;
+    return ReasoningInputItem._(
+      id: id,
+      summary: List<ReasoningSummaryContent>.unmodifiable(summary),
+      content: content == null
+          ? null
+          : List<Map<String, dynamic>>.unmodifiable(content),
+      encryptedContent: optionalJsonString(
+        snapshot,
+        'encrypted_content',
+        context,
+        nullable: true,
+      ),
+      hasEncryptedContent: snapshot.containsKey('encrypted_content'),
+      status: status,
+      agent: toolSearchJsonAgent(snapshot, context, nullable: true),
+    );
+  }
+
+  /// The fixed item discriminator.
+  String get type => 'reasoning';
+
+  /// The returned reasoning item's identifier.
+  final String id;
+
+  /// Summary parts, including an empty list for models without summaries.
+  final List<ReasoningSummaryContent> summary;
+
+  /// Optional plaintext reasoning parts, separate from assistant message text.
+  final List<Map<String, dynamic>>? content;
+
+  /// Opaque reasoning state to replay unchanged, when returned by the provider.
+  final String? encryptedContent;
+
+  /// Whether the nullable encrypted key was present, including explicit null.
+  /// Set this in construction to emit a null key deliberately.
+  final bool hasEncryptedContent;
+
+  /// Optional returned status, retained when replaying completed output.
+  final ItemStatus? status;
+
+  /// Producing-agent metadata on the beta multi-agent surface.
+  final AgentTag? agent;
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'summary': summary.map((part) => part.toJson()).toList(),
+    if (content != null) 'content': content,
+    if (encryptedContent != null || hasEncryptedContent)
+      'encrypted_content': encryptedContent,
+    if (status != null) 'status': status!.toJson(),
+    if (agent != null) 'agent': agent!.toJson(),
+  };
+
+  /// Copies every field and owns replacement collections. Null clears an
+  /// optional value. For encrypted content it retains explicit null; also set
+  /// [hasEncryptedContent] to false to restore omission.
+  ReasoningInputItem copyWith({
+    String? id,
+    List<ReasoningSummaryContent>? summary,
+    Object? content = unsetCopyWithValue,
+    Object? encryptedContent = unsetCopyWithValue,
+    bool? hasEncryptedContent,
+    Object? status = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
+  }) => ReasoningInputItem(
+    id: id ?? this.id,
+    summary: summary ?? this.summary,
+    content: identical(content, unsetCopyWithValue)
+        ? this.content
+        : _reasoningInputCopyContent(content),
+    encryptedContent: identical(encryptedContent, unsetCopyWithValue)
+        ? this.encryptedContent
+        : encryptedContent as String?,
+    hasEncryptedContent:
+        hasEncryptedContent ??
+        (!identical(encryptedContent, unsetCopyWithValue) ||
+            this.hasEncryptedContent),
+    status: identical(status, unsetCopyWithValue)
+        ? this.status
+        : status as ItemStatus?,
+    agent: identical(agent, unsetCopyWithValue)
+        ? this.agent
+        : agent as AgentTag?,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ReasoningInputItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          listsEqual(summary, other.summary) &&
+          listOfMapsDeepEqual(content, other.content) &&
+          encryptedContent == other.encryptedContent &&
+          hasEncryptedContent == other.hasEncryptedContent &&
+          status == other.status &&
+          agent == other.agent;
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    listHash(summary),
+    listOfMapsHashCode(content),
+    encryptedContent,
+    hasEncryptedContent,
+    status,
+    agent,
+  );
+
+  @override
+  String toString() =>
+      'ReasoningInputItem(id: [REDACTED], '
+      'summary: ${summary.length} parts, '
+      'content: ${content == null ? null : '${content!.length} parts'}, '
+      'encryptedContent: ${encryptedContent == null ? null : '[${encryptedContent!.length} chars]'}, '
+      'hasEncryptedContent: $hasEncryptedContent, status: $status, '
+      'agent: ${agent == null ? null : 'present'})';
+}
+
+List<Map<String, dynamic>>? _reasoningInputCopyContent(Object? value) {
+  if (value == null) return null;
+  if (value is! List) {
+    throw const FormatException(
+      'ReasoningInputItem.content: expected an array',
+    );
+  }
+  return [
+    for (var index = 0; index < value.length; index++)
+      requireJsonObject(value[index], 'ReasoningInputItem.content[$index]'),
+  ];
 }
 
 /// A computer call replayed in Responses input history.

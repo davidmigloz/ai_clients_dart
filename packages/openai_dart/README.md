@@ -938,6 +938,40 @@ Configure domain and content-type filters on `ResponseTool.webSearch` and reques
 
 </details>
 
+<a id="how-do-i-replay-reasoning-across-tool-calls"></a>
+<details>
+<summary><b>How do I replay reasoning across tool calls?</b></summary>
+
+Convert completed reasoning output with `ReasoningItem.toInput()` and keep it in the original history order. For a reasoning/function-call turn:
+
+```dart
+final history = <Item>[...previousInput];
+for (final item in response.output) {
+  history.add(switch (item) {
+    final ReasoningItem reasoning => reasoning.toInput(),
+    final FunctionCallOutputItemResponse call => call.toFunctionCallItem(),
+    _ => throw StateError('Handle this output kind before replaying it.'),
+  });
+}
+// After your application executes the requested tool:
+history.add(FunctionCallOutputItem.string(
+  callId: callId,
+  output: toolResult,
+));
+final next = await client.responses.create(CreateResponseRequest(
+  model: model,
+  input: ResponseInput.items(history),
+));
+```
+
+`ReasoningInputItem` also supports direct construction and `Item.fromJson()`, with required `id` and `summary`. It keeps plaintext content, summaries, opaque encrypted state, status and beta agent metadata separate from assistant text. Use finalized streaming items; an added item's encrypted state may be unfinished.
+
+Provider support differs: [DeepSeek](https://api-docs.deepseek.com/guides/responses_api/) supports plaintext reasoning input but does not support summaries or encrypted reasoning. Raw `ResponseInput.fromOutputItems(...)` remains available for provider-specific shapes. This helper preserves returned data; it does not generate or interpret reasoning.
+
+→ [Offline example](example/reasoning_replay_example.dart)
+
+</details>
+
 <a id="how-do-i-change-reasoning-effort-during-a-conversation"></a>
 <details>
 <summary><b>How do I change reasoning effort during a conversation?</b></summary>
@@ -1303,6 +1337,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [async_tools_example.dart](example/async_tools_example.dart) | Local async function/custom jobs, original call IDs and latest-response continuation |
 | [tool_search_example.dart](example/tool_search_example.dart) | **Offline.** client tool-search continuation with the original call ID and complete discovered definitions |
 | [web_search_controls_example.dart](example/web_search_controls_example.dart) | Local GA filters, image results, sources, and REST/SSE parsing without API calls |
+| [reasoning_replay_example.dart](example/reasoning_replay_example.dart) | **Offline.** typed reasoning and function history replay with opaque state and original ordering |
 | [configuration_updates_example.dart](example/configuration_updates_example.dart) | **Offline.** change reasoning effort during a conversation |
 | [prompt_cache_example.dart](example/prompt_cache_example.dart) | Responses prewarming, comparison diagnostics, and narrow Chat cache options |
 | [responses_cache_usage_example.dart](example/responses_cache_usage_example.dart) | Offline 30m/12h cache boundaries and separate hosted-tool usage |

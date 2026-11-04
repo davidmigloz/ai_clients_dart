@@ -1,0 +1,91 @@
+{
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "issue": 429,
+  "promotion_owner": 427,
+  "source_receipts": [
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/responses/response_reasoning_item_param.py",
+      "sha256": "b424d6f0def2825fb9ac635428f3032de78013717d303b1aa277d1e5ee365e8f"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/responses/response_reasoning_item.py",
+      "sha256": "a407ce25e045d11f932d481b115496cf17bfd08600ad8842456eeae380e55e44"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/resources/responses/responses.ts",
+      "sha256": "f84e394bf08d71403c054ccb4d41d278861f2d19db3ea426e7aec789f3eb5dbb"
+    }
+  ],
+  "types": {
+    "ResponsesReasoningInputItem": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ReasoningInputItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "ReasoningItem",
+      "note": "Canonical typed replay requires id and summary; optional reasoning_text content, encrypted_content, status and beta agent metadata. Dispatches from Item.fromJson and ResponseInput.items. Reasoning remains a distinct item rather than assistant text.",
+      "parent": "Item"
+    },
+    "ResponsesReasoningOutputItem": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ReasoningItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "ReasoningItem",
+      "note": "Existing output model gains typed input conversion and preserves returned status. Existing const construction remains; replay conversion snapshots caller-owned content and summary. Full content equality/hash and redacted diagnostics are checked.",
+      "parent": "OutputItem"
+    },
+    "ResponsesReasoningSummaryContent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ReasoningSummaryContent",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "SummaryTextContent",
+      "note": "Existing summary scalar value reused for canonical reasoning replay; type summary_text and text string remain distinct from reasoning_text."
+    },
+    "ResponsesReasoningTextContent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ReasoningTextContent",
+      "file": "lib/src/models/responses/content/output_content.dart",
+      "schema": "ReasoningTextContent",
+      "note": "Existing public OutputContent reasoning_text value model. Reasoning replay uses validated raw-map content with the same required type/text fields, preserving future metadata keys rather than flattening it into assistant text.",
+      "parent": "OutputContent"
+    },
+    "BetaResponsesReasoningInputItem": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ReasoningInputItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "BetaReasoningItem",
+      "note": "Canonical typed replay requires id and summary; optional reasoning_text content, encrypted_content, status and beta agent metadata. Dispatches from Item.fromJson and ResponseInput.items. Reasoning remains a distinct item rather than assistant text.",
+      "parent": "Item"
+    },
+    "BetaResponsesReasoningOutputItem": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ReasoningItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaReasoningItem",
+      "note": "Existing output model gains typed input conversion and preserves returned status. Existing const construction remains; replay conversion snapshots caller-owned content and summary. Full content equality/hash and redacted diagnostics are checked.",
+      "parent": "OutputItem"
+    },
+    "BetaResponsesReasoningSummaryContent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ReasoningSummaryContent",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "BetaSummaryTextContent",
+      "note": "Existing summary scalar value reused for canonical reasoning replay; type summary_text and text string remain distinct from reasoning_text."
+    },
+    "BetaResponsesReasoningTextContent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ReasoningTextContent",
+      "file": "lib/src/models/responses/content/output_content.dart",
+      "schema": "BetaReasoningTextContent",
+      "note": "Existing public OutputContent reasoning_text value model. Reasoning replay uses validated raw-map content with the same required type/text fields, preserving future metadata keys rather than flattening it into assistant text.",
+      "parent": "OutputContent"
+    }
+  }
+}
