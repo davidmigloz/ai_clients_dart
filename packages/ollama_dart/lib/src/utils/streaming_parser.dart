@@ -14,19 +14,24 @@ import 'dart:convert';
 ///   }
 /// }
 /// ```
-Stream<Map<String, dynamic>> parseNDJSON(Stream<List<int>> byteStream) async* {
-  final lines = byteStream
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .where((line) => line.isNotEmpty);
-
-  await for (final line in lines) {
-    try {
-      yield jsonDecode(line) as Map<String, dynamic>;
-    } catch (_) {
-      // Skip malformed JSON lines
-    }
-  }
+Stream<Map<String, dynamic>> parseNDJSON(Stream<List<int>> byteStream) {
+  return bytesToLines(byteStream).transform(
+    StreamTransformer<String, Map<String, dynamic>>.fromHandlers(
+      handleData: (line, sink) {
+        if (line.isEmpty) return;
+        try {
+          sink.add(jsonDecode(line) as Map<String, dynamic>);
+        } catch (_) {
+          // Skip malformed JSON lines.
+        }
+      },
+      handleError: (error, trace, sink) {
+        sink
+          ..addError(error, trace)
+          ..close();
+      },
+    ),
+  );
 }
 
 /// Parses a stream of bytes as NDJSON and converts to typed objects.
@@ -39,10 +44,25 @@ Stream<Map<String, dynamic>> parseNDJSON(Stream<List<int>> byteStream) async* {
 Stream<T> parseNDJSONAs<T>(
   Stream<List<int>> byteStream,
   T Function(Map<String, dynamic>) fromJson,
-) async* {
-  await for (final json in parseNDJSON(byteStream)) {
-    yield fromJson(json);
-  }
+) {
+  return parseNDJSON(byteStream).transform(
+    StreamTransformer<Map<String, dynamic>, T>.fromHandlers(
+      handleData: (json, sink) {
+        try {
+          sink.add(fromJson(json));
+        } catch (error, trace) {
+          sink
+            ..addError(error, trace)
+            ..close();
+        }
+      },
+      handleError: (error, trace, sink) {
+        sink
+          ..addError(error, trace)
+          ..close();
+      },
+    ),
+  );
 }
 
 /// Transforms a byte stream to lines.
