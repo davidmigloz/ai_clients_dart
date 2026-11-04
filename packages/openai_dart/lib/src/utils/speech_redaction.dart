@@ -1,5 +1,7 @@
 import 'package:http/http.dart' as http;
 
+import 'admin_redaction.dart';
+
 /// Identifies the speech operation, including an application's base path.
 bool isSpeechRequest(http.BaseRequest? request) =>
     request != null &&
@@ -24,7 +26,8 @@ bool isPrivateAudioRequest(http.BaseRequest? request) =>
     isVoiceConsentRequest(request) ||
     isCustomVoiceRequest(request) ||
     isLiveRequest(request) ||
-    isAgentsApiRequest(request);
+    isAgentsApiRequest(request) ||
+    isAdminRequest(request);
 
 /// Identifies implemented Agents routes containing private configuration/input.
 bool isAgentsApiRequest(http.BaseRequest? request) =>

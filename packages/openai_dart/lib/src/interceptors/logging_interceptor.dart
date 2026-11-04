@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
+import '../utils/admin_redaction.dart';
 import '../utils/monitoring_error_redaction.dart';
 import '../utils/request_id.dart';
 import '../utils/speech_redaction.dart';
@@ -61,7 +62,8 @@ class LoggingInterceptor implements Interceptor {
         isVoiceConsentRequest(request) ||
         isCustomVoiceRequest(request) ||
         isLiveRequest(request) ||
-        savedAgentRequest;
+        savedAgentRequest ||
+        isAdminRequest(request);
     final diagnosticUrl = privateVoiceRequest
         ? '[REDACTED]'
         : request.url.toString();

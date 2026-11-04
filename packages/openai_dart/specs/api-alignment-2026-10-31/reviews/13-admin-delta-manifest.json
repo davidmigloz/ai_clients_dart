@@ -1,0 +1,469 @@
+{
+  "issue": 426,
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "promotion_owner": 427,
+  "types": {
+    "AwsExternalKeyParams": {
+      "spec": "main",
+      "schema": "AwsExternalKeyParams",
+      "kind": "sealed_variant",
+      "dart_class": "AwsExternalKeyParams",
+      "file": "lib/src/models/admin/external_keys.dart",
+      "parent": "V1OrganizationExternalKeysPostRequest"
+    },
+    "AwsExternalStorageProviderParams": {
+      "spec": "main",
+      "schema": "AwsExternalStorageProviderParams",
+      "kind": "object",
+      "dart_class": "AwsExternalStorageProviderParams",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "AwsExternalStorageProviderResponse": {
+      "spec": "main",
+      "schema": "AwsExternalStorageProviderResponse",
+      "kind": "object",
+      "dart_class": "AwsExternalStorageProviderResponse",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "AzureExternalKeyParams": {
+      "spec": "main",
+      "schema": "AzureExternalKeyParams",
+      "kind": "sealed_variant",
+      "dart_class": "AzureExternalKeyParams",
+      "file": "lib/src/models/admin/external_keys.dart",
+      "parent": "V1OrganizationExternalKeysPostRequest"
+    },
+    "AzureExternalStorageProviderParams": {
+      "spec": "main",
+      "schema": "AzureExternalStorageProviderParams",
+      "kind": "object",
+      "dart_class": "AzureExternalStorageProviderParams",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "AzureExternalStorageProviderResponse": {
+      "spec": "main",
+      "schema": "AzureExternalStorageProviderResponse",
+      "kind": "object",
+      "dart_class": "AzureExternalStorageProviderResponse",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "CreateExternalStorageBody": {
+      "spec": "main",
+      "schema": "CreateExternalStorageBody",
+      "kind": "object",
+      "dart_class": "CreateExternalStorageRequest",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "DecisionsUsageApiSource": {
+      "spec": "main",
+      "schema": "DecisionsUsageApiSource",
+      "kind": "enum",
+      "dart_class": "DecisionsUsageApiSource",
+      "file": "lib/src/models/admin/admin_enums.dart",
+      "note": "Value class deliberately preserves unknown received strings; request contexts require known values. ExternalStorageOrder and OrderEnum share identical AdminListOrder wire values."
+    },
+    "DecisionsUsageBucket": {
+      "spec": "main",
+      "schema": "DecisionsUsageBucket",
+      "kind": "object",
+      "dart_class": "DecisionsUsageBucket",
+      "file": "lib/src/models/admin/decisions_usage.dart"
+    },
+    "DecisionsUsageBucketWidth": {
+      "spec": "main",
+      "schema": "DecisionsUsageBucketWidth",
+      "kind": "enum",
+      "dart_class": "DecisionsUsageBucketWidth",
+      "file": "lib/src/models/admin/admin_enums.dart",
+      "note": "Value class deliberately preserves unknown received strings; request contexts require known values. ExternalStorageOrder and OrderEnum share identical AdminListOrder wire values."
+    },
+    "DecisionsUsageGroupBy": {
+      "spec": "main",
+      "schema": "DecisionsUsageGroupBy",
+      "kind": "enum",
+      "dart_class": "DecisionsUsageGroupBy",
+      "file": "lib/src/models/admin/admin_enums.dart",
+      "note": "Value class deliberately preserves unknown received strings; request contexts require known values. ExternalStorageOrder and OrderEnum share identical AdminListOrder wire values."
+    },
+    "DecisionsUsageResult": {
+      "spec": "main",
+      "schema": "DecisionsUsageResult",
+      "kind": "object",
+      "dart_class": "DecisionsUsageResult",
+      "file": "lib/src/models/admin/decisions_usage.dart"
+    },
+    "ExternalKeyPurpose": {
+      "spec": "main",
+      "schema": "ExternalKeyPurpose",
+      "kind": "enum",
+      "dart_class": "ExternalKeyPurpose",
+      "file": "lib/src/models/admin/admin_enums.dart",
+      "note": "Value class deliberately preserves unknown received strings; request contexts require known values. ExternalStorageOrder and OrderEnum share identical AdminListOrder wire values."
+    },
+    "ExternalKeyResource": {
+      "spec": "main",
+      "schema": "ExternalKeyResource",
+      "kind": "object",
+      "dart_class": "ExternalKey",
+      "file": "lib/src/models/admin/external_keys.dart"
+    },
+    "ExternalStorageDeletedResource": {
+      "spec": "main",
+      "schema": "ExternalStorageDeletedResource",
+      "kind": "object",
+      "dart_class": "DeletedExternalStorage",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "ExternalStorageListResource": {
+      "spec": "main",
+      "schema": "ExternalStorageListResource",
+      "kind": "object",
+      "dart_class": "ExternalStorageList",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "ExternalStorageOrder": {
+      "spec": "main",
+      "schema": "ExternalStorageOrder",
+      "kind": "enum",
+      "dart_class": "AdminListOrder",
+      "file": "lib/src/models/admin/admin_enums.dart",
+      "note": "Value class deliberately preserves unknown received strings; request contexts require known values. ExternalStorageOrder and OrderEnum share identical AdminListOrder wire values."
+    },
+    "ExternalStorageResponse": {
+      "spec": "main",
+      "schema": "ExternalStorageResponse",
+      "kind": "object",
+      "dart_class": "ExternalStorage",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "ExternalStorageStatus": {
+      "spec": "main",
+      "schema": "ExternalStorageStatus",
+      "kind": "enum",
+      "dart_class": "ExternalStorageStatus",
+      "file": "lib/src/models/admin/admin_enums.dart",
+      "note": "Value class deliberately preserves unknown received strings; request contexts require known values. ExternalStorageOrder and OrderEnum share identical AdminListOrder wire values."
+    },
+    "GcpExternalKeyParams": {
+      "spec": "main",
+      "schema": "GcpExternalKeyParams",
+      "kind": "sealed_variant",
+      "dart_class": "GcpExternalKeyParams",
+      "file": "lib/src/models/admin/external_keys.dart",
+      "parent": "V1OrganizationExternalKeysPostRequest"
+    },
+    "GcpExternalStorageProviderParams": {
+      "spec": "main",
+      "schema": "GcpExternalStorageProviderParams",
+      "kind": "object",
+      "dart_class": "GcpExternalStorageProviderParams",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "GcpExternalStorageProviderResponse": {
+      "spec": "main",
+      "schema": "GcpExternalStorageProviderResponse",
+      "kind": "object",
+      "dart_class": "GcpExternalStorageProviderResponse",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "ListExternalKeysResource": {
+      "spec": "main",
+      "schema": "ListExternalKeysResource",
+      "kind": "object",
+      "dart_class": "ExternalKeyList",
+      "file": "lib/src/models/admin/external_keys.dart"
+    },
+    "OciExternalStorageProviderParams": {
+      "spec": "main",
+      "schema": "OciExternalStorageProviderParams",
+      "kind": "object",
+      "dart_class": "OciExternalStorageProviderParams",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "OciExternalStorageProviderResponse": {
+      "spec": "main",
+      "schema": "OciExternalStorageProviderResponse",
+      "kind": "object",
+      "dart_class": "OciExternalStorageProviderResponse",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    "OrderEnum": {
+      "spec": "main",
+      "schema": "OrderEnum",
+      "kind": "enum",
+      "dart_class": "AdminListOrder",
+      "file": "lib/src/models/admin/admin_enums.dart",
+      "note": "Value class deliberately preserves unknown received strings; request contexts require known values. ExternalStorageOrder and OrderEnum share identical AdminListOrder wire values."
+    },
+    "ProjectApiKey": {
+      "spec": "main",
+      "schema": "ProjectApiKey",
+      "kind": "object",
+      "dart_class": "ProjectApiKey",
+      "file": "lib/src/models/admin/project_api_key.dart"
+    },
+    "ProjectApiKeyOwnerServiceAccount": {
+      "spec": "main",
+      "schema": "ProjectApiKeyOwnerServiceAccount",
+      "kind": "object",
+      "dart_class": "ProjectApiKeyOwnerServiceAccount",
+      "file": "lib/src/models/admin/project_api_key.dart"
+    },
+    "ProjectApiKeyOwnerUser": {
+      "spec": "main",
+      "schema": "ProjectApiKeyOwnerUser",
+      "kind": "object",
+      "dart_class": "ProjectApiKeyOwnerUser",
+      "file": "lib/src/models/admin/project_api_key.dart"
+    },
+    "PublicDecisionsUsageResponseResource": {
+      "spec": "main",
+      "schema": "PublicDecisionsUsageResponseResource",
+      "kind": "object",
+      "dart_class": "DecisionsUsagePage",
+      "file": "lib/src/models/admin/decisions_usage.dart"
+    },
+    "UpdateProjectApiKeyBody": {
+      "spec": "main",
+      "schema": "UpdateProjectApiKeyBody",
+      "kind": "object",
+      "dart_class": "UpdateProjectApiKeyRequest",
+      "file": "lib/src/models/admin/project_api_key.dart"
+    },
+    "V1OrganizationExternalKeysPostRequest": {
+      "spec": "main",
+      "schema": "V1OrganizationExternalKeysPostRequest",
+      "kind": "sealed_parent",
+      "dart_class": "ExternalKeyParams",
+      "file": "lib/src/models/admin/external_keys.dart",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "AwsExternalKeyParams": "aws",
+          "AzureExternalKeyParams": "azure",
+          "GcpExternalKeyParams": "gcp"
+        }
+      }
+    },
+    "ValidateExternalKeyResource": {
+      "spec": "main",
+      "schema": "ValidateExternalKeyResource",
+      "kind": "object",
+      "dart_class": "ExternalKeyValidation",
+      "file": "lib/src/models/admin/external_keys.dart"
+    }
+  },
+  "contextual_bindings": [
+    {
+      "dart_class": "ExternalStorageProviderParams",
+      "schema_context": "CreateExternalStorageBody.provider",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    {
+      "dart_class": "ExternalStorageProvider",
+      "schema_context": "ExternalStorageResponse.provider",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    {
+      "dart_class": "ProjectApiKeyOwner",
+      "schema_context": "ProjectApiKey.owner inline optional members",
+      "file": "lib/src/models/admin/project_api_key.dart"
+    }
+  ],
+  "conditional_dispositions": [
+    {
+      "schema": "UsageCompletionsResult",
+      "disposition": "not_applicable",
+      "reason": "No existing historical organization completions-usage endpoint/response model. Ticket condition does not authorize adding one or aliasing Chat CompletionUsage. DecisionsUsageResult includes its own input_cache_write_30m_tokens."
+    }
+  ],
+  "operations": [
+    {
+      "method": "POST",
+      "path": "/organization/projects/{project_id}/api_keys/{api_key_id}",
+      "operation_id": "update-project-api-key",
+      "dart_context": "AdminProjectApiKeysResource.update",
+      "file": "lib/src/resources/admin/organization_resource.dart",
+      "success_status": 200,
+      "request_body": true
+    },
+    {
+      "method": "POST",
+      "path": "/organization/external_keys",
+      "operation_id": "Addanexternalkeyconfigforanorganization",
+      "dart_context": "AdminExternalKeysResource.create",
+      "file": "lib/src/resources/admin/organization_resource.dart",
+      "success_status": 200,
+      "request_body": true
+    },
+    {
+      "method": "GET",
+      "path": "/organization/external_keys",
+      "operation_id": "Listtheexternalkeyconfigsregisteredontheuser'sorganization",
+      "dart_context": "AdminExternalKeysResource.list",
+      "file": "lib/src/resources/admin/organization_resource.dart",
+      "success_status": 200,
+      "request_body": false
+    },
+    {
+      "method": "GET",
+      "path": "/organization/external_keys/{external_key_id}",
+      "operation_id": "Retrieveanexternalkeyregistration",
+      "dart_context": "AdminExternalKeysResource.retrieve",
+      "file": "lib/src/resources/admin/organization_resource.dart",
+      "success_status": 200,
+      "request_body": false
+    },
+    {
+      "method": "DELETE",
+      "path": "/organization/external_keys/{external_key_id}",
+      "operation_id": "Deleteanexternalkeyconfigfortheuser'sorganization",
+      "dart_context": "AdminExternalKeysResource.delete",
+      "file": "lib/src/resources/admin/organization_resource.dart",
+      "success_status": 200,
+      "request_body": false
+    },
+    {
+      "method": "POST",
+      "path": "/organization/external_keys/{external_key_id}/validate",
+      "operation_id": "Validateanexternalkeyconfigfortheuser'sorganization",
+      "dart_context": "AdminExternalKeysResource.validate",
+      "file": "lib/src/resources/admin/organization_resource.dart",
+      "success_status": 200,
+      "request_body": false
+    },
+    {
+      "method": "GET",
+      "path": "/organization/usage/decisions",
+      "operation_id": "OrganizationDecisionsusage",
+      "dart_context": "AdminUsageResource.decisions",
+      "file": "lib/src/resources/admin/organization_resource.dart",
+      "success_status": 200,
+      "request_body": false
+    },
+    {
+      "method": "GET",
+      "path": "/organization/external_storage",
+      "operation_id": "Listexternalstorageconfigurations",
+      "dart_context": "AdminExternalStorageResource.list",
+      "file": "lib/src/resources/admin/organization_resource.dart",
+      "success_status": 200,
+      "request_body": false
+    },
+    {
+      "method": "POST",
+      "path": "/organization/external_storage",
+      "operation_id": "Createanexternalstorageconfiguration",
+      "dart_context": "AdminExternalStorageResource.create",
+      "file": "lib/src/resources/admin/organization_resource.dart",
+      "success_status": 200,
+      "request_body": true
+    },
+    {
+      "method": "GET",
+      "path": "/organization/external_storage/{external_storage_id}",
+      "operation_id": "Getanexternalstorageconfiguration",
+      "dart_context": "AdminExternalStorageResource.retrieve",
+      "file": "lib/src/resources/admin/organization_resource.dart",
+      "success_status": 200,
+      "request_body": false
+    },
+    {
+      "method": "DELETE",
+      "path": "/organization/external_storage/{external_storage_id}",
+      "operation_id": "Deleteanexternalstorageconfiguration",
+      "dart_context": "AdminExternalStorageResource.delete",
+      "file": "lib/src/resources/admin/organization_resource.dart",
+      "success_status": 200,
+      "request_body": false
+    },
+    {
+      "method": "POST",
+      "path": "/organization/external_storage/{external_storage_id}/validate",
+      "operation_id": "Validateanexternalstorageconfiguration",
+      "dart_context": "AdminExternalStorageResource.validate",
+      "file": "lib/src/resources/admin/organization_resource.dart",
+      "success_status": 200,
+      "request_body": false
+    }
+  ],
+  "source_receipts": [
+    {
+      "url": "https://github.com/openai/openai-openapi/blob/2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce/openapi.json",
+      "sha256": "73d582b052d0e86f222717799377a73c7f5023ea7e50333e3e893b91bb51e3bc"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/resources/admin/organization/external_keys.py",
+      "sha256": "e1288655d595633c904b060833d7ebf0d9cfd0f285f10d0f8d08035d2f61e7be"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/resources/admin/organization/external_storage.py",
+      "sha256": "3da24c9c52c8e39cdd6d8ca866193ea4879fbb4b865d5bc1b6a3f16b0fbd60ca"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/resources/admin/organization/projects/api_keys.py",
+      "sha256": "6b916777096940e6ba31445cd42be1aee77b9e9201d950a58a8c93232fb715be"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/resources/admin/organization/usage.py",
+      "sha256": "2f226f29cb7dcf766fc00c3ce171c67ea6d8ab810b70cb92e956c60239f04b3a"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/_client.py",
+      "sha256": "4ed7e53a2a8282ca001358386a6e6cd689cb1c42e9d31ea01828399fbd4a0ee8"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/resources/admin/organization/external-keys.ts",
+      "sha256": "56b7bc0ce61ebc624afb500d0a2c0d079c96916ac3c0652c71c6b01080d3c91a"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/resources/admin/organization/external-storage.ts",
+      "sha256": "6f11c00489dff60c60a04618938a44d7a373f542e126e2d4a88456313b90cdb8"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/resources/admin/organization/projects/api-keys.ts",
+      "sha256": "5597d0d7a130481a1f77e642037d33871acc5eaa4a0241881b67a9f6b53e1324"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/resources/admin/organization/usage.ts",
+      "sha256": "f13c6dffb08329a06b90095b849dd8e221d1ad1f22925c548fdcf2110fa1de84"
+    },
+    {
+      "url": "https://github.com/openai/openai-node/blob/c717857c3151bde92e07e4d396301a9c67163e68/src/client.ts",
+      "sha256": "ad27a23b9f869472bbd20b922b55fdc0d095f9be8a25b44def7ef5a8f0fd53ad"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/admin/organization/external_key_create_params.py",
+      "sha256": "b72cf37b3d75ab44fe26db1892dc04e372da3126500221d87a385449e425e4c5"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/admin/organization/external_key_list_params.py",
+      "sha256": "c7a4a6b062742f49632fedf361b45d87d862e7f9875b7523f3aeda062628f54a"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/admin/organization/usage_decisions_params.py",
+      "sha256": "549aeacee8fce4c7af0147e87298dec370dcd077a3add18fb6c0a3bf11917c4f"
+    },
+    {
+      "url": "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/admin/organization/projects/api_key_update_params.py",
+      "sha256": "f5c5226edce73de84c6833a49ad1ec1a39331156c3aca0048fb5ce3855f61ba3"
+    }
+  ],
+  "guide_receipts": [
+    {
+      "url": "https://developers.openai.com/api/docs/guides/admin-apis",
+      "sha256": "61fb616697a0495d3967c1e6cf4832fae23dfab9c455d09f52f29c57d9030172",
+      "note": "Cached guide read for workflow and credential semantics; no later API scope."
+    }
+  ],
+  "inventory_coverage": {
+    "assigned_schemas": 12,
+    "implemented_assigned_schemas": 11,
+    "conditional_not_applicable": 1,
+    "type_bindings": 33,
+    "supporting_bindings": 22,
+    "new_operations": 7,
+    "prerequisite_operations": 5,
+    "unassigned": []
+  }
+}

@@ -1326,6 +1326,33 @@ Use `client.vaults` and `.credentials` to store or rotate OAuth, bearer, and hos
 
 </details>
 
+### Organization administration
+
+<details>
+<summary><b>How do I use Admin keys, storage, and Decisions usage?</b></summary>
+
+Use a separate `OpenAIAdminClient`. `fromEnvironment()` reads **`OPENAI_ADMIN_KEY`**; project client credentials and defaults are never inherited. Admin credentials are used only by this bounded administration namespace. Custom providers supply a Bearer Authorization header; configure organization/routing headers explicitly in `OpenAIAdminConfig`.
+
+```dart
+final admin = OpenAIAdminClient.fromEnvironment();
+try {
+  final usage = await admin.organization.usage.decisions(
+    startTime: 1793404800,
+    groupBy: [DecisionsUsageGroupBy.model, DecisionsUsageGroupBy.apiSource],
+  );
+  // Pass usage.nextPage as page explicitly when usage.hasMore is true.
+  print(usage.data.length);
+} finally {
+  admin.close();
+}
+```
+
+The 12 supported operations cover AWS/Azure/GCP external keys, AWS/Azure/GCP/OCI external storage, project API-key scope/relative-expiry updates, and Decisions usage. Empty key scopes means **All permissions** within the owner's effective access; eligible HTTP retries reapply relative expiry. Storage status and deletion effects remain service-owned. Historical Admin APIs are outside this slice. Redirects are disabled; automatic diagnostics redact key/provider metadata, IDs, and usage filters.
+
+See [the offline Admin example](example/admin_example.dart) for synthetic key validation, OCI storage, service-account-owned key updates, and 30-minute cache-write usage. It uses only `MockClient`, with no real key registration, cloud access, or billing queries. The narrower import `package:openai_dart/openai_dart_admin.dart` is also available.
+
+</details>
+
 ## Error Handling
 
 <details>
@@ -1476,6 +1503,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [agent_subagents_example.dart](example/agent_subagents_example.dart) | **Offline.** Agent session subagents |
 | [agent_environments_example.dart](example/agent_environments_example.dart) | **Offline.** template CRUD and owned hosted environment prewarming, pagination and safe inspection |
 | [agent_files_artifacts_example.dart](example/agent_files_artifacts_example.dart) | **Offline.** Agent environment files and published artifacts |
+| [admin_example.dart](example/admin_example.dart) | **Offline.** isolated Admin credentials, external keys, OCI storage, key updates, and Decisions usage |
 | [vaults_example.dart](example/vaults_example.dart) | **Offline.** Vault CRUD and write-only credential create/rotate with safe inspection |
 | [chatkit_example.dart](example/chatkit_example.dart) | ChatKit sessions and threads |
 | [skills_example.dart](example/skills_example.dart) | Skills management |
@@ -1513,11 +1541,12 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | Safety | Read-only project alerts, organization cases, and typed monitoring details |
 | Agents | Saved agents, context settings, action review, durable sessions, scheduled automations and invocations, metadata filters, root/child history, hosted environments, files, and artifacts |
 | Vaults | Vault management and write-only credentials |
+| Organization Admin | Separate Admin credentials; external keys/storage, project API-key updates, and Decisions usage (12 operations) |
 | ChatKit Beta and Skills | Sessions/threads and skills management |
 | Assistants, Threads, Messages, Runs, and Vector Stores | Deprecated; separate Assistants import |
 | Completions | Legacy text completions |
 
-Some Responses tool/configuration details, Agents helper workflows, and administration APIs remain outside current coverage. See the [API alignment inventory](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/specs/api-alignment/README.md) for the detailed scope.
+Some Responses tool/configuration details, Agents helper workflows, and historical administration APIs remain outside current coverage. See the [API alignment inventory](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/specs/api-alignment/README.md) for the detailed scope.
 
 </details>
 
