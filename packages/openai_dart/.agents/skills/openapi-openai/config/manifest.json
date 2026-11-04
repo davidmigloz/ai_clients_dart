@@ -6625,6 +6625,8 @@
           "LiveSessionUpdated": "session.updated",
           "LiveInputAudioMuted": "session.input_audio.muted",
           "LiveInputAudioUnmuted": "session.input_audio.unmuted",
+          "LiveOutputAudioFixturePlaying": "session.output_audio.fixture.playing",
+          "LiveOutputAudioFixturePlayed": "session.output_audio.fixture.played",
           "LiveInstructionsAppended": "session.instructions.appended",
           "LiveThinkingAppended": "session.thinking.appended",
           "LiveCommentaryAppended": "session.commentary.appended",
@@ -6634,18 +6636,21 @@
           "LiveOutputTranscriptDelta": "session.output_transcript.delta",
           "LiveDelegationCreated": "session.delegation.created",
           "LiveResponseEvent": "response.event",
+          "LiveDecisionEvent": "decision.event",
+          "LiveDecisionItemCreated": "decision.item.created",
+          "LiveDecisionItemDeleted": "decision.item.deleted",
           "LiveSessionUsageUpdated": "session.usage.updated",
           "LiveSessionClosed": "session.closed",
           "LiveErrorEvent": "error",
           "LiveInfoEvent": "info",
           "LiveTransportDTMFReceived": "transport.dtmf.received",
-          "LiveTransportDTMFSend": "transport.dtmf.send",
+          "LiveTransportDTMFSent": "transport.dtmf.sent",
           "LiveTransportRinging": "transport.ringing",
           "LiveTransportAnswered": "transport.answered",
           "LiveTransportFailed": "transport.failed"
         }
       },
-      "note": "Actual full 22-component received union. LiveServerEvent allOf and LiveForkServerEvent alias resolve here; same factory serves the narrower 18-canonical/15-SDK sideband union with separately documented guide delivery extras. No duplicate hierarchy or fabricated alias class."
+      "note": "Actual full 27-component received union in fixed LiveServerEvent-2, resolving LiveServerEvent allOf and LiveForkServerEvent aliases to the same codec. The narrower canonical LiveSidebandServerEvent union has 25 components; shared decoding additionally preserves the two reflected audio variants per individual canonical descriptions, pinned SDK/guide evidence and channel-aware tests. Unknown future variants remain UnknownLiveServerEvent; no duplicate hierarchy or fabricated alias class."
     },
     "UnknownLiveServerEvent": {
       "spec": "main",

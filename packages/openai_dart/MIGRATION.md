@@ -128,6 +128,34 @@ new/updated sessions may take time to appear in filtered results.
 
 See [the offline settings example](example/agent_settings_example.dart).
 
+## Upcoming release: Responses tool configuration
+
+Responses image tools now use `ImageGenerationMask` instead of a mask string,
+`ImageModerationLevel` instead of a boolean, and an integer compression level.
+Choose the supported moderation policy explicitly:
+
+```dart
+// Before
+final tool = ResponseTool.imageGeneration(
+  inputImageMask: 'file_mask', moderation: true, outputCompression: '90',
+);
+
+// After
+final tool = ResponseTool.imageGeneration(
+  inputImageMask: const ImageGenerationMask(fileId: 'file_mask'),
+  moderation: ImageModerationLevel.auto,
+  outputCompression: 90,
+);
+```
+
+A mask can carry a file ID or image URL; the service validates combinations.
+`action` and typed `inputFidelity` are additive options. The same argument types
+apply to direct `ImageGenerationTool` construction.
+
+Exhaustive `ResponseToolChoice` switches must handle `ResponseToolChoiceCustom`.
+Use `ResponseToolChoice.custom(name: 'my_tool')` to select a declared custom tool;
+function selection continues to use `ResponseToolChoice.function`.
+
 ## Upcoming release: Image safety identifiers and markup
 
 Image edit/request response collections now own immutable snapshots:

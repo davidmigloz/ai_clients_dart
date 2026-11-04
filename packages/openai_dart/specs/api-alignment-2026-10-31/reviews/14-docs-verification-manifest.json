@@ -301,5 +301,18 @@
       "schema": null,
       "note": "Local request policy/readiness controls on unchanged canonical operations. Authentication cannot enable retries."
     }
-  ]
+  ],
+  "union_metadata_corrections": {
+    "LiveServerEvent": {
+      "known_variants": 27,
+      "canonical_sideband_variants": 25,
+      "removed_server_mapping": "LiveTransportDTMFSend / transport.dtmf.send",
+      "replacement_server_mapping": "LiveTransportDTMFSent / transport.dtmf.sent",
+      "added_contexts": [
+        "audio fixture playing/played acknowledgments",
+        "decision event/item-created/item-deleted"
+      ],
+      "evidence": "Actual Dart factory equals full pinned canonical tag map; narrower sideband includes documented reflected audio contexts. Unknown receive fallback and current client SendParam stay distinct."
+    }
+  }
 }

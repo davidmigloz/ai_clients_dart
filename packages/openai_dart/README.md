@@ -1016,7 +1016,7 @@ Opt into connection recovery and handle queued or unsent requests explicitly. Re
 <details>
 <summary><b>How do I use async function and custom tools?</b></summary>
 
-Declare async tools and return results with their original call IDs. Continue from the latest response ID when concurrent jobs complete.
+Declare async tools and return results with their original call IDs. Continue from the latest response ID when concurrent jobs complete. Use `ResponseToolChoice.custom(name: 'my_tool')` to select a declared custom tool.
 
 → [Full example](example/async_tools_example.dart)
 
