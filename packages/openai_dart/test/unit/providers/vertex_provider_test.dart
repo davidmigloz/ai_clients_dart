@@ -627,6 +627,79 @@ void main() {
   );
 
   test(
+    'hostile dedicated close cannot leak its error or strand later adapters',
+    () async {
+      final tokens = <Completer<String>>[];
+      Future<String> callback() {
+        final token = Completer<String>();
+        tokens.add(token);
+        return token.future;
+      }
+
+      final shared = _StreamClient();
+      final dedicated = _HostileCloseClient();
+      final client = OpenAIClient(
+        config: _config(callback),
+        httpClient: shared,
+        streamClientFactory: () => dedicated,
+      );
+      final stream = expectLater(
+        client.responses
+            .createStream(_create(), abortTrigger: Completer<void>().future)
+            .toList(),
+        throwsA(isA<AbortedException>()),
+      );
+      await _until(() => tokens.length == 1);
+      client.updateConfig(
+        vertexProvider: _provider(callback, baseUrl: 'https://new.invalid/v1'),
+      );
+      final later = expectLater(
+        client.responses.retrieve('later'),
+        throwsA(isA<AbortedException>()),
+      );
+      await _until(() => tokens.length == 2);
+      expect(client.close, returnsNormally);
+      await Future.wait([stream, later]).timeout(const Duration(seconds: 1));
+      expect(shared.closes, 0);
+      expect(dedicated.closes, 1);
+      client.close();
+      expect(dedicated.closes, 1);
+      for (final token in tokens) {
+        token.complete('late');
+      }
+      await Future<void>.delayed(Duration.zero);
+      expect(shared.sent, isEmpty);
+      expect(dedicated.sent, isEmpty);
+    },
+  );
+
+  test(
+    'logical close ends idle buffered and SSE bodies without transport cooperation',
+    () async {
+      final raw = _IdleBodyClient();
+      final client = OpenAIClient(config: _config(() => 't'), httpClient: raw);
+      final buffered = expectLater(
+        client.responses.create(_create()),
+        throwsA(isA<AbortedException>()),
+      );
+      final streaming = expectLater(
+        client.responses.createStream(_create()).toList(),
+        throwsA(isA<AbortedException>()),
+      );
+      await _until(() => raw.listeners == 2);
+      client.close();
+      await Future.wait([
+        buffered,
+        streaming,
+      ]).timeout(const Duration(seconds: 1));
+      expect(raw.cancellations, 2);
+      expect(raw.closes, 0);
+      raw.close();
+      expect(raw.closes, 1);
+    },
+  );
+
+  test(
     'synchronous callback elapsed time cannot evade the authentication budget',
     () async {
       var sends = 0;
@@ -860,6 +933,50 @@ class _StreamClient extends http.BaseClient {
   @override
   void close() {
     closes++;
+  }
+}
+
+class _HostileCloseClient extends _StreamClient {
+  @override
+  void close() {
+    super.close();
+    throw StateError('private-google-close-failure');
+  }
+}
+
+class _IdleBodyClient extends http.BaseClient {
+  int listeners = 0;
+  int cancellations = 0;
+  int closes = 0;
+  final bodies = <StreamController<List<int>>>[];
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    await request.finalize().drain<void>();
+    // Intentionally ignore Abortable and never emit a body chunk. Cancellation
+    // also never settles, to prove the public result does not await the peer.
+    final body = StreamController<List<int>>(
+      onListen: () {
+        listeners++;
+      },
+      onCancel: () {
+        cancellations++;
+        return Completer<void>().future;
+      },
+    );
+    bodies.add(body);
+    return http.StreamedResponse(
+      body.stream,
+      200,
+      headers: {'content-type': 'text/event-stream'},
+    );
+  }
+
+  @override
+  void close() {
+    closes++;
+    for (final body in bodies) {
+      body.close().ignore();
+    }
   }
 }
 

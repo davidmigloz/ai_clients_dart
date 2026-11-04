@@ -84,8 +84,11 @@ callback results cannot dispatch, and borrowed raw pools remain open.
 Timeout covers auth and response headers; buffered HTTP retains its existing body
 budget. SSE body lifetime has no automatic whole-stream deadline. Explicit abort
 and subscription cancellation retain request-scoped native cancellation and
-backpressure. The response-body forwarding controller has immediate cancellation,
-without awaiting an idle peer. Raw shared pools are closed only by their original
+backpressure. The response-body forwarding controller directly observes the attempt abort
+future and ends buffered/SSE consumers locally without awaiting another chunk or
+an uncooperative transport's cancellation future. Dedicated close is best effort;
+private custom close errors cannot strand later adapters, and registry removal
+runs in finally. Raw shared pools are closed only by their original
 owner. Dedicated factory clients close normally; a factory returning the injected
 shared pool is wrapped as borrowed and cannot close that pool.
 
@@ -96,21 +99,22 @@ Live/Realtime socket paths reject before any connection/token request.
 
 ## Requirements evidence and validation
 
-- 21 portable provider unit fixtures passed on VM: exact roots/identifiers,
+- 23 portable provider unit fixtures passed on VM: exact roots/identifiers,
   residency mapping, copy/value/provider identity, atomic config conflict checks,
   all six lifecycle method+URL/query shapes, concurrent out-of-order tokens,
   retry rotation, immutable original headers, opaque response ID handling, wrong origins/routes/encoded path
   traversal/auth headers, unsupported resources/WS/listing, timeout/abort/close
   late results, blocking callback elapsed time, safe errors, retained-generation
-  updates, SSE auth and dedicated/borrowed ownership.
+  updates, SSE auth and dedicated/borrowed ownership, hostile dedicated close,
+  and idle borrowed bodies that ignore native abort and never finish cancellation.
 - Three real loopback HTTP/SSE fixtures passed: cross-origin redirects never
   reach the second peer with credentials, header timeout cancels an actual
   transport, and cancelling an idle SSE subscription leaves a borrowed pool
   usable for the next request. The idle peer explicitly disables HttpServer
   output buffering so it emits a complete event before holding its response open.
-- Actual Chrome JavaScript and Wasm each passed 42 tests serially: the 21
-  portable provider fixtures plus 21 existing runtime/config tests. The final
-  opaque-ID fixture refinement also passed the portable VM21 selection.
+- After the final cleanup fixes, actual Chrome JavaScript and Wasm each passed
+  all 23 portable provider fixtures serially. Earlier each also passed 42 tests:
+  the preceding 21 provider fixtures plus 21 existing runtime/config tests.
 - `example/vertex_responses_example.dart` passed with six synthetic lifecycle
   requests and six independently acquired tokens, zero external calls.
 - The relevant serial ordinary client, auth/URL/snapshot, timeout/abort/SSE and
@@ -119,11 +123,13 @@ Live/Realtime socket paths reject before any connection/token request.
   when unrelated environment subprocess tests timed out while browser compilation
   overlapped. Their source/timeouts were not changed; this run is not reported as
   passing. Final integrated suite ownership belongs to the parent workflow/CI.
-- Package format (802 files), fix and fatal-info analysis completed cleanly.
-- Toolkit docs verification passed (45 discovered/29 verified resources, zero
-  issues/exclusion changes); README verification passed (20 headings/61
-  collapsible usage topics, zero issues).
+- Package format, fix and fatal-info analysis completed cleanly.
+- Toolkit docs and README verification passed with zero issues and no new
+  exclusions. Post-rebase verification also includes merged Admin/helper docs.
 - Independent auth architecture peer review found no blocker. The root reviewer
-  requested prompt close of unresolved provider work and an empty-segment guard;
-  both are implemented and covered by the final 24 provider tests. Final whole-PR
-  review and exact-head GitHub CI remain pending at PR preparation.
+  requested prompt close of unresolved auth, an empty-segment guard, best-effort
+  hostile dedicated cleanup and local cancellation of idle borrowed bodies.
+  All are implemented and covered by the final 26 provider tests. Independent
+  whole-PR engineering and requirements review confirmed both final cleanup
+  findings closed, with no remaining blocker. Exact-head GitHub CI is the final
+  merge gate.

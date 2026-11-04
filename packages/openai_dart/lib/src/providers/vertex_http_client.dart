@@ -164,7 +164,11 @@ final class VertexHttpClient extends http.BaseClient {
             handedOff = true;
             outcome.complete(
               http.StreamedResponse(
-                _safeBody(response.stream, () => _pendingAborts.remove(abort)),
+                _safeBody(
+                  response.stream,
+                  nativeAbort.future,
+                  () => _pendingAborts.remove(abort),
+                ),
                 response.statusCode,
                 contentLength: response.contentLength,
                 request: response.request ?? prepared,
@@ -272,15 +276,42 @@ final class VertexHttpClient extends http.BaseClient {
     for (final abort in List<void Function()>.of(_pendingAborts)) {
       abort();
     }
-    if (ownsInner) inner.close();
-    onClose?.call();
+    try {
+      if (ownsInner) inner.close();
+    } catch (_) {
+      // Dedicated cleanup is best effort. A credential-bearing custom close
+      // error must not mask cancellation or prevent other adapters closing.
+    } finally {
+      onClose?.call();
+    }
   }
 }
 
-Stream<List<int>> _safeBody(Stream<List<int>> body, void Function() onFinish) {
+Stream<List<int>> _safeBody(
+  Stream<List<int>> body,
+  Future<void> abortTrigger,
+  void Function() onFinish,
+) {
   StreamSubscription<List<int>>? subscription;
   late StreamController<List<int>> controller;
   var ended = false;
+  var sourceStarted = false;
+
+  void cancelUpstream() {
+    try {
+      // Cancellation can arrive before the returned body is first listened to.
+      // Subscribe only to release that source, without waiting for another byte.
+      if (!sourceStarted) {
+        sourceStarted = true;
+        subscription = body.listen(null, onError: (Object _) {});
+      }
+      subscription?.cancel().ignore();
+    } catch (_) {
+      // A custom subscription may throw synchronously or never finish cancel.
+      // Neither may replace the locally completed, sanitized result.
+    }
+  }
+
   void finish([Object? error, StackTrace? stackTrace]) {
     if (ended) return;
     ended = true;
@@ -293,17 +324,24 @@ Stream<List<int>> _safeBody(Stream<List<int>> body, void Function() onFinish) {
         StackTrace.current,
       );
     }
-    subscription?.cancel().ignore();
+    cancelUpstream();
     unawaited(controller.close());
   }
 
   controller = StreamController<List<int>>(
     onListen: () {
-      subscription = body.listen(
-        controller.add,
-        onError: finish,
-        onDone: finish,
-      );
+      if (ended) return;
+      sourceStarted = true;
+      try {
+        subscription = body.listen(
+          controller.add,
+          onError: finish,
+          onDone: finish,
+        );
+        if (ended) cancelUpstream();
+      } catch (error) {
+        finish(error);
+      }
     },
     onPause: () => subscription?.pause(),
     onResume: () => subscription?.resume(),
@@ -312,9 +350,15 @@ Stream<List<int>> _safeBody(Stream<List<int>> body, void Function() onFinish) {
         ended = true;
         onFinish();
       }
-      // Cancellation of an idle/paused peer must not wait for another chunk.
-      subscription?.cancel().ignore();
+      cancelUpstream();
     },
+  );
+  unawaited(
+    abortTrigger.then(
+      (_) => finish(const AbortedException(stage: AbortionStage.duringStream)),
+      onError: (Object _) =>
+          finish(const AbortedException(stage: AbortionStage.duringStream)),
+    ),
   );
   return controller.stream;
 }
