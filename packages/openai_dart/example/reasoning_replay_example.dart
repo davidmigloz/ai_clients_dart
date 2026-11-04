@@ -100,9 +100,7 @@ Future<void> main() async {
     for (final item in first.output) {
       history.add(switch (item) {
         final ReasoningItem reasoning => reasoning.toInput(),
-        final FunctionCallOutputItemResponse call => FunctionCallItem.fromJson(
-          call.toJson(),
-        ),
+        final FunctionCallOutputItemResponse call => call.toFunctionCallItem(),
         _ => throw StateError('Unexpected synthetic output'),
       });
     }

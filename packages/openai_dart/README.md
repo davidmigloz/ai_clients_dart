@@ -949,8 +949,7 @@ final history = <Item>[...previousInput];
 for (final item in response.output) {
   history.add(switch (item) {
     final ReasoningItem reasoning => reasoning.toInput(),
-    final FunctionCallOutputItemResponse call =>
-      FunctionCallItem.fromJson(call.toJson()),
+    final FunctionCallOutputItemResponse call => call.toFunctionCallItem(),
     _ => throw StateError('Handle this output kind before replaying it.'),
   });
 }
