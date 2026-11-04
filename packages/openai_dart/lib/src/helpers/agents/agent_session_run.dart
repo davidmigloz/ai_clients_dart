@@ -505,7 +505,11 @@ final class AgentSessionRun {
           );
         }
         try {
-          Uri.encodeComponent(id);
+          if (Uri.decodeComponent(Uri.encodeComponent(id)) != id) {
+            throw const FormatException(
+              'Agent session run requires a losslessly encodable session ID',
+            );
+          }
         } on ArgumentError {
           throw const FormatException(
             'Agent session run requires an encodable session ID',

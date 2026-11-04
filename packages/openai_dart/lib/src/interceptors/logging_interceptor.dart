@@ -56,7 +56,8 @@ class LoggingInterceptor implements Interceptor {
   ) async {
     var request = context.request;
     final speechRequest = isSpeechRequest(request);
-    final privateAudioRequest = isPrivateAudioRequest(request);
+    final privateAudioRequest =
+        isPrivateAudioRequest(request) || context.redactDiagnostics;
     final savedAgentRequest = isAgentsApiRequest(request);
     final privateVoiceRequest =
         isVoiceConsentRequest(request) ||
@@ -64,7 +65,8 @@ class LoggingInterceptor implements Interceptor {
         isLiveRequest(request) ||
         savedAgentRequest ||
         isAdminRequest(request) ||
-        isImagesRequest(request);
+        isImagesRequest(request) ||
+        context.redactDiagnostics;
     final diagnosticUrl = privateVoiceRequest
         ? '[REDACTED]'
         : request.url.toString();
@@ -100,7 +102,9 @@ class LoggingInterceptor implements Interceptor {
 
     if (logRequestBody && request is http.Request && request.body.isNotEmpty) {
       logger.finest(
-        '  Body: ${savedAgentRequest
+        '  Body: ${context.redactDiagnostics
+            ? '[REDACTED private request]'
+            : savedAgentRequest
             ? '[REDACTED Agents request]'
             : isLiveRequest(request)
             ? '[REDACTED Live request]'
@@ -137,7 +141,9 @@ class LoggingInterceptor implements Interceptor {
 
       if (logResponseBody && privateAudioRequest) {
         logger.finest(
-          '  Body: ${savedAgentRequest
+          '  Body: ${context.redactDiagnostics
+              ? '[REDACTED private response]'
+              : savedAgentRequest
               ? '[REDACTED Agents response]'
               : isLiveRequest(request)
               ? '[REDACTED Live response]'

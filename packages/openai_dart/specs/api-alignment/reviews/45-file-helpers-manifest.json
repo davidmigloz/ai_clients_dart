@@ -1,0 +1,44 @@
+{
+  "issue": 397,
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "promotion_owner": 427,
+  "http_operations_added": 0,
+  "schemas_added": 0,
+  "canonical_contract": "Raw Files user_data uploads and existing Agent environment-files/artifacts resources from issue390 remain authoritative. No canonical DTO is weakened.",
+  "local_helpers": {
+    "AgentFiles": "lib/src/helpers/agents/agent_files.dart",
+    "AgentResultArtifacts": "lib/src/helpers/agents/agent_result_artifacts.dart",
+    "AgentFileInput": "lib/src/helpers/agents/agent_file_inputs.dart",
+    "PreparedAgentFiles": "lib/src/helpers/agents/agent_file_preparation.dart",
+    "AgentFileSystem": "lib/src/helpers/agents/agent_file_system.dart"
+  },
+  "contextual_views": {
+    "AgentArtifactLookupCandidate": "Artifact helper-only received view permits absent/null legacy ID; all other canonical fields remain strict. Never bind this view as canonical Artifact.",
+    "AgentArtifactLookupPage": "Same existing list GET/envelope; only nested ID presence differs. Cursor is actual opaque last_id, with no row-ID fallback."
+  },
+  "sdk_sources": {
+    "openai-python/src/openai/lib/beta/agents/_files.py": {
+      "sha256": "f2ac9757522ec341e47a7f38dde9655dd4e4ad0875911b42c896e505a1f4bb12"
+    },
+    "openai-python/src/openai/lib/beta/agents/_artifacts.py": {
+      "sha256": "dd0b4ae735d3848edd3969c8b2bae4c45082d6df0418f24b86fa0046f17f041b"
+    },
+    "openai-node/src/lib/beta/agents/files.ts": {
+      "sha256": "ebd8dbbefea305be29727356ade651101ee68b40e50e56535a07b2a7014d5652"
+    },
+    "openai-node/src/lib/beta/agents/result-artifacts.ts": {
+      "sha256": "06fe9e9d0a2a6ac504327731055fbdf4154dfd43e88de52c01567f28c3bd1115"
+    },
+    "openai-node/src/lib/beta/agents/pages.ts": {
+      "sha256": "adc17644f5bd651076646928fd7b2b1a67b8762956d410fa67650071ce7c686c"
+    },
+    "openai-node/src/helpers/beta/agents/filesystem.ts": {
+      "sha256": "58e5a7d8f666f812d3269e4e188fda404bd7ad0ae731350638f802d4a2f31b39"
+    }
+  },
+  "known_dispositions": [
+    "Dart chooses stricter exact unique-match selection and actual-last_id-only pagination instead of source first-match/row-ID cursor conveniences.",
+    "Dart IO deliberately never overwrites; public Dart metadata cannot provide Node descriptor inode/device guarantees.",
+    "Explicit local byte budget is Dart memory policy, not an API quota."
+  ]
+}

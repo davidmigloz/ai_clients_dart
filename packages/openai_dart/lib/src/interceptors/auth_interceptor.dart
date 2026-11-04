@@ -36,13 +36,15 @@ class AuthInterceptor implements Interceptor {
     final providerHeaders = privateAgentInspectionExternal(
       context.request,
       authProvider.getHeaders,
+      redactDiagnostics: context.redactDiagnostics,
     );
 
     // Private resources select their required media headers at the boundary.
     // Keep those request-level values when refreshing provider credentials.
     // Filter before copying the body: a conflicting charset could otherwise
     // change its encoding before a later header correction.
-    final authHeaders = isPrivateAudioRequest(context.request)
+    final authHeaders =
+        (isPrivateAudioRequest(context.request) || context.redactDiagnostics)
         ? {
             for (final entry in providerHeaders.entries)
               if (entry.key.toLowerCase() != 'accept' &&
@@ -51,7 +53,9 @@ class AuthInterceptor implements Interceptor {
                       entry.key.toLowerCase() != 'openai-beta') &&
                   (!(isAgentSessionRequest(context.request) ||
                           isAgentEnvironmentRequest(context.request) ||
-                          isAgentAutomationRequest(context.request)) ||
+                          isAgentAutomationRequest(context.request) ||
+                          (context.redactDiagnostics &&
+                              isAgentFileRequest(context.request))) ||
                       entry.key.toLowerCase() != 'idempotency-key'))
                 entry.key: entry.value,
           }

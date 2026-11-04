@@ -14,6 +14,7 @@ class RequestContext {
     this.response,
     this.metadata = const {},
     this.abortTrigger,
+    this.redactDiagnostics = false,
   });
 
   /// The HTTP request being processed.
@@ -36,6 +37,10 @@ class RequestContext {
   /// in-flight operation should be cancelled as soon as possible.
   final Future<void>? abortTrigger;
 
+  /// Redacts package logs/errors for this operation while retaining explicit
+  /// payload/cause access. This local policy is never sent to the API.
+  final bool redactDiagnostics;
+
   /// Creates a copy with updated values.
   ///
   /// Nullable fields can be explicitly set to `null` to clear them.
@@ -44,9 +49,11 @@ class RequestContext {
     Object? response = unsetCopyWithValue,
     Map<String, dynamic>? metadata,
     Object? abortTrigger = unsetCopyWithValue,
+    bool? redactDiagnostics,
   }) {
     return RequestContext(
       request: request ?? this.request,
+      redactDiagnostics: redactDiagnostics ?? this.redactDiagnostics,
       response: response == unsetCopyWithValue
           ? this.response
           : response as http.Response?,

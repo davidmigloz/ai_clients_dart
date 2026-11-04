@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/files/files.dart';
+import '../utils/private_agent_inspection_http.dart';
+import '../utils/private_audio_http.dart';
 import 'base_resource.dart';
 
 /// Resource for file operations.
@@ -107,22 +109,51 @@ class FilesResource extends ResourceBase {
   ///
   /// print('Uploaded: ${file.id}');
   /// ```
+  /// [abortTrigger] uses the supplied transport's cancellation support.
+  /// [redactDiagnostics] keeps package logs and error strings private while
+  /// retaining explicit response/cause fields; it sends no marker header.
   Future<FileObject> upload({
     required List<int> bytes,
     required String filename,
     required FilePurpose purpose,
+    Map<String, String>? additionalHeaders,
+    Future<void>? abortTrigger,
+    bool redactDiagnostics = false,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl(_endpoint);
+    final url = privateAgentInspectionExternal(
+      null,
+      () => requestBuilder.buildUrl(_endpoint),
+      redactDiagnostics: redactDiagnostics,
+    );
     final request = http.MultipartRequest('POST', url);
 
     request.files.add(
       http.MultipartFile.fromBytes('file', bytes, filename: filename),
     );
     request.fields['purpose'] = purpose.toJson();
-    request.headers.addAll(requestBuilder.buildMultipartHeaders());
+    request.headers.addAll(
+      privateAgentInspectionExternal(
+        request,
+        () => requestBuilder.buildMultipartHeaders(
+          additionalHeaders: additionalHeaders,
+        ),
+        redactDiagnostics: redactDiagnostics,
+      ),
+    );
 
-    final response = await interceptorChain.execute(request);
+    final response = await interceptorChain.execute(
+      request,
+      abortTrigger: abortTrigger,
+      redactDiagnostics: redactDiagnostics,
+    );
+    if (redactDiagnostics) {
+      return parsePrivateAudioResponse(
+        response,
+        FileObject.fromJson,
+        'private file upload',
+      );
+    }
     final json = jsonDecode(response.body) as Map<String, dynamic>;
     return FileObject.fromJson(json);
   }

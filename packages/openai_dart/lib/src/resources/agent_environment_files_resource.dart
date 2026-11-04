@@ -135,6 +135,37 @@ class AgentSessionArtifactsResource extends ResourceBase with _AgentFileHttp {
     );
   }
 
+  /// Reads the same artifact-list operation through a helper-only legacy-ID
+  /// view. Every other known field stays strict; the canonical [list] model is
+  /// unchanged. Selectors advance with actual lastId, never a synthesized ID.
+  Future<AgentArtifactLookupPage> listForLookup(
+    String sessionId, {
+    int? limit,
+    AgentListOrder? order,
+    String? after,
+    Map<String, String>? additionalHeaders,
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    final path = _artifactsPath(sessionId);
+    _validatePage(limit, order);
+    if (after != null) {
+      validateAgentLength(after, 'Artifact lookup after', max: 1048576);
+    }
+    return _json(
+      'GET',
+      path,
+      AgentArtifactLookupPage.fromJson,
+      query: {
+        if (limit != null) 'limit': limit.toString(),
+        if (order != null) 'order': order.value,
+        'after': ?after,
+      },
+      additionalHeaders: additionalHeaders,
+      abortTrigger: abortTrigger,
+    );
+  }
+
   /// Retrieves immutable metadata, including original hosted path and turn ID.
   Future<AgentSessionArtifact> retrieve(
     String sessionId,

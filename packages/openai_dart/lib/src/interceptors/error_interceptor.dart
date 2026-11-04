@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 
+import '../utils/diagnostic_label.dart';
 import '../utils/http_error_response.dart';
 import 'interceptor.dart';
 
@@ -34,7 +35,9 @@ class ErrorInterceptor implements Interceptor {
 
     // Check for error status codes
     if (response.statusCode >= 400) {
-      throw parseHttpErrorResponse(response, request: context.request);
+      final error = parseHttpErrorResponse(response, request: context.request);
+      if (context.redactDiagnostics) markPrivateDiagnostics(error);
+      throw error;
     }
 
     return response;

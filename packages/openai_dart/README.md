@@ -1521,6 +1521,31 @@ Use `client.agents.environments` and `.templates` to save hosted setup and prewa
 
 </details>
 
+<a id="how-do-i-upload-agent-inputs-and-download-result-files"></a>
+<details>
+<summary><b>How do I upload Agent inputs and download result files?</b></summary>
+
+Use `AgentFiles(client).prepare(selected)` to upload explicit bytes or streams with `purpose=user_data`, then pass `prepared.files` to `AgentSessionEnvironment.openaiHosted(files: ...)`. Use `.stage(environmentId, selectedFile)` to copy one upload into an existing connected environment.
+
+Bind downloads to a completed run result and an explicit binary sink:
+
+```dart
+final result = await run.withResultCollection().finalResult();
+final artifacts = AgentResultArtifacts(client: client, result: result);
+await artifacts.downloadTo(
+  '/workspace/outputs/report.pdf',
+  sink: (bytes) => outputSink.add(bytes),
+);
+```
+
+The helper finds one exact session/turn/path match across every page. Callers own sink flush/close and upload cleanup; a failed preparation exposes observed IDs in `AgentFilePreparationException.prepared`. Streams are materialized one file at a time within a configurable local budget (64 MiB by default).
+
+For explicit local files, import `package:openai_dart/openai_dart_agent_files_io.dart`. `AgentFileSystem` accepts paths beneath a stable application-owned directory and creates new output files only; it rejects overwrites and symlinks. Metadata checks cannot prove identity against same-metadata replacement, so this adapter requires stable directories.
+
+→ Offline [portable upload/result/download example](example/agent_file_helpers_example.dart) · [Optional local-file example](example/agent_files_io_example.dart)
+
+</details>
+
 <a id="agent-environment-files-and-published-artifacts"></a>
 <details>
 <summary><b>Agent environment files and published artifacts</b></summary>
@@ -1726,6 +1751,8 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [agent_session_history_example.dart](example/agent_session_history_example.dart) | **Offline.** root/turn history and published OTLP trace pagination |
 | [agent_subagents_example.dart](example/agent_subagents_example.dart) | **Offline.** Agent session subagents |
 | [agent_environments_example.dart](example/agent_environments_example.dart) | **Offline.** template CRUD and owned hosted environment prewarming, pagination and safe inspection |
+| [agent_file_helpers_example.dart](example/agent_file_helpers_example.dart) | **Offline.** selected bytes, explicit staging, completed run identity and binary artifact sink |
+| [agent_files_io_example.dart](example/agent_files_io_example.dart) | **Local only.** explicit regular-file selection beneath an application-owned directory; no API calls |
 | [agent_files_artifacts_example.dart](example/agent_files_artifacts_example.dart) | **Offline.** Agent environment files and published artifacts |
 | [admin_example.dart](example/admin_example.dart) | **Offline.** isolated Admin credentials, external keys, OCI storage, key updates, and Decisions usage |
 | [vaults_example.dart](example/vaults_example.dart) | **Offline.** Vault CRUD and write-only credential create/rotate with safe inspection |
@@ -1763,7 +1790,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | Content Provenance Checks | C2PA and SynthID inspection |
 | Webhooks | Local signed verification and project endpoint management |
 | Safety | Read-only project alerts, organization cases, and typed monitoring details |
-| Agents | Saved agents, context settings, action review, durable sessions, scheduled automations and invocations, metadata filters, root/child history, hosted environments, files, and artifacts |
+| Agents | Saved agents, context settings, action review, durable sessions, scheduled automations and invocations, metadata filters, root/child history, hosted environments, portable file preparation, explicit staging, and completed-result artifacts |
 | Vaults | Vault management and write-only credentials |
 | Organization Admin | Separate Admin credentials; external keys/storage, project API-key updates, and Decisions usage (12 operations) |
 | ChatKit Beta and Skills | Sessions/threads and skills management |

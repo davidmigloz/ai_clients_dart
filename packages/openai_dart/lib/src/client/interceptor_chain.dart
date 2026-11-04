@@ -2,6 +2,8 @@ import 'package:http/http.dart' as http;
 
 import '../errors/exceptions.dart';
 import '../interceptors/interceptor.dart';
+import '../providers/vertex_provider.dart';
+import '../utils/diagnostic_label.dart';
 import '../utils/private_agent_inspection_http.dart';
 import '../utils/request_id.dart';
 import '../utils/speech_redaction.dart';
@@ -69,11 +71,13 @@ class InterceptorChain {
     http.BaseRequest request, {
     Future<void>? abortTrigger,
     bool allowRetries = true,
+    bool redactDiagnostics = false,
   }) {
     ensureNotClosed?.call();
 
     final context = RequestContext(
       request: request,
+      redactDiagnostics: redactDiagnostics,
       metadata: {if (!allowRetries) 'automaticRetriesDisabled': true},
       abortTrigger: abortTrigger,
     );
@@ -84,22 +88,46 @@ class InterceptorChain {
         : (context) => firstTransport ??= Future<http.Response>.microtask(
             () => _executeTransport(context, allowRetries: false),
           );
-    return _buildChain(0, terminal: terminal)(context);
+    if (!redactDiagnostics) return _buildChain(0, terminal: terminal)(context);
+    return _privateResult(() => _buildChain(0, terminal: terminal)(context));
   }
 
   /// Builds the interceptor chain recursively.
   InterceptorNext _buildChain(int index, {InterceptorNext? terminal}) {
     if (index >= interceptors.length) {
       // Terminal: execute the actual HTTP request
-      return terminal ?? _executeTransport;
+      final transport = terminal ?? _executeTransport;
+      return (context) => context.redactDiagnostics
+          ? _privateResult(() => transport(context))
+          : transport(context);
     }
 
     // Recursive: call current interceptor with next in chain
     return (context) {
       final interceptor = interceptors[index];
       final next = _buildChain(index + 1, terminal: terminal);
-      return interceptor.intercept(context, next);
+      return context.redactDiagnostics
+          ? _privateResult(() => interceptor.intercept(context, next))
+          : interceptor.intercept(context, next);
     };
+  }
+
+  Future<http.Response> _privateResult(
+    Future<http.Response> Function() callback,
+  ) async {
+    try {
+      return await callback();
+    } catch (error, stackTrace) {
+      if (error is OpenAIException || error is VertexAuthenticationException) {
+        if (error is OpenAIException) markPrivateDiagnostics(error);
+        Error.throwWithStackTrace(error, stackTrace);
+      }
+      throw ConnectionException(
+        message: 'Private request pipeline failed',
+        cause: error,
+        redactDiagnostics: true,
+      );
+    }
   }
 
   /// Executes the HTTP transport with optional retry wrapper.
@@ -190,6 +218,7 @@ class InterceptorChain {
                   abortableRequest,
                 );
               },
+              redactDiagnostics: context.redactDiagnostics,
             );
           } on http.RequestAbortedException catch (e) {
             // Convert http package's abort exception to our AbortedException
@@ -205,7 +234,7 @@ class InterceptorChain {
           return privateAgentInspectionTransport(requestToSend, () async {
             final streamedResponse = await httpClient.send(requestToSend);
             return _bufferPrivateResponse(streamedResponse, requestToSend);
-          });
+          }, redactDiagnostics: context.redactDiagnostics);
         }
       }
 
