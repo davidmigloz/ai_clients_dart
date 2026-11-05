@@ -1,3 +1,9 @@
+## Unreleased
+
+- **FEAT**: Add runner selection, model manifest-list creation/inspection, capability overrides, voice/template discovery, and native tool item schemas.
+- **FEAT**: Preserve model-copy status warnings with older empty-response compatibility and add a server heartbeat check.
+- **FIX**: Correct model-list, progress-event, and push/pull option equality and hashing.
+
 ## 4.1.0
 
 Adds optional `abortTrigger` parameters to chat, generation and model create/pull/push streams. Abort signals and listener cancellation now interrupt stalled requests and NDJSON bodies while preserving shared HTTP clients, sibling requests and successful connection reuse.

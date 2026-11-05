@@ -94,8 +94,17 @@ String toolTypeToString(ToolType value) {
 }
 
 /// A tool definition that can be provided to the model.
+///
+/// The const constructor retains supplied JSON references; keep them immutable.
+/// Decoded or replaced [items] JSON is copied and recursively frozen.
 @immutable
 class ToolDefinition {
+  /// Optional top-level item schema passed through to the native tool renderer.
+  ///
+  /// Accepts arbitrary JSON, matching the native Go client's `Tool.items`.
+  /// For function argument schemas, use [ToolFunction.parameters].
+  final Object? items;
+
   /// Type of tool (always `function`).
   final ToolType type;
 
@@ -103,23 +112,36 @@ class ToolDefinition {
   final ToolFunction function;
 
   /// Creates a [ToolDefinition].
-  const ToolDefinition({this.type = ToolType.function, required this.function});
+  const ToolDefinition({
+    this.type = ToolType.function,
+    required this.function,
+    this.items,
+  });
 
   /// Creates a [ToolDefinition] from JSON.
   factory ToolDefinition.fromJson(Map<String, dynamic> json) => ToolDefinition(
+    items: _freezeToolItems(json['items']),
     type: toolTypeFromString(json['type'] as String?),
     function: ToolFunction.fromJson(json['function'] as Map<String, dynamic>),
   );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (items != null) 'items': items,
     'type': toolTypeToString(type),
     'function': function.toJson(),
   };
 
   /// Creates a copy with replaced values.
-  ToolDefinition copyWith({ToolType? type, ToolFunction? function}) {
+  ToolDefinition copyWith({
+    ToolType? type,
+    ToolFunction? function,
+    Object? items = unsetCopyWithValue,
+  }) {
     return ToolDefinition(
+      items: identical(items, unsetCopyWithValue)
+          ? this.items
+          : _freezeToolItems(items),
       type: type ?? this.type,
       function: function ?? this.function,
     );
@@ -130,12 +152,23 @@ class ToolDefinition {
       identical(this, other) ||
       other is ToolDefinition &&
           runtimeType == other.runtimeType &&
+          mapsDeepEqual({'items': items}, {'items': other.items}) &&
           type == other.type &&
           function == other.function;
 
   @override
-  int get hashCode => Object.hash(type, function);
+  int get hashCode =>
+      Object.hash(type, function, mapDeepHashCode({'items': items}));
 
   @override
-  String toString() => 'ToolDefinition(type: $type, function: $function)';
+  String toString() =>
+      'ToolDefinition(type: $type, function: $function, items: $items)';
 }
+
+Object? _freezeToolItems(Object? value) => switch (value) {
+  Map<String, dynamic>() => Map<String, dynamic>.unmodifiable({
+    for (final entry in value.entries) entry.key: _freezeToolItems(entry.value),
+  }),
+  List() => List<Object?>.unmodifiable(value.map(_freezeToolItems)),
+  _ => value,
+};

@@ -43,7 +43,8 @@ Dart client for the **[Ollama API](https://ollama.com/)** — chat, streaming, t
 
 - Pull, push, copy, create, delete, and inspect models
 - Upload binary blobs and import GGUF or Safetensors model files
-- List running models and query server version
+- Inspect manifest variants, speech voices, capabilities, and effective templates
+- List running models, check server health, and query server version
 - Connect to local or remote Ollama instances with optional auth
 
 ### Cloud web tools
@@ -431,6 +432,25 @@ Future<void> main() async {
 ```
 
 → [Full example](example/models_example.dart)
+
+</details>
+
+<details>
+<summary><b>How do I select or inspect model variants?</b></summary>
+
+Generation, chat, show, and pull requests accept an
+optional `runner`. Create a manifest list with
+`CreateRequest(model: 'multi', list: ['model:mlx', 'model:gguf'])`; add explicit
+capabilities with `CreateRequest.capabilities`. Normal show responses expose
+`manifests`, `templateSource`, and speech `voices`. Use
+`client.models.showManifests(request: ShowRequest(model: 'multi'))` to inspect
+all child variants; their model information is under each variant's `details`.
+The all-manifests operation cannot be combined with a runner selector.
+`models.copy` now returns `StatusResponse`, preserving warnings if unavailable
+child manifests are dropped; older empty success responses remain supported.
+Use `await client.heartbeat()` to check server responsiveness with `HEAD /`.
+
+→ [Model management example](example/models_example.dart)
 
 </details>
 

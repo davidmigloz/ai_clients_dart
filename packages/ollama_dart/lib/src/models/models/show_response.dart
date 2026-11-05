@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import '../chat/chat_message.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import 'manifest_summary.dart';
 import 'model_tensor.dart';
 import 'model_thinking.dart';
 
@@ -15,6 +16,15 @@ import 'model_thinking.dart';
 /// should keep immutable.
 @immutable
 class ShowResponse {
+  /// Child variants available through this model tag.
+  final List<ManifestSummary>? manifests;
+
+  /// Voice names supported by a speech model.
+  final List<String>? voices;
+
+  /// Source of the effective prompt template, such as `go_template` or `gguf_chat_template`.
+  final String? templateSource;
+
   /// Model parameter settings serialized as text.
   final String? parameters;
 
@@ -71,6 +81,9 @@ class ShowResponse {
 
   /// Creates a [ShowResponse].
   const ShowResponse({
+    this.manifests,
+    this.voices,
+    this.templateSource,
     this.parameters,
     this.license,
     this.modifiedAt,
@@ -93,6 +106,13 @@ class ShowResponse {
 
   /// Creates a [ShowResponse] from JSON.
   factory ShowResponse.fromJson(Map<String, dynamic> json) => ShowResponse(
+    manifests: _freezeList(
+      (json['manifests'] as List?)?.map(
+        (e) => ManifestSummary.fromJson(e as Map<String, dynamic>),
+      ),
+    ),
+    voices: _freezeList((json['voices'] as List?)?.cast<String>()),
+    templateSource: json['template_source'] as String?,
     modelfile: json['modelfile'] as String?,
     system: json['system'] as String?,
     renderer: json['renderer'] as String?,
@@ -127,6 +147,10 @@ class ShowResponse {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (manifests != null)
+      'manifests': manifests!.map((e) => e.toJson()).toList(),
+    if (voices != null) 'voices': voices,
+    if (templateSource != null) 'template_source': templateSource,
     if (modelfile != null) 'modelfile': modelfile,
     if (system != null) 'system': system,
     if (renderer != null) 'renderer': renderer,
@@ -149,6 +173,9 @@ class ShowResponse {
 
   /// Creates a copy with replaced values.
   ShowResponse copyWith({
+    Object? manifests = unsetCopyWithValue,
+    Object? voices = unsetCopyWithValue,
+    Object? templateSource = unsetCopyWithValue,
     Object? modelfile = unsetCopyWithValue,
     Object? system = unsetCopyWithValue,
     Object? renderer = unsetCopyWithValue,
@@ -169,6 +196,21 @@ class ShowResponse {
     Object? modelInfo = unsetCopyWithValue,
   }) {
     return ShowResponse(
+      manifests: identical(manifests, unsetCopyWithValue)
+          ? this.manifests
+          : manifests == null
+          ? null
+          : List<ManifestSummary>.unmodifiable(
+              manifests as List<ManifestSummary>,
+            ),
+      voices: identical(voices, unsetCopyWithValue)
+          ? this.voices
+          : voices == null
+          ? null
+          : List<String>.unmodifiable(voices as List<String>),
+      templateSource: identical(templateSource, unsetCopyWithValue)
+          ? this.templateSource
+          : templateSource as String?,
       modelfile: identical(modelfile, unsetCopyWithValue)
           ? this.modelfile
           : modelfile as String?,
@@ -237,6 +279,9 @@ class ShowResponse {
       identical(this, other) ||
       other is ShowResponse &&
           runtimeType == other.runtimeType &&
+          listsEqual(manifests, other.manifests) &&
+          listsEqual(voices, other.voices) &&
+          templateSource == other.templateSource &&
           parameters == other.parameters &&
           license == other.license &&
           modifiedAt == other.modifiedAt &&
@@ -258,6 +303,9 @@ class ShowResponse {
 
   @override
   int get hashCode => Object.hashAll([
+    listHash(manifests),
+    listHash(voices),
+    templateSource,
     parameters,
     license,
     modifiedAt,
@@ -281,6 +329,9 @@ class ShowResponse {
   @override
   String toString() =>
       'ShowResponse('
+      'manifests: $manifests, '
+      'voices: $voices, '
+      'templateSource: $templateSource, '
       'parameters: $parameters, '
       'license: $license, '
       'modifiedAt: $modifiedAt, '

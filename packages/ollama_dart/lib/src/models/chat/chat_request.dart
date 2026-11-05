@@ -12,6 +12,9 @@ import 'chat_message.dart';
 /// Request for chat completion.
 @immutable
 class ChatRequest {
+  /// Runner variant to select from a model manifest list.
+  final String? runner;
+
   /// Model name.
   final String model;
 
@@ -56,6 +59,7 @@ class ChatRequest {
 
   /// Creates a [ChatRequest].
   const ChatRequest({
+    this.runner,
     required this.model,
     required this.messages,
     this.tools,
@@ -72,6 +76,7 @@ class ChatRequest {
 
   /// Creates a [ChatRequest] from JSON.
   factory ChatRequest.fromJson(Map<String, dynamic> json) => ChatRequest(
+    runner: json['runner'] as String?,
     truncate: json['truncate'] as bool?,
     shift: json['shift'] as bool?,
     model: json['model'] as String,
@@ -94,6 +99,7 @@ class ChatRequest {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (runner != null) 'runner': runner,
     if (truncate != null) 'truncate': truncate,
     if (shift != null) 'shift': shift,
     'model': model,
@@ -110,6 +116,7 @@ class ChatRequest {
 
   /// Creates a copy with replaced values.
   ChatRequest copyWith({
+    Object? runner = unsetCopyWithValue,
     Object? truncate = unsetCopyWithValue,
     Object? shift = unsetCopyWithValue,
     String? model,
@@ -124,6 +131,9 @@ class ChatRequest {
     Object? topLogprobs = unsetCopyWithValue,
   }) {
     return ChatRequest(
+      runner: identical(runner, unsetCopyWithValue)
+          ? this.runner
+          : runner as String?,
       truncate: identical(truncate, unsetCopyWithValue)
           ? this.truncate
           : truncate as bool?,
@@ -158,6 +168,7 @@ class ChatRequest {
       identical(this, other) ||
       other is ChatRequest &&
           runtimeType == other.runtimeType &&
+          runner == other.runner &&
           model == other.model &&
           listsEqual(messages, other.messages) &&
           listsEqual(tools, other.tools) &&
@@ -173,6 +184,7 @@ class ChatRequest {
 
   @override
   int get hashCode => Object.hashAll([
+    runner,
     model,
     listHash(messages),
     listHash(tools),
@@ -190,6 +202,7 @@ class ChatRequest {
   @override
   String toString() =>
       'ChatRequest('
+      'runner: $runner, '
       'model: $model, '
       'messages: $messages, '
       'tools: $tools, '

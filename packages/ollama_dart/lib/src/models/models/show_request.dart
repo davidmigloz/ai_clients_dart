@@ -6,6 +6,12 @@ import '../metadata/model_options.dart';
 /// Request to show model details.
 @immutable
 class ShowRequest {
+  /// Whether to inspect every variant. Use `models.showManifests` to parse that response.
+  final bool? allManifests;
+
+  /// Runner variant to inspect from a model manifest list.
+  final String? runner;
+
   /// Model name to show.
   final String model;
 
@@ -20,6 +26,8 @@ class ShowRequest {
 
   /// Creates a [ShowRequest].
   const ShowRequest({
+    this.allManifests,
+    this.runner,
     required this.model,
     this.verbose,
     this.system,
@@ -28,6 +36,8 @@ class ShowRequest {
 
   /// Creates a [ShowRequest] from JSON.
   factory ShowRequest.fromJson(Map<String, dynamic> json) => ShowRequest(
+    allManifests: json['all_manifests'] as bool?,
+    runner: json['runner'] as String?,
     system: json['system'] as String?,
     options: json['options'] != null
         ? ModelOptions.fromJson(json['options'] as Map<String, dynamic>)
@@ -38,6 +48,8 @@ class ShowRequest {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (allManifests != null) 'all_manifests': allManifests,
+    if (runner != null) 'runner': runner,
     if (system != null) 'system': system,
     if (options != null) 'options': options!.toJson(),
     'model': model,
@@ -46,12 +58,20 @@ class ShowRequest {
 
   /// Creates a copy with replaced values.
   ShowRequest copyWith({
+    Object? allManifests = unsetCopyWithValue,
+    Object? runner = unsetCopyWithValue,
     Object? system = unsetCopyWithValue,
     Object? options = unsetCopyWithValue,
     String? model,
     Object? verbose = unsetCopyWithValue,
   }) {
     return ShowRequest(
+      allManifests: identical(allManifests, unsetCopyWithValue)
+          ? this.allManifests
+          : allManifests as bool?,
+      runner: identical(runner, unsetCopyWithValue)
+          ? this.runner
+          : runner as String?,
       system: identical(system, unsetCopyWithValue)
           ? this.system
           : system as String?,
@@ -68,17 +88,22 @@ class ShowRequest {
       identical(this, other) ||
       other is ShowRequest &&
           runtimeType == other.runtimeType &&
+          allManifests == other.allManifests &&
+          runner == other.runner &&
           model == other.model &&
           verbose == other.verbose &&
           system == other.system &&
           options == other.options;
 
   @override
-  int get hashCode => Object.hashAll([model, verbose, system, options]);
+  int get hashCode =>
+      Object.hashAll([allManifests, runner, model, verbose, system, options]);
 
   @override
   String toString() =>
       'ShowRequest('
+      'allManifests: $allManifests, '
+      'runner: $runner, '
       'model: $model, '
       'verbose: $verbose, '
       'system: $system, '

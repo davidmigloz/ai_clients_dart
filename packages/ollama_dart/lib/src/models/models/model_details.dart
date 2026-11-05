@@ -6,6 +6,9 @@ import '../common/equality_helpers.dart';
 /// Additional information about the model's format and family.
 @immutable
 class ModelDetails {
+  /// Runner associated with the model variant.
+  final String? runner;
+
   /// Model file format (e.g., `gguf`).
   final String? format;
 
@@ -32,6 +35,7 @@ class ModelDetails {
 
   /// Creates a [ModelDetails].
   const ModelDetails({
+    this.runner,
     this.format,
     this.family,
     this.families,
@@ -44,6 +48,7 @@ class ModelDetails {
 
   /// Creates a [ModelDetails] from JSON.
   factory ModelDetails.fromJson(Map<String, dynamic> json) => ModelDetails(
+    runner: json['runner'] as String?,
     contextLength: json['context_length'] as int?,
     embeddingLength: json['embedding_length'] as int?,
     format: json['format'] as String?,
@@ -56,6 +61,7 @@ class ModelDetails {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (runner != null) 'runner': runner,
     if (contextLength != null) 'context_length': contextLength,
     if (embeddingLength != null) 'embedding_length': embeddingLength,
     if (format != null) 'format': format,
@@ -68,6 +74,7 @@ class ModelDetails {
 
   /// Creates a copy with replaced values.
   ModelDetails copyWith({
+    Object? runner = unsetCopyWithValue,
     Object? contextLength = unsetCopyWithValue,
     Object? embeddingLength = unsetCopyWithValue,
     Object? format = unsetCopyWithValue,
@@ -78,6 +85,9 @@ class ModelDetails {
     Object? parentModel = unsetCopyWithValue,
   }) {
     return ModelDetails(
+      runner: identical(runner, unsetCopyWithValue)
+          ? this.runner
+          : runner as String?,
       contextLength: identical(contextLength, unsetCopyWithValue)
           ? this.contextLength
           : contextLength as int?,
@@ -106,6 +116,7 @@ class ModelDetails {
       identical(this, other) ||
       other is ModelDetails &&
           runtimeType == other.runtimeType &&
+          runner == other.runner &&
           format == other.format &&
           family == other.family &&
           listsEqual(families, other.families) &&
@@ -117,6 +128,7 @@ class ModelDetails {
 
   @override
   int get hashCode => Object.hashAll([
+    runner,
     format,
     family,
     listHash(families),
@@ -130,6 +142,7 @@ class ModelDetails {
   @override
   String toString() =>
       'ModelDetails('
+      'runner: $runner, '
       'format: $format, '
       'family: $family, '
       'families: $families, '

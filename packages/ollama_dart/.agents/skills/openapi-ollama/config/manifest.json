@@ -98,9 +98,7 @@
       "embed",
       "models"
     ],
-    "notes": {
-      "CreateRequest.capabilities": "Deferred until stable Ollama release; stable target v0.35.0."
-    },
+    "notes": {},
     "expected_properties": {
       "ModelOptions": [
         "seed",
@@ -155,7 +153,8 @@
         "height",
         "steps",
         "truncate",
-        "shift"
+        "shift",
+        "runner"
       ],
       "GenerateResponse": [
         "model",
@@ -190,7 +189,8 @@
         "logprobs",
         "top_logprobs",
         "truncate",
-        "shift"
+        "shift",
+        "runner"
       ],
       "ChatResponse": [
         "model",
@@ -247,14 +247,17 @@
       ],
       "ModelDetails": [
         "context_length",
-        "embedding_length"
+        "embedding_length",
+        "runner"
       ],
       "ModelSummary": [
         "capabilities"
       ],
       "ShowRequest": [
         "system",
-        "options"
+        "options",
+        "runner",
+        "all_manifests"
       ],
       "ShowResponse": [
         "modelfile",
@@ -267,7 +270,23 @@
         "projector_info",
         "tensors",
         "requires",
-        "thinking"
+        "thinking",
+        "template_source",
+        "voices",
+        "manifests"
+      ],
+      "CreateRequest": [
+        "list",
+        "capabilities"
+      ],
+      "RunningModel": [
+        "runner"
+      ],
+      "PullRequest": [
+        "runner"
+      ],
+      "ToolDefinition": [
+        "items"
       ]
     },
     "excluded_properties": {
@@ -319,11 +338,8 @@
       "dart_class": "CreateRequest",
       "file": "lib/src/models/models/create_request.dart",
       "schema": "CreateRequest",
-      "note": "Preserves stable v0.35.0 native import fields and legacy adapters. capabilities is deferred: introduced after v0.35.0, currently prerelease-only. files/draft_files/draft_quantize/requires are now in OpenAPI.",
-      "tags": [],
-      "excluded_properties": [
-        "capabilities"
-      ]
+      "note": "Stable v0.40.14 native import fields, manifest lists, capability overrides, and legacy adapters retained for older servers.",
+      "tags": []
     },
     "GenerateRequest": {
       "spec": "main",
@@ -731,6 +747,50 @@
       "schema": null,
       "tags": [],
       "parent": "SystemOneContent"
+    },
+    "RunningModel": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "RunningModel",
+      "file": "lib/src/models/models/running_model.dart",
+      "schema": null,
+      "tags": []
+    },
+    "PullRequest": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "PullRequest",
+      "file": "lib/src/models/models/pull_request.dart",
+      "schema": null,
+      "tags": []
+    },
+    "ShowManifestsResponse": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ShowManifestsResponse",
+      "file": "lib/src/models/models/show_manifests_response.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot."
+    },
+    "ShowManifest": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ShowManifest",
+      "file": "lib/src/models/models/show_manifest.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot.",
+      "excluded_properties": []
+    },
+    "ManifestSummary": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ManifestSummary",
+      "file": "lib/src/models/models/manifest_summary.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot."
     }
   }
 }

@@ -9,6 +9,7 @@ import '../models/models/list_response.dart';
 import '../models/models/ps_response.dart';
 import '../models/models/pull_request.dart';
 import '../models/models/push_request.dart';
+import '../models/models/show_manifests_response.dart';
 import '../models/models/show_request.dart';
 import '../models/models/show_response.dart';
 import '../models/models/status_event.dart';
@@ -67,6 +68,9 @@ class ModelsResource extends ResourceBase with StreamingResource {
   ///
   /// Returns a [ShowResponse] with model details.
   Future<ShowResponse> show({required ShowRequest request}) async {
+    if (request.allManifests == true) {
+      throw ArgumentError('Use showManifests for all_manifests responses.');
+    }
     final url = requestBuilder.buildUrl('/api/show');
 
     final headers = requestBuilder.buildHeaders(
@@ -81,6 +85,34 @@ class ModelsResource extends ResourceBase with StreamingResource {
 
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
     return ShowResponse.fromJson(responseBody);
+  }
+
+  /// Shows model information for every child in a manifest list.
+  ///
+  /// Sets `all_manifests` regardless of the value in [request]. The response
+  /// shape differs from [show] and includes per-runner model details.
+  Future<ShowManifestsResponse> showManifests({
+    required ShowRequest request,
+    Future<void>? abortTrigger,
+  }) async {
+    if (request.runner != null && request.runner!.isNotEmpty) {
+      throw ArgumentError('runner and all_manifests cannot be combined.');
+    }
+    final httpRequest =
+        http.Request('POST', requestBuilder.buildUrl('/api/show'))
+          ..headers.addAll(
+            requestBuilder.buildHeaders(
+              additionalHeaders: {'Content-Type': 'application/json'},
+            ),
+          )
+          ..body = jsonEncode(request.copyWith(allManifests: true).toJson());
+    final response = await interceptorChain.execute(
+      httpRequest,
+      abortTrigger: abortTrigger,
+    );
+    return ShowManifestsResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Creates a new model.
@@ -142,7 +174,9 @@ class ModelsResource extends ResourceBase with StreamingResource {
   /// Copies a model.
   ///
   /// The [request] contains the source and destination names.
-  Future<void> copy({required CopyRequest request}) async {
+  /// Returns the server status, including warnings about unavailable variants.
+  /// Older servers with an empty success body return an empty status response.
+  Future<StatusResponse> copy({required CopyRequest request}) async {
     final url = requestBuilder.buildUrl('/api/copy');
 
     final headers = requestBuilder.buildHeaders(
@@ -153,7 +187,12 @@ class ModelsResource extends ResourceBase with StreamingResource {
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
 
-    await interceptorChain.execute(httpRequest);
+    final response = await interceptorChain.execute(httpRequest);
+    return response.body.trim().isEmpty
+        ? const StatusResponse()
+        : StatusResponse.fromJson(
+            jsonDecode(response.body) as Map<String, dynamic>,
+          );
   }
 
   /// Deletes a model.

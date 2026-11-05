@@ -10,6 +10,9 @@ import '../metadata/model_options.dart';
 /// Request for text generation.
 @immutable
 class GenerateRequest {
+  /// Runner variant to select from a model manifest list.
+  final String? runner;
+
   /// Model name.
   final String model;
 
@@ -97,6 +100,7 @@ class GenerateRequest {
 
   /// Creates a [GenerateRequest].
   const GenerateRequest({
+    this.runner,
     required this.model,
     this.prompt,
     this.suffix,
@@ -122,6 +126,7 @@ class GenerateRequest {
   /// Creates a [GenerateRequest] from JSON.
   factory GenerateRequest.fromJson(Map<String, dynamic> json) =>
       GenerateRequest(
+        runner: json['runner'] as String?,
         truncate: json['truncate'] as bool?,
         shift: json['shift'] as bool?,
         model: json['model'] as String,
@@ -148,6 +153,7 @@ class GenerateRequest {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (runner != null) 'runner': runner,
     if (truncate != null) 'truncate': truncate,
     if (shift != null) 'shift': shift,
     'model': model,
@@ -172,6 +178,7 @@ class GenerateRequest {
 
   /// Creates a copy with replaced values.
   GenerateRequest copyWith({
+    Object? runner = unsetCopyWithValue,
     Object? truncate = unsetCopyWithValue,
     Object? shift = unsetCopyWithValue,
     String? model,
@@ -194,6 +201,9 @@ class GenerateRequest {
     Object? steps = unsetCopyWithValue,
   }) {
     return GenerateRequest(
+      runner: identical(runner, unsetCopyWithValue)
+          ? this.runner
+          : runner as String?,
       truncate: identical(truncate, unsetCopyWithValue)
           ? this.truncate
           : truncate as bool?,
@@ -240,6 +250,7 @@ class GenerateRequest {
       identical(this, other) ||
       other is GenerateRequest &&
           runtimeType == other.runtimeType &&
+          runner == other.runner &&
           model == other.model &&
           prompt == other.prompt &&
           suffix == other.suffix &&
@@ -263,6 +274,7 @@ class GenerateRequest {
 
   @override
   int get hashCode => Object.hashAll([
+    runner,
     model,
     prompt,
     suffix,
@@ -288,6 +300,7 @@ class GenerateRequest {
   @override
   String toString() =>
       'GenerateRequest('
+      'runner: $runner, '
       'model: $model, '
       'prompt: $prompt, '
       'suffix: $suffix, '
