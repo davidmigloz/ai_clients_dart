@@ -2,19 +2,80 @@
   "specs": {
     "main": {
       "current_version": "0.1.0",
-      "last_fetched": "2026-09-30T10:27:34.541321Z",
-      "source_url": "https://raw.githubusercontent.com/ollama/ollama/1abe35e6e6e777e858bbfbba283667ee8d516801/docs/openapi.yaml",
+      "last_fetched": "2026-11-05T22:31:29.707940Z",
+      "source_url": "https://raw.githubusercontent.com/ollama/ollama/02480ca2a47153e1f9c31cbe1e05536da97ce1ba/docs/openapi.yaml",
       "title": "Ollama API",
       "version_history": [
         {
           "version": "0.1.0",
           "fetched_at": "2026-08-02T05:59:42.284937Z",
           "source_url": "https://raw.githubusercontent.com/ollama/ollama/refs/heads/main/docs/openapi.yaml"
+        },
+        {
+          "version": "0.1.0",
+          "fetched_at": "2026-09-30T10:27:34.541321Z",
+          "source_url": "https://raw.githubusercontent.com/ollama/ollama/1abe35e6e6e777e858bbfbba283667ee8d516801/docs/openapi.yaml",
+          "source_commit": "1abe35e6e6e777e858bbfbba283667ee8d516801",
+          "target_release": "v0.35.0",
+          "target_release_commit": "cc4069396f3ad2c370c53eed2e4a42ac13adab84"
         }
       ],
-      "source_commit": "1abe35e6e6e777e858bbfbba283667ee8d516801",
-      "target_release": "v0.35.0",
-      "target_release_commit": "cc4069396f3ad2c370c53eed2e4a42ac13adab84"
+      "source_commit": "02480ca2a47153e1f9c31cbe1e05536da97ce1ba",
+      "target_release": "v0.40.14",
+      "target_release_commit": "9a3e8177767245acc62b735eba7d5d8a553606d0",
+      "reference_clients": {
+        "python": "35d9667e84ebbd9d792826868d050027f75c1cc1",
+        "javascript": "c276d078eee37a0df003b9ee2120ec70327f32e9"
+      },
+      "alignment": {
+        "checked_at": "2026-11-05",
+        "source_files": [
+          "docs/openapi.yaml",
+          "api/types.go",
+          "api/client.go",
+          "server/routes.go",
+          "server/images.go",
+          "server/speech.go",
+          "server/transcription.go",
+          "openai/openai.go",
+          "template/template.go"
+        ],
+        "covered": [
+          "native generate/chat/embed",
+          "model management and manifest variants",
+          "System One text/image/audio and cloud",
+          "binary blobs",
+          "hosted web search/fetch",
+          "audio speech/transcriptions/translations",
+          "read-only balance/usage"
+        ],
+        "intentional_exclusions": [
+          "internal _debug fields",
+          "experimental server-control and web-proxy routes",
+          "account mutation and key management",
+          "superseded /api/embeddings",
+          "compatibility adapters other than audio",
+          "SystemOneRequest.videos (documented unsupported)",
+          "new deprecated Go aliases name/quantization/show template"
+        ],
+        "stable_audio_constraints": {
+          "speech_response_formats": [
+            "wav",
+            "pcm"
+          ],
+          "speech_speed": 1,
+          "speech_stream_format": "audio",
+          "speech_instructions": "empty",
+          "transcription_response_formats": [
+            "json",
+            "text",
+            "verbose_json"
+          ],
+          "timestamp_granularities": "not parsed by stable server"
+        },
+        "validation": "Unit tests with mocks and local HTTP servers; static analysis; no live inference or integration tests."
+      },
+      "source_sha256": "d8e08be41dd858c933c32bef5ee8d0c5faf7d7462069a49b368731cfbceaab03"
     }
   }
 }

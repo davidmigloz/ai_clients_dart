@@ -78,6 +78,13 @@
           "translation"
         ],
         "directory": "audio"
+      },
+      "account": {
+        "patterns": [
+          "balance",
+          "usage"
+        ],
+        "directory": "account"
       }
     },
     "default_category": "common",
@@ -861,6 +868,169 @@
         "wav",
         "pcm"
       ]
+    },
+    "BalanceResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "BalanceResponse",
+      "file": "lib/src/models/account/balance_response.dart",
+      "schema": "BalanceResponse",
+      "tags": []
+    },
+    "UsageRange": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "UsageRange",
+      "file": "lib/src/models/account/usage_selectors.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Typed values from stable server handlers or inline query schemas; no named OpenAPI enum schema. Unit tests cover wire values and unknown handling.",
+      "enum_values": [
+        "24h",
+        "7d",
+        "30d"
+      ]
+    },
+    "UsageScope": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "UsageScope",
+      "file": "lib/src/models/account/usage_selectors.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Typed values from stable server handlers or inline query schemas; no named OpenAPI enum schema. Unit tests cover wire values and unknown handling.",
+      "enum_values": [
+        "self",
+        "team"
+      ]
+    },
+    "UsageGroupBy": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "UsageGroupBy",
+      "file": "lib/src/models/account/usage_selectors.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Typed values from stable server handlers or inline query schemas; no named OpenAPI enum schema. Unit tests cover wire values and unknown handling.",
+      "enum_values": [
+        "model"
+      ]
+    },
+    "UsageGranularity": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "UsageGranularity",
+      "file": "lib/src/models/account/usage_selectors.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Typed values from stable server handlers or inline query schemas; no named OpenAPI enum schema. Unit tests cover wire values and unknown handling.",
+      "enum_values": [
+        "hour",
+        "day"
+      ]
+    },
+    "UsageResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UsageResponse",
+      "file": "lib/src/models/account/usage_response.dart",
+      "schema": "UsageResponse",
+      "tags": []
+    },
+    "UsageBucket": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UsageBucket",
+      "file": "lib/src/models/account/usage_bucket.dart",
+      "schema": "UsageBucket",
+      "tags": []
+    },
+    "BalancePeriod": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "BalancePeriod",
+      "file": "lib/src/models/account/balance_period.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot."
+    },
+    "BalanceIncluded": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "BalanceIncluded",
+      "file": "lib/src/models/account/balance_included.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot."
+    },
+    "UnknownIncludedBalance": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownIncludedBalance",
+      "file": "lib/src/models/account/balance_included.dart",
+      "schema": null,
+      "tags": [],
+      "parent": "BalanceIncluded",
+      "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot."
+    },
+    "IncludedBalance": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "IncludedBalance",
+      "file": "lib/src/models/account/balance_included.dart",
+      "schema": "IncludedBalance",
+      "tags": [],
+      "parent": "BalanceIncluded"
+    },
+    "LegacyIncludedBalance": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LegacyIncludedBalance",
+      "file": "lib/src/models/account/balance_included.dart",
+      "schema": "LegacyIncludedBalance",
+      "tags": [],
+      "parent": "BalanceIncluded"
+    },
+    "UsageGroup": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UsageGroup",
+      "file": "lib/src/models/account/usage_group.dart",
+      "schema": "UsageGroup",
+      "tags": []
+    },
+    "UsageMetrics": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UsageMetrics",
+      "file": "lib/src/models/account/usage_metrics.dart",
+      "schema": "UsageMetrics",
+      "tags": []
+    },
+    "UsageSummary": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UsageSummary",
+      "file": "lib/src/models/account/usage_summary.dart",
+      "schema": "UsageSummary",
+      "tags": []
+    },
+    "PurchasedBalance": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "PurchasedBalance",
+      "file": "lib/src/models/account/purchased_balance.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot."
+    },
+    "LegacyBalanceLimit": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LegacyBalanceLimit",
+      "file": "lib/src/models/account/legacy_balance_limit.dart",
+      "schema": "LegacyBalanceLimit",
+      "tags": []
     },
     "ShowManifestsResponse": {
       "spec": "main",

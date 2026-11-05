@@ -6,12 +6,14 @@ import '../interceptors/error_interceptor.dart';
 import '../interceptors/interceptor.dart';
 import '../interceptors/logging_interceptor.dart';
 import '../resources/audio_resource.dart';
+import '../resources/balance_resource.dart';
 import '../resources/blobs_resource.dart';
 import '../resources/chat_resource.dart';
 import '../resources/completions_resource.dart';
 import '../resources/embeddings_resource.dart';
 import '../resources/models_resource.dart';
 import '../resources/system_one_resource.dart';
+import '../resources/usage_resource.dart';
 import '../resources/version_resource.dart';
 import '../resources/web_resource.dart';
 import 'config.dart';
@@ -30,6 +32,7 @@ import 'retry_wrapper.dart';
 /// - [completions] - Text generation (generate endpoint)
 /// - [chat] - Chat message generation (chat endpoint)
 /// - [audio] - Speech generation, transcription, and translation
+/// - [balance] / [usage] - Read-only cloud account reporting
 /// - [embeddings] - Text and multimodal embeddings (embed endpoint)
 /// - [models] - Model management (list, show, create, copy, delete, pull, push)
 /// - [version] - Server version information
@@ -100,6 +103,12 @@ class OllamaClient {
   /// Interceptor chain.
   late final InterceptorChain _interceptorChain;
 
+  /// Read-only cloud credit balance (or the local server's signed-in account).
+  late final BalanceResource balance;
+
+  /// Read-only cloud usage (or the local server's signed-in account).
+  late final UsageResource usage;
+
   /// Resource for speech generation, transcription, and translation.
   late final AudioResource audio;
 
@@ -160,6 +169,22 @@ class OllamaClient {
       httpClient: _httpClient,
       interceptors: interceptors,
       retryWrapper: RetryWrapper(config: this.config),
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    balance = BalanceResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    usage = UsageResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
       ensureNotClosed: _ensureNotClosed,
     );
 

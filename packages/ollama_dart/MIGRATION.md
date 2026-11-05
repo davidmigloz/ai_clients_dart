@@ -19,8 +19,10 @@ its method tear-off with an explicit function type should review that type.
 `models.showManifests` parses all-manifest inspection separately from normal
 `models.show`; use each manifest's `details` for model information.
 
-The audio, runner selector, and System One image/cloud APIs are additive.
-The default host remains the local server.
+The audio, read-only balance/usage, runner selector, and System One image/cloud
+APIs are additive. The default host remains the local server. Account reporting
+through that host uses the server's signed-in account; use an explicitly
+configured cloud client for API-key account selection.
 
 ## Migrating from v3.x to v4.0.0
 

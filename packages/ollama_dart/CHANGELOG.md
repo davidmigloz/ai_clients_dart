@@ -7,6 +7,7 @@
 - **FEAT**: Add System One images/audio, cloud routing documentation, runner selection, and cached-token metrics.
 - **FEAT**: Add speech, transcription, and translation APIs with binary audio and SSE text streaming.
 - **FIX**: Preserve streaming transport flags and nested audio API error messages.
+- **FEAT**: Add read-only credit balance and usage reporting with current/legacy plan support, grouped metrics, and UTC buckets.
 
 ## 4.1.0
 
