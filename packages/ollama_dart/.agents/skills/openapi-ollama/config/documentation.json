@@ -23,7 +23,9 @@
     "system_one": "system_one",
     "blobs": "blobs",
     "web": "web",
-    "audio": "audio"
+    "audio": "audio",
+    "balance": "account",
+    "usage": "account"
   },
   "excluded_from_examples": [],
   "drift_patterns": [

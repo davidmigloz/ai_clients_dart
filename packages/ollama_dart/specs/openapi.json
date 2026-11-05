@@ -12,6 +12,37 @@
       }
     },
     "schemas": {
+      "BalanceResponse": {
+        "properties": {
+          "included": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/IncludedBalance"
+              },
+              {
+                "$ref": "#/components/schemas/LegacyIncludedBalance"
+              }
+            ]
+          },
+          "purchased": {
+            "properties": {
+              "balance_usd": {
+                "description": "Remaining unexpired purchased credits in USD.",
+                "type": "number"
+              }
+            },
+            "required": [
+              "balance_usd"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "included",
+          "purchased"
+        ],
+        "type": "object"
+      },
       "ChatMessage": {
         "properties": {
           "content": {
@@ -664,6 +695,80 @@
         },
         "type": "object"
       },
+      "IncludedBalance": {
+        "properties": {
+          "allowance_usd": {
+            "description": "Included credits available for the full period in USD.",
+            "type": "number"
+          },
+          "balance_usd": {
+            "description": "Remaining included credits in USD.",
+            "type": "number"
+          },
+          "period": {
+            "properties": {
+              "from": {
+                "description": "Start of the included period in UTC, inclusive.",
+                "format": "date-time",
+                "type": "string"
+              },
+              "until": {
+                "description": "End of the included period in UTC, exclusive.",
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "from",
+              "until"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "balance_usd",
+          "allowance_usd",
+          "period"
+        ],
+        "title": "Included credits",
+        "type": "object"
+      },
+      "LegacyBalanceLimit": {
+        "properties": {
+          "remaining_percent": {
+            "description": "Percentage of the limit remaining.",
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "resets_at": {
+            "description": "Next reset time in UTC.",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "remaining_percent",
+          "resets_at"
+        ],
+        "type": "object"
+      },
+      "LegacyIncludedBalance": {
+        "properties": {
+          "session": {
+            "$ref": "#/components/schemas/LegacyBalanceLimit"
+          },
+          "weekly": {
+            "$ref": "#/components/schemas/LegacyBalanceLimit"
+          }
+        },
+        "required": [
+          "session",
+          "weekly"
+        ],
+        "title": "Legacy plan limits",
+        "type": "object"
+      },
       "ListResponse": {
         "properties": {
           "models": {
@@ -954,8 +1059,20 @@
             "description": "Model parameter settings serialized as text",
             "type": "string"
           },
+          "parser": {
+            "description": "The output parser configured on the model, when one is set",
+            "type": "string"
+          },
+          "renderer": {
+            "description": "The effective chat renderer of the model (aliases resolved), when one is set",
+            "type": "string"
+          },
           "template": {
             "description": "The template used by the model to render prompts",
+            "type": "string"
+          },
+          "template_source": {
+            "description": "Where the chat prompt actually comes from; one of `renderer_parser`, `renderer`, `parser` (a Go renderer runs and any packaged template is inert), `harmony`, `go_template`, `gguf_chat_template` (the runner renders the GGUF's embedded jinja), or `none`",
             "type": "string"
           },
           "thinking": {
@@ -997,7 +1114,7 @@
       "SystemOneChoiceAnswer": {
         "properties": {
           "choice": {
-            "description": "Option key with the highest probability. Ties select the first option in request order.",
+            "description": "Option key with the highest probability. Ties follow the model's option order.",
             "type": "string"
           },
           "confidence": {
@@ -1031,8 +1148,8 @@
                 "null"
               ]
             },
-            "description": "Option keys mapped to descriptions. A null description uses the key itself. Keys must not be blank; ties select the first option in request order.",
-            "maxProperties": 26,
+            "description": "Option keys mapped to descriptions, or null for a bare label. Keys must not be blank; ties follow the model's option order. The option limit depends on the model.",
+            "maxProperties": 255,
             "minProperties": 2,
             "propertyNames": {
               "pattern": "\\S"
@@ -1106,14 +1223,12 @@
         "properties": {
           "criteria": {
             "additionalProperties": false,
-            "description": "Optional descriptions for the two outcomes. Omitted entries use No and Yes.",
+            "description": "Optional descriptions for the two outcomes. Omitted entries use model-specific defaults.",
             "properties": {
               "false": {
-                "default": "No",
                 "type": "string"
               },
               "true": {
-                "default": "Yes",
                 "type": "string"
               }
             },
@@ -1147,6 +1262,14 @@
       },
       "SystemOneRequest": {
         "properties": {
+          "images": {
+            "description": "Base64-encoded images shared by all questions, in request order. Requires a model with vision, such as Clef. Models with audio input also accept WAV clips here. URLs and data URLs are not supported.",
+            "items": {
+              "format": "byte",
+              "type": "string"
+            },
+            "type": "array"
+          },
           "keep_alive": {
             "description": "How long to keep the model loaded after the request, as a duration string (such as 5m) or seconds. Zero unloads after the request; a negative value keeps it loaded. Defaults to the server's keep-alive setting (5m unless configured otherwise).",
             "oneOf": [
@@ -1159,7 +1282,7 @@
             ]
           },
           "model": {
-            "description": "Local model trained for System One, such as nimble. Requires compatible GGUF weights and a scoring-capable runner; cloud and MLX/Safetensors models are not supported.",
+            "description": "Model trained for System One, such as nimble, or clef:cloud for Ollama's cloud.",
             "pattern": "\\S",
             "type": "string"
           },
@@ -1177,7 +1300,7 @@
                 }
               ]
             },
-            "description": "Named questions about the shared state. Each is scored separately against the full state and question schema; answers are not passed to later questions.",
+            "description": "Named questions about the shared state. Answers are not passed to later questions. Cloud models accept names of up to 100 ASCII letters, digits, `_`, `.`, or `-`.",
             "maxProperties": 64,
             "minProperties": 1,
             "propertyNames": {
@@ -1222,7 +1345,7 @@
           "usage": {
             "properties": {
               "input_tokens": {
-                "description": "Sum of full rendered prompt lengths across all questions, including repeated shared context even when cached.",
+                "description": "Total evaluated input tokens, including image positions. Shared context is counted again when the model scores questions separately.",
                 "minimum": 0,
                 "type": "integer"
               },
@@ -1264,7 +1387,7 @@
           },
           "score": {
             "description": "Probability-weighted average of the zero-based criterion indices, from 0 to the number of criteria minus 1. Not rounded to a level or normalized to 0\u20131.",
-            "maximum": 25,
+            "maximum": 9,
             "minimum": 0,
             "type": "number"
           },
@@ -1292,7 +1415,7 @@
             "items": {
               "type": "string"
             },
-            "maxItems": 26,
+            "maxItems": 10,
             "minItems": 2,
             "type": "array"
           },
@@ -1446,6 +1569,174 @@
         ],
         "type": "object"
       },
+      "UsageBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UsageSummary"
+          },
+          {
+            "properties": {
+              "from": {
+                "description": "Start of the bucket in UTC, inclusive.",
+                "format": "date-time",
+                "type": "string"
+              },
+              "partial": {
+                "description": "Present and true for the current hour or day, which is still in progress.",
+                "type": "boolean"
+              },
+              "until": {
+                "description": "End of the bucket in UTC, exclusive.",
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "from",
+              "until"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "UsageGroup": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UsageMetrics"
+          },
+          {
+            "properties": {
+              "model": {
+                "description": "Model name.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "model"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "UsageMetrics": {
+        "properties": {
+          "cached_input_tokens": {
+            "description": "Recorded input tokens read from cache, already included in input_tokens.",
+            "type": "integer"
+          },
+          "input_tokens": {
+            "description": "Recorded input tokens, including cached input tokens.",
+            "type": "integer"
+          },
+          "output_tokens": {
+            "description": "Recorded output tokens.",
+            "type": "integer"
+          },
+          "request_count": {
+            "description": "Number of recorded requests.",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "usage_usd": {
+            "description": "Total value of the requests in USD, including usage covered by your plan and usage paid from purchased credits.",
+            "type": "number"
+          }
+        },
+        "required": [
+          "request_count"
+        ],
+        "type": "object"
+      },
+      "UsageResponse": {
+        "properties": {
+          "buckets": {
+            "description": "Usage in chronological order, including buckets with no recorded requests.",
+            "items": {
+              "$ref": "#/components/schemas/UsageBucket"
+            },
+            "type": "array"
+          },
+          "from": {
+            "description": "Start of the range in UTC, inclusive.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "granularity": {
+            "description": "Set automatically: hour for 24h, day for 7d and 30d.",
+            "enum": [
+              "hour",
+              "day"
+            ],
+            "type": "string"
+          },
+          "group_by": {
+            "description": "Selected grouping. Present when group_by is requested.",
+            "enum": [
+              "model"
+            ],
+            "type": "string"
+          },
+          "range": {
+            "description": "Selected time range.",
+            "enum": [
+              "24h",
+              "7d",
+              "30d"
+            ],
+            "type": "string"
+          },
+          "scope": {
+            "description": "Selected usage scope.",
+            "enum": [
+              "self",
+              "team"
+            ],
+            "type": "string"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/UsageSummary",
+            "description": "Usage across the entire range, including groups in the remainder."
+          },
+          "until": {
+            "description": "End of the range in UTC, exclusive.",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "range",
+          "scope",
+          "granularity",
+          "from",
+          "until",
+          "totals",
+          "buckets"
+        ],
+        "type": "object"
+      },
+      "UsageSummary": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UsageMetrics"
+          },
+          {
+            "properties": {
+              "groups": {
+                "description": "Present when group_by is requested. Currently returns up to 10 groups selected across the entire range, ranked by usage_usd or by request_count when the range includes legacy requests. Groups use the same order in every bucket; groups without requests in a bucket are omitted.",
+                "items": {
+                  "$ref": "#/components/schemas/UsageGroup"
+                },
+                "type": "array"
+              },
+              "remainder": {
+                "$ref": "#/components/schemas/UsageMetrics",
+                "description": "Combined usage from groups outside the current limit. Omitted when there are no requests from additional groups."
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
       "VersionResponse": {
         "properties": {
           "version": {
@@ -1558,6 +1849,95 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/balance": {
+      "get": {
+        "description": "Check your remaining usage credits.",
+        "operationId": "balance",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BalanceResponse"
+                }
+              }
+            },
+            "description": "Current included and purchased balances."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid query parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid credentials."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Account suspended."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too many requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "minimum": 1,
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Balance reporting is temporarily unavailable."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "servers": [
+          {
+            "description": "Ollama's cloud",
+            "url": "https://ollama.com"
+          }
+        ],
+        "summary": "Balance"
+      }
+    },
     "/api/blobs/{digest}": {
       "head": {
         "operationId": "headBlob",
@@ -1733,7 +2113,10 @@
           }
         ],
         "x-mint": {
-          "href": "/api/chat"
+          "href": "/api/chat",
+          "metadata": {
+            "sidebarTitle": "/api/chat"
+          }
         }
       }
     },
@@ -1756,7 +2139,37 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "success"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/StatusResponse"
+                }
+              }
+            },
             "description": "Model successfully copied"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Model could not be copied"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Source model not found"
           }
         },
         "summary": "Copy a model",
@@ -1768,7 +2181,10 @@
           }
         ],
         "x-mint": {
-          "href": "/api/copy"
+          "href": "/api/copy",
+          "metadata": {
+            "sidebarTitle": "/api/copy"
+          }
         }
       }
     },
@@ -1832,7 +2248,10 @@
           }
         ],
         "x-mint": {
-          "href": "/api/create"
+          "href": "/api/create",
+          "metadata": {
+            "sidebarTitle": "/api/create"
+          }
         }
       }
     },
@@ -1866,7 +2285,10 @@
           }
         ],
         "x-mint": {
-          "href": "/api/delete"
+          "href": "/api/delete",
+          "metadata": {
+            "sidebarTitle": "/api/delete"
+          }
         }
       }
     },
@@ -1944,7 +2366,10 @@
           }
         ],
         "x-mint": {
-          "href": "/api/embed"
+          "href": "/api/embed",
+          "metadata": {
+            "sidebarTitle": "/api/embed"
+          }
         }
       }
     },
@@ -2040,7 +2465,10 @@
           }
         ],
         "x-mint": {
-          "href": "/api/generate"
+          "href": "/api/generate",
+          "metadata": {
+            "sidebarTitle": "/api/generate"
+          }
         }
       }
     },
@@ -2092,7 +2520,10 @@
           }
         ],
         "x-mint": {
-          "href": "/api/ps"
+          "href": "/api/ps",
+          "metadata": {
+            "sidebarTitle": "/api/ps"
+          }
         }
       }
     },
@@ -2149,7 +2580,10 @@
           }
         ],
         "x-mint": {
-          "href": "/api/pull"
+          "href": "/api/pull",
+          "metadata": {
+            "sidebarTitle": "/api/pull"
+          }
         }
       }
     },
@@ -2206,7 +2640,10 @@
           }
         ],
         "x-mint": {
-          "href": "/api/push"
+          "href": "/api/push",
+          "metadata": {
+            "sidebarTitle": "/api/push"
+          }
         }
       }
     },
@@ -2346,7 +2783,12 @@
             "lang": "bash",
             "source": "curl http://localhost:11434/api/show -d '{\n  \"model\": \"gpt-oss\"\n}'\n"
           }
-        ]
+        ],
+        "x-mint": {
+          "metadata": {
+            "sidebarTitle": "/api/show"
+          }
+        }
       }
     },
     "/api/tags": {
@@ -2394,8 +2836,140 @@
           }
         ],
         "x-mint": {
-          "href": "/api/tags"
+          "href": "/api/tags",
+          "metadata": {
+            "sidebarTitle": "/api/tags"
+          }
         }
+      }
+    },
+    "/api/usage": {
+      "get": {
+        "description": "Usage statistics for cloud inference, web search, and web fetch.",
+        "operationId": "usage",
+        "parameters": [
+          {
+            "description": "Completed UTC hours or days to include, plus the current partial hour or day.",
+            "in": "query",
+            "name": "range",
+            "schema": {
+              "default": "7d",
+              "enum": [
+                "24h",
+                "7d",
+                "30d"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Your requests, or your team's requests. Team scope requires being a team admin.",
+            "in": "query",
+            "name": "scope",
+            "schema": {
+              "default": "self",
+              "enum": [
+                "self",
+                "team"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "How to group usage within totals and buckets. Supported values: model.",
+            "in": "query",
+            "name": "group_by",
+            "schema": {
+              "enum": [
+                "model"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageResponse"
+                }
+              }
+            },
+            "description": "Usage for the selected range and scope."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid query parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid credentials."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Account suspended or team scope requested without team admin access."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too many requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "minimum": 1,
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Usage reporting is temporarily unavailable."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "servers": [
+          {
+            "description": "Ollama's cloud",
+            "url": "https://ollama.com"
+          }
+        ],
+        "summary": "Cloud usage"
       }
     },
     "/api/version": {
@@ -2424,12 +2998,17 @@
             "lang": "bash",
             "source": "curl http://localhost:11434/api/version\n"
           }
-        ]
+        ],
+        "x-mint": {
+          "metadata": {
+            "sidebarTitle": "/api/version"
+          }
+        }
       }
     },
     "/v1/systemone": {
       "post": {
-        "description": "Answer choice, yes/no, and scoring questions with a local System One model. Requires Ollama v0.35.0 or later. See the [decision guide](/capabilities/decision) for examples.\n",
+        "description": "Answer choice, yes/no, and scoring questions with a System One model, locally or in Ollama's cloud. Requires Ollama v0.35.0 or later, or v0.40.5 or later for cloud models. See the [decision guide](/capabilities/decision) for examples.\n",
         "operationId": "systemone",
         "requestBody": {
           "content": {
@@ -2494,7 +3073,27 @@
                 }
               }
             },
-            "description": "Invalid request, unsupported model or runner, or a rendered prompt that exceeds the loaded context. Cloud models are rejected."
+            "description": "Invalid request, unsupported model or runner, or a rendered prompt that exceeds the loaded context or a cloud model's token limit."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "A cloud model was requested without signing in, or with an invalid API key. Through a local server, the response includes a `signin_url`."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The cloud model isn't included in the Free plan. Add usage credits or upgrade. Also returned when a payment fails."
           },
           "404": {
             "content": {
@@ -2504,20 +3103,20 @@
                 }
               }
             },
-            "description": "Local model not found. Download the model before making a request."
+            "description": "Model not found. Download a local model before making a request."
           },
           "413": {
             "content": {
               "application/json": {
                 "example": {
-                  "error": "request body must not exceed 64 KiB"
+                  "error": "text and schema must not exceed 64 KiB"
                 },
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             },
-            "description": "Request body exceeds 64 KiB."
+            "description": "Local text and schema exceed 64 KiB or the request exceeds 32 MiB, or a cloud request exceeds 13 MiB or the model's context window."
           },
           "500": {
             "content": {
@@ -2530,6 +3129,22 @@
             "description": "Model loading, rendering, or scoring failed."
           }
         },
+        "security": [
+          {},
+          {
+            "bearerAuth": []
+          }
+        ],
+        "servers": [
+          {
+            "description": "Ollama",
+            "url": "http://localhost:11434"
+          },
+          {
+            "description": "Ollama's cloud",
+            "url": "https://ollama.com"
+          }
+        ],
         "summary": "Answer typed questions",
         "x-codeSamples": [
           {
@@ -2539,10 +3154,10 @@
           }
         ],
         "x-mint": {
-          "content": "<Note>\nCurrently available locally in Ollama.\n</Note>\n\n- Returns one JSON response; streaming, images, tools, and generation controls are not supported.\n- Requests must fit within 64 KiB. Each rendered prompt must fit the loaded context window with two token positions left for scoring. Input is never truncated.\n",
+          "content": "- Returns one JSON response; streaming, video, tools, and generation controls are not supported.\n- Local requests' text and schema, excluding images, must fit within 64 KiB, and the whole request within 32 MiB, including base64 and JSON. The complete input must fit the loaded context window. Nimble and Tev also require two token positions for scoring. Input is never truncated.\n- Cloud models need a paid plan or purchased [usage credits](https://ollama.com/pricing). Cloud requests accept up to 64 questions, named with up to 100 ASCII letters, digits, `_`, `.`, or `-`, and up to 4 images of at most 4 MiB and 16 megapixels each, 8 MiB in total. Requests must fit within 13 MiB, and input must fit the model's 65,536-token context window.\n",
           "href": "/api/systemone",
           "metadata": {
-            "sidebarTitle": "System One",
+            "sidebarTitle": "/v1/systemone",
             "title": "System One"
           }
         }

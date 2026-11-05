@@ -46,6 +46,7 @@
 /// - **Text Generation**: Raw text generation with streaming
 /// - **Embeddings**: Text, image, and audio embedding inputs
 /// - **Audio**: Speech, transcription, and translation, with streaming
+/// - **Account**: Read-only cloud balance and usage reports
 /// - **Model Management**: List, pull, push, create, copy, delete models
 /// - **Thinking Mode**: Extended reasoning for supported models
 /// - **Structured Output**: JSON schema-constrained generation
@@ -77,6 +78,18 @@ export 'src/errors/exceptions.dart'
         StreamException,
         TimeoutException,
         ValidationException;
+// Account Models
+export 'src/models/account/balance_included.dart';
+export 'src/models/account/balance_period.dart';
+export 'src/models/account/balance_response.dart';
+export 'src/models/account/legacy_balance_limit.dart';
+export 'src/models/account/purchased_balance.dart';
+export 'src/models/account/usage_bucket.dart';
+export 'src/models/account/usage_group.dart';
+export 'src/models/account/usage_metrics.dart';
+export 'src/models/account/usage_response.dart';
+export 'src/models/account/usage_selectors.dart';
+export 'src/models/account/usage_summary.dart';
 // Audio Models
 export 'src/models/audio/audio_file.dart';
 export 'src/models/audio/audio_text_request.dart';

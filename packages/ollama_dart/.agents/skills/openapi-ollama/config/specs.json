@@ -13,7 +13,7 @@
         "schema_aliases": {},
         "reference_impl": {
           "repo": "ollama/ollama-python",
-          "ref": "main",
+          "ref": "35d9667e84ebbd9d792826868d050027f75c1cc1",
           "resources": {
             "adapter": "python_client_methods",
             "path": "ollama/_client.py",

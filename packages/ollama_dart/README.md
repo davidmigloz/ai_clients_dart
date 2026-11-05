@@ -48,9 +48,10 @@ Dart client for the **[Ollama API](https://ollama.com/)** — chat, streaming, t
 - List running models, check server health, and query server version
 - Connect to local or remote Ollama instances with optional auth
 
-### Cloud web tools
+### Cloud tools and reporting
 
 - Search the web and fetch page content with an Ollama API key
+- Read credit balances and cloud usage, including model grouping
 - Explicit cloud configuration using the same authentication and transport settings
 
 ## Why choose this client?
@@ -537,6 +538,36 @@ Use `await client.heartbeat()` to check server responsiveness with `HEAD /`.
 </details>
 
 <details>
+<summary><b>How do I inspect cloud balance and usage?</b></summary>
+
+```dart
+final cloud = OllamaClient.withApiKey(apiKey, baseUrl: 'https://ollama.com');
+try {
+  final balance = await cloud.balance.get();
+  final usage = await cloud.usage.get(
+    range: UsageRange.days7,
+    scope: UsageScope.self,
+    groupBy: UsageGroupBy.model,
+  );
+  print(balance.purchased.balanceUsd);
+  print(usage.totals);
+} finally {
+  cloud.close();
+}
+```
+
+`balance.included` is typed as current credits, legacy session/weekly limits, or
+an unknown response shape. Usage timestamps are UTC, and token metrics include
+cached input tokens within input tokens. Unset selectors preserve server
+defaults. When these endpoints target a local Ollama server, the server proxies
+requests using its own signed-in account and discards the incoming bearer token.
+Use the explicit cloud base URL to select an account with an API key.
+
+→ [Account reporting example](example/account_example.dart)
+
+</details>
+
+<details>
 <summary><b>How do I make System One decisions?</b></summary>
 
 System One requires a compatible decision model such as `nimble` locally or `clef:cloud` in the cloud. Local text support starts at Ollama **v0.35.0**, image input at **v0.40.0**, and routing to cloud models through a local server at **v0.40.5**. Its single JSON response answers named questions against a shared state; it does not stream. It supports choice questions, yes/no probabilities (`noul`), and scores over ordered criteria.
@@ -667,6 +698,7 @@ See the [example/](example/) directory for complete examples:
 | [`completions_example.dart`](example/completions_example.dart) | Plain text generation |
 | [`embeddings_example.dart`](example/embeddings_example.dart) | Text and multimodal embeddings |
 | [`audio_example.dart`](example/audio_example.dart) | Speech, transcription, and translation |
+| [`account_example.dart`](example/account_example.dart) | Cloud balance and usage |
 | [`models_example.dart`](example/models_example.dart) | Model management |
 | [`system_one_example.dart`](example/system_one_example.dart) | Choice, yes/no, and score decisions |
 | [`blobs_example.dart`](example/blobs_example.dart) | Binary upload and file-based model creation |
@@ -687,10 +719,11 @@ See the [example/](example/) directory for complete examples:
 | Blobs | ✅ Existence checks and binary uploads |
 | System One | ✅ Local and cloud decisions, images/audio, cached tokens |
 | Audio | ✅ Speech, transcription, translation; binary and SSE streaming |
+| Balance / usage | ✅ Read-only cloud reporting and local signed-in proxy |
 | Web search / fetch | ✅ Hosted endpoints with explicit cloud configuration |
 | Version / heartbeat | ✅ Version information and server health |
 
-Coverage targets Ollama's public native API, hosted web tools, and audio compatibility endpoints. Existing experimental image-generation fields remain available for compatible servers; Ollama 0.35.0 rejects image generation. Other OpenAI and Anthropic compatibility endpoints can be used through [openai_dart](../openai_dart) and [anthropic_sdk_dart](../anthropic_sdk_dart); experimental server-control routes and debug fields are excluded.
+Coverage targets Ollama's public native API, hosted web tools and account reporting, and audio compatibility endpoints. Existing experimental image-generation fields remain available for compatible servers; Ollama 0.35.0 rejects image generation. Other OpenAI and Anthropic compatibility endpoints can be used through [openai_dart](../openai_dart) and [anthropic_sdk_dart](../anthropic_sdk_dart); experimental server-control routes and debug fields are excluded.
 
 ## Official Documentation
 
