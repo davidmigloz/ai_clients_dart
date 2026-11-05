@@ -2138,7 +2138,7 @@ def _verify_exports(config: ToolkitConfig) -> tuple[int, dict[str, Any]]:
     model_files = []
     skip = set(config.package.skip_files) | set(config.package.internal_barrel_files)
     for path in models_dir.glob("**/*.dart"):
-        if path.name in skip or any(part.startswith(".") for part in path.parts):
+        if path.name in skip or any(part.startswith(".") for part in path.relative_to(models_dir).parts):
             continue
         head = "\n".join(read_text(path).splitlines()[:5])
         if PART_OF_RE.search(head):
@@ -3038,7 +3038,7 @@ def _dart_class_index(config: ToolkitConfig) -> dict[str, list[Path]]:
     skip_names = set(config.package.skip_files)
     index: dict[str, list[Path]] = defaultdict(list)
     for path in sorted(models_dir.rglob("*.dart")):
-        if path.name in skip_names or any(part.startswith(".") for part in path.parts):
+        if path.name in skip_names or any(part.startswith(".") for part in path.relative_to(models_dir).parts):
             continue
         for class_name in find_declared_classes(path):
             index[class_name].append(path)
@@ -3211,7 +3211,7 @@ def _python_top_level_classes(path: Path) -> dict[str, ast.ClassDef]:
 def _python_class_index(root: Path) -> dict[str, list[Path]]:
     index: dict[str, list[Path]] = defaultdict(list)
     for path in sorted(root.rglob("*.py")):
-        if any(part.startswith(".") for part in path.parts):
+        if any(part.startswith(".") for part in path.relative_to(root).parts):
             continue
         try:
             classes = _python_top_level_classes(path)

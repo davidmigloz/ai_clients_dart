@@ -2839,6 +2839,43 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertEqual((config / "manifest.json").read_text(), manifest)
             self.assertEqual((package / "specs/openapi.json").read_text(), canonical)
 
+    def test_enum_discovery_under_hidden_ancestors_ignores_hidden_sources(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir) / ".codex" / "worktrees" / "checkout"
+            root.mkdir(parents=True)
+            package, config_dir = self._enum_audit_fixture(root, {
+                "MessageRole": {"type": "string", "enum": ["user", "assistant"]},
+            }, {"role.dart": "enum MessageRole { user }"})
+            models = package / "lib/src/models"
+            (models / ".cache").mkdir()
+            # Either duplicate would make exact discovery ambiguous if included.
+            (models / ".cache" / "role.dart").write_text("enum MessageRole { user, assistant }")
+            (models / ".role.dart").write_text("enum MessageRole { user, assistant }")
+            code, payload = self._verify_enum_audit(config_dir)
+            implementation = payload["results"]["implementation"]
+            self.assertEqual(code, toolkit_config.EXIT_FAILURE)
+            self.assertEqual(implementation["enum_discovery"]["checked_untracked_enums"], ["MessageRole"])
+            self.assertTrue(any("'assistant' not found" in item["message"] for item in implementation["issues"]))
+            (models / "common/role.dart").write_text("enum MessageRole { user, assistant }")
+            self.assertEqual(self._verify_enum_audit(config_dir)[0], toolkit_config.EXIT_SUCCESS)
+
+    def test_python_sdk_index_under_hidden_ancestors_ignores_hidden_sources(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            # A configured reference root may itself be hidden, independently
+            # of the directory where its checkout/cache happens to live.
+            root = Path(tmp_dir) / ".codex" / "checkout" / ".reference-sdk"
+            resources = root / "src" / "resources"
+            resources.mkdir(parents=True)
+            visible = resources / "widgets.py"
+            visible.write_text("class Widgets:\n    pass\n\nclass _PrivateSupport:\n    pass\n")
+            (resources / ".widgets.py").write_text("class Widgets:\n    pass\n")
+            hidden = resources / ".cache"
+            hidden.mkdir()
+            (hidden / "widgets.py").write_text("class Widgets:\n    pass\n\nclass HiddenOnly:\n    pass\n")
+            self.assertEqual(toolkit_operations._python_class_index(root), {
+                "Widgets": [visible], "_PrivateSupport": [visible],
+            })
+
     def test_verify_enum_discovery_does_not_expand_changed_or_critical_scope(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             _, config = self._enum_audit_fixture(Path(tmp_dir), {"Role": {"type": "string", "enum": ["user"]}}, {"roles.dart": "enum Role { unknown }"})
@@ -4527,6 +4564,28 @@ class ApiToolkitCommandTests(unittest.TestCase):
 
             self.assertEqual(exit_code, 1)
             self.assertIn("lib/src/models/common/missing.dart", payload["results"]["exports"]["missing_exports"])
+
+    def test_verify_exports_under_hidden_ancestors_ignores_hidden_sources(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir) / ".codex" / "worktrees" / "checkout"
+            root.mkdir(parents=True)
+            package, config_dir = self._enum_audit_fixture(root, {}, {
+                "example.dart": "class Example {}",
+                "missing.dart": "class Missing {}",
+                "copy_with_sentinel.dart": "class SkippedByName {}",
+                "part.dart": "part of 'example.dart';\nclass Part {}",
+            })
+            models = package / "lib/src/models"
+            (models / ".hidden.dart").write_text("class HiddenFile {}")
+            (models / ".cache").mkdir()
+            (models / ".cache/hidden.dart").write_text("class HiddenDirectory {}")
+            args = SimpleNamespace(config_dir=config_dir, spec_name=None, checks="exports", scope="all", type_name=None, baseline=None, git_ref=None)
+            code, payload = command_verify(args)
+            self.assertEqual(code, toolkit_config.EXIT_FAILURE)
+            self.assertEqual(payload["results"]["exports"]["missing_exports"], ["lib/src/models/common/missing.dart"])
+            with (package / "lib/sample_dart.dart").open("a") as barrel:
+                barrel.write("export 'src/models/common/missing.dart';\n")
+            self.assertEqual(command_verify(args)[0], toolkit_config.EXIT_SUCCESS)
 
     def test_verify_exports_detects_duplicate_basename_missing_export(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
