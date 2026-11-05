@@ -11,9 +11,10 @@ class EmbedRequest {
   /// Model name.
   final String model;
 
-  /// Text or array of texts to generate embeddings for.
-  ///
-  /// Can be a [EmbedInputString] or [EmbedInputList].
+  /// Runner variant to select from a model's manifest list.
+  final String? runner;
+
+  /// Text, a multimodal item, or a batch of inputs to generate embeddings for.
   final EmbedInput input;
 
   /// If true, truncate inputs that exceed the context window.
@@ -32,6 +33,7 @@ class EmbedRequest {
   const EmbedRequest({
     required this.model,
     required this.input,
+    this.runner,
     this.truncate,
     this.dimensions,
     this.keepAlive,
@@ -41,6 +43,7 @@ class EmbedRequest {
   /// Creates an [EmbedRequest] from JSON.
   factory EmbedRequest.fromJson(Map<String, dynamic> json) => EmbedRequest(
     model: json['model'] as String,
+    runner: json['runner'] as String?,
     input: EmbedInput.fromJson(json['input'] as Object),
     truncate: json['truncate'] as bool?,
     dimensions: json['dimensions'] as int?,
@@ -53,6 +56,7 @@ class EmbedRequest {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'model': model,
+    if (runner != null) 'runner': runner,
     'input': input.toJson(),
     if (truncate != null) 'truncate': truncate,
     if (dimensions != null) 'dimensions': dimensions,
@@ -63,6 +67,7 @@ class EmbedRequest {
   /// Creates a copy with replaced values.
   EmbedRequest copyWith({
     String? model,
+    Object? runner = unsetCopyWithValue,
     EmbedInput? input,
     Object? truncate = unsetCopyWithValue,
     Object? dimensions = unsetCopyWithValue,
@@ -71,6 +76,7 @@ class EmbedRequest {
   }) {
     return EmbedRequest(
       model: model ?? this.model,
+      runner: runner == unsetCopyWithValue ? this.runner : runner as String?,
       input: input ?? this.input,
       truncate: truncate == unsetCopyWithValue
           ? this.truncate
@@ -93,6 +99,7 @@ class EmbedRequest {
       other is EmbedRequest &&
           runtimeType == other.runtimeType &&
           model == other.model &&
+          runner == other.runner &&
           input == other.input &&
           truncate == other.truncate &&
           dimensions == other.dimensions &&
@@ -100,13 +107,21 @@ class EmbedRequest {
           options == other.options;
 
   @override
-  int get hashCode =>
-      Object.hash(model, input, truncate, dimensions, keepAlive, options);
+  int get hashCode => Object.hash(
+    model,
+    runner,
+    input,
+    truncate,
+    dimensions,
+    keepAlive,
+    options,
+  );
 
   @override
   String toString() =>
       'EmbedRequest('
       'model: $model, '
+      'runner: $runner, '
       'input: $input, '
       'truncate: $truncate, '
       'dimensions: $dimensions, '

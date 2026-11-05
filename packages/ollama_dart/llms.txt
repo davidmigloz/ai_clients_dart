@@ -16,7 +16,7 @@
 - [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/tool_calling_example.dart) (~802 tokens): Tool calling.
 - [completions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/completions_example.dart) (~935 tokens): Plain text generation.
 - [image_generation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/image_generation_example.dart) (~587 tokens): Experimental image generation (unavailable in Ollama 0.35.0).
-- [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/embeddings_example.dart) (~616 tokens): Text embeddings.
+- [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/embeddings_example.dart) (~616 tokens): Text and multimodal embeddings.
 - [system_one_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/system_one_example.dart) (~453 tokens): Choice, yes/no, and score decisions.
 - [blobs_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/blobs_example.dart) (~335 tokens): Binary upload and file-based model creation.
 - [web_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/web_example.dart) (~290 tokens): Hosted web search and page fetch.

@@ -1,10 +1,18 @@
 // ignore_for_file: avoid_print
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:ollama_dart/ollama_dart.dart';
 
 /// Example demonstrating embedding generation with the Ollama API.
-void main() async {
+/// Pass an image path and a compatible multimodal embedding model as CLI
+/// arguments to also embed an image:
+///
+/// ```sh
+/// dart run example/embeddings_example.dart photo.png <model>
+/// ```
+void main(List<String> args) async {
   final client = OllamaClient();
 
   try {
@@ -37,6 +45,24 @@ void main() async {
     );
 
     print('Generated ${batchResponse.embeddings?.length ?? 0} embeddings');
+
+    if (args.length >= 2) {
+      // Each batch item owns its media. Audio uses the same base64 format via
+      // EmbedInput.multimodal(audio: base64Encode(audioBytes)).
+      final image = base64Encode(await File(args[0]).readAsBytes());
+      final mediaResponse = await client.embeddings.create(
+        request: EmbedRequest(
+          model: args[1],
+          input: EmbedInput.batch([
+            const EmbedInput.string('A photograph'),
+            EmbedInput.multimodal(image: image),
+          ]),
+        ),
+      );
+      print(
+        'Generated ${mediaResponse.embeddings?.length ?? 0} media embeddings',
+      );
+    }
 
     // Calculate similarity between texts
     print('\n--- Similarity Calculation ---');
