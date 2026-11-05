@@ -20,7 +20,7 @@ Dart and Flutter client for the **[OpenAI API](https://platform.openai.com/docs/
 - [Usage](#usage)
   - [Responses API](#responses-api)
   - [Other model APIs](#other-model-apis)
-  - [Images, audio, and video](#images-audio-and-video)
+  - [Images and audio](#images-audio-and-video)
   - [Files, batches, and model evaluation](#files-batches-and-model-evaluation)
   - [Webhooks and safety](#webhooks-and-safety)
   - [Advanced Responses workflows](#advanced-responses-workflows)
@@ -38,9 +38,9 @@ Dart and Flutter client for the **[OpenAI API](https://platform.openai.com/docs/
 ## Features
 
 - Responses API: text generation, streaming, conversations, structured output, vision, and tool calling.
-- Chat Completions, Decisions, embeddings, and image, audio, and video generation.
+- Chat Completions, Decisions, embeddings, and image and audio generation.
 - Built-in web search, file search, Code Interpreter, computer use, and custom tools.
-- Files, batches, fine-tuning, evals, signed webhooks, and safety resources.
+- Files, batches, fine-tuning, signed webhooks, and safety resources.
 - Realtime and Live sessions, persistent Responses WebSockets, Agents, and Vaults.
 - Pure Dart support for Dart and Flutter on mobile, desktop, web, and servers.
 
@@ -686,7 +686,9 @@ Future<void> main() async {
 
 </details>
 
-### Images, audio, and video
+<a id="images-audio-and-video"></a>
+
+### Images and audio
 
 <a id="how-do-i-generate-and-edit-images-with-gpt-image-25"></a>
 <details>
@@ -1814,7 +1816,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | Vector Stores | File search storage and ingestion; separate Assistants import |
 | Completions | Legacy compatibility API; prefer Responses |
 
-Some Responses tool/configuration details, Agents helper workflows, and historical administration APIs remain outside current coverage. See the [API alignment inventory](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/specs/api-alignment/README.md) for the detailed scope.
+Some Responses tool/configuration details and historical administration APIs remain outside current coverage. See the [completed October alignment and remaining limits](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/specs/api-alignment-2026-10-31/README.md) for the detailed scope.
 
 </details>
 

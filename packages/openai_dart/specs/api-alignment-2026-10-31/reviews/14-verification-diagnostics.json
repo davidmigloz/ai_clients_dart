@@ -9411,5 +9411,17 @@
   "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
   "runtime_base": "cc01bb596f600ba6adc036bf908fc5f3c540c7d8",
   "canonical_sha256": "5ff86e04f91cfa85158340ed8edcd9a352ad11b108743222851661606f35aeaa",
-  "reproduction": "python .agents/shared/api-toolkit/scripts/api_toolkit.py verify --config-dir packages/openai_dart/.agents/skills/openapi-openai/config --checks all --scope all --format json"
+  "reproduction": "python .agents/shared/api-toolkit/scripts/api_toolkit.py verify --config-dir packages/openai_dart/.agents/skills/openapi-openai/config --checks all --scope all --format json",
+  "export_findings": [
+    "lib/src/models/images/image_json_helpers.dart",
+    "lib/src/models/admin/admin_json.dart",
+    "lib/src/models/decisions/decision_helpers.dart",
+    "lib/src/models/audio/file_audio_json_helpers.dart",
+    "lib/src/models/audio/audio_json_helpers.dart",
+    "lib/src/models/audio/audio_upload_helpers.dart",
+    "lib/src/models/containers/container_json_helpers.dart",
+    "lib/src/models/responses/websocket/websocket_json_helpers.dart",
+    "lib/src/models/responses/items/shell_call_helpers.dart",
+    "lib/src/models/responses/items/tool_search_item_helpers.dart"
+  ]
 }

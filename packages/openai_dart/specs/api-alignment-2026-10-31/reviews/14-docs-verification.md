@@ -144,6 +144,14 @@ all three Dart/export/Python scans relative to their selected source root.
 Ten previously hidden untracked OpenAI enums are now actually checked, with no
 change to the implementation diagnostic array. There is no global-green claim.
 
+## Independent final review
+
+Separate source/accounting and consumer-documentation reviews checked all 297
+schema rows, 18 operations, 260 inventory bindings, preserved exclusions, current
+SDK receipts, public links and 68 Usage disclosures. The final review corrected
+stale helper-deferral and retired-service feature claims. No actionable finding
+remains. Exact-head CI is the final merge gate.
+
 ## Release boundary
 
 [Release readiness](14-release-readiness.md) proposes openai_dart 12.0.0 and

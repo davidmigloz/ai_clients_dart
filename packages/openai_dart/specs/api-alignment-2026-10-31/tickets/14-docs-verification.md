@@ -15,12 +15,17 @@ Dependencies: #414, #415, #416, #417, #418, #419, #420, #421, #422, #423, #424, 
 
 ## Acceptance criteria
 
-- [ ] Reconcile every changed schema and all 18 added operations in inventory.json with merged implementation evidence or a named intentional exclusion. Do not interpret toolkit resource-file presence as full method/field parity.
-- [ ] Promote the reviewed pinned candidate into canonical specs only with truthful manifest mappings/exclusions and source metadata. Record fetch/review/verify results including baseline failures; never suppress unknown gaps to make checks green.
-- [ ] Keep common Responses calls first and every Usage topic collapsible. Each implemented feature has a runnable example and matching concise README/llms links; preserve old anchors where practical.
-- [ ] Update guidance for GPT-6.1 Terra/Rosalind access restrictions, server-managed service-tier controls and account credits, current image/audio/model sunsets, Assistants shutdown and Evals November 30 shutdown. String model IDs need no closed-enum feature implementation.
-- [ ] Record compatible changes and targeted migrations (Decisions unions, Agent spend_control removal, Live DTMF and any shared open_responses change); release/version bump remains a later task.
-- [ ] Run appropriate Dart formatting/analysis/unit tests and toolkit checks; validate README structure/links across managed packages when shared tooling changes. HTTP/2 #408 may remain explicitly gated without reopening this milestone.
+- [x] Reconcile every changed schema and all 18 added operations in inventory.json with merged implementation evidence or a named intentional exclusion. Do not interpret toolkit resource-file presence as full method/field parity.
+- [x] Promote the reviewed pinned candidate into canonical specs only with truthful manifest mappings/exclusions and source metadata. Record fetch/review/verify results including baseline failures; never suppress unknown gaps to make checks green.
+- [x] Keep common Responses calls first and every Usage topic collapsible. Each implemented feature has a runnable example and matching concise README/llms links; preserve old anchors where practical.
+- [x] Update guidance for GPT-6.1 Terra/Rosalind access restrictions, server-managed service-tier controls and account credits, current image/audio/model sunsets, Assistants shutdown and Evals November 30 shutdown. String model IDs need no closed-enum feature implementation.
+- [x] Record compatible changes and targeted migrations (Decisions unions, Agent spend_control removal, Live DTMF and any shared open_responses change); release/version bump remains a later task.
+- [x] Run appropriate Dart formatting/analysis/unit tests and toolkit checks; validate README structure/links across managed packages when shared tooling changes. HTTP/2 #408 may remain explicitly gated without reopening this milestone.
+
+Final verification: [source/docs audit](../reviews/14-docs-verification.md),
+[diagnostic disposition](../reviews/14-verification-diagnostics.md), and
+[release readiness](../reviews/14-release-readiness.md). Exact-head CI and merge
+remain the final PR gate; publication requires separate user approval.
 
 ## Compatibility and validation
 
