@@ -31,7 +31,7 @@ Read and apply the [core review checklist](../../../../../../.agents/shared/api-
 - Verify assistant content/thinking/tool-call replay plus tool names, IDs, and function indices.
 - Exercise blob uploads with non-UTF8 bytes through bearer authentication, request-ID cloning, and retry paths. Check empty 200/201 bodies, HEAD 404, other errors, and configured proxy subpaths/query parameters.
 - Verify hosted web routing with explicit cloud configuration and bearer auth, omitted result limits, empty results, response equality, and service failures.
-- Cover every System One question/answer variant, content shapes, limits, insertion order, local-only documentation, probability semantics, and non-streaming behavior.
+- Cover every System One question/answer variant, content shapes, limits, insertion order, local/cloud and image/audio documentation, probability semantics, and non-streaming behavior.
 - Analyze runnable examples and maintained README snippets; check factory invocations and nullable collection access. Do not run live examples or integration tests without explicit user authorization.
 
 ## Intentional Verification Warnings
@@ -39,4 +39,18 @@ Read and apply the [core review checklist](../../../../../../.agents/shared/api-
 - `CreateRequest.license` retains its existing `Object?` string/list union for source compatibility; replacing it is outside this API refresh.
 - System One question `criteria` intentionally has different types and nullability: required ordered choice map, optional Noul criteria object, and required score list. Consistency warnings reflect the wire contract, not model drift.
 - `ModelThinking.defaultValue` maps to the reserved JSON key `default`; unit tests cover the property excluded from name-based toolkit verification.
-- `CreateRequest.capabilities` in the fetched main spec is deferred until a stable release after v0.35.0. Preserve the snapshot and manifest exclusion instead of altering upstream schemas.
+- `CreateRequest.capabilities` is stable in v0.40.14 and must remain implemented; do not restore the former deferred exclusion.
+
+## Audio, reporting, and manifest checks
+
+- Check audio against stable server handlers as well as documentation: binary
+  WAV/PCM fidelity, multipart field scoping, JSON/text/verbose JSON, SSE boundaries,
+  Unicode chunk splitting, done-event teardown, cancellation, auth, retries, and
+  nested compatibility error envelopes.
+- Cover current/legacy/unknown balance variants, UTC usage periods, omitted query
+  selectors, and local signed-in account versus direct-cloud authentication.
+- Preserve runner selectors through streaming request copies; round-trip voices,
+  template source and manifest metadata. Separate all-manifest response parsing
+  and retain copy warning status strings.
+- Check equality/hash contracts for model lists, progress totals/completed values,
+  and push/pull request options.
