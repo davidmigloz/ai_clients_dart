@@ -1,6 +1,6 @@
 # Ollama Dart Client
 
-> Dart client for the Ollama API — chat, streaming, tool calling, embeddings, System One decisions, model management, and cloud web search.
+> Dart client for the Ollama API — chat, streaming, tool calling, multimodal embeddings, audio, System One decisions, model management, and cloud reporting.
 
 ## Docs
 

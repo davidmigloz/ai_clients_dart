@@ -772,22 +772,6 @@
       "tags": [],
       "parent": "SystemOneContent"
     },
-    "RunningModel": {
-      "spec": "main",
-      "kind": "extension",
-      "dart_class": "RunningModel",
-      "file": "lib/src/models/models/running_model.dart",
-      "schema": null,
-      "tags": []
-    },
-    "PullRequest": {
-      "spec": "main",
-      "kind": "extension",
-      "dart_class": "PullRequest",
-      "file": "lib/src/models/models/pull_request.dart",
-      "schema": null,
-      "tags": []
-    },
     "SpeechRequest": {
       "spec": "main",
       "kind": "extension",
@@ -1108,6 +1092,22 @@
       "tags": [],
       "parent": "EmbedInput",
       "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot."
+    },
+    "RunningModel": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "RunningModel",
+      "file": "lib/src/models/models/running_model.dart",
+      "schema": null,
+      "tags": []
+    },
+    "PullRequest": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "PullRequest",
+      "file": "lib/src/models/models/pull_request.dart",
+      "schema": null,
+      "tags": []
     },
     "TranscriptionRequest": {
       "spec": "main",

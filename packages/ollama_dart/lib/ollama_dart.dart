@@ -1,8 +1,9 @@
 /// Dart client for the Ollama API.
 ///
 /// This library provides a type-safe, well-documented interface to the
-/// [Ollama](https://ollama.com/) API for local and cloud inference, local and cloud
-/// decision models, model management, and hosted web search.
+/// [Ollama](https://ollama.com/) API for local and cloud inference,
+/// decision models, multimodal embeddings, audio, model management, and hosted
+/// web tools and account reporting.
 ///
 /// ## Getting Started
 ///

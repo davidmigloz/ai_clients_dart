@@ -21,7 +21,17 @@
 
 ## System One
 
-- Use typed string/object/array content, named question maps, sealed choice/noul/score variants, and typed answers. Objects and arrays are JSON content, not chat messages or image input.
+- Use typed string/object/array content, named question maps, sealed choice/noul/score variants, and typed answers. Objects and arrays are JSON content, not chat messages. Shared base64 image/audio input belongs in the separate `images` field, in request order.
 - Preserve question/criterion insertion order: tied choices select the first candidate. Validate JSON field shapes, leaving blank text, question/candidate counts, request size, and context limits to the server. Do not invent probabilities or normalize scores.
 - A `noul` is a probability of true; a score is a weighted average of zero-based criterion indices. Confidence is distribution concentration, not calibrated correctness.
-- System One returns one JSON response and reuses the normal transport pipeline; it does not have a streaming variant.
+- System One returns one JSON response and reuses the normal transport pipeline; it does not have a streaming variant. Local and direct/proxied cloud requests use the configured base URL. Keep optional runner and cached-token response metrics nullable.
+
+## Audio and model variants
+
+- Use `StreamingResource.streamBytes` for binary audio and SSE byte input. Keep
+  cancellation active before headers, during authentication, and through the body.
+  Preserve transport flags when cloning authenticated/request-ID requests.
+- Buffer multipart request bytes once before the shared auth/retry pipeline, so
+  retries clone bytes instead of re-finalizing a consumed MultipartRequest.
+- `showManifests` forces `all_manifests` and rejects runner selection; `show` rejects
+  all-manifests responses. Preserve copy warnings and older empty 200 responses.

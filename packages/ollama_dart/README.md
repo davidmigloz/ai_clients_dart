@@ -5,7 +5,7 @@
 ![Discord](https://img.shields.io/discord/1123158322812555295?label=discord)
 [![MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://github.com/davidmigloz/ai_clients_dart/blob/main/LICENSE)
 
-Dart client for the **[Ollama API](https://ollama.com/)** — chat, streaming, tool calling, embeddings, System One decisions, model management, and cloud web search. Connect to local, self-hosted, or Ollama Cloud models from Dart and Flutter across iOS, Android, macOS, Windows, Linux, Web, and server-side Dart.
+Dart client for the **[Ollama API](https://ollama.com/)** — chat, streaming, tool calling, multimodal embeddings, audio, System One decisions, model management, and cloud reporting. Connect to local, self-hosted, or Ollama Cloud models from Dart and Flutter across iOS, Android, macOS, Windows, Linux, Web, and server-side Dart.
 
 > [!TIP]
 > Coding agents: start with [llms.txt](./llms.txt). It links to the package docs, examples, and optional references in a compact format.
@@ -44,7 +44,7 @@ Dart client for the **[Ollama API](https://ollama.com/)** — chat, streaming, t
 
 - Pull, push, copy, create, delete, and inspect models
 - Upload binary blobs and import GGUF or Safetensors model files
-- Inspect manifest variants, speech voices, capabilities, and effective templates
+- Inspect manifest lists, select runner variants, discover voices and capabilities
 - List running models, check server health, and query server version
 - Connect to local or remote Ollama instances with optional auth
 
@@ -188,7 +188,8 @@ final response = await client.chat.create(
 
 </details>
 
-### How do I discover a model's thinking controls?
+<details>
+<summary><b>How do I discover a model's thinking controls?</b></summary>
 
 `/api/show` advertises supported values and the model default. Keep `think` unset to use that default. Existing `ThinkValue.enabled(...)` and `ThinkValue.level(...)` constructors remain available; use `ThinkValue.string(...)` for names advertised by a model.
 
@@ -216,10 +217,10 @@ Thinking values are model-defined; use a value returned by `thinking.values`. `p
 
 → [Full model-inspection example](example/models_example.dart)
 
-### How do I stream local model output?
+</details>
 
 <details>
-<summary><b>Show example</b></summary>
+<summary><b>How do I stream local model output?</b></summary>
 
 Streaming uses Ollama's NDJSON response format and works well for terminals and live Flutter widgets. This is the fastest way to surface partial output from a local model.
 
@@ -254,10 +255,8 @@ Future<void> main() async {
 
 </details>
 
-### How do I use tool calling?
-
 <details>
-<summary><b>Show example</b></summary>
+<summary><b>How do I use tool calling?</b></summary>
 
 Tool calling is declared on the request with typed `ToolDefinition` objects. This makes local agent-style workflows possible without switching to another API format.
 
@@ -304,10 +303,8 @@ Future<void> main() async {
 
 </details>
 
-### How do I generate plain text?
-
 <details>
-<summary><b>Show example</b></summary>
+<summary><b>How do I generate plain text?</b></summary>
 
 Use the completions resource when you want prompt-style generation instead of chat messages. This is useful for legacy templates, code infill helpers, or smaller server utilities.
 
@@ -336,12 +333,10 @@ Future<void> main() async {
 
 </details>
 
-### How do I generate images (experimental)?
-
 <details>
-<summary><b>Show example</b></summary>
+<summary><b>How do I generate images (experimental)?</b></summary>
 
-Ollama 0.35.0 rejects image generation with HTTP 400. The feature was [temporarily removed in 0.32.6](https://github.com/ollama/ollama/releases/tag/v0.32.6); upstream identifies 0.32.5 as the last release with support. The client retains the experimental fields for compatible servers.
+Ollama 0.40.14 rejects image generation with HTTP 400. The feature was [temporarily removed in 0.32.6](https://github.com/ollama/ollama/releases/tag/v0.32.6); upstream identifies 0.32.5 as the last release with support. The client retains the experimental fields for compatible servers.
 
 On a server that supports image generation, pass `width`/`height`/`steps` to `/api/generate`; the response carries a base64 string in `image` (decode it before writing bytes). These fields may change or be removed in a future Ollama release.
 
@@ -379,10 +374,8 @@ Future<void> main() async {
 
 </details>
 
-### How do I create embeddings?
-
 <details>
-<summary><b>Show example</b></summary>
+<summary><b>How do I create embeddings?</b></summary>
 
 Embeddings are exposed as a first-class resource, so semantic search or retrieval code can stay inside the same Ollama client. This is useful for local RAG pipelines in Dart.
 
@@ -411,10 +404,8 @@ Future<void> main() async {
 
 </details>
 
-### How do I manage local models?
-
 <details>
-<summary><b>Show example</b></summary>
+<summary><b>How do I manage local models?</b></summary>
 
 Model management is part of the same client, which means pull, inspect, and runtime checks do not require a separate admin tool. That is useful for installers, desktop apps, and local dev tooling.
 
@@ -597,7 +588,8 @@ State and instructions also accept `SystemOneContent.object(...)` and `SystemOne
 
 </details>
 
-### How do I upload files to create a model?
+<details>
+<summary><b>How do I upload files to create a model?</b></summary>
 
 Use `client.blobs.exists(digest: ...)` and `client.blobs.create(digest: ..., bytes: ...)` against your local server, then pass original file names and their SHA256 digests through `CreateRequest.files`. Blob methods return no JSON payload; an existing blob is a successful upload, and only a missing blob returns `false` from `exists`.
 
@@ -626,7 +618,10 @@ Keep split GGUF shard names intact and upload every shard. GGUF weights must be 
 
 → [Full file-upload and model-import example](example/blobs_example.dart)
 
-### How do I search and fetch the web?
+</details>
+
+<details>
+<summary><b>How do I search and fetch the web?</b></summary>
 
 Use an explicit cloud client with your Ollama API key. Local Ollama's experimental web proxy paths are outside these methods.
 
@@ -654,6 +649,8 @@ try {
 Omit `maxResults` to use the service default of 5; the maximum is 10. Web fetch accepts a single URL and returns its title, extracted content, and links.
 
 → [Full example](example/web_example.dart)
+
+</details>
 
 ## Error Handling
 
@@ -703,7 +700,7 @@ See the [example/](example/) directory for complete examples:
 | [`system_one_example.dart`](example/system_one_example.dart) | Choice, yes/no, and score decisions |
 | [`blobs_example.dart`](example/blobs_example.dart) | Binary upload and file-based model creation |
 | [`web_example.dart`](example/web_example.dart) | Hosted web search and page fetch |
-| [`image_generation_example.dart`](example/image_generation_example.dart) | Experimental image generation (unavailable in Ollama 0.35.0) |
+| [`image_generation_example.dart`](example/image_generation_example.dart) | Experimental image generation (unavailable in Ollama 0.40.14) |
 | [`version_example.dart`](example/version_example.dart) | Server version |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
 | [`ollama_dart_example.dart`](example/ollama_dart_example.dart) | Quick-start overview |
@@ -723,7 +720,7 @@ See the [example/](example/) directory for complete examples:
 | Web search / fetch | ✅ Hosted endpoints with explicit cloud configuration |
 | Version / heartbeat | ✅ Version information and server health |
 
-Coverage targets Ollama's public native API, hosted web tools and account reporting, and audio compatibility endpoints. Existing experimental image-generation fields remain available for compatible servers; Ollama 0.35.0 rejects image generation. Other OpenAI and Anthropic compatibility endpoints can be used through [openai_dart](../openai_dart) and [anthropic_sdk_dart](../anthropic_sdk_dart); experimental server-control routes and debug fields are excluded.
+Coverage is checked against Ollama **v0.40.14**, the latest OpenAPI snapshot, and pinned official Go, Python, and JavaScript clients; source revisions and scope are in [spec_metadata.json](specs/spec_metadata.json). It includes public native APIs, hosted web/account reporting, and audio compatibility endpoints. Existing experimental image-generation fields remain available for compatible servers; Ollama 0.40.14 rejects image generation. Other OpenAI and Anthropic compatibility endpoints can be used through [openai_dart](../openai_dart) and [anthropic_sdk_dart](../anthropic_sdk_dart); experimental server-control routes and debug fields are excluded.
 
 ## Official Documentation
 

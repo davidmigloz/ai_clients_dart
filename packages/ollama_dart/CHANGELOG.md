@@ -1,13 +1,9 @@
 ## Unreleased
 
-- **FEAT**: Add runner selection, model manifest-list creation/inspection, capability overrides, voice/template discovery, and native tool item schemas.
-- **FEAT**: Preserve model-copy status warnings with older empty-response compatibility and add a server heartbeat check.
-- **FIX**: Correct model-list, progress-event, and push/pull option equality and hashing.
-- **BREAKING FEAT**: Add multimodal embedding inputs (`EmbedInputMultimodal` and `EmbedInputBatch`) and embedding runner selection; exhaustive switches must handle both variants. Existing string/list factories remain available.
-- **FEAT**: Add System One images/audio, cloud routing documentation, runner selection, and cached-token metrics.
-- **FEAT**: Add speech, transcription, and translation APIs with binary audio and SSE text streaming.
-- **FIX**: Preserve streaming transport flags and nested audio API error messages.
-- **FEAT**: Add read-only credit balance and usage reporting with current/legacy plan support, grouped metrics, and UTC buckets.
+- **BREAKING FEAT**: Add multimodal embedding inputs (`EmbedInputMultimodal` and `EmbedInputBatch`); exhaustive switches must handle both variants. Existing string/list factories remain available.
+- **FEAT**: Align with Ollama v0.40.14: speech, transcription, and translation (including binary/SSE streaming), System One images/audio and cloud support, runner selectors, manifest-list creation and inspection, model voices/template source, and read-only balance/usage reporting.
+- **FEAT**: Return copy status warnings with older empty-response compatibility and add a server heartbeat check.
+- **FIX**: Preserve streaming transport flags and nested audio API error messages. Correct equality/hashing for model lists, progress events, and push/pull options.
 
 ## 4.1.0
 
