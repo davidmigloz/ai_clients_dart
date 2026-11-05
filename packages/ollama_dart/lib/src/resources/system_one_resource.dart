@@ -7,11 +7,17 @@ import '../models/system_one/system_one_request.dart';
 import '../models/system_one/system_one_response.dart';
 import 'base_resource.dart';
 
-/// Resource for the local System One decision API in Ollama v0.35.0 and later.
+/// Resource for the System One decision API in Ollama v0.35.0 and later.
 ///
-/// Returns choices, probabilities, and scores in one JSON response. Requires a
-/// compatible local model such as Nimble or Tev1; cloud and streaming are not
-/// supported. The server validates body and context limits without truncation.
+/// Returns choices, probabilities, and scores in one JSON response. Compatible
+/// decision models include Nimble and Clef. Images are shared across questions
+/// for models with vision. Streaming is not supported.
+///
+/// Use a `:cloud` model through a signed-in local server (v0.40.5+) or configure
+/// the client for `https://ollama.com` with bearer authentication for direct
+/// cloud access. Requests use the client's configured URL and transport.
+/// The server validates body, media, question, and context limits without
+/// truncation.
 class SystemOneResource extends ResourceBase {
   /// Creates a System One resource using the client's shared transport.
   SystemOneResource({

@@ -1,10 +1,20 @@
 // ignore_for_file: avoid_print
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:ollama_dart/ollama_dart.dart';
 
-/// Requires Ollama v0.35.0+ and a compatible local model (for example, nimble).
-/// Pull the model before running this example; System One is local only.
+/// Requires Ollama v0.35.0+ and a compatible decision model.
+/// Pull a local model before running, for example `ollama pull nimble`.
+/// Use `clef:cloud` through a signed-in local server (v0.40.5+) for cloud access.
+/// For image input (v0.40.0+ locally), pass a vision model and image path:
+/// `dart run example/system_one_example.dart clef receipt.png`.
 Future<void> main(List<String> args) async {
   final client = OllamaClient();
+  // Direct cloud access instead uses OllamaClient.withApiKey(
+  //   Platform.environment['OLLAMA_API_KEY']!,
+  //   baseUrl: 'https://ollama.com',
+  // ) and a model such as 'clef' (without the local ':cloud' suffix).
 
   try {
     final response = await client.systemOne.create(
@@ -53,6 +63,24 @@ Future<void> main(List<String> args) async {
       print('${entry.key}: ${entry.value}');
     }
     print('Usage: ${response.usage}');
+
+    if (args.length > 1) {
+      final imageResponse = await client.systemOne.create(
+        request: SystemOneRequest(
+          model: args.first,
+          state: const SystemOneContent.string('A customer sent this image.'),
+          images: [base64Encode(await File(args[1]).readAsBytes())],
+          questions: const {
+            'is_receipt': SystemOneQuestion.noul(
+              instructions: SystemOneContent.string(
+                'Is the image a purchase receipt?',
+              ),
+            ),
+          },
+        ),
+      );
+      print('Image answer: ${imageResponse.answers['is_receipt']}');
+    }
 
     // Noul answers contain a probability of true, not a Boolean.
     // Scores are weighted averages of zero-based criterion indices.

@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '_system_one_helpers.dart';
 import 'system_one_answer.dart';
@@ -13,6 +14,7 @@ class SystemOneResponse {
     required this.model,
     required Map<String, SystemOneAnswer> answers,
     required this.usage,
+    this.promptEvalCachedCount,
   }) : answers = Map.unmodifiable(answers);
 
   /// Model name supplied in the request.
@@ -23,6 +25,9 @@ class SystemOneResponse {
 
   /// Server-reported token usage across all questions.
   final SystemOneUsage usage;
+
+  /// Prompt tokens reused from cache, when reported by the server.
+  final int? promptEvalCachedCount;
 
   /// Creates a response from JSON, validating required field shapes.
   factory SystemOneResponse.fromJson(Map<String, dynamic> json) {
@@ -44,6 +49,12 @@ class SystemOneResponse {
       usage: SystemOneUsage.fromJson(
         systemOneObject(json['usage'], 'SystemOneResponse.usage'),
       ),
+      promptEvalCachedCount: json['prompt_eval_cached_count'] == null
+          ? null
+          : systemOneInt(
+              json['prompt_eval_cached_count'],
+              'SystemOneResponse.prompt_eval_cached_count',
+            ),
     );
   }
 
@@ -54,6 +65,8 @@ class SystemOneResponse {
       for (final entry in answers.entries) entry.key: entry.value.toJson(),
     },
     'usage': usage.toJson(),
+    if (promptEvalCachedCount != null)
+      'prompt_eval_cached_count': promptEvalCachedCount,
   };
 
   /// Creates a copy with replaced values.
@@ -61,10 +74,14 @@ class SystemOneResponse {
     String? model,
     Map<String, SystemOneAnswer>? answers,
     SystemOneUsage? usage,
+    Object? promptEvalCachedCount = unsetCopyWithValue,
   }) => SystemOneResponse(
     model: model ?? this.model,
     answers: answers ?? this.answers,
     usage: usage ?? this.usage,
+    promptEvalCachedCount: identical(promptEvalCachedCount, unsetCopyWithValue)
+        ? this.promptEvalCachedCount
+        : promptEvalCachedCount as int?,
   );
 
   @override
@@ -73,13 +90,15 @@ class SystemOneResponse {
       other is SystemOneResponse &&
           model == other.model &&
           mapsEqual(answers, other.answers) &&
-          usage == other.usage;
+          usage == other.usage &&
+          promptEvalCachedCount == other.promptEvalCachedCount;
 
   @override
-  int get hashCode => Object.hash(model, mapHash(answers), usage);
+  int get hashCode =>
+      Object.hash(model, mapHash(answers), usage, promptEvalCachedCount);
 
   @override
   String toString() =>
       'SystemOneResponse(model: $model, answers: ${answers.length} entries, '
-      'usage: $usage)';
+      'usage: $usage, promptEvalCachedCount: $promptEvalCachedCount)';
 }

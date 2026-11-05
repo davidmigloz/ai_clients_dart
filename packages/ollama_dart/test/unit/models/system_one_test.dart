@@ -360,6 +360,49 @@ void main() {
       expect(request().copyWith(model: 'tev1').model, 'tev1');
     });
 
+    test('round-trips ordered images and runner with nullable clearing', () {
+      final original = request().copyWith(
+        model: 'clef',
+        runner: 'mlx',
+        images: ['aW1hZ2Ux', 'aW1hZ2Uy'],
+      );
+      final copy = SystemOneRequest.fromJson(original.toJson());
+      expect(copy, original);
+      expect(copy.hashCode, original.hashCode);
+      expect(copy.runner, 'mlx');
+      expect(copy.images, ['aW1hZ2Ux', 'aW1hZ2Uy']);
+      expect(copy.toJson()['images'], ['aW1hZ2Ux', 'aW1hZ2Uy']);
+      expect(original.copyWith(), original);
+      expect(original, isNot(original.copyWith(runner: 'llama.cpp')));
+      expect(original, isNot(original.copyWith(images: ['aW1hZ2Uy'])));
+      expect(
+        original,
+        isNot(original.copyWith(images: ['aW1hZ2Uy', 'aW1hZ2Ux'])),
+      );
+      final cleared = original.copyWith(runner: null, images: null);
+      expect(cleared.runner, isNull);
+      expect(cleared.images, isNull);
+      expect(cleared.toJson().containsKey('runner'), isFalse);
+      expect(cleared.toJson().containsKey('images'), isFalse);
+      expect(original.toString(), contains('images: 2 items'));
+      expect(cleared.toString(), contains('images: null'));
+      final empty = original.copyWith(images: <String>[]);
+      expect(empty.toJson()['images'], isEmpty);
+      expect(empty, isNot(cleared));
+    });
+
+    test('copies and freezes supplied images', () {
+      final images = ['aW1hZ2U='];
+      final original = request().copyWith(images: images);
+      images.clear();
+      expect(original.images, ['aW1hZ2U=']);
+      expect(original.images!.clear, throwsUnsupportedError);
+      expect(
+        (original.toJson()['images'] as List<String>).clear,
+        throwsUnsupportedError,
+      );
+    });
+
     test(
       'question maps are copied and equality distinguishes request order',
       () {
@@ -388,6 +431,8 @@ void main() {
         'state': true,
         'questions': [],
         'keep_alive': false,
+        'runner': 42,
+        'images': 'not an array',
       }.entries) {
         expect(
           () => SystemOneRequest.fromJson({...json, entry.key: entry.value}),
@@ -407,6 +452,26 @@ void main() {
         }),
         throwsFormatException,
       );
+      for (final image in <Object?>[
+        null,
+        42,
+        <Object?>[],
+        <String, Object?>{},
+      ]) {
+        expect(
+          () => SystemOneRequest.fromJson({
+            ...json,
+            'images': ['valid-base64', image],
+          }),
+          throwsA(
+            isA<FormatException>().having(
+              (error) => error.message,
+              'context',
+              contains('SystemOneRequest.images[1]'),
+            ),
+          ),
+        );
+      }
     });
   });
 
@@ -431,6 +496,38 @@ void main() {
       },
       'usage': {'input_tokens': 900, 'output_tokens': 7},
     };
+
+    test('cached prompt tokens are optional and can be cleared', () {
+      final original = SystemOneResponse.fromJson(responseJson);
+      expect(original.promptEvalCachedCount, isNull);
+      expect(
+        original.toJson().containsKey('prompt_eval_cached_count'),
+        isFalse,
+      );
+      for (final count in [0, 512]) {
+        final response = SystemOneResponse.fromJson({
+          ...responseJson,
+          'prompt_eval_cached_count': count,
+        });
+        expect(response.promptEvalCachedCount, count);
+        expect(response.toJson()['prompt_eval_cached_count'], count);
+        final copy = SystemOneResponse.fromJson(response.toJson());
+        expect(copy, response);
+        expect(copy.hashCode, response.hashCode);
+        expect(response.copyWith(), response);
+        expect(response, isNot(original));
+        expect(response.copyWith(promptEvalCachedCount: null), original);
+        expect(original.copyWith(promptEvalCachedCount: count), response);
+        expect(response.toString(), contains('promptEvalCachedCount: $count'));
+      }
+      expect(
+        () => SystemOneResponse.fromJson({
+          ...responseJson,
+          'prompt_eval_cached_count': 1.5,
+        }),
+        throwsFormatException,
+      );
+    });
 
     test(
       'decodes all variants and integer numeric values without altering scores',

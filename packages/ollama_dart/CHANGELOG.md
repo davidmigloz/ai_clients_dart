@@ -4,6 +4,7 @@
 - **FEAT**: Preserve model-copy status warnings with older empty-response compatibility and add a server heartbeat check.
 - **FIX**: Correct model-list, progress-event, and push/pull option equality and hashing.
 - **BREAKING FEAT**: Add multimodal embedding inputs (`EmbedInputMultimodal` and `EmbedInputBatch`) and embedding runner selection; exhaustive switches must handle both variants. Existing string/list factories remain available.
+- **FEAT**: Add System One images/audio, cloud routing documentation, runner selection, and cached-token metrics.
 
 ## 4.1.0
 

@@ -126,6 +126,62 @@ void main() {
       },
     );
 
+    for (final directCloud in [false, true]) {
+      test(
+        'sends images and runner to ${directCloud ? 'direct cloud' : 'local cloud proxy'}',
+        () async {
+          final cloudRequest = request.copyWith(
+            model: directCloud ? 'clef' : 'clef:cloud',
+            images: ['aW1hZ2Ux', 'aW1hZ2Uy'],
+            runner: directCloud ? null : 'mlx',
+          );
+          final transport = MockClient((httpRequest) async {
+            expect(
+              httpRequest.url.toString(),
+              directCloud
+                  ? 'https://ollama.com/v1/systemone'
+                  : 'http://localhost:11434/v1/systemone',
+            );
+            expect(httpRequest.method, 'POST');
+            expect(
+              httpRequest.headers['content-type'],
+              startsWith('application/json'),
+            );
+            expect(
+              httpRequest.headers['authorization'],
+              directCloud ? 'Bearer cloud-token' : isNull,
+            );
+            final body = jsonDecode(httpRequest.body) as Map<String, dynamic>;
+            expect(body, cloudRequest.toJson());
+            expect(body['images'], ['aW1hZ2Ux', 'aW1hZ2Uy']);
+            expect(body.containsKey('stream'), isFalse);
+            return http.Response(
+              jsonEncode({
+                ...responseJson,
+                'model': cloudRequest.model,
+                'prompt_eval_cached_count': 42,
+              }),
+              200,
+            );
+          });
+          final client = OllamaClient(
+            config: directCloud
+                ? const OllamaConfig(
+                    baseUrl: 'https://ollama.com',
+                    authProvider: BearerTokenProvider('cloud-token'),
+                  )
+                : const OllamaConfig(),
+            httpClient: transport,
+          );
+          addTearDown(client.close);
+          addTearDown(transport.close);
+          final response = await client.systemOne.create(request: cloudRequest);
+          expect(response.model, cloudRequest.model);
+          expect(response.promptEvalCachedCount, 42);
+        },
+      );
+    }
+
     test('preserves explicit authorization headers', () async {
       final transport = MockClient((httpRequest) async {
         expect(httpRequest.headers['authorization'], 'Bearer explicit-token');
@@ -143,7 +199,7 @@ void main() {
       await client.systemOne.create(request: request);
     });
 
-    for (final status in [400, 404, 413, 500]) {
+    for (final status in [400, 402, 404, 413, 500]) {
       test('propagates $status through the shared error interceptor', () async {
         final transport = MockClient(
           (_) async =>

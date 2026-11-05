@@ -37,7 +37,7 @@ Dart client for the **[Ollama API](https://ollama.com/)** — chat, streaming, t
 - NDJSON streaming for chat and completions
 - Tool calling, thinking mode, and structured output
 - Cached prompt token metrics and model-defined thinking controls
-- System One classification, yes/no probabilities, and ordered scoring
+- System One classification, yes/no probabilities, and ordered scoring with image/audio input
 
 ### Local model operations
 
@@ -131,7 +131,7 @@ final client = OllamaClient.withApiKey(
 );
 ```
 
-Here `apiKey` is your Ollama API key. Configure the host without an `/api` suffix; resources append their endpoint paths. Web search and fetch use the configured host and require Ollama Cloud or a proxy exposing those endpoints. Local model creation, blob uploads, and System One require a local Ollama server.
+Here `apiKey` is your Ollama API key. Configure the host without an `/api` suffix; resources append their endpoint paths. Web search and fetch use the configured host and require Ollama Cloud or a proxy exposing those endpoints. Model creation and blob uploads require a local Ollama server. System One supports local models, cloud models through a signed-in local server, and direct cloud requests.
 
 By default the client does **not** send an `X-Request-ID` header — Ollama's CORS allow-list excludes it, so sending it breaks the preflight in browser targets (Flutter Web / dart2wasm). A request ID is still generated internally for logging and error correlation. Set `OllamaConfig(sendRequestIdHeader: true)` to emit the header when talking to an intermediary (e.g. a reverse proxy) you've configured to accept it.
 
@@ -462,7 +462,7 @@ final response = await client.embeddings.create(
 <details>
 <summary><b>How do I select or inspect model variants?</b></summary>
 
-Generation, chat, embeddings, show, and pull requests accept an
+Generation, chat, embeddings, System One, show, and pull requests accept an
 optional `runner`. Create a manifest list with
 `CreateRequest(model: 'multi', list: ['model:mlx', 'model:gguf'])`; add explicit
 capabilities with `CreateRequest.capabilities`. Normal show responses expose
@@ -478,9 +478,10 @@ Use `await client.heartbeat()` to check server responsiveness with `HEAD /`.
 
 </details>
 
-### How do I make System One decisions?
+<details>
+<summary><b>How do I make System One decisions?</b></summary>
 
-System One requires Ollama **v0.35.0 or later** and a compatible local decision model such as `nimble`. Its single JSON response answers named questions against a shared state; it does not stream. It supports choice questions, yes/no probabilities (`noul`), and scores over ordered criteria.
+System One requires a compatible decision model such as `nimble` locally or `clef:cloud` in the cloud. Local text support starts at Ollama **v0.35.0**, image input at **v0.40.0**, and routing to cloud models through a local server at **v0.40.5**. Its single JSON response answers named questions against a shared state; it does not stream. It supports choice questions, yes/no probabilities (`noul`), and scores over ordered criteria.
 
 ```dart
 final response = await client.systemOne.create(
@@ -490,7 +491,7 @@ final response = await client.systemOne.create(
     questions: {
       'intent': SystemOneQuestion.choice(
         instructions: const SystemOneContent.string('Classify the request.'),
-        criteria: {
+        criteria: const {
           'refund': 'A request to return money',
           'other': 'Any other request',
         },
@@ -501,9 +502,11 @@ final response = await client.systemOne.create(
 print(response.answers['intent']);
 ```
 
-State and instructions also accept `SystemOneContent.object(...)` and `SystemOneContent.array(...)`, serialized as JSON text. Send 1–64 named questions; choice and score questions need 2–26 criteria. A `noul` answer is a probability of true. A score is the probability-weighted average of zero-based criterion indices. Confidence measures probability concentration, not calibrated correctness. Questions are evaluated independently against the shared state. Ollama Cloud and MLX/Safetensors runners do not support this endpoint.
+State and instructions also accept `SystemOneContent.object(...)` and `SystemOneContent.array(...)`, serialized as JSON text. Send 1–64 named questions; choice questions need 2–26 criteria locally (up to 255 in the cloud), and score questions need 2–10 criteria. A `noul` answer is a probability of true. A score is the probability-weighted average of zero-based criterion indices. Confidence measures probability concentration, not calibrated correctness. Questions are evaluated independently against the shared state. Set `SystemOneRequest.images` to base64 file contents shared by all questions, in order. Vision models accept images; audio-capable models also accept WAV clips in this field. URLs, data URLs, and video input are unsupported. The optional `runner` selects a local variant, and responses can report `promptEvalCachedCount`. Direct cloud access uses `OllamaClient.withApiKey(key, baseUrl: 'https://ollama.com')`.
 
 → [Full example with all question types](example/system_one_example.dart)
+
+</details>
 
 ### How do I upload files to create a model?
 
@@ -623,7 +626,7 @@ See the [example/](example/) directory for complete examples:
 | Embeddings | ✅ Full |
 | Models | ✅ Full |
 | Blobs | ✅ Existence checks and binary uploads |
-| System One | ✅ Local decision API; requires Ollama v0.35.0+ |
+| System One | ✅ Local and cloud decisions, images/audio, cached tokens |
 | Web search / fetch | ✅ Hosted endpoints with explicit cloud configuration |
 | Version / heartbeat | ✅ Version information and server health |
 
