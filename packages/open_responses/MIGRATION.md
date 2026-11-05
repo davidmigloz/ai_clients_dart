@@ -6,15 +6,18 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
-## Upcoming release: nullable provider error types
+## Migrating from v0.6.x to v0.7.0
+
+v0.7.0 preserves nullable provider error types and the distinction between omitted
+and explicit null error fields. Code that expects `ErrorPayload.type` to be a
+nonnullable string or mutates parsed/copied header maps needs updating.
+
+### 1) Handle nullable error types
 
 `ErrorPayload.type` is now `String?` so an OpenAI-compatible provider's explicit
-null is retained instead of becoming `'error'`. This provider tolerance does not
-change OpenResponses' canonical streaming contract, which still requires a string
-type. A missing type retains the legacy `'error'` read default, with
-`hasType == false`; serialization no longer invents the key. Parsed explicit null
-code/param values also survive round trips. Copies can explicitly clear nullable
-values; clear their presence flags too to omit the corresponding key.
+null is retained instead of becoming `'error'`. Check for null or provide a local
+display fallback. This provider tolerance does not change OpenResponses' canonical
+streaming contract, which still requires a string type.
 
 ```dart
 // Before
@@ -23,12 +26,57 @@ final String type = error.type;
 // After (error is ErrorPayload)
 final String? type = error.type;
 final label = type ?? 'Type not recorded';
+```
+
+### 2) Preserve or omit nullable fields explicitly
+
+A missing type retains the legacy `'error'` read default, with
+`hasType == false`; serialization no longer invents the key. A supplied string or
+explicit null has `hasType == true` and round-trips with its original value.
+Parsed explicit null `code` and `param` values also survive round trips, tracked
+by `hasCode` and `hasParam`.
+
+```dart
+final absent = ErrorPayload.fromJson({'message': 'Failed'});
+assert(absent.type == 'error' && !absent.hasType);
+assert(!absent.toJson().containsKey('type'));
+
+final explicitNull = ErrorPayload.fromJson({
+  'type': null,
+  'message': 'Failed',
+});
+assert(explicitNull.type == null && explicitNull.hasType);
+assert(explicitNull.toJson().containsKey('type'));
+```
+
+Copies can explicitly clear nullable values. Also clear the corresponding
+presence flag to omit the key; the same pattern applies to `code`/`hasCode` and
+`param`/`hasParam`.
+
+```dart
 final cleared = error.copyWith(type: null);
 final omitted = error.copyWith(type: null, hasType: false);
 ```
 
+### 3) Copy headers before editing them
+
 Parsed/copied header maps are immutable snapshots. Const constructor calls remain
 available; their caller-supplied maps retain the existing ownership contract.
+Create a mutable copy when changing headers and pass it through `copyWith`:
+
+```dart
+// Before (error is ErrorPayload)
+error.headers?['retry-after'] = '2';
+
+// After
+final headers = <String, String>{...?error.headers};
+headers['retry-after'] = '2';
+final updated = error.copyWith(headers: headers);
+```
+
+When parsing JSON, omit `headers` if unavailable; a supplied value must be a map
+of strings, so `"headers": null` is rejected.
+
 The OpenAI-specific hosted-tool usage and cache lifetimes are not added to the
 OpenResponses wire contract.
 

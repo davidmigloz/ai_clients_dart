@@ -1,3 +1,13 @@
+## 0.7.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Round-trips nullable provider errors without losing whether `type`, `code` and `param` were omitted or explicitly null; callers must handle the now-nullable `ErrorPayload.type`. Streaming abort signals and listener cancellation now interrupt pending authentication, response headers and stalled response bodies without closing shared HTTP clients.
+
+- **BREAKING** **FEAT**: Preserve nullable provider errors and omitted fields ([#440](https://github.com/davidmigloz/ai_clients_dart/issues/440)). ([5061f42c](https://github.com/davidmigloz/ai_clients_dart/commit/5061f42cce2495e10bced8ac56090b506c59e513))
+- **FIX**: Cancel stalled response streams ([#433](https://github.com/davidmigloz/ai_clients_dart/issues/433)). ([d754d662](https://github.com/davidmigloz/ai_clients_dart/commit/d754d662f38a34b0f8bdd54286e3c4218bd077c2))
+
 ## 0.6.0
 
 > [!CAUTION]

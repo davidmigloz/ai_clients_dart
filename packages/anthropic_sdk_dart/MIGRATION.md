@@ -6,6 +6,47 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v9.x to v10.0.0
+
+v10.0.0 adds document sources that reference uploaded files. `DocumentSource` is sealed, so exhaustive switches must handle the new `FileDocumentSource` variant.
+
+### 1) Handle uploaded-file document sources
+
+Add a `FileDocumentSource` case to switches over `DocumentSource`, or use a wildcard branch if your application does not need to distinguish source variants.
+
+Before:
+
+```dart
+String describeSource(DocumentSource source) => switch (source) {
+  Base64PdfSource() => 'Base64 PDF',
+  PlainTextSource() => 'Plain text',
+  UrlPdfSource(:final url) => url,
+};
+```
+
+After:
+
+```dart
+String describeSource(DocumentSource source) => switch (source) {
+  Base64PdfSource() => 'Base64 PDF',
+  PlainTextSource() => 'Plain text',
+  UrlPdfSource(:final url) => url,
+  FileDocumentSource(:final fileId) => 'Uploaded file: $fileId',
+};
+```
+
+To reference an uploaded file in a document block, use the new factory:
+
+```dart
+final document = InputContentBlock.document(
+  DocumentSource.file('file_123'),
+);
+```
+
+The source serializes as `{"type": "file", "file_id": "file_123"}`. Existing base64, text, and URL constructors keep their signatures.
+
+---
+
 ## Migrating from v8.x to v9.0.0
 
 v9.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.

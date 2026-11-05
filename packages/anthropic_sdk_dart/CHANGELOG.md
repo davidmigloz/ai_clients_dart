@@ -1,3 +1,16 @@
+## 10.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Use uploaded files as [document sources](https://platform.claude.com/docs/en/build-with-claude/pdf-support) through `DocumentSource.file(fileId)`, and retain their file IDs in decoded and accumulated response citations. Streaming and batch-result cancellation now interrupts stalled requests promptly, while HTTP failures preserve provider request IDs and safe retry metadata for diagnostics. Exhaustive switches over `DocumentSource` must handle `FileDocumentSource`.
+
+- **BREAKING** **FEAT**: Add file document sources ([#431](https://github.com/davidmigloz/ai_clients_dart/issues/431)). ([e719d02b](https://github.com/davidmigloz/ai_clients_dart/commit/e719d02b41624a134d55f86d1b5ee330ccda21b0))
+- **FIX**: Retain resource error request IDs ([#447](https://github.com/davidmigloz/ai_clients_dart/issues/447)). ([f58ef563](https://github.com/davidmigloz/ai_clients_dart/commit/f58ef5636e6a6d624fb5bb90a63b873a6d525867))
+- **FIX**: Retain stream error request IDs ([#445](https://github.com/davidmigloz/ai_clients_dart/issues/445)). ([1396797b](https://github.com/davidmigloz/ai_clients_dart/commit/1396797bbd70ddfd0b40c975e9929128c279144e))
+- **FIX**: Retain document citation file IDs ([#441](https://github.com/davidmigloz/ai_clients_dart/issues/441)). ([8835eabb](https://github.com/davidmigloz/ai_clients_dart/commit/8835eabbce2725eb45840f8836613a88e55b6e36))
+- **FIX**: Abort stalled streaming requests ([#432](https://github.com/davidmigloz/ai_clients_dart/issues/432)). ([230b8dc3](https://github.com/davidmigloz/ai_clients_dart/commit/230b8dc3f59e1b58462f66864cf6574c7bf76d9e))
+
 ## 9.0.1
 
 Prevents Messages response deserialization from failing when `usage.service_tier` is empty or unrecognized. These values now deserialize to `null`, while known service tiers retain their existing behavior.

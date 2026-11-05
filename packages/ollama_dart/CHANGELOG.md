@@ -1,3 +1,9 @@
+## 4.1.0
+
+Adds optional `abortTrigger` parameters to chat, generation and model create/pull/push streams. Abort signals and listener cancellation now interrupt stalled requests and NDJSON bodies while preserving shared HTTP clients, sibling requests and successful connection reuse.
+
+- **FIX**: Cancel stalled streaming requests ([#437](https://github.com/davidmigloz/ai_clients_dart/issues/437)). ([3ebebc95](https://github.com/davidmigloz/ai_clients_dart/commit/3ebebc9503ef1d1bfd99a2bbf471a4818fff4e8b))
+
 ## 4.0.0
 
 > [!CAUTION]

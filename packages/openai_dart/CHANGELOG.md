@@ -1,3 +1,44 @@
+## 12.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Adds multimodal questions and caching for [Decisions GA](https://developers.openai.com/api/docs/guides/decisions), typed reasoning replay and native MCP output, bounded [Responses WebSocket sessions](https://developers.openai.com/api/docs/guides/websocket-mode), Vertex Responses and regional routing.
+
+Adds Agent settings, automations, environment webhooks, recovery, local function dispatch, validated results and file/artifact helpers, plus audio controls and opt-in WebSocket recovery for Live and Realtime.
+
+Use the Migration Guide to update exhaustive switches and callers that use image/MCP types, nullable errors/search URLs, reasoning data, and Realtime delta/recovery options.
+
+- **BREAKING** **FIX**: Align Live cache TTLs and search URLs ([#464](https://github.com/davidmigloz/ai_clients_dart/issues/464)). ([62f0f208](https://github.com/davidmigloz/ai_clients_dart/commit/62f0f20865b2ad5f94a5743178836019fc1cd33b))
+- **BREAKING** **FEAT**: Add image safety markup and tool failures ([#458](https://github.com/davidmigloz/ai_clients_dart/issues/458)). ([6f08922b](https://github.com/davidmigloz/ai_clients_dart/commit/6f08922b4e4a40fcaa93d1f55d4ddf78f9fa283a))
+- **BREAKING** **FEAT**: Add environment webhook notifications ([#456](https://github.com/davidmigloz/ai_clients_dart/issues/456)). ([7c811520](https://github.com/davidmigloz/ai_clients_dart/commit/7c8115209e7a0fab1ea0512b583a649b185a474b))
+- **BREAKING** **FEAT**: Add runtime configuration snapshots. ([091972d4](https://github.com/davidmigloz/ai_clients_dart/commit/091972d402430b03daf4840faed4c445131649db))
+- **BREAKING** **FEAT**: Add Agent context and review settings. ([aa8867cc](https://github.com/davidmigloz/ai_clients_dart/commit/aa8867ccaab68bba254b99272861c74c7bb0e954))
+- **BREAKING** **FEAT**: Add Realtime input and audio controls ([#452](https://github.com/davidmigloz/ai_clients_dart/issues/452)). ([ebd626a2](https://github.com/davidmigloz/ai_clients_dart/commit/ebd626a2a7e39ba37493162ac9677ef4670da754))
+- **BREAKING** **FEAT**: Add named custom tool choices ([#451](https://github.com/davidmigloz/ai_clients_dart/issues/451)). ([52cceefb](https://github.com/davidmigloz/ai_clients_dart/commit/52cceefbd87b55d89fd16331af28874c2acd65a5))
+- **BREAKING** **FEAT**: Add Live audio fixtures and SIP DTMF ([#450](https://github.com/davidmigloz/ai_clients_dart/issues/450)). ([532a43e9](https://github.com/davidmigloz/ai_clients_dart/commit/532a43e9fb3094f026571636c3b017fc4a4272fd))
+- **BREAKING** **FEAT**: Integrate Decisions with Live sessions ([#449](https://github.com/davidmigloz/ai_clients_dart/issues/449)). ([6e1e5313](https://github.com/davidmigloz/ai_clients_dart/commit/6e1e5313ae5bb24b5f61443acc8f69ce19f051e7))
+- **BREAKING** **FEAT**: Add voice WebSocket recovery ([#446](https://github.com/davidmigloz/ai_clients_dart/issues/446)). ([a8d35249](https://github.com/davidmigloz/ai_clients_dart/commit/a8d35249d702140f4a95d733bfcc94baad97528a))
+- **BREAKING** **FEAT**: Add typed reasoning replay ([#444](https://github.com/davidmigloz/ai_clients_dart/issues/444)). ([ceca52b8](https://github.com/davidmigloz/ai_clients_dart/commit/ceca52b8dff7fd193eb8886e0dff7cb9b68b79b6))
+- **BREAKING** **FIX**: Decode native MCP response output items ([#443](https://github.com/davidmigloz/ai_clients_dart/issues/443)). ([eed64e89](https://github.com/davidmigloz/ai_clients_dart/commit/eed64e89576f9d977fb0cf7728d766cf898f079a))
+- **BREAKING** **FIX**: Correct Responses image tool option types ([#436](https://github.com/davidmigloz/ai_clients_dart/issues/436)). ([35e2d435](https://github.com/davidmigloz/ai_clients_dart/commit/35e2d435bbe7f35ac40078b22c105c56c068fe23))
+- **BREAKING** **FEAT**: Add cache TTL overrides and hosted tool usage ([#440](https://github.com/davidmigloz/ai_clients_dart/issues/440)). ([5061f42c](https://github.com/davidmigloz/ai_clients_dart/commit/5061f42cce2495e10bced8ac56090b506c59e513))
+- **BREAKING** **FEAT**: Support Decisions GA inputs and caching ([#435](https://github.com/davidmigloz/ai_clients_dart/issues/435)). ([d7ef952f](https://github.com/davidmigloz/ai_clients_dart/commit/d7ef952f189fed842e309b47e1b0c818ab0d8512))
+- **FEAT**: Add Agent file and artifact helpers ([#467](https://github.com/davidmigloz/ai_clients_dart/issues/467)). ([cc01bb59](https://github.com/davidmigloz/ai_clients_dart/commit/cc01bb596f600ba6adc036bf908fc5f3c540c7d8))
+- **FEAT**: Collect and validate completed Agent results ([#466](https://github.com/davidmigloz/ai_clients_dart/issues/466)). ([223810a4](https://github.com/davidmigloz/ai_clients_dart/commit/223810a4cc96bc8167a4ae5d7ac4dc3e5250e393))
+- **FEAT**: Add opt-in Agent function dispatch ([#465](https://github.com/davidmigloz/ai_clients_dart/issues/465)). ([d3dd201d](https://github.com/davidmigloz/ai_clients_dart/commit/d3dd201da7a0b0882eb98818cabb3d97f12ce8df))
+- **FEAT**: Add lazy idle-session run observation ([#463](https://github.com/davidmigloz/ai_clients_dart/issues/463)). ([6c86883c](https://github.com/davidmigloz/ai_clients_dart/commit/6c86883c1b5501e008597fb309eae2ffb62c2291))
+- **FEAT**: Add Vertex Responses and regional routing ([#460](https://github.com/davidmigloz/ai_clients_dart/issues/460)). ([45c92a72](https://github.com/davidmigloz/ai_clients_dart/commit/45c92a720bbbf9967b680d475a36b21379c381ae))
+- **FEAT**: Add session recovery and browser workflows ([#459](https://github.com/davidmigloz/ai_clients_dart/issues/459)). ([29d2273f](https://github.com/davidmigloz/ai_clients_dart/commit/29d2273fb0e4fc8ecac348b1006911aaece106ff))
+- **FEAT**: Add isolated Admin keys storage and usage APIs ([#457](https://github.com/davidmigloz/ai_clients_dart/issues/457)). ([fb211b05](https://github.com/davidmigloz/ai_clients_dart/commit/fb211b05590e68761c0866cb766771e879f4df8a))
+- **FEAT**: Add Agent automations and invocations. ([cb68105f](https://github.com/davidmigloz/ai_clients_dart/commit/cb68105f33747ee9f78a88e9018b5cdac537e006))
+- **FEAT**: Create prompt voices and delete saved voices ([#448](https://github.com/davidmigloz/ai_clients_dart/issues/448)). ([9a83b911](https://github.com/davidmigloz/ai_clients_dart/commit/9a83b911351b2985a0ce1fe045ed4731c724831b))
+- **FEAT**: Add bounded Responses WebSocket sessions ([#442](https://github.com/davidmigloz/ai_clients_dart/issues/442)). ([b7b26957](https://github.com/davidmigloz/ai_clients_dart/commit/b7b26957b0aa24cca5aeaabb335afb140e1a1e45))
+- **FIX**: Validate Live image replay errors ([#462](https://github.com/davidmigloz/ai_clients_dart/issues/462)). ([6fc4fc0a](https://github.com/davidmigloz/ai_clients_dart/commit/6fc4fc0a5a2f27d823ff169539af83b552a484b8))
+- **FIX**: Propagate streaming request cancellation ([#439](https://github.com/davidmigloz/ai_clients_dart/issues/439)). ([bf50eb8d](https://github.com/davidmigloz/ai_clients_dart/commit/bf50eb8dfe946060c78f51e24e15aeab2b685fbe))
+- **FIX**: Support computer-use Responses input items ([#430](https://github.com/davidmigloz/ai_clients_dart/issues/430)). ([6f72c9ba](https://github.com/davidmigloz/ai_clients_dart/commit/6f72c9ba75db30820f6b74c2f1d831afcc92b8c1))
+- **DOCS**: Close verified October API alignment ([#469](https://github.com/davidmigloz/ai_clients_dart/issues/469)). ([c64ff1a1](https://github.com/davidmigloz/ai_clients_dart/commit/c64ff1a197461edb65ab7733b66608975a114874))
+
 ## 11.0.1
 
 Simplified the README with collapsible usage topics, common Responses API examples first, and an updated example index.

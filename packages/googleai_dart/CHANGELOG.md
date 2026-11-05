@@ -1,3 +1,9 @@
+## 13.1.0
+
+Streaming cancellation now interrupts requests waiting for credentials, response headers, or stalled response bodies across model, dynamic-model, tuned-model and interaction streams. Interactions create/resume accept an optional `abortTrigger`, and listener cancellation releases request resources without closing shared HTTP clients.
+
+- **FIX**: Cancel stalled streaming requests ([#434](https://github.com/davidmigloz/ai_clients_dart/issues/434)). ([cc410ce0](https://github.com/davidmigloz/ai_clients_dart/commit/cc410ce05c63bec76910698805511329ed86d730))
+
 ## 13.0.0
 
 > [!CAUTION]

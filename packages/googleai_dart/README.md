@@ -70,7 +70,7 @@ Requires Dart 3.12 or later. See the [Migration Guide](MIGRATION.md) for upgrade
 
 ```yaml
 dependencies:
-  googleai_dart: ^13.0.0
+  googleai_dart: ^13.1.0
 ```
 
 ```dart

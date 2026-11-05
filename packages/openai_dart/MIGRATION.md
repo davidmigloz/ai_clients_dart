@@ -6,45 +6,28 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
-## Upcoming release: Live find-action URLs
+## Migrating from v11.x to v12.0.0
 
-`LiveInputWebSearchActionFind.url` is now `String?`, matching the API's optional
-nullable URL. Handle missing URLs before passing the value to a nonnullable API:
+v12.0.0 expands Decisions, Live, Realtime and Agent workflows while correcting
+nullable fields, native output types and immutable configuration snapshots.
+Update exhaustive switches for the new sealed variants and replace mutation of
+owned collections with supported copy/update methods. The minimum Dart SDK
+remains 3.12.
 
-```dart
-// Before
-final page = Uri.parse(action.url);
+Update your dependency and run `dart pub get` (or `flutter pub get`):
 
-// After
-final url = action.url;
-final page = url == null ? null : Uri.parse(url);
+```yaml
+dependencies:
+  openai_dart: ^12.0.0
 ```
 
-`hasUrl` distinguishes omission from an explicit wire null. In `copyWith`,
-`url: null` emits null and `clearUrl: true` removes the key. Existing JSON
-constructors and nonnull URL copies remain available.
+Review the sections for the APIs your application uses, including saved JSON
+fixtures, exception handlers and retained resource handles. Model access,
+account permissions and service retirements remain separate deployment checks.
 
-## Upcoming release: service and model availability
+<a id="upcoming-release-runtime-configuration-snapshots"></a>
 
-Review the [README availability guidance](README.md#which-model-ids-and-account-settings-can-i-use)
-and retained API notices before deploying. Library type compatibility does not
-restore a retired service. Model access and account permissions remain server-owned.
-
-## Upcoming release: Agent environment webhook notifications
-
-Environment notifications now decode to `AgentEnvironmentReadyWebhookEvent`,
-`AgentEnvironmentFailedWebhookEvent`, `AgentEnvironmentSuspendedWebhookEvent`
-and `AgentEnvironmentExpiredWebhookEvent`, with a typed `WebhookIdData` payload.
-Add the new cases to exhaustive switches over `WebhookEvent`,
-`WebhookAgentSessionEnvelope` or `WebhookEventType`. The shared envelope's existing
-name remains unchanged; its canonical fields also apply to environment events.
-
-Continue verifying original request bytes before handling deliveries. Receivers
-own acknowledgment and deduplication. Ready/failed concern prewarm setup;
-suspended may resume from a snapshot, whereas expired cannot. These notifications
-are separate from session SSE and grant no environment lifecycle-control route.
-
-## Upcoming release: runtime configuration snapshots
+### 1) Runtime configuration snapshots
 
 Clients now detach and freeze their default-header maps. Mutating the map passed
 to the constructor no longer changes a client, and `client.config.defaultHeaders`
@@ -55,21 +38,27 @@ is read-only. Use `updateConfig` with a replacement map instead:
 headers['X-Mode'] = 'new';
 
 // After: install new settings, then acquire a fresh resource handle.
-client.updateConfig(defaultHeaders: {...client.config.defaultHeaders, 'X-Mode': 'new'});
+client.updateConfig(
+  defaultHeaders: {...client.config.defaultHeaders, 'X-Mode': 'new'},
+);
 final responses = client.responses;
 ```
 
 Retained resource handles, including later-created children, keep their original
 configuration. In-flight requests/retries, lazy or active streams, and WebSocket
 handshakes/recovery keep that handle's settings. Updating configuration does not
-close transports or migrate existing sessions. A retained provider can resolve
-rotating credentials through request-local header maps; changing provider identity
-requires a newly acquired handle. Nullable config fields use explicit null to
-clear, while omitted options are retained. Custom interceptor instances and
-transport ownership are preserved. See the
+close transports or migrate existing sessions.
+
+A retained provider can resolve rotating credentials through request-local header
+maps. Changing provider identity requires a newly acquired handle.
+
+Nullable config fields use explicit null to clear, while omitted options are
+retained. Custom interceptor instances and transport ownership are preserved. See the
 [offline example](example/runtime_config_example.dart).
 
-## Upcoming release: Agent context settings and action review
+<a id="upcoming-release-agent-context-settings-and-action-review"></a>
+
+### 2) Agent context settings, action review and automations
 
 `spend_control` was removed from session create/update/resource schemas. The
 `spendControl`/`clearSpendControl` arguments and
@@ -90,11 +79,12 @@ final request = UpdateAgentSessionRequest();
 
 Action review is a separate choice with no conversion from an old spending
 limit. Set `review: SessionReviewParam.autoReview` to review eligible actions
-automatically; this mode denies manual approval fallbacks. Set `.none` for the
-existing execution behavior. Omit on create to use none, or on update to retain
-the current mode. Updates affect new root turns; existing turns and their
-subagents retain their review mode. Received omission means none, without an
-invented serialized default.
+automatically. This mode denies manual approval fallbacks.
+
+Set `.none` for the existing execution behavior. Omit on create to use none, or
+on update to retain the current mode. Updates affect new root turns; existing
+turns and their subagents retain their review mode. Received omission means none,
+without an invented serialized default.
 
 Context settings preserve their own update rules:
 
@@ -128,7 +118,113 @@ new/updated sessions may take time to appear in filtered results.
 
 See [the offline settings example](example/agent_settings_example.dart).
 
-## Upcoming release: Responses tool configuration
+<a id="upcoming-release-agent-environment-webhook-notifications"></a>
+
+### 3) Agent environment webhook notifications
+
+Environment notifications now decode to `AgentEnvironmentReadyWebhookEvent`,
+`AgentEnvironmentFailedWebhookEvent`, `AgentEnvironmentSuspendedWebhookEvent`
+and `AgentEnvironmentExpiredWebhookEvent`, with a typed `WebhookIdData` payload.
+Add the new cases to exhaustive switches over `WebhookEvent`,
+`WebhookAgentSessionEnvelope` or `WebhookEventType`. The shared envelope's existing
+name remains unchanged; its canonical fields also apply to environment events.
+
+Continue verifying original request bytes before handling deliveries. Receivers
+own acknowledgment and deduplication. Ready/failed concern prewarm setup;
+suspended may resume from a snapshot, whereas expired cannot. These notifications
+are separate from session SSE and grant no environment lifecycle-control route.
+
+<a id="upcoming-release-decisions-ga"></a>
+
+### 4) Decisions GA question instructions and history
+
+Existing string question constructors (including const predicates), user messages,
+and text/image input calls continue to work. Two read/copy APIs broaden to
+represent GA content:
+
+- `DecisionQuestion.instructions` returns `DecisionInstructions` instead of
+  `String`. Use `TextDecisionInstructions.text` for a text-only consumer or
+  handle `PartsDecisionInstructions.parts` for multimodal criteria.
+- Question `copyWith(instructions: ...)` takes `DecisionInstructions`.
+- `MessagesDecisionInput.messages` now contains `DecisionInputItem`, including
+  developer/system/assistant messages and function/custom tool history. The
+  `items` getter aliases that list. Match a message variant before reading its
+  role-specific content.
+
+```dart
+// Before
+final String criteria = question.instructions;
+final updated = question.copyWith(instructions: 'Is it damaged?');
+final content = input.messages.first.content;
+
+// After (question is a PredicateDecisionQuestion; input is MessagesDecisionInput)
+final criteria = switch (question.instructions) {
+  TextDecisionInstructions(:final text) => text,
+  PartsDecisionInstructions() => 'Multimodal criteria',
+};
+final updated = question.copyWith(
+  instructions: const DecisionInstructions.text('Is it damaged?'),
+);
+final content = switch (input.items.first) {
+  DecisionInputMessage(:final content) => content,
+  _ => null, // Handle the other roles/tool items as your application requires.
+};
+```
+
+Update exhaustive switches over `DecisionInputPart` for `JsonDecisionInputPart`
+and the new `DecisionEvidencePart` branch (text/image). Sealed instruction and
+history unions expose role-specific types to prevent invalid request content.
+Their parsers reject unsupported request variants; received answer variants
+continue to preserve unknown data. Shared-input text/image parts accept explicit
+cache breakpoints, while question parts do not. Decisions cache TTL is `30m`;
+Responses' `12h` option is not valid here. Optional null cache fields are omitted.
+
+See the [offline GA example](example/decisions_ga_example.dart) for complete
+construction through the public client.
+
+<a id="upcoming-release-responses-cache-and-error-corrections"></a>
+
+### 5) Responses cache and error corrections
+
+`ResponseError.type` is now `String?`: unavailable provider error types remain
+null instead of becoming `'error'`. `copyWith(type: null)` preserves an explicit
+nullable key; also set `hasType: false` to omit it. Code, message, parameter,
+misalignment details and future metadata remain available.
+
+```dart
+// Before
+final String type = response.error!.type;
+
+// After
+final String? type = response.error!.type;
+final label = type ?? 'Type not recorded';
+```
+
+`WebSearchActionFind.url` is now `String?` and optional in construction. Handle a
+missing page URL before navigation or display. `copyWith(url: null)` clears it.
+The URL and pattern remain separate fields; the pattern is still required.
+
+```dart
+// Before
+final page = Uri.parse(action.url);
+
+// After (action is WebSearchActionFind)
+final page = action.url == null ? null : Uri.parse(action.url!);
+```
+
+Cache breakpoint `fromJson` now validates `mode: 'explicit'` instead of silently
+accepting invalid/missing modes. Breakpoint lifetimes use the separate
+`PromptCacheBreakpointTtl` enum (`30m`/`12h`); top-level `PromptCacheTtl` remains
+unchanged. New hosted-tool counts live in `Response.toolUsage`, separately from
+base-model `usage`. An omitted tool-usage object or cache count stays unknown.
+`VideoError` also retains nullable type/param, recorded retry headers and review
+details from the pinned `Error-2` schema. No automatic continuation is performed.
+
+See the [offline example](example/responses_cache_usage_example.dart).
+
+<a id="upcoming-release-responses-tool-configuration"></a>
+
+### 6) Responses image tools and named custom tool choices
 
 Responses image tools now use `ImageGenerationMask` instead of a mask string,
 `ImageModerationLevel` instead of a boolean, and an integer compression level.
@@ -156,7 +252,129 @@ Exhaustive `ResponseToolChoice` switches must handle `ResponseToolChoiceCustom`.
 Use `ResponseToolChoice.custom(name: 'my_tool')` to select a declared custom tool;
 function selection continues to use `ResponseToolChoice.function`.
 
-## Upcoming release: Image safety identifiers and markup
+<a id="upcoming-release-native-mcp-response-output"></a>
+
+### 7) Native MCP response output
+
+`McpCallOutputItem` now follows native Responses output: `callId` is removed;
+`arguments`, `name` and `serverLabel` are required. Use `id` for the returned
+item and `approvalRequestId` for approval correlation. `status` now uses
+`McpCallStatus`, including `calling` and `failed`; unknown returned strings map
+to `McpCallStatus.unknown` without retaining the original string.
+
+```dart
+// Before
+const call = McpCallOutputItem(
+  id: 'mcp_call_1',
+  callId: 'legacy_call_id',
+  status: ItemStatus.completed,
+);
+
+// After
+const call = McpCallOutputItem(
+  id: 'mcp_call_1',
+  arguments: '{}',
+  name: 'search',
+  serverLabel: 'docs',
+  status: McpCallStatus.completed,
+);
+```
+
+`error` now uses the sealed `McpCallError` family instead of a string. Handle
+protocol, HTTP and tool execution errors, plus `UnknownMcpCallError` for future
+variants. Unknown errors retain immutable raw JSON; malformed known errors still
+fail validation. Default diagnostics redact error payloads.
+
+Exhaustive `OutputItem` switches must handle `McpListToolsOutputItem`,
+`McpApprovalRequestOutputItem` and `McpApprovalResponseOutputItem`. These are
+returned output models; typed request `Item` parsing and conversation-resource
+MCP models are unchanged. Explicit approval input can still use
+`ResponseInput.fromOutputItems` with the native approval response fields.
+
+<a id="upcoming-release-typed-reasoning-replay"></a>
+
+### 8) Typed reasoning replay
+
+`Item.fromJson` now recognizes `type: 'reasoning'` as `ReasoningInputItem`, and
+`ResponseInput.items` accepts it alongside messages, function calls and tool
+results. Convert a returned `ReasoningItem` with `toInput()` instead of changing
+the history to raw JSON or flattening reasoning into assistant text:
+
+```dart
+final reasoning = response.output.whereType<ReasoningItem>().first;
+final ReasoningInputItem inputItem = reasoning.toInput();
+```
+
+Use the converted item in the complete history passed to `ResponseInput.items`,
+keeping assistant/tool-call items and results in their original order. OpenAI
+reasoning replay requires the returned `id` and `summary`. Preserve completed
+reasoning items and their encrypted content; do not replay an unfinished
+`output_item.added` snapshot.
+
+Existing `ReasoningItem` const construction remains available. Returned status,
+reasoning content, summary, encrypted content and beta agent metadata survive typed
+conversion. Content participates in equality/hash, and default diagnostics redact
+reasoning text and encrypted payloads. Exhaustive switches over sealed `Item` must
+handle `ReasoningInputItem`.
+
+Parsed reasoning lists and `copyWith` replacements are now immutable snapshots.
+Use a copy for local transformations, while replaying returned reasoning unchanged:
+
+```dart
+// Before
+reasoning.content!.add({'type': 'reasoning_text', 'text': 'Local note'});
+
+// After
+final updated = reasoning.copyWith(content: [
+  ...?reasoning.content,
+  {'type': 'reasoning_text', 'text': 'Local note'},
+]);
+```
+
+`ReasoningItem.fromJson` and `ReasoningSummaryContent.fromJson` now validate fixed
+`reasoning`/`summary_text` discriminators and required fields with contextual
+errors. Supply complete canonical JSON instead of relying on omitted types or
+malformed required values being accepted.
+
+DeepSeek's guide describes plain-text reasoning replay but does not support
+summary/encrypted-content semantics. This adds canonical typed OpenAI replay, not
+a provider-specific content-only constructor. Keep `ResponseInput.fromOutputItems`
+for provider-specific shapes that omit canonical required fields.
+
+<a id="upcoming-release-responses-websocket-sessions"></a>
+
+### 9) Responses WebSocket session workflows
+
+Existing direct `connection.create()` and `connection.events` use remains available.
+To collect routed final responses, attach `ResponsesWebSocketSession` with explicit
+`ResponsesWebSocketLimits` and register lanes before sending. Consume one response
+per lane before sending its next create. No tool execution or history replay is
+automatic. The helper currently rejects recovery-enabled connections.
+
+Session close releases its reader and buffers. Close the caller-owned connection
+separately. Lane detach keeps its stream ID reserved on that physical connection,
+including across helper recreation.
+
+Cancelled waits retain partial output for a subsequent wait on the same lane.
+Failed/incomplete terminal events return their response. Request-level errors
+throw `ResponsesWebSocketSessionException` and end that local lane. Restore
+context on a new lane or connection explicitly.
+
+Terminal WebSocket output may be omitted or null: the envelope retains exact raw
+presence while its shared typed response uses an empty list. The session collector
+fills this from finalized output items; an explicit empty list stays empty. HTTP
+and SSE response parsing retain their existing contracts.
+
+Configuration updates gain optional `text`: omit it to keep the format, send
+`ConfigurationUpdateText(format: JsonSchemaFormat(...))` to change it, or use
+`const ConfigurationUpdateText.plainText()` to reset. Explicit null and JSON object
+mode are rejected. Schemas are snapshotted; parser/output-type metadata stays local.
+
+See the [offline session example](example/responses_websocket_session_example.dart).
+
+<a id="upcoming-release-image-safety-identifiers-and-markup"></a>
+
+### 10) Immutable image inputs and image-call output
 
 Image edit/request response collections now own immutable snapshots:
 `ImageEditRequest` copies image, mask and markup bytes; `ImageEditJsonRequest`
@@ -207,7 +425,9 @@ GPT Image 1 shut down October 23, 2026. Select an explicitly supported replaceme
 such as GPT Image 2.5; the client keeps string IDs open for compatible providers.
 See [the offline edit example](example/image_markup_example.dart).
 
-## Upcoming release: Realtime response input and audio controls
+<a id="upcoming-release-realtime-response-input-and-audio-controls"></a>
+
+### 11) Realtime transcription deltas and audio workflows
 
 `InputAudioTranscriptionDeltaEvent.contentIndex` and `delta` are now nullable:
 current events can omit either field. Explicit wire null remains invalid for
@@ -255,7 +475,7 @@ WebSockets still require a backend proxy; browser media sessions use WebRTC.
 See [the offline input example](example/realtime_input_example.dart) and
 [translation example](example/realtime_translation_example.dart).
 
-### Announced audio shutdowns
+#### Announced audio shutdowns
 
 The [official schedule](https://developers.openai.com/api/docs/deprecations)
 includes legacy TTS on January 6, 2027; legacy Realtime/audio on January 20;
@@ -267,48 +487,9 @@ its model name to a legacy endpoint. Realtime beta was removed on May 12, 2026;
 retained beta codecs support stored/compatible payloads only. Model IDs stay open
 strings so applications can choose supported replacements.
 
-## Upcoming release: Live audio fixtures and SIP DTMF
+<a id="upcoming-release-native-live-decisions"></a>
 
-The old receive-only `LiveTransportDTMFSend` class is replaced by
-`LiveTransportDTMFSent` with wire type `transport.dtmf.sent`. Sending is a separate
-`LiveTransportDTMFSendParam` command, allowed only on a SIP server sideband.
-Both sent and received DTMF notifications are sideband-only.
-
-```dart
-// Before: old server notification.
-if (event is LiveTransportDTMFSend) {
-  print(event.event);
-}
-
-// After: current server confirmation. Correlate your command when ID is present.
-if (event is LiveTransportDTMFSent) {
-  print(event.clientEventId);
-}
-sideband.send(LiveTransportDTMFSendParam(event: '#', eventId: 'send_key'));
-```
-
-Saved server frames whose type is `transport.dtmf.send` now decode as
-`UnknownLiveServerEvent`; their finite JSON is retained without treating them as
-an outbound command or changing their recorded type. Update exhaustive switches
-for the renamed server branch, new `LiveOutputAudioFixturePlaying/Played` events,
-and `LiveOutputAudioFixturePlayParam`/`LiveTransportDTMFSendParam` commands.
-Primary/fork parsers and writers reject DTMF; actual SIP eligibility is checked by
-the service. A send confirmation does not prove remote IVR success.
-
-Fixtures require raw mono PCM16 little-endian at 24 kHz, up to 30 seconds,
-independently of session audio format. Use `fromBytes` or standard base64; WAV
-containers are rejected. Fixture playback is available over primary/fork
-WebSockets and server sidebands, with no borrowed WebRTC data-channel admission.
-`playing` means acceptance; `played` means server mixer drain, with possible
-transport buffering afterward. Neither marks an exact listener delivery boundary.
-During playback input is dropped and instructions/thinking/commentary appends are
-rejected by the service. Explicit input mute stays independent, and failures or
-close never synthesize a successful drain event. Ordinary input-audio appends
-retain their session-selected format and do not inherit the fixture limit.
-
-See [the offline media example](example/live_media_example.dart).
-
-## Upcoming release: Native Live Decisions
+### 12) Native Live Decisions
 
 Live delegation, client-command and server-event sealed unions gain Decisions
 variants. Update exhaustive switches to handle the new variants, including
@@ -354,14 +535,78 @@ connection.send(LiveSessionUpdateParam(
 Native decision.event payloads require all four nullable correlation keys
 (delegation_id, trigger_id, source_event_type, source_event_id). Include nulls in
 synthetic fixtures rather than copying abbreviated guide snippets. Unknown outer
-server events continue to retain raw data. Results keep arrival order; correlate
-source IDs in the application and explicitly confirm actions before reporting
-results to Live. No application action, history reconciliation or event replay
-is automatic.
+server events continue to retain raw data.
 
----
+Results keep arrival order. Correlate source IDs in the application. Explicitly
+confirm actions before reporting results to Live. No application action, history
+reconciliation or event replay is automatic.
 
-## Upcoming release: WebSocket recovery budgets
+<a id="upcoming-release-live-find-action-urls"></a>
+
+### 13) Nullable Live find-action URLs
+
+`LiveInputWebSearchActionFind.url` is now `String?`, matching the API's optional
+nullable URL. Handle missing URLs before passing the value to a nonnullable API:
+
+```dart
+// Before
+final page = Uri.parse(action.url);
+
+// After
+final url = action.url;
+final page = url == null ? null : Uri.parse(url);
+```
+
+`hasUrl` distinguishes omission from an explicit wire null. In `copyWith`,
+`url: null` emits null and `clearUrl: true` removes the key. Existing JSON
+constructors and nonnull URL copies remain available.
+
+<a id="upcoming-release-live-audio-fixtures-and-sip-dtmf"></a>
+
+### 14) Live audio fixtures and SIP DTMF notifications
+
+The old receive-only `LiveTransportDTMFSend` class is replaced by
+`LiveTransportDTMFSent` with wire type `transport.dtmf.sent`. Sending is a separate
+`LiveTransportDTMFSendParam` command, allowed only on a SIP server sideband.
+Both sent and received DTMF notifications are sideband-only.
+
+```dart
+// Before: old server notification.
+if (event is LiveTransportDTMFSend) {
+  print(event.event);
+}
+
+// After: current server confirmation. Correlate your command when ID is present.
+if (event is LiveTransportDTMFSent) {
+  print(event.clientEventId);
+}
+sideband.send(LiveTransportDTMFSendParam(event: '#', eventId: 'send_key'));
+```
+
+Saved server frames whose type is `transport.dtmf.send` now decode as
+`UnknownLiveServerEvent`; their finite JSON is retained without treating them as
+an outbound command or changing their recorded type. Update exhaustive switches
+for the renamed server branch, new `LiveOutputAudioFixturePlaying/Played` events,
+and `LiveOutputAudioFixturePlayParam`/`LiveTransportDTMFSendParam` commands.
+Primary/fork parsers and writers reject DTMF; actual SIP eligibility is checked by
+the service. A send confirmation does not prove remote IVR success.
+
+Fixtures require raw mono PCM16 little-endian at 24 kHz, up to 30 seconds,
+independently of session audio format. Use `fromBytes` or standard base64; WAV
+containers are rejected. Fixture playback is available over primary/fork
+WebSockets and server sidebands, with no borrowed WebRTC data-channel admission.
+`playing` means acceptance; `played` means server mixer drain, with possible
+transport buffering afterward. Neither marks an exact listener delivery boundary.
+During playback input is dropped and instructions/thinking/commentary appends are
+rejected by the service. Explicit input mute stays independent, and failures or
+close never synthesize a successful drain event. Ordinary input-audio appends
+retain their session-selected format and do not inherit the fixture limit.
+
+See [the offline media example](example/live_media_example.dart).
+
+<a id="upcoming-release-websocket-recovery-budgets"></a>
+
+### 15) WebSocket recovery budgets and error handling
 
 Opt-in Responses recovery now also limits pending frames to
 `maxQueueMessages: 1024`, including empty text or binary frames. This closes an
@@ -413,217 +658,21 @@ physical interruption, create a fresh connection/helper and reconcile each lane
 explicitly. No lane state or previously attempted request is replayed.
 
 Live, Realtime and Translation recovery is additive and disabled by default.
-Their default zero-byte pending budget rejects disconnected sends. If enabled,
-restore the fresh session explicitly before flushing pending work; Live primary
-and fork sockets require a fresh `start(...)` acknowledgment. Finalization commands
-are rejected while recovering; finalize only a known active session. A failed attempted
-write is reported as uncertain and is excluded from the final unsent list.
+Their default zero-byte pending budget rejects disconnected sends.
 
----
+If enabled, restore the fresh session explicitly before flushing pending work.
+Live primary and fork sockets require a fresh `start(...)` acknowledgment.
+Finalization commands are rejected while recovering. Finalize only a known active
+session. A failed attempted write is reported as uncertain and is excluded from
+the final unsent list.
 
-## Upcoming release: Typed reasoning replay
+<a id="upcoming-release-service-and-model-availability"></a>
 
-`Item.fromJson` now recognizes `type: 'reasoning'` as `ReasoningInputItem`, and
-`ResponseInput.items` accepts it alongside messages, function calls and tool
-results. Convert a returned `ReasoningItem` with `toInput()` instead of changing
-the history to raw JSON or flattening reasoning into assistant text:
+### 16) Service and model availability
 
-```dart
-final reasoning = response.output.whereType<ReasoningItem>().first;
-final ReasoningInputItem inputItem = reasoning.toInput();
-```
-
-Use the converted item in the complete history passed to `ResponseInput.items`,
-keeping assistant/tool-call items and results in their original order. OpenAI
-reasoning replay requires the returned `id` and `summary`. Preserve completed
-reasoning items and their encrypted content; do not replay an unfinished
-`output_item.added` snapshot.
-
-Existing `ReasoningItem` const construction remains available. Returned status,
-reasoning content, summary, encrypted content and beta agent metadata survive typed
-conversion. Content participates in equality/hash, and default diagnostics redact
-reasoning text and encrypted payloads. Exhaustive switches over sealed `Item` must
-handle `ReasoningInputItem`.
-
-Parsed reasoning lists and `copyWith` replacements are now immutable snapshots.
-Use a copy for local transformations, while replaying returned reasoning unchanged:
-
-```dart
-// Before
-reasoning.content!.add({'type': 'reasoning_text', 'text': 'Local note'});
-
-// After
-final updated = reasoning.copyWith(content: [
-  ...?reasoning.content,
-  {'type': 'reasoning_text', 'text': 'Local note'},
-]);
-```
-
-`ReasoningItem.fromJson` and `ReasoningSummaryContent.fromJson` now validate fixed
-`reasoning`/`summary_text` discriminators and required fields with contextual
-errors. Supply complete canonical JSON instead of relying on omitted types or
-malformed required values being accepted.
-
-DeepSeek's guide describes plain-text reasoning replay but does not support
-summary/encrypted-content semantics. This adds canonical typed OpenAI replay, not
-a provider-specific content-only constructor. Keep `ResponseInput.fromOutputItems`
-for provider-specific shapes that omit canonical required fields.
-
----
-
-## Upcoming release: Responses WebSocket sessions
-
-Existing direct `connection.create()` and `connection.events` use remains available.
-To collect routed final responses, attach `ResponsesWebSocketSession` with explicit
-`ResponsesWebSocketLimits` and register lanes before sending. Consume one response
-per lane before sending its next create. No tool execution or history replay is
-automatic. The helper currently rejects recovery-enabled connections.
-
-Session close releases its reader and buffers; close the caller-owned connection
-separately. Lane detach keeps its stream ID reserved on that physical connection,
-including across helper recreation. Cancelled waits retain partial output for a
-subsequent wait on the same lane. Failed/incomplete terminal events return their
-response; request-level errors throw `ResponsesWebSocketSessionException` and
-end that local lane. Restore context on a new lane or connection explicitly.
-
-Terminal WebSocket output may be omitted or null: the envelope retains exact raw
-presence while its shared typed response uses an empty list. The session collector
-fills this from finalized output items; an explicit empty list stays empty. HTTP
-and SSE response parsing retain their existing contracts.
-
-Configuration updates gain optional `text`: omit it to keep the format, send
-`ConfigurationUpdateText(format: JsonSchemaFormat(...))` to change it, or use
-`const ConfigurationUpdateText.plainText()` to reset. Explicit null and JSON object
-mode are rejected. Schemas are snapshotted; parser/output-type metadata stays local.
-
-See the [offline session example](example/responses_websocket_session_example.dart).
-
----
-
-## Upcoming release: Responses cache and error corrections
-
-`ResponseError.type` is now `String?`: unavailable provider error types remain
-null instead of becoming `'error'`. `copyWith(type: null)` preserves an explicit
-nullable key; also set `hasType: false` to omit it. Code, message, parameter,
-misalignment details and future metadata remain available.
-
-```dart
-// Before
-final String type = response.error!.type;
-
-// After
-final String? type = response.error!.type;
-final label = type ?? 'Type not recorded';
-```
-
-`WebSearchActionFind.url` is now `String?` and optional in construction. Handle a
-missing page URL before navigation or display. `copyWith(url: null)` clears it.
-The URL and pattern remain separate fields; the pattern is still required.
-
-```dart
-// Before
-final page = Uri.parse(action.url);
-
-// After (action is WebSearchActionFind)
-final page = action.url == null ? null : Uri.parse(action.url!);
-```
-
-Cache breakpoint `fromJson` now validates `mode: 'explicit'` instead of silently
-accepting invalid/missing modes. Breakpoint lifetimes use the separate
-`PromptCacheBreakpointTtl` enum (`30m`/`12h`); top-level `PromptCacheTtl` remains
-unchanged. New hosted-tool counts live in `Response.toolUsage`, separately from
-base-model `usage`. An omitted tool-usage object or cache count stays unknown.
-`VideoError` also retains nullable type/param, recorded retry headers and review
-details from the pinned `Error-2` schema. No automatic continuation is performed.
-
-See the [offline example](example/responses_cache_usage_example.dart).
-
----
-
-## Upcoming release: Native MCP response output
-
-`McpCallOutputItem` now follows native Responses output: `callId` is removed;
-`arguments`, `name` and `serverLabel` are required. Use `id` for the returned
-item and `approvalRequestId` for approval correlation. `status` now uses
-`McpCallStatus`, including `calling` and `failed`; unknown returned strings map
-to `McpCallStatus.unknown` without retaining the original string.
-
-```dart
-// Before
-const call = McpCallOutputItem(
-  id: 'mcp_call_1',
-  callId: 'legacy_call_id',
-  status: ItemStatus.completed,
-);
-
-// After
-const call = McpCallOutputItem(
-  id: 'mcp_call_1',
-  arguments: '{}',
-  name: 'search',
-  serverLabel: 'docs',
-  status: McpCallStatus.completed,
-);
-```
-
-`error` now uses the sealed `McpCallError` family instead of a string. Handle
-protocol, HTTP and tool execution errors, plus `UnknownMcpCallError` for future
-variants. Unknown errors retain immutable raw JSON; malformed known errors still
-fail validation. Default diagnostics redact error payloads.
-
-Exhaustive `OutputItem` switches must handle `McpListToolsOutputItem`,
-`McpApprovalRequestOutputItem` and `McpApprovalResponseOutputItem`. These are
-returned output models; typed request `Item` parsing and conversation-resource
-MCP models are unchanged. Explicit approval input can still use
-`ResponseInput.fromOutputItems` with the native approval response fields.
-
----
-
-## Upcoming release: Decisions GA
-
-Existing string question constructors (including const predicates), user messages,
-and text/image input calls continue to work. Two read/copy APIs broaden to
-represent GA content:
-
-- `DecisionQuestion.instructions` returns `DecisionInstructions` instead of
-  `String`. Use `TextDecisionInstructions.text` for a text-only consumer or
-  handle `PartsDecisionInstructions.parts` for multimodal criteria.
-- Question `copyWith(instructions: ...)` takes `DecisionInstructions`.
-- `MessagesDecisionInput.messages` now contains `DecisionInputItem`, including
-  developer/system/assistant messages and function/custom tool history. The
-  `items` getter aliases that list. Match a message variant before reading its
-  role-specific content.
-
-```dart
-// Before
-final String criteria = question.instructions;
-final updated = question.copyWith(instructions: 'Is it damaged?');
-final content = input.messages.first.content;
-
-// After (question is a PredicateDecisionQuestion; input is MessagesDecisionInput)
-final criteria = switch (question.instructions) {
-  TextDecisionInstructions(:final text) => text,
-  PartsDecisionInstructions() => 'Multimodal criteria',
-};
-final updated = question.copyWith(
-  instructions: const DecisionInstructions.text('Is it damaged?'),
-);
-final content = switch (input.items.first) {
-  DecisionInputMessage(:final content) => content,
-  _ => null, // Handle the other roles/tool items as your application requires.
-};
-```
-
-Update exhaustive switches over `DecisionInputPart` for `JsonDecisionInputPart`
-and the new `DecisionEvidencePart` branch (text/image). Sealed instruction and
-history unions expose role-specific types to prevent invalid request content.
-Their parsers reject unsupported request variants; received answer variants
-continue to preserve unknown data. Shared-input text/image parts accept explicit
-cache breakpoints, while question parts do not. Decisions cache TTL is `30m`;
-Responses' `12h` option is not valid here. Optional null cache fields are omitted.
-
-See the [offline GA example](example/decisions_ga_example.dart) for complete
-construction through the public client.
+Review the [README availability guidance](README.md#which-model-ids-and-account-settings-can-i-use)
+and retained API notices before deploying. Library type compatibility does not
+restore a retired service. Model access and account permissions remain server-owned.
 
 ---
 

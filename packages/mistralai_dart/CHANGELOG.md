@@ -1,3 +1,9 @@
+## 8.3.0
+
+Adds optional `abortTrigger` parameters across chat, FIM, agents, speech, transcription, RAG summaries and workflow streams. Abort signals and listener cancellation now interrupt pending authentication, response headers and stalled SSE/NDJSON bodies, while preserving shared HTTP clients and successful connection reuse.
+
+- **FIX**: Cancel stalled streaming requests ([#438](https://github.com/davidmigloz/ai_clients_dart/issues/438)). ([65eb5d09](https://github.com/davidmigloz/ai_clients_dart/commit/65eb5d09ada025552b8c4b33d4d0aae7a2a0fb85))
+
 ## 8.2.0
 
 Restores cached prompt-token details on `UsageInfo` for [prompt-cache](https://docs.mistral.ai/studio/conversations/advanced/prompt-caching) and cost accounting, and adds `CompletionTokensDetails` for reasoning-token usage. All added fields are optional.
