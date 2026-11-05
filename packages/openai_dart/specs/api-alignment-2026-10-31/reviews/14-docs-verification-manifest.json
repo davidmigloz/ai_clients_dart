@@ -191,7 +191,8 @@
     "specs/api-alignment/reviews/42-idle-run-helper-manifest.json",
     "specs/api-alignment-2026-10-31/reviews/issue415-live-input-closure-manifest.json",
     "specs/api-alignment/reviews/43-local-dispatch-manifest.json",
-    "specs/api-alignment/reviews/44-result-parser-manifest.json"
+    "specs/api-alignment/reviews/44-result-parser-manifest.json",
+    "specs/api-alignment/reviews/45-file-helpers-manifest.json"
   ],
   "inventory_coverage": {
     "schemas": 297,
@@ -283,6 +284,11 @@
       "issue": 396,
       "pull_request": 466,
       "receipt": "specs/api-alignment/reviews/44-result-parser-manifest.json"
+    },
+    {
+      "issue": 397,
+      "pull_request": 467,
+      "receipt": "specs/api-alignment/reviews/45-file-helpers-manifest.json"
     }
   ],
   "client_helper_contexts": [
@@ -320,6 +326,41 @@
       "file": "lib/src/helpers/agents/agent_session_run_result.dart",
       "schema": null,
       "note": "Local completed/partial results, private failures, pure projection and caller validator. No invented DTO fields or annotations."
+    },
+    {
+      "receipt": "specs/api-alignment/reviews/45-file-helpers-manifest.json",
+      "dart_context": "AgentFiles",
+      "file": "lib/src/helpers/agents/agent_files.dart",
+      "schema": null,
+      "note": "Local helper; no canonical wire DTO/operation is introduced."
+    },
+    {
+      "receipt": "specs/api-alignment/reviews/45-file-helpers-manifest.json",
+      "dart_context": "AgentResultArtifacts",
+      "file": "lib/src/helpers/agents/agent_result_artifacts.dart",
+      "schema": null,
+      "note": "Local helper; no canonical wire DTO/operation is introduced."
+    },
+    {
+      "receipt": "specs/api-alignment/reviews/45-file-helpers-manifest.json",
+      "dart_context": "AgentFileInput",
+      "file": "lib/src/helpers/agents/agent_file_inputs.dart",
+      "schema": null,
+      "note": "Local helper; no canonical wire DTO/operation is introduced."
+    },
+    {
+      "receipt": "specs/api-alignment/reviews/45-file-helpers-manifest.json",
+      "dart_context": "PreparedAgentFiles",
+      "file": "lib/src/helpers/agents/agent_file_preparation.dart",
+      "schema": null,
+      "note": "Local helper; no canonical wire DTO/operation is introduced."
+    },
+    {
+      "receipt": "specs/api-alignment/reviews/45-file-helpers-manifest.json",
+      "dart_context": "AgentFileSystem",
+      "file": "lib/src/helpers/agents/agent_file_system.dart",
+      "schema": null,
+      "note": "Local helper; no canonical wire DTO/operation is introduced."
     }
   ],
   "union_metadata_corrections": {
@@ -334,5 +375,81 @@
       ],
       "evidence": "Actual Dart factory equals full pinned canonical tag map; narrower sideband includes documented reflected audio contexts. Unknown receive fallback and current client SendParam stay distinct."
     }
+  },
+  "file_artifact_contextual_views": {
+    "receipt": "specs/api-alignment/reviews/45-file-helpers-manifest.json",
+    "AgentArtifactLookupCandidate": "Artifact helper-only received view permits absent/null legacy ID; all other canonical fields remain strict. Never bind this view as canonical Artifact.",
+    "AgentArtifactLookupPage": "Same existing list GET/envelope; only nested ID presence differs. Cursor is actual opaque last_id, with no row-ID fallback."
+  },
+  "final_verification": {
+    "runtime_base": "cc01bb596f600ba6adc036bf908fc5f3c540c7d8",
+    "toolkit_fix_pull_request": 468,
+    "openai_unit": {
+      "passed": 26813,
+      "environment_skips": 2
+    },
+    "shared_open_responses_unit": {
+      "passed": 547,
+      "environment_skips": 3
+    },
+    "shared_error_browser": {
+      "chrome_js_passed": 3,
+      "chrome_wasm_passed": 3
+    },
+    "dart_quality": {
+      "formatted_files": 862,
+      "format_changes": 0,
+      "fixes": 0,
+      "analysis": "No issues found"
+    },
+    "docs": {
+      "managed_configs_checked": 8,
+      "errors": 0,
+      "openai_usage_topics": 68,
+      "openai_warnings": 0
+    },
+    "toolkit_unit": {
+      "tests": 290,
+      "known_baseline_failures": 5,
+      "errors": 0,
+      "skips": 2
+    },
+    "global_implementation": {
+      "errors": 1040,
+      "warnings": 246,
+      "infos": 351,
+      "assigned_classified_errors": 210,
+      "outside_assigned_errors": 830,
+      "unclassified_assigned_errors": 0
+    },
+    "same_final_runtime_old_canonical": {
+      "errors": 1011,
+      "warnings": 128,
+      "infos": 281
+    },
+    "historical_pre_promotion_runtime": {
+      "errors": 1010,
+      "warnings": 128,
+      "infos": 281
+    },
+    "exports": {
+      "internal_helper_file_findings": 10,
+      "same_findings_on_old_canonical": true
+    },
+    "consistency": {
+      "errors": 0,
+      "warnings": 127
+    },
+    "source_receipts": {
+      "verified_sdk_references": 128,
+      "verified_dart_declaration_references": 424
+    },
+    "new_suppressions": 0,
+    "diagnostic_disposition": "14-verification-diagnostics.md",
+    "diagnostics": "14-verification-diagnostics.json",
+    "merged_evidence": "14-merged-implementation-evidence.json",
+    "release_readiness": "14-release-readiness.md",
+    "live_api_calls": 0,
+    "publication_authorized": false
   }
 }

@@ -5772,28 +5772,36 @@
     {
       "number": 392,
       "role": "active carry-over",
-      "dependencies": []
+      "dependencies": [],
+      "implementation_status": "merged",
+      "implementation_pull_request": 456
     },
     {
       "number": 393,
       "role": "active carry-over",
       "dependencies": [
         "09-agent-settings"
-      ]
+      ],
+      "implementation_status": "merged",
+      "implementation_pull_request": 459
     },
     {
       "number": 394,
       "role": "active carry-over",
       "dependencies": [
         "09-agent-settings"
-      ]
+      ],
+      "implementation_status": "merged",
+      "implementation_pull_request": 463
     },
     {
       "number": 395,
       "role": "active carry-over",
       "dependencies": [
         "#394"
-      ]
+      ],
+      "implementation_status": "merged",
+      "implementation_pull_request": 465
     },
     {
       "number": 396,
@@ -5801,29 +5809,42 @@
       "dependencies": [
         "#394",
         "#395"
-      ]
+      ],
+      "implementation_status": "merged",
+      "implementation_pull_request": 466
     },
     {
       "number": 397,
       "role": "active carry-over",
       "dependencies": [
         "#396"
-      ]
+      ],
+      "implementation_status": "merged",
+      "implementation_pull_request": 467
     },
     {
       "number": 316,
       "role": "active carry-over",
-      "dependencies": []
+      "dependencies": [],
+      "implementation_status": "merged",
+      "implementation_pull_request": 455
     },
     {
       "number": 246,
       "role": "supporting tooling",
-      "dependencies": []
+      "dependencies": [],
+      "implementation_status": "merged",
+      "implementation_pull_request": 461,
+      "supplemental_pull_requests": [
+        468
+      ]
     },
     {
       "number": 408,
       "role": "gated follow-up",
-      "dependencies": []
+      "dependencies": [],
+      "implementation_status": "gated_follow_up",
+      "note": "Existing upstream blockers require revalidation; explicitly not a #413 closure blocker."
     }
   ],
   "issues": {
@@ -5893,31 +5914,52 @@
       "key": "01-decisions-ga",
       "title": "feat(openai_dart): align Decisions GA inputs and caching",
       "outcome": "Evaluate structured evidence and conversation/tool history with the generally available Decisions API, including up to 400 questions.",
-      "dependencies": []
+      "dependencies": [],
+      "implementation_status": "merged",
+      "implementation_pull_requests": [
+        435
+      ]
     },
     {
       "key": "02-responses-cache-usage",
       "title": "feat(openai_dart): preserve cache TTLs and hosted tool usage",
       "outcome": "Control each Responses cache breakpoint lifetime and inspect billable hosted-tool usage and error diagnostics.",
-      "dependencies": []
+      "dependencies": [],
+      "implementation_status": "merged",
+      "implementation_pull_requests": [
+        440,
+        464
+      ]
     },
     {
       "key": "03-responses-websocket-workflows",
       "title": "feat(openai_dart): add Responses WebSocket warmup and sessions",
       "outcome": "Warm up a Responses connection, change output formats mid-session, and consume bounded per-lane final results.",
-      "dependencies": []
+      "dependencies": [],
+      "implementation_status": "merged",
+      "implementation_pull_requests": [
+        442
+      ]
     },
     {
       "key": "04-websocket-recovery",
       "title": "fix(openai_dart): align WebSocket recovery and delivery reporting",
       "outcome": "Recover supported WebSocket connections explicitly and report uncertain or unsent delivery without replaying attempted work.",
-      "dependencies": []
+      "dependencies": [],
+      "implementation_status": "merged",
+      "implementation_pull_requests": [
+        446
+      ]
     },
     {
       "key": "05-custom-voices",
       "title": "feat(openai_dart): create prompt voices and delete saved voices",
       "outcome": "Create a saved voice from a text description, inspect its metadata, and explicitly delete it.",
-      "dependencies": []
+      "dependencies": [],
+      "implementation_status": "merged",
+      "implementation_pull_requests": [
+        448
+      ]
     },
     {
       "key": "06-live-decisions",
@@ -5925,25 +5967,41 @@
       "outcome": "Delegate from Live to Decisions, evaluate transcript triggers, and manage shared decision items.",
       "dependencies": [
         "01-decisions-ga"
+      ],
+      "implementation_status": "merged",
+      "implementation_pull_requests": [
+        449
       ]
     },
     {
       "key": "07-live-media",
       "title": "feat(openai_dart): align Live audio fixtures and SIP DTMF",
       "outcome": "Play a bounded audio fixture and distinguish SIP DTMF commands from delivery notifications.",
-      "dependencies": []
+      "dependencies": [],
+      "implementation_status": "merged",
+      "implementation_pull_requests": [
+        450
+      ]
     },
     {
       "key": "08-realtime-audio",
       "title": "feat(openai_dart): align Realtime references and audio controls",
       "outcome": "Use current Realtime input references/noise controls and the official Translation WebSocket flow.",
-      "dependencies": []
+      "dependencies": [],
+      "implementation_status": "merged",
+      "implementation_pull_requests": [
+        452
+      ]
     },
     {
       "key": "09-agent-settings",
       "title": "feat(openai_dart): align Agent review and context settings",
       "outcome": "Configure current Agent/session context and review behavior, and use ultrafast requests successfully.",
-      "dependencies": []
+      "dependencies": [],
+      "implementation_status": "merged",
+      "implementation_pull_requests": [
+        453
+      ]
     },
     {
       "key": "10-agent-automations",
@@ -5951,13 +6009,22 @@
       "outcome": "Create, pause, resume and inspect scheduled Agent work and its invocations.",
       "dependencies": [
         "09-agent-settings"
+      ],
+      "implementation_status": "merged",
+      "implementation_pull_requests": [
+        454
       ]
     },
     {
       "key": "11-image-contracts",
       "title": "feat(openai_dart): align image safety identifiers and edit markup",
       "outcome": "Attach image safety identifiers, inspect tool moderation errors, and guide edits with markup overlays.",
-      "dependencies": []
+      "dependencies": [],
+      "implementation_status": "merged",
+      "implementation_pull_requests": [
+        458,
+        462
+      ]
     },
     {
       "key": "12-vertex-residency",
@@ -5965,13 +6032,21 @@
       "outcome": "Route Responses through Vertex using request-scoped Google credentials and current regional endpoints.",
       "dependencies": [
         "#316"
+      ],
+      "implementation_status": "merged",
+      "implementation_pull_requests": [
+        460
       ]
     },
     {
       "key": "13-admin-delta",
       "title": "feat(openai_dart): add bounded Admin key usage and storage APIs",
       "outcome": "Use the new Admin key/Decisions-usage operations and inspect current external-storage providers/statuses.",
-      "dependencies": []
+      "dependencies": [],
+      "implementation_status": "merged",
+      "implementation_pull_requests": [
+        457
+      ]
     },
     {
       "key": "14-docs-verification",
@@ -6005,7 +6080,7 @@
   "previous_canonical_openapi": "0ef225c4f701046f8fe88cae9d29d0df4d1a9fa9",
   "reconciliation": {
     "issue": 427,
-    "status": "prepared; final merged implementation/CI evidence remains required",
+    "status": "All bounded implementation issues merged; integrated verification complete. This final docs/source closeout completes #427 and #413 after its CI and merge.",
     "schema_dispositions": {
       "implemented": 248,
       "metadata_only": 15,
@@ -6027,6 +6102,7 @@
         "schema": "BetaImageGenOutputTokensDetails",
         "correction": "Use actual BetaImageGenToolUsage.output_tokens_details runtime binding to responses.ImageGenOutputTokensDetails from #415, rather than an equivalent ordinary Images usage object."
       }
-    ]
+    ],
+    "merged_evidence": "specs/api-alignment-2026-10-31/reviews/14-merged-implementation-evidence.json"
   }
 }

@@ -1,0 +1,256 @@
+{
+  "issue": 427,
+  "parent": 413,
+  "source_cutoff": "2026-10-31",
+  "status": "All implementation PRs merged; final source/docs closeout belongs to #427.",
+  "merged_implementations": [
+    {
+      "pull_request": 430,
+      "title": "fix(openai_dart): support computer-use Responses input items",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/430",
+      "head_sha": "1cc26531ecaaeb7532ba1da0dffce002c354e8c3",
+      "merge_commit_sha": "6f72c9ba75db30820f6b74c2f1d831afcc92b8c1",
+      "merged_at": "2026-11-04T08:14:50Z"
+    },
+    {
+      "pull_request": 433,
+      "title": "fix(open_responses): cancel stalled response streams",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/433",
+      "head_sha": "9efbe2b0b01224dfa74daf7dfd0c41fc165331fc",
+      "merge_commit_sha": "d754d662f38a34b0f8bdd54286e3c4218bd077c2",
+      "merged_at": "2026-11-04T11:20:18Z"
+    },
+    {
+      "pull_request": 435,
+      "title": "feat(openai_dart)!: support Decisions GA inputs and caching",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/435",
+      "head_sha": "6588494852d96793dc0ca88b8d6ffbaf72e89980",
+      "merge_commit_sha": "d7ef952f189fed842e309b47e1b0c818ab0d8512",
+      "merged_at": "2026-11-04T10:44:25Z"
+    },
+    {
+      "pull_request": 436,
+      "title": "fix(openai_dart)!: correct Responses image tool option types",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/436",
+      "head_sha": "ed6a711c15b809845301928a4f341473f5598e2e",
+      "merge_commit_sha": "35e2d435bbe7f35ac40078b22c105c56c068fe23",
+      "merged_at": "2026-11-04T13:12:15Z"
+    },
+    {
+      "pull_request": 439,
+      "title": "fix(openai_dart): propagate streaming request cancellation",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/439",
+      "head_sha": "543b043ebc2cbea4ec7acdec7a569f66851d6b32",
+      "merge_commit_sha": "bf50eb8dfe946060c78f51e24e15aeab2b685fbe",
+      "merged_at": "2026-11-04T11:25:00Z"
+    },
+    {
+      "pull_request": 440,
+      "title": "feat(openai_dart)!: add cache TTL overrides and hosted tool usage",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/440",
+      "head_sha": "62101449aa989683ebc235c32f554d432aa665be",
+      "merge_commit_sha": "5061f42cce2495e10bced8ac56090b506c59e513",
+      "merged_at": "2026-11-04T12:38:40Z"
+    },
+    {
+      "pull_request": 442,
+      "title": "feat(openai_dart): add bounded Responses WebSocket sessions",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/442",
+      "head_sha": "40f471f3401514f6d7263e1427971c9aae8af33d",
+      "merge_commit_sha": "b7b26957b0aa24cca5aeaabb335afb140e1a1e45",
+      "merged_at": "2026-11-04T14:10:19Z"
+    },
+    {
+      "pull_request": 443,
+      "title": "fix(openai_dart)!: decode native MCP response output items",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/443",
+      "head_sha": "c4f998105bafccffbe39a0d659ee1debfc25eb76",
+      "merge_commit_sha": "eed64e89576f9d977fb0cf7728d766cf898f079a",
+      "merged_at": "2026-11-04T14:50:33Z"
+    },
+    {
+      "pull_request": 444,
+      "title": "feat(openai_dart)!: add typed reasoning replay",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/444",
+      "head_sha": "f3debcb196cf6788ef37fb2238e11fdd4ffca7c0",
+      "merge_commit_sha": "ceca52b8dff7fd193eb8886e0dff7cb9b68b79b6",
+      "merged_at": "2026-11-04T15:37:33Z"
+    },
+    {
+      "pull_request": 446,
+      "title": "feat(openai_dart)!: add voice WebSocket recovery",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/446",
+      "head_sha": "9e79bb0b68e601a90b545e4e07a2bdb49759f520",
+      "merge_commit_sha": "a8d35249d702140f4a95d733bfcc94baad97528a",
+      "merged_at": "2026-11-04T16:31:51Z"
+    },
+    {
+      "pull_request": 448,
+      "title": "feat(openai_dart): create prompt voices and delete saved voices",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/448",
+      "head_sha": "9c5a8f6aa5fff6e939db216cc7bd75950daf1ffd",
+      "merge_commit_sha": "9a83b911351b2985a0ce1fe045ed4731c724831b",
+      "merged_at": "2026-11-04T16:51:20Z"
+    },
+    {
+      "pull_request": 449,
+      "title": "feat(openai_dart)!: integrate Decisions with Live sessions",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/449",
+      "head_sha": "abaae750f75cf879fed3927c3ded786bf91bdab5",
+      "merge_commit_sha": "6e1e5313ae5bb24b5f61443acc8f69ce19f051e7",
+      "merged_at": "2026-11-04T17:45:42Z"
+    },
+    {
+      "pull_request": 450,
+      "title": "feat(openai_dart)!: add Live audio fixtures and SIP DTMF",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/450",
+      "head_sha": "419540fce9c2f4e1399024eaefacba3836de75ae",
+      "merge_commit_sha": "532a43e9fb3094f026571636c3b017fc4a4272fd",
+      "merged_at": "2026-11-04T18:32:57Z"
+    },
+    {
+      "pull_request": 451,
+      "title": "feat(openai_dart)!: add named custom tool choices",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/451",
+      "head_sha": "4270c636e27cca54296907aefce1218c4fffa8ab",
+      "merge_commit_sha": "52cceefbd87b55d89fd16331af28874c2acd65a5",
+      "merged_at": "2026-11-04T18:49:42Z"
+    },
+    {
+      "pull_request": 452,
+      "title": "feat(openai_dart)!: add Realtime input and audio controls",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/452",
+      "head_sha": "27806dabad499b29e940a1acdf14672a0d3c5c9b",
+      "merge_commit_sha": "ebd626a2a7e39ba37493162ac9677ef4670da754",
+      "merged_at": "2026-11-04T19:31:47Z"
+    },
+    {
+      "pull_request": 453,
+      "title": "feat(openai_dart)!: add Agent context and review settings",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/453",
+      "head_sha": "b31e93b2ecc91ee47dc50745f6713c803a5e5ebe",
+      "merge_commit_sha": "aa8867ccaab68bba254b99272861c74c7bb0e954",
+      "merged_at": "2026-11-04T20:10:36Z"
+    },
+    {
+      "pull_request": 454,
+      "title": "feat(openai_dart): add Agent automations and invocations",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/454",
+      "head_sha": "68d0ce0aeef6d1fd12d2c37605e62edc756d4271",
+      "merge_commit_sha": "cb68105f33747ee9f78a88e9018b5cdac537e006",
+      "merged_at": "2026-11-04T20:49:49Z"
+    },
+    {
+      "pull_request": 455,
+      "title": "feat(openai_dart)!: add runtime configuration snapshots",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/455",
+      "head_sha": "05b2049603ee9c0c41e568f5604d99ef0a7ba4a3",
+      "merge_commit_sha": "091972d402430b03daf4840faed4c445131649db",
+      "merged_at": "2026-11-04T21:24:32Z"
+    },
+    {
+      "pull_request": 456,
+      "title": "feat(openai_dart)!: add environment webhook notifications",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/456",
+      "head_sha": "4256894467bcfea4c1d138f1be36fb4bbfae6bd9",
+      "merge_commit_sha": "7c8115209e7a0fab1ea0512b583a649b185a474b",
+      "merged_at": "2026-11-04T21:34:40Z"
+    },
+    {
+      "pull_request": 457,
+      "title": "feat(openai_dart): add isolated Admin keys storage and usage APIs",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/457",
+      "head_sha": "74ac5393c1fc776ebb442425322b719a5bb2f21f",
+      "merge_commit_sha": "fb211b05590e68761c0866cb766771e879f4df8a",
+      "merged_at": "2026-11-04T21:45:51Z"
+    },
+    {
+      "pull_request": 458,
+      "title": "feat(openai_dart)!: add image safety markup and tool failures",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/458",
+      "head_sha": "edda4d625cc87bc8ab284ec2f3d0ff173f12b8dd",
+      "merge_commit_sha": "6f08922b4e4a40fcaa93d1f55d4ddf78f9fa283a",
+      "merged_at": "2026-11-04T22:03:10Z"
+    },
+    {
+      "pull_request": 459,
+      "title": "feat(openai_dart): add session recovery and browser workflows",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/459",
+      "head_sha": "7eb922da6dfe1fcea319dfc770b815f476659689",
+      "merge_commit_sha": "29d2273fb0e4fc8ecac348b1006911aaece106ff",
+      "merged_at": "2026-11-04T22:11:00Z"
+    },
+    {
+      "pull_request": 460,
+      "title": "feat(openai_dart): add Vertex Responses and regional routing",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/460",
+      "head_sha": "d4dc5c3b8568a165f625cf07813b722aaf9f09f0",
+      "merge_commit_sha": "45c92a720bbbf9967b680d475a36b21379c381ae",
+      "merged_at": "2026-11-04T22:33:28Z"
+    },
+    {
+      "pull_request": 461,
+      "title": "fix(api-toolkit): verify unchanged untracked enum completeness",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/461",
+      "head_sha": "376a798cc6e91f37dd4e7cf44389ae7727c0435e",
+      "merge_commit_sha": "86f6fc809a66d8194c67326574334d3df1008ee5",
+      "merged_at": "2026-11-04T22:18:47Z"
+    },
+    {
+      "pull_request": 462,
+      "title": "fix(openai_dart): validate Live image replay errors",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/462",
+      "head_sha": "283c342e8549b555a08ca2233df67214bf707257",
+      "merge_commit_sha": "6fc4fc0a5a2f27d823ff169539af83b552a484b8",
+      "merged_at": "2026-11-04T22:52:25Z"
+    },
+    {
+      "pull_request": 463,
+      "title": "feat(openai_dart): add lazy idle-session run observation",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/463",
+      "head_sha": "07392ce0e045eb0e8ac7060927df259843b332d8",
+      "merge_commit_sha": "6c86883c1b5501e008597fb309eae2ffb62c2291",
+      "merged_at": "2026-11-04T22:56:31Z"
+    },
+    {
+      "pull_request": 464,
+      "title": "fix(openai_dart)!: align Live cache TTLs and search URLs",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/464",
+      "head_sha": "a747fea65389b3039884b805cab93c1b8929bdfb",
+      "merge_commit_sha": "62f0f20865b2ad5f94a5743178836019fc1cd33b",
+      "merged_at": "2026-11-04T23:11:23Z"
+    },
+    {
+      "pull_request": 465,
+      "title": "feat(openai_dart): add opt-in Agent function dispatch",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/465",
+      "head_sha": "5ddea2923a3e33c6b3a37a015e4260143475c706",
+      "merge_commit_sha": "d3dd201da7a0b0882eb98818cabb3d97f12ce8df",
+      "merged_at": "2026-11-04T23:16:11Z"
+    },
+    {
+      "pull_request": 466,
+      "title": "feat(openai_dart): collect and validate completed Agent results",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/466",
+      "head_sha": "790f9fc029a2d2f00f094b8cc38782cfd8035e76",
+      "merge_commit_sha": "223810a4cc96bc8167a4ae5d7ac4dc3e5250e393",
+      "merged_at": "2026-11-04T23:36:09Z"
+    },
+    {
+      "pull_request": 467,
+      "title": "feat(openai_dart): add Agent file and artifact helpers",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/467",
+      "head_sha": "a69884b007208bffb004c20cdd46532d20e762af",
+      "merge_commit_sha": "cc01bb596f600ba6adc036bf908fc5f3c540c7d8",
+      "merged_at": "2026-11-04T23:58:08Z"
+    },
+    {
+      "pull_request": 468,
+      "title": "fix: discover source files beneath hidden checkout paths",
+      "url": "https://github.com/davidmigloz/ai_clients_dart/pull/468",
+      "head_sha": "74aef2169bb2fafc760e3c931c5c0f999e3a1273",
+      "merge_commit_sha": "6d9aeab0a20e59fa86e82ace936bf62237711588",
+      "merged_at": "2026-11-05T00:29:25Z"
+    }
+  ]
+}
