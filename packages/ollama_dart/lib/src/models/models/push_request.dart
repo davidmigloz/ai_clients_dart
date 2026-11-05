@@ -51,11 +51,14 @@ class PushRequest {
       identical(this, other) ||
       other is PushRequest &&
           runtimeType == other.runtimeType &&
-          model == other.model;
+          model == other.model &&
+          insecure == other.insecure &&
+          stream == other.stream;
 
   @override
-  int get hashCode => model.hashCode;
+  int get hashCode => Object.hash(model, insecure, stream);
 
   @override
-  String toString() => 'PushRequest(model: $model)';
+  String toString() =>
+      'PushRequest(model: $model, insecure: $insecure, stream: $stream)';
 }
