@@ -22,7 +22,8 @@
     "version": "version",
     "system_one": "system_one",
     "blobs": "blobs",
-    "web": "web"
+    "web": "web",
+    "audio": "audio"
   },
   "excluded_from_examples": [],
   "drift_patterns": [

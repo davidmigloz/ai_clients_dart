@@ -45,6 +45,7 @@
 /// - **Chat Completions**: Multi-turn conversations with tool calling
 /// - **Text Generation**: Raw text generation with streaming
 /// - **Embeddings**: Text, image, and audio embedding inputs
+/// - **Audio**: Speech, transcription, and translation, with streaming
 /// - **Model Management**: List, pull, push, create, copy, delete models
 /// - **Thinking Mode**: Extended reasoning for supported models
 /// - **Structured Output**: JSON schema-constrained generation
@@ -76,6 +77,14 @@ export 'src/errors/exceptions.dart'
         StreamException,
         TimeoutException,
         ValidationException;
+// Audio Models
+export 'src/models/audio/audio_file.dart';
+export 'src/models/audio/audio_text_request.dart';
+export 'src/models/audio/audio_text_response_format.dart';
+export 'src/models/audio/speech_request.dart';
+export 'src/models/audio/speech_response_format.dart';
+export 'src/models/audio/transcription_response.dart';
+export 'src/models/audio/transcription_stream_event.dart';
 // Chat Models
 export 'src/models/chat/chat_message.dart'
     show

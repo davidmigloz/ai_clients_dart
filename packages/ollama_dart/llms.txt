@@ -10,6 +10,8 @@
 
 ## Examples
 
+- [audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/audio_example.dart): Speech generation, transcription, translation, and streaming.
+
 - [chat_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/chat_example.dart) (~529 tokens): Chat completions.
 - [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/models_example.dart) (~786 tokens): Model management.
 - [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/streaming_example.dart) (~536 tokens): Streaming responses.

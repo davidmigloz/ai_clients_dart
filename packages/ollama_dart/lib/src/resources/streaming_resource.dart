@@ -91,7 +91,34 @@ mixin StreamingResource on ResourceBase {
     required http.Request Function() createRequest,
     required T Function(Map<String, dynamic>) fromJson,
     Future<void>? abortTrigger,
+  }) => _streamBody(
+    createRequest: createRequest,
+    abortTrigger: abortTrigger,
+    transform: (body) => parseNDJSON(body).map((json) {
+      if (json['error'] != null) throwInlineStreamError(json);
+      return fromJson(json);
+    }),
+  );
+
+  /// Streams raw response bytes without buffering or decoding binary audio.
+  ///
+  /// Subscription cancellation and [abortTrigger] cancel the pending request
+  /// and active response body. HTTP failures use the normal error hierarchy.
+  Stream<List<int>> streamBytes({
+    required http.Request Function() createRequest,
+    Future<void>? abortTrigger,
+  }) => _streamBody(
+    createRequest: createRequest,
+    abortTrigger: abortTrigger,
+    transform: (body) => body,
+  );
+
+  Stream<T> _streamBody<T>({
+    required http.Request Function() createRequest,
+    required Stream<T> Function(Stream<List<int>>) transform,
+    Future<void>? abortTrigger,
   }) {
+    ensureNotClosed?.call();
     final requestAbort = Completer<void>();
     StreamSubscription<dynamic>? subscription;
     late StreamController<T> controller;
@@ -165,15 +192,9 @@ mixin StreamingResource on ResourceBase {
             },
           );
         } else {
-          subscription = parseNDJSON(response.stream).listen(
-            (json) {
-              if (stopped) return;
-              try {
-                if (json['error'] != null) throwInlineStreamError(json);
-                controller.add(fromJson(json));
-              } catch (error, trace) {
-                finish(error, trace);
-              }
+          subscription = transform(response.stream).listen(
+            (event) {
+              if (!stopped) controller.add(event);
             },
             onError: finish,
             onDone: finish,
@@ -226,7 +247,10 @@ mixin StreamingResource on ResourceBase {
           ..headers.addAll(request.headers)
           ..headers['Authorization'] = 'Bearer $token'
           ..bodyBytes = request.bodyBytes
-          ..encoding = request.encoding,
+          ..encoding = request.encoding
+          ..followRedirects = request.followRedirects
+          ..maxRedirects = request.maxRedirects
+          ..persistentConnection = request.persistentConnection,
       NoAuthCredentials() => request,
     };
   }
@@ -252,7 +276,10 @@ mixin StreamingResource on ResourceBase {
         ..headers.addAll(request.headers)
         ..headers['X-Request-ID'] = requestId
         ..bodyBytes = request.bodyBytes
-        ..encoding = request.encoding;
+        ..encoding = request.encoding
+        ..followRedirects = request.followRedirects
+        ..maxRedirects = request.maxRedirects
+        ..persistentConnection = request.persistentConnection;
 
       return (updatedRequest, requestId);
     }
@@ -268,7 +295,12 @@ mixin StreamingResource on ResourceBase {
     try {
       final errorDetails = jsonDecode(response.body);
       if (errorDetails is Map<String, dynamic>) {
-        message = errorDetails['error']?.toString() ?? message;
+        final error = errorDetails['error'];
+        message = switch (error) {
+          String() => error,
+          Map<String, dynamic>() => error['message']?.toString() ?? message,
+          _ => message,
+        };
       }
     } catch (_) {
       if (response.body.isNotEmpty && response.body.length < 200) {
