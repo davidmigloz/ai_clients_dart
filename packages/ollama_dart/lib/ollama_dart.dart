@@ -119,6 +119,7 @@ export 'src/models/models/copy_request.dart' show CopyRequest;
 export 'src/models/models/create_request.dart' show CreateRequest;
 export 'src/models/models/delete_request.dart' show DeleteRequest;
 export 'src/models/models/list_response.dart' show ListResponse;
+export 'src/models/models/manifest_summary.dart' show ManifestSummary;
 export 'src/models/models/model_details.dart' show ModelDetails;
 export 'src/models/models/model_summary.dart' show ModelSummary;
 export 'src/models/models/model_tensor.dart' show ModelTensor;
@@ -127,6 +128,9 @@ export 'src/models/models/ps_response.dart' show PsResponse;
 export 'src/models/models/pull_request.dart' show PullRequest;
 export 'src/models/models/push_request.dart' show PushRequest;
 export 'src/models/models/running_model.dart' show RunningModel;
+export 'src/models/models/show_manifest.dart' show ShowManifest;
+export 'src/models/models/show_manifests_response.dart'
+    show ShowManifestsResponse;
 export 'src/models/models/show_request.dart' show ShowRequest;
 export 'src/models/models/show_response.dart' show ShowResponse;
 export 'src/models/models/status_event.dart' show StatusEvent;

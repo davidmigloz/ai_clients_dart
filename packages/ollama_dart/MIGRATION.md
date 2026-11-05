@@ -6,6 +6,14 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Unreleased model inspection
+
+`models.copy` returns `Future<StatusResponse>` to expose server warnings.
+Existing calls that await and discard its result continue to work. Code storing
+its method tear-off with an explicit function type should review that type.
+`models.showManifests` parses all-manifest inspection separately from normal
+`models.show`; use each manifest's `details` for model information.
+
 ## Migrating from v3.x to v4.0.0
 
 v4.0.0 adds `ThinkWithString` to the sealed thinking union. Exhaustive switches must handle this new branch. Existing resource methods, constructors, thinking enums, and experimental image-generation fields remain available. The minimum Dart SDK stays at 3.12, with no new runtime dependencies.

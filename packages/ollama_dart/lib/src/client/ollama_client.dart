@@ -269,6 +269,15 @@ class OllamaClient {
     );
   }
 
+  /// Checks that the server is responsive using `HEAD /`.
+  ///
+  /// HTTP and transport errors propagate through the normal client pipeline.
+  Future<void> heartbeat({Future<void>? abortTrigger}) async {
+    final request = http.Request('HEAD', _requestBuilder.buildUrl('/'))
+      ..headers.addAll(_requestBuilder.buildHeaders());
+    await _interceptorChain.execute(request, abortTrigger: abortTrigger);
+  }
+
   /// Throws a [StateError] if the client has been closed.
   void _ensureNotClosed() {
     if (_closed) {

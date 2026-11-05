@@ -5,8 +5,18 @@ import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 
 /// Request to create a model.
+///
+/// The const constructor retains supplied collection references. Keep them
+/// immutable; new list/capability fields decoded or replaced at runtime are
+/// copied into unmodifiable lists.
 @immutable
 class CreateRequest {
+  /// Local model tags to combine into a manifest list.
+  final List<String>? list;
+
+  /// Capabilities added to the inherited or inferred model capabilities.
+  final List<String>? capabilities;
+
   /// Name for the model to create.
   final String model;
 
@@ -96,6 +106,8 @@ class CreateRequest {
 
   /// Creates a [CreateRequest].
   const CreateRequest({
+    this.list,
+    this.capabilities,
     required this.model,
     this.from,
     this.template,
@@ -118,6 +130,14 @@ class CreateRequest {
 
   /// Creates a [CreateRequest] from JSON.
   factory CreateRequest.fromJson(Map<String, dynamic> json) => CreateRequest(
+    list: json['list'] == null
+        ? null
+        : List<String>.unmodifiable((json['list'] as List).cast<String>()),
+    capabilities: json['capabilities'] == null
+        ? null
+        : List<String>.unmodifiable(
+            (json['capabilities'] as List).cast<String>(),
+          ),
     model: json['model'] as String,
     from: json['from'] as String?,
     template: json['template'] as String?,
@@ -142,6 +162,8 @@ class CreateRequest {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (list != null) 'list': list,
+    if (capabilities != null) 'capabilities': capabilities,
     'model': model,
     if (from != null) 'from': from,
     if (template != null) 'template': template,
@@ -164,6 +186,8 @@ class CreateRequest {
 
   /// Creates a copy with replaced values.
   CreateRequest copyWith({
+    Object? list = unsetCopyWithValue,
+    Object? capabilities = unsetCopyWithValue,
     String? model,
     Object? from = unsetCopyWithValue,
     Object? template = unsetCopyWithValue,
@@ -184,6 +208,16 @@ class CreateRequest {
     Object? stream = unsetCopyWithValue,
   }) {
     return CreateRequest(
+      list: identical(list, unsetCopyWithValue)
+          ? this.list
+          : list == null
+          ? null
+          : List<String>.unmodifiable(list as List<String>),
+      capabilities: identical(capabilities, unsetCopyWithValue)
+          ? this.capabilities
+          : capabilities == null
+          ? null
+          : List<String>.unmodifiable(capabilities as List<String>),
       model: model ?? this.model,
       from: from == unsetCopyWithValue ? this.from : from as String?,
       template: template == unsetCopyWithValue
@@ -240,6 +274,8 @@ class CreateRequest {
       identical(this, other) ||
       other is CreateRequest &&
           runtimeType == other.runtimeType &&
+          listsEqual(list, other.list) &&
+          listsEqual(capabilities, other.capabilities) &&
           model == other.model &&
           from == other.from &&
           template == other.template &&
@@ -261,6 +297,8 @@ class CreateRequest {
 
   @override
   int get hashCode => Object.hashAll([
+    listHash(list),
+    listHash(capabilities),
     model,
     from,
     template,
@@ -284,6 +322,8 @@ class CreateRequest {
   @override
   String toString() =>
       'CreateRequest('
+      'list: $list, '
+      'capabilities: $capabilities, '
       'model: $model, '
       'from: $from, '
       'template: $template, '

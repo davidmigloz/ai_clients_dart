@@ -6,6 +6,9 @@ import '../common/equality_helpers.dart';
 /// Information about a currently running model.
 @immutable
 class RunningModel {
+  /// Runner selected for the loaded model.
+  final String? runner;
+
   /// Display name of the running model (may include a tag, e.g., `llama3.2:latest`).
   final String? name;
 
@@ -32,6 +35,7 @@ class RunningModel {
 
   /// Creates a [RunningModel].
   const RunningModel({
+    this.runner,
     this.name,
     this.model,
     this.size,
@@ -44,6 +48,7 @@ class RunningModel {
 
   /// Creates a [RunningModel] from JSON.
   factory RunningModel.fromJson(Map<String, dynamic> json) => RunningModel(
+    runner: json['runner'] as String?,
     name: json['name'] as String?,
     model: json['model'] as String?,
     size: json['size'] as int?,
@@ -56,6 +61,7 @@ class RunningModel {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (runner != null) 'runner': runner,
     if (name != null) 'name': name,
     if (model != null) 'model': model,
     if (size != null) 'size': size,
@@ -68,6 +74,7 @@ class RunningModel {
 
   /// Creates a copy with replaced values.
   RunningModel copyWith({
+    Object? runner = unsetCopyWithValue,
     Object? name = unsetCopyWithValue,
     Object? model = unsetCopyWithValue,
     Object? size = unsetCopyWithValue,
@@ -78,6 +85,9 @@ class RunningModel {
     Object? contextLength = unsetCopyWithValue,
   }) {
     return RunningModel(
+      runner: identical(runner, unsetCopyWithValue)
+          ? this.runner
+          : runner as String?,
       name: name == unsetCopyWithValue ? this.name : name as String?,
       model: model == unsetCopyWithValue ? this.model : model as String?,
       size: size == unsetCopyWithValue ? this.size : size as int?,
@@ -102,6 +112,7 @@ class RunningModel {
       identical(this, other) ||
       other is RunningModel &&
           runtimeType == other.runtimeType &&
+          runner == other.runner &&
           name == other.name &&
           model == other.model &&
           size == other.size &&
@@ -113,6 +124,7 @@ class RunningModel {
 
   @override
   int get hashCode => Object.hash(
+    runner,
     name,
     model,
     size,
@@ -126,6 +138,7 @@ class RunningModel {
   @override
   String toString() =>
       'RunningModel('
+      'runner: $runner, '
       'name: $name, '
       'model: $model, '
       'size: $size, '
