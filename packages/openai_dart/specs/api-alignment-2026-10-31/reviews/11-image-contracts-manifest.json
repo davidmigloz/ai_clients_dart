@@ -5,11 +5,11 @@
   "types": {
     "BetaImageGenOutputTokensDetails": {
       "spec": "main",
-      "schema": "BetaImageGenOutputTokensDetails",
       "kind": "object",
-      "dart_class": "ImagesUsageOutputTokensDetails",
-      "file": "lib/src/models/images/image_response.dart",
-      "note": "Reuses the identical GA output-token detail object; no duplicate class or accounting change."
+      "dart_class": "ImageGenOutputTokensDetails",
+      "file": "lib/src/models/responses/response_tool_usage.dart",
+      "schema": "BetaImageGenOutputTokensDetails",
+      "note": "Shared GA/beta receive-only hosted-tool usage; required counts fail contextually, absent optional cache counts stay unknown."
     },
     "BetaImageGenTool": {
       "spec": "main",

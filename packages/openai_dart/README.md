@@ -20,7 +20,7 @@ Dart and Flutter client for the **[OpenAI API](https://platform.openai.com/docs/
 - [Usage](#usage)
   - [Responses API](#responses-api)
   - [Other model APIs](#other-model-apis)
-  - [Images, audio, and video](#images-audio-and-video)
+  - [Images and audio](#images-audio-and-video)
   - [Files, batches, and model evaluation](#files-batches-and-model-evaluation)
   - [Webhooks and safety](#webhooks-and-safety)
   - [Advanced Responses workflows](#advanced-responses-workflows)
@@ -38,9 +38,9 @@ Dart and Flutter client for the **[OpenAI API](https://platform.openai.com/docs/
 ## Features
 
 - Responses API: text generation, streaming, conversations, structured output, vision, and tool calling.
-- Chat Completions, Decisions, embeddings, and image, audio, and video generation.
+- Chat Completions, Decisions, embeddings, and image and audio generation.
 - Built-in web search, file search, Code Interpreter, computer use, and custom tools.
-- Files, batches, fine-tuning, evals, signed webhooks, and safety resources.
+- Files, batches, fine-tuning, signed webhooks, and safety resources.
 - Realtime and Live sessions, persistent Responses WebSockets, Agents, and Vaults.
 - Pure Dart support for Dart and Flutter on mobile, desktop, web, and servers.
 
@@ -154,9 +154,9 @@ Omitted options retain their values; `defaultHeaders: {}` clears global headers.
 </details>
 
 <details>
-<summary><b>Imports for Realtime and deprecated Assistants APIs</b></summary>
+<summary><b>Imports for Realtime and retained Assistants types</b></summary>
 
-The main import is `package:openai_dart/openai_dart.dart`. Realtime uses `package:openai_dart/openai_dart_realtime.dart`; deprecated Assistants resources use `package:openai_dart/openai_dart_assistants.dart`.
+The main import is `package:openai_dart/openai_dart.dart`. Realtime uses `package:openai_dart/openai_dart_realtime.dart`. Retained Assistants types use `package:openai_dart/openai_dart_assistants.dart`; that API shut down on August 26, 2026. See the [Responses migration guide](https://developers.openai.com/api/docs/assistants/migration).
 
 </details>
 
@@ -556,6 +556,18 @@ Future<void> main() async {
 
 </details>
 
+<a id="which-model-ids-and-account-settings-can-i-use"></a>
+<details>
+<summary><b>Which model IDs and account settings can I use?</b></summary>
+
+Model IDs are open strings, including `gpt-6.1-terra`. GPT-6 Rosalind requires trusted access for authorized internal research; an ID does not grant access. See the [model catalog](https://developers.openai.com/api/docs/models) and [API changelog](https://developers.openai.com/api/docs/changelog).
+
+Paid usage tiers **Build, Launch, and Grow**, project service-tier permissions, and subscription API credits are managed by OpenAI. They are separate from a request's `serviceTier`. Review [rate limits](https://developers.openai.com/api/docs/guides/rate-limits) and [credit eligibility](https://developers.openai.com/api/docs/guides/chatgpt-api-credits); the client does not change account entitlements.
+
+→ [Responses model-call example](example/responses_example.dart)
+
+</details>
+
 ### Other model APIs
 
 <a id="how-do-i-use-chat-completions"></a>
@@ -674,7 +686,9 @@ Future<void> main() async {
 
 </details>
 
-### Images, audio, and video
+<a id="images-audio-and-video"></a>
+
+### Images and audio
 
 <a id="how-do-i-generate-and-edit-images-with-gpt-image-25"></a>
 <details>
@@ -708,6 +722,8 @@ Future<void> main() async {
   }
 }
 ```
+
+GPT Image 1 retired on October 23, 2026. Older `gpt-image-1.5`, `gpt-image-1-mini` and `chatgpt-image-latest` retire on December 1; use Sunburst or Flare. See the [deprecation schedule](https://developers.openai.com/api/docs/deprecations).
 
 → [Full example](example/images_example.dart) · [Model selection](example/image_model_selection_example.dart)
 
@@ -758,16 +774,6 @@ Future<void> main() async {
 ```
 
 → [Full example](example/audio_example.dart) · [Streaming speech](example/speech_streaming_example.dart) · [Transcription and translation](example/existing_audio_example.dart)
-
-</details>
-
-<a id="how-do-i-generate-videos"></a>
-<details>
-<summary><b>How do I generate videos?</b></summary>
-
-Use `client.videos.create` to start a video job, poll `retrieve` until completion, then download with `retrieveContent`. The example also covers editing and extension.
-
-→ [Full example](example/videos_example.dart)
 
 </details>
 
@@ -853,16 +859,6 @@ Use `client.batches.create` to submit a JSONL input file for asynchronous proces
 Create a job through `client.fineTuning.jobs` with a training file ID, then retrieve its status and resulting model name.
 
 → [Full example](example/fine_tuning_example.dart)
-
-</details>
-
-<a id="how-do-i-evaluate-models"></a>
-<details>
-<summary><b>How do I evaluate models?</b></summary>
-
-Use `client.evals` to define grading criteria and run evaluations against test data.
-
-→ [Full example](example/evals_example.dart)
 
 </details>
 
@@ -1022,7 +1018,7 @@ Opt into connection recovery and handle queued or unsent requests explicitly. Re
 <details>
 <summary><b>How do I use async function and custom tools?</b></summary>
 
-Declare async tools and return results with their original call IDs. Continue from the latest response ID when concurrent jobs complete.
+Declare async tools and return results with their original call IDs. Continue from the latest response ID when concurrent jobs complete. Use `ResponseToolChoice.custom(name: 'my_tool')` to select a declared custom tool.
 
 → [Full example](example/async_tools_example.dart)
 
@@ -1593,6 +1589,28 @@ See [the offline Admin example](example/admin_example.dart) for synthetic key va
 
 </details>
 
+### Legacy and retiring APIs
+
+<a id="how-do-i-generate-videos"></a>
+<details>
+<summary><b>What remains of the Videos API?</b></summary>
+
+The Videos API and Sora 2 shut down on September 24, 2026. Retained types and this example are historical compatibility references. See the [official deprecation schedule](https://developers.openai.com/api/docs/deprecations).
+
+→ [Historical example](example/videos_example.dart)
+
+</details>
+
+<a id="how-do-i-evaluate-models"></a>
+<details>
+<summary><b>What is the Evals retirement timeline?</b></summary>
+
+Evals became read-only on October 31 and is scheduled to shut down on November 30, 2026. Plan a migration using the [official retirement guidance](https://developers.openai.com/api/docs/deprecations). The retained example documents the historical API.
+
+→ [Historical example](example/evals_example.dart)
+
+</details>
+
 ## Error Handling
 
 <details>
@@ -1670,7 +1688,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [speech_streaming_example.dart](example/speech_streaming_example.dart) | **Offline.** buffered/byte/SSE speech, voice references and usage |
 | [existing_audio_example.dart](example/existing_audio_example.dart) | **Offline.** modern file fields, verbose/raw translation, open/custom Chat voices and AAC |
 | [chat_audio_example.dart](example/chat_audio_example.dart) | Chat audio output, ID-only replay, and partial stream accumulation |
-| [videos_example.dart](example/videos_example.dart) | Sora video generation, editing, and extension |
+| [videos_example.dart](example/videos_example.dart) | Historical Videos API reference; endpoint retired |
 | [realtime_example.dart](example/realtime_example.dart) | Realtime API (WebSocket and WebRTC) |
 | [realtime_input_example.dart](example/realtime_input_example.dart) | **Offline.** acknowledged history references, typed new input and out-of-band response output |
 | [realtime_translation_example.dart](example/realtime_translation_example.dart) | **Offline.** scoped translation secret, noise strength, typed audio/transcripts and flush/close |
@@ -1694,7 +1712,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [uploads_example.dart](example/uploads_example.dart) | Large file multipart uploads |
 | [batches_example.dart](example/batches_example.dart) | Batch processing for async jobs |
 | [fine_tuning_example.dart](example/fine_tuning_example.dart) | Fine-tuning job management |
-| [evals_example.dart](example/evals_example.dart) | Model evaluation and testing |
+| [evals_example.dart](example/evals_example.dart) | Historical Evals reference; read-only until November 30, 2026 |
 | [models_example.dart](example/models_example.dart) | Model listing and retrieval |
 | [moderation_example.dart](example/moderation_example.dart) | Content moderation |
 | [content_provenance_checks_example.dart](example/content_provenance_checks_example.dart) | Content provenance (C2PA/SynthID) detection |
@@ -1758,7 +1776,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [vaults_example.dart](example/vaults_example.dart) | **Offline.** Vault CRUD and write-only credential create/rotate with safe inspection |
 | [chatkit_example.dart](example/chatkit_example.dart) | ChatKit sessions and threads |
 | [skills_example.dart](example/skills_example.dart) | Skills management |
-| [assistants_example.dart](example/assistants_example.dart) | Assistants API (deprecated) |
+| [assistants_example.dart](example/assistants_example.dart) | Historical Assistants reference; endpoint retired |
 | [completions_example.dart](example/completions_example.dart) | Legacy completions API |
 
 </details>
@@ -1776,7 +1794,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | Embeddings | Text vectors with dimension control |
 | Images | Generation, editing, and streaming |
 | Audio | Speech, transcription, translation, voice consents, prompt/sample voice creation, and saved voice deletion; consent phrase lookup remains untyped |
-| Videos | Generation, editing, extension, and downloads |
+| Videos | Retained compatibility types; API shut down September 24, 2026 |
 | Realtime | WebSocket and WebRTC sessions, typed response input references, noise strength, Translation sockets, and opt-in recovery with explicit pending delivery |
 | Live | HTTP call controls, recordings, WebSockets, native Decisions delegation/triggers, audio fixtures, SIP DTMF, forks, transcript helpers, and opt-in recovery with fresh startup gating |
 | Files and Uploads | File management and large multipart uploads |
@@ -1784,7 +1802,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | Models | Listing and retrieval |
 | Moderations | Text and image moderation |
 | Fine-tuning | Job management; some grader/checkpoint operations pending |
-| Evals | Evaluation definitions and runs |
+| Evals | Read-only since October 31; scheduled shutdown November 30, 2026 |
 | Conversations | Conversation and item management |
 | Containers | Memory, network policy, skills, and files |
 | Content Provenance Checks | C2PA and SynthID inspection |
@@ -1794,10 +1812,11 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | Vaults | Vault management and write-only credentials |
 | Organization Admin | Separate Admin credentials; external keys/storage, project API-key updates, and Decisions usage (12 operations) |
 | ChatKit Beta and Skills | Sessions/threads and skills management |
-| Assistants, Threads, Messages, Runs, and Vector Stores | Deprecated; separate Assistants import |
-| Completions | Legacy text completions |
+| Assistants, Threads, Messages, and Runs | Historical types; Assistants API retired; separate import |
+| Vector Stores | File search storage and ingestion; separate Assistants import |
+| Completions | Legacy compatibility API; prefer Responses |
 
-Some Responses tool/configuration details, Agents helper workflows, and historical administration APIs remain outside current coverage. See the [API alignment inventory](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/specs/api-alignment/README.md) for the detailed scope.
+Some Responses tool/configuration details and historical administration APIs remain outside current coverage. See the [completed October alignment and remaining limits](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/specs/api-alignment-2026-10-31/README.md) for the detailed scope.
 
 </details>
 

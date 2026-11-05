@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print, deprecated_member_use_from_same_package
+// ignore_for_file: avoid_print, deprecated_member_use_from_same_package, unreachable_from_main
 /// Example demonstrating the Assistants API with OpenAI.
 ///
 /// This example shows how to create assistants, threads, and runs.
@@ -14,6 +14,14 @@ import 'package:openai_dart/openai_dart.dart'
 import 'package:openai_dart/openai_dart_assistants.dart';
 
 Future<void> main() async {
+  print('Historical Assistants example: API retired on August 26, 2026.');
+  print(
+    'Use Responses and Conversations; see https://developers.openai.com/api/docs/assistants/migration.',
+  );
+}
+
+/// Historical workflow retained for source reference.
+Future<void> historicalAssistantsWorkflow() async {
   // Create client from environment variable
   final client = OpenAIClient.fromEnvironment();
 

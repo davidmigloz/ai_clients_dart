@@ -1,34 +1,24 @@
-// ignore_for_file: avoid_print, unused_local_variable
+// ignore_for_file: avoid_print, unused_local_variable, unreachable_from_main
 import 'dart:async';
 
 import 'package:openai_dart/openai_dart.dart';
 
 /// Example demonstrating the Evals API for model evaluation.
 ///
-/// The Evals API allows you to:
+/// The former Evals API supported:
 /// - Create evaluations with various grading criteria
 /// - Run evaluations against data sources
 /// - Analyze results to understand model performance
 ///
-/// Before running this example, set the `OPENAI_API_KEY` environment variable.
+/// Historical reference: creation/run operations are no longer available.
+/// Running this file prints the retirement notice and makes no API calls.
 Future<void> main() async {
-  final client = OpenAIClient.fromEnvironment();
-
-  try {
-    // Example 1: Create an evaluation with a string check grader
-    await createBasicEvaluation(client);
-
-    // Example 2: Create an evaluation with multiple graders
-    await createMultiGraderEvaluation(client);
-
-    // Example 3: Run an evaluation and poll for results
-    await runEvaluationWithPolling(client);
-
-    // Example 4: List and analyze output items
-    await analyzeOutputItems(client);
-  } finally {
-    client.close();
-  }
+  print(
+    'Historical Evals example: read-only since October 31, 2026; retirement November 30.',
+  );
+  print(
+    'See https://developers.openai.com/api/docs/deprecations before migration.',
+  );
 }
 
 /// Creates a basic evaluation with a string check grader.

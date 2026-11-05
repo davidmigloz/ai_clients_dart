@@ -310,7 +310,9 @@ class LiveSessionCreateParams extends LiveJsonModel {
   /// Distinguishes omission from explicit null for delegation.
   final bool hasDelegation;
 
-  /// Ordered text-only history supplied before startup. Supports developer, user, and assistant messages with one text part each; at most 128 messages and 8,192 rendered tokens in total.
+  /// Ordered text-only history supplied before startup, with at most 128 messages.
+  /// Developer, user and assistant messages each contain one text part.
+  /// The rendered-token limit is configured by the service (8,192 by default).
   final List<LiveInitialItem>? input;
 
   /// Frontend instructions for voice, conversation, interruptions, and when to delegate. Start with the [Live prompting guide](https://developers.openai.com/api/docs/guides/live-prompting); put business rules and tool workflows in a separate [backend prompt](https://developers.openai.com/api/docs/guides/live-delegation#start-with-your-existing-backend-prompt). Limited to 16,384 client-supplied tokens. Omitted or blank instructions use server defaults. Immutable after startup.
@@ -590,7 +592,9 @@ class LiveSessionResourceParam extends LiveJsonModel {
   /// The unique ID of the Live session. Use this ID for sideband connections, forking, and recording download.
   final String id;
 
-  /// Ordered text-only history supplied before startup. Supports developer, user, and assistant messages with one text part each; at most 128 messages and 8,192 rendered tokens in total.
+  /// Ordered text-only history supplied before startup, with at most 128 messages.
+  /// Developer, user and assistant messages each contain one text part.
+  /// The rendered-token limit is configured by the service (8,192 by default).
   final List<LiveInitialItem>? input;
 
   /// Frontend instructions for voice, conversation, interruptions, and when to delegate. Start with the [Live prompting guide](https://developers.openai.com/api/docs/guides/live-prompting); put business rules and tool workflows in a separate [backend prompt](https://developers.openai.com/api/docs/guides/live-delegation#start-with-your-existing-backend-prompt). Limited to 16,384 client-supplied tokens. Omitted or blank instructions use server defaults. Immutable after startup.
@@ -1008,7 +1012,9 @@ class LiveMediaSessionCreateParams extends LiveJsonModel {
   /// Distinguishes omission from explicit null for delegation.
   final bool hasDelegation;
 
-  /// Ordered text-only history supplied before startup. Supports developer, user, and assistant messages with one text part each; at most 128 messages and 8,192 rendered tokens in total.
+  /// Ordered text-only history supplied before startup, with at most 128 messages.
+  /// Developer, user and assistant messages each contain one text part.
+  /// The rendered-token limit is configured by the service (8,192 by default).
   final List<LiveInitialItem>? input;
 
   /// Frontend instructions for voice, conversation, interruptions, and when to delegate. Start with the [Live prompting guide](https://developers.openai.com/api/docs/guides/live-prompting); put business rules and tool workflows in a separate [backend prompt](https://developers.openai.com/api/docs/guides/live-delegation#start-with-your-existing-backend-prompt). Limited to 16,384 client-supplied tokens. Omitted or blank instructions use server defaults. Immutable after startup.
@@ -1400,7 +1406,9 @@ class LiveCallAcceptSession extends LiveJsonModel {
   /// Distinguishes omission from explicit null for delegation.
   final bool hasDelegation;
 
-  /// Ordered text-only history supplied before startup. Supports developer, user, and assistant messages with one text part each; at most 128 messages and 8,192 rendered tokens in total.
+  /// Ordered text-only history supplied before startup, with at most 128 messages.
+  /// Developer, user and assistant messages each contain one text part.
+  /// The rendered-token limit is configured by the service (8,192 by default).
   final List<LiveInitialItem>? input;
 
   /// Frontend instructions for voice, conversation, interruptions, and when to delegate. Start with the [Live prompting guide](https://developers.openai.com/api/docs/guides/live-prompting); put business rules and tool workflows in a separate [backend prompt](https://developers.openai.com/api/docs/guides/live-delegation#start-with-your-existing-backend-prompt). Limited to 16,384 client-supplied tokens. Omitted or blank instructions use server defaults. Immutable after startup.

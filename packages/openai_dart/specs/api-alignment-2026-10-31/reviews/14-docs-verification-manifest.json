@@ -1,0 +1,455 @@
+{
+  "issue": 427,
+  "source_ref": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+  "types": {
+    "BetaPromptCacheBreakpointConfig": {
+      "spec": "main",
+      "kind": "object",
+      "schema": "BetaPromptCacheBreakpointConfig",
+      "dart_class": "PromptCacheBreakpointConfig",
+      "file": "lib/src/models/common/prompt_cache_breakpoint.dart",
+      "note": "Actual shared GA/beta request/receive breakpoint object; fixed explicit mode and optional 30m/12h override, as implemented/tested in #415. Not a top-level cache-options alias."
+    },
+    "BetaPromptCacheBreakpointParam": {
+      "spec": "main",
+      "kind": "object",
+      "schema": "BetaPromptCacheBreakpointParam",
+      "dart_class": "PromptCacheBreakpointConfig",
+      "file": "lib/src/models/common/prompt_cache_breakpoint.dart",
+      "note": "Actual shared GA/beta request/receive breakpoint object; fixed explicit mode and optional 30m/12h override, as implemented/tested in #415. Not a top-level cache-options alias."
+    },
+    "PromptCacheBreakpointParam": {
+      "spec": "main",
+      "kind": "object",
+      "schema": "PromptCacheBreakpointParam",
+      "dart_class": "PromptCacheBreakpointConfig",
+      "file": "lib/src/models/common/prompt_cache_breakpoint.dart",
+      "note": "Actual shared GA/beta request/receive breakpoint object; fixed explicit mode and optional 30m/12h override, as implemented/tested in #415. Not a top-level cache-options alias."
+    },
+    "FunctionCallStatusParam": {
+      "spec": "main",
+      "kind": "enum",
+      "schema": "FunctionCallStatusParam",
+      "dart_class": "DecisionToolStatus",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "note": "Actual closed writable Decisions history enum. Unknown request strings reject instead of introducing a writable unknown sentinel. Generic Responses counterpart remains separate."
+    },
+    "MessagePhaseParam": {
+      "spec": "main",
+      "kind": "enum",
+      "schema": "MessagePhaseParam",
+      "dart_class": "DecisionMessagePhase",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "note": "Actual closed writable Decisions history enum. Unknown request strings reject instead of introducing a writable unknown sentinel. Generic Responses counterpart remains separate."
+    }
+  },
+  "contextual_bindings": [
+    {
+      "schema": "DecisionInputAssistantContentParts",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "dart_context": "PartsDecisionAssistantContent.parts / toJson list",
+      "representation": "Typed immutable array branch, not an invented object DTO. Canonical item unions retained; aggregate request bounds remain service-owned as recorded in #414.",
+      "receipt": "specs/api-alignment-2026-10-31/reviews/14-docs-verification-manifest.json"
+    },
+    {
+      "schema": "DecisionInputDeveloperContentParts",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "dart_context": "PartsDecisionDeveloperContent.parts / toJson list",
+      "representation": "Typed immutable array branch, not an invented object DTO. Canonical item unions retained; aggregate request bounds remain service-owned as recorded in #414.",
+      "receipt": "specs/api-alignment-2026-10-31/reviews/14-docs-verification-manifest.json"
+    },
+    {
+      "schema": "DecisionInputToolOutputContentParts",
+      "file": "lib/src/models/decisions/decision_history.dart",
+      "dart_context": "PartsDecisionToolOutput.parts / toJson list",
+      "representation": "Typed immutable array branch, not an invented object DTO. Canonical item unions retained; aggregate request bounds remain service-owned as recorded in #414.",
+      "receipt": "specs/api-alignment-2026-10-31/reviews/14-docs-verification-manifest.json"
+    },
+    {
+      "schema": "DecisionsUsageErrorDetails",
+      "file": "lib/src/utils/http_error_response.dart",
+      "dart_context": "parseHttpErrorResponse / ApiException",
+      "representation": "Error response envelope for GET /organization/usage/decisions, implemented by #426 using the shared concrete HTTP-error layer. Required nullable code/param, message/type, error object or permission string remain caller-readable via fields/raw body. No standalone success/request DTO or strict error-admission parser is invented.",
+      "receipt": "specs/api-alignment-2026-10-31/reviews/14-docs-verification-manifest.json",
+      "cross_ticket_implementation": 457
+    },
+    {
+      "schema": "DecisionsUsageErrorResponse",
+      "file": "lib/src/utils/http_error_response.dart",
+      "dart_context": "parseHttpErrorResponse / ApiException",
+      "representation": "Error response envelope for GET /organization/usage/decisions, implemented by #426 using the shared concrete HTTP-error layer. Required nullable code/param, message/type, error object or permission string remain caller-readable via fields/raw body. No standalone success/request DTO or strict error-admission parser is invented.",
+      "receipt": "specs/api-alignment-2026-10-31/reviews/14-docs-verification-manifest.json",
+      "cross_ticket_implementation": 457
+    },
+    {
+      "schema": "DecisionsUsagePermissionErrorResponse",
+      "file": "lib/src/utils/http_error_response.dart",
+      "dart_context": "parseHttpErrorResponse / ApiException",
+      "representation": "Error response envelope for GET /organization/usage/decisions, implemented by #426 using the shared concrete HTTP-error layer. Required nullable code/param, message/type, error object or permission string remain caller-readable via fields/raw body. No standalone success/request DTO or strict error-admission parser is invented.",
+      "receipt": "specs/api-alignment-2026-10-31/reviews/14-docs-verification-manifest.json",
+      "cross_ticket_implementation": 457
+    },
+    {
+      "schema": "PublicProjectResidency",
+      "disposition": "intentional_exclusion",
+      "reason": "Fifteen project storage/processing settings; project CRUD remains excluded. Four named runtime OpenAI URL choices are not a mapping for this enum.",
+      "receipt": "specs/api-alignment-2026-10-31/reviews/14-docs-verification-manifest.json"
+    },
+    {
+      "schema": "UsageCompletionsResult",
+      "disposition": "intentional_exclusion",
+      "reason": "Conditional older Admin completion-usage change is not applicable: no existing supported completion-usage model or endpoint. Decisions usage implements its own canonical 30-minute write count. Historical Admin remains excluded.",
+      "receipt": "specs/api-alignment-2026-10-31/reviews/14-docs-verification-manifest.json"
+    }
+  ],
+  "inline_contexts": [
+    {
+      "receipt": "specs/api-alignment-2026-10-31/reviews/10-agent-automations-manifest.json",
+      "dart_class": "AgentAutomationList",
+      "schema_context": "listAgentAutomations 200 inline list",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    {
+      "receipt": "specs/api-alignment-2026-10-31/reviews/10-agent-automations-manifest.json",
+      "dart_class": "AgentAutomationInvocationList",
+      "schema_context": "listAgentAutomationInvocations 200 inline list",
+      "file": "lib/src/models/agents/agent_automation_models.dart"
+    },
+    {
+      "receipt": "specs/api-alignment-2026-10-31/reviews/13-admin-delta-manifest.json",
+      "dart_class": "ExternalStorageProviderParams",
+      "schema_context": "CreateExternalStorageBody.provider",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    {
+      "receipt": "specs/api-alignment-2026-10-31/reviews/13-admin-delta-manifest.json",
+      "dart_class": "ExternalStorageProvider",
+      "schema_context": "ExternalStorageResponse.provider",
+      "file": "lib/src/models/admin/external_storage.dart"
+    },
+    {
+      "receipt": "specs/api-alignment-2026-10-31/reviews/13-admin-delta-manifest.json",
+      "dart_class": "ProjectApiKeyOwner",
+      "schema_context": "ProjectApiKey.owner inline optional members",
+      "file": "lib/src/models/admin/project_api_key.dart"
+    }
+  ],
+  "metadata_only_schemas": [
+    "AssistantSupportedModels",
+    "AudioTranscription",
+    "BetaModelIdsShared",
+    "CloseSubagentCallItemResource",
+    "CreateChatCompletionRequest",
+    "CreateModerationRequest",
+    "CreateSpeechRequest",
+    "CreateSubagentCallItemResource",
+    "CreateThreadAndRunRequest",
+    "CreateTranscriptionRequest",
+    "InlineCapabilitySourceParamBase64",
+    "InterruptSubagentCallItemResource",
+    "ModelIdsShared",
+    "ResumeSubagentCallItemResource",
+    "SendSubagentInputCallItemResource",
+    "WaitForSubagentsCallItemResource",
+    "input"
+  ],
+  "removed_manifest_keys": [
+    "LiveTransportDTMFSend",
+    "SessionSpendControlParam",
+    "SessionSpendControlResource"
+  ],
+  "receipt_corrections": [
+    {
+      "receipt": "specs/api-alignment-2026-10-31/reviews/11-image-contracts-manifest.json",
+      "schema": "BetaImageGenOutputTokensDetails",
+      "correction": "Use actual BetaImageGenToolUsage.output_tokens_details runtime binding to responses.ImageGenOutputTokensDetails from #415, rather than an equivalent ordinary Images usage object."
+    },
+    {
+      "kind": "inline_context_mapping",
+      "count": 10,
+      "note": "Ten proven Live image inline wrappers/branches are extensions with exact source pointers, rather than false whole-parent DTO aliases. Scalar LiveInputFidelity is a real enum codec. No skip/exclusion is introduced."
+    }
+  ],
+  "promoted_receipts": [
+    "specs/api-alignment-2026-10-31/reviews/01-decisions-ga-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/02-responses-cache-usage-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/03-responses-websocket-workflows-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/04-websocket-recovery-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/05-custom-voices-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/06-live-decisions-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/07-live-media-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/08-realtime-audio-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/09-agent-settings-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/10-agent-automations-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/11-image-contracts-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/13-admin-delta-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/issue429-reasoning-replay-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/pr443-mcp-output-manifest.json",
+    "specs/api-alignment/reviews/40-environment-webhooks-manifest.json",
+    "specs/api-alignment/reviews/41-browser-recovery-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/issue424-live-image-error-replay-manifest.json",
+    "specs/api-alignment/reviews/42-idle-run-helper-manifest.json",
+    "specs/api-alignment-2026-10-31/reviews/issue415-live-input-closure-manifest.json",
+    "specs/api-alignment/reviews/43-local-dispatch-manifest.json",
+    "specs/api-alignment/reviews/44-result-parser-manifest.json",
+    "specs/api-alignment/reviews/45-file-helpers-manifest.json"
+  ],
+  "inventory_coverage": {
+    "schemas": 297,
+    "operations": 18,
+    "unaccounted": []
+  },
+  "note": "All dispositions describe the bounded delta. Historical Administration/legacy exclusions and advisory scanner diagnostics remain visible; route filename presence is not method/field parity.",
+  "reviewed_inline_contexts": {
+    "LiveInputImageGenToolInputImageMaskValue": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/input_image_mask",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolCallSizeValue": {
+      "schema": "ImageGenToolCall",
+      "source_pointer": "#/components/schemas/ImageGenToolCall/properties/size/anyOf/0",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolCallSizeValueBranch0": {
+      "schema": "ImageGenToolCall",
+      "source_pointer": "#/components/schemas/ImageGenToolCall/properties/size/anyOf/0/anyOf/0",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolCallSizeValueBranch1": {
+      "schema": "ImageGenToolCall",
+      "source_pointer": "#/components/schemas/ImageGenToolCall/properties/size/anyOf/0/anyOf/1",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolModelValue": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/model",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolModelValueBranch0": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/model/anyOf/0",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolModelValueBranch1": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/model/anyOf/1",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolSizeValue": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/size",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolSizeValueBranch0": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/size/anyOf/0",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputImageGenToolSizeValueBranch1": {
+      "schema": "ImageGenTool",
+      "source_pointer": "#/components/schemas/ImageGenTool/properties/size/anyOf/1",
+      "file": "lib/src/models/live/live_input_item.dart"
+    },
+    "LiveInputFidelity": {
+      "schema": "InputFidelity",
+      "source_pointer": "#/components/schemas/InputFidelity",
+      "file": "lib/src/models/live/live_input_item.dart",
+      "wire_kind": "string",
+      "note": "Closed writable high/low value adapter, not an object DTO."
+    }
+  },
+  "merged_completion_receipts": [
+    {
+      "issue": 424,
+      "pull_request": 462,
+      "receipt": "specs/api-alignment-2026-10-31/reviews/issue424-live-image-error-replay-manifest.json"
+    },
+    {
+      "issue": 394,
+      "pull_request": 463,
+      "receipt": "specs/api-alignment/reviews/42-idle-run-helper-manifest.json"
+    },
+    {
+      "issue": 415,
+      "pull_request": 464,
+      "receipt": "specs/api-alignment-2026-10-31/reviews/issue415-live-input-closure-manifest.json"
+    },
+    {
+      "issue": 395,
+      "pull_request": 465,
+      "receipt": "specs/api-alignment/reviews/43-local-dispatch-manifest.json"
+    },
+    {
+      "issue": 396,
+      "pull_request": 466,
+      "receipt": "specs/api-alignment/reviews/44-result-parser-manifest.json"
+    },
+    {
+      "issue": 397,
+      "pull_request": 467,
+      "receipt": "specs/api-alignment/reviews/45-file-helpers-manifest.json"
+    }
+  ],
+  "client_helper_contexts": [
+    {
+      "receipt": "specs/api-alignment/reviews/43-local-dispatch-manifest.json",
+      "dart_context": "AgentSessionRun.create / AgentSessionsResource.createRun",
+      "file": "lib/src/helpers/agents/agent_session_run.dart",
+      "schema": null,
+      "note": "Lazy captured streamed creation sharing the same single cursor/checkpoints. Explicit stream:false rejects locally; canonical session.created establishes identity."
+    },
+    {
+      "receipt": "specs/api-alignment/reviews/43-local-dispatch-manifest.json",
+      "dart_context": "AgentToolHandler / AgentToolErrorObserver / AgentToolErrorStage / AgentToolError",
+      "file": "lib/src/helpers/agents/agent_tool_dispatcher.dart",
+      "schema": null,
+      "note": "Opt-in application callbacks and private error metadata; never serialized as tools or wire request fields."
+    },
+    {
+      "receipt": "specs/api-alignment/reviews/43-local-dispatch-manifest.json",
+      "dart_context": "AgentSessionEventsResource.create.allowRetries / AgentSessionsResource.createStream.onReady",
+      "file": "lib/src/resources/agent_sessions_resource.dart",
+      "schema": null,
+      "note": "Local request policy/readiness controls on unchanged canonical operations. Authentication cannot enable retries."
+    },
+    {
+      "receipt": "specs/api-alignment/reviews/44-result-parser-manifest.json",
+      "dart_context": "AgentSessionRun.withResultCollection / finalResult / withOutput",
+      "file": "lib/src/helpers/agents/agent_session_run.dart",
+      "schema": null,
+      "note": "One existing cursor/dispatcher; optional bounded retention and cached results, no new endpoint."
+    },
+    {
+      "receipt": "specs/api-alignment/reviews/44-result-parser-manifest.json",
+      "dart_context": "AgentSessionRunResult / AgentSessionParsedRunResult / AgentSessionOutputBinding / AgentSessionTypedRun / AgentSessionRunResultReason / AgentSessionRunResultException / AgentSessionOutputParseException / agentSessionMessagesText",
+      "file": "lib/src/helpers/agents/agent_session_run_result.dart",
+      "schema": null,
+      "note": "Local completed/partial results, private failures, pure projection and caller validator. No invented DTO fields or annotations."
+    },
+    {
+      "receipt": "specs/api-alignment/reviews/45-file-helpers-manifest.json",
+      "dart_context": "AgentFiles",
+      "file": "lib/src/helpers/agents/agent_files.dart",
+      "schema": null,
+      "note": "Local helper; no canonical wire DTO/operation is introduced."
+    },
+    {
+      "receipt": "specs/api-alignment/reviews/45-file-helpers-manifest.json",
+      "dart_context": "AgentResultArtifacts",
+      "file": "lib/src/helpers/agents/agent_result_artifacts.dart",
+      "schema": null,
+      "note": "Local helper; no canonical wire DTO/operation is introduced."
+    },
+    {
+      "receipt": "specs/api-alignment/reviews/45-file-helpers-manifest.json",
+      "dart_context": "AgentFileInput",
+      "file": "lib/src/helpers/agents/agent_file_inputs.dart",
+      "schema": null,
+      "note": "Local helper; no canonical wire DTO/operation is introduced."
+    },
+    {
+      "receipt": "specs/api-alignment/reviews/45-file-helpers-manifest.json",
+      "dart_context": "PreparedAgentFiles",
+      "file": "lib/src/helpers/agents/agent_file_preparation.dart",
+      "schema": null,
+      "note": "Local helper; no canonical wire DTO/operation is introduced."
+    },
+    {
+      "receipt": "specs/api-alignment/reviews/45-file-helpers-manifest.json",
+      "dart_context": "AgentFileSystem",
+      "file": "lib/src/helpers/agents/agent_file_system.dart",
+      "schema": null,
+      "note": "Local helper; no canonical wire DTO/operation is introduced."
+    }
+  ],
+  "union_metadata_corrections": {
+    "LiveServerEvent": {
+      "known_variants": 27,
+      "canonical_sideband_variants": 25,
+      "removed_server_mapping": "LiveTransportDTMFSend / transport.dtmf.send",
+      "replacement_server_mapping": "LiveTransportDTMFSent / transport.dtmf.sent",
+      "added_contexts": [
+        "audio fixture playing/played acknowledgments",
+        "decision event/item-created/item-deleted"
+      ],
+      "evidence": "Actual Dart factory equals full pinned canonical tag map; narrower sideband includes documented reflected audio contexts. Unknown receive fallback and current client SendParam stay distinct."
+    }
+  },
+  "file_artifact_contextual_views": {
+    "receipt": "specs/api-alignment/reviews/45-file-helpers-manifest.json",
+    "AgentArtifactLookupCandidate": "Artifact helper-only received view permits absent/null legacy ID; all other canonical fields remain strict. Never bind this view as canonical Artifact.",
+    "AgentArtifactLookupPage": "Same existing list GET/envelope; only nested ID presence differs. Cursor is actual opaque last_id, with no row-ID fallback."
+  },
+  "final_verification": {
+    "runtime_base": "cc01bb596f600ba6adc036bf908fc5f3c540c7d8",
+    "toolkit_fix_pull_request": 468,
+    "openai_unit": {
+      "passed": 26813,
+      "environment_skips": 2
+    },
+    "shared_open_responses_unit": {
+      "passed": 547,
+      "environment_skips": 3
+    },
+    "shared_error_browser": {
+      "chrome_js_passed": 3,
+      "chrome_wasm_passed": 3
+    },
+    "dart_quality": {
+      "formatted_files": 862,
+      "format_changes": 0,
+      "fixes": 0,
+      "analysis": "No issues found"
+    },
+    "docs": {
+      "managed_configs_checked": 8,
+      "errors": 0,
+      "openai_usage_topics": 68,
+      "openai_warnings": 0
+    },
+    "toolkit_unit": {
+      "tests": 290,
+      "known_baseline_failures": 5,
+      "errors": 0,
+      "skips": 2
+    },
+    "global_implementation": {
+      "errors": 1040,
+      "warnings": 246,
+      "infos": 351,
+      "assigned_classified_errors": 210,
+      "outside_assigned_errors": 830,
+      "unclassified_assigned_errors": 0
+    },
+    "same_final_runtime_old_canonical": {
+      "errors": 1011,
+      "warnings": 128,
+      "infos": 281
+    },
+    "historical_pre_promotion_runtime": {
+      "errors": 1010,
+      "warnings": 128,
+      "infos": 281
+    },
+    "exports": {
+      "internal_helper_file_findings": 10,
+      "same_findings_on_old_canonical": true
+    },
+    "consistency": {
+      "errors": 0,
+      "warnings": 127
+    },
+    "source_receipts": {
+      "verified_sdk_references": 128,
+      "verified_dart_declaration_references": 424
+    },
+    "new_suppressions": 0,
+    "diagnostic_disposition": "14-verification-diagnostics.md",
+    "diagnostics": "14-verification-diagnostics.json",
+    "merged_evidence": "14-merged-implementation-evidence.json",
+    "release_readiness": "14-release-readiness.md",
+    "live_api_calls": 0,
+    "publication_authorized": false
+  }
+}

@@ -24,6 +24,12 @@ final page = url == null ? null : Uri.parse(url);
 `url: null` emits null and `clearUrl: true` removes the key. Existing JSON
 constructors and nonnull URL copies remain available.
 
+## Upcoming release: service and model availability
+
+Review the [README availability guidance](README.md#which-model-ids-and-account-settings-can-i-use)
+and retained API notices before deploying. Library type compatibility does not
+restore a retired service. Model access and account permissions remain server-owned.
+
 ## Upcoming release: Agent environment webhook notifications
 
 Environment notifications now decode to `AgentEnvironmentReadyWebhookEvent`,
@@ -121,6 +127,34 @@ There are at most 16 pairs, with 1–64-character keys and values up to 512 char
 new/updated sessions may take time to appear in filtered results.
 
 See [the offline settings example](example/agent_settings_example.dart).
+
+## Upcoming release: Responses tool configuration
+
+Responses image tools now use `ImageGenerationMask` instead of a mask string,
+`ImageModerationLevel` instead of a boolean, and an integer compression level.
+Choose the supported moderation policy explicitly:
+
+```dart
+// Before
+final tool = ResponseTool.imageGeneration(
+  inputImageMask: 'file_mask', moderation: true, outputCompression: '90',
+);
+
+// After
+final tool = ResponseTool.imageGeneration(
+  inputImageMask: const ImageGenerationMask(fileId: 'file_mask'),
+  moderation: ImageModerationLevel.auto,
+  outputCompression: 90,
+);
+```
+
+A mask can carry a file ID or image URL; the service validates combinations.
+`action` and typed `inputFidelity` are additive options. The same argument types
+apply to direct `ImageGenerationTool` construction.
+
+Exhaustive `ResponseToolChoice` switches must handle `ResponseToolChoiceCustom`.
+Use `ResponseToolChoice.custom(name: 'my_tool')` to select a declared custom tool;
+function selection continues to use `ResponseToolChoice.function`.
 
 ## Upcoming release: Image safety identifiers and markup
 
