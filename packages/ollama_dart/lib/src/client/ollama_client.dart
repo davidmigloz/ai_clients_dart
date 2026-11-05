@@ -28,7 +28,7 @@ import 'retry_wrapper.dart';
 /// API methods are grouped into logical resources:
 /// - [completions] - Text generation (generate endpoint)
 /// - [chat] - Chat message generation (chat endpoint)
-/// - [embeddings] - Text embeddings (embed endpoint)
+/// - [embeddings] - Text and multimodal embeddings (embed endpoint)
 /// - [models] - Model management (list, show, create, copy, delete, pull, push)
 /// - [version] - Server version information
 /// - [systemOne] - Local decision models (choice, probability, score)

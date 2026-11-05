@@ -213,7 +213,8 @@
         "truncate",
         "keep_alive",
         "options",
-        "dimensions"
+        "dimensions",
+        "runner"
       ],
       "EmbedResponse": [
         "model",
@@ -790,6 +791,55 @@
       "file": "lib/src/models/models/manifest_summary.dart",
       "schema": null,
       "tags": [],
+      "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot."
+    },
+    "EmbedInput": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "EmbedInput",
+      "file": "lib/src/models/embeddings/embed_input.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot."
+    },
+    "EmbedInputString": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "EmbedInputString",
+      "file": "lib/src/models/embeddings/embed_input.dart",
+      "schema": null,
+      "tags": [],
+      "parent": "EmbedInput",
+      "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot."
+    },
+    "EmbedInputList": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "EmbedInputList",
+      "file": "lib/src/models/embeddings/embed_input.dart",
+      "schema": null,
+      "tags": [],
+      "parent": "EmbedInput",
+      "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot."
+    },
+    "EmbedInputMultimodal": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "EmbedInputMultimodal",
+      "file": "lib/src/models/embeddings/embed_input.dart",
+      "schema": null,
+      "tags": [],
+      "parent": "EmbedInput",
+      "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot."
+    },
+    "EmbedInputBatch": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "EmbedInputBatch",
+      "file": "lib/src/models/embeddings/embed_input.dart",
+      "schema": null,
+      "tags": [],
+      "parent": "EmbedInput",
       "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot."
     }
   }

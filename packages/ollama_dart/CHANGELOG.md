@@ -3,6 +3,7 @@
 - **FEAT**: Add runner selection, model manifest-list creation/inspection, capability overrides, voice/template discovery, and native tool item schemas.
 - **FEAT**: Preserve model-copy status warnings with older empty-response compatibility and add a server heartbeat check.
 - **FIX**: Correct model-list, progress-event, and push/pull option equality and hashing.
+- **BREAKING FEAT**: Add multimodal embedding inputs (`EmbedInputMultimodal` and `EmbedInputBatch`) and embedding runner selection; exhaustive switches must handle both variants. Existing string/list factories remain available.
 
 ## 4.1.0
 

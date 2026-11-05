@@ -33,7 +33,7 @@ Dart client for the **[Ollama API](https://ollama.com/)** — chat, streaming, t
 
 - Chat completions with context memory and multimodal inputs
 - Text generation for prompt-style completions
-- Embeddings for semantic search and retrieval
+- Text, image, and audio embeddings for semantic search and retrieval
 - NDJSON streaming for chat and completions
 - Tool calling, thinking mode, and structured output
 - Cached prompt token metrics and model-defined thinking controls
@@ -436,9 +436,33 @@ Future<void> main() async {
 </details>
 
 <details>
+<summary><b>How do I embed images or audio?</b></summary>
+
+`EmbedInput.multimodal(text: ..., image: ..., audio: ...)` represents one item;
+media fields hold base64 file contents. `EmbedInput.batch([...])` preserves the
+order of text and multimodal items. Existing `EmbedInput.string` and
+`EmbedInput.list` factories remain available. A compatible model is required.
+
+```dart
+final response = await client.embeddings.create(
+  request: EmbedRequest(
+    model: embeddingModel,
+    input: EmbedInput.batch([
+      const EmbedInput.string('A landscape'),
+      EmbedInput.multimodal(image: imageBase64),
+    ]),
+  ),
+);
+```
+
+→ [Embedding example](example/embeddings_example.dart)
+
+</details>
+
+<details>
 <summary><b>How do I select or inspect model variants?</b></summary>
 
-Generation, chat, show, and pull requests accept an
+Generation, chat, embeddings, show, and pull requests accept an
 optional `runner`. Create a manifest list with
 `CreateRequest(model: 'multi', list: ['model:mlx', 'model:gguf'])`; add explicit
 capabilities with `CreateRequest.capabilities`. Normal show responses expose
@@ -580,7 +604,7 @@ See the [example/](example/) directory for complete examples:
 | [`streaming_example.dart`](example/streaming_example.dart) | Streaming responses |
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Tool calling |
 | [`completions_example.dart`](example/completions_example.dart) | Plain text generation |
-| [`embeddings_example.dart`](example/embeddings_example.dart) | Text embeddings |
+| [`embeddings_example.dart`](example/embeddings_example.dart) | Text and multimodal embeddings |
 | [`models_example.dart`](example/models_example.dart) | Model management |
 | [`system_one_example.dart`](example/system_one_example.dart) | Choice, yes/no, and score decisions |
 | [`blobs_example.dart`](example/blobs_example.dart) | Binary upload and file-based model creation |
@@ -601,7 +625,7 @@ See the [example/](example/) directory for complete examples:
 | Blobs | ✅ Existence checks and binary uploads |
 | System One | ✅ Local decision API; requires Ollama v0.35.0+ |
 | Web search / fetch | ✅ Hosted endpoints with explicit cloud configuration |
-| Version | ✅ Full |
+| Version / heartbeat | ✅ Version information and server health |
 
 Coverage targets Ollama's public native API and hosted web tools. Existing experimental image-generation fields remain available for compatible servers; Ollama 0.35.0 rejects image generation. OpenAI and Anthropic compatibility endpoints can be used through [openai_dart](../openai_dart) and [anthropic_sdk_dart](../anthropic_sdk_dart); experimental server-control routes and debug fields are excluded.
 

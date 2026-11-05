@@ -44,7 +44,7 @@
 ///
 /// - **Chat Completions**: Multi-turn conversations with tool calling
 /// - **Text Generation**: Raw text generation with streaming
-/// - **Embeddings**: Generate vector embeddings for text
+/// - **Embeddings**: Text, image, and audio embedding inputs
 /// - **Model Management**: List, pull, push, create, copy, delete models
 /// - **Thinking Mode**: Extended reasoning for supported models
 /// - **Structured Output**: JSON schema-constrained generation
@@ -107,7 +107,12 @@ export 'src/models/completions/generate_stream_event.dart'
 export 'src/models/completions/logprob.dart' show Logprob, TokenLogprob;
 // Embeddings Models
 export 'src/models/embeddings/embed_input.dart'
-    show EmbedInput, EmbedInputList, EmbedInputString;
+    show
+        EmbedInput,
+        EmbedInputBatch,
+        EmbedInputList,
+        EmbedInputMultimodal,
+        EmbedInputString;
 export 'src/models/embeddings/embed_request.dart' show EmbedRequest;
 export 'src/models/embeddings/embed_response.dart' show EmbedResponse;
 // Metadata Models

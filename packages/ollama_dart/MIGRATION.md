@@ -6,7 +6,12 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
-## Unreleased model inspection
+## Unreleased API alignment
+
+`EmbedInput` gains `EmbedInputMultimodal` and `EmbedInputBatch`. Exhaustive
+switches must handle both new variants; existing const string/list factories
+remain available. Use `EmbedInput.multimodal(...)` or `EmbedInput.batch(...)`
+for model-supported image/audio embeddings.
 
 `models.copy` returns `Future<StatusResponse>` to expose server warnings.
 Existing calls that await and discard its result continue to work. Code storing
