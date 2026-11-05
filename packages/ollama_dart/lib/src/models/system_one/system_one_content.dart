@@ -5,7 +5,8 @@ import '_system_one_helpers.dart';
 /// Text or structured JSON submitted as System One state or instructions.
 ///
 /// Objects and arrays are rendered as JSON text by the server, rather than
-/// interpreted as chat messages or multimodal input.
+/// interpreted as chat messages or multimodal input. Submit images separately
+/// through `SystemOneRequest.images`.
 ///
 /// Variants: [SystemOneStringContent], [SystemOneObjectContent], and
 /// [SystemOneArrayContent].

@@ -31,7 +31,7 @@ import 'retry_wrapper.dart';
 /// - [embeddings] - Text and multimodal embeddings (embed endpoint)
 /// - [models] - Model management (list, show, create, copy, delete, pull, push)
 /// - [version] - Server version information
-/// - [systemOne] - Local decision models (choice, probability, score)
+/// - [systemOne] - Local and cloud decision models (choice, probability, score)
 /// - [blobs] - Local binary model-file storage
 /// - [web] - Hosted web search/fetch, using an authenticated cloud client
 ///
@@ -113,7 +113,7 @@ class OllamaClient {
   /// Resource for server version information.
   late final VersionResource version;
 
-  /// Resource for local System One decision models (Ollama 0.35.0 or later).
+  /// Resource for System One decisions on local and cloud models.
   late final SystemOneResource systemOne;
 
   /// Resource for local model-file blob storage.

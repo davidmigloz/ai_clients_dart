@@ -66,7 +66,8 @@ class SystemOneChoiceQuestion extends SystemOneQuestion {
 
   /// Ordered option keys and descriptions; null uses the option key itself.
   ///
-  /// Ties select the first option. The server requires 2–26 options.
+  /// Ties select the first option. Local models require 2–26 options;
+  /// cloud models allow up to 255.
   final Map<String, String?> criteria;
 
   @override
@@ -208,7 +209,7 @@ class SystemOneScoreQuestion extends SystemOneQuestion {
   /// Instructions describing the rubric to evaluate.
   final SystemOneContent instructions;
 
-  /// Descriptions ordered from index zero upwards; the server requires 2–26.
+  /// Descriptions ordered from index zero upwards; the server requires 2–10.
   final List<String> criteria;
 
   @override

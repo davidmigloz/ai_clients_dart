@@ -276,6 +276,13 @@
         "voices",
         "manifests"
       ],
+      "SystemOneRequest": [
+        "runner",
+        "images"
+      ],
+      "SystemOneResponse": [
+        "prompt_eval_cached_count"
+      ],
       "CreateRequest": [
         "list",
         "capabilities"
