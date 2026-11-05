@@ -34,6 +34,7 @@ Dart client for the **[Ollama API](https://ollama.com/)** — chat, streaming, t
 - Chat completions with context memory and multimodal inputs
 - Text generation for prompt-style completions
 - Text, image, and audio embeddings for semantic search and retrieval
+- Speech generation, transcription, and translation with streaming audio/text
 - NDJSON streaming for chat and completions
 - Tool calling, thinking mode, and structured output
 - Cached prompt token metrics and model-defined thinking controls
@@ -436,6 +437,63 @@ Future<void> main() async {
 </details>
 
 <details>
+<summary><b>How do I generate, transcribe, or translate audio?</b></summary>
+
+Use `client.audio` for Ollama's OpenAI-compatible audio endpoints. The default
+base URL stays `http://localhost:11434`; the resource appends `/v1/audio/...`.
+
+```dart
+final bytes = await client.audio.createSpeech(
+  request: const SpeechRequest(
+    model: 'phonon',
+    input: 'Hello from Ollama.',
+    voice: 'Hugh',
+    responseFormat: SpeechResponseFormat.wav,
+  ),
+);
+```
+
+`createSpeechStream` yields raw audio chunks as they arrive. Chunk boundaries can
+split samples. Ollama v0.40.14 supports WAV (the default) and headerless PCM,
+24 kHz mono signed 16-bit little-endian audio. The WAV header uses maximum length
+fields while streaming. The server currently accepts only `speed: 1`,
+`streamFormat: 'audio'`, and empty instructions. Discover model-specific voice
+names through `client.models.show(...).voices`. Speech models require a compatible
+Ollama installation and runner; platform/model validation stays on the server.
+
+```dart
+final transcript = await client.audio.createTranscription(
+  request: TranscriptionRequest(
+    model: speechToTextModel,
+    file: AudioFile(bytes: wavBytes, filename: 'recording.wav'),
+    responseFormat: AudioTextResponseFormat.verboseJson,
+  ),
+);
+print(transcript.text);
+
+final translation = await client.audio.createTranslation(
+  request: TranslationRequest(
+    model: speechToTextModel,
+    file: AudioFile(bytes: wavBytes, filename: 'recording.wav'),
+  ),
+);
+print(translation.text);
+```
+
+Choose a speech-to-text model supported by your server as `speechToTextModel`.
+Transcription and translation upload WAV bytes as multipart data. Stable
+v0.40.14 supports `json`, `text`, and `verbose_json`; translation requires
+v0.40.12+. Translation defaults to English; set `toLanguage` when supported by
+the model. `createTranscriptionStream` and `createTranslationStream` parse SSE
+into typed `TranscriptTextDelta` and `TranscriptTextDone` events. These streams
+are text events, while speech streams contain binary audio. Streaming methods
+accept `abortTrigger` and stop transport when their subscription is canceled.
+
+→ [Audio example](example/audio_example.dart)
+
+</details>
+
+<details>
 <summary><b>How do I embed images or audio?</b></summary>
 
 `EmbedInput.multimodal(text: ..., image: ..., audio: ...)` represents one item;
@@ -608,6 +666,7 @@ See the [example/](example/) directory for complete examples:
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Tool calling |
 | [`completions_example.dart`](example/completions_example.dart) | Plain text generation |
 | [`embeddings_example.dart`](example/embeddings_example.dart) | Text and multimodal embeddings |
+| [`audio_example.dart`](example/audio_example.dart) | Speech, transcription, and translation |
 | [`models_example.dart`](example/models_example.dart) | Model management |
 | [`system_one_example.dart`](example/system_one_example.dart) | Choice, yes/no, and score decisions |
 | [`blobs_example.dart`](example/blobs_example.dart) | Binary upload and file-based model creation |
@@ -627,15 +686,18 @@ See the [example/](example/) directory for complete examples:
 | Models | ✅ Full |
 | Blobs | ✅ Existence checks and binary uploads |
 | System One | ✅ Local and cloud decisions, images/audio, cached tokens |
+| Audio | ✅ Speech, transcription, translation; binary and SSE streaming |
 | Web search / fetch | ✅ Hosted endpoints with explicit cloud configuration |
 | Version / heartbeat | ✅ Version information and server health |
 
-Coverage targets Ollama's public native API and hosted web tools. Existing experimental image-generation fields remain available for compatible servers; Ollama 0.35.0 rejects image generation. OpenAI and Anthropic compatibility endpoints can be used through [openai_dart](../openai_dart) and [anthropic_sdk_dart](../anthropic_sdk_dart); experimental server-control routes and debug fields are excluded.
+Coverage targets Ollama's public native API, hosted web tools, and audio compatibility endpoints. Existing experimental image-generation fields remain available for compatible servers; Ollama 0.35.0 rejects image generation. Other OpenAI and Anthropic compatibility endpoints can be used through [openai_dart](../openai_dart) and [anthropic_sdk_dart](../anthropic_sdk_dart); experimental server-control routes and debug fields are excluded.
 
 ## Official Documentation
 
 - [API reference](https://pub.dev/documentation/ollama_dart/latest/)
 - [Ollama API docs](https://docs.ollama.com/api/introduction)
+- [Speech](https://docs.ollama.com/capabilities/speech)
+- [Audio API compatibility](https://docs.ollama.com/api/openai-compatibility)
 - [System One API](https://docs.ollama.com/api/systemone)
 - [Web search and fetch](https://docs.ollama.com/capabilities/web-search)
 - [Ollama Python SDK](https://github.com/ollama/ollama-python)

@@ -5,6 +5,8 @@
 - **FIX**: Correct model-list, progress-event, and push/pull option equality and hashing.
 - **BREAKING FEAT**: Add multimodal embedding inputs (`EmbedInputMultimodal` and `EmbedInputBatch`) and embedding runner selection; exhaustive switches must handle both variants. Existing string/list factories remain available.
 - **FEAT**: Add System One images/audio, cloud routing documentation, runner selection, and cached-token metrics.
+- **FEAT**: Add speech, transcription, and translation APIs with binary audio and SSE text streaming.
+- **FIX**: Preserve streaming transport flags and nested audio API error messages.
 
 ## 4.1.0
 

@@ -69,6 +69,15 @@
           "web"
         ],
         "directory": "web"
+      },
+      "audio": {
+        "patterns": [
+          "audio",
+          "speech",
+          "transcript",
+          "translation"
+        ],
+        "directory": "audio"
       }
     },
     "default_category": "common",
@@ -772,6 +781,87 @@
       "schema": null,
       "tags": []
     },
+    "SpeechRequest": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "SpeechRequest",
+      "file": "lib/src/models/audio/speech_request.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot."
+    },
+    "AudioTextResponseFormat": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AudioTextResponseFormat",
+      "file": "lib/src/models/audio/audio_text_response_format.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Typed values from stable server handlers or inline query schemas; no named OpenAPI enum schema. Unit tests cover wire values and unknown handling.",
+      "enum_values": [
+        "json",
+        "text",
+        "verbose_json"
+      ]
+    },
+    "TranscriptionSegment": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "TranscriptionSegment",
+      "file": "lib/src/models/audio/transcription_response.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot."
+    },
+    "TranscriptionResponse": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "TranscriptionResponse",
+      "file": "lib/src/models/audio/transcription_response.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot."
+    },
+    "AudioTextRequest": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AudioTextRequest",
+      "file": "lib/src/models/audio/audio_text_request.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot."
+    },
+    "AudioFile": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "AudioFile",
+      "file": "lib/src/models/audio/audio_file.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot."
+    },
+    "TranscriptionStreamEvent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "TranscriptionStreamEvent",
+      "file": "lib/src/models/audio/transcription_stream_event.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot."
+    },
+    "SpeechResponseFormat": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "SpeechResponseFormat",
+      "file": "lib/src/models/audio/speech_response_format.dart",
+      "schema": null,
+      "tags": [],
+      "note": "Typed values from stable server handlers or inline query schemas; no named OpenAPI enum schema. Unit tests cover wire values and unknown handling.",
+      "enum_values": [
+        "wav",
+        "pcm"
+      ]
+    },
     "ShowManifestsResponse": {
       "spec": "main",
       "kind": "extension",
@@ -848,6 +938,51 @@
       "tags": [],
       "parent": "EmbedInput",
       "note": "Released native or audio wire contract supplements the upstream OpenAPI snapshot."
+    },
+    "TranscriptionRequest": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "TranscriptionRequest",
+      "file": "lib/src/models/audio/audio_text_request.dart",
+      "schema": null,
+      "parent": "AudioTextRequest",
+      "tags": []
+    },
+    "TranslationRequest": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "TranslationRequest",
+      "file": "lib/src/models/audio/audio_text_request.dart",
+      "schema": null,
+      "parent": "AudioTextRequest",
+      "tags": []
+    },
+    "TranscriptTextDelta": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "TranscriptTextDelta",
+      "file": "lib/src/models/audio/transcription_stream_event.dart",
+      "schema": null,
+      "parent": "TranscriptionStreamEvent",
+      "tags": []
+    },
+    "TranscriptTextDone": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "TranscriptTextDone",
+      "file": "lib/src/models/audio/transcription_stream_event.dart",
+      "schema": null,
+      "parent": "TranscriptionStreamEvent",
+      "tags": []
+    },
+    "UnknownTranscriptionEvent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownTranscriptionEvent",
+      "file": "lib/src/models/audio/transcription_stream_event.dart",
+      "schema": null,
+      "parent": "TranscriptionStreamEvent",
+      "tags": []
     }
   }
 }

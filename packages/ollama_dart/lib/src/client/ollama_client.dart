@@ -5,6 +5,7 @@ import '../interceptors/auth_interceptor.dart';
 import '../interceptors/error_interceptor.dart';
 import '../interceptors/interceptor.dart';
 import '../interceptors/logging_interceptor.dart';
+import '../resources/audio_resource.dart';
 import '../resources/blobs_resource.dart';
 import '../resources/chat_resource.dart';
 import '../resources/completions_resource.dart';
@@ -28,6 +29,7 @@ import 'retry_wrapper.dart';
 /// API methods are grouped into logical resources:
 /// - [completions] - Text generation (generate endpoint)
 /// - [chat] - Chat message generation (chat endpoint)
+/// - [audio] - Speech generation, transcription, and translation
 /// - [embeddings] - Text and multimodal embeddings (embed endpoint)
 /// - [models] - Model management (list, show, create, copy, delete, pull, push)
 /// - [version] - Server version information
@@ -98,6 +100,9 @@ class OllamaClient {
   /// Interceptor chain.
   late final InterceptorChain _interceptorChain;
 
+  /// Resource for speech generation, transcription, and translation.
+  late final AudioResource audio;
+
   /// Resource for text completions (generate endpoint).
   late final CompletionsResource completions;
 
@@ -159,6 +164,13 @@ class OllamaClient {
     );
 
     // Initialize all API resources
+    audio = AudioResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
     completions = CompletionsResource(
       config: this.config,
       httpClient: _httpClient,
