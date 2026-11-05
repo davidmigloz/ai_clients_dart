@@ -65,13 +65,16 @@ class StatusEvent {
       other is StatusEvent &&
           runtimeType == other.runtimeType &&
           status == other.status &&
-          digest == other.digest;
+          digest == other.digest &&
+          total == other.total &&
+          completed == other.completed;
 
   @override
-  int get hashCode => Object.hash(status, digest);
+  int get hashCode => Object.hash(status, digest, total, completed);
 
   @override
   String toString() =>
       'StatusEvent(status: $status, '
+      'digest: $digest, total: $total, completed: $completed, '
       'progress: ${progress != null ? '${(progress! * 100).toStringAsFixed(1)}%' : 'N/A'})';
 }
