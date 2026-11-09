@@ -1,9 +1,17 @@
-## Unreleased
+## 5.0.0
 
-- **BREAKING FEAT**: Add multimodal embedding inputs (`EmbedInputMultimodal` and `EmbedInputBatch`); exhaustive switches must handle both variants. Existing string/list factories remain available.
-- **FEAT**: Align with Ollama v0.40.14: speech, transcription, and translation (including binary/SSE streaming), System One images/audio and cloud support, runner selectors, manifest-list creation and inspection, model voices/template source, and read-only balance/usage reporting.
-- **FEAT**: Return copy status warnings with older empty-response compatibility and add a server heartbeat check.
-- **FIX**: Preserve streaming transport flags and nested audio API error messages. Correct equality/hashing for model lists, progress events, and push/pull options.
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+This release aligns the Dart client with [Ollama v0.40.14](https://github.com/ollama/ollama/releases/tag/v0.40.14). Add cases for multimodal items and mixed batches wherever you switch exhaustively over `EmbedInput`. The client adds [speech streaming](https://docs.ollama.com/capabilities/speech), transcription, audio translation, [System One](https://docs.ollama.com/api/systemone) media inputs, and read-only cloud account reporting.
+
+- **BREAKING** **FEAT**: Accept text, images, and audio in embedding requests on compatible models. Handle `EmbedInputMultimodal` and `EmbedInputBatch` in exhaustive switches ([#472](https://github.com/davidmigloz/ai_clients_dart/issues/472)). ([881a502c](https://github.com/davidmigloz/ai_clients_dart/commit/881a502c2e8649d50940db313a754fd163c337b5))
+- **FEAT**: Read cloud balances and query usage by time range, scope, and model grouping ([#475](https://github.com/davidmigloz/ai_clients_dart/issues/475)). ([a266eb4d](https://github.com/davidmigloz/ai_clients_dart/commit/a266eb4d69ed05c7e0ab5a4c93a20380272dede7))
+- **FEAT**: Generate speech, transcribe audio, and translate audio. Stream speech as bytes and transcripts as server-sent events. Preserve streaming request options and nested API error messages ([#474](https://github.com/davidmigloz/ai_clients_dart/issues/474)). ([3f82d6bd](https://github.com/davidmigloz/ai_clients_dart/commit/3f82d6bd9ff5e04fb31f82b43987b438f5651ebc))
+- **FEAT**: Send ordered media inputs to System One, use cloud models, and read cached prompt-token counts ([#473](https://github.com/davidmigloz/ai_clients_dart/issues/473)). ([3e13e9e3](https://github.com/davidmigloz/ai_clients_dart/commit/3e13e9e36121c21b8496ede7cfce049243b7c174))
+- **FEAT**: Select runners, create and inspect model manifests, and read model voices and template sources. Check server health with `client.heartbeat()` and read copy warnings from `models.copy()`. Include runner and transfer options in `PullRequest` equality and hashing ([#471](https://github.com/davidmigloz/ai_clients_dart/issues/471)). ([6af22879](https://github.com/davidmigloz/ai_clients_dart/commit/6af22879793cd85e41de678ba6673183a5b278bf))
+- **FIX**: Correct equality and hashing for model lists, progress events, and push requests with different options ([#470](https://github.com/davidmigloz/ai_clients_dart/issues/470)). ([948e7a83](https://github.com/davidmigloz/ai_clients_dart/commit/948e7a83e151e3a70fb1ef5ae4a19b45e12f157b))
+- **DOCS**: Update examples and document the audio and image-generation limits of the stable server ([#476](https://github.com/davidmigloz/ai_clients_dart/issues/476)). ([4cabccf2](https://github.com/davidmigloz/ai_clients_dart/commit/4cabccf2403db35e6f7109162c21a3c9c1eee20b))
 
 ## 4.1.0
 

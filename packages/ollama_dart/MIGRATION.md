@@ -6,23 +6,87 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
-## Unreleased API alignment
+## Migrating from v4.x to v5.0.0
 
-`EmbedInput` gains `EmbedInputMultimodal` and `EmbedInputBatch`. Exhaustive
-switches must handle both new variants; existing const string/list factories
-remain available. Use `EmbedInput.multimodal(...)` or `EmbedInput.batch(...)`
-for model-supported image/audio embeddings.
+`EmbedInput` gains two variants for media and mixed batches. Update exhaustive
+switches and any code that edits a decoded list of embedding texts in place.
 
-`models.copy` returns `Future<StatusResponse>` to expose server warnings.
-Existing calls that await and discard its result continue to work. Code storing
-its method tear-off with an explicit function type should review that type.
-`models.showManifests` parses all-manifest inspection separately from normal
-`models.show`; use each manifest's `details` for model information.
+### 1) Handle the new embedding inputs
 
-The audio, read-only balance/usage, runner selector, and System One image/cloud
-APIs are additive. The default host remains the local server. Account reporting
-through that host uses the server's signed-in account; use an explicitly
-configured cloud client for API-key account selection.
+Handle `EmbedInputMultimodal` and `EmbedInputBatch` in each exhaustive switch.
+The `EmbedInput.string` and `EmbedInput.list` factories still work in const
+expressions. Use `EmbedInput.multimodal(...)` or `EmbedInput.batch(...)` with a
+model and server that support the supplied media.
+
+**Before (v4.x)**
+
+```dart
+int countInputs(EmbedInput input) => switch (input) {
+  EmbedInputString() => 1,
+  EmbedInputList(:final values) => values.length,
+};
+```
+
+**After (v5.0.0)**
+
+```dart
+int countInputs(EmbedInput input) => switch (input) {
+  EmbedInputString() => 1,
+  EmbedInputList(:final values) => values.length,
+  EmbedInputMultimodal() => 1,
+  EmbedInputBatch(:final values) => values.length,
+};
+```
+
+### 2) Copy decoded text lists before editing
+
+`EmbedInput.fromJson` now copies JSON string arrays into unmodifiable lists.
+To add another string, build a new `EmbedInput.list` from the decoded values.
+
+**Before (v4.x)**
+
+```dart
+final decoded = EmbedInput.fromJson(['hello']) as EmbedInputList;
+decoded.values.add('world');
+```
+
+**After (v5.0.0)**
+
+```dart
+final decoded = EmbedInput.fromJson(['hello']) as EmbedInputList;
+final updated = EmbedInput.list([...decoded.values, 'world']);
+```
+
+### 3) Update custom implementations of `models.copy`
+
+`models.copy` returns `Future<StatusResponse>`. Read `status` for the server's
+message, which can include a warning. If an older server sends an empty success
+response, `status` is null. Calls that discard the result and tear-offs typed to
+return `Future<void>` still work. If an override or mock returns `Future<void>`,
+update it to return `Future<StatusResponse>`.
+
+Use `models.showManifests` to inspect all variants in a manifest list. Read
+each manifest's `details` for its model information.
+
+### 4) Catch closed-client errors at the stream call
+
+If the client is already closed, streaming methods for chat, generation, and
+model operations now throw `StateError` at the call site. If you catch this
+error, include the call that creates the stream in the `try` block.
+
+### 5) Update your pubspec
+
+```yaml
+dependencies:
+  ollama_dart: ^5.0.0
+```
+
+Run `dart pub get`. For Flutter projects, run `flutter pub get`.
+
+Account reporting through a local server uses that server's signed-in account.
+To select an account by API key, configure a cloud client explicitly.
+
+---
 
 ## Migrating from v3.x to v4.0.0
 
