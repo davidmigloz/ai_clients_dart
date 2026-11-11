@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:http/http.dart' as http;
 
 import '../errors/exceptions.dart';
@@ -43,15 +45,28 @@ class InterceptorChain {
       abortTrigger: abortTrigger,
     );
 
-    return _buildChain(0)(context);
+    if (abortTrigger == null) return _buildChain(0)(context);
+
+    final admission = _TransportAdmission(request.headers['X-Request-ID']);
+    return admission.run(
+      abortTrigger,
+      () => _buildChain(0, admission)(context),
+    );
   }
 
   /// Builds the interceptor chain recursively.
-  InterceptorNext _buildChain(int index) {
+  InterceptorNext _buildChain(int index, [_TransportAdmission? admission]) {
     if (index >= interceptors.length) {
       // Terminal: execute the actual HTTP request
       // Per spec, retry wraps the transport execution
-      return (context) {
+      return (context) async {
+        if (admission != null) {
+          // Drain cancellation queued in the same event turn as authentication.
+          // Hand off to the transport synchronously after checking admission.
+          await Future<void>.delayed(Duration.zero);
+          admission.enter();
+        }
+        ensureNotClosed?.call();
         final originalRequest = context.request;
 
         // For retries, clone the request since http.BaseRequest can only be
@@ -139,10 +154,73 @@ class InterceptorChain {
     // Recursive: call current interceptor with next in chain
     return (context) {
       final interceptor = interceptors[index];
-      final next = _buildChain(index + 1);
+      final next = _buildChain(index + 1, admission);
 
       return interceptor.intercept(context, next);
     };
+  }
+}
+
+/// Cancels while the interceptor chain is waiting to reach transport.
+class _TransportAdmission {
+  _TransportAdmission(this._correlationId);
+
+  final String? _correlationId;
+  Completer<http.Response>? _pending = Completer();
+  AbortedException? _failure;
+
+  Future<http.Response> run(
+    Future<void> abortTrigger,
+    Future<http.Response> Function() execute,
+  ) {
+    final result = _pending!;
+    unawaited(
+      abortTrigger.then<void>(_abort, onError: (Object _, StackTrace _) {}),
+    );
+    unawaited(_complete(result, execute));
+    return result.future;
+  }
+
+  Future<void> _complete(
+    Completer<http.Response> result,
+    Future<http.Response> Function() execute,
+  ) async {
+    try {
+      // Give an already-completed abort trigger a chance to prevent admission.
+      final response = await Future<http.Response>.microtask(() {
+        _throwIfAborted();
+        return execute();
+      });
+      if (!result.isCompleted) result.complete(response);
+    } catch (error, stackTrace) {
+      if (!result.isCompleted) result.completeError(error, stackTrace);
+    } finally {
+      _pending = null;
+    }
+  }
+
+  void enter() {
+    _throwIfAborted();
+    // The transport and retry wrapper handle cancellation from this point on.
+    _pending = null;
+  }
+
+  void _abort(void _) {
+    final pending = _pending;
+    if (pending == null) return;
+    final failure = AbortedException(
+      message: 'Request aborted by user',
+      correlationId: _correlationId ?? generateRequestId(),
+      timestamp: DateTime.now(),
+      stage: AbortionStage.beforeRequest,
+    );
+    _failure = failure;
+    _pending = null;
+    pending.completeError(failure);
+  }
+
+  void _throwIfAborted() {
+    if (_failure case final failure?) throw failure;
   }
 }
 

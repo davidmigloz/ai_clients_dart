@@ -55,6 +55,7 @@ class FilesResource extends ResourceBase {
     String? mimeType,
     int? expiresInSeconds,
   }) async {
+    ensureNotClosed?.call();
     final file = io.File(filePath);
     if (!file.existsSync()) {
       throw ArgumentError('File not found: $filePath');
@@ -100,6 +101,7 @@ class FilesResource extends ResourceBase {
     String? mimeType,
     int? expiresInSeconds,
   }) async {
+    ensureNotClosed?.call();
     if (expiresInSeconds != null &&
         (expiresInSeconds < 3600 || expiresInSeconds > 7776000)) {
       throw ArgumentError.value(
@@ -131,6 +133,7 @@ class FilesResource extends ResourceBase {
 
     // Add authentication header
     await _applyAuthentication(request);
+    ensureNotClosed?.call();
 
     final response = await sendResourceRequest(httpClient, request);
 
@@ -248,6 +251,7 @@ class FilesResource extends ResourceBase {
   /// await io.File('downloaded.pdf').writeAsBytes(bytes);
   /// ```
   Future<Uint8List> download({required String fileId}) async {
+    ensureNotClosed?.call();
     final uri = requestBuilder.buildUrl('/v1/files/$fileId/content');
     final headers = requestBuilder.buildHeaders();
     // We want binary, not JSON
@@ -258,6 +262,7 @@ class FilesResource extends ResourceBase {
 
     // Apply authentication before sending (bypasses interceptor chain)
     await _applyAuthentication(request);
+    ensureNotClosed?.call();
 
     final response = await sendResourceRequest(httpClient, request);
 

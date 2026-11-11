@@ -54,6 +54,7 @@ class SkillsResource extends ResourceBase {
     required List<SkillFile> files,
     String? displayName,
   }) async {
+    ensureNotClosed?.call();
     final uri = requestBuilder.buildUrl('/v1/skills');
     // Remove content-type as multipart will set its own
     final headers = requestBuilder.buildHeaders()..remove('content-type');
@@ -77,6 +78,7 @@ class SkillsResource extends ResourceBase {
 
     // Add authentication header
     await _applyAuthentication(request);
+    ensureNotClosed?.call();
 
     final response = await sendResourceRequest(httpClient, request);
 
@@ -194,6 +196,7 @@ class SkillsResource extends ResourceBase {
     required String skillId,
     required List<SkillFile> files,
   }) async {
+    ensureNotClosed?.call();
     final uri = requestBuilder.buildUrl('/v1/skills/$skillId/versions');
     // Remove content-type as multipart will set its own
     final headers = requestBuilder.buildHeaders()..remove('content-type');
@@ -214,6 +217,7 @@ class SkillsResource extends ResourceBase {
 
     // Add authentication header
     await _applyAuthentication(request);
+    ensureNotClosed?.call();
 
     final response = await sendResourceRequest(httpClient, request);
 
