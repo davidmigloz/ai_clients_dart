@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../content/content_block.dart';
+import '../messages/context_management.dart';
 import '../messages/input_transformation.dart';
 import '../messages/message.dart';
 import 'content_block_delta.dart';
@@ -95,18 +96,32 @@ class MessageDeltaEvent extends MessageStreamEvent {
   /// `anthropic-beta: thinking-binding-controls-2026-08-01`.
   final List<InputTransformation>? inputTransformations;
 
+  /// Context edits applied to this request (beta).
+  final ContextManagementResult? contextManagement;
+
+  /// Whether the response carries the context-management field, even if null.
+  final bool hasContextManagement;
+
   /// Creates a [MessageDeltaEvent].
   const MessageDeltaEvent({
     required this.delta,
     required this.usage,
     this.inputTransformations,
-  });
+    this.contextManagement,
+    bool hasContextManagement = false,
+  }) : hasContextManagement = hasContextManagement || contextManagement != null;
 
   /// Creates a [MessageDeltaEvent] from JSON.
   factory MessageDeltaEvent.fromJson(Map<String, dynamic> json) {
     return MessageDeltaEvent(
       delta: MessageDelta.fromJson(json['delta'] as Map<String, dynamic>),
       usage: MessageDeltaUsage.fromJson(json['usage'] as Map<String, dynamic>),
+      hasContextManagement: json.containsKey('context_management'),
+      contextManagement: json['context_management'] != null
+          ? ContextManagementResult.fromJson(
+              json['context_management'] as Map<String, dynamic>,
+            )
+          : null,
       inputTransformations: (json['input_transformations'] as List?)
           ?.map((e) => InputTransformation.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -118,6 +133,7 @@ class MessageDeltaEvent extends MessageStreamEvent {
     'type': type,
     'delta': delta.toJson(),
     'usage': usage.toJson(),
+    if (hasContextManagement) 'context_management': contextManagement?.toJson(),
     if (inputTransformations != null)
       'input_transformations': inputTransformations!
           .map((e) => e.toJson())
@@ -129,6 +145,7 @@ class MessageDeltaEvent extends MessageStreamEvent {
     MessageDelta? delta,
     MessageDeltaUsage? usage,
     Object? inputTransformations = unsetCopyWithValue,
+    Object? contextManagement = unsetCopyWithValue,
   }) {
     return MessageDeltaEvent(
       delta: delta ?? this.delta,
@@ -136,6 +153,10 @@ class MessageDeltaEvent extends MessageStreamEvent {
       inputTransformations: inputTransformations == unsetCopyWithValue
           ? this.inputTransformations
           : inputTransformations as List<InputTransformation>?,
+      hasContextManagement: hasContextManagement,
+      contextManagement: contextManagement == unsetCopyWithValue
+          ? this.contextManagement
+          : contextManagement as ContextManagementResult?,
     );
   }
 
@@ -146,15 +167,24 @@ class MessageDeltaEvent extends MessageStreamEvent {
           runtimeType == other.runtimeType &&
           delta == other.delta &&
           usage == other.usage &&
-          listsEqual(inputTransformations, other.inputTransformations);
+          listsEqual(inputTransformations, other.inputTransformations) &&
+          hasContextManagement == other.hasContextManagement &&
+          contextManagement == other.contextManagement;
 
   @override
-  int get hashCode => Object.hash(delta, usage, listHash(inputTransformations));
+  int get hashCode => Object.hash(
+    delta,
+    usage,
+    listHash(inputTransformations),
+    contextManagement,
+    hasContextManagement,
+  );
 
   @override
   String toString() =>
       'MessageDeltaEvent(delta: $delta, usage: $usage, '
-      'inputTransformations: $inputTransformations)';
+      'inputTransformations: $inputTransformations, '
+      'contextManagement: $contextManagement)';
 }
 
 /// Event indicating the end of message generation.

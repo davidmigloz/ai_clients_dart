@@ -184,6 +184,7 @@ export 'src/models/managed_agents/webhooks/webhook_event.dart';
 // Models - Messages
 export 'src/models/messages/cache_miss_reason.dart';
 export 'src/models/messages/compaction_config.dart';
+export 'src/models/messages/context_management.dart';
 export 'src/models/messages/diagnostics.dart';
 export 'src/models/messages/diagnostics_param.dart';
 export 'src/models/messages/fallback_config.dart';
@@ -269,6 +270,7 @@ export 'src/resources/memories_resource.dart';
 export 'src/resources/memory_stores_resource.dart';
 export 'src/resources/memory_versions_resource.dart';
 export 'src/resources/message_batches_resource.dart';
+export 'src/resources/message_thread.dart';
 export 'src/resources/messages_resource.dart';
 export 'src/resources/models_resource.dart';
 export 'src/resources/session_events_resource.dart';

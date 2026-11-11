@@ -96,6 +96,9 @@ class ApiException extends AnthropicException {
   /// Additional error details from the server.
   final List<Object> details;
 
+  /// The provider error code from `error.details.error_code`, when present.
+  final String? errorCode;
+
   @override
   final StackTrace? stackTrace;
 
@@ -116,6 +119,7 @@ class ApiException extends AnthropicException {
     required this.statusCode,
     required this.message,
     this.details = const [],
+    this.errorCode,
     this.stackTrace,
     this.requestMetadata,
     this.responseMetadata,
@@ -153,6 +157,7 @@ class AuthenticationException extends ApiException {
   const AuthenticationException({
     required super.message,
     super.details,
+    super.errorCode,
     super.stackTrace,
     super.requestMetadata,
     super.responseMetadata,
@@ -206,6 +211,7 @@ class RateLimitException extends ApiException {
     required super.statusCode,
     required super.message,
     super.details,
+    super.errorCode,
     super.stackTrace,
     super.requestMetadata,
     super.responseMetadata,

@@ -36,7 +36,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - SSE streaming with cancelation and token counting
 - Adaptive and extended thinking controls, with `outputTokensDetails` reasoning-token breakdown, typed `thinking`/`redacted_thinking` input blocks, `Message.toInputMessage()` for multi-turn replay, `display: updates` progress updates, and preserved-thinking block-binding controls with `inputTransformations` reporting (beta)
 - Prompt-cache diagnostics on the Claude API report where the cache prefix diverged between turns
-- Server-held Messages threads and signed on-demand compaction (beta)
+- Server-held Messages threads, context editing, threshold compaction, and signed on-demand compaction (beta)
 - Server-side fallback: automatically re-run refused requests on another model via the `fallbacks` chain (or Anthropic's `FallbacksParam.defaultMode()` recommendations), or retry manually with the refusal `fallback_credit_token` — including best-effort redemption mode and per-response `fallback_credit` usage outcomes (beta)
 
 ### Tools and multimodal
@@ -347,7 +347,14 @@ hooks. They are ineligible for zero data retention. For token counting, send
 the full history including system and tools. Batches report a thread-bearing
 item as an individual request error.
 
-[Runnable thread example](example/message_threads_example.dart) · [Claude message threads guide](https://platform.claude.com/docs/en/build-with-claude/message-threads)
+Use `client.messages.createThread(request)` to track the conversation and its
+latest usable response ID. The handle keeps routing and beta headers and
+reuses the response container. Set `replayOnThreadError: true` to replay the
+full history once when the API identifies an unusable continuation ID.
+Replay resends earlier messages. The default surfaces the error to the caller.
+After a stream ends early, call `send()` with no new messages to retry that turn.
+
+[Runnable thread example](example/message_threads_example.dart) · [Runnable thread helper](example/message_thread_helper_example.dart) · [Claude message threads guide](https://platform.claude.com/docs/en/build-with-claude/message-threads)
 
 </details>
 
@@ -357,6 +364,16 @@ item as an individual request error.
 <summary><b>Show example</b></summary>
 
 Set `compaction: const CompactionConfig.summarize()` on a separate Messages request with the `compact-2026-09-04` beta header. Use a model with on-demand compaction capability. On success the response has `StopReason.compaction` and a signed `CompactionBlock`. Replace the summarized history with `summary.toInputMessage()` and send the same beta header when using the block. Keep the summary, signature, and tool changes together as returned. Keep the full conversation if compaction returns no valid summary.
+
+For threshold compaction, configure `ContextManagementConfig` with a
+`thresholdCompaction` edit and send `compact-2026-01-12`. Tool-result and
+thinking-block clearing use `context-management-2025-06-27`. Inspect
+`message.contextManagement?.appliedEdits` for edits the server applied. Beta
+token counting can report the original input count. Send on-demand compaction
+and context editing on separate requests. Threads only allow the context edit
+that preserves all thinking blocks.
+
+[Runnable context editing example](example/context_management_example.dart) · [Context editing guide](https://platform.claude.com/docs/en/build-with-claude/context-editing)
 
 [Runnable compaction example](example/on_demand_compaction_example.dart) · [Claude on-demand compaction guide](https://platform.claude.com/docs/en/build-with-claude/compaction-on-demand)
 
@@ -791,7 +808,9 @@ See the [example/](example/) directory for complete examples:
 | [`thinking_example.dart`](example/thinking_example.dart) | Adaptive thinking, progress updates, block binding, and multi-turn replay |
 | [`diagnostics_example.dart`](example/diagnostics_example.dart) | Prompt-cache diagnostics on the Claude API |
 | [`message_threads_example.dart`](example/message_threads_example.dart) | Create and continue a Messages thread (beta) |
+| [`message_thread_helper_example.dart`](example/message_thread_helper_example.dart) | Track a thread and opt into bounded recovery (beta) |
 | [`on_demand_compaction_example.dart`](example/on_demand_compaction_example.dart) | Stream a signed summary and replay it (beta) |
+| [`context_management_example.dart`](example/context_management_example.dart) | Edit context and preview input token counts (beta) |
 | [`fallback_example.dart`](example/fallback_example.dart) | Server-side fallback chain and refusal credit-token retry (beta) |
 | [`vision_example.dart`](example/vision_example.dart) | Image and document inputs |
 | [`document_example.dart`](example/document_example.dart) | Document inputs with citations |

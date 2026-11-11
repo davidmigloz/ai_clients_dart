@@ -1,8 +1,7 @@
-import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 
 import '../errors/exceptions.dart';
+import '../errors/response_error.dart';
 import 'interceptor.dart';
 
 /// Interceptor that transforms HTTP errors into typed exceptions.
@@ -52,13 +51,14 @@ class ErrorInterceptor implements Interceptor {
     );
 
     // Parse error message from response body
-    final (message, details) = _parseErrorBody(response.body);
+    final (:message, :details, :errorCode) = parseApiErrorBody(response.body);
 
     // Handle authentication errors
     if (response.statusCode == 401) {
       return AuthenticationException(
         message: message,
         details: details,
+        errorCode: errorCode,
         requestMetadata: requestMetadata,
         responseMetadata: responseMetadata,
       );
@@ -70,6 +70,7 @@ class ErrorInterceptor implements Interceptor {
         statusCode: response.statusCode,
         message: message,
         details: details,
+        errorCode: errorCode,
         requestMetadata: requestMetadata,
         responseMetadata: responseMetadata,
         retryAfter: _parseRetryAfter(response.headers),
@@ -81,41 +82,10 @@ class ErrorInterceptor implements Interceptor {
       statusCode: response.statusCode,
       message: message,
       details: details,
+      errorCode: errorCode,
       requestMetadata: requestMetadata,
       responseMetadata: responseMetadata,
     );
-  }
-
-  /// Parses error message and details from response body.
-  (String, List<Object>) _parseErrorBody(String body) {
-    if (body.isEmpty) {
-      return ('Unknown error', []);
-    }
-
-    try {
-      final json = jsonDecode(body);
-      if (json is Map<String, dynamic>) {
-        // Anthropic error format: {"type": "error", "error": {"type": "...", "message": "..."}}
-        final error = json['error'];
-        if (error is Map<String, dynamic>) {
-          final message = error['message'] as String? ?? 'Unknown error';
-          final errorType = error['type'] as String?;
-          return (
-            message,
-            errorType != null ? <Object>[errorType] : <Object>[],
-          );
-        }
-        // Fallback: {"message": "..."}
-        final message = json['message'];
-        if (message is String) {
-          return (message, []);
-        }
-        return (body, []);
-      }
-      return (body, []);
-    } catch (_) {
-      return (body, []);
-    }
   }
 
   /// Parses Retry-After header.

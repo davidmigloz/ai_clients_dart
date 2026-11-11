@@ -4,7 +4,7 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~7.2k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~7.5k tokens): Primary package documentation with installation, configuration, and usage examples.
 - [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/CHANGELOG.md) (~12.9k tokens): Release history and version-by-version changes.
 - [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) (~11.2k tokens): Upgrade notes and breaking-change guidance.
 
@@ -15,6 +15,8 @@
 - [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/tool_calling_example.dart) (~685 tokens): Tool calling with schemas.
 - [thinking_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/thinking_example.dart) (~2.2k tokens): Adaptive thinking, progress updates, block binding, and multi-turn replay.
 - [message_threads_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/message_threads_example.dart) (~276 tokens): Create and continue a Messages thread (beta).
+- [message_thread_helper_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/message_thread_helper_example.dart) (~210 tokens): Track a thread and opt into bounded recovery (beta).
+- [context_management_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/context_management_example.dart) (~293 tokens): Edit context and preview input token counts (beta).
 - [on_demand_compaction_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/on_demand_compaction_example.dart) (~366 tokens): Stream a signed summary and replay it (beta).
 - [vision_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/vision_example.dart) (~1.2k tokens): Image and document inputs.
 - [token_counting_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/token_counting_example.dart) (~1k tokens): Token counting.
@@ -47,4 +49,4 @@
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/anthropic_sdk_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~58.5k tokens**
+**Total: ~59.3k tokens**
