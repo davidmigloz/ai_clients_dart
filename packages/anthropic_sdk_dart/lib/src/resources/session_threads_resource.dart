@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../models/managed_agents/sessions/session.dart' show SessionStatus;
 import '../models/managed_agents/sessions/session_thread.dart';
 import '../models/managed_agents/sessions/session_thread_list_response.dart';
 import 'base_resource.dart';
@@ -73,16 +74,23 @@ class SessionThreadsResource extends ResourceBase {
   /// Parameters:
   /// - [limit]: Maximum number of threads to return.
   /// - [page]: Pagination token from a previous response.
+  /// - [statuses]: Filter threads by their current status.
   /// - [abortTrigger]: Allows canceling the request.
   Future<ListSessionThreadsResponse> list({
     int? limit,
     String? page,
+    List<SessionStatus>? statuses,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
+    if (statuses?.contains(SessionStatus.unknown) ?? false) {
+      throw ArgumentError.value(statuses, 'statuses', 'Unknown thread status');
+    }
     final queryParams = <String, dynamic>{
       'limit': ?limit?.toString(),
       'page': ?page,
+      if (statuses != null && statuses.isNotEmpty)
+        'statuses[]': statuses.map((status) => status.toJson()).toList(),
     };
 
     final url = requestBuilder.buildUrl(

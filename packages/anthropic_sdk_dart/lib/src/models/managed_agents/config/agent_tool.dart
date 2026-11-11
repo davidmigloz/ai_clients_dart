@@ -4,6 +4,7 @@ import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../../tools/built_in_tools.dart' show UserLocation;
 import 'permission_policy.dart';
+import 'web_fetch_url_sources.dart';
 
 // ---------------------------------------------------------------------------
 // AgentToolName enum
@@ -1503,6 +1504,11 @@ class WebFetchToolConfig extends AgentToolConfig {
   /// per call. Does not apply to binary content such as PDFs.
   final int? maxContentTokens;
 
+  /// Limits which sources contribute URLs eligible for web fetch.
+  final ManagedWebFetchUrlSources? urlSources;
+
+  final bool _includeNullUrlSources;
+
   /// Creates a [WebFetchToolConfig].
   const WebFetchToolConfig({
     this.type = 'web_fetch',
@@ -1512,6 +1518,8 @@ class WebFetchToolConfig extends AgentToolConfig {
     this.allowedDomains,
     this.blockedDomains,
     this.maxContentTokens,
+    this.urlSources,
+    this._includeNullUrlSources = true,
   });
 
   /// Creates a [WebFetchToolConfig] from JSON.
@@ -1530,6 +1538,12 @@ class WebFetchToolConfig extends AgentToolConfig {
           ?.map((e) => e as String)
           .toList(),
       maxContentTokens: json['max_content_tokens'] as int?,
+      includeNullUrlSources: json.containsKey('url_sources'),
+      urlSources: json['url_sources'] != null
+          ? ManagedWebFetchUrlSources.fromJson(
+              json['url_sources'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -1542,6 +1556,8 @@ class WebFetchToolConfig extends AgentToolConfig {
     if (allowedDomains != null) 'allowed_domains': allowedDomains,
     if (blockedDomains != null) 'blocked_domains': blockedDomains,
     if (maxContentTokens != null) 'max_content_tokens': maxContentTokens,
+    if (urlSources != null || _includeNullUrlSources)
+      'url_sources': urlSources?.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -1553,6 +1569,7 @@ class WebFetchToolConfig extends AgentToolConfig {
     Object? allowedDomains = unsetCopyWithValue,
     Object? blockedDomains = unsetCopyWithValue,
     Object? maxContentTokens = unsetCopyWithValue,
+    Object? urlSources = unsetCopyWithValue,
   }) {
     return WebFetchToolConfig(
       type: type ?? this.type,
@@ -1568,6 +1585,11 @@ class WebFetchToolConfig extends AgentToolConfig {
       maxContentTokens: maxContentTokens == unsetCopyWithValue
           ? this.maxContentTokens
           : maxContentTokens as int?,
+      includeNullUrlSources:
+          urlSources != unsetCopyWithValue || _includeNullUrlSources,
+      urlSources: urlSources == unsetCopyWithValue
+          ? this.urlSources
+          : urlSources as ManagedWebFetchUrlSources?,
     );
   }
 
@@ -1582,7 +1604,10 @@ class WebFetchToolConfig extends AgentToolConfig {
           permissionPolicy == other.permissionPolicy &&
           listsEqual(allowedDomains, other.allowedDomains) &&
           listsEqual(blockedDomains, other.blockedDomains) &&
-          maxContentTokens == other.maxContentTokens;
+          maxContentTokens == other.maxContentTokens &&
+          urlSources == other.urlSources &&
+          (urlSources != null ||
+              _includeNullUrlSources == other._includeNullUrlSources);
 
   @override
   int get hashCode => Object.hash(
@@ -1593,6 +1618,8 @@ class WebFetchToolConfig extends AgentToolConfig {
     listHash(allowedDomains),
     listHash(blockedDomains),
     maxContentTokens,
+    urlSources,
+    urlSources == null && _includeNullUrlSources,
   );
 
   @override
@@ -1602,7 +1629,7 @@ class WebFetchToolConfig extends AgentToolConfig {
       'permissionPolicy: $permissionPolicy, '
       'allowedDomains: $allowedDomains, '
       'blockedDomains: $blockedDomains, '
-      'maxContentTokens: $maxContentTokens)';
+      'maxContentTokens: $maxContentTokens, urlSources: $urlSources)';
 }
 
 /// Configuration for the `web_search` tool (response variant).
@@ -1956,12 +1983,14 @@ sealed class AgentToolConfigParams {
     List<String>? allowedDomains,
     List<String>? blockedDomains,
     int? maxContentTokens,
+    ManagedWebFetchUrlSources? urlSources,
   }) => WebFetchToolConfigParams(
     enabled: enabled,
     permissionPolicy: permissionPolicy,
     allowedDomains: allowedDomains,
     blockedDomains: blockedDomains,
     maxContentTokens: maxContentTokens,
+    urlSources: urlSources,
   );
 
   /// Creates a [WebSearchToolConfigParams].
@@ -2451,6 +2480,9 @@ class WebFetchToolConfigParams extends AgentToolConfigParams {
   /// per call. Does not apply to binary content such as PDFs.
   final int? maxContentTokens;
 
+  /// Limits which sources contribute URLs eligible for web fetch.
+  final ManagedWebFetchUrlSources? urlSources;
+
   /// Creates a [WebFetchToolConfigParams].
   const WebFetchToolConfigParams({
     this.enabled,
@@ -2458,6 +2490,7 @@ class WebFetchToolConfigParams extends AgentToolConfigParams {
     this.allowedDomains,
     this.blockedDomains,
     this.maxContentTokens,
+    this.urlSources,
   });
 
   /// Creates a [WebFetchToolConfigParams] from JSON.
@@ -2481,6 +2514,11 @@ class WebFetchToolConfigParams extends AgentToolConfigParams {
           ?.map((e) => e as String)
           .toList(),
       maxContentTokens: json['max_content_tokens'] as int?,
+      urlSources: json['url_sources'] != null
+          ? ManagedWebFetchUrlSources.fromJson(
+              json['url_sources'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -2494,6 +2532,7 @@ class WebFetchToolConfigParams extends AgentToolConfigParams {
     if (allowedDomains != null) 'allowed_domains': allowedDomains,
     if (blockedDomains != null) 'blocked_domains': blockedDomains,
     if (maxContentTokens != null) 'max_content_tokens': maxContentTokens,
+    'url_sources': ?urlSources?.toRequestJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -2503,6 +2542,7 @@ class WebFetchToolConfigParams extends AgentToolConfigParams {
     Object? allowedDomains = unsetCopyWithValue,
     Object? blockedDomains = unsetCopyWithValue,
     Object? maxContentTokens = unsetCopyWithValue,
+    Object? urlSources = unsetCopyWithValue,
   }) {
     return WebFetchToolConfigParams(
       enabled: enabled == unsetCopyWithValue ? this.enabled : enabled as bool?,
@@ -2518,6 +2558,9 @@ class WebFetchToolConfigParams extends AgentToolConfigParams {
       maxContentTokens: maxContentTokens == unsetCopyWithValue
           ? this.maxContentTokens
           : maxContentTokens as int?,
+      urlSources: urlSources == unsetCopyWithValue
+          ? this.urlSources
+          : urlSources as ManagedWebFetchUrlSources?,
     );
   }
 
@@ -2530,7 +2573,8 @@ class WebFetchToolConfigParams extends AgentToolConfigParams {
           permissionPolicy == other.permissionPolicy &&
           listsEqual(allowedDomains, other.allowedDomains) &&
           listsEqual(blockedDomains, other.blockedDomains) &&
-          maxContentTokens == other.maxContentTokens;
+          maxContentTokens == other.maxContentTokens &&
+          urlSources == other.urlSources;
 
   @override
   int get hashCode => Object.hash(
@@ -2539,6 +2583,7 @@ class WebFetchToolConfigParams extends AgentToolConfigParams {
     listHash(allowedDomains),
     listHash(blockedDomains),
     maxContentTokens,
+    urlSources,
   );
 
   @override
@@ -2546,7 +2591,7 @@ class WebFetchToolConfigParams extends AgentToolConfigParams {
       'WebFetchToolConfigParams('
       'enabled: $enabled, permissionPolicy: $permissionPolicy, '
       'allowedDomains: $allowedDomains, blockedDomains: $blockedDomains, '
-      'maxContentTokens: $maxContentTokens)';
+      'maxContentTokens: $maxContentTokens, urlSources: $urlSources)';
 }
 
 /// Configuration override for the `web_search` tool (request variant).

@@ -65,6 +65,35 @@ The server migration also renames Admin and Enterprise Analytics response fields
 
 ---
 
+## Handle automatic Managed Agents permissions
+
+The Managed Agents beta adds `AutoPolicy` to the sealed `PermissionPolicy` type.
+Handle it in exhaustive switches. This policy asks the server to evaluate
+each tool call.
+
+Before
+
+```dart
+String policyLabel(PermissionPolicy policy) => switch (policy) {
+  AlwaysAllowPolicy() => 'Allow',
+  AlwaysAskPolicy() => 'Ask',
+  UnknownPermissionPolicy() => 'Other',
+};
+```
+
+After
+
+```dart
+String policyLabel(PermissionPolicy policy) => switch (policy) {
+  AlwaysAllowPolicy() => 'Allow',
+  AlwaysAskPolicy() => 'Ask',
+  AutoPolicy() => 'Evaluate each tool call',
+  UnknownPermissionPolicy() => 'Other',
+};
+```
+
+---
+
 ## Generally available User Profiles
 
 Existing `client.userProfiles` calls use the legacy beta contract. Use

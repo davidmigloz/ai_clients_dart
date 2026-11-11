@@ -4,6 +4,7 @@ import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../config/agent_skill.dart';
 import '../config/agent_tool.dart';
+import '../config/execution_identity.dart';
 import '../config/mcp_server.dart';
 import '../config/model_config.dart';
 import 'multiagent_params.dart';
@@ -39,6 +40,9 @@ class CreateAgentParams {
   /// `coordinator` topology with a roster of 1-20 agents.
   final MultiagentParams? multiagent;
 
+  /// Principal for agent execution. Omit to use the default.
+  final AgentExecutionIdentity? executionIdentity;
+
   /// Creates a [CreateAgentParams].
   const CreateAgentParams({
     required this.name,
@@ -50,6 +54,7 @@ class CreateAgentParams {
     this.skills,
     this.metadata,
     this.multiagent,
+    this.executionIdentity,
   });
 
   /// Creates a [CreateAgentParams] from JSON.
@@ -69,6 +74,11 @@ class CreateAgentParams {
           ?.map((e) => AgentSkillParams.fromJson(e as Map<String, dynamic>))
           .toList(),
       metadata: (json['metadata'] as Map?)?.cast<String, String>(),
+      executionIdentity: json['execution_identity'] != null
+          ? AgentExecutionIdentity.fromJson(
+              json['execution_identity'] as Map<String, dynamic>,
+            )
+          : null,
       multiagent: json['multiagent'] != null
           ? MultiagentParams.fromJson(
               json['multiagent'] as Map<String, dynamic>,
@@ -89,6 +99,7 @@ class CreateAgentParams {
     if (skills != null) 'skills': skills!.map((e) => e.toJson()).toList(),
     if (metadata != null) 'metadata': metadata,
     if (multiagent != null) 'multiagent': multiagent!.toJson(),
+    'execution_identity': ?executionIdentity?.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -102,6 +113,7 @@ class CreateAgentParams {
     Object? skills = unsetCopyWithValue,
     Object? metadata = unsetCopyWithValue,
     Object? multiagent = unsetCopyWithValue,
+    Object? executionIdentity = unsetCopyWithValue,
   }) {
     return CreateAgentParams(
       name: name ?? this.name,
@@ -125,6 +137,9 @@ class CreateAgentParams {
       multiagent: multiagent == unsetCopyWithValue
           ? this.multiagent
           : multiagent as MultiagentParams?,
+      executionIdentity: executionIdentity == unsetCopyWithValue
+          ? this.executionIdentity
+          : executionIdentity as AgentExecutionIdentity?,
     );
   }
 
@@ -141,7 +156,8 @@ class CreateAgentParams {
           listsEqual(mcpServers, other.mcpServers) &&
           listsEqual(skills, other.skills) &&
           mapsEqual(metadata, other.metadata) &&
-          multiagent == other.multiagent;
+          multiagent == other.multiagent &&
+          executionIdentity == other.executionIdentity;
 
   @override
   int get hashCode => Object.hash(
@@ -154,6 +170,7 @@ class CreateAgentParams {
     listHash(skills),
     mapHash(metadata),
     multiagent,
+    executionIdentity,
   );
 
   @override
@@ -167,5 +184,6 @@ class CreateAgentParams {
       'mcpServers: $mcpServers, '
       'skills: $skills, '
       'metadata: $metadata, '
+      'executionIdentity: $executionIdentity, '
       'multiagent: $multiagent)';
 }

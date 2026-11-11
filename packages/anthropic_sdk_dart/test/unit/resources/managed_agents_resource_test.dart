@@ -207,6 +207,420 @@ void main() {
     client.close();
   });
 
+  group('Current Managed Agents configuration', () {
+    const beta = 'managed-agents-2026-04-01';
+    const arn = 'arn:aws:iam::123456789012:role/AgentRunner';
+    const identity = {'type': 'aws_role', 'role_arn': arn};
+
+    test(
+      'agent create and update send execution identity and reset explicitly',
+      () async {
+        mockHttpClient
+          ..queueJsonResponse({
+            ...ManagedAgentsFixtures.agent(),
+            'execution_identity': identity,
+          })
+          ..queueJsonResponse({
+            ...ManagedAgentsFixtures.agent(version: 2),
+            'execution_identity': {'type': 'service_account'},
+          });
+        final agent = await client.agents.create(
+          const CreateAgentParams(
+            name: 'AWS agent',
+            model: ModelParamsId(id: 'claude-sonnet-5-5'),
+            executionIdentity: AgentExecutionIdentity.awsRole(arn),
+          ),
+        );
+        expect(agent.executionIdentity?.roleArn, arn);
+        expect(agent.toJson()['execution_identity'], identity);
+        expect(
+          agent.copyWith(executionIdentity: null).executionIdentity,
+          isNull,
+        );
+        final reset = await client.agents.update(
+          agent.id,
+          const UpdateAgentParams(executionIdentity: null),
+        );
+        expect(
+          reset.executionIdentity,
+          const AgentExecutionIdentity.serviceAccount(),
+        );
+        expect(
+          const UpdateAgentParams().toJson(),
+          isNot(contains('execution_identity')),
+        );
+        final create = mockHttpClient.requests.first;
+        final update = mockHttpClient.requests.last;
+        expect(create.url.path, '/v1/agents');
+        expect(update.url.path, '/v1/agents/${agent.id}');
+        expect(create.headers['anthropic-beta'], beta);
+        expect(update.headers['anthropic-beta'], beta);
+        expect(
+          (jsonDecode((create as dynamic).body as String)
+              as Map<String, dynamic>)['execution_identity'],
+          identity,
+        );
+        expect(jsonDecode((update as dynamic).body as String), {
+          'execution_identity': null,
+        });
+        final unchanged = UpdateAgentParams.fromJson(const {});
+        final cleared = UpdateAgentParams.fromJson(const {
+          'execution_identity': null,
+        });
+        expect(unchanged, isNot(cleared));
+        expect(cleared.copyWith().toJson(), {'execution_identity': null});
+      },
+    );
+
+    test(
+      'session and thread snapshots carry identity and thread status filters',
+      () async {
+        final session = ManagedAgentsFixtures.session();
+        final sessionAgent = Map<String, dynamic>.of(
+          session['agent'] as Map<String, dynamic>,
+        );
+        session['agent'] = sessionAgent..['execution_identity'] = identity;
+        final thread = ManagedAgentsFixtures.sessionThread(
+          status: 'future_status',
+        );
+        final threadAgent = Map<String, dynamic>.of(
+          thread['agent'] as Map<String, dynamic>,
+        );
+        thread['agent'] = threadAgent..['execution_identity'] = identity;
+        mockHttpClient
+          ..queueJsonResponse(session)
+          ..queueJsonResponse({
+            'data': [thread],
+            'next_page': 'page_next',
+          })
+          ..queueJsonResponse({
+            'data': <Map<String, dynamic>>[],
+            'next_page': null,
+          });
+        final loaded = await client.sessions.retrieve('session_test123');
+        final threads = client.sessions.threads(loaded.id);
+        const statuses = [SessionStatus.idle, SessionStatus.running];
+        final first = await threads.list(limit: 1, statuses: statuses);
+        final next = await threads.list(
+          limit: 1,
+          statuses: statuses,
+          page: first.nextPage,
+        );
+
+        expect(loaded.agent.executionIdentity?.roleArn, arn);
+        expect(
+          (first.data.single.agent as SessionThreadAgent)
+              .executionIdentity
+              ?.roleArn,
+          arn,
+        );
+        expect(first.data.single.status, SessionStatus.unknown);
+        expect(first.data.single.toJson()['status'], 'future_status');
+        expect(
+          first.data.single.copyWith().toJson()['status'],
+          'future_status',
+        );
+        expect(next.data, isEmpty);
+        final firstRequest = mockHttpClient.requests[1];
+        final nextRequest = mockHttpClient.requests[2];
+        expect(firstRequest.url.path, '/v1/sessions/session_test123/threads');
+        expect(firstRequest.url.queryParametersAll['statuses[]'], [
+          'idle',
+          'running',
+        ]);
+        expect(nextRequest.url.queryParametersAll['statuses[]'], [
+          'idle',
+          'running',
+        ]);
+        expect(nextRequest.url.queryParameters['page'], 'page_next');
+        for (final request in mockHttpClient.requests) {
+          expect(request.headers['anthropic-beta'], beta);
+        }
+      },
+    );
+
+    test(
+      'auto permission and web fetch URL sources reach the toolset wire shape',
+      () async {
+        const sources = ManagedWebFetchUrlSources(
+          userInput: ManagedWebFetchUrlSourceFilter.none(shorthand: true),
+          clientToolResults: ManagedWebFetchUrlSourceFilter.all(),
+          serverToolResults: ManagedWebFetchUrlSourceFilter.only([
+            'web_search',
+          ]),
+        );
+        final response = ManagedAgentsFixtures.agent()
+          ..['tools'] = [
+            {
+              'type': 'agent_toolset_20260401',
+              'default_config': {
+                'type': 'default',
+                'enabled': true,
+                'permission_policy': {'type': 'always_allow'},
+              },
+              'configs': [
+                {
+                  'type': 'web_fetch',
+                  'name': 'web_fetch',
+                  'enabled': true,
+                  'permission_policy': {'type': 'auto'},
+                  'url_sources': {
+                    ...sources.toJson(),
+                    'user_input': {'type': 'none'},
+                  },
+                },
+              ],
+            },
+          ];
+        mockHttpClient.queueJsonResponse(response);
+        final agent = await client.agents.create(
+          const CreateAgentParams(
+            name: 'Restricted fetch',
+            model: ModelParamsId(id: 'claude-sonnet-5-5'),
+            tools: [
+              AgentToolset20260401Params(
+                configs: [
+                  WebFetchToolConfigParams(
+                    permissionPolicy: AutoPolicy(),
+                    urlSources: sources,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+        final tools = agent.tools.single as AgentToolset20260401;
+        final fetch = tools.configs.single as WebFetchToolConfig;
+        expect(fetch.permissionPolicy, const AutoPolicy());
+        expect(fetch.urlSources!.userInput!.toJson(), {'type': 'none'});
+        expect(fetch.urlSources!.serverToolResults!.tools, ['web_search']);
+        final request = mockHttpClient.lastRequest!;
+        expect(request.headers['anthropic-beta'], beta);
+        final body =
+            jsonDecode((request as dynamic).body as String)
+                as Map<String, dynamic>;
+        final tool = (body['tools'] as List).single as Map<String, dynamic>;
+        final config = (tool['configs'] as List).single as Map<String, dynamic>;
+        expect(config['permission_policy'], {'type': 'auto'});
+        expect(config['url_sources'], {
+          'user_input': 'none',
+          'client_tool_results': {'type': 'all'},
+          'server_tool_results': {
+            'type': 'only',
+            'tools': [
+              {'type': 'tool_reference', 'name': 'web_search'},
+            ],
+          },
+        });
+      },
+    );
+
+    test(
+      'web fetch response preserves explicit null and omitted fields',
+      () async {
+        const nested = {
+          'user_input': null,
+          'client_tool_results': null,
+          'server_tool_results': {'type': 'all'},
+        };
+        for (final fields in <Map<String, dynamic>>[
+          {},
+          {'url_sources': null},
+          {'url_sources': nested},
+        ]) {
+          mockHttpClient.queueJsonResponse({
+            ...ManagedAgentsFixtures.agent(),
+            'tools': [
+              {
+                'type': 'agent_toolset_20260401',
+                'default_config': {
+                  'type': 'default',
+                  'enabled': true,
+                  'permission_policy': {'type': 'always_allow'},
+                },
+                'configs': [
+                  {
+                    'type': 'web_fetch',
+                    'name': 'web_fetch',
+                    'enabled': true,
+                    'permission_policy': {'type': 'auto'},
+                    ...fields,
+                  },
+                ],
+              },
+            ],
+          });
+        }
+
+        final configs = <WebFetchToolConfig>[];
+        for (var index = 0; index < 3; index++) {
+          final agent = await client.agents.retrieve('agent_test123');
+          final tools = agent.tools.single as AgentToolset20260401;
+          configs.add(tools.configs.single as WebFetchToolConfig);
+          expect(mockHttpClient.lastRequest?.headers['anthropic-beta'], beta);
+        }
+
+        expect(configs[0].copyWith().toJson(), isNot(contains('url_sources')));
+        expect(
+          configs[1].copyWith().toJson(),
+          containsPair('url_sources', null),
+        );
+        final resolved = configs[2].urlSources!;
+        expect(resolved.copyWith().toJson(), nested);
+        expect(
+          configs[2].copyWith(urlSources: null).toJson(),
+          containsPair('url_sources', null),
+        );
+
+        mockHttpClient.queueJsonResponse(ManagedAgentsFixtures.agent());
+        await client.agents.create(
+          CreateAgentParams(
+            name: 'Replay only the configured URL sources',
+            model: const ModelParamsId(id: 'claude-sonnet-5'),
+            tools: [
+              AgentToolset20260401Params(
+                configs: [WebFetchToolConfigParams(urlSources: resolved)],
+              ),
+            ],
+          ),
+        );
+        final body =
+            jsonDecode((mockHttpClient.lastRequest as dynamic).body as String)
+                as Map<String, dynamic>;
+        final tool = (body['tools'] as List).single as Map<String, dynamic>;
+        final config = (tool['configs'] as List).single as Map<String, dynamic>;
+        expect(config['url_sources'], {
+          'server_tool_results': {'type': 'all'},
+        });
+      },
+    );
+
+    test('invalid URL source filters fail before agent creation', () async {
+      const none = ManagedWebFetchUrlSourceFilter.none();
+      final invalid = [
+        const ManagedWebFetchUrlSources(
+          userInput: ManagedWebFetchUrlSourceFilter.only(['fetcher']),
+        ),
+        const ManagedWebFetchUrlSources(
+          clientToolResults: ManagedWebFetchUrlSourceFilter.except([]),
+        ),
+        const ManagedWebFetchUrlSources(
+          clientToolResults: ManagedWebFetchUrlSourceFilter.only([
+            'read',
+            'read',
+          ]),
+        ),
+        const ManagedWebFetchUrlSources(
+          clientToolResults: ManagedWebFetchUrlSourceFilter.only(['']),
+        ),
+        ManagedWebFetchUrlSources(
+          clientToolResults: ManagedWebFetchUrlSourceFilter.only(
+            List.generate(129, (index) => 'tool_$index'),
+          ),
+        ),
+        const ManagedWebFetchUrlSources(
+          serverToolResults: ManagedWebFetchUrlSourceFilter.except(['read']),
+        ),
+        const ManagedWebFetchUrlSources(
+          userInput: none,
+          clientToolResults: none,
+          serverToolResults: none,
+        ),
+      ];
+      for (final sources in invalid) {
+        await expectLater(
+          client.agents.create(
+            CreateAgentParams(
+              name: 'Invalid source',
+              model: const ModelParamsId(id: 'claude-sonnet-5'),
+              tools: [
+                AgentToolset20260401Params(
+                  configs: [WebFetchToolConfigParams(urlSources: sources)],
+                ),
+              ],
+            ),
+          ),
+          throwsArgumentError,
+        );
+      }
+      expect(mockHttpClient.requests, isEmpty);
+    });
+
+    test('unknown session status is rejected as a thread filter', () async {
+      await expectLater(
+        client.sessions
+            .threads('session_test123')
+            .list(statuses: [SessionStatus.idle, SessionStatus.unknown]),
+        throwsArgumentError,
+      );
+      expect(mockHttpClient.requests, isEmpty);
+    });
+
+    test('tool evaluation parses on event listing and thread SSE', () async {
+      const auto = {
+        'type': 'auto',
+        'evaluated_permission': {'type': 'ask', 'reason_code': 'unknown_risk'},
+      };
+      const tool = {
+        'type': 'agent.tool_use',
+        'id': 'evt_tool',
+        'processed_at': '2026-11-10T00:00:00.000Z',
+        'name': 'web_fetch',
+        'input': {'url': 'https://example.com'},
+        'evaluated_permission': 'ask',
+        'evaluation': auto,
+      };
+      final mcp = {
+        ...tool,
+        'type': 'agent.mcp_tool_use',
+        'id': 'evt_mcp',
+        'mcp_server_name': 'example',
+        'evaluated_permission': 'future_permission',
+        'evaluation': {
+          'type': 'future_policy',
+          'detail': {
+            'nested': [1],
+          },
+        },
+      };
+      mockHttpClient
+        ..queueJsonResponse({
+          'data': [tool],
+          'next_page': null,
+        })
+        ..queueStreamingResponse([mcp]);
+      final listed = await client.sessions.events('session_test123').list();
+      final builtIn = listed.data.single as AgentToolUseEvent;
+      final streamed =
+          await client.sessions
+                  .threads('session_test123')
+                  .events('sthr_test123')
+                  .stream()
+                  .single
+              as AgentMcpToolUseEvent;
+      expect(
+        builtIn.evaluation?.autoDecision?.permission,
+        AgentEvaluatedPermission.ask,
+      );
+      expect(builtIn.evaluation?.autoDecision?.reasonCode, 'unknown_risk');
+      expect(builtIn.toJson(), tool);
+      expect(streamed.evaluatedPermission, AgentEvaluatedPermission.unknown);
+      expect(streamed.copyWith().toJson(), mcp);
+      expect(streamed.copyWith(evaluation: null).evaluation, isNull);
+      expect(
+        mockHttpClient.requests.first.url.path,
+        '/v1/sessions/session_test123/events',
+      );
+      expect(
+        mockHttpClient.requests.last.url.path,
+        '/v1/sessions/session_test123/threads/sthr_test123/stream',
+      );
+      for (final request in mockHttpClient.requests) {
+        expect(request.headers['anthropic-beta'], beta);
+      }
+    });
+  });
+
   group('AgentsResource', () {
     test('create sends correct request and parses response', () async {
       mockHttpClient.queueJsonResponse(

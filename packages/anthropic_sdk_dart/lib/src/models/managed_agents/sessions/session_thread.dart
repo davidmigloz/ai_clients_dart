@@ -25,6 +25,11 @@ class SessionThread {
   /// Current thread status.
   final SessionStatus status;
 
+  final String? _rawStatus;
+
+  /// Original status, including values introduced by the server.
+  String get rawStatus => _rawStatus ?? status.value;
+
   /// Resolved agent snapshot at thread creation time: either a saved-agent
   /// snapshot or the platform advisor entry.
   final SessionRosterEntry agent;
@@ -54,6 +59,7 @@ class SessionThread {
     this.type = 'session_thread',
     required this.sessionId,
     required this.status,
+    this._rawStatus,
     required this.agent,
     required this.parentThreadId,
     required this.createdAt,
@@ -70,6 +76,7 @@ class SessionThread {
       type: json['type'] as String? ?? 'session_thread',
       sessionId: json['session_id'] as String,
       status: SessionStatus.fromJson(json['status'] as String),
+      rawStatus: json['status'] as String,
       agent: SessionRosterEntry.fromJson(json['agent'] as Map<String, dynamic>),
       parentThreadId: json['parent_thread_id'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
@@ -91,7 +98,7 @@ class SessionThread {
     'id': id,
     'type': type,
     'session_id': sessionId,
-    'status': status.toJson(),
+    'status': rawStatus,
     'agent': agent.toJson(),
     'parent_thread_id': parentThreadId,
     'created_at': createdAt.toUtc().toIso8601String(),
@@ -124,6 +131,7 @@ class SessionThread {
       type: type ?? this.type,
       sessionId: sessionId ?? this.sessionId,
       status: status ?? this.status,
+      rawStatus: status == null ? _rawStatus : null,
       agent: agent ?? this.agent,
       parentThreadId: parentThreadId == unsetCopyWithValue
           ? this.parentThreadId
@@ -150,7 +158,7 @@ class SessionThread {
           id == other.id &&
           type == other.type &&
           sessionId == other.sessionId &&
-          status == other.status &&
+          rawStatus == other.rawStatus &&
           agent == other.agent &&
           parentThreadId == other.parentThreadId &&
           createdAt == other.createdAt &&
@@ -164,7 +172,7 @@ class SessionThread {
     id,
     type,
     sessionId,
-    status,
+    rawStatus,
     agent,
     parentThreadId,
     createdAt,
@@ -180,7 +188,7 @@ class SessionThread {
       'id: $id, '
       'type: $type, '
       'sessionId: $sessionId, '
-      'status: $status, '
+      'status: $rawStatus, '
       'agent: $agent, '
       'parentThreadId: $parentThreadId, '
       'createdAt: $createdAt, '

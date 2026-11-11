@@ -7,6 +7,7 @@ import '../common/budget.dart';
 import '../config/agent_tool.dart' show AgentEvaluatedPermission;
 import '../outcomes/rubric.dart';
 import '../sessions/session.dart' show SessionAgent;
+import 'agent_tool_evaluation.dart';
 import 'telemetry.dart';
 
 /// Server-sent event in a managed agents session.
@@ -384,7 +385,20 @@ class AgentToolUseEvent extends SessionEvent {
   final Map<String, dynamic> input;
 
   /// The evaluated permission policy for this tool invocation.
-  final AgentEvaluatedPermission? evaluatedPermission;
+  AgentEvaluatedPermission? get evaluatedPermission {
+    final value = rawEvaluatedPermission;
+    return value == null ? null : AgentEvaluatedPermission.fromJson(value);
+  }
+
+  final AgentEvaluatedPermission? _evaluatedPermission;
+  final String? _rawEvaluatedPermission;
+
+  /// The original permission string, including future values.
+  String? get rawEvaluatedPermission =>
+      _rawEvaluatedPermission ?? _evaluatedPermission?.value;
+
+  /// The resolved policy and automatic decision for this tool call.
+  final AgentToolEvaluation? evaluation;
 
   /// Timestamp when this event was processed.
   final BetaTimestamp processedAt;
@@ -397,7 +411,9 @@ class AgentToolUseEvent extends SessionEvent {
     required this.id,
     required this.name,
     required this.input,
-    this.evaluatedPermission,
+    this._evaluatedPermission,
+    this._rawEvaluatedPermission,
+    this.evaluation,
     required this.processedAt,
     this.sessionThreadId,
   });
@@ -408,9 +424,10 @@ class AgentToolUseEvent extends SessionEvent {
       id: json['id'] as String,
       name: json['name'] as String,
       input: json['input'] as Map<String, dynamic>,
-      evaluatedPermission: json['evaluated_permission'] != null
-          ? AgentEvaluatedPermission.fromJson(
-              json['evaluated_permission'] as String,
+      rawEvaluatedPermission: json['evaluated_permission'] as String?,
+      evaluation: json['evaluation'] != null
+          ? AgentToolEvaluation.fromJson(
+              json['evaluation'] as Map<String, dynamic>,
             )
           : null,
       processedAt: DateTime.parse(json['processed_at'] as String),
@@ -424,8 +441,8 @@ class AgentToolUseEvent extends SessionEvent {
     'id': id,
     'name': name,
     'input': input,
-    if (evaluatedPermission != null)
-      'evaluated_permission': evaluatedPermission!.toJson(),
+    'evaluated_permission': ?rawEvaluatedPermission,
+    'evaluation': ?evaluation?.toJson(),
     'processed_at': processedAt.toUtc().toIso8601String(),
     if (sessionThreadId != null) 'session_thread_id': sessionThreadId,
   };
@@ -436,6 +453,7 @@ class AgentToolUseEvent extends SessionEvent {
     String? name,
     Map<String, dynamic>? input,
     Object? evaluatedPermission = unsetCopyWithValue,
+    Object? evaluation = unsetCopyWithValue,
     BetaTimestamp? processedAt,
     Object? sessionThreadId = unsetCopyWithValue,
   }) {
@@ -446,6 +464,12 @@ class AgentToolUseEvent extends SessionEvent {
       evaluatedPermission: evaluatedPermission == unsetCopyWithValue
           ? this.evaluatedPermission
           : evaluatedPermission as AgentEvaluatedPermission?,
+      rawEvaluatedPermission: evaluatedPermission == unsetCopyWithValue
+          ? rawEvaluatedPermission
+          : null,
+      evaluation: evaluation == unsetCopyWithValue
+          ? this.evaluation
+          : evaluation as AgentToolEvaluation?,
       processedAt: processedAt ?? this.processedAt,
       sessionThreadId: sessionThreadId == unsetCopyWithValue
           ? this.sessionThreadId
@@ -461,7 +485,8 @@ class AgentToolUseEvent extends SessionEvent {
           id == other.id &&
           name == other.name &&
           mapsDeepEqual(input, other.input) &&
-          evaluatedPermission == other.evaluatedPermission &&
+          rawEvaluatedPermission == other.rawEvaluatedPermission &&
+          evaluation == other.evaluation &&
           processedAt == other.processedAt &&
           sessionThreadId == other.sessionThreadId;
 
@@ -470,7 +495,8 @@ class AgentToolUseEvent extends SessionEvent {
     id,
     name,
     mapDeepHashCode(input),
-    evaluatedPermission,
+    rawEvaluatedPermission,
+    evaluation,
     processedAt,
     sessionThreadId,
   );
@@ -478,7 +504,7 @@ class AgentToolUseEvent extends SessionEvent {
   @override
   String toString() =>
       'AgentToolUseEvent(id: $id, name: $name, input: $input, '
-      'evaluatedPermission: $evaluatedPermission, '
+      'evaluatedPermission: $rawEvaluatedPermission, evaluation: $evaluation, '
       'processedAt: $processedAt, '
       'sessionThreadId: $sessionThreadId)';
 }
@@ -600,7 +626,20 @@ class AgentMcpToolUseEvent extends SessionEvent {
   final Map<String, dynamic> input;
 
   /// The evaluated permission policy for this tool invocation.
-  final AgentEvaluatedPermission? evaluatedPermission;
+  AgentEvaluatedPermission? get evaluatedPermission {
+    final value = rawEvaluatedPermission;
+    return value == null ? null : AgentEvaluatedPermission.fromJson(value);
+  }
+
+  final AgentEvaluatedPermission? _evaluatedPermission;
+  final String? _rawEvaluatedPermission;
+
+  /// The original permission string, including future values.
+  String? get rawEvaluatedPermission =>
+      _rawEvaluatedPermission ?? _evaluatedPermission?.value;
+
+  /// The resolved policy and automatic decision for this tool call.
+  final AgentToolEvaluation? evaluation;
 
   /// Timestamp when this event was processed.
   final BetaTimestamp processedAt;
@@ -614,7 +653,9 @@ class AgentMcpToolUseEvent extends SessionEvent {
     required this.mcpServerName,
     required this.name,
     required this.input,
-    this.evaluatedPermission,
+    this._evaluatedPermission,
+    this._rawEvaluatedPermission,
+    this.evaluation,
     required this.processedAt,
     this.sessionThreadId,
   });
@@ -626,9 +667,10 @@ class AgentMcpToolUseEvent extends SessionEvent {
       mcpServerName: json['mcp_server_name'] as String,
       name: json['name'] as String,
       input: json['input'] as Map<String, dynamic>,
-      evaluatedPermission: json['evaluated_permission'] != null
-          ? AgentEvaluatedPermission.fromJson(
-              json['evaluated_permission'] as String,
+      rawEvaluatedPermission: json['evaluated_permission'] as String?,
+      evaluation: json['evaluation'] != null
+          ? AgentToolEvaluation.fromJson(
+              json['evaluation'] as Map<String, dynamic>,
             )
           : null,
       processedAt: DateTime.parse(json['processed_at'] as String),
@@ -643,8 +685,8 @@ class AgentMcpToolUseEvent extends SessionEvent {
     'mcp_server_name': mcpServerName,
     'name': name,
     'input': input,
-    if (evaluatedPermission != null)
-      'evaluated_permission': evaluatedPermission!.toJson(),
+    'evaluated_permission': ?rawEvaluatedPermission,
+    'evaluation': ?evaluation?.toJson(),
     'processed_at': processedAt.toUtc().toIso8601String(),
     if (sessionThreadId != null) 'session_thread_id': sessionThreadId,
   };
@@ -656,6 +698,7 @@ class AgentMcpToolUseEvent extends SessionEvent {
     String? name,
     Map<String, dynamic>? input,
     Object? evaluatedPermission = unsetCopyWithValue,
+    Object? evaluation = unsetCopyWithValue,
     BetaTimestamp? processedAt,
     Object? sessionThreadId = unsetCopyWithValue,
   }) {
@@ -667,6 +710,12 @@ class AgentMcpToolUseEvent extends SessionEvent {
       evaluatedPermission: evaluatedPermission == unsetCopyWithValue
           ? this.evaluatedPermission
           : evaluatedPermission as AgentEvaluatedPermission?,
+      rawEvaluatedPermission: evaluatedPermission == unsetCopyWithValue
+          ? rawEvaluatedPermission
+          : null,
+      evaluation: evaluation == unsetCopyWithValue
+          ? this.evaluation
+          : evaluation as AgentToolEvaluation?,
       processedAt: processedAt ?? this.processedAt,
       sessionThreadId: sessionThreadId == unsetCopyWithValue
           ? this.sessionThreadId
@@ -683,7 +732,8 @@ class AgentMcpToolUseEvent extends SessionEvent {
           mcpServerName == other.mcpServerName &&
           name == other.name &&
           mapsDeepEqual(input, other.input) &&
-          evaluatedPermission == other.evaluatedPermission &&
+          rawEvaluatedPermission == other.rawEvaluatedPermission &&
+          evaluation == other.evaluation &&
           processedAt == other.processedAt &&
           sessionThreadId == other.sessionThreadId;
 
@@ -693,7 +743,8 @@ class AgentMcpToolUseEvent extends SessionEvent {
     mcpServerName,
     name,
     mapDeepHashCode(input),
-    evaluatedPermission,
+    rawEvaluatedPermission,
+    evaluation,
     processedAt,
     sessionThreadId,
   );
@@ -702,7 +753,7 @@ class AgentMcpToolUseEvent extends SessionEvent {
   String toString() =>
       'AgentMcpToolUseEvent(id: $id, mcpServerName: $mcpServerName, '
       'name: $name, input: $input, '
-      'evaluatedPermission: $evaluatedPermission, '
+      'evaluatedPermission: $rawEvaluatedPermission, evaluation: $evaluation, '
       'processedAt: $processedAt, '
       'sessionThreadId: $sessionThreadId)';
 }
