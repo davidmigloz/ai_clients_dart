@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../messages/fallback_config.dart';
+import '../tools/built_in_tools.dart' show McpListedTool;
 import '../tools/tool_caller.dart';
 
 /// Content block in a response message.
@@ -35,6 +36,7 @@ sealed class ContentBlock {
       'container_upload' => ContainerUploadBlock.fromJson(json),
       'compaction' => CompactionBlock.fromJson(json),
       'mcp_tool_use' => MCPToolUseBlock.fromJson(json),
+      'mcp_tool_listing' => McpToolListingBlock.fromJson(json),
       'mcp_tool_result' => MCPToolResultBlock.fromJson(json),
       'advisor_tool_result' => AdvisorToolResultBlock.fromJson(json),
       'fallback' => FallbackBlock.fromJson(json),
@@ -1827,6 +1829,70 @@ class MCPToolUseBlock extends ContentBlock {
   String toString() =>
       'MCPToolUseBlock(id: $id, name: $name, '
       'serverName: $serverName, input: $input)';
+}
+
+/// The MCP tool list captured for a named server in a conversation.
+@immutable
+final class McpToolListingBlock extends ContentBlock {
+  /// Creates a tool listing block.
+  McpToolListingBlock({
+    required this.serverName,
+    required List<McpListedTool> tools,
+  }) : tools = List.unmodifiable(tools);
+
+  /// Parses the current `mcp_tool_listing` payload.
+  factory McpToolListingBlock.fromJson(Map<String, dynamic> json) {
+    if (json case {
+      'type': 'mcp_tool_listing',
+      'mcp_server_name': final String serverName,
+      'tools': final List<Object?> tools,
+    }) {
+      return McpToolListingBlock(
+        serverName: serverName,
+        tools: tools
+            .map(
+              (tool) => McpListedTool.fromJson(tool! as Map<String, dynamic>),
+            )
+            .toList(),
+      );
+    }
+    throw const FormatException('Invalid MCP tool listing block');
+  }
+
+  /// Name of the MCP server in the Messages request.
+  final String serverName;
+
+  /// Tools Claude saw, in the order reported by the server.
+  final List<McpListedTool> tools;
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'mcp_tool_listing',
+    'mcp_server_name': serverName,
+    'tools': tools.map((tool) => tool.toJson()).toList(),
+  };
+
+  /// Copies the block with selected properties replaced.
+  McpToolListingBlock copyWith({
+    String? serverName,
+    List<McpListedTool>? tools,
+  }) => McpToolListingBlock(
+    serverName: serverName ?? this.serverName,
+    tools: tools ?? this.tools,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      other is McpToolListingBlock &&
+      serverName == other.serverName &&
+      listsEqual(tools, other.tools);
+
+  @override
+  int get hashCode => Object.hash(serverName, listHash(tools));
+
+  @override
+  String toString() =>
+      'McpToolListingBlock(serverName: $serverName, tools: ${tools.length})';
 }
 
 /// Content of an MCP tool result — either a plain string or a list of

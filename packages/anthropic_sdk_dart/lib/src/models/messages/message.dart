@@ -186,7 +186,9 @@ class Message {
           : contextManagement as ContextManagementResult?,
       inputTransformations: inputTransformations == unsetCopyWithValue
           ? this.inputTransformations
-          : inputTransformations as List<InputTransformation>?,
+          : (inputTransformations as List<Object?>?)
+                ?.cast<InputTransformation>()
+                .toList(),
     );
   }
 

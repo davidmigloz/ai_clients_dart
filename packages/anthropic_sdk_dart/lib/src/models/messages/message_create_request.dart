@@ -8,6 +8,7 @@ import '../metadata/cache_control.dart';
 import '../metadata/metadata.dart';
 import '../metadata/service_tier.dart';
 import '../metadata/speed.dart';
+import '../tools/built_in_tools.dart' show McpConnectorServer;
 import '../tools/tool_choice.dart';
 import '../tools/tool_definition.dart';
 import 'compaction_config.dart';
@@ -243,6 +244,12 @@ class MessageCreateRequest {
   /// Use this field separately from [compaction].
   final ContextManagementConfig? contextManagement;
 
+  /// Remote MCP servers the Messages API can connect to.
+  ///
+  /// Supply the connector beta header and reference servers in [tools] when
+  /// using the current connector contract.
+  final List<McpConnectorServer>? mcpServers;
+
   /// Creates or continues server-held conversation state (beta).
   ///
   /// Requires `message-threads-2026-08-12`. Message Batches cannot use threads.
@@ -291,6 +298,7 @@ class MessageCreateRequest {
     this.diagnostics,
     this.compaction,
     this.contextManagement,
+    this.mcpServers,
     this.thread,
     this.fallbacks,
     this.fallbackCreditToken,
@@ -347,6 +355,12 @@ class MessageCreateRequest {
               json['diagnostics'] as Map<String, dynamic>,
             )
           : null,
+      mcpServers: (json['mcp_servers'] as List<Object?>?)
+          ?.map(
+            (value) =>
+                McpConnectorServer.fromJson(value! as Map<String, dynamic>),
+          )
+          .toList(),
       contextManagement: json['context_management'] != null
           ? ContextManagementConfig.fromJson(
               json['context_management'] as Map<String, dynamic>,
@@ -393,6 +407,7 @@ class MessageCreateRequest {
     if (diagnostics != null) 'diagnostics': diagnostics!.toJson(),
     if (compaction != null) 'compaction': compaction!.toJson(),
     'context_management': ?contextManagement?.toJson(),
+    'mcp_servers': ?mcpServers?.map((server) => server.toJson()).toList(),
     if (thread != null) 'thread': thread!.toJson(),
     if (fallbacks != null) 'fallbacks': fallbacks!.toJson(),
     if (fallbackCreditToken != null)
@@ -423,6 +438,7 @@ class MessageCreateRequest {
     Object? diagnostics = unsetCopyWithValue,
     Object? compaction = unsetCopyWithValue,
     Object? contextManagement = unsetCopyWithValue,
+    Object? mcpServers = unsetCopyWithValue,
     Object? thread = unsetCopyWithValue,
     Object? fallbacks = unsetCopyWithValue,
     Object? fallbackCreditToken = unsetCopyWithValue,
@@ -442,7 +458,7 @@ class MessageCreateRequest {
           : serviceTier as ServiceTierRequest?,
       stopSequences: stopSequences == unsetCopyWithValue
           ? this.stopSequences
-          : stopSequences as List<String>?,
+          : (stopSequences as List<Object?>?)?.cast<String>().toList(),
       stream: stream == unsetCopyWithValue ? this.stream : stream as bool?,
       temperature: temperature == unsetCopyWithValue
           ? this.temperature
@@ -455,7 +471,7 @@ class MessageCreateRequest {
           : toolChoice as ToolChoice?,
       tools: tools == unsetCopyWithValue
           ? this.tools
-          : tools as List<ToolDefinition>?,
+          : (tools as List<Object?>?)?.cast<ToolDefinition>().toList(),
       topP: topP == unsetCopyWithValue ? this.topP : topP as double?,
       topK: topK == unsetCopyWithValue ? this.topK : topK as int?,
       inferenceGeo: inferenceGeo == unsetCopyWithValue
@@ -477,6 +493,9 @@ class MessageCreateRequest {
       compaction: compaction == unsetCopyWithValue
           ? this.compaction
           : compaction as CompactionConfig?,
+      mcpServers: mcpServers == unsetCopyWithValue
+          ? this.mcpServers
+          : (mcpServers as List<Object?>?)?.cast<McpConnectorServer>().toList(),
       contextManagement: contextManagement == unsetCopyWithValue
           ? this.contextManagement
           : contextManagement as ContextManagementConfig?,
@@ -518,6 +537,7 @@ class MessageCreateRequest {
           cacheControl == other.cacheControl &&
           diagnostics == other.diagnostics &&
           compaction == other.compaction &&
+          listsEqual(mcpServers, other.mcpServers) &&
           contextManagement == other.contextManagement &&
           thread == other.thread &&
           fallbacks == other.fallbacks &&
@@ -547,6 +567,7 @@ class MessageCreateRequest {
     diagnostics,
     compaction,
     contextManagement,
+    listHash(mcpServers),
     thread,
     fallbacks,
     fallbackCreditToken,
@@ -562,7 +583,7 @@ class MessageCreateRequest {
       'inferenceGeo: $inferenceGeo, outputConfig: $outputConfig, '
       'container: $container, speed: $speed, cacheControl: $cacheControl, '
       'diagnostics: $diagnostics, compaction: $compaction, thread: $thread, '
-      'contextManagement: $contextManagement, '
+      'mcpServers: $mcpServers, contextManagement: $contextManagement, '
       'fallbacks: $fallbacks, '
       'fallbackCreditToken: '
       '${fallbackCreditToken == null ? null : '[redacted]'})';

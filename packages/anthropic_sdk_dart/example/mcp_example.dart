@@ -1,148 +1,75 @@
-// ignore_for_file: avoid_print
+import 'dart:io';
+
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 
-/// MCP Toolset example (Beta).
+/// Connects Claude to a remote MCP server and reuses its returned tool listing.
 ///
-/// This example demonstrates how to configure the MCP (Model Context Protocol)
-/// Toolset for connecting to external tool servers.
-///
-/// MCP allows Claude to:
-/// - Connect to external tool servers
-/// - Use tools defined by those servers
-/// - Integrate with custom backends
-void main() {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
+/// Set ANTHROPIC_API_KEY and MCP_SERVER_URL. Set MCP_AUTHORIZATION_TOKEN if
+/// the server requires an OAuth access token. Tool listing and pinning use the
+/// Claude API's mcp-client-2026-09-15 beta.
+Future<void> main() async {
+  final url = Platform.environment['MCP_SERVER_URL'];
+  if (url == null || url.isEmpty) {
+    stderr.writeln('Set MCP_SERVER_URL and ANTHROPIC_API_KEY.');
+    exitCode = 64;
+    return;
+  }
+
+  final client = AnthropicClient.fromEnvironment();
+  const beta = ['mcp-client-2026-09-15'];
+  const serverName = 'remote-tools';
+  final request = MessageCreateRequest(
+    model: 'claude-sonnet-5-5',
+    maxTokens: 512,
+    messages: [InputMessage.user('Which tools can you use?')],
+    mcpServers: [
+      McpConnectorServer(
+        name: serverName,
+        url: url,
+        authorizationToken: Platform.environment['MCP_AUTHORIZATION_TOKEN'],
+      ),
+    ],
+    tools: [
+      ToolDefinition.builtIn(BuiltInTool.mcpConnector(serverName: serverName)),
+    ],
   );
 
   try {
-    // Example 1: Configure MCP Toolset
-    print('=== MCP Toolset Configuration ===');
-    print('''
-The MCP Toolset connects Claude to external tool servers:
+    final first = await client.messages.create(request, betas: beta);
+    stdout.writeln(first.text);
 
-final tools = [
-  ToolDefinition.builtIn(
-    McpToolset(
-      serverDefinition: McpServerUrlDefinition(
-        url: 'https://mcp.example.com/tools',
-      ),
-      toolConfiguration: McpToolConfig(
-        allowedTools: ['calculator', 'translator', 'code_runner'],
-      ),
-      authorizationToken: 'Bearer your-token-here',
-    ),
-  ),
-];
-
-final response = await client.messages.create(
-  MessageCreateRequest(
-    model: 'claude-sonnet-5',
-    maxTokens: 4096,
-    tools: tools,
-    messages: [
-      InputMessage.user('Calculate 15% of 240'),
-    ],
-  ),
-);
-
-Claude will discover and use tools from your MCP server.
-''');
-
-    // Example 2: MCP with specific tools
-    print('\n=== Tool Filtering ===');
-    final tool = ToolDefinition.builtIn(
-      const McpToolset(
-        serverDefinition: McpServerUrlDefinition(
-          url: 'https://code-tools.example.com/mcp',
+    final listings = first.content.whereType<McpToolListingBlock>();
+    if (listings.isEmpty) return;
+    if (first.stopReason == StopReason.endTurn) {
+      final followUp = await client.messages.create(
+        request.copyWith(
+          messages: [
+            ...request.messages,
+            first.toInputMessage(),
+            InputMessage.user('Explain what I can do with those tools.'),
+          ],
         ),
-        toolConfiguration: McpToolConfig(
-          allowedTools: ['run_python', 'lint_code', 'format_code'],
-        ),
+        betas: beta,
+      );
+      stdout.writeln(followUp.text);
+    }
+
+    // Start a fresh request with the pinned tools. The continued conversation
+    // above kept the tool configuration used by its earlier turn.
+    final pinned = await client.messages.create(
+      request.copyWith(
+        tools: [
+          ToolDefinition.builtIn(
+            BuiltInTool.mcpConnector(
+              serverName: serverName,
+              tools: listings.single.tools,
+            ),
+          ),
+        ],
       ),
+      betas: beta,
     );
-    print('McpToolset JSON:');
-    print(tool.toJson());
-    print('''
-
-Using toolConfiguration.allowedTools lets you expose only specific tools
-from your MCP server to Claude.
-''');
-
-    // Example 3: Multiple MCP servers
-    print('\n=== Multiple MCP Servers ===');
-    print('''
-You can connect to multiple MCP servers:
-
-final tools = [
-  ToolDefinition.builtIn(
-    McpToolset(
-      serverDefinition: McpServerUrlDefinition(
-        url: 'https://db.example.com/mcp',
-      ),
-      toolConfiguration: McpToolConfig(
-        allowedTools: ['query', 'insert', 'update'],
-      ),
-    ),
-  ),
-  ToolDefinition.builtIn(
-    McpToolset(
-      serverDefinition: McpServerUrlDefinition(
-        url: 'https://files.example.com/mcp',
-      ),
-      toolConfiguration: McpToolConfig(
-        allowedTools: ['read_file', 'write_file', 'list_files'],
-      ),
-    ),
-  ),
-];
-
-Claude can then use tools from any of the configured servers.
-''');
-
-    // Example 4: MCP interaction flow
-    print('\n=== MCP Interaction Flow ===');
-    print('''
-When using MCP tools:
-
-1. Configure MCP toolset with server URL
-2. Send message to Claude
-3. Claude discovers available tools from server
-4. Claude calls appropriate tools via tool_use blocks
-5. Your MCP server executes the tool
-6. Result is returned to Claude
-7. Claude continues processing
-
-The MCP protocol handles:
-- Tool discovery (listing available tools)
-- Tool invocation (calling tools with arguments)
-- Result handling (parsing tool outputs)
-''');
-
-    // Example 5: Authentication options
-    print('\n=== Authentication ===');
-    print('''
-MCP servers can be authenticated using:
-
-ToolDefinition.builtIn(
-  McpToolset(
-    serverDefinition: McpServerUrlDefinition(
-      url: 'https://secure.example.com/mcp',
-    ),
-    authorizationToken: 'Bearer eyJhbGciOiJIUzI1NiIs...',
-  ),
-)
-
-The authorizationToken is passed in the Authorization header
-when connecting to the MCP server.
-
-For production use:
-- Store tokens securely
-- Rotate tokens regularly
-- Use environment variables for tokens
-''');
+    stdout.writeln(pinned.text);
   } finally {
     client.close();
   }

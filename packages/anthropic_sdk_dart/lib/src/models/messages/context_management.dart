@@ -36,7 +36,7 @@ class ContextManagementConfig {
       ContextManagementConfig(
         edits: edits == unsetCopyWithValue
             ? this.edits
-            : edits as List<ContextManagementEdit>?,
+            : (edits as List<Object?>?)?.cast<ContextManagementEdit>().toList(),
       );
 
   @override
