@@ -53,7 +53,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Model discovery with lifecycle filters, model lines, and thinking and server-tool capabilities
 - Organization Admin API for keys, users, invites, workspaces, rate limits and compliance settings
 - Files (expiration, cursor pagination) and skills (multi-file uploads, container skills)
-- Managed agents with sessions, thread status filters, execution principals, tool permission evaluation, vaults, and streaming events (beta)
+- Managed agents with environments, self-hosted work, sessions, thread status filters, execution principals, tool permission evaluation, vaults, and streaming events (beta)
 - Scheduled deployments: run agent sessions on a cron schedule, with deployment runs, pause/resume, and run-now (beta)
 - Multiagent orchestration with dynamic workflows, subagents, and an advisor, plus per-tool configs, session budgets, and outcome evaluations (beta)
 - Typed webhook event parsing and MCP-OAuth / static-bearer / environment-variable credential validation (beta)
@@ -695,6 +695,57 @@ Use `AutoPolicy()` for server-evaluated tool permissions and read the event's `e
 
 </details>
 
+### How do I manage agent environments?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.environments` to manage the execution environments used by Claude Managed Agents. Select a cloud configuration to set networking and packages, or a self-hosted configuration for an environment served by your own workers. Each operation sends the Managed Agents beta header. Use the key’s workspace or supply the matching `workspaceId`.
+
+```dart
+final environment = await client.environments.create(
+  const CreateEnvironmentParams(
+    name: 'Restricted environment',
+    config: CloudEnvironmentConfigParams(
+      networking: LimitedEnvironmentNetworkParams(
+        allowedHosts: ['example.com'],
+      ),
+    ),
+  ),
+);
+```
+
+Pass the returned ID as `environmentId` when creating a session. To paginate the list, pass each response’s `nextPage` into the next `list(page: ...)` call until it is null.
+
+→ [Full example](example/environments_example.dart)
+
+</details>
+
+### How do I poll work from a self-hosted environment?
+
+<details>
+<summary><b>Show example</b></summary>
+
+On the Claude API, pass the environment key to poll. If the response includes a scoped sessions token, use it for the claimed item's lifecycle calls. Pass `EnvironmentWorkResource.noHeartbeat` when first claiming a lease and echo the server's exact `lastHeartbeat` on later calls. A conditional conflict exposes the server's lease state in `EnvironmentHeartbeatConflictException`.
+
+```dart
+final queue = client.environments.work(environmentId, bearerToken: environmentKey);
+final item = await queue.poll(blockMs: 100, workerId: 'worker-1');
+if (item != null) {
+  final work = client.environments.work(
+    environmentId,
+    bearerToken: item.credentials?.sessionsToken ?? environmentKey,
+  );
+  await work.ack(item.id);
+}
+```
+
+These Dart methods expose the work API. The prebuilt worker in the official CLI and SDKs additionally runs the sandbox, tools and lease renewal loop. Claude Platform on AWS and Anthropic-managed Claude Models on Google Cloud use provider credentials for workers. Self-hosted memory stores are unavailable on those platforms. [Environment and platform differences](https://platform.claude.com/docs/en/managed-agents/choosing-an-environment)
+
+→ [Full example](example/environment_work_example.dart)
+
+</details>
+
 ### How do I manage agent memory stores?
 
 <details>
@@ -952,6 +1003,8 @@ See the [example/](example/) directory for complete examples:
 | [`mcp_example.dart`](example/mcp_example.dart) | Connect an MCP server and pin its tool listing (beta) |
 | [`managed_agents_example.dart`](example/managed_agents_example.dart) | Managed agents: agents, sessions, vaults, multiagent rosters, outcomes, webhooks, credential validation (beta) |
 | [`managed_agents_workflow_example.dart`](example/managed_agents_workflow_example.dart) | Configure dynamic workflows and follow workflow run events (Managed Agents beta) |
+| [`environments_example.dart`](example/environments_example.dart) | Managed Agents cloud and self-hosted environment lifecycle (beta) |
+| [`environment_work_example.dart`](example/environment_work_example.dart) | Self-hosted environment work polling and lease heartbeat (beta) |
 | [`session_threads_example.dart`](example/session_threads_example.dart) | Session threads: list, retrieve, stream events, archive (beta) |
 | [`deployments_example.dart`](example/deployments_example.dart) | Scheduled deployments and deployment runs: cron schedule, pause/resume, run-now (beta) |
 | [`memory_stores_example.dart`](example/memory_stores_example.dart) | Managed agents memory stores, memories, and versions (beta) |

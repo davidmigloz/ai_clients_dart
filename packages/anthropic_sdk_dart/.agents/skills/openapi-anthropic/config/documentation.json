@@ -16,6 +16,8 @@
     "streaming_resource"
   ],
   "resource_to_example": {
+    "environments": "environments",
+    "environmentWork": "environment_work",
     "organization": "organization_admin",
     "organizationWorkspaces": "organization_admin",
     "messages": "messages",

@@ -10,6 +10,7 @@ import '../resources/compliance_resource.dart';
 import '../resources/deployment_runs_resource.dart';
 import '../resources/deployments_resource.dart';
 import '../resources/dreams_resource.dart';
+import '../resources/environments_resource.dart';
 import '../resources/files_resource.dart';
 import '../resources/memory_stores_resource.dart';
 import '../resources/message_batches_resource.dart';
@@ -101,6 +102,9 @@ class AnthropicClient {
 
   /// Resource for the Memory Stores API (Beta).
   late final MemoryStoresResource memoryStores;
+
+  /// Resource for managing Claude Managed Agents environments.
+  late final EnvironmentsResource environments;
 
   /// Legacy User Profiles beta and the generally available resource.
   ///
@@ -245,6 +249,13 @@ class AnthropicClient {
       ensureNotClosed: _ensureNotClosed,
     );
     sessions = SessionsResource(
+      config: config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+    environments = EnvironmentsResource(
       config: config,
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,
