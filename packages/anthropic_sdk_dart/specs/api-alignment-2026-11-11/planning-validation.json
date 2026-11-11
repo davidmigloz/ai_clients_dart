@@ -1,0 +1,50 @@
+{
+  "baseline": "acbd8c80ef6550e932319873b1778be2c575a0cd",
+  "operations_accounted": 386,
+  "schemas_accounted": 1449,
+  "webhooks_accounted": 47,
+  "compliance_http_operations_accounted": 39,
+  "credential_http_operations_accounted": 1,
+  "tickets": 16,
+  "dependency_edges": 32,
+  "dependency_cycles": 0,
+  "by_issue": {
+    "operations": {
+      "483": 25,
+      "478": 1,
+      "485": 69,
+      "484": 33,
+      "479": 20,
+      "488": 23,
+      "486": 64,
+      "490": 47,
+      "487": 54,
+      "489": 37,
+      "482": 13
+    },
+    "schemas": {
+      "481": 327,
+      "487": 38,
+      "489": 90,
+      "486": 141,
+      "488": 166,
+      "492": 1,
+      "478": 8,
+      "490": 123,
+      "480": 43,
+      "485": 136,
+      "479": 64,
+      "482": 48,
+      "484": 14,
+      "483": 250
+    },
+    "webhooks": {
+      "485": 44,
+      "490": 3
+    },
+    "http_only": {
+      "491": 39,
+      "487": 1
+    }
+  }
+}
