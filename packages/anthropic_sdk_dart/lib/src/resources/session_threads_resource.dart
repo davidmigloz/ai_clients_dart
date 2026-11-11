@@ -83,6 +83,9 @@ class SessionThreadsResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
+    if (statuses?.contains(SessionStatus.unknown) ?? false) {
+      throw ArgumentError.value(statuses, 'statuses', 'Unknown thread status');
+    }
     final queryParams = <String, dynamic>{
       'limit': ?limit?.toString(),
       'page': ?page,

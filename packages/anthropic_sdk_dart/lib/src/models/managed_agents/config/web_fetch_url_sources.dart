@@ -9,17 +9,27 @@ class ManagedWebFetchUrlSources {
   /// URLs from user input. Use all or none.
   final ManagedWebFetchUrlSourceFilter? userInput;
 
-  /// URLs returned by custom tools on this agent.
+  /// URLs returned by custom tools configured on this agent.
+  /// Only and except filters accept 1 to 128 unique tool names.
   final ManagedWebFetchUrlSourceFilter? clientToolResults;
 
   /// URLs returned by web search and web fetch.
   final ManagedWebFetchUrlSourceFilter? serverToolResults;
+
+  final Map<String, Object?> _nullFields;
 
   /// Creates the URL source configuration.
   const ManagedWebFetchUrlSources({
     this.userInput,
     this.clientToolResults,
     this.serverToolResults,
+  }) : _nullFields = const {};
+
+  const ManagedWebFetchUrlSources._({
+    required this.userInput,
+    required this.clientToolResults,
+    required this.serverToolResults,
+    required this._nullFields,
   });
 
   /// Parses the URL source configuration.
@@ -27,7 +37,15 @@ class ManagedWebFetchUrlSources {
     final userInput = json['user_input'];
     final clientResults = json['client_tool_results'];
     final serverResults = json['server_tool_results'];
-    return ManagedWebFetchUrlSources(
+    return ManagedWebFetchUrlSources._(
+      nullFields: Map.unmodifiable({
+        for (final field in const [
+          'user_input',
+          'client_tool_results',
+          'server_tool_results',
+        ])
+          if (json.containsKey(field) && json[field] == null) field: null,
+      }),
       userInput: userInput == null
           ? null
           : ManagedWebFetchUrlSourceFilter.fromJson(userInput as Object),
@@ -40,19 +58,51 @@ class ManagedWebFetchUrlSources {
     );
   }
 
-  /// Converts to JSON.
+  /// Converts to JSON and preserves explicitly null fields read from a response.
   Map<String, dynamic> toJson() => {
+    ..._nullFields,
     'user_input': ?userInput?.toJson(),
     'client_tool_results': ?clientToolResults?.toJson(),
     'server_tool_results': ?serverToolResults?.toJson(),
   };
+
+  /// Serializes the typed filters for a request, omitting unset sources.
+  Map<String, dynamic> toRequestJson() {
+    if (userInput?.type == 'none' &&
+        clientToolResults?.type == 'none' &&
+        serverToolResults?.type == 'none') {
+      throw ArgumentError('At least one web fetch URL source must be enabled');
+    }
+    return {
+      'user_input': ?userInput?._toRequestJson('user_input'),
+      'client_tool_results': ?clientToolResults?._toRequestJson(
+        'client_tool_results',
+        allowToolFilter: true,
+      ),
+      'server_tool_results': ?serverToolResults?._toRequestJson(
+        'server_tool_results',
+        allowToolFilter: true,
+        allowedNames: const {'web_search', 'web_fetch'},
+      ),
+    };
+  }
 
   /// Creates a copy with replaced values.
   ManagedWebFetchUrlSources copyWith({
     Object? userInput = unsetCopyWithValue,
     Object? clientToolResults = unsetCopyWithValue,
     Object? serverToolResults = unsetCopyWithValue,
-  }) => ManagedWebFetchUrlSources(
+  }) => ManagedWebFetchUrlSources._(
+    nullFields: Map.unmodifiable({
+      for (final (key, value) in [
+        ('user_input', userInput),
+        ('client_tool_results', clientToolResults),
+        ('server_tool_results', serverToolResults),
+      ])
+        if (value == null ||
+            value == unsetCopyWithValue && _nullFields.containsKey(key))
+          key: null,
+    }),
     userInput: userInput == unsetCopyWithValue
         ? this.userInput
         : userInput as ManagedWebFetchUrlSourceFilter?,
@@ -70,11 +120,16 @@ class ManagedWebFetchUrlSources {
       other is ManagedWebFetchUrlSources &&
           userInput == other.userInput &&
           clientToolResults == other.clientToolResults &&
-          serverToolResults == other.serverToolResults;
+          serverToolResults == other.serverToolResults &&
+          mapsDeepEqual(_nullFields, other._nullFields);
 
   @override
-  int get hashCode =>
-      Object.hash(userInput, clientToolResults, serverToolResults);
+  int get hashCode => Object.hash(
+    userInput,
+    clientToolResults,
+    serverToolResults,
+    mapDeepHashCode(_nullFields),
+  );
 
   @override
   String toString() =>
@@ -178,6 +233,46 @@ final class ManagedWebFetchUrlSourceFilter {
                     {'type': 'tool_reference', 'name': name},
                 ],
             };
+
+  Object _toRequestJson(
+    String field, {
+    bool allowToolFilter = false,
+    Set<String>? allowedNames,
+  }) {
+    if (type == 'all' || type == 'none') {
+      return _shorthand ? type : {'type': type};
+    }
+    if (!allowToolFilter || (type != 'only' && type != 'except')) {
+      throw ArgumentError.value(type, field, 'Invalid URL source filter');
+    }
+
+    final names = tools;
+    if (names == null ||
+        names.isEmpty ||
+        names.length > 128 ||
+        names.toSet().length != names.length) {
+      throw ArgumentError.value(
+        names,
+        field,
+        'Expected 1 to 128 unique tool names',
+      );
+    }
+    if (names.any(
+      (name) =>
+          name.isEmpty ||
+          name.runes.length > 128 ||
+          (allowedNames != null && !allowedNames.contains(name)),
+    )) {
+      throw ArgumentError.value(names, field, 'Invalid tool name');
+    }
+
+    return {
+      'type': type,
+      'tools': [
+        for (final name in names) {'type': 'tool_reference', 'name': name},
+      ],
+    };
+  }
 
   @override
   bool operator ==(Object other) =>
