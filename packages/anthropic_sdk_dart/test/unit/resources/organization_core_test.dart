@@ -621,6 +621,34 @@ void main() {
     expect(transport.requests.single.url.path, '/prefix/v1/organizations/me');
   });
 
+  test(
+    'Admin redirects retain status and ID without following Location',
+    () async {
+      transport.queueJsonResponse(
+        <String, dynamic>{},
+        statusCode: 307,
+        headers: {
+          'request-id': 'req_redirect',
+          'location': 'https://elsewhere.invalid/private',
+        },
+      );
+      await expectLater(
+        client.organization.retrieve(),
+        throwsA(
+          isA<ApiException>()
+              .having((e) => e.statusCode, 'status', 307)
+              .having((e) => e.requestId, 'provider ID', 'req_redirect')
+              .having(
+                (e) => e.responseMetadata?.headers,
+                'headers',
+                isNot(contains('location')),
+              ),
+        ),
+      );
+      expect(transport.requests.single.followRedirects, isFalse);
+    },
+  );
+
   test('escapes path identifiers as single segments', () async {
     transport.queueJsonResponse(_userRecord);
     final result = await client.organization.users.retrieve('org/user?x#y');
