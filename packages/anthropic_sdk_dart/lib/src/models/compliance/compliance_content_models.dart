@@ -278,12 +278,15 @@ final class ComplianceSessionMessage extends ComplianceRecord {
 final class ComplianceSessionMessages
     extends ComplianceCursorPage<ComplianceSessionMessage> {
   /// Metadata for the session whose transcript was fetched.
-  ComplianceSession get session =>
-      ComplianceSession.fromJson(_required('session'));
+  late final ComplianceSession session;
 
   /// Decodes a page of transcript messages.
   ComplianceSessionMessages.fromJson(Map<String, dynamic> json)
-    : super.fromJson(json, ComplianceSessionMessage.fromJson);
+    : super.fromJson(json, ComplianceSessionMessage.fromJson) {
+    session = ComplianceSession.fromJson(
+      _required<Map<String, dynamic>>('session'),
+    );
+  }
 }
 
 /// An Artifact published from Claude Code or a built-in Artifact type.
@@ -332,13 +335,19 @@ final class ComplianceCodeArtifactVersion extends ComplianceRecord {
 /// Confirmation that a Compliance content deletion was accepted.
 final class ComplianceDeletion extends ComplianceRecord {
   /// The deleted object's ID.
-  String get id => _required<String>('id');
+  late final String id;
 
   /// The deletion discriminator, when included.
-  String? get type => _optional<String>('type');
+  late final String? type;
 
   /// Decodes a JSON deletion receipt.
-  ComplianceDeletion.fromJson(super.json) : super._();
+  ComplianceDeletion.fromJson(super.json) : super._() {
+    id = _required<String>('id');
+    if (id.trim().isEmpty) {
+      throw const FormatException('Missing Compliance deletion ID');
+    }
+    type = raw.containsKey('type') ? _required<String>('type') : null;
+  }
 }
 
 /// Headers supplied before a Compliance download's body begins.

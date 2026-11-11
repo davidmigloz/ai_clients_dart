@@ -288,9 +288,16 @@ mixin StreamingResource on ResourceBase {
             },
           );
         } else {
-          subscription = decode(
-            response,
-          ).listen(controller.add, onError: finish, onDone: finish);
+          final decoded = decode(response);
+          if (stopped) {
+            await decoded.listen(null).cancel();
+            return;
+          }
+          subscription = decoded.listen(
+            controller.add,
+            onError: finish,
+            onDone: finish,
+          );
         }
         if (controller.isPaused) subscription?.pause();
       } catch (error, stackTrace) {

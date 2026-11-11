@@ -49,7 +49,11 @@ final class ComplianceAppsResource {
   Future<ComplianceDeletion?> deleteChat(
     String chatId, {
     Future<void>? abortTrigger,
-  }) => _delete('apps/chats/${_segment(chatId)}', abortTrigger);
+  }) => _delete(
+    'apps/chats/${_segment(chatId)}',
+    'claude_chat_deleted',
+    abortTrigger,
+  );
 
   /// Retrieves a chat's metadata and a page of its messages.
   Future<ComplianceChatMessages> listChatMessages(
@@ -93,7 +97,11 @@ final class ComplianceAppsResource {
   Future<ComplianceDeletion?> deleteChatFile(
     String fileId, {
     Future<void>? abortTrigger,
-  }) => _delete('apps/chats/files/${_segment(fileId)}', abortTrigger);
+  }) => _delete(
+    'apps/chats/files/${_segment(fileId)}',
+    'claude_file_deleted',
+    abortTrigger,
+  );
 
   /// Streams an uploaded chat file as bytes.
   Stream<List<int>> downloadChatFile(
@@ -164,7 +172,11 @@ final class ComplianceAppsResource {
   Future<ComplianceDeletion?> deleteProject(
     String projectId, {
     Future<void>? abortTrigger,
-  }) => _delete('apps/projects/${_segment(projectId)}', abortTrigger);
+  }) => _delete(
+    'apps/projects/${_segment(projectId)}',
+    'claude_project_deleted',
+    abortTrigger,
+  );
 
   /// Lists files and documents attached to a project.
   Future<ComplianceCursorPage<ComplianceProjectAttachment>>
@@ -220,8 +232,12 @@ final class ComplianceAppsResource {
   Future<ComplianceDeletion?> deleteProjectDocument(
     String documentId, {
     Future<void>? abortTrigger,
-  }) =>
-      _delete('apps/projects/documents/${_segment(documentId)}', abortTrigger);
+  }) => _delete(
+    'apps/projects/documents/${_segment(documentId)}',
+    'claude_project_document_deleted',
+    abortTrigger,
+    requiresType: true,
+  );
 
   /// Retrieves metadata for a chat artifact version.
   Future<ComplianceArtifactVersion> retrieveArtifactVersion(
@@ -396,7 +412,12 @@ final class ComplianceAppsResource {
   Future<ComplianceDeletion?> deleteCodeArtifact(
     String artifactId, {
     Future<void>? abortTrigger,
-  }) => _delete('apps/code/artifacts/${_segment(artifactId)}', abortTrigger);
+  }) => _delete(
+    'apps/code/artifacts/${_segment(artifactId)}',
+    'code_artifact_deleted',
+    abortTrigger,
+    requiresType: true,
+  );
 
   Future<ComplianceSessionMessages> _listTranscript(
     String path, {
@@ -430,17 +451,26 @@ final class ComplianceAppsResource {
 
   Future<ComplianceDeletion?> _delete(
     String path,
-    Future<void>? abortTrigger,
-  ) async {
+    String expectedType,
+    Future<void>? abortTrigger, {
+    bool requiresType = false,
+  }) async {
     final response = await _resource._send(
       'DELETE',
       path,
       abortTrigger: abortTrigger,
     );
     if (response.bodyBytes.isEmpty) return null;
-    return ComplianceDeletion.fromJson(
+    final receipt = ComplianceDeletion.fromJson(
       ComplianceResource._decodeObject(response),
     );
+    if ((requiresType || receipt.type != null) &&
+        receipt.type != expectedType) {
+      throw FormatException(
+        'Expected Compliance deletion type "$expectedType"',
+      );
+    }
+    return receipt;
   }
 
   Stream<List<int>> _download(

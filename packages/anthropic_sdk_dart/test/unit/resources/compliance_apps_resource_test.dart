@@ -419,7 +419,7 @@ void main() {
       toolResultMaxBytes: 0,
       toolUseInputMaxBytes: 5000,
     ),
-    {..._cursor(_sessionMessage), 'session': _session},
+    {..._cursor(_sessionMessage, cursorOnly: true), 'session': _session},
     (transcript) {
       expect(transcript.session.id, 'session-1');
       expect(transcript.data.single.content, _sessionMessage['content']);
@@ -453,7 +453,7 @@ void main() {
     'retrieves a remote transcript and preserves unavailable content state',
     'sessions/remote/session-1/messages',
     (apps) => apps.listRemoteSessionMessages('session-1', page: 'remote-page'),
-    {..._cursor(_sessionMessage), 'session': _session},
+    {..._cursor(_sessionMessage, cursorOnly: true), 'session': _session},
     (transcript) {
       expect(transcript.session.id, 'session-1');
       expect(transcript.data.single.contentUnavailable, isTrue);
@@ -586,6 +586,76 @@ void main() {
       ]),
     );
   });
+
+  test('deletion validates the receipt discriminator and ID eagerly', () async {
+    transport
+      ..queueJson(<String, dynamic>{})
+      ..queueJson({'id': 'artifact-1', 'type': 'unrelated'})
+      ..queueJson({'id': 'artifact-1'})
+      ..queueJson({'id': 'chat-1'});
+    for (var i = 0; i < 3; i++) {
+      await expectLater(
+        apps.deleteCodeArtifact('artifact-1'),
+        throwsFormatException,
+      );
+    }
+    final receipt = await apps.deleteChat('chat-1');
+    expect(receipt?.id, 'chat-1');
+    expect(receipt?.type, isNull);
+  });
+
+  test('a transcript must carry session metadata before returning', () async {
+    transport.queueJson({'data': <Object>[], 'next_page': null});
+    await expectLater(
+      apps.listRemoteSessionMessages('session-1'),
+      throwsFormatException,
+    );
+  });
+
+  for (final useAbortTrigger in [false, true]) {
+    test(
+      'header callback releases the stalled body (abort=$useAbortTrigger)',
+      () async {
+        final canceled = Completer<void>();
+        final body = StreamController<List<int>>(onCancel: canceled.complete);
+        addTearDown(body.close);
+        transport.queue(body.stream);
+        final abort = Completer<void>.sync();
+        final headers = Completer<void>();
+        final errors = <Object>[];
+        final done = Completer<void>();
+        late StreamSubscription<List<int>> subscription;
+        subscription = apps
+            .downloadChatFile(
+              'file-1',
+              abortTrigger: useAbortTrigger ? abort.future : null,
+              onResponse: (_) {
+                if (useAbortTrigger) {
+                  abort.complete();
+                } else {
+                  unawaited(subscription.cancel());
+                }
+                headers.complete();
+              },
+            )
+            .listen(
+              (_) => fail('Unexpected download bytes'),
+              onError: errors.add,
+              onDone: done.complete,
+            );
+        addTearDown(subscription.cancel);
+        await headers.future.timeout(const Duration(seconds: 1));
+        await canceled.future.timeout(const Duration(seconds: 1));
+        expect(body.hasListener, isFalse);
+        if (useAbortTrigger) {
+          await done.future.timeout(const Duration(seconds: 1));
+          expect(errors.single, isA<AbortedException>());
+        } else {
+          expect(errors, isEmpty);
+        }
+      },
+    );
+  }
 
   test('an empty successful deletion does not try to decode JSON', () async {
     transport.queue(const Stream<List<int>>.empty(), statusCode: 204);
