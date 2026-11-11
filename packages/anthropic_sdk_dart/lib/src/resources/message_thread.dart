@@ -218,9 +218,7 @@ final class MessageThread {
               try {
                 _recordReply(turn, accumulator.toFinalMessage());
               } catch (_) {
-                _previousMessageId = null;
-                _interruptedTurn = turn;
-                _staged.clear();
+                _markInterrupted(turn);
                 rethrow;
               } finally {
                 _finishTurn(turn);
@@ -325,7 +323,8 @@ final class MessageThread {
     final fellBack = reply.usage.iterations?.any(
       (iteration) => iteration.type == 'fallback_message',
     );
-    _history = [...turn.history, ...turn.inputs, reply.toInputMessage()];
+    final input = _replayInput(turn, reply);
+    _history = [...turn.history, ...turn.inputs, input];
     _staged.clear();
     _interruptedTurn = null;
     _lastMessage = reply;
@@ -345,14 +344,31 @@ final class MessageThread {
       _dropRefusedTurn(turn);
       return;
     }
-    _history = [
-      ...turn.history,
-      ...turn.inputs,
-      if (reply.content.isNotEmpty) reply.toInputMessage(),
-    ];
-    _staged.clear();
+    InputMessage? partial;
+    if (reply.content.isNotEmpty) {
+      try {
+        partial = reply.toInputMessage();
+      } catch (_) {
+        // Keep the original stream error and discard the unreplayable reply.
+      }
+    }
+    _history = [...turn.history, ...turn.inputs, ?partial];
+    _markInterrupted(turn);
+  }
+
+  InputMessage _replayInput(_ThreadTurn turn, Message reply) {
+    try {
+      return reply.toInputMessage();
+    } catch (_) {
+      _markInterrupted(turn);
+      rethrow;
+    }
+  }
+
+  void _markInterrupted(_ThreadTurn turn) {
     _previousMessageId = null;
     _interruptedTurn = turn;
+    _staged.clear();
   }
 
   void _dropRefusedTurn(_ThreadTurn turn) {

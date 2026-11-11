@@ -141,6 +141,63 @@ void main() {
     },
   );
 
+  for (final streaming in [false, true]) {
+    test(
+      'replay conversion failure invalidates a consumed anchor (stream=$streaming)',
+      () async {
+        const malformedText = {
+          'type': 'text',
+          'text': 'Claim with an incomplete provider citation',
+          'citations': [
+            {
+              'type': 'web_search_result_location',
+              'cited_text': 'Claim',
+              'encrypted_index': 'opaque',
+              'title': null,
+            },
+          ],
+        };
+        transport.queueJsonResponse(MockResponses.message(id: 'msg_consumed'));
+        if (streaming) {
+          final start = MockResponses.message(id: 'msg_partial')
+            ..['content'] = <Object>[]
+            ..['stop_reason'] = null;
+          transport.queueStreamingResponse([
+            {'type': 'message_start', 'message': start},
+            {
+              'type': 'content_block_start',
+              'index': 0,
+              'content_block': malformedText,
+            },
+            {'type': 'content_block_stop', 'index': 0},
+          ]);
+        } else {
+          final message = MockResponses.message(id: 'msg_complete')
+            ..['content'] = [malformedText];
+          transport.queueJsonResponse(message);
+        }
+        transport.queueJsonResponse(MockResponses.message(id: 'msg_new'));
+        final thread = client.messages.createThread(_request());
+        await thread.send();
+
+        final next = [InputMessage.user('Next')];
+        await expectLater(
+          streaming
+              ? thread.stream(messages: next).finalMessage()
+              : thread.send(messages: next),
+          streaming ? throwsStateError : throwsFormatException,
+        );
+        expect(thread.previousMessageId, isNull);
+        expect(thread.lastMessage?.id, 'msg_consumed');
+
+        await thread.send();
+        final recovered = _body(transport.requests.last);
+        expect(recovered['thread'], {'type': 'create'});
+        expect((recovered['messages'] as List).last, _user('Next'));
+      },
+    );
+  }
+
   test(
     'starts and continues turns with consistent routing and beta headers',
     () async {
