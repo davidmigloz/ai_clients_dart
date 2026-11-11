@@ -44,15 +44,16 @@ class ErrorInterceptor implements Interceptor {
     );
 
     final body = decodeApiErrorResponse(response);
+    final (:message, :details, :errorCode, :requestId) = parseApiErrorBody(
+      body,
+    );
     final responseMetadata = ResponseMetadata(
       statusCode: response.statusCode,
       headers: response.headers,
       bodyExcerpt: _truncateBody(body),
       latency: latency,
+      bodyRequestId: requestId,
     );
-
-    // Parse error message from response body
-    final (:message, :details, :errorCode) = parseApiErrorBody(body);
 
     // Handle authentication errors
     if (response.statusCode == 401) {

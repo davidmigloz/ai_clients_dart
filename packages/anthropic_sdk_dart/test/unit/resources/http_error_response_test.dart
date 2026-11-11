@@ -80,7 +80,97 @@ void main() {
         expect(error.retryAfter!.isAfter(end.add(delay)), isFalse);
       }
     });
+
+    test('$name exposes the headerless body ID and ISO deadline', () async {
+      final client = _clientFromResponse(
+        http.Response(
+          '{"type":"error","error":{"type":"rate_limit_error","message":"Slow"},'
+          '"request_id":"req_body"}',
+          429,
+          headers: const {
+            'content-type': 'application/json',
+            'retry-after': '2099-01-01T00:00:00Z',
+          },
+        ),
+      );
+      addTearDown(client.close);
+      await expectLater(
+        send(client),
+        throwsA(
+          isA<RateLimitException>()
+              .having((e) => e.requestId, 'provider ID', 'req_body')
+              .having((e) => e.retryAfter, 'deadline', DateTime.utc(2099)),
+        ),
+      );
+    });
+
+    test('$name decodes a proxy error with an explicit charset', () async {
+      final client = _client(503, const {
+        'content-type': 'text/plain; charset="iso-8859-1"',
+      }, latin1.encode('Café'));
+      addTearDown(client.close);
+      await expectLater(
+        send(client),
+        throwsA(
+          isA<ApiException>()
+              .having((e) => e.statusCode, 'status', 503)
+              .having((e) => e.requestId, 'provider ID', 'req_provider')
+              .having((e) => e.message, 'message', 'Café'),
+        ),
+      );
+    });
   }
+
+  for (final (headerId, bodyId, expected) in <(String?, Object?, String?)>[
+    ('req_header', 'req_body', 'req_header'),
+    ('', 'req_body', 'req_body'),
+    (null, '', null),
+    (null, 123, null),
+    (null, null, null),
+  ]) {
+    test(
+      'direct validation error picks the provider ID ($headerId, $bodyId)',
+      () async {
+        final client = _clientFromResponse(
+          http.Response(
+            jsonEncode({
+              'error': {'message': 'Bad input'},
+              'request_id': bodyId,
+            }),
+            400,
+            headers: {'request-id': ?headerId},
+          ),
+        );
+        addTearDown(client.close);
+        await expectLater(
+          client.files.download(fileId: 'file_test'),
+          throwsA(
+            isA<ValidationException>().having(
+              (e) => e.requestId,
+              'provider ID',
+              expected,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  test(
+    'streaming HTTP errors default to UTF-8 when charset is absent',
+    () async {
+      final client = _client(503, const {
+        'content-type': 'text/plain',
+      }, utf8.encode('Café'));
+      addTearDown(client.close);
+      await expectLater(
+        client.messages.createStream(_request).drain<void>(),
+        throwsA(
+          isA<ApiException>().having((e) => e.message, 'message', 'Café'),
+        ),
+      );
+    },
+  );
 
   test(
     'keeps the direct validation exception and provider request ID',
@@ -142,22 +232,24 @@ AnthropicClient _client(
   int status, [
   Map<String, String> headers = const {},
   List<int>? bytes,
-]) => AnthropicClient(
+]) => _clientFromResponse(
+  http.Response.bytes(
+    bytes ??
+        [
+          ...utf8.encode('{"error":{"type":"test_error","message":"Bad '),
+          0xff,
+          ...utf8.encode(' body"}}'),
+        ],
+    status,
+    headers: {
+      'content-type': 'application/json; charset=utf-8',
+      'Request-Id': 'req_provider',
+      ...headers,
+    },
+  ),
+);
+
+AnthropicClient _clientFromResponse(http.Response response) => AnthropicClient(
   config: const AnthropicConfig(retryPolicy: RetryPolicy(maxRetries: 0)),
-  httpClient: MockClient((_) async {
-    return http.Response.bytes(
-      bytes ??
-          [
-            ...utf8.encode('{"error":{"type":"test_error","message":"Bad '),
-            0xff,
-            ...utf8.encode(' body"}}'),
-          ],
-      status,
-      headers: {
-        'content-type': 'application/json; charset=utf-8',
-        'Request-Id': 'req_provider',
-        ...headers,
-      },
-    );
-  }),
+  httpClient: MockClient((_) async => response),
 );
