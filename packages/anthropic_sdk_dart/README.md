@@ -342,6 +342,11 @@ Message threads are in beta on the Claude API, Claude Platform on AWS, Claude Mo
 
 Wait for `message_stop` before using a streamed response ID. `finalMessage()` returns the completed message or throws when the stream fails or ends early. If the turn refused or a fallback model wrote the reply, start a new thread. To recover from an expired thread, keep a local copy of your conversation and replay it in a new create request. The low-level calls send one logical request and leave replay to the caller.
 
+Threads are unavailable to organizations using HIPAA readiness or Inference
+hooks. They are ineligible for zero data retention. For token counting, send
+the full history including system and tools. Batches report a thread-bearing
+item as an individual request error.
+
 [Runnable thread example](example/message_threads_example.dart) · [Claude message threads guide](https://platform.claude.com/docs/en/build-with-claude/message-threads)
 
 </details>

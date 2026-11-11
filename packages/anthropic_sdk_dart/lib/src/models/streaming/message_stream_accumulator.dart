@@ -113,11 +113,14 @@ class MessageStreamAccumulator {
         block.signature = signature;
       case CitationsDelta(:final citation):
         block.citations.add(citation);
-      case CompactionDelta(:final content, :final encryptedContent):
+      case CompactionDelta():
         if (block.initialBlock case final CompactionBlock initial) {
-          block.compaction = (block.compaction ?? initial).copyWith(
-            content: content,
-            encryptedContent: encryptedContent,
+          final current = block.compaction ?? initial;
+          block.compaction = current.copyWith(
+            content: delta.content,
+            encryptedContent: delta.hasEncryptedContent
+                ? delta.encryptedContent
+                : current.encryptedContent,
           );
         }
       case UnknownContentBlockDelta():
@@ -192,8 +195,10 @@ class MessageStreamAccumulator {
   String get text {
     final buffer = StringBuffer();
     for (final block in _blocks) {
-      if (block.initialBlock is TextBlock) {
-        buffer.write(block.textBuffer);
+      if (block.initialBlock case final TextBlock initial) {
+        buffer
+          ..write(initial.text)
+          ..write(block.textBuffer);
       }
     }
     return buffer.toString();
@@ -203,8 +208,10 @@ class MessageStreamAccumulator {
   String get thinking {
     final buffer = StringBuffer();
     for (final block in _blocks) {
-      if (block.initialBlock is ThinkingBlock) {
-        buffer.write(block.thinkingBuffer);
+      if (block.initialBlock case final ThinkingBlock initial) {
+        buffer
+          ..write(initial.thinking)
+          ..write(block.thinkingBuffer);
       }
     }
     return buffer.toString();
@@ -213,7 +220,11 @@ class MessageStreamAccumulator {
   /// Returns `true` if any thinking block has non-empty content.
   bool get hasThinking {
     return _blocks.any(
-      (b) => b.initialBlock is ThinkingBlock && b.thinkingBuffer.isNotEmpty,
+      (b) => switch (b.initialBlock) {
+        ThinkingBlock(:final thinking) =>
+          thinking.isNotEmpty || b.thinkingBuffer.isNotEmpty,
+        _ => false,
+      },
     );
   }
 
@@ -272,7 +283,9 @@ class MessageStreamAccumulator {
   ///
   /// Throws [StateError] if no `message_start` event has been received
   /// (i.e. [id] or [model] is `null`), or if [usage] is `null`.
-  Message toMessage() {
+  Message toMessage() => _buildMessage(strict: false);
+
+  Message _buildMessage({required bool strict}) {
     if (_id == null || _model == null) {
       throw StateError(
         'Cannot build Message: no message_start event received.',
@@ -285,7 +298,9 @@ class MessageStreamAccumulator {
       id: _id!,
       model: _model!,
       role: _role ?? MessageRole.assistant,
-      content: contentBlocks,
+      content: [
+        for (final block in _blocks) _buildBlock(block, strict: strict),
+      ],
       stopReason: _stopReason,
       stopDetails: _stopDetails,
       stopSequence: _stopSequence,
@@ -299,7 +314,8 @@ class MessageStreamAccumulator {
   /// Builds a complete message for use as conversation history.
   ///
   /// Throws [StateError] if the stream ended before `message_stop` or sent
-  /// an [ErrorEvent]. Use [toMessage] to inspect a partial snapshot.
+  /// an [ErrorEvent], or [FormatException] when tool input is malformed.
+  /// Use [toMessage] to inspect a partial snapshot.
   Message toFinalMessage() {
     if (_streamError case final error?) {
       throw StateError('Message stream failed: ${error.errorType}');
@@ -307,7 +323,7 @@ class MessageStreamAccumulator {
     if (!_receivedStop) {
       throw StateError('Message stream ended before message_stop');
     }
-    return toMessage();
+    return _buildMessage(strict: true);
   }
 
   /// Resets all accumulated state.
@@ -329,35 +345,48 @@ class MessageStreamAccumulator {
 
   // -- Internals -------------------------------------------------------------
 
-  ContentBlock _buildBlock(_AccumulatedContentBlock acc) {
+  ContentBlock _buildBlock(
+    _AccumulatedContentBlock acc, {
+    bool strict = false,
+  }) {
     final initial = acc.initialBlock;
     return switch (initial) {
-      TextBlock() => TextBlock(
-        text: acc.textBuffer.toString(),
-        citations: acc.citations.isEmpty ? null : List.of(acc.citations),
+      TextBlock() => initial.copyWith(
+        text: '${initial.text}${acc.textBuffer}',
+        citations: acc.citations.isEmpty
+            ? initial.citations
+            : [...?initial.citations, ...acc.citations],
       ),
-      ThinkingBlock() => ThinkingBlock(
-        thinking: acc.thinkingBuffer.toString(),
-        signature: acc.signature ?? '',
+      ThinkingBlock() => initial.copyWith(
+        thinking: '${initial.thinking}${acc.thinkingBuffer}',
+        signature: acc.signature ?? initial.signature,
       ),
-      ToolUseBlock() => ToolUseBlock(
-        id: initial.id,
-        name: initial.name,
-        input: _parseJson(acc.inputJsonBuffer),
-        caller: initial.caller,
-        toolsetName: initial.toolsetName,
+      ToolUseBlock() => initial.copyWith(
+        input: _toolInput(acc.inputJsonBuffer, initial.input, strict: strict),
+      ),
+      ServerToolUseBlock() => initial.copyWith(
+        input: _toolInput(acc.inputJsonBuffer, initial.input, strict: strict),
+      ),
+      MCPToolUseBlock() => initial.copyWith(
+        input: _toolInput(acc.inputJsonBuffer, initial.input, strict: strict),
       ),
       CompactionBlock() => acc.compaction ?? initial,
       _ => initial,
     };
   }
 
-  static Map<String, dynamic> _parseJson(StringBuffer buffer) {
-    final str = buffer.toString();
-    if (str.isEmpty) return const {};
+  static Map<String, dynamic> _toolInput(
+    StringBuffer buffer,
+    Map<String, dynamic> initial, {
+    required bool strict,
+  }) {
+    if (buffer.isEmpty) return initial;
     try {
-      return jsonDecode(str) as Map<String, dynamic>;
+      final json = jsonDecode(buffer.toString());
+      if (json is Map<String, dynamic>) return json;
+      throw const FormatException('Expected a JSON object for tool input');
     } on FormatException {
+      if (strict) throw const FormatException('Malformed tool input in stream');
       return const {};
     }
   }

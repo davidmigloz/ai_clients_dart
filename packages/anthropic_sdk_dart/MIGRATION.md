@@ -117,7 +117,7 @@ String describeReport(InputTransformation report) => switch (report) {
 };
 ```
 
-For legacy auto-compaction, the latest `compaction_delta` replaces the earlier summary. A null summary marks a failed compaction. On-demand signed compaction arrives as a complete block at `content_block_start`. Use `finalMessage()` when replay depends on reaching `message_stop`.
+For legacy auto-compaction, the latest `compaction_delta` replaces the earlier summary. A null summary marks a failed compaction. When a delta omits encrypted content, the accumulator retains the earlier payload. On-demand signed compaction arrives as a complete block at `content_block_start`. Use `finalMessage()` when replay depends on reaching `message_stop`.
 
 ---
 

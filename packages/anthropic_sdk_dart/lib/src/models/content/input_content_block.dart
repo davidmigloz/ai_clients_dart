@@ -2024,6 +2024,9 @@ class CompactionInputBlock extends InputContentBlock {
   /// Cache control for this block.
   final CacheControlEphemeral? cacheControl;
 
+  // These nullable beta fields must retain their wire presence during replay.
+  final ({bool signature, bool toolChanges}) _presence;
+
   /// Creates a [CompactionInputBlock].
   const CompactionInputBlock({
     required this.content,
@@ -2031,15 +2034,32 @@ class CompactionInputBlock extends InputContentBlock {
     this.signature,
     this.toolChanges,
     this.cacheControl,
+  }) : _presence = (
+         signature: signature != null,
+         toolChanges: toolChanges != null,
+       );
+
+  const CompactionInputBlock._({
+    required this.content,
+    required this.encryptedContent,
+    required this.signature,
+    required this.toolChanges,
+    required this.cacheControl,
+
+    required this._presence,
   });
 
   /// Creates a [CompactionInputBlock] from JSON.
   factory CompactionInputBlock.fromJson(Map<String, dynamic> json) {
     final toolChanges = json['tool_changes'] as List<Object?>?;
-    return CompactionInputBlock(
+    return CompactionInputBlock._(
       content: json['content'] as String?,
       encryptedContent: json['encrypted_content'] as String?,
       signature: json['signature'] as String?,
+      presence: (
+        signature: json.containsKey('signature'),
+        toolChanges: json.containsKey('tool_changes'),
+      ),
       toolChanges: toolChanges == null
           ? null
           : List.unmodifiable(
@@ -2061,8 +2081,8 @@ class CompactionInputBlock extends InputContentBlock {
     'type': 'compaction',
     'content': content,
     if (encryptedContent != null) 'encrypted_content': encryptedContent,
-    'signature': ?signature,
-    'tool_changes': ?toolChanges,
+    if (_presence.signature) 'signature': signature,
+    if (_presence.toolChanges) 'tool_changes': toolChanges,
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
   };
 
@@ -2074,13 +2094,21 @@ class CompactionInputBlock extends InputContentBlock {
     Object? toolChanges = unsetCopyWithValue,
     Object? cacheControl = unsetCopyWithValue,
   }) {
-    return CompactionInputBlock(
+    return CompactionInputBlock._(
       content: content == unsetCopyWithValue
           ? this.content
           : content as String?,
       encryptedContent: encryptedContent == unsetCopyWithValue
           ? this.encryptedContent
           : encryptedContent as String?,
+      presence: (
+        signature: signature == unsetCopyWithValue
+            ? _presence.signature
+            : signature != null,
+        toolChanges: toolChanges == unsetCopyWithValue
+            ? _presence.toolChanges
+            : toolChanges != null,
+      ),
       signature: signature == unsetCopyWithValue
           ? this.signature
           : signature as String?,
@@ -2101,6 +2129,7 @@ class CompactionInputBlock extends InputContentBlock {
           content == other.content &&
           encryptedContent == other.encryptedContent &&
           signature == other.signature &&
+          _presence == other._presence &&
           listOfMapsDeepEqual(toolChanges, other.toolChanges) &&
           cacheControl == other.cacheControl;
 
@@ -2109,6 +2138,7 @@ class CompactionInputBlock extends InputContentBlock {
     content,
     encryptedContent,
     signature,
+    _presence,
     listOfMapsHashCode(toolChanges),
     cacheControl,
   );

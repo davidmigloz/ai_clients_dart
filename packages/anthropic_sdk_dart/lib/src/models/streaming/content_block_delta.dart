@@ -197,14 +197,28 @@ class CompactionDelta extends ContentBlockDelta {
   /// Encrypted compaction payload for server-side context restoration.
   final String? encryptedContent;
 
+  /// Whether this delta supplies the encrypted-content field.
+  ///
+  /// An omitted field retains earlier encrypted content. Explicit null clears
+  /// it. A directly constructed delta supplies the field.
+  final bool hasEncryptedContent;
+
   /// Creates a [CompactionDelta].
-  const CompactionDelta(this.content, {this.encryptedContent});
+  const CompactionDelta(this.content, {this.encryptedContent})
+    : hasEncryptedContent = true;
+
+  const CompactionDelta._(
+    this.content,
+    this.encryptedContent,
+    this.hasEncryptedContent,
+  );
 
   /// Creates a [CompactionDelta] from JSON.
   factory CompactionDelta.fromJson(Map<String, dynamic> json) {
-    return CompactionDelta(
+    return CompactionDelta._(
       json['content'] as String?,
-      encryptedContent: json['encrypted_content'] as String?,
+      json['encrypted_content'] as String?,
+      json.containsKey('encrypted_content'),
     );
   }
 
@@ -212,7 +226,7 @@ class CompactionDelta extends ContentBlockDelta {
   Map<String, dynamic> toJson() => {
     'type': 'compaction_delta',
     'content': content,
-    'encrypted_content': encryptedContent,
+    if (hasEncryptedContent) 'encrypted_content': encryptedContent,
   };
 
   /// Creates a copy with replaced values.
@@ -220,11 +234,12 @@ class CompactionDelta extends ContentBlockDelta {
     Object? content = unsetCopyWithValue,
     Object? encryptedContent = unsetCopyWithValue,
   }) {
-    return CompactionDelta(
+    return CompactionDelta._(
       content == unsetCopyWithValue ? this.content : content as String?,
-      encryptedContent: encryptedContent == unsetCopyWithValue
+      encryptedContent == unsetCopyWithValue
           ? this.encryptedContent
           : encryptedContent as String?,
+      encryptedContent != unsetCopyWithValue || hasEncryptedContent,
     );
   }
 
@@ -234,10 +249,12 @@ class CompactionDelta extends ContentBlockDelta {
       other is CompactionDelta &&
           runtimeType == other.runtimeType &&
           content == other.content &&
-          encryptedContent == other.encryptedContent;
+          encryptedContent == other.encryptedContent &&
+          hasEncryptedContent == other.hasEncryptedContent;
 
   @override
-  int get hashCode => Object.hash(content, encryptedContent);
+  int get hashCode =>
+      Object.hash(content, encryptedContent, hasEncryptedContent);
 
   @override
   String toString() =>

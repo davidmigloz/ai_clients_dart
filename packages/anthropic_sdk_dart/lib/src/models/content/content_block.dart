@@ -904,21 +904,40 @@ class CompactionBlock extends ContentBlock {
   /// and an empty list when the server reports no tool changes.
   final List<Map<String, dynamic>>? toolChanges;
 
+  // These nullable beta fields must retain their wire presence during replay.
+  final ({bool signature, bool toolChanges}) _presence;
+
   /// Creates a [CompactionBlock].
   const CompactionBlock({
     required this.content,
     this.encryptedContent,
     this.signature,
     this.toolChanges,
+  }) : _presence = (
+         signature: signature != null,
+         toolChanges: toolChanges != null,
+       );
+
+  const CompactionBlock._({
+    required this.content,
+    required this.encryptedContent,
+    required this.signature,
+    required this.toolChanges,
+
+    required this._presence,
   });
 
   /// Creates a [CompactionBlock] from JSON.
   factory CompactionBlock.fromJson(Map<String, dynamic> json) {
     final toolChanges = json['tool_changes'] as List<Object?>?;
-    return CompactionBlock(
+    return CompactionBlock._(
       content: json['content'] as String?,
       encryptedContent: json['encrypted_content'] as String?,
       signature: json['signature'] as String?,
+      presence: (
+        signature: json.containsKey('signature'),
+        toolChanges: json.containsKey('tool_changes'),
+      ),
       toolChanges: toolChanges == null
           ? null
           : List.unmodifiable(
@@ -935,8 +954,8 @@ class CompactionBlock extends ContentBlock {
     'type': 'compaction',
     'content': content,
     'encrypted_content': encryptedContent,
-    'signature': ?signature,
-    'tool_changes': ?toolChanges,
+    if (_presence.signature) 'signature': signature,
+    if (_presence.toolChanges) 'tool_changes': toolChanges,
   };
 
   /// Creates a copy with replaced values.
@@ -946,13 +965,21 @@ class CompactionBlock extends ContentBlock {
     Object? signature = unsetCopyWithValue,
     Object? toolChanges = unsetCopyWithValue,
   }) {
-    return CompactionBlock(
+    return CompactionBlock._(
       content: content == unsetCopyWithValue
           ? this.content
           : content as String?,
       encryptedContent: encryptedContent == unsetCopyWithValue
           ? this.encryptedContent
           : encryptedContent as String?,
+      presence: (
+        signature: signature == unsetCopyWithValue
+            ? _presence.signature
+            : signature != null,
+        toolChanges: toolChanges == unsetCopyWithValue
+            ? _presence.toolChanges
+            : toolChanges != null,
+      ),
       signature: signature == unsetCopyWithValue
           ? this.signature
           : signature as String?,
@@ -970,6 +997,7 @@ class CompactionBlock extends ContentBlock {
           content == other.content &&
           encryptedContent == other.encryptedContent &&
           signature == other.signature &&
+          _presence == other._presence &&
           listOfMapsDeepEqual(toolChanges, other.toolChanges);
 
   @override
@@ -977,6 +1005,7 @@ class CompactionBlock extends ContentBlock {
     content,
     encryptedContent,
     signature,
+    _presence,
     listOfMapsHashCode(toolChanges),
   );
 
