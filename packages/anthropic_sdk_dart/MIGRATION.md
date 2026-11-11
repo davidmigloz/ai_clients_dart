@@ -65,6 +65,39 @@ The server migration also renames Admin and Enterprise Analytics response fields
 
 ---
 
+## Generally available User Profiles
+
+Existing `client.userProfiles` calls use the legacy beta contract. Use
+`client.userProfiles.current` to adopt the generally available contract.
+
+```dart
+// Legacy beta
+final legacy = await client.userProfiles.create(
+  const CreateUserProfileRequest(externalId: 'customer_123'),
+);
+
+// Generally available
+final profile = await client.userProfiles.current.create(
+  const CreateCurrentUserProfileRequest(
+    externalUserDetails: UserProfileExternalUserDetails(referenceId: 'customer_123'),
+  ),
+);
+```
+
+When an existing profile already has an ID, retrieve that ID through the new
+resource. The create endpoint creates a distinct profile on each successful
+call. Under the current contract `referenceId` and `onboardedAt` are part of
+`externalUserDetails`. Omit an external detail on update to keep it.
+`programs` reports program status and `enforcementStatus` reports Anthropic's
+overall enforcement state.
+
+Use `createActionUrl(profile.id, action: UserProfileAction.enrollEndUser)` for
+a current enrollment action. The URL is short-lived and grants access to the
+recipient until expiration. Keep it out of application logs.
+[User Profiles reference](https://platform.claude.com/docs/en/api/user_profiles)
+
+---
+
 ## Handle the between-tools thinking variant
 
 The exported `ThinkingConfig` sealed type now includes `ThinkingBetweenTools`. Add a case to exhaustive switches over `ThinkingConfig`.

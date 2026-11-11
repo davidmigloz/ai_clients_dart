@@ -94,7 +94,9 @@ class AnthropicClient {
   /// Resource for the Memory Stores API (Beta).
   late final MemoryStoresResource memoryStores;
 
-  /// Resource for the User Profiles API (Beta).
+  /// Legacy User Profiles beta and the generally available resource.
+  ///
+  /// Use `userProfiles.current` for the generally available API.
   late final UserProfilesResource userProfiles;
 
   /// Resource for the Vaults API (Beta).

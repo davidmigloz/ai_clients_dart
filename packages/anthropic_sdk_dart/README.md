@@ -57,7 +57,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Typed webhook event parsing and MCP-OAuth / static-bearer / environment-variable credential validation (beta)
 - Memory stores for persistent agent memories with versioning and redaction (beta)
 - Dreams: asynchronous memory-consolidation jobs over memory stores and session transcripts, with `create_new`/`update_existing` output behavior (beta, research preview)
-- User profiles with access-type classification (`application`/`passthrough`), onboarding timestamps, trust-grant tracking, and enrollment URLs (beta)
+- Generally available user profiles with end-customer attribution, enforcement filters, program status, and action URLs. The legacy beta profile methods remain available.
 
 ## Why choose this client?
 
@@ -688,6 +688,50 @@ Future<void> main() async {
 
 </details>
 
+### How do I attribute Claude requests to a user profile?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Create a profile once for each customer in your onboarding flow and store its
+ID. Reuse that ID on requests made on the customer's behalf.
+
+```dart
+final profiles = client.userProfiles.current;
+final profile = await profiles.create(
+  const CreateCurrentUserProfileRequest(
+    externalUserDetails: UserProfileExternalUserDetails(referenceId: 'customer_123'),
+  ),
+);
+
+final response = await client.messages.create(
+  MessageCreateRequest(
+    model: 'claude-sonnet-5-5',
+    maxTokens: 256,
+    messages: [InputMessage.user('Summarize this support request.')],
+  ),
+  userProfileId: profile.id,
+);
+print(response.text);
+```
+
+The profile methods use the API key for the organization that owns the
+profile. An Admin API key is unnecessary. The `userProfileId` argument
+adds `anthropic-user-profile-id` to an inference request. It works with
+Messages, token counting, and batch creation. On a batch it applies to all
+entries.
+
+Profile management is also available on Claude Platform on AWS with the
+appropriate IAM actions. Anthropic-managed Google Cloud supports create, list,
+retrieve, and update with Google Cloud credentials and its organization-level
+base URL. The [Anthropic guide](https://platform.claude.com/docs/en/manage-claude/user-profiles#before-you-start)
+lists cross-platform attribution requirements.
+
+See [the user profiles example](example/current_user_profiles_example.dart)
+for enforcement status and pagination.
+
+</details>
+
 ## Error Handling
 
 <details>
@@ -760,7 +804,8 @@ See the [example/](example/) directory for complete examples:
 | [`deployments_example.dart`](example/deployments_example.dart) | Scheduled deployments and deployment runs: cron schedule, pause/resume, run-now (beta) |
 | [`memory_stores_example.dart`](example/memory_stores_example.dart) | Managed agents memory stores, memories, and versions (beta) |
 | [`dreams_example.dart`](example/dreams_example.dart) | Dreams: memory-consolidation jobs — create, poll, list, archive (beta, research preview) |
-| [`user_profiles_example.dart`](example/user_profiles_example.dart) | User profiles and enrollment URLs (beta) |
+| [`current_user_profiles_example.dart`](example/current_user_profiles_example.dart) | Inspect enforcement status and paginate user profiles |
+| [`user_profiles_example.dart`](example/user_profiles_example.dart) | Legacy user profiles and enrollment URLs (beta) |
 | [`models_example.dart`](example/models_example.dart) | Model lifecycle filters, pagination, and capabilities |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
 | [`anthropic_sdk_dart_example.dart`](example/anthropic_sdk_dart_example.dart) | Quick-start overview |
@@ -779,7 +824,7 @@ See the [example/](example/) directory for complete examples:
 | Vaults (Beta) | ✅ Full |
 | Memory Stores (Beta) | ✅ Full |
 | Dreams (Beta) | ✅ Full |
-| User Profiles (Beta) | ✅ Full |
+| User Profiles | ✅ GA and legacy beta |
 | Webhooks (Beta) | ✅ Full |
 
 ## Official Documentation
