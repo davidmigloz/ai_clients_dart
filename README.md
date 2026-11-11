@@ -59,9 +59,10 @@ Future<void> main() async {
 <details>
 <summary><b>Anthropic</b></summary>
 
-```yaml
-dependencies:
-  anthropic_sdk_dart: ^1.4.0
+Set `ANTHROPIC_API_KEY` in your environment.
+
+```sh
+dart pub add anthropic_sdk_dart
 ```
 
 ```dart
@@ -155,7 +156,7 @@ Future<void> main() async {
 | Package | Description | Version | Downloads |
 | --- | --- | --- | --- |
 | [openai_dart](https://pub.dev/packages/openai_dart) | [OpenAI](https://platform.openai.com/docs/api-reference) — Responses, Chat Completions, images, audio, realtime | [![openai_dart](https://img.shields.io/pub/v/openai_dart.svg)](https://pub.dev/packages/openai_dart) | ![openai_dart monthly downloads](https://img.shields.io/pub/dm/openai_dart) |
-| [anthropic_sdk_dart](https://pub.dev/packages/anthropic_sdk_dart) | [Anthropic](https://docs.anthropic.com/en/api) — Claude messages, streaming, tools, extended thinking | [![anthropic_sdk_dart](https://img.shields.io/pub/v/anthropic_sdk_dart.svg)](https://pub.dev/packages/anthropic_sdk_dart) | ![anthropic_sdk_dart monthly downloads](https://img.shields.io/pub/dm/anthropic_sdk_dart) |
+| [anthropic_sdk_dart](https://pub.dev/packages/anthropic_sdk_dart) | [Anthropic](https://platform.claude.com/docs/en/api/overview) — Claude messages, streaming, tools, extended thinking | [![anthropic_sdk_dart](https://img.shields.io/pub/v/anthropic_sdk_dart.svg)](https://pub.dev/packages/anthropic_sdk_dart) | ![anthropic_sdk_dart monthly downloads](https://img.shields.io/pub/dm/anthropic_sdk_dart) |
 | [googleai_dart](https://pub.dev/packages/googleai_dart) | [Google AI](https://ai.google.dev/) / [Vertex AI](https://cloud.google.com/vertex-ai) (Gemini Enterprise Agent Platform) — Gemini generation, embeddings, Live API | [![googleai_dart](https://img.shields.io/pub/v/googleai_dart.svg)](https://pub.dev/packages/googleai_dart) | ![googleai_dart monthly downloads](https://img.shields.io/pub/dm/googleai_dart) |
 | [mistralai_dart](https://pub.dev/packages/mistralai_dart) | [Mistral AI](https://docs.mistral.ai/api) — chat, embeddings, OCR, TTS, reasoning, agents | [![mistralai_dart](https://img.shields.io/pub/v/mistralai_dart.svg)](https://pub.dev/packages/mistralai_dart) | ![mistralai_dart monthly downloads](https://img.shields.io/pub/dm/mistralai_dart) |
 | [ollama_dart](https://pub.dev/packages/ollama_dart) | [Ollama](https://ollama.com/) — chat, streaming, embeddings, tools, System One decisions, model management, and cloud web search | [![ollama_dart](https://img.shields.io/pub/v/ollama_dart.svg)](https://pub.dev/packages/ollama_dart) | ![ollama_dart monthly downloads](https://img.shields.io/pub/dm/ollama_dart) |
