@@ -15,7 +15,7 @@ Future<http.Response> sendResourceRequest(
   if (response.statusCode >= 400) {
     throw createResourceException(
       response.statusCode,
-      response.body,
+      decodeApiErrorResponse(response),
       createSafeResponseMetadata(
         statusCode: response.statusCode,
         headers: response.headers,

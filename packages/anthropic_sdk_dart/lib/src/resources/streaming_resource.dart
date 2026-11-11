@@ -106,7 +106,7 @@ mixin StreamingResource on ResourceBase {
         details: details,
         errorCode: errorCode,
         responseMetadata: responseMetadata,
-        retryAfter: parseRetryAfter(responseMetadata.headers),
+        retryAfter: retryAfterTime(responseMetadata.headers),
       );
     }
 
@@ -220,7 +220,7 @@ mixin StreamingResource on ResourceBase {
         if (response.statusCode >= 400) {
           final responseBody = StringBuffer();
           subscription = response.stream
-              .transform(utf8.decoder)
+              .transform(const Utf8Decoder(allowMalformed: true))
               .listen(
                 responseBody.write,
                 onError: finish,

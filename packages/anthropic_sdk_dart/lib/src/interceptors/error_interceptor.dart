@@ -43,15 +43,16 @@ class ErrorInterceptor implements Interceptor {
       timestamp: DateTime.now(),
     );
 
+    final body = decodeApiErrorResponse(response);
     final responseMetadata = ResponseMetadata(
       statusCode: response.statusCode,
       headers: response.headers,
-      bodyExcerpt: _truncateBody(response.body),
+      bodyExcerpt: _truncateBody(body),
       latency: latency,
     );
 
     // Parse error message from response body
-    final (:message, :details, :errorCode) = parseApiErrorBody(response.body);
+    final (:message, :details, :errorCode) = parseApiErrorBody(body);
 
     // Handle authentication errors
     if (response.statusCode == 401) {
@@ -73,7 +74,7 @@ class ErrorInterceptor implements Interceptor {
         errorCode: errorCode,
         requestMetadata: requestMetadata,
         responseMetadata: responseMetadata,
-        retryAfter: _parseRetryAfter(response.headers),
+        retryAfter: retryAfterTime(response.headers),
       );
     }
 
@@ -86,25 +87,6 @@ class ErrorInterceptor implements Interceptor {
       requestMetadata: requestMetadata,
       responseMetadata: responseMetadata,
     );
-  }
-
-  /// Parses Retry-After header.
-  DateTime? _parseRetryAfter(Map<String, String> headers) {
-    final retryAfter = headers['retry-after'] ?? headers['Retry-After'];
-    if (retryAfter == null) return null;
-
-    // Try parsing as seconds
-    final seconds = int.tryParse(retryAfter);
-    if (seconds != null) {
-      return DateTime.now().add(Duration(seconds: seconds));
-    }
-
-    // Try parsing as HTTP date
-    try {
-      return DateTime.parse(retryAfter);
-    } catch (_) {
-      return null;
-    }
   }
 
   /// Truncates body to 200 characters.

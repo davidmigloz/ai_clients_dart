@@ -34,7 +34,7 @@ class ResponseMetadata {
   /// HTTP status code.
   final int statusCode;
 
-  /// Response headers, which may be restricted to request-id and retry-after.
+  /// Response headers, which may be restricted to request ID and retry hints.
   final Map<String, String> headers;
 
   /// Excerpt of response body, empty when omitted to protect secrets.

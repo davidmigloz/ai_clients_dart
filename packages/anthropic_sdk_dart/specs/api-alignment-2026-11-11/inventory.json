@@ -42391,6 +42391,26 @@
         "10-admin-identity"
       ]
     },
+    "17-historical-regressions": {
+      "number": 498,
+      "url": "https://github.com/davidmigloz/ai_clients_dart/issues/498",
+      "title": "Audit recurring regressions across Anthropic and OpenAI clients",
+      "deps": [
+        "02-models-routing",
+        "04-tools-streaming",
+        "05-profiles",
+        "06-agents-sessions",
+        "07-environments-tunnels",
+        "08-agent-resources",
+        "09-admin-core",
+        "10-admin-identity",
+        "11-analytics",
+        "12-admin-governance",
+        "13-admin-integrations",
+        "14-compliance",
+        "16-providers"
+      ]
+    },
     "15-closeout": {
       "number": 492,
       "url": "https://github.com/davidmigloz/ai_clients_dart/issues/492",
@@ -42408,7 +42428,8 @@
         "12-admin-governance",
         "13-admin-integrations",
         "14-compliance",
-        "16-providers"
+        "16-providers",
+        "17-historical-regressions"
       ]
     }
   },

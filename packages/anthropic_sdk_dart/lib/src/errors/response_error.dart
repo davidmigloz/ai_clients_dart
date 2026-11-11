@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import 'package:http/http.dart' as http;
+
+import '../client/retry_after.dart';
 import 'exceptions.dart';
 
 /// Reads the provider error envelope, retaining existing message and type
@@ -45,29 +48,31 @@ ResponseMetadata createSafeResponseMetadata({
   statusCode: statusCode,
   headers: Map.unmodifiable({
     for (final entry in headers.entries)
-      if (const {'request-id', 'retry-after'}.contains(entry.key.toLowerCase()))
+      if (const {
+        'request-id',
+        'retry-after',
+        'retry-after-ms',
+      }.contains(entry.key.toLowerCase()))
         entry.key.toLowerCase(): entry.value,
   }),
   bodyExcerpt: '',
   latency: latency,
 );
 
-/// Parses a retry delay without allowing oversized values to mask an API error.
-DateTime? parseRetryAfter(Map<String, String> headers) {
-  final value = headers['retry-after']?.trim();
-  if (value == null) return null;
-  if (!RegExp(r'^-?\d+$').hasMatch(value)) {
-    return DateTime.tryParse(value);
-  }
-  final seconds = int.tryParse(value);
-  if (seconds == null || seconds < 0) return null;
-  final duration = Duration(seconds: seconds);
-  if (duration.inSeconds != seconds) return null;
+/// Reads HTTP error text even when the response charset decoder fails.
+String decodeApiErrorResponse(http.Response response) {
   try {
-    return DateTime.now().add(duration);
-  } on ArgumentError {
-    return null;
+    return response.body;
+  } on FormatException {
+    return utf8.decode(response.bodyBytes, allowMalformed: true);
   }
+}
+
+/// Converts server retry guidance to the timestamp exposed by exceptions.
+DateTime? retryAfterTime(Map<String, String> headers) {
+  final now = DateTime.now();
+  final delay = parseRetryAfter(headers, now: now);
+  return delay == null ? null : now.add(delay);
 }
 
 /// Creates an error for resource requests that historically treat 400 as
@@ -99,7 +104,7 @@ AnthropicException createResourceException(
       statusCode: statusCode,
       message: message,
       responseMetadata: responseMetadata,
-      retryAfter: parseRetryAfter(responseMetadata.headers),
+      retryAfter: retryAfterTime(responseMetadata.headers),
     ),
     _ => ApiException(
       statusCode: statusCode,

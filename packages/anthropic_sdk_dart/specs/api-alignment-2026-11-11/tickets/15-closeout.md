@@ -21,6 +21,7 @@ Promote the fixed upstream snapshot and reconcile its operation/schema rows and 
 - #490
 - #491
 - #494
+- #498
 
 ## Acceptance
 

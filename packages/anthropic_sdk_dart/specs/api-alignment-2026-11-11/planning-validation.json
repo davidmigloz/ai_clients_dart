@@ -5,8 +5,8 @@
   "webhooks_accounted": 47,
   "compliance_http_operations_accounted": 39,
   "credential_http_operations_accounted": 1,
-  "tickets": 16,
-  "dependency_edges": 32,
+  "tickets": 17,
+  "dependency_edges": 46,
   "dependency_cycles": 0,
   "by_issue": {
     "operations": {

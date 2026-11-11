@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import '../errors/exceptions.dart';
 import '../platform/http_utils.dart';
 import 'config.dart';
+import 'retry_after.dart';
 
 /// Wraps HTTP transport execution with retry logic.
 ///
@@ -86,7 +87,7 @@ class RetryWrapper {
 
         // Check for retryable status codes
         if (_shouldRetry(response.statusCode, request.method, attempt)) {
-          final retryAfter = _parseRetryAfter(response.headers['retry-after']);
+          final retryAfter = parseRetryAfter(response.headers);
           if (retryAfter != null) {
             // Clamp server-provided Retry-After to a reasonable maximum to avoid
             // excessively long sleeps that bypass our configured retry policy.
@@ -215,53 +216,6 @@ class RetryWrapper {
         ? config.retryPolicy.maxDelay
         : nextDelay;
   }
-
-  /// Parses the Retry-After header value.
-  ///
-  /// Supports both delta-seconds and HTTP-date formats.
-  /// Handles leading/trailing whitespace in header values.
-  Duration? _parseRetryAfter(String? value) {
-    if (value == null) {
-      return null;
-    }
-
-    // Trim whitespace - HTTP headers can contain leading/trailing spaces
-    final trimmed = value.trim();
-    if (trimmed.isEmpty) {
-      return null;
-    }
-
-    // Try parsing as seconds (clamp to >= 0 to avoid negative durations)
-    final seconds = int.tryParse(trimmed);
-    if (seconds != null) {
-      return Duration(seconds: max(0, seconds));
-    }
-
-    // Try parsing as HTTP-date
-    try {
-      final date = _parseHttpDate(trimmed);
-      final now = DateTime.now();
-      if (date.isAfter(now)) {
-        return date.difference(now);
-      }
-      // Date is now or in the past (clock skew, coarse timestamp) - retry immediately
-      return Duration.zero;
-    } catch (_) {
-      // Ignore parse errors - fall through to return null
-    }
-
-    return null;
-  }
-
-  /// Parses an HTTP-date string.
-  ///
-  /// Supports RFC 7231 date formats. On IO platforms, all formats are supported:
-  /// - RFC 1123 (preferred): "Wed, 21 Oct 2015 07:28:00 GMT"
-  /// - RFC 850: "Wednesday, 21-Oct-15 07:28:00 GMT"
-  /// - ANSI C asctime(): "Wed Oct 21 07:28:00 2015"
-  ///
-  /// On web platforms, only RFC 1123 format is supported.
-  DateTime _parseHttpDate(String value) => parseHttpDate(value);
 
   /// Computes a delay with jitter to avoid thundering herd problem.
   ///
