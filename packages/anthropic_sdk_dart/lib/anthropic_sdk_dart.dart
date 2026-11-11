@@ -79,6 +79,9 @@ export 'src/models/beta_timestamp.dart';
 // Models - Completions (Legacy)
 export 'src/models/completions/completion.dart';
 
+// Models - Compliance
+export 'src/models/compliance/compliance_models.dart';
+
 // Models - Content
 export 'src/models/content/browser_state.dart';
 export 'src/models/content/citations_config.dart';
@@ -262,6 +265,7 @@ export 'src/models/user_profiles/user_profile_trust_grant.dart';
 
 // Resources
 export 'src/resources/agents_resource.dart';
+export 'src/resources/compliance_resource.dart';
 export 'src/resources/deployment_runs_resource.dart';
 export 'src/resources/deployments_resource.dart';
 export 'src/resources/dreams_resource.dart';

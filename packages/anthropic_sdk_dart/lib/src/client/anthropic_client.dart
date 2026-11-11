@@ -6,6 +6,7 @@ import '../interceptors/error_interceptor.dart';
 import '../interceptors/interceptor.dart';
 import '../interceptors/logging_interceptor.dart';
 import '../resources/agents_resource.dart';
+import '../resources/compliance_resource.dart';
 import '../resources/deployment_runs_resource.dart';
 import '../resources/deployments_resource.dart';
 import '../resources/dreams_resource.dart';
@@ -68,6 +69,9 @@ class AnthropicClient {
 
   /// Resource for the Messages API.
   late final MessagesResource messages;
+
+  /// Resource for the Claude Compliance API.
+  late final ComplianceResource compliance;
 
   /// Resource for the Models API.
   late final ModelsResource models;
@@ -188,6 +192,13 @@ class AnthropicClient {
 
     // Initialize resources
     messages = MessagesResource(
+      config: config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+    compliance = ComplianceResource(
       config: config,
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,

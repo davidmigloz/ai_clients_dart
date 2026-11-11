@@ -49,6 +49,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 ### Operational APIs
 
 - Message batches for large-scale offline processing
+- Compliance Activity Feed, organization directory, effective settings, and Security Posture (beta)
 - Model discovery with lifecycle filters, model lines, and thinking and server-tool capabilities
 - Files (expiration, cursor pagination) and skills (multi-file uploads, container skills)
 - Managed agents with sessions, threads, vaults, and streaming events (beta)
@@ -751,6 +752,50 @@ restricted when deciding access, and preserve the wire value for diagnostics.
 
 </details>
 
+### Compliance Activity Feed and directory
+
+<details>
+<summary><b>Read scoped Compliance activity and organization metadata</b></summary>
+
+Use a client configured with a separate Compliance Access Key. A Claude Console
+Admin API key with `read:compliance_activities` can query the Activity Feed.
+Use `read:compliance_org_data` for organizations, roles, groups, and effective
+settings. Use `read:compliance_user_data` for organization users, member
+preferences, and group members. Security Posture accepts
+`read:compliance_org_data` or `read:org_audit`. Member preferences and Security
+Posture are beta. Pass the organization UUID to organization-specific routes.
+
+```dart
+final client = AnthropicClient.withApiKey(complianceAccessKey);
+try {
+  final first = await client.compliance.listActivities(
+    order: ComplianceOrder.asc,
+    limit: 100,
+  );
+  if (first.hasMore && first.lastId != null) {
+    final next = await client.compliance.listActivities(
+      order: ComplianceOrder.asc,
+      afterId: first.lastId,
+      limit: 100,
+    );
+    // Process next.data in a secure destination.
+  }
+} finally {
+  client.close();
+}
+```
+
+Use one activity cursor at a time and keep its filters and order. For
+incremental export, use overlapping `createdAt` windows and deduplicate by
+activity ID so late-arriving records are included. Directory lists use the
+opaque `nextPage` token. When listing preferences, pass the same `userIds`
+and `includeUnset` values with each page, including after an empty page
+that supplies a continuation token.
+
+[Activity Feed example](example/compliance_example.dart) · [Compliance API access](https://platform.claude.com/docs/en/manage-claude/compliance-api-access) · [Directory guide](https://platform.claude.com/docs/en/manage-claude/compliance-org-data)
+
+</details>
+
 ## Error Handling
 
 <details>
@@ -828,6 +873,7 @@ See the [example/](example/) directory for complete examples:
 | [`current_user_profiles_example.dart`](example/current_user_profiles_example.dart) | Inspect enforcement status and paginate user profiles |
 | [`user_profiles_example.dart`](example/user_profiles_example.dart) | Legacy user profiles and enrollment URLs (beta) |
 | [`models_example.dart`](example/models_example.dart) | Model lifecycle filters, pagination, and capabilities |
+| [`compliance_example.dart`](example/compliance_example.dart) | Scoped Compliance Activity Feed |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
 | [`anthropic_sdk_dart_example.dart`](example/anthropic_sdk_dart_example.dart) | Quick-start overview |
 
@@ -847,6 +893,7 @@ See the [example/](example/) directory for complete examples:
 | Dreams (Beta) | ✅ Full |
 | User Profiles | ✅ GA and legacy beta |
 | Webhooks (Beta) | ✅ Full |
+| Compliance | Activity Feed and organization directory, settings, Security Posture |
 
 ## Official Documentation
 
