@@ -74,8 +74,9 @@ final class EnvironmentWorkItem {
       final decoded = jsonDecode(
         utf8.decode(base64Url.decode(base64Url.normalize(value))),
       );
-      if (decoded case {'sessions_token': final String token}
-          when token.isNotEmpty) {
+      if (decoded case {
+        'sessions_token': final String token,
+      } when token.isNotEmpty) {
         return EnvironmentWorkSecret(
           sessionsToken: token,
           apiBaseUrl: switch (decoded) {
