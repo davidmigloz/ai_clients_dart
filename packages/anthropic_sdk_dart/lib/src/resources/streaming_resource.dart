@@ -299,6 +299,12 @@ mixin StreamingResource on ResourceBase {
             onDone: finish,
           );
         }
+        // A custom response stream can abort synchronously from its onListen
+        // callback, before its subscription is available to stop().
+        if (stopped) {
+          await subscription?.cancel();
+          return;
+        }
         if (controller.isPaused) subscription?.pause();
       } catch (error, stackTrace) {
         finish(error, stackTrace);

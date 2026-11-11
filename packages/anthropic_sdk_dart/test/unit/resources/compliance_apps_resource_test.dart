@@ -657,6 +657,36 @@ void main() {
     );
   }
 
+  for (final statusCode in [200, 403]) {
+    test(
+      'sync abort during body subscription releases HTTP $statusCode',
+      () async {
+        final abort = Completer<void>.sync();
+        final canceled = Completer<void>();
+        var cancels = 0;
+        final body = StreamController<List<int>>(
+          onListen: abort.complete,
+          onCancel: () {
+            cancels++;
+            canceled.complete();
+          },
+        );
+        addTearDown(body.close);
+        transport.queue(body.stream, statusCode: statusCode);
+        await expectLater(
+          apps
+              .downloadChatFile('file-1', abortTrigger: abort.future)
+              .toList()
+              .timeout(const Duration(seconds: 1)),
+          throwsA(isA<AbortedException>()),
+        );
+        await canceled.future.timeout(const Duration(seconds: 1));
+        expect(body.hasListener, isFalse);
+        expect(cancels, 1);
+      },
+    );
+  }
+
   test('an empty successful deletion does not try to decode JSON', () async {
     transport.queue(const Stream<List<int>>.empty(), statusCode: 204);
     expect(await apps.deleteChat('chat-1'), isNull);
