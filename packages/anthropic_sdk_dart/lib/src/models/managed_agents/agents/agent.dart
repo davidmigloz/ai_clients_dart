@@ -5,6 +5,7 @@ import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../config/agent_skill.dart';
 import '../config/agent_tool.dart';
+import '../config/execution_identity.dart';
 import '../config/mcp_server.dart';
 import '../config/model_config.dart';
 import 'multiagent.dart';
@@ -49,6 +50,9 @@ class Agent {
   /// single-threaded.
   final Multiagent? multiagent;
 
+  /// Execution principal reported by the server. Older responses may omit it.
+  final AgentExecutionIdentity? executionIdentity;
+
   /// ISO 8601 timestamp of when the agent was created.
   final BetaTimestamp createdAt;
 
@@ -72,6 +76,7 @@ class Agent {
     required this.skills,
     required this.metadata,
     this.multiagent,
+    this.executionIdentity,
     required this.createdAt,
     required this.updatedAt,
     required this.archivedAt,
@@ -97,6 +102,11 @@ class Agent {
           .map((e) => AgentSkill.fromJson(e as Map<String, dynamic>))
           .toList(),
       metadata: (json['metadata'] as Map?)?.cast<String, String>(),
+      executionIdentity: json['execution_identity'] != null
+          ? AgentExecutionIdentity.fromJson(
+              json['execution_identity'] as Map<String, dynamic>,
+            )
+          : null,
       multiagent: json['multiagent'] != null
           ? Multiagent.fromJson(json['multiagent'] as Map<String, dynamic>)
           : null,
@@ -122,6 +132,7 @@ class Agent {
     'skills': skills.map((e) => e.toJson()).toList(),
     'metadata': metadata,
     if (multiagent != null) 'multiagent': multiagent!.toJson(),
+    'execution_identity': ?executionIdentity?.toJson(),
     'created_at': createdAt.toUtc().toIso8601String(),
     'updated_at': updatedAt.toUtc().toIso8601String(),
     'archived_at': archivedAt?.toUtc().toIso8601String(),
@@ -145,6 +156,7 @@ class Agent {
     List<AgentSkill>? skills,
     Object? metadata = unsetCopyWithValue,
     Object? multiagent = unsetCopyWithValue,
+    Object? executionIdentity = unsetCopyWithValue,
     BetaTimestamp? createdAt,
     BetaTimestamp? updatedAt,
     Object? archivedAt = unsetCopyWithValue,
@@ -168,6 +180,9 @@ class Agent {
       multiagent: multiagent == unsetCopyWithValue
           ? this.multiagent
           : multiagent as Multiagent?,
+      executionIdentity: executionIdentity == unsetCopyWithValue
+          ? this.executionIdentity
+          : executionIdentity as AgentExecutionIdentity?,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       archivedAt: archivedAt == unsetCopyWithValue
@@ -193,6 +208,7 @@ class Agent {
           listsEqual(skills, other.skills) &&
           mapsEqual(metadata, other.metadata) &&
           multiagent == other.multiagent &&
+          executionIdentity == other.executionIdentity &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt &&
           archivedAt == other.archivedAt;
@@ -211,6 +227,7 @@ class Agent {
     listHash(skills),
     mapHash(metadata),
     multiagent,
+    executionIdentity,
     createdAt,
     updatedAt,
     archivedAt,
@@ -230,6 +247,7 @@ class Agent {
       'mcpServers: $mcpServers, '
       'skills: $skills, '
       'metadata: $metadata, '
+      'executionIdentity: $executionIdentity, '
       'multiagent: $multiagent, '
       'createdAt: $createdAt, '
       'updatedAt: $updatedAt, '

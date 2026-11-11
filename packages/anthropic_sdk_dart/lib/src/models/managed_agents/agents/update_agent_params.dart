@@ -4,6 +4,7 @@ import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../config/agent_skill.dart';
 import '../config/agent_tool.dart';
+import '../config/execution_identity.dart';
 import '../config/mcp_server.dart';
 import '../config/model_config.dart';
 import 'multiagent_params.dart';
@@ -70,6 +71,13 @@ class UpdateAgentParams {
       _multiagent == _notSet ? null : _multiagent as MultiagentParams?;
   final Object? _multiagent;
 
+  /// Principal for runs of the agent. Omit to preserve it. Set null to reset
+  /// to the Anthropic-managed service account.
+  AgentExecutionIdentity? get executionIdentity => _executionIdentity == _notSet
+      ? null
+      : _executionIdentity as AgentExecutionIdentity?;
+  final Object? _executionIdentity;
+
   /// Creates an [UpdateAgentParams].
   ///
   /// Omit a field to preserve its current value on the server.
@@ -85,6 +93,7 @@ class UpdateAgentParams {
     this._skills = _notSet,
     this._metadata = _notSet,
     this._multiagent = _notSet,
+    this._executionIdentity = _notSet,
   });
 
   /// Creates an [UpdateAgentParams] from JSON.
@@ -125,6 +134,13 @@ class UpdateAgentParams {
       metadata: json.containsKey('metadata')
           ? (json['metadata'] as Map?)?.cast<String, String?>()
           : _notSet,
+      executionIdentity: json.containsKey('execution_identity')
+          ? json['execution_identity'] != null
+                ? AgentExecutionIdentity.fromJson(
+                    json['execution_identity'] as Map<String, dynamic>,
+                  )
+                : null
+          : _notSet,
       multiagent: json.containsKey('multiagent')
           ? json['multiagent'] != null
                 ? MultiagentParams.fromJson(
@@ -162,6 +178,8 @@ class UpdateAgentParams {
           .map((e) => e.toJson())
           .toList(),
     if (_metadata != _notSet) 'metadata': _metadata,
+    if (_executionIdentity != _notSet)
+      'execution_identity': executionIdentity?.toJson(),
     if (_multiagent != _notSet)
       'multiagent': (_multiagent as MultiagentParams?)?.toJson(),
   };
@@ -178,6 +196,7 @@ class UpdateAgentParams {
     Object? skills = unsetCopyWithValue,
     Object? metadata = unsetCopyWithValue,
     Object? multiagent = unsetCopyWithValue,
+    Object? executionIdentity = unsetCopyWithValue,
   }) {
     return UpdateAgentParams(
       version: version == unsetCopyWithValue ? this.version : version as int?,
@@ -192,6 +211,9 @@ class UpdateAgentParams {
       skills: skills == unsetCopyWithValue ? _skills : skills,
       metadata: metadata == unsetCopyWithValue ? _metadata : metadata,
       multiagent: multiagent == unsetCopyWithValue ? _multiagent : multiagent,
+      executionIdentity: executionIdentity == unsetCopyWithValue
+          ? _executionIdentity
+          : executionIdentity,
     );
   }
 
@@ -209,7 +231,8 @@ class UpdateAgentParams {
           _listsEqualOrBothSentinel(_mcpServers, other._mcpServers) &&
           _listsEqualOrBothSentinel(_skills, other._skills) &&
           _mapsEqualOrBothSentinel(_metadata, other._metadata) &&
-          _multiagent == other._multiagent;
+          _multiagent == other._multiagent &&
+          _executionIdentity == other._executionIdentity;
 
   @override
   int get hashCode => Object.hash(
@@ -223,6 +246,7 @@ class UpdateAgentParams {
     _skills == _notSet ? _notSet : listHash(skills),
     _metadata == _notSet ? _notSet : mapHash(metadata),
     _multiagent,
+    _executionIdentity,
   );
 
   @override
@@ -237,7 +261,7 @@ class UpdateAgentParams {
       'mcpServers: $mcpServers, '
       'skills: $skills, '
       'metadata: $metadata, '
-      'multiagent: $multiagent)';
+      'multiagent: $multiagent, executionIdentity: $executionIdentity)';
 }
 
 bool _listsEqualOrBothSentinel(Object? a, Object? b) {

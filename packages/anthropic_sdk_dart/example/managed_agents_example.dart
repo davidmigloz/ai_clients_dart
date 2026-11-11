@@ -31,6 +31,7 @@ void main() async {
         name: 'Helper Agent',
         model: const ModelParamsId(id: 'claude-sonnet-4-6'),
         system: 'You are a helpful assistant.',
+        executionIdentity: const AgentExecutionIdentity.serviceAccount(),
         tools: [
           AgentToolset20260401Params(
             configs: [

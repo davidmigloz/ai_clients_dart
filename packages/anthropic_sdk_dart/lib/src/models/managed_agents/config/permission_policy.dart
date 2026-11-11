@@ -7,6 +7,7 @@ import '../../common/equality_helpers.dart';
 /// Variants:
 /// - [AlwaysAllowPolicy] — tool calls are automatically approved.
 /// - [AlwaysAskPolicy] — tool calls require user confirmation.
+/// - [AutoPolicy] — the server evaluates each tool call.
 /// - [UnknownPermissionPolicy] — unrecognised policy (preserves raw JSON).
 sealed class PermissionPolicy {
   const PermissionPolicy();
@@ -17,6 +18,7 @@ sealed class PermissionPolicy {
     return switch (type) {
       'always_allow' => AlwaysAllowPolicy.fromJson(json),
       'always_ask' => AlwaysAskPolicy.fromJson(json),
+      'auto' => const AutoPolicy(),
       _ => UnknownPermissionPolicy._(type: type, raw: json),
     };
   }
@@ -97,6 +99,25 @@ class AlwaysAskPolicy extends PermissionPolicy {
   String toString() => 'AlwaysAskPolicy(type: $type)';
 }
 
+/// The server evaluates each tool call as allow, ask, or deny.
+@immutable
+final class AutoPolicy extends PermissionPolicy {
+  /// Creates an automatic permission policy.
+  const AutoPolicy();
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'auto'};
+
+  @override
+  bool operator ==(Object other) => other is AutoPolicy;
+
+  @override
+  int get hashCode => 'auto'.hashCode;
+
+  @override
+  String toString() => 'AutoPolicy()';
+}
+
 /// Unrecognised permission policy — preserves the raw JSON.
 @immutable
 class UnknownPermissionPolicy extends PermissionPolicy {
@@ -106,7 +127,10 @@ class UnknownPermissionPolicy extends PermissionPolicy {
   /// The raw JSON map.
   final Map<String, dynamic> raw;
 
-  const UnknownPermissionPolicy._({required this.type, required this.raw});
+  UnknownPermissionPolicy._({
+    required this.type,
+    required Map<String, dynamic> raw,
+  }) : raw = deepUnmodifiableMap(raw);
 
   @override
   Map<String, dynamic> toJson() => raw;

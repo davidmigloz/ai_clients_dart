@@ -7,6 +7,7 @@ import '../agents/multiagent.dart' show Advisor;
 import '../common/budget.dart';
 import '../config/agent_skill.dart';
 import '../config/agent_tool.dart';
+import '../config/execution_identity.dart';
 import '../config/mcp_server.dart';
 import '../config/model_config.dart';
 import '../events/telemetry.dart';
@@ -60,6 +61,11 @@ class Session {
   /// Current session status.
   final SessionStatus status;
 
+  final String? _rawStatus;
+
+  /// Original status, including values introduced by the server.
+  String get rawStatus => _rawStatus ?? status.value;
+
   /// Resolved agent snapshot at session creation time.
   final SessionAgent agent;
 
@@ -109,6 +115,7 @@ class Session {
     required this.id,
     this.type = 'session',
     required this.status,
+    this._rawStatus,
     required this.agent,
     required this.environmentId,
     this.deploymentId,
@@ -131,6 +138,7 @@ class Session {
       id: json['id'] as String,
       type: json['type'] as String? ?? 'session',
       status: SessionStatus.fromJson(json['status'] as String),
+      rawStatus: json['status'] as String,
       agent: SessionAgent.fromJson(json['agent'] as Map<String, dynamic>),
       environmentId: json['environment_id'] as String,
       deploymentId: json['deployment_id'] as String?,
@@ -166,7 +174,7 @@ class Session {
   Map<String, dynamic> toJson() => {
     'id': id,
     'type': type,
-    'status': status.toJson(),
+    'status': rawStatus,
     'agent': agent.toJson(),
     'environment_id': environmentId,
     if (deploymentId != null) 'deployment_id': deploymentId,
@@ -207,6 +215,7 @@ class Session {
       id: id ?? this.id,
       type: type ?? this.type,
       status: status ?? this.status,
+      rawStatus: status == null ? _rawStatus : null,
       agent: agent ?? this.agent,
       environmentId: environmentId ?? this.environmentId,
       deploymentId: deploymentId == unsetCopyWithValue
@@ -235,7 +244,7 @@ class Session {
           runtimeType == other.runtimeType &&
           id == other.id &&
           type == other.type &&
-          status == other.status &&
+          rawStatus == other.rawStatus &&
           agent == other.agent &&
           environmentId == other.environmentId &&
           deploymentId == other.deploymentId &&
@@ -255,7 +264,7 @@ class Session {
   int get hashCode => Object.hash(
     id,
     type,
-    status,
+    rawStatus,
     agent,
     environmentId,
     deploymentId,
@@ -277,7 +286,7 @@ class Session {
       'Session('
       'id: $id, '
       'type: $type, '
-      'status: $status, '
+      'status: $rawStatus, '
       'agent: $agent, '
       'environmentId: $environmentId, '
       'deploymentId: $deploymentId, '
@@ -324,6 +333,9 @@ class SessionAgent {
   /// Skills attached to this agent.
   final List<AgentSkill> skills;
 
+  /// Execution principal used by this agent, when reported.
+  final AgentExecutionIdentity? executionIdentity;
+
   /// Tool configurations for this agent.
   final List<AgentTool> tools;
 
@@ -342,6 +354,7 @@ class SessionAgent {
     required this.model,
     required this.mcpServers,
     required this.skills,
+    this.executionIdentity,
     required this.tools,
     this.multiagent,
   });
@@ -361,6 +374,11 @@ class SessionAgent {
               ?.map((e) => MCPServer.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      executionIdentity: json['execution_identity'] != null
+          ? AgentExecutionIdentity.fromJson(
+              json['execution_identity'] as Map<String, dynamic>,
+            )
+          : null,
       skills:
           (json['skills'] as List?)
               ?.map((e) => AgentSkill.fromJson(e as Map<String, dynamic>))
@@ -390,6 +408,7 @@ class SessionAgent {
     'model': model.toJson(),
     'mcp_servers': mcpServers.map((e) => e.toJson()).toList(),
     'skills': skills.map((e) => e.toJson()).toList(),
+    'execution_identity': ?executionIdentity?.toJson(),
     'tools': tools.map((e) => e.toJson()).toList(),
     if (multiagent != null) 'multiagent': multiagent!.toJson(),
   };
@@ -405,6 +424,7 @@ class SessionAgent {
     ModelConfig? model,
     List<MCPServer>? mcpServers,
     List<AgentSkill>? skills,
+    Object? executionIdentity = unsetCopyWithValue,
     List<AgentTool>? tools,
     Object? multiagent = unsetCopyWithValue,
   }) {
@@ -420,6 +440,9 @@ class SessionAgent {
       model: model ?? this.model,
       mcpServers: mcpServers ?? this.mcpServers,
       skills: skills ?? this.skills,
+      executionIdentity: executionIdentity == unsetCopyWithValue
+          ? this.executionIdentity
+          : executionIdentity as AgentExecutionIdentity?,
       tools: tools ?? this.tools,
       multiagent: multiagent == unsetCopyWithValue
           ? this.multiagent
@@ -440,6 +463,7 @@ class SessionAgent {
           system == other.system &&
           model == other.model &&
           listsEqual(mcpServers, other.mcpServers) &&
+          executionIdentity == other.executionIdentity &&
           listsEqual(skills, other.skills) &&
           listsEqual(tools, other.tools) &&
           multiagent == other.multiagent;
@@ -455,6 +479,7 @@ class SessionAgent {
     model,
     listHash(mcpServers),
     listHash(skills),
+    executionIdentity,
     listHash(tools),
     multiagent,
   );
@@ -470,6 +495,7 @@ class SessionAgent {
       'system: $system, '
       'model: $model, '
       'mcpServers: $mcpServers, '
+      'executionIdentity: $executionIdentity, '
       'skills: $skills, '
       'tools: $tools, '
       'multiagent: $multiagent)';
@@ -893,6 +919,9 @@ class SessionThreadAgent extends SessionRosterEntry {
   /// Skills attached to this agent.
   final List<AgentSkill> skills;
 
+  /// Execution principal used by this agent, when reported.
+  final AgentExecutionIdentity? executionIdentity;
+
   /// Tool configurations for this agent.
   final List<AgentTool> tools;
 
@@ -907,6 +936,7 @@ class SessionThreadAgent extends SessionRosterEntry {
     required this.model,
     required this.mcpServers,
     required this.skills,
+    this.executionIdentity,
     required this.tools,
   });
 
@@ -925,6 +955,11 @@ class SessionThreadAgent extends SessionRosterEntry {
               ?.map((e) => MCPServer.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      executionIdentity: json['execution_identity'] != null
+          ? AgentExecutionIdentity.fromJson(
+              json['execution_identity'] as Map<String, dynamic>,
+            )
+          : null,
       skills:
           (json['skills'] as List?)
               ?.map((e) => AgentSkill.fromJson(e as Map<String, dynamic>))
@@ -949,6 +984,7 @@ class SessionThreadAgent extends SessionRosterEntry {
     'model': model.toJson(),
     'mcp_servers': mcpServers.map((e) => e.toJson()).toList(),
     'skills': skills.map((e) => e.toJson()).toList(),
+    'execution_identity': ?executionIdentity?.toJson(),
     'tools': tools.map((e) => e.toJson()).toList(),
   };
 
@@ -963,6 +999,7 @@ class SessionThreadAgent extends SessionRosterEntry {
     ModelConfig? model,
     List<MCPServer>? mcpServers,
     List<AgentSkill>? skills,
+    Object? executionIdentity = unsetCopyWithValue,
     List<AgentTool>? tools,
   }) {
     return SessionThreadAgent(
@@ -977,6 +1014,9 @@ class SessionThreadAgent extends SessionRosterEntry {
       model: model ?? this.model,
       mcpServers: mcpServers ?? this.mcpServers,
       skills: skills ?? this.skills,
+      executionIdentity: executionIdentity == unsetCopyWithValue
+          ? this.executionIdentity
+          : executionIdentity as AgentExecutionIdentity?,
       tools: tools ?? this.tools,
     );
   }
@@ -994,6 +1034,7 @@ class SessionThreadAgent extends SessionRosterEntry {
           system == other.system &&
           model == other.model &&
           listsEqual(mcpServers, other.mcpServers) &&
+          executionIdentity == other.executionIdentity &&
           listsEqual(skills, other.skills) &&
           listsEqual(tools, other.tools);
 
@@ -1008,6 +1049,7 @@ class SessionThreadAgent extends SessionRosterEntry {
     model,
     listHash(mcpServers),
     listHash(skills),
+    executionIdentity,
     listHash(tools),
   );
 
@@ -1022,6 +1064,7 @@ class SessionThreadAgent extends SessionRosterEntry {
       'system: $system, '
       'model: $model, '
       'mcpServers: $mcpServers, '
+      'executionIdentity: $executionIdentity, '
       'skills: $skills, '
       'tools: $tools)';
 }

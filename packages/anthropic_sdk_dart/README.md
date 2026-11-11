@@ -52,7 +52,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Compliance Activity Feed, organization directory, effective settings, and Security Posture (beta)
 - Model discovery with lifecycle filters, model lines, and thinking and server-tool capabilities
 - Files (expiration, cursor pagination) and skills (multi-file uploads, container skills)
-- Managed agents with sessions, threads, vaults, and streaming events (beta)
+- Managed agents with sessions, thread status filters, execution principals, tool permission evaluation, vaults, and streaming events (beta)
 - Scheduled deployments: run agent sessions on a cron schedule, with deployment runs, pause/resume, and run-now (beta)
 - Multiagent coordinator orchestration (agent and advisor roster entries), per-tool agent toolset configs (incl. web-search/web-fetch domain filters), session budgets, and outcome evaluations with grading rubrics (beta)
 - Typed webhook event parsing and MCP-OAuth / static-bearer / environment-variable credential validation (beta)
@@ -645,6 +645,10 @@ Future<void> main() async {
   }
 }
 ```
+
+Agent execution defaults to the Anthropic-managed service account. On Claude Platform on AWS, configure `AgentExecutionIdentity.awsRole(arn)` for an IAM role. An explicit `executionIdentity: null` in `UpdateAgentParams` resets the principal.
+
+Use `AutoPolicy()` for server-evaluated tool permissions and read the event's `evaluation` alongside `evaluatedPermission`. Web fetch can restrict which URL sources contribute candidates with `ManagedWebFetchUrlSources`. Claude applies those filters along with organization domain restrictions and the environment's network configuration.
 
 → [Full example](example/managed_agents_example.dart)
 
