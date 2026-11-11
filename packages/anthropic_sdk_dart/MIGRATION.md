@@ -224,6 +224,28 @@ For legacy auto-compaction, the latest `compaction_delta` replaces the earlier s
 
 ---
 
+## Read Admin scope and rate-limit groups
+
+The current API version returns an API key's `scope`, including a real
+`workspace_id` for a key scoped to the Default Workspace. The older
+`workspace_id: null` shape can represent a Default Workspace key or an
+organization-wide key. Read `scope?.type` to distinguish those cases in
+current responses. For rate limits, use `groupType` to read both the current
+`group.type` and the older top-level `group_type` response shape.
+
+```dart
+final key = await client.organization.apiKeys.retrieve(apiKeyId);
+final scope = key.scope;
+if (scope?.type == 'workspace') {
+  final workspaceId = scope?.workspaceId;
+  print(workspaceId);
+}
+```
+
+[Claude Admin version migration](https://platform.claude.com/docs/en/api/migration-2026-10-21)
+
+---
+
 ## Migrating from v9.x to v10.0.0
 
 v10.0.0 adds document sources that reference uploaded files. `DocumentSource` is sealed, so exhaustive switches must handle the new `FileDocumentSource` variant.
