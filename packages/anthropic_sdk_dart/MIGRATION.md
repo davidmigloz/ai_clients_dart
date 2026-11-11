@@ -6,6 +6,64 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Claude API version 2026-10-21
+
+The default API version changes from `2023-06-01` to `2026-10-21`. Every
+request uses the configured version. A case-insensitive `anthropic-version`
+entry in `defaultHeaders` takes precedence over `apiVersion`.
+
+### Use the current Messages contract
+
+Remove `temperature`, `topP` and `topK` from message creation and batch
+parameters, including parameters set to their defaults.
+
+```dart
+// Before
+final previous = MessageCreateRequest(
+  model: 'claude-sonnet-4-6',
+  maxTokens: 512,
+  messages: [InputMessage.user('Give a short explanation of SSE.')],
+  temperature: 0.2,
+);
+
+// After
+final current = MessageCreateRequest(
+  model: 'claude-sonnet-4-6',
+  maxTokens: 512,
+  messages: [InputMessage.user('Give a short explanation of SSE.')],
+);
+```
+
+Move direct `document` blocks from assistant turns to user turns. Remove
+nonempty citations from user text blocks, including text inside search results.
+Assistant text citations, nested documents in tool results, and the
+`citations: {enabled: true}` setting on a document or search result are still
+supported. The Dart client raises `ValidationException` before sending these
+incompatible inputs in Messages create, streaming, token count where applicable,
+and batch create.
+
+### Keep the legacy behavior when required
+
+Select the legacy version explicitly if your application still needs the
+previous sampling controls. The following example uses the first-party Claude
+API. Separately configured Bedrock transports must keep their previous API
+version for models older than Claude 4.7.
+
+```dart
+final client = AnthropicClient(
+  config: AnthropicConfig.fromEnvironment().copyWith(
+    apiVersion: AnthropicConfig.legacyApiVersion,
+  ),
+);
+```
+
+`ApiKeyProvider` continues to send the API key in `x-api-key`, which the Claude
+API accepts. The pinned official SDKs send keys as Bearer by default.
+
+The server migration also renames Admin and Enterprise Analytics response fields. [Claude API migration guide](https://platform.claude.com/docs/en/api/migration-2026-10-21) · [Runnable version example](example/api_version_example.dart)
+
+---
+
 ## Migrating from v9.x to v10.0.0
 
 v10.0.0 adds document sources that reference uploaded files. `DocumentSource` is sealed, so exhaustive switches must handle the new `FileDocumentSource` variant.

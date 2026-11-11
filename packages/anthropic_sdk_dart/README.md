@@ -83,7 +83,7 @@ Future<void> main() async {
   try {
     final response = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-5',
+        model: 'claude-sonnet-5-5',
         maxTokens: 1024,
         messages: [InputMessage.user('What is the capital of France?')],
       ),
@@ -127,6 +127,11 @@ Environment variables:
 
 - `ANTHROPIC_API_KEY`
 - `ANTHROPIC_BASE_URL`
+
+The client defaults to Claude API version `2026-10-21`. If your requests rely
+on sampling parameters or other legacy input behavior, set
+`apiVersion: AnthropicConfig.legacyApiVersion` in `AnthropicConfig`.
+See the [API version migration](MIGRATION.md#claude-api-version-2026-10-21).
 
 Use explicit configuration on web builds where runtime environment variables are not available.
 
@@ -684,6 +689,7 @@ See the [example/](example/) directory for complete examples:
 | Example | Description |
 |---------|-------------|
 | [`messages_example.dart`](example/messages_example.dart) | Basic message creation |
+| [`api_version_example.dart`](example/api_version_example.dart) | Current API version and legacy opt-out |
 | [`mid_conversation_system_example.dart`](example/mid_conversation_system_example.dart) | Mid-conversation, turn-scoped, and effort-only system messages |
 | [`streaming_example.dart`](example/streaming_example.dart) | Streaming responses |
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Tool calling with schemas |

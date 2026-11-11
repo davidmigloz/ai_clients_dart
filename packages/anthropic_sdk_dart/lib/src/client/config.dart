@@ -31,6 +31,12 @@ class RetryPolicy {
 
 /// Configuration for the Anthropic client.
 class AnthropicConfig {
+  /// API version used by default for Claude requests.
+  static const defaultApiVersion = '2026-10-21';
+
+  /// API version for callers that still rely on legacy request behavior.
+  static const legacyApiVersion = '2023-06-01';
+
   /// Base URL for the Anthropic API.
   ///
   /// Defaults to `https://api.anthropic.com`.
@@ -70,7 +76,8 @@ class AnthropicConfig {
 
   /// API version header value.
   ///
-  /// Defaults to `2023-06-01`.
+  /// Defaults to [defaultApiVersion]. Set [legacyApiVersion] to continue
+  /// sending legacy Messages inputs such as sampling parameters.
   final String apiVersion;
 
   /// Creates an [AnthropicConfig].
@@ -89,7 +96,7 @@ class AnthropicConfig {
       'password',
       'secret',
     ],
-    this.apiVersion = '2023-06-01',
+    this.apiVersion = defaultApiVersion,
   });
 
   /// Creates an [AnthropicConfig] using runtime environment variables.

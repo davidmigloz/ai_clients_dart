@@ -175,6 +175,8 @@ class MessageCreateRequest {
   final bool? stream;
 
   /// Temperature for randomness (0.0-1.0).
+  ///
+  /// Only accepted with API version `2023-06-01`.
   final double? temperature;
 
   /// Extended thinking configuration.
@@ -193,9 +195,13 @@ class MessageCreateRequest {
   final List<ToolDefinition>? tools;
 
   /// Nucleus sampling parameter.
+  ///
+  /// Only accepted with API version `2023-06-01`.
   final double? topP;
 
   /// Top-K sampling parameter.
+  ///
+  /// Only accepted with API version `2023-06-01`.
   final int? topK;
 
   /// Inference region to execute the request in.

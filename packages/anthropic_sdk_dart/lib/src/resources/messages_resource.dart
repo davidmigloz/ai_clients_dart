@@ -8,6 +8,7 @@ import '../models/streaming/message_stream_event.dart';
 import '../models/tokens/token_count.dart';
 import 'base_resource.dart';
 import 'message_batches_resource.dart';
+import 'message_request_validation.dart';
 import 'streaming_resource.dart';
 
 /// Resource for the Messages API.
@@ -61,6 +62,7 @@ class MessagesResource extends ResourceBase with StreamingResource {
         userProfileId: userProfileId,
       ),
     );
+    validateMessageRequestVersion(headers['anthropic-version'], body);
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(body);
@@ -94,6 +96,8 @@ class MessagesResource extends ResourceBase with StreamingResource {
       '/v1/messages',
       body: body,
       headers: _requestHeaders(betas: betas, userProfileId: userProfileId),
+      validateHeaders: (headers) =>
+          validateMessageRequestVersion(headers['anthropic-version'], body),
       abortTrigger: abortTrigger,
     );
 
@@ -122,9 +126,11 @@ class MessagesResource extends ResourceBase with StreamingResource {
         userProfileId: userProfileId,
       ),
     );
+    final body = request.toJson();
+    validateMessageRequestVersion(headers['anthropic-version'], body);
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
+      ..body = jsonEncode(body);
 
     final response = await interceptorChain.execute(
       httpRequest,
