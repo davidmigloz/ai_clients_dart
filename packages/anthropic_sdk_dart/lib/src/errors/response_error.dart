@@ -2,6 +2,40 @@ import 'dart:convert';
 
 import 'exceptions.dart';
 
+/// Reads the provider error envelope, retaining existing message and type
+/// behavior for malformed or legacy responses.
+({String message, List<Object> details, String? errorCode}) parseApiErrorBody(
+  String body,
+) {
+  if (body.isEmpty) {
+    return (message: 'Unknown error', details: const [], errorCode: null);
+  }
+  try {
+    final decoded = jsonDecode(body);
+    if (decoded case {'error': final Map<String, dynamic> error}) {
+      final message = error['message'] as String? ?? 'Unknown error';
+      final type = error['type'] as String?;
+      final details = error['details'];
+      return (
+        message: message,
+        details: type == null ? const [] : <Object>[type],
+        errorCode: switch (details) {
+          {'error_code': final String code} => code,
+          _ => null,
+        },
+      );
+    }
+    if (decoded case {'message': final String message}) {
+      return (message: message, details: const [], errorCode: null);
+    }
+  } on FormatException {
+    // Some proxies return an error body that isn't JSON.
+  } on TypeError {
+    // Preserve the fallback if the error envelope has unexpected types.
+  }
+  return (message: body, details: const [], errorCode: null);
+}
+
 /// Retains useful response diagnostics without copying sensitive content.
 ResponseMetadata createSafeResponseMetadata({
   required int statusCode,

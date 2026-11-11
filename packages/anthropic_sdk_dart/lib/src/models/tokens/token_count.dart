@@ -4,6 +4,7 @@ import '../beta/config/output_config.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../messages/compaction_config.dart';
+import '../messages/context_management.dart';
 import '../messages/input_message.dart';
 import '../messages/message_create_request.dart';
 import '../messages/thinking_config.dart';
@@ -56,6 +57,11 @@ class TokenCountRequest {
   /// The API counts the supplied conversation without running compaction.
   final CompactionConfig? compaction;
 
+  /// Beta context editing or threshold compaction configuration.
+  ///
+  /// Use this field separately from [compaction].
+  final ContextManagementConfig? contextManagement;
+
   /// Creates a [TokenCountRequest].
   const TokenCountRequest({
     required this.model,
@@ -68,13 +74,14 @@ class TokenCountRequest {
     this.speed,
     this.cacheControl,
     this.compaction,
+    this.contextManagement,
   });
 
   /// Creates a [TokenCountRequest] from a [MessageCreateRequest].
   ///
   /// Copies the fields relevant to token counting: model, messages,
   /// system, thinking, toolChoice, tools, outputConfig, speed, and
-  /// cacheControl, and compaction.
+  /// cacheControl, compaction, and contextManagement.
   factory TokenCountRequest.fromMessageCreateRequest(
     MessageCreateRequest request,
   ) {
@@ -89,6 +96,7 @@ class TokenCountRequest {
       speed: request.speed,
       cacheControl: request.cacheControl,
       compaction: request.compaction,
+      contextManagement: request.contextManagement,
     );
   }
 
@@ -122,6 +130,11 @@ class TokenCountRequest {
               json['cache_control'] as Map<String, dynamic>,
             )
           : null,
+      contextManagement: json['context_management'] != null
+          ? ContextManagementConfig.fromJson(
+              json['context_management'] as Map<String, dynamic>,
+            )
+          : null,
       compaction: json['compaction'] != null
           ? CompactionConfig.fromJson(
               json['compaction'] as Map<String, dynamic>,
@@ -142,6 +155,7 @@ class TokenCountRequest {
     if (speed != null) 'speed': speed!.toJson(),
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
     if (compaction != null) 'compaction': compaction!.toJson(),
+    'context_management': ?contextManagement?.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -156,6 +170,7 @@ class TokenCountRequest {
     Object? speed = unsetCopyWithValue,
     Object? cacheControl = unsetCopyWithValue,
     Object? compaction = unsetCopyWithValue,
+    Object? contextManagement = unsetCopyWithValue,
   }) {
     return TokenCountRequest(
       model: model ?? this.model,
@@ -182,6 +197,9 @@ class TokenCountRequest {
       compaction: compaction == unsetCopyWithValue
           ? this.compaction
           : compaction as CompactionConfig?,
+      contextManagement: contextManagement == unsetCopyWithValue
+          ? this.contextManagement
+          : contextManagement as ContextManagementConfig?,
     );
   }
 
@@ -199,7 +217,8 @@ class TokenCountRequest {
           outputConfig == other.outputConfig &&
           speed == other.speed &&
           cacheControl == other.cacheControl &&
-          compaction == other.compaction;
+          compaction == other.compaction &&
+          contextManagement == other.contextManagement;
 
   @override
   int get hashCode => Object.hash(
@@ -213,6 +232,7 @@ class TokenCountRequest {
     speed,
     cacheControl,
     compaction,
+    contextManagement,
   );
 
   @override
@@ -220,7 +240,8 @@ class TokenCountRequest {
       'TokenCountRequest(model: $model, messages: $messages, system: $system, '
       'thinking: $thinking, toolChoice: $toolChoice, tools: $tools, '
       'outputConfig: $outputConfig, speed: $speed, '
-      'cacheControl: $cacheControl, compaction: $compaction)';
+      'cacheControl: $cacheControl, compaction: $compaction, '
+      'contextManagement: $contextManagement)';
 }
 
 /// Response for token counting.
@@ -229,32 +250,65 @@ class TokenCountResponse {
   /// Number of input tokens.
   final int inputTokens;
 
+  /// Input-token accounting when context management is reported.
+  final TokenCountContextManagement? contextManagement;
+
+  /// Whether the response carries the context-management field, even if null.
+  final bool hasContextManagement;
+
   /// Creates a [TokenCountResponse].
-  const TokenCountResponse({required this.inputTokens});
+  const TokenCountResponse({
+    required this.inputTokens,
+    this.contextManagement,
+    bool hasContextManagement = false,
+  }) : hasContextManagement = hasContextManagement || contextManagement != null;
 
   /// Creates a [TokenCountResponse] from JSON.
   factory TokenCountResponse.fromJson(Map<String, dynamic> json) {
-    return TokenCountResponse(inputTokens: json['input_tokens'] as int);
+    return TokenCountResponse(
+      inputTokens: json['input_tokens'] as int,
+      hasContextManagement: json.containsKey('context_management'),
+      contextManagement: json['context_management'] != null
+          ? TokenCountContextManagement.fromJson(
+              json['context_management'] as Map<String, dynamic>,
+            )
+          : null,
+    );
   }
 
   /// Converts to JSON.
-  Map<String, dynamic> toJson() => {'input_tokens': inputTokens};
+  Map<String, dynamic> toJson() => {
+    'input_tokens': inputTokens,
+    if (hasContextManagement) 'context_management': contextManagement?.toJson(),
+  };
 
   /// Creates a copy with replaced values.
-  TokenCountResponse copyWith({int? inputTokens}) {
-    return TokenCountResponse(inputTokens: inputTokens ?? this.inputTokens);
-  }
+  TokenCountResponse copyWith({
+    int? inputTokens,
+    Object? contextManagement = unsetCopyWithValue,
+  }) => TokenCountResponse(
+    inputTokens: inputTokens ?? this.inputTokens,
+    hasContextManagement: hasContextManagement,
+    contextManagement: contextManagement == unsetCopyWithValue
+        ? this.contextManagement
+        : contextManagement as TokenCountContextManagement?,
+  );
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is TokenCountResponse &&
           runtimeType == other.runtimeType &&
-          inputTokens == other.inputTokens;
+          inputTokens == other.inputTokens &&
+          hasContextManagement == other.hasContextManagement &&
+          contextManagement == other.contextManagement;
 
   @override
-  int get hashCode => inputTokens.hashCode;
+  int get hashCode =>
+      Object.hash(inputTokens, contextManagement, hasContextManagement);
 
   @override
-  String toString() => 'TokenCountResponse(inputTokens: $inputTokens)';
+  String toString() =>
+      'TokenCountResponse(inputTokens: $inputTokens, '
+      'contextManagement: $contextManagement)';
 }

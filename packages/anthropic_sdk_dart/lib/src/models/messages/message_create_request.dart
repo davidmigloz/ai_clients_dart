@@ -11,6 +11,7 @@ import '../metadata/speed.dart';
 import '../tools/tool_choice.dart';
 import '../tools/tool_definition.dart';
 import 'compaction_config.dart';
+import 'context_management.dart';
 import 'diagnostics_param.dart';
 import 'fallback_config.dart';
 import 'fallback_credit_token_param.dart';
@@ -237,6 +238,11 @@ class MessageCreateRequest {
   /// Requires `compact-2026-09-04`. Omit [thread] on compaction requests.
   final CompactionConfig? compaction;
 
+  /// Beta context editing or threshold compaction configuration.
+  ///
+  /// Use this field separately from [compaction].
+  final ContextManagementConfig? contextManagement;
+
   /// Creates or continues server-held conversation state (beta).
   ///
   /// Requires `message-threads-2026-08-12`. Message Batches cannot use threads.
@@ -284,6 +290,7 @@ class MessageCreateRequest {
     this.cacheControl,
     this.diagnostics,
     this.compaction,
+    this.contextManagement,
     this.thread,
     this.fallbacks,
     this.fallbackCreditToken,
@@ -340,6 +347,11 @@ class MessageCreateRequest {
               json['diagnostics'] as Map<String, dynamic>,
             )
           : null,
+      contextManagement: json['context_management'] != null
+          ? ContextManagementConfig.fromJson(
+              json['context_management'] as Map<String, dynamic>,
+            )
+          : null,
       compaction: json['compaction'] != null
           ? CompactionConfig.fromJson(
               json['compaction'] as Map<String, dynamic>,
@@ -380,6 +392,7 @@ class MessageCreateRequest {
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
     if (diagnostics != null) 'diagnostics': diagnostics!.toJson(),
     if (compaction != null) 'compaction': compaction!.toJson(),
+    'context_management': ?contextManagement?.toJson(),
     if (thread != null) 'thread': thread!.toJson(),
     if (fallbacks != null) 'fallbacks': fallbacks!.toJson(),
     if (fallbackCreditToken != null)
@@ -409,6 +422,7 @@ class MessageCreateRequest {
     Object? cacheControl = unsetCopyWithValue,
     Object? diagnostics = unsetCopyWithValue,
     Object? compaction = unsetCopyWithValue,
+    Object? contextManagement = unsetCopyWithValue,
     Object? thread = unsetCopyWithValue,
     Object? fallbacks = unsetCopyWithValue,
     Object? fallbackCreditToken = unsetCopyWithValue,
@@ -463,6 +477,9 @@ class MessageCreateRequest {
       compaction: compaction == unsetCopyWithValue
           ? this.compaction
           : compaction as CompactionConfig?,
+      contextManagement: contextManagement == unsetCopyWithValue
+          ? this.contextManagement
+          : contextManagement as ContextManagementConfig?,
       thread: thread == unsetCopyWithValue
           ? this.thread
           : thread as MessageThreadParam?,
@@ -501,6 +518,7 @@ class MessageCreateRequest {
           cacheControl == other.cacheControl &&
           diagnostics == other.diagnostics &&
           compaction == other.compaction &&
+          contextManagement == other.contextManagement &&
           thread == other.thread &&
           fallbacks == other.fallbacks &&
           fallbackCreditToken == other.fallbackCreditToken;
@@ -528,6 +546,7 @@ class MessageCreateRequest {
     cacheControl,
     diagnostics,
     compaction,
+    contextManagement,
     thread,
     fallbacks,
     fallbackCreditToken,
@@ -543,6 +562,7 @@ class MessageCreateRequest {
       'inferenceGeo: $inferenceGeo, outputConfig: $outputConfig, '
       'container: $container, speed: $speed, cacheControl: $cacheControl, '
       'diagnostics: $diagnostics, compaction: $compaction, thread: $thread, '
+      'contextManagement: $contextManagement, '
       'fallbacks: $fallbacks, '
       'fallbackCreditToken: '
       '${fallbackCreditToken == null ? null : '[redacted]'})';

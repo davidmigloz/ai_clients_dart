@@ -6,6 +6,7 @@ import '../common/equality_helpers.dart';
 import '../content/content_block.dart';
 import '../metadata/stop_reason.dart';
 import '../metadata/usage.dart';
+import 'context_management.dart';
 import 'diagnostics.dart';
 import 'input_transformation.dart';
 import 'message_role.dart';
@@ -49,6 +50,12 @@ class Message {
   /// reported divergence or is pending.
   final Diagnostics? diagnostics;
 
+  /// Context edits applied to the request (beta).
+  final ContextManagementResult? contextManagement;
+
+  /// Whether the response carries the context-management field, even if null.
+  final bool hasContextManagement;
+
   /// Changes the API made to the request's input before showing it to the
   /// model, one entry per change, in request order.
   ///
@@ -70,8 +77,10 @@ class Message {
     required this.usage,
     this.container,
     this.diagnostics,
+    this.contextManagement,
+    bool hasContextManagement = false,
     this.inputTransformations,
-  });
+  }) : hasContextManagement = hasContextManagement || contextManagement != null;
 
   /// Creates a [Message] from JSON.
   factory Message.fromJson(Map<String, dynamic> json) {
@@ -101,6 +110,12 @@ class Message {
       diagnostics: json['diagnostics'] != null
           ? Diagnostics.fromJson(json['diagnostics'] as Map<String, dynamic>)
           : null,
+      hasContextManagement: json.containsKey('context_management'),
+      contextManagement: json['context_management'] != null
+          ? ContextManagementResult.fromJson(
+              json['context_management'] as Map<String, dynamic>,
+            )
+          : null,
       inputTransformations: (json['input_transformations'] as List?)
           ?.map((e) => InputTransformation.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -120,6 +135,7 @@ class Message {
     'usage': usage.toJson(),
     if (container != null) 'container': container!.toJson(),
     if (diagnostics != null) 'diagnostics': diagnostics!.toJson(),
+    if (hasContextManagement) 'context_management': contextManagement?.toJson(),
     if (inputTransformations != null)
       'input_transformations': inputTransformations!
           .map((e) => e.toJson())
@@ -139,6 +155,7 @@ class Message {
     Usage? usage,
     Object? container = unsetCopyWithValue,
     Object? diagnostics = unsetCopyWithValue,
+    Object? contextManagement = unsetCopyWithValue,
     Object? inputTransformations = unsetCopyWithValue,
   }) {
     return Message(
@@ -163,6 +180,10 @@ class Message {
       diagnostics: diagnostics == unsetCopyWithValue
           ? this.diagnostics
           : diagnostics as Diagnostics?,
+      hasContextManagement: hasContextManagement,
+      contextManagement: contextManagement == unsetCopyWithValue
+          ? this.contextManagement
+          : contextManagement as ContextManagementResult?,
       inputTransformations: inputTransformations == unsetCopyWithValue
           ? this.inputTransformations
           : inputTransformations as List<InputTransformation>?,
@@ -185,6 +206,8 @@ class Message {
           usage == other.usage &&
           container == other.container &&
           diagnostics == other.diagnostics &&
+          hasContextManagement == other.hasContextManagement &&
+          contextManagement == other.contextManagement &&
           listsEqual(inputTransformations, other.inputTransformations);
 
   @override
@@ -200,6 +223,8 @@ class Message {
     usage,
     container,
     diagnostics,
+    contextManagement,
+    hasContextManagement,
     listHash(inputTransformations),
   );
 
@@ -209,5 +234,6 @@ class Message {
       'content: $content, model: $model, stopReason: $stopReason, '
       'stopDetails: $stopDetails, stopSequence: $stopSequence, '
       'usage: $usage, container: $container, diagnostics: $diagnostics, '
+      'contextManagement: $contextManagement, '
       'inputTransformations: $inputTransformations)';
 }

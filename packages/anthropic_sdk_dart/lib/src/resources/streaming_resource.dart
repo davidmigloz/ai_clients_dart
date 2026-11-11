@@ -88,12 +88,13 @@ mixin StreamingResource on ResourceBase {
     String body,
     ResponseMetadata responseMetadata,
   ) {
-    final (message, details) = _parseErrorBody(body);
+    final (:message, :details, :errorCode) = parseApiErrorBody(body);
 
     if (statusCode == 401) {
       return AuthenticationException(
         message: message,
         details: details,
+        errorCode: errorCode,
         responseMetadata: responseMetadata,
       );
     }
@@ -103,6 +104,7 @@ mixin StreamingResource on ResourceBase {
         statusCode: statusCode,
         message: message,
         details: details,
+        errorCode: errorCode,
         responseMetadata: responseMetadata,
         retryAfter: parseRetryAfter(responseMetadata.headers),
       );
@@ -112,40 +114,9 @@ mixin StreamingResource on ResourceBase {
       statusCode: statusCode,
       message: message,
       details: details,
+      errorCode: errorCode,
       responseMetadata: responseMetadata,
     );
-  }
-
-  /// Parses error message and details from response body.
-  (String, List<Object>) _parseErrorBody(String body) {
-    if (body.isEmpty) {
-      return ('Unknown error', <Object>[]);
-    }
-
-    try {
-      final json = jsonDecode(body);
-      if (json is Map<String, dynamic>) {
-        // Anthropic error format: {"type": "error", "error": {"type": "...", "message": "..."}}
-        final error = json['error'];
-        if (error is Map<String, dynamic>) {
-          final message = error['message'] as String? ?? 'Unknown error';
-          final errorType = error['type'] as String?;
-          return (
-            message,
-            errorType != null ? <Object>[errorType] : <Object>[],
-          );
-        }
-        // Fallback: {"message": "..."}
-        final message = json['message'];
-        if (message is String) {
-          return (message, <Object>[]);
-        }
-        return (body, <Object>[]);
-      }
-      return (body, <Object>[]);
-    } catch (_) {
-      return (body, <Object>[]);
-    }
   }
 
   /// Makes a streaming GET request.

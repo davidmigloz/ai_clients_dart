@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import '../beta/config/container.dart';
 import '../content/content_block.dart';
+import '../messages/context_management.dart';
 import '../messages/diagnostics.dart';
 import '../messages/input_transformation.dart';
 import '../messages/message.dart';
@@ -58,6 +59,8 @@ class MessageStreamAccumulator {
   String? _stopSequence;
   Container? _container;
   Diagnostics? _diagnostics;
+  ContextManagementResult? _contextManagement;
+  bool _hasContextManagement = false;
   bool _receivedStop = false;
   ErrorEvent? _streamError;
   List<InputTransformation>? _inputTransformations;
@@ -71,7 +74,10 @@ class MessageStreamAccumulator {
         _model = message.model;
         _role = message.role;
         _usage = message.usage;
+        _container = message.container;
         _diagnostics = message.diagnostics;
+        _contextManagement = message.contextManagement;
+        _hasContextManagement = message.hasContextManagement;
         _inputTransformations = message.inputTransformations;
       case ContentBlockStartEvent(:final contentBlock):
         _blocks.add(_AccumulatedContentBlock(contentBlock));
@@ -85,12 +91,16 @@ class MessageStreamAccumulator {
         :final delta,
         :final usage,
         :final inputTransformations,
+        :final contextManagement,
+        :final hasContextManagement,
       ):
         _stopReason = delta.stopReason ?? _stopReason;
         _stopDetails = delta.stopDetails ?? _stopDetails;
         _stopSequence = delta.stopSequence ?? _stopSequence;
         _container = delta.container ?? _container;
         _inputTransformations = inputTransformations ?? _inputTransformations;
+        _contextManagement = contextManagement ?? _contextManagement;
+        _hasContextManagement = hasContextManagement || _hasContextManagement;
         _mergeUsage(usage);
       case MessageStopEvent():
         _receivedStop = true;
@@ -277,6 +287,27 @@ class MessageStreamAccumulator {
     return [for (final block in _blocks) _buildBlock(block)];
   }
 
+  /// Returns blocks safe to replay after an interrupted stream.
+  ///
+  /// Include completed blocks with valid tool input and any received text.
+  /// Incomplete non-text blocks and malformed tool arguments are omitted.
+  List<ContentBlock> replayablePartialContent(Set<int> completedIndices) {
+    final content = <ContentBlock>[];
+    for (final (index, block) in _blocks.indexed) {
+      final completed = completedIndices.contains(index);
+      if (!completed && block.initialBlock is! TextBlock) continue;
+      try {
+        final decoded = _buildBlock(block, strict: true);
+        if (completed || decoded is TextBlock && decoded.text.isNotEmpty) {
+          content.add(decoded);
+        }
+      } on FormatException {
+        // Incomplete tool inputs cannot be replayed.
+      }
+    }
+    return content;
+  }
+
   // -- Building & resetting --------------------------------------------------
 
   /// Builds an immutable [Message] from the accumulated state.
@@ -307,6 +338,8 @@ class MessageStreamAccumulator {
       usage: _usage!,
       container: _container,
       diagnostics: _diagnostics,
+      contextManagement: _contextManagement,
+      hasContextManagement: _hasContextManagement,
       inputTransformations: _inputTransformations,
     );
   }
@@ -337,6 +370,8 @@ class MessageStreamAccumulator {
     _stopSequence = null;
     _container = null;
     _diagnostics = null;
+    _contextManagement = null;
+    _hasContextManagement = false;
     _receivedStop = false;
     _streamError = null;
     _inputTransformations = null;
