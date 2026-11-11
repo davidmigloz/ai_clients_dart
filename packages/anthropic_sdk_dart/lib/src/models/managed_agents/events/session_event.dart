@@ -5,10 +5,13 @@ import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../common/budget.dart';
 import '../config/agent_tool.dart' show AgentEvaluatedPermission;
+import '../errors/session_error_details.dart';
 import '../outcomes/rubric.dart';
 import '../sessions/session.dart' show SessionAgent;
 import 'agent_tool_evaluation.dart';
 import 'telemetry.dart';
+
+part 'workflow_run_events.dart';
 
 /// Server-sent event in a managed agents session.
 ///
@@ -50,6 +53,7 @@ import 'telemetry.dart';
 /// - [UserDefineOutcomeEvent] — echo of a `user.define_outcome` input event.
 /// - [EventStartEvent] — previews an upcoming event's type and id.
 /// - [EventDeltaEvent] — previews a fragment of an event as it is generated.
+/// - [WorkflowRunEvent] — dynamic workflow lifecycle and failures.
 /// - [UnknownSessionEvent] — unrecognized event type.
 sealed class SessionEvent {
   const SessionEvent();
@@ -57,6 +61,9 @@ sealed class SessionEvent {
   /// Creates a [SessionEvent] from JSON.
   factory SessionEvent.fromJson(Map<String, dynamic> json) {
     final type = json['type'] as String?;
+    if (WorkflowRunEventKind._fromWire(type) case final kind?) {
+      return WorkflowRunEvent._fromKind(json, kind);
+    }
     return switch (type) {
       'agent.message' => AgentMessageEvent.fromJson(json),
       'agent.thinking' => AgentThinkingEvent.fromJson(json),
@@ -485,6 +492,7 @@ class AgentToolUseEvent extends SessionEvent {
           id == other.id &&
           name == other.name &&
           mapsDeepEqual(input, other.input) &&
+          evaluatedPermission == other.evaluatedPermission &&
           rawEvaluatedPermission == other.rawEvaluatedPermission &&
           evaluation == other.evaluation &&
           processedAt == other.processedAt &&
@@ -495,6 +503,7 @@ class AgentToolUseEvent extends SessionEvent {
     id,
     name,
     mapDeepHashCode(input),
+    evaluatedPermission,
     rawEvaluatedPermission,
     evaluation,
     processedAt,
@@ -732,6 +741,7 @@ class AgentMcpToolUseEvent extends SessionEvent {
           mcpServerName == other.mcpServerName &&
           name == other.name &&
           mapsDeepEqual(input, other.input) &&
+          evaluatedPermission == other.evaluatedPermission &&
           rawEvaluatedPermission == other.rawEvaluatedPermission &&
           evaluation == other.evaluation &&
           processedAt == other.processedAt &&
@@ -743,6 +753,7 @@ class AgentMcpToolUseEvent extends SessionEvent {
     mcpServerName,
     name,
     mapDeepHashCode(input),
+    evaluatedPermission,
     rawEvaluatedPermission,
     evaluation,
     processedAt,
@@ -1694,6 +1705,7 @@ class SessionStatusRunningEvent extends SessionEvent {
 /// - [SessionRetriesExhausted] — turn ended because retry budget exhausted.
 /// - [SessionBudgetReached] — turn ended because the session's budget was
 ///   reached.
+/// - [SessionRefusal] — the model declined to complete the request.
 /// - [UnknownSessionStopReason] — unrecognized stop reason.
 sealed class SessionStopReason {
   const SessionStopReason();
@@ -1706,12 +1718,70 @@ sealed class SessionStopReason {
       'requires_action' => SessionRequiresAction.fromJson(json),
       'retries_exhausted' => SessionRetriesExhausted.fromJson(json),
       'budget_reached' => SessionBudgetReached.fromJson(json),
+      'refusal' => const SessionRefusal(),
       _ => UnknownSessionStopReason(rawJson: json),
     };
   }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson();
+}
+
+/// The model declined to complete the request.
+@immutable
+final class SessionRefusal extends SessionStopReason {
+  /// The type, always 'refusal'.
+  String get type => 'refusal';
+
+  /// Creates a refusal stop reason.
+  const SessionRefusal();
+
+  @override
+  Map<String, dynamic> toJson() => {'type': type};
+
+  @override
+  bool operator ==(Object other) => other is SessionRefusal;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() => 'SessionRefusal()';
+}
+
+/// Additional context for why a Managed Agents session or thread stopped.
+@immutable
+final class SessionStopDetails {
+  final Map<String, dynamic> _raw;
+
+  /// Provider discriminator, including future detail types.
+  String get type => _raw['type'] as String;
+
+  /// Refusal category, including future categories. May be unavailable.
+  String? get category =>
+      type == 'refusal' ? _raw['category'] as String? : null;
+
+  /// Refusal explanation, when provided.
+  String? get explanation =>
+      type == 'refusal' ? _raw['explanation'] as String? : null;
+
+  /// Creates stop details from JSON.
+  SessionStopDetails.fromJson(Map<String, dynamic> json)
+    : _raw = deepUnmodifiableMap(json);
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => Map.of(_raw);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SessionStopDetails && mapsDeepEqual(_raw, other._raw);
+
+  @override
+  int get hashCode => mapDeepHashCode(_raw);
+
+  @override
+  String toString() => 'SessionStopDetails(type: $type, category: $category)';
 }
 
 /// The agent completed its turn naturally.
@@ -1883,6 +1953,10 @@ class SessionStatusIdleEvent extends SessionEvent {
   /// The reason the session transitioned to idle.
   final SessionStopReason stopReason;
 
+  /// Additional provider details, when available.
+  final SessionStopDetails? stopDetails;
+  final bool _includeNullStopDetails;
+
   /// Timestamp of status change.
   final BetaTimestamp processedAt;
 
@@ -1890,6 +1964,8 @@ class SessionStatusIdleEvent extends SessionEvent {
   const SessionStatusIdleEvent({
     required this.id,
     required this.stopReason,
+    this.stopDetails,
+    this._includeNullStopDetails = false,
     required this.processedAt,
   });
 
@@ -1900,6 +1976,13 @@ class SessionStatusIdleEvent extends SessionEvent {
       stopReason: SessionStopReason.fromJson(
         json['stop_reason'] as Map<String, dynamic>,
       ),
+      includeNullStopDetails: json.containsKey('stop_details'),
+      stopDetails: switch (json['stop_details']) {
+        final Map<String, dynamic> details => SessionStopDetails.fromJson(
+          details,
+        ),
+        _ => null,
+      },
       processedAt: DateTime.parse(json['processed_at'] as String),
     );
   }
@@ -1909,6 +1992,8 @@ class SessionStatusIdleEvent extends SessionEvent {
     'type': type,
     'id': id,
     'stop_reason': stopReason.toJson(),
+    if (stopDetails != null || _includeNullStopDetails)
+      'stop_details': stopDetails?.toJson(),
     'processed_at': processedAt.toUtc().toIso8601String(),
   };
 
@@ -1916,11 +2001,17 @@ class SessionStatusIdleEvent extends SessionEvent {
   SessionStatusIdleEvent copyWith({
     String? id,
     SessionStopReason? stopReason,
+    Object? stopDetails = unsetCopyWithValue,
     BetaTimestamp? processedAt,
   }) {
     return SessionStatusIdleEvent(
       id: id ?? this.id,
       stopReason: stopReason ?? this.stopReason,
+      includeNullStopDetails:
+          stopDetails != unsetCopyWithValue || _includeNullStopDetails,
+      stopDetails: stopDetails == unsetCopyWithValue
+          ? this.stopDetails
+          : stopDetails as SessionStopDetails?,
       processedAt: processedAt ?? this.processedAt,
     );
   }
@@ -1932,15 +2023,24 @@ class SessionStatusIdleEvent extends SessionEvent {
           runtimeType == other.runtimeType &&
           id == other.id &&
           stopReason == other.stopReason &&
+          stopDetails == other.stopDetails &&
+          (stopDetails != null ||
+              _includeNullStopDetails == other._includeNullStopDetails) &&
           processedAt == other.processedAt;
 
   @override
-  int get hashCode => Object.hash(id, stopReason, processedAt);
+  int get hashCode => Object.hash(
+    id,
+    stopReason,
+    stopDetails,
+    stopDetails == null && _includeNullStopDetails,
+    processedAt,
+  );
 
   @override
   String toString() =>
       'SessionStatusIdleEvent(id: $id, stopReason: $stopReason, '
-      'processedAt: $processedAt)';
+      'stopDetails: $stopDetails, processedAt: $processedAt)';
 }
 
 /// Session rescheduled after recovering from an error.
@@ -2074,6 +2174,9 @@ class SessionErrorEvent extends SessionEvent {
 
   /// The error details.
   final Map<String, dynamic> error;
+
+  /// Typed access to [error], including retry status and repository failures.
+  SessionErrorDetails get errorDetails => SessionErrorDetails.fromJson(error);
 
   /// Timestamp when the error occurred.
   final BetaTimestamp processedAt;
@@ -2702,6 +2805,10 @@ class SessionThreadCreatedEvent extends SessionEvent {
   /// ID of the session thread that was created.
   final String sessionThreadId;
 
+  /// The owning workflow run, when the thread was spawned by a workflow.
+  final String? workflowRunId;
+  final bool _includeNullWorkflowRunId;
+
   /// Timestamp when this event was processed.
   final BetaTimestamp processedAt;
 
@@ -2710,6 +2817,8 @@ class SessionThreadCreatedEvent extends SessionEvent {
     required this.id,
     required this.agentName,
     required this.sessionThreadId,
+    this.workflowRunId,
+    this._includeNullWorkflowRunId = false,
     required this.processedAt,
   });
 
@@ -2719,6 +2828,8 @@ class SessionThreadCreatedEvent extends SessionEvent {
       id: json['id'] as String,
       agentName: json['agent_name'] as String,
       sessionThreadId: json['session_thread_id'] as String,
+      includeNullWorkflowRunId: json.containsKey('workflow_run_id'),
+      workflowRunId: json['workflow_run_id'] as String?,
       processedAt: DateTime.parse(json['processed_at'] as String),
     );
   }
@@ -2729,6 +2840,8 @@ class SessionThreadCreatedEvent extends SessionEvent {
     'id': id,
     'agent_name': agentName,
     'session_thread_id': sessionThreadId,
+    if (workflowRunId != null || _includeNullWorkflowRunId)
+      'workflow_run_id': workflowRunId,
     'processed_at': processedAt.toUtc().toIso8601String(),
   };
 
@@ -2737,12 +2850,18 @@ class SessionThreadCreatedEvent extends SessionEvent {
     String? id,
     String? agentName,
     String? sessionThreadId,
+    Object? workflowRunId = unsetCopyWithValue,
     BetaTimestamp? processedAt,
   }) {
     return SessionThreadCreatedEvent(
       id: id ?? this.id,
       agentName: agentName ?? this.agentName,
       sessionThreadId: sessionThreadId ?? this.sessionThreadId,
+      includeNullWorkflowRunId:
+          workflowRunId != unsetCopyWithValue || _includeNullWorkflowRunId,
+      workflowRunId: workflowRunId == unsetCopyWithValue
+          ? this.workflowRunId
+          : workflowRunId as String?,
       processedAt: processedAt ?? this.processedAt,
     );
   }
@@ -2755,15 +2874,26 @@ class SessionThreadCreatedEvent extends SessionEvent {
           id == other.id &&
           agentName == other.agentName &&
           sessionThreadId == other.sessionThreadId &&
+          workflowRunId == other.workflowRunId &&
+          (workflowRunId != null ||
+              _includeNullWorkflowRunId == other._includeNullWorkflowRunId) &&
           processedAt == other.processedAt;
 
   @override
-  int get hashCode => Object.hash(id, agentName, sessionThreadId, processedAt);
+  int get hashCode => Object.hash(
+    id,
+    agentName,
+    sessionThreadId,
+    workflowRunId,
+    workflowRunId == null && _includeNullWorkflowRunId,
+    processedAt,
+  );
 
   @override
   String toString() =>
       'SessionThreadCreatedEvent(id: $id, agentName: $agentName, '
-      'sessionThreadId: $sessionThreadId, processedAt: $processedAt)';
+      'sessionThreadId: $sessionThreadId, workflowRunId: $workflowRunId, '
+      'processedAt: $processedAt)';
 }
 
 /// Thread is actively running.
@@ -2863,6 +2993,10 @@ class SessionThreadStatusIdleEvent extends SessionEvent {
   /// The reason the thread transitioned to idle.
   final SessionStopReason stopReason;
 
+  /// Additional provider details, when available.
+  final SessionStopDetails? stopDetails;
+  final bool _includeNullStopDetails;
+
   /// Timestamp when this event was processed.
   final BetaTimestamp processedAt;
 
@@ -2872,6 +3006,8 @@ class SessionThreadStatusIdleEvent extends SessionEvent {
     required this.agentName,
     required this.sessionThreadId,
     required this.stopReason,
+    this.stopDetails,
+    this._includeNullStopDetails = false,
     required this.processedAt,
   });
 
@@ -2884,6 +3020,13 @@ class SessionThreadStatusIdleEvent extends SessionEvent {
       stopReason: SessionStopReason.fromJson(
         json['stop_reason'] as Map<String, dynamic>,
       ),
+      includeNullStopDetails: json.containsKey('stop_details'),
+      stopDetails: switch (json['stop_details']) {
+        final Map<String, dynamic> details => SessionStopDetails.fromJson(
+          details,
+        ),
+        _ => null,
+      },
       processedAt: DateTime.parse(json['processed_at'] as String),
     );
   }
@@ -2895,6 +3038,8 @@ class SessionThreadStatusIdleEvent extends SessionEvent {
     'agent_name': agentName,
     'session_thread_id': sessionThreadId,
     'stop_reason': stopReason.toJson(),
+    if (stopDetails != null || _includeNullStopDetails)
+      'stop_details': stopDetails?.toJson(),
     'processed_at': processedAt.toUtc().toIso8601String(),
   };
 
@@ -2904,6 +3049,7 @@ class SessionThreadStatusIdleEvent extends SessionEvent {
     String? agentName,
     String? sessionThreadId,
     SessionStopReason? stopReason,
+    Object? stopDetails = unsetCopyWithValue,
     BetaTimestamp? processedAt,
   }) {
     return SessionThreadStatusIdleEvent(
@@ -2911,6 +3057,11 @@ class SessionThreadStatusIdleEvent extends SessionEvent {
       agentName: agentName ?? this.agentName,
       sessionThreadId: sessionThreadId ?? this.sessionThreadId,
       stopReason: stopReason ?? this.stopReason,
+      includeNullStopDetails:
+          stopDetails != unsetCopyWithValue || _includeNullStopDetails,
+      stopDetails: stopDetails == unsetCopyWithValue
+          ? this.stopDetails
+          : stopDetails as SessionStopDetails?,
       processedAt: processedAt ?? this.processedAt,
     );
   }
@@ -2924,17 +3075,27 @@ class SessionThreadStatusIdleEvent extends SessionEvent {
           agentName == other.agentName &&
           sessionThreadId == other.sessionThreadId &&
           stopReason == other.stopReason &&
+          stopDetails == other.stopDetails &&
+          (stopDetails != null ||
+              _includeNullStopDetails == other._includeNullStopDetails) &&
           processedAt == other.processedAt;
 
   @override
-  int get hashCode =>
-      Object.hash(id, agentName, sessionThreadId, stopReason, processedAt);
+  int get hashCode => Object.hash(
+    id,
+    agentName,
+    sessionThreadId,
+    stopReason,
+    stopDetails,
+    stopDetails == null && _includeNullStopDetails,
+    processedAt,
+  );
 
   @override
   String toString() =>
       'SessionThreadStatusIdleEvent(id: $id, agentName: $agentName, '
       'sessionThreadId: $sessionThreadId, stopReason: $stopReason, '
-      'processedAt: $processedAt)';
+      'stopDetails: $stopDetails, processedAt: $processedAt)';
 }
 
 /// Thread rescheduled after recovering from an error.

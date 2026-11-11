@@ -113,7 +113,8 @@ class SessionEventsResource extends ResourceBase with StreamingResource {
   /// Streams events from the session via SSE.
   ///
   /// Parameters:
-  /// - [lastEventId]: Resume streaming from after this event ID.
+  /// - [lastEventId]: Legacy query option. Current Managed Agents streams
+  ///   deliver live events. Use [list] to recover missed events.
   /// - [eventDeltas]: Event types to preview incrementally via [EventStartEvent]
   ///   and [EventDeltaEvent] before the complete event arrives. Accepts
   ///   `agent.message` and `agent.thinking`.

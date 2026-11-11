@@ -22,6 +22,10 @@ class SessionThread {
   /// Identifier of the session this thread belongs to.
   final String sessionId;
 
+  /// Identifier of the workflow run owning this thread, if any.
+  final String? workflowRunId;
+  final bool _includeNullWorkflowRunId;
+
   /// Current thread status.
   final SessionStatus status;
 
@@ -31,7 +35,7 @@ class SessionThread {
   String get rawStatus => _rawStatus ?? status.value;
 
   /// Resolved agent snapshot at thread creation time: either a saved-agent
-  /// snapshot or the platform advisor entry.
+  /// snapshot, the platform advisor entry, or an inline agent.
   final SessionRosterEntry agent;
 
   /// Identifier of the parent thread, when this thread was spawned by another.
@@ -58,6 +62,8 @@ class SessionThread {
     required this.id,
     this.type = 'session_thread',
     required this.sessionId,
+    this.workflowRunId,
+    this._includeNullWorkflowRunId = false,
     required this.status,
     this._rawStatus,
     required this.agent,
@@ -75,6 +81,8 @@ class SessionThread {
       id: json['id'] as String,
       type: json['type'] as String? ?? 'session_thread',
       sessionId: json['session_id'] as String,
+      includeNullWorkflowRunId: json.containsKey('workflow_run_id'),
+      workflowRunId: json['workflow_run_id'] as String?,
       status: SessionStatus.fromJson(json['status'] as String),
       rawStatus: json['status'] as String,
       agent: SessionRosterEntry.fromJson(json['agent'] as Map<String, dynamic>),
@@ -98,6 +106,8 @@ class SessionThread {
     'id': id,
     'type': type,
     'session_id': sessionId,
+    if (workflowRunId != null || _includeNullWorkflowRunId)
+      'workflow_run_id': workflowRunId,
     'status': rawStatus,
     'agent': agent.toJson(),
     'parent_thread_id': parentThreadId,
@@ -110,13 +120,15 @@ class SessionThread {
 
   /// Creates a copy with replaced values.
   ///
-  /// For nullable fields ([parentThreadId], [archivedAt], [usage], [stats]),
+  /// For nullable fields ([workflowRunId], [parentThreadId], [archivedAt],
+  /// [usage], [stats]),
   /// pass the sentinel value [unsetCopyWithValue] (or omit) to keep the
   /// original value, or pass `null` explicitly to set the field to null.
   SessionThread copyWith({
     String? id,
     String? type,
     String? sessionId,
+    Object? workflowRunId = unsetCopyWithValue,
     SessionStatus? status,
     SessionRosterEntry? agent,
     Object? parentThreadId = unsetCopyWithValue,
@@ -130,6 +142,11 @@ class SessionThread {
       id: id ?? this.id,
       type: type ?? this.type,
       sessionId: sessionId ?? this.sessionId,
+      includeNullWorkflowRunId:
+          workflowRunId != unsetCopyWithValue || _includeNullWorkflowRunId,
+      workflowRunId: workflowRunId == unsetCopyWithValue
+          ? this.workflowRunId
+          : workflowRunId as String?,
       status: status ?? this.status,
       rawStatus: status == null ? _rawStatus : null,
       agent: agent ?? this.agent,
@@ -158,6 +175,9 @@ class SessionThread {
           id == other.id &&
           type == other.type &&
           sessionId == other.sessionId &&
+          workflowRunId == other.workflowRunId &&
+          (workflowRunId != null ||
+              _includeNullWorkflowRunId == other._includeNullWorkflowRunId) &&
           rawStatus == other.rawStatus &&
           agent == other.agent &&
           parentThreadId == other.parentThreadId &&
@@ -172,6 +192,8 @@ class SessionThread {
     id,
     type,
     sessionId,
+    workflowRunId,
+    workflowRunId == null && _includeNullWorkflowRunId,
     rawStatus,
     agent,
     parentThreadId,
@@ -188,6 +210,7 @@ class SessionThread {
       'id: $id, '
       'type: $type, '
       'sessionId: $sessionId, '
+      'workflowRunId: $workflowRunId, '
       'status: $rawStatus, '
       'agent: $agent, '
       'parentThreadId: $parentThreadId, '

@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../../common/equality_helpers.dart';
 import '../sessions/session.dart' show SessionRosterEntry;
+import 'multiagent_settings.dart';
 
 /// Resolved multiagent orchestration configuration as returned in API
 /// responses.
@@ -21,12 +22,95 @@ sealed class Multiagent {
     final type = json['type'] as String?;
     return switch (type) {
       'coordinator' => MultiagentCoordinator.fromJson(json),
+      'multiagent_20261001' => Multiagent20261001.fromJson(json),
       _ => UnknownMultiagent(rawJson: json),
     };
   }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson();
+}
+
+/// Resolved workflow, subagent and advisor settings for the v20261001 topology.
+@immutable
+final class Multiagent20261001 extends Multiagent {
+  /// The topology type, always 'multiagent_20261001'.
+  String get type => 'multiagent_20261001';
+
+  /// Resolved workflows and predefined workflow agents.
+  final MultiagentWorkers<AgentReference> workflows;
+
+  /// Resolved subagents and predefined agents available to spawn.
+  final MultiagentWorkers<AgentReference> subagents;
+
+  /// Resolved advisor settings.
+  final MultiagentAdvisorSettings advisor;
+
+  /// Creates a resolved v20261001 configuration.
+  const Multiagent20261001({
+    required this.workflows,
+    required this.subagents,
+    required this.advisor,
+  });
+
+  /// Parses resolved v20261001 settings.
+  factory Multiagent20261001.fromJson(Map<String, dynamic> json) {
+    if (json case {
+      'type': 'multiagent_20261001',
+      'workflows': final Map<String, dynamic> workflows,
+      'subagents': final Map<String, dynamic> subagents,
+      'advisor': final Map<String, dynamic> advisor,
+    }) {
+      return Multiagent20261001(
+        workflows: MultiagentWorkers.fromJson(
+          workflows,
+          AgentReference.fromJson,
+        ),
+        subagents: MultiagentWorkers.fromJson(
+          subagents,
+          AgentReference.fromJson,
+        ),
+        advisor: MultiagentAdvisorSettings.fromJson(advisor),
+      );
+    }
+    throw const FormatException(
+      'Resolved multiagent settings require workflows, subagents and advisor',
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'workflows': workflows.toJson(),
+    'subagents': subagents.toJson(),
+    'advisor': advisor.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  Multiagent20261001 copyWith({
+    MultiagentWorkers<AgentReference>? workflows,
+    MultiagentWorkers<AgentReference>? subagents,
+    MultiagentAdvisorSettings? advisor,
+  }) => Multiagent20261001(
+    workflows: workflows ?? this.workflows,
+    subagents: subagents ?? this.subagents,
+    advisor: advisor ?? this.advisor,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Multiagent20261001 &&
+          workflows == other.workflows &&
+          subagents == other.subagents &&
+          advisor == other.advisor;
+
+  @override
+  int get hashCode => Object.hash(workflows, subagents, advisor);
+
+  @override
+  String toString() =>
+      'Multiagent20261001(workflows: $workflows, subagents: $subagents, advisor: $advisor)';
 }
 
 /// Resolved coordinator topology with a concrete agent roster.

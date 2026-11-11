@@ -102,11 +102,14 @@ class AlwaysAskPolicy extends PermissionPolicy {
 /// The server evaluates each tool call as allow, ask, or deny.
 @immutable
 final class AutoPolicy extends PermissionPolicy {
+  /// The type, always 'auto'.
+  String get type => 'auto';
+
   /// Creates an automatic permission policy.
   const AutoPolicy();
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'auto'};
+  Map<String, dynamic> toJson() => {'type': type};
 
   @override
   bool operator ==(Object other) => other is AutoPolicy;

@@ -54,7 +54,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Files (expiration, cursor pagination) and skills (multi-file uploads, container skills)
 - Managed agents with sessions, thread status filters, execution principals, tool permission evaluation, vaults, and streaming events (beta)
 - Scheduled deployments: run agent sessions on a cron schedule, with deployment runs, pause/resume, and run-now (beta)
-- Multiagent coordinator orchestration (agent and advisor roster entries), per-tool agent toolset configs (incl. web-search/web-fetch domain filters), session budgets, and outcome evaluations with grading rubrics (beta)
+- Multiagent orchestration with dynamic workflows, subagents, and an advisor, plus per-tool configs, session budgets, and outcome evaluations (beta)
 - Typed webhook event parsing and MCP-OAuth / static-bearer / environment-variable credential validation (beta)
 - Memory stores for persistent agent memories with versioning and redaction (beta)
 - Dreams: asynchronous memory-consolidation jobs over memory stores and session transcripts, with `create_new`/`update_existing` output behavior (beta, research preview)
@@ -602,6 +602,10 @@ Future<void> main() async {
 
 Use `client.agents`, `client.sessions`, and `client.vaults` for the Managed Agents beta API. Create an agent configuration, start sessions to interact with Claude, list session events and session thread events as the agent works, and store vault credentials securely.
 
+Use `Multiagent20261001Params` to configure workflow workers, subagents, and the advisor. Agent and session responses expose the resolved topology. Updating a configuration within the same version preserves omitted fields, and an explicit `null` resets a field to its default.
+
+The session event list and stream expose dynamic workflow progress as `WorkflowRunEvent`. A workflow error can arrive before the run is created, or before an existing run ends. Follow the terminal result through the workflow end event. Session and thread idle events also expose model refusals and their optional details. Retrieve the thread to inspect a `SessionInlineAgent` snapshot for an unsaved workflow worker. Use `SessionErrorEvent.errorDetails` for typed session errors and retry status. See the runnable [workflow example](example/managed_agents_workflow_example.dart).
+
 ```dart
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 
@@ -870,6 +874,7 @@ See the [example/](example/) directory for complete examples:
 | [`skills_example.dart`](example/skills_example.dart) | Skills management |
 | [`mcp_example.dart`](example/mcp_example.dart) | MCP tool integration |
 | [`managed_agents_example.dart`](example/managed_agents_example.dart) | Managed agents: agents, sessions, vaults, multiagent rosters, outcomes, webhooks, credential validation (beta) |
+| [`managed_agents_workflow_example.dart`](example/managed_agents_workflow_example.dart) | Configure dynamic workflows and follow workflow run events (Managed Agents beta) |
 | [`session_threads_example.dart`](example/session_threads_example.dart) | Session threads: list, retrieve, stream events, archive (beta) |
 | [`deployments_example.dart`](example/deployments_example.dart) | Scheduled deployments and deployment runs: cron schedule, pause/resume, run-now (beta) |
 | [`memory_stores_example.dart`](example/memory_stores_example.dart) | Managed agents memory stores, memories, and versions (beta) |
