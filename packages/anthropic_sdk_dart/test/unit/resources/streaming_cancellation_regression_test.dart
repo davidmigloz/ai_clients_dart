@@ -28,6 +28,7 @@ void main() {
       final abort = Completer<void>();
       final done = Completer<void>();
       final errors = <Object>[];
+      final sent = transport.sent.stream.first;
       fixture.Resource(transport, const AnthropicConfig())
           .getStream('/test', abortTrigger: abort.future)
           .listen(
@@ -38,7 +39,7 @@ void main() {
             },
             onDone: done.complete,
           );
-      await _tick();
+      await sent.timeout(_deadline);
       transport.responses.single.completeError(StateError('send failed'));
       await done.future.timeout(_deadline);
       await _tick();
@@ -90,8 +91,9 @@ void main() {
                 body: {},
                 abortTrigger: abort.future,
               );
+        final sent = transport.sent.stream.first;
         final result = stream.toList();
-        await _tick();
+        await sent.timeout(_deadline);
         transport.responses.single.complete(
           http.StreamedResponse(body.stream, status),
         );
@@ -424,11 +426,12 @@ void main() {
   test('abort after normal completion is ignored', () async {
     final transport = fixture.Transport();
     final abort = Completer<void>();
+    final sent = transport.sent.stream.first;
     final future = fixture.Resource(
       transport,
       const AnthropicConfig(),
     ).getStream('/test', abortTrigger: abort.future).toList();
-    await _tick();
+    await sent.timeout(_deadline);
     var nativeAborted = false;
     unawaited(
       (transport.requests.single as http.Abortable).abortTrigger!.then((_) {

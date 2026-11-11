@@ -151,6 +151,126 @@ void main() {
     expect(transport.closeCount, 0);
   });
 
+  test('closing during backoff prevents a new buffered attempt', () async {
+    const retryDelay = Duration(seconds: 12);
+    var backoffs = 0;
+    var attempts = 0;
+    final transport = _Transport(
+      respond: (_) async {
+        if (attempts++ == 0) return http.Response('Rate limited', 429);
+        return http.Response(
+          '{"input_tokens":7}',
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      },
+    );
+    final client = _client(
+      transport,
+      retryPolicy: const RetryPolicy(
+        maxRetries: 1,
+        initialDelay: retryDelay,
+        jitter: 0,
+      ),
+    );
+    addTearDown(client.close);
+    final request = TokenCountRequest(
+      model: _request.model,
+      messages: _request.messages,
+    );
+    final response = runZoned(
+      () => client.messages.countTokens(request),
+      zoneSpecification: ZoneSpecification(
+        createTimer: (self, parent, zone, delay, callback) {
+          if (delay == retryDelay) {
+            backoffs++;
+            client.close();
+            return parent.createTimer(zone, Duration.zero, callback);
+          }
+          return parent.createTimer(zone, delay, callback);
+        },
+      ),
+    );
+    await expectLater(response.timeout(_deadline), throwsStateError);
+    expect(backoffs, 1);
+    expect(transport.requests, hasLength(1));
+    expect(transport.closeCount, 0);
+
+    final sibling = _client(transport);
+    addTearDown(sibling.close);
+    expect((await sibling.messages.countTokens(request)).inputTokens, 7);
+    expect(transport.requests, hasLength(2));
+  });
+
+  final streams =
+      <String, Stream<Object?> Function(AnthropicClient, Future<void>?)>{
+        'Messages SSE': (client, abort) =>
+            client.messages.createStream(_request, abortTrigger: abort),
+        'Batch JSONL': (client, abort) => client.messages.batches.results(
+          'msgbatch_fixture',
+          abortTrigger: abort,
+        ),
+      };
+
+  for (final stream in streams.entries) {
+    test('${stream.key} rejects close during authentication', () async {
+      final auth = _GatedAuth();
+      final transport = _Transport();
+      final client = _client(transport, auth: auth);
+      addTearDown(client.close);
+      addTearDown(auth.release);
+
+      final rejected = expectLater(
+        stream.value(client, null).toList().timeout(_deadline),
+        throwsA(
+          isA<StateError>().having(
+            (error) => error.message,
+            'message',
+            'Client has been closed',
+          ),
+        ),
+      );
+      await auth.entered.future.timeout(_deadline);
+      client.close();
+      auth.release();
+      await rejected;
+      expect(transport.requests, isEmpty);
+      expect(transport.closeCount, 0);
+    });
+
+    for (final deferAbort in [false, true]) {
+      test('${stream.key} rejects a same-turn abort before dispatch '
+          '(deferAbort=$deferAbort)', () async {
+        final auth = _GatedAuth();
+        final abort = Completer<void>();
+        final transport = _Transport(
+          respond: (_) async => http.Response('', 200),
+        );
+        final client = _client(transport, auth: auth);
+        addTearDown(client.close);
+        addTearDown(auth.release);
+
+        final rejected = expectLater(
+          stream.value(client, abort.future).toList().timeout(_deadline),
+          throwsA(isA<AbortedException>()),
+        );
+        await auth.entered.future.timeout(_deadline);
+        auth.release();
+        if (deferAbort) {
+          scheduleMicrotask(abort.complete);
+        } else {
+          abort.complete();
+        }
+        await rejected;
+        expect(transport.requests, isEmpty);
+        expect(transport.closeCount, 0);
+
+        expect(await stream.value(client, null).toList(), isEmpty);
+        expect(transport.requests, hasLength(1));
+      });
+    }
+  }
+
   group('direct Files and Skills admission', () {
     late Directory directory;
     late File file;
@@ -221,15 +341,18 @@ void main() {
   });
 }
 
-AnthropicClient _client(_Transport transport, {AuthProvider? auth}) =>
-    AnthropicClient(
-      config: AnthropicConfig(
-        authProvider: auth,
-        defaultHeaders: const {'X-Request-ID': 'local-id'},
-        retryPolicy: const RetryPolicy(maxRetries: 0),
-      ),
-      httpClient: transport,
-    );
+AnthropicClient _client(
+  _Transport transport, {
+  AuthProvider? auth,
+  RetryPolicy retryPolicy = const RetryPolicy(maxRetries: 0),
+}) => AnthropicClient(
+  config: AnthropicConfig(
+    authProvider: auth,
+    defaultHeaders: const {'X-Request-ID': 'local-id'},
+    retryPolicy: retryPolicy,
+  ),
+  httpClient: transport,
+);
 
 class _GatedAuth implements AuthProvider {
   final entered = Completer<void>();
@@ -249,13 +372,16 @@ class _GatedAuth implements AuthProvider {
 }
 
 class _Transport extends http.BaseClient {
+  _Transport({this.respond});
+
+  final Future<http.Response> Function(http.Request)? respond;
   final requests = <http.BaseRequest>[];
   int closeCount = 0;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) {
     requests.add(request);
-    return MockClient(_respond).send(request);
+    return MockClient(respond ?? _respond).send(request);
   }
 
   @override

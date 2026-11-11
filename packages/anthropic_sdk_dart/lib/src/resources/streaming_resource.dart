@@ -211,7 +211,12 @@ mixin StreamingResource on ResourceBase {
         )..headers.addAll(requestHeaders);
         if (body != null) request.body = jsonEncode(body);
         await _applyAuthentication(request);
+        if (abortTrigger != null && !stopped) {
+          // Drain cancellation queued in the same event turn as authentication.
+          await Future<void>.delayed(Duration.zero);
+        }
         if (stopped) return;
+        ensureNotClosed?.call();
         correlationId = request.headers['X-Request-ID'] ?? correlationId;
         final stopwatch = Stopwatch()..start();
         final response = await httpClient.send(request);
