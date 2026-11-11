@@ -183,6 +183,7 @@ export 'src/models/managed_agents/webhooks/webhook_event.dart';
 
 // Models - Messages
 export 'src/models/messages/cache_miss_reason.dart';
+export 'src/models/messages/compaction_config.dart';
 export 'src/models/messages/diagnostics.dart';
 export 'src/models/messages/diagnostics_param.dart';
 export 'src/models/messages/fallback_config.dart';
@@ -192,6 +193,7 @@ export 'src/models/messages/input_transformation.dart';
 export 'src/models/messages/message.dart';
 export 'src/models/messages/message_create_request.dart';
 export 'src/models/messages/message_role.dart';
+export 'src/models/messages/message_thread_param.dart';
 export 'src/models/messages/thinking_config.dart';
 
 // Models - Metadata

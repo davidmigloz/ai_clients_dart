@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import '../beta/config/output_config.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import '../messages/compaction_config.dart';
 import '../messages/input_message.dart';
 import '../messages/message_create_request.dart';
 import '../messages/thinking_config.dart';
@@ -50,6 +51,11 @@ class TokenCountRequest {
   /// in the request.
   final CacheControlEphemeral? cacheControl;
 
+  /// Compaction parameters also accepted by the beta token counting API.
+  ///
+  /// The API counts the supplied conversation without running compaction.
+  final CompactionConfig? compaction;
+
   /// Creates a [TokenCountRequest].
   const TokenCountRequest({
     required this.model,
@@ -61,13 +67,14 @@ class TokenCountRequest {
     this.outputConfig,
     this.speed,
     this.cacheControl,
+    this.compaction,
   });
 
   /// Creates a [TokenCountRequest] from a [MessageCreateRequest].
   ///
   /// Copies the fields relevant to token counting: model, messages,
   /// system, thinking, toolChoice, tools, outputConfig, speed, and
-  /// cacheControl.
+  /// cacheControl, and compaction.
   factory TokenCountRequest.fromMessageCreateRequest(
     MessageCreateRequest request,
   ) {
@@ -81,6 +88,7 @@ class TokenCountRequest {
       outputConfig: request.outputConfig,
       speed: request.speed,
       cacheControl: request.cacheControl,
+      compaction: request.compaction,
     );
   }
 
@@ -114,6 +122,11 @@ class TokenCountRequest {
               json['cache_control'] as Map<String, dynamic>,
             )
           : null,
+      compaction: json['compaction'] != null
+          ? CompactionConfig.fromJson(
+              json['compaction'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -128,6 +141,7 @@ class TokenCountRequest {
     if (outputConfig != null) 'output_config': outputConfig!.toJson(),
     if (speed != null) 'speed': speed!.toJson(),
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
+    if (compaction != null) 'compaction': compaction!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -141,6 +155,7 @@ class TokenCountRequest {
     Object? outputConfig = unsetCopyWithValue,
     Object? speed = unsetCopyWithValue,
     Object? cacheControl = unsetCopyWithValue,
+    Object? compaction = unsetCopyWithValue,
   }) {
     return TokenCountRequest(
       model: model ?? this.model,
@@ -164,6 +179,9 @@ class TokenCountRequest {
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
           : cacheControl as CacheControlEphemeral?,
+      compaction: compaction == unsetCopyWithValue
+          ? this.compaction
+          : compaction as CompactionConfig?,
     );
   }
 
@@ -180,7 +198,8 @@ class TokenCountRequest {
           listsEqual(tools, other.tools) &&
           outputConfig == other.outputConfig &&
           speed == other.speed &&
-          cacheControl == other.cacheControl;
+          cacheControl == other.cacheControl &&
+          compaction == other.compaction;
 
   @override
   int get hashCode => Object.hash(
@@ -193,6 +212,7 @@ class TokenCountRequest {
     outputConfig,
     speed,
     cacheControl,
+    compaction,
   );
 
   @override
@@ -200,7 +220,7 @@ class TokenCountRequest {
       'TokenCountRequest(model: $model, messages: $messages, system: $system, '
       'thinking: $thinking, toolChoice: $toolChoice, tools: $tools, '
       'outputConfig: $outputConfig, speed: $speed, '
-      'cacheControl: $cacheControl)';
+      'cacheControl: $cacheControl, compaction: $compaction)';
 }
 
 /// Response for token counting.

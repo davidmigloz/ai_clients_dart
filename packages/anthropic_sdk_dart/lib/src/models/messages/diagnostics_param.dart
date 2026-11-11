@@ -8,8 +8,7 @@ import '../common/copy_with_sentinel.dart';
 /// diagnosis to the immediately preceding turn so the API can report which
 /// portion of the cached prefix missed.
 ///
-/// Requires the `cache-diagnosis-2026-04-07` beta header. Pass
-/// `betas: ['cache-diagnosis-2026-04-07']` to `messages.create`.
+/// Available on the Claude API without a beta header.
 ///
 /// ```dart
 /// final response = await client.messages.create(
@@ -19,7 +18,6 @@ import '../common/copy_with_sentinel.dart';
 ///     diagnostics: DiagnosticsParam(previousMessageId: 'msg_123'),
 ///     messages: [InputMessage.user('Continue the conversation.')],
 ///   ),
-///   betas: ['cache-diagnosis-2026-04-07'],
 /// );
 /// ```
 @immutable

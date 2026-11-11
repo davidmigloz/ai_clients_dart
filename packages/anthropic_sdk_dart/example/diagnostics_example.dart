@@ -1,7 +1,7 @@
 // ignore_for_file: avoid_print
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 
-/// Prompt-cache diagnostics example (Beta).
+/// Prompt-cache diagnostics example.
 ///
 /// Cache diagnostics let you find out *why* the prompt cache prefix could not
 /// be fully reused between two consecutive requests. Pass the previous
@@ -9,26 +9,20 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// a [Diagnostics.cacheMissReason] on the response explaining where the prompt
 /// diverged.
 ///
-/// Requires the `cache-diagnosis-2026-04-07` beta header — pass it via the
-/// `betas` parameter of `messages.create`.
+/// On the Claude API, enable diagnostics with the request parameter.
 Future<void> main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // First turn — opt in to diagnostics without a prior message to compare
     // against by passing `previousMessageId: null`.
     final first = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-5',
+        model: 'claude-sonnet-5-5',
         maxTokens: 1024,
         diagnostics: const DiagnosticsParam(),
         messages: [InputMessage.user('Summarize the rules of chess.')],
       ),
-      betas: ['cache-diagnosis-2026-04-07'],
     );
     print('First message id: ${first.id}');
 
@@ -36,12 +30,15 @@ Future<void> main() async {
     // `diagnostics.cacheMissReason` explains any prompt-cache divergence.
     final second = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-5',
+        model: 'claude-sonnet-5-5',
         maxTokens: 1024,
         diagnostics: DiagnosticsParam(previousMessageId: first.id),
-        messages: [InputMessage.user('Now explain en passant.')],
+        messages: [
+          InputMessage.user('Summarize the rules of chess.'),
+          first.toInputMessage(),
+          InputMessage.user('Now explain en passant.'),
+        ],
       ),
-      betas: ['cache-diagnosis-2026-04-07'],
     );
 
     final reason = second.diagnostics?.cacheMissReason;

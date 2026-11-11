@@ -45,18 +45,16 @@ class Message {
   /// Container metadata when server-side code execution was used.
   final Container? container;
 
-  /// Cache diagnostics, present only when requested via the
-  /// `cache-diagnosis-2026-04-07` beta header. `null` when no prompt-cache
-  /// divergence was detected.
+  /// Prompt-cache diagnostics when the request opted in and a comparison
+  /// reported divergence or is pending.
   final Diagnostics? diagnostics;
 
   /// Changes the API made to the request's input before showing it to the
   /// model, one entry per change, in request order.
   ///
   /// Present only with `anthropic-beta: thinking-binding-controls-2026-08-01`,
-  /// as `[]` when nothing was dropped. Each entry is a thinking or
-  /// redacted-thinking block the API removed before the model saw it
-  /// because it failed a binding check; dropped blocks are not billed.
+  /// as `[]` when no transformation was reported. Entries describe blocks
+  /// that failed a binding check and whether they reached the model.
   final List<InputTransformation>? inputTransformations;
 
   /// Creates a [Message].

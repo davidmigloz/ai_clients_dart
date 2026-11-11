@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import '../beta/config/container.dart';
 import '../content/content_block.dart';
+import '../messages/diagnostics.dart';
 import '../messages/input_transformation.dart';
 import '../messages/message.dart';
 import '../messages/message_role.dart';
@@ -21,7 +22,7 @@ class _AccumulatedContentBlock {
   final StringBuffer textBuffer = StringBuffer();
   final StringBuffer thinkingBuffer = StringBuffer();
   final StringBuffer inputJsonBuffer = StringBuffer();
-  final StringBuffer compactionBuffer = StringBuffer();
+  CompactionBlock? compaction;
 
   // Signature (overwrite semantics — not appended).
   String? signature;
@@ -56,6 +57,9 @@ class MessageStreamAccumulator {
   RefusalStopDetails? _stopDetails;
   String? _stopSequence;
   Container? _container;
+  Diagnostics? _diagnostics;
+  bool _receivedStop = false;
+  ErrorEvent? _streamError;
   List<InputTransformation>? _inputTransformations;
   final List<_AccumulatedContentBlock> _blocks = [];
 
@@ -67,11 +71,12 @@ class MessageStreamAccumulator {
         _model = message.model;
         _role = message.role;
         _usage = message.usage;
+        _diagnostics = message.diagnostics;
         _inputTransformations = message.inputTransformations;
       case ContentBlockStartEvent(:final contentBlock):
         _blocks.add(_AccumulatedContentBlock(contentBlock));
       case ContentBlockDeltaEvent(:final index, :final delta):
-        if (index < _blocks.length) {
+        if (index >= 0 && index < _blocks.length) {
           _addDelta(_blocks[index], delta);
         }
       case ContentBlockStopEvent():
@@ -88,11 +93,11 @@ class MessageStreamAccumulator {
         _inputTransformations = inputTransformations ?? _inputTransformations;
         _mergeUsage(usage);
       case MessageStopEvent():
-        break;
+        _receivedStop = true;
       case PingEvent():
         break;
       case ErrorEvent():
-        break;
+        _streamError = event;
     }
   }
 
@@ -108,8 +113,16 @@ class MessageStreamAccumulator {
         block.signature = signature;
       case CitationsDelta(:final citation):
         block.citations.add(citation);
-      case CompactionDelta(:final content):
-        if (content != null) block.compactionBuffer.write(content);
+      case CompactionDelta():
+        if (block.initialBlock case final CompactionBlock initial) {
+          final current = block.compaction ?? initial;
+          block.compaction = current.copyWith(
+            content: delta.content,
+            encryptedContent: delta.hasEncryptedContent
+                ? delta.encryptedContent
+                : current.encryptedContent,
+          );
+        }
       case UnknownContentBlockDelta():
         break; // Unknown deltas are ignored during accumulation
     }
@@ -182,8 +195,10 @@ class MessageStreamAccumulator {
   String get text {
     final buffer = StringBuffer();
     for (final block in _blocks) {
-      if (block.initialBlock is TextBlock) {
-        buffer.write(block.textBuffer);
+      if (block.initialBlock case final TextBlock initial) {
+        buffer
+          ..write(initial.text)
+          ..write(block.textBuffer);
       }
     }
     return buffer.toString();
@@ -193,8 +208,10 @@ class MessageStreamAccumulator {
   String get thinking {
     final buffer = StringBuffer();
     for (final block in _blocks) {
-      if (block.initialBlock is ThinkingBlock) {
-        buffer.write(block.thinkingBuffer);
+      if (block.initialBlock case final ThinkingBlock initial) {
+        buffer
+          ..write(initial.thinking)
+          ..write(block.thinkingBuffer);
       }
     }
     return buffer.toString();
@@ -203,7 +220,11 @@ class MessageStreamAccumulator {
   /// Returns `true` if any thinking block has non-empty content.
   bool get hasThinking {
     return _blocks.any(
-      (b) => b.initialBlock is ThinkingBlock && b.thinkingBuffer.isNotEmpty,
+      (b) => switch (b.initialBlock) {
+        ThinkingBlock(:final thinking) =>
+          thinking.isNotEmpty || b.thinkingBuffer.isNotEmpty,
+        _ => false,
+      },
     );
   }
 
@@ -248,6 +269,9 @@ class MessageStreamAccumulator {
   /// Returns `true` if the stop reason is [StopReason.refusal].
   bool get isRefusal => _stopReason == StopReason.refusal;
 
+  /// Whether the server completed the message without an error event.
+  bool get isComplete => _receivedStop && _streamError == null;
+
   /// Returns all accumulated content blocks.
   List<ContentBlock> get contentBlocks {
     return [for (final block in _blocks) _buildBlock(block)];
@@ -259,7 +283,9 @@ class MessageStreamAccumulator {
   ///
   /// Throws [StateError] if no `message_start` event has been received
   /// (i.e. [id] or [model] is `null`), or if [usage] is `null`.
-  Message toMessage() {
+  Message toMessage() => _buildMessage(strict: false);
+
+  Message _buildMessage({required bool strict}) {
     if (_id == null || _model == null) {
       throw StateError(
         'Cannot build Message: no message_start event received.',
@@ -272,14 +298,32 @@ class MessageStreamAccumulator {
       id: _id!,
       model: _model!,
       role: _role ?? MessageRole.assistant,
-      content: contentBlocks,
+      content: [
+        for (final block in _blocks) _buildBlock(block, strict: strict),
+      ],
       stopReason: _stopReason,
       stopDetails: _stopDetails,
       stopSequence: _stopSequence,
       usage: _usage!,
       container: _container,
+      diagnostics: _diagnostics,
       inputTransformations: _inputTransformations,
     );
+  }
+
+  /// Builds a complete message for use as conversation history.
+  ///
+  /// Throws [StateError] if the stream ended before `message_stop` or sent
+  /// an [ErrorEvent], or [FormatException] when tool input is malformed.
+  /// Use [toMessage] to inspect a partial snapshot.
+  Message toFinalMessage() {
+    if (_streamError case final error?) {
+      throw StateError('Message stream failed: ${error.errorType}');
+    }
+    if (!_receivedStop) {
+      throw StateError('Message stream ended before message_stop');
+    }
+    return _buildMessage(strict: true);
   }
 
   /// Resets all accumulated state.
@@ -292,45 +336,57 @@ class MessageStreamAccumulator {
     _stopDetails = null;
     _stopSequence = null;
     _container = null;
+    _diagnostics = null;
+    _receivedStop = false;
+    _streamError = null;
     _inputTransformations = null;
     _blocks.clear();
   }
 
   // -- Internals -------------------------------------------------------------
 
-  ContentBlock _buildBlock(_AccumulatedContentBlock acc) {
+  ContentBlock _buildBlock(
+    _AccumulatedContentBlock acc, {
+    bool strict = false,
+  }) {
     final initial = acc.initialBlock;
     return switch (initial) {
-      TextBlock() => TextBlock(
-        text: acc.textBuffer.toString(),
-        citations: acc.citations.isEmpty ? null : List.of(acc.citations),
+      TextBlock() => initial.copyWith(
+        text: '${initial.text}${acc.textBuffer}',
+        citations: acc.citations.isEmpty
+            ? initial.citations
+            : [...?initial.citations, ...acc.citations],
       ),
-      ThinkingBlock() => ThinkingBlock(
-        thinking: acc.thinkingBuffer.toString(),
-        signature: acc.signature ?? '',
+      ThinkingBlock() => initial.copyWith(
+        thinking: '${initial.thinking}${acc.thinkingBuffer}',
+        signature: acc.signature ?? initial.signature,
       ),
-      ToolUseBlock() => ToolUseBlock(
-        id: initial.id,
-        name: initial.name,
-        input: _parseJson(acc.inputJsonBuffer),
-        caller: initial.caller,
-        toolsetName: initial.toolsetName,
+      ToolUseBlock() => initial.copyWith(
+        input: _toolInput(acc.inputJsonBuffer, initial.input, strict: strict),
       ),
-      CompactionBlock() => CompactionBlock(
-        content: acc.compactionBuffer.isEmpty
-            ? initial.content
-            : acc.compactionBuffer.toString(),
+      ServerToolUseBlock() => initial.copyWith(
+        input: _toolInput(acc.inputJsonBuffer, initial.input, strict: strict),
       ),
+      MCPToolUseBlock() => initial.copyWith(
+        input: _toolInput(acc.inputJsonBuffer, initial.input, strict: strict),
+      ),
+      CompactionBlock() => acc.compaction ?? initial,
       _ => initial,
     };
   }
 
-  static Map<String, dynamic> _parseJson(StringBuffer buffer) {
-    final str = buffer.toString();
-    if (str.isEmpty) return const {};
+  static Map<String, dynamic> _toolInput(
+    StringBuffer buffer,
+    Map<String, dynamic> initial, {
+    required bool strict,
+  }) {
+    if (buffer.isEmpty) return initial;
     try {
-      return jsonDecode(str) as Map<String, dynamic>;
+      final json = jsonDecode(buffer.toString());
+      if (json is Map<String, dynamic>) return json;
+      throw const FormatException('Expected a JSON object for tool input');
     } on FormatException {
+      if (strict) throw const FormatException('Malformed tool input in stream');
       return const {};
     }
   }

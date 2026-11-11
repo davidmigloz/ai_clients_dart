@@ -6,7 +6,7 @@ import 'cache_miss_reason.dart';
 /// Response-level cache diagnostics (Beta).
 ///
 /// Returned on a [Message] when prompt-cache diagnostics were requested via
-/// [DiagnosticsParam] and the `cache-diagnosis-2026-04-07` beta header.
+/// [DiagnosticsParam] on the Claude API.
 @immutable
 class Diagnostics {
   /// Why the prompt-cache lookup missed.
