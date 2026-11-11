@@ -112,7 +112,7 @@ void main() {
           ),
         );
 
-      const betas = ['feature-a', 'feature-b'];
+      const betas = ['feature-a', 'message-batches-2024-09-24'];
       final created = await client.messages.batches.create(
         MessageBatchCreateRequest(
           requests: [BatchRequestItem(customId: 'fixture', params: message)],
@@ -169,7 +169,7 @@ void main() {
           method,
           expectedPath,
           _override,
-          beta: 'feature-a,feature-b',
+          beta: 'feature-a,message-batches-2024-09-24',
         );
       }
       expect(
@@ -177,8 +177,39 @@ void main() {
         'uprofile_fixture',
       );
       expect(transport.requests[1].url.queryParameters['limit'], '1');
+      expect(transport.requests.last.headers['accept'], 'application/x-jsonl');
+      expect(transport.requests.last.headers['content-type'], isNull);
     },
   );
+
+  test('JSONL keeps an explicit media header override', () async {
+    final custom = AnthropicClient(
+      config: const AnthropicConfig(
+        defaultHeaders: {
+          'Accept': 'application/binary',
+          'Content-Type': 'application/octet-stream',
+        },
+      ),
+      httpClient: transport,
+    );
+    addTearDown(custom.close);
+    transport.queueResponse(
+      const MockResponse(
+        body: '{"custom_id":"fixture","result":{"type":"expired"}}',
+      ),
+    );
+
+    final result = await custom.messages.batches
+        .results('batch_test123')
+        .single;
+
+    expect(result.customId, 'fixture');
+    expect(transport.lastRequest!.headers['accept'], 'application/binary');
+    expect(
+      transport.lastRequest!.headers['content-type'],
+      'application/octet-stream',
+    );
+  });
 
   test(
     'multipart, binary and gated operations share workspace routing',

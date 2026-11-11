@@ -214,6 +214,21 @@ mixin StreamingResource on ResourceBase {
         final requestHeaders = requestBuilder.buildHeaders(
           additionalHeaders: headers,
         );
+        if (decode != null) {
+          // JSONL responses are streamed bytes. Leave explicit header
+          // overrides in place and omit the synthesized JSON Content-Type.
+          if (!requestHeaders.keys.any(
+            (key) => key.toLowerCase() == 'accept',
+          )) {
+            requestHeaders['accept'] = 'application/x-jsonl';
+          }
+          if (![config.defaultHeaders, ?headers].any(
+            (source) =>
+                source.keys.any((key) => key.toLowerCase() == 'content-type'),
+          )) {
+            requestHeaders.remove('content-type');
+          }
+        }
         validateHeaders?.call(requestHeaders);
         final request = http.AbortableRequest(
           method,

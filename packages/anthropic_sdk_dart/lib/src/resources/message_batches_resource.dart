@@ -15,7 +15,8 @@ import 'streaming_resource.dart';
 /// The Message Batches API allows you to process large volumes of
 /// Messages requests asynchronously. Set `workspaceId` to override the
 /// client's workspace for a call. Set `betas` to opt into beta behavior
-/// for the same HTTP endpoint.
+/// for the same HTTP endpoint. Include `message-batches-2024-09-24` to
+/// request the beta Batches contract used by the official SDKs.
 class MessageBatchesResource extends ResourceBase with StreamingResource {
   /// Creates a [MessageBatchesResource].
   MessageBatchesResource({

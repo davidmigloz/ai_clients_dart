@@ -271,6 +271,18 @@ void main() {
         expect(cleared.deprecatedAt, isNull);
         expect(cleared.retiresAt, isNull);
         expect(cleared, isNot(model));
+        final currentJson = cleared.toJson();
+        for (final key in [
+          'line',
+          'deprecated_at',
+          'retires_at',
+          'capabilities',
+          'max_input_tokens',
+          'max_tokens',
+        ]) {
+          expect(currentJson, containsPair(key, null));
+        }
+        expect(ModelInfo.fromJson(currentJson), cleared);
         final clearedJson = cleared.copyWith(lifecycle: null).toJson();
         for (final key in [
           'line',

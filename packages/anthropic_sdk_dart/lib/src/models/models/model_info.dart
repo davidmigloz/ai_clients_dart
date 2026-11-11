@@ -135,14 +135,19 @@ class ModelInfo {
     'display_name': displayName,
     'created_at': createdAt.toUtc().toIso8601String(),
     'type': type,
-    if (line != null) 'line': line,
+    // Current model responses require these nullable fields. Older responses
+    // can omit the lifecycle metadata and keep their original shape.
+    if (lifecycle != null || line != null) 'line': line,
     if (lifecycle != null) 'lifecycle': lifecycle!.toJson(),
-    if (deprecatedAt != null)
-      'deprecated_at': deprecatedAt!.toUtc().toIso8601String(),
-    if (retiresAt != null) 'retires_at': retiresAt!.toUtc().toIso8601String(),
-    if (capabilities != null) 'capabilities': capabilities!.toJson(),
-    if (maxInputTokens != null) 'max_input_tokens': maxInputTokens,
-    if (maxTokens != null) 'max_tokens': maxTokens,
+    if (lifecycle != null || deprecatedAt != null)
+      'deprecated_at': deprecatedAt?.toUtc().toIso8601String(),
+    if (lifecycle != null || retiresAt != null)
+      'retires_at': retiresAt?.toUtc().toIso8601String(),
+    if (lifecycle != null || capabilities != null)
+      'capabilities': capabilities?.toJson(),
+    if (lifecycle != null || maxInputTokens != null)
+      'max_input_tokens': maxInputTokens,
+    if (lifecycle != null || maxTokens != null) 'max_tokens': maxTokens,
     if (allowedFallbackModels != null)
       'allowed_fallback_models': allowedFallbackModels,
   };

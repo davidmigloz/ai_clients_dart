@@ -136,7 +136,10 @@ See the [API version migration](MIGRATION.md#claude-api-version-2026-10-21).
 
 Set `AnthropicConfig.workspaceId` to select a workspace with a key that can
 access multiple workspaces. Messages, Batches and Models also accept a
-per-call `workspaceId`. Single-workspace keys can normally omit it.
+per-call `workspaceId`. Single-workspace keys can normally omit it. Claude
+Platform on AWS requires workspace selection on workspace-scoped endpoints.
+Workload Identity Federation tokens select their workspace at token exchange.
+Use a new token exchange to change it.
 [Workspace selection](https://platform.claude.com/docs/en/manage-claude/authentication#select-a-workspace)
 
 Use explicit configuration on web builds where runtime environment variables are not available.
