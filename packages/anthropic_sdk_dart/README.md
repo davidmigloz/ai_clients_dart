@@ -43,7 +43,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 
 - Custom tool calling with strict schemas and tool choice controls
 - Mid-conversation tool changes: add or remove tools between turns with `tool_addition`/`tool_removal` blocks while preserving the prompt cache (beta)
-- Computer-use and browser-use toolsets (`computer_toolset_20260801` / `browser_toolset_20260801` with per-member configs and `browser_state` results), web search, code execution, advisor, and MCP tool integration
+- Computer-use and browser-use toolsets (`computer_toolset_20260801` / `browser_toolset_20260801` with per-member configs and `browser_state` results), web search, code execution, advisor, and the beta Messages MCP connector with tool listing and pinning
 - Vision and document inputs with citations, an oversized-image policy via `transformations`, plus your own cited `search_result` blocks (RAG)
 
 ### Operational APIs
@@ -281,6 +281,42 @@ final response = await client.messages.create(
 ```
 
 → [Full example](example/tool_calling_example.dart)
+
+</details>
+
+### How do I connect a remote MCP server?
+
+<details>
+<summary><b>Declare an MCP server and toolset in a Messages request</b></summary>
+
+Set `mcpServers` on the request and add a matching toolset under `tools`.
+Pass the connector beta header with the request.
+
+```dart
+final request = MessageCreateRequest(
+  model: 'claude-sonnet-5-5',
+  maxTokens: 512,
+  messages: [InputMessage.user('Which tools can you use?')],
+  mcpServers: const [
+    McpConnectorServer(name: 'remote-tools', url: 'https://mcp.example.com/mcp'),
+  ],
+  tools: [
+    ToolDefinition.builtIn(BuiltInTool.mcpConnector(serverName: 'remote-tools')),
+  ],
+);
+final response = await client.messages.create(
+  request,
+  betas: const ['mcp-client-2026-09-15'],
+);
+```
+
+Use `mcp-client-2026-09-15` on the Claude API to record and pin tool lists.
+Replay any `McpToolListingBlock` in the assistant turn and keep the beta header
+on the follow-up. The earlier `mcp-client-2025-11-20` beta provides the
+connector on supported platforms without listing or pinning. Check the provider
+availability and data-handling limits before selecting a beta.
+
+[Runnable MCP example](example/mcp_example.dart) · [Claude MCP connector guide](https://platform.claude.com/docs/en/agents-and-tools/mcp-connector)
 
 </details>
 
@@ -913,7 +949,7 @@ See the [example/](example/) directory for complete examples:
 | [`message_batches_example.dart`](example/message_batches_example.dart) | Batch processing |
 | [`files_example.dart`](example/files_example.dart) | File management |
 | [`skills_example.dart`](example/skills_example.dart) | Skills management |
-| [`mcp_example.dart`](example/mcp_example.dart) | MCP tool integration |
+| [`mcp_example.dart`](example/mcp_example.dart) | Connect an MCP server and pin its tool listing (beta) |
 | [`managed_agents_example.dart`](example/managed_agents_example.dart) | Managed agents: agents, sessions, vaults, multiagent rosters, outcomes, webhooks, credential validation (beta) |
 | [`managed_agents_workflow_example.dart`](example/managed_agents_workflow_example.dart) | Configure dynamic workflows and follow workflow run events (Managed Agents beta) |
 | [`session_threads_example.dart`](example/session_threads_example.dart) | Session threads: list, retrieve, stream events, archive (beta) |

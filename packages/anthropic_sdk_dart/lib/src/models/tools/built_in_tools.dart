@@ -15,6 +15,7 @@ export '../content/citations_config.dart';
 // Include beta tools as part of this library to allow them to extend BuiltInTool
 part '../beta/tools/advisor_tool.dart';
 part '../beta/tools/computer_use_tool.dart';
+part '../beta/tools/mcp_connector.dart';
 part '../beta/tools/mcp_toolset.dart';
 
 // ============================================================================
@@ -228,6 +229,15 @@ sealed class BuiltInTool {
     CacheControlEphemeral? cacheControl,
   }) = McpToolset;
 
+  /// Creates an MCP toolset for a server in the Messages request.
+  factory BuiltInTool.mcpConnector({
+    required String serverName,
+    McpConnectorToolSettings? defaultConfig,
+    Map<String, McpConnectorToolSettings>? configs,
+    List<McpListedTool>? tools,
+    CacheControlEphemeral? cacheControl,
+  }) = McpConnectorToolset;
+
   /// Creates a computer toolset.
   ///
   /// A single `tools[]` entry (carrying no `name`) that declares the
@@ -303,6 +313,8 @@ sealed class BuiltInTool {
       final String t when t.startsWith('computer_') => ComputerUseTool.fromJson(
         json,
       ),
+      'mcp_toolset' when !json.containsKey('server_definition') =>
+        McpConnectorToolset.fromJson(json),
       final String t when t.startsWith('mcp_') => McpToolset.fromJson(json),
       _ => throw FormatException('Unknown BuiltInTool type: $type'),
     };

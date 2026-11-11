@@ -6,6 +6,7 @@ import '../messages/fallback_config.dart';
 import '../metadata/cache_control.dart';
 import '../sources/document_source.dart';
 import '../sources/image_source.dart';
+import '../tools/built_in_tools.dart' show McpListedTool;
 import '../tools/tool_caller.dart';
 import '../tools/tool_change_reference.dart';
 import 'browser_state.dart';
@@ -231,6 +232,7 @@ sealed class InputContentBlock {
       'tool_addition' => ToolAdditionInputBlock.fromJson(json),
       'tool_removal' => ToolRemovalInputBlock.fromJson(json),
       'mcp_tool_use' => MCPToolUseInputBlock.fromJson(json),
+      'mcp_tool_listing' => McpToolListingInputBlock.fromJson(json),
       'mcp_tool_result' => MCPToolResultInputBlock.fromJson(json),
       'advisor_tool_result' => AdvisorToolResultInputBlock.fromJson(json),
       'fallback' => FallbackInputBlock.fromJson(json),
@@ -2662,7 +2664,14 @@ class MCPToolResultInputBlock extends InputContentBlock {
   Map<String, dynamic> toJson() => {
     'type': 'mcp_tool_result',
     'tool_use_id': toolUseId,
-    if (content != null) 'content': content!.toJson(),
+    if (content case final value?)
+      'content': switch (value) {
+        MCPToolResultBlocksContent(:final blocks) => [
+          for (final block in blocks)
+            TextInputBlock.fromJson(block.toJson()).toJson(),
+        ],
+        MCPToolResultStringContent() => value.toJson(),
+      },
     if (isError != null) 'is_error': isError,
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
   };
@@ -2704,6 +2713,70 @@ class MCPToolResultInputBlock extends InputContentBlock {
       'MCPToolResultInputBlock(toolUseId: $toolUseId, '
       'content: $content, isError: $isError, '
       'cacheControl: $cacheControl)';
+}
+
+/// The MCP tool list captured for a named server in a conversation.
+@immutable
+final class McpToolListingInputBlock extends InputContentBlock {
+  /// Creates a tool listing block.
+  McpToolListingInputBlock({
+    required this.serverName,
+    required List<McpListedTool> tools,
+  }) : tools = List.unmodifiable(tools);
+
+  /// Parses the current `mcp_tool_listing` payload.
+  factory McpToolListingInputBlock.fromJson(Map<String, dynamic> json) {
+    if (json case {
+      'type': 'mcp_tool_listing',
+      'mcp_server_name': final String serverName,
+      'tools': final List<Object?> tools,
+    }) {
+      return McpToolListingInputBlock(
+        serverName: serverName,
+        tools: tools
+            .map(
+              (tool) => McpListedTool.fromJson(tool! as Map<String, dynamic>),
+            )
+            .toList(),
+      );
+    }
+    throw const FormatException('Invalid MCP tool listing block');
+  }
+
+  /// Name of the MCP server in the Messages request.
+  final String serverName;
+
+  /// Tools Claude saw, in the order reported by the server.
+  final List<McpListedTool> tools;
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'mcp_tool_listing',
+    'mcp_server_name': serverName,
+    'tools': tools.map((tool) => tool.toJson()).toList(),
+  };
+
+  /// Copies the block with selected properties replaced.
+  McpToolListingInputBlock copyWith({
+    String? serverName,
+    List<McpListedTool>? tools,
+  }) => McpToolListingInputBlock(
+    serverName: serverName ?? this.serverName,
+    tools: tools ?? this.tools,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      other is McpToolListingInputBlock &&
+      serverName == other.serverName &&
+      listsEqual(tools, other.tools);
+
+  @override
+  int get hashCode => Object.hash(serverName, listHash(tools));
+
+  @override
+  String toString() =>
+      'McpToolListingInputBlock(serverName: $serverName, tools: ${tools.length})';
 }
 
 /// Forward-compatible fallback for unknown input content block types.

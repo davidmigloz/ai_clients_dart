@@ -246,6 +246,42 @@ if (scope?.type == 'workspace') {
 
 ---
 
+## Use the current Messages MCP connector
+
+Declare each server in `MessageCreateRequest.mcpServers`, and reference its
+name from a `McpConnectorToolset` in `tools`. Move enablement and allowlists
+into the toolset's default and per-tool configs.
+
+```dart
+// Before
+final oldRequest = request.copyWith(
+  tools: [
+    ToolDefinition.builtIn(BuiltInTool.mcp(
+      serverDefinition: McpServerUrlDefinition(url: serverUrl),
+    )),
+  ],
+);
+
+// After
+final currentRequest = request.copyWith(
+  mcpServers: [McpConnectorServer(name: 'remote-tools', url: serverUrl)],
+  tools: [
+    ToolDefinition.builtIn(BuiltInTool.mcpConnector(serverName: 'remote-tools')),
+  ],
+);
+final reply = await client.messages.create(
+  currentRequest,
+  betas: const ['mcp-client-2026-09-15'],
+);
+```
+
+Handle `McpConnectorToolset` in exhaustive `BuiltInTool` switches and
+`McpToolListingBlock` and `McpToolListingInputBlock` in exhaustive content
+switches. `Message.toInputMessage()` converts the listing for replay.
+[Runnable MCP example](example/mcp_example.dart)
+
+---
+
 ## Migrating from v9.x to v10.0.0
 
 v10.0.0 adds document sources that reference uploaded files. `DocumentSource` is sealed, so exhaustive switches must handle the new `FileDocumentSource` variant.

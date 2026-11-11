@@ -10,6 +10,7 @@ import '../messages/message_create_request.dart';
 import '../messages/thinking_config.dart';
 import '../metadata/cache_control.dart';
 import '../metadata/speed.dart';
+import '../tools/built_in_tools.dart' show McpConnectorServer;
 import '../tools/tool_choice.dart';
 import '../tools/tool_definition.dart';
 
@@ -62,6 +63,12 @@ class TokenCountRequest {
   /// Use this field separately from [compaction].
   final ContextManagementConfig? contextManagement;
 
+  /// Remote MCP servers the Messages API can connect to.
+  ///
+  /// Supply the connector beta header and reference servers in [tools] when
+  /// using the current connector contract.
+  final List<McpConnectorServer>? mcpServers;
+
   /// Creates a [TokenCountRequest].
   const TokenCountRequest({
     required this.model,
@@ -75,13 +82,14 @@ class TokenCountRequest {
     this.cacheControl,
     this.compaction,
     this.contextManagement,
+    this.mcpServers,
   });
 
   /// Creates a [TokenCountRequest] from a [MessageCreateRequest].
   ///
   /// Copies the fields relevant to token counting: model, messages,
   /// system, thinking, toolChoice, tools, outputConfig, speed, and
-  /// cacheControl, compaction, and contextManagement.
+  /// cacheControl, compaction, contextManagement, and mcpServers.
   factory TokenCountRequest.fromMessageCreateRequest(
     MessageCreateRequest request,
   ) {
@@ -97,6 +105,7 @@ class TokenCountRequest {
       cacheControl: request.cacheControl,
       compaction: request.compaction,
       contextManagement: request.contextManagement,
+      mcpServers: request.mcpServers,
     );
   }
 
@@ -130,6 +139,12 @@ class TokenCountRequest {
               json['cache_control'] as Map<String, dynamic>,
             )
           : null,
+      mcpServers: (json['mcp_servers'] as List<Object?>?)
+          ?.map(
+            (value) =>
+                McpConnectorServer.fromJson(value! as Map<String, dynamic>),
+          )
+          .toList(),
       contextManagement: json['context_management'] != null
           ? ContextManagementConfig.fromJson(
               json['context_management'] as Map<String, dynamic>,
@@ -156,6 +171,7 @@ class TokenCountRequest {
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
     if (compaction != null) 'compaction': compaction!.toJson(),
     'context_management': ?contextManagement?.toJson(),
+    'mcp_servers': ?mcpServers?.map((server) => server.toJson()).toList(),
   };
 
   /// Creates a copy with replaced values.
@@ -171,6 +187,7 @@ class TokenCountRequest {
     Object? cacheControl = unsetCopyWithValue,
     Object? compaction = unsetCopyWithValue,
     Object? contextManagement = unsetCopyWithValue,
+    Object? mcpServers = unsetCopyWithValue,
   }) {
     return TokenCountRequest(
       model: model ?? this.model,
@@ -186,7 +203,7 @@ class TokenCountRequest {
           : toolChoice as ToolChoice?,
       tools: tools == unsetCopyWithValue
           ? this.tools
-          : tools as List<ToolDefinition>?,
+          : (tools as List<Object?>?)?.cast<ToolDefinition>().toList(),
       outputConfig: outputConfig == unsetCopyWithValue
           ? this.outputConfig
           : outputConfig as OutputConfig?,
@@ -197,6 +214,9 @@ class TokenCountRequest {
       compaction: compaction == unsetCopyWithValue
           ? this.compaction
           : compaction as CompactionConfig?,
+      mcpServers: mcpServers == unsetCopyWithValue
+          ? this.mcpServers
+          : (mcpServers as List<Object?>?)?.cast<McpConnectorServer>().toList(),
       contextManagement: contextManagement == unsetCopyWithValue
           ? this.contextManagement
           : contextManagement as ContextManagementConfig?,
@@ -218,6 +238,7 @@ class TokenCountRequest {
           speed == other.speed &&
           cacheControl == other.cacheControl &&
           compaction == other.compaction &&
+          listsEqual(mcpServers, other.mcpServers) &&
           contextManagement == other.contextManagement;
 
   @override
@@ -233,6 +254,7 @@ class TokenCountRequest {
     cacheControl,
     compaction,
     contextManagement,
+    listHash(mcpServers),
   );
 
   @override
@@ -241,7 +263,7 @@ class TokenCountRequest {
       'thinking: $thinking, toolChoice: $toolChoice, tools: $tools, '
       'outputConfig: $outputConfig, speed: $speed, '
       'cacheControl: $cacheControl, compaction: $compaction, '
-      'contextManagement: $contextManagement)';
+      'mcpServers: $mcpServers, contextManagement: $contextManagement)';
 }
 
 /// Response for token counting.
