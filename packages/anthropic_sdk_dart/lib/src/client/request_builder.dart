@@ -59,18 +59,32 @@ class RequestBuilder {
   /// Automatically adds:
   /// - `anthropic-version` header with configured API version
   /// - `content-type: application/json`
-  Map<String, String> buildHeaders({Map<String, String>? additionalHeaders}) {
+  /// - `anthropic-workspace-id` when configured and [includeWorkspace] is true
+  Map<String, String> buildHeaders({
+    Map<String, String>? additionalHeaders,
+    bool includeWorkspace = true,
+  }) {
     return {
       'anthropic-version': config.apiVersion,
       'content-type': 'application/json',
+      if (config.workspaceId case final String workspaceId
+          when includeWorkspace)
+        'anthropic-workspace-id': workspaceId,
       for (final entry in config.defaultHeaders.entries)
-        _versionHeaderKey(entry.key): entry.value,
+        _routingHeaderKey(entry.key): entry.value,
       if (additionalHeaders != null)
         for (final entry in additionalHeaders.entries)
-          _versionHeaderKey(entry.key): entry.value,
+          _routingHeaderKey(entry.key): entry.value,
     };
   }
 
-  static String _versionHeaderKey(String key) =>
-      key.toLowerCase() == 'anthropic-version' ? 'anthropic-version' : key;
+  static String _routingHeaderKey(String key) {
+    final lower = key.toLowerCase();
+    return switch (lower) {
+      'anthropic-version' ||
+      'anthropic-workspace-id' ||
+      'anthropic-beta' => lower,
+      _ => key,
+    };
+  }
 }

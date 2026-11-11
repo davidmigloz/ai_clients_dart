@@ -4,6 +4,16 @@ import 'package:test/test.dart';
 
 void main() {
   group('AnthropicConfig', () {
+    test('copyWith preserves and can clear the workspace selector', () {
+      const original = AnthropicConfig(workspaceId: 'wrkspc_original');
+      expect(original.copyWith().workspaceId, 'wrkspc_original');
+      expect(
+        original.copyWith(workspaceId: 'wrkspc_other').workspaceId,
+        'wrkspc_other',
+      );
+      expect(original.copyWith(workspaceId: null).workspaceId, isNull);
+    });
+
     test('has sensible defaults', () {
       const config = AnthropicConfig();
 

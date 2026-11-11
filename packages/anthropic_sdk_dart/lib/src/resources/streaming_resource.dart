@@ -60,6 +60,7 @@ mixin StreamingResource on ResourceBase {
   Stream<Map<String, dynamic>> getJsonlStream(
     String path, {
     Future<void>? abortTrigger,
+    Map<String, String>? headers,
     AnthropicException Function(int statusCode, String body)? errorFactory,
     AnthropicException Function(
       int statusCode,
@@ -71,6 +72,7 @@ mixin StreamingResource on ResourceBase {
     'GET',
     path,
     abortTrigger: abortTrigger,
+    headers: headers,
     errorFactory: errorFactory,
     errorFactoryWithMetadata: errorFactoryWithMetadata,
     decode: (bytes) => bytes
@@ -212,6 +214,21 @@ mixin StreamingResource on ResourceBase {
         final requestHeaders = requestBuilder.buildHeaders(
           additionalHeaders: headers,
         );
+        if (decode != null) {
+          // JSONL responses are streamed bytes. Leave explicit header
+          // overrides in place and omit the synthesized JSON Content-Type.
+          if (!requestHeaders.keys.any(
+            (key) => key.toLowerCase() == 'accept',
+          )) {
+            requestHeaders['accept'] = 'application/x-jsonl';
+          }
+          if (![config.defaultHeaders, ?headers].any(
+            (source) =>
+                source.keys.any((key) => key.toLowerCase() == 'content-type'),
+          )) {
+            requestHeaders.remove('content-type');
+          }
+        }
         validateHeaders?.call(requestHeaders);
         final request = http.AbortableRequest(
           method,

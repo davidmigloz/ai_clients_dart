@@ -44,7 +44,8 @@ class MessagesResource extends ResourceBase with StreamingResource {
   /// and the model will generate the next message in the conversation.
   ///
   /// [userProfileId] attributes this request to an end-user profile; it is sent
-  /// as the `anthropic-user-profile-id` header.
+  /// as the `anthropic-user-profile-id` header. [workspaceId] overrides the
+  /// configured workspace for this call.
   ///
   /// The optional [abortTrigger] allows canceling the request.
   Future<Message> create(
@@ -52,6 +53,7 @@ class MessagesResource extends ResourceBase with StreamingResource {
     Future<void>? abortTrigger,
     List<String> betas = const [],
     String? userProfileId,
+    String? workspaceId,
   }) async {
     ensureNotClosed?.call();
     final body = request.toJson()..remove('stream'); // Ensure non-streaming
@@ -60,6 +62,7 @@ class MessagesResource extends ResourceBase with StreamingResource {
       additionalHeaders: _requestHeaders(
         betas: betas,
         userProfileId: userProfileId,
+        workspaceId: workspaceId,
       ),
     );
     validateMessageRequestVersion(headers['anthropic-version'], body);
@@ -80,7 +83,8 @@ class MessagesResource extends ResourceBase with StreamingResource {
   /// Returns a stream of [MessageStreamEvent]s as the response is generated.
   ///
   /// [userProfileId] attributes this request to an end-user profile; it is sent
-  /// as the `anthropic-user-profile-id` header.
+  /// as the `anthropic-user-profile-id` header. [workspaceId] overrides the
+  /// configured workspace for this call.
   ///
   /// The optional [abortTrigger] allows canceling the stream.
   Stream<MessageStreamEvent> createStream(
@@ -88,6 +92,7 @@ class MessagesResource extends ResourceBase with StreamingResource {
     Future<void>? abortTrigger,
     List<String> betas = const [],
     String? userProfileId,
+    String? workspaceId,
   }) {
     final body = request.toJson();
     body['stream'] = true;
@@ -95,7 +100,11 @@ class MessagesResource extends ResourceBase with StreamingResource {
     final eventStream = postStream(
       '/v1/messages',
       body: body,
-      headers: _requestHeaders(betas: betas, userProfileId: userProfileId),
+      headers: _requestHeaders(
+        betas: betas,
+        userProfileId: userProfileId,
+        workspaceId: workspaceId,
+      ),
       validateHeaders: (headers) =>
           validateMessageRequestVersion(headers['anthropic-version'], body),
       abortTrigger: abortTrigger,
@@ -109,7 +118,8 @@ class MessagesResource extends ResourceBase with StreamingResource {
   /// Returns the count of input tokens for the given request.
   ///
   /// [userProfileId] attributes this request to an end-user profile; it is sent
-  /// as the `anthropic-user-profile-id` header.
+  /// as the `anthropic-user-profile-id` header. [workspaceId] overrides the
+  /// configured workspace for this call.
   ///
   /// The optional [abortTrigger] allows canceling the request.
   Future<TokenCountResponse> countTokens(
@@ -117,6 +127,7 @@ class MessagesResource extends ResourceBase with StreamingResource {
     Future<void>? abortTrigger,
     List<String> betas = const [],
     String? userProfileId,
+    String? workspaceId,
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/messages/count_tokens');
@@ -124,6 +135,7 @@ class MessagesResource extends ResourceBase with StreamingResource {
       additionalHeaders: _requestHeaders(
         betas: betas,
         userProfileId: userProfileId,
+        workspaceId: workspaceId,
       ),
     );
     final body = request.toJson();
@@ -142,19 +154,16 @@ class MessagesResource extends ResourceBase with StreamingResource {
     );
   }
 
-  /// Builds the per-request header map from the [betas] feature list and an
-  /// optional [userProfileId].
-  ///
-  /// Sets `anthropic-beta` when [betas] is non-empty and
-  /// `anthropic-user-profile-id` when [userProfileId] is provided. Returns
-  /// `null` when neither applies, so that no extra header is sent.
+  /// Builds the per-request beta, attribution and workspace headers.
   static Map<String, String>? _requestHeaders({
     List<String> betas = const [],
     String? userProfileId,
+    String? workspaceId,
   }) {
     final headers = <String, String>{
       if (betas.isNotEmpty) 'anthropic-beta': betas.join(','),
       'anthropic-user-profile-id': ?userProfileId,
+      'anthropic-workspace-id': ?workspaceId,
     };
     return headers.isEmpty ? null : headers;
   }

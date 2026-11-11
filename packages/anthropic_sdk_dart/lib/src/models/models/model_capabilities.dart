@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+
 /// Indicates whether a capability is supported.
 @immutable
 class CapabilitySupport {
@@ -40,8 +42,23 @@ class ThinkingTypes {
   /// Whether the model supports thinking with type 'enabled'.
   final CapabilitySupport enabled;
 
+  /// Whether the model accepts thinking with type 'between_tools'.
+  ///
+  /// May be null on responses that predate this capability.
+  final CapabilitySupport? betweenTools;
+
+  /// Whether the model accepts thinking with type 'disabled'.
+  ///
+  /// May be null on responses that predate this capability.
+  final CapabilitySupport? disabled;
+
   /// Creates a [ThinkingTypes].
-  const ThinkingTypes({required this.adaptive, required this.enabled});
+  const ThinkingTypes({
+    required this.adaptive,
+    required this.enabled,
+    this.betweenTools,
+    this.disabled,
+  });
 
   /// Creates a [ThinkingTypes] from JSON.
   factory ThinkingTypes.fromJson(Map<String, dynamic> json) {
@@ -52,6 +69,14 @@ class ThinkingTypes {
       enabled: CapabilitySupport.fromJson(
         json['enabled'] as Map<String, dynamic>,
       ),
+      betweenTools: json['between_tools'] != null
+          ? CapabilitySupport.fromJson(
+              json['between_tools'] as Map<String, dynamic>,
+            )
+          : null,
+      disabled: json['disabled'] != null
+          ? CapabilitySupport.fromJson(json['disabled'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -59,7 +84,26 @@ class ThinkingTypes {
   Map<String, dynamic> toJson() => {
     'adaptive': adaptive.toJson(),
     'enabled': enabled.toJson(),
+    if (betweenTools != null) 'between_tools': betweenTools!.toJson(),
+    if (disabled != null) 'disabled': disabled!.toJson(),
   };
+
+  /// Creates a copy with replaced values.
+  ThinkingTypes copyWith({
+    CapabilitySupport? adaptive,
+    CapabilitySupport? enabled,
+    Object? betweenTools = unsetCopyWithValue,
+    Object? disabled = unsetCopyWithValue,
+  }) => ThinkingTypes(
+    adaptive: adaptive ?? this.adaptive,
+    enabled: enabled ?? this.enabled,
+    betweenTools: betweenTools == unsetCopyWithValue
+        ? this.betweenTools
+        : betweenTools as CapabilitySupport?,
+    disabled: disabled == unsetCopyWithValue
+        ? this.disabled
+        : disabled as CapabilitySupport?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -67,13 +111,17 @@ class ThinkingTypes {
       other is ThinkingTypes &&
           runtimeType == other.runtimeType &&
           adaptive == other.adaptive &&
-          enabled == other.enabled;
+          enabled == other.enabled &&
+          betweenTools == other.betweenTools &&
+          disabled == other.disabled;
 
   @override
-  int get hashCode => Object.hash(adaptive, enabled);
+  int get hashCode => Object.hash(adaptive, enabled, betweenTools, disabled);
 
   @override
-  String toString() => 'ThinkingTypes(adaptive: $adaptive, enabled: $enabled)';
+  String toString() =>
+      'ThinkingTypes(adaptive: $adaptive, enabled: $enabled, '
+      'betweenTools: $betweenTools, disabled: $disabled)';
 }
 
 /// Thinking capability details.
@@ -279,6 +327,141 @@ class EffortCapability {
       'medium: $medium, xhigh: $xhigh, supported: $supported)';
 }
 
+/// Availability of individual server tools.
+@immutable
+class ServerToolsCapability {
+  /// Whether the model supports at least one of these server tools.
+  final bool supported;
+
+  /// Whether the model supports a version of the code execution server tool.
+  final CapabilitySupport codeExecution;
+
+  /// Whether the model supports a version of the web search server tool.
+  final CapabilitySupport webSearch;
+
+  /// Creates a [ServerToolsCapability].
+  const ServerToolsCapability({
+    required this.supported,
+    required this.codeExecution,
+    required this.webSearch,
+  });
+
+  /// Creates a [ServerToolsCapability] from JSON.
+  factory ServerToolsCapability.fromJson(Map<String, dynamic> json) {
+    if (json case {
+      'supported': final bool supported,
+      'code_execution': final Map<String, dynamic> codeExecution,
+      'web_search': final Map<String, dynamic> webSearch,
+    }) {
+      return ServerToolsCapability(
+        supported: supported,
+        codeExecution: CapabilitySupport.fromJson(codeExecution),
+        webSearch: CapabilitySupport.fromJson(webSearch),
+      );
+    }
+    throw const FormatException(
+      'ServerToolsCapability requires supported, code_execution, and web_search',
+    );
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    'supported': supported,
+    'code_execution': codeExecution.toJson(),
+    'web_search': webSearch.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  ServerToolsCapability copyWith({
+    bool? supported,
+    CapabilitySupport? codeExecution,
+    CapabilitySupport? webSearch,
+  }) => ServerToolsCapability(
+    supported: supported ?? this.supported,
+    codeExecution: codeExecution ?? this.codeExecution,
+    webSearch: webSearch ?? this.webSearch,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ServerToolsCapability &&
+          runtimeType == other.runtimeType &&
+          supported == other.supported &&
+          codeExecution == other.codeExecution &&
+          webSearch == other.webSearch;
+
+  @override
+  int get hashCode => Object.hash(supported, codeExecution, webSearch);
+
+  @override
+  String toString() =>
+      'ServerToolsCapability(supported: $supported, '
+      'codeExecution: $codeExecution, webSearch: $webSearch)';
+}
+
+/// On-demand compaction capability details (beta).
+@immutable
+class CompactionCapability {
+  /// Whether the model accepts the top-level `compaction` parameter.
+  final bool supported;
+
+  /// Whether the model supports compaction with type 'summarize'.
+  final CapabilitySupport summarize;
+
+  /// Creates a [CompactionCapability].
+  const CompactionCapability({
+    required this.supported,
+    required this.summarize,
+  });
+
+  /// Creates a [CompactionCapability] from JSON.
+  factory CompactionCapability.fromJson(Map<String, dynamic> json) {
+    if (json case {
+      'supported': final bool supported,
+      'summarize': final Map<String, dynamic> summarize,
+    }) {
+      return CompactionCapability(
+        supported: supported,
+        summarize: CapabilitySupport.fromJson(summarize),
+      );
+    }
+    throw const FormatException(
+      'CompactionCapability requires supported and summarize',
+    );
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    'supported': supported,
+    'summarize': summarize.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  CompactionCapability copyWith({
+    bool? supported,
+    CapabilitySupport? summarize,
+  }) => CompactionCapability(
+    supported: supported ?? this.supported,
+    summarize: summarize ?? this.summarize,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CompactionCapability &&
+          runtimeType == other.runtimeType &&
+          supported == other.supported &&
+          summarize == other.summarize;
+
+  @override
+  int get hashCode => Object.hash(supported, summarize);
+
+  @override
+  String toString() =>
+      'CompactionCapability(supported: $supported, summarize: $summarize)';
+}
+
 /// Model capability information.
 @immutable
 class ModelCapabilities {
@@ -288,7 +471,9 @@ class ModelCapabilities {
   /// Whether the model supports citation generation.
   final CapabilitySupport citations;
 
-  /// Whether the model supports code execution tools.
+  /// Whether code running in the code execution tool can call other tools.
+  ///
+  /// See [serverTools] for support for the code execution tool itself.
   final CapabilitySupport codeExecution;
 
   /// Context management support and available strategies.
@@ -310,6 +495,16 @@ class ModelCapabilities {
   /// Thinking capability and supported type configurations.
   final ThinkingCapability thinking;
 
+  /// Model support for web search and code execution server tools.
+  ///
+  /// May be null on responses that predate this capability.
+  final ServerToolsCapability? serverTools;
+
+  /// Model support for on-demand compaction.
+  ///
+  /// May be null unless requested with the `compact-2026-09-04` beta header.
+  final CompactionCapability? compaction;
+
   /// Creates a [ModelCapabilities].
   const ModelCapabilities({
     required this.batch,
@@ -321,6 +516,8 @@ class ModelCapabilities {
     required this.pdfInput,
     required this.structuredOutputs,
     required this.thinking,
+    this.serverTools,
+    this.compaction,
   });
 
   /// Creates a [ModelCapabilities] from JSON.
@@ -349,6 +546,16 @@ class ModelCapabilities {
       thinking: ThinkingCapability.fromJson(
         json['thinking'] as Map<String, dynamic>,
       ),
+      serverTools: json['server_tools'] != null
+          ? ServerToolsCapability.fromJson(
+              json['server_tools'] as Map<String, dynamic>,
+            )
+          : null,
+      compaction: json['compaction'] != null
+          ? CompactionCapability.fromJson(
+              json['compaction'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -363,7 +570,40 @@ class ModelCapabilities {
     'pdf_input': pdfInput.toJson(),
     'structured_outputs': structuredOutputs.toJson(),
     'thinking': thinking.toJson(),
+    if (serverTools != null) 'server_tools': serverTools!.toJson(),
+    if (compaction != null) 'compaction': compaction!.toJson(),
   };
+
+  /// Creates a copy with replaced values.
+  ModelCapabilities copyWith({
+    CapabilitySupport? batch,
+    CapabilitySupport? citations,
+    CapabilitySupport? codeExecution,
+    ContextManagementCapability? contextManagement,
+    EffortCapability? effort,
+    CapabilitySupport? imageInput,
+    CapabilitySupport? pdfInput,
+    CapabilitySupport? structuredOutputs,
+    ThinkingCapability? thinking,
+    Object? serverTools = unsetCopyWithValue,
+    Object? compaction = unsetCopyWithValue,
+  }) => ModelCapabilities(
+    batch: batch ?? this.batch,
+    citations: citations ?? this.citations,
+    codeExecution: codeExecution ?? this.codeExecution,
+    contextManagement: contextManagement ?? this.contextManagement,
+    effort: effort ?? this.effort,
+    imageInput: imageInput ?? this.imageInput,
+    pdfInput: pdfInput ?? this.pdfInput,
+    structuredOutputs: structuredOutputs ?? this.structuredOutputs,
+    thinking: thinking ?? this.thinking,
+    serverTools: serverTools == unsetCopyWithValue
+        ? this.serverTools
+        : serverTools as ServerToolsCapability?,
+    compaction: compaction == unsetCopyWithValue
+        ? this.compaction
+        : compaction as CompactionCapability?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -378,7 +618,9 @@ class ModelCapabilities {
           imageInput == other.imageInput &&
           pdfInput == other.pdfInput &&
           structuredOutputs == other.structuredOutputs &&
-          thinking == other.thinking;
+          thinking == other.thinking &&
+          serverTools == other.serverTools &&
+          compaction == other.compaction;
 
   @override
   int get hashCode => Object.hash(
@@ -391,6 +633,8 @@ class ModelCapabilities {
     pdfInput,
     structuredOutputs,
     thinking,
+    serverTools,
+    compaction,
   );
 
   @override
@@ -399,5 +643,6 @@ class ModelCapabilities {
       'codeExecution: $codeExecution, '
       'contextManagement: $contextManagement, effort: $effort, '
       'imageInput: $imageInput, pdfInput: $pdfInput, '
-      'structuredOutputs: $structuredOutputs, thinking: $thinking)';
+      'structuredOutputs: $structuredOutputs, thinking: $thinking, '
+      'serverTools: $serverTools, compaction: $compaction)';
 }

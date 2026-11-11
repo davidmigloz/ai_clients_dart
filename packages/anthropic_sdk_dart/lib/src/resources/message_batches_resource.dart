@@ -13,7 +13,10 @@ import 'streaming_resource.dart';
 /// Resource for the Message Batches API.
 ///
 /// The Message Batches API allows you to process large volumes of
-/// Messages requests asynchronously.
+/// Messages requests asynchronously. Set `workspaceId` to override the
+/// client's workspace for a call. Set `betas` to opt into beta behavior
+/// for the same HTTP endpoint. Include `message-batches-2024-09-24` to
+/// request the beta Batches contract used by the official SDKs.
 class MessageBatchesResource extends ResourceBase with StreamingResource {
   /// Creates a [MessageBatchesResource].
   MessageBatchesResource({
@@ -36,13 +39,13 @@ class MessageBatchesResource extends ResourceBase with StreamingResource {
     MessageBatchCreateRequest request, {
     Future<void>? abortTrigger,
     String? userProfileId,
+    String? workspaceId,
+    List<String> betas = const [],
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/messages/batches');
     final headers = requestBuilder.buildHeaders(
-      additionalHeaders: userProfileId != null
-          ? {'anthropic-user-profile-id': userProfileId}
-          : null,
+      additionalHeaders: _requestHeaders(betas, workspaceId, userProfileId),
     );
     final body = request.toJson();
     validateBatchRequestVersion(headers['anthropic-version'], body);
@@ -74,6 +77,8 @@ class MessageBatchesResource extends ResourceBase with StreamingResource {
     String? afterId,
     int? limit,
     Future<void>? abortTrigger,
+    String? workspaceId,
+    List<String> betas = const [],
   }) async {
     ensureNotClosed?.call();
     final queryParams = <String, dynamic>{};
@@ -85,7 +90,9 @@ class MessageBatchesResource extends ResourceBase with StreamingResource {
       '/v1/messages/batches',
       queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    final headers = requestBuilder.buildHeaders();
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: _requestHeaders(betas, workspaceId),
+    );
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(
@@ -106,10 +113,14 @@ class MessageBatchesResource extends ResourceBase with StreamingResource {
   Future<MessageBatch> retrieve(
     String batchId, {
     Future<void>? abortTrigger,
+    String? workspaceId,
+    List<String> betas = const [],
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/messages/batches/$batchId');
-    final headers = requestBuilder.buildHeaders();
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: _requestHeaders(betas, workspaceId),
+    );
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(
@@ -132,10 +143,14 @@ class MessageBatchesResource extends ResourceBase with StreamingResource {
   Future<MessageBatch> cancel(
     String batchId, {
     Future<void>? abortTrigger,
+    String? workspaceId,
+    List<String> betas = const [],
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/messages/batches/$batchId/cancel');
-    final headers = requestBuilder.buildHeaders();
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: _requestHeaders(betas, workspaceId),
+    );
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(<String, dynamic>{});
@@ -160,10 +175,14 @@ class MessageBatchesResource extends ResourceBase with StreamingResource {
   Future<DeletedMessageBatch> deleteBatch(
     String batchId, {
     Future<void>? abortTrigger,
+    String? workspaceId,
+    List<String> betas = const [],
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/messages/batches/$batchId');
-    final headers = requestBuilder.buildHeaders();
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: _requestHeaders(betas, workspaceId),
+    );
     final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(
@@ -186,12 +205,25 @@ class MessageBatchesResource extends ResourceBase with StreamingResource {
   Stream<BatchIndividualResponse> results(
     String batchId, {
     Future<void>? abortTrigger,
+    String? workspaceId,
+    List<String> betas = const [],
   }) => mapStream(
     getJsonlStream(
       '/v1/messages/batches/$batchId/results',
       abortTrigger: abortTrigger,
+      headers: _requestHeaders(betas, workspaceId),
       errorFactoryWithMetadata: createResourceException,
     ),
     BatchIndividualResponse.fromJson,
   );
+
+  static Map<String, String> _requestHeaders(
+    List<String> betas,
+    String? workspaceId, [
+    String? userProfileId,
+  ]) => {
+    if (betas.isNotEmpty) 'anthropic-beta': betas.join(','),
+    'anthropic-user-profile-id': ?userProfileId,
+    'anthropic-workspace-id': ?workspaceId,
+  };
 }

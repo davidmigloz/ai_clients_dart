@@ -78,6 +78,75 @@ void main() {
       expect(caps.thinking.types.enabled.supported, isTrue);
     });
 
+    test('new capability fields are optional on older responses', () {
+      final caps = ModelCapabilities.fromJson(fullCapabilitiesJson());
+      expect(caps.serverTools, isNull);
+      expect(caps.compaction, isNull);
+      expect(caps.thinking.types.betweenTools, isNull);
+      expect(caps.thinking.types.disabled, isNull);
+      expect(caps.toJson(), isNot(contains('server_tools')));
+      expect(caps.toJson(), isNot(contains('compaction')));
+      expect(caps.thinking.types.toJson(), isNot(contains('between_tools')));
+      expect(caps.thinking.types.toJson(), isNot(contains('disabled')));
+    });
+
+    test(
+      'round-trips and clears server tools, compaction and thinking modes',
+      () {
+        final json = fullCapabilitiesJson()
+          ..['server_tools'] = {
+            'supported': true,
+            'code_execution': {'supported': true},
+            'web_search': {'supported': false},
+          }
+          ..['compaction'] = {
+            'supported': true,
+            'summarize': {'supported': true},
+          };
+        final types =
+            ((json['thinking'] as Map<String, dynamic>)['types']
+                  as Map<String, dynamic>)
+              ..['between_tools'] = {'supported': true}
+              ..['disabled'] = {'supported': false};
+        final caps = ModelCapabilities.fromJson(json);
+
+        final encoded = caps.toJson();
+        expect(encoded['server_tools'], json['server_tools']);
+        expect(encoded['compaction'], json['compaction']);
+        expect(caps.thinking.types.toJson(), types);
+        final restored = ModelCapabilities.fromJson(encoded);
+        expect(restored, caps);
+        expect(restored.hashCode, caps.hashCode);
+        expect(caps.toString(), contains('serverTools: ServerToolsCapability'));
+        expect(caps.toString(), contains('compaction: CompactionCapability'));
+        expect(caps.toString(), contains('betweenTools: CapabilitySupport'));
+        expect(caps.toString(), contains('disabled: CapabilitySupport'));
+
+        final cleared = caps.copyWith(serverTools: null, compaction: null);
+        expect(cleared.serverTools, isNull);
+        expect(cleared.compaction, isNull);
+        expect(cleared, isNot(caps));
+        final clearedTypes = caps.thinking.types.copyWith(
+          betweenTools: null,
+          disabled: null,
+        );
+        expect(clearedTypes.betweenTools, isNull);
+        expect(clearedTypes.disabled, isNull);
+        expect(clearedTypes, isNot(caps.thinking.types));
+      },
+    );
+
+    test('present capability objects require their fields', () {
+      expect(
+        () => ServerToolsCapability.fromJson(const {'supported': true}),
+        throwsFormatException,
+      );
+      expect(
+        () => CompactionCapability.fromJson(const {'supported': true}),
+        throwsFormatException,
+      );
+    });
+
     test('toJson round-trip works', () {
       final json = fullCapabilitiesJson();
       final caps = ModelCapabilities.fromJson(json);
@@ -160,6 +229,71 @@ void main() {
       expect(model.maxInputTokens, isNull);
       expect(model.maxTokens, isNull);
     });
+
+    test(
+      'preserves open lifecycle and line values and lifecycle timestamps',
+      () {
+        final model = ModelInfo.fromJson(const {
+          'id': 'custom-model',
+          'type': 'model',
+          'display_name': 'Custom',
+          'created_at': '2025-05-14T00:00:00.000Z',
+          'line': 'new_line',
+          'lifecycle': 'new_stage',
+          'deprecated_at': '2026-09-29T00:00:00.000Z',
+          'retires_at': '2026-11-30T00:00:00.000Z',
+        });
+        expect(model.lifecycle, const ModelLifecycle('new_stage'));
+        expect(model.line, 'new_line');
+        expect(model.deprecatedAt, DateTime.utc(2026, 9, 29));
+        expect(model.retiresAt, DateTime.utc(2026, 11, 30));
+        final json = model.toJson();
+        expect(json['lifecycle'], 'new_stage');
+        expect(json['line'], 'new_line');
+        expect(json['deprecated_at'], '2026-09-29T00:00:00.000Z');
+        expect(json['retires_at'], '2026-11-30T00:00:00.000Z');
+        final restored = ModelInfo.fromJson(json);
+        expect(restored, model);
+        expect(restored.hashCode, model.hashCode);
+        expect(model.toString(), contains('line: new_line'));
+        expect(model.toString(), contains('lifecycle: new_stage'));
+        expect(model.toString(), contains('deprecatedAt: 2026-09-29'));
+        expect(model.toString(), contains('retiresAt: 2026-11-30'));
+
+        final cleared = model.copyWith(
+          line: null,
+          lifecycle: ModelLifecycle.retired,
+          deprecatedAt: null,
+          retiresAt: null,
+        );
+        expect(cleared.line, isNull);
+        expect(cleared.lifecycle, ModelLifecycle.retired);
+        expect(cleared.deprecatedAt, isNull);
+        expect(cleared.retiresAt, isNull);
+        expect(cleared, isNot(model));
+        final currentJson = cleared.toJson();
+        for (final key in [
+          'line',
+          'deprecated_at',
+          'retires_at',
+          'capabilities',
+          'max_input_tokens',
+          'max_tokens',
+        ]) {
+          expect(currentJson, containsPair(key, null));
+        }
+        expect(ModelInfo.fromJson(currentJson), cleared);
+        final clearedJson = cleared.copyWith(lifecycle: null).toJson();
+        for (final key in [
+          'line',
+          'lifecycle',
+          'deprecated_at',
+          'retires_at',
+        ]) {
+          expect(clearedJson, isNot(contains(key)));
+        }
+      },
+    );
 
     test('fromJson deserializes with capabilities', () {
       final json = {
@@ -309,6 +443,21 @@ void main() {
 
       expect(modified.maxInputTokens, isNull);
       expect(modified.maxTokens, 8192);
+    });
+  });
+
+  group('ThinkingBetweenTools', () {
+    test('uses a single constant wire value', () {
+      const thinking = ThinkingConfig.betweenTools();
+      final parsed = ThinkingConfig.fromJson({'type': 'between_tools'});
+      expect(parsed, thinking);
+      expect(parsed.hashCode, thinking.hashCode);
+      expect(thinking.toJson(), {'type': 'between_tools'});
+      expect(thinking, isNot(ThinkingConfig.disabled()));
+      expect(
+        () => ThinkingBetweenTools.fromJson(const {'type': 'enabled'}),
+        throwsFormatException,
+      );
     });
   });
 

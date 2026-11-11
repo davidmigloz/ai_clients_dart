@@ -27,11 +27,21 @@ class ModelsResource extends ResourceBase {
   /// - [beforeId]: Return models before this ID for pagination.
   /// - [afterId]: Return models after this ID for pagination.
   /// - [limit]: Maximum number of models to return (default: 20).
+  /// - [lifecycle]: Return models in any of these stages. If omitted, the API
+  ///   includes active and deprecated models. Request [ModelLifecycle.retired]
+  ///   explicitly to include retired models.
+  /// - [betas]: Beta features to request, such as `compact-2026-09-04`.
+  /// - [workspaceId]: Select a workspace when the credential can act on more
+  ///   than one workspace. For workspace-scoped credentials, omit it or use
+  ///   the credential's workspace.
   /// - [abortTrigger]: Allows canceling the request.
   Future<ModelListResponse> list({
     String? beforeId,
     String? afterId,
     int? limit,
+    List<ModelLifecycle> lifecycle = const [],
+    List<String> betas = const [],
+    String? workspaceId,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
@@ -39,12 +49,17 @@ class ModelsResource extends ResourceBase {
     if (beforeId != null) queryParams['before_id'] = beforeId;
     if (afterId != null) queryParams['after_id'] = afterId;
     if (limit != null) queryParams['limit'] = limit.toString();
+    if (lifecycle.isNotEmpty) {
+      queryParams['lifecycle[]'] = lifecycle
+          .map((stage) => stage.toJson())
+          .toList();
+    }
 
     final url = requestBuilder.buildUrl(
       '/v1/models',
       queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    final headers = requestBuilder.buildHeaders();
+    final headers = _headers(betas: betas, workspaceId: workspaceId);
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(
@@ -63,14 +78,26 @@ class ModelsResource extends ResourceBase {
   ///
   /// Parameters:
   /// - [modelId]: The ID of the model to retrieve.
+  /// - [betas]: Beta features to request, such as `compact-2026-09-04`.
+  /// - [workspaceId]: Select a workspace when the credential can act on more
+  ///   than one workspace.
   /// - [abortTrigger]: Allows canceling the request.
   Future<ModelInfo> retrieve(
     String modelId, {
+    List<String> betas = const [],
+    String? workspaceId,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/models/$modelId');
-    final headers = requestBuilder.buildHeaders();
+    // Prevent empty and dot-only segments from addressing another endpoint.
+    final segment = modelId.split(';').first;
+    if (segment.isEmpty || segment == '.' || segment == '..') {
+      throw ArgumentError.value(modelId, 'modelId', 'Invalid model ID');
+    }
+    final url = requestBuilder.buildUrl(
+      '/v1/models/${Uri.encodeComponent(modelId)}',
+    );
+    final headers = _headers(betas: betas, workspaceId: workspaceId);
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(
@@ -82,4 +109,14 @@ class ModelsResource extends ResourceBase {
       jsonDecode(response.body) as Map<String, dynamic>,
     );
   }
+
+  Map<String, String> _headers({
+    required List<String> betas,
+    required String? workspaceId,
+  }) => requestBuilder.buildHeaders(
+    additionalHeaders: {
+      if (betas.isNotEmpty) 'anthropic-beta': betas.join(','),
+      'anthropic-workspace-id': ?workspaceId,
+    },
+  );
 }

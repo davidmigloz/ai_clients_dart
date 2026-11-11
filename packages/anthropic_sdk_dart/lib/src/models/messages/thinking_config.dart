@@ -141,6 +141,10 @@ sealed class ThinkingConfig {
   /// Disables extended thinking.
   factory ThinkingConfig.disabled() = ThinkingDisabled;
 
+  /// Turns off up-front thinking while retaining progress updates the model
+  /// may write between tool calls. Only supported on compatible models.
+  const factory ThinkingConfig.betweenTools() = ThinkingBetweenTools;
+
   /// Enables adaptive thinking mode.
   ///
   /// In adaptive mode, the model automatically determines the thinking budget.
@@ -155,6 +159,7 @@ sealed class ThinkingConfig {
     return switch (type) {
       'enabled' => ThinkingEnabled.fromJson(json),
       'disabled' => ThinkingDisabled.fromJson(json),
+      'between_tools' => ThinkingBetweenTools.fromJson(json),
       'adaptive' => ThinkingAdaptive.fromJson(json),
       _ => throw FormatException('Unknown ThinkingConfig type: $type'),
     };
@@ -274,6 +279,35 @@ class ThinkingDisabled extends ThinkingConfig {
 
   @override
   String toString() => 'ThinkingDisabled()';
+}
+
+/// Disables up-front thinking while allowing progress between tool calls.
+@immutable
+class ThinkingBetweenTools extends ThinkingConfig {
+  /// Creates a [ThinkingBetweenTools].
+  const ThinkingBetweenTools();
+
+  /// Creates a [ThinkingBetweenTools] from JSON.
+  factory ThinkingBetweenTools.fromJson(Map<String, dynamic> json) {
+    if (json['type'] != 'between_tools') {
+      throw const FormatException('Expected thinking type "between_tools"');
+    }
+    return const ThinkingBetweenTools();
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'between_tools'};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ThinkingBetweenTools && runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() => 'ThinkingBetweenTools()';
 }
 
 /// Enables adaptive thinking where budget is determined by the model.
