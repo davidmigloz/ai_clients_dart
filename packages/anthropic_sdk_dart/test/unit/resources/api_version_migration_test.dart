@@ -177,6 +177,10 @@ void main() {
       ]),
       'citations',
     ),
+    'user web fetch result document text citations': (
+      InputMessage.userBlocks([_webFetchWithCitedDocument()]),
+      'citations',
+    ),
   };
 
   for (final MapEntry(key: name, value: (message, field))
@@ -244,6 +248,7 @@ void main() {
           ),
           _citedText,
         ]),
+        InputMessage.assistantBlocks([_webFetchWithCitedDocument()]),
         InputMessage.user('Continue'),
       ];
 
@@ -343,3 +348,19 @@ Matcher _validationMentions(String field) => isA<ValidationException>().having(
 
 Map<String, dynamic> _body(http.BaseRequest request) =>
     jsonDecode((request as http.Request).body) as Map<String, dynamic>;
+
+WebFetchToolResultInputBlock _webFetchWithCitedDocument() =>
+    WebFetchToolResultInputBlock(
+      toolUseId: 'srvtoolu_fetch',
+      content: {
+        'type': 'web_fetch_result',
+        'url': 'https://example.com/source',
+        'content': {
+          'type': 'document',
+          'source': {
+            'type': 'content',
+            'content': [_citedText.toJson()],
+          },
+        },
+      },
+    );

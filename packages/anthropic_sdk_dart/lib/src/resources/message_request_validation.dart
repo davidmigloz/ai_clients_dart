@@ -73,6 +73,14 @@ void _validateUserCitations(Object? block, String field) {
       'source': {'type': 'content', 'content': final List<Object?> children},
     }:
       _validateUserCitationChildren(children, '$field.source.content');
+    case {
+      'type': 'web_fetch_tool_result',
+      'content': {
+        'type': 'web_fetch_result',
+        'content': final Object? document,
+      },
+    }:
+      _validateUserCitations(document, '$field.content.content');
   }
 }
 
