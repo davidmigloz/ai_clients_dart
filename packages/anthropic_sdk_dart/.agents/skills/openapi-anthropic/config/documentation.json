@@ -30,7 +30,8 @@
     "memoryVersions": "memory_stores",
     "deployments": "deployments",
     "deploymentRuns": "deployments",
-    "compliance": "compliance"
+    "compliance": "compliance",
+    "complianceApps": "compliance_content"
   },
   "excluded_from_examples": [],
   "drift_patterns": []

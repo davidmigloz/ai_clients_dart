@@ -49,7 +49,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 ### Operational APIs
 
 - Message batches for large-scale offline processing
-- Compliance Activity Feed, organization directory, effective settings, and Security Posture (beta)
+- Compliance Activity Feed, directory, organization settings, app content, sessions, and artifact downloads. Security Posture is beta.
 - Model discovery with lifecycle filters, model lines, and thinking and server-tool capabilities
 - Organization Admin API for keys, users, invites, workspaces, rate limits and compliance settings
 - Files (expiration, cursor pagination) and skills (multi-file uploads, container skills)
@@ -788,10 +788,10 @@ try {
 
 </details>
 
-### Compliance Activity Feed and directory
+### How do I use the Compliance API?
 
 <details>
-<summary><b>Read scoped Compliance activity and organization metadata</b></summary>
+<summary><b>Read scoped Compliance activity, directory and content</b></summary>
 
 Use a client configured with a separate Compliance Access Key. A Claude Console
 Admin API key with `read:compliance_activities` can query the Activity Feed.
@@ -800,6 +800,8 @@ settings. Use `read:compliance_user_data` for organization users, member
 preferences, and group members. Security Posture accepts
 `read:compliance_org_data` or `read:org_audit`. Member preferences and Security
 Posture are beta. Pass the organization UUID to organization-specific routes.
+A key with `read:org_audit` can use the Compliance read endpoints.
+Use a server or CLI when Compliance is enabled for the organization.
 
 ```dart
 final client = AnthropicClient.withApiKey(complianceAccessKey);
@@ -828,7 +830,18 @@ opaque `nextPage` token. When listing preferences, pass the same `userIds`
 and `includeUnset` values with each page, including after an empty page
 that supplies a continuation token.
 
-[Activity Feed example](example/compliance_example.dart) · [Compliance API access](https://platform.claude.com/docs/en/manage-claude/compliance-api-access) · [Directory guide](https://platform.claude.com/docs/en/manage-claude/compliance-org-data)
+Use the Compliance apps resource at `client.compliance.apps` for chats, files,
+projects, local and remote session transcripts, and Code Artifacts. Read access
+requires a Compliance Access Key with `read:compliance_user_data` or
+`read:org_audit`. Use the separate
+`delete:compliance_user_data` scope for permanent deletions. Download methods
+return streams of bytes and can report media type, disposition, checksum,
+and request ID through `onResponse`. Code Artifact downloads accept
+`allowZip: true` for multi-file content. Chat artifact version content is a
+JSON object containing the version's text. Check that a binary transfer
+completed before using its bytes.
+
+[Activity Feed example](example/compliance_example.dart) · [Content example](example/compliance_content_example.dart) · [Compliance API access](https://platform.claude.com/docs/en/manage-claude/compliance-api-access) · [Directory guide](https://platform.claude.com/docs/en/manage-claude/compliance-org-data)
 
 </details>
 
@@ -912,6 +925,7 @@ See the [example/](example/) directory for complete examples:
 | [`organization_admin_example.dart`](example/organization_admin_example.dart) | Read-only organization and workspace administration |
 | [`models_example.dart`](example/models_example.dart) | Model lifecycle filters, pagination, and capabilities |
 | [`compliance_example.dart`](example/compliance_example.dart) | Scoped Compliance Activity Feed |
+| [`compliance_content_example.dart`](example/compliance_content_example.dart) | Scoped Compliance app content and artifact downloads |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
 | [`anthropic_sdk_dart_example.dart`](example/anthropic_sdk_dart_example.dart) | Quick-start overview |
 
@@ -931,7 +945,7 @@ See the [example/](example/) directory for complete examples:
 | Dreams (Beta) | ✅ Full |
 | User Profiles | ✅ GA and legacy beta |
 | Webhooks (Beta) | ✅ Full |
-| Compliance | Activity Feed and organization directory, settings, Security Posture |
+| Compliance | Activity Feed, directory, settings, Security Posture, apps, sessions and Code Artifacts |
 
 ## Official Documentation
 

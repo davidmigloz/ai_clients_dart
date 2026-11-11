@@ -2,6 +2,8 @@ import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
 
+part 'compliance_content_models.dart';
+
 /// Ordering by timestamp on Compliance lists and transcripts.
 enum ComplianceOrder {
   /// Oldest first.
@@ -65,6 +67,13 @@ abstract class ComplianceRecord {
     return _required<T>(key);
   }
 
+  T? _requiredNullable<T>(String key) {
+    if (!raw.containsKey(key)) {
+      throw FormatException('Missing Compliance field "$key"');
+    }
+    return _optional<T>(key);
+  }
+
   DateTime _date(String key) => DateTime.parse(_required<String>(key));
 
   DateTime? _optionalDate(String key) {
@@ -124,32 +133,37 @@ final class ComplianceCursorPage<T extends ComplianceRecord>
   late final List<T> data;
 
   /// The next opaque cursor, even when this page is empty.
-  String? get nextPage => _optional<String>('next_page');
+  late final String? nextPage;
 
   /// Whether a next page is available.
-  bool get hasMore => _optional<bool>('has_more') ?? nextPage != null;
+  late final bool hasMore;
 
   /// Decodes a cursor page and its records.
   ComplianceCursorPage.fromJson(
     super.json,
     T Function(Map<String, dynamic>) decode,
   ) : super._() {
+    nextPage = _requiredNullable<String>('next_page');
+    if (nextPage?.isEmpty == true) {
+      throw const FormatException('Empty Compliance continuation token');
+    }
+    hasMore = _optional<bool>('has_more') ?? nextPage != null;
     data = _records('data', decode);
   }
 
-  /// Decodes a directory page and requires usable continuation metadata.
+  /// Decodes a page with a required `has_more` and continuation metadata.
   ComplianceCursorPage.directoryFromJson(
     super.json,
     T Function(Map<String, dynamic>) decode, {
     bool allowMissingTerminalCursor = false,
   }) : super._() {
-    final hasMore = _required<bool>('has_more');
-    final cursor = nextPage;
+    hasMore = _required<bool>('has_more');
+    nextPage = _optional<String>('next_page');
     if (!raw.containsKey('next_page') &&
         !(allowMissingTerminalCursor && !hasMore)) {
       throw const FormatException('Missing Compliance field "next_page"');
     }
-    if (hasMore && (cursor == null || cursor.isEmpty)) {
+    if (hasMore && (nextPage?.isNotEmpty != true)) {
       throw const FormatException('Missing Compliance continuation token');
     }
     data = _records('data', decode);
@@ -163,20 +177,33 @@ final class ComplianceIdPage<T extends ComplianceRecord>
   late final List<T> data;
 
   /// Cursor to use as `before_id` where backward paging is supported.
-  String? get firstId => _optional<String>('first_id');
+  late final String? firstId;
 
   /// Cursor to use as `after_id` for forward paging.
-  String? get lastId => _optional<String>('last_id');
+  late final String? lastId;
 
   /// Whether further records are available in the chosen order.
-  bool get hasMore => _optional<bool>('has_more') ?? false;
+  late final bool hasMore;
 
   /// Decodes a page of records. The Activity Feed may omit `data`.
   ComplianceIdPage.fromJson(
     super.json,
     T Function(Map<String, dynamic>) decode, {
     bool allowMissingData = false,
+    bool requirePagination = false,
   }) : super._() {
+    firstId = requirePagination
+        ? _requiredNullable<String>('first_id')
+        : _optional<String>('first_id');
+    lastId = requirePagination
+        ? _requiredNullable<String>('last_id')
+        : _optional<String>('last_id');
+    hasMore = requirePagination
+        ? _required<bool>('has_more')
+        : _optional<bool>('has_more') ?? false;
+    if (hasMore && lastId?.isNotEmpty != true) {
+      throw const FormatException('Missing Compliance forward cursor');
+    }
     data = _records('data', decode, allowMissing: allowMissingData);
   }
 }

@@ -6,13 +6,19 @@ import '../errors/exceptions.dart';
 import '../errors/response_error.dart';
 import '../models/compliance/compliance_models.dart';
 import 'base_resource.dart';
+import 'streaming_resource.dart';
+
+part 'compliance_apps_resource.dart';
 
 /// Access to the Claude Compliance API.
 ///
 /// Configure an `AnthropicClient` with a scoped Compliance Access Key.
 /// An Admin API key with the Activity Feed scope can list activities.
 /// See the Claude Platform Compliance guide for eligibility and scopes.
-class ComplianceResource extends ResourceBase {
+class ComplianceResource extends ResourceBase with StreamingResource {
+  /// Enterprise content, application sessions, and Code Artifacts.
+  late final ComplianceAppsResource apps = ComplianceAppsResource._(this);
+
   /// Creates a Compliance resource using the client's configured transport.
   ComplianceResource({
     required super.config,
@@ -246,16 +252,21 @@ class ComplianceResource extends ResourceBase {
     int? limit,
     Map<String, dynamic>? query,
     bool allowMissingTerminalCursor = false,
+    bool cursorOnly = false,
     Future<void>? abortTrigger,
-  }) async => ComplianceCursorPage.directoryFromJson(
-    await _get(
+  }) async {
+    final body = await _get(
       path,
       query: {'page': ?page, 'limit': ?limit?.toString(), ...?query},
       abortTrigger: abortTrigger,
-    ),
-    decode,
-    allowMissingTerminalCursor: allowMissingTerminalCursor,
-  );
+    );
+    if (cursorOnly) return ComplianceCursorPage.fromJson(body, decode);
+    return ComplianceCursorPage.directoryFromJson(
+      body,
+      decode,
+      allowMissingTerminalCursor: allowMissingTerminalCursor,
+    );
+  }
 
   Future<Map<String, dynamic>> _get(
     String path, {
@@ -290,6 +301,11 @@ class ComplianceResource extends ResourceBase {
           'activityTypes and excludeActivityTypes are mutually exclusive.',
         );
       }
+    }
+    if (path == 'activities' ||
+        path == 'apps/chats' ||
+        path.startsWith('apps/chats/') && path.endsWith('/messages')) {
+      final effectiveQuery = url.queryParametersAll;
       if (effectiveQuery.containsKey('before_id') &&
           effectiveQuery.containsKey('after_id')) {
         throw ArgumentError('beforeId and afterId are mutually exclusive.');
@@ -300,11 +316,19 @@ class ComplianceResource extends ResourceBase {
         allowQuery ? url : Uri.parse(url.toString().split('?').first),
       )
       ..followRedirects = false
-      ..headers.addAll(requestBuilder.buildHeaders(includeWorkspace: false))
-      ..headers.remove('anthropic-workspace-id')
-      ..headers.remove('content-type')
-      ..headers['accept'] = 'application/json';
+      ..headers.addAll(_headers('application/json'));
   }
+
+  Map<String, String> _headers(String accept) =>
+      requestBuilder.buildHeaders(includeWorkspace: false)
+        ..removeWhere(
+          (key, _) => const {
+            'accept',
+            'content-type',
+            'anthropic-workspace-id',
+          }.contains(key.toLowerCase()),
+        )
+        ..['accept'] = accept;
 
   Future<http.Response> _send(
     String method,
