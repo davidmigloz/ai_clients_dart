@@ -59,8 +59,13 @@ class InterceptorChain {
     if (index >= interceptors.length) {
       // Terminal: execute the actual HTTP request
       // Per spec, retry wraps the transport execution
-      return (context) {
-        admission?.enter();
+      return (context) async {
+        if (admission != null) {
+          // Drain cancellation queued in the same event turn as authentication.
+          // Hand off to the transport synchronously after checking admission.
+          await Future<void>.delayed(Duration.zero);
+          admission.enter();
+        }
         ensureNotClosed?.call();
         final originalRequest = context.request;
 

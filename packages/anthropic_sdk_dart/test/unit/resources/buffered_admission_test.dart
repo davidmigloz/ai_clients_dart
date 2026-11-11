@@ -62,6 +62,53 @@ void main() {
     expect(transport.closeCount, 0);
   });
 
+  for (final deferAbort in [false, true]) {
+    test(
+      'buffered abort prevents dispatch when credentials resolve in the same '
+      'event turn (deferAbort=$deferAbort)',
+      () async {
+        final auth = _GatedAuth();
+        final abort = Completer<void>();
+        final transport = _Transport();
+        final client = _client(transport, auth: auth);
+        addTearDown(client.close);
+        addTearDown(auth.release);
+
+        final aborted = expectLater(
+          client.messages
+              .create(_request, abortTrigger: abort.future)
+              .timeout(_deadline),
+          throwsA(
+            isA<AbortedException>()
+                .having(
+                  (error) => error.stage,
+                  'stage',
+                  AbortionStage.beforeRequest,
+                )
+                .having(
+                  (error) => error.correlationId,
+                  'correlationId',
+                  'local-id',
+                ),
+          ),
+        );
+        await auth.entered.future.timeout(_deadline);
+        auth.release();
+        if (deferAbort) {
+          scheduleMicrotask(abort.complete);
+        } else {
+          abort.complete();
+        }
+        await aborted;
+        expect(transport.requests, isEmpty);
+
+        expect((await client.messages.create(_request)).id, 'msg_fixture');
+        expect(transport.requests, hasLength(1));
+        expect(transport.closeCount, 0);
+      },
+    );
+  }
+
   test(
     'already-completed buffered abort prevents dispatch without auth',
     () async {
