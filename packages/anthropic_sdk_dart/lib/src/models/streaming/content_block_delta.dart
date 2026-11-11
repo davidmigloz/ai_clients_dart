@@ -191,7 +191,7 @@ class ThinkingDelta extends ContentBlockDelta {
 /// Delta for compaction content updates (beta).
 @immutable
 class CompactionDelta extends ContentBlockDelta {
-  /// The partial or final compaction summary content.
+  /// The final compaction summary content. Null indicates failure.
   final String? content;
 
   /// Encrypted compaction payload for server-side context restoration.

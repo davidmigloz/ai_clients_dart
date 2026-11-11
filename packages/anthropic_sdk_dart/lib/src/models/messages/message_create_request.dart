@@ -10,10 +10,12 @@ import '../metadata/service_tier.dart';
 import '../metadata/speed.dart';
 import '../tools/tool_choice.dart';
 import '../tools/tool_definition.dart';
+import 'compaction_config.dart';
 import 'diagnostics_param.dart';
 import 'fallback_config.dart';
 import 'fallback_credit_token_param.dart';
 import 'input_message.dart';
+import 'message_thread_param.dart';
 import 'thinking_config.dart';
 
 /// System prompt content.
@@ -227,10 +229,18 @@ class MessageCreateRequest {
 
   /// Cache diagnostics configuration.
   ///
-  /// Opts the request into prompt-cache diagnostics. Requires the
-  /// `cache-diagnosis-2026-04-07` beta header — pass
-  /// `betas: ['cache-diagnosis-2026-04-07']` to `messages.create`.
+  /// Opts the request into prompt-cache diagnostics on the Claude API.
   final DiagnosticsParam? diagnostics;
+
+  /// On-demand summarization for this conversation (beta).
+  ///
+  /// Requires `compact-2026-09-04`. Omit [thread] on compaction requests.
+  final CompactionConfig? compaction;
+
+  /// Creates or continues server-held conversation state (beta).
+  ///
+  /// Requires `message-threads-2026-08-12`. Message Batches cannot use threads.
+  final MessageThreadParam? thread;
 
   /// Ordered chain of fallback models to attempt if the primary [model]
   /// declines ([FallbacksParam.list]), or a request for the model's
@@ -273,6 +283,8 @@ class MessageCreateRequest {
     this.speed,
     this.cacheControl,
     this.diagnostics,
+    this.compaction,
+    this.thread,
     this.fallbacks,
     this.fallbackCreditToken,
   });
@@ -328,6 +340,14 @@ class MessageCreateRequest {
               json['diagnostics'] as Map<String, dynamic>,
             )
           : null,
+      compaction: json['compaction'] != null
+          ? CompactionConfig.fromJson(
+              json['compaction'] as Map<String, dynamic>,
+            )
+          : null,
+      thread: json['thread'] != null
+          ? MessageThreadParam.fromJson(json['thread'] as Map<String, dynamic>)
+          : null,
       fallbacks: json['fallbacks'] != null
           ? FallbacksParam.fromJson(json['fallbacks'])
           : null,
@@ -359,6 +379,8 @@ class MessageCreateRequest {
     if (speed != null) 'speed': speed!.toJson(),
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
     if (diagnostics != null) 'diagnostics': diagnostics!.toJson(),
+    if (compaction != null) 'compaction': compaction!.toJson(),
+    if (thread != null) 'thread': thread!.toJson(),
     if (fallbacks != null) 'fallbacks': fallbacks!.toJson(),
     if (fallbackCreditToken != null)
       'fallback_credit_token': fallbackCreditToken!.toJson(),
@@ -386,6 +408,8 @@ class MessageCreateRequest {
     Object? speed = unsetCopyWithValue,
     Object? cacheControl = unsetCopyWithValue,
     Object? diagnostics = unsetCopyWithValue,
+    Object? compaction = unsetCopyWithValue,
+    Object? thread = unsetCopyWithValue,
     Object? fallbacks = unsetCopyWithValue,
     Object? fallbackCreditToken = unsetCopyWithValue,
   }) {
@@ -436,6 +460,12 @@ class MessageCreateRequest {
       diagnostics: diagnostics == unsetCopyWithValue
           ? this.diagnostics
           : diagnostics as DiagnosticsParam?,
+      compaction: compaction == unsetCopyWithValue
+          ? this.compaction
+          : compaction as CompactionConfig?,
+      thread: thread == unsetCopyWithValue
+          ? this.thread
+          : thread as MessageThreadParam?,
       fallbacks: fallbacks == unsetCopyWithValue
           ? this.fallbacks
           : fallbacks as FallbacksParam?,
@@ -470,6 +500,8 @@ class MessageCreateRequest {
           speed == other.speed &&
           cacheControl == other.cacheControl &&
           diagnostics == other.diagnostics &&
+          compaction == other.compaction &&
+          thread == other.thread &&
           fallbacks == other.fallbacks &&
           fallbackCreditToken == other.fallbackCreditToken;
 
@@ -495,6 +527,8 @@ class MessageCreateRequest {
     speed,
     cacheControl,
     diagnostics,
+    compaction,
+    thread,
     fallbacks,
     fallbackCreditToken,
   ]);
@@ -508,7 +542,7 @@ class MessageCreateRequest {
       'toolChoice: $toolChoice, tools: $tools, topP: $topP, topK: $topK, '
       'inferenceGeo: $inferenceGeo, outputConfig: $outputConfig, '
       'container: $container, speed: $speed, cacheControl: $cacheControl, '
-      'diagnostics: $diagnostics, '
+      'diagnostics: $diagnostics, compaction: $compaction, thread: $thread, '
       'fallbacks: $fallbacks, '
       'fallbackCreditToken: '
       '${fallbackCreditToken == null ? null : '[redacted]'})';

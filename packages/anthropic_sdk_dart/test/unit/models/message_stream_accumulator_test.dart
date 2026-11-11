@@ -382,12 +382,16 @@ void main() {
         expect(block.input, {'query': 'dart'});
       });
 
-      test('compaction block with deltas', () {
+      test('compaction delta replaces the summary and encrypted content', () {
         final acc = _accumulate([
           _messageStartJson(),
           _contentBlockStartJson(0, _compactionBlockJson()),
-          _contentBlockDeltaJson(0, _compactionDeltaJson('Summary ')),
-          _contentBlockDeltaJson(0, _compactionDeltaJson('of context.')),
+          _contentBlockDeltaJson(0, _compactionDeltaJson('Earlier summary')),
+          _contentBlockDeltaJson(
+            0,
+            _compactionDeltaJson('Final summary')
+              ..['encrypted_content'] = 'opaque-final',
+          ),
           _contentBlockStopJson(0),
           _messageDeltaJson(stopReason: 'compaction'),
           _messageStopJson,
@@ -396,7 +400,8 @@ void main() {
         expect(acc.contentBlocks, hasLength(1));
         final block = acc.contentBlocks[0];
         expect(block, isA<CompactionBlock>());
-        expect((block as CompactionBlock).content, 'Summary of context.');
+        expect((block as CompactionBlock).content, 'Final summary');
+        expect(block.encryptedContent, 'opaque-final');
       });
 
       test('redacted thinking block pass-through', () {
@@ -1144,7 +1149,7 @@ void main() {
         expect(block.content, isNull);
       });
 
-      test('compaction delta with null content is no-op', () {
+      test('compaction delta with null content clears the summary', () {
         final acc = _accumulate([
           _messageStartJson(),
           _contentBlockStartJson(0, _compactionBlockJson(content: 'initial')),
@@ -1155,8 +1160,7 @@ void main() {
         ]);
 
         final block = acc.contentBlocks[0] as CompactionBlock;
-        // Buffer is empty (null delta was no-op), so falls back to initial.
-        expect(block.content, 'initial');
+        expect(block.content, isNull);
       });
     });
 

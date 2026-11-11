@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import '../beta/config/container.dart';
 import '../content/content_block.dart';
+import '../messages/diagnostics.dart';
 import '../messages/input_transformation.dart';
 import '../messages/message.dart';
 import '../messages/message_role.dart';
@@ -21,7 +22,7 @@ class _AccumulatedContentBlock {
   final StringBuffer textBuffer = StringBuffer();
   final StringBuffer thinkingBuffer = StringBuffer();
   final StringBuffer inputJsonBuffer = StringBuffer();
-  final StringBuffer compactionBuffer = StringBuffer();
+  CompactionBlock? compaction;
 
   // Signature (overwrite semantics — not appended).
   String? signature;
@@ -56,6 +57,9 @@ class MessageStreamAccumulator {
   RefusalStopDetails? _stopDetails;
   String? _stopSequence;
   Container? _container;
+  Diagnostics? _diagnostics;
+  bool _receivedStop = false;
+  ErrorEvent? _streamError;
   List<InputTransformation>? _inputTransformations;
   final List<_AccumulatedContentBlock> _blocks = [];
 
@@ -67,11 +71,12 @@ class MessageStreamAccumulator {
         _model = message.model;
         _role = message.role;
         _usage = message.usage;
+        _diagnostics = message.diagnostics;
         _inputTransformations = message.inputTransformations;
       case ContentBlockStartEvent(:final contentBlock):
         _blocks.add(_AccumulatedContentBlock(contentBlock));
       case ContentBlockDeltaEvent(:final index, :final delta):
-        if (index < _blocks.length) {
+        if (index >= 0 && index < _blocks.length) {
           _addDelta(_blocks[index], delta);
         }
       case ContentBlockStopEvent():
@@ -88,11 +93,11 @@ class MessageStreamAccumulator {
         _inputTransformations = inputTransformations ?? _inputTransformations;
         _mergeUsage(usage);
       case MessageStopEvent():
-        break;
+        _receivedStop = true;
       case PingEvent():
         break;
       case ErrorEvent():
-        break;
+        _streamError = event;
     }
   }
 
@@ -108,8 +113,13 @@ class MessageStreamAccumulator {
         block.signature = signature;
       case CitationsDelta(:final citation):
         block.citations.add(citation);
-      case CompactionDelta(:final content):
-        if (content != null) block.compactionBuffer.write(content);
+      case CompactionDelta(:final content, :final encryptedContent):
+        if (block.initialBlock case final CompactionBlock initial) {
+          block.compaction = (block.compaction ?? initial).copyWith(
+            content: content,
+            encryptedContent: encryptedContent,
+          );
+        }
       case UnknownContentBlockDelta():
         break; // Unknown deltas are ignored during accumulation
     }
@@ -248,6 +258,9 @@ class MessageStreamAccumulator {
   /// Returns `true` if the stop reason is [StopReason.refusal].
   bool get isRefusal => _stopReason == StopReason.refusal;
 
+  /// Whether the server completed the message without an error event.
+  bool get isComplete => _receivedStop && _streamError == null;
+
   /// Returns all accumulated content blocks.
   List<ContentBlock> get contentBlocks {
     return [for (final block in _blocks) _buildBlock(block)];
@@ -278,8 +291,23 @@ class MessageStreamAccumulator {
       stopSequence: _stopSequence,
       usage: _usage!,
       container: _container,
+      diagnostics: _diagnostics,
       inputTransformations: _inputTransformations,
     );
+  }
+
+  /// Builds a complete message for use as conversation history.
+  ///
+  /// Throws [StateError] if the stream ended before `message_stop` or sent
+  /// an [ErrorEvent]. Use [toMessage] to inspect a partial snapshot.
+  Message toFinalMessage() {
+    if (_streamError case final error?) {
+      throw StateError('Message stream failed: ${error.errorType}');
+    }
+    if (!_receivedStop) {
+      throw StateError('Message stream ended before message_stop');
+    }
+    return toMessage();
   }
 
   /// Resets all accumulated state.
@@ -292,6 +320,9 @@ class MessageStreamAccumulator {
     _stopDetails = null;
     _stopSequence = null;
     _container = null;
+    _diagnostics = null;
+    _receivedStop = false;
+    _streamError = null;
     _inputTransformations = null;
     _blocks.clear();
   }
@@ -316,11 +347,7 @@ class MessageStreamAccumulator {
         caller: initial.caller,
         toolsetName: initial.toolsetName,
       ),
-      CompactionBlock() => CompactionBlock(
-        content: acc.compactionBuffer.isEmpty
-            ? initial.content
-            : acc.compactionBuffer.toString(),
-      ),
+      CompactionBlock() => acc.compaction ?? initial,
       _ => initial,
     };
   }

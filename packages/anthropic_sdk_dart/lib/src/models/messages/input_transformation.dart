@@ -2,7 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
 
-/// Which binding check removed a dropped thinking block.
+/// Which binding check a thinking block failed.
 ///
 /// A block that would fail several checks reports one reason, in this
 /// order of precedence: [organizationBindingMismatch],
@@ -52,8 +52,7 @@ enum InputTransformationReason {
   String toJson() => value;
 }
 
-/// A change the API made to a request's input before showing it to the
-/// model.
+/// A binding check reported for a request input block.
 ///
 /// One entry per change, in request order. Present only with
 /// `anthropic-beta: thinking-binding-controls-2026-08-01`. Ignore types you
@@ -66,6 +65,8 @@ sealed class InputTransformation {
     final type = json['type'] as String?;
     return switch (type) {
       'thinking_dropped' => ThinkingDroppedInputTransformation.fromJson(json),
+      'thinking_mismatch_allowed' =>
+        ThinkingMismatchAllowedInputTransformation.fromJson(json),
       _ => UnknownInputTransformation.fromJson(json),
     };
   }
@@ -93,11 +94,22 @@ class ThinkingDroppedInputTransformation extends InputTransformation {
   /// Which binding check removed the block.
   final InputTransformationReason reason;
 
+  final String? _rawReason;
+
+  /// Original wire reason, including unrecognized values.
+  String get rawReason => _rawReason ?? reason.value;
+
   /// Creates a [ThinkingDroppedInputTransformation].
   const ThinkingDroppedInputTransformation({
     required this.path,
     required this.reason,
-  });
+  }) : _rawReason = null;
+
+  const ThinkingDroppedInputTransformation._(
+    this.path,
+    this.reason,
+    this._rawReason,
+  );
 
   /// Creates a [ThinkingDroppedInputTransformation] from JSON.
   factory ThinkingDroppedInputTransformation.fromJson(
@@ -115,9 +127,11 @@ class ThinkingDroppedInputTransformation extends InputTransformation {
         'ThinkingDroppedInputTransformation: missing required "reason"',
       );
     }
-    return ThinkingDroppedInputTransformation(
-      path: path as String,
-      reason: InputTransformationReason.fromJson(reason as String),
+    final rawReason = reason as String;
+    return ThinkingDroppedInputTransformation._(
+      path as String,
+      InputTransformationReason.fromJson(rawReason),
+      rawReason,
     );
   }
 
@@ -125,7 +139,7 @@ class ThinkingDroppedInputTransformation extends InputTransformation {
   Map<String, dynamic> toJson() => {
     'type': type,
     'path': path,
-    'reason': reason.toJson(),
+    'reason': rawReason,
   };
 
   /// Creates a copy with replaced values.
@@ -133,9 +147,10 @@ class ThinkingDroppedInputTransformation extends InputTransformation {
     String? path,
     InputTransformationReason? reason,
   }) {
-    return ThinkingDroppedInputTransformation(
-      path: path ?? this.path,
-      reason: reason ?? this.reason,
+    return ThinkingDroppedInputTransformation._(
+      path ?? this.path,
+      reason ?? this.reason,
+      reason == null ? _rawReason : null,
     );
   }
 
@@ -145,14 +160,97 @@ class ThinkingDroppedInputTransformation extends InputTransformation {
       other is ThinkingDroppedInputTransformation &&
           runtimeType == other.runtimeType &&
           path == other.path &&
-          reason == other.reason;
+          rawReason == other.rawReason;
 
   @override
-  int get hashCode => Object.hash(path, reason);
+  int get hashCode => Object.hash(path, rawReason);
 
   @override
   String toString() =>
-      'ThinkingDroppedInputTransformation(path: $path, reason: $reason)';
+      'ThinkingDroppedInputTransformation(path: $path, reason: $reason, '
+      'rawReason: $rawReason)';
+}
+
+/// A thinking block that failed a binding check and still reached the model.
+@immutable
+class ThinkingMismatchAllowedInputTransformation extends InputTransformation {
+  /// Always `thinking_mismatch_allowed` for this entry type.
+  static const String type = 'thinking_mismatch_allowed';
+
+  /// Location of the block in the request as `messages.{i}.content.{j}`.
+  final String path;
+
+  /// The binding check that failed.
+  final InputTransformationReason reason;
+
+  final String? _rawReason;
+
+  /// Original wire reason, including unrecognized values.
+  String get rawReason => _rawReason ?? reason.value;
+
+  /// Creates a [ThinkingMismatchAllowedInputTransformation].
+  const ThinkingMismatchAllowedInputTransformation({
+    required this.path,
+    required this.reason,
+  }) : _rawReason = null;
+
+  const ThinkingMismatchAllowedInputTransformation._(
+    this.path,
+    this.reason,
+    this._rawReason,
+  );
+
+  /// Creates a [ThinkingMismatchAllowedInputTransformation] from JSON.
+  factory ThinkingMismatchAllowedInputTransformation.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    if (json case {
+      'type': 'thinking_mismatch_allowed',
+      'path': final String path,
+      'reason': final String rawReason,
+    }) {
+      return ThinkingMismatchAllowedInputTransformation._(
+        path,
+        InputTransformationReason.fromJson(rawReason),
+        rawReason,
+      );
+    }
+    throw const FormatException(
+      'Expected thinking_mismatch_allowed with string path and reason',
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'path': path,
+    'reason': rawReason,
+  };
+
+  /// Creates a copy with replaced values.
+  ThinkingMismatchAllowedInputTransformation copyWith({
+    String? path,
+    InputTransformationReason? reason,
+  }) => ThinkingMismatchAllowedInputTransformation._(
+    path ?? this.path,
+    reason ?? this.reason,
+    reason == null ? _rawReason : null,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ThinkingMismatchAllowedInputTransformation &&
+          runtimeType == other.runtimeType &&
+          path == other.path &&
+          rawReason == other.rawReason;
+
+  @override
+  int get hashCode => Object.hash(path, rawReason);
+
+  @override
+  String toString() =>
+      'ThinkingMismatchAllowedInputTransformation(path: $path, reason: $rawReason)';
 }
 
 /// An unrecognized input transformation entry.

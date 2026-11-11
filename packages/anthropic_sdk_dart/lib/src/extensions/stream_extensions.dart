@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../models/messages/message.dart';
 import '../models/metadata/stop_reason.dart';
 import '../models/streaming/content_block_delta.dart';
 import '../models/streaming/message_stream_accumulator.dart';
@@ -60,6 +61,19 @@ extension MessageStreamExtension on Stream<MessageStreamEvent> {
         this,
         _AccumulatorSink.new,
       );
+
+  /// Consumes the stream and returns its completed message.
+  ///
+  /// A truncated or failed stream throws. For partial output, use
+  /// [accumulate] instead.
+  Future<Message> finalMessage() async {
+    final accumulator = MessageStreamAccumulator();
+    await for (final event in this) {
+      accumulator.add(event);
+      if (event is ErrorEvent) break;
+    }
+    return accumulator.toFinalMessage();
+  }
 
   /// Consumes the entire stream and returns the last stop reason.
   ///

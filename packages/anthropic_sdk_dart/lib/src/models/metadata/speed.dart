@@ -3,7 +3,10 @@ enum Speed {
   /// Standard throughput mode.
   standard('standard'),
 
-  /// Fast mode (beta / premium pricing depending on model).
+  /// Fast mode with premium pricing on supported models.
+  ///
+  /// On the Claude API, Claude Opus 5.5 and Claude Fable 5.2 accept fast mode
+  /// without a beta header. Some earlier models require the fast-mode beta.
   fast('fast');
 
   const Speed(this.value);

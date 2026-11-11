@@ -895,14 +895,38 @@ class CompactionBlock extends ContentBlock {
   /// Encrypted compaction payload for server-side context restoration.
   final String? encryptedContent;
 
+  /// Signature over the summary. Pass it back unchanged on subsequent turns.
+  final String? signature;
+
+  /// Tool changes from the summarized range.
+  ///
+  /// Forward these provider objects unchanged, including nested definitions
+  /// and an empty list when the server reports no tool changes.
+  final List<Map<String, dynamic>>? toolChanges;
+
   /// Creates a [CompactionBlock].
-  const CompactionBlock({required this.content, this.encryptedContent});
+  const CompactionBlock({
+    required this.content,
+    this.encryptedContent,
+    this.signature,
+    this.toolChanges,
+  });
 
   /// Creates a [CompactionBlock] from JSON.
   factory CompactionBlock.fromJson(Map<String, dynamic> json) {
+    final toolChanges = json['tool_changes'] as List<Object?>?;
     return CompactionBlock(
       content: json['content'] as String?,
       encryptedContent: json['encrypted_content'] as String?,
+      signature: json['signature'] as String?,
+      toolChanges: toolChanges == null
+          ? null
+          : List.unmodifiable(
+              toolChanges.map(
+                (change) =>
+                    deepUnmodifiableMap(change! as Map<String, dynamic>),
+              ),
+            ),
     );
   }
 
@@ -911,12 +935,16 @@ class CompactionBlock extends ContentBlock {
     'type': 'compaction',
     'content': content,
     'encrypted_content': encryptedContent,
+    'signature': ?signature,
+    'tool_changes': ?toolChanges,
   };
 
   /// Creates a copy with replaced values.
   CompactionBlock copyWith({
     Object? content = unsetCopyWithValue,
     Object? encryptedContent = unsetCopyWithValue,
+    Object? signature = unsetCopyWithValue,
+    Object? toolChanges = unsetCopyWithValue,
   }) {
     return CompactionBlock(
       content: content == unsetCopyWithValue
@@ -925,6 +953,12 @@ class CompactionBlock extends ContentBlock {
       encryptedContent: encryptedContent == unsetCopyWithValue
           ? this.encryptedContent
           : encryptedContent as String?,
+      signature: signature == unsetCopyWithValue
+          ? this.signature
+          : signature as String?,
+      toolChanges: toolChanges == unsetCopyWithValue
+          ? this.toolChanges
+          : toolChanges as List<Map<String, dynamic>>?,
     );
   }
 
@@ -934,15 +968,24 @@ class CompactionBlock extends ContentBlock {
       other is CompactionBlock &&
           runtimeType == other.runtimeType &&
           content == other.content &&
-          encryptedContent == other.encryptedContent;
+          encryptedContent == other.encryptedContent &&
+          signature == other.signature &&
+          listOfMapsDeepEqual(toolChanges, other.toolChanges);
 
   @override
-  int get hashCode => Object.hash(content, encryptedContent);
+  int get hashCode => Object.hash(
+    content,
+    encryptedContent,
+    signature,
+    listOfMapsHashCode(toolChanges),
+  );
 
   @override
   String toString() =>
       'CompactionBlock(content: $content, '
-      'encryptedContent: ${encryptedContent == null ? 'null' : '[${encryptedContent!.length} chars]'})';
+      'encryptedContent: ${encryptedContent == null ? 'null' : '[${encryptedContent!.length} chars]'}, '
+      'signature: ${signature == null ? 'null' : '[${signature!.length} chars]'}, '
+      'toolChanges: ${toolChanges?.length})';
 }
 
 /// Web search result content.

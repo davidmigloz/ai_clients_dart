@@ -135,6 +135,9 @@ sealed class InputContentBlock {
   /// Creates a compaction block.
   factory InputContentBlock.compaction({
     required String? content,
+    String? encryptedContent,
+    String? signature,
+    List<Map<String, dynamic>>? toolChanges,
     CacheControlEphemeral? cacheControl,
   }) = CompactionInputBlock;
 
@@ -2012,6 +2015,12 @@ class CompactionInputBlock extends InputContentBlock {
   /// Encrypted compaction payload for server-side context restoration.
   final String? encryptedContent;
 
+  /// Signature over the summary. Pass it back unchanged on subsequent turns.
+  final String? signature;
+
+  /// Tool changes from the summarized range, preserved as provider objects.
+  final List<Map<String, dynamic>>? toolChanges;
+
   /// Cache control for this block.
   final CacheControlEphemeral? cacheControl;
 
@@ -2019,14 +2028,26 @@ class CompactionInputBlock extends InputContentBlock {
   const CompactionInputBlock({
     required this.content,
     this.encryptedContent,
+    this.signature,
+    this.toolChanges,
     this.cacheControl,
   });
 
   /// Creates a [CompactionInputBlock] from JSON.
   factory CompactionInputBlock.fromJson(Map<String, dynamic> json) {
+    final toolChanges = json['tool_changes'] as List<Object?>?;
     return CompactionInputBlock(
       content: json['content'] as String?,
       encryptedContent: json['encrypted_content'] as String?,
+      signature: json['signature'] as String?,
+      toolChanges: toolChanges == null
+          ? null
+          : List.unmodifiable(
+              toolChanges.map(
+                (change) =>
+                    deepUnmodifiableMap(change! as Map<String, dynamic>),
+              ),
+            ),
       cacheControl: json['cache_control'] != null
           ? CacheControlEphemeral.fromJson(
               json['cache_control'] as Map<String, dynamic>,
@@ -2040,6 +2061,8 @@ class CompactionInputBlock extends InputContentBlock {
     'type': 'compaction',
     'content': content,
     if (encryptedContent != null) 'encrypted_content': encryptedContent,
+    'signature': ?signature,
+    'tool_changes': ?toolChanges,
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
   };
 
@@ -2047,6 +2070,8 @@ class CompactionInputBlock extends InputContentBlock {
   CompactionInputBlock copyWith({
     Object? content = unsetCopyWithValue,
     Object? encryptedContent = unsetCopyWithValue,
+    Object? signature = unsetCopyWithValue,
+    Object? toolChanges = unsetCopyWithValue,
     Object? cacheControl = unsetCopyWithValue,
   }) {
     return CompactionInputBlock(
@@ -2056,6 +2081,12 @@ class CompactionInputBlock extends InputContentBlock {
       encryptedContent: encryptedContent == unsetCopyWithValue
           ? this.encryptedContent
           : encryptedContent as String?,
+      signature: signature == unsetCopyWithValue
+          ? this.signature
+          : signature as String?,
+      toolChanges: toolChanges == unsetCopyWithValue
+          ? this.toolChanges
+          : toolChanges as List<Map<String, dynamic>>?,
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
           : cacheControl as CacheControlEphemeral?,
@@ -2069,16 +2100,25 @@ class CompactionInputBlock extends InputContentBlock {
           runtimeType == other.runtimeType &&
           content == other.content &&
           encryptedContent == other.encryptedContent &&
+          signature == other.signature &&
+          listOfMapsDeepEqual(toolChanges, other.toolChanges) &&
           cacheControl == other.cacheControl;
 
   @override
-  int get hashCode => Object.hash(content, encryptedContent, cacheControl);
+  int get hashCode => Object.hash(
+    content,
+    encryptedContent,
+    signature,
+    listOfMapsHashCode(toolChanges),
+    cacheControl,
+  );
 
   @override
   String toString() =>
       'CompactionInputBlock(content: $content, '
       'encryptedContent: ${encryptedContent == null ? 'null' : '[${encryptedContent!.length} chars]'}, '
-      'cacheControl: $cacheControl)';
+      'signature: ${signature == null ? 'null' : '[${signature!.length} chars]'}, '
+      'toolChanges: ${toolChanges?.length}, cacheControl: $cacheControl)';
 }
 
 /// Tool reference block in input.

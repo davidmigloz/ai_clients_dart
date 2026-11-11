@@ -94,6 +94,33 @@ Use `ThinkingConfig.betweenTools()` when the model accepts this setting. Check `
 
 ---
 
+## Handle thinking binding reports
+
+`InputTransformation` now includes `ThinkingMismatchAllowedInputTransformation`. It reports a block that reached the model after a binding check failed. Add a case to exhaustive switches.
+
+Before
+
+```dart
+String describeReport(InputTransformation report) => switch (report) {
+  ThinkingDroppedInputTransformation(:final path) => 'Dropped $path',
+  UnknownInputTransformation() => 'Unknown transformation',
+};
+```
+
+After
+
+```dart
+String describeReport(InputTransformation report) => switch (report) {
+  ThinkingDroppedInputTransformation(:final path) => 'Dropped $path',
+  ThinkingMismatchAllowedInputTransformation(:final path) => 'Allowed $path',
+  UnknownInputTransformation() => 'Unknown transformation',
+};
+```
+
+For legacy auto-compaction, the latest `compaction_delta` replaces the earlier summary. A null summary marks a failed compaction. On-demand signed compaction arrives as a complete block at `content_block_start`. Use `finalMessage()` when replay depends on reaching `message_stop`.
+
+---
+
 ## Migrating from v9.x to v10.0.0
 
 v10.0.0 adds document sources that reference uploaded files. `DocumentSource` is sealed, so exhaustive switches must handle the new `FileDocumentSource` variant.
