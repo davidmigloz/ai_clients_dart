@@ -1,0 +1,58 @@
+# Claude API alignment · November 11, 2026
+
+Tracking issue [#477](https://github.com/davidmigloz/ai_clients_dart/issues/477). This round uses the sources below as they stood on November 11, 2026 in Europe/Madrid. The release notes' latest entry at cutoff is November 9. The two SDK pins were published November 10.
+
+## Sources and baseline
+
+| Source | Pin |
+| --- | --- |
+| Dart | `main` at `acbd8c80ef6550e932319873b1778be2c575a0cd`, package 10.0.0 |
+| Last spec promotion | [#302](https://github.com/davidmigloz/ai_clients_dart/pull/302) on September 2, commit `7adfe29c60c2a0c21b864e41854f265a9a1a350e` |
+| Committed OpenAPI | Stainless pin `e50cf35b74cc0471a2b5af7ea03765aa81c035f82588e9a1ba1b29aeaa17d064`. Normalized file SHA-256 `a247996d52c269f7ec74f8c1129206fa2360fecaa3d109eac462cce10c188bd0`. |
+| Platform | [Release notes](https://platform.claude.com/docs/en/release-notes/overview), [API overview](https://platform.claude.com/docs/en/api/overview), [API versions](https://platform.claude.com/docs/en/api/versioning), [2026-10-21 migration](https://platform.claude.com/docs/en/api/migration-2026-10-21) |
+| Python | [v2.8.0](https://github.com/anthropics/anthropic-sdk-python/releases/tag/v2.8.0), [source](https://github.com/anthropics/anthropic-sdk-python/tree/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9) |
+| TypeScript | [sdk-v1.8.0](https://github.com/anthropics/anthropic-sdk-typescript/releases/tag/sdk-v1.8.0), [source](https://github.com/anthropics/anthropic-sdk-typescript/tree/590783078cd961a0df698d9fddc0275c65ff3afd) |
+| Candidate OpenAPI | [Python bundle](https://raw.githubusercontent.com/anthropics/anthropic-sdk-python/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/scripts/mock-spec.json.gz) and [TypeScript bundle](https://raw.githubusercontent.com/anthropics/anthropic-sdk-typescript/590783078cd961a0df698d9fddc0275c65ff3afd/scripts/mock-spec.json.gz). Identical compressed SHA-256 `3e2a4bbb5c9cfad58b39bb801086ce65436a7f88c6b04b9dca0f626d6113537e`. Decompressed JSON SHA-256 `690622377a5eedc0e9f2265ed755ee34dc0c52d35b47327f425777a550f45e1e`. |
+
+The toolkit's remote fetch reaches HTTP 404 for the September Stainless URL. Anthropic's [source change](https://github.com/anthropics/anthropic-sdk-python/commit/f9b0cf281932512e6b40cd1a887a44542c883468) removed the public spec URL from `.stats.yml` and added the bundled OpenAPI fixture. The current official mock servers use that bundle. For candidate review, verify both pinned digests, decompress to the toolkit's `/tmp/openapi-anthropic-dart/latest-main.json`, and run `review` with the package config. Promote the snapshot and update the fetch instructions in the closeout. The canonical spec remains at the September pin during implementation.
+
+Use the HTTP reference for request/response shapes, the guide for workflow and access, and the generated resources for the official SDK's actual headers, routes and helpers. The OpenAPI keys ending in `?beta=true` identify variants. Both pinned SDKs use the same URL path on the wire and select the beta contract with headers when required. Keep the original keys in the snapshot and preserve the distinction in the inventory.
+
+### Scope accounting
+
+The September snapshot contains 214 operations, 1,229 schema components and 44 webhooks. The candidate contains 385 operations, 2,235 schema components and 47 webhooks. Exact JSON comparison finds 172 added, 213 modified and one removed operation, plus 1,011 added, 433 modified and five removed schemas. Descriptions, SDK annotations, parameter metadata and aliases contribute to the exact comparison. The toolkit normalizes the same inputs to 172 added, 179 modified and one removed operation, and 1,011 added, 70 modified and five removed schemas.
+
+Both pinned SDKs report 373 configured endpoints. Their resource methods account for 373 candidate rows, including two Batch results methods that use the returned URL. Twelve remaining rows are nine deprecated organization-prefixed MCP tunnel operations and three HTTP-only report operations (legacy Messages usage and cost, and active Claude Code usage). The public [Compliance HTTP reference](https://platform.claude.com/docs/en/api/compliance) supplies 39 additional operations outside the snapshot. The [inventory](inventory.json) assigns each delta and the public HTTP-only work to a ticket. An assignment records investigation and implementation ownership. Closeout must add the resulting Dart carrier or documented disposition.
+
+No existing open Anthropic tickets were found. The repository's only open issue before this round was the unrelated OpenAI HTTP/2 follow-up #408. The current round also accounts for older Admin, Compliance, Environments and tunnels gaps already present at the baseline, plus SDK helpers whose absence is independent of this spec change.
+
+### Baseline diagnostics
+
+- Dart 3.13.7. All 350 Dart files are formatted, `dart fix --dry-run` finds no fixes, and `dart analyze --fatal-infos` is clean.
+- Unit suite passes 1,913 tests with three environment-dependent skips. Live API calls were excluded.
+- Canonical toolkit verify has one implementation error for the existing `StopReason` fallback diagnostic, 151 implementation info findings, no resource coverage gaps under the existing manifest, and zero errors in exports, docs, README and consistency. The manifest excludes several entire resource groups. Those exclusions do not establish public API parity.
+- Candidate review reports 2,155 errors, 81 warnings and 1,026 missing manifest entries before implementation. Use it as discovery output and compare the exact diagnostics at closeout.
+
+## Work and verification
+
+| Issue | Slice | Dependencies |
+| --- | --- | --- |
+| [#478](https://github.com/davidmigloz/ai_clients_dart/issues/478) | [Adopt API version 2026-10-21 with a legacy opt-out](tickets/01-version.md) | None |
+| [#479](https://github.com/davidmigloz/ai_clients_dart/issues/479) | [Add Models capabilities and workspace routing](tickets/02-models-routing.md) | [478](https://github.com/davidmigloz/ai_clients_dart/issues/478) |
+| [#480](https://github.com/davidmigloz/ai_clients_dart/issues/480) | [Add message threads and signed compaction](tickets/03-message-state.md) | [478](https://github.com/davidmigloz/ai_clients_dart/issues/478) |
+| [#481](https://github.com/davidmigloz/ai_clients_dart/issues/481) | [Align tool replay, streaming and typed errors](tickets/04-tools-streaming.md) | [478](https://github.com/davidmigloz/ai_clients_dart/issues/478) · [480](https://github.com/davidmigloz/ai_clients_dart/issues/480) |
+| [#482](https://github.com/davidmigloz/ai_clients_dart/issues/482) | [Add generally available User Profiles workflows](tickets/05-profiles.md) | [478](https://github.com/davidmigloz/ai_clients_dart/issues/478) |
+| [#483](https://github.com/davidmigloz/ai_clients_dart/issues/483) | [Align agents, sessions, events and multiagent workflows](tickets/06-agents-sessions.md) | [478](https://github.com/davidmigloz/ai_clients_dart/issues/478) · [479](https://github.com/davidmigloz/ai_clients_dart/issues/479) |
+| [#484](https://github.com/davidmigloz/ai_clients_dart/issues/484) | [Add Managed Agents environments and tunnels](tickets/07-environments-tunnels.md) | [483](https://github.com/davidmigloz/ai_clients_dart/issues/483) |
+| [#485](https://github.com/davidmigloz/ai_clients_dart/issues/485) | [Align Files, Skills, memory, vaults and deployments](tickets/08-agent-resources.md) | [478](https://github.com/davidmigloz/ai_clients_dart/issues/478) · [479](https://github.com/davidmigloz/ai_clients_dart/issues/479) |
+| [#486](https://github.com/davidmigloz/ai_clients_dart/issues/486) | [Add core Organization Admin API resources](tickets/09-admin-core.md) | [478](https://github.com/davidmigloz/ai_clients_dart/issues/478) |
+| [#487](https://github.com/davidmigloz/ai_clients_dart/issues/487) | [Add Admin service accounts and federation resources](tickets/10-admin-identity.md) | [486](https://github.com/davidmigloz/ai_clients_dart/issues/486) |
+| [#488](https://github.com/davidmigloz/ai_clients_dart/issues/488) | [Add usage and cost analytics and legacy reports](tickets/11-analytics.md) | [486](https://github.com/davidmigloz/ai_clients_dart/issues/486) |
+| [#489](https://github.com/davidmigloz/ai_clients_dart/issues/489) | [Add Admin RBAC, spend limits and sign-out](tickets/12-admin-governance.md) | [486](https://github.com/davidmigloz/ai_clients_dart/issues/486) |
+| [#490](https://github.com/davidmigloz/ai_clients_dart/issues/490) | [Add Admin plugins, webhooks, telemetry and Claude Tag](tickets/13-admin-integrations.md) | [486](https://github.com/davidmigloz/ai_clients_dart/issues/486) · [482](https://github.com/davidmigloz/ai_clients_dart/issues/482) |
+| [#491](https://github.com/davidmigloz/ai_clients_dart/issues/491) | [Add the public Compliance HTTP API](tickets/14-compliance.md) | [478](https://github.com/davidmigloz/ai_clients_dart/issues/478) |
+| [#492](https://github.com/davidmigloz/ai_clients_dart/issues/492) | [Reconcile the Claude API alignment and release readiness](tickets/15-closeout.md) | [479](https://github.com/davidmigloz/ai_clients_dart/issues/479) · [481](https://github.com/davidmigloz/ai_clients_dart/issues/481) · [482](https://github.com/davidmigloz/ai_clients_dart/issues/482) · [483](https://github.com/davidmigloz/ai_clients_dart/issues/483) · [484](https://github.com/davidmigloz/ai_clients_dart/issues/484) · [485](https://github.com/davidmigloz/ai_clients_dart/issues/485) · [486](https://github.com/davidmigloz/ai_clients_dart/issues/486) · [487](https://github.com/davidmigloz/ai_clients_dart/issues/487) · [488](https://github.com/davidmigloz/ai_clients_dart/issues/488) · [489](https://github.com/davidmigloz/ai_clients_dart/issues/489) · [490](https://github.com/davidmigloz/ai_clients_dart/issues/490) · [491](https://github.com/davidmigloz/ai_clients_dart/issues/491) |
+
+Read the [core audit](core-audit.md) and [platform audit](platform-audit.md) for current support, wire decisions and restrictions. Each slice verifies the public Dart entry point against the fixed evidence, including exports, exact endpoint and version/beta headers, request/response models, pagination and failure paths where relevant. Add runnable examples for new capabilities and update the documentation and toolkit index in the implementation slices. Do not call live APIs during this round.
+
+An independent reviewer must try to reproduce the implementation's claims and look for missed requirements and false-positive tests. Resolve findings, then record the clean review and passing CI against the same head before squash-merging. Closeout records merged evidence and full-suite verification. Release readiness includes the recommended semver and migration examples. Actual versioning and publication are a separate approval.
