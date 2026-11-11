@@ -3,27 +3,26 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/user_profiles/create_user_profile_request.dart';
+import '../models/user_profiles/current_user_profile.dart';
+import '../models/user_profiles/current_user_profile_requests.dart';
 import '../models/user_profiles/enrollment_url.dart';
 import '../models/user_profiles/list_user_profiles_response.dart';
 import '../models/user_profiles/update_user_profile_request.dart';
 import '../models/user_profiles/user_profile.dart';
+import '../models/user_profiles/user_profile_action.dart';
+import '../models/user_profiles/user_profile_enforcement.dart';
 import '../models/user_profiles/user_profile_list_order.dart';
 import '../models/user_profiles/user_profile_list_order_by.dart';
 import 'base_resource.dart';
 
-/// Beta header for the User Profiles API.
-const _betaHeader = 'user-profiles-2026-08-18';
+const _profilesPath = '/v1/user_profiles';
+const _legacyBetaHeader = 'user-profiles-2026-08-18';
 
-/// Resource for the User Profiles API (Beta).
+/// The legacy beta User Profiles API.
 ///
-/// User profiles let a platform register end-users with Anthropic, attach
-/// metadata and an external identifier, track trust-grant status for feature
-/// areas that require per-user enrollment, and generate short-lived enrollment
-/// URLs for end users to authorize their profile.
-///
-/// This is a beta feature and requires the `anthropic-beta` header, which
-/// this resource sets automatically.
-class UserProfilesResource extends ResourceBase {
+/// Use [current] for the generally available User Profiles API. This resource
+/// continues to send the legacy beta header and use the corresponding models.
+class UserProfilesResource extends _UserProfilesBase {
   /// Creates a [UserProfilesResource].
   UserProfilesResource({
     required super.config,
@@ -31,164 +30,310 @@ class UserProfilesResource extends ResourceBase {
     required super.interceptorChain,
     required super.requestBuilder,
     super.ensureNotClosed,
-  });
+  }) : super(legacyBeta: true);
 
-  /// Creates a new user profile.
-  ///
-  /// The optional [abortTrigger] allows canceling the request.
+  /// The generally available User Profiles API.
+  late final CurrentUserProfilesResource current = CurrentUserProfilesResource(
+    config: config,
+    httpClient: httpClient,
+    interceptorChain: interceptorChain,
+    requestBuilder: requestBuilder,
+    ensureNotClosed: ensureNotClosed,
+  );
+
+  /// Creates a user profile using the legacy beta request shape.
   Future<UserProfile> create(
     CreateUserProfileRequest request, {
+    String? workspaceId,
     Future<void>? abortTrigger,
-  }) async {
-    ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/user_profiles');
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'anthropic-beta': _betaHeader},
-    );
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
+  }) => _send(
+    'POST',
+    UserProfile.fromJson,
+    body: request.toJson,
+    workspaceId: workspaceId,
+    abortTrigger: abortTrigger,
+  );
 
-    final response = await interceptorChain.execute(
-      httpRequest,
-      abortTrigger: abortTrigger,
-    );
-
-    return UserProfile.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
-  }
-
-  /// Lists user profiles.
-  ///
-  /// Parameters:
-  /// - [limit]: Maximum number of user profiles to return.
-  /// - [page]: Pagination cursor from a previous response's `nextPage`.
-  /// - [order]: Sort order for the results.
-  /// - [orderBy]: Sort field for the results (`created_at` by default, or
-  ///   `name`).
-  /// - [abortTrigger]: Allows canceling the request.
+  /// Lists legacy user profiles. Pass the response's next cursor as [page].
   Future<ListUserProfilesResponse> list({
     int? limit,
     String? page,
     UserProfileListOrder? order,
     UserProfileListOrderBy? orderBy,
+    String? workspaceId,
     Future<void>? abortTrigger,
-  }) async {
-    ensureNotClosed?.call();
-    final queryParams = <String, dynamic>{
-      'limit': ?limit?.toString(),
-      'page': ?page,
-      'order': ?order?.toJson(),
-      'order_by': ?orderBy?.toJson(),
-    };
+  }) => _send(
+    'GET',
+    ListUserProfilesResponse.fromJson,
+    query: () => _listQuery(limit, page, order, orderBy),
+    workspaceId: workspaceId,
+    abortTrigger: abortTrigger,
+  );
 
-    final url = requestBuilder.buildUrl(
-      '/v1/user_profiles',
-      queryParams: queryParams.isEmpty ? null : queryParams,
-    );
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'anthropic-beta': _betaHeader},
-    );
-    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
-
-    final response = await interceptorChain.execute(
-      httpRequest,
-      abortTrigger: abortTrigger,
-    );
-
-    return ListUserProfilesResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
-  }
-
-  /// Retrieves a specific user profile.
-  ///
-  /// Parameters:
-  /// - [userProfileId]: The ID of the user profile to retrieve.
-  /// - [abortTrigger]: Allows canceling the request.
+  /// Retrieves a legacy user profile by its ID.
   Future<UserProfile> retrieve(
     String userProfileId, {
+    String? workspaceId,
     Future<void>? abortTrigger,
-  }) async {
-    ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/user_profiles/$userProfileId');
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'anthropic-beta': _betaHeader},
-    );
-    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+  }) => _send(
+    'GET',
+    UserProfile.fromJson,
+    profileId: userProfileId,
+    workspaceId: workspaceId,
+    abortTrigger: abortTrigger,
+  );
 
-    final response = await interceptorChain.execute(
-      httpRequest,
-      abortTrigger: abortTrigger,
-    );
-
-    return UserProfile.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
-  }
-
-  /// Updates a user profile.
-  ///
-  /// Parameters:
-  /// - [userProfileId]: The ID of the user profile to update.
-  /// - [request]: The update parameters. Omit fields to leave them unchanged.
-  /// - [abortTrigger]: Allows canceling the request.
+  /// Updates a legacy user profile. Omit fields to leave them unchanged.
   Future<UserProfile> update(
     String userProfileId,
     UpdateUserProfileRequest request, {
+    String? workspaceId,
     Future<void>? abortTrigger,
-  }) async {
-    ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/user_profiles/$userProfileId');
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'anthropic-beta': _betaHeader},
-    );
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
+  }) => _send(
+    'POST',
+    UserProfile.fromJson,
+    profileId: userProfileId,
+    body: request.toJson,
+    workspaceId: workspaceId,
+    abortTrigger: abortTrigger,
+  );
 
-    final response = await interceptorChain.execute(
-      httpRequest,
-      abortTrigger: abortTrigger,
-    );
-
-    return UserProfile.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
-  }
-
-  /// Creates an enrollment URL for a user profile.
-  ///
-  /// Send the returned URL to the end user so they can authorize their
-  /// profile. Each URL is single-use and expires after a short time window;
-  /// once expired (or consumed), request a new one.
-  ///
-  /// Parameters:
-  /// - [userProfileId]: The ID of the user profile to enroll.
-  /// - [abortTrigger]: Allows canceling the request.
+  /// Creates a short-lived legacy enrollment URL.
   Future<EnrollmentUrl> createEnrollmentUrl(
     String userProfileId, {
+    String? workspaceId,
+    Future<void>? abortTrigger,
+  }) => _send(
+    'POST',
+    EnrollmentUrl.fromJson,
+    profileId: userProfileId,
+    subpath: '/enrollment_url',
+    workspaceId: workspaceId,
+    abortTrigger: abortTrigger,
+  );
+
+  /// Deletes a profile using the legacy beta route.
+  Future<DeletedUserProfile> delete(
+    String userProfileId, {
+    String? workspaceId,
+    Future<void>? abortTrigger,
+  }) => _send(
+    'DELETE',
+    DeletedUserProfile.fromJson,
+    profileId: userProfileId,
+    workspaceId: workspaceId,
+    abortTrigger: abortTrigger,
+  );
+
+  /// Creates a short-lived action URL using the legacy beta route.
+  Future<UserProfileActionUrl> createActionUrl(
+    String userProfileId, {
+    required UserProfileAction action,
+    String? workspaceId,
+    Future<void>? abortTrigger,
+  }) => _send(
+    'POST',
+    UserProfileActionUrl.fromJson,
+    profileId: userProfileId,
+    subpath: '/action_urls',
+    body: () => {'action': action.toJson()},
+    workspaceId: workspaceId,
+    abortTrigger: abortTrigger,
+  );
+}
+
+/// The generally available User Profiles API.
+///
+/// Profiles belong to an organization. Pass a returned profile ID to Messages,
+/// token counting, or batch creation to attribute inference to that profile.
+/// The optional `workspaceId` parameter on operations select the request workspace when
+/// the caller's credentials can access multiple workspaces.
+class CurrentUserProfilesResource extends _UserProfilesBase {
+  /// Creates a [CurrentUserProfilesResource].
+  CurrentUserProfilesResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  }) : super(legacyBeta: false);
+
+  /// Creates a user profile. Each successful call creates a distinct profile.
+  Future<CurrentUserProfile> create(
+    CreateCurrentUserProfileRequest request, {
+    String? workspaceId,
+    Future<void>? abortTrigger,
+  }) => _send(
+    'POST',
+    CurrentUserProfile.fromJson,
+    body: request.toJson,
+    workspaceId: workspaceId,
+    abortTrigger: abortTrigger,
+  );
+
+  /// Lists user profiles, optionally filtered by enforcement status.
+  ///
+  /// Pass [CurrentUserProfilePage.nextPage] as [page] on the next request
+  /// with the same filters. A null cursor means the list is complete.
+  Future<CurrentUserProfilePage> list({
+    int? limit,
+    String? page,
+    UserProfileListOrder? order,
+    UserProfileListOrderBy? orderBy,
+    List<UserProfileEnforcementStatus>? enforcementStatuses,
+    String? workspaceId,
+    Future<void>? abortTrigger,
+  }) => _send(
+    'GET',
+    CurrentUserProfilePage.fromJson,
+    query: () => {
+      ..._listQuery(limit, page, order, orderBy),
+      if (enforcementStatuses != null)
+        'enforcement_status[]': enforcementStatuses.map(_filterStatus).toList(),
+    },
+    workspaceId: workspaceId,
+    abortTrigger: abortTrigger,
+  );
+
+  /// Retrieves a user profile by its ID.
+  Future<CurrentUserProfile> retrieve(
+    String userProfileId, {
+    String? workspaceId,
+    Future<void>? abortTrigger,
+  }) => _send(
+    'GET',
+    CurrentUserProfile.fromJson,
+    profileId: userProfileId,
+    workspaceId: workspaceId,
+    abortTrigger: abortTrigger,
+  );
+
+  /// Updates a profile. Omit fields to leave them unchanged.
+  Future<CurrentUserProfile> update(
+    String userProfileId,
+    UpdateCurrentUserProfileRequest request, {
+    String? workspaceId,
+    Future<void>? abortTrigger,
+  }) => _send(
+    'POST',
+    CurrentUserProfile.fromJson,
+    profileId: userProfileId,
+    body: request.toJson,
+    workspaceId: workspaceId,
+    abortTrigger: abortTrigger,
+  );
+
+  /// Deletes a profile and returns confirmation of its ID.
+  Future<DeletedUserProfile> delete(
+    String userProfileId, {
+    String? workspaceId,
+    Future<void>? abortTrigger,
+  }) => _send(
+    'DELETE',
+    DeletedUserProfile.fromJson,
+    profileId: userProfileId,
+    workspaceId: workspaceId,
+    abortTrigger: abortTrigger,
+  );
+
+  /// Creates a short-lived URL for the specified [action].
+  Future<UserProfileActionUrl> createActionUrl(
+    String userProfileId, {
+    required UserProfileAction action,
+    String? workspaceId,
+    Future<void>? abortTrigger,
+  }) => _send(
+    'POST',
+    UserProfileActionUrl.fromJson,
+    profileId: userProfileId,
+    subpath: '/action_urls',
+    body: () => {'action': action.toJson()},
+    workspaceId: workspaceId,
+    abortTrigger: abortTrigger,
+  );
+}
+
+abstract class _UserProfilesBase extends ResourceBase {
+  final bool _legacyBeta;
+
+  _UserProfilesBase({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    required this._legacyBeta,
+    super.ensureNotClosed,
+  });
+
+  Future<T> _send<T>(
+    String method,
+    T Function(Map<String, dynamic>) decode, {
+    String? profileId,
+    String subpath = '',
+    Map<String, dynamic> Function()? body,
+    Map<String, dynamic> Function()? query,
+    String? workspaceId,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl(
-      '/v1/user_profiles/$userProfileId/enrollment_url',
-    );
+    final path = profileId == null
+        ? _profilesPath
+        : '${_profilePath(profileId)}$subpath';
+    final url = requestBuilder.buildUrl(path, queryParams: query?.call());
     final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'anthropic-beta': _betaHeader},
+      additionalHeaders: {
+        if (_legacyBeta) 'anthropic-beta': _legacyBetaHeader,
+        'anthropic-workspace-id': ?workspaceId,
+      },
     );
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(<String, dynamic>{});
-
+    if (headers['anthropic-beta'] case final String features
+        when !_legacyBeta) {
+      final gaFeatures = features
+          .split(',')
+          .map((feature) => feature.trim())
+          .where(
+            (feature) =>
+                feature.isNotEmpty && !feature.startsWith('user-profiles-'),
+          )
+          .join(',');
+      if (gaFeatures.isEmpty) {
+        headers.remove('anthropic-beta');
+      } else {
+        headers['anthropic-beta'] = gaFeatures;
+      }
+    }
+    final request = http.Request(method, url)..headers.addAll(headers);
+    if (body != null) request.body = jsonEncode(body());
     final response = await interceptorChain.execute(
-      httpRequest,
+      request,
       abortTrigger: abortTrigger,
     );
-
-    return EnrollmentUrl.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decode(jsonDecode(response.body) as Map<String, dynamic>);
   }
+}
+
+String _profilePath(String id) {
+  if (id.isEmpty || id == '.' || id == '..') {
+    throw ArgumentError.value(id, 'userProfileId', 'expected a profile ID');
+  }
+  return '$_profilesPath/${Uri.encodeComponent(id)}';
+}
+
+Map<String, dynamic> _listQuery(
+  int? limit,
+  String? page,
+  UserProfileListOrder? order,
+  UserProfileListOrderBy? orderBy,
+) => {
+  'limit': ?limit?.toString(),
+  'page': ?page,
+  'order': ?order?.toJson(),
+  'order_by': ?orderBy?.toJson(),
+};
+
+String _filterStatus(UserProfileEnforcementStatus status) {
+  if (status == UserProfileEnforcementStatus.unknown) {
+    throw ArgumentError('Filtering requires a known enforcement status');
+  }
+  return status.value;
 }

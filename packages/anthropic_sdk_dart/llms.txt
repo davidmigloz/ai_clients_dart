@@ -4,9 +4,9 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~6.8k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~7.2k tokens): Primary package documentation with installation, configuration, and usage examples.
 - [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/CHANGELOG.md) (~12.9k tokens): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) (~10.9k tokens): Upgrade notes and breaking-change guidance.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) (~11.2k tokens): Upgrade notes and breaking-change guidance.
 
 ## Examples
 
@@ -24,6 +24,7 @@
 - [skills_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/skills_example.dart) (~1.1k tokens): Skills management.
 - [managed_agents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/managed_agents_example.dart) (~1.7k tokens): Managed agents: agents, sessions, vaults, multiagent rosters, outcomes, webhooks, credential validation (beta).
 - [memory_stores_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/memory_stores_example.dart) (~940 tokens): Managed agents memory stores, memories, and versions (beta).
+- [current_user_profiles_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/current_user_profiles_example.dart) (~252 tokens): Inspect enforcement status and paginate user profiles.
 - [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/error_handling_example.dart) (~624 tokens): Exception handling patterns.
 - [api_version_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/api_version_example.dart) (~226 tokens): Current API version and legacy opt-out.
 - [mid_conversation_system_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/mid_conversation_system_example.dart) (~1.1k tokens): Mid-conversation, turn-scoped, and effort-only system messages.
@@ -39,11 +40,11 @@
 - [session_threads_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/session_threads_example.dart) (~857 tokens): Session threads: list, retrieve, stream events, archive (beta).
 - [deployments_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/deployments_example.dart) (~609 tokens): Scheduled deployments and deployment runs: cron schedule, pause/resume, run-now (beta).
 - [dreams_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/dreams_example.dart) (~829 tokens): Dreams: memory-consolidation jobs — create, poll, list, archive (beta, research preview).
-- [user_profiles_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/user_profiles_example.dart) (~740 tokens): User profiles and enrollment URLs (beta).
+- [user_profiles_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/user_profiles_example.dart) (~743 tokens): Legacy user profiles and enrollment URLs (beta).
 - [anthropic_sdk_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/anthropic_sdk_dart_example.dart) (~662 tokens): Quick-start overview.
 
 ## Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/anthropic_sdk_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~57.5k tokens**
+**Total: ~58.5k tokens**

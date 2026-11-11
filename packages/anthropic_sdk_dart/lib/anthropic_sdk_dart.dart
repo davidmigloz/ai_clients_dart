@@ -244,13 +244,19 @@ export 'src/models/tools/toolsets.dart';
 
 // Models - User Profiles (Beta)
 export 'src/models/user_profiles/create_user_profile_request.dart';
+export 'src/models/user_profiles/current_user_profile.dart';
+export 'src/models/user_profiles/current_user_profile_requests.dart';
 export 'src/models/user_profiles/enrollment_url.dart';
 export 'src/models/user_profiles/list_user_profiles_response.dart';
 export 'src/models/user_profiles/update_user_profile_request.dart';
 export 'src/models/user_profiles/user_profile.dart';
 export 'src/models/user_profiles/user_profile_access_type.dart';
+export 'src/models/user_profiles/user_profile_action.dart';
+export 'src/models/user_profiles/user_profile_enforcement.dart';
+export 'src/models/user_profiles/user_profile_external_user_details.dart';
 export 'src/models/user_profiles/user_profile_list_order.dart';
 export 'src/models/user_profiles/user_profile_list_order_by.dart';
+export 'src/models/user_profiles/user_profile_programs.dart';
 export 'src/models/user_profiles/user_profile_trust_grant.dart';
 
 // Resources

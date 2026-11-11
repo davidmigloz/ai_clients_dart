@@ -61,5 +61,5 @@ class EnrollmentUrl {
 
   @override
   String toString() =>
-      'EnrollmentUrl(type: $type, url: $url, expiresAt: $expiresAt)';
+      'EnrollmentUrl(type: $type, url: [redacted], expiresAt: $expiresAt)';
 }
