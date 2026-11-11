@@ -63,9 +63,12 @@ void main() {
             method == 'GET'
             ? resource.getStream('/test', abortTrigger: signal)
             : resource.postStream('/test', body: {}, abortTrigger: signal);
+        final firstSend = transport.sent.stream.first;
         final first = request(abort.future).toList();
+        await firstSend.timeout(const Duration(seconds: 1));
+        final siblingSend = transport.sent.stream.first;
         final sibling = request(null).toList();
-        await Future<void>.delayed(Duration.zero);
+        await siblingSend.timeout(const Duration(seconds: 1));
         expect(transport.requests, hasLength(2));
         final native =
             (transport.requests.first as http.Abortable).abortTrigger!;
@@ -101,10 +104,11 @@ void main() {
     final bodyCanceled = Completer<void>();
     final body = StreamController<List<int>>(onCancel: bodyCanceled.complete);
     final abort = Completer<void>();
+    final sent = transport.sent.stream.first;
     final result = resource
         .getStream('/test', abortTrigger: abort.future)
         .toList();
-    await Future<void>.delayed(Duration.zero);
+    await sent.timeout(const Duration(seconds: 1));
     transport.responses.single.complete(
       http.StreamedResponse(body.stream, 200),
     );

@@ -66,7 +66,6 @@ class InterceptorChain {
           await Future<void>.delayed(Duration.zero);
           admission.enter();
         }
-        ensureNotClosed?.call();
         final originalRequest = context.request;
 
         // For retries, clone the request since http.BaseRequest can only be
@@ -93,6 +92,7 @@ class InterceptorChain {
 
         // Transport execution function
         Future<http.Response> executeTransport() async {
+          ensureNotClosed?.call();
           final requestToSend = createRequest();
           if (context.abortTrigger != null) {
             // Wrap request to enable http client's native abort support
