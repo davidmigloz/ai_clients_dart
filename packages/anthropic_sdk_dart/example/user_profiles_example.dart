@@ -80,8 +80,8 @@ void main() async {
     final enrollment = await client.userProfiles.createEnrollmentUrl(
       profile.id,
     );
-    print('Enrollment URL expires at ${enrollment.expiresAt}:');
-    print('  ${enrollment.url}');
+    print('Enrollment URL expires at ${enrollment.expiresAt}.');
+    // Deliver enrollment.url privately to the intended end user.
   } finally {
     client.close();
   }

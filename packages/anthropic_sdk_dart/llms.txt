@@ -40,11 +40,11 @@
 - [session_threads_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/session_threads_example.dart) (~857 tokens): Session threads: list, retrieve, stream events, archive (beta).
 - [deployments_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/deployments_example.dart) (~609 tokens): Scheduled deployments and deployment runs: cron schedule, pause/resume, run-now (beta).
 - [dreams_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/dreams_example.dart) (~829 tokens): Dreams: memory-consolidation jobs — create, poll, list, archive (beta, research preview).
-- [user_profiles_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/user_profiles_example.dart) (~740 tokens): Legacy user profiles and enrollment URLs (beta).
+- [user_profiles_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/user_profiles_example.dart) (~743 tokens): Legacy user profiles and enrollment URLs (beta).
 - [anthropic_sdk_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/anthropic_sdk_dart_example.dart) (~662 tokens): Quick-start overview.
 
 ## Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/anthropic_sdk_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~58.4k tokens**
+**Total: ~58.5k tokens**

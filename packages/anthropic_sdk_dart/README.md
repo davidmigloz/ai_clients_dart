@@ -728,7 +728,9 @@ base URL. The [Anthropic guide](https://platform.claude.com/docs/en/manage-claud
 lists cross-platform attribution requirements.
 
 See [the user profiles example](example/current_user_profiles_example.dart)
-for enforcement status and pagination.
+for enforcement status and pagination. Treat an unfamiliar status as
+restricted when deciding access, and preserve the wire value for diagnostics.
+[Enforcement guidance](https://platform.claude.com/docs/en/manage-claude/user-profiles#check-whether-anthropic-has-restricted-or-banned-a-profile)
 
 </details>
 

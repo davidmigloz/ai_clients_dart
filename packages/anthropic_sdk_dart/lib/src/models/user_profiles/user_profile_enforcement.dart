@@ -18,6 +18,8 @@ enum UserProfileEnforcementStatus {
   banned('banned'),
 
   /// An unrecognized status. The profile retains the original wire value.
+  ///
+  /// Treat it as [restricted] when deciding whether to allow access.
   unknown('unknown');
 
   const UserProfileEnforcementStatus(this.value);
@@ -34,6 +36,7 @@ enum UserProfileEnforcementStatus {
 ///
 /// Known restrictions and bans use [UserProfilePolicyEnforcementAction].
 /// Other action types are retained by [UnknownUserProfileEnforcementAction].
+/// Treat an unrecognized type as a restriction when deciding access.
 sealed class UserProfileEnforcementAction {
   const UserProfileEnforcementAction();
 
@@ -64,10 +67,12 @@ class UserProfilePolicyEnforcementAction extends UserProfileEnforcementAction {
   /// The enforcement action ID.
   final String id;
 
-  /// Why Anthropic opened the action.
+  /// Why Anthropic opened the action. Treat an unrecognized reason as
+  /// unspecified.
   final String reason;
 
   /// Next step for the entity, such as `verify`. May be null.
+  /// Treat an unrecognized next step as null.
   final String? action;
 
   /// When Anthropic opened the action.

@@ -93,7 +93,10 @@ overall enforcement state.
 
 Use `createActionUrl(profile.id, action: UserProfileAction.enrollEndUser)` for
 a current enrollment action. The URL is short-lived and grants access to the
-recipient until expiration. Keep it out of application logs.
+recipient until expiration. Keep it out of application logs. Access to GA action
+URLs is organization-gated. A 404 can indicate that the organization has no
+access. On Claude Platform on AWS, use the legacy `createEnrollmentUrl` route.
+[Verification Portal guide](https://platform.claude.com/docs/en/manage-claude/user-profiles-verification-portal#create-the-link)
 [User Profiles reference](https://platform.claude.com/docs/en/api/user_profiles)
 
 ---

@@ -13,6 +13,38 @@ const _profiles = '/v1/user_profiles';
 const _legacyBeta = 'user-profiles-2026-08-18';
 
 void main() {
+  test(
+    'GA filters the legacy profile selectors while retaining other betas',
+    () async {
+      final transport = MockHttpClient();
+      final client = AnthropicClient(
+        config: const AnthropicConfig(
+          defaultHeaders: {
+            'Anthropic-Beta':
+                'feature-flag, user-profiles-2026-03-24,'
+                ' user-profiles-2026-08-18, user-profiles-2026-09-04',
+          },
+        ),
+        httpClient: transport,
+      );
+      addTearDown(client.close);
+      transport
+        ..queueJsonResponse({'data': <Object>[], 'next_page': null})
+        ..queueJsonResponse(UserProfilesFixtures.enrollmentUrl());
+
+      expect((await client.userProfiles.current.list()).data, isEmpty);
+      final legacy = await client.userProfiles.createEnrollmentUrl(_id);
+
+      expect(
+        transport.requests.first.headers['anthropic-beta'],
+        'feature-flag',
+      );
+      expect(transport.requests.last.headers['anthropic-beta'], _legacyBeta);
+      expect((transport.requests.last as http.Request).body, isEmpty);
+      expect(legacy.toString(), isNot(contains(legacy.url)));
+    },
+  );
+
   late MockHttpClient transport;
   late AnthropicClient client;
   late CurrentUserProfilesResource profiles;
@@ -267,7 +299,7 @@ void main() {
       null,
       null,
       {'external_id': null},
-      <String, dynamic>{},
+      null,
       null,
       {
         'action': {'type': 'enroll_end_user'},

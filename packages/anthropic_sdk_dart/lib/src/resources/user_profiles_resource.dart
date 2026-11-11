@@ -108,7 +108,6 @@ class UserProfilesResource extends _UserProfilesBase {
     EnrollmentUrl.fromJson,
     profileId: userProfileId,
     subpath: '/enrollment_url',
-    body: () => const {},
     workspaceId: workspaceId,
     abortTrigger: abortTrigger,
   );
@@ -287,6 +286,22 @@ abstract class _UserProfilesBase extends ResourceBase {
         'anthropic-workspace-id': ?workspaceId,
       },
     );
+    if (headers['anthropic-beta'] case final String features
+        when !_legacyBeta) {
+      final gaFeatures = features
+          .split(',')
+          .map((feature) => feature.trim())
+          .where(
+            (feature) =>
+                feature.isNotEmpty && !feature.startsWith('user-profiles-'),
+          )
+          .join(',');
+      if (gaFeatures.isEmpty) {
+        headers.remove('anthropic-beta');
+      } else {
+        headers['anthropic-beta'] = gaFeatures;
+      }
+    }
     final request = http.Request(method, url)..headers.addAll(headers);
     if (body != null) request.body = jsonEncode(body());
     final response = await interceptorChain.execute(
