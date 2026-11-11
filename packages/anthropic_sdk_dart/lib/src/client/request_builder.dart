@@ -63,8 +63,14 @@ class RequestBuilder {
     return {
       'anthropic-version': config.apiVersion,
       'content-type': 'application/json',
-      ...config.defaultHeaders,
-      ...?additionalHeaders,
+      for (final entry in config.defaultHeaders.entries)
+        _versionHeaderKey(entry.key): entry.value,
+      if (additionalHeaders != null)
+        for (final entry in additionalHeaders.entries)
+          _versionHeaderKey(entry.key): entry.value,
     };
   }
+
+  static String _versionHeaderKey(String key) =>
+      key.toLowerCase() == 'anthropic-version' ? 'anthropic-version' : key;
 }

@@ -12,7 +12,7 @@ void main() {
       expect(config.defaultHeaders, isEmpty);
       expect(config.defaultQueryParams, isEmpty);
       expect(config.timeout, const Duration(minutes: 10));
-      expect(config.apiVersion, '2023-06-01');
+      expect(config.apiVersion, '2026-10-21');
       expect(config.logLevel, Level.INFO);
     });
 

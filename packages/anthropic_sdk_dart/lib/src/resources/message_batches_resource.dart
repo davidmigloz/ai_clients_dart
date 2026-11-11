@@ -7,6 +7,7 @@ import '../errors/response_error.dart';
 import '../models/batches/batch_request.dart';
 import '../models/batches/message_batch.dart';
 import 'base_resource.dart';
+import 'message_request_validation.dart';
 import 'streaming_resource.dart';
 
 /// Resource for the Message Batches API.
@@ -43,9 +44,11 @@ class MessageBatchesResource extends ResourceBase with StreamingResource {
           ? {'anthropic-user-profile-id': userProfileId}
           : null,
     );
+    final body = request.toJson();
+    validateBatchRequestVersion(headers['anthropic-version'], body);
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
+      ..body = jsonEncode(body);
 
     final response = await interceptorChain.execute(
       httpRequest,

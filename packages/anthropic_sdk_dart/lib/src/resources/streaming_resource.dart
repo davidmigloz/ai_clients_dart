@@ -31,12 +31,14 @@ mixin StreamingResource on ResourceBase {
   /// The optional [abortTrigger] cancels the request and closes the stream.
   /// Transport cancellation depends on support from the supplied HTTP client;
   /// it does not guarantee the server has stopped processing the request.
+  /// [validateHeaders] sees the effective headers before transport starts.
   Stream<Map<String, dynamic>> postStream(
     String path, {
     required Map<String, dynamic> body,
     Map<String, dynamic>? queryParams,
     Map<String, String>? headers,
     Future<void>? abortTrigger,
+    void Function(Map<String, String>)? validateHeaders,
   }) => _stream(
     'POST',
     path,
@@ -44,6 +46,7 @@ mixin StreamingResource on ResourceBase {
     queryParams: queryParams,
     headers: headers,
     abortTrigger: abortTrigger,
+    validateHeaders: validateHeaders,
   );
 
   /// Makes a streaming GET request whose response contains JSON lines.
@@ -169,6 +172,7 @@ mixin StreamingResource on ResourceBase {
     Map<String, dynamic>? queryParams,
     Map<String, String>? headers,
     Future<void>? abortTrigger,
+    void Function(Map<String, String>)? validateHeaders,
     Stream<Map<String, dynamic>> Function(Stream<List<int>> bytes)? decode,
     AnthropicException Function(int statusCode, String body)? errorFactory,
     AnthropicException Function(
@@ -205,15 +209,15 @@ mixin StreamingResource on ResourceBase {
       try {
         ensureNotClosed?.call();
         final uri = requestBuilder.buildUrl(path, queryParams: queryParams);
-        final request =
-            http.AbortableRequest(
-                method,
-                uri,
-                abortTrigger: requestAbort.future,
-              )
-              ..headers.addAll(
-                requestBuilder.buildHeaders(additionalHeaders: headers),
-              );
+        final requestHeaders = requestBuilder.buildHeaders(
+          additionalHeaders: headers,
+        );
+        validateHeaders?.call(requestHeaders);
+        final request = http.AbortableRequest(
+          method,
+          uri,
+          abortTrigger: requestAbort.future,
+        )..headers.addAll(requestHeaders);
         if (body != null) request.body = jsonEncode(body);
         await _applyAuthentication(request);
         if (stopped) return;
