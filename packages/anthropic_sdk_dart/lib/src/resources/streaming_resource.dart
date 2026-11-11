@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
@@ -88,7 +89,9 @@ mixin StreamingResource on ResourceBase {
     String body,
     ResponseMetadata responseMetadata,
   ) {
-    final (:message, :details, :errorCode) = parseApiErrorBody(body);
+    final (:message, :details, :errorCode, requestId: _) = parseApiErrorBody(
+      body,
+    );
 
     if (statusCode == 401) {
       return AuthenticationException(
@@ -106,7 +109,7 @@ mixin StreamingResource on ResourceBase {
         details: details,
         errorCode: errorCode,
         responseMetadata: responseMetadata,
-        retryAfter: parseRetryAfter(responseMetadata.headers),
+        retryAfter: retryAfterTime(responseMetadata.headers),
       );
     }
 
@@ -218,34 +221,41 @@ mixin StreamingResource on ResourceBase {
           return;
         }
         if (response.statusCode >= 400) {
-          final responseBody = StringBuffer();
-          subscription = response.stream
-              .transform(utf8.decoder)
-              .listen(
-                responseBody.write,
-                onError: finish,
-                onDone: () {
-                  final responseMetadata = createSafeResponseMetadata(
-                    statusCode: response.statusCode,
-                    headers: response.headers,
-                    latency: stopwatch.elapsed,
-                  );
-                  final body = responseBody.toString();
-                  finish(
-                    errorFactoryWithMetadata?.call(
-                          response.statusCode,
-                          body,
-                          responseMetadata,
-                        ) ??
-                        errorFactory?.call(response.statusCode, body) ??
-                        _createStreamException(
-                          response.statusCode,
-                          body,
-                          responseMetadata,
-                        ),
-                  );
-                },
-              );
+          final responseBody = BytesBuilder();
+          subscription = response.stream.listen(
+            responseBody.add,
+            onError: finish,
+            onDone: () {
+              if (stopped) return;
+              try {
+                final body = decodeStreamingApiErrorBody(
+                  responseBody.takeBytes(),
+                  response.headers,
+                );
+                final responseMetadata = createSafeResponseMetadata(
+                  statusCode: response.statusCode,
+                  headers: response.headers,
+                  latency: stopwatch.elapsed,
+                  bodyRequestId: parseApiErrorBody(body).requestId,
+                );
+                finish(
+                  errorFactoryWithMetadata?.call(
+                        response.statusCode,
+                        body,
+                        responseMetadata,
+                      ) ??
+                      errorFactory?.call(response.statusCode, body) ??
+                      _createStreamException(
+                        response.statusCode,
+                        body,
+                        responseMetadata,
+                      ),
+                );
+              } catch (error, stackTrace) {
+                finish(error, stackTrace);
+              }
+            },
+          );
         } else {
           subscription = (decode ?? SseParser().parse)(
             response.stream,

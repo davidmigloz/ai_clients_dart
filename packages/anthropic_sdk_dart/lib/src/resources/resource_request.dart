@@ -13,13 +13,15 @@ Future<http.Response> sendResourceRequest(
   stopwatch.stop();
   final response = await http.Response.fromStream(streamedResponse);
   if (response.statusCode >= 400) {
+    final body = decodeApiErrorResponse(response);
     throw createResourceException(
       response.statusCode,
-      response.body,
+      body,
       createSafeResponseMetadata(
         statusCode: response.statusCode,
         headers: response.headers,
         latency: stopwatch.elapsed,
+        bodyRequestId: parseApiErrorBody(body).requestId,
       ),
     );
   }

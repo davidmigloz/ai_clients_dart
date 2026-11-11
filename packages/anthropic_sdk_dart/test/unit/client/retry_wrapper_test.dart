@@ -432,6 +432,54 @@ void main() {
     });
 
     group('Retry-After header parsing', () {
+      test('waits for fractional milliseconds ahead of Retry-After', () async {
+        final wrapper = RetryWrapper(
+          config: const AnthropicConfig(
+            retryPolicy: RetryPolicy(
+              maxRetries: 1,
+              initialDelay: Duration(milliseconds: 1),
+              maxDelay: Duration(milliseconds: 10),
+              jitter: 0,
+            ),
+          ),
+        );
+        final request = http.Request(
+          'GET',
+          Uri.parse('https://api.example.com'),
+        );
+        final delays = <Duration>[];
+        var attempts = 0;
+
+        final response = await dart_async.runZoned(
+          () => wrapper.executeWithRetry(
+            request,
+            () async {
+              attempts++;
+              if (attempts == 1) {
+                return http.Response(
+                  'rate limited',
+                  429,
+                  headers: {'Retry-After-Ms': '4.5', 'retry-after': '8'},
+                );
+              }
+              return http.Response('{}', 200);
+            },
+            null,
+            'req_123',
+          ),
+          zoneSpecification: dart_async.ZoneSpecification(
+            createTimer: (self, parent, zone, delay, callback) {
+              delays.add(delay);
+              return parent.createTimer(zone, Duration.zero, callback);
+            },
+          ),
+        );
+
+        expect(response.statusCode, 200);
+        expect(attempts, 2);
+        expect(delays, [const Duration(microseconds: 4500)]);
+      });
+
       test('parses integer seconds', () async {
         var callCount = 0;
         final request = http.Request(

@@ -34,7 +34,7 @@ class ResponseMetadata {
   /// HTTP status code.
   final int statusCode;
 
-  /// Response headers, which may be restricted to request-id and retry-after.
+  /// Response headers, which may be restricted to request ID and retry hints.
   final Map<String, String> headers;
 
   /// Excerpt of response body, empty when omitted to protect secrets.
@@ -43,21 +43,28 @@ class ResponseMetadata {
   /// Request latency.
   final Duration latency;
 
+  /// Provider request ID from the error envelope, used when headers omit it.
+  final String? bodyRequestId;
+
   /// Creates [ResponseMetadata].
   const ResponseMetadata({
     required this.statusCode,
     required this.headers,
     required this.bodyExcerpt,
     required this.latency,
+    this.bodyRequestId,
   });
 }
 
 String? _responseRequestId(ResponseMetadata? metadata) {
   for (final entry
       in metadata?.headers.entries ?? const <MapEntry<String, String>>[]) {
-    if (entry.key.toLowerCase() == 'request-id') return entry.value;
+    if (entry.key.toLowerCase() == 'request-id' &&
+        entry.value.trim().isNotEmpty) {
+      return entry.value;
+    }
   }
-  return null;
+  return metadata?.bodyRequestId;
 }
 
 /// Base sealed class for all Anthropic exceptions.
