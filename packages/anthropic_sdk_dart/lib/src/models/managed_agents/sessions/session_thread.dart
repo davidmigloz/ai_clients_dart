@@ -24,6 +24,7 @@ class SessionThread {
 
   /// Identifier of the workflow run owning this thread, if any.
   final String? workflowRunId;
+  final bool _includeNullWorkflowRunId;
 
   /// Current thread status.
   final SessionStatus status;
@@ -62,6 +63,7 @@ class SessionThread {
     this.type = 'session_thread',
     required this.sessionId,
     this.workflowRunId,
+    this._includeNullWorkflowRunId = false,
     required this.status,
     this._rawStatus,
     required this.agent,
@@ -79,6 +81,7 @@ class SessionThread {
       id: json['id'] as String,
       type: json['type'] as String? ?? 'session_thread',
       sessionId: json['session_id'] as String,
+      includeNullWorkflowRunId: json.containsKey('workflow_run_id'),
       workflowRunId: json['workflow_run_id'] as String?,
       status: SessionStatus.fromJson(json['status'] as String),
       rawStatus: json['status'] as String,
@@ -103,7 +106,8 @@ class SessionThread {
     'id': id,
     'type': type,
     'session_id': sessionId,
-    'workflow_run_id': ?workflowRunId,
+    if (workflowRunId != null || _includeNullWorkflowRunId)
+      'workflow_run_id': workflowRunId,
     'status': rawStatus,
     'agent': agent.toJson(),
     'parent_thread_id': parentThreadId,
@@ -138,6 +142,8 @@ class SessionThread {
       id: id ?? this.id,
       type: type ?? this.type,
       sessionId: sessionId ?? this.sessionId,
+      includeNullWorkflowRunId:
+          workflowRunId != unsetCopyWithValue || _includeNullWorkflowRunId,
       workflowRunId: workflowRunId == unsetCopyWithValue
           ? this.workflowRunId
           : workflowRunId as String?,
@@ -170,6 +176,8 @@ class SessionThread {
           type == other.type &&
           sessionId == other.sessionId &&
           workflowRunId == other.workflowRunId &&
+          (workflowRunId != null ||
+              _includeNullWorkflowRunId == other._includeNullWorkflowRunId) &&
           rawStatus == other.rawStatus &&
           agent == other.agent &&
           parentThreadId == other.parentThreadId &&
@@ -185,6 +193,7 @@ class SessionThread {
     type,
     sessionId,
     workflowRunId,
+    workflowRunId == null && _includeNullWorkflowRunId,
     rawStatus,
     agent,
     parentThreadId,

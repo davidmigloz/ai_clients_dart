@@ -666,6 +666,31 @@ void main() {
       'advisor': {'type': 'enabled', 'model': 'claude-opus-5-5'},
     };
 
+    test(
+      'new workflows can clear predefined agents with an empty literal',
+      () async {
+        mockHttpClient.queueJsonResponse(ManagedAgentsFixtures.agent());
+        await client.agents.create(
+          const CreateAgentParams(
+            name: 'Agent',
+            model: ModelParamsId(id: 'claude-sonnet-5'),
+            multiagent: Multiagent20261001Params(
+              workflows: MultiagentWorkersParams.enabled(predefinedAgents: []),
+            ),
+          ),
+        );
+        final request = mockHttpClient.lastRequest!;
+        final body =
+            jsonDecode((request as dynamic).body as String)
+                as Map<String, dynamic>;
+        expect(body['multiagent'], {
+          'type': 'multiagent_20261001',
+          'workflows': {'type': 'enabled', 'predefined_agents': <Object>[]},
+        });
+        expect(request.headers['anthropic-beta'], beta);
+      },
+    );
+
     test('create resolves workflows, workers, and advisor settings', () async {
       mockHttpClient.queueJsonResponse({
         ...ManagedAgentsFixtures.agent(),
@@ -1412,7 +1437,129 @@ void main() {
       ]);
     });
 
+    test(
+      'thread snapshot retains null or missing workflow references',
+      () async {
+        mockHttpClient
+          ..queueJsonResponse({
+            ...ManagedAgentsFixtures.sessionThread(),
+            'workflow_run_id': null,
+          })
+          ..queueJsonResponse(ManagedAgentsFixtures.sessionThread());
+        final threads = client.sessions.threads('session_test123');
+        final current = await threads.retrieve('sthr_test123');
+        final previous = await threads.retrieve('sthr_test123');
+        expect(
+          current.copyWith().toJson(),
+          containsPair('workflow_run_id', null),
+        );
+        expect(
+          previous.copyWith().toJson(),
+          isNot(contains('workflow_run_id')),
+        );
+        for (final request in mockHttpClient.requests) {
+          expect(request.headers['anthropic-beta'], beta);
+        }
+      },
+    );
+
+    test(
+      'event history and SSE retain null and missing status fields',
+      () async {
+        const sessionIdle = {
+          'type': 'session.status_idle',
+          'id': 'event_idle',
+          'processed_at': timestamp,
+          'stop_reason': {'type': 'end_turn'},
+        };
+        final threadCreated = ManagedAgentsFixtures.sessionThreadCreatedEvent();
+        const threadIdle = {
+          'type': 'session.thread_status_idle',
+          'id': 'event_thread_idle',
+          'processed_at': timestamp,
+          'session_thread_id': 'sthr_test123',
+          'agent_name': 'Test Agent',
+          'stop_reason': {'type': 'end_turn'},
+        };
+
+        mockHttpClient
+          ..queueJsonResponse({
+            'data': [
+              {...sessionIdle, 'stop_details': null},
+              {...sessionIdle, 'id': 'event_idle_legacy'},
+              {...threadCreated, 'workflow_run_id': null},
+              {...threadCreated, 'id': 'event_thread_legacy'},
+            ],
+            'next_page': null,
+          })
+          ..queueStreamingResponse([
+            {...threadIdle, 'stop_details': null},
+            {...threadIdle, 'id': 'event_thread_idle_legacy'},
+          ]);
+
+        final history = await client.sessions.events('session_test123').list();
+        final [current, previous, created, previousCreated] = history.data;
+        expect(
+          (current as SessionStatusIdleEvent).copyWith().toJson(),
+          containsPair('stop_details', null),
+        );
+        expect(
+          (previous as SessionStatusIdleEvent).copyWith().toJson(),
+          isNot(contains('stop_details')),
+        );
+        expect(
+          (created as SessionThreadCreatedEvent).copyWith().toJson(),
+          containsPair('workflow_run_id', null),
+        );
+        expect(
+          (previousCreated as SessionThreadCreatedEvent).copyWith().toJson(),
+          isNot(contains('workflow_run_id')),
+        );
+
+        final streamed = await client.sessions
+            .threads('session_test123')
+            .events('sthr_test123')
+            .stream()
+            .cast<SessionThreadStatusIdleEvent>()
+            .toList();
+        expect(
+          streamed.first.copyWith().toJson(),
+          containsPair('stop_details', null),
+        );
+        expect(
+          streamed.last.copyWith().toJson(),
+          isNot(contains('stop_details')),
+        );
+        for (final request in mockHttpClient.requests) {
+          expect(request.headers['anthropic-beta'], beta);
+        }
+      },
+    );
+
+    test(
+      'known workflow error still requires the documented message',
+      () async {
+        mockHttpClient.queueJsonResponse({
+          'data': [
+            workflowEvent('error', {
+              'error': {'type': 'program_error'},
+            }),
+          ],
+          'next_page': null,
+        });
+        await expectLater(
+          client.sessions.events('session_test123').list(),
+          throwsFormatException,
+        );
+        expect(mockHttpClient.lastRequest?.headers['anthropic-beta'], beta);
+      },
+    );
+
     test('session SSE distinguishes failed starts and ended runs', () async {
+      const futureError = {
+        'type': 'future_workflow_error',
+        'additional_details': {'retry': true},
+      };
       final wireEvents = [
         workflowEvent('error', {
           'workflow_run_id': null,
@@ -1431,6 +1578,11 @@ void main() {
           'id': 'event_future_terminal',
           'result': {'type': 'new_terminal_result', 'future_detail': 7},
         }),
+        workflowEvent('status_ended', {
+          'workflow_run_id': 'run_future_error',
+          'id': 'event_future_error',
+          'result': {'type': 'error', 'error': futureError},
+        }),
         workflowEvent('future_event', {'extra': 'preserved'}),
       ];
       mockHttpClient.queueStreamingResponse(wireEvents);
@@ -1439,7 +1591,7 @@ void main() {
           .events('session_test123')
           .stream()
           .toList();
-      expect(events, hasLength(5));
+      expect(events, hasLength(6));
       final first = events[0] as WorkflowRunEvent;
       expect(first.workflowRunId, isNull);
       expect(first.error?.type, 'max_workflow_runs_error');
@@ -1451,8 +1603,12 @@ void main() {
         (events[3] as WorkflowRunEvent).result?.type,
         'new_terminal_result',
       );
+      final future = (events[4] as WorkflowRunEvent).result?.error;
+      expect(future?.type, 'future_workflow_error');
+      expect(future?.message, isNull);
+      expect(future?.toJson(), futureError);
       expect(events.last, isA<UnknownSessionEvent>());
-      expect(events.take(4).map((event) => event.toJson()), wireEvents.take(4));
+      expect(events.take(5).map((event) => event.toJson()), wireEvents.take(5));
       expect(events.last.toJson()['extra'], 'preserved');
 
       final request = mockHttpClient.lastRequest!;

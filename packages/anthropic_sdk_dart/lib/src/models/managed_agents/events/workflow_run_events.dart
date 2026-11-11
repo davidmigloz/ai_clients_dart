@@ -93,19 +93,28 @@ final class WorkflowRunError {
   /// The original error type, including future error types.
   final String type;
 
-  /// Human-readable provider error.
-  final String message;
+  /// Human-readable provider error, when available.
+  final String? message;
 
   WorkflowRunError._(this.type, this.message, Map<String, dynamic> json)
     : _raw = deepUnmodifiableMap(json);
 
   /// Parses a workflow error.
-  factory WorkflowRunError.fromJson(Map<String, dynamic> json) =>
-      WorkflowRunError._(
-        _requiredWorkflowField<String>(json, 'type'),
-        _requiredWorkflowField<String>(json, 'message'),
-        json,
-      );
+  factory WorkflowRunError.fromJson(Map<String, dynamic> json) {
+    final type = _requiredWorkflowField<String>(json, 'type');
+    final message = switch (type) {
+      'max_workflow_runs_error' ||
+      'program_error' ||
+      'thread_limit_error' ||
+      'timeout_error' ||
+      'unknown_error' => _requiredWorkflowField<String>(json, 'message'),
+      _ => switch (json['message']) {
+        final String value => value,
+        _ => null,
+      },
+    };
+    return WorkflowRunError._(type, message, json);
+  }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => Map.of(_raw);

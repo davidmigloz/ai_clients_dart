@@ -66,7 +66,9 @@ Future<void> main() async {
                   openRuns.remove(runId);
                   print('Workflow $runId ended with ${event.result?.type}');
                 case WorkflowRunEventKind.error:
-                  print('Workflow error: ${event.error?.message}');
+                  print(
+                    'Workflow error: ${event.error?.message ?? event.error?.type}',
+                  );
                 case _:
                   break;
               }

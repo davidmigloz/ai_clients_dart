@@ -396,7 +396,7 @@ final class MultiagentWorkersParams {
   List<MultiagentRosterEntryParams>? get predefinedAgents =>
       _predefinedAgents == unsetCopyWithValue
       ? null
-      : _predefinedAgents as List<MultiagentRosterEntryParams>?;
+      : (_predefinedAgents as List?)?.cast<MultiagentRosterEntryParams>();
 
   /// Enables the workers. Pass a [MultiagentInlineAgents] policy and a list of
   /// agent references or self entries. Omit values on an update to keep them,

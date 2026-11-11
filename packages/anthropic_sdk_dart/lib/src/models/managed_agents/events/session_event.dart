@@ -1955,6 +1955,7 @@ class SessionStatusIdleEvent extends SessionEvent {
 
   /// Additional provider details, when available.
   final SessionStopDetails? stopDetails;
+  final bool _includeNullStopDetails;
 
   /// Timestamp of status change.
   final BetaTimestamp processedAt;
@@ -1964,6 +1965,7 @@ class SessionStatusIdleEvent extends SessionEvent {
     required this.id,
     required this.stopReason,
     this.stopDetails,
+    this._includeNullStopDetails = false,
     required this.processedAt,
   });
 
@@ -1974,6 +1976,7 @@ class SessionStatusIdleEvent extends SessionEvent {
       stopReason: SessionStopReason.fromJson(
         json['stop_reason'] as Map<String, dynamic>,
       ),
+      includeNullStopDetails: json.containsKey('stop_details'),
       stopDetails: switch (json['stop_details']) {
         final Map<String, dynamic> details => SessionStopDetails.fromJson(
           details,
@@ -1989,7 +1992,8 @@ class SessionStatusIdleEvent extends SessionEvent {
     'type': type,
     'id': id,
     'stop_reason': stopReason.toJson(),
-    if (stopDetails case final details?) 'stop_details': details.toJson(),
+    if (stopDetails != null || _includeNullStopDetails)
+      'stop_details': stopDetails?.toJson(),
     'processed_at': processedAt.toUtc().toIso8601String(),
   };
 
@@ -2003,6 +2007,8 @@ class SessionStatusIdleEvent extends SessionEvent {
     return SessionStatusIdleEvent(
       id: id ?? this.id,
       stopReason: stopReason ?? this.stopReason,
+      includeNullStopDetails:
+          stopDetails != unsetCopyWithValue || _includeNullStopDetails,
       stopDetails: stopDetails == unsetCopyWithValue
           ? this.stopDetails
           : stopDetails as SessionStopDetails?,
@@ -2018,10 +2024,18 @@ class SessionStatusIdleEvent extends SessionEvent {
           id == other.id &&
           stopReason == other.stopReason &&
           stopDetails == other.stopDetails &&
+          (stopDetails != null ||
+              _includeNullStopDetails == other._includeNullStopDetails) &&
           processedAt == other.processedAt;
 
   @override
-  int get hashCode => Object.hash(id, stopReason, stopDetails, processedAt);
+  int get hashCode => Object.hash(
+    id,
+    stopReason,
+    stopDetails,
+    stopDetails == null && _includeNullStopDetails,
+    processedAt,
+  );
 
   @override
   String toString() =>
@@ -2793,6 +2807,7 @@ class SessionThreadCreatedEvent extends SessionEvent {
 
   /// The owning workflow run, when the thread was spawned by a workflow.
   final String? workflowRunId;
+  final bool _includeNullWorkflowRunId;
 
   /// Timestamp when this event was processed.
   final BetaTimestamp processedAt;
@@ -2803,6 +2818,7 @@ class SessionThreadCreatedEvent extends SessionEvent {
     required this.agentName,
     required this.sessionThreadId,
     this.workflowRunId,
+    this._includeNullWorkflowRunId = false,
     required this.processedAt,
   });
 
@@ -2812,6 +2828,7 @@ class SessionThreadCreatedEvent extends SessionEvent {
       id: json['id'] as String,
       agentName: json['agent_name'] as String,
       sessionThreadId: json['session_thread_id'] as String,
+      includeNullWorkflowRunId: json.containsKey('workflow_run_id'),
       workflowRunId: json['workflow_run_id'] as String?,
       processedAt: DateTime.parse(json['processed_at'] as String),
     );
@@ -2823,7 +2840,8 @@ class SessionThreadCreatedEvent extends SessionEvent {
     'id': id,
     'agent_name': agentName,
     'session_thread_id': sessionThreadId,
-    'workflow_run_id': ?workflowRunId,
+    if (workflowRunId != null || _includeNullWorkflowRunId)
+      'workflow_run_id': workflowRunId,
     'processed_at': processedAt.toUtc().toIso8601String(),
   };
 
@@ -2839,6 +2857,8 @@ class SessionThreadCreatedEvent extends SessionEvent {
       id: id ?? this.id,
       agentName: agentName ?? this.agentName,
       sessionThreadId: sessionThreadId ?? this.sessionThreadId,
+      includeNullWorkflowRunId:
+          workflowRunId != unsetCopyWithValue || _includeNullWorkflowRunId,
       workflowRunId: workflowRunId == unsetCopyWithValue
           ? this.workflowRunId
           : workflowRunId as String?,
@@ -2855,11 +2875,19 @@ class SessionThreadCreatedEvent extends SessionEvent {
           agentName == other.agentName &&
           sessionThreadId == other.sessionThreadId &&
           workflowRunId == other.workflowRunId &&
+          (workflowRunId != null ||
+              _includeNullWorkflowRunId == other._includeNullWorkflowRunId) &&
           processedAt == other.processedAt;
 
   @override
-  int get hashCode =>
-      Object.hash(id, agentName, sessionThreadId, workflowRunId, processedAt);
+  int get hashCode => Object.hash(
+    id,
+    agentName,
+    sessionThreadId,
+    workflowRunId,
+    workflowRunId == null && _includeNullWorkflowRunId,
+    processedAt,
+  );
 
   @override
   String toString() =>
@@ -2967,6 +2995,7 @@ class SessionThreadStatusIdleEvent extends SessionEvent {
 
   /// Additional provider details, when available.
   final SessionStopDetails? stopDetails;
+  final bool _includeNullStopDetails;
 
   /// Timestamp when this event was processed.
   final BetaTimestamp processedAt;
@@ -2978,6 +3007,7 @@ class SessionThreadStatusIdleEvent extends SessionEvent {
     required this.sessionThreadId,
     required this.stopReason,
     this.stopDetails,
+    this._includeNullStopDetails = false,
     required this.processedAt,
   });
 
@@ -2990,6 +3020,7 @@ class SessionThreadStatusIdleEvent extends SessionEvent {
       stopReason: SessionStopReason.fromJson(
         json['stop_reason'] as Map<String, dynamic>,
       ),
+      includeNullStopDetails: json.containsKey('stop_details'),
       stopDetails: switch (json['stop_details']) {
         final Map<String, dynamic> details => SessionStopDetails.fromJson(
           details,
@@ -3007,7 +3038,8 @@ class SessionThreadStatusIdleEvent extends SessionEvent {
     'agent_name': agentName,
     'session_thread_id': sessionThreadId,
     'stop_reason': stopReason.toJson(),
-    if (stopDetails case final details?) 'stop_details': details.toJson(),
+    if (stopDetails != null || _includeNullStopDetails)
+      'stop_details': stopDetails?.toJson(),
     'processed_at': processedAt.toUtc().toIso8601String(),
   };
 
@@ -3025,6 +3057,8 @@ class SessionThreadStatusIdleEvent extends SessionEvent {
       agentName: agentName ?? this.agentName,
       sessionThreadId: sessionThreadId ?? this.sessionThreadId,
       stopReason: stopReason ?? this.stopReason,
+      includeNullStopDetails:
+          stopDetails != unsetCopyWithValue || _includeNullStopDetails,
       stopDetails: stopDetails == unsetCopyWithValue
           ? this.stopDetails
           : stopDetails as SessionStopDetails?,
@@ -3042,6 +3076,8 @@ class SessionThreadStatusIdleEvent extends SessionEvent {
           sessionThreadId == other.sessionThreadId &&
           stopReason == other.stopReason &&
           stopDetails == other.stopDetails &&
+          (stopDetails != null ||
+              _includeNullStopDetails == other._includeNullStopDetails) &&
           processedAt == other.processedAt;
 
   @override
@@ -3051,6 +3087,7 @@ class SessionThreadStatusIdleEvent extends SessionEvent {
     sessionThreadId,
     stopReason,
     stopDetails,
+    stopDetails == null && _includeNullStopDetails,
     processedAt,
   );
 
