@@ -48,7 +48,8 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 ### Operational APIs
 
 - Message batches for large-scale offline processing
-- Model discovery, files (expiration, cursor pagination), and skills (multi-file uploads, container skills)
+- Model discovery with lifecycle filters, model lines, and thinking and server-tool capabilities
+- Files (expiration, cursor pagination) and skills (multi-file uploads, container skills)
 - Managed agents with sessions, threads, vaults, and streaming events (beta)
 - Scheduled deployments: run agent sessions on a cron schedule, with deployment runs, pause/resume, and run-now (beta)
 - Multiagent coordinator orchestration (agent and advisor roster entries), per-tool agent toolset configs (incl. web-search/web-fetch domain filters), session budgets, and outcome evaluations with grading rubrics (beta)
@@ -132,6 +133,11 @@ The client defaults to Claude API version `2026-10-21`. If your requests rely
 on sampling parameters or other legacy input behavior, set
 `apiVersion: AnthropicConfig.legacyApiVersion` in `AnthropicConfig`.
 See the [API version migration](MIGRATION.md#claude-api-version-2026-10-21).
+
+Set `AnthropicConfig.workspaceId` to select a workspace with a key that can
+access multiple workspaces. Messages, Batches and Models also accept a
+per-call `workspaceId`. Single-workspace keys can normally omit it.
+[Workspace selection](https://platform.claude.com/docs/en/manage-claude/authentication#select-a-workspace)
 
 Use explicit configuration on web builds where runtime environment variables are not available.
 
@@ -441,7 +447,7 @@ Future<void> main() async {
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.models.list()` to discover available Claude models and inspect their metadata.
+Use `client.models.list()` to discover Claude models by lifecycle stage and inspect their capabilities. The default list includes active and deprecated models. Include `ModelLifecycle.retired` in the filter to list retired models.
 
 ```dart
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
@@ -450,16 +456,22 @@ Future<void> main() async {
   final client = AnthropicClient.fromEnvironment();
 
   try {
-    final response = await client.models.list();
+    final response = await client.models.list(
+      lifecycle: const [ModelLifecycle.active],
+    );
 
     for (final model in response.data) {
-      print('${model.id} — ${model.displayName}');
+      print('${model.id} — ${model.line ?? model.displayName}');
     }
   } finally {
     client.close();
   }
 }
 ```
+
+Use `client.models.retrieve(modelId)` to check capabilities for one model. For example, read `model.capabilities?.thinking.types.betweenTools?.supported` before using `ThinkingConfig.betweenTools()` with a compatible model. Read `model.capabilities?.serverTools` for code execution and web search availability.
+
+Pass `betas: ['compact-2026-09-04']` to `list` or `retrieve` to request the beta on-demand compaction capability. Pass `workspaceId` to select a workspace when your credential can access several. A workspace-scoped credential can omit it or pass its own workspace ID.
 
 → [Full example](example/models_example.dart)
 
@@ -714,7 +726,7 @@ See the [example/](example/) directory for complete examples:
 | [`memory_stores_example.dart`](example/memory_stores_example.dart) | Managed agents memory stores, memories, and versions (beta) |
 | [`dreams_example.dart`](example/dreams_example.dart) | Dreams: memory-consolidation jobs — create, poll, list, archive (beta, research preview) |
 | [`user_profiles_example.dart`](example/user_profiles_example.dart) | User profiles and enrollment URLs (beta) |
-| [`models_example.dart`](example/models_example.dart) | Model listing |
+| [`models_example.dart`](example/models_example.dart) | Model lifecycle filters, pagination, and capabilities |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
 | [`anthropic_sdk_dart_example.dart`](example/anthropic_sdk_dart_example.dart) | Quick-start overview |
 

@@ -4,6 +4,43 @@ import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import 'model_capabilities.dart';
 
+/// Lifecycle stage returned by the Models API or passed to a model list filter.
+///
+/// The API can return new stages. [value] preserves the exact wire value.
+@immutable
+final class ModelLifecycle {
+  /// The model is open to new adopters.
+  static const active = ModelLifecycle('active');
+
+  /// The model remains callable for organizations with existing access.
+  static const deprecated = ModelLifecycle('deprecated');
+
+  /// The model can no longer be called for inference.
+  static const retired = ModelLifecycle('retired');
+
+  /// The lifecycle stage as it appears on the wire.
+  final String value;
+
+  /// Creates a lifecycle value, including values introduced by the server.
+  const ModelLifecycle(this.value);
+
+  /// Reads a lifecycle value from JSON without normalizing unknown values.
+  factory ModelLifecycle.fromJson(String json) => ModelLifecycle(json);
+
+  /// Converts this lifecycle value to JSON.
+  String toJson() => value;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is ModelLifecycle && value == other.value;
+
+  @override
+  int get hashCode => value.hashCode;
+
+  @override
+  String toString() => value;
+}
+
 /// Information about an Anthropic model.
 @immutable
 class ModelInfo {
@@ -18,6 +55,22 @@ class ModelInfo {
 
   /// Object type. Always "model".
   final String type;
+
+  /// The model line, for example `opus` or `sonnet`.
+  ///
+  /// This is an open string. May be null when the model belongs to no line or
+  /// the response predates this field.
+  final String? line;
+
+  /// The model's lifecycle stage. May be null on older responses.
+  final ModelLifecycle? lifecycle;
+
+  /// When the model was most recently deprecated. Null while active.
+  final DateTime? deprecatedAt;
+
+  /// The scheduled retirement time, if any. Use [lifecycle] to check whether
+  /// retirement has occurred.
+  final DateTime? retiresAt;
 
   /// Model capability information.
   final ModelCapabilities? capabilities;
@@ -40,6 +93,10 @@ class ModelInfo {
     required this.displayName,
     required this.createdAt,
     this.type = 'model',
+    this.line,
+    this.lifecycle,
+    this.deprecatedAt,
+    this.retiresAt,
     this.capabilities,
     this.maxInputTokens,
     this.maxTokens,
@@ -48,11 +105,18 @@ class ModelInfo {
 
   /// Creates a [ModelInfo] from JSON.
   factory ModelInfo.fromJson(Map<String, dynamic> json) {
+    final lifecycle = json['lifecycle'] as String?;
+    final deprecatedAt = json['deprecated_at'] as String?;
+    final retiresAt = json['retires_at'] as String?;
     return ModelInfo(
       id: json['id'] as String,
       displayName: json['display_name'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
       type: json['type'] as String? ?? 'model',
+      line: json['line'] as String?,
+      lifecycle: lifecycle == null ? null : ModelLifecycle.fromJson(lifecycle),
+      deprecatedAt: deprecatedAt == null ? null : DateTime.parse(deprecatedAt),
+      retiresAt: retiresAt == null ? null : DateTime.parse(retiresAt),
       capabilities: json['capabilities'] != null
           ? ModelCapabilities.fromJson(
               json['capabilities'] as Map<String, dynamic>,
@@ -71,6 +135,11 @@ class ModelInfo {
     'display_name': displayName,
     'created_at': createdAt.toUtc().toIso8601String(),
     'type': type,
+    if (line != null) 'line': line,
+    if (lifecycle != null) 'lifecycle': lifecycle!.toJson(),
+    if (deprecatedAt != null)
+      'deprecated_at': deprecatedAt!.toUtc().toIso8601String(),
+    if (retiresAt != null) 'retires_at': retiresAt!.toUtc().toIso8601String(),
     if (capabilities != null) 'capabilities': capabilities!.toJson(),
     if (maxInputTokens != null) 'max_input_tokens': maxInputTokens,
     if (maxTokens != null) 'max_tokens': maxTokens,
@@ -84,6 +153,10 @@ class ModelInfo {
     String? displayName,
     DateTime? createdAt,
     String? type,
+    Object? line = unsetCopyWithValue,
+    Object? lifecycle = unsetCopyWithValue,
+    Object? deprecatedAt = unsetCopyWithValue,
+    Object? retiresAt = unsetCopyWithValue,
     Object? capabilities = unsetCopyWithValue,
     Object? maxInputTokens = unsetCopyWithValue,
     Object? maxTokens = unsetCopyWithValue,
@@ -94,6 +167,16 @@ class ModelInfo {
       displayName: displayName ?? this.displayName,
       createdAt: createdAt ?? this.createdAt,
       type: type ?? this.type,
+      line: line == unsetCopyWithValue ? this.line : line as String?,
+      lifecycle: lifecycle == unsetCopyWithValue
+          ? this.lifecycle
+          : lifecycle as ModelLifecycle?,
+      deprecatedAt: deprecatedAt == unsetCopyWithValue
+          ? this.deprecatedAt
+          : deprecatedAt as DateTime?,
+      retiresAt: retiresAt == unsetCopyWithValue
+          ? this.retiresAt
+          : retiresAt as DateTime?,
       capabilities: capabilities == unsetCopyWithValue
           ? this.capabilities
           : capabilities as ModelCapabilities?,
@@ -118,6 +201,10 @@ class ModelInfo {
           displayName == other.displayName &&
           createdAt == other.createdAt &&
           type == other.type &&
+          line == other.line &&
+          lifecycle == other.lifecycle &&
+          deprecatedAt == other.deprecatedAt &&
+          retiresAt == other.retiresAt &&
           capabilities == other.capabilities &&
           maxInputTokens == other.maxInputTokens &&
           maxTokens == other.maxTokens &&
@@ -129,6 +216,10 @@ class ModelInfo {
     displayName,
     createdAt,
     type,
+    line,
+    lifecycle,
+    deprecatedAt,
+    retiresAt,
     capabilities,
     maxInputTokens,
     maxTokens,
@@ -138,7 +229,9 @@ class ModelInfo {
   @override
   String toString() =>
       'ModelInfo(id: $id, displayName: $displayName, createdAt: $createdAt, '
-      'type: $type, capabilities: $capabilities, '
+      'type: $type, line: $line, lifecycle: $lifecycle, '
+      'deprecatedAt: $deprecatedAt, retiresAt: $retiresAt, '
+      'capabilities: $capabilities, '
       'maxInputTokens: $maxInputTokens, maxTokens: $maxTokens, '
       'allowedFallbackModels: $allowedFallbackModels)';
 }

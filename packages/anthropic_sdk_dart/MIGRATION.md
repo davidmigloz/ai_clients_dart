@@ -65,6 +65,35 @@ The server migration also renames Admin and Enterprise Analytics response fields
 
 ---
 
+## Handle the between-tools thinking variant
+
+The exported `ThinkingConfig` sealed type now includes `ThinkingBetweenTools`. Add a case to exhaustive switches over `ThinkingConfig`.
+
+Before
+
+```dart
+String describeThinking(ThinkingConfig config) => switch (config) {
+  ThinkingEnabled() => 'Manual budget',
+  ThinkingDisabled() => 'Disabled',
+  ThinkingAdaptive() => 'Adaptive',
+};
+```
+
+After
+
+```dart
+String describeThinking(ThinkingConfig config) => switch (config) {
+  ThinkingEnabled() => 'Manual budget',
+  ThinkingDisabled() => 'Disabled',
+  ThinkingAdaptive() => 'Adaptive',
+  ThinkingBetweenTools() => 'Between tools',
+};
+```
+
+Use `ThinkingConfig.betweenTools()` when the model accepts this setting. Check `model.capabilities?.thinking.types.betweenTools?.supported` and the model's effort restrictions before requesting it. [Claude Sonnet 5.5 migration guide](https://platform.claude.com/docs/en/models/sonnet-5-5/migration-guide)
+
+---
+
 ## Migrating from v9.x to v10.0.0
 
 v10.0.0 adds document sources that reference uploaded files. `DocumentSource` is sealed, so exhaustive switches must handle the new `FileDocumentSource` variant.

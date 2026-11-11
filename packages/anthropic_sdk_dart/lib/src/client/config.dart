@@ -1,6 +1,7 @@
 import 'package:logging/logging.dart';
 
 import '../auth/auth_provider.dart';
+import '../models/common/copy_with_sentinel.dart';
 import '../platform/environment.dart';
 
 /// Retry policy configuration.
@@ -80,6 +81,12 @@ class AnthropicConfig {
   /// sending legacy Messages inputs such as sampling parameters.
   final String apiVersion;
 
+  /// Workspace selected for requests to workspace-scoped resources.
+  ///
+  /// Set this when the key spans workspaces and the operation requires one.
+  /// An explicit request header can override this setting.
+  final String? workspaceId;
+
   /// Creates an [AnthropicConfig].
   const AnthropicConfig({
     this.baseUrl = 'https://api.anthropic.com',
@@ -97,6 +104,7 @@ class AnthropicConfig {
       'secret',
     ],
     this.apiVersion = defaultApiVersion,
+    this.workspaceId,
   });
 
   /// Creates an [AnthropicConfig] using runtime environment variables.
@@ -134,6 +142,7 @@ class AnthropicConfig {
     Level? logLevel,
     List<String>? redactionList,
     String? apiVersion,
+    Object? workspaceId = unsetCopyWithValue,
   }) {
     return AnthropicConfig(
       baseUrl: baseUrl ?? this.baseUrl,
@@ -145,6 +154,9 @@ class AnthropicConfig {
       logLevel: logLevel ?? this.logLevel,
       redactionList: redactionList ?? this.redactionList,
       apiVersion: apiVersion ?? this.apiVersion,
+      workspaceId: workspaceId == unsetCopyWithValue
+          ? this.workspaceId
+          : workspaceId as String?,
     );
   }
 }
