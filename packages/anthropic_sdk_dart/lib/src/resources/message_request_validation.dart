@@ -64,12 +64,21 @@ void _validateUserCitations(Object? block, String field) {
         when citations.isNotEmpty:
       _reject('$field.citations', 'Remove citations from user text blocks');
     case {
-      'type': 'search_result' || 'tool_result',
+      'type': 'search_result' || 'tool_result' || 'mcp_tool_result',
       'content': final List<Object?> children,
     }:
-      for (final (index, child) in children.indexed) {
-        _validateUserCitations(child, '$field.content[$index]');
-      }
+      _validateUserCitationChildren(children, '$field.content');
+    case {
+      'type': 'document',
+      'source': {'type': 'content', 'content': final List<Object?> children},
+    }:
+      _validateUserCitationChildren(children, '$field.source.content');
+  }
+}
+
+void _validateUserCitationChildren(List<Object?> children, String field) {
+  for (final (index, child) in children.indexed) {
+    _validateUserCitations(child, '$field[$index]');
   }
 }
 

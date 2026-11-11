@@ -142,6 +142,41 @@ void main() {
       ]),
       'citations',
     ),
+    'user MCP tool result text citations': (
+      InputMessage.userBlocks([
+        MCPToolResultInputBlock(
+          toolUseId: 'mcptoolu_search',
+          content: MCPToolResultContent.blocks(const [
+            TextBlock(
+              text: 'source text',
+              citations: [
+                CharLocationCitation(
+                  citedText: 'source text',
+                  documentIndex: 0,
+                  startCharIndex: 0,
+                  endCharIndex: 11,
+                ),
+              ],
+            ),
+          ]),
+        ),
+      ]),
+      'citations',
+    ),
+    'user document source text citations': (
+      InputMessage.userBlocks([
+        UnknownInputContentBlock(
+          raw: {
+            'type': 'document',
+            'source': {
+              'type': 'content',
+              'content': [_citedText.toJson()],
+            },
+          },
+        ),
+      ]),
+      'citations',
+    ),
   };
 
   for (final MapEntry(key: name, value: (message, field))

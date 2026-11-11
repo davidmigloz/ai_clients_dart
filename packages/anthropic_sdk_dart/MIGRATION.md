@@ -35,7 +35,8 @@ final current = MessageCreateRequest(
 ```
 
 Move direct `document` blocks from assistant turns to user turns. Remove
-nonempty citations from user text blocks, including text inside search results.
+nonempty citations from user text blocks, including text in search results, tool
+results and structured document sources.
 Assistant text citations, nested documents in tool results, and the
 `citations: {enabled: true}` setting on a document or search result are still
 supported. The Dart client raises `ValidationException` before sending these
