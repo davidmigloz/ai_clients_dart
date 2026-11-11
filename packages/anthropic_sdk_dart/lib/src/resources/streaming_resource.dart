@@ -48,6 +48,7 @@ mixin StreamingResource on ResourceBase {
     headers: headers,
     abortTrigger: abortTrigger,
     validateHeaders: validateHeaders,
+    decode: (response) => SseParser().parse(response.stream),
   );
 
   /// Makes a streaming GET request whose response contains JSON lines.
@@ -76,7 +77,8 @@ mixin StreamingResource on ResourceBase {
     headers: headers,
     errorFactory: errorFactory,
     errorFactoryWithMetadata: errorFactoryWithMetadata,
-    decode: (bytes) => bytes
+    jsonlMedia: true,
+    decode: (response) => response.stream
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .where((line) => line.trim().isNotEmpty)
@@ -139,9 +141,10 @@ mixin StreamingResource on ResourceBase {
     queryParams: queryParams,
     headers: headers,
     abortTrigger: abortTrigger,
+    decode: (response) => SseParser().parse(response.stream),
   );
 
-  Stream<Map<String, dynamic>> _stream(
+  Stream<T> _stream<T>(
     String method,
     String path, {
     Map<String, dynamic>? body,
@@ -149,7 +152,10 @@ mixin StreamingResource on ResourceBase {
     Map<String, String>? headers,
     Future<void>? abortTrigger,
     void Function(Map<String, String>)? validateHeaders,
-    Stream<Map<String, dynamic>> Function(Stream<List<int>> bytes)? decode,
+    required Stream<T> Function(http.StreamedResponse response) decode,
+    Map<String, String> Function()? buildRequestHeaders,
+    bool followRedirects = true,
+    bool jsonlMedia = false,
     AnthropicException Function(int statusCode, String body)? errorFactory,
     AnthropicException Function(
       int statusCode,
@@ -164,7 +170,7 @@ mixin StreamingResource on ResourceBase {
     StreamSubscription<dynamic>? subscription;
     var correlationId = generateRequestId();
     var stopped = false;
-    late StreamController<Map<String, dynamic>> controller;
+    late StreamController<T> controller;
 
     void stop({bool abort = true}) {
       if (stopped) return;
@@ -185,10 +191,10 @@ mixin StreamingResource on ResourceBase {
       try {
         ensureNotClosed?.call();
         final uri = requestBuilder.buildUrl(path, queryParams: queryParams);
-        final requestHeaders = requestBuilder.buildHeaders(
-          additionalHeaders: headers,
-        );
-        if (decode != null) {
+        final requestHeaders =
+            buildRequestHeaders?.call() ??
+            requestBuilder.buildHeaders(additionalHeaders: headers);
+        if (jsonlMedia) {
           // JSONL responses are streamed bytes. Leave explicit header
           // overrides in place and omit the synthesized JSON Content-Type.
           if (!requestHeaders.keys.any(
@@ -204,11 +210,14 @@ mixin StreamingResource on ResourceBase {
           }
         }
         validateHeaders?.call(requestHeaders);
-        final request = http.AbortableRequest(
-          method,
-          uri,
-          abortTrigger: requestAbort.future,
-        )..headers.addAll(requestHeaders);
+        final request =
+            http.AbortableRequest(
+                method,
+                uri,
+                abortTrigger: requestAbort.future,
+              )
+              ..followRedirects = followRedirects
+              ..headers.addAll(requestHeaders);
         if (body != null) request.body = jsonEncode(body);
         await _applyAuthentication(request);
         if (abortTrigger != null && !stopped) {
@@ -223,6 +232,23 @@ mixin StreamingResource on ResourceBase {
         stopwatch.stop();
         if (stopped) {
           await response.stream.listen(null).cancel();
+          return;
+        }
+        if (!followRedirects &&
+            response.statusCode >= 300 &&
+            response.statusCode < 400) {
+          response.stream.listen(null).cancel().ignore();
+          finish(
+            ApiException(
+              statusCode: response.statusCode,
+              message: 'Unexpected redirect from the API',
+              responseMetadata: createSafeResponseMetadata(
+                statusCode: response.statusCode,
+                headers: response.headers,
+                latency: stopwatch.elapsed,
+              ),
+            ),
+          );
           return;
         }
         if (response.statusCode >= 400) {
@@ -262,9 +288,22 @@ mixin StreamingResource on ResourceBase {
             },
           );
         } else {
-          subscription = (decode ?? SseParser().parse)(
-            response.stream,
-          ).listen(controller.add, onError: finish, onDone: finish);
+          final decoded = decode(response);
+          if (stopped) {
+            await decoded.listen(null).cancel();
+            return;
+          }
+          subscription = decoded.listen(
+            controller.add,
+            onError: finish,
+            onDone: finish,
+          );
+        }
+        // A custom response stream can abort synchronously from its onListen
+        // callback, before its subscription is available to stop().
+        if (stopped) {
+          await subscription?.cancel();
+          return;
         }
         if (controller.isPaused) subscription?.pause();
       } catch (error, stackTrace) {
@@ -272,7 +311,7 @@ mixin StreamingResource on ResourceBase {
       }
     }
 
-    controller = StreamController<Map<String, dynamic>>(
+    controller = StreamController<T>(
       onListen: () {
         unawaited(
           abortTrigger?.then((_) {
@@ -312,6 +351,32 @@ mixin StreamingResource on ResourceBase {
     }
   }
 }
+
+/// Opens a raw response body using the same lifecycle as SSE and JSONL streams.
+Stream<List<int>> getResourceByteStream(
+  StreamingResource resource,
+  String path, {
+  Map<String, dynamic>? queryParams,
+  required Map<String, String> Function() headers,
+  void Function(Map<String, String>)? onResponse,
+  Future<void>? abortTrigger,
+}) => resource._stream(
+  'GET',
+  path,
+  queryParams: queryParams,
+  buildRequestHeaders: headers,
+  followRedirects: false,
+  abortTrigger: abortTrigger,
+  decode: (response) {
+    try {
+      onResponse?.call(response.headers);
+      return response.stream;
+    } catch (_) {
+      response.stream.listen(null).cancel().ignore();
+      rethrow;
+    }
+  },
+);
 
 class _MappedEventSink<T> implements EventSink<Map<String, dynamic>> {
   final EventSink<T> _output;
