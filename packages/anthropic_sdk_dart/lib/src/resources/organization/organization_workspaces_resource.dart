@@ -109,7 +109,8 @@ final class OrganizationWorkspacesResource {
       'display_color': ?displayColor,
       'external_key_id': ?externalKeyId,
       'user_profile_id': ?userProfileId,
-      if (tags != unsetCopyWithValue) 'tags': tags as Map<String, String>?,
+      if (tags != unsetCopyWithValue)
+        'tags': tags == null ? null : Map<String, String?>.from(tags as Map),
       if (allowedInferenceGeos != null || defaultInferenceGeo != null)
         'data_residency': {
           'allowed_inference_geos': ?allowedInferenceGeos?.toJson(),

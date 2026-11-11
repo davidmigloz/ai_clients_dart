@@ -567,6 +567,28 @@ void main() {
     },
   );
 
+  test('workspace tags support empty updates and nullable entries', () async {
+    transport
+      ..queueJsonResponse(_workspaceRecord)
+      ..queueJsonResponse(_workspaceRecord);
+    final workspaces = client.organization.workspaces;
+    await workspaces.update('wrkspc_fixture', tags: {});
+    await workspaces.update(
+      'wrkspc_fixture',
+      tags: {'env': null, 'app': 'fixture'},
+    );
+    final bodies = [
+      for (final request in transport.requests)
+        jsonDecode((request as http.Request).body),
+    ];
+    expect(bodies, [
+      {'tags': <String, String?>{}},
+      {
+        'tags': {'env': null, 'app': 'fixture'},
+      },
+    ]);
+  });
+
   test('legacy version keeps nullable workspace and group_type', () async {
     final legacyClient = AnthropicClient(
       config: const AnthropicConfig(
