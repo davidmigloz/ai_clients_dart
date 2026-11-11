@@ -27,7 +27,8 @@
     "memories": "memory_stores",
     "memoryVersions": "memory_stores",
     "deployments": "deployments",
-    "deploymentRuns": "deployments"
+    "deploymentRuns": "deployments",
+    "compliance": "compliance"
   },
   "excluded_from_examples": [],
   "drift_patterns": []
