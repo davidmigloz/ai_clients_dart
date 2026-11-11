@@ -15,6 +15,7 @@ import '../resources/memory_stores_resource.dart';
 import '../resources/message_batches_resource.dart';
 import '../resources/messages_resource.dart';
 import '../resources/models_resource.dart';
+import '../resources/organization/organization_resource.dart';
 import '../resources/sessions_resource.dart';
 import '../resources/skills_resource.dart';
 import '../resources/user_profiles_resource.dart';
@@ -72,6 +73,9 @@ class AnthropicClient {
 
   /// Resource for the Claude Compliance API.
   late final ComplianceResource compliance;
+
+  /// Organization Admin API. Requires a credential with administrative scope.
+  late final OrganizationResource organization;
 
   /// Resource for the Models API.
   late final ModelsResource models;
@@ -187,6 +191,12 @@ class AnthropicClient {
       interceptors: interceptors,
       httpClient: _httpClient,
       retryWrapper: retryWrapper,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    organization = OrganizationResource(
+      requestBuilder: _requestBuilder,
+      interceptorChain: _interceptorChain,
       ensureNotClosed: _ensureNotClosed,
     );
 

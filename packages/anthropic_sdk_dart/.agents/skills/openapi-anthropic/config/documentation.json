@@ -16,6 +16,8 @@
     "streaming_resource"
   ],
   "resource_to_example": {
+    "organization": "organization_admin",
+    "organizationWorkspaces": "organization_admin",
     "messages": "messages",
     "models": "models",
     "agents": "managed_agents",

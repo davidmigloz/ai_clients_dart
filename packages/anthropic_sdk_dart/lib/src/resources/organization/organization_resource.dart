@@ -1,0 +1,62 @@
+import '../../client/interceptor_chain.dart';
+import '../../client/request_builder.dart';
+import '../../models/organization/organization_records.dart';
+import 'organization_access_resources.dart';
+import 'organization_settings_resources.dart';
+import 'organization_transport.dart';
+import 'organization_workspaces_resource.dart';
+
+/// Organization-scoped Claude Admin API operations.
+///
+/// Use an Admin API key or another credential with the documented scope.
+final class OrganizationResource {
+  /// Creates an organization resource on the shared client transport.
+  OrganizationResource({
+    required RequestBuilder requestBuilder,
+    required InterceptorChain interceptorChain,
+    void Function()? ensureNotClosed,
+  }) : this._(
+         OrganizationTransport(
+           requestBuilder: requestBuilder,
+           interceptorChain: interceptorChain,
+           ensureNotClosed: ensureNotClosed,
+         ),
+       );
+
+  OrganizationResource._(this._transport)
+    : apiKeys = OrganizationApiKeysResource(_transport),
+      invites = OrganizationInvitesResource(_transport),
+      users = OrganizationUsersResource(_transport),
+      workspaces = OrganizationWorkspacesResource(_transport),
+      rateLimits = OrganizationRateLimitsResource(_transport),
+      complianceSettings = OrganizationComplianceSettingsResource(_transport);
+
+  final OrganizationTransport _transport;
+
+  /// API key metadata and lifecycle.
+  final OrganizationApiKeysResource apiKeys;
+
+  /// Organization invitations.
+  final OrganizationInvitesResource invites;
+
+  /// Organization membership.
+  final OrganizationUsersResource users;
+
+  /// Organization rate limits.
+  final OrganizationRateLimitsResource rateLimits;
+
+  /// Organization compliance settings.
+  final OrganizationComplianceSettingsResource complianceSettings;
+
+  /// Workspaces and workspace membership.
+  final OrganizationWorkspacesResource workspaces;
+
+  /// Retrieves the organization associated with the credential.
+  Future<OrganizationInfo> retrieve({Future<void>? abortTrigger}) =>
+      _transport.send(
+        'GET',
+        '/me',
+        OrganizationInfo.fromJson,
+        abortTrigger: abortTrigger,
+      );
+}

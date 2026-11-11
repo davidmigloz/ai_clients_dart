@@ -219,6 +219,13 @@ export 'src/models/metadata/usage.dart';
 export 'src/models/models/model_capabilities.dart';
 export 'src/models/models/model_info.dart';
 
+// Organization Admin API
+export 'src/models/organization/organization_api_key.dart';
+export 'src/models/organization/organization_limits.dart';
+export 'src/models/organization/organization_page.dart';
+export 'src/models/organization/organization_records.dart';
+export 'src/models/organization/organization_workspace.dart';
+
 // Models - Skills
 export 'src/models/skills/deleted_skill.dart';
 export 'src/models/skills/skill.dart';
@@ -282,6 +289,10 @@ export 'src/resources/message_batches_resource.dart';
 export 'src/resources/message_thread.dart';
 export 'src/resources/messages_resource.dart';
 export 'src/resources/models_resource.dart';
+export 'src/resources/organization/organization_access_resources.dart';
+export 'src/resources/organization/organization_resource.dart';
+export 'src/resources/organization/organization_settings_resources.dart';
+export 'src/resources/organization/organization_workspaces_resource.dart';
 export 'src/resources/session_events_resource.dart';
 export 'src/resources/session_resources_resource.dart';
 export 'src/resources/session_thread_events_resource.dart';

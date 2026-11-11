@@ -51,6 +51,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Message batches for large-scale offline processing
 - Compliance Activity Feed, organization directory, effective settings, and Security Posture (beta)
 - Model discovery with lifecycle filters, model lines, and thinking and server-tool capabilities
+- Organization Admin API for keys, users, invites, workspaces, rate limits and compliance settings
 - Files (expiration, cursor pagination) and skills (multi-file uploads, container skills)
 - Managed agents with sessions, thread status filters, execution principals, tool permission evaluation, vaults, and streaming events (beta)
 - Scheduled deployments: run agent sessions on a cron schedule, with deployment runs, pause/resume, and run-now (beta)
@@ -760,6 +761,33 @@ restricted when deciding access, and preserve the wire value for diagnostics.
 
 </details>
 
+### How do I manage organization workspaces and access?
+
+<details>
+<summary><b>List workspaces with a scoped Admin key</b></summary>
+
+Configure a separate client with a Claude Console Admin API key for
+organization membership, invitations, API keys, workspace settings, and rate
+limits. Select a workspace with the resource path or filter where applicable.
+
+```dart
+final admin = AnthropicClient.withApiKey(adminKey);
+try {
+  final organization = await admin.organization.retrieve();
+  final workspaces = await admin.organization.workspaces.list(
+    includeDefault: true,
+    limit: 10,
+  );
+  print('${organization.name}: ${workspaces.data.length} workspaces');
+} finally {
+  admin.close();
+}
+```
+
+[Runnable Admin example](example/organization_admin_example.dart) · [Claude Admin API](https://platform.claude.com/docs/en/manage-claude/admin-api)
+
+</details>
+
 ### Compliance Activity Feed and directory
 
 <details>
@@ -881,6 +909,7 @@ See the [example/](example/) directory for complete examples:
 | [`dreams_example.dart`](example/dreams_example.dart) | Dreams: memory-consolidation jobs — create, poll, list, archive (beta, research preview) |
 | [`current_user_profiles_example.dart`](example/current_user_profiles_example.dart) | Inspect enforcement status and paginate user profiles |
 | [`user_profiles_example.dart`](example/user_profiles_example.dart) | Legacy user profiles and enrollment URLs (beta) |
+| [`organization_admin_example.dart`](example/organization_admin_example.dart) | Read-only organization and workspace administration |
 | [`models_example.dart`](example/models_example.dart) | Model lifecycle filters, pagination, and capabilities |
 | [`compliance_example.dart`](example/compliance_example.dart) | Scoped Compliance Activity Feed |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |

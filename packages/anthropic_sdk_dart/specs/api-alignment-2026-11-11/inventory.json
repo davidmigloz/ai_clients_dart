@@ -4915,7 +4915,7 @@
           "line": 137
         }
       ],
-      "issue": 486,
+      "issue": 487,
       "wire_path": "/v1/organizations/federation_issuers",
       "disposition": "resource missing at baseline"
     },
@@ -4943,7 +4943,7 @@
           "line": 39
         }
       ],
-      "issue": 486,
+      "issue": 487,
       "wire_path": "/v1/organizations/federation_issuers",
       "disposition": "resource missing at baseline"
     },
@@ -4969,7 +4969,7 @@
           "line": 66
         }
       ],
-      "issue": 486,
+      "issue": 487,
       "wire_path": "/v1/organizations/federation_issuers/{federation_issuer_id}",
       "disposition": "resource missing at baseline"
     },
@@ -4997,7 +4997,7 @@
           "line": 105
         }
       ],
-      "issue": 486,
+      "issue": 487,
       "wire_path": "/v1/organizations/federation_issuers/{federation_issuer_id}",
       "disposition": "resource missing at baseline"
     },
@@ -5024,7 +5024,7 @@
           "line": 171
         }
       ],
-      "issue": 486,
+      "issue": 487,
       "wire_path": "/v1/organizations/federation_issuers/{federation_issuer_id}/archive",
       "disposition": "resource missing at baseline"
     },
@@ -5060,7 +5060,7 @@
           "line": 206
         }
       ],
-      "issue": 486,
+      "issue": 487,
       "wire_path": "/v1/organizations/federation_issuers/{federation_issuer_id}/archive",
       "disposition": "resource missing at baseline"
     },
@@ -5095,7 +5095,7 @@
           "line": 79
         }
       ],
-      "issue": 486,
+      "issue": 487,
       "wire_path": "/v1/organizations/federation_issuers/{federation_issuer_id}",
       "disposition": "resource missing at baseline"
     },
@@ -5132,7 +5132,7 @@
           "line": 124
         }
       ],
-      "issue": 486,
+      "issue": 487,
       "wire_path": "/v1/organizations/federation_issuers/{federation_issuer_id}",
       "disposition": "resource missing at baseline"
     },
@@ -5167,7 +5167,7 @@
           "line": 162
         }
       ],
-      "issue": 486,
+      "issue": 487,
       "wire_path": "/v1/organizations/federation_issuers",
       "disposition": "resource missing at baseline"
     },
@@ -5204,7 +5204,7 @@
           "line": 42
         }
       ],
-      "issue": 486,
+      "issue": 487,
       "wire_path": "/v1/organizations/federation_issuers",
       "disposition": "resource missing at baseline"
     },
