@@ -2630,6 +2630,18 @@ class MCPToolResultInputBlock extends InputContentBlock {
   /// The content of the tool result.
   final MCPToolResultContent? content;
 
+  final List<TextInputBlock>? _textContent;
+
+  /// Request text blocks, including any nested cache control.
+  List<TextInputBlock>? get textContent =>
+      _textContent ??
+      switch (content) {
+        MCPToolResultBlocksContent(:final blocks) => List.unmodifiable(
+          blocks.map((block) => TextInputBlock.fromJson(block.toJson())),
+        ),
+        _ => null,
+      };
+
   /// Whether this result represents an error.
   final bool? isError;
 
@@ -2642,14 +2654,42 @@ class MCPToolResultInputBlock extends InputContentBlock {
     this.content,
     this.isError,
     this.cacheControl,
+  }) : _textContent = null;
+
+  /// Creates a result from request text blocks with their input-only fields.
+  MCPToolResultInputBlock.withTextContent({
+    required this.toolUseId,
+    required List<TextInputBlock> textContent,
+    this.isError,
+    this.cacheControl,
+  }) : _textContent = List.unmodifiable(textContent),
+       content = MCPToolResultBlocksContent(
+         List.unmodifiable(
+           textContent.map((block) => TextBlock.fromJson(block.toJson())),
+         ),
+       );
+
+  const MCPToolResultInputBlock._({
+    required this.toolUseId,
+    required this.content,
+    required this._textContent,
+    required this.isError,
+    required this.cacheControl,
   });
 
   /// Creates an [MCPToolResultInputBlock] from JSON.
   factory MCPToolResultInputBlock.fromJson(Map<String, dynamic> json) {
-    return MCPToolResultInputBlock(
+    final value = json['content'];
+    return MCPToolResultInputBlock._(
       toolUseId: json['tool_use_id'] as String,
-      content: json['content'] != null
-          ? MCPToolResultContent.fromJson(json['content'] as Object)
+      content: value == null ? null : MCPToolResultContent.fromJson(value),
+      textContent: value is List
+          ? List.unmodifiable(
+              value.map(
+                (Object? block) =>
+                    TextInputBlock.fromJson(block! as Map<String, dynamic>),
+              ),
+            )
           : null,
       isError: json['is_error'] as bool?,
       cacheControl: json['cache_control'] != null
@@ -2664,14 +2704,10 @@ class MCPToolResultInputBlock extends InputContentBlock {
   Map<String, dynamic> toJson() => {
     'type': 'mcp_tool_result',
     'tool_use_id': toolUseId,
-    if (content case final value?)
-      'content': switch (value) {
-        MCPToolResultBlocksContent(:final blocks) => [
-          for (final block in blocks)
-            TextInputBlock.fromJson(block.toJson()).toJson(),
-        ],
-        MCPToolResultStringContent() => value.toJson(),
-      },
+    if (textContent case final blocks?)
+      'content': [for (final block in blocks) block.toJson()]
+    else if (content case final value?)
+      'content': value.toJson(),
     if (isError != null) 'is_error': isError,
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
   };
@@ -2683,11 +2719,12 @@ class MCPToolResultInputBlock extends InputContentBlock {
     Object? isError = unsetCopyWithValue,
     Object? cacheControl = unsetCopyWithValue,
   }) {
-    return MCPToolResultInputBlock(
+    return MCPToolResultInputBlock._(
       toolUseId: toolUseId ?? this.toolUseId,
       content: content == unsetCopyWithValue
           ? this.content
           : content as MCPToolResultContent?,
+      textContent: content == unsetCopyWithValue ? _textContent : null,
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
@@ -2702,16 +2739,23 @@ class MCPToolResultInputBlock extends InputContentBlock {
           runtimeType == other.runtimeType &&
           toolUseId == other.toolUseId &&
           content == other.content &&
+          listsEqual(textContent, other.textContent) &&
           isError == other.isError &&
           cacheControl == other.cacheControl;
 
   @override
-  int get hashCode => Object.hash(toolUseId, content, isError, cacheControl);
+  int get hashCode => Object.hash(
+    toolUseId,
+    content,
+    listHash(textContent),
+    isError,
+    cacheControl,
+  );
 
   @override
   String toString() =>
       'MCPToolResultInputBlock(toolUseId: $toolUseId, '
-      'content: $content, isError: $isError, '
+      'content: $content, textBlocks: ${textContent?.length}, isError: $isError, '
       'cacheControl: $cacheControl)';
 }
 

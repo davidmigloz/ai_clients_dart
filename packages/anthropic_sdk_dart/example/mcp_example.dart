@@ -40,13 +40,24 @@ Future<void> main() async {
 
     final listings = first.content.whereType<McpToolListingBlock>();
     if (listings.isEmpty) return;
-    final followUp = await client.messages.create(
+    if (first.stopReason == StopReason.endTurn) {
+      final followUp = await client.messages.create(
+        request.copyWith(
+          messages: [
+            ...request.messages,
+            first.toInputMessage(),
+            InputMessage.user('Explain what I can do with those tools.'),
+          ],
+        ),
+        betas: beta,
+      );
+      stdout.writeln(followUp.text);
+    }
+
+    // Start a fresh request with the pinned tools. The continued conversation
+    // above kept the tool configuration used by its earlier turn.
+    final pinned = await client.messages.create(
       request.copyWith(
-        messages: [
-          ...request.messages,
-          first.toInputMessage(),
-          InputMessage.user('Explain what I can do with those tools.'),
-        ],
         tools: [
           ToolDefinition.builtIn(
             BuiltInTool.mcpConnector(
@@ -58,7 +69,7 @@ Future<void> main() async {
       ),
       betas: beta,
     );
-    stdout.writeln(followUp.text);
+    stdout.writeln(pinned.text);
   } finally {
     client.close();
   }

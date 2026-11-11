@@ -146,7 +146,9 @@ final class McpListedTool {
     required this.name,
     required Map<String, dynamic> inputSchema,
     this.description,
-  }) : inputSchema = deepUnmodifiableMap(inputSchema);
+    bool hasDescription = false,
+  }) : inputSchema = deepUnmodifiableMap(inputSchema),
+       hasDescription = hasDescription || description != null;
 
   /// Parses one tool entry from the provider.
   factory McpListedTool.fromJson(Map<String, dynamic> json) {
@@ -158,6 +160,7 @@ final class McpListedTool {
         name: name,
         inputSchema: schema,
         description: json['description'] as String?,
+        hasDescription: json.containsKey('description'),
       );
     }
     throw const FormatException('Invalid MCP listed tool');
@@ -172,11 +175,14 @@ final class McpListedTool {
   /// Human-readable tool description.
   final String? description;
 
+  /// Whether the listing supplied the description, including explicit null.
+  final bool hasDescription;
+
   /// Serializes the tool for pinning or history replay.
   Map<String, dynamic> toJson() => {
     'name': name,
     'input_schema': inputSchema,
-    'description': ?description,
+    if (hasDescription) 'description': description,
   };
 
   /// Copies this tool listing entry.
@@ -184,12 +190,18 @@ final class McpListedTool {
     String? name,
     Map<String, dynamic>? inputSchema,
     Object? description = unsetCopyWithValue,
+    bool? hasDescription,
   }) => McpListedTool(
     name: name ?? this.name,
     inputSchema: inputSchema ?? this.inputSchema,
     description: description == unsetCopyWithValue
         ? this.description
         : description as String?,
+    hasDescription:
+        hasDescription ??
+        (description == unsetCopyWithValue
+            ? this.hasDescription
+            : description != null),
   );
 
   @override
@@ -197,15 +209,21 @@ final class McpListedTool {
       other is McpListedTool &&
       name == other.name &&
       description == other.description &&
+      hasDescription == other.hasDescription &&
       mapsDeepEqual(inputSchema, other.inputSchema);
 
   @override
-  int get hashCode =>
-      Object.hash(name, description, mapDeepHashCode(inputSchema));
+  int get hashCode => Object.hash(
+    name,
+    description,
+    hasDescription,
+    mapDeepHashCode(inputSchema),
+  );
 
   @override
   String toString() =>
-      'McpListedTool(name: $name, schema: ${inputSchema.length} fields)';
+      'McpListedTool(name: $name, hasDescription: $hasDescription, '
+      'schema: ${inputSchema.length} fields)';
 }
 
 /// A Messages toolset referencing a server declared in `mcp_servers`.

@@ -183,7 +183,7 @@ class McpToolConfig {
     return McpToolConfig(
       allowedTools: allowedTools == unsetCopyWithValue
           ? this.allowedTools
-          : allowedTools as List<String>?,
+          : (allowedTools as List<Object?>?)?.cast<String>().toList(),
       enabled: enabled == unsetCopyWithValue ? this.enabled : enabled as bool?,
     );
   }

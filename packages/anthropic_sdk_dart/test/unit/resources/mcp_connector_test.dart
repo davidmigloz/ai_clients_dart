@@ -307,6 +307,134 @@ void main() {
   });
 
   test(
+    'listing retains an explicit nullable description in replay and pinning',
+    () async {
+      final nullable = {..._tool, 'description': null};
+      final response = MockResponses.message()
+        ..['content'] = [
+          {
+            ..._listing,
+            'tools': [nullable],
+          },
+        ];
+      transport
+        ..queueJsonResponse(response)
+        ..queueJsonResponse(MockResponses.message())
+        ..queueJsonResponse(MockResponses.message());
+      final request = _request();
+      final first = await client.messages.create(request, betas: _betas);
+      final listing = first.content.single as McpToolListingBlock;
+      expect(listing.tools.single.toJson(), nullable);
+      expect(listing.tools.single.copyWith().toJson(), nullable);
+      expect(listing.tools.single.description, isNull);
+      expect(listing.tools.single.hasDescription, isTrue);
+      await client.messages.create(
+        request.copyWith(
+          messages: [
+            ...request.messages,
+            first.toInputMessage(),
+            InputMessage.user('Continue'),
+          ],
+        ),
+        betas: _betas,
+      );
+      final replay = _body(transport.requests[1]);
+      expect(replay['tools'], request.toJson()['tools']);
+      final assistant =
+          (replay['messages'] as List<Object?>)[1]! as Map<String, dynamic>;
+      expect(assistant['content'], [
+        {
+          ..._listing,
+          'tools': [nullable],
+        },
+      ]);
+      await client.messages.create(
+        request.copyWith(
+          tools: [
+            ToolDefinition.builtIn(
+              BuiltInTool.mcpConnector(
+                serverName: _serverName,
+                tools: listing.tools,
+              ),
+            ),
+          ],
+        ),
+        betas: _betas,
+      );
+      final pinned = _body(transport.requests.last);
+      expect(pinned['messages'], request.toJson()['messages']);
+      expect(pinned['tools'], [
+        {
+          'type': 'mcp_toolset',
+          'mcp_server_name': _serverName,
+          'tools': [nullable],
+        },
+      ]);
+    },
+  );
+
+  test(
+    'request MCP text blocks keep nested cache controls when copied and sent',
+    () async {
+      const raw = {
+        'type': 'mcp_tool_result',
+        'tool_use_id': 'mcp_tool_fixture',
+        'content': [
+          {
+            'type': 'text',
+            'text': 'Cached tool output',
+            'cache_control': {'type': 'ephemeral', 'ttl': '1h'},
+          },
+        ],
+      };
+      final block = InputContentBlock.fromJson(raw) as MCPToolResultInputBlock;
+      expect(block.toJson(), raw);
+      expect(block.copyWith().toJson(), raw);
+      expect(block.copyWith(), block);
+      expect(block.copyWith().hashCode, block.hashCode);
+      expect(block.textContent?.single.cacheControl?.toJson(), {
+        'type': 'ephemeral',
+        'ttl': '1h',
+      });
+      final built = MCPToolResultInputBlock.withTextContent(
+        toolUseId: block.toolUseId,
+        textContent: block.textContent!,
+      );
+      expect(built.toJson(), raw);
+      transport.queueJsonResponse(MockResponses.message());
+      await client.messages.create(
+        _request().copyWith(
+          messages: [
+            InputMessage.user('Call the lookup tool.'),
+            InputMessage.assistantBlocks([
+              InputContentBlock.fromJson(_mcpUse),
+              built,
+            ]),
+            InputMessage.user('Continue.'),
+          ],
+        ),
+        betas: _betas,
+      );
+      final messages =
+          _body(transport.requests.single)['messages'] as List<Object?>;
+      final assistant = messages[1]! as Map<String, dynamic>;
+      expect(assistant['content'], [_mcpUse, raw]);
+    },
+  );
+
+  test('legacy MCP allowlist copies accept untyped empty lists', () {
+    const config = McpToolConfig(allowedTools: ['query']);
+    expect(
+      config.copyWith(allowedTools: []).toJson()['allowed_tools'],
+      isEmpty,
+    );
+    expect(
+      config.copyWith(allowedTools: null).toJson(),
+      isNot(contains('allowed_tools')),
+    );
+  });
+
+  test(
     'DTOs preserve legacy omissions, round trips and nullable copy behavior',
     () {
       final request = _request();
