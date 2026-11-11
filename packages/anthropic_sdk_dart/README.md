@@ -759,9 +759,11 @@ restricted when deciding access, and preserve the wire value for diagnostics.
 
 Use a client configured with a separate Compliance Access Key. A Claude Console
 Admin API key with `read:compliance_activities` can query the Activity Feed.
-Linked organization, directory, settings, and Security Posture requests require
-the applicable Enterprise Compliance Access Key scopes. User preferences and
-Security Posture are beta endpoints.
+Use `read:compliance_org_data` for organizations, roles, groups, and effective
+settings. Use `read:compliance_user_data` for organization users, member
+preferences, and group members. Security Posture accepts
+`read:compliance_org_data` or `read:org_audit`. Member preferences and Security
+Posture are beta. Pass the organization UUID to organization-specific routes.
 
 ```dart
 final client = AnthropicClient.withApiKey(complianceAccessKey);
@@ -783,12 +785,14 @@ try {
 }
 ```
 
-Keep the same filters and order when following an activity cursor. For
+Use one activity cursor at a time and keep its filters and order. For
 incremental export, use overlapping `createdAt` windows and deduplicate by
 activity ID so late-arriving records are included. Directory lists use the
-opaque `nextPage` token.
+opaque `nextPage` token. When listing preferences, pass the same `userIds`
+and `includeUnset` values with each page, including after an empty page
+that supplies a continuation token.
 
-[Activity Feed example](example/compliance_example.dart) · [Compliance API access](https://platform.claude.com/docs/en/manage-claude/compliance-api-access)
+[Activity Feed example](example/compliance_example.dart) · [Compliance API access](https://platform.claude.com/docs/en/manage-claude/compliance-api-access) · [Directory guide](https://platform.claude.com/docs/en/manage-claude/compliance-org-data)
 
 </details>
 

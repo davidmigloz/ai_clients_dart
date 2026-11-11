@@ -24,8 +24,9 @@ class ComplianceResource extends ResourceBase {
 
   /// Lists organization activity with the caller's Activity Feed scope.
   ///
-  /// Cursors are relative to [order]. To capture late arrivals when polling,
-  /// overlap [createdAt] windows and deduplicate by activity ID.
+  /// Use a key with `read:compliance_activities`. Cursors are relative to
+  /// [order]. Use either [beforeId] or [afterId] per request. To capture late
+  /// arrivals when polling, overlap [createdAt] windows and deduplicate by ID.
   Future<ComplianceIdPage<ComplianceActivity>> listActivities({
     List<String>? activityTypes,
     List<String>? excludeActivityTypes,
@@ -39,12 +40,6 @@ class ComplianceResource extends ResourceBase {
     int? limit,
     Future<void>? abortTrigger,
   }) async {
-    if (activityTypes?.isNotEmpty == true &&
-        excludeActivityTypes?.isNotEmpty == true) {
-      throw ArgumentError(
-        'activityTypes and excludeActivityTypes are mutually exclusive.',
-      );
-    }
     final response = await _get(
       'activities',
       query: {
@@ -69,6 +64,8 @@ class ComplianceResource extends ResourceBase {
   }
 
   /// Lists organizations visible to the caller's Compliance key.
+  ///
+  /// Requires `read:compliance_org_data`.
   Future<ComplianceCursorPage<ComplianceOrganization>> listOrganizations({
     String? page,
     int? limit,
@@ -78,10 +75,13 @@ class ComplianceResource extends ResourceBase {
     ComplianceOrganization.fromJson,
     page: page,
     limit: limit,
+    allowMissingTerminalCursor: true,
     abortTrigger: abortTrigger,
   );
 
   /// Lists current user members of the organization identified by its UUID.
+  ///
+  /// Requires `read:compliance_user_data`.
   Future<ComplianceCursorPage<ComplianceOrganizationUser>>
   listOrganizationUsers(
     String organizationUuid, {
@@ -98,7 +98,9 @@ class ComplianceResource extends ResourceBase {
 
   /// Lists personal Claude and Cowork preferences for members (beta).
   ///
-  /// The caller needs the `read:compliance_user_data` scope.
+  /// Pass the organization UUID. The caller needs `read:compliance_user_data`.
+  /// Repeat [userIds] and [includeUnset] on each page, and continue when an
+  /// empty page supplies a [ComplianceCursorPage.nextPage] token.
   Future<ComplianceCursorPage<ComplianceUserPreferences>>
   listOrganizationUserPreferences(
     String organizationUuid, {
@@ -117,6 +119,8 @@ class ComplianceResource extends ResourceBase {
   );
 
   /// Lists roles in a linked organization.
+  ///
+  /// Pass its UUID and a key with `read:compliance_org_data`.
   Future<ComplianceCursorPage<ComplianceRole>> listOrganizationRoles(
     String organizationUuid, {
     String? page,
@@ -131,6 +135,8 @@ class ComplianceResource extends ResourceBase {
   );
 
   /// Retrieves an organization role.
+  ///
+  /// Pass its UUID and a key with `read:compliance_org_data`.
   Future<ComplianceRole> retrieveOrganizationRole(
     String organizationUuid,
     String roleId, {
@@ -143,6 +149,8 @@ class ComplianceResource extends ResourceBase {
   );
 
   /// Lists an organization role's permissions.
+  ///
+  /// Pass its UUID and a key with `read:compliance_org_data`.
   Future<ComplianceCursorPage<ComplianceRolePermission>>
   listOrganizationRolePermissions(
     String organizationUuid,
@@ -160,6 +168,8 @@ class ComplianceResource extends ResourceBase {
   );
 
   /// Retrieves the effective settings and API-key metadata for an organization.
+  ///
+  /// Pass its UUID and a key with `read:compliance_org_data`.
   Future<ComplianceOrganizationSettings> retrieveOrganizationSettings(
     String organizationId, {
     Future<void>? abortTrigger,
@@ -172,6 +182,7 @@ class ComplianceResource extends ResourceBase {
 
   /// Retrieves the organization's current Security Posture results (beta).
   ///
+  /// Pass its UUID and a key with `read:compliance_org_data` or `read:org_audit`.
   /// The server rejects query parameters on this endpoint, so configured
   /// default query parameters are omitted.
   Future<ComplianceSecurityPosture> retrieveSecurityPosture(
@@ -186,6 +197,8 @@ class ComplianceResource extends ResourceBase {
   );
 
   /// Lists the directory groups visible to the caller.
+  ///
+  /// Requires `read:compliance_org_data`.
   Future<ComplianceCursorPage<ComplianceGroup>> listGroups({
     String? namePrefix,
     String? page,
@@ -201,6 +214,8 @@ class ComplianceResource extends ResourceBase {
   );
 
   /// Retrieves a directory group.
+  ///
+  /// Requires `read:compliance_org_data`.
   Future<ComplianceGroup> retrieveGroup(
     String groupId, {
     Future<void>? abortTrigger,
@@ -209,6 +224,8 @@ class ComplianceResource extends ResourceBase {
   );
 
   /// Lists members of a directory group.
+  ///
+  /// Requires `read:compliance_user_data`.
   Future<ComplianceCursorPage<ComplianceGroupMember>> listGroupMembers(
     String groupId, {
     String? page,
@@ -228,14 +245,16 @@ class ComplianceResource extends ResourceBase {
     String? page,
     int? limit,
     Map<String, dynamic>? query,
+    bool allowMissingTerminalCursor = false,
     Future<void>? abortTrigger,
-  }) async => ComplianceCursorPage.fromJson(
+  }) async => ComplianceCursorPage.directoryFromJson(
     await _get(
       path,
       query: {'page': ?page, 'limit': ?limit?.toString(), ...?query},
       abortTrigger: abortTrigger,
     ),
     decode,
+    allowMissingTerminalCursor: allowMissingTerminalCursor,
   );
 
   Future<Map<String, dynamic>> _get(
@@ -263,6 +282,19 @@ class ComplianceResource extends ResourceBase {
       '/v1/compliance/$path',
       queryParams: query,
     );
+    if (path == 'activities') {
+      final effectiveQuery = url.queryParametersAll;
+      if (effectiveQuery.containsKey('activity_types[]') &&
+          effectiveQuery.containsKey('exclude_activity_types[]')) {
+        throw ArgumentError(
+          'activityTypes and excludeActivityTypes are mutually exclusive.',
+        );
+      }
+      if (effectiveQuery.containsKey('before_id') &&
+          effectiveQuery.containsKey('after_id')) {
+        throw ArgumentError('beforeId and afterId are mutually exclusive.');
+      }
+    }
     return http.Request(
         method,
         allowQuery ? url : Uri.parse(url.toString().split('?').first),

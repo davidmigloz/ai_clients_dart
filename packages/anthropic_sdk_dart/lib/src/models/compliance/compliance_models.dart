@@ -136,6 +136,24 @@ final class ComplianceCursorPage<T extends ComplianceRecord>
   ) : super._() {
     data = _records('data', decode);
   }
+
+  /// Decodes a directory page and requires usable continuation metadata.
+  ComplianceCursorPage.directoryFromJson(
+    super.json,
+    T Function(Map<String, dynamic>) decode, {
+    bool allowMissingTerminalCursor = false,
+  }) : super._() {
+    final hasMore = _required<bool>('has_more');
+    final cursor = nextPage;
+    if (!raw.containsKey('next_page') &&
+        !(allowMissingTerminalCursor && !hasMore)) {
+      throw const FormatException('Missing Compliance field "next_page"');
+    }
+    if (hasMore && (cursor == null || cursor.isEmpty)) {
+      throw const FormatException('Missing Compliance continuation token');
+    }
+    data = _records('data', decode);
+  }
 }
 
 /// A page addressed by the first and last records' opaque cursors.

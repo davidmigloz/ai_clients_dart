@@ -1,4 +1,6 @@
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:test/test.dart';
 
 import '../../mocks/mock_http_client.dart';
@@ -142,6 +144,137 @@ void main() {
       throwsArgumentError,
     );
     expect(transport.requests, isEmpty);
+  });
+
+  test('conflicting activity cursors fail before transport', () async {
+    await expectLater(
+      client.compliance.listActivities(beforeId: 'before', afterId: 'after'),
+      throwsArgumentError,
+    );
+    expect(transport.requests, isEmpty);
+  });
+
+  test(
+    'activity cursor validation includes inherited query parameters',
+    () async {
+      final scoped = AnthropicClient(
+        config: client.config.copyWith(
+          defaultQueryParams: {'before_id': 'inherited'},
+        ),
+        httpClient: transport,
+      );
+      addTearDown(scoped.close);
+      await expectLater(
+        scoped.compliance.listActivities(afterId: 'explicit'),
+        throwsArgumentError,
+      );
+      expect(transport.requests, isEmpty);
+    },
+  );
+
+  test('directory pages require a boolean has_more and next_page', () async {
+    for (final body in <Map<String, dynamic>>[
+      {'data': <Object>[]},
+      {'data': <Object>[], 'has_more': false},
+      {'data': <Object>[], 'has_more': true, 'next_page': null},
+      {'data': <Object>[], 'has_more': true, 'next_page': ''},
+    ]) {
+      transport.queueJsonResponse(body);
+      await expectLater(client.compliance.listGroups(), throwsFormatException);
+    }
+  });
+
+  test('terminal organization page may omit next_page', () async {
+    final body = {'data': <Object>[], 'has_more': false};
+    transport.queueJsonResponse(body);
+    final page = await client.compliance.listOrganizations();
+    expect(page.hasMore, isFalse);
+    expect(page.nextPage, isNull);
+    expect(page.toJson(), body);
+  });
+
+  test(
+    'preference paging keeps filters when the first page is empty',
+    () async {
+      transport
+        ..queueJsonResponse({
+          'data': <Object>[],
+          'has_more': true,
+          'next_page': 'a/+?',
+        })
+        ..queueJsonResponse({
+          'data': <Object>[],
+          'has_more': false,
+          'next_page': null,
+        });
+      const users = ['user-1', 'user-2'];
+      final first = await client.compliance.listOrganizationUserPreferences(
+        'org-uuid',
+        userIds: users,
+        includeUnset: true,
+      );
+      expect(first.data, isEmpty);
+      expect(first.hasMore, isTrue);
+      final next = await client.compliance.listOrganizationUserPreferences(
+        'org-uuid',
+        userIds: users,
+        includeUnset: true,
+        page: first.nextPage,
+      );
+      expectRequest(
+        'organizations/org-uuid/user_preferences',
+        query: {
+          'user_ids[]': users,
+          'include_unset': ['true'],
+          'page': ['a/+?'],
+        },
+      );
+      expect(next.hasMore, isFalse);
+    },
+  );
+
+  test(
+    'retains status and request ID when a scoped error is malformed',
+    () async {
+      final scoped = AnthropicClient(
+        config: client.config,
+        httpClient: MockClient(
+          (_) async => http.Response.bytes(
+            [0xf0, 0x9f],
+            503,
+            headers: const {
+              'content-type': 'application/json',
+              'request-id': 'provider-id',
+            },
+          ),
+        ),
+      );
+      addTearDown(scoped.close);
+      await expectLater(
+        scoped.compliance.retrieveSecurityPosture('org-uuid'),
+        throwsA(
+          isA<ApiException>()
+              .having((e) => e.statusCode, 'status', 503)
+              .having((e) => e.requestId, 'provider ID', 'provider-id'),
+        ),
+      );
+    },
+  );
+
+  test('falls back to a body request ID when the header is absent', () async {
+    transport.queueJsonResponse({
+      'type': 'error',
+      'request_id': 'provider-body-id',
+      'error': {'type': 'permission_error', 'message': 'Scope missing'},
+    }, statusCode: 403);
+    await expectLater(
+      client.compliance.listOrganizations(),
+      throwsA(
+        isA<ApiException>()
+            .having((e) => e.statusCode, 'status', 403)
+            .having((e) => e.requestId, 'provider ID', 'provider-body-id'),
+      ),
+    );
   });
 
   test(
