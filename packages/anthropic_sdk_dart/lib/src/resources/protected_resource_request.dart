@@ -41,11 +41,12 @@ Future<Object?> sendProtectedResourceRequest(
   final status = response.statusCode;
   if (status < 200 || status >= 300) {
     final body = decodeApiErrorResponse(response);
+    final parsed = parseApiErrorBody(body);
     final metadata = createSafeResponseMetadata(
       statusCode: status,
       headers: response.headers,
       latency: watch.elapsed,
-      bodyRequestId: parseApiErrorBody(body).requestId,
+      bodyRequestId: parsed.requestId,
     );
     final specific = handleError?.call(body, metadata);
     if (specific != null) throw specific;
@@ -53,17 +54,20 @@ Future<Object?> sendProtectedResourceRequest(
     throw switch (status) {
       401 => AuthenticationException(
         message: message,
+        errorCode: parsed.errorCode,
         responseMetadata: metadata,
       ),
       429 => RateLimitException(
         statusCode: status,
         message: message,
+        errorCode: parsed.errorCode,
         responseMetadata: metadata,
         retryAfter: retryAfterTime(metadata.headers),
       ),
       _ => ApiException(
         statusCode: status,
         message: message,
+        errorCode: parsed.errorCode,
         responseMetadata: metadata,
       ),
     };

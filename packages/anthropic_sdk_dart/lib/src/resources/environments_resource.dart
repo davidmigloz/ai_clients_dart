@@ -137,8 +137,14 @@ class EnvironmentsResource extends ResourceBase {
   );
 
   String _path(String environmentId) {
-    if (environmentId.isEmpty) {
-      throw ArgumentError.value(environmentId, 'environmentId', 'is empty');
+    if (environmentId.isEmpty ||
+        environmentId == '.' ||
+        environmentId == '..') {
+      throw ArgumentError.value(
+        environmentId,
+        'environmentId',
+        'Expected a nonempty environment identifier',
+      );
     }
     return '/v1/environments/${Uri.encodeComponent(environmentId)}';
   }

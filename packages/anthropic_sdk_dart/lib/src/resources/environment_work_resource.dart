@@ -25,9 +25,9 @@ class EnvironmentHeartbeatConflictException extends ApiException {
 
 /// Work queue operations for one self-hosted Managed Agents environment.
 ///
-/// A scoped bearer token replaces configured API-key credentials. Poll with
-/// the environment token and use the claimed item's sessions token for its
-/// lifecycle operations.
+/// A scoped bearer token replaces configured API-key credentials. On the
+/// direct Claude API, poll and acknowledge with the environment key. Use the
+/// claimed item's sessions token for lease renewal and stop when available.
 class EnvironmentWorkResource extends ResourceBase {
   /// Creates an environment-scoped work resource.
   EnvironmentWorkResource({
@@ -204,8 +204,8 @@ class EnvironmentWorkResource extends ResourceBase {
   );
 
   String _id(String value) {
-    if (value.isEmpty) {
-      throw ArgumentError('Environment and work IDs must be nonempty');
+    if (value.isEmpty || value == '.' || value == '..') {
+      throw ArgumentError('Expected a nonempty environment or work identifier');
     }
     return Uri.encodeComponent(value);
   }

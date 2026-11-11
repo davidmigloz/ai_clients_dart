@@ -726,17 +726,21 @@ Pass the returned ID as `environmentId` when creating a session. To paginate the
 <details>
 <summary><b>Show example</b></summary>
 
-On the Claude API, pass the environment key to poll. If the response includes a scoped sessions token, use it for the claimed item's lifecycle calls. Pass `EnvironmentWorkResource.noHeartbeat` when first claiming a lease and echo the server's exact `lastHeartbeat` on later calls. A conditional conflict exposes the server's lease state in `EnvironmentHeartbeatConflictException`.
+On the Claude API, use the environment key to poll and acknowledge work. If the claim includes a scoped sessions token, use it for lease renewal and stop. Pass `EnvironmentWorkResource.noHeartbeat` when first claiming a lease and echo the server's exact `lastHeartbeat` on later calls. A conditional conflict exposes the server's lease state in `EnvironmentHeartbeatConflictException`.
 
 ```dart
 final queue = client.environments.work(environmentId, bearerToken: environmentKey);
 final item = await queue.poll(blockMs: 100, workerId: 'worker-1');
 if (item != null) {
+  await queue.ack(item.id);
   final work = client.environments.work(
     environmentId,
     bearerToken: item.credentials?.sessionsToken ?? environmentKey,
   );
-  await work.ack(item.id);
+  await work.heartbeat(
+    item.id,
+    expectedLastHeartbeat: EnvironmentWorkResource.noHeartbeat,
+  );
 }
 ```
 

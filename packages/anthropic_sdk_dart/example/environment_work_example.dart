@@ -30,13 +30,13 @@ Future<void> main() async {
       print('No work available.');
       return;
     }
+    await queue.ack(item.id);
     final worker = client.environments.work(
       id,
       bearerToken: item.credentials?.sessionsToken ?? key,
     );
     var ownsLease = false;
     try {
-      await worker.ack(item.id);
       final lease = await worker.heartbeat(
         item.id,
         expectedLastHeartbeat: EnvironmentWorkResource.noHeartbeat,

@@ -99,7 +99,7 @@ void main() {
       expect(await environment.poll(), isNull);
 
       final session = client.environments.work(_env, bearerToken: _token);
-      expect(await session.ack(_work), EnvironmentWorkItem.fromJson(_item));
+      expect(await environment.ack(_work), EnvironmentWorkItem.fromJson(_item));
       final lease = await session.heartbeat(
         _work,
         desiredTtlSeconds: 60,
@@ -172,7 +172,7 @@ void main() {
           request.headers['authorization'],
           isManagement
               ? null
-              : 'Bearer ${index >= 2 && index <= 5 ? _token : _key}',
+              : 'Bearer ${index >= 3 && index <= 5 ? _token : _key}',
         );
         expect(request.headers['anthropic-workspace-id'], switch (index) {
           5 => 'wrkspc_override',
@@ -267,6 +267,69 @@ void main() {
       );
     },
   );
+
+  test(
+    'invalid dot-segment environment and work identifiers do not dispatch',
+    () async {
+      var sends = 0;
+      final client = AnthropicClient(
+        httpClient: MockClient((request) async {
+          sends++;
+          return _json(_item);
+        }),
+      );
+      addTearDown(client.close);
+      expect(() => client.environments.retrieve('..'), throwsArgumentError);
+      await expectLater(
+        client.environments.work('..', bearerToken: _key).poll(),
+        throwsArgumentError,
+      );
+      await expectLater(
+        client.environments.work(_env, bearerToken: _key).ack('.'),
+        throwsArgumentError,
+      );
+      expect(sends, 0);
+    },
+  );
+
+  for (final status in [400, 401, 429]) {
+    test(
+      'protected HTTP $status retains error code without body data',
+      () async {
+        final client = AnthropicClient(
+          config: const AnthropicConfig(
+            retryPolicy: RetryPolicy(maxRetries: 0),
+          ),
+          httpClient: MockClient(
+            (_) async => _json({
+              'type': 'error',
+              'request_id': 'req_work',
+              'error': {
+                'type': 'invalid_request_error',
+                'message': 'Sensitive server data $_token',
+                'details': {'error_code': 'invalid_metadata'},
+              },
+            }, status: status),
+          ),
+        );
+        addTearDown(client.close);
+        await expectLater(
+          client.environments.work(_env).update(_work, metadata: {}),
+          throwsA(
+            isA<ApiException>()
+                .having((e) => e.statusCode, 'status', status)
+                .having((e) => e.requestId, 'provider ID', 'req_work')
+                .having((e) => e.errorCode, 'code', 'invalid_metadata')
+                .having(
+                  (e) => e.toString(),
+                  'safe diagnostic',
+                  isNot(contains(_token)),
+                ),
+          ),
+        );
+      },
+    );
+  }
 
   test('unknown work types round-trip and malformed credential is ignored', () {
     final work = EnvironmentWorkItem.fromJson({
