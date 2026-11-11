@@ -53,6 +53,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/agents/agents.ts",
+          "class": "Agents",
+          "method": "archive",
+          "line": 171
+        }
+      ],
       "issue": 483,
       "wire_path": "/v1/agents/{agent_id}/archive",
       "disposition": "baseline resource; verify route, gates and models"
@@ -81,6 +89,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/agents/versions.ts",
+          "class": "Versions",
+          "method": "list",
+          "line": 31
+        }
+      ],
       "issue": 483,
       "wire_path": "/v1/agents/{agent_id}/versions",
       "disposition": "baseline resource; verify route, gates and models"
@@ -108,6 +124,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/agents/agents.ts",
+          "class": "Agents",
+          "method": "retrieve",
+          "line": 65
+        }
       ],
       "issue": 483,
       "wire_path": "/v1/agents/{agent_id}",
@@ -138,6 +162,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/agents/agents.ts",
+          "class": "Agents",
+          "method": "update",
+          "line": 102
+        }
+      ],
       "issue": 483,
       "wire_path": "/v1/agents/{agent_id}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -166,6 +198,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/agents/agents.ts",
+          "class": "Agents",
+          "method": "list",
+          "line": 136
+        }
       ],
       "issue": 483,
       "wire_path": "/v1/agents",
@@ -196,6 +236,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/agents/agents.ts",
+          "class": "Agents",
+          "method": "create",
+          "line": 30
+        }
+      ],
       "issue": 483,
       "wire_path": "/v1/agents",
       "disposition": "baseline resource; verify route, gates and models"
@@ -209,6 +257,7 @@
       "family": "complete",
       "source_disposition": "deprecated-http-endpoint-removed-from-current-mock-and-sdks",
       "source": "https://platform.claude.com/docs/en/api/completions/create",
+      "typescript": [],
       "issue": 478,
       "wire_path": "/v1/complete",
       "disposition": "deprecated HTTP operation; removed from pinned SDKs; Dart has legacy DTOs only"
@@ -236,6 +285,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/deployment-runs.ts",
+          "class": "DeploymentRuns",
+          "method": "retrieve",
+          "line": 29
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/deployment_runs/{deployment_run_id}",
@@ -267,6 +324,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/deployment-runs.ts",
+          "class": "DeploymentRuns",
+          "method": "list",
+          "line": 62
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/deployment_runs",
       "disposition": "baseline resource; verify route, gates and models"
@@ -294,6 +359,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/deployments.ts",
+          "class": "Deployments",
+          "method": "archive",
+          "line": 188
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/deployments/{deployment_id}/archive",
@@ -323,6 +396,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/deployments.ts",
+          "class": "Deployments",
+          "method": "pause",
+          "line": 222
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/deployments/{deployment_id}/pause",
       "disposition": "baseline resource; verify route, gates and models"
@@ -350,6 +431,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/deployments.ts",
+          "class": "Deployments",
+          "method": "run",
+          "line": 256
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/deployments/{deployment_id}/run",
@@ -379,6 +468,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/deployments.ts",
+          "class": "Deployments",
+          "method": "unpause",
+          "line": 290
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/deployments/{deployment_id}/unpause",
       "disposition": "baseline resource; verify route, gates and models"
@@ -406,6 +503,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/deployments.ts",
+          "class": "Deployments",
+          "method": "retrieve",
+          "line": 76
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/deployments/{deployment_id}",
@@ -435,6 +540,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/deployments.ts",
+          "class": "Deployments",
+          "method": "update",
+          "line": 111
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/deployments/{deployment_id}",
@@ -466,6 +579,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/deployments.ts",
+          "class": "Deployments",
+          "method": "list",
+          "line": 145
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/deployments",
       "disposition": "baseline resource; verify route, gates and models"
@@ -494,6 +615,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/deployments.ts",
+          "class": "Deployments",
+          "method": "create",
+          "line": 41
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/deployments",
@@ -524,6 +653,14 @@
       "beta_required": [
         "dreaming-2026-04-21"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/dreams.ts",
+          "class": "Dreams",
+          "method": "archive",
+          "line": 156
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/dreams/{dream_id}/archive",
       "disposition": "baseline resource; verify route, gates and models"
@@ -553,6 +690,14 @@
       "beta_required": [
         "dreaming-2026-04-21"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/dreams.ts",
+          "class": "Dreams",
+          "method": "cancel",
+          "line": 198
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/dreams/{dream_id}/cancel",
       "disposition": "baseline resource; verify route, gates and models"
@@ -581,6 +726,14 @@
       ],
       "beta_required": [
         "dreaming-2026-04-21"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/dreams.ts",
+          "class": "Dreams",
+          "method": "retrieve",
+          "line": 74
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/dreams/{dream_id}",
@@ -613,6 +766,14 @@
       "beta_required": [
         "dreaming-2026-04-21"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/dreams.ts",
+          "class": "Dreams",
+          "method": "list",
+          "line": 113
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/dreams",
       "disposition": "baseline resource; verify route, gates and models"
@@ -643,6 +804,14 @@
       "beta_required": [
         "dreaming-2026-04-21"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/dreams.ts",
+          "class": "Dreams",
+          "method": "create",
+          "line": 34
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/dreams",
       "disposition": "baseline resource; verify route, gates and models"
@@ -672,6 +841,14 @@
         "BetaErrorResponse",
         "BetaOrganizationOnHoldErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/environments/environments.ts",
+          "class": "Environments",
+          "method": "archive",
+          "line": 316
+        }
+      ],
       "issue": 484,
       "wire_path": "/v1/environments/{environment_id}/archive",
       "disposition": "resource missing at baseline"
@@ -698,6 +875,14 @@
         "AnthropicBeta",
         "BetaErrorResponse",
         "BetaSelfHostedWork"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/environments/work.ts",
+          "class": "Work",
+          "method": "poll",
+          "line": 255
+        }
       ],
       "issue": 484,
       "wire_path": "/v1/environments/{environment_id}/work/poll",
@@ -728,6 +913,14 @@
         "BetaOrganizationOnHoldErrorDetails",
         "BetaSelfHostedWorkQueueStats"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/environments/work.ts",
+          "class": "Work",
+          "method": "stats",
+          "line": 294
+        }
+      ],
       "issue": 484,
       "wire_path": "/v1/environments/{environment_id}/work/stats",
       "disposition": "resource missing at baseline"
@@ -754,6 +947,14 @@
         "AnthropicBeta",
         "BetaErrorResponse",
         "BetaSelfHostedWork"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/environments/work.ts",
+          "class": "Work",
+          "method": "ack",
+          "line": 179
+        }
       ],
       "issue": 484,
       "wire_path": "/v1/environments/{environment_id}/work/{work_id}/ack",
@@ -782,6 +983,14 @@
         "BetaErrorResponse",
         "BetaHeartbeatPreconditionFailedErrorDetails",
         "BetaSelfHostedWorkHeartbeatResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/environments/work.ts",
+          "class": "Work",
+          "method": "heartbeat",
+          "line": 217
+        }
       ],
       "issue": 484,
       "wire_path": "/v1/environments/{environment_id}/work/{work_id}/heartbeat",
@@ -813,6 +1022,14 @@
         "BetaSelfHostedWork",
         "BetaSelfHostedWorkStopRequest"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/environments/work.ts",
+          "class": "Work",
+          "method": "stop",
+          "line": 332
+        }
+      ],
       "issue": 484,
       "wire_path": "/v1/environments/{environment_id}/work/{work_id}/stop",
       "disposition": "resource missing at baseline"
@@ -841,6 +1058,14 @@
         "BetaErrorResponse",
         "BetaOrganizationOnHoldErrorDetails",
         "BetaSelfHostedWork"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/environments/work.ts",
+          "class": "Work",
+          "method": "retrieve",
+          "line": 58
+        }
       ],
       "issue": 484,
       "wire_path": "/v1/environments/{environment_id}/work/{work_id}",
@@ -873,6 +1098,14 @@
         "BetaSelfHostedWork",
         "BetaSelfHostedWorkUpdateRequest"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/environments/work.ts",
+          "class": "Work",
+          "method": "update",
+          "line": 98
+        }
+      ],
       "issue": 484,
       "wire_path": "/v1/environments/{environment_id}/work/{work_id}",
       "disposition": "resource missing at baseline"
@@ -899,6 +1132,14 @@
         "AnthropicBeta",
         "BetaErrorResponse",
         "BetaSelfHostedWorkListResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/environments/work.ts",
+          "class": "Work",
+          "method": "list",
+          "line": 140
+        }
       ],
       "issue": 484,
       "wire_path": "/v1/environments/{environment_id}/work",
@@ -929,6 +1170,14 @@
         "BetaErrorResponse",
         "BetaOrganizationOnHoldErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/environments/environments.ts",
+          "class": "Environments",
+          "method": "delete",
+          "line": 278
+        }
+      ],
       "issue": 484,
       "wire_path": "/v1/environments/{environment_id}",
       "disposition": "resource missing at baseline"
@@ -957,6 +1206,14 @@
         "BetaEnvironment",
         "BetaErrorResponse",
         "BetaOrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/environments/environments.ts",
+          "class": "Environments",
+          "method": "retrieve",
+          "line": 162
+        }
       ],
       "issue": 484,
       "wire_path": "/v1/environments/{environment_id}",
@@ -991,6 +1248,14 @@
         "BetaOrganizationOnHoldErrorDetails",
         "BetaPublicEnvironmentUpdateRequest"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/environments/environments.ts",
+          "class": "Environments",
+          "method": "update",
+          "line": 203
+        }
+      ],
       "issue": 484,
       "wire_path": "/v1/environments/{environment_id}",
       "disposition": "resource missing at baseline"
@@ -1019,6 +1284,14 @@
         "BetaEnvironmentListResponse",
         "BetaErrorResponse",
         "BetaOrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/environments/environments.ts",
+          "class": "Environments",
+          "method": "list",
+          "line": 240
+        }
       ],
       "issue": 484,
       "wire_path": "/v1/environments",
@@ -1051,6 +1324,14 @@
         "BetaOrganizationOnHoldErrorDetails",
         "BetaPublicEnvironmentCreateRequest"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/environments/environments.ts",
+          "class": "Environments",
+          "method": "create",
+          "line": 124
+        }
+      ],
       "issue": 484,
       "wire_path": "/v1/environments",
       "disposition": "resource missing at baseline"
@@ -1080,6 +1361,14 @@
         "ErrorResponse",
         "FileListResponse",
         "OrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/files.ts",
+          "class": "Files",
+          "method": "list",
+          "line": 70
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/files",
@@ -1113,6 +1402,14 @@
         "OrganizationOnHoldErrorDetails",
         "StorageQuotaExceededErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/files.ts",
+          "class": "Files",
+          "method": "upload",
+          "line": 209
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/files",
       "disposition": "baseline resource; verify route, gates and models"
@@ -1142,6 +1439,14 @@
         "ErrorResponse",
         "FileDeleteResponse",
         "OrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/files.ts",
+          "class": "Files",
+          "method": "delete",
+          "line": 103
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/files/{file_id}",
@@ -1173,6 +1478,14 @@
         "FileMetadataSchema",
         "OrganizationOnHoldErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/files.ts",
+          "class": "Files",
+          "method": "retrieveMetadata",
+          "line": 178
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/files/{file_id}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -1203,6 +1516,14 @@
         "FileExpiredErrorDetails",
         "FileNotDownloadableErrorDetails",
         "OrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/files.ts",
+          "class": "Files",
+          "method": "download",
+          "line": 140
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/files/{file_id}/content",
@@ -1236,6 +1557,14 @@
         "BetaFileNotDownloadableErrorDetails",
         "BetaOrganizationOnHoldErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/files.ts",
+          "class": "Files",
+          "method": "download",
+          "line": 117
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/files/{file_id}/content",
       "disposition": "baseline resource; verify route, gates and models"
@@ -1266,6 +1595,14 @@
         "BetaErrorResponse",
         "BetaFileDeleteResponse",
         "BetaOrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/files.ts",
+          "class": "Files",
+          "method": "delete",
+          "line": 74
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/files/{file_id}",
@@ -1298,6 +1635,14 @@
         "BetaFileMetadataSchema",
         "BetaOrganizationOnHoldErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/files.ts",
+          "class": "Files",
+          "method": "retrieveMetadata",
+          "line": 156
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/files/{file_id}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -1328,6 +1673,14 @@
         "BetaErrorResponse",
         "BetaFileListResponse",
         "BetaOrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/files.ts",
+          "class": "Files",
+          "method": "list",
+          "line": 35
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/files",
@@ -1362,6 +1715,14 @@
         "BetaOrganizationOnHoldErrorDetails",
         "BetaStorageQuotaExceededErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/files.ts",
+          "class": "Files",
+          "method": "upload",
+          "line": 191
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/files",
       "disposition": "baseline resource; verify route, gates and models"
@@ -1391,6 +1752,14 @@
       "beta_required": [
         "agent-memory-2026-07-22",
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/memory-stores/memory-stores.ts",
+          "class": "MemoryStores",
+          "method": "archive",
+          "line": 233
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/memory_stores/{memory_store_id}/archive",
@@ -1422,6 +1791,14 @@
         "agent-memory-2026-07-22",
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/memory-stores/memories.ts",
+          "class": "Memories",
+          "method": "delete",
+          "line": 186
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/memory_stores/{memory_store_id}/memories/{memory_id}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -1452,6 +1829,14 @@
       "beta_required": [
         "agent-memory-2026-07-22",
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/memory-stores/memories.ts",
+          "class": "Memories",
+          "method": "retrieve",
+          "line": 68
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/memory_stores/{memory_store_id}/memories/{memory_id}",
@@ -1485,6 +1870,14 @@
         "agent-memory-2026-07-22",
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/memory-stores/memories.ts",
+          "class": "Memories",
+          "method": "update",
+          "line": 105
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/memory_stores/{memory_store_id}/memories/{memory_id}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -1515,6 +1908,14 @@
       "beta_required": [
         "agent-memory-2026-07-22",
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/memory-stores/memories.ts",
+          "class": "Memories",
+          "method": "list",
+          "line": 144
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/memory_stores/{memory_store_id}/memories",
@@ -1548,6 +1949,14 @@
         "agent-memory-2026-07-22",
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/memory-stores/memories.ts",
+          "class": "Memories",
+          "method": "create",
+          "line": 29
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/memory_stores/{memory_store_id}/memories",
       "disposition": "baseline resource; verify route, gates and models"
@@ -1577,6 +1986,14 @@
       "beta_required": [
         "agent-memory-2026-07-22",
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/memory-stores/memory-versions.ts",
+          "class": "MemoryVersions",
+          "method": "redact",
+          "line": 123
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact",
@@ -1608,6 +2025,14 @@
       "beta_required": [
         "agent-memory-2026-07-22",
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/memory-stores/memory-versions.ts",
+          "class": "MemoryVersions",
+          "method": "retrieve",
+          "line": 30
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}",
@@ -1642,6 +2067,14 @@
         "agent-memory-2026-07-22",
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/memory-stores/memory-versions.ts",
+          "class": "MemoryVersions",
+          "method": "list",
+          "line": 71
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/memory_stores/{memory_store_id}/memory_versions",
       "disposition": "baseline resource; verify route, gates and models"
@@ -1672,6 +2105,14 @@
         "agent-memory-2026-07-22",
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/memory-stores/memory-stores.ts",
+          "class": "MemoryStores",
+          "method": "delete",
+          "line": 201
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/memory_stores/{memory_store_id}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -1701,6 +2142,14 @@
       "beta_required": [
         "agent-memory-2026-07-22",
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/memory-stores/memory-stores.ts",
+          "class": "MemoryStores",
+          "method": "retrieve",
+          "line": 99
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/memory_stores/{memory_store_id}",
@@ -1733,6 +2182,14 @@
         "agent-memory-2026-07-22",
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/memory-stores/memory-stores.ts",
+          "class": "MemoryStores",
+          "method": "update",
+          "line": 134
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/memory_stores/{memory_store_id}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -1764,6 +2221,14 @@
         "agent-memory-2026-07-22",
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/memory-stores/memory-stores.ts",
+          "class": "MemoryStores",
+          "method": "list",
+          "line": 168
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/memory_stores",
       "disposition": "baseline resource; verify route, gates and models"
@@ -1794,6 +2259,14 @@
       "beta_required": [
         "agent-memory-2026-07-22",
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/memory-stores/memory-stores.ts",
+          "class": "MemoryStores",
+          "method": "create",
+          "line": 64
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/memory_stores",
@@ -1852,6 +2325,14 @@
         "ToolNameConflictErrorDetails",
         "ToolReferenceUnresolvedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/messages/messages.ts",
+          "class": "Messages",
+          "method": "create",
+          "line": 357
+        }
+      ],
       "issue": 479,
       "wire_path": "/v1/messages",
       "disposition": "baseline resource; verify route, gates and models"
@@ -1879,6 +2360,14 @@
         "ErrorResponse",
         "ListResponse_MessageBatch_",
         "OrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/messages/batches.ts",
+          "class": "Batches",
+          "method": "list",
+          "line": 128
+        }
       ],
       "issue": 479,
       "wire_path": "/v1/messages/batches",
@@ -1911,6 +2400,14 @@
         "MessageBatch",
         "OrganizationOnHoldErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/messages/batches.ts",
+          "class": "Batches",
+          "method": "create",
+          "line": 49
+        }
+      ],
       "issue": 479,
       "wire_path": "/v1/messages/batches",
       "disposition": "baseline resource; verify route, gates and models"
@@ -1938,6 +2435,14 @@
         "DeleteMessageBatchResponse",
         "ErrorResponse",
         "OrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/messages/batches.ts",
+          "class": "Batches",
+          "method": "delete",
+          "line": 166
+        }
       ],
       "issue": 479,
       "wire_path": "/v1/messages/batches/{message_batch_id}",
@@ -1967,6 +2472,14 @@
         "MessageBatch",
         "OrganizationOnHoldErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/messages/batches.ts",
+          "class": "Batches",
+          "method": "retrieve",
+          "line": 92
+        }
+      ],
       "issue": 479,
       "wire_path": "/v1/messages/batches/{message_batch_id}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -1994,6 +2507,14 @@
         "ErrorResponse",
         "MessageBatch",
         "OrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/messages/batches.ts",
+          "class": "Batches",
+          "method": "cancel",
+          "line": 209
+        }
       ],
       "issue": 479,
       "wire_path": "/v1/messages/batches/{message_batch_id}/cancel",
@@ -2024,6 +2545,14 @@
         "BetaMessageBatch",
         "BetaOrganizationOnHoldErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/messages/batches.ts",
+          "class": "Batches",
+          "method": "cancel",
+          "line": 229
+        }
+      ],
       "issue": 479,
       "wire_path": "/v1/messages/batches/{message_batch_id}/cancel",
       "disposition": "baseline resource; verify route, gates and models"
@@ -2052,6 +2581,14 @@
         "ErrorResponse",
         "MessageBatchIndividualResponse",
         "OrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/messages/batches.ts",
+          "class": "Batches",
+          "method": "results",
+          "line": 259
+        }
       ],
       "issue": 479,
       "wire_path": "/v1/messages/batches/{message_batch_id}/results",
@@ -2083,6 +2620,14 @@
         "BetaMessageBatchIndividualResponse",
         "BetaOrganizationOnHoldErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/messages/batches.ts",
+          "class": "Batches",
+          "method": "results",
+          "line": 283
+        }
+      ],
       "issue": 479,
       "wire_path": "/v1/messages/batches/{message_batch_id}/results",
       "disposition": "baseline resource; verify route, gates and models"
@@ -2111,6 +2656,14 @@
         "BetaDeleteMessageBatchResponse",
         "BetaErrorResponse",
         "BetaOrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/messages/batches.ts",
+          "class": "Batches",
+          "method": "delete",
+          "line": 181
+        }
       ],
       "issue": 479,
       "wire_path": "/v1/messages/batches/{message_batch_id}",
@@ -2141,6 +2694,14 @@
         "BetaMessageBatch",
         "BetaOrganizationOnHoldErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/messages/batches.ts",
+          "class": "Batches",
+          "method": "retrieve",
+          "line": 97
+        }
+      ],
       "issue": 479,
       "wire_path": "/v1/messages/batches/{message_batch_id}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -2169,6 +2730,14 @@
         "BetaErrorResponse",
         "BetaListResponse_MessageBatch_",
         "BetaOrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/messages/batches.ts",
+          "class": "Batches",
+          "method": "list",
+          "line": 137
+        }
       ],
       "issue": 479,
       "wire_path": "/v1/messages/batches",
@@ -2201,6 +2770,14 @@
         "BetaErrorResponse",
         "BetaMessageBatch",
         "BetaOrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/messages/batches.ts",
+          "class": "Batches",
+          "method": "create",
+          "line": 51
+        }
       ],
       "issue": 479,
       "wire_path": "/v1/messages/batches",
@@ -2245,6 +2822,14 @@
         "ToolNameConflictErrorDetails",
         "ToolReferenceUnresolvedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/messages/messages.ts",
+          "class": "Messages",
+          "method": "countTokens",
+          "line": 477
+        }
+      ],
       "issue": 479,
       "wire_path": "/v1/messages/count_tokens",
       "disposition": "baseline resource; verify route, gates and models"
@@ -2288,6 +2873,14 @@
         "BetaRequestBodyTooLargeAfterDecodingErrorDetails",
         "BetaToolNameConflictErrorDetails",
         "BetaToolReferenceUnresolvedErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/messages/messages.ts",
+          "class": "Messages",
+          "method": "countTokens",
+          "line": 297
+        }
       ],
       "issue": 479,
       "wire_path": "/v1/messages/count_tokens",
@@ -2347,6 +2940,14 @@
         "BetaToolNameConflictErrorDetails",
         "BetaToolReferenceUnresolvedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/messages/messages.ts",
+          "class": "Messages",
+          "method": "create",
+          "line": 185
+        }
+      ],
       "issue": 479,
       "wire_path": "/v1/messages",
       "disposition": "baseline resource; verify route, gates and models"
@@ -2375,6 +2976,14 @@
         "ListResponse_ModelInfo_",
         "OrganizationOnHoldErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/models.ts",
+          "class": "Models",
+          "method": "list",
+          "line": 65
+        }
+      ],
       "issue": 479,
       "wire_path": "/v1/models",
       "disposition": "baseline resource; verify route, gates and models"
@@ -2402,6 +3011,14 @@
         "ErrorResponse",
         "ModelInfo",
         "OrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/models.ts",
+          "class": "Models",
+          "method": "retrieve",
+          "line": 30
+        }
       ],
       "issue": 479,
       "wire_path": "/v1/models/{model_id}",
@@ -2432,6 +3049,14 @@
         "BetaModelInfo",
         "BetaOrganizationOnHoldErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/models.ts",
+          "class": "Models",
+          "method": "retrieve",
+          "line": 33
+        }
+      ],
       "issue": 479,
       "wire_path": "/v1/models/{model_id}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -2461,6 +3086,14 @@
         "BetaListResponse_ModelInfo_",
         "BetaOrganizationOnHoldErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/models.ts",
+          "class": "Models",
+          "method": "list",
+          "line": 72
+        }
+      ],
       "issue": 479,
       "wire_path": "/v1/models",
       "disposition": "baseline resource; verify route, gates and models"
@@ -2480,6 +3113,14 @@
         "AnalyticsProjectGroupBy",
         "AnalyticsProjectsResponse",
         "ErrorResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/analytics/apps/chat/projects.ts",
+          "class": "Projects",
+          "method": "list",
+          "line": 30
+        }
       ],
       "issue": 488,
       "wire_path": "/v1/organizations/analytics/apps/chat/projects",
@@ -2501,6 +3142,14 @@
         "BetaAnalyticsProjectsResponse",
         "BetaErrorResponse"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/analytics/apps/chat/projects.ts",
+          "class": "Projects",
+          "method": "list",
+          "line": 30
+        }
+      ],
       "issue": 488,
       "wire_path": "/v1/organizations/analytics/apps/chat/projects",
       "disposition": "resource missing at baseline"
@@ -2520,6 +3169,14 @@
         "AnalyticsArtifactsResponse",
         "ErrorResponse"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/analytics/artifacts.ts",
+          "class": "Artifacts",
+          "method": "list",
+          "line": 31
+        }
+      ],
       "issue": 488,
       "wire_path": "/v1/organizations/analytics/artifacts",
       "disposition": "resource missing at baseline"
@@ -2538,6 +3195,14 @@
         "BetaAnalyticsArtifactGroupBy",
         "BetaAnalyticsArtifactsResponse",
         "BetaErrorResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/analytics/artifacts.ts",
+          "class": "Artifacts",
+          "method": "list",
+          "line": 31
+        }
       ],
       "issue": 488,
       "wire_path": "/v1/organizations/analytics/artifacts",
@@ -2559,6 +3224,14 @@
         "AnalyticsOrder",
         "ErrorResponse"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/analytics/connectors.ts",
+          "class": "Connectors",
+          "method": "list",
+          "line": 32
+        }
+      ],
       "issue": 488,
       "wire_path": "/v1/organizations/analytics/connectors",
       "disposition": "resource missing at baseline"
@@ -2578,6 +3251,14 @@
         "BetaAnalyticsConnectorsResponse",
         "BetaAnalyticsOrder",
         "BetaErrorResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/analytics/connectors.ts",
+          "class": "Connectors",
+          "method": "list",
+          "line": 32
+        }
       ],
       "issue": 488,
       "wire_path": "/v1/organizations/analytics/connectors",
@@ -2612,6 +3293,14 @@
       "beta_required": [
         "analytics-usage-cost-2026-08-24"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/analytics/cost.ts",
+          "class": "Cost",
+          "method": "list",
+          "line": 35
+        }
+      ],
       "issue": 488,
       "wire_path": "/v1/organizations/analytics/cost",
       "disposition": "resource missing at baseline"
@@ -2634,6 +3323,14 @@
         "BetaInferenceGeoFilter",
         "BetaMessagesUsageReportContextWindow"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/analytics/cost-report.ts",
+          "class": "CostReport",
+          "method": "list",
+          "line": 41
+        }
+      ],
       "issue": 488,
       "wire_path": "/v1/organizations/analytics/cost_report",
       "disposition": "resource missing at baseline"
@@ -2653,6 +3350,14 @@
         "AnalyticsPluginGroupBy",
         "AnalyticsPluginsResponse",
         "ErrorResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/analytics/plugins.ts",
+          "class": "Plugins",
+          "method": "list",
+          "line": 35
+        }
       ],
       "issue": 488,
       "wire_path": "/v1/organizations/analytics/plugins",
@@ -2674,6 +3379,14 @@
         "BetaAnalyticsPluginsResponse",
         "BetaErrorResponse"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/analytics/plugins.ts",
+          "class": "Plugins",
+          "method": "list",
+          "line": 35
+        }
+      ],
       "issue": 488,
       "wire_path": "/v1/organizations/analytics/plugins",
       "disposition": "resource missing at baseline"
@@ -2693,6 +3406,14 @@
         "AnalyticsSkillGroupBy",
         "AnalyticsSkillsResponse",
         "ErrorResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/analytics/skills.ts",
+          "class": "Skills",
+          "method": "list",
+          "line": 30
+        }
       ],
       "issue": 488,
       "wire_path": "/v1/organizations/analytics/skills",
@@ -2714,6 +3435,14 @@
         "BetaAnalyticsSkillsResponse",
         "BetaErrorResponse"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/analytics/skills.ts",
+          "class": "Skills",
+          "method": "list",
+          "line": 30
+        }
+      ],
       "issue": 488,
       "wire_path": "/v1/organizations/analytics/skills",
       "disposition": "resource missing at baseline"
@@ -2732,6 +3461,14 @@
         "AnalyticsActivitySummaryResponse",
         "ErrorResponse"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/analytics/summaries.ts",
+          "class": "Summaries",
+          "method": "list",
+          "line": 39
+        }
+      ],
       "issue": 488,
       "wire_path": "/v1/organizations/analytics/summaries",
       "disposition": "resource missing at baseline"
@@ -2749,6 +3486,14 @@
       "direct_schema_refs": [
         "BetaAnalyticsActivitySummaryResponse",
         "BetaErrorResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/analytics/summaries.ts",
+          "class": "Summaries",
+          "method": "list",
+          "line": 39
+        }
       ],
       "issue": 488,
       "wire_path": "/v1/organizations/analytics/summaries",
@@ -2783,6 +3528,14 @@
       "beta_required": [
         "analytics-usage-cost-2026-08-24"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/analytics/usage.ts",
+          "class": "Usage",
+          "method": "list",
+          "line": 37
+        }
+      ],
       "issue": 488,
       "wire_path": "/v1/organizations/analytics/usage",
       "disposition": "resource missing at baseline"
@@ -2804,6 +3557,14 @@
         "BetaErrorResponse",
         "BetaInferenceGeoFilter",
         "BetaMessagesUsageReportContextWindow"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/analytics/usage-report.ts",
+          "class": "UsageReport",
+          "method": "list",
+          "line": 41
+        }
       ],
       "issue": 488,
       "wire_path": "/v1/organizations/analytics/usage_report",
@@ -2829,6 +3590,14 @@
         "BetaInferenceGeoFilter",
         "BetaMessagesUsageReportContextWindow"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/analytics/user-cost-report.ts",
+          "class": "UserCostReport",
+          "method": "list",
+          "line": 42
+        }
+      ],
       "issue": 488,
       "wire_path": "/v1/organizations/analytics/user_cost_report",
       "disposition": "resource missing at baseline"
@@ -2853,6 +3622,14 @@
         "BetaInferenceGeoFilter",
         "BetaMessagesUsageReportContextWindow"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/analytics/user-usage-report.ts",
+          "class": "UserUsageReport",
+          "method": "list",
+          "line": 42
+        }
+      ],
       "issue": 488,
       "wire_path": "/v1/organizations/analytics/user_usage_report",
       "disposition": "resource missing at baseline"
@@ -2872,6 +3649,14 @@
         "AnalyticsUserGroupBy",
         "AnalyticsUsersResponse",
         "ErrorResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/analytics/users.ts",
+          "class": "Users",
+          "method": "list",
+          "line": 30
+        }
       ],
       "issue": 488,
       "wire_path": "/v1/organizations/analytics/users",
@@ -2893,6 +3678,14 @@
         "BetaAnalyticsUsersResponse",
         "BetaErrorResponse"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/analytics/users.ts",
+          "class": "Users",
+          "method": "list",
+          "line": 30
+        }
+      ],
       "issue": 488,
       "wire_path": "/v1/organizations/analytics/users",
       "disposition": "resource missing at baseline"
@@ -2911,6 +3704,14 @@
         "ErrorResponse",
         "ListResponse_ApiKey_"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/api-keys.ts",
+          "class": "APIKeys",
+          "method": "list",
+          "line": 93
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/api_keys",
       "disposition": "resource missing at baseline"
@@ -2928,6 +3729,14 @@
       "direct_schema_refs": [
         "ApiKey",
         "ErrorResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/api-keys.ts",
+          "class": "APIKeys",
+          "method": "retrieve",
+          "line": 43
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/api_keys/{api_key_id}",
@@ -2950,6 +3759,14 @@
         "OrgApiKeyLimitExceededErrorDetails",
         "SandboxEgressRestrictedErrorDetails",
         "WorkspaceApiKeyLimitExceededErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/api-keys.ts",
+          "class": "APIKeys",
+          "method": "update",
+          "line": 68
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/api_keys/{api_key_id}",
@@ -2976,6 +3793,14 @@
       "direct_schema_refs": [
         "BetaApiKey",
         "BetaErrorResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/api-keys.ts",
+          "class": "APIKeys",
+          "method": "retrieve",
+          "line": 21
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/api_keys/{api_key_id}",
@@ -3005,6 +3830,14 @@
         "BetaSandboxEgressRestrictedErrorDetails",
         "BetaWorkspaceApiKeyLimitExceededErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/api-keys.ts",
+          "class": "APIKeys",
+          "method": "update",
+          "line": 48
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/api_keys/{api_key_id}",
       "disposition": "resource missing at baseline"
@@ -3030,6 +3863,14 @@
       "direct_schema_refs": [
         "BetaErrorResponse",
         "BetaListResponse_ApiKey_"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/api-keys.ts",
+          "class": "APIKeys",
+          "method": "list",
+          "line": 74
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/api_keys",
@@ -3057,6 +3898,14 @@
       "beta_required": [
         "experimental-claude-tag-2026-10-21"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/claude-tag/bundles/targets.ts",
+          "class": "Targets",
+          "method": "delete",
+          "line": 184
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/claude_tag/bundles/{bundle_id}/targets/{target_id}",
       "disposition": "resource missing at baseline"
@@ -3083,6 +3932,14 @@
       "beta_required": [
         "experimental-claude-tag-2026-10-21"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/claude-tag/bundles/targets.ts",
+          "class": "Targets",
+          "method": "retrieve",
+          "line": 87
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/claude_tag/bundles/{bundle_id}/targets/{target_id}",
       "disposition": "resource missing at baseline"
@@ -3108,6 +3965,14 @@
       ],
       "beta_required": [
         "experimental-claude-tag-2026-10-21"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/claude-tag/bundles/targets.ts",
+          "class": "Targets",
+          "method": "list",
+          "line": 135
+        }
       ],
       "issue": 490,
       "wire_path": "/v1/organizations/claude_tag/bundles/{bundle_id}/targets",
@@ -3136,6 +4001,14 @@
       "beta_required": [
         "experimental-claude-tag-2026-10-21"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/claude-tag/bundles/targets.ts",
+          "class": "Targets",
+          "method": "create",
+          "line": 43
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/claude_tag/bundles/{bundle_id}/targets",
       "disposition": "resource missing at baseline"
@@ -3162,6 +4035,14 @@
       "beta_required": [
         "experimental-claude-tag-2026-10-21"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/claude-tag/bundles/bundles.ts",
+          "class": "Bundles",
+          "method": "retrieve",
+          "line": 52
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/claude_tag/bundles/{bundle_id}",
       "disposition": "resource missing at baseline"
@@ -3187,6 +4068,14 @@
       ],
       "beta_required": [
         "experimental-claude-tag-2026-10-21"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/claude-tag/bundles/bundles.ts",
+          "class": "Bundles",
+          "method": "list",
+          "line": 88
+        }
       ],
       "issue": 490,
       "wire_path": "/v1/organizations/claude_tag/bundles",
@@ -3215,6 +4104,14 @@
       "beta_required": [
         "experimental-claude-tag-2026-10-21"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/claude-tag/slack-channels.ts",
+          "class": "SlackChannels",
+          "method": "delete",
+          "line": 254
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/claude_tag/slack_channels/{id}",
       "disposition": "resource missing at baseline"
@@ -3240,6 +4137,14 @@
       ],
       "beta_required": [
         "experimental-claude-tag-2026-10-21"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/claude-tag/slack-channels.ts",
+          "class": "SlackChannels",
+          "method": "retrieve",
+          "line": 92
+        }
       ],
       "issue": 490,
       "wire_path": "/v1/organizations/claude_tag/slack_channels/{id}",
@@ -3271,6 +4176,14 @@
       "beta_required": [
         "experimental-claude-tag-2026-10-21"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/claude-tag/slack-channels.ts",
+          "class": "SlackChannels",
+          "method": "update",
+          "line": 142
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/claude_tag/slack_channels/{id}",
       "disposition": "resource missing at baseline"
@@ -3296,6 +4209,14 @@
       ],
       "beta_required": [
         "experimental-claude-tag-2026-10-21"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/claude-tag/slack-channels.ts",
+          "class": "SlackChannels",
+          "method": "list",
+          "line": 194
+        }
       ],
       "issue": 490,
       "wire_path": "/v1/organizations/claude_tag/slack_channels",
@@ -3328,6 +4249,14 @@
       "beta_required": [
         "experimental-claude-tag-2026-10-21"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/claude-tag/slack-channels.ts",
+          "class": "SlackChannels",
+          "method": "create",
+          "line": 43
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/claude_tag/slack_channels",
       "disposition": "resource missing at baseline"
@@ -3353,6 +4282,14 @@
       ],
       "beta_required": [
         "experimental-claude-tag-2026-10-21"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/claude-tag/slack-workspaces.ts",
+          "class": "SlackWorkspaces",
+          "method": "retrieve",
+          "line": 40
+        }
       ],
       "issue": 490,
       "wire_path": "/v1/organizations/claude_tag/slack_workspaces/{id}",
@@ -3384,6 +4321,14 @@
       "beta_required": [
         "experimental-claude-tag-2026-10-21"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/claude-tag/slack-workspaces.ts",
+          "class": "SlackWorkspaces",
+          "method": "update",
+          "line": 89
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/claude_tag/slack_workspaces/{id}",
       "disposition": "resource missing at baseline"
@@ -3410,6 +4355,14 @@
       "beta_required": [
         "experimental-claude-tag-2026-10-21"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/claude-tag/slack-workspaces.ts",
+          "class": "SlackWorkspaces",
+          "method": "list",
+          "line": 137
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/claude_tag/slack_workspaces",
       "disposition": "resource missing at baseline"
@@ -3428,7 +4381,15 @@
         "ComplianceSettings",
         "ErrorResponse"
       ],
-      "issue": 490,
+      "typescript": [
+        {
+          "file": "resources/organization/compliance-settings.ts",
+          "class": "ComplianceSettings",
+          "method": "retrieve",
+          "line": 22
+        }
+      ],
+      "issue": 486,
       "wire_path": "/v1/organizations/compliance_settings",
       "disposition": "resource missing at baseline"
     },
@@ -3448,7 +4409,15 @@
         "ErrorResponse",
         "SandboxEgressRestrictedErrorDetails"
       ],
-      "issue": 490,
+      "typescript": [
+        {
+          "file": "resources/organization/compliance-settings.ts",
+          "class": "ComplianceSettings",
+          "method": "update",
+          "line": 62
+        }
+      ],
+      "issue": 486,
       "wire_path": "/v1/organizations/compliance_settings",
       "disposition": "resource missing at baseline"
     },
@@ -3474,7 +4443,15 @@
         "BetaComplianceSettings",
         "BetaErrorResponse"
       ],
-      "issue": 490,
+      "typescript": [
+        {
+          "file": "resources/beta/organization/compliance-settings.ts",
+          "class": "ComplianceSettings",
+          "method": "retrieve",
+          "line": 22
+        }
+      ],
+      "issue": 486,
       "wire_path": "/v1/organizations/compliance_settings",
       "disposition": "resource missing at baseline"
     },
@@ -3501,7 +4478,15 @@
         "BetaErrorResponse",
         "BetaSandboxEgressRestrictedErrorDetails"
       ],
-      "issue": 490,
+      "typescript": [
+        {
+          "file": "resources/beta/organization/compliance-settings.ts",
+          "class": "ComplianceSettings",
+          "method": "update",
+          "line": 60
+        }
+      ],
+      "issue": 486,
       "wire_path": "/v1/organizations/compliance_settings",
       "disposition": "resource missing at baseline"
     },
@@ -3531,6 +4516,7 @@
         "BetaErrorResponse",
         "BetaGetCostReportResponse"
       ],
+      "typescript": [],
       "issue": 488,
       "wire_path": "/v1/organizations/cost_report",
       "disposition": "documented legacy HTTP operation; no separate method in the pinned SDKs"
@@ -3548,6 +4534,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "ExternalKeyListResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/external-keys.ts",
+          "class": "ExternalKeys",
+          "method": "list",
+          "line": 160
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/external_keys",
@@ -3570,6 +4564,14 @@
         "SandboxEgressRestrictedErrorDetails",
         "UserProfileNotFoundErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/external-keys.ts",
+          "class": "ExternalKeys",
+          "method": "create",
+          "line": 77
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/external_keys",
       "disposition": "resource missing at baseline"
@@ -3590,6 +4592,14 @@
         "ExternalKeyInWorkspacePolicyErrorDetails",
         "SandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/external-keys.ts",
+          "class": "ExternalKeys",
+          "method": "delete",
+          "line": 187
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/external_keys/{external_key_id}",
       "disposition": "resource missing at baseline"
@@ -3607,6 +4617,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "ExternalKey"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/external-keys.ts",
+          "class": "ExternalKeys",
+          "method": "retrieve",
+          "line": 99
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/external_keys/{external_key_id}",
@@ -3629,6 +4647,14 @@
         "ExternalKeyUpdateParams",
         "SandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/external-keys.ts",
+          "class": "ExternalKeys",
+          "method": "update",
+          "line": 132
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/external_keys/{external_key_id}",
       "disposition": "resource missing at baseline"
@@ -3647,6 +4673,14 @@
         "ErrorResponse",
         "SandboxEgressRestrictedErrorDetails",
         "ValidateExternalKeyResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/external-keys.ts",
+          "class": "ExternalKeys",
+          "method": "validate",
+          "line": 215
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/external_keys/{external_key_id}/validate",
@@ -3672,6 +4706,14 @@
         "BetaErrorResponse",
         "BetaSandboxEgressRestrictedErrorDetails",
         "BetaValidateExternalKeyResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/external-keys.ts",
+          "class": "ExternalKeys",
+          "method": "validate",
+          "line": 171
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/external_keys/{external_key_id}/validate",
@@ -3701,6 +4743,14 @@
         "BetaExternalKeyInWorkspacePolicyErrorDetails",
         "BetaSandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/external-keys.ts",
+          "class": "ExternalKeys",
+          "method": "delete",
+          "line": 142
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/external_keys/{external_key_id}",
       "disposition": "resource missing at baseline"
@@ -3726,6 +4776,14 @@
       "direct_schema_refs": [
         "BetaErrorResponse",
         "BetaExternalKey"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/external-keys.ts",
+          "class": "ExternalKeys",
+          "method": "retrieve",
+          "line": 51
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/external_keys/{external_key_id}",
@@ -3754,6 +4812,14 @@
         "BetaExternalKeyUpdateParams",
         "BetaSandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/external-keys.ts",
+          "class": "ExternalKeys",
+          "method": "update",
+          "line": 85
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/external_keys/{external_key_id}",
       "disposition": "resource missing at baseline"
@@ -3779,6 +4845,14 @@
       "direct_schema_refs": [
         "BetaErrorResponse",
         "BetaExternalKeyListResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/external-keys.ts",
+          "class": "ExternalKeys",
+          "method": "list",
+          "line": 114
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/external_keys",
@@ -3807,6 +4881,14 @@
         "BetaSandboxEgressRestrictedErrorDetails",
         "BetaUserProfileNotFoundErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/external-keys.ts",
+          "class": "ExternalKeys",
+          "method": "create",
+          "line": 28
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/external_keys",
       "disposition": "resource missing at baseline"
@@ -3824,6 +4906,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "FederationIssuerListResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/federation/issuers.ts",
+          "class": "Issuers",
+          "method": "list",
+          "line": 137
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/federation_issuers",
@@ -3845,6 +4935,14 @@
         "FederationIssuerCreateParams",
         "SandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/federation/issuers.ts",
+          "class": "Issuers",
+          "method": "create",
+          "line": 39
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/federation_issuers",
       "disposition": "resource missing at baseline"
@@ -3862,6 +4960,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "FederationIssuer"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/federation/issuers.ts",
+          "class": "Issuers",
+          "method": "retrieve",
+          "line": 66
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/federation_issuers/{federation_issuer_id}",
@@ -3883,6 +4989,14 @@
         "FederationIssuerUpdateParams",
         "SandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/federation/issuers.ts",
+          "class": "Issuers",
+          "method": "update",
+          "line": 105
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/federation_issuers/{federation_issuer_id}",
       "disposition": "resource missing at baseline"
@@ -3901,6 +5015,14 @@
         "ErrorResponse",
         "FederationIssuer",
         "SandboxEgressRestrictedErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/federation/issuers.ts",
+          "class": "Issuers",
+          "method": "archive",
+          "line": 171
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/federation_issuers/{federation_issuer_id}/archive",
@@ -3930,6 +5052,14 @@
         "BetaFederationIssuer",
         "BetaSandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/federation/issuers.ts",
+          "class": "Issuers",
+          "method": "archive",
+          "line": 206
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/federation_issuers/{federation_issuer_id}/archive",
       "disposition": "resource missing at baseline"
@@ -3956,6 +5086,14 @@
         "AnthropicBeta",
         "BetaErrorResponse",
         "BetaFederationIssuer"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/federation/issuers.ts",
+          "class": "Issuers",
+          "method": "retrieve",
+          "line": 79
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/federation_issuers/{federation_issuer_id}",
@@ -3986,6 +5124,14 @@
         "BetaFederationIssuerUpdateParams",
         "BetaSandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/federation/issuers.ts",
+          "class": "Issuers",
+          "method": "update",
+          "line": 124
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/federation_issuers/{federation_issuer_id}",
       "disposition": "resource missing at baseline"
@@ -4012,6 +5158,14 @@
         "AnthropicBeta",
         "BetaErrorResponse",
         "BetaFederationIssuerListResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/federation/issuers.ts",
+          "class": "Issuers",
+          "method": "list",
+          "line": 162
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/federation_issuers",
@@ -4042,6 +5196,14 @@
         "BetaFederationIssuerCreateParams",
         "BetaSandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/federation/issuers.ts",
+          "class": "Issuers",
+          "method": "create",
+          "line": 42
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/federation_issuers",
       "disposition": "resource missing at baseline"
@@ -4059,6 +5221,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "FederationRuleListResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/federation/rules/rules.ts",
+          "class": "Rules",
+          "method": "list",
+          "line": 166
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/federation_rules",
@@ -4080,6 +5250,14 @@
         "FederationRuleCreateParams",
         "SandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/federation/rules/rules.ts",
+          "class": "Rules",
+          "method": "create",
+          "line": 58
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/federation_rules",
       "disposition": "resource missing at baseline"
@@ -4097,6 +5275,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "FederationRule"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/federation/rules/rules.ts",
+          "class": "Rules",
+          "method": "retrieve",
+          "line": 85
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/federation_rules/{federation_rule_id}",
@@ -4118,6 +5304,14 @@
         "FederationRuleUpdateParams",
         "SandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/federation/rules/rules.ts",
+          "class": "Rules",
+          "method": "update",
+          "line": 133
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/federation_rules/{federation_rule_id}",
       "disposition": "resource missing at baseline"
@@ -4136,6 +5330,14 @@
         "ErrorResponse",
         "FederationRule",
         "SandboxEgressRestrictedErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/federation/rules/rules.ts",
+          "class": "Rules",
+          "method": "archive",
+          "line": 202
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/federation_rules/{federation_rule_id}/archive",
@@ -4165,6 +5367,14 @@
         "BetaFederationRule",
         "BetaSandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/federation/rules/rules.ts",
+          "class": "Rules",
+          "method": "archive",
+          "line": 237
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/federation_rules/{federation_rule_id}/archive",
       "disposition": "resource missing at baseline"
@@ -4182,6 +5392,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "FederationRuleWorkspaceListResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/federation/rules/workspaces.ts",
+          "class": "Workspaces",
+          "method": "list",
+          "line": 40
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/federation_rules/{federation_rule_id}/workspaces",
@@ -4203,6 +5421,14 @@
         "FederationRuleWorkspace",
         "SandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/federation/rules/workspaces.ts",
+          "class": "Workspaces",
+          "method": "add",
+          "line": 92
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/federation_rules/{federation_rule_id}/workspaces",
       "disposition": "resource missing at baseline"
@@ -4221,6 +5447,14 @@
         "ErrorResponse",
         "RemoveFederationRuleWorkspaceResponse",
         "SandboxEgressRestrictedErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/federation/rules/workspaces.ts",
+          "class": "Workspaces",
+          "method": "remove",
+          "line": 138
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/federation_rules/{federation_rule_id}/workspaces/{workspace_id}",
@@ -4250,6 +5484,14 @@
         "BetaRemoveFederationRuleWorkspaceResponse",
         "BetaSandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/federation/rules/workspaces.ts",
+          "class": "Workspaces",
+          "method": "remove",
+          "line": 152
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/federation_rules/{federation_rule_id}/workspaces/{workspace_id}",
       "disposition": "resource missing at baseline"
@@ -4276,6 +5518,14 @@
         "AnthropicBeta",
         "BetaErrorResponse",
         "BetaFederationRuleWorkspaceListResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/federation/rules/workspaces.ts",
+          "class": "Workspaces",
+          "method": "list",
+          "line": 43
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/federation_rules/{federation_rule_id}/workspaces",
@@ -4306,6 +5556,14 @@
         "BetaFederationRuleWorkspace",
         "BetaSandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/federation/rules/workspaces.ts",
+          "class": "Workspaces",
+          "method": "add",
+          "line": 101
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/federation_rules/{federation_rule_id}/workspaces",
       "disposition": "resource missing at baseline"
@@ -4332,6 +5590,14 @@
         "AnthropicBeta",
         "BetaErrorResponse",
         "BetaFederationRule"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/federation/rules/rules.ts",
+          "class": "Rules",
+          "method": "retrieve",
+          "line": 98
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/federation_rules/{federation_rule_id}",
@@ -4362,6 +5628,14 @@
         "BetaFederationRuleUpdateParams",
         "BetaSandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/federation/rules/rules.ts",
+          "class": "Rules",
+          "method": "update",
+          "line": 152
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/federation_rules/{federation_rule_id}",
       "disposition": "resource missing at baseline"
@@ -4388,6 +5662,14 @@
         "AnthropicBeta",
         "BetaErrorResponse",
         "BetaFederationRuleListResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/federation/rules/rules.ts",
+          "class": "Rules",
+          "method": "list",
+          "line": 191
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/federation_rules",
@@ -4418,6 +5700,14 @@
         "BetaFederationRuleCreateParams",
         "BetaSandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/federation/rules/rules.ts",
+          "class": "Rules",
+          "method": "create",
+          "line": 61
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/federation_rules",
       "disposition": "resource missing at baseline"
@@ -4435,6 +5725,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "ListResponse_InviteSchema_"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/invites.ts",
+          "class": "Invites",
+          "method": "list",
+          "line": 130
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/invites",
@@ -4463,6 +5761,14 @@
         "RbacGroupOwnerAccessUnconfirmedErrorDetails",
         "SandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/invites.ts",
+          "class": "Invites",
+          "method": "create",
+          "line": 86
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/invites",
       "disposition": "resource missing at baseline"
@@ -4482,6 +5788,14 @@
         "ErrorResponse",
         "SandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/invites.ts",
+          "class": "Invites",
+          "method": "delete",
+          "line": 153
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/invites/{invite_id}",
       "disposition": "resource missing at baseline"
@@ -4499,6 +5813,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "InviteSchema"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/invites.ts",
+          "class": "Invites",
+          "method": "retrieve",
+          "line": 106
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/invites/{invite_id}",
@@ -4527,6 +5849,14 @@
         "BetaErrorResponse",
         "BetaSandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/invites.ts",
+          "class": "Invites",
+          "method": "delete",
+          "line": 110
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/invites/{invite_id}",
       "disposition": "resource missing at baseline"
@@ -4553,6 +5883,14 @@
         "BetaErrorResponse",
         "BetaInviteSchema"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/invites.ts",
+          "class": "Invites",
+          "method": "retrieve",
+          "line": 60
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/invites/{invite_id}",
       "disposition": "resource missing at baseline"
@@ -4578,6 +5916,14 @@
       "direct_schema_refs": [
         "BetaErrorResponse",
         "BetaListResponse_InviteSchema_"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/invites.ts",
+          "class": "Invites",
+          "method": "list",
+          "line": 85
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/invites",
@@ -4612,6 +5958,14 @@
         "BetaRbacGroupOwnerAccessUnconfirmedErrorDetails",
         "BetaSandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/invites.ts",
+          "class": "Invites",
+          "method": "create",
+          "line": 37
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/invites",
       "disposition": "resource missing at baseline"
@@ -4629,6 +5983,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "OrganizationSchema"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/organization.ts",
+          "class": "Organization",
+          "method": "retrieve",
+          "line": 275
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/me",
@@ -4656,6 +6018,14 @@
         "BetaErrorResponse",
         "BetaOrganizationSchema"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/organization.ts",
+          "class": "Organization",
+          "method": "retrieve",
+          "line": 425
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/me",
       "disposition": "resource missing at baseline"
@@ -4679,6 +6049,14 @@
       "beta_required": [
         "ce-plugins-2026-09-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/plugin-marketplaces.ts",
+          "class": "PluginMarketplaces",
+          "method": "validateArchive",
+          "line": 206
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/plugin_marketplaces/validate_archive",
       "disposition": "resource missing at baseline"
@@ -4700,6 +6078,14 @@
       ],
       "beta_required": [
         "ce-plugins-2026-09-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/plugin-marketplaces.ts",
+          "class": "PluginMarketplaces",
+          "method": "validateRepository",
+          "line": 278
+        }
       ],
       "issue": 490,
       "wire_path": "/v1/organizations/plugin_marketplaces/validate_repository",
@@ -4723,6 +6109,14 @@
       "beta_required": [
         "ce-plugins-2026-09-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/plugin-marketplaces.ts",
+          "class": "PluginMarketplaces",
+          "method": "retrieve",
+          "line": 42
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/plugin_marketplaces/{marketplace_id}",
       "disposition": "resource missing at baseline"
@@ -4744,6 +6138,14 @@
       ],
       "beta_required": [
         "ce-plugins-2026-09-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/plugin-marketplaces.ts",
+          "class": "PluginMarketplaces",
+          "method": "update",
+          "line": 90
+        }
       ],
       "issue": 490,
       "wire_path": "/v1/organizations/plugin_marketplaces/{marketplace_id}",
@@ -4767,6 +6169,14 @@
       "beta_required": [
         "ce-plugins-2026-09-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/plugin-marketplaces.ts",
+          "class": "PluginMarketplaces",
+          "method": "list",
+          "line": 139
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/plugin_marketplaces",
       "disposition": "resource missing at baseline"
@@ -4788,6 +6198,14 @@
       ],
       "beta_required": [
         "ce-plugins-2026-09-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/plugins/installation-settings.ts",
+          "class": "InstallationSettings",
+          "method": "remove",
+          "line": 116
+        }
       ],
       "issue": 490,
       "wire_path": "/v1/organizations/plugins/{plugin_id}/installation_settings/{target}",
@@ -4811,6 +6229,14 @@
       "beta_required": [
         "ce-plugins-2026-09-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/plugins/installation-settings.ts",
+          "class": "InstallationSettings",
+          "method": "set",
+          "line": 180
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/plugins/{plugin_id}/installation_settings/{target}",
       "disposition": "resource missing at baseline"
@@ -4833,6 +6259,14 @@
       "beta_required": [
         "ce-plugins-2026-09-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/plugins/installation-settings.ts",
+          "class": "InstallationSettings",
+          "method": "list",
+          "line": 47
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/plugins/{plugin_id}/installation_settings",
       "disposition": "resource missing at baseline"
@@ -4854,6 +6288,14 @@
       ],
       "beta_required": [
         "ce-plugins-2026-09-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/plugins/shares.ts",
+          "class": "Shares",
+          "method": "list",
+          "line": 48
+        }
       ],
       "issue": 490,
       "wire_path": "/v1/organizations/plugins/{plugin_id}/shares",
@@ -4878,6 +6320,14 @@
       "beta_required": [
         "ce-plugins-2026-09-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/plugins/versions.ts",
+          "class": "Versions",
+          "method": "download",
+          "line": 236
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/plugins/{plugin_id}/versions/{version}/content",
       "disposition": "resource missing at baseline"
@@ -4900,6 +6350,14 @@
       "beta_required": [
         "ce-plugins-2026-09-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/plugins/versions.ts",
+          "class": "Versions",
+          "method": "retrieve",
+          "line": 117
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/plugins/{plugin_id}/versions/{version}",
       "disposition": "resource missing at baseline"
@@ -4921,6 +6379,14 @@
       ],
       "beta_required": [
         "ce-plugins-2026-09-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/plugins/versions.ts",
+          "class": "Versions",
+          "method": "list",
+          "line": 169
+        }
       ],
       "issue": 490,
       "wire_path": "/v1/organizations/plugins/{plugin_id}/versions",
@@ -4949,6 +6415,14 @@
       "beta_required": [
         "ce-plugins-2026-09-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/plugins/versions.ts",
+          "class": "Versions",
+          "method": "create",
+          "line": 66
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/plugins/{plugin_id}/versions",
       "disposition": "resource missing at baseline"
@@ -4972,6 +6446,14 @@
       "beta_required": [
         "ce-plugins-2026-09-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/plugins/plugins.ts",
+          "class": "Plugins",
+          "method": "delete",
+          "line": 392
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/plugins/{plugin_id}",
       "disposition": "resource missing at baseline"
@@ -4993,6 +6475,14 @@
       ],
       "beta_required": [
         "ce-plugins-2026-09-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/plugins/plugins.ts",
+          "class": "Plugins",
+          "method": "retrieve",
+          "line": 205
+        }
       ],
       "issue": 490,
       "wire_path": "/v1/organizations/plugins/{plugin_id}",
@@ -5021,6 +6511,14 @@
       "beta_required": [
         "ce-plugins-2026-09-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/plugins/plugins.ts",
+          "class": "Plugins",
+          "method": "update",
+          "line": 276
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/plugins/{plugin_id}",
       "disposition": "resource missing at baseline"
@@ -5042,6 +6540,14 @@
       ],
       "beta_required": [
         "ce-plugins-2026-09-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/plugins/plugins.ts",
+          "class": "Plugins",
+          "method": "list",
+          "line": 325
+        }
       ],
       "issue": 490,
       "wire_path": "/v1/organizations/plugins",
@@ -5071,6 +6577,14 @@
       "beta_required": [
         "ce-plugins-2026-09-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/plugins/plugins.ts",
+          "class": "Plugins",
+          "method": "create",
+          "line": 156
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/plugins",
       "disposition": "resource missing at baseline"
@@ -5089,7 +6603,15 @@
         "ErrorResponse",
         "RateLimitListResponse"
       ],
-      "issue": 489,
+      "typescript": [
+        {
+          "file": "resources/organization/rate-limits.ts",
+          "class": "RateLimits",
+          "method": "list",
+          "line": 29
+        }
+      ],
+      "issue": 486,
       "wire_path": "/v1/organizations/rate_limits",
       "disposition": "resource missing at baseline"
     },
@@ -5116,7 +6638,15 @@
         "BetaErrorResponse",
         "BetaRateLimitListResponse"
       ],
-      "issue": 489,
+      "typescript": [
+        {
+          "file": "resources/beta/organization/rate-limits.ts",
+          "class": "RateLimits",
+          "method": "list",
+          "line": 29
+        }
+      ],
+      "issue": 486,
       "wire_path": "/v1/organizations/rate_limits",
       "disposition": "resource missing at baseline"
     },
@@ -5133,6 +6663,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "RbacGroupList"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/rbac-groups/rbac-groups.ts",
+          "class": "RBACGroups",
+          "method": "list",
+          "line": 145
+        }
       ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_groups",
@@ -5153,6 +6691,14 @@
         "ErrorResponse",
         "RbacGroup",
         "SandboxEgressRestrictedErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/rbac-groups/rbac-groups.ts",
+          "class": "RBACGroups",
+          "method": "create",
+          "line": 66
+        }
       ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_groups",
@@ -5175,6 +6721,14 @@
         "RbacGroupOwnerAccessUnconfirmedErrorDetails",
         "SandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/rbac-groups/rbac-groups.ts",
+          "class": "RBACGroups",
+          "method": "delete",
+          "line": 175
+        }
+      ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_groups/{rbac_group_id}",
       "disposition": "resource missing at baseline"
@@ -5192,6 +6746,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "RbacGroup"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/rbac-groups/rbac-groups.ts",
+          "class": "RBACGroups",
+          "method": "retrieve",
+          "line": 90
+        }
       ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_groups/{rbac_group_id}",
@@ -5213,6 +6775,14 @@
         "SandboxEgressRestrictedErrorDetails",
         "UpdateRbacGroupParams"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/rbac-groups/rbac-groups.ts",
+          "class": "RBACGroups",
+          "method": "update",
+          "line": 118
+        }
+      ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_groups/{rbac_group_id}",
       "disposition": "resource missing at baseline"
@@ -5230,6 +6800,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "RbacGroupMemberList"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/rbac-groups/members.ts",
+          "class": "Members",
+          "method": "list",
+          "line": 29
+        }
       ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_groups/{rbac_group_id}/members",
@@ -5253,6 +6831,14 @@
         "RbacGroupOwnerAccessUnconfirmedErrorDetails",
         "SandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/rbac-groups/members.ts",
+          "class": "Members",
+          "method": "add",
+          "line": 65
+        }
+      ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_groups/{rbac_group_id}/members",
       "disposition": "resource missing at baseline"
@@ -5273,6 +6859,14 @@
         "RbacGroupGrantsOwnerAccessErrorDetails",
         "RbacGroupOwnerAccessUnconfirmedErrorDetails",
         "SandboxEgressRestrictedErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/rbac-groups/members.ts",
+          "class": "Members",
+          "method": "remove",
+          "line": 103
+        }
       ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_groups/{rbac_group_id}/members/{user_id}",
@@ -5295,6 +6889,14 @@
         "BetaRbacGroupOwnerAccessUnconfirmedErrorDetails",
         "BetaSandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/rbac-groups/members.ts",
+          "class": "Members",
+          "method": "remove",
+          "line": 105
+        }
+      ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_groups/{rbac_group_id}/members/{user_id}",
       "disposition": "resource missing at baseline"
@@ -5312,6 +6914,14 @@
       "direct_schema_refs": [
         "BetaErrorResponse",
         "BetaRbacGroupMemberList"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/rbac-groups/members.ts",
+          "class": "Members",
+          "method": "list",
+          "line": 29
+        }
       ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_groups/{rbac_group_id}/members",
@@ -5335,6 +6945,14 @@
         "BetaRbacGroupOwnerAccessUnconfirmedErrorDetails",
         "BetaSandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/rbac-groups/members.ts",
+          "class": "Members",
+          "method": "add",
+          "line": 66
+        }
+      ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_groups/{rbac_group_id}/members",
       "disposition": "resource missing at baseline"
@@ -5356,6 +6974,14 @@
         "BetaRbacGroupOwnerAccessUnconfirmedErrorDetails",
         "BetaSandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/rbac-groups/rbac-groups.ts",
+          "class": "RBACGroups",
+          "method": "delete",
+          "line": 155
+        }
+      ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_groups/{rbac_group_id}",
       "disposition": "resource missing at baseline"
@@ -5373,6 +6999,14 @@
       "direct_schema_refs": [
         "BetaErrorResponse",
         "BetaRbacGroup"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/rbac-groups/rbac-groups.ts",
+          "class": "RBACGroups",
+          "method": "retrieve",
+          "line": 63
+        }
       ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_groups/{rbac_group_id}",
@@ -5394,6 +7028,14 @@
         "BetaSandboxEgressRestrictedErrorDetails",
         "BetaUpdateRbacGroupParams"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/rbac-groups/rbac-groups.ts",
+          "class": "RBACGroups",
+          "method": "update",
+          "line": 96
+        }
+      ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_groups/{rbac_group_id}",
       "disposition": "resource missing at baseline"
@@ -5411,6 +7053,14 @@
       "direct_schema_refs": [
         "BetaErrorResponse",
         "BetaRbacGroupList"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/rbac-groups/rbac-groups.ts",
+          "class": "RBACGroups",
+          "method": "list",
+          "line": 124
+        }
       ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_groups",
@@ -5432,6 +7082,14 @@
         "BetaRbacGroup",
         "BetaSandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/rbac-groups/rbac-groups.ts",
+          "class": "RBACGroups",
+          "method": "create",
+          "line": 38
+        }
+      ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_groups",
       "disposition": "resource missing at baseline"
@@ -5449,6 +7107,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "RbacRoleList"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/rbac-roles/rbac-roles.ts",
+          "class": "RBACRoles",
+          "method": "list",
+          "line": 63
+        }
       ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_roles",
@@ -5468,6 +7134,14 @@
         "ErrorResponse",
         "RbacRole"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/rbac-roles/rbac-roles.ts",
+          "class": "RBACRoles",
+          "method": "retrieve",
+          "line": 37
+        }
+      ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_roles/{rbac_role_id}",
       "disposition": "resource missing at baseline"
@@ -5485,6 +7159,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "RbacRolePermissionList"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/rbac-roles/permissions.ts",
+          "class": "Permissions",
+          "method": "list",
+          "line": 28
+        }
       ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_roles/{rbac_role_id}/permissions",
@@ -5504,6 +7186,14 @@
         "BetaErrorResponse",
         "BetaRbacRolePermissionList"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/rbac-roles/permissions.ts",
+          "class": "Permissions",
+          "method": "list",
+          "line": 28
+        }
+      ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_roles/{rbac_role_id}/permissions",
       "disposition": "resource missing at baseline"
@@ -5521,6 +7211,14 @@
       "direct_schema_refs": [
         "BetaErrorResponse",
         "BetaRbacRole"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/rbac-roles/rbac-roles.ts",
+          "class": "RBACRoles",
+          "method": "retrieve",
+          "line": 37
+        }
       ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_roles/{rbac_role_id}",
@@ -5540,6 +7238,14 @@
         "BetaErrorResponse",
         "BetaRbacRoleList"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/rbac-roles/rbac-roles.ts",
+          "class": "RBACRoles",
+          "method": "list",
+          "line": 64
+        }
+      ],
       "issue": 489,
       "wire_path": "/v1/organizations/rbac_roles",
       "disposition": "resource missing at baseline"
@@ -5557,6 +7263,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "ServiceAccountListResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/service-accounts/service-accounts.ts",
+          "class": "ServiceAccounts",
+          "method": "list",
+          "line": 145
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/service_accounts",
@@ -5578,6 +7292,14 @@
         "ServiceAccount",
         "ServiceAccountCreateParams"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/service-accounts/service-accounts.ts",
+          "class": "ServiceAccounts",
+          "method": "create",
+          "line": 46
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/service_accounts",
       "disposition": "resource missing at baseline"
@@ -5595,6 +7317,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "ServiceAccount"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/service-accounts/service-accounts.ts",
+          "class": "ServiceAccounts",
+          "method": "retrieve",
+          "line": 73
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/service_accounts/{service_account_id}",
@@ -5616,6 +7346,14 @@
         "ServiceAccount",
         "ServiceAccountUpdateParams"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/service-accounts/service-accounts.ts",
+          "class": "ServiceAccounts",
+          "method": "update",
+          "line": 111
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/service_accounts/{service_account_id}",
       "disposition": "resource missing at baseline"
@@ -5634,6 +7372,14 @@
         "ErrorResponse",
         "SandboxEgressRestrictedErrorDetails",
         "ServiceAccount"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/service-accounts/service-accounts.ts",
+          "class": "ServiceAccounts",
+          "method": "archive",
+          "line": 179
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/service_accounts/{service_account_id}/archive",
@@ -5663,6 +7409,14 @@
         "BetaSandboxEgressRestrictedErrorDetails",
         "BetaServiceAccount"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/service-accounts/service-accounts.ts",
+          "class": "ServiceAccounts",
+          "method": "archive",
+          "line": 214
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/service_accounts/{service_account_id}/archive",
       "disposition": "resource missing at baseline"
@@ -5680,6 +7434,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "ServiceAccountWorkspaceMemberListResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/service-accounts/workspaces.ts",
+          "class": "Workspaces",
+          "method": "list",
+          "line": 47
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/service_accounts/{service_account_id}/workspaces",
@@ -5701,6 +7463,14 @@
         "ServiceAccountWorkspaceMember",
         "ServiceAccountWorkspaceMemberCreateFromSAParams"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/service-accounts/workspaces.ts",
+          "class": "Workspaces",
+          "method": "add",
+          "line": 100
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/service_accounts/{service_account_id}/workspaces",
       "disposition": "resource missing at baseline"
@@ -5719,6 +7489,14 @@
         "ErrorResponse",
         "SandboxEgressRestrictedErrorDetails",
         "ServiceAccountWorkspaceMemberDeleteResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/service-accounts/workspaces.ts",
+          "class": "Workspaces",
+          "method": "remove",
+          "line": 150
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/service_accounts/{service_account_id}/workspaces/{workspace_id}",
@@ -5748,6 +7526,14 @@
         "BetaSandboxEgressRestrictedErrorDetails",
         "BetaServiceAccountWorkspaceMemberDeleteResponse"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/service-accounts/workspaces.ts",
+          "class": "Workspaces",
+          "method": "remove",
+          "line": 167
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/service_accounts/{service_account_id}/workspaces/{workspace_id}",
       "disposition": "resource missing at baseline"
@@ -5774,6 +7560,14 @@
         "AnthropicBeta",
         "BetaErrorResponse",
         "BetaServiceAccountWorkspaceMemberListResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/service-accounts/workspaces.ts",
+          "class": "Workspaces",
+          "method": "list",
+          "line": 53
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/service_accounts/{service_account_id}/workspaces",
@@ -5804,6 +7598,14 @@
         "BetaServiceAccountWorkspaceMember",
         "BetaServiceAccountWorkspaceMemberCreateFromSAParams"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/service-accounts/workspaces.ts",
+          "class": "Workspaces",
+          "method": "add",
+          "line": 112
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/service_accounts/{service_account_id}/workspaces",
       "disposition": "resource missing at baseline"
@@ -5830,6 +7632,14 @@
         "AnthropicBeta",
         "BetaErrorResponse",
         "BetaServiceAccount"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/service-accounts/service-accounts.ts",
+          "class": "ServiceAccounts",
+          "method": "retrieve",
+          "line": 86
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/service_accounts/{service_account_id}",
@@ -5860,6 +7670,14 @@
         "BetaServiceAccount",
         "BetaServiceAccountUpdateParams"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/service-accounts/service-accounts.ts",
+          "class": "ServiceAccounts",
+          "method": "update",
+          "line": 130
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/service_accounts/{service_account_id}",
       "disposition": "resource missing at baseline"
@@ -5886,6 +7704,14 @@
         "AnthropicBeta",
         "BetaErrorResponse",
         "BetaServiceAccountListResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/service-accounts/service-accounts.ts",
+          "class": "ServiceAccounts",
+          "method": "list",
+          "line": 170
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/service_accounts",
@@ -5916,6 +7742,14 @@
         "BetaServiceAccount",
         "BetaServiceAccountCreateParams"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/service-accounts/service-accounts.ts",
+          "class": "ServiceAccounts",
+          "method": "create",
+          "line": 49
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/service_accounts",
       "disposition": "resource missing at baseline"
@@ -5935,6 +7769,14 @@
         "SpendLimitIncreaseRequestListResponse",
         "SpendLimitIncreaseRequestStatus"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/spend-limits/increase-requests.ts",
+          "class": "IncreaseRequests",
+          "method": "list",
+          "line": 65
+        }
+      ],
       "issue": 489,
       "wire_path": "/v1/organizations/spend_limit_increase_requests",
       "disposition": "resource missing at baseline"
@@ -5952,6 +7794,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "SpendLimitIncreaseRequestSchema"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/spend-limits/increase-requests.ts",
+          "class": "IncreaseRequests",
+          "method": "retrieve",
+          "line": 28
+        }
       ],
       "issue": 489,
       "wire_path": "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}",
@@ -5973,6 +7823,14 @@
         "ErrorResponse",
         "SandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/spend-limits/increase-requests.ts",
+          "class": "IncreaseRequests",
+          "method": "approve",
+          "line": 107
+        }
+      ],
       "issue": 489,
       "wire_path": "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/approve",
       "disposition": "resource missing at baseline"
@@ -5992,6 +7850,14 @@
         "BetaApproveSpendLimitIncreaseRequestResponse",
         "BetaErrorResponse",
         "BetaSandboxEgressRestrictedErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/spend-limits/increase-requests.ts",
+          "class": "IncreaseRequests",
+          "method": "approve",
+          "line": 109
+        }
       ],
       "issue": 489,
       "wire_path": "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/approve",
@@ -6013,6 +7879,14 @@
         "SandboxEgressRestrictedErrorDetails",
         "SpendLimitIncreaseRequestSchema"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/spend-limits/increase-requests.ts",
+          "class": "IncreaseRequests",
+          "method": "deny",
+          "line": 150
+        }
+      ],
       "issue": 489,
       "wire_path": "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/deny",
       "disposition": "resource missing at baseline"
@@ -6033,6 +7907,14 @@
         "BetaSandboxEgressRestrictedErrorDetails",
         "BetaSpendLimitIncreaseRequestSchema"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/spend-limits/increase-requests.ts",
+          "class": "IncreaseRequests",
+          "method": "deny",
+          "line": 153
+        }
+      ],
       "issue": 489,
       "wire_path": "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/deny",
       "disposition": "resource missing at baseline"
@@ -6050,6 +7932,14 @@
       "direct_schema_refs": [
         "BetaErrorResponse",
         "BetaSpendLimitIncreaseRequestSchema"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/spend-limits/increase-requests.ts",
+          "class": "IncreaseRequests",
+          "method": "retrieve",
+          "line": 28
+        }
       ],
       "issue": 489,
       "wire_path": "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}",
@@ -6069,6 +7959,14 @@
         "BetaErrorResponse",
         "BetaSpendLimitIncreaseRequestListResponse",
         "BetaSpendLimitIncreaseRequestStatus"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/spend-limits/increase-requests.ts",
+          "class": "IncreaseRequests",
+          "method": "list",
+          "line": 66
+        }
       ],
       "issue": 489,
       "wire_path": "/v1/organizations/spend_limit_increase_requests",
@@ -6090,6 +7988,14 @@
         "OrganizationTypeNotSupportedErrorDetails",
         "SpendLimitPeriod"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/spend-limits/effective.ts",
+          "class": "Effective",
+          "method": "list",
+          "line": 31
+        }
+      ],
       "issue": 489,
       "wire_path": "/v1/organizations/spend_limits/effective",
       "disposition": "resource missing at baseline"
@@ -6109,6 +8015,14 @@
         "BetaListEffectiveSpendLimitsResponse",
         "BetaOrganizationTypeNotSupportedErrorDetails",
         "BetaSpendLimitPeriod"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/spend-limits/effective.ts",
+          "class": "Effective",
+          "method": "list",
+          "line": 31
+        }
       ],
       "issue": 489,
       "wire_path": "/v1/organizations/spend_limits/effective",
@@ -6130,6 +8044,14 @@
         "BetaSandboxEgressRestrictedErrorDetails",
         "BetaSpendLimitsAdminApiWritesNotEnabledErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/spend-limits/spend-limits.ts",
+          "class": "SpendLimits",
+          "method": "delete",
+          "line": 130
+        }
+      ],
       "issue": 489,
       "wire_path": "/v1/organizations/spend_limits/{spend_limit_id}",
       "disposition": "resource missing at baseline"
@@ -6148,6 +8070,14 @@
         "BetaErrorResponse",
         "BetaSpendLimit",
         "BetaSpendLimitsAdminApiWritesNotEnabledErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/spend-limits/spend-limits.ts",
+          "class": "SpendLimits",
+          "method": "retrieve",
+          "line": 58
+        }
       ],
       "issue": 489,
       "wire_path": "/v1/organizations/spend_limits/{spend_limit_id}",
@@ -6172,6 +8102,14 @@
       "beta_required": [
         "spend-limit-reads-2026-09-26"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/spend-limits/spend-limits.ts",
+          "class": "SpendLimits",
+          "method": "list",
+          "line": 93
+        }
+      ],
       "issue": 489,
       "wire_path": "/v1/organizations/spend_limits",
       "disposition": "resource missing at baseline"
@@ -6193,6 +8131,14 @@
         "BetaSetSpendLimitParams",
         "BetaSpendLimit",
         "BetaSpendLimitsAdminApiWritesNotEnabledErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/spend-limits/spend-limits.ts",
+          "class": "SpendLimits",
+          "method": "set",
+          "line": 167
+        }
       ],
       "issue": 489,
       "wire_path": "/v1/organizations/spend_limits",
@@ -6216,6 +8162,14 @@
       "beta_required": [
         "telemetry-destinations-2026-08-11"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/telemetry-destinations/telemetry-destinations.ts",
+          "class": "TelemetryDestinations",
+          "method": "test",
+          "line": 274
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/telemetry_destinations/{destination_id}/test",
       "disposition": "resource missing at baseline"
@@ -6237,6 +8191,14 @@
       ],
       "beta_required": [
         "telemetry-destinations-2026-08-11"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/telemetry-destinations/workspaces.ts",
+          "class": "Workspaces",
+          "method": "remove",
+          "line": 146
+        }
       ],
       "issue": 490,
       "wire_path": "/v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}",
@@ -6260,6 +8222,14 @@
       "beta_required": [
         "telemetry-destinations-2026-08-11"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/telemetry-destinations/workspaces.ts",
+          "class": "Workspaces",
+          "method": "add",
+          "line": 93
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}",
       "disposition": "resource missing at baseline"
@@ -6281,6 +8251,14 @@
       ],
       "beta_required": [
         "telemetry-destinations-2026-08-11"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/telemetry-destinations/workspaces.ts",
+          "class": "Workspaces",
+          "method": "list",
+          "line": 37
+        }
       ],
       "issue": 490,
       "wire_path": "/v1/organizations/telemetry_destinations/{destination_id}/workspaces",
@@ -6304,6 +8282,14 @@
       "beta_required": [
         "telemetry-destinations-2026-08-11"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/telemetry-destinations/telemetry-destinations.ts",
+          "class": "TelemetryDestinations",
+          "method": "delete",
+          "line": 231
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/telemetry_destinations/{destination_id}",
       "disposition": "resource missing at baseline"
@@ -6325,6 +8311,14 @@
       ],
       "beta_required": [
         "telemetry-destinations-2026-08-11"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/telemetry-destinations/telemetry-destinations.ts",
+          "class": "TelemetryDestinations",
+          "method": "retrieve",
+          "line": 90
+        }
       ],
       "issue": 490,
       "wire_path": "/v1/organizations/telemetry_destinations/{destination_id}",
@@ -6349,6 +8343,14 @@
       "beta_required": [
         "telemetry-destinations-2026-08-11"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/telemetry-destinations/telemetry-destinations.ts",
+          "class": "TelemetryDestinations",
+          "method": "update",
+          "line": 141
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/telemetry_destinations/{destination_id}",
       "disposition": "resource missing at baseline"
@@ -6370,6 +8372,14 @@
       ],
       "beta_required": [
         "telemetry-destinations-2026-08-11"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/telemetry-destinations/telemetry-destinations.ts",
+          "class": "TelemetryDestinations",
+          "method": "list",
+          "line": 182
+        }
       ],
       "issue": 490,
       "wire_path": "/v1/organizations/telemetry_destinations",
@@ -6393,6 +8403,14 @@
       ],
       "beta_required": [
         "telemetry-destinations-2026-08-11"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/telemetry-destinations/telemetry-destinations.ts",
+          "class": "TelemetryDestinations",
+          "method": "create",
+          "line": 49
+        }
       ],
       "issue": 490,
       "wire_path": "/v1/organizations/telemetry_destinations",
@@ -6424,6 +8442,7 @@
       "beta_required": [
         "mcp-tunnels-2026-05-19"
       ],
+      "typescript": [],
       "issue": 484,
       "wire_path": "/v1/organizations/tunnels/{tunnel_id}/archive",
       "disposition": "deprecated migration-window HTTP operation; superseded by workspace tunnel routes"
@@ -6454,6 +8473,7 @@
       "beta_required": [
         "mcp-tunnels-2026-05-19"
       ],
+      "typescript": [],
       "issue": 484,
       "wire_path": "/v1/organizations/tunnels/{tunnel_id}/certificates/{certificate_id}/archive",
       "disposition": "deprecated migration-window HTTP operation; superseded by workspace tunnel routes"
@@ -6483,6 +8503,7 @@
       "beta_required": [
         "mcp-tunnels-2026-05-19"
       ],
+      "typescript": [],
       "issue": 484,
       "wire_path": "/v1/organizations/tunnels/{tunnel_id}/certificates/{certificate_id}",
       "disposition": "deprecated migration-window HTTP operation; superseded by workspace tunnel routes"
@@ -6512,6 +8533,7 @@
       "beta_required": [
         "mcp-tunnels-2026-05-19"
       ],
+      "typescript": [],
       "issue": 484,
       "wire_path": "/v1/organizations/tunnels/{tunnel_id}/certificates",
       "disposition": "deprecated migration-window HTTP operation; superseded by workspace tunnel routes"
@@ -6543,6 +8565,7 @@
       "beta_required": [
         "mcp-tunnels-2026-05-19"
       ],
+      "typescript": [],
       "issue": 484,
       "wire_path": "/v1/organizations/tunnels/{tunnel_id}/certificates",
       "disposition": "deprecated migration-window HTTP operation; superseded by workspace tunnel routes"
@@ -6573,6 +8596,7 @@
       "beta_required": [
         "mcp-tunnels-2026-05-19"
       ],
+      "typescript": [],
       "issue": 484,
       "wire_path": "/v1/organizations/tunnels/{tunnel_id}/reveal_token",
       "disposition": "deprecated migration-window HTTP operation; superseded by workspace tunnel routes"
@@ -6604,6 +8628,7 @@
       "beta_required": [
         "mcp-tunnels-2026-05-19"
       ],
+      "typescript": [],
       "issue": 484,
       "wire_path": "/v1/organizations/tunnels/{tunnel_id}/rotate_token",
       "disposition": "deprecated migration-window HTTP operation; superseded by workspace tunnel routes"
@@ -6633,6 +8658,7 @@
       "beta_required": [
         "mcp-tunnels-2026-05-19"
       ],
+      "typescript": [],
       "issue": 484,
       "wire_path": "/v1/organizations/tunnels/{tunnel_id}",
       "disposition": "deprecated migration-window HTTP operation; superseded by workspace tunnel routes"
@@ -6662,6 +8688,7 @@
       "beta_required": [
         "mcp-tunnels-2026-05-19"
       ],
+      "typescript": [],
       "issue": 484,
       "wire_path": "/v1/organizations/tunnels",
       "disposition": "deprecated migration-window HTTP operation; superseded by workspace tunnel routes"
@@ -6688,9 +8715,10 @@
         "BetaErrorResponse",
         "BetaGetClaudeCodeUsageReportResponse"
       ],
+      "typescript": [],
       "issue": 488,
       "wire_path": "/v1/organizations/usage_report/claude_code",
-      "disposition": "documented legacy HTTP operation; no separate method in the pinned SDKs"
+      "disposition": "active Claude Code usage report; public HTTP operation outside the SDKs"
     },
     {
       "method": "GET",
@@ -6722,6 +8750,7 @@
         "BetaSpeed",
         "BetaUsageReportServiceTier"
       ],
+      "typescript": [],
       "issue": 488,
       "wire_path": "/v1/organizations/usage_report/messages",
       "disposition": "documented legacy HTTP operation; no separate method in the pinned SDKs"
@@ -6739,6 +8768,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "ListResponse_User_"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/users.ts",
+          "class": "Users",
+          "method": "list",
+          "line": 81
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/users",
@@ -6761,6 +8798,14 @@
         "ErrorResponse",
         "SandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/users.ts",
+          "class": "Users",
+          "method": "remove",
+          "line": 106
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/users/{user_id}",
       "disposition": "resource missing at baseline"
@@ -6778,6 +8823,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "User"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/users.ts",
+          "class": "Users",
+          "method": "retrieve",
+          "line": 33
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/users/{user_id}",
@@ -6798,6 +8851,14 @@
         "SandboxEgressRestrictedErrorDetails",
         "UpdateUserParams",
         "User"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/users.ts",
+          "class": "Users",
+          "method": "update",
+          "line": 56
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/users/{user_id}",
@@ -6829,7 +8890,15 @@
       "beta_required": [
         "admin-user-sign-out-2026-10-08"
       ],
-      "issue": 486,
+      "typescript": [
+        {
+          "file": "resources/beta/organization/users.ts",
+          "class": "Users",
+          "method": "signOut",
+          "line": 229
+        }
+      ],
+      "issue": 489,
       "wire_path": "/v1/organizations/users/{user_id}/sign_out",
       "disposition": "resource missing at baseline"
     },
@@ -6858,6 +8927,14 @@
         "BetaErrorResponse",
         "BetaSandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/users.ts",
+          "class": "Users",
+          "method": "remove",
+          "line": 171
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/users/{user_id}",
       "disposition": "resource missing at baseline"
@@ -6883,6 +8960,14 @@
       "direct_schema_refs": [
         "BetaErrorResponse",
         "BetaUser"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/users.ts",
+          "class": "Users",
+          "method": "retrieve",
+          "line": 95
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/users/{user_id}",
@@ -6910,6 +8995,14 @@
         "BetaUpdateUserParams",
         "BetaUser"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/users.ts",
+          "class": "Users",
+          "method": "update",
+          "line": 119
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/users/{user_id}",
       "disposition": "resource missing at baseline"
@@ -6936,6 +9029,14 @@
         "BetaErrorResponse",
         "BetaListResponse_User_"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/users.ts",
+          "class": "Users",
+          "method": "list",
+          "line": 145
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/users",
       "disposition": "resource missing at baseline"
@@ -6958,6 +9059,14 @@
       ],
       "beta_required": [
         "webhooks-2026-10-07"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/webhooks.ts",
+          "class": "Webhooks",
+          "method": "regenerateSigningSecret",
+          "line": 246
+        }
       ],
       "issue": 490,
       "wire_path": "/v1/organizations/webhooks/{webhook_endpoint_id}/regenerate_signing_secret",
@@ -6982,6 +9091,14 @@
       "beta_required": [
         "webhooks-2026-10-07"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/webhooks.ts",
+          "class": "Webhooks",
+          "method": "delete",
+          "line": 205
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/webhooks/{webhook_endpoint_id}",
       "disposition": "resource missing at baseline"
@@ -7003,6 +9120,14 @@
       ],
       "beta_required": [
         "webhooks-2026-10-07"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/webhooks.ts",
+          "class": "Webhooks",
+          "method": "retrieve",
+          "line": 83
+        }
       ],
       "issue": 490,
       "wire_path": "/v1/organizations/webhooks/{webhook_endpoint_id}",
@@ -7026,6 +9151,14 @@
       "beta_required": [
         "webhooks-2026-10-07"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/webhooks.ts",
+          "class": "Webhooks",
+          "method": "update",
+          "line": 122
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/webhooks/{webhook_endpoint_id}",
       "disposition": "resource missing at baseline"
@@ -7047,6 +9180,14 @@
       ],
       "beta_required": [
         "webhooks-2026-10-07"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/webhooks.ts",
+          "class": "Webhooks",
+          "method": "list",
+          "line": 164
+        }
       ],
       "issue": 490,
       "wire_path": "/v1/organizations/webhooks",
@@ -7070,6 +9211,14 @@
       "beta_required": [
         "webhooks-2026-10-07"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/webhooks.ts",
+          "class": "Webhooks",
+          "method": "create",
+          "line": 44
+        }
+      ],
       "issue": 490,
       "wire_path": "/v1/organizations/webhooks",
       "disposition": "resource missing at baseline"
@@ -7087,6 +9236,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "ListResponse_Workspace_"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/workspaces/workspaces.ts",
+          "class": "Workspaces",
+          "method": "list",
+          "line": 181
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/workspaces",
@@ -7114,6 +9271,14 @@
         "WorkspaceCreateParams",
         "WorkspacePolicyViolationErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/workspaces/workspaces.ts",
+          "class": "Workspaces",
+          "method": "create",
+          "line": 104
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/workspaces",
       "disposition": "resource missing at baseline"
@@ -7131,6 +9296,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "Workspace"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/workspaces/workspaces.ts",
+          "class": "Workspaces",
+          "method": "retrieve",
+          "line": 126
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}",
@@ -7158,6 +9331,14 @@
         "WorkspacePolicyViolationErrorDetails",
         "WorkspaceUpdateParams"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/workspaces/workspaces.ts",
+          "class": "Workspaces",
+          "method": "update",
+          "line": 156
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}",
       "disposition": "resource missing at baseline"
@@ -7176,6 +9357,14 @@
         "ErrorResponse",
         "SandboxEgressRestrictedErrorDetails",
         "Workspace"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/workspaces/workspaces.ts",
+          "class": "Workspaces",
+          "method": "archive",
+          "line": 205
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/archive",
@@ -7202,6 +9391,14 @@
         "BetaSandboxEgressRestrictedErrorDetails",
         "BetaWorkspace"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/workspaces/workspaces.ts",
+          "class": "Workspaces",
+          "method": "archive",
+          "line": 182
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/archive",
       "disposition": "resource missing at baseline"
@@ -7219,6 +9416,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "ListResponse_WorkspaceMemberSchema_"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/workspaces/members.ts",
+          "class": "Members",
+          "method": "list",
+          "line": 96
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/members",
@@ -7241,6 +9446,14 @@
         "WorkspaceMemberLimitExceededErrorDetails",
         "WorkspaceMemberSchema"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/workspaces/members.ts",
+          "class": "Members",
+          "method": "add",
+          "line": 134
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/members",
       "disposition": "resource missing at baseline"
@@ -7260,6 +9473,14 @@
         "ErrorResponse",
         "SandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/workspaces/members.ts",
+          "class": "Members",
+          "method": "remove",
+          "line": 166
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
       "disposition": "resource missing at baseline"
@@ -7277,6 +9498,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "WorkspaceMemberSchema"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/workspaces/members.ts",
+          "class": "Members",
+          "method": "retrieve",
+          "line": 29
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
@@ -7298,6 +9527,14 @@
         "UpdateWorkspaceMemberParams",
         "WorkspaceMemberLimitExceededErrorDetails",
         "WorkspaceMemberSchema"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/workspaces/members.ts",
+          "class": "Members",
+          "method": "update",
+          "line": 65
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
@@ -7326,6 +9563,14 @@
         "BetaErrorResponse",
         "BetaSandboxEgressRestrictedErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/workspaces/members.ts",
+          "class": "Members",
+          "method": "remove",
+          "line": 170
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
       "disposition": "resource missing at baseline"
@@ -7351,6 +9596,14 @@
       "direct_schema_refs": [
         "BetaErrorResponse",
         "BetaWorkspaceMemberSchema"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/workspaces/members.ts",
+          "class": "Members",
+          "method": "retrieve",
+          "line": 29
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
@@ -7379,6 +9632,14 @@
         "BetaWorkspaceMemberLimitExceededErrorDetails",
         "BetaWorkspaceMemberSchema"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/workspaces/members.ts",
+          "class": "Members",
+          "method": "update",
+          "line": 66
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
       "disposition": "resource missing at baseline"
@@ -7404,6 +9665,14 @@
       "direct_schema_refs": [
         "BetaErrorResponse",
         "BetaListResponse_WorkspaceMemberSchema_"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/workspaces/members.ts",
+          "class": "Members",
+          "method": "list",
+          "line": 98
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/members",
@@ -7432,6 +9701,14 @@
         "BetaWorkspaceMemberLimitExceededErrorDetails",
         "BetaWorkspaceMemberSchema"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/workspaces/members.ts",
+          "class": "Members",
+          "method": "add",
+          "line": 137
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/members",
       "disposition": "resource missing at baseline"
@@ -7450,7 +9727,15 @@
         "ErrorResponse",
         "WorkspaceRateLimitListResponse"
       ],
-      "issue": 489,
+      "typescript": [
+        {
+          "file": "resources/organization/workspaces/rate-limits.ts",
+          "class": "RateLimits",
+          "method": "list",
+          "line": 87
+        }
+      ],
+      "issue": 486,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/rate_limits",
       "disposition": "resource missing at baseline"
     },
@@ -7470,7 +9755,15 @@
         "WorkspaceRateLimit",
         "WorkspaceRateLimitUpdateParams"
       ],
-      "issue": 489,
+      "typescript": [
+        {
+          "file": "resources/organization/workspaces/rate-limits.ts",
+          "class": "RateLimits",
+          "method": "update",
+          "line": 42
+        }
+      ],
+      "issue": 486,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/rate_limits/{rate_limit_id}",
       "disposition": "resource missing at baseline"
     },
@@ -7490,7 +9783,15 @@
         "BetaWorkspaceRateLimit",
         "BetaWorkspaceRateLimitUpdateParams"
       ],
-      "issue": 489,
+      "typescript": [
+        {
+          "file": "resources/beta/organization/workspaces/rate-limits.ts",
+          "class": "RateLimits",
+          "method": "update",
+          "line": 42
+        }
+      ],
+      "issue": 486,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/rate_limits/{rate_limit_id}",
       "disposition": "resource missing at baseline"
     },
@@ -7517,7 +9818,15 @@
         "BetaErrorResponse",
         "BetaWorkspaceRateLimitListResponse"
       ],
-      "issue": 489,
+      "typescript": [
+        {
+          "file": "resources/beta/organization/workspaces/rate-limits.ts",
+          "class": "RateLimits",
+          "method": "list",
+          "line": 88
+        }
+      ],
+      "issue": 486,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/rate_limits",
       "disposition": "resource missing at baseline"
     },
@@ -7534,6 +9843,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "ServiceAccountWorkspaceMemberListResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/workspaces/service-accounts.ts",
+          "class": "ServiceAccounts",
+          "method": "list",
+          "line": 145
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/service_accounts",
@@ -7555,6 +9872,14 @@
         "ServiceAccountWorkspaceMember",
         "ServiceAccountWorkspaceMemberCreateParams"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/workspaces/service-accounts.ts",
+          "class": "ServiceAccounts",
+          "method": "add",
+          "line": 200
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/service_accounts",
       "disposition": "resource missing at baseline"
@@ -7574,6 +9899,14 @@
         "SandboxEgressRestrictedErrorDetails",
         "ServiceAccountWorkspaceMemberDeleteResponse"
       ],
+      "typescript": [
+        {
+          "file": "resources/organization/workspaces/service-accounts.ts",
+          "class": "ServiceAccounts",
+          "method": "remove",
+          "line": 248
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
       "disposition": "resource missing at baseline"
@@ -7591,6 +9924,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "ServiceAccountWorkspaceMember"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/workspaces/service-accounts.ts",
+          "class": "ServiceAccounts",
+          "method": "retrieve",
+          "line": 41
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
@@ -7611,6 +9952,14 @@
         "SandboxEgressRestrictedErrorDetails",
         "ServiceAccountWorkspaceMember",
         "ServiceAccountWorkspaceMemberUpdateParams"
+      ],
+      "typescript": [
+        {
+          "file": "resources/organization/workspaces/service-accounts.ts",
+          "class": "ServiceAccounts",
+          "method": "update",
+          "line": 95
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
@@ -7640,6 +9989,14 @@
         "BetaSandboxEgressRestrictedErrorDetails",
         "BetaServiceAccountWorkspaceMemberDeleteResponse"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/workspaces/service-accounts.ts",
+          "class": "ServiceAccounts",
+          "method": "remove",
+          "line": 275
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
       "disposition": "resource missing at baseline"
@@ -7666,6 +10023,14 @@
         "AnthropicBeta",
         "BetaErrorResponse",
         "BetaServiceAccountWorkspaceMember"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/workspaces/service-accounts.ts",
+          "class": "ServiceAccounts",
+          "method": "retrieve",
+          "line": 43
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
@@ -7696,6 +10061,14 @@
         "BetaServiceAccountWorkspaceMember",
         "BetaServiceAccountWorkspaceMemberUpdateParams"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/workspaces/service-accounts.ts",
+          "class": "ServiceAccounts",
+          "method": "update",
+          "line": 102
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
       "disposition": "resource missing at baseline"
@@ -7722,6 +10095,14 @@
         "AnthropicBeta",
         "BetaErrorResponse",
         "BetaServiceAccountWorkspaceMemberListResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/workspaces/service-accounts.ts",
+          "class": "ServiceAccounts",
+          "method": "list",
+          "line": 161
+        }
       ],
       "issue": 487,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/service_accounts",
@@ -7752,6 +10133,14 @@
         "BetaServiceAccountWorkspaceMember",
         "BetaServiceAccountWorkspaceMemberCreateParams"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/workspaces/service-accounts.ts",
+          "class": "ServiceAccounts",
+          "method": "add",
+          "line": 222
+        }
+      ],
       "issue": 487,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}/service_accounts",
       "disposition": "resource missing at baseline"
@@ -7777,6 +10166,14 @@
       "direct_schema_refs": [
         "BetaErrorResponse",
         "BetaWorkspace"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/workspaces/workspaces.ts",
+          "class": "Workspaces",
+          "method": "retrieve",
+          "line": 96
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}",
@@ -7810,6 +10207,14 @@
         "BetaWorkspacePolicyViolationErrorDetails",
         "BetaWorkspaceUpdateParams"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/workspaces/workspaces.ts",
+          "class": "Workspaces",
+          "method": "update",
+          "line": 131
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/workspaces/{workspace_id}",
       "disposition": "resource missing at baseline"
@@ -7835,6 +10240,14 @@
       "direct_schema_refs": [
         "BetaErrorResponse",
         "BetaListResponse_Workspace_"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/workspaces/workspaces.ts",
+          "class": "Workspaces",
+          "method": "list",
+          "line": 157
+        }
       ],
       "issue": 486,
       "wire_path": "/v1/organizations/workspaces",
@@ -7871,6 +10284,14 @@
         "BetaWorkspaceCreateParams",
         "BetaWorkspacePolicyViolationErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/organization/workspaces/workspaces.ts",
+          "class": "Workspaces",
+          "method": "create",
+          "line": 69
+        }
+      ],
       "issue": 486,
       "wire_path": "/v1/organizations/workspaces",
       "disposition": "resource missing at baseline"
@@ -7898,6 +10319,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/sessions/sessions.ts",
+          "class": "Sessions",
+          "method": "archive",
+          "line": 391
+        }
       ],
       "issue": 483,
       "wire_path": "/v1/sessions/{session_id}/archive",
@@ -7927,6 +10356,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/sessions/events.ts",
+          "class": "Events",
+          "method": "stream",
+          "line": 136
+        }
       ],
       "issue": 483,
       "wire_path": "/v1/sessions/{session_id}/events/stream",
@@ -7959,6 +10396,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/sessions/events.ts",
+          "class": "Events",
+          "method": "list",
+          "line": 37
+        }
+      ],
       "issue": 483,
       "wire_path": "/v1/sessions/{session_id}/events",
       "disposition": "baseline resource; verify route, gates and models"
@@ -7988,6 +10433,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/sessions/events.ts",
+          "class": "Events",
+          "method": "send",
+          "line": 99
+        }
+      ],
       "issue": 483,
       "wire_path": "/v1/sessions/{session_id}/events",
       "disposition": "baseline resource; verify route, gates and models"
@@ -8016,6 +10469,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/sessions/resources.ts",
+          "class": "Resources",
+          "method": "delete",
+          "line": 146
+        }
+      ],
       "issue": 483,
       "wire_path": "/v1/sessions/{session_id}/resources/{resource_id}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -8043,6 +10504,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/sessions/resources.ts",
+          "class": "Resources",
+          "method": "retrieve",
+          "line": 30
+        }
       ],
       "issue": 483,
       "wire_path": "/v1/sessions/{session_id}/resources/{resource_id}",
@@ -8073,6 +10542,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/sessions/resources.ts",
+          "class": "Resources",
+          "method": "update",
+          "line": 68
+        }
+      ],
       "issue": 483,
       "wire_path": "/v1/sessions/{session_id}/resources/{resource_id}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -8100,6 +10577,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/sessions/resources.ts",
+          "class": "Resources",
+          "method": "list",
+          "line": 105
+        }
       ],
       "issue": 483,
       "wire_path": "/v1/sessions/{session_id}/resources",
@@ -8130,6 +10615,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/sessions/resources.ts",
+          "class": "Resources",
+          "method": "add",
+          "line": 184
+        }
+      ],
       "issue": 483,
       "wire_path": "/v1/sessions/{session_id}/resources",
       "disposition": "baseline resource; verify route, gates and models"
@@ -8158,6 +10651,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/sessions/threads/threads.ts",
+          "class": "Threads",
+          "method": "archive",
+          "line": 113
+        }
+      ],
       "issue": 483,
       "wire_path": "/v1/sessions/{session_id}/threads/{thread_id}/archive",
       "disposition": "baseline resource; verify route, gates and models"
@@ -8185,6 +10686,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/sessions/threads/events.ts",
+          "class": "Events",
+          "method": "list",
+          "line": 36
+        }
       ],
       "issue": 483,
       "wire_path": "/v1/sessions/{session_id}/threads/{thread_id}/events",
@@ -8215,6 +10724,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/sessions/threads/events.ts",
+          "class": "Events",
+          "method": "stream",
+          "line": 80
+        }
+      ],
       "issue": 483,
       "wire_path": "/v1/sessions/{session_id}/threads/{thread_id}/stream",
       "disposition": "baseline resource; verify route, gates and models"
@@ -8242,6 +10759,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/sessions/threads/threads.ts",
+          "class": "Threads",
+          "method": "retrieve",
+          "line": 36
+        }
       ],
       "issue": 483,
       "wire_path": "/v1/sessions/{session_id}/threads/{thread_id}",
@@ -8272,6 +10797,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/sessions/threads/threads.ts",
+          "class": "Threads",
+          "method": "list",
+          "line": 72
+        }
+      ],
       "issue": 483,
       "wire_path": "/v1/sessions/{session_id}/threads",
       "disposition": "baseline resource; verify route, gates and models"
@@ -8299,6 +10832,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/sessions/sessions.ts",
+          "class": "Sessions",
+          "method": "delete",
+          "line": 357
+        }
       ],
       "issue": 483,
       "wire_path": "/v1/sessions/{session_id}",
@@ -8328,6 +10869,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/sessions/sessions.ts",
+          "class": "Sessions",
+          "method": "retrieve",
+          "line": 239
+        }
+      ],
       "issue": 483,
       "wire_path": "/v1/sessions/{session_id}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -8356,6 +10905,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/sessions/sessions.ts",
+          "class": "Sessions",
+          "method": "update",
+          "line": 274
+        }
       ],
       "issue": 483,
       "wire_path": "/v1/sessions/{session_id}",
@@ -8388,6 +10945,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/sessions/sessions.ts",
+          "class": "Sessions",
+          "method": "list",
+          "line": 308
+        }
+      ],
       "issue": 483,
       "wire_path": "/v1/sessions",
       "disposition": "baseline resource; verify route, gates and models"
@@ -8418,6 +10983,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/sessions/sessions.ts",
+          "class": "Sessions",
+          "method": "create",
+          "line": 211
+        }
+      ],
       "issue": 483,
       "wire_path": "/v1/sessions",
       "disposition": "baseline resource; verify route, gates and models"
@@ -8445,6 +11018,14 @@
         "ErrorResponse",
         "ListSkillsResponse",
         "OrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/skills/skills.ts",
+          "class": "Skills",
+          "method": "list",
+          "line": 126
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/skills",
@@ -8478,6 +11059,14 @@
         "OrganizationOnHoldErrorDetails",
         "Skill"
       ],
+      "typescript": [
+        {
+          "file": "resources/skills/skills.ts",
+          "class": "Skills",
+          "method": "create",
+          "line": 56
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/skills",
       "disposition": "baseline resource; verify route, gates and models"
@@ -8505,6 +11094,14 @@
         "DeletedSkill",
         "ErrorResponse",
         "OrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/skills/skills.ts",
+          "class": "Skills",
+          "method": "delete",
+          "line": 157
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/skills/{skill_id}",
@@ -8534,6 +11131,14 @@
         "OrganizationOnHoldErrorDetails",
         "Skill"
       ],
+      "typescript": [
+        {
+          "file": "resources/skills/skills.ts",
+          "class": "Skills",
+          "method": "retrieve",
+          "line": 94
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/skills/{skill_id}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -8561,6 +11166,14 @@
         "ErrorResponse",
         "ListSkillVersionsResponse",
         "OrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/skills/versions.ts",
+          "class": "Versions",
+          "method": "list",
+          "line": 108
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/skills/{skill_id}/versions",
@@ -8594,6 +11207,14 @@
         "OrganizationOnHoldErrorDetails",
         "SkillVersion"
       ],
+      "typescript": [
+        {
+          "file": "resources/skills/versions.ts",
+          "class": "Versions",
+          "method": "create",
+          "line": 31
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/skills/{skill_id}/versions",
       "disposition": "baseline resource; verify route, gates and models"
@@ -8621,6 +11242,14 @@
         "DeletedSkillVersion",
         "ErrorResponse",
         "OrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/skills/versions.ts",
+          "class": "Versions",
+          "method": "delete",
+          "line": 143
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/skills/{skill_id}/versions/{version}",
@@ -8650,6 +11279,14 @@
         "OrganizationOnHoldErrorDetails",
         "SkillVersion"
       ],
+      "typescript": [
+        {
+          "file": "resources/skills/versions.ts",
+          "class": "Versions",
+          "method": "retrieve",
+          "line": 73
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/skills/{skill_id}/versions/{version}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -8675,6 +11312,14 @@
       "direct_schema_refs": [
         "AnthropicBeta",
         "BetaErrorResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/skills/versions.ts",
+          "class": "Versions",
+          "method": "download",
+          "line": 193
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/skills/{skill_id}/versions/{version}/content",
@@ -8705,6 +11350,14 @@
         "BetaErrorResponse",
         "BetaOrganizationOnHoldErrorDetails"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/skills/versions.ts",
+          "class": "Versions",
+          "method": "delete",
+          "line": 160
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/skills/{skill_id}/versions/{version}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -8734,6 +11387,14 @@
         "BetaOrganizationOnHoldErrorDetails",
         "BetaSkillVersion"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/skills/versions.ts",
+          "class": "Versions",
+          "method": "retrieve",
+          "line": 82
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/skills/{skill_id}/versions/{version}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -8762,6 +11423,14 @@
         "BetaErrorResponse",
         "BetaListSkillVersionsResponse",
         "BetaOrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/skills/versions.ts",
+          "class": "Versions",
+          "method": "list",
+          "line": 121
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/skills/{skill_id}/versions",
@@ -8796,6 +11465,14 @@
         "BetaOrganizationOnHoldErrorDetails",
         "BetaSkillVersion"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/skills/versions.ts",
+          "class": "Versions",
+          "method": "create",
+          "line": 36
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/skills/{skill_id}/versions",
       "disposition": "baseline resource; verify route, gates and models"
@@ -8824,6 +11501,14 @@
         "BetaDeletedSkill",
         "BetaErrorResponse",
         "BetaOrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/skills/skills.ts",
+          "class": "Skills",
+          "method": "delete",
+          "line": 162
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/skills/{skill_id}",
@@ -8854,6 +11539,14 @@
         "BetaOrganizationOnHoldErrorDetails",
         "BetaSkill"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/skills/skills.ts",
+          "class": "Skills",
+          "method": "retrieve",
+          "line": 89
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/skills/{skill_id}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -8882,6 +11575,14 @@
         "BetaErrorResponse",
         "BetaListSkillsResponse",
         "BetaOrganizationOnHoldErrorDetails"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/skills/skills.ts",
+          "class": "Skills",
+          "method": "list",
+          "line": 125
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/skills",
@@ -8916,6 +11617,14 @@
         "BetaOrganizationOnHoldErrorDetails",
         "BetaSkill"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/skills/skills.ts",
+          "class": "Skills",
+          "method": "create",
+          "line": 45
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/skills",
       "disposition": "baseline resource; verify route, gates and models"
@@ -8943,6 +11652,14 @@
       ],
       "beta_required": [
         "mcp-tunnels-2026-06-22"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/tunnels/tunnels.ts",
+          "class": "Tunnels",
+          "method": "archive",
+          "line": 160
+        }
       ],
       "issue": 484,
       "wire_path": "/v1/tunnels/{tunnel_id}/archive",
@@ -8972,6 +11689,14 @@
       "beta_required": [
         "mcp-tunnels-2026-06-22"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/tunnels/certificates.ts",
+          "class": "Certificates",
+          "method": "archive",
+          "line": 169
+        }
+      ],
       "issue": 484,
       "wire_path": "/v1/tunnels/{tunnel_id}/certificates/{certificate_id}/archive",
       "disposition": "resource missing at baseline"
@@ -9000,6 +11725,14 @@
       "beta_required": [
         "mcp-tunnels-2026-06-22"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/tunnels/certificates.ts",
+          "class": "Certificates",
+          "method": "retrieve",
+          "line": 78
+        }
+      ],
       "issue": 484,
       "wire_path": "/v1/tunnels/{tunnel_id}/certificates/{certificate_id}",
       "disposition": "resource missing at baseline"
@@ -9027,6 +11760,14 @@
       ],
       "beta_required": [
         "mcp-tunnels-2026-06-22"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/tunnels/certificates.ts",
+          "class": "Certificates",
+          "method": "list",
+          "line": 120
+        }
       ],
       "issue": 484,
       "wire_path": "/v1/tunnels/{tunnel_id}/certificates",
@@ -9057,6 +11798,14 @@
       "beta_required": [
         "mcp-tunnels-2026-06-22"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/tunnels/certificates.ts",
+          "class": "Certificates",
+          "method": "create",
+          "line": 36
+        }
+      ],
       "issue": 484,
       "wire_path": "/v1/tunnels/{tunnel_id}/certificates",
       "disposition": "resource missing at baseline"
@@ -9084,6 +11833,14 @@
       ],
       "beta_required": [
         "mcp-tunnels-2026-06-22"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/tunnels/tunnels.ts",
+          "class": "Tunnels",
+          "method": "revealToken",
+          "line": 200
+        }
       ],
       "issue": 484,
       "wire_path": "/v1/tunnels/{tunnel_id}/reveal_token",
@@ -9114,6 +11871,14 @@
       "beta_required": [
         "mcp-tunnels-2026-06-22"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/tunnels/tunnels.ts",
+          "class": "Tunnels",
+          "method": "rotateToken",
+          "line": 239
+        }
+      ],
       "issue": 484,
       "wire_path": "/v1/tunnels/{tunnel_id}/rotate_token",
       "disposition": "resource missing at baseline"
@@ -9142,6 +11907,14 @@
       "beta_required": [
         "mcp-tunnels-2026-06-22"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/tunnels/tunnels.ts",
+          "class": "Tunnels",
+          "method": "retrieve",
+          "line": 79
+        }
+      ],
       "issue": 484,
       "wire_path": "/v1/tunnels/{tunnel_id}",
       "disposition": "resource missing at baseline"
@@ -9169,6 +11942,14 @@
       ],
       "beta_required": [
         "mcp-tunnels-2026-06-22"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/tunnels/tunnels.ts",
+          "class": "Tunnels",
+          "method": "list",
+          "line": 118
+        }
       ],
       "issue": 484,
       "wire_path": "/v1/tunnels",
@@ -9199,6 +11980,14 @@
       "beta_required": [
         "mcp-tunnels-2026-06-22"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/tunnels/tunnels.ts",
+          "class": "Tunnels",
+          "method": "create",
+          "line": 40
+        }
+      ],
       "issue": 484,
       "wire_path": "/v1/tunnels",
       "disposition": "resource missing at baseline"
@@ -9220,6 +12009,14 @@
         "UserProfileListOrder",
         "UserProfileListOrderBy"
       ],
+      "typescript": [
+        {
+          "file": "resources/user-profiles/user-profiles.ts",
+          "class": "UserProfiles",
+          "method": "list",
+          "line": 133
+        }
+      ],
       "issue": 482,
       "wire_path": "/v1/user_profiles",
       "disposition": "new GA or beta profile operation"
@@ -9239,6 +12036,14 @@
         "ErrorResponse",
         "UserProfile"
       ],
+      "typescript": [
+        {
+          "file": "resources/user-profiles/user-profiles.ts",
+          "class": "UserProfiles",
+          "method": "create",
+          "line": 43
+        }
+      ],
       "issue": 482,
       "wire_path": "/v1/user_profiles",
       "disposition": "new GA or beta profile operation"
@@ -9257,6 +12062,14 @@
         "DeletedUserProfile",
         "ErrorResponse"
       ],
+      "typescript": [
+        {
+          "file": "resources/user-profiles/user-profiles.ts",
+          "class": "UserProfiles",
+          "method": "delete",
+          "line": 163
+        }
+      ],
       "issue": 482,
       "wire_path": "/v1/user_profiles/{user_profile_id}",
       "disposition": "new GA or beta profile operation"
@@ -9274,6 +12087,14 @@
       "direct_schema_refs": [
         "ErrorResponse",
         "UserProfile"
+      ],
+      "typescript": [
+        {
+          "file": "resources/user-profiles/user-profiles.ts",
+          "class": "UserProfiles",
+          "method": "retrieve",
+          "line": 73
+        }
       ],
       "issue": 482,
       "wire_path": "/v1/user_profiles/{user_profile_id}",
@@ -9294,6 +12115,14 @@
         "UpdateUserProfileRequestBody",
         "UserProfile"
       ],
+      "typescript": [
+        {
+          "file": "resources/user-profiles/user-profiles.ts",
+          "class": "UserProfiles",
+          "method": "update",
+          "line": 103
+        }
+      ],
       "issue": 482,
       "wire_path": "/v1/user_profiles/{user_profile_id}",
       "disposition": "new GA or beta profile operation"
@@ -9312,6 +12141,14 @@
         "CreateUserProfileActionUrlRequestBody",
         "ErrorResponse",
         "UserProfileActionUrl"
+      ],
+      "typescript": [
+        {
+          "file": "resources/user-profiles/action-urls.ts",
+          "class": "ActionURLs",
+          "method": "create",
+          "line": 27
+        }
       ],
       "issue": 482,
       "wire_path": "/v1/user_profiles/{user_profile_id}/action_urls",
@@ -9332,6 +12169,14 @@
         "BetaCreateUserProfileActionUrlRequestBody",
         "BetaErrorResponse",
         "BetaUserProfileActionUrl"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/user-profiles/action-urls.ts",
+          "class": "ActionURLs",
+          "method": "create",
+          "line": 28
+        }
       ],
       "issue": 482,
       "wire_path": "/v1/user_profiles/{user_profile_id}/action_urls",
@@ -9360,6 +12205,14 @@
         "BetaEnrollmentUrl",
         "BetaErrorResponse"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/user-profiles/user-profiles.ts",
+          "class": "UserProfiles",
+          "method": "createEnrollmentURL",
+          "line": 204
+        }
+      ],
       "issue": 482,
       "wire_path": "/v1/user_profiles/{user_profile_id}/enrollment_url",
       "disposition": "baseline resource; verify route, gates and models"
@@ -9378,6 +12231,14 @@
         "AnthropicBeta",
         "BetaDeletedUserProfile",
         "BetaErrorResponse"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/user-profiles/user-profiles.ts",
+          "class": "UserProfiles",
+          "method": "delete",
+          "line": 170
+        }
       ],
       "issue": 482,
       "wire_path": "/v1/user_profiles/{user_profile_id}",
@@ -9406,6 +12267,14 @@
         "BetaErrorResponse",
         "BetaUserProfile"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/user-profiles/user-profiles.ts",
+          "class": "UserProfiles",
+          "method": "retrieve",
+          "line": 66
+        }
+      ],
       "issue": 482,
       "wire_path": "/v1/user_profiles/{user_profile_id}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -9433,6 +12302,14 @@
         "BetaErrorResponse",
         "BetaUpdateUserProfileRequestBody",
         "BetaUserProfile"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/user-profiles/user-profiles.ts",
+          "class": "UserProfiles",
+          "method": "update",
+          "line": 101
+        }
       ],
       "issue": 482,
       "wire_path": "/v1/user_profiles/{user_profile_id}",
@@ -9463,6 +12340,14 @@
         "BetaUserProfileListOrder",
         "BetaUserProfileListOrderBy"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/user-profiles/user-profiles.ts",
+          "class": "UserProfiles",
+          "method": "list",
+          "line": 135
+        }
+      ],
       "issue": 482,
       "wire_path": "/v1/user_profiles",
       "disposition": "baseline resource; verify route, gates and models"
@@ -9490,6 +12375,14 @@
         "BetaCreateUserProfileRequest",
         "BetaErrorResponse",
         "BetaUserProfile"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/user-profiles/user-profiles.ts",
+          "class": "UserProfiles",
+          "method": "create",
+          "line": 31
+        }
       ],
       "issue": 482,
       "wire_path": "/v1/user_profiles",
@@ -9520,6 +12413,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/vaults/vaults.ts",
+          "class": "Vaults",
+          "method": "archive",
+          "line": 246
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/vaults/{vault_id}/archive",
       "disposition": "baseline resource; verify route, gates and models"
@@ -9548,6 +12449,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/vaults/credentials.ts",
+          "class": "Credentials",
+          "method": "archive",
+          "line": 221
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/vaults/{vault_id}/credentials/{credential_id}/archive",
@@ -9578,6 +12487,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/vaults/credentials.ts",
+          "class": "Credentials",
+          "method": "mcpOAuthValidate",
+          "line": 256
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/vaults/{vault_id}/credentials/{credential_id}/mcp_oauth_validate",
       "disposition": "baseline resource; verify route, gates and models"
@@ -9607,6 +12524,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/vaults/credentials.ts",
+          "class": "Credentials",
+          "method": "delete",
+          "line": 186
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/vaults/{vault_id}/credentials/{credential_id}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -9635,6 +12560,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/vaults/credentials.ts",
+          "class": "Credentials",
+          "method": "retrieve",
+          "line": 73
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/vaults/{vault_id}/credentials/{credential_id}",
@@ -9666,6 +12599,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/vaults/credentials.ts",
+          "class": "Credentials",
+          "method": "update",
+          "line": 108
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/vaults/{vault_id}/credentials/{credential_id}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -9693,6 +12634,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/vaults/credentials.ts",
+          "class": "Credentials",
+          "method": "list",
+          "line": 145
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/vaults/{vault_id}/credentials",
@@ -9724,6 +12673,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/vaults/credentials.ts",
+          "class": "Credentials",
+          "method": "create",
+          "line": 36
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/vaults/{vault_id}/credentials",
       "disposition": "baseline resource; verify route, gates and models"
@@ -9753,6 +12710,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/vaults/vaults.ts",
+          "class": "Vaults",
+          "method": "delete",
+          "line": 212
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/vaults/{vault_id}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -9781,6 +12746,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/vaults/vaults.ts",
+          "class": "Vaults",
+          "method": "retrieve",
+          "line": 108
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/vaults/{vault_id}",
@@ -9812,6 +12785,14 @@
       "beta_required": [
         "managed-agents-2026-04-01"
       ],
+      "typescript": [
+        {
+          "file": "resources/beta/vaults/vaults.ts",
+          "class": "Vaults",
+          "method": "update",
+          "line": 143
+        }
+      ],
       "issue": 485,
       "wire_path": "/v1/vaults/{vault_id}",
       "disposition": "baseline resource; verify route, gates and models"
@@ -9839,6 +12820,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/vaults/vaults.ts",
+          "class": "Vaults",
+          "method": "list",
+          "line": 177
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/vaults",
@@ -9869,6 +12858,14 @@
       ],
       "beta_required": [
         "managed-agents-2026-04-01"
+      ],
+      "typescript": [
+        {
+          "file": "resources/beta/vaults/vaults.ts",
+          "class": "Vaults",
+          "method": "create",
+          "line": 73
+        }
       ],
       "issue": 485,
       "wire_path": "/v1/vaults",
@@ -10876,7 +13873,7 @@
         490
       ],
       "issue": 492,
-      "disposition": "audit Dart carrier or implementation gap"
+      "disposition": "contextual representation by open List<String> beta headers"
     },
     {
       "schema": "ApiKey",
@@ -13652,7 +16649,7 @@
       "candidate_tickets": [
         486
       ],
-      "issue": 486,
+      "issue": 489,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -13666,7 +16663,7 @@
       "candidate_tickets": [
         486
       ],
-      "issue": 486,
+      "issue": 489,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -13680,7 +16677,7 @@
       "candidate_tickets": [
         486
       ],
-      "issue": 486,
+      "issue": 489,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -13694,7 +16691,7 @@
       "candidate_tickets": [
         486
       ],
-      "issue": 486,
+      "issue": 489,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -13708,7 +16705,7 @@
       "candidate_tickets": [
         486
       ],
-      "issue": 486,
+      "issue": 489,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -13722,7 +16719,7 @@
       "candidate_tickets": [
         486
       ],
-      "issue": 486,
+      "issue": 489,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -14679,7 +17676,7 @@
       "candidate_tickets": [
         490
       ],
-      "issue": 490,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -14694,7 +17691,7 @@
       "candidate_tickets": [
         490
       ],
-      "issue": 490,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -14709,7 +17706,7 @@
       "candidate_tickets": [
         490
       ],
-      "issue": 490,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -14730,7 +17727,7 @@
       "candidate_tickets": [
         490
       ],
-      "issue": 490,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -26846,7 +29843,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -26861,7 +29858,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -26925,7 +29922,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -26940,7 +29937,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -26955,7 +29952,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -26970,7 +29967,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -26985,7 +29982,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -30173,7 +33170,7 @@
       "candidate_tickets": [
         485
       ],
-      "issue": 485,
+      "issue": 490,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -30187,7 +33184,7 @@
       "candidate_tickets": [
         485
       ],
-      "issue": 485,
+      "issue": 490,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -30201,7 +33198,7 @@
       "candidate_tickets": [
         485
       ],
-      "issue": 485,
+      "issue": 490,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -30361,7 +33358,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -30380,7 +33377,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "documentation or annotation delta; verify meaning"
     },
     {
@@ -30395,7 +33392,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -30410,7 +33407,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -30425,7 +33422,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -30448,7 +33445,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -30463,7 +33460,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -31433,7 +34430,7 @@
       "candidate_tickets": [
         490
       ],
-      "issue": 490,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -31448,7 +34445,7 @@
       "candidate_tickets": [
         490
       ],
-      "issue": 490,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -31463,7 +34460,7 @@
       "candidate_tickets": [
         490
       ],
-      "issue": 490,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -31478,7 +34475,7 @@
       "candidate_tickets": [
         490
       ],
-      "issue": 490,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -31493,7 +34490,7 @@
       "candidate_tickets": [
         490
       ],
-      "issue": 490,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -31508,7 +34505,7 @@
       "candidate_tickets": [
         490
       ],
-      "issue": 490,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -31523,7 +34520,7 @@
       "candidate_tickets": [
         490
       ],
-      "issue": 490,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -31538,7 +34535,7 @@
       "candidate_tickets": [
         490
       ],
-      "issue": 490,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -33305,7 +36302,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -33320,7 +36317,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -33372,7 +36369,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -33387,7 +36384,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -33402,7 +36399,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -33417,7 +36414,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -33432,7 +36429,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -33447,7 +36444,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -33462,7 +36459,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -35983,7 +38980,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -35998,7 +38995,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -36013,7 +39010,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -36028,7 +39025,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -36043,7 +39040,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -36058,7 +39055,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -36073,7 +39070,7 @@
       "candidate_tickets": [
         489
       ],
-      "issue": 489,
+      "issue": 486,
       "disposition": "audit Dart carrier or implementation gap"
     },
     {
@@ -39263,6 +42260,10 @@
     "compliance_reference": {
       "url": "https://platform.claude.com/docs/en/api/compliance",
       "sha256": "b6a2f60bb1e743c8d9c16b33e254248a6a2392c4499ec75530687e33bd58fabd"
+    },
+    "wif_reference": {
+      "url": "https://platform.claude.com/docs/en/manage-claude/wif-reference",
+      "sha256": "2c72a0a16e187ec5417a2a2bd92ce2812c71c0912b530f35705a1e2990bd6c2c"
     }
   },
   "parent_issue": 477,
@@ -39381,6 +42382,15 @@
         "01-version"
       ]
     },
+    "16-providers": {
+      "number": 494,
+      "url": "https://github.com/davidmigloz/ai_clients_dart/issues/494",
+      "title": "Align official Claude cloud provider transports",
+      "deps": [
+        "01-version",
+        "10-admin-identity"
+      ]
+    },
     "15-closeout": {
       "number": 492,
       "url": "https://github.com/davidmigloz/ai_clients_dart/issues/492",
@@ -39397,7 +42407,8 @@
         "11-analytics",
         "12-admin-governance",
         "13-admin-integrations",
-        "14-compliance"
+        "14-compliance",
+        "16-providers"
       ]
     }
   },
@@ -39635,6 +42646,13 @@
       "path": "/v1/compliance/apps/code/artifacts/{artifact_id}",
       "issue": 491,
       "source": "https://platform.claude.com/docs/en/api/compliance"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/oauth/token",
+      "issue": 487,
+      "source": "https://platform.claude.com/docs/en/manage-claude/wif-reference",
+      "disposition": "official SDK credential transport outside the resource snapshot"
     }
   ]
 }

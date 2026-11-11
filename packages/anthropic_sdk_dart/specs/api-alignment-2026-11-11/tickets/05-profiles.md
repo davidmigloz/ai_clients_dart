@@ -13,7 +13,7 @@ Expose the GA profile routes and current enforcement fields, filtering, action U
 ## Acceptance
 
 - [ ] Verify six GA operations and overlapping beta routes on their documented paths with exact headers.
-- [ ] Test cursor progression, repeated filters, nullable and unknown enforcement values, safe write semantics and webhook decoding.
+- [ ] Test cursor progression, repeated filters, nullable and unknown enforcement values, and safe write semantics. Profile webhook decoding is owned by #490.
 - [ ] Document account access and the distinction between a profile ID header and creating or managing profiles.
 - [ ] Independently reviewed against the pinned sources; exact-head CI passes before squash merge.
 
