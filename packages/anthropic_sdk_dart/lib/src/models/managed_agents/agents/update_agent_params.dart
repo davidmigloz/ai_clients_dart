@@ -65,8 +65,9 @@ class UpdateAgentParams {
       : (_metadata as Map?)?.cast<String, String?>();
   final Object? _metadata;
 
-  /// Multiagent orchestration configuration. Full replacement. Omit to
-  /// preserve; send null to clear.
+  /// Multiagent orchestration configuration. Omit to preserve or send null
+  /// to clear. On v20261001-to-v20261001 updates the service merges settings.
+  /// Changing topology replaces the stored configuration.
   MultiagentParams? get multiagent =>
       _multiagent == _notSet ? null : _multiagent as MultiagentParams?;
   final Object? _multiagent;

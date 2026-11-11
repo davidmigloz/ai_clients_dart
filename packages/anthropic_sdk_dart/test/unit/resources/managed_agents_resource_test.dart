@@ -207,6 +207,34 @@ void main() {
     client.close();
   });
 
+  test(
+    'agent create copies untyped empty collections into its request',
+    () async {
+      const original = CreateAgentParams(
+        name: 'Agent',
+        model: ModelParamsId(id: 'claude-sonnet-5'),
+        tools: [AgentToolset20260401Params()],
+        metadata: {'key': 'value'},
+      );
+      expect(original.copyWith().toJson(), original.toJson());
+      expect(original.copyWith(tools: null).toJson(), isNot(contains('tools')));
+
+      mockHttpClient.queueJsonResponse(ManagedAgentsFixtures.agent());
+      await client.agents.create(
+        original.copyWith(tools: [], mcpServers: [], skills: [], metadata: {}),
+      );
+      final request = mockHttpClient.lastRequest!;
+      final body =
+          jsonDecode((request as dynamic).body as String)
+              as Map<String, dynamic>;
+      expect(body['tools'], isEmpty);
+      expect(body['mcp_servers'], isEmpty);
+      expect(body['skills'], isEmpty);
+      expect(body['metadata'], isEmpty);
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
+    },
+  );
+
   group('Current Managed Agents configuration', () {
     const beta = 'managed-agents-2026-04-01';
     const arn = 'arn:aws:iam::123456789012:role/AgentRunner';
@@ -621,6 +649,192 @@ void main() {
     });
   });
 
+  group('Managed Agents v20261001 configuration', () {
+    const beta = 'managed-agents-2026-04-01';
+    const resolved = {
+      'type': 'multiagent_20261001',
+      'workflows': {
+        'type': 'enabled',
+        'inline_agents': {'type': 'enabled'},
+        'predefined_agents': [
+          {'type': 'agent', 'id': 'agent_worker', 'version': 2},
+          {'type': 'agent', 'id': 'agent_pinned', 'version': 1},
+          {'type': 'agent', 'id': 'agent_test123', 'version': 1},
+        ],
+      },
+      'subagents': {'type': 'disabled'},
+      'advisor': {'type': 'enabled', 'model': 'claude-opus-5-5'},
+    };
+
+    test('create resolves workflows, workers, and advisor settings', () async {
+      mockHttpClient.queueJsonResponse({
+        ...ManagedAgentsFixtures.agent(),
+        'multiagent': resolved,
+      });
+      const config = Multiagent20261001Params(
+        workflows: MultiagentWorkersParams.enabled(
+          inlineAgents: MultiagentInlineAgents.enabled(),
+          predefinedAgents: <MultiagentRosterEntryParams>[
+            MultiagentRosterEntryAgent(
+              agent: AgentParamsId(id: 'agent_worker'),
+            ),
+            MultiagentRosterEntryAgent(
+              agent: AgentParamsObject(id: 'agent_pinned', version: 1),
+            ),
+            MultiagentSelfParams(),
+          ],
+        ),
+        subagents: MultiagentWorkersParams.disabled(),
+        advisor: MultiagentAdvisorSettings.enabled('claude-opus-5-5'),
+      );
+      final response = await client.agents.create(
+        const CreateAgentParams(
+          name: 'Coordinator',
+          model: ModelParamsId(id: 'claude-sonnet-5-5'),
+          multiagent: config,
+        ),
+      );
+
+      final multiagent = response.multiagent! as Multiagent20261001;
+      expect(multiagent.workflows.predefinedAgents!.first.version, 2);
+      expect(multiagent.workflows.inlineAgents?.type, 'enabled');
+      expect(multiagent.subagents.type, 'disabled');
+      expect(multiagent.advisor.model, 'claude-opus-5-5');
+      expect(multiagent.toJson(), resolved);
+      final request = mockHttpClient.lastRequest!;
+      expect(request.url.path, '/v1/agents');
+      expect(request.headers['anthropic-beta'], beta);
+      final body =
+          jsonDecode((request as dynamic).body as String)
+              as Map<String, dynamic>;
+      expect(body['multiagent'], {
+        'type': 'multiagent_20261001',
+        'workflows': {
+          'type': 'enabled',
+          'inline_agents': {'type': 'enabled'},
+          'predefined_agents': [
+            'agent_worker',
+            {'type': 'agent', 'id': 'agent_pinned', 'version': 1},
+            {'type': 'self'},
+          ],
+        },
+        'subagents': {'type': 'disabled'},
+        'advisor': {'type': 'enabled', 'model': 'claude-opus-5-5'},
+      });
+      final parsed = MultiagentParams.fromJson(config.toJson());
+      expect(parsed, config);
+      expect(parsed.hashCode, config.hashCode);
+    });
+
+    test(
+      'update distinguishes omission, null reset and empty roster',
+      () async {
+        mockHttpClient.queueJsonResponse({
+          ...ManagedAgentsFixtures.agent(),
+          'multiagent': {
+            ...resolved,
+            'workflows': {
+              'type': 'enabled',
+              'inline_agents': {'type': 'enabled'},
+              'predefined_agents': <Map<String, dynamic>>[],
+            },
+            'subagents': {
+              'type': 'enabled',
+              'inline_agents': {'type': 'enabled'},
+              'predefined_agents': <Map<String, dynamic>>[],
+            },
+          },
+        });
+        const config = Multiagent20261001Params(
+          workflows: null,
+          subagents: MultiagentWorkersParams.enabled(
+            inlineAgents: null,
+            predefinedAgents: <MultiagentRosterEntryParams>[],
+          ),
+        );
+        final response = await client.agents.update(
+          'agent_test123',
+          const UpdateAgentParams(multiagent: config),
+        );
+        expect(
+          (response.multiagent! as Multiagent20261001)
+              .subagents
+              .predefinedAgents,
+          isEmpty,
+        );
+        expect(config, MultiagentParams.fromJson(config.toJson()));
+        expect(config, config.copyWith());
+        final request = mockHttpClient.lastRequest!;
+        expect(request.url.path, '/v1/agents/agent_test123');
+        expect(request.method, 'POST');
+        expect(request.headers['anthropic-beta'], beta);
+        expect(jsonDecode((request as dynamic).body as String), {
+          'multiagent': {
+            'type': 'multiagent_20261001',
+            'workflows': null,
+            'subagents': {
+              'type': 'enabled',
+              'inline_agents': null,
+              'predefined_agents': <Object>[],
+            },
+          },
+        });
+      },
+    );
+
+    test(
+      'session retrieval decodes resolved worker snapshots and future modes',
+      () async {
+        final session = ManagedAgentsFixtures.session();
+        final mainAgent = session['agent'] as Map<String, dynamic>;
+        final worker = Map<String, dynamic>.of(mainAgent)
+          ..['id'] = 'agent_worker'
+          ..['execution_identity'] = {'type': 'service_account'};
+        session['agent'] = {
+          ...mainAgent,
+          'multiagent': {
+            'type': 'multiagent_20261001',
+            'workflows': {
+              'type': 'enabled',
+              'inline_agents': {'type': 'enabled'},
+              'predefined_agents': [worker],
+            },
+            'subagents': {
+              'type': 'future_worker_policy',
+              'detail': {
+                'nested': [1],
+              },
+            },
+            'advisor': {'type': 'disabled'},
+          },
+        };
+        mockHttpClient.queueJsonResponse(session);
+
+        final response = await client.sessions.retrieve('session_test123');
+
+        final multiagent =
+            response.agent.multiagent! as SessionMultiagent20261001;
+        final workerSnapshot = multiagent.workflows.predefinedAgents!.single;
+        expect(workerSnapshot.id, 'agent_worker');
+        expect(
+          workerSnapshot.executionIdentity,
+          const AgentExecutionIdentity.serviceAccount(),
+        );
+        expect(multiagent.subagents.toJson(), {
+          'type': 'future_worker_policy',
+          'detail': {
+            'nested': [1],
+          },
+        });
+        expect(mockHttpClient.lastRequest!.headers['anthropic-beta'], beta);
+        expect(
+          mockHttpClient.lastRequest!.url.path,
+          '/v1/sessions/session_test123',
+        );
+      },
+    );
+  });
+
   group('AgentsResource', () {
     test('create sends correct request and parses response', () async {
       mockHttpClient.queueJsonResponse(
@@ -1007,6 +1221,327 @@ void main() {
         'agent.thinking',
       ]);
       expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
+    });
+  });
+
+  group('Managed Agents workflow run events', () {
+    const beta = 'managed-agents-2026-04-01';
+    const timestamp = '2026-10-21T00:00:00Z';
+    const workflowError = {
+      'type': 'program_error',
+      'message': 'A workflow worker failed.',
+    };
+
+    Map<String, dynamic> workflowEvent(
+      String type,
+      Map<String, dynamic> fields,
+    ) => {
+      'type': 'workflow_run.$type',
+      'id': 'event_$type',
+      'processed_at': timestamp,
+      'workflow_run_id': 'run_01',
+      ...fields,
+    };
+
+    test(
+      'thread retrieval exposes an inline agent without an id or version',
+      () async {
+        const inline = {
+          'type': 'inline',
+          'name': 'workflow-reviewer',
+          'description': null,
+          'model': {'id': 'claude-sonnet-5', 'speed': 'standard'},
+          'system': 'Review the supplied draft.',
+          'tools': <Map<String, Object?>>[],
+          'mcp_servers': <Map<String, Object?>>[],
+          'skills': <Map<String, Object?>>[],
+          'execution_identity': {'type': 'service_account'},
+        };
+        mockHttpClient.queueJsonResponse({
+          ...ManagedAgentsFixtures.sessionThread(),
+          'agent': inline,
+          'workflow_run_id': 'run_01',
+        });
+
+        final thread = await client.sessions
+            .threads('session_test123')
+            .retrieve('sthr_test123');
+        final agent = thread.agent as SessionInlineAgent;
+        expect(agent.name, 'workflow-reviewer');
+        expect(agent.model.id, 'claude-sonnet-5');
+        expect(
+          agent.executionIdentity,
+          const AgentExecutionIdentity.serviceAccount(),
+        );
+        expect(thread.toJson()['agent'], inline);
+        expect(agent.copyWith(system: null).system, isNull);
+        expect(
+          mockHttpClient.lastRequest?.url.path,
+          '/v1/sessions/session_test123/threads/sthr_test123',
+        );
+        expect(mockHttpClient.lastRequest?.headers['anthropic-beta'], beta);
+      },
+    );
+
+    test(
+      'session SSE exposes retrying repository errors and future kinds',
+      () async {
+        const errors = [
+          {
+            'type': 'repository_checkout_error',
+            'message': 'Could not check out the requested ref.',
+            'retry_status': {'type': 'retrying'},
+            'repository_url': 'https://github.com/example/test',
+          },
+          {
+            'type': 'compaction_limit_reached_error',
+            'message': 'Reached the compaction limit.',
+            'retry_status': {'type': 'exhausted'},
+          },
+          {
+            'type': 'future_error',
+            'message': 'A new error.',
+            'retry_status': {'type': 'new_status', 'backoff_ms': 1000},
+            'additional': [1, 2],
+          },
+        ];
+        mockHttpClient.queueStreamingResponse([
+          for (final (index, error) in errors.indexed)
+            {
+              'type': 'session.error',
+              'id': 'event_error_$index',
+              'processed_at': timestamp,
+              'error': error,
+            },
+        ]);
+
+        final events = await client.sessions
+            .events('session_test123')
+            .stream()
+            .cast<SessionErrorEvent>()
+            .toList();
+        expect(events.map((event) => event.error), errors);
+        final checkout = events[0].errorDetails;
+        expect(checkout.kind, SessionErrorKind.repositoryCheckout);
+        expect(checkout.repositoryUrl, 'https://github.com/example/test');
+        expect(checkout.retryStatus, const RetryStatusRetrying());
+        expect(
+          events[1].errorDetails.kind,
+          SessionErrorKind.compactionLimitReached,
+        );
+        expect(
+          events[1].errorDetails.retryStatus,
+          const RetryStatusExhausted(),
+        );
+        final future = events[2].errorDetails;
+        expect(future.type, 'future_error');
+        expect(future.kind, SessionErrorKind.unrecognized);
+        expect(future.retryStatus, isA<UnknownRetryStatus>());
+        expect(future.toJson(), errors.last);
+        expect(mockHttpClient.lastRequest?.headers['anthropic-beta'], beta);
+      },
+    );
+
+    test('session event list decodes the workflow lifecycle', () async {
+      final wireEvents = [
+        workflowEvent('created', {
+          'name': 'Review',
+          'description': null,
+          'phases': [
+            {'id': 'phase_01', 'name': 'Draft', 'description': null},
+          ],
+        }),
+        workflowEvent('status_running', {}),
+        workflowEvent('phase_started', {'workflow_run_phase_id': 'phase_01'}),
+        workflowEvent('phase_ended', {
+          'workflow_run_phase_id': 'phase_01',
+          'phase_started_id': 'event_phase_started',
+        }),
+        workflowEvent('status_idle', {}),
+        workflowEvent('status_ended', {
+          'result': {'type': 'completed'},
+        }),
+      ];
+      mockHttpClient.queueJsonResponse({
+        'data': wireEvents,
+        'next_page': 'page_next',
+      });
+
+      final response = await client.sessions
+          .events('session_test123')
+          .list(
+            page: 'page_current',
+            types: [
+              'workflow_run.created',
+              'workflow_run.status_running',
+              'workflow_run.phase_started',
+              'workflow_run.phase_ended',
+              'workflow_run.status_idle',
+              'workflow_run.status_ended',
+            ],
+          );
+      final events = response.data.cast<WorkflowRunEvent>();
+      expect(events.map((event) => event.kind), [
+        WorkflowRunEventKind.created,
+        WorkflowRunEventKind.running,
+        WorkflowRunEventKind.phaseStarted,
+        WorkflowRunEventKind.phaseEnded,
+        WorkflowRunEventKind.idle,
+        WorkflowRunEventKind.ended,
+      ]);
+      expect(events.first.name, 'Review');
+      expect(events.first.workflowRunId, 'run_01');
+      expect(events.first.phases?.single.name, 'Draft');
+      expect(events[2].workflowRunPhaseId, 'phase_01');
+      expect(events[3].phaseStartedId, events[2].id);
+      expect(events.last.result?.type, 'completed');
+      expect(events.map((event) => event.toJson()), wireEvents);
+      expect(response.nextPage, 'page_next');
+
+      final request = mockHttpClient.lastRequest!;
+      expect(request.url.path, '/v1/sessions/session_test123/events');
+      expect(request.headers['anthropic-beta'], beta);
+      expect(request.url.queryParameters['page'], 'page_current');
+      expect(request.url.queryParametersAll['types[]'], [
+        'workflow_run.created',
+        'workflow_run.status_running',
+        'workflow_run.phase_started',
+        'workflow_run.phase_ended',
+        'workflow_run.status_idle',
+        'workflow_run.status_ended',
+      ]);
+    });
+
+    test('session SSE distinguishes failed starts and ended runs', () async {
+      final wireEvents = [
+        workflowEvent('error', {
+          'workflow_run_id': null,
+          'id': 'event_failed_start',
+          'error': {
+            'type': 'max_workflow_runs_error',
+            'message': 'Run limit reached.',
+          },
+        }),
+        workflowEvent('error', {'error': workflowError}),
+        workflowEvent('status_ended', {
+          'result': {'type': 'error', 'error': workflowError},
+        }),
+        workflowEvent('status_ended', {
+          'workflow_run_id': 'run_future',
+          'id': 'event_future_terminal',
+          'result': {'type': 'new_terminal_result', 'future_detail': 7},
+        }),
+        workflowEvent('future_event', {'extra': 'preserved'}),
+      ];
+      mockHttpClient.queueStreamingResponse(wireEvents);
+
+      final events = await client.sessions
+          .events('session_test123')
+          .stream()
+          .toList();
+      expect(events, hasLength(5));
+      final first = events[0] as WorkflowRunEvent;
+      expect(first.workflowRunId, isNull);
+      expect(first.error?.type, 'max_workflow_runs_error');
+      expect((events[1] as WorkflowRunEvent).workflowRunId, 'run_01');
+      final ended = events[2] as WorkflowRunEvent;
+      expect(ended.kind, WorkflowRunEventKind.ended);
+      expect(ended.result?.error?.message, 'A workflow worker failed.');
+      expect(
+        (events[3] as WorkflowRunEvent).result?.type,
+        'new_terminal_result',
+      );
+      expect(events.last, isA<UnknownSessionEvent>());
+      expect(events.take(4).map((event) => event.toJson()), wireEvents.take(4));
+      expect(events.last.toJson()['extra'], 'preserved');
+
+      final request = mockHttpClient.lastRequest!;
+      expect(request.url.path, '/v1/sessions/session_test123/events/stream');
+      expect(request.headers['anthropic-beta'], beta);
+    });
+
+    test(
+      'thread response and creation event link the owning workflow',
+      () async {
+        mockHttpClient
+          ..queueJsonResponse({
+            ...ManagedAgentsFixtures.sessionThread(),
+            'workflow_run_id': 'run_01',
+          })
+          ..queueJsonResponse({
+            'data': [
+              {
+                ...ManagedAgentsFixtures.sessionThreadCreatedEvent(),
+                'workflow_run_id': 'run_01',
+              },
+            ],
+            'next_page': null,
+          });
+
+        final thread = await client.sessions
+            .threads('session_test123')
+            .retrieve('sthr_test123');
+        expect(thread.workflowRunId, 'run_01');
+        expect(thread.toJson()['workflow_run_id'], 'run_01');
+        expect(thread.copyWith(workflowRunId: null).workflowRunId, isNull);
+        expect(mockHttpClient.lastRequest?.headers['anthropic-beta'], beta);
+        final response = await client.sessions.events('session_test123').list();
+        final created = response.data.single as SessionThreadCreatedEvent;
+        expect(created.workflowRunId, 'run_01');
+        expect(created.toJson()['workflow_run_id'], 'run_01');
+        expect(created.copyWith(workflowRunId: null).workflowRunId, isNull);
+      },
+    );
+
+    test('session and thread idle events retain refusal details', () async {
+      const details = {
+        'type': 'refusal',
+        'category': 'future_category',
+        'explanation': null,
+      };
+      mockHttpClient
+        ..queueJsonResponse({
+          'data': [
+            {
+              'type': 'session.status_idle',
+              'id': 'event_session_idle',
+              'processed_at': timestamp,
+              'stop_reason': {'type': 'refusal'},
+              'stop_details': details,
+            },
+          ],
+          'next_page': null,
+        })
+        ..queueStreamingResponse([
+          {
+            'type': 'session.thread_status_idle',
+            'id': 'event_thread_idle',
+            'processed_at': timestamp,
+            'session_thread_id': 'sthr_test123',
+            'agent_name': 'Test Agent',
+            'stop_reason': {'type': 'refusal'},
+            'stop_details': details,
+          },
+        ]);
+
+      final response = await client.sessions.events('session_test123').list();
+      final idle = response.data.single as SessionStatusIdleEvent;
+      expect(idle.stopReason, const SessionRefusal());
+      expect(idle.stopDetails?.category, 'future_category');
+      expect(idle.stopDetails?.explanation, isNull);
+      expect(idle.toJson()['stop_details'], details);
+      expect(idle.copyWith(stopDetails: null).stopDetails, isNull);
+
+      final events = await client.sessions
+          .threads('session_test123')
+          .events('sthr_test123')
+          .stream()
+          .toList();
+      final threadIdle = events.single as SessionThreadStatusIdleEvent;
+      expect(threadIdle.stopReason, const SessionRefusal());
+      expect(threadIdle.stopDetails?.category, 'future_category');
+      expect(threadIdle.toJson()['stop_details'], details);
+      expect(mockHttpClient.lastRequest?.headers['anthropic-beta'], beta);
     });
   });
 

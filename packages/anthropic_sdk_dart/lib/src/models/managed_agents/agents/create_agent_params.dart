@@ -36,8 +36,8 @@ class CreateAgentParams {
   /// Arbitrary key-value metadata.
   final Map<String, String>? metadata;
 
-  /// Multiagent orchestration configuration. Currently supports the
-  /// `coordinator` topology with a roster of 1-20 agents.
+  /// Multiagent orchestration configuration. Supports the coordinator roster
+  /// and v20261001 workflow, subagent and advisor settings.
   final MultiagentParams? multiagent;
 
   /// Principal for agent execution. Omit to use the default.
@@ -124,16 +124,16 @@ class CreateAgentParams {
       system: system == unsetCopyWithValue ? this.system : system as String?,
       tools: tools == unsetCopyWithValue
           ? this.tools
-          : tools as List<AgentToolParams>?,
+          : (tools as List?)?.cast<AgentToolParams>(),
       mcpServers: mcpServers == unsetCopyWithValue
           ? this.mcpServers
-          : mcpServers as List<MCPServerParams>?,
+          : (mcpServers as List?)?.cast<MCPServerParams>(),
       skills: skills == unsetCopyWithValue
           ? this.skills
-          : skills as List<AgentSkillParams>?,
+          : (skills as List?)?.cast<AgentSkillParams>(),
       metadata: metadata == unsetCopyWithValue
           ? this.metadata
-          : metadata as Map<String, String>?,
+          : (metadata as Map?)?.cast<String, String>(),
       multiagent: multiagent == unsetCopyWithValue
           ? this.multiagent
           : multiagent as MultiagentParams?,

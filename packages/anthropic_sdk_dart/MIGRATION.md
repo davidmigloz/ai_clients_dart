@@ -94,6 +94,44 @@ String policyLabel(PermissionPolicy policy) => switch (policy) {
 
 ---
 
+## Handle Managed Agents workflow variants
+
+Existing coordinator configuration is still accepted. Use
+`Multiagent20261001Params` to configure dynamic workflows and subagents.
+Switches over the following sealed types need the new cases.
+
+| Sealed type | New case |
+| --- | --- |
+| `MultiagentParams` | `Multiagent20261001Params` |
+| `Multiagent` | `Multiagent20261001` |
+| `SessionMultiagent` | `SessionMultiagent20261001` |
+| `SessionEvent` | `WorkflowRunEvent` |
+| `SessionStopReason` | `SessionRefusal` |
+
+```dart
+// Before
+final mode = switch (config) {
+  MultiagentCoordinatorParams() => 'Coordinator',
+  UnknownMultiagentParams() => 'Unknown',
+};
+
+// After
+final mode = switch (config) {
+  MultiagentCoordinatorParams() => 'Coordinator',
+  Multiagent20261001Params() => 'Dynamic workflows and subagents',
+  UnknownMultiagentParams() => 'Unknown',
+};
+```
+
+A session keeps the topology copied at creation. Create a new session to use
+changes to the saved agent. Thread snapshots may contain `SessionInlineAgent`
+without a saved ID or version. `SessionErrorEvent.errorDetails` adds typed access
+while retaining the raw `error` object. Read paginated event history after a
+disconnect. The Managed Agents stream delivers live events.
+[Managed Agents workflow example](example/managed_agents_workflow_example.dart)
+
+---
+
 ## Generally available User Profiles
 
 Existing `client.userProfiles` calls use the legacy beta contract. Use

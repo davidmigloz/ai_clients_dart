@@ -1,14 +1,17 @@
 import 'package:meta/meta.dart';
 
+import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../sessions/create_session_params.dart';
+import 'multiagent_settings.dart';
 
 /// Multiagent orchestration configuration for create/update requests.
 ///
-/// Currently supports the `coordinator` topology.
+/// Supports coordinator and v20261001 configurations.
 ///
 /// Variants:
 /// - [MultiagentCoordinatorParams] — a coordinator topology with a roster.
+/// - [Multiagent20261001Params] — independent workflow, subagent and advisor settings.
 /// - [UnknownMultiagentParams] — unrecognized topology, for forward
 ///   compatibility.
 sealed class MultiagentParams {
@@ -22,6 +25,7 @@ sealed class MultiagentParams {
     final type = json['type'] as String?;
     return switch (type) {
       'coordinator' => MultiagentCoordinatorParams.fromJson(json),
+      'multiagent_20261001' => Multiagent20261001Params.fromJson(json),
       _ => UnknownMultiagentParams(rawJson: json),
     };
   }
@@ -277,4 +281,221 @@ class UnknownMultiagentRosterEntryParams extends MultiagentRosterEntryParams {
 
   @override
   String toString() => 'UnknownMultiagentRosterEntryParams(rawJson: $rawJson)';
+}
+
+/// Multiagent settings with independent workflow, subagent and advisor modes.
+///
+/// On an update with the same version, omitted settings retain their current
+/// values and explicit null restores the service default for that setting.
+@immutable
+final class Multiagent20261001Params extends MultiagentParams {
+  final Object? _workflows;
+  final Object? _subagents;
+  final Object? _advisor;
+  static const _type = 'multiagent_20261001';
+
+  /// Workflow settings when specified and non-null.
+  MultiagentWorkersParams? get workflows => _workflows == unsetCopyWithValue
+      ? null
+      : _workflows as MultiagentWorkersParams?;
+
+  /// Subagent settings when specified and non-null.
+  MultiagentWorkersParams? get subagents => _subagents == unsetCopyWithValue
+      ? null
+      : _subagents as MultiagentWorkersParams?;
+
+  /// Advisor settings when specified and non-null.
+  MultiagentAdvisorSettings? get advisor => _advisor == unsetCopyWithValue
+      ? null
+      : _advisor as MultiagentAdvisorSettings?;
+
+  /// Creates v20261001 settings. Pass [MultiagentWorkersParams] for workflows
+  /// and subagents, and [MultiagentAdvisorSettings] for advisor. Omit a setting
+  /// to preserve it on update, or use null to restore the server default.
+  const Multiagent20261001Params({
+    this._workflows = unsetCopyWithValue,
+    this._subagents = unsetCopyWithValue,
+    this._advisor = unsetCopyWithValue,
+  });
+
+  /// Parses a v20261001 configuration.
+  factory Multiagent20261001Params.fromJson(Map<String, dynamic> json) {
+    if (json['type'] != _type) {
+      throw const FormatException('Expected multiagent_20261001');
+    }
+    return Multiagent20261001Params(
+      workflows: _readSetting(
+        json,
+        'workflows',
+        MultiagentWorkersParams.fromJson,
+      ),
+      subagents: _readSetting(
+        json,
+        'subagents',
+        MultiagentWorkersParams.fromJson,
+      ),
+      advisor: _readSetting(
+        json,
+        'advisor',
+        MultiagentAdvisorSettings.fromJson,
+      ),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': _type,
+    if (_workflows != unsetCopyWithValue) 'workflows': workflows?.toJson(),
+    if (_subagents != unsetCopyWithValue) 'subagents': subagents?.toJson(),
+    if (_advisor != unsetCopyWithValue) 'advisor': advisor?.toJson(),
+  };
+
+  /// Replaces only the supplied settings.
+  Multiagent20261001Params copyWith({
+    Object? workflows = unsetCopyWithValue,
+    Object? subagents = unsetCopyWithValue,
+    Object? advisor = unsetCopyWithValue,
+  }) => Multiagent20261001Params(
+    workflows: workflows == unsetCopyWithValue ? _workflows : workflows,
+    subagents: subagents == unsetCopyWithValue ? _subagents : subagents,
+    advisor: advisor == unsetCopyWithValue ? _advisor : advisor,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Multiagent20261001Params &&
+          _workflows == other._workflows &&
+          _subagents == other._subagents &&
+          _advisor == other._advisor;
+
+  @override
+  int get hashCode => Object.hash(_workflows, _subagents, _advisor);
+
+  @override
+  String toString() =>
+      'Multiagent20261001Params(workflows: $workflows, subagents: $subagents, advisor: $advisor)';
+}
+
+/// Request settings for the workflow or subagent workers.
+@immutable
+final class MultiagentWorkersParams {
+  /// The worker setting's wire value.
+  final String type;
+  final Object? _inlineAgents;
+  final Object? _predefinedAgents;
+  final Map<String, dynamic>? _raw;
+
+  /// Inline-agent setting when specified and non-null.
+  MultiagentInlineAgents? get inlineAgents =>
+      _inlineAgents == unsetCopyWithValue
+      ? null
+      : _inlineAgents as MultiagentInlineAgents?;
+
+  /// Predefined agents when specified and non-null.
+  List<MultiagentRosterEntryParams>? get predefinedAgents =>
+      _predefinedAgents == unsetCopyWithValue
+      ? null
+      : _predefinedAgents as List<MultiagentRosterEntryParams>?;
+
+  /// Enables the workers. Pass a [MultiagentInlineAgents] policy and a list of
+  /// agent references or self entries. Omit values on an update to keep them,
+  /// or pass null to restore the defaults.
+  /// When inline agents are disabled, the final configuration must contain
+  /// at least one predefined agent.
+  const MultiagentWorkersParams.enabled({
+    this._inlineAgents = unsetCopyWithValue,
+    this._predefinedAgents = unsetCopyWithValue,
+  }) : type = 'enabled',
+       _raw = null;
+
+  /// Disables the workers.
+  const MultiagentWorkersParams.disabled()
+    : type = 'disabled',
+      _inlineAgents = unsetCopyWithValue,
+      _predefinedAgents = unsetCopyWithValue,
+      _raw = null;
+
+  MultiagentWorkersParams._(this.type, Map<String, dynamic> json)
+    : _inlineAgents = unsetCopyWithValue,
+      _predefinedAgents = unsetCopyWithValue,
+      _raw = deepUnmodifiableMap(json);
+
+  /// Parses worker settings and preserves future worker modes.
+  factory MultiagentWorkersParams.fromJson(Map<String, dynamic> json) {
+    return switch (json['type']) {
+      'enabled' => MultiagentWorkersParams.enabled(
+        inlineAgents: _readSetting(
+          json,
+          'inline_agents',
+          MultiagentInlineAgents.fromJson,
+        ),
+        predefinedAgents: _readSetting(
+          json,
+          'predefined_agents',
+          (List<Object?> agents) =>
+              List<MultiagentRosterEntryParams>.unmodifiable(
+                agents.map((agent) {
+                  if (agent == null) {
+                    throw const FormatException(
+                      'Predefined agents cannot contain null',
+                    );
+                  }
+                  return MultiagentRosterEntryParams.fromJson(agent);
+                }),
+              ),
+        ),
+      ),
+      'disabled' => const MultiagentWorkersParams.disabled(),
+      final String type => MultiagentWorkersParams._(type, json),
+      _ => throw const FormatException(
+        'Multiagent worker settings require type',
+      ),
+    };
+  }
+
+  /// Converts to JSON, preserving omitted and explicitly cleared settings.
+  Map<String, dynamic> toJson() => {
+    ...?_raw,
+    'type': type,
+    if (_inlineAgents != unsetCopyWithValue)
+      'inline_agents': inlineAgents?.toJson(),
+    if (_predefinedAgents != unsetCopyWithValue)
+      'predefined_agents': predefinedAgents
+          ?.map(_predefinedAgentToJson)
+          .toList(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MultiagentWorkersParams &&
+          mapsDeepEqual(toJson(), other.toJson());
+
+  @override
+  int get hashCode => mapDeepHashCode(toJson());
+
+  @override
+  String toString() =>
+      'MultiagentWorkersParams(type: $type, inlineAgents: $inlineAgents, '
+      'predefinedAgents: $predefinedAgents)';
+}
+
+Object? _readSetting<T>(
+  Map<String, dynamic> json,
+  String field,
+  Object Function(T) parse,
+) {
+  if (!json.containsKey(field)) return unsetCopyWithValue;
+  final value = json[field];
+  return value == null ? null : parse(value as T);
+}
+
+Object _predefinedAgentToJson(MultiagentRosterEntryParams agent) {
+  if (agent is MultiagentRosterEntryAdvisor ||
+      agent is MultiagentRosterEntryAgent &&
+          agent.agent is AgentParamsWithOverrides) {
+    throw ArgumentError('Predefined agents must be agent references or self');
+  }
+  return agent.toJson();
 }

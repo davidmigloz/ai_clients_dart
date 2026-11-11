@@ -4,6 +4,7 @@ import '../../beta_timestamp.dart';
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../agents/multiagent.dart' show Advisor;
+import '../agents/multiagent_settings.dart';
 import '../common/budget.dart';
 import '../config/agent_skill.dart';
 import '../config/agent_tool.dart';
@@ -13,6 +14,8 @@ import '../config/model_config.dart';
 import '../events/telemetry.dart';
 import '../outcomes/outcome_evaluation.dart';
 import '../resources/session_resource.dart';
+
+part 'session_inline_agent.dart';
 
 /// Session status.
 enum SessionStatus {
@@ -244,6 +247,7 @@ class Session {
           runtimeType == other.runtimeType &&
           id == other.id &&
           type == other.type &&
+          status == other.status &&
           rawStatus == other.rawStatus &&
           agent == other.agent &&
           environmentId == other.environmentId &&
@@ -264,6 +268,7 @@ class Session {
   int get hashCode => Object.hash(
     id,
     type,
+    status,
     rawStatus,
     agent,
     environmentId,
@@ -768,12 +773,95 @@ sealed class SessionMultiagent {
     final type = json['type'] as String?;
     return switch (type) {
       'coordinator' => SessionMultiagentCoordinator.fromJson(json),
+      'multiagent_20261001' => SessionMultiagent20261001.fromJson(json),
       _ => UnknownSessionMultiagent(rawJson: json),
     };
   }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson();
+}
+
+/// Resolved workflow, subagent and advisor settings for the v20261001 topology.
+@immutable
+final class SessionMultiagent20261001 extends SessionMultiagent {
+  /// The topology type, always 'multiagent_20261001'.
+  String get type => 'multiagent_20261001';
+
+  /// Resolved workflows and predefined workflow agents.
+  final MultiagentWorkers<SessionThreadAgent> workflows;
+
+  /// Resolved subagents and predefined agents available to spawn.
+  final MultiagentWorkers<SessionThreadAgent> subagents;
+
+  /// Resolved advisor settings.
+  final MultiagentAdvisorSettings advisor;
+
+  /// Creates a resolved v20261001 configuration.
+  const SessionMultiagent20261001({
+    required this.workflows,
+    required this.subagents,
+    required this.advisor,
+  });
+
+  /// Parses resolved v20261001 settings.
+  factory SessionMultiagent20261001.fromJson(Map<String, dynamic> json) {
+    if (json case {
+      'type': 'multiagent_20261001',
+      'workflows': final Map<String, dynamic> workflows,
+      'subagents': final Map<String, dynamic> subagents,
+      'advisor': final Map<String, dynamic> advisor,
+    }) {
+      return SessionMultiagent20261001(
+        workflows: MultiagentWorkers.fromJson(
+          workflows,
+          SessionThreadAgent.fromJson,
+        ),
+        subagents: MultiagentWorkers.fromJson(
+          subagents,
+          SessionThreadAgent.fromJson,
+        ),
+        advisor: MultiagentAdvisorSettings.fromJson(advisor),
+      );
+    }
+    throw const FormatException(
+      'Resolved multiagent settings require workflows, subagents and advisor',
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'workflows': workflows.toJson(),
+    'subagents': subagents.toJson(),
+    'advisor': advisor.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  SessionMultiagent20261001 copyWith({
+    MultiagentWorkers<SessionThreadAgent>? workflows,
+    MultiagentWorkers<SessionThreadAgent>? subagents,
+    MultiagentAdvisorSettings? advisor,
+  }) => SessionMultiagent20261001(
+    workflows: workflows ?? this.workflows,
+    subagents: subagents ?? this.subagents,
+    advisor: advisor ?? this.advisor,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SessionMultiagent20261001 &&
+          workflows == other.workflows &&
+          subagents == other.subagents &&
+          advisor == other.advisor;
+
+  @override
+  int get hashCode => Object.hash(workflows, subagents, advisor);
+
+  @override
+  String toString() =>
+      'SessionMultiagent20261001(workflows: $workflows, subagents: $subagents, advisor: $advisor)';
 }
 
 /// Resolved coordinator topology with full agent definitions for each roster
@@ -855,7 +943,7 @@ class UnknownSessionMultiagent extends SessionMultiagent {
 // ---------------------------------------------------------------------------
 
 /// The resolved agent a coordinator roster entry or session thread runs: a
-/// saved-agent snapshot or the platform advisor entry.
+/// saved-agent snapshot, the platform advisor entry, or an inline agent.
 ///
 /// Deliberately declared as a plain abstract class rather than `sealed`: the
 /// [Advisor] variant is shared with [MultiagentRosterEntry] (a separate union
@@ -867,6 +955,7 @@ class UnknownSessionMultiagent extends SessionMultiagent {
 /// Variants:
 /// - [SessionThreadAgent] — a saved-agent snapshot (`type: "agent"`).
 /// - [Advisor] — the platform advisor roster entry (`type: "advisor"`).
+/// - [SessionInlineAgent] — an unsaved agent (`type: "inline"`).
 /// - [UnknownSessionRosterEntry] — unrecognized entry type (preserves raw
 ///   JSON).
 abstract class SessionRosterEntry {
@@ -878,6 +967,7 @@ abstract class SessionRosterEntry {
     final type = json['type'] as String?;
     return switch (type) {
       'agent' => SessionThreadAgent.fromJson(json),
+      'inline' => SessionInlineAgent.fromJson(json),
       'advisor' => Advisor.fromJson(json),
       _ => UnknownSessionRosterEntry(rawJson: json),
     };
