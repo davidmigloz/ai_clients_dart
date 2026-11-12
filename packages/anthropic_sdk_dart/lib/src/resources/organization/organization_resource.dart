@@ -9,6 +9,7 @@ import 'organization_rbac_resources.dart';
 import 'organization_service_accounts_resource.dart';
 import 'organization_settings_resources.dart';
 import 'organization_spend_resources.dart';
+import 'organization_telemetry_destinations_resource.dart';
 import 'organization_transport.dart';
 import 'organization_webhooks_resource.dart';
 import 'organization_workspaces_resource.dart';
@@ -40,6 +41,9 @@ final class OrganizationResource {
       rbacRoles = OrganizationRbacRolesResource(_transport),
       spendLimits = OrganizationSpendLimitsResource(_transport),
       webhooks = OrganizationWebhooksResource(_transport),
+      telemetryDestinations = OrganizationTelemetryDestinationsResource(
+        _transport,
+      ),
       complianceSettings = OrganizationComplianceSettingsResource(_transport),
       federation = OrganizationFederationResource(_transport),
       serviceAccounts = OrganizationServiceAccountsResource(_transport),
@@ -83,6 +87,9 @@ final class OrganizationResource {
 
   /// Configured and effective spend limits and increase requests.
   final OrganizationSpendLimitsResource spendLimits;
+
+  /// Server-side OpenTelemetry destinations.
+  final OrganizationTelemetryDestinationsResource telemetryDestinations;
 
   /// Organization webhook subscriptions and signing secret rotation.
   final OrganizationWebhooksResource webhooks;

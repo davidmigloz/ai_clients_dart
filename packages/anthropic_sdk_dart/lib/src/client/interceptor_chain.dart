@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:http/http.dart' as http;
 
+import '../auth/request_auth.dart';
 import '../errors/exceptions.dart';
 import '../interceptors/interceptor.dart';
 import '../utils/request_id.dart';
@@ -109,23 +110,34 @@ class InterceptorChain {
         // Creates a fresh request for each attempt (required for retries).
         http.BaseRequest createRequest([Future<void>? abortTrigger]) {
           if (originalRequest is http.Request) {
-            return (abortTrigger == null
-                  ? http.Request(originalRequest.method, originalRequest.url)
-                  : http.AbortableRequest(
-                      originalRequest.method,
-                      originalRequest.url,
-                      abortTrigger: abortTrigger,
-                    ))
-              ..headers.addAll(originalRequest.headers)
-              ..followRedirects = originalRequest.followRedirects
-              ..maxRedirects = originalRequest.maxRedirects
-              ..persistentConnection = originalRequest.persistentConnection
-              ..bodyBytes = bodyBytes ?? [];
+            final request =
+                (abortTrigger == null
+                      ? http.Request(
+                          originalRequest.method,
+                          originalRequest.url,
+                        )
+                      : http.AbortableRequest(
+                          originalRequest.method,
+                          originalRequest.url,
+                          abortTrigger: abortTrigger,
+                        ))
+                  ..headers.addAll(originalRequest.headers)
+                  ..followRedirects = originalRequest.followRedirects
+                  ..maxRedirects = originalRequest.maxRedirects
+                  ..persistentConnection = originalRequest.persistentConnection
+                  ..bodyBytes = bodyBytes ?? [];
+            return withRequestDiagnosticCredentials(
+              request,
+              requestDiagnosticCredentials(originalRequest),
+            );
           }
           // Non-cloneable requests are sent only once.
           return abortTrigger == null
               ? originalRequest
-              : _AbortableRequestWrapper(originalRequest, abortTrigger);
+              : withRequestDiagnosticCredentials(
+                  _AbortableRequestWrapper(originalRequest, abortTrigger),
+                  requestDiagnosticCredentials(originalRequest),
+                );
         }
 
         final correlationId =

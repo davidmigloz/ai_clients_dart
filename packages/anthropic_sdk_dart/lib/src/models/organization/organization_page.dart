@@ -78,11 +78,14 @@ final class OrganizationCursorPage<T> {
        _serverHasMore = requireHasMore || json.containsKey('has_more')
            ? requiredOrganizationField<bool>(json, 'has_more', 'Admin page')
            : null,
-       nextPage = requiredOrganizationField<String?>(
+       nextPage = switch (requiredOrganizationField<String?>(
          json,
          'next_page',
          'Admin page',
-       ) {
+       )) {
+         '' => null,
+         final cursor => cursor,
+       } {
     if (hasMore && nextPage?.isNotEmpty != true) {
       throw const FormatException('Missing Admin continuation token');
     }

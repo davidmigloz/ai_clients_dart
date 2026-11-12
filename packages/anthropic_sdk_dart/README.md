@@ -61,6 +61,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Usage and cost analytics with actor, workspace, and organization dimensions (beta)
 - Claude Enterprise activity reports for users, projects, skills, connectors, plugins, and artifacts
 - Organization webhook endpoint management and signed event verification (beta)
+- Organization OpenTelemetry destination setup, test spans, and workspace selection (beta)
 - Files (expiration, cursor pagination) and skills (multi-file uploads, container skills)
 - Managed agents with environments, self-hosted work, sessions, thread status filters, execution principals, tool permission evaluation, vaults, and streaming events (beta)
 - Scheduled deployments on the Claude API, Claude Platform on AWS, and Anthropic-managed Claude Models on Google Cloud (beta)
@@ -1411,6 +1412,40 @@ if (event.data case WebhookUserProfileEventData(:final event, :final id)) {
 
 </details>
 
+### How do I send Claude API traces to a collector?
+
+<details>
+<summary><b>Configure an organization OpenTelemetry destination</b></summary>
+
+Use `client.organization.telemetryDestinations` with an Admin API key or
+service account on the Claude API, or IAM on Claude Platform on AWS. The
+resource adds the required `telemetry-destinations-2026-08-11` beta header.
+Use an HTTPS collector with a DNS hostname on port 443 that accepts OTLP/HTTP
+protobuf. A separate traces URL must use the same origin. Choose all workspaces
+or an include/exclude list. Content export depends on organization, model, and
+platform eligibility. Metadata-only is the default.
+
+```dart
+final destination = await admin.organization.telemetryDestinations.create(
+  endpointUrl: 'https://collector.example.com/otlp',
+  workspaces: const TelemetryWorkspaceSelection.all(),
+  headers: {'authorization': collectorToken},
+);
+final delivery = await admin.organization.telemetryDestinations.test(
+  destination.id,
+);
+print(delivery.result.succeeded ? 'Delivered' : delivery.result.error);
+```
+
+Read responses return header names. For updates, pass `null` inside the
+headers map to remove one header, and include the endpoint URL when setting a
+value. Moving to a new host clears registered headers. A failed test delivery
+is reported in the result of a successful API request.
+
+[Runnable destinations example](example/organization_telemetry_example.dart) · [Claude API OpenTelemetry export](https://platform.claude.com/docs/en/manage-claude/opentelemetry/api)
+
+</details>
+
 ### How do I use the Compliance API?
 
 <details>
@@ -1612,6 +1647,7 @@ See the [example/](example/) directory for complete examples:
 | [`organization_spend_example.dart`](example/organization_spend_example.dart) | List effective spend limits and pending increase requests |
 | [`organization_webhooks_example.dart`](example/organization_webhooks_example.dart) | List organization webhook endpoints (beta) |
 | [`organization_webhook_receiver_example.dart`](example/organization_webhook_receiver_example.dart) | Verify and parse signed webhook deliveries |
+| [`organization_telemetry_example.dart`](example/organization_telemetry_example.dart) | Page through OpenTelemetry destinations and inspect delivery health (beta) |
 | [`models_example.dart`](example/models_example.dart) | Model lifecycle filters, pagination, and capabilities |
 | [`compliance_example.dart`](example/compliance_example.dart) | Scoped Compliance Activity Feed |
 | [`compliance_content_example.dart`](example/compliance_content_example.dart) | Scoped Compliance app content and artifact downloads |

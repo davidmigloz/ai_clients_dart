@@ -1,5 +1,7 @@
 import 'package:http/http.dart' as http;
 
+import '../auth/request_auth.dart';
+
 /// Context for an HTTP request/response.
 class RequestContext {
   /// HTTP request.
@@ -30,7 +32,12 @@ class RequestContext {
     Future<void>? abortTrigger,
   }) {
     return RequestContext(
-      request: request ?? this.request,
+      request: request == null
+          ? this.request
+          : withRequestDiagnosticCredentials(
+              request,
+              requestDiagnosticCredentials(this.request),
+            ),
       response: response ?? this.response,
       metadata: metadata ?? this.metadata,
       abortTrigger: abortTrigger ?? this.abortTrigger,

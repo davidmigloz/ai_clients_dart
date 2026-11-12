@@ -31,6 +31,7 @@
     "organizationWorkspaceServiceAccounts": "service_accounts",
     "organizationWorkspaces": "organization_admin",
     "organizationWebhooks": "organization_webhooks",
+    "organizationTelemetryDestinations": "organization_telemetry",
     "messages": "messages",
     "models": "models",
     "agents": "managed_agents",

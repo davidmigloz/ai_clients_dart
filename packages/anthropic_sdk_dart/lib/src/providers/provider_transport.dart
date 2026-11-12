@@ -85,7 +85,10 @@ abstract base class ProviderTransport extends http.BaseClient {
           ..persistentConnection = request.persistentConnection
           ..headers.addAll(prepared.headers)
           ..bodyBytes = prepared.body;
-    final credentials = requestCredentialValues(outbound.headers);
+    final bodyCredentials = requestDiagnosticCredentials(request);
+    withRequestDiagnosticCredentials(outbound, bodyCredentials);
+    final credentials = requestCredentialValues(outbound.headers)
+      ..addAll(bodyCredentials);
     final http.StreamedResponse response;
     try {
       response = await sendApiRequest(
