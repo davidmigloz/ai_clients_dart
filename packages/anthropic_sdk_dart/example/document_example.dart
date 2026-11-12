@@ -11,17 +11,18 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// - Extracting text from PDFs
 /// - Analyzing document content
 /// - Multi-page document handling
-void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+///
+/// Set ANTHROPIC_API_KEY. Optionally pass a path to a local PDF.
+Future<void> main(List<String> arguments) async {
+  if (arguments.length > 1) {
+    throw ArgumentError('Usage: document_example.dart [document.pdf]');
+  }
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // Example 1: Analyze a PDF document
     print('=== PDF Document Analysis ===');
-    const pdfPath = 'example/sample_document.pdf';
+    final pdfPath = arguments.firstOrNull ?? 'example/sample_document.pdf';
     final pdfFile = File(pdfPath);
 
     if (pdfFile.existsSync()) {

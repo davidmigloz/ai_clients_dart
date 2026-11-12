@@ -10,12 +10,10 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// - Cancelling batches
 ///
 /// Note: Batches can take minutes to hours to complete depending on load.
+///
+/// Set ANTHROPIC_API_KEY before running.
 void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // Example 1: Create a batch with multiple requests
@@ -109,7 +107,7 @@ void main() async {
       }
     } else {
       print('\nBatch still processing...');
-      print('In production, you would continue polling or use webhooks.');
+      print('Continue polling the saved batch ID until its status is ended.');
     }
 
     // Example 5: Cancel a batch (demo - commented to avoid canceling real batch)

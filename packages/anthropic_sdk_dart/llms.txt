@@ -4,83 +4,86 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~18.3k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~22k tokens): Primary package documentation with installation, configuration, and usage examples.
 - [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/CHANGELOG.md) (~12.9k tokens): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) (~15.9k tokens): Upgrade notes and breaking-change guidance.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) (~16.4k tokens): Upgrade notes and breaking-change guidance.
 
 ## Examples
 
 - [workload_identity_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/workload_identity_example.dart) (~375 tokens): Exchange a workload identity JWT and call Messages.
 - [federation_issuers_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/federation_issuers_example.dart) (~247 tokens): List OIDC issuers with an organization OAuth token.
 - [federation_rules_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/federation_rules_example.dart) (~217 tokens): List federation rules and workspace bindings.
-- [messages_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/messages_example.dart) (~794 tokens): Basic message creation.
+- [messages_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/messages_example.dart) (~777 tokens): Basic message creation.
 - [message_response_metadata_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/message_response_metadata_example.dart) (~269 tokens): Read status and provider IDs from a Messages response.
 - [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/streaming_example.dart) (~1.3k tokens): Streaming responses.
 - [structured_output_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/structured_output_example.dart) (~341 tokens): Typed JSON output with buffered or streamed responses.
-- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/tool_calling_example.dart) (~685 tokens): Tool calling with schemas.
+- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/tool_calling_example.dart) (~667 tokens): Tool calling with schemas.
 - [inline_tools_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/inline_tools_example.dart) (~302 tokens): Define a client tool partway through a conversation (beta).
-- [browser_use_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/browser_use_example.dart) (~1k tokens): Browser-use toolset with `browser_state` tool results.
-- [computer_use_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/computer_use_example.dart) (~897 tokens): Computer-use toolset (`computer_toolset_20260801`).
 - [message_tool_runner_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/message_tool_runner_example.dart) (~523 tokens): Bounded typed custom tool loop with optional streaming and threads.
 - [message_toolset_runner_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/message_toolset_runner_example.dart) (~377 tokens): Typed browser actions with a stub executor.
-- [mcp_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/mcp_example.dart) (~537 tokens): Connect an MCP server and pin its tool listing (beta).
 - [web_fetch_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/web_fetch_example.dart) (~300 tokens): Restrict URL sources and inspect web fetch results.
-- [thinking_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/thinking_example.dart) (~2.2k tokens): Adaptive thinking, progress updates, block binding, and multi-turn replay.
+- [browser_use_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/browser_use_example.dart) (~1k tokens): Browser-use toolset with `browser_state` tool results.
+- [computer_use_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/computer_use_example.dart) (~897 tokens): Computer-use toolset (`computer_toolset_20260801`).
+- [token_counting_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/token_counting_example.dart) (~1k tokens): Token counting.
+- [vision_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/vision_example.dart) (~1.2k tokens): Image and document inputs.
+- [custom_content_document_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/custom_content_document_example.dart) (~300 tokens): Cite custom document chunks by block index.
+- [thinking_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/thinking_example.dart) (~2.3k tokens): Adaptive thinking, progress updates, block binding, and multi-turn replay.
 - [message_threads_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/message_threads_example.dart) (~276 tokens): Create and continue a Messages thread (beta).
 - [message_thread_helper_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/message_thread_helper_example.dart) (~210 tokens): Track a thread and opt into bounded recovery (beta).
 - [context_management_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/context_management_example.dart) (~293 tokens): Edit context and preview input token counts (beta).
 - [on_demand_compaction_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/on_demand_compaction_example.dart) (~366 tokens): Stream a signed summary and replay it (beta).
-- [vision_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/vision_example.dart) (~1.2k tokens): Image and document inputs.
-- [custom_content_document_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/custom_content_document_example.dart) (~300 tokens): Cite custom document chunks by block index.
-- [token_counting_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/token_counting_example.dart) (~1k tokens): Token counting.
-- [message_batches_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/message_batches_example.dart) (~874 tokens): Batch processing.
-- [batch_pagination_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/batch_pagination_example.dart) (~398 tokens): Stream batch history by page or item.
 - [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/models_example.dart) (~309 tokens): Model lifecycle filters, pagination, and capabilities.
-- [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/files_example.dart) (~663 tokens): File management.
+- [message_batches_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/message_batches_example.dart) (~855 tokens): Create a batch, inspect its status, and stream results.
+- [batch_pagination_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/batch_pagination_example.dart) (~398 tokens): Stream batch history by page or item.
+- [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/files_example.dart) (~702 tokens): File management.
 - [skills_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/skills_example.dart) (~1.1k tokens): Skills management.
+- [mcp_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/mcp_example.dart) (~537 tokens): Connect an MCP server and pin its tool listing (beta).
 - [claude_aws_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/claude_aws_example.dart) (~170 tokens): Native Claude Platform on AWS authentication and Messages.
 - [bedrock_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/bedrock_example.dart) (~346 tokens): Stream Claude through Bedrock Mantle or Runtime.
 - [google_cloud_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/google_cloud_example.dart) (~384 tokens): Send a message through Anthropic-managed Google Cloud or Vertex.
-- [foundry_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/foundry_example.dart) (~284 tokens): Stream a Foundry deployment with Azure authentication.
+- [foundry_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/foundry_example.dart) (~306 tokens): Stream a Foundry deployment with Azure authentication.
 - [managed_agents_workflow_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/managed_agents_workflow_example.dart) (~734 tokens): Configure dynamic workflows and follow workflow run events (Managed Agents beta).
 - [managed_agents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/managed_agents_example.dart) (~1.7k tokens): Managed agents: agents, sessions, vaults, multiagent rosters, outcomes, webhooks, credential validation (beta).
 - [environments_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/environments_example.dart) (~206 tokens): Managed Agents cloud and self-hosted environment lifecycle (beta).
 - [environment_work_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/environment_work_example.dart) (~400 tokens): Self-hosted environment work polling and lease heartbeat (beta).
-- [mcp_tunnels_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/mcp_tunnels_example.dart) (~337 tokens): MCP tunnel, proxy token and certificate management (research preview).
+- [mcp_tunnels_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/mcp_tunnels_example.dart) (~387 tokens): MCP tunnel, proxy token and certificate management (research preview).
 - [memory_stores_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/memory_stores_example.dart) (~935 tokens): Managed agents memory stores, memories, and versions (beta).
 - [current_user_profiles_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/current_user_profiles_example.dart) (~252 tokens): Inspect enforcement status and paginate user profiles.
 - [organization_admin_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_admin_example.dart) (~268 tokens): Read-only organization and workspace administration.
 - [service_accounts_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/service_accounts_example.dart) (~244 tokens): List service accounts and their workspace memberships.
 - [organization_rbac_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_rbac_example.dart) (~308 tokens): List RBAC groups, members, roles and permissions.
 - [organization_spend_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_spend_example.dart) (~233 tokens): List effective spend limits and pending increase requests.
+- [organization_sign_out_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_sign_out_example.dart) (~292 tokens): Sign out a specified Claude Enterprise member (beta).
 - [external_keys_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/external_keys_example.dart) (~220 tokens): List registered customer-managed encryption keys.
-- [organization_webhooks_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_webhooks_example.dart) (~217 tokens): List organization webhook endpoints (beta).
-- [organization_webhook_receiver_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_webhook_receiver_example.dart) (~336 tokens): Verify and parse signed webhook deliveries.
-- [organization_telemetry_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_telemetry_example.dart) (~254 tokens): Page through OpenTelemetry destinations and inspect delivery health (beta).
-- [organization_claude_tag_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_claude_tag_example.dart) (~319 tokens): Audit Slack channel settings and inheritance in Claude Tag (beta).
-- [organization_plugins_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_plugins_example.dart) (~353 tokens): List plugins and optionally validate a marketplace repository (beta).
-- [compliance_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/compliance_example.dart) (~209 tokens): Scoped Compliance Activity Feed.
-- [compliance_content_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/compliance_content_example.dart) (~273 tokens): Scoped Compliance app content and artifact downloads.
 - [organization_analytics_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_analytics_example.dart) (~423 tokens): Dimensioned organization usage and cost with cursor pagination (beta).
 - [organization_legacy_analytics_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_legacy_analytics_example.dart) (~369 tokens): Legacy Console or Enterprise usage report with time buckets.
 - [organization_activity_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_activity_example.dart) (~401 tokens): Claude Enterprise daily summaries and paginated user activity.
-- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/error_handling_example.dart) (~624 tokens): Exception handling patterns.
+- [organization_webhooks_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_webhooks_example.dart) (~217 tokens): List organization webhook endpoints (beta).
+- [organization_webhook_receiver_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_webhook_receiver_example.dart) (~336 tokens): Verify and parse signed webhook deliveries.
+- [organization_telemetry_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_telemetry_example.dart) (~254 tokens): Page through OpenTelemetry destinations and inspect delivery health (beta).
+- [organization_plugins_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_plugins_example.dart) (~353 tokens): List plugins and optionally validate a marketplace repository (beta).
+- [organization_claude_tag_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_claude_tag_example.dart) (~319 tokens): Audit Slack channel settings and inheritance in Claude Tag (beta).
+- [compliance_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/compliance_example.dart) (~234 tokens): Scoped Compliance Activity Feed.
+- [compliance_content_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/compliance_content_example.dart) (~308 tokens): Scoped Compliance app content and artifact downloads.
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/error_handling_example.dart) (~615 tokens): Exception handling patterns.
 - [api_version_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/api_version_example.dart) (~226 tokens): Current API version and legacy opt-out.
 - [mid_conversation_system_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/mid_conversation_system_example.dart) (~1.1k tokens): Mid-conversation, turn-scoped, and effort-only system messages.
-- [web_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/web_search_example.dart) (~791 tokens): Web search tool.
-- [advisor_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/advisor_example.dart) (~922 tokens): Advisor tool (beta).
-- [diagnostics_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/diagnostics_example.dart) (~596 tokens): Prompt-cache diagnostics on the Claude API.
-- [fallback_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/fallback_example.dart) (~933 tokens): Server-side fallback chain and refusal credit-token retry (beta).
-- [document_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/document_example.dart) (~929 tokens): Document inputs with citations.
-- [search_result_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/search_result_example.dart) (~708 tokens): Supplying your own cited `search_result` blocks (RAG).
-- [session_threads_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/session_threads_example.dart) (~857 tokens): Session threads: list, retrieve, stream events, archive (beta).
-- [deployments_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/deployments_example.dart) (~630 tokens): Scheduled deployments and deployment runs: cron schedule, pause/resume, run-now (beta).
-- [dreams_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/dreams_example.dart) (~890 tokens): Dreams: memory-consolidation jobs — create, poll, list, archive (beta, research preview).
-- [user_profiles_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/user_profiles_example.dart) (~743 tokens): Legacy user profiles and enrollment URLs (beta).
-- [anthropic_sdk_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/anthropic_sdk_dart_example.dart) (~662 tokens): Quick-start overview.
+- [web_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/web_search_example.dart) (~337 tokens): Web search tool.
+- [advisor_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/advisor_example.dart) (~904 tokens): Advisor tool (beta).
+- [diagnostics_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/diagnostics_example.dart) (~683 tokens): Prompt-cache diagnostics on the Claude API.
+- [fallback_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/fallback_example.dart) (~941 tokens): Server-side fallback chain and refusal credit-token retry (beta).
+- [document_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/document_example.dart) (~957 tokens): Document inputs with citations.
+- [search_result_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/search_result_example.dart) (~691 tokens): Supplying your own cited `search_result` blocks (RAG).
+- [batch_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/batch_example.dart) (~1k tokens): Poll batch progress with a bounded wait.
+- [session_threads_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/session_threads_example.dart) (~987 tokens): Session threads: list, retrieve, stream events, archive (beta).
+- [deployments_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/deployments_example.dart) (~723 tokens): Scheduled deployments and deployment runs: cron schedule, pause/resume, run-now (beta).
+- [dreams_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/dreams_example.dart) (~905 tokens): Dreams: memory-consolidation jobs — create, poll, list, archive (beta, research preview).
+- [user_profiles_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/user_profiles_example.dart) (~725 tokens): Legacy user profiles and enrollment URLs (beta).
+- [abort_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/abort_example.dart) (~862 tokens): Cancel buffered requests and streams with an abort trigger.
+- [anthropic_sdk_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/anthropic_sdk_dart_example.dart) (~634 tokens): Quick-start overview.
 
 ## Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/anthropic_sdk_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~85.5k tokens**
+**Total: ~91.8k tokens**

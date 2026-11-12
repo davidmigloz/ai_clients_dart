@@ -1,8 +1,11 @@
-// Query the Activity Feed with a scoped key. This example makes a live API call.
 import 'dart:io';
 
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 
+/// Lists Activity Feed records without printing record contents.
+///
+/// Set ANTHROPIC_COMPLIANCE_ACCESS_KEY with Activity Feed read access, or
+/// use an ANTHROPIC_ADMIN_KEY created while Compliance was enabled.
 Future<void> main() async {
   final key =
       Platform.environment['ANTHROPIC_COMPLIANCE_ACCESS_KEY'] ??

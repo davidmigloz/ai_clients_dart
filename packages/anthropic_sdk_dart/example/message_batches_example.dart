@@ -12,12 +12,10 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 ///
 /// Note: Batches can take minutes to hours to complete depending on load.
 /// For a full example, see also batch_example.dart.
+///
+/// Set ANTHROPIC_API_KEY before running.
 void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // Example 1: Create a message batch
@@ -48,7 +46,7 @@ void main() async {
     print('Batch created:');
     print('  ID: ${batch.id}');
     print('  Status: ${batch.processingStatus}');
-    print('  Total requests: ${batch.requestCounts.processing}');
+    print('  Processing: ${batch.requestCounts.processing}');
 
     // Example 2: List all batches
     print('\n=== List Batches ===');

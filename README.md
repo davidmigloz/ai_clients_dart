@@ -74,7 +74,7 @@ Future<void> main() async {
   try {
     final response = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-5-5',
         maxTokens: 1024,
         messages: [InputMessage.user('What is the capital of France?')],
       ),

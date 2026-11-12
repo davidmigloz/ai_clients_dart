@@ -850,7 +850,7 @@ class WebSearchTool extends BuiltInTool {
   /// Cache control for this tool definition.
   final CacheControlEphemeral? cacheControl;
 
-  /// Maximum number of times the tool can be used in the API request.
+  /// Maximum number of searches in a conversation turn.
   final int? maxUses;
 
   /// User location for search personalization.

@@ -6,12 +6,10 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// Tool calling example demonstrating function use with Claude.
 ///
 /// This example shows how to define tools and handle tool use responses.
+///
+/// Set ANTHROPIC_API_KEY before running.
 void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // Define a weather tool

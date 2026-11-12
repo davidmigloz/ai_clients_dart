@@ -12,12 +12,10 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 ///
 /// Note: The abortTrigger is a `Future<void>` that, when completed,
 /// signals the request should be cancelled.
+///
+/// Set ANTHROPIC_API_KEY before running.
 void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // Example 1: Manual cancellation using Completer
@@ -72,10 +70,11 @@ void main() async {
         ),
         abortTrigger: timeoutCompleter.future,
       );
-      timer.cancel();
       print('Response: ${response.text}');
     } on AbortedException catch (e) {
       print('Request timed out: ${e.message}');
+    } finally {
+      timer.cancel();
     }
 
     // Example 3: Cancel streaming request
@@ -102,7 +101,7 @@ void main() async {
         }
 
         // Cancel after receiving 10 events
-        if (eventCount >= 10) {
+        if (eventCount == 10) {
           print('\n[Cancelling stream after 10 events]');
           streamCompleter.complete();
         }

@@ -13,22 +13,20 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// - Preserved thinking / block binding controls
 /// - Multi-turn conversation with thinking replay (tool use)
 ///
-/// Note: current-generation models (e.g. `claude-sonnet-5`) have adaptive
-/// thinking always on and reject `enabled`/`disabled` thinking
-/// configurations — use [ThinkingConfig.adaptive] instead.
+/// Claude Sonnet 5.5 accepts [ThinkingConfig.adaptive]. Thinking settings
+/// and effort limits differ by model.
+///
+/// Set ANTHROPIC_API_KEY before running. Enable web search to see progress
+/// updates during the server tool call example.
 void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // Example 1: Basic extended thinking
     print('=== Extended Thinking ===');
     final thinkingResponse = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-5',
+        model: 'claude-sonnet-5-5',
         maxTokens: 16000,
         thinking: ThinkingConfig.adaptive(
           display: ThinkingDisplayMode.summarized,
@@ -66,7 +64,7 @@ void main() async {
     print('\n=== Streaming with Thinking ===');
     final thinkingStream = client.messages.createStream(
       MessageCreateRequest(
-        model: 'claude-sonnet-5',
+        model: 'claude-sonnet-5-5',
         maxTokens: 16000,
         thinking: ThinkingConfig.adaptive(
           display: ThinkingDisplayMode.summarized,
@@ -112,7 +110,7 @@ void main() async {
     print('\n=== Complex Reasoning ===');
     final complexResponse = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-5',
+        model: 'claude-sonnet-5-5',
         maxTokens: 16000,
         thinking: ThinkingConfig.adaptive(
           display: ThinkingDisplayMode.summarized,
@@ -156,12 +154,14 @@ void main() async {
     print('\n=== Progress Updates ===');
     final updatesResponse = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-5',
+        model: 'claude-sonnet-5-5',
         maxTokens: 16000,
         thinking: ThinkingConfig.adaptive(display: ThinkingDisplayMode.updates),
+        tools: [ToolDefinition.builtIn(const WebSearchTool(maxUses: 3))],
         messages: [
           InputMessage.user(
-            'Plan a 3-day itinerary for a trip to Kyoto, Japan.',
+            'Check current opening hours for two Kyoto museums, then '
+            'plan a two-day itinerary.',
           ),
         ],
       ),
@@ -186,7 +186,7 @@ void main() async {
     print('\n=== Preserved Thinking / Block Binding ===');
     final bindingResponse = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-5',
+        model: 'claude-sonnet-5-5',
         maxTokens: 16000,
         thinking: ThinkingConfig.adaptive(
           display: ThinkingDisplayMode.summarized,
@@ -194,7 +194,15 @@ void main() async {
             prefixMismatchBehavior: ThinkingPrefixMismatchBehavior.dropBlock,
           ),
         ),
-        messages: [InputMessage.user('What is the square root of 2025?')],
+        messages: [
+          // Deliberately edit the history before the earlier assistant turn
+          // so the server can report a prefix mismatch if it generated thinking.
+          InputMessage.user('Compare the speeds of two trains.'),
+          thinkingResponse.toInputMessage(),
+          InputMessage.user(
+            'How do I convert both speeds to meters per second?',
+          ),
+        ],
       ),
       betas: ['thinking-binding-controls-2026-08-01'],
     );
@@ -244,7 +252,7 @@ void main() async {
 
     final toolResponse = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-5',
+        model: 'claude-sonnet-5-5',
         maxTokens: 16000,
         thinking: ThinkingConfig.adaptive(
           display: ThinkingDisplayMode.summarized,
@@ -286,7 +294,7 @@ void main() async {
 
       final finalResponse = await client.messages.create(
         MessageCreateRequest(
-          model: 'claude-sonnet-5',
+          model: 'claude-sonnet-5-5',
           maxTokens: 16000,
           thinking: ThinkingConfig.adaptive(
             display: ThinkingDisplayMode.summarized,

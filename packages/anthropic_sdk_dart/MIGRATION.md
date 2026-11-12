@@ -99,6 +99,73 @@ supported. The Dart client raises `ValidationException` before sending these
 incompatible inputs in Messages create, streaming, token count where applicable,
 and batch create.
 
+Move the document to the user turn that supplies it.
+
+**Before**
+
+```json
+{
+  "role": "assistant",
+  "content": [
+    {
+      "type": "document",
+      "source": {"type": "text", "media_type": "text/plain", "data": "Release notes"}
+    }
+  ]
+}
+```
+
+**After**
+
+```json
+{
+  "role": "user",
+  "content": [
+    {
+      "type": "document",
+      "source": {"type": "text", "media_type": "text/plain", "data": "Release notes"}
+    }
+  ]
+}
+```
+
+Keep the user tool result and omit its nested text citations.
+
+**Before**
+
+```json
+{
+  "type": "tool_result",
+  "tool_use_id": "toolu_example",
+  "content": [
+    {
+      "type": "text",
+      "text": "Excerpt",
+      "citations": [
+        {
+          "type": "char_location",
+          "cited_text": "Excerpt",
+          "document_index": 0,
+          "document_title": null,
+          "start_char_index": 0,
+          "end_char_index": 7
+        }
+      ]
+    }
+  ]
+}
+```
+
+**After**
+
+```json
+{
+  "type": "tool_result",
+  "tool_use_id": "toolu_example",
+  "content": [{"type": "text", "text": "Excerpt"}]
+}
+```
+
 ### Keep the legacy behavior when required
 
 Select the legacy version explicitly if your application still needs the
@@ -118,6 +185,18 @@ final client = AnthropicClient(
 API accepts. The pinned official SDKs send keys as Bearer by default.
 
 The server migration also renames Admin and Enterprise Analytics response fields. [Claude API migration guide](https://platform.claude.com/docs/en/api/migration-2026-10-21) · [Runnable version example](example/api_version_example.dart)
+
+---
+
+## Move Text Completions to Messages
+
+Anthropic documents `POST /v1/complete` as deprecated. The pinned Python and
+TypeScript SDKs omit that resource, and Dart exposes `CompletionRequest` and
+`CompletionResponse` for legacy data. For new requests, use
+`client.messages.create` with `MessageCreateRequest` and `InputMessage.user`.
+Move any legacy `Human:` and `Assistant:` prompt delimiters to message roles,
+and use `maxTokens` and `response.text`.
+[Anthropic migration guidance](https://platform.claude.com/docs/en/api/migration-2026-10-21#sdk-text-completions) · [Runnable Messages example](example/messages_example.dart)
 
 ---
 
@@ -706,7 +785,7 @@ account or user ID filters. To reproduce an Enterprise per-user report, group
 by `actor` and filter `AnalyticsFilter.actorType` to `user_actor`. Read
 `row.group.actor?.emailAddress` for either the older `email` or the current
 `email_address` field. Cost values retain their original decimal strings.
-[Usage and cost migration guide](https://platform.claude.com/docs/en/manage-claude/usage-cost-analytics-api#migrate-from-the-usage-and-cost-api)
+[Usage and cost migration guide](https://platform.claude.com/docs/en/manage-claude/usage-cost-analytics-api#migrate-from-usage-cost-api)
 
 ### Read Enterprise summary rows from `data`
 
@@ -1502,7 +1581,7 @@ final response = await client.messages.create(
       ToolDefinition.builtIn(
         BuiltInTool.webSearch(
           maxUses: 5,
-          allowedDomains: ['wikipedia.org', 'docs.anthropic.com'],
+          allowedDomains: ['wikipedia.org', 'platform.claude.com'],
         ),
       ),
       // Bash tool (computer use)

@@ -15,11 +15,16 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// For a browser build, compile with
 /// `dart compile js -DANTHROPIC_PROXY_URL=https://your-proxy.example example/files_example.dart`.
 /// Load the compiled script from your application. The backend handles Claude
-/// authentication, per-user file access, and CORS. The example uses byte upload
-/// when no arguments
-/// are supplied.
+/// authentication, per-user file access, and CORS. With no arguments the
+/// example uploads sample bytes.
 Future<void> main(List<String> args) async {
-  if (args.length > 1 && (args.length != 2 || args.first != '--session')) {
+  final validArguments = switch (args) {
+    [] => true,
+    [final filePath] => filePath.isNotEmpty && !filePath.startsWith('--'),
+    ['--session', final id] => id.startsWith('sesn_'),
+    _ => false,
+  };
+  if (!validArguments) {
     print('Usage: dart run example/files_example.dart [path | --session ID]');
     return;
   }

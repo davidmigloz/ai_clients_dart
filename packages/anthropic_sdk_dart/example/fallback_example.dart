@@ -8,12 +8,11 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// re-run a refused request on another model (billed at the fallback model's
 /// rates). Requires the `server-side-fallback-2026-07-01` beta header; add
 /// `fallback-credit-2026-07-01` to reuse the cache-miss credit on manual retries.
+///
+/// Set ANTHROPIC_API_KEY with access to Claude Fable 5.1 and Claude Opus 5.
+/// Enable the fallback and fallback-credit betas for the account.
 void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // Example 1: server-side fallback chain
