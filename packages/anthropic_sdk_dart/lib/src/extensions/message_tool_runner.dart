@@ -5,6 +5,8 @@ import '../models/beta/config/container.dart';
 import '../models/common/equality_helpers.dart';
 import '../models/content/content_block.dart';
 import '../models/content/input_content_block.dart';
+import '../models/messages/compaction_config.dart';
+import '../models/messages/fallback_config.dart';
 import '../models/messages/input_message.dart';
 import '../models/messages/message.dart';
 import '../models/messages/message_create_request.dart';
@@ -13,6 +15,7 @@ import '../models/metadata/stop_reason.dart';
 import '../models/streaming/message_stream_event.dart';
 import '../models/tools/tool.dart';
 import '../models/tools/tool_change_reference.dart';
+import '../models/tools/tool_choice.dart';
 import '../models/tools/tool_definition.dart';
 import '../resources/message_thread.dart';
 import '../resources/messages_resource.dart';
@@ -88,6 +91,7 @@ final class MessageToolRunResult {
     this.iterations,
     this.iterationLimitReached,
     this.thread,
+    this.compactionMessage,
   ) : history = List.unmodifiable(history);
 
   /// Final raw reply. Inspect it for refusals or pending tool calls.
@@ -104,6 +108,9 @@ final class MessageToolRunResult {
 
   /// The continuation handle when the run opted into beta Messages threads.
   final MessageThread? thread;
+
+  /// Raw response from the optional on-demand compaction request.
+  final Message? compactionMessage;
 }
 
 /// Executes application callbacks for completed Messages tool turns.
@@ -127,6 +134,12 @@ extension MessageToolRunner on MessagesResource {
   /// Expired thread continuation errors are returned to the caller. Choose
   /// stateless mode for providers and context edits that require full history.
   ///
+  /// [compactBeforeNextTurn] can schedule one signed summary before another
+  /// assistant request. It requires the `compact-2026-09-04` beta and stateless
+  /// history. If you use a task budget, omit its remaining value. The summary
+  /// request is separate from [maxIterations]. An unusable summary leaves the
+  /// original replay history available.
+  ///
   /// Tool exceptions become generic error results, with the original error
   /// available to [onToolError]. The [abortTrigger] applies to all requests and
   /// prevents new callbacks. An active callback must cooperate to cancel its
@@ -142,6 +155,7 @@ extension MessageToolRunner on MessagesResource {
     String? userProfileId,
     String? workspaceId,
     void Function(Message message)? onTurn,
+    CompactionConfig? Function(Message message)? compactBeforeNextTurn,
     void Function(MessageStreamEvent event)? onEvent,
     void Function(MessageToolCall call, Object error, StackTrace stackTrace)?
     onToolError,
@@ -155,6 +169,9 @@ extension MessageToolRunner on MessagesResource {
     }
     if (request.thread != null || request.compaction != null) {
       throw ArgumentError('runTools manages thread and compaction parameters');
+    }
+    if (useThread && compactBeforeNextTurn != null) {
+      throw ArgumentError('On-demand compaction requires stateless tool runs');
     }
     final registered = <String, RunnableMessageTool<Object?>>{};
     for (final tool in tools) {
@@ -185,42 +202,39 @@ extension MessageToolRunner on MessagesResource {
     var settings = configured;
     var nextInputs = <InputMessage>[];
 
+    final streaming = stream || onEvent != null;
+    CompactionConfig? pendingCompaction;
+    Message? compactionMessage;
+
+    Future<Message> sendStateless(MessageCreateRequest params) => streaming
+        ? _finalMessage(
+            createStream(
+              params,
+              abortTrigger: abortTrigger,
+              betas: activeBetas,
+              userProfileId: userProfileId,
+              workspaceId: workspaceId,
+            ),
+            onEvent,
+          )
+        : create(
+            params,
+            abortTrigger: abortTrigger,
+            betas: activeBetas,
+            userProfileId: userProfileId,
+            workspaceId: workspaceId,
+          );
+
     for (var iteration = 1; ; iteration++) {
       abort.check();
-      final turnRequest = settings.copyWith(messages: history);
-      final Message message;
-      if (stream || onEvent != null) {
-        final events = thread != null
-            ? thread.stream(messages: nextInputs, abortTrigger: abortTrigger)
-            : createStream(
-                turnRequest,
-                abortTrigger: abortTrigger,
-                betas: activeBetas,
-                userProfileId: userProfileId,
-                workspaceId: workspaceId,
-              );
-        message =
-            await (onEvent == null
-                    ? events
-                    : events.map((event) {
-                        onEvent(event);
-                        return event;
-                      }))
-                .finalMessage();
-      } else {
-        message = thread != null
-            ? await thread.send(
-                messages: nextInputs,
-                abortTrigger: abortTrigger,
-              )
-            : await create(
-                turnRequest,
-                abortTrigger: abortTrigger,
-                betas: activeBetas,
-                userProfileId: userProfileId,
-                workspaceId: workspaceId,
-              );
-      }
+      final message = thread == null
+          ? await sendStateless(settings.copyWith(messages: history))
+          : streaming
+          ? await _finalMessage(
+              thread.stream(messages: nextInputs, abortTrigger: abortTrigger),
+              onEvent,
+            )
+          : await thread.send(messages: nextInputs, abortTrigger: abortTrigger);
 
       abort.check();
       if (message.role != MessageRole.assistant) {
@@ -247,6 +261,7 @@ extension MessageToolRunner on MessagesResource {
           iteration,
           canContinue && iteration == maxIterations,
           thread,
+          compactionMessage,
         );
       }
 
@@ -263,9 +278,24 @@ extension MessageToolRunner on MessagesResource {
           throw const FormatException('A tool turn repeated a tool use ID.');
         }
       }
+      final available = calls.isEmpty
+          ? const <String>{}
+          : _availableTools(registered, [...history, reply]);
+      if (pendingCompaction == null &&
+          compactionMessage == null &&
+          compactBeforeNextTurn != null) {
+        ensureNotClosed?.call();
+        pendingCompaction = compactBeforeNextTurn(message);
+        if (abortTrigger != null) await Future<void>.value();
+        abort.check();
+        ensureNotClosed?.call();
+        if (pendingCompaction != null) {
+          _validateOnDemandCompaction(settings, _effectiveBetas(activeBetas));
+        }
+      }
+
       nextInputs = [];
       if (calls.isNotEmpty) {
-        final available = _availableTools(registered, [...history, reply]);
         final results = <ToolResultInputBlock>[];
         for (final toolUse in calls) {
           final tool = available.contains(toolUse.name)
@@ -283,6 +313,171 @@ extension MessageToolRunner on MessagesResource {
           fallbackCreditToken: null,
           container: _reuseContainer(settings.container, message.container),
         );
+      }
+      // A paused assistant reply must finish before it can be summarized.
+      if (pendingCompaction case final config? when !resume) {
+        abort.check();
+        final summary = await sendStateless(
+          _compactionRequest(settings, history, config),
+        );
+        abort.check();
+        pendingCompaction = null;
+        compactionMessage = summary;
+        if (_replaySignedSummary(summary, history, _effectiveBetas(activeBetas))
+            case final replay?) {
+          history
+            ..clear()
+            ..add(replay);
+        }
+      }
+    }
+  }
+
+  Iterable<String> _effectiveBetas(List<String> betas) =>
+      (betas.isEmpty
+              ? requestBuilder.buildHeaders()['anthropic-beta']?.split(',') ??
+                    const <String>[]
+              : betas.expand((value) => value.split(',')))
+          .map((value) => value.trim());
+}
+
+Future<Message> _finalMessage(
+  Stream<MessageStreamEvent> events,
+  void Function(MessageStreamEvent)? onEvent,
+) {
+  final observed = onEvent == null
+      ? events
+      : events.map((event) {
+          onEvent(event);
+          return event;
+        });
+  return observed.finalMessage();
+}
+
+void _validateOnDemandCompaction(
+  MessageCreateRequest request,
+  Iterable<String>? betas,
+) {
+  if (betas?.contains('compact-2026-09-04') != true) {
+    throw ArgumentError('On-demand compaction requires compact-2026-09-04');
+  }
+  final fallbacks = request.fallbacks;
+  if (request.outputConfig?.taskBudget?.remaining != null ||
+      fallbacks is FallbacksList &&
+          fallbacks.fallbacks.any(
+            (fallback) => fallback.outputConfig?.taskBudget?.remaining != null,
+          )) {
+    throw ArgumentError(
+      'On-demand compaction requires task budgets without remaining',
+    );
+  }
+  final edits = request.contextManagement?.edits;
+  if (edits?.any((edit) {
+        final type = edit.toJson()['type'] as String?;
+        return type?.startsWith('compact_') == true;
+      }) ??
+      false) {
+    throw ArgumentError(
+      'On-demand compaction cannot be used with a threshold compaction edit',
+    );
+  }
+}
+
+MessageCreateRequest _compactionRequest(
+  MessageCreateRequest request,
+  List<InputMessage> history,
+  CompactionConfig config,
+) => request.copyWith(
+  messages: history,
+  compaction: config,
+  contextManagement: null,
+  stopSequences: null,
+  toolChoice: switch (request.toolChoice) {
+    ToolChoiceAny() || ToolChoiceTool() => null,
+    final choice => choice,
+  },
+  outputConfig: request.outputConfig?.copyWith(format: null),
+  fallbacks: switch (request.fallbacks) {
+    FallbacksList(:final fallbacks) => FallbacksParam.list([
+      for (final fallback in fallbacks)
+        fallback.copyWith(
+          outputConfig: fallback.outputConfig?.copyWith(format: null),
+        ),
+    ]),
+    final fallback => fallback,
+  },
+);
+
+InputMessage? _replaySignedSummary(
+  Message message,
+  List<InputMessage> history,
+  Iterable<String> betas,
+) {
+  if (message.role != MessageRole.assistant ||
+      message.stopReason != StopReason.compaction) {
+    return null;
+  }
+  if (message.content case [
+    CompactionBlock(
+      content: final String content,
+      signature: final String signature,
+      :final toolChanges,
+    ),
+  ] when content.trim().isNotEmpty && signature.trim().isNotEmpty) {
+    if (toolChanges != null && !betas.contains('inline-tools-2026-09-15')) {
+      return null;
+    }
+    // Preserve ordered changes for every tool, including server and MCP
+    // tools with no local callback. Keep full replay if equivalence is unknown.
+    if (listOfMapsDeepEqual(
+      _toolChangesIn(history).toList(),
+      toolChanges ?? const [],
+    )) {
+      return message.toInputMessage();
+    }
+  }
+  return null;
+}
+
+Iterable<Map<String, dynamic>> _toolChangesIn(
+  List<InputMessage> history,
+) sync* {
+  for (final message in history) {
+    if (message.content case BlocksMessageContent(:final blocks)) {
+      for (final block in blocks) {
+        switch ((message.role, block)) {
+          case (
+            MessageRole.system,
+            final change &&
+                (ToolAdditionInputBlock() || ToolRemovalInputBlock()),
+          ):
+            yield change.toJson();
+          case (
+            MessageRole.assistant,
+            CompactionInputBlock(content: String(), :final toolChanges),
+          ):
+            yield* toolChanges ?? const [];
+          case (
+            MessageRole.system,
+            UnknownInputContentBlock(
+              raw: final json && {'type': 'tool_addition' || 'tool_removal'},
+            ),
+          ):
+            yield json;
+          case (
+            MessageRole.assistant,
+            UnknownInputContentBlock(
+              raw: {
+                'type': 'compaction',
+                'content': String(),
+                'tool_changes': final List<Object?> changes,
+              },
+            ),
+          ):
+            yield* changes.cast<Map<String, dynamic>>();
+          default:
+            break;
+        }
       }
     }
   }
@@ -360,19 +555,8 @@ Set<String> _availableTools(
     }
   }
 
-  for (final message in history) {
-    if (message.content case BlocksMessageContent(:final blocks)) {
-      for (final block in blocks) {
-        if (message.role == MessageRole.system) {
-          apply(block);
-        } else if (message.role == MessageRole.assistant &&
-            block is CompactionInputBlock) {
-          for (final change in block.toolChanges ?? const []) {
-            apply(InputContentBlock.fromJson(change));
-          }
-        }
-      }
-    }
+  for (final change in _toolChangesIn(history)) {
+    apply(InputContentBlock.fromJson(change));
   }
   return available;
 }

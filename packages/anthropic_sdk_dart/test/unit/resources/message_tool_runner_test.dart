@@ -268,6 +268,46 @@ void main() {
     });
   });
 
+  test('applies a tool change on the same reply as the tool call', () async {
+    httpClient
+      ..queueJsonResponse(
+        _reply('msg_tools', 'tool_use', [
+          {
+            'type': 'compaction',
+            'content': 'summary',
+            'encrypted_content': null,
+            'tool_changes': [
+              {
+                'type': 'tool_removal',
+                'tool': {'type': 'tool_reference', 'name': 'calculate'},
+              },
+            ],
+          },
+          _toolUse('one'),
+        ]),
+      )
+      ..queueJsonResponse(MockResponses.message());
+    await client.messages.runTools(
+      request,
+      tools: [_calculator((_, _) => fail('Removed callback was invoked.'))],
+      betas: ['compact-2026-01-12', 'inline-tools-2026-09-15'],
+    );
+    expect(_body(httpClient.lastRequest!)['messages'], [
+      request.messages.single.toJson(),
+      isA<Map<String, dynamic>>(),
+      {
+        'role': 'user',
+        'content': [
+          _result(
+            'one',
+            'The requested tool has no available callback.',
+            isError: true,
+          ),
+        ],
+      },
+    ]);
+  });
+
   test(
     'redemption is initial-only and a returned container is reused',
     () async {
@@ -407,6 +447,389 @@ void main() {
           'content': [_result('one', '6')],
         },
       ]);
+    },
+  );
+
+  test('on-demand compaction trims only the summary request', () async {
+    const format = JsonOutputFormat(schema: {'type': 'object'});
+    const output = OutputConfig(effort: EffortLevel.low, format: format);
+    final configured = request.copyWith(
+      model: 'claude-sonnet-5-5',
+      stopSequences: ['the end'],
+      toolChoice: const ToolChoiceAny(),
+      outputConfig: output,
+      contextManagement: const ContextManagementConfig(
+        edits: [ClearToolUsesEdit()],
+      ),
+      fallbacks: const FallbacksParam.list([
+        FallbackConfigV2(model: 'claude-opus-5-5', outputConfig: output),
+      ]),
+    );
+    const summary = {
+      'type': 'compaction',
+      'content': 'Signed summary',
+      'encrypted_content': null,
+      'signature': 'signature-fixture',
+      'tool_changes': <Object>[],
+    };
+
+    httpClient
+      ..queueJsonResponse(_reply('msg_tools', 'tool_use', [_toolUse('one')]))
+      ..queueJsonResponse(_reply('msg_summary', 'compaction', [summary]))
+      ..queueJsonResponse(MockResponses.message(id: 'msg_final'));
+    final result = await client.messages.runTools(
+      configured,
+      tools: [_calculator((_, _) => MessageToolResult.text('6'))],
+      maxIterations: 2,
+      compactBeforeNextTurn: (_) => const CompactionConfig.summarize(),
+      betas: ['compact-2026-09-04', 'inline-tools-2026-09-15'],
+      workspaceId: 'wrk_fixture',
+    );
+    expect(result.iterations, 2);
+    expect(result.compactionMessage!.id, 'msg_summary');
+    expect(result.message.id, 'msg_final');
+    expect(httpClient.requests, hasLength(3));
+    final sidecar = _body(httpClient.requests[1]);
+    expect(
+      httpClient.requests[1].headers['anthropic-workspace-id'],
+      'wrk_fixture',
+    );
+    expect(
+      httpClient.requests[1].headers['anthropic-beta'],
+      'compact-2026-09-04,inline-tools-2026-09-15',
+    );
+    expect(sidecar['compaction'], {'type': 'summarize'});
+    expect(sidecar, isNot(contains('context_management')));
+    expect(sidecar, isNot(contains('tool_choice')));
+    expect(sidecar, isNot(contains('stop_sequences')));
+    expect(sidecar, isNot(contains('thread')));
+    expect(sidecar['output_config'], {'effort': 'low'});
+    expect(sidecar['fallbacks'], [
+      {
+        'model': 'claude-opus-5-5',
+        'output_config': {'effort': 'low'},
+      },
+    ]);
+    expect(sidecar['messages'], [
+      configured.messages.single.toJson(),
+      {
+        'role': 'assistant',
+        'content': [_toolUse('one')],
+      },
+      {
+        'role': 'user',
+        'content': [_result('one', '6')],
+      },
+    ]);
+    final followUp = _body(httpClient.lastRequest!);
+    expect(followUp['messages'], [
+      {
+        'role': 'assistant',
+        'content': [summary],
+      },
+    ]);
+    expect(followUp['output_config'], output.toJson());
+    expect(followUp['fallbacks'], configured.fallbacks!.toJson());
+    expect(followUp['stop_sequences'], ['the end']);
+    expect(
+      followUp['context_management'],
+      configured.contextManagement!.toJson(),
+    );
+    expect(followUp, isNot(contains('compaction')));
+    expect(followUp, isNot(contains('thread')));
+    expect(result.thread, isNull);
+  });
+
+  test('streamed compaction replays the complete signed start block', () async {
+    final block = <String, dynamic>{
+      'type': 'compaction',
+      'content': 'Summary',
+      'encrypted_content': 'opaque-untouched',
+      'signature': 'signed',
+    };
+    final summary = MockResponses.streamingEvents(id: 'msg_summary')
+      ..[1] = {
+        'type': 'content_block_start',
+        'index': 0,
+        'content_block': block,
+      }
+      ..removeAt(2)
+      ..[3] = {
+        'type': 'message_delta',
+        'delta': {'stop_reason': 'compaction'},
+        'usage': {'output_tokens': 10},
+      };
+    httpClient
+      ..queueStreamingResponse(_toolEvents())
+      ..queueStreamingResponse(summary)
+      ..queueStreamingResponse(MockResponses.streamingEvents());
+    final observed = <MessageStreamEvent>[];
+    final result = await client.messages.runTools(
+      request,
+      tools: [_calculator((_, _) => MessageToolResult.text('6'))],
+      compactBeforeNextTurn: (_) => const CompactionConfig.summarize(),
+      betas: ['compact-2026-09-04'],
+      onEvent: observed.add,
+    );
+    expect(result.compactionMessage!.content.single.toJson(), block);
+    expect(observed.whereType<MessageStopEvent>(), hasLength(3));
+    expect(_body(httpClient.requests[1])['stream'], isTrue);
+    expect(_body(httpClient.lastRequest!)['messages'], [
+      {
+        'role': 'assistant',
+        'content': [block],
+      },
+    ]);
+  });
+
+  test('unsigned summary leaves the original replay available', () async {
+    httpClient
+      ..queueJsonResponse(_reply('msg_tools', 'tool_use', [_toolUse('one')]))
+      ..queueJsonResponse(
+        _reply('msg_summary', 'compaction', [
+          {
+            'type': 'compaction',
+            'content': 'unsigned',
+            'encrypted_content': null,
+          },
+        ]),
+      )
+      ..queueJsonResponse(MockResponses.message());
+    final result = await client.messages.runTools(
+      request,
+      tools: [_calculator((_, _) => MessageToolResult.text('6'))],
+      compactBeforeNextTurn: (_) => const CompactionConfig.summarize(),
+      betas: ['compact-2026-09-04'],
+    );
+    expect(result.compactionMessage!.id, 'msg_summary');
+    expect(_body(httpClient.lastRequest!)['messages'], [
+      request.messages.single.toJson(),
+      {
+        'role': 'assistant',
+        'content': [_toolUse('one')],
+      },
+      {
+        'role': 'user',
+        'content': [_result('one', '6')],
+      },
+    ]);
+  });
+
+  test('signed summary must retain the prior tool availability', () async {
+    const removed = ToolRemovalInputBlock(
+      tool: ToolChangeToolReference('calculate'),
+    );
+    final input = request.copyWith(
+      model: 'claude-sonnet-5-5',
+      messages: [
+        ...request.messages,
+        InputMessage(
+          role: MessageRole.system,
+          content: MessageContent.blocks([removed]),
+        ),
+      ],
+    );
+    for (final carriesChanges in [false, true]) {
+      final summary = {
+        'type': 'compaction',
+        'content': 'Summary',
+        'signature': 'signed',
+        if (carriesChanges) 'tool_changes': [removed.toJson()],
+      };
+      httpClient
+        ..reset()
+        ..queueJsonResponse(_reply('msg_tools', 'tool_use', [_toolUse('one')]))
+        ..queueJsonResponse(_reply('msg_summary', 'compaction', [summary]))
+        ..queueJsonResponse(
+          _reply('msg_more_tools', 'tool_use', [_toolUse('two')]),
+        )
+        ..queueJsonResponse(MockResponses.message());
+      final result = await client.messages.runTools(
+        input,
+        tools: [
+          _calculator((_, _) => fail('Removed callback ran after summary.')),
+        ],
+        compactBeforeNextTurn: (_) => const CompactionConfig.summarize(),
+        betas: ['compact-2026-09-04', 'inline-tools-2026-09-15'],
+      );
+      expect(result.compactionMessage!.id, 'msg_summary');
+      final messages = _body(httpClient.requests[2])['messages'] as List;
+      if (carriesChanges) {
+        expect(messages, [
+          {
+            'role': 'assistant',
+            'content': [summary],
+          },
+        ]);
+      } else {
+        expect(messages, hasLength(4));
+        expect(messages[1], input.messages.last.toJson());
+      }
+      final followUp = _body(httpClient.requests[3])['messages'] as List;
+      expect(followUp.last, {
+        'role': 'user',
+        'content': [
+          _result(
+            'two',
+            'The requested tool has no available callback.',
+            isError: true,
+          ),
+        ],
+      });
+    }
+  });
+
+  test(
+    'signed compaction rejects server-held threads before any work',
+    () async {
+      await expectLater(
+        client.messages.runTools(
+          request,
+          tools: [_calculator((_, _) => fail('Unexpected tool callback.'))],
+          useThread: true,
+          compactBeforeNextTurn: (_) => fail('Unexpected compaction selector.'),
+          onTurn: (_) => fail('Unexpected turn callback.'),
+          betas: ['compact-2026-09-04'],
+        ),
+        throwsArgumentError,
+      );
+      expect(httpClient.requests, isEmpty);
+    },
+  );
+
+  test(
+    'scheduled compaction preserves the abort boundary before tools',
+    () async {
+      final abort = Completer<void>();
+      httpClient.queueJsonResponse(
+        _reply('msg_tools', 'tool_use', [_toolUse('one')]),
+      );
+      await expectLater(
+        client.messages.runTools(
+          request,
+          tools: [_calculator((_, _) => fail('Aborted tool callback.'))],
+          compactBeforeNextTurn: (_) {
+            abort.complete();
+            return const CompactionConfig.summarize();
+          },
+          abortTrigger: abort.future,
+          betas: ['compact-2026-09-04'],
+        ),
+        throwsA(isA<AbortedException>()),
+      );
+      expect(httpClient.requests, hasLength(1));
+    },
+  );
+
+  test(
+    'malformed tool IDs prevent scheduling or executing compaction',
+    () async {
+      httpClient.queueJsonResponse(
+        _reply('msg_tools', 'tool_use', [_toolUse('bad id')]),
+      );
+      await expectLater(
+        client.messages.runTools(
+          request,
+          tools: [_calculator((_, _) => fail('Invalid tool callback.'))],
+          compactBeforeNextTurn: (_) => fail('Invalid compaction selector.'),
+          betas: ['compact-2026-09-04'],
+        ),
+        throwsFormatException,
+      );
+      expect(httpClient.requests, hasLength(1));
+    },
+  );
+
+  test(
+    'compaction rejects primary and fallback task budget remainders',
+    () async {
+      const budget = OutputConfig(
+        taskBudget: TokenTaskBudget(total: 24000, remaining: 22000),
+      );
+      final requests = [
+        request.copyWith(outputConfig: budget),
+        request.copyWith(
+          fallbacks: const FallbacksParam.list([
+            FallbackConfigV2(model: 'claude-opus-5-5', outputConfig: budget),
+          ]),
+        ),
+      ];
+      for (final configured in requests) {
+        httpClient.queueJsonResponse(
+          _reply('msg_tools', 'tool_use', [_toolUse('one')]),
+        );
+        await expectLater(
+          client.messages.runTools(
+            configured,
+            tools: [_calculator((_, _) => fail('Unexpected tool callback.'))],
+            compactBeforeNextTurn: (_) => const CompactionConfig.summarize(),
+            betas: ['compact-2026-09-04', 'task-budgets-2026-03-13'],
+          ),
+          throwsArgumentError,
+        );
+      }
+      expect(httpClient.requests, hasLength(2));
+    },
+  );
+
+  test('invalid compaction combinations fail before local callbacks', () async {
+    final tool = _calculator((_, _) => fail('Unexpected callback.'));
+    httpClient.queueJsonResponse(
+      _reply('msg_tools', 'tool_use', [_toolUse('one')]),
+    );
+    await expectLater(
+      client.messages.runTools(
+        request,
+        tools: [tool],
+        compactBeforeNextTurn: (_) => const CompactionConfig.summarize(),
+      ),
+      throwsArgumentError,
+    );
+    httpClient.queueJsonResponse(
+      _reply('msg_tools', 'tool_use', [_toolUse('one')]),
+    );
+    await expectLater(
+      client.messages.runTools(
+        request.copyWith(
+          contextManagement: const ContextManagementConfig(
+            edits: [ThresholdCompactionEdit()],
+          ),
+        ),
+        tools: [tool],
+        compactBeforeNextTurn: (_) => const CompactionConfig.summarize(),
+        betas: ['compact-2026-09-04', 'compact-2026-01-12'],
+      ),
+      throwsArgumentError,
+    );
+    expect(httpClient.requests, hasLength(2));
+  });
+
+  test(
+    'pending on-demand compaction waits for a completed tool turn',
+    () async {
+      httpClient
+        ..queueJsonResponse(MockResponses.message(stopReason: 'pause_turn'))
+        ..queueJsonResponse(_reply('msg_tools', 'tool_use', [_toolUse('one')]))
+        ..queueJsonResponse(
+          _reply('msg_summary', 'compaction', [
+            {'type': 'compaction', 'content': 'summary', 'signature': 'signed'},
+          ]),
+        )
+        ..queueJsonResponse(MockResponses.message());
+      final result = await client.messages.runTools(
+        request,
+        tools: [_calculator((_, _) => MessageToolResult.text('6'))],
+        compactBeforeNextTurn: (message) =>
+            message.stopReason == StopReason.pauseTurn
+            ? const CompactionConfig.summarize()
+            : null,
+        betas: ['compact-2026-09-04'],
+      );
+      expect(result.iterations, 3);
+      expect(_body(httpClient.requests[1]), isNot(contains('compaction')));
+      expect(_body(httpClient.requests[2])['compaction'], {
+        'type': 'summarize',
+      });
     },
   );
 

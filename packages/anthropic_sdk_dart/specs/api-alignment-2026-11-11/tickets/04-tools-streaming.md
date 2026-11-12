@@ -44,3 +44,22 @@ requires a non-null terminal stop reason before decoding. Ordinary stream
 completion still preserves explicit null updates for compatibility. Snapshots
 can be read during the stream. [Claude streaming event order](https://platform.claude.com/docs/en/build-with-claude/streaming) · [Streaming stop reasons](https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons)
 [Pinned Python conflict check](https://github.com/anthropics/anthropic-sdk-python/blob/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/src/anthropic/lib/_parse/_transform.py) · [Pinned TypeScript request transform](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/src/lib/internal/beta-messages-request.ts)
+
+## Signed compaction in tool runs
+
+The runner can request one signed summary between completed tool turns and
+outside its assistant iteration budget. It uses full stateless replay. Claude
+rejects signed compaction together with server-held Messages threads or
+threshold compaction. Task budgets keep their total and omit `remaining`.
+The summary request omits context editing, stop sequences, forced tool choices
+and structured output formats, including fallback formats. Assistant requests
+keep those settings.
+
+The inline-tools beta records tool changes in the signed block. Dart compares
+the ordered changes for local, server and MCP tools with the existing replay.
+It keeps the original history when the returned list differs, including when
+the API drops changes or returns a list whose equivalence is uncertain. A
+failed threshold summary with null content leaves tool availability unchanged.
+Signed blocks are reused unchanged and unusable summaries remain inspectable.
+
+[Claude on-demand compaction](https://platform.claude.com/docs/en/build-with-claude/compaction-on-demand) · [Messages thread limits](https://platform.claude.com/docs/en/build-with-claude/message-threads#compaction) · [Signed replay and tool changes](https://platform.claude.com/docs/en/build-with-claude/compaction-thinking-blocks#change-the-system-prompt-or-tools) · [Pinned Python runner](https://github.com/anthropics/anthropic-sdk-python/blob/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/src/anthropic/lib/tools/_beta_runner.py) · [Pinned TypeScript runner](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/src/lib/tools/BetaToolRunner.ts)

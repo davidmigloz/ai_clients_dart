@@ -511,6 +511,12 @@ print(result.message.text);
 
 Use `onEvent` for streamed events and `onTurn` for completed responses. `useThread: true` opts into the Messages threads beta. A tool request on the last permitted iteration remains available in the raw reply. Toolset member calls, such as browser or computer use, also return the raw reply for your executor to handle. The runner supports server-side threshold compaction through `contextManagement`.
 
+For a stateless run, `compactBeforeNextTurn` can request one signed summary
+between assistant requests. Include `compact-2026-09-04` and leave any task
+budget's `remaining` unset. Use either a signed summary or threshold compaction.
+The runner preserves its replay history if the API omits a usable summary.
+[Claude on-demand compaction](https://platform.claude.com/docs/en/build-with-claude/compaction-on-demand)
+
 The runner passes an expired thread continuation error to the caller. Use the default stateless mode when your provider or context edit requires full conversation replay.
 
 → [Full example](example/message_tool_runner_example.dart)
