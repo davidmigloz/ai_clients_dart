@@ -61,9 +61,11 @@ class AnthropicConfig {
   /// Default query parameters to include in all requests.
   final Map<String, String> defaultQueryParams;
 
-  /// Request timeout.
+  /// HTTP timeout, starting after credentials resolve.
   ///
-  /// Defaults to 10 minutes to handle long-running generations.
+  /// Defaults to 10 minutes. Buffered attempts include headers and body reads.
+  /// Streams use separate deadlines for headers and gaps between body chunks.
+  /// The retry policy governs whether a timed-out attempt can be retried.
   final Duration timeout;
 
   /// Retry policy.

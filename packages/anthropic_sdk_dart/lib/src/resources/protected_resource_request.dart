@@ -33,6 +33,7 @@ Future<Object?> sendProtectedResourceRequest(
     ],
     httpClient: resource.httpClient,
     retryWrapper: resource.interceptorChain.retryWrapper,
+    timeout: resource.interceptorChain.timeout,
     ensureNotClosed: resource.ensureNotClosed,
   );
   final watch = Stopwatch()..start();

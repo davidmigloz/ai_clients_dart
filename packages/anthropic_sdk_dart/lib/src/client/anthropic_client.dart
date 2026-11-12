@@ -260,6 +260,7 @@ class AnthropicClient {
       interceptors: interceptors,
       httpClient: _httpClient,
       retryWrapper: retryWrapper,
+      timeout: config.timeout,
       ensureNotClosed: _ensureNotClosed,
     );
 

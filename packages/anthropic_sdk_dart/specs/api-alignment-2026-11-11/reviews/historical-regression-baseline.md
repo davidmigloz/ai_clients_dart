@@ -40,3 +40,11 @@ The representative open_responses SSE implementation closes the typed stream and
 The independent review of [#501](https://github.com/davidmigloz/ai_clients_dart/pull/501) also reproduced two older lifecycle defects. A borrowed transport can receive an SSE request after close during authentication or a new buffered attempt after close during retry backoff. Cover those sibling paths separately from first buffered admission and direct Files and Skills.
 
 Re-run public resource probes on the final merge head and inspect the new Compliance downloads, provider implementations, workspace routes, new session/agent resources and new update DTOs using the same matrix. If provider-specific local stubs cannot reproduce a wire branch, record the exact unavailable mock/fixture or service access required. The final verification uses local fixtures and records evidence against the integrated commit.
+
+## Configured timeout
+
+Six buffered and nine streaming/direct fixtures reproduced the unused timeout on the reviewed environments baseline. Dart applies the configured timeout per buffered attempt, after authentication. Streams bound the handshake and raw-byte idle time. A paused subscription suspends the idle clock. A productive stream can continue past one interval. The transport receives an abort signal, and the SDK releases stalled and late borrowed response bodies while retaining the existing retry policy.
+
+The pinned Python SDK uses HTTPX connect, read, write, and pool deadlines. The pinned TypeScript SDK aborts each fetch while waiting for headers. OpenAI Dart already times buffered attempts. The independent Models probe showed that a borrowed stalled response body remains subscribed after its timeout. The packages' different timeout boundaries are recorded for the next cross-client review.
+
+[Pinned Python defaults](https://github.com/anthropics/anthropic-sdk-python/blob/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/src/anthropic/_constants.py) · [Pinned TypeScript transport](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/src/client.ts)
