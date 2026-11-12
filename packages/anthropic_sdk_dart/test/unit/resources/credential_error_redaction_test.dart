@@ -49,6 +49,68 @@ void main() {
   });
 
   test(
+    'buffered errors check duplicate JSON fields in the raw excerpt',
+    () async {
+      final client = _client(
+        r'{"error":{"message":"fixture\u002Dsecret","message":"actual error"}}',
+        status: 503,
+      );
+      addTearDown(client.close);
+      await expectLater(
+        client.models.list(),
+        throwsA(
+          isA<ApiException>()
+              .having((e) => e.statusCode, 'status', 503)
+              .having((e) => e.message, 'message', 'actual error')
+              .having(
+                (e) => e.responseMetadata?.bodyExcerpt,
+                'excerpt',
+                isEmpty,
+              ),
+        ),
+      );
+    },
+  );
+
+  test(
+    'batch HTTP failure provides a sanitized body to the error factory',
+    () async {
+      final client = _client(
+        r'{"error":{"message":"fixture\u002Dsecret","message":null}}',
+        status: 503,
+      );
+      addTearDown(client.close);
+      await expectLater(
+        client.batches.results('msgbatch_fixture').drain<void>(),
+        throwsA(
+          isA<ApiException>()
+              .having((e) => e.statusCode, 'status', 503)
+              .having((e) => e.message, 'message', '{"error":{"message":null}}')
+              .having(
+                (e) => e.toString(),
+                'diagnostic',
+                isNot(contains(r'fixture\u002Dsecret')),
+              ),
+        ),
+      );
+    },
+  );
+
+  test(
+    'clean batch HTTP fallback retains the original diagnostic text',
+    () async {
+      const body =
+          r'{ "error": {"message":"clean\u002Dfixture","message":null} }';
+      final client = _client(body, status: 503);
+      addTearDown(client.close);
+      await expectLater(
+        client.batches.results('msgbatch_fixture').drain<void>(),
+        throwsA(isA<ApiException>().having((e) => e.message, 'message', body)),
+      );
+    },
+  );
+
+  test(
     'SSE HTTP failure must not retain encoded credential in malformed body',
     () async {
       final client = _client(_malformed, status: 503);

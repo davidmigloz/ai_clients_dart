@@ -131,15 +131,8 @@ String apiErrorBodyExcerpt(String body, Set<String> credentials) {
   return body.length <= 200 ? body : '${body.substring(0, 200)}...';
 }
 
-bool _bodyContainsCredential(String body, Set<String> credentials) {
-  if (credentials.isEmpty) return false;
-  if (redactCredentialEcho(body, credentials) == null) return true;
-  try {
-    return _containsCredential(jsonDecode(body), credentials);
-  } on FormatException {
-    return _redactMalformedDiagnosticText(body, credentials) != body;
-  }
-}
+bool _bodyContainsCredential(String body, Set<String> credentials) =>
+    _redactDiagnosticBodyText(body, credentials) != body;
 
 bool _containsCredential(Object? value, Set<String> credentials) =>
     switch (value) {
@@ -165,9 +158,9 @@ String _redactDiagnosticText(String value, Set<String> credentials) {
 
 final _jsonDiagnosticEscape = RegExp(r'\\(?:u[0-9a-fA-F]{4}|["\\/bfnrt])');
 
-/// Redacts plain credentials and detects standard JSON escapes in malformed
-/// diagnostics. Clean text is returned verbatim.
-String _redactMalformedDiagnosticText(String text, Set<String> credentials) {
+/// Redacts plain credentials and detects standard JSON escapes in raw
+/// diagnostics. The raw check also sees fields hidden by duplicate JSON keys.
+String _redactDiagnosticBodyText(String text, Set<String> credentials) {
   if (credentials.isEmpty) return text;
   // Decode escape tokens independently so a truncated JSON envelope remains
   // checkable without relying on its quotes or structural delimiters.
@@ -195,7 +188,7 @@ FormatException redactApiFormatException(
   Set<String> credentials,
 ) {
   if (credentials.isEmpty) return error;
-  final message = _redactMalformedDiagnosticText(error.message, credentials);
+  final message = _redactDiagnosticBodyText(error.message, credentials);
   final Object? source = error.source;
   final sourceText = switch (source) {
     String() => source,
@@ -204,7 +197,7 @@ FormatException redactApiFormatException(
   };
   final unsafeSource =
       sourceText != null &&
-      _redactMalformedDiagnosticText(sourceText, credentials) != sourceText;
+      _redactDiagnosticBodyText(sourceText, credentials) != sourceText;
   if (message == error.message && !unsafeSource) return error;
   return FormatException(message, unsafeSource ? null : source, error.offset);
 }
@@ -261,7 +254,7 @@ Map<String, dynamic> redactApiErrorEnvelope(
     'type': 'error',
     '_rawData': final String raw,
   } when envelope.length == 3) {
-    final safe = _redactMalformedDiagnosticText(raw, credentials);
+    final safe = _redactDiagnosticBodyText(raw, credentials);
     return safe == raw ? envelope : {...envelope, '_rawData': safe};
   }
   if (!_containsCredential(envelope, credentials)) return envelope;
@@ -275,17 +268,17 @@ Map<String, dynamic> redactApiErrorEnvelope(
 
 /// Provides a safe body to custom error factories while retaining its shape.
 String redactApiErrorBody(String body, Set<String> credentials) {
-  if (credentials.isEmpty) return body;
+  final safeText = _redactDiagnosticBodyText(body, credentials);
+  if (safeText == body) return body;
   try {
     final decoded = jsonDecode(body);
-    if (!_containsCredential(decoded, credentials)) return body;
     return jsonEncode(
       decoded is Map<String, dynamic>
           ? redactApiErrorEnvelope(decoded, credentials)
           : _redactDiagnosticValue(decoded, credentials),
     );
   } on FormatException {
-    return _redactMalformedDiagnosticText(body, credentials);
+    return safeText;
   }
 }
 
