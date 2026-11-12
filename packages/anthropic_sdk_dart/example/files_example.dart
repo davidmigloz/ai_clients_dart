@@ -1,117 +1,67 @@
 // ignore_for_file: avoid_print
-import 'dart:io';
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 
-/// Files API example.
+/// Upload a file, inspect metadata, and follow file pagination.
 ///
-/// This example demonstrates:
-/// - Uploading files to the API (optionally with an expiration)
-/// - Listing uploaded files (page-cursor pagination)
-/// - Retrieving file metadata
-/// - Downloading files
-/// - Deleting files
-///
-/// Note: The Files API is generally available and does not require an
-/// anthropic-beta header.
-void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+/// Set ANTHROPIC_API_KEY and run:
+/// - `dart run example/files_example.dart` to upload sample text.
+/// - `dart run example/files_example.dart path/to/file.pdf` to upload a file.
+/// - `dart run example/files_example.dart --session sesn_...` to list and read
+///   downloadable output files from a Managed Agents session you can access.
+Future<void> main(List<String> args) async {
+  if (args.length > 1 && (args.length != 2 || args.first != '--session')) {
+    print('Usage: dart run example/files_example.dart [path | --session ID]');
+    return;
+  }
 
+  final client = AnthropicClient.fromEnvironment();
   try {
-    // Example 1: Upload a file from path
-    print('=== Upload File ===');
-    const filePath = 'example/sample_image.jpg';
-    final file = File(filePath);
-
-    if (file.existsSync()) {
-      final uploadedFile = await client.files.upload(
-        filePath: filePath,
-        mimeType: 'image/jpeg',
-        expiresInSeconds: 86400, // Expires in 1 day.
-      );
-
-      print('File uploaded:');
-      print('  ID: ${uploadedFile.id}');
-      print('  Filename: ${uploadedFile.filename}');
-      print('  MIME type: ${uploadedFile.mimeType}');
-      print('  Size: ${uploadedFile.sizeBytes} bytes');
-      print('  Created at: ${uploadedFile.createdAt}');
-      print('  Expires at: ${uploadedFile.expiresAt}');
-
-      // Example 2: List files, following page cursors.
-      print('\n=== List Files ===');
-      var fileList = await client.files.list(limit: 10);
-      var totalListed = 0;
-      while (true) {
-        for (final f in fileList.data) {
-          print('  - ${f.id}: ${f.filename} (${f.sizeBytes} bytes)');
-          totalListed++;
+    if (args case ['--session', final sessionId]) {
+      String? page;
+      do {
+        // The scope filter adds the Managed Agents beta header automatically.
+        final files = await client.files.list(scopeId: sessionId, page: page);
+        for (final file in files.data) {
+          print('${file.id}: ${file.filename}');
+          if (file.downloadable) {
+            final bytes = await client.files.download(fileId: file.id);
+            print('Read ${bytes.length} bytes.');
+          }
         }
-        final nextPage = fileList.nextPage;
-        if (nextPage == null) break;
-        fileList = await client.files.list(limit: 10, page: nextPage);
-      }
-      print('Listed $totalListed file(s) total.');
+        page = files.nextPage;
+      } while (page != null);
+      return;
+    }
 
-      // Example 3: Retrieve file metadata
-      print('\n=== Retrieve File ===');
-      final retrievedFile = await client.files.retrieve(
-        fileId: uploadedFile.id,
-      );
+    final uploaded = args.isEmpty
+        ? await client.files.uploadBytes(
+            bytes: Uint8List.fromList(utf8.encode('Hello from Dart!')),
+            fileName: 'hello.txt',
+            mimeType: 'text/plain',
+            expiresInSeconds: 3600,
+          )
+        : await client.files.upload(
+            filePath: args.single,
+            expiresInSeconds: 3600,
+          );
+    try {
+      final file = await client.files.retrieve(fileId: uploaded.id);
+      print('${file.id}: ${file.filename} (${file.sizeBytes} bytes)');
+      print('Expires at ${file.expiresAt}');
 
-      print('File details:');
-      print('  ID: ${retrievedFile.id}');
-      print('  Filename: ${retrievedFile.filename}');
-      print('  MIME type: ${retrievedFile.mimeType}');
-      print('  Size: ${retrievedFile.sizeBytes} bytes');
-      print('  Downloadable: ${retrievedFile.downloadable}');
-
-      // Example 4: Download file content
-      print('\n=== Download File ===');
-      if (retrievedFile.downloadable) {
-        final bytes = await client.files.download(fileId: uploadedFile.id);
-        print('Downloaded ${bytes.length} bytes');
-
-        // You could save the file:
-        // await File('downloaded_file.jpg').writeAsBytes(bytes);
-      } else {
-        print('File is not downloadable');
-      }
-
-      // Example 5: Delete file
-      print('\n=== Delete File ===');
-      final deleteResponse = await client.files.deleteFile(
-        fileId: uploadedFile.id,
-      );
-      print('Deleted file: ${deleteResponse.id}');
-    } else {
-      print('No sample file found at $filePath');
-      print('To test file upload:');
-      print('1. Place an image file at $filePath');
-      print('2. Run this example again');
-
-      print('\nDemonstrating upload from bytes instead...');
-
-      // Upload from bytes
-      final bytes = Uint8List.fromList(List.generate(100, (i) => i % 256));
-      final uploadedFromBytes = await client.files.uploadBytes(
-        bytes: bytes,
-        fileName: 'test_file.bin',
-        mimeType: 'application/octet-stream',
-      );
-
-      print('Uploaded from bytes:');
-      print('  ID: ${uploadedFromBytes.id}');
-      print('  Size: ${uploadedFromBytes.sizeBytes} bytes');
-
-      // Clean up
-      await client.files.deleteFile(fileId: uploadedFromBytes.id);
-      print('Cleaned up test file');
+      String? page;
+      do {
+        final files = await client.files.list(limit: 20, page: page);
+        for (final item in files.data) {
+          print('${item.id}: ${item.filename}');
+        }
+        page = files.nextPage;
+      } while (page != null);
+    } finally {
+      await client.files.deleteFile(fileId: uploaded.id);
     }
   } finally {
     client.close();

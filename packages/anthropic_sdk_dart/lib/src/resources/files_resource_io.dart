@@ -18,8 +18,8 @@ import 'resource_request.dart';
 /// can be used as part of message content (e.g., for vision or document
 /// understanding).
 ///
-/// This is a generally-available (GA) API; no `anthropic-beta` header is
-/// required.
+/// The Files API is generally available. Use `betas` to opt into additional
+/// beta features and `workspaceId` for request-level workspace routing.
 class FilesResource extends ResourceBase {
   /// Creates a [FilesResource].
   FilesResource({
@@ -54,6 +54,8 @@ class FilesResource extends ResourceBase {
     required String filePath,
     String? mimeType,
     int? expiresInSeconds,
+    List<String> betas = const [],
+    String? workspaceId,
   }) async {
     ensureNotClosed?.call();
     final file = io.File(filePath);
@@ -70,6 +72,8 @@ class FilesResource extends ResourceBase {
       fileName: fileName,
       mimeType: inferredMimeType,
       expiresInSeconds: expiresInSeconds,
+      betas: betas,
+      workspaceId: workspaceId,
     );
   }
 
@@ -100,6 +104,8 @@ class FilesResource extends ResourceBase {
     required String fileName,
     String? mimeType,
     int? expiresInSeconds,
+    List<String> betas = const [],
+    String? workspaceId,
   }) async {
     ensureNotClosed?.call();
     if (expiresInSeconds != null &&
@@ -115,7 +121,10 @@ class FilesResource extends ResourceBase {
 
     final uri = requestBuilder.buildUrl('/v1/files');
     // Remove content-type as multipart will set its own
-    final headers = requestBuilder.buildHeaders()..remove('content-type');
+    final headers = requestBuilder.buildHeaders(
+      betas: betas,
+      workspaceId: workspaceId,
+    )..removeWhere((name, _) => name.toLowerCase() == 'content-type');
 
     final request = http.MultipartRequest('POST', uri)
       ..headers.addAll(headers)
@@ -156,7 +165,12 @@ class FilesResource extends ResourceBase {
   /// page ([FileListResponse.nextPage] is `null`) and is mutually exclusive
   /// with [page] and [limit].
   /// The [scopeId] filters by scope ID, returning only files associated with
-  /// that scope (e.g., a session ID).
+  /// that scope (e.g., a session ID). This requires the Managed Agents beta.
+  /// The current Managed Agents beta header is sent for scoped listings
+  /// unless a Managed Agents beta is already configured.
+  /// The [beforeId] and [afterId] cursors are only supported with legacy Files
+  /// or Managed Agents headers. They cannot be combined with [page] or [ids].
+  /// The [betas] and [workspaceId] override configured routing for this call.
   ///
   /// Returns a [FileListResponse] with the list of files and pagination info.
   ///
@@ -172,6 +186,10 @@ class FilesResource extends ResourceBase {
     String? page,
     List<String>? ids,
     String? scopeId,
+    String? beforeId,
+    String? afterId,
+    List<String> betas = const [],
+    String? workspaceId,
   }) async {
     ensureNotClosed?.call();
     final queryParams = <String, dynamic>{
@@ -179,13 +197,32 @@ class FilesResource extends ResourceBase {
       'page': ?page,
       'ids[]': ?ids,
       'scope_id': ?scopeId,
+      'before_id': ?beforeId,
+      'after_id': ?afterId,
     };
 
     final url = requestBuilder.buildUrl(
       '/v1/files',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
-    final headers = requestBuilder.buildHeaders();
+    final headers = requestBuilder.buildHeaders(
+      betas: betas,
+      workspaceId: workspaceId,
+    );
+    if (scopeId != null) {
+      final selected =
+          headers['anthropic-beta']
+              ?.split(',')
+              .map((beta) => beta.trim())
+              .where((beta) => beta.isNotEmpty) ??
+          const <String>[];
+      if (!selected.any((beta) => beta.startsWith('managed-agents-'))) {
+        headers['anthropic-beta'] = [
+          ...selected,
+          'managed-agents-2026-04-01',
+        ].join(',');
+      }
+    }
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
@@ -206,10 +243,19 @@ class FilesResource extends ResourceBase {
   /// final file = await client.files.retrieve(fileId: 'file_abc123');
   /// print('File size: ${file.sizeBytes} bytes');
   /// ```
-  Future<FileMetadata> retrieve({required String fileId}) async {
+  Future<FileMetadata> retrieve({
+    required String fileId,
+    List<String> betas = const [],
+    String? workspaceId,
+  }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/files/$fileId');
-    final headers = requestBuilder.buildHeaders();
+    final url = requestBuilder.buildUrl(
+      '/v1/files/${Uri.encodeComponent(fileId)}',
+    );
+    final headers = requestBuilder.buildHeaders(
+      betas: betas,
+      workspaceId: workspaceId,
+    );
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
@@ -230,10 +276,19 @@ class FilesResource extends ResourceBase {
   /// final response = await client.files.deleteFile(fileId: 'file_abc123');
   /// print('Deleted: ${response.id}');
   /// ```
-  Future<FileDeleteResponse> deleteFile({required String fileId}) async {
+  Future<FileDeleteResponse> deleteFile({
+    required String fileId,
+    List<String> betas = const [],
+    String? workspaceId,
+  }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/files/$fileId');
-    final headers = requestBuilder.buildHeaders();
+    final url = requestBuilder.buildUrl(
+      '/v1/files/${Uri.encodeComponent(fileId)}',
+    );
+    final headers = requestBuilder.buildHeaders(
+      betas: betas,
+      workspaceId: workspaceId,
+    );
     final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
@@ -254,13 +309,22 @@ class FilesResource extends ResourceBase {
   /// final bytes = await client.files.download(fileId: 'file_abc123');
   /// await io.File('downloaded.pdf').writeAsBytes(bytes);
   /// ```
-  Future<Uint8List> download({required String fileId}) async {
+  Future<Uint8List> download({
+    required String fileId,
+    List<String> betas = const [],
+    String? workspaceId,
+  }) async {
     ensureNotClosed?.call();
-    final uri = requestBuilder.buildUrl('/v1/files/$fileId/content');
-    final headers = requestBuilder.buildHeaders();
-    // We want binary, not JSON
-    headers['accept'] = '*/*';
-    headers.remove('content-type');
+    final uri = requestBuilder.buildUrl(
+      '/v1/files/${Uri.encodeComponent(fileId)}/content',
+    );
+    final headers =
+        requestBuilder.buildHeaders(betas: betas, workspaceId: workspaceId)
+          ..removeWhere(
+            (name, _) =>
+                const {'accept', 'content-type'}.contains(name.toLowerCase()),
+          )
+          ..['accept'] = 'application/binary';
 
     final request = http.Request('GET', uri)..headers.addAll(headers);
 

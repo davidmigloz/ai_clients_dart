@@ -27,6 +27,8 @@ class FilesResource {
     required String filePath,
     String? mimeType,
     int? expiresInSeconds,
+    List<String> betas = const [],
+    String? workspaceId,
   }) {
     throw UnsupportedError(
       'File upload is not supported on this platform. '
@@ -42,6 +44,8 @@ class FilesResource {
     required String fileName,
     String? mimeType,
     int? expiresInSeconds,
+    List<String> betas = const [],
+    String? workspaceId,
   }) {
     throw UnsupportedError(
       'File upload is not supported on this platform. '
@@ -57,6 +61,10 @@ class FilesResource {
     String? page,
     List<String>? ids,
     String? scopeId,
+    String? beforeId,
+    String? afterId,
+    List<String> betas = const [],
+    String? workspaceId,
   }) {
     throw UnsupportedError(
       'Files API is not supported on this platform. '
@@ -67,7 +75,11 @@ class FilesResource {
   /// Gets metadata for a specific file.
   ///
   /// This method is not supported on the current platform.
-  Future<FileMetadata> retrieve({required String fileId}) {
+  Future<FileMetadata> retrieve({
+    required String fileId,
+    List<String> betas = const [],
+    String? workspaceId,
+  }) {
     throw UnsupportedError(
       'Files API is not supported on this platform. '
       'Use a platform that supports dart:io.',
@@ -77,7 +89,11 @@ class FilesResource {
   /// Deletes a file.
   ///
   /// This method is not supported on the current platform.
-  Future<FileDeleteResponse> deleteFile({required String fileId}) {
+  Future<FileDeleteResponse> deleteFile({
+    required String fileId,
+    List<String> betas = const [],
+    String? workspaceId,
+  }) {
     throw UnsupportedError(
       'Files API is not supported on this platform. '
       'Use a platform that supports dart:io.',
@@ -87,7 +103,11 @@ class FilesResource {
   /// Downloads file content.
   ///
   /// This method is not supported on the current platform.
-  Future<Uint8List> download({required String fileId}) {
+  Future<Uint8List> download({
+    required String fileId,
+    List<String> betas = const [],
+    String? workspaceId,
+  }) {
     throw UnsupportedError(
       'File download is not supported on this platform. '
       'Use a platform that supports dart:io.',

@@ -6,14 +6,12 @@ import '../common/equality_helpers.dart';
 
 /// A single file to upload as part of a skill or skill version.
 ///
-/// All files that make up a Skill must share one top-level directory that
-/// contains a `SKILL.md` file (e.g. `my-skill/SKILL.md`). [path] is that
-/// file's path relative to the upload root, including the top-level
-/// directory name (e.g. `my-skill/SKILL.md` or `my-skill/scripts/run.py`).
+/// Include `SKILL.md` at the upload root or in one enclosing directory.
+/// [path] is relative to the upload root, for example `SKILL.md` or
+/// `my-skill/scripts/run.py`.
 @immutable
 class SkillFile {
-  /// Path of this file relative to the upload root, including the top-level
-  /// skill directory (e.g. `my-skill/SKILL.md`).
+  /// Path of this file relative to the upload root.
   final String path;
 
   /// Raw contents of the file.

@@ -605,7 +605,9 @@ Pass `betas: ['compact-2026-09-04']` to `list` or `retrieve` to request the beta
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.files` to upload, list, and delete files. This beta API lets you attach stored files to messages without re-uploading each time.
+Use `client.files` to upload, list, and delete files. The Files API is generally available on the Claude API and supported first-party cloud platforms. It lets you reference stored files in Messages without uploading them again. This Dart resource requires a platform with `dart:io`.
+
+Use `client.files.list(scopeId: sessionId)` to list Managed Agents outputs. The scoped request adds the Managed Agents beta header. Only files whose metadata reports `downloadable` can be downloaded.
 
 ```dart
 import 'dart:typed_data';
@@ -634,7 +636,7 @@ Future<void> main() async {
 }
 ```
 
-→ [Full example](example/files_example.dart)
+→ [Full example](example/files_example.dart) · [Files API and platform support](https://platform.claude.com/docs/en/build-with-claude/files) · [Managed Agents output files](https://platform.claude.com/docs/en/managed-agents/files)
 
 </details>
 
@@ -643,7 +645,7 @@ Future<void> main() async {
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.skills` to list reusable skills. The full API also lets you create, version, and delete skills, packaging prompts and tools into versioned units that Claude can invoke.
+Use `client.skills` to list and manage reusable skills. Use a model that supports code execution when loading skills in Messages. Upload `SKILL.md` at the root or under one enclosing directory. The ZIP download endpoint appears in the official SDK beta namespaces and requires no beta header. Deleting a skill also deletes all its versions.
 
 ```dart
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
@@ -663,7 +665,7 @@ Future<void> main() async {
 }
 ```
 
-→ [Full example](example/skills_example.dart)
+→ [Full example](example/skills_example.dart) · [Skills API and compatibility](https://platform.claude.com/docs/en/build-with-claude/skills-guide)
 
 </details>
 
