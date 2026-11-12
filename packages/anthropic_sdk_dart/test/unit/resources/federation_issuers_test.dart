@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:logging/logging.dart';
 import 'package:test/test.dart';
 
 const _route = '/proxy/v1/organizations/federation_issuers';
@@ -301,6 +302,80 @@ void main() {
       );
     },
   );
+
+  test('buffered OAuth diagnostics redact echoed credentials', () async {
+    const token = 'fake-org-admin-bearer-fixture';
+    final logs = <LogRecord>[];
+    final subscription = Logger.root.onRecord.listen(logs.add);
+    addTearDown(subscription.cancel);
+    final transport = MockClient((request) async {
+      expect(request.headers['authorization'], 'Bearer $token');
+      final body = jsonEncode({
+        'type': 'error',
+        'request_id': 'req_permission_failure',
+        'error': {
+          'type': 'permission_error',
+          'message': 'Denied for Bearer $token',
+          'details': {
+            'error_code': 'issuer_scope_required',
+            'scope': 'org:admin',
+            'nested': [
+              {'echo': token, 'token-$token': 'reflected key'},
+            ],
+          },
+        },
+      }).replaceAll(token, r'\u0066ake-org-admin-bearer-fixture');
+      return http.Response(
+        body,
+        403,
+        headers: {
+          'content-type': 'application/json',
+          'request-id': token,
+          'x-reflected': 'Bearer $token',
+          'retry-after': '5',
+        },
+      );
+    });
+    addTearDown(transport.close);
+    final client = AnthropicClient.withAuthToken(token, httpClient: transport);
+    addTearDown(client.close);
+    await expectLater(
+      client.organization.federation.issuers.list(),
+      throwsA(
+        isA<ApiException>()
+            .having((e) => e.requestId, 'body ID', 'req_permission_failure')
+            .having((e) => e.errorCode, 'error code', 'issuer_scope_required')
+            .having((e) => e.message, 'safe message', 'Denied for [REDACTED]')
+            .having((e) => e.errorDetails, 'safe details', {
+              'error_code': 'issuer_scope_required',
+              'scope': 'org:admin',
+              'nested': [
+                {'echo': '[REDACTED]'},
+              ],
+            })
+            .having(
+              (e) => e.responseMetadata?.bodyExcerpt,
+              'safe excerpt',
+              isEmpty,
+            )
+            .having((e) => e.responseMetadata?.headers, 'safe headers', {
+              'content-type': 'application/json',
+              'retry-after': '5',
+            })
+            .having(
+              (e) => e.toString(),
+              'safe diagnostic',
+              isNot(contains(token)),
+            ),
+      ),
+    );
+    final warnings = logs.where((record) => record.level == Level.WARNING);
+    expect(warnings, isNotEmpty);
+    expect(
+      warnings.map((record) => record.message),
+      everyElement(isNot(contains(token))),
+    );
+  });
 }
 
 Map<String, dynamic> _issuer() => {

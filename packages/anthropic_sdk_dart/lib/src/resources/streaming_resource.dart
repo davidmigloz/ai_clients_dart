@@ -91,15 +91,14 @@ mixin StreamingResource on ResourceBase {
     String body,
     ResponseMetadata responseMetadata,
   ) {
-    final (:message, :details, :errorCode, requestId: _) = parseApiErrorBody(
-      body,
-    );
+    final parsed = parseApiErrorBody(body);
 
     if (statusCode == 401) {
       return AuthenticationException(
-        message: message,
-        details: details,
-        errorCode: errorCode,
+        message: parsed.message,
+        details: parsed.details,
+        errorCode: parsed.errorCode,
+        errorDetails: parsed.errorDetails,
         responseMetadata: responseMetadata,
       );
     }
@@ -107,9 +106,10 @@ mixin StreamingResource on ResourceBase {
     if (statusCode == 429) {
       return RateLimitException(
         statusCode: statusCode,
-        message: message,
-        details: details,
-        errorCode: errorCode,
+        message: parsed.message,
+        details: parsed.details,
+        errorCode: parsed.errorCode,
+        errorDetails: parsed.errorDetails,
         responseMetadata: responseMetadata,
         retryAfter: retryAfterTime(responseMetadata.headers),
       );
@@ -117,9 +117,10 @@ mixin StreamingResource on ResourceBase {
 
     return ApiException(
       statusCode: statusCode,
-      message: message,
-      details: details,
-      errorCode: errorCode,
+      message: parsed.message,
+      details: parsed.details,
+      errorCode: parsed.errorCode,
+      errorDetails: parsed.errorDetails,
       responseMetadata: responseMetadata,
     );
   }
