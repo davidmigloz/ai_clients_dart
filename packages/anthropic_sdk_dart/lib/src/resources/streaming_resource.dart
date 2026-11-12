@@ -167,7 +167,7 @@ mixin StreamingResource on ResourceBase {
     )
     decode,
     bool Function(T)? isTerminal,
-    void Function(http.StreamedResponse, Duration)? onResponse,
+    void Function(http.StreamedResponse, Set<String>)? onResponse,
     Map<String, String> Function()? buildRequestHeaders,
     bool followRedirects = true,
     bool jsonlMedia = false,
@@ -344,7 +344,7 @@ mixin StreamingResource on ResourceBase {
           );
         } else {
           try {
-            onResponse?.call(response, stopwatch.elapsed);
+            onResponse?.call(response, credentials);
           } catch (_) {
             response.stream.listen(null).cancel().ignore();
             rethrow;
@@ -529,9 +529,31 @@ Stream<List<int>> getResourceByteStream(
   abortTrigger: abortTrigger,
   onResponse: onResponse == null
       ? null
-      : (response, _) => onResponse(response.headers),
+      : (response, credentials) => onResponse({
+          for (final entry in response.headers.entries)
+            if (_safeDownloadHeader(entry.value, credentials)
+                case final String value)
+              entry.key: value,
+        }),
   decode: (body, _, _, _) => body,
 );
+
+final _downloadHeaderEscapes = RegExp(r'(?:%[0-9a-fA-F]{2})+');
+
+String? _safeDownloadHeader(String value, Set<String> credentials) {
+  if (redactCredentialEcho(value, credentials) == null) return null;
+  if (credentials.isEmpty || !value.contains('%')) return value;
+  // RFC 8187 filenames can carry credentials as percent-encoded bytes. Scan
+  // the decoded value while preserving the original encoding for safe headers.
+  final decoded = value.replaceAllMapped(_downloadHeaderEscapes, (match) {
+    final encoded = match[0]!;
+    return utf8.decode([
+      for (var offset = 0; offset < encoded.length; offset += 3)
+        int.parse(encoded.substring(offset + 1, offset + 3), radix: 16),
+    ], allowMalformed: true);
+  });
+  return redactCredentialEcho(decoded, credentials) == null ? null : value;
+}
 
 class _MappedEventSink<T> implements EventSink<Map<String, dynamic>> {
   final EventSink<T> _output;

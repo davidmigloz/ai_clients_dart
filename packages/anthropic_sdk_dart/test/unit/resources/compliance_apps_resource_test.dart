@@ -781,6 +781,65 @@ void main() {
     },
   );
 
+  test(
+    'download metadata checks escaped credentials and keeps safe filenames',
+    () async {
+      const safeDisposition =
+          "attachment; filename=100%25; filename*=UTF-8''caf%C3%A9.txt";
+      for (final (disposition, expected) in [
+        ("attachment; filename*=UTF-8''scoped%2dcompliance%2Dkey", null),
+        ("attachment; filename*=UTF-8''%FFscoped%2Dcompliance%2Dkey", null),
+        (safeDisposition, safeDisposition),
+      ]) {
+        transport.queue(
+          Stream.value([0, 255]),
+          headers: {
+            'Request-Id': 'req_clean',
+            'Content-Disposition': disposition,
+            'Content-Type': 'application/octet-stream',
+          },
+        );
+        late ComplianceDownloadHeaders observed;
+        expect(
+          await apps
+              .downloadChatFile(
+                'file-1',
+                onResponse: (value) => observed = value,
+              )
+              .expand((chunk) => chunk)
+              .toList(),
+          [0, 255],
+        );
+        expect(observed.requestId, 'req_clean');
+        expect(observed.contentDisposition, expected);
+        expect(observed.contentType, 'application/octet-stream');
+      }
+    },
+  );
+
+  test('download metadata omits headers that echo the effective key', () async {
+    transport.queue(
+      Stream.value([0, 255, 1]),
+      headers: {
+        'Request-Id': 'reflected-scoped-compliance-key',
+        'Content-Disposition': 'attachment; filename="scoped-compliance-key"',
+        'Content-Type': 'application/octet-stream',
+        'Content-Md5': 'fixture-checksum',
+      },
+    );
+    late ComplianceDownloadHeaders observed;
+    final bytes = await apps
+        .downloadChatFile('file-1', onResponse: (value) => observed = value)
+        .expand((chunk) => chunk)
+        .toList();
+    expect(bytes, [0, 255, 1]);
+    expect(observed.requestId, isNull);
+    expect(observed.contentDisposition, isNull);
+    expect(observed.contentType, 'application/octet-stream');
+    expect(observed.contentMd5, 'fixture-checksum');
+    expectRequest('chats/files/file-1/content', binary: true);
+  });
+
   test('a failed header callback releases the binary body', () async {
     final canceled = Completer<void>();
     final body = StreamController<List<int>>(onCancel: canceled.complete);
