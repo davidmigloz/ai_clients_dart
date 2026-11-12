@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
+import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
 
 import '../../mocks/mock_http_client.dart';
@@ -273,6 +274,36 @@ void main() {
           jsonDecode((request as dynamic).body) as Map<String, dynamic>;
       expect(body['external_id'], 'user_new');
       expect(body.containsKey('metadata'), isFalse);
+    });
+
+    test('update accepts an untyped empty metadata patch', () async {
+      mockHttpClient.queueJsonResponse(UserProfilesFixtures.userProfile());
+
+      await client.userProfiles.update(
+        'uprof_011CZkZCu8hGbp5mYRQgUmz9',
+        const UpdateUserProfileRequest(metadata: {}),
+      );
+
+      final request = mockHttpClient.lastRequest!;
+      expect(
+        request.url.path,
+        '/v1/user_profiles/uprof_011CZkZCu8hGbp5mYRQgUmz9',
+      );
+      expect(request.headers['anthropic-beta'], 'user-profiles-2026-08-18');
+      expect(jsonDecode((request as http.Request).body), {
+        'metadata': <String, String>{},
+      });
+    });
+
+    test('update rejects invalid metadata entries before dispatch', () async {
+      await expectLater(
+        client.userProfiles.update(
+          'uprof_011CZkZCu8hGbp5mYRQgUmz9',
+          const UpdateUserProfileRequest(metadata: {'tier': 1}),
+        ),
+        throwsA(isA<TypeError>()),
+      );
+      expect(mockHttpClient.lastRequest, isNull);
     });
 
     test('update with explicit null clears external_id', () async {
