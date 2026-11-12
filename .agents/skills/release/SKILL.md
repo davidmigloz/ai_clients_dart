@@ -337,6 +337,8 @@ git add packages/{pkg1}/pubspec.yaml packages/{pkg1}/CHANGELOG.md packages/{pkg1
 git add packages/{pkg}/MIGRATION.md  # for each package with breaking changes
 ```
 
+Check `git diff --cached --name-only` against the verified release file list before committing. If unrelated files are staged, use `git commit --only -- <release paths>` to preserve those staged changes.
+
 Commit message format:
 ```
 chore(release): publish packages
