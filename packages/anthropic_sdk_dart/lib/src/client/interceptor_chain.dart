@@ -40,12 +40,14 @@ class InterceptorChain {
   /// The optional [abortTrigger] allows canceling the request before completion.
   /// Set [redirectErrorMessage] on a request with redirects disabled to reject
   /// 3xx responses with credential-safe metadata before reading the body.
+  /// [onTransportRequest] observes effective headers before each attempt.
   ///
   /// Returns the HTTP response after all interceptors have processed it.
   Future<http.Response> execute(
     http.BaseRequest request, {
     Future<void>? abortTrigger,
     String? redirectErrorMessage,
+    void Function(Map<String, String> headers)? onTransportRequest,
   }) {
     ensureNotClosed?.call();
     final context = RequestContext(
@@ -60,6 +62,7 @@ class InterceptorChain {
         0,
         nativeRequest: nativeRequest,
         redirectErrorMessage: redirectErrorMessage,
+        onTransportRequest: onTransportRequest,
       )(context);
     }
 
@@ -71,6 +74,7 @@ class InterceptorChain {
         admission: admission,
         nativeRequest: nativeRequest,
         redirectErrorMessage: redirectErrorMessage,
+        onTransportRequest: onTransportRequest,
       )(context),
     );
   }
@@ -81,6 +85,7 @@ class InterceptorChain {
     _TransportAdmission? admission,
     http.Abortable? nativeRequest,
     String? redirectErrorMessage,
+    void Function(Map<String, String> headers)? onTransportRequest,
   }) {
     if (index >= interceptors.length) {
       // Terminal: execute the actual HTTP request
@@ -130,6 +135,7 @@ class InterceptorChain {
 
         Future<http.Response> executeTransport() async {
           ensureNotClosed?.call();
+          onTransportRequest?.call(originalRequest.headers);
           if (timeout == null &&
               context.abortTrigger == null &&
               nativeRequest?.abortTrigger == null) {
@@ -179,6 +185,7 @@ class InterceptorChain {
         admission: admission,
         nativeRequest: nativeRequest,
         redirectErrorMessage: redirectErrorMessage,
+        onTransportRequest: onTransportRequest,
       );
 
       return interceptor.intercept(context, next);

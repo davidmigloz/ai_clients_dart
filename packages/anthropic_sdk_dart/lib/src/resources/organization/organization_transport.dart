@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../auth/request_auth.dart';
 import '../../client/interceptor_chain.dart';
 import '../../client/request_builder.dart';
+import '../../errors/response_error.dart';
 import '../../utils/path_segment.dart';
 
 /// Shared transport for organization-scoped Admin calls.
@@ -25,6 +27,7 @@ final class OrganizationTransport {
   final void Function()? ensureNotClosed;
 
   /// Sends an organization-scoped request and decodes its JSON body.
+  /// [diagnosticField] identifies an in-band error message to sanitize.
   Future<T> send<T>(
     String method,
     String path,
@@ -33,6 +36,7 @@ final class OrganizationTransport {
     Map<String, dynamic>? body,
     String? beta,
     String? requiredBeta,
+    String? diagnosticField,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
@@ -57,14 +61,35 @@ final class OrganizationTransport {
       ..headers.addAll(headers);
     if (body != null) request.body = jsonEncode(body);
 
+    final credentials = diagnosticField == null ? null : <String>{};
     final response = await interceptorChain.execute(
       request,
       abortTrigger: abortTrigger,
       redirectErrorMessage: 'Unexpected redirect from the Admin API',
+      onTransportRequest: credentials == null
+          ? null
+          : (headers) => credentials.addAll(requestCredentialValues(headers)),
     );
-    final json = jsonDecode(utf8.decode(response.bodyBytes));
+    final sentHeaders = response.request?.headers;
+    if (credentials != null && sentHeaders != null) {
+      credentials.addAll(requestCredentialValues(sentHeaders));
+    }
+    final Object? json;
+    try {
+      json = jsonDecode(utf8.decode(response.bodyBytes));
+    } on FormatException catch (error, stackTrace) {
+      if (credentials == null) rethrow;
+      Error.throwWithStackTrace(
+        redactApiFormatException(error, credentials),
+        stackTrace,
+      );
+    }
     if (json is! Map<String, dynamic>) {
       throw const FormatException('Expected a JSON object from the Admin API');
+    }
+    if (json[diagnosticField] case final String value
+        when diagnosticField != null && credentials != null) {
+      json[diagnosticField] = redactDiagnosticText(value, credentials);
     }
     return decode(json);
   }

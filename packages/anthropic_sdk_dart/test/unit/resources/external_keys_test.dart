@@ -260,6 +260,57 @@ void main() {
     });
   }
 
+  for (final (provider, header, wireValue, echo) in [
+    (
+      const ApiKeyProvider('admin-validation-fixture'),
+      'x-api-key',
+      'admin-validation-fixture',
+      'admin-validation-fixture',
+    ),
+    (
+      const BearerTokenProvider('oauth-validation-fixture'),
+      'authorization',
+      'Bearer oauth-validation-fixture',
+      'oauth-validation-fixture',
+    ),
+  ]) {
+    test('validate redacts echoed $header without response.request', () async {
+      var malformed = false;
+      final client = AnthropicClient(
+        config: AnthropicConfig(authProvider: provider),
+        httpClient: MockClient((request) async {
+          expect(request.headers[header], wireValue);
+          return malformed
+              ? http.Response('{"error": "$echo",', 200)
+              : _json({
+                  'type': 'external_key_validation',
+                  'status': 'failure',
+                  'error': 'Cloud KMS rejected $echo',
+                });
+        }),
+      );
+      addTearDown(client.close);
+      final keys = client.organization.externalKeys;
+      final result = await keys.validate(_arn);
+      expect(result.succeeded, isFalse);
+      expect(result.error, 'Cloud KMS rejected [REDACTED]');
+      expect(jsonEncode(result.toJson()), isNot(contains(echo)));
+      malformed = true;
+      await expectLater(
+        keys.validate(_arn),
+        throwsA(
+          isA<FormatException>()
+              .having((error) => error.source, 'source', isNull)
+              .having(
+                (error) => error.toString(),
+                'text',
+                isNot(contains(echo)),
+              ),
+        ),
+      );
+    });
+  }
+
   test('Admin errors keep provider details, code and request ID', () async {
     final client = AnthropicClient.withApiKey(
       'admin-fixture',

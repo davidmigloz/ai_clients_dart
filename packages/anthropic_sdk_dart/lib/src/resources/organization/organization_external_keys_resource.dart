@@ -120,6 +120,7 @@ final class OrganizationExternalKeysResource {
     'POST',
     '${_keyPath(externalKeyId)}/validate',
     ExternalKeyValidation.fromJson,
+    diagnosticField: 'error',
     beta: _beta(betas),
     abortTrigger: abortTrigger,
   );
