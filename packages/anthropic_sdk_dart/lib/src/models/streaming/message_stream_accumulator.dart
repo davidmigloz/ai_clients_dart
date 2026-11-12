@@ -108,8 +108,8 @@ class MessageStreamAccumulator {
         :final contextManagement,
         :final hasContextManagement,
       ):
-        if (delta.stopReason case final reason?) {
-          _stopReason = reason;
+        if (delta.hasStopReason) {
+          _stopReason = delta.stopReason;
           _stopReasonValue = delta.stopReasonValue;
         }
         _stopDetails = delta.stopDetails ?? _stopDetails;

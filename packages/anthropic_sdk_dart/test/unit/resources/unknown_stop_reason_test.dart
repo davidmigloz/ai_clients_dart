@@ -40,6 +40,13 @@ void main() {
         message.copyWith(stopReason: null).toJson(),
         isNot(contains('stop_reason')),
       );
+      final cleared = message.copyWith(
+        stopReason: StopReason.endTurn,
+        stopReasonValue: null,
+      );
+      expect(cleared.stopReason, isNull);
+      expect(cleared.stopReasonValue, isNull);
+      expect(cleared.toJson(), isNot(contains('stop_reason')));
       final different = Message.fromJson({
         ...json,
         'stop_reason': 'future_second',
@@ -74,6 +81,79 @@ void main() {
       expect(result.toJson()['stop_reason'], _futureReason);
     },
   );
+
+  test('delta preserves omitted and explicitly null stop reasons', () {
+    const omitted = MessageDelta();
+    const cleared = MessageDelta(hasStopReason: true);
+    const known = MessageDelta(stopReason: StopReason.endTurn);
+    final unfamiliar = MessageDelta.fromJson(const {
+      'stop_reason': _futureReason,
+    });
+
+    expect(omitted.hasStopReason, isFalse);
+    expect(const MessageDelta(stopReason: null), omitted);
+    expect(omitted.toJson(), isNot(contains('stop_reason')));
+    expect(MessageDelta.fromJson(const {}), omitted);
+    expect(omitted.copyWith(), omitted);
+
+    expect(cleared.hasStopReason, isTrue);
+    expect(cleared.stopReason, isNull);
+    expect(cleared.stopReasonValue, isNull);
+    expect(cleared.toJson(), containsPair('stop_reason', null));
+    expect(MessageDelta.fromJson(cleared.toJson()), cleared);
+    expect(omitted.copyWith(stopReason: null), cleared);
+    expect(unfamiliar.copyWith(stopReason: null), cleared);
+    expect(cleared.copyWith().hashCode, cleared.hashCode);
+    expect(cleared, isNot(omitted));
+
+    expect(known.hasStopReason, isTrue);
+    expect(known.toJson(), containsPair('stop_reason', 'end_turn'));
+    expect(unfamiliar.copyWith(), unfamiliar);
+    expect(unfamiliar.copyWith(stopReason: StopReason.endTurn), known);
+  });
+
+  for (final clear in [false, true]) {
+    test(
+      'stream stop reason honors omitted and null updates (clear=$clear)',
+      () async {
+        final events = MockResponses.streamingEvents();
+        events.replaceRange(events.length - 2, events.length - 1, [
+          {
+            'type': 'message_delta',
+            'delta': {'stop_reason': _futureReason},
+            'usage': {'output_tokens': 8},
+          },
+          {
+            'type': 'message_delta',
+            'delta': <String, dynamic>{},
+            'usage': {'output_tokens': 9},
+          },
+          if (clear)
+            {
+              'type': 'message_delta',
+              'delta': {'stop_reason': null},
+              'usage': {'output_tokens': 9},
+            },
+        ]);
+        final transport = MockHttpClient()
+          ..queueStreamingResponse(events)
+          ..queueStreamingResponse(events);
+        final client = AnthropicClient(httpClient: transport);
+        addTearDown(client.close);
+
+        final expected = clear ? null : StopReason.unknown;
+        final finalMessage = await client.messages
+            .createStream(_request)
+            .finalMessage();
+        expect(finalMessage.stopReason, expected);
+        expect(finalMessage.stopReasonValue, clear ? null : _futureReason);
+        expect(
+          await client.messages.createStream(_request).stopReason,
+          expected,
+        );
+      },
+    );
+  }
 
   test(
     'batch results preserve a successful item with a future stop reason',
@@ -112,5 +192,13 @@ void main() {
     expect(response.stopReason, StopReason.unknown);
     expect(response.copyWith().toJson()['stop_reason'], _futureReason);
     expect(response.copyWith().hashCode, response.hashCode);
+    final cleared = response.copyWith(stopReason: null);
+    expect(cleared.stopReason, isNull);
+    expect(cleared.stopReasonValue, isNull);
+    expect(cleared.toJson(), isNot(contains('stop_reason')));
+    expect(
+      response.copyWith(stopReason: StopReason.stopSequence).stopReasonValue,
+      'stop_sequence',
+    );
   });
 }

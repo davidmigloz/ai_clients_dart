@@ -173,7 +173,8 @@ class Message {
 
   /// Creates a copy with replaced values.
   ///
-  /// A supplied [stopReasonValue] is decoded and sets the typed stop reason.
+  /// A supplied [stopReasonValue] takes precedence over [stopReason]. Pass a
+  /// string to decode the reason or null to clear it.
   Message copyWith({
     String? id,
     String? type,
@@ -181,7 +182,7 @@ class Message {
     List<ContentBlock>? content,
     String? model,
     Object? stopReason = unsetCopyWithValue,
-    String? stopReasonValue,
+    Object? stopReasonValue = unsetCopyWithValue,
     Object? stopDetails = unsetCopyWithValue,
     Object? stopSequence = unsetCopyWithValue,
     Usage? usage,
@@ -190,20 +191,23 @@ class Message {
     Object? contextManagement = unsetCopyWithValue,
     Object? inputTransformations = unsetCopyWithValue,
   }) {
+    final replaceWireReason = !identical(stopReasonValue, unsetCopyWithValue);
+    final replaceTypedReason = !identical(stopReason, unsetCopyWithValue);
+    final wireReason = replaceWireReason ? stopReasonValue as String? : null;
     return Message._(
       id: id ?? this.id,
       type: type ?? this.type,
       role: role ?? this.role,
       content: content ?? this.content,
       model: model ?? this.model,
-      stopReason: stopReasonValue != null
-          ? StopReason.fromJson(stopReasonValue)
-          : stopReason == unsetCopyWithValue
-          ? this.stopReason
-          : stopReason as StopReason?,
-      stopReasonValue:
-          stopReasonValue ??
-          (stopReason == unsetCopyWithValue ? _rawStopReason : null),
+      stopReason: replaceWireReason
+          ? (wireReason == null ? null : StopReason.fromJson(wireReason))
+          : replaceTypedReason
+          ? stopReason as StopReason?
+          : this.stopReason,
+      stopReasonValue: replaceWireReason || replaceTypedReason
+          ? wireReason
+          : _rawStopReason,
       stopDetails: stopDetails == unsetCopyWithValue
           ? this.stopDetails
           : stopDetails as RefusalStopDetails?,

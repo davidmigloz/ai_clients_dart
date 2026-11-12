@@ -79,15 +79,14 @@ extension MessageStreamExtension on Stream<MessageStreamEvent> {
 
   /// Consumes the entire stream and returns the last stop reason.
   ///
-  /// Returns `null` if no [MessageDeltaEvent] with a stop reason was received.
+  /// Returns null if no delta supplied a stop reason or the last one cleared it.
   /// Throws [MessageStreamFailure] on an in-band API error.
   Future<StopReason?> get stopReason async {
     StopReason? result;
     await for (final event in this) {
       if (event is ErrorEvent) throw MessageStreamFailure(event);
-      if (event is MessageDeltaEvent) {
-        final reason = event.delta.stopReason;
-        if (reason != null) result = reason;
+      if (event case MessageDeltaEvent(:final delta) when delta.hasStopReason) {
+        result = delta.stopReason;
       }
     }
     return result;

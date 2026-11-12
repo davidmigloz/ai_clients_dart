@@ -401,6 +401,9 @@ terminal `ErrorEvent`.
 `StopReason` adds `unknown`. Add that case to exhaustive switches. Read
 `Message.stopReasonValue` or `MessageDelta.stopReasonValue` for the original
 wire string. Completed Messages, streams and batch results preserve it.
+`MessageDelta.hasStopReason` distinguishes a missing reason from an explicit
+null that clears it. Use `message.copyWith(stopReasonValue: null)` to clear both
+representations in a copied message.
 
 ```dart
 // Before
