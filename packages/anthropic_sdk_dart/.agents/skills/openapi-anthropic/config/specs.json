@@ -1,15 +1,11 @@
 {
   "output_dir": "/tmp/openapi-anthropic-dart",
-  "preflight": {
-    "stats_field": "openapi_spec_url",
-    "stats_url": "https://raw.githubusercontent.com/anthropics/anthropic-sdk-python/refs/heads/main/.stats.yml"
-  },
   "specs": {
     "main": {
       "audit": {
         "excluded_schemas": [],
         "reference_impl": {
-          "ref": "main",
+          "ref": "5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9",
           "repo": "anthropics/anthropic-sdk-python",
           "resources": {
             "adapter": "python_stainless_resources",
@@ -26,14 +22,12 @@
           "BetaManagedAgentsSessionThreadStatus": "BetaManagedAgentsSessionStatus"
         }
       },
-      "auth_env_vars": [],
       "description": "Anthropic API for Claude models",
-      "fetch_mode": "remote",
+      "fetch_mode": "local_file",
       "local_file": "openapi.yaml",
       "name": "Anthropic API",
-      "pinned_hash": "e50cf35b74cc0471a2b5af7ea03765aa81c035f82588e9a1ba1b29aeaa17d064",
-      "requires_auth": false,
-      "url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic/anthropic-e50cf35b74cc0471a2b5af7ea03765aa81c035f82588e9a1ba1b29aeaa17d064.yml"
+      "pinned_hash": "690622377a5eedc0e9f2265ed755ee34dc0c52d35b47327f425777a550f45e1e",
+      "source_file": "specs/openapi.yaml"
     }
   },
   "specs_dir": "packages/anthropic_sdk_dart/specs"

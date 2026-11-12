@@ -2,8 +2,9 @@
 
 ## Toolkit Workflow
 
+Prepare a hash-checked candidate from the official SDK bundles using [SKILL.md](../SKILL.md). Use `fetch` only to stage the committed snapshot for offline checks.
+
 ```bash
-python3 .agents/shared/api-toolkit/scripts/api_toolkit.py fetch --config-dir packages/anthropic_sdk_dart/.agents/skills/openapi-anthropic/config
 python3 .agents/shared/api-toolkit/scripts/api_toolkit.py review --config-dir packages/anthropic_sdk_dart/.agents/skills/openapi-anthropic/config
 python3 .agents/shared/api-toolkit/scripts/api_toolkit.py verify --config-dir packages/anthropic_sdk_dart/.agents/skills/openapi-anthropic/config --checks all --scope all
 ```
@@ -28,5 +29,5 @@ Read and apply the [core review checklist](../../../../../../.agents/shared/api-
 - [ ] **Input block pairing**: New response content blocks have a matching `*InputBlock` in `input_content_block.dart` for multi-turn round-tripping. Check `additionalProperties` in the request schema — exclude fields not in the spec.
 - [ ] **Enum round-trip fidelity**: Forward-compatible enums that appear in round-trippable content store the raw wire string and derive the typed enum via a getter, so unknown values serialize back unchanged.
 - [ ] **Raw JSON fields**: Unknown/fallback types storing `Map<String, dynamic> raw` use `mapsDeepEqual`/`mapDeepHashCode` (not shallow `mapsEqual`/`mapHash`).
-- [ ] **Spec promotion**: `pinned_hash` in `config/specs.json` matches the promoted spec URL hash.
+- [ ] **Spec promotion**: `pinned_hash` in `config/specs.json` equals the SHA-256 of the promoted `specs/openapi.yaml` bytes. Verify both official compressed archives against the recorded archive SHA-256, and retain the preceding pin in spec metadata.
 - [ ] **Documentation artifacts**: Example file, README (features + examples table), and `llms.txt` are updated (see SKILL.md).
