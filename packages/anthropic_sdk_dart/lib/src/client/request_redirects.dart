@@ -50,6 +50,7 @@ Future<http.StreamedResponse> _sendGuardedRequest(
   required void Function()? ensureNotClosed,
 }) async {
   var current = request..followRedirects = false;
+  final followedTargets = <Uri>{};
   final credentials = requestCredentialValues(request.headers);
   final watch = Stopwatch()..start();
   final abort = request is http.Abortable ? request.abortTrigger : null;
@@ -81,6 +82,8 @@ Future<http.StreamedResponse> _sendGuardedRequest(
           'Refusing to forward an API key to a different origin',
         _ when redirects >= request.maxRedirects =>
           'HTTP redirect limit reached',
+        final Uri redirect when !followedTargets.add(redirect) =>
+          'HTTP redirect loop detected',
         _ => null,
       };
       if (error != null) {

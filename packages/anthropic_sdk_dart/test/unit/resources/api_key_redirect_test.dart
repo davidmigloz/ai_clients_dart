@@ -210,6 +210,39 @@ void main() {
     ]);
   });
 
+  test('native same-origin loop stops before repeating a target', () async {
+    final origin = await io.HttpServer.bind(io.InternetAddress.loopbackIPv4, 0);
+    addTearDown(() => origin.close(force: true));
+    final paths = <String>[];
+    origin.listen((request) async {
+      paths.add(request.uri.path);
+      await request.drain<void>();
+      request.response
+        ..statusCode = 302
+        ..headers.set('location', '/cycle')
+        ..headers.set('request-id', 'req_redirect_loop');
+      await request.response.close();
+    });
+    final client = AnthropicClient.withAuthToken(
+      'fixture-bearer',
+      config: AnthropicConfig(
+        baseUrl: 'http://127.0.0.1:${origin.port}',
+        retryPolicy: const RetryPolicy(maxRetries: 0),
+      ),
+    );
+    addTearDown(client.close);
+    await expectLater(
+      client.models.retrieve('claude-fixture'),
+      throwsA(
+        isA<ApiException>()
+            .having((e) => e.statusCode, 'status', 302)
+            .having((e) => e.message, 'message', 'HTTP redirect loop detected')
+            .having((e) => e.requestId, 'request ID', 'req_redirect_loop'),
+      ),
+    );
+    expect(paths, ['/v1/models/claude-fixture', '/cycle']);
+  });
+
   test('an aborted response does not admit another same-origin hop', () async {
     final abort = Completer<void>();
     final requests = <Uri>[];
