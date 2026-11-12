@@ -63,9 +63,25 @@ class SessionThread {
     this.type = 'session_thread',
     required this.sessionId,
     this.workflowRunId,
-    this._includeNullWorkflowRunId = false,
     required this.status,
-    this._rawStatus,
+    required this.agent,
+    required this.parentThreadId,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.archivedAt,
+    required this.usage,
+    required this.stats,
+  }) : _includeNullWorkflowRunId = false,
+       _rawStatus = null;
+
+  const SessionThread._({
+    required this.id,
+    this.type = 'session_thread',
+    required this.sessionId,
+    this.workflowRunId,
+    required this._includeNullWorkflowRunId,
+    required this.status,
+    required this._rawStatus,
     required this.agent,
     required this.parentThreadId,
     required this.createdAt,
@@ -77,7 +93,7 @@ class SessionThread {
 
   /// Creates a [SessionThread] from JSON.
   factory SessionThread.fromJson(Map<String, dynamic> json) {
-    return SessionThread(
+    return SessionThread._(
       id: json['id'] as String,
       type: json['type'] as String? ?? 'session_thread',
       sessionId: json['session_id'] as String,
@@ -138,7 +154,7 @@ class SessionThread {
     Object? usage = unsetCopyWithValue,
     Object? stats = unsetCopyWithValue,
   }) {
-    return SessionThread(
+    return SessionThread._(
       id: id ?? this.id,
       type: type ?? this.type,
       sessionId: sessionId ?? this.sessionId,

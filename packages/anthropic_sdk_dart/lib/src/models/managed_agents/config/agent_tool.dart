@@ -1519,12 +1519,23 @@ class WebFetchToolConfig extends AgentToolConfig {
     this.blockedDomains,
     this.maxContentTokens,
     this.urlSources,
-    this._includeNullUrlSources = true,
+  }) : _includeNullUrlSources = true;
+
+  const WebFetchToolConfig._({
+    this.type = 'web_fetch',
+    this.name = AgentToolName.webFetch,
+    required this.enabled,
+    required this.permissionPolicy,
+    this.allowedDomains,
+    this.blockedDomains,
+    this.maxContentTokens,
+    this.urlSources,
+    required this._includeNullUrlSources,
   });
 
   /// Creates a [WebFetchToolConfig] from JSON.
   factory WebFetchToolConfig.fromJson(Map<String, dynamic> json) {
-    return WebFetchToolConfig(
+    return WebFetchToolConfig._(
       type: json['type'] as String? ?? 'web_fetch',
       name: AgentToolName.fromJson(json['name'] as String),
       enabled: json['enabled'] as bool,
@@ -1571,7 +1582,7 @@ class WebFetchToolConfig extends AgentToolConfig {
     Object? maxContentTokens = unsetCopyWithValue,
     Object? urlSources = unsetCopyWithValue,
   }) {
-    return WebFetchToolConfig(
+    return WebFetchToolConfig._(
       type: type ?? this.type,
       name: name ?? this.name,
       enabled: enabled ?? this.enabled,

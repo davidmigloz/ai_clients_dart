@@ -392,17 +392,13 @@ class AgentToolUseEvent extends SessionEvent {
   final Map<String, dynamic> input;
 
   /// The evaluated permission policy for this tool invocation.
-  AgentEvaluatedPermission? get evaluatedPermission {
-    final value = rawEvaluatedPermission;
-    return value == null ? null : AgentEvaluatedPermission.fromJson(value);
-  }
+  final AgentEvaluatedPermission? evaluatedPermission;
 
-  final AgentEvaluatedPermission? _evaluatedPermission;
   final String? _rawEvaluatedPermission;
 
   /// The original permission string, including future values.
   String? get rawEvaluatedPermission =>
-      _rawEvaluatedPermission ?? _evaluatedPermission?.value;
+      _rawEvaluatedPermission ?? evaluatedPermission?.value;
 
   /// The resolved policy and automatic decision for this tool call.
   final AgentToolEvaluation? evaluation;
@@ -418,8 +414,18 @@ class AgentToolUseEvent extends SessionEvent {
     required this.id,
     required this.name,
     required this.input,
-    this._evaluatedPermission,
-    this._rawEvaluatedPermission,
+    this.evaluatedPermission,
+    this.evaluation,
+    required this.processedAt,
+    this.sessionThreadId,
+  }) : _rawEvaluatedPermission = null;
+
+  const AgentToolUseEvent._({
+    required this.id,
+    required this.name,
+    required this.input,
+    this.evaluatedPermission,
+    required this._rawEvaluatedPermission,
     this.evaluation,
     required this.processedAt,
     this.sessionThreadId,
@@ -427,11 +433,15 @@ class AgentToolUseEvent extends SessionEvent {
 
   /// Creates an [AgentToolUseEvent] from JSON.
   factory AgentToolUseEvent.fromJson(Map<String, dynamic> json) {
-    return AgentToolUseEvent(
+    final rawPermission = json['evaluated_permission'] as String?;
+    return AgentToolUseEvent._(
       id: json['id'] as String,
       name: json['name'] as String,
       input: json['input'] as Map<String, dynamic>,
-      rawEvaluatedPermission: json['evaluated_permission'] as String?,
+      evaluatedPermission: rawPermission == null
+          ? null
+          : AgentEvaluatedPermission.fromJson(rawPermission),
+      rawEvaluatedPermission: rawPermission,
       evaluation: json['evaluation'] != null
           ? AgentToolEvaluation.fromJson(
               json['evaluation'] as Map<String, dynamic>,
@@ -464,7 +474,7 @@ class AgentToolUseEvent extends SessionEvent {
     BetaTimestamp? processedAt,
     Object? sessionThreadId = unsetCopyWithValue,
   }) {
-    return AgentToolUseEvent(
+    return AgentToolUseEvent._(
       id: id ?? this.id,
       name: name ?? this.name,
       input: input ?? this.input,
@@ -472,7 +482,7 @@ class AgentToolUseEvent extends SessionEvent {
           ? this.evaluatedPermission
           : evaluatedPermission as AgentEvaluatedPermission?,
       rawEvaluatedPermission: evaluatedPermission == unsetCopyWithValue
-          ? rawEvaluatedPermission
+          ? _rawEvaluatedPermission
           : null,
       evaluation: evaluation == unsetCopyWithValue
           ? this.evaluation
@@ -635,17 +645,13 @@ class AgentMcpToolUseEvent extends SessionEvent {
   final Map<String, dynamic> input;
 
   /// The evaluated permission policy for this tool invocation.
-  AgentEvaluatedPermission? get evaluatedPermission {
-    final value = rawEvaluatedPermission;
-    return value == null ? null : AgentEvaluatedPermission.fromJson(value);
-  }
+  final AgentEvaluatedPermission? evaluatedPermission;
 
-  final AgentEvaluatedPermission? _evaluatedPermission;
   final String? _rawEvaluatedPermission;
 
   /// The original permission string, including future values.
   String? get rawEvaluatedPermission =>
-      _rawEvaluatedPermission ?? _evaluatedPermission?.value;
+      _rawEvaluatedPermission ?? evaluatedPermission?.value;
 
   /// The resolved policy and automatic decision for this tool call.
   final AgentToolEvaluation? evaluation;
@@ -662,8 +668,19 @@ class AgentMcpToolUseEvent extends SessionEvent {
     required this.mcpServerName,
     required this.name,
     required this.input,
-    this._evaluatedPermission,
-    this._rawEvaluatedPermission,
+    this.evaluatedPermission,
+    this.evaluation,
+    required this.processedAt,
+    this.sessionThreadId,
+  }) : _rawEvaluatedPermission = null;
+
+  const AgentMcpToolUseEvent._({
+    required this.id,
+    required this.mcpServerName,
+    required this.name,
+    required this.input,
+    this.evaluatedPermission,
+    required this._rawEvaluatedPermission,
     this.evaluation,
     required this.processedAt,
     this.sessionThreadId,
@@ -671,12 +688,16 @@ class AgentMcpToolUseEvent extends SessionEvent {
 
   /// Creates an [AgentMcpToolUseEvent] from JSON.
   factory AgentMcpToolUseEvent.fromJson(Map<String, dynamic> json) {
-    return AgentMcpToolUseEvent(
+    final rawPermission = json['evaluated_permission'] as String?;
+    return AgentMcpToolUseEvent._(
       id: json['id'] as String,
       mcpServerName: json['mcp_server_name'] as String,
       name: json['name'] as String,
       input: json['input'] as Map<String, dynamic>,
-      rawEvaluatedPermission: json['evaluated_permission'] as String?,
+      evaluatedPermission: rawPermission == null
+          ? null
+          : AgentEvaluatedPermission.fromJson(rawPermission),
+      rawEvaluatedPermission: rawPermission,
       evaluation: json['evaluation'] != null
           ? AgentToolEvaluation.fromJson(
               json['evaluation'] as Map<String, dynamic>,
@@ -711,7 +732,7 @@ class AgentMcpToolUseEvent extends SessionEvent {
     BetaTimestamp? processedAt,
     Object? sessionThreadId = unsetCopyWithValue,
   }) {
-    return AgentMcpToolUseEvent(
+    return AgentMcpToolUseEvent._(
       id: id ?? this.id,
       mcpServerName: mcpServerName ?? this.mcpServerName,
       name: name ?? this.name,
@@ -720,7 +741,7 @@ class AgentMcpToolUseEvent extends SessionEvent {
           ? this.evaluatedPermission
           : evaluatedPermission as AgentEvaluatedPermission?,
       rawEvaluatedPermission: evaluatedPermission == unsetCopyWithValue
-          ? rawEvaluatedPermission
+          ? _rawEvaluatedPermission
           : null,
       evaluation: evaluation == unsetCopyWithValue
           ? this.evaluation
@@ -1965,13 +1986,20 @@ class SessionStatusIdleEvent extends SessionEvent {
     required this.id,
     required this.stopReason,
     this.stopDetails,
-    this._includeNullStopDetails = false,
+    required this.processedAt,
+  }) : _includeNullStopDetails = false;
+
+  const SessionStatusIdleEvent._({
+    required this.id,
+    required this.stopReason,
+    this.stopDetails,
+    required this._includeNullStopDetails,
     required this.processedAt,
   });
 
   /// Creates a [SessionStatusIdleEvent] from JSON.
   factory SessionStatusIdleEvent.fromJson(Map<String, dynamic> json) {
-    return SessionStatusIdleEvent(
+    return SessionStatusIdleEvent._(
       id: json['id'] as String,
       stopReason: SessionStopReason.fromJson(
         json['stop_reason'] as Map<String, dynamic>,
@@ -2004,7 +2032,7 @@ class SessionStatusIdleEvent extends SessionEvent {
     Object? stopDetails = unsetCopyWithValue,
     BetaTimestamp? processedAt,
   }) {
-    return SessionStatusIdleEvent(
+    return SessionStatusIdleEvent._(
       id: id ?? this.id,
       stopReason: stopReason ?? this.stopReason,
       includeNullStopDetails:
@@ -2818,13 +2846,21 @@ class SessionThreadCreatedEvent extends SessionEvent {
     required this.agentName,
     required this.sessionThreadId,
     this.workflowRunId,
-    this._includeNullWorkflowRunId = false,
+    required this.processedAt,
+  }) : _includeNullWorkflowRunId = false;
+
+  const SessionThreadCreatedEvent._({
+    required this.id,
+    required this.agentName,
+    required this.sessionThreadId,
+    this.workflowRunId,
+    required this._includeNullWorkflowRunId,
     required this.processedAt,
   });
 
   /// Creates a [SessionThreadCreatedEvent] from JSON.
   factory SessionThreadCreatedEvent.fromJson(Map<String, dynamic> json) {
-    return SessionThreadCreatedEvent(
+    return SessionThreadCreatedEvent._(
       id: json['id'] as String,
       agentName: json['agent_name'] as String,
       sessionThreadId: json['session_thread_id'] as String,
@@ -2853,7 +2889,7 @@ class SessionThreadCreatedEvent extends SessionEvent {
     Object? workflowRunId = unsetCopyWithValue,
     BetaTimestamp? processedAt,
   }) {
-    return SessionThreadCreatedEvent(
+    return SessionThreadCreatedEvent._(
       id: id ?? this.id,
       agentName: agentName ?? this.agentName,
       sessionThreadId: sessionThreadId ?? this.sessionThreadId,
@@ -3007,13 +3043,22 @@ class SessionThreadStatusIdleEvent extends SessionEvent {
     required this.sessionThreadId,
     required this.stopReason,
     this.stopDetails,
-    this._includeNullStopDetails = false,
+    required this.processedAt,
+  }) : _includeNullStopDetails = false;
+
+  const SessionThreadStatusIdleEvent._({
+    required this.id,
+    required this.agentName,
+    required this.sessionThreadId,
+    required this.stopReason,
+    this.stopDetails,
+    required this._includeNullStopDetails,
     required this.processedAt,
   });
 
   /// Creates a [SessionThreadStatusIdleEvent] from JSON.
   factory SessionThreadStatusIdleEvent.fromJson(Map<String, dynamic> json) {
-    return SessionThreadStatusIdleEvent(
+    return SessionThreadStatusIdleEvent._(
       id: json['id'] as String,
       agentName: json['agent_name'] as String,
       sessionThreadId: json['session_thread_id'] as String,
@@ -3052,7 +3097,7 @@ class SessionThreadStatusIdleEvent extends SessionEvent {
     Object? stopDetails = unsetCopyWithValue,
     BetaTimestamp? processedAt,
   }) {
-    return SessionThreadStatusIdleEvent(
+    return SessionThreadStatusIdleEvent._(
       id: id ?? this.id,
       agentName: agentName ?? this.agentName,
       sessionThreadId: sessionThreadId ?? this.sessionThreadId,

@@ -118,7 +118,27 @@ class Session {
     required this.id,
     this.type = 'session',
     required this.status,
-    this._rawStatus,
+    required this.agent,
+    required this.environmentId,
+    this.deploymentId,
+    required this.title,
+    required this.metadata,
+    required this.resources,
+    required this.vaultIds,
+    required this.stats,
+    required this.usage,
+    this.outcomeEvaluations = const [],
+    required this.createdAt,
+    required this.updatedAt,
+    required this.archivedAt,
+    this.budget,
+  }) : _rawStatus = null;
+
+  const Session._({
+    required this.id,
+    this.type = 'session',
+    required this.status,
+    required this._rawStatus,
     required this.agent,
     required this.environmentId,
     this.deploymentId,
@@ -137,7 +157,7 @@ class Session {
 
   /// Creates a [Session] from JSON.
   factory Session.fromJson(Map<String, dynamic> json) {
-    return Session(
+    return Session._(
       id: json['id'] as String,
       type: json['type'] as String? ?? 'session',
       status: SessionStatus.fromJson(json['status'] as String),
@@ -214,7 +234,7 @@ class Session {
     Object? archivedAt = unsetCopyWithValue,
     Object? budget = unsetCopyWithValue,
   }) {
-    return Session(
+    return Session._(
       id: id ?? this.id,
       type: type ?? this.type,
       status: status ?? this.status,
