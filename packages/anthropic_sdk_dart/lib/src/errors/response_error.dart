@@ -27,14 +27,10 @@ parseApiErrorBody(String body) {
     if (decoded case {'error': final Map<String, dynamic> error}) {
       final message = error['message'] as String? ?? 'Unknown error';
       final type = error['type'] as String?;
-      final details = error['details'];
       return (
         message: message,
         details: type == null ? const [] : <Object>[type],
-        errorCode: switch (details) {
-          {'error_code': final String code} => code,
-          _ => null,
-        },
+        errorCode: _providerErrorCode(error['details']),
         requestId: requestId,
       );
     }
@@ -58,6 +54,11 @@ parseApiErrorBody(String body) {
     requestId: requestId,
   );
 }
+
+String? _providerErrorCode(Object? details) => switch (details) {
+  {'error_code': final String code} => code,
+  _ => null,
+};
 
 /// Retains useful response diagnostics without copying sensitive content.
 ResponseMetadata createSafeResponseMetadata({
@@ -135,32 +136,44 @@ AnthropicException createResourceException(
   ResponseMetadata responseMetadata,
 ) {
   String message;
+  String? errorCode;
+  Map<String, dynamic>? errorDetails;
   try {
     final json = jsonDecode(body) as Map<String, dynamic>;
     final error = json['error'] as Map<String, dynamic>?;
     message = error?['message'] as String? ?? body;
+    final providerDetails = error?['details'];
+    errorCode = _providerErrorCode(providerDetails);
+    if (providerDetails is Map<String, dynamic>) {
+      errorDetails = Map.unmodifiable(providerDetails);
+    }
   } catch (_) {
     message = body;
   }
   return switch (statusCode) {
     400 => ValidationException(
       message: message,
+      errorCode: errorCode,
+      errorDetails: errorDetails,
       fieldErrors: const {},
       responseMetadata: responseMetadata,
     ),
     401 => AuthenticationException(
       message: message,
+      errorCode: errorCode,
       responseMetadata: responseMetadata,
     ),
     429 => RateLimitException(
       statusCode: statusCode,
       message: message,
+      errorCode: errorCode,
       responseMetadata: responseMetadata,
       retryAfter: retryAfterTime(responseMetadata.headers),
     ),
     _ => ApiException(
       statusCode: statusCode,
       message: message,
+      errorCode: errorCode,
       responseMetadata: responseMetadata,
     ),
   };

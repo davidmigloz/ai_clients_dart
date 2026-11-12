@@ -183,6 +183,12 @@ class ValidationException extends AnthropicException {
   /// Field-specific validation errors.
   final Map<String, List<String>> fieldErrors;
 
+  /// The provider error code from `error.details.error_code`, when present.
+  final String? errorCode;
+
+  /// Structured diagnostics from `error.details`, when present.
+  final Map<String, dynamic>? errorDetails;
+
   /// Response metadata when validation failed on the server.
   final ResponseMetadata? responseMetadata;
 
@@ -199,6 +205,8 @@ class ValidationException extends AnthropicException {
   const ValidationException({
     required this.message,
     required this.fieldErrors,
+    this.errorCode,
+    this.errorDetails,
     this.responseMetadata,
     this.stackTrace,
     this.cause,

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:test/test.dart';
 
 import '../../mocks/mock_http_client.dart';
@@ -47,6 +48,163 @@ void main() {
 
   tearDown(() {
     client.close();
+  });
+
+  test('Skill uploads retain root and nested paths and media types', () async {
+    final transport = MockClient((request) async {
+      expect(request.url.path, '/proxy/v1/skills');
+      expect(request.headers['anthropic-workspace-id'], 'wrkspc_override');
+      expect(request.headers['anthropic-beta'], 'skill-opt-in');
+      expect(request.headers['x-api-key'], 'test-api-key');
+      expect(
+        request.headers['content-type'],
+        startsWith('multipart/form-data; boundary='),
+      );
+      final body = latin1.decode(request.bodyBytes);
+      expect(body, contains('name="files[]"; filename="SKILL.md"\r\n'));
+      expect(body, contains('content-type: text/markdown; charset=utf-8\r\n'));
+      expect(body, contains('\r\n\r\n# Fixture\r\n'));
+      expect(
+        body,
+        contains('name="files[]"; filename="assets/payload.bin"\r\n'),
+      );
+      expect(body, contains('content-type: application/octet-stream\r\n'));
+      expect(body, contains('\r\n\r\n\u0000\u0080\u00ff\r\n'));
+      return http.Response(
+        jsonEncode(_skillJson()),
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+    });
+    final sdk = AnthropicClient(
+      config: const AnthropicConfig(
+        baseUrl: 'https://proxy.invalid/proxy',
+        authProvider: ApiKeyProvider('test-api-key'),
+        workspaceId: 'wrkspc_default',
+      ),
+      httpClient: transport,
+    );
+    addTearDown(sdk.close);
+    final skill = await sdk.skills.create(
+      files: [
+        SkillFile(
+          path: 'SKILL.md',
+          bytes: Uint8List.fromList(utf8.encode('# Fixture')),
+          mimeType: 'text/markdown; charset=utf-8',
+        ),
+        SkillFile(
+          path: 'assets/payload.bin',
+          bytes: Uint8List.fromList([0, 128, 255]),
+        ),
+      ],
+      betas: ['skill-opt-in'],
+      workspaceId: 'wrkspc_override',
+    );
+    expect(skill.latestVersionId, 'skillver_1');
+  });
+
+  test('Skill ZIP download passes through binary bytes and routing', () async {
+    final transport = MockClient((request) async {
+      expect(request.url.pathSegments, [
+        'proxy',
+        'v1',
+        'skills',
+        'skill/opaque',
+        'versions',
+        'version/opaque',
+        'content',
+      ]);
+      expect(request.headers['accept'], 'application/binary');
+      expect(request.headers['anthropic-beta'], 'skill-opt-in');
+      expect(request.headers['anthropic-workspace-id'], 'wrkspc_override');
+      expect(request.headers, isNot(contains('content-type')));
+      return http.Response.bytes(
+        [0x50, 0x4b, 0, 128, 255],
+        200,
+        headers: {'content-type': 'application/zip'},
+      );
+    });
+    final sdk = AnthropicClient(
+      config: const AnthropicConfig(
+        baseUrl: 'https://proxy.invalid/proxy',
+        defaultHeaders: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ),
+      httpClient: transport,
+    );
+    addTearDown(sdk.close);
+    expect(
+      await sdk.skills.downloadVersion(
+        skillId: 'skill/opaque',
+        version: 'version/opaque',
+        betas: ['skill-opt-in'],
+        workspaceId: 'wrkspc_override',
+      ),
+      [0x50, 0x4b, 0, 128, 255],
+    );
+  });
+
+  test(
+    'Skill upload preserves provider code and request ID on rejection',
+    () async {
+      mockHttpClient.queueJsonResponse({
+        'type': 'error',
+        'request_id': 'req_skill',
+        'error': {
+          'type': 'invalid_request_error',
+          'message': 'A Skill with this name already exists.',
+          'details': {
+            'error_code': 'skill_name_taken',
+            'skill_name': 'fixture',
+          },
+        },
+      }, statusCode: 400);
+      await expectLater(
+        client.skills.create(
+          files: [SkillFile(path: 'SKILL.md', bytes: Uint8List(1))],
+        ),
+        throwsA(
+          isA<ValidationException>()
+              .having(
+                (error) => error.errorCode,
+                'provider code',
+                'skill_name_taken',
+              )
+              .having((error) => error.requestId, 'request ID', 'req_skill')
+              .having(
+                (error) => error.errorDetails?['skill_name'],
+                'provider skill name',
+                'fixture',
+              )
+              .having(
+                (error) => error.responseMetadata?.statusCode,
+                'status',
+                400,
+              ),
+        ),
+      );
+      expect(
+        mockHttpClient.lastRequest?.headers,
+        isNot(contains('anthropic-beta')),
+      );
+    },
+  );
+
+  test('Skill retrieval preserves a future source value', () async {
+    mockHttpClient.queueJsonResponse({
+      ..._skillJson(),
+      'source': {'type': 'future_catalog'},
+    });
+    final skill = await client.skills.retrieve(skillId: 'skill_abc123');
+    expect(skill.source.type, SkillSourceType.unknown);
+    expect(skill.source.rawType, 'future_catalog');
+    expect(skill.copyWith().toJson()['source'], {'type': 'future_catalog'});
+    expect(
+      skill.source.copyWith(type: SkillSourceType.custom).rawType,
+      'custom',
+    );
   });
 
   group('SkillsResource.create', () {
@@ -246,7 +404,7 @@ void main() {
       expect(request.headers.containsKey('anthropic-beta'), isFalse);
       // Binary download: Accept is widened and the default JSON content-type is
       // dropped, matching FilesResource.download.
-      expect(request.headers['accept'], '*/*');
+      expect(request.headers['accept'], 'application/binary');
       expect(request.headers.containsKey('content-type'), isFalse);
       expect(request.headers['x-api-key'], 'test-api-key');
     });

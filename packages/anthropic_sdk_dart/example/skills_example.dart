@@ -14,20 +14,15 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// - Managing skill versions
 /// - Deleting skills and versions
 ///
-/// Note: The Skills API is generally available and does not require an
-/// anthropic-beta header.
-void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+/// Set ANTHROPIC_API_KEY and run `dart run example/skills_example.dart`.
+/// This creates a custom skill and writes a copy to downloaded_skill.zip.
+Future<void> main() async {
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // Example 1: Create a skill from an in-memory SKILL.md.
     //
-    // All files must share one top-level directory that contains a
-    // `SKILL.md` file at its root (e.g. `my-skill/SKILL.md`).
+    // SKILL.md may be at the upload root or under one enclosing directory.
     print('=== Create Skill ===');
 
     const skillMdContent = '''
@@ -44,7 +39,7 @@ This skill demonstrates the Skills API.
     final skill = await client.skills.create(
       files: [
         SkillFile(
-          path: 'my-custom-skill/SKILL.md',
+          path: 'SKILL.md',
           bytes: Uint8List.fromList(utf8.encode(skillMdContent)),
           mimeType: 'text/markdown',
         ),
@@ -111,16 +106,22 @@ description: A demo skill created from the Dart SDK (v2).
       print('  - ${v.id}: ${v.description}');
     }
 
+    // Resolve the newest version without listing all versions.
+    final latest = await client.skills.retrieveVersion(
+      skillId: skill.id,
+      version: 'latest',
+    );
+
     // Example 6: Download a version's content (zip archive)
     print('\n=== Download Version Content ===');
     final contentBytes = await client.skills.downloadVersion(
       skillId: skill.id,
-      version: version.id,
+      version: latest.id,
     );
     print('Downloaded ${contentBytes.length} bytes');
     await File('downloaded_skill.zip').writeAsBytes(contentBytes);
 
-    // Example 7: Delete version
+    // Example 7: Delete a version while another version remains.
     print('\n=== Delete Version ===');
     final deletedVersion = await client.skills.deleteVersion(
       skillId: skill.id,
@@ -128,7 +129,7 @@ description: A demo skill created from the Dart SDK (v2).
     );
     print('Version deleted: ${deletedVersion.id}');
 
-    // Example 8: Delete skill
+    // Example 8: Delete the skill and all remaining versions.
     print('\n=== Delete Skill ===');
     final deletedSkill = await client.skills.deleteSkill(skillId: skill.id);
     print('Skill deleted: ${deletedSkill.id}');

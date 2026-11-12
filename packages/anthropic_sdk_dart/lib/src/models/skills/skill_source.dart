@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-/// Where a [Skill] comes from.
+/// Where a Skill comes from.
 enum SkillSourceType {
   /// Authored by the platform user; private to their workspace.
   custom('custom'),
@@ -35,26 +35,37 @@ enum SkillSourceType {
   String toJson() => value;
 }
 
-/// Where a [Skill] comes from.
+/// Where a Skill comes from.
 @immutable
 class SkillSource {
   /// The kind of source this skill comes from.
   final SkillSourceType type;
+  final String? _rawType;
+
+  /// Original source discriminator, including a value the SDK does not know.
+  String get rawType => _rawType ?? type.value;
 
   /// Creates a [SkillSource].
-  const SkillSource({required this.type});
+  const SkillSource({required this.type}) : _rawType = null;
+
+  const SkillSource._(this.type, this._rawType);
 
   /// Creates a [SkillSource] from JSON.
   factory SkillSource.fromJson(Map<String, dynamic> json) {
-    return SkillSource(type: SkillSourceType.fromJson(json['type'] as String));
+    final rawType = json['type'] as String;
+    final type = SkillSourceType.fromJson(rawType);
+    return SkillSource._(
+      type,
+      type == SkillSourceType.unknown ? rawType : null,
+    );
   }
 
   /// Converts to JSON.
-  Map<String, dynamic> toJson() => {'type': type.toJson()};
+  Map<String, dynamic> toJson() => {'type': rawType};
 
   /// Creates a copy with replaced values.
   SkillSource copyWith({SkillSourceType? type}) {
-    return SkillSource(type: type ?? this.type);
+    return type == null ? this : SkillSource(type: type);
   }
 
   @override
@@ -62,11 +73,11 @@ class SkillSource {
       identical(this, other) ||
       other is SkillSource &&
           runtimeType == other.runtimeType &&
-          type == other.type;
+          rawType == other.rawType;
 
   @override
-  int get hashCode => type.hashCode;
+  int get hashCode => rawType.hashCode;
 
   @override
-  String toString() => 'SkillSource(type: $type)';
+  String toString() => 'SkillSource(type: $rawType)';
 }

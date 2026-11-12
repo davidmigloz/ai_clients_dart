@@ -308,6 +308,37 @@ String authKind(AuthCredentials credentials) => switch (credentials) {
 
 ---
 
+## Use current Files and Skills responses
+
+Use `page` and `nextPage` for current Files and Skills pagination. Current
+Files and Skills calls omit the historical beta headers by default, including
+the official SDKs’ beta aliases. Pass beta names per call when using a current
+beta capability. Scoped Files listing adds the Managed Agents beta header.
+
+```dart
+// Historical Files paging while explicitly opting into the old response.
+const legacyFiles = ['files-api-2025-04-14'];
+final previous = await client.files.list(betas: legacyFiles);
+if (previous.hasMore == true) {
+  await client.files.list(betas: legacyFiles, afterId: previous.lastId);
+}
+
+// Current Files paging.
+final current = await client.files.list();
+if (current.nextPage case final nextPage?) {
+  await client.files.list(page: nextPage);
+}
+```
+
+The historical `skills-2025-10-02` header returns a different Skill shape.
+Remove it when using the current Dart Skill models. They use
+`displayName`, `latestVersionId`, and `source.type`. To resolve the newest
+version, pass `version: 'latest'` to `retrieveVersion` and use its returned
+`id`. Deleting a skill on the current API deletes its versions too.
+[Files migration](https://platform.claude.com/docs/en/build-with-claude/files#migrate-from-files-api-2025-04-14) · [Skills migration](https://platform.claude.com/docs/en/build-with-claude/skills-guide#migrate-from-skills-2025-10-02)
+
+---
+
 ## Migrating from v9.x to v10.0.0
 
 v10.0.0 adds document sources that reference uploaded files. `DocumentSource` is sealed, so exhaustive switches must handle the new `FileDocumentSource` variant.

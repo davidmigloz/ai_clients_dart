@@ -10,6 +10,7 @@ import '../models/skills/skill_file.dart';
 import '../models/skills/skill_list_response.dart';
 import '../models/skills/skill_source.dart';
 import '../models/skills/skill_version.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 import 'media_type.dart';
 import 'resource_request.dart';
@@ -18,8 +19,8 @@ import 'resource_request.dart';
 ///
 /// Skills are reusable components that extend Claude's capabilities.
 ///
-/// This is a generally-available (GA) API; no `anthropic-beta` header is
-/// required.
+/// The Skills API is generally available. Use `betas` to opt into additional
+/// beta features and `workspaceId` for request-level workspace routing.
 class SkillsResource extends ResourceBase {
   /// Creates a [SkillsResource].
   SkillsResource({
@@ -32,10 +33,8 @@ class SkillsResource extends ResourceBase {
 
   /// Creates a new skill.
   ///
-  /// The [files] must all share one top-level directory that contains a
-  /// `SKILL.md` file at its root (e.g. `my-skill/SKILL.md`). Each file is
-  /// sent as a separate multipart part under the repeated field name
-  /// `files[]`.
+  /// Include `SKILL.md` at the upload root or in one enclosing directory.
+  /// Each file is sent as a separate multipart part under `files[]`.
   /// The [displayName] is an optional human-readable label for the skill;
   /// when omitted, it's derived from the `SKILL.md` frontmatter `name`.
   ///
@@ -53,11 +52,16 @@ class SkillsResource extends ResourceBase {
   Future<Skill> create({
     required List<SkillFile> files,
     String? displayName,
+    List<String> betas = const [],
+    String? workspaceId,
   }) async {
     ensureNotClosed?.call();
     final uri = requestBuilder.buildUrl('/v1/skills');
     // Remove content-type as multipart will set its own
-    final headers = requestBuilder.buildHeaders()..remove('content-type');
+    final headers = requestBuilder.buildHeaders(
+      betas: betas,
+      workspaceId: workspaceId,
+    )..removeWhere((name, _) => name.toLowerCase() == 'content-type');
 
     final request = http.MultipartRequest('POST', uri)..headers.addAll(headers);
     for (final file in files) {
@@ -109,6 +113,8 @@ class SkillsResource extends ResourceBase {
     int? limit,
     String? page,
     SkillSourceType? source,
+    List<String> betas = const [],
+    String? workspaceId,
   }) async {
     ensureNotClosed?.call();
     final queryParams = <String, dynamic>{
@@ -121,7 +127,10 @@ class SkillsResource extends ResourceBase {
       '/v1/skills',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
-    final headers = requestBuilder.buildHeaders();
+    final headers = requestBuilder.buildHeaders(
+      betas: betas,
+      workspaceId: workspaceId,
+    );
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
@@ -142,10 +151,19 @@ class SkillsResource extends ResourceBase {
   /// final skill = await client.skills.retrieve(skillId: 'skill_abc123');
   /// print('Skill: ${skill.displayName}');
   /// ```
-  Future<Skill> retrieve({required String skillId}) async {
+  Future<Skill> retrieve({
+    required String skillId,
+    List<String> betas = const [],
+    String? workspaceId,
+  }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/skills/$skillId');
-    final headers = requestBuilder.buildHeaders();
+    final url = requestBuilder.buildUrl(
+      '/v1/skills/${encodePathSegment(skillId, 'skillId')}',
+    );
+    final headers = requestBuilder.buildHeaders(
+      betas: betas,
+      workspaceId: workspaceId,
+    );
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
@@ -153,7 +171,7 @@ class SkillsResource extends ResourceBase {
     return Skill.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
-  /// Deletes a skill.
+  /// Deletes a skill and all of its versions.
   ///
   /// The [skillId] is the unique identifier of the skill to delete.
   ///
@@ -164,10 +182,19 @@ class SkillsResource extends ResourceBase {
   /// final deleted = await client.skills.deleteSkill(skillId: 'skill_abc123');
   /// print('Skill deleted: ${deleted.id}');
   /// ```
-  Future<DeletedSkill> deleteSkill({required String skillId}) async {
+  Future<DeletedSkill> deleteSkill({
+    required String skillId,
+    List<String> betas = const [],
+    String? workspaceId,
+  }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/skills/$skillId');
-    final headers = requestBuilder.buildHeaders();
+    final url = requestBuilder.buildUrl(
+      '/v1/skills/${encodePathSegment(skillId, 'skillId')}',
+    );
+    final headers = requestBuilder.buildHeaders(
+      betas: betas,
+      workspaceId: workspaceId,
+    );
     final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
@@ -180,10 +207,8 @@ class SkillsResource extends ResourceBase {
   /// Creates a new version of a skill.
   ///
   /// The [skillId] is the unique identifier of the skill.
-  /// The [files] must all share one top-level directory that contains a
-  /// `SKILL.md` file at its root (e.g. `my-skill/SKILL.md`). Each file is
-  /// sent as a separate multipart part under the repeated field name
-  /// `files[]`.
+  /// Include `SKILL.md` at the upload root or in one enclosing directory.
+  /// Each file is sent as a separate multipart part under `files[]`.
   ///
   /// Returns a [SkillVersion] with information about the created version.
   ///
@@ -199,11 +224,18 @@ class SkillsResource extends ResourceBase {
   Future<SkillVersion> createVersion({
     required String skillId,
     required List<SkillFile> files,
+    List<String> betas = const [],
+    String? workspaceId,
   }) async {
     ensureNotClosed?.call();
-    final uri = requestBuilder.buildUrl('/v1/skills/$skillId/versions');
+    final uri = requestBuilder.buildUrl(
+      '/v1/skills/${encodePathSegment(skillId, 'skillId')}/versions',
+    );
     // Remove content-type as multipart will set its own
-    final headers = requestBuilder.buildHeaders()..remove('content-type');
+    final headers = requestBuilder.buildHeaders(
+      betas: betas,
+      workspaceId: workspaceId,
+    )..removeWhere((name, _) => name.toLowerCase() == 'content-type');
 
     final request = http.MultipartRequest('POST', uri)..headers.addAll(headers);
     for (final file in files) {
@@ -254,6 +286,8 @@ class SkillsResource extends ResourceBase {
     required String skillId,
     int? limit,
     String? page,
+    List<String> betas = const [],
+    String? workspaceId,
   }) async {
     ensureNotClosed?.call();
     final queryParams = <String, dynamic>{
@@ -262,10 +296,13 @@ class SkillsResource extends ResourceBase {
     };
 
     final url = requestBuilder.buildUrl(
-      '/v1/skills/$skillId/versions',
+      '/v1/skills/${encodePathSegment(skillId, 'skillId')}/versions',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
-    final headers = requestBuilder.buildHeaders();
+    final headers = requestBuilder.buildHeaders(
+      betas: betas,
+      workspaceId: workspaceId,
+    );
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
@@ -293,12 +330,17 @@ class SkillsResource extends ResourceBase {
   Future<SkillVersion> retrieveVersion({
     required String skillId,
     required String version,
+    List<String> betas = const [],
+    String? workspaceId,
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/skills/$skillId/versions/$version',
+      '/v1/skills/${encodePathSegment(skillId, 'skillId')}/versions/${encodePathSegment(version, 'version')}',
     );
-    final headers = requestBuilder.buildHeaders();
+    final headers = requestBuilder.buildHeaders(
+      betas: betas,
+      workspaceId: workspaceId,
+    );
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
@@ -315,10 +357,8 @@ class SkillsResource extends ResourceBase {
   ///
   /// Returns the version's content as a ZIP archive (raw bytes).
   ///
-  /// This endpoint is header-less like the rest of this resource. Note that
-  /// the spec only documents it under the beta namespace (with an optional
-  /// `anthropic-beta` header) and it isn't exposed by the official Python
-  /// SDK; it is included here for completeness.
+  /// The official SDKs expose this endpoint in their beta namespaces. It
+  /// does not require a beta header.
   ///
   /// Example:
   /// ```dart
@@ -331,6 +371,8 @@ class SkillsResource extends ResourceBase {
   Future<Uint8List> downloadVersion({
     required String skillId,
     required String version,
+    List<String> betas = const [],
+    String? workspaceId,
   }) async {
     if (skillId.isEmpty) {
       throw ArgumentError.value(skillId, 'skillId', 'must not be empty');
@@ -341,14 +383,18 @@ class SkillsResource extends ResourceBase {
 
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/skills/$skillId/versions/$version/content',
+      '/v1/skills/${encodePathSegment(skillId, 'skillId')}/versions/${encodePathSegment(version, 'version')}/content',
     );
     // The response is a binary ZIP archive. Widen Accept and drop the default
     // JSON content-type (this GET has no request body), matching the binary
     // download convention used by FilesResource.download.
-    final headers = requestBuilder.buildHeaders();
-    headers['accept'] = '*/*';
-    headers.remove('content-type');
+    final headers =
+        requestBuilder.buildHeaders(betas: betas, workspaceId: workspaceId)
+          ..removeWhere(
+            (name, _) =>
+                const {'accept', 'content-type'}.contains(name.toLowerCase()),
+          )
+          ..['accept'] = 'application/binary';
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
@@ -357,6 +403,8 @@ class SkillsResource extends ResourceBase {
   }
 
   /// Deletes a specific version of a skill.
+  ///
+  /// Deleting the only version of a skill returns a 400 error.
   ///
   /// The [skillId] is the unique identifier of the skill.
   /// The [version] is the version identifier to delete.
@@ -374,12 +422,17 @@ class SkillsResource extends ResourceBase {
   Future<DeletedSkillVersion> deleteVersion({
     required String skillId,
     required String version,
+    List<String> betas = const [],
+    String? workspaceId,
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/skills/$skillId/versions/$version',
+      '/v1/skills/${encodePathSegment(skillId, 'skillId')}/versions/${encodePathSegment(version, 'version')}',
     );
-    final headers = requestBuilder.buildHeaders();
+    final headers = requestBuilder.buildHeaders(
+      betas: betas,
+      workspaceId: workspaceId,
+    );
     final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);

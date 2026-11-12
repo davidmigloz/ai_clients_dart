@@ -60,9 +60,14 @@ class RequestBuilder {
   /// - `anthropic-version` header with configured API version
   /// - `content-type: application/json`
   /// - `anthropic-workspace-id` when configured and [includeWorkspace] is true
+  ///
+  /// Nonempty [betas] and [workspaceId] override configured headers. Headers
+  /// in [additionalHeaders] still take precedence.
   Map<String, String> buildHeaders({
     Map<String, String>? additionalHeaders,
     bool includeWorkspace = true,
+    List<String> betas = const [],
+    String? workspaceId,
   }) {
     return {
       'anthropic-version': config.apiVersion,
@@ -72,6 +77,8 @@ class RequestBuilder {
         'anthropic-workspace-id': workspaceId,
       for (final entry in config.defaultHeaders.entries)
         _routingHeaderKey(entry.key): entry.value,
+      if (betas.isNotEmpty) 'anthropic-beta': betas.join(','),
+      'anthropic-workspace-id': ?workspaceId,
       if (additionalHeaders != null)
         for (final entry in additionalHeaders.entries)
           _routingHeaderKey(entry.key): entry.value,
