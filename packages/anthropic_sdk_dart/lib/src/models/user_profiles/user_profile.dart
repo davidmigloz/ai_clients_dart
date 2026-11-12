@@ -35,7 +35,7 @@ class UserProfile {
   /// platform, as stated by the platform. `null` until the platform
   /// supplies one.
   final BetaTimestamp? externalUserOnboardedAt;
-  final bool _includeNullExternalUserOnboardedAt;
+  final bool _hasExternalUserOnboardedAt;
 
   /// Arbitrary key-value metadata. Maximum 16 pairs, keys up to 64 chars,
   /// values up to 512 chars. Always present; may be empty.
@@ -66,7 +66,7 @@ class UserProfile {
     required this.trustGrants,
     required this.createdAt,
     required this.updatedAt,
-  }) : _includeNullExternalUserOnboardedAt = false;
+  }) : _hasExternalUserOnboardedAt = externalUserOnboardedAt != null;
 
   const UserProfile._({
     required this.id,
@@ -79,7 +79,7 @@ class UserProfile {
     required this.trustGrants,
     required this.createdAt,
     required this.updatedAt,
-    required this._includeNullExternalUserOnboardedAt,
+    required this._hasExternalUserOnboardedAt,
   });
 
   /// Creates a [UserProfile] from JSON.
@@ -96,7 +96,7 @@ class UserProfile {
       externalUserOnboardedAt: json['external_user_onboarded_at'] != null
           ? DateTime.parse(json['external_user_onboarded_at'] as String)
           : null,
-      includeNullExternalUserOnboardedAt: json.containsKey(
+      hasExternalUserOnboardedAt: json.containsKey(
         'external_user_onboarded_at',
       ),
       metadata:
@@ -124,7 +124,7 @@ class UserProfile {
     'external_id': externalId,
     'name': name,
     if (accessType != null) 'access_type': accessType!.toJson(),
-    if (externalUserOnboardedAt != null || _includeNullExternalUserOnboardedAt)
+    if (_hasExternalUserOnboardedAt)
       'external_user_onboarded_at': externalUserOnboardedAt
           ?.toUtc()
           .toIso8601String(),
@@ -152,6 +152,10 @@ class UserProfile {
     BetaTimestamp? createdAt,
     BetaTimestamp? updatedAt,
   }) {
+    final replacesOnboardingTime = !identical(
+      externalUserOnboardedAt,
+      unsetCopyWithValue,
+    );
     return UserProfile._(
       id: id ?? this.id,
       type: type ?? this.type,
@@ -162,10 +166,11 @@ class UserProfile {
       accessType: accessType == unsetCopyWithValue
           ? this.accessType
           : accessType as UserProfileAccessType?,
-      externalUserOnboardedAt: externalUserOnboardedAt == unsetCopyWithValue
-          ? this.externalUserOnboardedAt
-          : externalUserOnboardedAt as BetaTimestamp?,
-      includeNullExternalUserOnboardedAt: _includeNullExternalUserOnboardedAt,
+      externalUserOnboardedAt: replacesOnboardingTime
+          ? externalUserOnboardedAt as BetaTimestamp?
+          : this.externalUserOnboardedAt,
+      hasExternalUserOnboardedAt:
+          _hasExternalUserOnboardedAt || replacesOnboardingTime,
       metadata: metadata ?? this.metadata,
       trustGrants: trustGrants ?? this.trustGrants,
       createdAt: createdAt ?? this.createdAt,
@@ -183,6 +188,7 @@ class UserProfile {
           externalId == other.externalId &&
           name == other.name &&
           accessType == other.accessType &&
+          _hasExternalUserOnboardedAt == other._hasExternalUserOnboardedAt &&
           externalUserOnboardedAt == other.externalUserOnboardedAt &&
           mapsEqual(metadata, other.metadata) &&
           mapsEqual(trustGrants, other.trustGrants) &&
@@ -196,6 +202,7 @@ class UserProfile {
     externalId,
     name,
     accessType,
+    _hasExternalUserOnboardedAt,
     externalUserOnboardedAt,
     mapHash(metadata),
     mapHash(trustGrants),

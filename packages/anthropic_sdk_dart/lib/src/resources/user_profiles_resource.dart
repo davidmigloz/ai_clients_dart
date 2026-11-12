@@ -298,10 +298,8 @@ abstract class _UserProfilesBase extends ResourceBase {
         : '${_profilePath(profileId)}$subpath';
     final url = requestBuilder.buildUrl(path, queryParams: query?.call());
     final headers = requestBuilder.buildHeaders(
+      betas: betas,
       workspaceId: workspaceId,
-      additionalHeaders: {
-        if (betas.isNotEmpty) 'anthropic-beta': betas.join(','),
-      },
     );
     // The selected resource owns the profile API version.
     final features = {

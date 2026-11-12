@@ -12,17 +12,13 @@ class ListUserProfilesResponse {
 
   /// Cursor for the next page, or `null` when there are no more results.
   final String? nextPage;
-  final bool _includeNullNextPage;
+  final bool _hasNextPage;
 
   /// Creates a [ListUserProfilesResponse].
   const ListUserProfilesResponse({required this.data, this.nextPage})
-    : _includeNullNextPage = false;
+    : _hasNextPage = nextPage != null;
 
-  const ListUserProfilesResponse._(
-    this.data,
-    this.nextPage,
-    this._includeNullNextPage,
-  );
+  const ListUserProfilesResponse._(this.data, this.nextPage, this._hasNextPage);
 
   /// Creates a [ListUserProfilesResponse] from JSON.
   factory ListUserProfilesResponse.fromJson(Map<String, dynamic> json) {
@@ -39,7 +35,7 @@ class ListUserProfilesResponse {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'data': data.map((e) => e.toJson()).toList(),
-    if (nextPage != null || _includeNullNextPage) 'next_page': nextPage,
+    if (_hasNextPage) 'next_page': nextPage,
   };
 
   /// Creates a copy with replaced values.
@@ -47,10 +43,11 @@ class ListUserProfilesResponse {
     List<UserProfile>? data,
     Object? nextPage = unsetCopyWithValue,
   }) {
+    final replacesNextPage = !identical(nextPage, unsetCopyWithValue);
     return ListUserProfilesResponse._(
       data ?? this.data,
-      nextPage == unsetCopyWithValue ? this.nextPage : nextPage as String?,
-      _includeNullNextPage,
+      replacesNextPage ? nextPage as String? : this.nextPage,
+      _hasNextPage || replacesNextPage,
     );
   }
 
@@ -60,10 +57,11 @@ class ListUserProfilesResponse {
       other is ListUserProfilesResponse &&
           runtimeType == other.runtimeType &&
           listsEqual(data, other.data) &&
+          _hasNextPage == other._hasNextPage &&
           nextPage == other.nextPage;
 
   @override
-  int get hashCode => Object.hash(listHash(data), nextPage);
+  int get hashCode => Object.hash(listHash(data), nextPage, _hasNextPage);
 
   @override
   String toString() =>
