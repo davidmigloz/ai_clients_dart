@@ -15,7 +15,12 @@ Future<http.Response> sendBufferedHttpAttempt({
   required Duration? timeout,
   required Future<void>? abortTrigger,
   required String correlationId,
-}) => _BufferedAttempt(timeout, abortTrigger, correlationId).run(send);
+  http.Abortable? nativeRequest,
+}) => _BufferedAttempt(
+  timeout,
+  abortTrigger,
+  correlationId,
+).run(send, nativeRequest);
 
 class _BufferedAttempt {
   _BufferedAttempt(this.timeout, this.abortTrigger, this.correlationId);
@@ -31,9 +36,14 @@ class _BufferedAttempt {
 
   Future<http.Response> run(
     Future<http.StreamedResponse> Function(Future<void>) send,
+    http.Abortable? nativeRequest,
   ) async {
     final userAbort = abortTrigger?.asStream().listen(
       (_) => _cancel(_userAbortError()),
+      onError: (Object _, StackTrace _) {},
+    );
+    final nativeAbort = nativeRequest?.abortTrigger?.asStream().listen(
+      (_) => _cancel(http.RequestAbortedException(nativeRequest.url)),
       onError: (Object _, StackTrace _) {},
     );
     _watch.start();
@@ -58,6 +68,7 @@ class _BufferedAttempt {
       _watch.stop();
       _body = null;
       unawaited(userAbort?.cancel());
+      unawaited(nativeAbort?.cancel());
     }
   }
 
@@ -112,7 +123,7 @@ class _BufferedAttempt {
     _result.completeError(failure, stackTrace);
   }
 
-  void _cancel(AnthropicException error) {
+  void _cancel(Object error) {
     if (_result.isCompleted) return;
     _result.completeError(error);
     _transportAbort.complete();

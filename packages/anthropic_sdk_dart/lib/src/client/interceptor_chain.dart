@@ -50,17 +50,26 @@ class InterceptorChain {
       abortTrigger: abortTrigger,
     );
 
-    if (abortTrigger == null) return _buildChain(0)(context);
+    final nativeRequest = request is http.Abortable ? request : null;
+    if (abortTrigger == null) {
+      return _buildChain(0, nativeRequest: nativeRequest)(context);
+    }
 
     final admission = _TransportAdmission(request.headers['X-Request-ID']);
     return admission.run(
       abortTrigger,
-      () => _buildChain(0, admission)(context),
+      () => _buildChain(0, admission: admission, nativeRequest: nativeRequest)(
+        context,
+      ),
     );
   }
 
   /// Builds the interceptor chain recursively.
-  InterceptorNext _buildChain(int index, [_TransportAdmission? admission]) {
+  InterceptorNext _buildChain(
+    int index, {
+    _TransportAdmission? admission,
+    http.Abortable? nativeRequest,
+  }) {
     if (index >= interceptors.length) {
       // Terminal: execute the actual HTTP request
       // Per spec, retry wraps the transport execution
@@ -109,7 +118,9 @@ class InterceptorChain {
 
         Future<http.Response> executeTransport() async {
           ensureNotClosed?.call();
-          if (timeout == null && context.abortTrigger == null) {
+          if (timeout == null &&
+              context.abortTrigger == null &&
+              nativeRequest?.abortTrigger == null) {
             return http.Response.fromStream(
               await httpClient.send(createRequest()),
             );
@@ -120,6 +131,7 @@ class InterceptorChain {
             timeout: timeout,
             abortTrigger: context.abortTrigger,
             correlationId: correlationId,
+            nativeRequest: nativeRequest,
           );
         }
 
@@ -141,7 +153,11 @@ class InterceptorChain {
     // Recursive: call current interceptor with next in chain
     return (context) {
       final interceptor = interceptors[index];
-      final next = _buildChain(index + 1, admission);
+      final next = _buildChain(
+        index + 1,
+        admission: admission,
+        nativeRequest: nativeRequest,
+      );
 
       return interceptor.intercept(context, next);
     };

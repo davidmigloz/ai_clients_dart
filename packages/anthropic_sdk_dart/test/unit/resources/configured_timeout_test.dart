@@ -21,6 +21,7 @@ final _message = MessageCreateRequest(
 );
 
 void main() {
+  _nativeAbortTests();
   _streamAndDirectTimeoutTests();
 
   test('POST timeout signals transport and cancels a late response', () async {
@@ -570,5 +571,85 @@ class _StreamObservation {
     await _closed.future;
     expect(_events, isEmpty);
     expect(_errors, [_timeoutError]);
+  }
+}
+
+void _nativeAbortTests() {
+  for (final multipart in [false, true]) {
+    for (final (description, hasSdkAbort, sdkWins) in [
+      ('native signal', false, false),
+      ('native signal with SDK signal pending', true, false),
+      ('SDK signal with native signal pending', true, true),
+    ]) {
+      test(
+        'advanced ${multipart ? 'multipart' : 'cloneable'} uses the $description',
+        () async {
+          final timers = _ControlledTimeouts();
+          await timers.run(() async {
+            final exchange = _Exchange();
+            final transport = _Transport([exchange]);
+            final client = _client(
+              transport,
+              _retryPolicy,
+              authProvider: const ApiKeyProvider('fixture-key'),
+            );
+            addTearDown(client.close);
+            final nativeAbort = Completer<void>();
+            final sdkAbort = Completer<void>();
+            final url = Uri.https('fixture.invalid', '/advanced');
+            final original = multipart
+                ? http.AbortableMultipartRequest(
+                    'POST',
+                    url,
+                    abortTrigger: nativeAbort.future,
+                  )
+                : http.AbortableRequest(
+                    'GET',
+                    url,
+                    abortTrigger: nativeAbort.future,
+                  );
+            final result = client.interceptorChain.execute(
+              original,
+              abortTrigger: hasSdkAbort ? sdkAbort.future : null,
+            );
+            final sent = await exchange.sent.future;
+            expect(sent.headers['x-api-key'], 'fixture-key');
+            final listening = Completer<void>();
+            var cancellations = 0;
+            final body = StreamController<List<int>>(
+              onListen: listening.complete,
+              onCancel: () => cancellations++,
+            );
+            exchange.response.complete(http.StreamedResponse(body.stream, 200));
+            await listening.future;
+            final failed = expectLater(
+              result,
+              throwsA(
+                sdkWins
+                    ? isA<AbortedException>().having(
+                        (error) => error.stage,
+                        'stage',
+                        AbortionStage.duringResponse,
+                      )
+                    : isA<http.RequestAbortedException>().having(
+                        (error) => error.uri,
+                        'request URL',
+                        url,
+                      ),
+              ),
+            );
+            (sdkWins ? sdkAbort : nativeAbort).complete();
+            await failed;
+            await (sent as http.Abortable).abortTrigger;
+            (sdkWins ? nativeAbort : sdkAbort).complete();
+            expect(transport.requests, hasLength(1));
+            expect(transport.closeCount, 0);
+            expect(cancellations, 1);
+            expect(timers.attempts.single.isActive, isFalse);
+            await body.close();
+          });
+        },
+      );
+    }
   }
 }
