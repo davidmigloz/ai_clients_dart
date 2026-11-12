@@ -520,9 +520,9 @@ final documentKind = switch (document) {
 
 Construct typed events with their public typed arguments. To preserve a
 future provider permission value, decode its wire event with `fromJson`.
-The same rule applies to wire-only presence flags for session titles, thread
-and workflow IDs, stop details, and web fetch URL sources. Decode responses
-and copy the resulting object to retain omitted or explicit null fields.
+Decode and copy provider data to retain unknown session and thread statuses
+and omitted or explicit null `workflow_run_id`, `stop_details`, and
+`url_sources` fields.
 
 ```dart
 // Before, Dart exposed the parser-only constructor argument.

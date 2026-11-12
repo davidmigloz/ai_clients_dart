@@ -189,6 +189,18 @@ class ManagedAgentsFixtures {
 }
 
 void main() {
+  test('public tool event subclasses keep permission getter behavior', () {
+    final tool = _TypedPermissionOverride();
+    expect(tool.evaluatedPermission, AgentEvaluatedPermission.allow);
+    expect(tool.toJson()['evaluated_permission'], 'allow');
+    expect(tool.copyWith().rawEvaluatedPermission, 'allow');
+
+    final mcp = _RawPermissionOverride();
+    expect(mcp.evaluatedPermission, AgentEvaluatedPermission.unknown);
+    expect(mcp.toJson()['evaluated_permission'], 'future_permission');
+    expect(mcp.copyWith().rawEvaluatedPermission, 'future_permission');
+  });
+
   group('public constructor invariants', () {
     final time = DateTime.utc(2026, 11, 11);
 
@@ -2631,4 +2643,36 @@ Object _withoutPrivateArguments(
     );
   }
   return result!;
+}
+
+final class _TypedPermissionOverride extends AgentToolUseEvent {
+  _TypedPermissionOverride()
+    : super(
+        id: 'toolu_fixture',
+        name: 'search',
+        input: const {},
+        evaluatedPermission: AgentEvaluatedPermission.allow,
+        processedAt: DateTime.utc(2026, 11, 11),
+      );
+
+  @override
+  AgentEvaluatedPermission? get evaluatedPermission {
+    final raw = rawEvaluatedPermission;
+    return raw == null ? null : AgentEvaluatedPermission.fromJson(raw);
+  }
+}
+
+final class _RawPermissionOverride extends AgentMcpToolUseEvent {
+  _RawPermissionOverride()
+    : super(
+        id: 'toolu_fixture',
+        mcpServerName: 'search_server',
+        name: 'search',
+        input: const {},
+        evaluatedPermission: AgentEvaluatedPermission.allow,
+        processedAt: DateTime.utc(2026, 11, 11),
+      );
+
+  @override
+  String get rawEvaluatedPermission => 'future_permission';
 }

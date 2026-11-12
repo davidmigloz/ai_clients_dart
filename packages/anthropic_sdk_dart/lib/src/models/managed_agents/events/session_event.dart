@@ -392,13 +392,17 @@ class AgentToolUseEvent extends SessionEvent {
   final Map<String, dynamic> input;
 
   /// The evaluated permission policy for this tool invocation.
-  final AgentEvaluatedPermission? evaluatedPermission;
+  AgentEvaluatedPermission? get evaluatedPermission {
+    final value = rawEvaluatedPermission;
+    return value == null ? null : AgentEvaluatedPermission.fromJson(value);
+  }
 
+  final AgentEvaluatedPermission? _evaluatedPermission;
   final String? _rawEvaluatedPermission;
 
   /// The original permission string, including future values.
   String? get rawEvaluatedPermission =>
-      _rawEvaluatedPermission ?? evaluatedPermission?.value;
+      _rawEvaluatedPermission ?? _evaluatedPermission?.value;
 
   /// The resolved policy and automatic decision for this tool call.
   final AgentToolEvaluation? evaluation;
@@ -414,7 +418,7 @@ class AgentToolUseEvent extends SessionEvent {
     required this.id,
     required this.name,
     required this.input,
-    this.evaluatedPermission,
+    this._evaluatedPermission,
     this.evaluation,
     required this.processedAt,
     this.sessionThreadId,
@@ -424,8 +428,8 @@ class AgentToolUseEvent extends SessionEvent {
     required this.id,
     required this.name,
     required this.input,
-    this.evaluatedPermission,
-    required this._rawEvaluatedPermission,
+    this._evaluatedPermission,
+    this._rawEvaluatedPermission,
     this.evaluation,
     required this.processedAt,
     this.sessionThreadId,
@@ -433,15 +437,11 @@ class AgentToolUseEvent extends SessionEvent {
 
   /// Creates an [AgentToolUseEvent] from JSON.
   factory AgentToolUseEvent.fromJson(Map<String, dynamic> json) {
-    final rawPermission = json['evaluated_permission'] as String?;
     return AgentToolUseEvent._(
       id: json['id'] as String,
       name: json['name'] as String,
       input: json['input'] as Map<String, dynamic>,
-      evaluatedPermission: rawPermission == null
-          ? null
-          : AgentEvaluatedPermission.fromJson(rawPermission),
-      rawEvaluatedPermission: rawPermission,
+      rawEvaluatedPermission: json['evaluated_permission'] as String?,
       evaluation: json['evaluation'] != null
           ? AgentToolEvaluation.fromJson(
               json['evaluation'] as Map<String, dynamic>,
@@ -482,7 +482,7 @@ class AgentToolUseEvent extends SessionEvent {
           ? this.evaluatedPermission
           : evaluatedPermission as AgentEvaluatedPermission?,
       rawEvaluatedPermission: evaluatedPermission == unsetCopyWithValue
-          ? _rawEvaluatedPermission
+          ? rawEvaluatedPermission
           : null,
       evaluation: evaluation == unsetCopyWithValue
           ? this.evaluation
@@ -645,13 +645,17 @@ class AgentMcpToolUseEvent extends SessionEvent {
   final Map<String, dynamic> input;
 
   /// The evaluated permission policy for this tool invocation.
-  final AgentEvaluatedPermission? evaluatedPermission;
+  AgentEvaluatedPermission? get evaluatedPermission {
+    final value = rawEvaluatedPermission;
+    return value == null ? null : AgentEvaluatedPermission.fromJson(value);
+  }
 
+  final AgentEvaluatedPermission? _evaluatedPermission;
   final String? _rawEvaluatedPermission;
 
   /// The original permission string, including future values.
   String? get rawEvaluatedPermission =>
-      _rawEvaluatedPermission ?? evaluatedPermission?.value;
+      _rawEvaluatedPermission ?? _evaluatedPermission?.value;
 
   /// The resolved policy and automatic decision for this tool call.
   final AgentToolEvaluation? evaluation;
@@ -668,7 +672,7 @@ class AgentMcpToolUseEvent extends SessionEvent {
     required this.mcpServerName,
     required this.name,
     required this.input,
-    this.evaluatedPermission,
+    this._evaluatedPermission,
     this.evaluation,
     required this.processedAt,
     this.sessionThreadId,
@@ -679,8 +683,8 @@ class AgentMcpToolUseEvent extends SessionEvent {
     required this.mcpServerName,
     required this.name,
     required this.input,
-    this.evaluatedPermission,
-    required this._rawEvaluatedPermission,
+    this._evaluatedPermission,
+    this._rawEvaluatedPermission,
     this.evaluation,
     required this.processedAt,
     this.sessionThreadId,
@@ -688,16 +692,12 @@ class AgentMcpToolUseEvent extends SessionEvent {
 
   /// Creates an [AgentMcpToolUseEvent] from JSON.
   factory AgentMcpToolUseEvent.fromJson(Map<String, dynamic> json) {
-    final rawPermission = json['evaluated_permission'] as String?;
     return AgentMcpToolUseEvent._(
       id: json['id'] as String,
       mcpServerName: json['mcp_server_name'] as String,
       name: json['name'] as String,
       input: json['input'] as Map<String, dynamic>,
-      evaluatedPermission: rawPermission == null
-          ? null
-          : AgentEvaluatedPermission.fromJson(rawPermission),
-      rawEvaluatedPermission: rawPermission,
+      rawEvaluatedPermission: json['evaluated_permission'] as String?,
       evaluation: json['evaluation'] != null
           ? AgentToolEvaluation.fromJson(
               json['evaluation'] as Map<String, dynamic>,
@@ -741,7 +741,7 @@ class AgentMcpToolUseEvent extends SessionEvent {
           ? this.evaluatedPermission
           : evaluatedPermission as AgentEvaluatedPermission?,
       rawEvaluatedPermission: evaluatedPermission == unsetCopyWithValue
-          ? _rawEvaluatedPermission
+          ? rawEvaluatedPermission
           : null,
       evaluation: evaluation == unsetCopyWithValue
           ? this.evaluation
