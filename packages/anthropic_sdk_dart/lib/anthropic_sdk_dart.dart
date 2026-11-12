@@ -191,6 +191,7 @@ export 'src/models/managed_agents/sessions/session_list_response.dart';
 export 'src/models/managed_agents/sessions/session_thread.dart';
 export 'src/models/managed_agents/sessions/session_thread_list_response.dart';
 export 'src/models/managed_agents/sessions/update_session_params.dart';
+export 'src/models/managed_agents/tunnels/tunnel.dart';
 export 'src/models/managed_agents/vaults/create_vault_params.dart';
 export 'src/models/managed_agents/vaults/update_vault_params.dart';
 export 'src/models/managed_agents/vaults/vault.dart';
@@ -313,6 +314,8 @@ export 'src/resources/session_thread_events_resource.dart';
 export 'src/resources/session_threads_resource.dart';
 export 'src/resources/sessions_resource.dart';
 export 'src/resources/skills_resource.dart';
+export 'src/resources/tunnels_resource.dart'
+    show TunnelCertificatesResource, TunnelsResource;
 export 'src/resources/user_profiles_resource.dart';
 export 'src/resources/vault_credentials_resource.dart';
 export 'src/resources/vaults_resource.dart';

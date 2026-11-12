@@ -22,6 +22,7 @@ import '../resources/models_resource.dart';
 import '../resources/organization/organization_resource.dart';
 import '../resources/sessions_resource.dart';
 import '../resources/skills_resource.dart';
+import '../resources/tunnels_resource.dart';
 import '../resources/user_profiles_resource.dart';
 import '../resources/vaults_resource.dart';
 import 'config.dart';
@@ -110,6 +111,9 @@ class AnthropicClient {
 
   /// Resource for managing Claude Managed Agents environments.
   late final EnvironmentsResource environments;
+
+  /// Workspace MCP tunnels and CA certificates (research preview).
+  late final TunnelsResource tunnels;
 
   /// Legacy User Profiles beta and the generally available resource.
   ///
@@ -322,6 +326,13 @@ class AnthropicClient {
       ensureNotClosed: _ensureNotClosed,
     );
     environments = EnvironmentsResource(
+      config: config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+    tunnels = TunnelsResource(
       config: config,
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,

@@ -52,6 +52,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Message batches for large-scale offline processing
 - Compliance Activity Feed, directory, organization settings, app content, sessions, and artifact downloads. Security Posture is beta.
 - Model discovery with lifecycle filters, model lines, and thinking and server-tool capabilities
+- MCP tunnel and certificate management in approved Claude API workspaces (research preview)
 - Organization Admin API for keys, users, invites, workspaces, rate limits, compliance settings, RBAC and spend limits
 - Files (expiration, cursor pagination) and skills (multi-file uploads, container skills)
 - Managed agents with environments, self-hosted work, sessions, thread status filters, execution principals, tool permission evaluation, vaults, and streaming events (beta)
@@ -784,6 +785,31 @@ These Dart methods expose the work API. The prebuilt worker in the official CLI 
 
 </details>
 
+### How do I manage MCP tunnels?
+
+<details>
+<summary><b>Show example</b></summary>
+
+MCP tunnels require research preview access on the Claude API. Use a workload identity federation token with `workspace:manage_tunnels` for the authorized workspace. The SDK sends the tunnel beta header on tunnel and certificate calls and the OAuth beta when using a scoped bearer token. [MCP tunnels guide](https://platform.claude.com/docs/en/agents-and-tools/mcp-tunnels/overview)
+
+```dart
+final tunnels = client.tunnels.withToken(workspaceToken);
+final tunnel = await tunnels.create(
+  displayName: 'Private MCP',
+  workspaceId: workspaceId,
+);
+final certificate = await tunnels.certificates(tunnel.id).create(
+  caCertificatePem: caCertificatePem,
+  workspaceId: workspaceId,
+);
+```
+
+For existing Admin integrations, migrate the organization-prefixed tunnel URLs to `/v1/tunnels`, use the `mcp-tunnels-2026-06-22` header, and exchange credentials for the workspace scope. Anthropic documents the older organization routes as deprecated and available during its migration window. [Legacy Admin tunnel reference](https://platform.claude.com/docs/en/api/http/beta/organization/mcp_tunnels)
+
+→ [Full example](example/mcp_tunnels_example.dart)
+
+</details>
+
 ### How do I manage agent memory stores?
 
 <details>
@@ -1107,6 +1133,7 @@ See the [example/](example/) directory for complete examples:
 | [`managed_agents_example.dart`](example/managed_agents_example.dart) | Managed agents: agents, sessions, vaults, multiagent rosters, outcomes, webhooks, credential validation (beta) |
 | [`managed_agents_workflow_example.dart`](example/managed_agents_workflow_example.dart) | Configure dynamic workflows and follow workflow run events (Managed Agents beta) |
 | [`environments_example.dart`](example/environments_example.dart) | Managed Agents cloud and self-hosted environment lifecycle (beta) |
+| [`mcp_tunnels_example.dart`](example/mcp_tunnels_example.dart) | MCP tunnel, proxy token and certificate management (research preview) |
 | [`environment_work_example.dart`](example/environment_work_example.dart) | Self-hosted environment work polling and lease heartbeat (beta) |
 | [`session_threads_example.dart`](example/session_threads_example.dart) | Session threads: list, retrieve, stream events, archive (beta) |
 | [`deployments_example.dart`](example/deployments_example.dart) | Scheduled deployments and deployment runs: cron schedule, pause/resume, run-now (beta) |

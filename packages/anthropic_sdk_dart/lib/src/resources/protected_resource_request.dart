@@ -6,6 +6,7 @@ import '../client/interceptor_chain.dart';
 import '../errors/exceptions.dart';
 import '../errors/response_error.dart';
 import '../interceptors/auth_interceptor.dart';
+import '../interceptors/interceptor.dart';
 import 'base_resource.dart';
 
 /// Sends a secret-bearing request without copying credentials or response
@@ -26,10 +27,12 @@ Future<Object?> sendProtectedResourceRequest(
       ..remove('x-api-key')
       ..['authorization'] = 'Bearer $bearerToken';
   }
+  final credentials = <String>{};
   final chain = InterceptorChain(
     interceptors: [
       if (bearerToken == null)
         ...resource.interceptorChain.interceptors.whereType<AuthInterceptor>(),
+      _CaptureProtectedCredentials(credentials),
     ],
     httpClient: resource.httpClient,
     retryWrapper: resource.interceptorChain.retryWrapper,
@@ -43,32 +46,42 @@ Future<Object?> sendProtectedResourceRequest(
   if (status < 200 || status >= 300) {
     final body = decodeApiErrorResponse(response);
     final parsed = parseApiErrorBody(body);
+    bool containsCredential(String? value) =>
+        value != null && credentials.any(value.contains);
     final metadata = createSafeResponseMetadata(
       statusCode: status,
-      headers: response.headers,
+      headers: {
+        for (final header in response.headers.entries)
+          if (!containsCredential(header.value)) header.key: header.value,
+      },
       latency: watch.elapsed,
-      bodyRequestId: parsed.requestId,
+      bodyRequestId: containsCredential(parsed.requestId)
+          ? null
+          : parsed.requestId,
     );
+    final errorCode = containsCredential(parsed.errorCode)
+        ? null
+        : parsed.errorCode;
     final specific = handleError?.call(body, metadata);
     if (specific != null) throw specific;
     final message = 'HTTP $status from the Claude API';
     throw switch (status) {
       401 => AuthenticationException(
         message: message,
-        errorCode: parsed.errorCode,
+        errorCode: errorCode,
         responseMetadata: metadata,
       ),
       429 => RateLimitException(
         statusCode: status,
         message: message,
-        errorCode: parsed.errorCode,
+        errorCode: errorCode,
         responseMetadata: metadata,
         retryAfter: retryAfterTime(metadata.headers),
       ),
       _ => ApiException(
         statusCode: status,
         message: message,
-        errorCode: parsed.errorCode,
+        errorCode: errorCode,
         responseMetadata: metadata,
       ),
     };
@@ -78,5 +91,32 @@ Future<Object?> sendProtectedResourceRequest(
   } on FormatException {
     // A decoder may attach the entire response body to the exception.
     throw const FormatException('Invalid JSON in protected API response');
+  }
+}
+
+// Auth providers can copy the request, and injected transports need not attach
+// the final request to their response. Observe the effective request here.
+final class _CaptureProtectedCredentials implements Interceptor {
+  const _CaptureProtectedCredentials(this._credentials);
+
+  final Set<String> _credentials;
+
+  @override
+  Future<http.Response> intercept(
+    RequestContext context,
+    InterceptorNext next,
+  ) {
+    final headers = context.request.headers;
+    final authorization = headers['authorization'];
+    final apiKey = headers['x-api-key'];
+    if (authorization != null && authorization.isNotEmpty) {
+      _credentials.add(authorization);
+      if (authorization.toLowerCase().startsWith('bearer ')) {
+        final token = authorization.substring(7).trim();
+        if (token.isNotEmpty) _credentials.add(token);
+      }
+    }
+    if (apiKey != null && apiKey.isNotEmpty) _credentials.add(apiKey);
+    return next(context);
   }
 }
