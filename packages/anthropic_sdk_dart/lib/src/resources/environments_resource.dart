@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../models/managed_agents/environments/agent_environment.dart';
 import '../models/managed_agents/environments/environment_params.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 import 'environment_work_resource.dart';
 
@@ -136,18 +137,8 @@ class EnvironmentsResource extends ResourceBase {
     abortTrigger: abortTrigger,
   );
 
-  String _path(String environmentId) {
-    if (environmentId.isEmpty ||
-        environmentId == '.' ||
-        environmentId == '..') {
-      throw ArgumentError.value(
-        environmentId,
-        'environmentId',
-        'Expected a nonempty environment identifier',
-      );
-    }
-    return '/v1/environments/${Uri.encodeComponent(environmentId)}';
-  }
+  String _path(String environmentId) =>
+      '/v1/environments/${encodePathSegment(environmentId, 'environmentId')}';
 
   Future<T> _send<T>(
     String method,

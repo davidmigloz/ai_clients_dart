@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../errors/exceptions.dart';
 import '../models/managed_agents/environments/environment_work.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 import 'protected_resource_request.dart';
 
@@ -56,7 +57,7 @@ class EnvironmentWorkResource extends ResourceBase {
   }) async => EnvironmentWorkItem.fromJson(
     (await _send(
           'GET',
-          '/${_id(workId)}',
+          '/${encodePathSegment(workId, 'workId')}',
           allowBearer: false,
           includeWorkspace: true,
           workspaceId: workspaceId,
@@ -76,7 +77,7 @@ class EnvironmentWorkResource extends ResourceBase {
   }) async => EnvironmentWorkItem.fromJson(
     (await _send(
           'POST',
-          '/${_id(workId)}',
+          '/${encodePathSegment(workId, 'workId')}',
           allowBearer: false,
           includeWorkspace: true,
           workspaceId: workspaceId,
@@ -112,7 +113,7 @@ class EnvironmentWorkResource extends ResourceBase {
   }) async => EnvironmentWorkItem.fromJson(
     (await _send(
           'POST',
-          '/${_id(workId)}/ack',
+          '/${encodePathSegment(workId, 'workId')}/ack',
           betas: betas,
           abortTrigger: abortTrigger,
         ))!
@@ -130,7 +131,7 @@ class EnvironmentWorkResource extends ResourceBase {
   }) async => EnvironmentWorkHeartbeat.fromJson(
     (await _send(
           'POST',
-          '/${_id(workId)}/heartbeat',
+          '/${encodePathSegment(workId, 'workId')}/heartbeat',
           query: {
             'desired_ttl_seconds': ?desiredTtlSeconds?.toString(),
             'expected_last_heartbeat': ?expectedLastHeartbeat,
@@ -193,7 +194,7 @@ class EnvironmentWorkResource extends ResourceBase {
   }) async => EnvironmentWorkItem.fromJson(
     (await _send(
           'POST',
-          '/${_id(workId)}/stop',
+          '/${encodePathSegment(workId, 'workId')}/stop',
           includeWorkspace: true,
           workspaceId: workspaceId,
           body: {'force': ?force},
@@ -202,13 +203,6 @@ class EnvironmentWorkResource extends ResourceBase {
         ))!
         as Map<String, dynamic>,
   );
-
-  String _id(String value) {
-    if (value.isEmpty || value == '.' || value == '..') {
-      throw ArgumentError('Expected a nonempty environment or work identifier');
-    }
-    return Uri.encodeComponent(value);
-  }
 
   Future<Object?> _send(
     String method,
@@ -229,7 +223,8 @@ class EnvironmentWorkResource extends ResourceBase {
         'Use management credentials for work retrieval and updates',
       );
     }
-    final path = '/v1/environments/${_id(environmentId)}/work$suffix';
+    final path =
+        '/v1/environments/${encodePathSegment(environmentId, 'environmentId')}/work$suffix';
     final headers = requestBuilder.buildHeaders(
       includeWorkspace: includeWorkspace,
       additionalHeaders: {

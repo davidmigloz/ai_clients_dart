@@ -48,3 +48,27 @@ Six buffered and nine streaming/direct fixtures reproduced the unused timeout on
 The pinned Python SDK uses HTTPX connect, read, write, and pool deadlines. The pinned TypeScript SDK aborts each fetch while waiting for headers. OpenAI Dart already times buffered attempts. The independent Models probe showed that a borrowed stalled response body remains subscribed after its timeout. The packages' different timeout boundaries are recorded for the next cross-client review.
 
 [Pinned Python defaults](https://github.com/anthropics/anthropic-sdk-python/blob/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/src/anthropic/_constants.py) · [Pinned TypeScript transport](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/src/client.ts)
+
+## Opaque path identifiers
+
+Existing Files, Skills, Batches and Managed Agents resource methods included
+raw IDs in route templates. A slash split the ID, and a bare dot segment could
+normalize to a parent route. The shared path encoder now escapes each opaque
+ID once and rejects empty, dot-only, and invalid Unicode identifiers. It also
+rejects dot segments before semicolon parameters, which intermediaries may
+strip. A caller-supplied percent-encoded dot remains literal text. The Files
+and Skills alignment introduced the guard for those resources. The follow-up
+applies it across the existing and newly aligned sibling resources.
+[Pinned Python path template](https://github.com/anthropics/anthropic-sdk-python/blob/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/src/anthropic/_utils/_path.py) · [Pinned TypeScript path template](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/src/internal/utils/path.ts)
+
+The local fixture checks 24 public paths. It covers escaped slash, query and
+fragment text, pre-escaped dots, nested identifiers, proxy prefixes, and
+repeated base query parameters. Invalid inputs fail before any HTTP send.
+The scope includes Files and Skills binary methods, JSONL, Managed Agents,
+Admin, Compliance, and workspace MCP tunnels and certificates.
+
+The pinned OpenAI Files and Batches probe reproduces two related gaps.
+A slash in `Files.retrieve` becomes a second route component, and
+`batches.retrieve('..')` sends to the parent endpoint. OpenAI Admin and Safety
+already use guarded encoded identifiers for their own routes.
+[Pinned OpenAI Files](https://github.com/davidmigloz/ai_clients_dart/blob/65b53e07324c13973fa3045d919630bd79a144af/packages/openai_dart/lib/src/resources/files_resource.dart) · [Pinned OpenAI Batches](https://github.com/davidmigloz/ai_clients_dart/blob/65b53e07324c13973fa3045d919630bd79a144af/packages/openai_dart/lib/src/resources/batches_resource.dart)

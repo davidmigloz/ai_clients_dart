@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/models/model_info.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 
 /// Resource for the Models API.
@@ -89,13 +90,8 @@ class ModelsResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    // Prevent empty and dot-only segments from addressing another endpoint.
-    final segment = modelId.split(';').first;
-    if (segment.isEmpty || segment == '.' || segment == '..') {
-      throw ArgumentError.value(modelId, 'modelId', 'Invalid model ID');
-    }
     final url = requestBuilder.buildUrl(
-      '/v1/models/${Uri.encodeComponent(modelId)}',
+      '/v1/models/${encodePathSegment(modelId, 'modelId')}',
     );
     final headers = _headers(betas: betas, workspaceId: workspaceId);
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);

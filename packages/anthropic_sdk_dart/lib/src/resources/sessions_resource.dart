@@ -7,6 +7,7 @@ import '../models/managed_agents/sessions/create_session_params.dart';
 import '../models/managed_agents/sessions/session.dart';
 import '../models/managed_agents/sessions/session_list_response.dart';
 import '../models/managed_agents/sessions/update_session_params.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 import 'session_events_resource.dart';
 import 'session_resources_resource.dart';
@@ -169,7 +170,9 @@ class SessionsResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/sessions/$sessionId');
+    final url = requestBuilder.buildUrl(
+      '/v1/sessions/${encodePathSegment(sessionId, 'sessionId')}',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );
@@ -195,7 +198,9 @@ class SessionsResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/sessions/$sessionId');
+    final url = requestBuilder.buildUrl(
+      '/v1/sessions/${encodePathSegment(sessionId, 'sessionId')}',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );
@@ -221,7 +226,9 @@ class SessionsResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/sessions/$sessionId');
+    final url = requestBuilder.buildUrl(
+      '/v1/sessions/${encodePathSegment(sessionId, 'sessionId')}',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );
@@ -247,7 +254,9 @@ class SessionsResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/sessions/$sessionId/archive');
+    final url = requestBuilder.buildUrl(
+      '/v1/sessions/${encodePathSegment(sessionId, 'sessionId')}/archive',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );

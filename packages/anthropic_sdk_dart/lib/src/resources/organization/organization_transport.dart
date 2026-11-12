@@ -6,6 +6,7 @@ import '../../client/interceptor_chain.dart';
 import '../../client/request_builder.dart';
 import '../../errors/exceptions.dart';
 import '../../errors/response_error.dart';
+import '../../utils/path_segment.dart';
 
 /// Shared transport for organization-scoped Admin calls.
 final class OrganizationTransport {
@@ -83,12 +84,8 @@ final class OrganizationTransport {
 }
 
 /// Escapes one user-supplied path segment before composing an Admin URI.
-String organizationIdSegment(String id, String parameter) {
-  if (id.isEmpty || id == '.' || id == '..') {
-    throw ArgumentError.value(id, parameter, 'Expected a non-empty identifier');
-  }
-  return Uri.encodeComponent(id);
-}
+String organizationIdSegment(String id, String parameter) =>
+    encodePathSegment(id, parameter);
 
 /// Produces the before/after-ID pagination filters shared by Admin lists.
 Map<String, dynamic> organizationPageQuery(

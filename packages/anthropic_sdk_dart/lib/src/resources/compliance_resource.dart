@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../errors/exceptions.dart';
 import '../errors/response_error.dart';
 import '../models/compliance/compliance_models.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 import 'streaming_resource.dart';
 
@@ -368,11 +369,5 @@ class ComplianceResource extends ResourceBase with StreamingResource {
     throw const FormatException('Expected a Compliance API response object');
   }
 
-  static String _segment(String value) {
-    final segment = value.split(';').first;
-    if (segment.isEmpty || segment == '.' || segment == '..') {
-      throw ArgumentError('Expected a non-empty Compliance identifier');
-    }
-    return Uri.encodeComponent(value);
-  }
+  static String _segment(String value) => encodePathSegment(value, 'id');
 }

@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../models/managed_agents/resources/session_resource.dart';
 import '../models/managed_agents/resources/session_resource_params.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 
 /// Beta header for the Managed Agents API.
@@ -35,7 +36,9 @@ class SessionResourcesResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/sessions/$sessionId/resources');
+    final url = requestBuilder.buildUrl(
+      '/v1/sessions/${encodePathSegment(sessionId, 'sessionId')}/resources',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );
@@ -71,7 +74,7 @@ class SessionResourcesResource extends ResourceBase {
     };
 
     final url = requestBuilder.buildUrl(
-      '/v1/sessions/$sessionId/resources',
+      '/v1/sessions/${encodePathSegment(sessionId, 'sessionId')}/resources',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
     final headers = requestBuilder.buildHeaders(
@@ -100,7 +103,8 @@ class SessionResourcesResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/sessions/$sessionId/resources/$resourceId',
+      '/v1/sessions/${encodePathSegment(sessionId, 'sessionId')}/resources'
+      '/${encodePathSegment(resourceId, 'resourceId')}',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
@@ -130,7 +134,8 @@ class SessionResourcesResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/sessions/$sessionId/resources/$resourceId',
+      '/v1/sessions/${encodePathSegment(sessionId, 'sessionId')}/resources'
+      '/${encodePathSegment(resourceId, 'resourceId')}',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
@@ -160,7 +165,8 @@ class SessionResourcesResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/sessions/$sessionId/resources/$resourceId',
+      '/v1/sessions/${encodePathSegment(sessionId, 'sessionId')}/resources'
+      '/${encodePathSegment(resourceId, 'resourceId')}',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
