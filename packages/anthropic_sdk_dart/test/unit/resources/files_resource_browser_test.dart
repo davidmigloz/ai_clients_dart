@@ -12,13 +12,16 @@ import 'package:test/test.dart';
 void main() {
   test('public Files operations send and receive bytes on Web', () async {
     final bytes = Uint8List.fromList([0, 1, 255, 3]);
+    final output = Uint8List.fromList([7, 0, 200]);
+    const outputId = 'file_output_fixture';
     final requests = <http.Request>[];
     final transport = MockClient((request) async {
       requests.add(request);
       final segments = request.url.pathSegments;
       if (segments.last == 'content') {
+        expect(segments[segments.length - 2], outputId);
         return http.Response.bytes(
-          bytes,
+          output,
           200,
           headers: {'content-type': 'application/octet-stream'},
         );
@@ -28,7 +31,9 @@ void main() {
       }
       if (request.method == 'GET' && segments.last == 'files') {
         return _json({
-          'data': [_file],
+          'data': [
+            {..._file, 'id': outputId, 'downloadable': true, 'size_bytes': 3},
+          ],
           'next_page': null,
         });
       }
@@ -64,13 +69,13 @@ void main() {
       workspaceId: 'workspace-override',
     );
     expect(uploaded.id, 'file_fixture');
-    final page = await client.files.list(
-      ids: [uploaded.id],
-      scopeId: 'sesn_fixture',
-    );
-    expect(page.data.single.id, uploaded.id);
+    expect(uploaded.downloadable, isFalse);
+    final page = await client.files.list(scopeId: 'sesn_fixture');
+    final generated = page.data.single;
+    expect(generated.id, outputId);
+    expect(generated.downloadable, isTrue);
     expect((await client.files.retrieve(fileId: uploaded.id)).id, uploaded.id);
-    expect(await client.files.download(fileId: uploaded.id), bytes);
+    expect(await client.files.download(fileId: generated.id), output);
     expect(
       (await client.files.deleteFile(fileId: uploaded.id)).id,
       uploaded.id,
@@ -87,7 +92,7 @@ void main() {
       '/proxy/v1/files',
       '/proxy/v1/files',
       '/proxy/v1/files/file_fixture',
-      '/proxy/v1/files/file_fixture/content',
+      '/proxy/v1/files/file_output_fixture/content',
       '/proxy/v1/files/file_fixture',
     ]);
     for (final (index, request) in requests.indexed) {
@@ -113,7 +118,6 @@ void main() {
     expect(body, contains('filename="fixture.bin"'));
     expect(body, contains('name="expires_in_seconds"'));
     expect(body, contains(latin1.decode(bytes)));
-    expect(requests[1].url.queryParametersAll['ids[]'], [uploaded.id]);
     expect(requests[1].url.queryParameters['scope_id'], 'sesn_fixture');
     expect(requests[3].headers['accept'], 'application/binary');
   });
@@ -126,7 +130,7 @@ const Map<String, Object> _file = {
   'filename': 'fixture.bin',
   'mime_type': 'application/octet-stream',
   'size_bytes': 4,
-  'downloadable': true,
+  'downloadable': false,
 };
 
 http.Response _json(Object data) => http.Response(

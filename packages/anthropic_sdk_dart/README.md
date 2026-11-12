@@ -613,7 +613,9 @@ across requests.
 On Web, use `uploadBytes` for browser-selected files. Listing, metadata,
 deletion, and byte downloads also work when the endpoint permits the browser's
 origin and request headers through CORS. Set `AnthropicConfig.baseUrl` to a
-CORS-enabled application backend that authenticates to Claude on the server.
+CORS-enabled application backend that authenticates to Claude on the server
+and enforces each user's file and workspace access. To expose provider request
+IDs in browser errors, include `request-id` in `Access-Control-Expose-Headers`.
 The Files example accepts `ANTHROPIC_PROXY_URL` at build time. Local
 `upload(filePath: ...)` requires `dart:io`.
 
