@@ -49,7 +49,8 @@ final class ProviderRequest {
 }
 
 /// Adapts a final HTTP request while retaining the caller's abort signal.
-abstract base class ProviderTransport extends http.BaseClient {
+abstract base class ProviderTransport extends http.BaseClient
+    implements DeferredCredentialHeaders {
   /// Wraps a borrowed transport or creates and owns one.
   ProviderTransport(http.Client? client)
     : _client = client ?? http.Client(),

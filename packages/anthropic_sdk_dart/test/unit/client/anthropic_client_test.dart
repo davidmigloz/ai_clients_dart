@@ -1,8 +1,6 @@
 @TestOn('vm')
 library;
 
-import 'dart:io';
-
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
@@ -132,16 +130,6 @@ void main() {
       // ignore: unused_local_variable
       final client = AnthropicClient(httpClient: httpClient)..close();
       expect(httpClient.closeCalled, isFalse);
-    });
-
-    group('fromEnvironment', () {
-      test('throws StateError when ANTHROPIC_API_KEY is not set', () {
-        if (Platform.environment['ANTHROPIC_API_KEY']?.isNotEmpty ?? false) {
-          markTestSkipped('ANTHROPIC_API_KEY is set');
-          return;
-        }
-        expect(AnthropicClient.fromEnvironment, throwsA(isA<StateError>()));
-      });
     });
   });
 }

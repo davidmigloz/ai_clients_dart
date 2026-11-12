@@ -52,7 +52,7 @@ import 'retry_wrapper.dart';
 ///
 /// ```dart
 /// final client = AnthropicClient.fromEnvironment();
-/// // Uses ANTHROPIC_API_KEY environment variable
+/// // Reads ANTHROPIC_API_KEY first, then ANTHROPIC_AUTH_TOKEN.
 /// ```
 class AnthropicClient {
   /// Client configuration.
@@ -155,10 +155,11 @@ class AnthropicClient {
 
   /// Creates an [AnthropicClient] from environment variables.
   ///
-  /// Reads `ANTHROPIC_API_KEY` for the API key (required).
+  /// Reads `ANTHROPIC_API_KEY` or, if it is absent or empty,
+  /// `ANTHROPIC_AUTH_TOKEN` for an OAuth access token.
   /// Optionally reads `ANTHROPIC_BASE_URL` for custom API endpoints.
   ///
-  /// Throws [StateError] if `ANTHROPIC_API_KEY` is not set.
+  /// Throws [StateError] if both credential variables are absent or empty.
   /// Throws [UnsupportedError] on web platforms.
   factory AnthropicClient.fromEnvironment({http.Client? httpClient}) {
     return AnthropicClient(
