@@ -49,7 +49,7 @@ mixin StreamingResource on ResourceBase {
     headers: headers,
     abortTrigger: abortTrigger,
     validateHeaders: validateHeaders,
-    decode: (body, _, _) => SseParser().parse(body),
+    decode: (body, _, _, credentials) => _decodeSse(body, credentials),
   );
 
   /// Makes a streaming GET request whose response contains JSON lines.
@@ -60,6 +60,8 @@ mixin StreamingResource on ResourceBase {
   /// precedence over [errorFactory] when both are provided. The legacy
   /// [errorFactory] receives only the status and body; its exception is returned
   /// unchanged, so that factory remains responsible for its own metadata.
+  /// Both factories receive the error body with echoed request credentials
+  /// removed.
   Stream<Map<String, dynamic>> getJsonlStream(
     String path, {
     Future<void>? abortTrigger,
@@ -79,21 +81,24 @@ mixin StreamingResource on ResourceBase {
     errorFactory: errorFactory,
     errorFactoryWithMetadata: errorFactoryWithMetadata,
     jsonlMedia: true,
-    decode: (body, _, _) => body
+    decode: (body, _, _, credentials) => body
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .where((line) => line.trim().isNotEmpty)
-        .map((line) => jsonDecode(line) as Map<String, dynamic>),
+        .map(
+          (line) => _redactJsonlBatchError(
+            jsonDecode(line) as Map<String, dynamic>,
+            credentials,
+          ),
+        ),
   );
 
   /// Creates an exception for streaming errors.
   AnthropicException _createStreamException(
     int statusCode,
-    String body,
+    ParsedApiErrorBody parsed,
     ResponseMetadata responseMetadata,
   ) {
-    final parsed = parseApiErrorBody(body);
-
     if (statusCode == 401) {
       return AuthenticationException(
         message: parsed.message,
@@ -143,7 +148,7 @@ mixin StreamingResource on ResourceBase {
     queryParams: queryParams,
     headers: headers,
     abortTrigger: abortTrigger,
-    decode: (body, _, _) => SseParser().parse(body),
+    decode: (body, _, _, credentials) => _decodeSse(body, credentials),
   );
 
   Stream<T> _stream<T>(
@@ -158,6 +163,7 @@ mixin StreamingResource on ResourceBase {
       Stream<List<int>> body,
       http.StreamedResponse response,
       Duration latency,
+      Set<String> credentials,
     )
     decode,
     bool Function(T)? isTerminal,
@@ -238,6 +244,7 @@ mixin StreamingResource on ResourceBase {
         if (stopped) return;
         ensureNotClosed?.call();
         correlationId = request.headers['X-Request-ID'] ?? correlationId;
+        final credentials = requestCredentialValues(request.headers);
         final stopwatch = Stopwatch()..start();
         headerTimer = Timer(
           config.timeout,
@@ -272,6 +279,7 @@ mixin StreamingResource on ResourceBase {
                 statusCode: response.statusCode,
                 headers: response.headers,
                 latency: stopwatch.elapsed,
+                credentials: credentials,
               ),
             ),
           );
@@ -301,22 +309,31 @@ mixin StreamingResource on ResourceBase {
                   responseBody.takeBytes(),
                   response.headers,
                 );
+                final parsed = parseApiErrorBody(
+                  body,
+                  credentials: credentials,
+                );
                 final responseMetadata = createSafeResponseMetadata(
                   statusCode: response.statusCode,
                   headers: response.headers,
                   latency: stopwatch.elapsed,
-                  bodyRequestId: parseApiErrorBody(body).requestId,
+                  bodyRequestId: parsed.requestId,
+                  credentials: credentials,
                 );
+                final callbackBody =
+                    errorFactoryWithMetadata == null && errorFactory == null
+                    ? body
+                    : redactApiErrorBody(body, credentials);
                 finish(
                   errorFactoryWithMetadata?.call(
                         response.statusCode,
-                        body,
+                        callbackBody,
                         responseMetadata,
                       ) ??
-                      errorFactory?.call(response.statusCode, body) ??
+                      errorFactory?.call(response.statusCode, callbackBody) ??
                       _createStreamException(
                         response.statusCode,
-                        body,
+                        parsed,
                         responseMetadata,
                       ),
                 );
@@ -336,8 +353,13 @@ mixin StreamingResource on ResourceBase {
             await response.stream.listen(null).cancel();
             return;
           }
-          subscription = decode(responseBodyStream, response, stopwatch.elapsed)
-              .listen(
+          subscription =
+              decode(
+                responseBodyStream,
+                response,
+                stopwatch.elapsed,
+                credentials,
+              ).listen(
                 (event) {
                   if (stopped) return;
                   final terminal = isTerminal?.call(event) == true;
@@ -345,7 +367,12 @@ mixin StreamingResource on ResourceBase {
                   controller.add(event);
                   if (terminal) unawaited(controller.close());
                 },
-                onError: finish,
+                onError: (Object error, StackTrace stackTrace) => finish(
+                  error is FormatException
+                      ? redactApiFormatException(error, credentials)
+                      : error,
+                  stackTrace,
+                ),
                 onDone: finish,
               );
         }
@@ -413,17 +440,77 @@ Stream<T> postResourceEventStream<T>(
   abortTrigger: abortTrigger,
   validateHeaders: validateHeaders,
   isTerminal: isTerminal,
-  decode: (body, response, latency) {
+  decode: (body, response, latency, credentials) {
     final metadata = createSafeResponseMetadata(
       statusCode: response.statusCode,
       headers: response.headers,
       latency: latency,
+      credentials: credentials,
     );
-    return SseParser()
-        .parse(body, strictJson: true)
-        .map((event) => decodeEvent(event, metadata));
+    return _decodeSse(
+      body,
+      credentials,
+      strictJson: true,
+    ).map((event) => decodeEvent(event, metadata));
   },
 );
+
+Stream<Map<String, dynamic>> _decodeSse(
+  Stream<List<int>> body,
+  Set<String> credentials, {
+  bool strictJson = false,
+}) => SseParser().parse(body, strictJson: strictJson).map((event) {
+  if (event['_event'] == 'error' || event['type'] == 'error') {
+    return redactApiErrorEnvelope(event, credentials);
+  }
+  return event;
+});
+
+Map<String, dynamic> _redactJsonlBatchError(
+  Map<String, dynamic> item,
+  Set<String> credentials,
+) {
+  if (credentials.isEmpty || item['result'] is! Map<String, dynamic>) {
+    return item;
+  }
+  final result = item['result'] as Map<String, dynamic>;
+  if (result case {
+    'type': 'errored',
+    'error': final Map<String, dynamic> error,
+  }) {
+    final safe = redactApiErrorEnvelope(error, credentials);
+    if (identical(safe, error)) return item;
+
+    // BatchError requires a string type and message, including for legacy
+    // flat items. Keep the result and envelope discriminators intact.
+    Map<String, dynamic> typedPayload(
+      Map<String, dynamic> original,
+      Map<String, dynamic> redacted,
+    ) => {
+      ...redacted,
+      if (original['type'] is String && !redacted.containsKey('type'))
+        'type': 'unknown',
+      if (original['message'] is String && !redacted.containsKey('message'))
+        'message': '[REDACTED]',
+    };
+
+    final safeError = switch (error) {
+      {'type': 'error', 'error': final Map<String, dynamic> payload} => {
+        ...safe,
+        'error': typedPayload(
+          payload,
+          (safe['error'] as Map<String, dynamic>?) ?? const {},
+        ),
+      },
+      _ => typedPayload(error, safe),
+    };
+    return {
+      ...item,
+      'result': {...result, 'error': safeError},
+    };
+  }
+  return item;
+}
 
 /// Opens a raw response body using the same lifecycle as SSE and JSONL streams.
 Stream<List<int>> getResourceByteStream(
@@ -443,7 +530,7 @@ Stream<List<int>> getResourceByteStream(
   onResponse: onResponse == null
       ? null
       : (response, _) => onResponse(response.headers),
-  decode: (body, _, _) => body,
+  decode: (body, _, _, _) => body,
 );
 
 class _MappedEventSink<T> implements EventSink<Map<String, dynamic>> {

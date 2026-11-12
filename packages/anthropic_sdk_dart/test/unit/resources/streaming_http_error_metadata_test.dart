@@ -87,6 +87,65 @@ void main() {
       });
     }
   }
+  test('typed SSE HTTP failure redacts effective bearer diagnostics', () async {
+    const token = 'fixture-bearer-secret';
+    final mock = MockClient((request) async {
+      expect(request.headers['authorization'], 'Bearer $token');
+      return http.Response(
+        jsonEncode({
+          'type': 'error',
+          'request_id': 'req_real_body',
+          'error': {
+            'type': 'permission_error',
+            'message': 'Rejected Bearer $token, token $token',
+            'details': {
+              'error_code': 'echo:$token',
+              'nested': {'value': 'prefix $token'},
+            },
+          },
+        }),
+        401,
+        headers: {'request-id': 'echo:$token', 'retry-after': '5'},
+      );
+    });
+    final client = AnthropicClient(
+      config: const AnthropicConfig(authProvider: BearerTokenProvider(token)),
+      httpClient: mock,
+    );
+    addTearDown(client.close);
+    await expectLater(
+      client.messages
+          .createStream(
+            MessageCreateRequest(
+              model: 'fixture',
+              maxTokens: 1,
+              messages: [InputMessage.user('Hi')],
+            ),
+          )
+          .toList(),
+      throwsA(
+        isA<AuthenticationException>()
+            .having((error) => error.requestId, 'request ID', 'req_real_body')
+            .having((error) => error.errorCode, 'error code', isNull)
+            .having((error) => error.details, 'error type', [
+              'permission_error',
+            ])
+            .having(
+              (error) => error.message,
+              'message',
+              'Rejected [REDACTED], token [REDACTED]',
+            )
+            .having((error) => error.errorDetails, 'details', {
+              'error_code': 'echo:[REDACTED]',
+              'nested': {'value': 'prefix [REDACTED]'},
+            })
+            .having((error) => error.responseMetadata!.headers, 'headers', {
+              'retry-after': '5',
+            }),
+      ),
+    );
+  });
+
   test(
     'missing server request ID is not replaced with local correlation',
     () async {

@@ -208,6 +208,66 @@ void main() {
   );
 
   test(
+    'heartbeat conflict removes a credential echoed in its lease state',
+    () async {
+      final client = AnthropicClient(
+        httpClient: MockClient((request) async {
+          expect(request.headers['authorization'], 'Bearer $_token');
+          return _json(
+            {
+              'type': 'error',
+              'request_id': 'req_real_heartbeat',
+              'error': {
+                'message': 'Diagnostic',
+                'details': {
+                  'error_code': 'heartbeat_precondition_failed',
+                  'current_state': {
+                    'last_heartbeat': 'echo $_token',
+                    'lease_extended': false,
+                    'state': 'state $_token',
+                    'ttl_seconds': 60,
+                  },
+                },
+              },
+            },
+            status: 412,
+            headers: {'request-id': 'echo $_token', 'x-debug': _token},
+          );
+        }),
+      );
+      addTearDown(client.close);
+      await expectLater(
+        client.environments.work(_env, bearerToken: _token).heartbeat(_work),
+        throwsA(
+          isA<EnvironmentHeartbeatConflictException>()
+              .having((error) => error.statusCode, 'status', 412)
+              .having(
+                (error) => error.errorCode,
+                'error code',
+                'heartbeat_precondition_failed',
+              )
+              .having(
+                (error) => error.requestId,
+                'provider ID',
+                'req_real_heartbeat',
+              )
+              .having((error) => error.currentState.toJson(), 'lease state', {
+                'last_heartbeat': 'echo [REDACTED]',
+                'lease_extended': false,
+                'state': 'state [REDACTED]',
+                'ttl_seconds': 60,
+              })
+              .having(
+                (error) => error.currentState.toString(),
+                'diagnostic',
+                isNot(contains(_token)),
+              ),
+        ),
+      );
+    },
+  );
+
+  test(
     'heartbeat conflict exposes current state without secret diagnostics',
     () async {
       final client = AnthropicClient(

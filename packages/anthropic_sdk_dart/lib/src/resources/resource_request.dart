@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 
+import '../auth/request_auth.dart';
 import '../client/buffered_http_attempt.dart';
 import '../client/request_redirects.dart';
 import '../errors/response_error.dart';
@@ -13,6 +14,7 @@ Future<http.Response> sendResourceRequest(
   required Duration timeout,
   required void Function()? ensureNotClosed,
 }) async {
+  final credentials = requestCredentialValues(request.headers);
   final stopwatch = Stopwatch()..start();
   final response = await sendBufferedHttpAttempt(
     send: (abortTrigger) async {
@@ -37,8 +39,13 @@ Future<http.Response> sendResourceRequest(
         statusCode: response.statusCode,
         headers: response.headers,
         latency: stopwatch.elapsed,
-        bodyRequestId: parseApiErrorBody(body).requestId,
+        bodyRequestId: parseApiErrorBody(
+          body,
+          credentials: credentials,
+        ).requestId,
+        credentials: credentials,
       ),
+      credentials: credentials,
     );
   }
   return response;
