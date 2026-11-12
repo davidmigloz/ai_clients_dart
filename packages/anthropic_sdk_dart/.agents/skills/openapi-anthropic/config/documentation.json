@@ -20,6 +20,7 @@
     "tunnels": "mcp_tunnels",
     "environmentWork": "environment_work",
     "organization": "organization_admin",
+    "organizationFederationIssuers": "federation_issuers",
     "organizationWorkspaces": "organization_admin",
     "messages": "messages",
     "models": "models",
