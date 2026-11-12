@@ -379,6 +379,534 @@ void main() {
     },
   );
 
+  test('toolset runners pair results and isolate family failures', () async {
+    final order = <String>[];
+    final browser = RunnableMessageToolset(
+      definition: BuiltInTool.browserToolset(
+        configs: const BrowserToolsetConfigs(
+          screenshot: ToolsetMemberConfig(enabled: false),
+        ),
+      ),
+      run: (action, call) {
+        order.add(call.toolUse.id);
+        expect(action, isA<BrowserNavigateAction>());
+        return MessageToolResult([
+          ToolResultContent.text('Navigated.'),
+          ToolResultContent.browserState(
+            tabs: const [
+              BrowserStateTabEntry(
+                tabId: 'tab_fixture',
+                title: 'Example',
+                url: 'https://example.invalid',
+                active: true,
+              ),
+            ],
+          ),
+        ]);
+      },
+    );
+    final computer = RunnableMessageToolset(
+      definition: BuiltInTool.computerToolset(),
+      confirm: (_, _) => true,
+      run: (action, call) {
+        order.add(call.toolUse.id);
+        expect(action, isA<ComputerScreenshotAction>());
+        return MessageToolResult.text('Screenshot.');
+      },
+    );
+    final custom = RunnableMessageTool<int>(
+      definition: _definition.copyWith(name: 'navigate'),
+      decode: (input) => input['input'] as int,
+      run: (value, call) {
+        order.add(call.toolUse.id);
+        return MessageToolResult.text('Custom $value.');
+      },
+    );
+    final calls = [
+      _toolsetUse('nav', 'browser', 'navigate', {
+        'url': 'https://example.invalid',
+      }),
+      _toolsetUse('disabled', 'browser', 'screenshot'),
+      _toolUse('custom', name: 'navigate'),
+      _toolsetUse('skipped', 'browser', 'read_page'),
+      _toolsetUse('computer', 'computer', 'screenshot'),
+    ];
+    httpClient
+      ..queueJsonResponse(_reply('msg_tools', 'tool_use', calls))
+      ..queueJsonResponse(MockResponses.message(text: 'Done'));
+
+    final result = await client.messages.runTools(
+      request,
+      tools: [custom],
+      toolsets: [browser, computer],
+      maxIterations: 2,
+    );
+
+    expect(result.message.text, 'Done');
+    expect(order, ['nav', 'custom', 'computer']);
+    final first = _body(httpClient.requests.first);
+    expect(first['tools'], [
+      custom.definition.toJson(),
+      browser.definition.toJson(),
+      computer.definition.toJson(),
+    ]);
+    final last = _body(httpClient.lastRequest!);
+    expect(last['messages'], [
+      request.messages.single.toJson(),
+      {'role': 'assistant', 'content': calls},
+      {
+        'role': 'user',
+        'content': [
+          {
+            ..._result('nav', 'Navigated.'),
+            'toolset_name': 'browser',
+            'content': [
+              {'type': 'text', 'text': 'Navigated.'},
+              ToolResultContent.browserState(
+                tabs: const [
+                  BrowserStateTabEntry(
+                    tabId: 'tab_fixture',
+                    title: 'Example',
+                    url: 'https://example.invalid',
+                    active: true,
+                  ),
+                ],
+              ).toJson(),
+            ],
+          },
+          {
+            ..._result(
+              'disabled',
+              'The requested toolset action is unavailable.',
+              isError: true,
+            ),
+            'toolset_name': 'browser',
+          },
+          _result('custom', 'Custom 3.'),
+          {
+            ..._result(
+              'skipped',
+              'Not executed: an earlier action in this turn failed.',
+              isError: true,
+            ),
+            'toolset_name': 'browser',
+          },
+          {..._result('computer', 'Screenshot.'), 'toolset_name': 'computer'},
+        ],
+      },
+    ]);
+  });
+
+  test('streamed toolset actions wait for completed frames', () async {
+    var completed = false;
+    var runs = 0;
+    final browser = RunnableMessageToolset(
+      definition: BuiltInTool.browserToolset(),
+      run: (action, _) {
+        expect(completed, isTrue);
+        expect(
+          action,
+          isA<BrowserNavigateAction>().having(
+            (value) => value.url,
+            'URL',
+            'https://example.invalid',
+          ),
+        );
+        runs++;
+        return MessageToolResult([
+          ToolResultContent.text('Navigated.'),
+          ToolResultContent.browserState(
+            tabs: const [
+              BrowserStateTabEntry(
+                tabId: 'tab_fixture',
+                title: 'Example',
+                url: 'https://example.invalid',
+                active: true,
+              ),
+            ],
+          ),
+        ]);
+      },
+    );
+    final events = _toolEvents()
+      ..[1]['content_block'] = _toolsetUse('navigate', 'browser', 'navigate')
+      ..[2]['delta'] = {
+        'type': 'input_json_delta',
+        'partial_json': '{"url":"https://example.invalid"}',
+      };
+    httpClient
+      ..queueStreamingResponse(events)
+      ..queueStreamingResponse(MockResponses.streamingEvents(text: 'Done.'));
+    final result = await client.messages.runTools(
+      request,
+      tools: [],
+      toolsets: [browser],
+      onEvent: (event) {
+        if (event is MessageStopEvent) completed = true;
+      },
+    );
+    expect(result.message.text, 'Done.');
+    expect(runs, 1);
+
+    httpClient.queueStreamingResponse(
+      events.where((event) => event['type'] != 'content_block_stop').toList(),
+    );
+    await expectLater(
+      client.messages.runTools(
+        request,
+        tools: [],
+        toolsets: [browser],
+        stream: true,
+      ),
+      throwsStateError,
+    );
+    expect(runs, 1);
+    expect(httpClient.requests, hasLength(3));
+  });
+
+  test(
+    'toolset errors keep family and never send empty error content',
+    () async {
+      final toolset = RunnableMessageToolset(
+        definition: BuiltInTool.browserToolset(),
+        run: (_, _) =>
+            MessageToolResult([ToolResultContent.text(' ')], isError: true),
+      );
+      httpClient
+        ..queueJsonResponse(
+          _reply('msg_tools', 'tool_use', [
+            _toolsetUse('empty', 'browser', 'screenshot'),
+          ]),
+        )
+        ..queueJsonResponse(MockResponses.message());
+      await client.messages.runTools(request, tools: [], toolsets: [toolset]);
+      expect(_body(httpClient.lastRequest!)['messages'], [
+        request.messages.single.toJson(),
+        isA<Map<String, dynamic>>(),
+        {
+          'role': 'user',
+          'content': [
+            {
+              ..._result(
+                'empty',
+                'The tool failed to complete.',
+                isError: true,
+              ),
+              'toolset_name': 'browser',
+            },
+          ],
+        },
+      ]);
+    },
+  );
+
+  test(
+    'browser optional member execution requires its explicit enablement',
+    () async {
+      final toolset = RunnableMessageToolset(
+        definition: BuiltInTool.browserToolset(),
+        run: (_, _) => fail('A default-disabled action was executed.'),
+      );
+      httpClient
+        ..queueJsonResponse(
+          _reply('msg_tools', 'tool_use', [
+            _toolsetUse('javascript', 'browser', 'javascript_exec', {
+              'text': '1',
+            }),
+          ]),
+        )
+        ..queueJsonResponse(MockResponses.message());
+      await client.messages.runTools(request, tools: [], toolsets: [toolset]);
+      final body = _body(httpClient.lastRequest!);
+      expect(body['messages'], [
+        request.messages.single.toJson(),
+        isA<Map<String, dynamic>>(),
+        {
+          'role': 'user',
+          'content': [
+            {
+              ..._result(
+                'javascript',
+                'The requested toolset action is unavailable.',
+                isError: true,
+              ),
+              'toolset_name': 'browser',
+            },
+          ],
+        },
+      ]);
+    },
+  );
+
+  test(
+    'abort while confirming cannot start an enabled browser action',
+    () async {
+      final definition = BuiltInTool.browserToolset(
+        configs: const BrowserToolsetConfigs(
+          javascriptExec: ToolsetMemberConfig(enabled: true),
+        ),
+      );
+      expect(
+        () => RunnableMessageToolset(
+          definition: definition,
+          run: (_, _) => fail('Unexpected action.'),
+        ),
+        throwsArgumentError,
+      );
+      final confirmation = Completer<bool>();
+      final confirming = Completer<void>();
+      final abort = Completer<void>();
+      var calls = 0;
+      final toolset = RunnableMessageToolset(
+        definition: definition,
+        confirm: (action, _) {
+          expect(action, isA<BrowserJavascriptExecAction>());
+          confirming.complete();
+          return confirmation.future;
+        },
+        run: (_, _) {
+          calls++;
+          return MessageToolResult.text('executed');
+        },
+      );
+      httpClient.queueJsonResponse(
+        _reply('msg_tools', 'tool_use', [
+          _toolsetUse('javascript', 'browser', 'javascript_exec', {
+            'text': '1',
+          }),
+        ]),
+      );
+      final run = client.messages.runTools(
+        request,
+        tools: [],
+        toolsets: [toolset],
+        abortTrigger: abort.future,
+      );
+      final failed = expectLater(run, throwsA(isA<AbortedException>()));
+      await confirming.future;
+      abort.complete();
+      await failed;
+      confirmation.complete(true);
+      await Future<void>.value();
+      expect(calls, 0);
+      expect(httpClient.requests, hasLength(1));
+    },
+  );
+
+  test(
+    'default computer key actions require confirmation and halt their own family',
+    () async {
+      final definition = BuiltInTool.computerToolset();
+      expect(
+        () => RunnableMessageToolset(
+          definition: definition,
+          run: (_, _) => fail('Unexpected computer action.'),
+        ),
+        throwsArgumentError,
+      );
+      final disabled = BuiltInTool.computerToolset(
+        configs: const ComputerToolsetConfigs(
+          typeAction: ToolsetMemberConfig(enabled: false),
+          key: ToolsetMemberConfig(enabled: false),
+          holdKey: ToolsetMemberConfig(enabled: false),
+        ),
+      );
+      expect(
+        RunnableMessageToolset(
+          definition: disabled,
+          run: (_, _) => fail('Unexpected disabled computer action.'),
+        ).family,
+        'computer',
+      );
+      final confirmations = <String>[];
+      final computer = RunnableMessageToolset(
+        definition: definition,
+        confirm: (action, _) {
+          confirmations.add(action.name);
+          return false;
+        },
+        run: (_, _) => fail('Declined computer action executed.'),
+      );
+      httpClient
+        ..queueJsonResponse(
+          _reply('msg_tools', 'tool_use', [
+            _toolsetUse('type', 'computer', 'type', {'text': 'fixture'}),
+            _toolsetUse('screenshot', 'computer', 'screenshot'),
+          ]),
+        )
+        ..queueJsonResponse(MockResponses.message());
+      await client.messages.runTools(request, tools: [], toolsets: [computer]);
+      expect(confirmations, ['type']);
+      final messages =
+          _body(httpClient.lastRequest!)['messages'] as List<Object?>;
+      expect(messages.last, {
+        'role': 'user',
+        'content': [
+          {
+            ..._result(
+              'type',
+              'The toolset action was declined.',
+              isError: true,
+            ),
+            'toolset_name': 'computer',
+          },
+          {
+            ..._result(
+              'screenshot',
+              'Not executed: an earlier computer action in this turn failed.',
+              isError: true,
+            ),
+            'toolset_name': 'computer',
+          },
+        ],
+      });
+    },
+  );
+
+  test(
+    'browser file policy runs before confirmation and file execution',
+    () async {
+      final definition = BuiltInTool.browserToolset(
+        configs: const BrowserToolsetConfigs(
+          fileUpload: ToolsetMemberConfig(enabled: true),
+        ),
+      );
+      final seen = <String>[];
+      final fileAction = _toolsetUse('upload', 'browser', 'file_upload', {
+        'target': {'type': 'ref', 'ref': 'ref_fixture'},
+        'paths': ['staged/fixture.txt'],
+        'document_ids': ['doc_fixture'],
+      });
+      for (final approved in [false, true]) {
+        final browser = RunnableMessageToolset(
+          definition: definition,
+          filePolicy: approved
+              ? (action, _) {
+                  expect(action.target.ref, 'ref_fixture');
+                  expect(action.paths, ['staged/fixture.txt']);
+                  expect(action.documentIds, ['doc_fixture']);
+                  seen.add('policy');
+                  return true;
+                }
+              : null,
+          confirm: (_, _) {
+            seen.add('confirm');
+            return true;
+          },
+          run: (_, _) {
+            seen.add('run');
+            return MessageToolResult.text('Uploaded.');
+          },
+        );
+        httpClient
+          ..queueJsonResponse(_reply('msg_tools', 'tool_use', [fileAction]))
+          ..queueJsonResponse(MockResponses.message());
+        await client.messages.runTools(request, tools: [], toolsets: [browser]);
+        final messages =
+            _body(httpClient.lastRequest!)['messages'] as List<Object?>;
+        expect(messages.last, {
+          'role': 'user',
+          'content': [
+            {
+              ..._result(
+                'upload',
+                approved
+                    ? 'Uploaded.'
+                    : 'The browser file upload was refused by its file policy.',
+                isError: !approved,
+              ),
+              'toolset_name': 'browser',
+            },
+          ],
+        });
+      }
+      expect(seen, ['policy', 'confirm', 'run']);
+    },
+  );
+
+  test('closed client cannot dispatch an approved toolset action', () async {
+    final browser = RunnableMessageToolset(
+      definition: BuiltInTool.browserToolset(),
+      confirm: (_, _) {
+        client.close();
+        return true;
+      },
+      run: (_, _) => fail('Closed client ran the toolset callback.'),
+    );
+    httpClient.queueJsonResponse(
+      _reply('msg_tools', 'tool_use', [
+        _toolsetUse('screenshot', 'browser', 'screenshot'),
+      ]),
+    );
+    await expectLater(
+      client.messages.runTools(request, tools: [], toolsets: [browser]),
+      throwsStateError,
+    );
+    expect(httpClient.requests, hasLength(1));
+  });
+
+  test(
+    'inline removal and re-addition govern a registered toolset family',
+    () async {
+      const remove = ToolRemovalInputBlock(
+        tool: ToolChangeToolReference('browser'),
+      );
+      const add = ToolAdditionInputBlock(
+        tool: ToolChangeToolReference('browser'),
+      );
+      var runs = 0;
+      final browser = RunnableMessageToolset(
+        definition: BuiltInTool.browserToolset(),
+        run: (_, _) {
+          runs++;
+          return MessageToolResult.text('Ran fixture action.');
+        },
+      );
+      for (final restored in [false, true]) {
+        httpClient
+          ..queueJsonResponse(
+            _reply('msg_tools', 'tool_use', [
+              _toolsetUse('read', 'browser', 'read_page'),
+            ]),
+          )
+          ..queueJsonResponse(MockResponses.message());
+        await client.messages.runTools(
+          request.copyWith(
+            model: 'claude-sonnet-5-5',
+            messages: [
+              ...request.messages,
+              InputMessage(
+                role: MessageRole.system,
+                content: MessageContent.blocks([remove, if (restored) add]),
+              ),
+            ],
+          ),
+          tools: [],
+          toolsets: [browser],
+          betas: ['inline-tools-2026-09-15'],
+        );
+        final messages =
+            _body(httpClient.lastRequest!)['messages'] as List<Object?>;
+        expect(messages.last, {
+          'role': 'user',
+          'content': [
+            {
+              ..._result(
+                'read',
+                restored
+                    ? 'Ran fixture action.'
+                    : 'The requested tool has no available callback.',
+                isError: !restored,
+              ),
+              'toolset_name': 'browser',
+            },
+          ],
+        });
+      }
+      expect(runs, 1);
+    },
+  );
+
   test(
     'pause and threshold compaction replay unchanged and run no callbacks',
     () async {
@@ -941,6 +1469,19 @@ Map<String, dynamic> _toolUse(
   'id': id,
   'name': name,
   'input': {'input': input},
+};
+
+Map<String, dynamic> _toolsetUse(
+  String id,
+  String family,
+  String name, [
+  Map<String, Object?> input = const {},
+]) => {
+  'type': 'tool_use',
+  'id': id,
+  'toolset_name': family,
+  'name': name,
+  'input': input,
 };
 
 Map<String, dynamic> _reply(

@@ -13,10 +13,12 @@ import '../models/messages/message_create_request.dart';
 import '../models/messages/message_role.dart';
 import '../models/metadata/stop_reason.dart';
 import '../models/streaming/message_stream_event.dart';
+import '../models/tools/built_in_tools.dart';
 import '../models/tools/tool.dart';
 import '../models/tools/tool_change_reference.dart';
 import '../models/tools/tool_choice.dart';
 import '../models/tools/tool_definition.dart';
+import '../models/tools/toolset_action.dart';
 import '../resources/message_thread.dart';
 import '../resources/messages_resource.dart';
 import '../utils/request_id.dart';
@@ -53,6 +55,139 @@ final class RunnableMessageTool<T> {
   )
   _invoke;
 }
+
+/// A browser or computer toolset backed by a caller-provided executor.
+final class RunnableMessageToolset {
+  /// Binds a pinned [BrowserToolset] or [ComputerToolset] to an executor.
+  ///
+  /// Supply `confirm` when enabling browser JavaScript or upload, or when
+  /// leaving computer typing or key actions enabled. A browser file upload
+  /// also needs `filePolicy` to approve its paths and document IDs. The
+  /// executor validates action bounds and supplies the applicable result
+  /// content, including browser state or screenshots.
+  RunnableMessageToolset({
+    required BuiltInTool definition,
+    required this._run,
+    this._confirm,
+    this._filePolicy,
+  }) : definition = _copyToolset(definition),
+       family = definition is BrowserToolset ? 'browser' : 'computer' {
+    final requiredMembers = family == 'browser'
+        ? _browserConfirmationMembers
+        : _computerConfirmationMembers;
+    if (_confirm == null && requiredMembers.any(_enabled)) {
+      throw ArgumentError('Enabled $family actions require confirm');
+    }
+  }
+
+  /// Toolset declaration sent to Claude.
+  final BuiltInTool definition;
+
+  /// The wire family, `browser` or `computer`.
+  final String family;
+
+  final FutureOr<MessageToolResult> Function(ToolsetAction, MessageToolCall)
+  _run;
+  final FutureOr<bool> Function(ToolsetAction, MessageToolCall)? _confirm;
+  final FutureOr<bool> Function(BrowserFileUploadAction, MessageToolCall)?
+  _filePolicy;
+
+  bool _enabled(String name) {
+    final configs = definition.toJson()['configs'] as Map<String, dynamic>?;
+    return switch (configs?[name]) {
+      {'enabled': final bool enabled} => enabled,
+      _ => family != 'browser' || !_browserOptionalMembers.contains(name),
+    };
+  }
+
+  Future<MessageToolResult> _invoke(
+    MessageToolCall call,
+    void Function() admitHandler,
+  ) async {
+    final action = call.toolUse.toolsetAction;
+    if (action == null ||
+        action is UnknownToolsetAction ||
+        !_enabled(call.toolUse.name)) {
+      return MessageToolResult.text(
+        'The requested toolset action is unavailable.',
+        isError: true,
+      );
+    }
+    if (!_hasValidConfirmationInput(action)) {
+      return MessageToolResult.text(
+        'The toolset action has invalid input.',
+        isError: true,
+      );
+    }
+    admitHandler();
+    if (action is BrowserFileUploadAction) {
+      final filePolicy = _filePolicy;
+      final allowed = filePolicy != null && await filePolicy(action, call);
+      await Future<void>.value();
+      admitHandler();
+      if (!allowed) {
+        return MessageToolResult.text(
+          'The browser file upload was refused by its file policy.',
+          isError: true,
+        );
+      }
+    }
+    if (_confirm case final confirm?) {
+      final allowed = await confirm(action, call);
+      await Future<void>.value();
+      admitHandler();
+      if (!allowed) {
+        return MessageToolResult.text(
+          'The toolset action was declined.',
+          isError: true,
+        );
+      }
+    }
+    return _run(action, call);
+  }
+}
+
+const _browserConfirmationMembers = {'javascript_exec', 'file_upload'};
+const _computerConfirmationMembers = {'type', 'key', 'hold_key'};
+const Set<String> _browserOptionalMembers = {
+  ..._browserConfirmationMembers,
+  'read_console',
+  'read_network',
+};
+
+BuiltInTool _copyToolset(BuiltInTool definition) {
+  final type = switch (definition) {
+    BrowserToolset() => 'browser_toolset_20260801',
+    ComputerToolset() => 'computer_toolset_20260801',
+    _ => null,
+  };
+  final wire = definition.toJson();
+  if (type == null || wire['type'] != type) {
+    throw ArgumentError('Expected a supported browser or computer toolset');
+  }
+  return BuiltInTool.fromJson(deepUnmodifiableMap(wire));
+}
+
+String? _wireToolsetFamily(Object? type) => switch (type) {
+  final String value when value.startsWith('browser_toolset_') => 'browser',
+  final String value when value.startsWith('computer_toolset_') => 'computer',
+  _ => null,
+};
+
+bool _hasValidConfirmationInput(ToolsetAction action) => switch (action) {
+  BrowserFileUploadAction(:final target, :final paths, :final documentIds) =>
+    target.type == 'ref' &&
+        target.ref.isNotEmpty &&
+        (paths?.isNotEmpty == true || documentIds?.isNotEmpty == true) &&
+        (paths?.every((path) => path.isNotEmpty) ?? true) &&
+        (documentIds?.every((id) => id.isNotEmpty) ?? true),
+  BrowserJavascriptExecAction() ||
+  ComputerTypeAction() ||
+  ComputerKeyAction() => action.input['text'] is String,
+  ComputerHoldKeyAction(input: {'text': String(), 'duration': int()}) => true,
+  ComputerHoldKeyAction() => false,
+  _ => true,
+};
 
 /// A completed assistant tool request supplied to an application callback.
 final class MessageToolCall {
@@ -115,13 +250,14 @@ final class MessageToolRunResult {
 
 /// Executes application callbacks for completed Messages tool turns.
 extension MessageToolRunner on MessagesResource {
-  /// Runs a Messages loop with registered custom [tools].
+  /// Runs a Messages loop with registered custom [tools] and [toolsets].
   ///
   /// Tool definitions are added to the supplied request. Other definitions,
   /// routing options and beta headers are preserved. Tool callbacks run in
   /// response order after a complete `tool_use` turn. An unregistered custom
-  /// call returns an error block. A toolset member call hands the raw reply
-  /// back to the application for manual handling of the whole turn.
+  /// call returns an error block. A call to an unregistered toolset hands
+  /// the whole turn back for manual handling. For registered toolsets, an
+  /// error skips later actions of that family in the same turn.
   ///
   /// [maxIterations] caps assistant requests. A tool call in the last
   /// allowed response is returned pending so a side effect cannot run without
@@ -147,6 +283,7 @@ extension MessageToolRunner on MessagesResource {
   Future<MessageToolRunResult> runTools(
     MessageCreateRequest request, {
     required List<RunnableMessageTool<Object?>> tools,
+    List<RunnableMessageToolset> toolsets = const [],
     int? maxIterations,
     bool stream = false,
     bool useThread = false,
@@ -183,8 +320,18 @@ extension MessageToolRunner on MessagesResource {
       }
       registered[tool.definition.name] = tool;
     }
+    final registeredToolsets = <String, RunnableMessageToolset>{};
+    for (final toolset in toolsets) {
+      if (registeredToolsets.containsKey(toolset.family)) {
+        throw ArgumentError('A toolset family can only have one callback');
+      }
+      registeredToolsets[toolset.family] = toolset;
+    }
     final configured = request.copyWith(
-      tools: _toolDefinitions(request.tools, registered),
+      tools: _toolsetDefinitions(
+        _toolDefinitions(request.tools, registered),
+        registeredToolsets,
+      ),
     );
     final activeBetas = List<String>.of(betas);
     final thread = useThread
@@ -253,7 +400,12 @@ extension MessageToolRunner on MessagesResource {
           message.stopReason == StopReason.compaction;
       final canContinue =
           resume ||
-          (calls.isNotEmpty && calls.every((call) => call.toolsetName == null));
+          (calls.isNotEmpty &&
+              calls.every(
+                (call) =>
+                    call.toolsetName == null ||
+                    registeredToolsets.containsKey(call.toolsetName),
+              ));
       if (!canContinue || iteration == maxIterations) {
         return MessageToolRunResult._(
           message,
@@ -280,7 +432,10 @@ extension MessageToolRunner on MessagesResource {
       }
       final available = calls.isEmpty
           ? const <String>{}
-          : _availableTools(registered, [...history, reply]);
+          : _availableTools(registered, [
+              ...history,
+              reply,
+            ], toolsets: registeredToolsets);
       if (pendingCompaction == null &&
           compactionMessage == null &&
           compactBeforeNextTurn != null) {
@@ -297,13 +452,50 @@ extension MessageToolRunner on MessagesResource {
       nextInputs = [];
       if (calls.isNotEmpty) {
         final results = <ToolResultInputBlock>[];
+        final failedFamilies = <String>{};
         for (final toolUse in calls) {
-          final tool = available.contains(toolUse.name)
-              ? registered[toolUse.name]
-              : null;
-          results.add(
-            await _runTool(tool, toolUse, abort, ensureNotClosed, onToolError),
+          final family = toolUse.toolsetName;
+          if (family == null && registeredToolsets.containsKey(toolUse.name)) {
+            failedFamilies.add(toolUse.name);
+            results.add(
+              ToolResultInputBlock.text(
+                toolUseId: toolUse.id,
+                text:
+                    'The ${toolUse.name} toolset requires a named member action.',
+                isError: true,
+              ),
+            );
+            continue;
+          }
+          if (family != null && failedFamilies.contains(family)) {
+            results.add(
+              ToolResultInputBlock.text(
+                toolUseId: toolUse.id,
+                toolsetName: family,
+                text: family == 'computer'
+                    ? 'Not executed: an earlier computer action in this turn failed.'
+                    : 'Not executed: an earlier action in this turn failed.',
+                isError: true,
+              ),
+            );
+            continue;
+          }
+          final invoke = !available.contains(family ?? toolUse.name)
+              ? null
+              : family == null
+              ? registered[toolUse.name]?._invoke
+              : registeredToolsets[family]?._invoke;
+          final result = await _runTool(
+            invoke,
+            toolUse,
+            abort,
+            ensureNotClosed,
+            onToolError,
           );
+          results.add(result);
+          if (family != null && result.isError == true) {
+            failedFamilies.add(family);
+          }
         }
         nextInputs.add(InputMessage.userBlocks(results));
       }
@@ -511,23 +703,80 @@ List<ToolDefinition>? _toolDefinitions(
   ];
 }
 
+List<ToolDefinition>? _toolsetDefinitions(
+  List<ToolDefinition>? existing,
+  Map<String, RunnableMessageToolset> registered,
+) {
+  if (registered.isEmpty) return existing;
+  final added = Map.of(registered);
+  final definitions = <ToolDefinition>[];
+  for (final definition in existing ?? const <ToolDefinition>[]) {
+    final json = definition.toJson();
+    if (registered.containsKey(json['name'])) {
+      throw ArgumentError(
+        'A tool name conflicts with a registered toolset family',
+      );
+    }
+    final family = _wireToolsetFamily(json['type']);
+    final runnable = registered[family];
+    if (runnable == null) {
+      definitions.add(definition);
+      continue;
+    }
+    if (added.remove(family) == null ||
+        !mapsDeepEqual(
+          _toolsetWire(json),
+          _toolsetWire(runnable.definition.toJson()),
+        )) {
+      throw ArgumentError(
+        'The request has conflicting definitions for a toolset',
+      );
+    }
+    definitions.add(ToolDefinition.builtIn(runnable.definition));
+  }
+  return [
+    ...definitions,
+    for (final toolset in added.values)
+      ToolDefinition.builtIn(toolset.definition),
+  ];
+}
+
+Map<String, dynamic> _toolsetWire(Map<String, dynamic> json) => {...json}
+  ..removeWhere(
+    (key, value) =>
+        key == 'configs' && (value == null || value is Map && value.isEmpty),
+  );
+
 bool _sameCustomDefinition(Map<String, dynamic> json, Tool tool) =>
     (json['type'] == null || json['type'] == 'custom') &&
     mapsDeepEqual({...json}..remove('type'), tool.toJson()..remove('type'));
 
 Set<String> _availableTools(
   Map<String, RunnableMessageTool<Object?>> registered,
-  List<InputMessage> history,
-) {
-  final available = registered.keys.toSet();
+  List<InputMessage> history, {
+  required Map<String, RunnableMessageToolset> toolsets,
+}) {
+  final known = {...registered.keys, ...toolsets.keys};
+  final available = {...known};
   final incompatible = <String>{};
+
+  void applyDefinition(String name, {required bool matches}) {
+    if (matches) {
+      incompatible.remove(name);
+      available.add(name);
+    } else {
+      // A replacement declaration cannot use the old local executor.
+      incompatible.add(name);
+      available.remove(name);
+    }
+  }
 
   void apply(InputContentBlock block) {
     switch (block) {
       case ToolRemovalInputBlock(tool: ToolChangeToolReference(:final name)):
         available.remove(name);
       case ToolAdditionInputBlock(tool: ToolChangeToolReference(:final name))
-          when registered.containsKey(name) && !incompatible.contains(name):
+          when known.contains(name) && !incompatible.contains(name):
         available.add(name);
       case ToolAdditionInputBlock(:final tool):
         // Handles the preserved wire shape on older input models and the
@@ -536,18 +785,27 @@ Set<String> _availableTools(
           'type': 'tool_definition',
           'definition': final Map<String, dynamic> definition,
         }) {
+          final family = _wireToolsetFamily(definition['type']);
+          final toolset = toolsets[family];
+          if (family != null && toolset != null) {
+            applyDefinition(
+              family,
+              matches: mapsDeepEqual(
+                _toolsetWire(definition),
+                _toolsetWire(toolset.definition.toJson()),
+              ),
+            );
+            return;
+          }
           final name = definition['name'] as String?;
           final runnable = registered[name];
-          if (name != null && runnable != null) {
-            if (_sameCustomDefinition(definition, runnable.definition)) {
-              incompatible.remove(name);
-              available.add(name);
-            } else {
-              // A model may still emit this name after the caller changes its
-              // schema. Never route the replacement to the old decoder.
-              incompatible.add(name);
-              available.remove(name);
-            }
+          if (name != null && toolsets.containsKey(name)) {
+            applyDefinition(name, matches: false);
+          } else if (name != null && runnable != null) {
+            applyDefinition(
+              name,
+              matches: _sameCustomDefinition(definition, runnable.definition),
+            );
           }
         }
       default:
@@ -571,8 +829,14 @@ ContainerParam? _reuseContainer(ContainerParam? config, Container? returned) {
   };
 }
 
+typedef _ToolCallback =
+    FutureOr<MessageToolResult> Function(
+      MessageToolCall call,
+      void Function() admitHandler,
+    );
+
 Future<ToolResultInputBlock> _runTool(
-  RunnableMessageTool<Object?>? tool,
+  _ToolCallback? invoke,
   ToolUseBlock use,
   _ToolRunAbort abort,
   void Function()? ensureNotClosed,
@@ -580,9 +844,10 @@ Future<ToolResultInputBlock> _runTool(
 ) async {
   abort.check();
   ensureNotClosed?.call();
-  if (tool == null) {
+  if (invoke == null) {
     return ToolResultInputBlock.text(
       toolUseId: use.id,
+      toolsetName: use.toolsetName,
       text: 'The requested tool has no available callback.',
       isError: true,
     );
@@ -594,7 +859,7 @@ Future<ToolResultInputBlock> _runTool(
   final MessageToolResult result;
   try {
     result = await abort.run(
-      () => tool._invoke(call, () {
+      () => invoke(call, () {
         abort.check();
         ensureNotClosed?.call();
       }),
@@ -605,13 +870,23 @@ Future<ToolResultInputBlock> _runTool(
     onError?.call(call, error, stackTrace);
     return ToolResultInputBlock.text(
       toolUseId: use.id,
+      toolsetName: use.toolsetName,
       text: 'The tool failed to complete.',
       isError: true,
     );
   }
+  final content = use.toolsetName != null && result.isError
+      ? result.content
+            .whereType<ToolResultTextContent>()
+            .where((block) => block.text.trim().isNotEmpty)
+            .toList()
+      : result.content;
   return ToolResultInputBlock(
     toolUseId: use.id,
-    content: result.content,
+    toolsetName: use.toolsetName,
+    content: use.toolsetName != null && result.isError && content.isEmpty
+        ? [ToolResultContent.text('The tool failed to complete.')]
+        : content,
     isError: result.isError ? true : null,
   );
 }

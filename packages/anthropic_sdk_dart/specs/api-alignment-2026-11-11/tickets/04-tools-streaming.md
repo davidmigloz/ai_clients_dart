@@ -82,3 +82,24 @@ and retains safe AWS and Azure request IDs independently, with a platform ID
 fallback when Claude's ID is unavailable.
 [AWS request IDs](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws#request-ids) · [Pinned AWS header aliases](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/packages/bedrock-sdk/src/AWS_restJson1.ts#L286-L288) · [Foundry correlation request IDs](https://platform.claude.com/docs/en/build-with-claude/claude-in-microsoft-foundry#correlation-request-ids)
 [Python response model fields](https://github.com/anthropics/anthropic-sdk-python/blob/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/src/anthropic/_models.py#L193-L217) · [TypeScript metadata attachment](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/src/internal/parse.ts#L73-L93) · [TypeScript APIPromise](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/src/core/api-promise.ts#L73-L99)
+
+## Browser and computer toolset executors
+
+The Dart adapter pairs the registered family and typed member, respects
+disabled members and inline removal, and runs actions in response order. After
+an error it returns the documented family-specific halt result for later
+members of that family. Other families and custom tools continue.
+
+A call named for a toolset without a member discriminator fails that family
+for the current turn. An inline replacement must match the registered
+declaration before the runner can use its local executor. Family references
+in replay also update local availability defensively.
+
+The pinned SDKs require confirmation for enabled browser uploads and
+JavaScript, and enabled computer typing, key and hold-key actions. Dart uses
+the same gates. An upload requires a caller policy that approves the original
+paths and document IDs before confirmation and execution. The executor owns
+browser or desktop operations, URL restrictions, file handling and result
+construction. It supplies any required browser state or images.
+
+[Pinned Python toolsets](https://github.com/anthropics/anthropic-sdk-python/tree/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/src/anthropic/lib/tools/_toolsets) · [Pinned TypeScript toolsets](https://github.com/anthropics/anthropic-sdk-typescript/tree/590783078cd961a0df698d9fddc0275c65ff3afd/src/lib/internal/toolsets) · [Browser use](https://platform.claude.com/docs/en/agents-and-tools/tool-use/browser-use-tool) · [Computer use](https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool)

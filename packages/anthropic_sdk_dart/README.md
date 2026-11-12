@@ -518,7 +518,8 @@ final result = await client.messages.runTools(
 print(result.message.text);
 ```
 
-Use `onEvent` for streamed events and `onTurn` for completed responses. `useThread: true` opts into the Messages threads beta. A tool request on the last permitted iteration remains available in the raw reply. Toolset member calls, such as browser or computer use, also return the raw reply for your executor to handle. The runner supports server-side threshold compaction through `contextManagement`.
+Use `onEvent` for streamed events and `onTurn` for completed responses. `useThread: true` opts into the Messages threads beta. A tool request on the last permitted iteration remains available in the raw reply. Register a `RunnableMessageToolset` for browser or computer actions. Calls to
+unregistered toolsets leave the whole turn available for your application. The runner supports server-side threshold compaction through `contextManagement`.
 
 For a stateless run, `compactBeforeNextTurn` can request one signed summary
 between assistant requests. Include `compact-2026-09-04` and leave any task
@@ -528,7 +529,14 @@ The runner preserves its replay history if the API omits a usable summary.
 
 The runner passes an expired thread continuation error to the caller. Use the default stateless mode when your provider or context edit requires full conversation replay.
 
-→ [Full example](example/message_tool_runner_example.dart)
+Toolset executors receive typed actions and supply result blocks. Use a
+`confirm` callback for enabled browser JavaScript and upload, and for enabled
+computer typing, key and hold-key actions. Browser uploads also need a
+`filePolicy` that approves the paths and document IDs. The executor validates
+input bounds, applies its navigation and filesystem policies, and supplies
+browser state or screenshots as appropriate.
+
+[Custom tool runner example](example/message_tool_runner_example.dart) · [Browser callback example](example/message_toolset_runner_example.dart)
 
 </details>
 
@@ -1684,6 +1692,7 @@ See the [example/](example/) directory for complete examples:
 | [`structured_output_example.dart`](example/structured_output_example.dart) | Typed JSON output with buffered or streamed responses |
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Tool calling with schemas |
 | [`message_tool_runner_example.dart`](example/message_tool_runner_example.dart) | Bounded typed custom tool loop with optional streaming and threads |
+| [`message_toolset_runner_example.dart`](example/message_toolset_runner_example.dart) | Typed browser actions with a stub executor |
 | [`web_search_example.dart`](example/web_search_example.dart) | Web search tool |
 | [`advisor_example.dart`](example/advisor_example.dart) | Advisor tool (beta) |
 | [`computer_use_example.dart`](example/computer_use_example.dart) | Computer-use toolset (`computer_toolset_20260801`) |
