@@ -162,7 +162,10 @@ final class OrganizationFederationRuleWorkspacesResource {
 
   final OrganizationTransport _transport;
 
-  /// Lists enabled workspaces with opaque pagination.
+  /// Lists explicitly enabled workspaces.
+  ///
+  /// The current API accepts [page] and [limit] for compatibility and returns
+  /// a null cursor. Inspect the rule for all-workspace and legacy bindings.
   Future<OrganizationCursorPage<FederationRuleWorkspace>> list(
     String ruleId, {
     String? page,

@@ -257,7 +257,9 @@ final class FederationRule {
       ),
       oauthScope: _required<String>(json, 'oauth_scope'),
       tokenLifetimeSeconds: _required<int>(json, 'token_lifetime_seconds'),
-      workspaceId: _required<String?>(json, 'workspace_id'),
+      workspaceId: json.containsKey('workspace_id')
+          ? _required<String?>(json, 'workspace_id')
+          : null,
       workspaceIds: _stringList(
         _required<List<dynamic>>(json, 'workspace_ids'),
       ),
@@ -265,9 +267,9 @@ final class FederationRule {
         json,
         'applies_to_all_workspaces',
       ),
-      attributes: _stringMap(
-        _required<Map<String, dynamic>?>(json, 'attributes'),
-      ),
+      attributes: json.containsKey('attributes')
+          ? _stringMap(_required<Map<String, dynamic>?>(json, 'attributes'))
+          : null,
       createdAt: DateTime.parse(_required<String>(json, 'created_at')),
       createdByActorId: _required<String?>(json, 'created_by_actor_id'),
       updatedAt: DateTime.parse(_required<String>(json, 'updated_at')),

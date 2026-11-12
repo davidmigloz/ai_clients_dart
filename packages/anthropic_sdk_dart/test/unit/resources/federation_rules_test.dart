@@ -155,6 +155,24 @@ void main() {
         expect(requests.last.url.pathSegments.last, 'fdrl/a ?');
       });
 
+      test(
+        'retrieve accepts the GA SDK projection of nullable fields',
+        () async {
+          response
+            ..remove('workspace_id')
+            ..remove('attributes');
+          final rule = await rules.retrieve(_ruleId, betas: betas);
+          expect(rule.workspaceId, isNull);
+          expect(rule.attributes, isNull);
+          expect(rule.toJson(), {
+            ...response,
+            'workspace_id': null,
+            'attributes': null,
+          });
+          expectRequest('GET', _rulePath);
+        },
+      );
+
       test('update sends false, empty maps, and explicit null clear', () async {
         final rule = await rules.update(
           _ruleId,
@@ -187,25 +205,28 @@ void main() {
         },
       );
 
-      test('list workspace bindings carries opaque pagination', () async {
-        response = {
-          'data': [_workspace()],
-          'next_page': null,
-        };
-        final page = await rules.workspaces.list(
-          _ruleId,
-          page: 'a/+=?',
-          limit: 1,
-          betas: betas,
-        );
-        expect(page.nextPage, isNull);
-        expect(page.data.single.workspaceName, isNull);
-        expectRequest(
-          'GET',
-          _workspacePath,
-          query: {'page': 'a/+=?', 'limit': '1'},
-        );
-      });
+      test(
+        'workspace list sends compatibility query and returns a null cursor',
+        () async {
+          response = {
+            'data': [_workspace()],
+            'next_page': null,
+          };
+          final page = await rules.workspaces.list(
+            _ruleId,
+            page: 'a/+=?',
+            limit: 1,
+            betas: betas,
+          );
+          expect(page.nextPage, isNull);
+          expect(page.data.single.workspaceName, isNull);
+          expectRequest(
+            'GET',
+            _workspacePath,
+            query: {'page': 'a/+=?', 'limit': '1'},
+          );
+        },
+      );
 
       test('add workspace binding sends workspace ID', () async {
         response = _workspace();
@@ -301,7 +322,7 @@ void main() {
       );
       expect(rule.toString(), isNot(contains('private-claim')));
       expect(
-        () => FederationRule.fromJson(source..remove('workspace_id')),
+        () => FederationRule.fromJson({...source, 'workspace_id': 42}),
         throwsFormatException,
       );
     },

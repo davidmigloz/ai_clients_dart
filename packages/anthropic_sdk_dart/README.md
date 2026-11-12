@@ -224,7 +224,9 @@ final page = await client.organization.federation.rules.list(
 ```
 
 Use `rules.workspaces` to list, add, or remove individual workspace
-bindings. Rules with `appliesToAllWorkspaces` also cover future workspaces.
+bindings. Its list returns the explicit bindings and a null cursor. Inspect
+the rule for legacy single-workspace and all-workspace bindings. Rules with
+`appliesToAllWorkspaces` also cover future workspaces.
 
 [Runnable federation rules example](example/federation_rules_example.dart)
 
