@@ -35,3 +35,22 @@ It keeps workspace selector omission distinct from an explicitly empty list.
 The API reports test span delivery failure as a result in HTTP 200.
 
 [Pinned Python telemetry resource](https://github.com/anthropics/anthropic-sdk-python/tree/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/src/anthropic/resources/beta/organization/telemetry_destinations) · [Pinned TypeScript telemetry resource](https://github.com/anthropics/anthropic-sdk-typescript/tree/590783078cd961a0df698d9fddc0275c65ff3afd/src/resources/beta/organization/telemetry-destinations) · [OpenTelemetry export](https://platform.claude.com/docs/en/manage-claude/opentelemetry/api)
+
+## Claude Tag
+
+The fourteen Slack workspace, channel, bundle and attachment operations use
+API version `2026-10-21` and beta `experimental-claude-tag-2026-10-21`.
+Claude Enterprise access and distinct read and write scopes apply. Anthropic
+must enable writes separately. Filters use Slack's identifiers; retrieve,
+update and attachment paths use IDs returned by the API.
+
+The guide lists five settings. The pinned snapshot and both SDKs include
+`reply_mode` as a sixth. Dart supports it and accepts responses where it is
+omitted. Omitted update settings stay unchanged. Explicit null clears the
+other nullable settings to inherit a value. The API rejects clearing an
+existing channel reply mode and sending a non-null workspace reply mode.
+`automatic` restores default channel behavior. A partially successful channel
+setup leaves the channel configured with unset settings and returns its
+`slack_channel_id` in the error details.
+
+[Pinned Python Claude Tag resource](https://github.com/anthropics/anthropic-sdk-python/tree/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/src/anthropic/resources/beta/organization/claude_tag) · [Pinned TypeScript Claude Tag resource](https://github.com/anthropics/anthropic-sdk-typescript/tree/590783078cd961a0df698d9fddc0275c65ff3afd/src/resources/beta/organization/claude-tag) · [Claude Tag API](https://platform.claude.com/docs/en/manage-claude/claude-tag-api)

@@ -4,7 +4,7 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~16.9k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~17.4k tokens): Primary package documentation with installation, configuration, and usage examples.
 - [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/CHANGELOG.md) (~12.9k tokens): Release history and version-by-version changes.
 - [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) (~15.9k tokens): Upgrade notes and breaking-change guidance.
 
@@ -54,6 +54,7 @@
 - [organization_webhooks_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_webhooks_example.dart) (~217 tokens): List organization webhook endpoints (beta).
 - [organization_webhook_receiver_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_webhook_receiver_example.dart) (~336 tokens): Verify and parse signed webhook deliveries.
 - [organization_telemetry_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_telemetry_example.dart) (~254 tokens): Page through OpenTelemetry destinations and inspect delivery health (beta).
+- [organization_claude_tag_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_claude_tag_example.dart) (~319 tokens): Audit Slack channel settings and inheritance in Claude Tag (beta).
 - [compliance_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/compliance_example.dart) (~209 tokens): Scoped Compliance Activity Feed.
 - [compliance_content_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/compliance_content_example.dart) (~273 tokens): Scoped Compliance app content and artifact downloads.
 - [organization_analytics_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_analytics_example.dart) (~423 tokens): Dimensioned organization usage and cost with cursor pagination (beta).
@@ -78,4 +79,4 @@
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/anthropic_sdk_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~82.3k tokens**
+**Total: ~83k tokens**
