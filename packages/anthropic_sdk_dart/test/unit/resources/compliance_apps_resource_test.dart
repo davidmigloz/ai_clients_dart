@@ -781,6 +781,29 @@ void main() {
     },
   );
 
+  test('download metadata omits headers that echo the effective key', () async {
+    transport.queue(
+      Stream.value([0, 255, 1]),
+      headers: {
+        'Request-Id': 'reflected-scoped-compliance-key',
+        'Content-Disposition': 'attachment; filename="scoped-compliance-key"',
+        'Content-Type': 'application/octet-stream',
+        'Content-Md5': 'fixture-checksum',
+      },
+    );
+    late ComplianceDownloadHeaders observed;
+    final bytes = await apps
+        .downloadChatFile('file-1', onResponse: (value) => observed = value)
+        .expand((chunk) => chunk)
+        .toList();
+    expect(bytes, [0, 255, 1]);
+    expect(observed.requestId, isNull);
+    expect(observed.contentDisposition, isNull);
+    expect(observed.contentType, 'application/octet-stream');
+    expect(observed.contentMd5, 'fixture-checksum');
+    expectRequest('chats/files/file-1/content', binary: true);
+  });
+
   test('a failed header callback releases the binary body', () async {
     final canceled = Completer<void>();
     final body = StreamController<List<int>>(onCancel: canceled.complete);

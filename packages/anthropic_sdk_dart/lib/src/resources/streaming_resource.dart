@@ -167,7 +167,7 @@ mixin StreamingResource on ResourceBase {
     )
     decode,
     bool Function(T)? isTerminal,
-    void Function(http.StreamedResponse, Duration)? onResponse,
+    void Function(http.StreamedResponse, Set<String>)? onResponse,
     Map<String, String> Function()? buildRequestHeaders,
     bool followRedirects = true,
     bool jsonlMedia = false,
@@ -344,7 +344,7 @@ mixin StreamingResource on ResourceBase {
           );
         } else {
           try {
-            onResponse?.call(response, stopwatch.elapsed);
+            onResponse?.call(response, credentials);
           } catch (_) {
             response.stream.listen(null).cancel().ignore();
             rethrow;
@@ -529,7 +529,12 @@ Stream<List<int>> getResourceByteStream(
   abortTrigger: abortTrigger,
   onResponse: onResponse == null
       ? null
-      : (response, _) => onResponse(response.headers),
+      : (response, credentials) => onResponse({
+          for (final entry in response.headers.entries)
+            if (redactCredentialEcho(entry.value, credentials)
+                case final String value)
+              entry.key: value,
+        }),
   decode: (body, _, _, _) => body,
 );
 
