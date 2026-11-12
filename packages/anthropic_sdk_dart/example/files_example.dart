@@ -11,13 +11,22 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// - `dart run example/files_example.dart path/to/file.pdf` to upload a file.
 /// - `dart run example/files_example.dart --session sesn_...` to list and read
 ///   downloadable output files from a Managed Agents session you can access.
+///
+/// For a browser build, compile with
+/// `dart compile js -DANTHROPIC_PROXY_URL=https://your-proxy.example example/files_example.dart`.
+/// Load the compiled script from your application. The backend handles Claude
+/// authentication and CORS. The example uses byte upload when no arguments
+/// are supplied.
 Future<void> main(List<String> args) async {
   if (args.length > 1 && (args.length != 2 || args.first != '--session')) {
     print('Usage: dart run example/files_example.dart [path | --session ID]');
     return;
   }
 
-  final client = AnthropicClient.fromEnvironment();
+  const proxyUrl = String.fromEnvironment('ANTHROPIC_PROXY_URL');
+  final client = proxyUrl.isEmpty
+      ? AnthropicClient.fromEnvironment()
+      : AnthropicClient(config: const AnthropicConfig(baseUrl: proxyUrl));
   try {
     if (args case ['--session', final sessionId]) {
       String? page;

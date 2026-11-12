@@ -1,4 +1,8 @@
+@TestOn('vm')
+library;
+
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
@@ -45,6 +49,43 @@ void main() {
   });
 
   group('FilesResource', () {
+    test(
+      'upload reads a native file and preserves the multipart options',
+      () async {
+        final directory = await Directory.systemTemp.createTemp(
+          'anthropic-file-',
+        );
+        addTearDown(() => directory.delete(recursive: true));
+        final bytes = Uint8List.fromList([0, 1, 255, 3]);
+        final localFile = File.fromUri(directory.uri.resolve('local.pdf'));
+        await localFile.writeAsBytes(bytes);
+        mockHttpClient.queueJsonResponse(_fileJson(filename: 'local.pdf'));
+
+        final file = await client.files.upload(
+          filePath: localFile.path,
+          expiresInSeconds: 3600,
+          betas: const ['files-beta'],
+          workspaceId: 'workspace-fixture',
+        );
+        expect(file.filename, 'local.pdf');
+        final request = mockHttpClient.lastRequest! as http.MultipartRequest;
+        final part = request.files.single;
+        expect(part.filename, 'local.pdf');
+        expect(part.contentType.mimeType, 'application/pdf');
+        expect(await part.finalize().toBytes(), bytes);
+        expect(request.fields['expires_in_seconds'], '3600');
+        expect(request.headers['anthropic-beta'], 'files-beta');
+        expect(request.headers['anthropic-workspace-id'], 'workspace-fixture');
+        await expectLater(
+          client.files.upload(
+            filePath: directory.uri.resolve('missing').toFilePath(),
+          ),
+          throwsArgumentError,
+        );
+        expect(mockHttpClient.requests, hasLength(1));
+      },
+    );
+
     test('uploadBytes sends no anthropic-beta header', () async {
       mockHttpClient.queueJsonResponse(_fileJson());
 
