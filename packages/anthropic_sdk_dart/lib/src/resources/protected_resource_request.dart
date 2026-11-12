@@ -43,32 +43,40 @@ Future<Object?> sendProtectedResourceRequest(
   if (status < 200 || status >= 300) {
     final body = decodeApiErrorResponse(response);
     final parsed = parseApiErrorBody(body);
+    bool containsBearer(String? value) =>
+        bearerToken != null && (value?.contains(bearerToken) ?? false);
     final metadata = createSafeResponseMetadata(
       statusCode: status,
-      headers: response.headers,
+      headers: {
+        for (final header in response.headers.entries)
+          if (!containsBearer(header.value)) header.key: header.value,
+      },
       latency: watch.elapsed,
-      bodyRequestId: parsed.requestId,
+      bodyRequestId: containsBearer(parsed.requestId) ? null : parsed.requestId,
     );
+    final errorCode = containsBearer(parsed.errorCode)
+        ? null
+        : parsed.errorCode;
     final specific = handleError?.call(body, metadata);
     if (specific != null) throw specific;
     final message = 'HTTP $status from the Claude API';
     throw switch (status) {
       401 => AuthenticationException(
         message: message,
-        errorCode: parsed.errorCode,
+        errorCode: errorCode,
         responseMetadata: metadata,
       ),
       429 => RateLimitException(
         statusCode: status,
         message: message,
-        errorCode: parsed.errorCode,
+        errorCode: errorCode,
         responseMetadata: metadata,
         retryAfter: retryAfterTime(metadata.headers),
       ),
       _ => ApiException(
         statusCode: status,
         message: message,
-        errorCode: parsed.errorCode,
+        errorCode: errorCode,
         responseMetadata: metadata,
       ),
     };

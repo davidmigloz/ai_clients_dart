@@ -39,11 +39,9 @@ export 'src/auth/auth_provider.dart'
         NoAuthProvider;
 export 'src/auth/workload_identity.dart'
     show WorkloadIdentityAccessToken, WorkloadIdentityTokenExchange;
-
 // Client
 export 'src/client/anthropic_client.dart' show AnthropicClient;
 export 'src/client/config.dart' show AnthropicConfig, RetryPolicy;
-
 // Errors
 export 'src/errors/exceptions.dart'
     show
@@ -57,42 +55,33 @@ export 'src/errors/exceptions.dart'
         ResponseMetadata,
         TimeoutException,
         ValidationException;
-
 // Extensions
 export 'src/extensions/content_block_extensions.dart';
 export 'src/extensions/message_extensions.dart';
 export 'src/extensions/stream_extensions.dart';
-
 // Models - Batches
 export 'src/models/batches/batch_request.dart';
 export 'src/models/batches/message_batch.dart';
-
 // Models - Beta Config
 export 'src/models/beta/config/container.dart';
 export 'src/models/beta/config/output_config.dart';
 export 'src/models/beta/config/token_task_budget.dart';
-
 // Models - Beta Tools
 // Note: ComputerUseTool and McpToolset are exported via built_in_tools.dart
 // since they extend BuiltInTool (sealed class)
 export 'src/models/beta/tools/code_execution_tool.dart';
-
 // Models - Beta Common
 export 'src/models/beta_timestamp.dart';
-
 // Models - Completions (Legacy)
 export 'src/models/completions/completion.dart';
-
 // Models - Compliance
 export 'src/models/compliance/compliance_models.dart';
-
 // Models - Content
 export 'src/models/content/browser_state.dart';
 export 'src/models/content/citations_config.dart';
 export 'src/models/content/content_block.dart';
 export 'src/models/content/image_transformations.dart';
 export 'src/models/content/input_content_block.dart';
-
 // Models - Dreams (Beta, research preview)
 export 'src/models/dreams/create_dream_request.dart';
 export 'src/models/dreams/dream.dart';
@@ -104,12 +93,10 @@ export 'src/models/dreams/dream_status.dart';
 export 'src/models/dreams/dream_usage.dart';
 export 'src/models/dreams/list_dreams_response.dart';
 export 'src/models/dreams/output_behavior.dart';
-
 // Models - Files
 export 'src/models/files/file_delete_response.dart';
 export 'src/models/files/file_list_response.dart';
 export 'src/models/files/file_metadata.dart';
-
 // Models - Managed Agents (Beta)
 export 'src/models/managed_agents/agents/agent.dart';
 export 'src/models/managed_agents/agents/agent_list_response.dart';
@@ -191,12 +178,12 @@ export 'src/models/managed_agents/sessions/session_list_response.dart';
 export 'src/models/managed_agents/sessions/session_thread.dart';
 export 'src/models/managed_agents/sessions/session_thread_list_response.dart';
 export 'src/models/managed_agents/sessions/update_session_params.dart';
+export 'src/models/managed_agents/tunnels/tunnel.dart';
 export 'src/models/managed_agents/vaults/create_vault_params.dart';
 export 'src/models/managed_agents/vaults/update_vault_params.dart';
 export 'src/models/managed_agents/vaults/vault.dart';
 export 'src/models/managed_agents/vaults/vault_list_response.dart';
 export 'src/models/managed_agents/webhooks/webhook_event.dart';
-
 // Models - Messages
 export 'src/models/messages/cache_miss_reason.dart';
 export 'src/models/messages/compaction_config.dart';
@@ -212,7 +199,6 @@ export 'src/models/messages/message_create_request.dart';
 export 'src/models/messages/message_role.dart';
 export 'src/models/messages/message_thread_param.dart';
 export 'src/models/messages/thinking_config.dart';
-
 // Models - Metadata
 export 'src/models/metadata/cache_control.dart';
 export 'src/models/metadata/fallback_credit_usage.dart';
@@ -222,11 +208,9 @@ export 'src/models/metadata/service_tier.dart';
 export 'src/models/metadata/speed.dart';
 export 'src/models/metadata/stop_reason.dart';
 export 'src/models/metadata/usage.dart';
-
 // Models - Models Domain
 export 'src/models/models/model_capabilities.dart';
 export 'src/models/models/model_info.dart';
-
 // Organization Admin API
 export 'src/models/organization/organization_api_key.dart';
 export 'src/models/organization/organization_limits.dart';
@@ -235,7 +219,6 @@ export 'src/models/organization/organization_rbac.dart';
 export 'src/models/organization/organization_records.dart';
 export 'src/models/organization/organization_spend.dart';
 export 'src/models/organization/organization_workspace.dart';
-
 // Models - Skills
 export 'src/models/skills/deleted_skill.dart';
 export 'src/models/skills/skill.dart';
@@ -243,20 +226,16 @@ export 'src/models/skills/skill_file.dart';
 export 'src/models/skills/skill_list_response.dart';
 export 'src/models/skills/skill_source.dart';
 export 'src/models/skills/skill_version.dart';
-
 // Models - Sources
 export 'src/models/sources/document_source.dart';
 export 'src/models/sources/image_source.dart';
-
 // Models - Streaming
 export 'src/models/streaming/content_block_delta.dart';
 export 'src/models/streaming/message_delta.dart';
 export 'src/models/streaming/message_stream_accumulator.dart';
 export 'src/models/streaming/message_stream_event.dart';
-
 // Models - Token Counting
 export 'src/models/tokens/token_count.dart';
-
 // Models - Tools
 export 'src/models/tools/built_in_tools.dart';
 export 'src/models/tools/input_schema.dart';
@@ -267,7 +246,6 @@ export 'src/models/tools/tool_change_reference.dart';
 export 'src/models/tools/tool_choice.dart';
 export 'src/models/tools/tool_definition.dart';
 export 'src/models/tools/toolsets.dart';
-
 // Models - User Profiles (Beta)
 export 'src/models/user_profiles/create_user_profile_request.dart';
 export 'src/models/user_profiles/current_user_profile.dart';
@@ -284,7 +262,6 @@ export 'src/models/user_profiles/user_profile_list_order.dart';
 export 'src/models/user_profiles/user_profile_list_order_by.dart';
 export 'src/models/user_profiles/user_profile_programs.dart';
 export 'src/models/user_profiles/user_profile_trust_grant.dart';
-
 // Resources
 export 'src/resources/agents_resource.dart';
 export 'src/resources/compliance_resource.dart';
@@ -313,9 +290,10 @@ export 'src/resources/session_thread_events_resource.dart';
 export 'src/resources/session_threads_resource.dart';
 export 'src/resources/sessions_resource.dart';
 export 'src/resources/skills_resource.dart';
+export 'src/resources/tunnels_resource.dart'
+    show TunnelCertificatesResource, TunnelsResource;
 export 'src/resources/user_profiles_resource.dart';
 export 'src/resources/vault_credentials_resource.dart';
 export 'src/resources/vaults_resource.dart';
-
 // Utilities
 export 'src/utils/streaming_parser.dart' show SseEventExtension, SseParser;
