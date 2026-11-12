@@ -358,4 +358,5 @@ export 'src/resources/vault_credentials_resource.dart';
 export 'src/resources/vaults_resource.dart';
 
 // Utilities
+export 'src/utils/cursor_pagination.dart' show CursorPagination;
 export 'src/utils/streaming_parser.dart' show SseEventExtension, SseParser;

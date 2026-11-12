@@ -52,6 +52,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - OIDC federation issuer management, signing-key sources, and polling status
 - Workload Identity Federation rules and workspace bindings
 - Message batches for large-scale offline processing
+- Lazy page and item streams over list operations
 - Compliance Activity Feed, directory, organization settings, app content, sessions, and artifact downloads. Security Posture is beta.
 - Model discovery with lifecycle filters, model lines, and thinking and server-tool capabilities
 - MCP tunnel and certificate management in approved Claude API workspaces (research preview)
@@ -823,7 +824,13 @@ Future<void> main() async {
 An errored result carries the item-level error and its provider request ID
 when supplied. Unknown result types preserve their JSON for later handling.
 
-→ [Full example](example/message_batches_example.dart)
+Use `CursorPagination` to visit batch history a page or an item at a time.
+Keep the limit, workspace, and beta flags in the fetch callback. The batch
+selector uses `hasMore` and `lastId` to continue. Canceling the stream stops
+further requests and aborts an in-flight request when the callback forwards
+`abortTrigger`. Item selection and iteration errors end the traversal.
+
+→ [Full example](example/message_batches_example.dart) · [Paginate batch history](example/batch_pagination_example.dart)
 
 </details>
 
@@ -1718,6 +1725,7 @@ See the [example/](example/) directory for complete examples:
 | [`search_result_example.dart`](example/search_result_example.dart) | Supplying your own cited `search_result` blocks (RAG) |
 | [`token_counting_example.dart`](example/token_counting_example.dart) | Token counting |
 | [`message_batches_example.dart`](example/message_batches_example.dart) | Batch processing |
+| [`batch_pagination_example.dart`](example/batch_pagination_example.dart) | Stream batch history by page or item |
 | [`files_example.dart`](example/files_example.dart) | File management |
 | [`skills_example.dart`](example/skills_example.dart) | Skills management |
 | [`inline_tools_example.dart`](example/inline_tools_example.dart) | Define a client tool partway through a conversation (beta) |
