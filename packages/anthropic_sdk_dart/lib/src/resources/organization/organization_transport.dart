@@ -4,8 +4,6 @@ import 'package:http/http.dart' as http;
 
 import '../../client/interceptor_chain.dart';
 import '../../client/request_builder.dart';
-import '../../errors/exceptions.dart';
-import '../../errors/response_error.dart';
 import '../../utils/path_segment.dart';
 
 /// Shared transport for organization-scoped Admin calls.
@@ -59,22 +57,11 @@ final class OrganizationTransport {
       ..headers.addAll(headers);
     if (body != null) request.body = jsonEncode(body);
 
-    final watch = Stopwatch()..start();
     final response = await interceptorChain.execute(
       request,
       abortTrigger: abortTrigger,
+      redirectErrorMessage: 'Unexpected redirect from the Admin API',
     );
-    if (response.statusCode >= 300 && response.statusCode < 400) {
-      throw ApiException(
-        statusCode: response.statusCode,
-        message: 'Unexpected redirect from the Admin API',
-        responseMetadata: createSafeResponseMetadata(
-          statusCode: response.statusCode,
-          headers: response.headers,
-          latency: watch.elapsed,
-        ),
-      );
-    }
     final json = jsonDecode(utf8.decode(response.bodyBytes));
     if (json is! Map<String, dynamic>) {
       throw const FormatException('Expected a JSON object from the Admin API');

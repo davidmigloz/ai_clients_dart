@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
@@ -468,6 +469,63 @@ void main() {
       throwsFormatException,
     );
   });
+
+  test(
+    'Admin redirect releases its body and removes an echoed OAuth token',
+    () async {
+      const token = 'fixture-org-admin-redirect-token';
+      final canceled = Completer<void>();
+      final body = StreamController<List<int>>(onCancel: canceled.complete);
+      addTearDown(() => unawaited(body.close()));
+      var requests = 0;
+      final transport = MockClient.streaming((request, _) async {
+        requests++;
+        expect(request.followRedirects, isFalse);
+        expect(request.headers['authorization'], 'Bearer $token');
+        return http.StreamedResponse(
+          body.stream,
+          302,
+          headers: {
+            'request-id': token,
+            'retry-after': '5',
+            'location': 'https://elsewhere.invalid/$token',
+          },
+        );
+      });
+      addTearDown(transport.close);
+      final client = AnthropicClient.withAuthToken(
+        token,
+        httpClient: transport,
+      );
+      addTearDown(client.close);
+      const timeout = Duration(seconds: 2);
+      await expectLater(
+        client.organization.serviceAccounts
+            .retrieve(_accountId)
+            .timeout(timeout),
+        throwsA(
+          isA<ApiException>()
+              .having((e) => e.statusCode, 'status', 302)
+              .having((e) => e.requestId, 'request ID', isNull)
+              .having((e) => e.responseMetadata?.headers, 'safe headers', {
+                'retry-after': '5',
+              })
+              .having(
+                (e) => e.responseMetadata?.bodyExcerpt,
+                'body excerpt',
+                isEmpty,
+              )
+              .having(
+                (e) => e.toString(),
+                'safe exception',
+                isNot(contains(token)),
+              ),
+        ),
+      );
+      await canceled.future.timeout(timeout);
+      expect(requests, 1);
+    },
+  );
 }
 
 Map<String, dynamic> _record() => {

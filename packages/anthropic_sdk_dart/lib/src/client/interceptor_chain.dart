@@ -38,11 +38,14 @@ class InterceptorChain {
   /// Executes the interceptor chain for a request.
   ///
   /// The optional [abortTrigger] allows canceling the request before completion.
+  /// Set [redirectErrorMessage] on a request with redirects disabled to reject
+  /// 3xx responses with credential-safe metadata before reading the body.
   ///
   /// Returns the HTTP response after all interceptors have processed it.
   Future<http.Response> execute(
     http.BaseRequest request, {
     Future<void>? abortTrigger,
+    String? redirectErrorMessage,
   }) {
     ensureNotClosed?.call();
     final context = RequestContext(
@@ -53,15 +56,22 @@ class InterceptorChain {
 
     final nativeRequest = request is http.Abortable ? request : null;
     if (abortTrigger == null) {
-      return _buildChain(0, nativeRequest: nativeRequest)(context);
+      return _buildChain(
+        0,
+        nativeRequest: nativeRequest,
+        redirectErrorMessage: redirectErrorMessage,
+      )(context);
     }
 
     final admission = _TransportAdmission(request.headers['X-Request-ID']);
     return admission.run(
       abortTrigger,
-      () => _buildChain(0, admission: admission, nativeRequest: nativeRequest)(
-        context,
-      ),
+      () => _buildChain(
+        0,
+        admission: admission,
+        nativeRequest: nativeRequest,
+        redirectErrorMessage: redirectErrorMessage,
+      )(context),
     );
   }
 
@@ -70,6 +80,7 @@ class InterceptorChain {
     int index, {
     _TransportAdmission? admission,
     http.Abortable? nativeRequest,
+    String? redirectErrorMessage,
   }) {
     if (index >= interceptors.length) {
       // Terminal: execute the actual HTTP request
@@ -127,6 +138,7 @@ class InterceptorChain {
                 httpClient,
                 createRequest(),
                 ensureNotClosed: ensureNotClosed,
+                redirectErrorMessage: redirectErrorMessage,
               ),
             );
           }
@@ -135,6 +147,7 @@ class InterceptorChain {
               httpClient,
               createRequest(abortTrigger),
               ensureNotClosed: ensureNotClosed,
+              redirectErrorMessage: redirectErrorMessage,
             ),
             timeout: timeout,
             abortTrigger: context.abortTrigger,
@@ -165,6 +178,7 @@ class InterceptorChain {
         index + 1,
         admission: admission,
         nativeRequest: nativeRequest,
+        redirectErrorMessage: redirectErrorMessage,
       );
 
       return interceptor.intercept(context, next);

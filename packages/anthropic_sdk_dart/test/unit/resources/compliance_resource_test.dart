@@ -619,6 +619,33 @@ void main() {
     expect(transport.requests, isEmpty);
   });
 
+  test('rejected redirects omit echoed Compliance credentials', () async {
+    transport.queueResponse(
+      const MockResponse(
+        statusCode: 302,
+        body: 'scoped-compliance-key',
+        headers: {
+          'location': 'https://elsewhere.invalid',
+          'request-id': 'scoped-compliance-key',
+          'retry-after': '5',
+        },
+      ),
+    );
+    await expectLater(
+      client.compliance.listOrganizations(),
+      throwsA(
+        isA<ApiException>()
+            .having((e) => e.statusCode, 'status', 302)
+            .having((e) => e.requestId, 'request ID', isNull)
+            .having((e) => e.responseMetadata?.headers, 'safe headers', {
+              'retry-after': '5',
+            }),
+      ),
+    );
+    expectRequest('organizations');
+    expect(transport.requests, hasLength(1));
+  });
+
   test('rejects non-object success and invalid page entries', () async {
     transport
       ..queueResponse(const MockResponse(body: '[]'))
