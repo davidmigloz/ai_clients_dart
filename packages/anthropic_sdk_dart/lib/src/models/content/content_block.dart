@@ -5,6 +5,7 @@ import '../common/equality_helpers.dart';
 import '../messages/fallback_config.dart';
 import '../tools/built_in_tools.dart' show McpListedTool;
 import '../tools/tool_caller.dart';
+import '../tools/tool_change_reference.dart';
 
 /// Content block in a response message.
 ///
@@ -906,8 +907,12 @@ class CompactionBlock extends ContentBlock {
   /// and an empty list when the server reports no tool changes.
   final List<Map<String, dynamic>>? toolChanges;
 
+  /// Typed view of [toolChanges]. Replay still uses the original JSON.
+  Iterable<CompactionToolChange>? get toolChangeBlocks =>
+      toolChanges?.map(CompactionToolChange.fromJson);
+
   // These nullable beta fields must retain their wire presence during replay.
-  final ({bool signature, bool toolChanges}) _presence;
+  final ({bool encryptedContent, bool signature, bool toolChanges}) _presence;
 
   /// Creates a [CompactionBlock].
   const CompactionBlock({
@@ -916,6 +921,7 @@ class CompactionBlock extends ContentBlock {
     this.signature,
     this.toolChanges,
   }) : _presence = (
+         encryptedContent: true,
          signature: signature != null,
          toolChanges: toolChanges != null,
        );
@@ -937,6 +943,7 @@ class CompactionBlock extends ContentBlock {
       encryptedContent: json['encrypted_content'] as String?,
       signature: json['signature'] as String?,
       presence: (
+        encryptedContent: json.containsKey('encrypted_content'),
         signature: json.containsKey('signature'),
         toolChanges: json.containsKey('tool_changes'),
       ),
@@ -955,7 +962,7 @@ class CompactionBlock extends ContentBlock {
   Map<String, dynamic> toJson() => {
     'type': 'compaction',
     'content': content,
-    'encrypted_content': encryptedContent,
+    if (_presence.encryptedContent) 'encrypted_content': encryptedContent,
     if (_presence.signature) 'signature': signature,
     if (_presence.toolChanges) 'tool_changes': toolChanges,
   };
@@ -975,6 +982,9 @@ class CompactionBlock extends ContentBlock {
           ? this.encryptedContent
           : encryptedContent as String?,
       presence: (
+        encryptedContent:
+            encryptedContent != unsetCopyWithValue ||
+            _presence.encryptedContent,
         signature: signature == unsetCopyWithValue
             ? _presence.signature
             : signature != null,
@@ -1248,6 +1258,11 @@ class CharLocationCitation extends Citation {
   /// End character offset.
   final int endCharIndex;
 
+  // Track explicit nulls from current Claude responses. Legacy payloads may
+  // omit these keys. Presence does not change the citation's value equality.
+  final bool _nullTitle;
+  final bool _nullFileId;
+
   /// Creates a [CharLocationCitation].
   const CharLocationCitation({
     required this.citedText,
@@ -1256,15 +1271,29 @@ class CharLocationCitation extends Citation {
     this.fileId,
     required this.startCharIndex,
     required this.endCharIndex,
+  }) : _nullTitle = false,
+       _nullFileId = false;
+
+  const CharLocationCitation._({
+    required this.citedText,
+    required this.documentIndex,
+    required this.documentTitle,
+    required this.fileId,
+    required this.startCharIndex,
+    required this.endCharIndex,
+    required this._nullTitle,
+    required this._nullFileId,
   });
 
   /// Creates a [CharLocationCitation] from JSON.
   factory CharLocationCitation.fromJson(Map<String, dynamic> json) {
-    return CharLocationCitation(
+    return CharLocationCitation._(
       citedText: json['cited_text'] as String,
       documentIndex: json['document_index'] as int,
       documentTitle: json['document_title'] as String?,
       fileId: json['file_id'] as String?,
+      nullTitle: json.containsKey('document_title'),
+      nullFileId: json.containsKey('file_id'),
       startCharIndex: json['start_char_index'] as int,
       endCharIndex: json['end_char_index'] as int,
     );
@@ -1275,8 +1304,8 @@ class CharLocationCitation extends Citation {
     'type': 'char_location',
     'cited_text': citedText,
     'document_index': documentIndex,
-    if (documentTitle != null) 'document_title': documentTitle,
-    if (fileId != null) 'file_id': fileId,
+    if (documentTitle != null || _nullTitle) 'document_title': documentTitle,
+    if (fileId != null || _nullFileId) 'file_id': fileId,
     'start_char_index': startCharIndex,
     'end_char_index': endCharIndex,
   };
@@ -1290,13 +1319,15 @@ class CharLocationCitation extends Citation {
     int? startCharIndex,
     int? endCharIndex,
   }) {
-    return CharLocationCitation(
+    return CharLocationCitation._(
       citedText: citedText ?? this.citedText,
       documentIndex: documentIndex ?? this.documentIndex,
       documentTitle: documentTitle == unsetCopyWithValue
           ? this.documentTitle
           : documentTitle as String?,
       fileId: fileId == unsetCopyWithValue ? this.fileId : fileId as String?,
+      nullTitle: documentTitle == unsetCopyWithValue && _nullTitle,
+      nullFileId: fileId == unsetCopyWithValue && _nullFileId,
       startCharIndex: startCharIndex ?? this.startCharIndex,
       endCharIndex: endCharIndex ?? this.endCharIndex,
     );
@@ -1353,6 +1384,11 @@ class PageLocationCitation extends Citation {
   /// End page number.
   final int endPageNumber;
 
+  // Track explicit nulls from current Claude responses. Legacy payloads may
+  // omit these keys. Presence does not change the citation's value equality.
+  final bool _nullTitle;
+  final bool _nullFileId;
+
   /// Creates a [PageLocationCitation].
   const PageLocationCitation({
     required this.citedText,
@@ -1361,15 +1397,29 @@ class PageLocationCitation extends Citation {
     this.fileId,
     required this.startPageNumber,
     required this.endPageNumber,
+  }) : _nullTitle = false,
+       _nullFileId = false;
+
+  const PageLocationCitation._({
+    required this.citedText,
+    required this.documentIndex,
+    required this.documentTitle,
+    required this.fileId,
+    required this.startPageNumber,
+    required this.endPageNumber,
+    required this._nullTitle,
+    required this._nullFileId,
   });
 
   /// Creates a [PageLocationCitation] from JSON.
   factory PageLocationCitation.fromJson(Map<String, dynamic> json) {
-    return PageLocationCitation(
+    return PageLocationCitation._(
       citedText: json['cited_text'] as String,
       documentIndex: json['document_index'] as int,
       documentTitle: json['document_title'] as String?,
       fileId: json['file_id'] as String?,
+      nullTitle: json.containsKey('document_title'),
+      nullFileId: json.containsKey('file_id'),
       startPageNumber: json['start_page_number'] as int,
       endPageNumber: json['end_page_number'] as int,
     );
@@ -1380,8 +1430,8 @@ class PageLocationCitation extends Citation {
     'type': 'page_location',
     'cited_text': citedText,
     'document_index': documentIndex,
-    if (documentTitle != null) 'document_title': documentTitle,
-    if (fileId != null) 'file_id': fileId,
+    if (documentTitle != null || _nullTitle) 'document_title': documentTitle,
+    if (fileId != null || _nullFileId) 'file_id': fileId,
     'start_page_number': startPageNumber,
     'end_page_number': endPageNumber,
   };
@@ -1395,13 +1445,15 @@ class PageLocationCitation extends Citation {
     int? startPageNumber,
     int? endPageNumber,
   }) {
-    return PageLocationCitation(
+    return PageLocationCitation._(
       citedText: citedText ?? this.citedText,
       documentIndex: documentIndex ?? this.documentIndex,
       documentTitle: documentTitle == unsetCopyWithValue
           ? this.documentTitle
           : documentTitle as String?,
       fileId: fileId == unsetCopyWithValue ? this.fileId : fileId as String?,
+      nullTitle: documentTitle == unsetCopyWithValue && _nullTitle,
+      nullFileId: fileId == unsetCopyWithValue && _nullFileId,
       startPageNumber: startPageNumber ?? this.startPageNumber,
       endPageNumber: endPageNumber ?? this.endPageNumber,
     );
@@ -1458,6 +1510,11 @@ class ContentBlockLocationCitation extends Citation {
   /// End content block index.
   final int endBlockIndex;
 
+  // Track explicit nulls from current Claude responses. Legacy payloads may
+  // omit these keys. Presence does not change the citation's value equality.
+  final bool _nullTitle;
+  final bool _nullFileId;
+
   /// Creates a [ContentBlockLocationCitation].
   const ContentBlockLocationCitation({
     required this.citedText,
@@ -1466,15 +1523,29 @@ class ContentBlockLocationCitation extends Citation {
     this.fileId,
     required this.startBlockIndex,
     required this.endBlockIndex,
+  }) : _nullTitle = false,
+       _nullFileId = false;
+
+  const ContentBlockLocationCitation._({
+    required this.citedText,
+    required this.documentIndex,
+    required this.documentTitle,
+    required this.fileId,
+    required this.startBlockIndex,
+    required this.endBlockIndex,
+    required this._nullTitle,
+    required this._nullFileId,
   });
 
   /// Creates a [ContentBlockLocationCitation] from JSON.
   factory ContentBlockLocationCitation.fromJson(Map<String, dynamic> json) {
-    return ContentBlockLocationCitation(
+    return ContentBlockLocationCitation._(
       citedText: json['cited_text'] as String,
       documentIndex: json['document_index'] as int,
       documentTitle: json['document_title'] as String?,
       fileId: json['file_id'] as String?,
+      nullTitle: json.containsKey('document_title'),
+      nullFileId: json.containsKey('file_id'),
       startBlockIndex: json['start_block_index'] as int,
       endBlockIndex: json['end_block_index'] as int,
     );
@@ -1485,8 +1556,8 @@ class ContentBlockLocationCitation extends Citation {
     'type': 'content_block_location',
     'cited_text': citedText,
     'document_index': documentIndex,
-    if (documentTitle != null) 'document_title': documentTitle,
-    if (fileId != null) 'file_id': fileId,
+    if (documentTitle != null || _nullTitle) 'document_title': documentTitle,
+    if (fileId != null || _nullFileId) 'file_id': fileId,
     'start_block_index': startBlockIndex,
     'end_block_index': endBlockIndex,
   };
@@ -1500,13 +1571,15 @@ class ContentBlockLocationCitation extends Citation {
     int? startBlockIndex,
     int? endBlockIndex,
   }) {
-    return ContentBlockLocationCitation(
+    return ContentBlockLocationCitation._(
       citedText: citedText ?? this.citedText,
       documentIndex: documentIndex ?? this.documentIndex,
       documentTitle: documentTitle == unsetCopyWithValue
           ? this.documentTitle
           : documentTitle as String?,
       fileId: fileId == unsetCopyWithValue ? this.fileId : fileId as String?,
+      nullTitle: documentTitle == unsetCopyWithValue && _nullTitle,
+      nullFileId: fileId == unsetCopyWithValue && _nullFileId,
       startBlockIndex: startBlockIndex ?? this.startBlockIndex,
       endBlockIndex: endBlockIndex ?? this.endBlockIndex,
     );

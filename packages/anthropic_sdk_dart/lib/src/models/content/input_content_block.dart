@@ -172,11 +172,10 @@ sealed class InputContentBlock {
     CacheControlEphemeral? cacheControl,
   }) = ToolReferenceInputBlock;
 
-  /// Creates a mid-conversation directive to surface a declared tool.
+  /// Creates a mid-conversation directive to surface a tool.
   ///
-  /// [tool] references a tool (or MCP toolset) by name from the request's
-  /// `tools`; it is offered to the model from this point in the conversation
-  /// onward.
+  /// [tool] references a declared tool or carries an inline declaration. Send
+  /// `inline-tools-2026-09-15` to define a tool inside the message.
   factory InputContentBlock.toolAddition({
     required ToolChangeReference tool,
     CacheControlEphemeral? cacheControl,
@@ -2027,7 +2026,13 @@ class CompactionInputBlock extends InputContentBlock {
   final CacheControlEphemeral? cacheControl;
 
   // These nullable beta fields must retain their wire presence during replay.
-  final ({bool signature, bool toolChanges}) _presence;
+  final ({
+    bool content,
+    bool encryptedContent,
+    bool signature,
+    bool toolChanges,
+  })
+  _presence;
 
   /// Creates a [CompactionInputBlock].
   const CompactionInputBlock({
@@ -2037,6 +2042,8 @@ class CompactionInputBlock extends InputContentBlock {
     this.toolChanges,
     this.cacheControl,
   }) : _presence = (
+         content: true,
+         encryptedContent: encryptedContent != null,
          signature: signature != null,
          toolChanges: toolChanges != null,
        );
@@ -2059,6 +2066,8 @@ class CompactionInputBlock extends InputContentBlock {
       encryptedContent: json['encrypted_content'] as String?,
       signature: json['signature'] as String?,
       presence: (
+        content: json.containsKey('content'),
+        encryptedContent: json.containsKey('encrypted_content'),
         signature: json.containsKey('signature'),
         toolChanges: json.containsKey('tool_changes'),
       ),
@@ -2081,8 +2090,8 @@ class CompactionInputBlock extends InputContentBlock {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'compaction',
-    'content': content,
-    if (encryptedContent != null) 'encrypted_content': encryptedContent,
+    if (_presence.content) 'content': content,
+    if (_presence.encryptedContent) 'encrypted_content': encryptedContent,
     if (_presence.signature) 'signature': signature,
     if (_presence.toolChanges) 'tool_changes': toolChanges,
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
@@ -2104,6 +2113,10 @@ class CompactionInputBlock extends InputContentBlock {
           ? this.encryptedContent
           : encryptedContent as String?,
       presence: (
+        content: content != unsetCopyWithValue || _presence.content,
+        encryptedContent: encryptedContent == unsetCopyWithValue
+            ? _presence.encryptedContent
+            : encryptedContent != null,
         signature: signature == unsetCopyWithValue
             ? _presence.signature
             : signature != null,
@@ -2307,11 +2320,16 @@ class ToolRemovalInputBlock extends InputContentBlock {
   }
 
   @override
-  Map<String, dynamic> toJson() => {
-    'type': 'tool_removal',
-    'tool': tool.toJson(),
-    if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
-  };
+  Map<String, dynamic> toJson() {
+    if (tool is ToolChangeInlineDefinition) {
+      throw ArgumentError('A tool removal requires a tool reference');
+    }
+    return {
+      'type': 'tool_removal',
+      'tool': tool.toJson(),
+      if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
+    };
+  }
 
   /// Creates a copy with replaced values.
   ToolRemovalInputBlock copyWith({

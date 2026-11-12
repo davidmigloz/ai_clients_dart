@@ -429,6 +429,33 @@ String stopStatus(StopReason? reason) => switch (reason) {
 
 ---
 
+## Handle inline tool definitions
+
+`ToolChangeReference` adds `ToolChangeInlineDefinition`. Add a case to
+exhaustive switches. `definition` exposes a known tool declaration, and
+`toJson()` retains the original declaration including future variants.
+
+```dart
+// Before
+final kind = switch (tool) {
+  ToolChangeToolReference() => 'tool',
+  ToolChangeMCPToolReference() => 'MCP tool',
+  ToolChangeMCPToolsetReference() => 'MCP toolset',
+  UnknownToolChangeReference() => 'unknown',
+};
+
+// After
+final kind = switch (tool) {
+  ToolChangeToolReference() => 'tool',
+  ToolChangeMCPToolReference() => 'MCP tool',
+  ToolChangeMCPToolsetReference() => 'MCP toolset',
+  ToolChangeInlineDefinition() => 'inline definition',
+  UnknownToolChangeReference() => 'unknown',
+};
+```
+
+---
+
 ## Migrating from v9.x to v10.0.0
 
 v10.0.0 adds document sources that reference uploaded files. `DocumentSource` is sealed, so exhaustive switches must handle the new `FileDocumentSource` variant.

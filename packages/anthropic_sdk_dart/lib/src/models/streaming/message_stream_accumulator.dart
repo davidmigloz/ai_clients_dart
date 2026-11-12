@@ -151,12 +151,10 @@ class MessageStreamAccumulator {
       case CompactionDelta():
         if (block.initialBlock case final CompactionBlock initial) {
           final current = block.compaction ?? initial;
-          block.compaction = current.copyWith(
-            content: delta.content,
-            encryptedContent: delta.hasEncryptedContent
-                ? delta.encryptedContent
-                : current.encryptedContent,
-          );
+          final updated = current.copyWith(content: delta.content);
+          block.compaction = delta.hasEncryptedContent
+              ? updated.copyWith(encryptedContent: delta.encryptedContent)
+              : updated;
         }
       case UnknownContentBlockDelta():
         break; // Unknown deltas are ignored during accumulation

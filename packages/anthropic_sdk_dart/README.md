@@ -41,7 +41,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 
 ### Tools and multimodal
 
-- Custom tool calling with strict schemas and tool choice controls
+- Custom tool calling with strict schemas, tool choice controls and inline changes (beta)
 - Mid-conversation tool changes: add or remove tools between turns with `tool_addition`/`tool_removal` blocks while preserving the prompt cache (beta)
 - Computer-use and browser-use toolsets (`computer_toolset_20260801` / `browser_toolset_20260801` with per-member configs and `browser_state` results), web search, code execution, advisor, and the beta Messages MCP connector with tool listing and pinning
 - Vision and document inputs with citations, an oversized-image policy via `transformations`, plus your own cited `search_result` blocks (RAG)
@@ -347,6 +347,25 @@ final response = await client.messages.create(
 ```
 
 → [Full example](example/tool_calling_example.dart)
+
+</details>
+
+<details>
+<summary><b>Define a tool partway through a conversation</b></summary>
+
+Add a system turn containing `InputContentBlock.toolAddition` with
+`ToolChangeReference.definition`. Send `inline-tools-2026-09-15` for this beta
+on the Claude API, Claude Platform on AWS, or Claude Models on Google Cloud
+(Anthropic managed). For an MCP toolset declaration, also send
+`mcp-client-2026-09-15` on the Claude API. Keep the MCP server URL and token
+in `mcpServers`. Reference a browser or computer tool declared in `tools` by
+name. To withdraw a tool, send a tool-removal block with its reference.
+
+Keep the original `tools` array and earlier messages to reuse the cached
+prefix. Retain signed compaction blocks as returned. `toolChangeBlocks`
+provides typed inspection of the tool changes contained in those blocks.
+
+[Runnable inline tool example](example/inline_tools_example.dart) · [Tool changes guide](https://platform.claude.com/docs/en/build-with-claude/mid-conversation-system-messages)
 
 </details>
 
@@ -1178,6 +1197,7 @@ See the [example/](example/) directory for complete examples:
 | [`message_batches_example.dart`](example/message_batches_example.dart) | Batch processing |
 | [`files_example.dart`](example/files_example.dart) | File management |
 | [`skills_example.dart`](example/skills_example.dart) | Skills management |
+| [`inline_tools_example.dart`](example/inline_tools_example.dart) | Define a client tool partway through a conversation (beta) |
 | [`mcp_example.dart`](example/mcp_example.dart) | Connect an MCP server and pin its tool listing (beta) |
 | [`managed_agents_example.dart`](example/managed_agents_example.dart) | Managed agents: agents, sessions, vaults, multiagent rosters, outcomes, webhooks, credential validation (beta) |
 | [`managed_agents_workflow_example.dart`](example/managed_agents_workflow_example.dart) | Configure dynamic workflows and follow workflow run events (Managed Agents beta) |
