@@ -58,6 +58,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Organization Admin API for keys, users, invites, workspaces, rate limits, compliance settings, RBAC and spend limits
 - Service account lifecycle and workspace memberships with scoped OAuth
 - Customer-managed encryption keys and validation through the Admin API
+- Usage and cost analytics with actor, workspace, and organization dimensions (beta)
 - Files (expiration, cursor pagination) and skills (multi-file uploads, container skills)
 - Managed agents with environments, self-hosted work, sessions, thread status filters, execution principals, tool permission evaluation, vaults, and streaming events (beta)
 - Scheduled deployments on the Claude API, Claude Platform on AWS, and Anthropic-managed Claude Models on Google Cloud (beta)
@@ -1250,6 +1251,36 @@ completed before using its bytes.
 
 </details>
 
+### How do I report organization usage and costs?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.organization.analytics` with a scoped organization credential.
+Console organizations can use an Admin API key or an `org:admin` OAuth token.
+Claude Enterprise organizations use a key with `read:analytics`. Usage and cost
+calls add the required beta header. Group by dimensions such as `model`,
+`actor` and `organization_id`, and reuse the query with `nextPage`.
+
+```dart
+final report = await admin.organization.analytics.usage(
+  UsageCostAnalyticsQuery(
+    startingAt: DateTime.utc(2026, 10, 1),
+    endingAt: DateTime.utc(2026, 10, 2),
+    groupBy: const ['model'],
+  ),
+);
+for (final row in report.data) {
+  print('${row.group.model}: ${row.usage.totalTokens}');
+}
+```
+
+Cost amounts are decimal strings in the currency's minor unit.
+
+[Runnable analytics example](example/organization_analytics_example.dart) · [Usage and cost analytics](https://platform.claude.com/docs/en/manage-claude/usage-cost-analytics-api)
+
+</details>
+
 ## Error Handling
 
 <details>
@@ -1339,6 +1370,7 @@ See the [example/](example/) directory for complete examples:
 | [`service_accounts_example.dart`](example/service_accounts_example.dart) | List service accounts and their workspace memberships |
 | [`organization_admin_example.dart`](example/organization_admin_example.dart) | Read-only organization and workspace administration |
 | [`external_keys_example.dart`](example/external_keys_example.dart) | List registered customer-managed encryption keys |
+| [`organization_analytics_example.dart`](example/organization_analytics_example.dart) | Dimensioned organization usage and cost with cursor pagination (beta) |
 | [`organization_rbac_example.dart`](example/organization_rbac_example.dart) | List RBAC groups, members, roles and permissions |
 | [`organization_spend_example.dart`](example/organization_spend_example.dart) | List effective spend limits and pending increase requests |
 | [`models_example.dart`](example/models_example.dart) | Model lifecycle filters, pagination, and capabilities |
