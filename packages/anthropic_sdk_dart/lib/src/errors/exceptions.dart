@@ -54,17 +54,17 @@ class ResponseMetadata {
     required this.latency,
     this.bodyRequestId,
   });
-}
 
-String? _responseRequestId(ResponseMetadata? metadata) {
-  for (final entry
-      in metadata?.headers.entries ?? const <MapEntry<String, String>>[]) {
-    if (entry.key.toLowerCase() == 'request-id' &&
-        entry.value.trim().isNotEmpty) {
-      return entry.value;
+  /// Provider request ID from the response header or error envelope.
+  String? get requestId {
+    for (final entry in headers.entries) {
+      if (entry.key.toLowerCase() == 'request-id' &&
+          entry.value.trim().isNotEmpty) {
+        return entry.value;
+      }
     }
+    return bodyRequestId;
   }
-  return metadata?.bodyRequestId;
 }
 
 /// Base sealed class for all Anthropic exceptions.
@@ -119,7 +119,7 @@ class ApiException extends AnthropicException {
   final Exception? cause;
 
   /// The server-provided request ID, distinct from the client correlation ID.
-  String? get requestId => _responseRequestId(responseMetadata);
+  String? get requestId => responseMetadata?.requestId;
 
   /// Creates an [ApiException].
   const ApiException({
@@ -193,7 +193,7 @@ class ValidationException extends AnthropicException {
   final ResponseMetadata? responseMetadata;
 
   /// The server-provided request ID, absent for client-side validation errors.
-  String? get requestId => _responseRequestId(responseMetadata);
+  String? get requestId => responseMetadata?.requestId;
 
   @override
   final StackTrace? stackTrace;

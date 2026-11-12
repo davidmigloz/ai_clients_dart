@@ -105,6 +105,7 @@ class MessageStreamAccumulator {
       case MessageStopEvent():
         _receivedStop = true;
       case PingEvent():
+      case UnknownMessageStreamEvent():
         break;
       case ErrorEvent():
         _streamError = event;
@@ -351,7 +352,7 @@ class MessageStreamAccumulator {
   /// Use [toMessage] to inspect a partial snapshot.
   Message toFinalMessage() {
     if (_streamError case final error?) {
-      throw StateError('Message stream failed: ${error.errorType}');
+      throw MessageStreamFailure(error);
     }
     if (!_receivedStop) {
       throw StateError('Message stream ended before message_stop');

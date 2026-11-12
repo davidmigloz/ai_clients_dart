@@ -20,10 +20,11 @@ mixin StreamingResource on ResourceBase {
   /// Unlike an async generator, this forwards listener cancellation while idle.
   Stream<T> mapStream<T>(
     Stream<Map<String, dynamic>> source,
-    T Function(Map<String, dynamic>) decode,
-  ) => Stream<T>.eventTransformed(
+    T Function(Map<String, dynamic>) decode, {
+    bool Function(Object?)? isTerminal,
+  }) => Stream<T>.eventTransformed(
     source,
-    (sink) => _MappedEventSink(sink, decode),
+    (sink) => _MappedEventSink<T>(sink, decode, isTerminal),
   );
 
   /// Makes a streaming POST request.
@@ -33,6 +34,7 @@ mixin StreamingResource on ResourceBase {
   /// Transport cancellation depends on support from the supplied HTTP client;
   /// it does not guarantee the server has stopped processing the request.
   /// [validateHeaders] sees the effective headers before transport starts.
+  /// [onResponse] receives safe metadata for the successful handshake.
   Stream<Map<String, dynamic>> postStream(
     String path, {
     required Map<String, dynamic> body,
@@ -40,6 +42,7 @@ mixin StreamingResource on ResourceBase {
     Map<String, String>? headers,
     Future<void>? abortTrigger,
     void Function(Map<String, String>)? validateHeaders,
+    void Function(ResponseMetadata)? onResponse,
   }) => _stream(
     'POST',
     path,
@@ -48,7 +51,18 @@ mixin StreamingResource on ResourceBase {
     headers: headers,
     abortTrigger: abortTrigger,
     validateHeaders: validateHeaders,
-    decode: (body, _) => SseParser().parse(body),
+    onResponse: onResponse == null
+        ? null
+        : (response, latency) {
+            onResponse(
+              createSafeResponseMetadata(
+                statusCode: response.statusCode,
+                headers: response.headers,
+                latency: latency,
+              ),
+            );
+          },
+    decode: (body) => SseParser().parse(body),
   );
 
   /// Makes a streaming GET request whose response contains JSON lines.
@@ -78,7 +92,7 @@ mixin StreamingResource on ResourceBase {
     errorFactory: errorFactory,
     errorFactoryWithMetadata: errorFactoryWithMetadata,
     jsonlMedia: true,
-    decode: (body, _) => body
+    decode: (body) => body
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .where((line) => line.trim().isNotEmpty)
@@ -141,7 +155,7 @@ mixin StreamingResource on ResourceBase {
     queryParams: queryParams,
     headers: headers,
     abortTrigger: abortTrigger,
-    decode: (body, _) => SseParser().parse(body),
+    decode: (body) => SseParser().parse(body),
   );
 
   Stream<T> _stream<T>(
@@ -152,11 +166,8 @@ mixin StreamingResource on ResourceBase {
     Map<String, String>? headers,
     Future<void>? abortTrigger,
     void Function(Map<String, String>)? validateHeaders,
-    required Stream<T> Function(
-      Stream<List<int>> body,
-      Map<String, String> headers,
-    )
-    decode,
+    required Stream<T> Function(Stream<List<int>> body) decode,
+    void Function(http.StreamedResponse, Duration)? onResponse,
     Map<String, String> Function()? buildRequestHeaders,
     bool followRedirects = true,
     bool jsonlMedia = false,
@@ -317,16 +328,19 @@ mixin StreamingResource on ResourceBase {
             },
           );
         } else {
-          final decoded = decode(responseBodyStream, response.headers);
+          try {
+            onResponse?.call(response, stopwatch.elapsed);
+          } catch (_) {
+            response.stream.listen(null).cancel().ignore();
+            rethrow;
+          }
           if (stopped) {
-            await decoded.listen(null).cancel();
+            await response.stream.listen(null).cancel();
             return;
           }
-          subscription = decoded.listen(
-            controller.add,
-            onError: finish,
-            onDone: finish,
-          );
+          subscription = decode(
+            responseBodyStream,
+          ).listen(controller.add, onError: finish, onDone: finish);
         }
         // A custom response stream can abort synchronously from its onListen
         // callback, before its subscription is available to stop().
@@ -389,15 +403,10 @@ Stream<List<int>> getResourceByteStream(
   buildRequestHeaders: headers,
   followRedirects: false,
   abortTrigger: abortTrigger,
-  decode: (body, headers) {
-    try {
-      onResponse?.call(headers);
-      return body;
-    } catch (_) {
-      body.listen(null).cancel().ignore();
-      rethrow;
-    }
-  },
+  onResponse: onResponse == null
+      ? null
+      : (response, _) => onResponse(response.headers),
+  decode: (body) => body,
 );
 
 class _MappedEventSink<T> implements EventSink<Map<String, dynamic>> {
@@ -405,13 +414,17 @@ class _MappedEventSink<T> implements EventSink<Map<String, dynamic>> {
   final T Function(Map<String, dynamic>) _decode;
   bool _closed = false;
 
-  _MappedEventSink(this._output, this._decode);
+  final bool Function(Object?)? _isTerminal;
+
+  _MappedEventSink(this._output, this._decode, this._isTerminal);
 
   @override
   void add(Map<String, dynamic> event) {
     if (_closed) return;
     try {
-      _output.add(_decode(event));
+      final decoded = _decode(event);
+      _output.add(decoded);
+      if (_isTerminal?.call(decoded) == true) close();
     } catch (error, stackTrace) {
       addError(error, stackTrace);
     }
