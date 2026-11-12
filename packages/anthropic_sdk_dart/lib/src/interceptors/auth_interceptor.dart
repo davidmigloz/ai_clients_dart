@@ -1,12 +1,13 @@
 import 'package:http/http.dart' as http;
 
 import '../auth/auth_provider.dart';
+import '../auth/request_auth.dart';
 import 'interceptor.dart';
 
 /// Interceptor that adds authentication credentials to requests.
 ///
-/// For API key auth, adds the `x-api-key` header.
-/// Auth headers are only added if not already present (respects request-level override).
+/// Supports API keys and OAuth bearer credentials. Explicit authentication
+/// headers take precedence.
 class AuthInterceptor implements Interceptor {
   /// Authentication provider.
   final AuthProvider authProvider;
@@ -19,33 +20,13 @@ class AuthInterceptor implements Interceptor {
     RequestContext context,
     InterceptorNext next,
   ) async {
-    final credentials = await authProvider.getCredentials();
-
-    // Clone the request to add auth headers
-    final request = _cloneRequest(context.request, credentials);
-
+    final headers = await resolveCredentialHeaders(
+      context.request.headers,
+      authProvider,
+    );
+    if (headers.isEmpty) return next(context);
+    final request = _copyRequest(context.request)..headers.addAll(headers);
     return next(context.copyWith(request: request));
-  }
-
-  /// Clones a request and adds authentication headers.
-  http.BaseRequest _cloneRequest(
-    http.BaseRequest original,
-    AuthCredentials credentials,
-  ) {
-    switch (credentials) {
-      case ApiKeyCredentials(:final apiKey):
-        // Only add x-api-key header if not already set
-        if (!original.headers.containsKey('x-api-key')) {
-          final newRequest = _copyRequest(original);
-          newRequest.headers['x-api-key'] = apiKey;
-          return newRequest;
-        }
-        return original;
-
-      case NoAuthCredentials():
-        // No authentication needed
-        return original;
-    }
   }
 
   /// Creates a copy of a request.

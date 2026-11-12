@@ -4,12 +4,13 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~10.3k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~10.6k tokens): Primary package documentation with installation, configuration, and usage examples.
 - [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/CHANGELOG.md) (~12.9k tokens): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) (~12.1k tokens): Upgrade notes and breaking-change guidance.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) (~12.3k tokens): Upgrade notes and breaking-change guidance.
 
 ## Examples
 
+- [workload_identity_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/workload_identity_example.dart) (~375 tokens): Exchange a workload identity JWT and call Messages.
 - [messages_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/messages_example.dart) (~794 tokens): Basic message creation.
 - [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/streaming_example.dart) (~1.3k tokens): Streaming responses.
 - [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/tool_calling_example.dart) (~685 tokens): Tool calling with schemas.
@@ -57,4 +58,4 @@
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/anthropic_sdk_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~65.3k tokens**
+**Total: ~66.1k tokens**

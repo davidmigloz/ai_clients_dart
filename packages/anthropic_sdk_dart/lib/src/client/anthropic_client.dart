@@ -1,6 +1,9 @@
+import 'dart:async' show FutureOr;
+
 import 'package:http/http.dart' as http;
 
 import '../auth/auth_provider.dart';
+import '../auth/workload_identity.dart';
 import '../interceptors/auth_interceptor.dart';
 import '../interceptors/error_interceptor.dart';
 import '../interceptors/interceptor.dart';
@@ -59,6 +62,8 @@ class AnthropicClient {
 
   /// Whether this client owns the HTTP client (and should close it).
   final bool _ownsHttpClient;
+
+  final void Function()? _closeAuth;
 
   /// Whether the client has been closed.
   bool _closed = false;
@@ -129,9 +134,18 @@ class AnthropicClient {
   /// cases. If not provided, a new client is created and will be closed when
   /// [close] is called. If provided, you are responsible for closing it.
   AnthropicClient({AnthropicConfig? config, http.Client? httpClient})
-    : config = config ?? const AnthropicConfig(),
-      _httpClient = httpClient ?? http.Client(),
-      _ownsHttpClient = httpClient == null {
+    : this._(
+        config ?? const AnthropicConfig(),
+        httpClient ?? http.Client(),
+        ownsHttpClient: httpClient == null,
+      );
+
+  AnthropicClient._(
+    this.config,
+    this._httpClient, {
+    required this._ownsHttpClient,
+    this._closeAuth,
+  }) {
     _initialize();
   }
 
@@ -166,6 +180,57 @@ class AnthropicClient {
       ),
       httpClient: httpClient,
     );
+  }
+
+  /// Creates a client with an existing OAuth bearer token.
+  ///
+  /// The token's scope determines the API operations it can authorize.
+  factory AnthropicClient.withAuthToken(
+    String authToken, {
+    AnthropicConfig config = const AnthropicConfig(),
+    http.Client? httpClient,
+  }) => AnthropicClient(
+    config: config.copyWith(authProvider: BearerTokenProvider(authToken)),
+    httpClient: httpClient,
+  );
+
+  /// Authenticates with a JWT obtained from an external identity provider.
+  ///
+  /// Exchanges and refreshes the token on the same API endpoint as requests.
+  /// The callback is invoked for every exchange so it can supply a fresh JWT.
+  /// Set the exchange [workspaceId] instead of a request workspace override.
+  factory AnthropicClient.withWorkloadIdentity({
+    required FutureOr<String> Function() identityTokenProvider,
+    required String federationRuleId,
+    required String organizationId,
+    required String serviceAccountId,
+    String? workspaceId,
+    AnthropicConfig config = const AnthropicConfig(),
+    http.Client? httpClient,
+  }) {
+    final transport = httpClient ?? http.Client();
+    try {
+      final auth = WorkloadIdentityAuthProvider(
+        exchange: WorkloadIdentityTokenExchange(
+          httpClient: transport,
+          baseUrl: config.baseUrl,
+        ),
+        identityTokenProvider: identityTokenProvider,
+        federationRuleId: federationRuleId,
+        organizationId: organizationId,
+        serviceAccountId: serviceAccountId,
+        workspaceId: workspaceId,
+      );
+      return AnthropicClient._(
+        config.copyWith(authProvider: auth),
+        transport,
+        ownsHttpClient: httpClient == null,
+        closeAuth: auth.close,
+      );
+    } catch (_) {
+      if (httpClient == null) transport.close();
+      rethrow;
+    }
   }
 
   /// Initializes the client with interceptor chain and resources.
@@ -317,6 +382,7 @@ class AnthropicClient {
   void close() {
     if (_closed) return;
     _closed = true;
+    _closeAuth?.call();
     if (_ownsHttpClient) {
       _httpClient.close();
     }

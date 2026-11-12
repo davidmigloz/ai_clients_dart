@@ -282,6 +282,32 @@ switches. `Message.toInputMessage()` converts the listing for replay.
 
 ---
 
+## Handle OAuth bearer credentials
+
+`AuthCredentials` adds the sealed `BearerTokenCredentials` case. Include
+it in exhaustive switches. Avoid logging any credential value.
+
+Before
+
+```dart
+String authKind(AuthCredentials credentials) => switch (credentials) {
+  ApiKeyCredentials() => 'API key',
+  NoAuthCredentials() => 'None',
+};
+```
+
+After
+
+```dart
+String authKind(AuthCredentials credentials) => switch (credentials) {
+  ApiKeyCredentials() => 'API key',
+  BearerTokenCredentials() => 'OAuth',
+  NoAuthCredentials() => 'None',
+};
+```
+
+---
+
 ## Migrating from v9.x to v10.0.0
 
 v10.0.0 adds document sources that reference uploaded files. `DocumentSource` is sealed, so exhaustive switches must handle the new `FileDocumentSource` variant.

@@ -48,6 +48,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 
 ### Operational APIs
 
+- OAuth bearer authentication and Workload Identity Federation with token refresh
 - Message batches for large-scale offline processing
 - Compliance Activity Feed, directory, organization settings, app content, sessions, and artifact downloads. Security Posture is beta.
 - Model discovery with lifecycle filters, model lines, and thinking and server-tool capabilities
@@ -146,6 +147,32 @@ Use a new token exchange to change it.
 [Workspace selection](https://platform.claude.com/docs/en/manage-claude/authentication#select-a-workspace)
 
 Use explicit configuration on web builds where runtime environment variables are not available.
+
+</details>
+
+<details>
+<summary><b>Authenticate with Workload Identity Federation</b></summary>
+
+Configure an issuer, a service account, and a federation rule in Claude
+Console. Supply a callback that reads a fresh identity-provider JWT for each
+exchange. The client exchanges the JWT at the configured Claude API base URL
+and caches the returned bearer token until refresh. For a rule that covers
+multiple workspaces, pass the exchange `workspaceId` to select one.
+
+```dart
+final client = AnthropicClient.withWorkloadIdentity(
+  identityTokenProvider: loadIdentityProviderJwt,
+  federationRuleId: federationRuleId,
+  organizationId: organizationId,
+  serviceAccountId: serviceAccountId,
+  workspaceId: workspaceId,
+);
+```
+
+Use `AnthropicClient.withAuthToken(token)` with an existing OAuth token. The
+token scope controls which Claude operations it authorizes.
+
+[Workload Identity Federation guide](https://platform.claude.com/docs/en/manage-claude/workload-identity-federation) · [Runnable example](example/workload_identity_example.dart)
 
 </details>
 
@@ -1046,6 +1073,7 @@ See the [example/](example/) directory for complete examples:
 | Example | Description |
 |---------|-------------|
 | [`messages_example.dart`](example/messages_example.dart) | Basic message creation |
+| [`workload_identity_example.dart`](example/workload_identity_example.dart) | Exchange a workload identity JWT and call Messages |
 | [`api_version_example.dart`](example/api_version_example.dart) | Current API version and legacy opt-out |
 | [`mid_conversation_system_example.dart`](example/mid_conversation_system_example.dart) | Mid-conversation, turn-scoped, and effort-only system messages |
 | [`streaming_example.dart`](example/streaming_example.dart) | Streaming responses |
