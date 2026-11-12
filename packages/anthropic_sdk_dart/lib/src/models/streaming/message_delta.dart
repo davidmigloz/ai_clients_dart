@@ -30,20 +30,30 @@ class MessageDelta {
   /// This is non-null when [stopReason] is [StopReason.refusal].
   final RefusalStopDetails? stopDetails;
 
+  /// Whether the delta specifies stop details, including an explicit null.
+  final bool hasStopDetails;
+
   /// The stop sequence that caused the stop, if applicable.
   final String? stopSequence;
 
+  /// Whether the delta specifies a stop sequence, including an explicit null.
+  final bool hasStopSequence;
+
   /// Creates a [MessageDelta].
   ///
-  /// Pass a [StopReason] to set it. Pass `hasStopReason: true` with a null
-  /// [stopReason] to clear it.
+  /// Pass a stop field to set it. Pass its presence flag with a null value to
+  /// clear it.
   const MessageDelta({
     this.container,
     this.stopReason,
     bool hasStopReason = false,
     this.stopDetails,
+    bool hasStopDetails = false,
     this.stopSequence,
+    bool hasStopSequence = false,
   }) : hasStopReason = hasStopReason || stopReason != null,
+       hasStopDetails = hasStopDetails || stopDetails != null,
+       hasStopSequence = hasStopSequence || stopSequence != null,
        _rawStopReason = null;
 
   const MessageDelta._({
@@ -52,7 +62,9 @@ class MessageDelta {
     required this.hasStopReason,
     String? stopReasonValue,
     this.stopDetails,
+    required this.hasStopDetails,
     this.stopSequence,
+    required this.hasStopSequence,
   }) : _rawStopReason = stopReason == StopReason.unknown
            ? stopReasonValue
            : null;
@@ -74,7 +86,9 @@ class MessageDelta {
               json['stop_details'] as Map<String, dynamic>,
             )
           : null,
+      hasStopDetails: json.containsKey('stop_details'),
       stopSequence: json['stop_sequence'] as String?,
+      hasStopSequence: json.containsKey('stop_sequence'),
     );
   }
 
@@ -82,8 +96,8 @@ class MessageDelta {
   Map<String, dynamic> toJson() => {
     if (container != null) 'container': container!.toJson(),
     if (hasStopReason) 'stop_reason': stopReasonValue,
-    if (stopDetails != null) 'stop_details': stopDetails!.toJson(),
-    if (stopSequence != null) 'stop_sequence': stopSequence,
+    if (hasStopDetails) 'stop_details': stopDetails?.toJson(),
+    if (hasStopSequence) 'stop_sequence': stopSequence,
   };
 
   /// Creates a copy with replaced values.
@@ -94,6 +108,8 @@ class MessageDelta {
     Object? stopSequence = unsetCopyWithValue,
   }) {
     final replaceStopReason = !identical(stopReason, unsetCopyWithValue);
+    final replaceStopDetails = !identical(stopDetails, unsetCopyWithValue);
+    final replaceStopSequence = !identical(stopSequence, unsetCopyWithValue);
     return MessageDelta._(
       container: container == unsetCopyWithValue
           ? this.container
@@ -103,12 +119,14 @@ class MessageDelta {
           : this.stopReason,
       hasStopReason: replaceStopReason || hasStopReason,
       stopReasonValue: replaceStopReason ? null : _rawStopReason,
-      stopDetails: stopDetails == unsetCopyWithValue
-          ? this.stopDetails
-          : stopDetails as RefusalStopDetails?,
-      stopSequence: stopSequence == unsetCopyWithValue
-          ? this.stopSequence
-          : stopSequence as String?,
+      stopDetails: replaceStopDetails
+          ? stopDetails as RefusalStopDetails?
+          : this.stopDetails,
+      hasStopDetails: replaceStopDetails || hasStopDetails,
+      stopSequence: replaceStopSequence
+          ? stopSequence as String?
+          : this.stopSequence,
+      hasStopSequence: replaceStopSequence || hasStopSequence,
     );
   }
 
@@ -121,7 +139,9 @@ class MessageDelta {
           hasStopReason == other.hasStopReason &&
           stopReason == other.stopReason &&
           stopReasonValue == other.stopReasonValue &&
+          hasStopDetails == other.hasStopDetails &&
           stopDetails == other.stopDetails &&
+          hasStopSequence == other.hasStopSequence &&
           stopSequence == other.stopSequence;
 
   @override
@@ -131,7 +151,9 @@ class MessageDelta {
     hasStopReason,
     stopReasonValue,
     stopDetails,
+    hasStopDetails,
     stopSequence,
+    hasStopSequence,
   );
 
   @override

@@ -112,6 +112,30 @@ void main() {
     expect(unfamiliar.copyWith(stopReason: StopReason.endTurn), known);
   });
 
+  test('delta copies and serializes explicit null for all stop fields', () {
+    const cleared = MessageDelta(
+      hasStopReason: true,
+      hasStopDetails: true,
+      hasStopSequence: true,
+    );
+    final wire = {
+      'stop_reason': null,
+      'stop_details': null,
+      'stop_sequence': null,
+    };
+    expect(cleared.toJson(), wire);
+    expect(MessageDelta.fromJson(wire), cleared);
+    expect(
+      const MessageDelta().copyWith(
+        stopReason: null,
+        stopDetails: null,
+        stopSequence: null,
+      ),
+      cleared,
+    );
+    expect(cleared.copyWith().hashCode, cleared.hashCode);
+  });
+
   for (final clear in [false, true]) {
     test(
       'stream stop reason honors omitted and null updates (clear=$clear)',
@@ -151,6 +175,48 @@ void main() {
           await client.messages.createStream(_request).stopReason,
           expected,
         );
+      },
+    );
+  }
+
+  for (final (field, initial) in [
+    (
+      'stop_sequence',
+      {'stop_reason': 'stop_sequence', 'stop_sequence': 'fixture sequence'},
+    ),
+    (
+      'stop_details',
+      {
+        'stop_reason': 'refusal',
+        'stop_details': {'type': 'refusal', 'explanation': 'fixture refusal'},
+      },
+    ),
+  ]) {
+    test(
+      'stream clears $field when the wire field is explicitly null',
+      () async {
+        final events = MockResponses.streamingEvents();
+        events.replaceRange(events.length - 2, events.length - 1, [
+          {
+            'type': 'message_delta',
+            'delta': initial,
+            'usage': {'output_tokens': 8},
+          },
+          {
+            'type': 'message_delta',
+            'delta': {'stop_reason': null, field: null},
+            'usage': {'output_tokens': 9},
+          },
+        ]);
+        final transport = MockHttpClient()..queueStreamingResponse(events);
+        final client = AnthropicClient(httpClient: transport);
+        addTearDown(client.close);
+        final message = await client.messages
+            .createStream(_request)
+            .finalMessage();
+        expect(message.stopReason, isNull);
+        expect(message.stopDetails, isNull);
+        expect(message.stopSequence, isNull);
       },
     );
   }

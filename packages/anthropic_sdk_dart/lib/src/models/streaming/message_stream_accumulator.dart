@@ -87,6 +87,8 @@ class MessageStreamAccumulator {
         _role = message.role;
         _stopReason = message.stopReason;
         _stopReasonValue = message.stopReasonValue;
+        _stopDetails = message.stopDetails;
+        _stopSequence = message.stopSequence;
         _usage = message.usage;
         _container = message.container;
         _diagnostics = message.diagnostics;
@@ -112,8 +114,8 @@ class MessageStreamAccumulator {
           _stopReason = delta.stopReason;
           _stopReasonValue = delta.stopReasonValue;
         }
-        _stopDetails = delta.stopDetails ?? _stopDetails;
-        _stopSequence = delta.stopSequence ?? _stopSequence;
+        if (delta.hasStopDetails) _stopDetails = delta.stopDetails;
+        if (delta.hasStopSequence) _stopSequence = delta.stopSequence;
         _container = delta.container ?? _container;
         _inputTransformations = inputTransformations ?? _inputTransformations;
         _contextManagement = contextManagement ?? _contextManagement;
