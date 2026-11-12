@@ -240,7 +240,15 @@ List<String> providerPath(Uri uri, Uri base) {
   final offset = prefix.isNotEmpty && prefix.last.isEmpty
       ? prefix.length - 1
       : prefix.length;
-  return uri.pathSegments.skip(offset).toList();
+  final segments = uri.pathSegments;
+  for (var index = 0; index < offset; index++) {
+    if (index >= segments.length || segments[index] != prefix[index]) {
+      throw ArgumentError(
+        'Request is outside the configured provider base path',
+      );
+    }
+  }
+  return segments.skip(offset).toList();
 }
 
 /// Reads optional provider defaults on platforms with an environment.
@@ -255,3 +263,16 @@ String? providerEnvironmentValue(String name) {
 /// Returns a non-default base URL supplied through a Claude config.
 String? configuredProviderBase(String value) =>
     value == 'https://api.anthropic.com' ? null : value;
+
+/// Replaces a provider request's path and removes the Claude beta URL marker.
+Uri replaceProviderPath(Uri uri, String path, {bool removeBeta = false}) {
+  final query = Map<String, List<String>>.of(uri.queryParametersAll);
+  if (removeBeta) query.remove('beta');
+  return Uri(
+    scheme: uri.scheme,
+    host: uri.host,
+    port: uri.hasPort ? uri.port : null,
+    path: path,
+    queryParameters: query.isEmpty ? null : query,
+  );
+}

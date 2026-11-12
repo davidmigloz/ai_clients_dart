@@ -299,6 +299,8 @@ export 'src/models/user_profiles/user_profile_trust_grant.dart';
 
 // Cloud provider transports
 export 'src/providers/anthropic_aws_client.dart' show AnthropicAwsClient;
+export 'src/providers/anthropic_bedrock_clients.dart'
+    show AnthropicBedrockClient, AnthropicBedrockMantleClient;
 export 'src/providers/aws_signing.dart'
     show ClaudeAwsCredentialProvider, ClaudeAwsCredentials;
 

@@ -21,6 +21,24 @@ final client = AnthropicAwsClient(
 Messages and streaming use the same Dart request types and Claude API version. AWS IAM determines available Admin and Compliance operations. [Claude Platform on AWS](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws)
 
 
+## Bedrock model API versions
+
+Bedrock uses `2026-10-21` by default for Claude models that accept it. For Claude 4.6 and earlier, retain the version your deployed model already uses. Runtime moves that value into `anthropic_version` in the JSON request. Mantle sends it in the `anthropic-version` header.
+
+```dart
+final runtime = AnthropicBedrockClient(
+  region: 'us-east-1',
+  config: const AnthropicConfig(apiVersion: 'bedrock-2023-05-31'),
+);
+final mantle = AnthropicBedrockMantleClient(
+  region: 'us-east-1',
+  config: const AnthropicConfig(apiVersion: AnthropicConfig.legacyApiVersion),
+);
+```
+
+The Bedrock clients expose Messages inference. Mantle uses the Claude count-tokens request and Runtime uses `countInvokeTokens` with the original InvokeModel body. Runtime stream exceptions surface as typed Claude error events. [Claude API version migration](https://platform.claude.com/docs/en/api/migration-2026-10-21) · [AWS token counting](https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_CountTokens.html)
+
+
 ## Claude API version 2026-10-21
 
 The default API version changes from `2023-06-01` to `2026-10-21`. Every

@@ -23,6 +23,7 @@ final _message = MessageCreateRequest(
 void main() {
   _nativeAbortTests();
   _streamAndDirectTimeoutTests();
+  _bedrockFrameTimeoutTests();
 
   test('POST timeout signals transport and cancels a late response', () async {
     final timers = _ControlledTimeouts();
@@ -572,6 +573,106 @@ class _StreamObservation {
     expect(_events, isEmpty);
     expect(_errors, [_timeoutError]);
   }
+}
+
+void _bedrockFrameTimeoutTests() {
+  const config = AnthropicConfig(timeout: _timeout, retryPolicy: _noRetry);
+  const frameHeaders = {'content-type': 'application/vnd.amazon.eventstream'};
+  // A complete message_stop frame produced with Python struct and zlib.
+  final frame = base64Decode(
+    'AAAAhwAAAEuH6ivzDTptZXNzYWdlLXR5cGUHAAVldmVudAs6ZXZlbnQtdHlwZQcABWNodW5r'
+    'DTpjb250ZW50LXR5cGUHABBhcHBsaWNhdGlvbi9qc29ueyJieXRlcyI6ImV5SjBlWEJsSWpv'
+    'aWJXVnpjMkZuWlY5emRHOXdJbjA9In1YpN0u',
+  );
+
+  test('Bedrock partial frame bytes restart the body idle timeout', () async {
+    final timers = _ControlledTimeouts();
+    await timers.run(() async {
+      final exchange = _Exchange();
+      final transport = _Transport([exchange]);
+      final client = AnthropicBedrockClient(
+        region: 'us-east-1',
+        apiKey: 'fixture-bedrock-key',
+        config: config,
+        httpClient: transport,
+      );
+      addTearDown(client.close);
+
+      final listening = Completer<void>();
+      final body = StreamController<List<int>>(onListen: listening.complete);
+      addTearDown(() => unawaited(body.close()));
+      final output = _StreamObservation(client.messages.createStream(_message));
+      addTearDown(output.cancel);
+      await exchange.sent.future;
+      exchange.response.complete(
+        http.StreamedResponse(body.stream, 200, headers: frameHeaders),
+      );
+      await listening.future;
+      expect(timers.attempts, hasLength(2));
+      expect(timers.attempts.first.isActive, isFalse);
+
+      var offset = 0;
+      for (final end in [5, 12, 41]) {
+        final previous = timers.attempts.last;
+        expect(previous.isActive, isTrue);
+        body.add(frame.sublist(offset, end));
+        await Future<void>.delayed(Duration.zero);
+        expect(previous.isActive, isFalse);
+        expect(timers.attempts.last, isNot(same(previous)));
+        offset = end;
+      }
+
+      body.add(frame.sublist(offset));
+      unawaited(body.close());
+      await output._closed.future;
+      expect(output._events.single, isA<MessageStopEvent>());
+      expect(output._errors, isEmpty);
+      expect(timers.attempts.every((timer) => !timer.isActive), isTrue);
+    });
+  });
+
+  test(
+    'Bedrock listener cancellation releases a stalled partial frame',
+    () async {
+      final timers = _ControlledTimeouts();
+      await timers.run(() async {
+        final exchange = _Exchange();
+        final transport = _Transport([exchange]);
+        final client = AnthropicBedrockClient(
+          region: 'us-east-1',
+          apiKey: 'fixture-bedrock-key',
+          config: config,
+          httpClient: transport,
+        );
+        addTearDown(client.close);
+
+        final listening = Completer<void>();
+        var cancellations = 0;
+        final body = StreamController<List<int>>(
+          onListen: listening.complete,
+          onCancel: () => cancellations++,
+        );
+        addTearDown(() => unawaited(body.close()));
+        final listener = client.messages.createStream(_message).listen(null);
+        addTearDown(listener.cancel);
+        final sent = await exchange.sent.future;
+        exchange.response.complete(
+          http.StreamedResponse(body.stream, 200, headers: frameHeaders),
+        );
+        await listening.future;
+        body.add(frame.sublist(0, 5));
+        await Future<void>.delayed(Duration.zero);
+
+        await listener.cancel();
+        await (sent as http.Abortable).abortTrigger;
+        expect(cancellations, 1);
+        expect(body.hasListener, isFalse);
+        expect(timers.attempts.last.isActive, isFalse);
+        client.close();
+        expect(transport.closeCount, 0);
+      });
+    },
+  );
 }
 
 void _nativeAbortTests() {

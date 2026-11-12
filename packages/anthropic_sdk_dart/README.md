@@ -68,7 +68,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Memory stores for persistent agent memories with versioning and redaction (beta)
 - Dreams: asynchronous memory-consolidation jobs over memory stores and session transcripts, with `create_new`/`update_existing` output behavior (Claude API research preview with access approval)
 - Generally available user profiles with end-customer attribution, enforcement filters, program status, and action URLs. The legacy beta profile methods remain available.
-- Claude Platform on AWS transport with AWS-issued Bearer and SigV4 authentication
+- Claude Platform on AWS and Amazon Bedrock Mantle and Runtime transports with AWS-issued Bearer or SigV4
 
 ## Why choose this client?
 
@@ -886,6 +886,25 @@ The callback returns `ClaudeAwsCredentials` with an access key ID, secret access
 
 </details>
 
+
+### How do I use Claude on Amazon Bedrock?
+
+<details>
+<summary><b>Choose Mantle or Runtime for Claude inference</b></summary>
+
+Choose `AnthropicBedrockMantleClient` for native Messages, SSE, and `messages.countTokens`. Choose `AnthropicBedrockClient` for Runtime's InvokeModel operations and AWS binary event streams. Pass the provider model ID or inference profile required by your endpoint and region. The client accepts `AWS_BEARER_TOKEN_BEDROCK`, AWS environment credentials, or an injected AWS credential callback. [Bedrock Mantle](https://platform.claude.com/docs/en/build-with-claude/claude-in-amazon-bedrock) · [Bedrock Runtime](https://platform.claude.com/docs/en/build-with-claude/claude-on-amazon-bedrock-legacy)
+
+```dart
+final client = AnthropicBedrockClient(region: 'us-east-1');
+final message = await client.messages.create(request);
+```
+
+Use `countInvokeTokens(request)` for a Runtime model that supports AWS CountTokens. It takes the same body as InvokeModel, including `maxTokens`. Model and region support differ, especially for models available only through cross-region inference. Use Mantle's Claude token-counting endpoint where Runtime lacks it. Mantle maps `userProfileId` to the request body's `user_profile_id`. Runtime does not support profile attribution. [Amazon Bedrock token counting](https://docs.aws.amazon.com/bedrock/latest/userguide/count-tokens.html)
+
+→ [Full example](example/bedrock_example.dart)
+
+</details>
+
 ### How do I use managed agents?
 
 <details>
@@ -1466,6 +1485,7 @@ See the [example/](example/) directory for complete examples:
 | [`inline_tools_example.dart`](example/inline_tools_example.dart) | Define a client tool partway through a conversation (beta) |
 | [`mcp_example.dart`](example/mcp_example.dart) | Connect an MCP server and pin its tool listing (beta) |
 | [`claude_aws_example.dart`](example/claude_aws_example.dart) | Native Claude Platform on AWS authentication and Messages |
+| [`bedrock_example.dart`](example/bedrock_example.dart) | Stream Claude through Bedrock Mantle or Runtime |
 | [`managed_agents_example.dart`](example/managed_agents_example.dart) | Managed agents: agents, sessions, vaults, multiagent rosters, outcomes, webhooks, credential validation (beta) |
 | [`managed_agents_workflow_example.dart`](example/managed_agents_workflow_example.dart) | Configure dynamic workflows and follow workflow run events (Managed Agents beta) |
 | [`environments_example.dart`](example/environments_example.dart) | Managed Agents cloud and self-hosted environment lifecycle (beta) |
