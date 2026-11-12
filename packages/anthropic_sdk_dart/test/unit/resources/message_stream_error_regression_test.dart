@@ -181,6 +181,51 @@ void main() {
   }
 
   test(
+    'named keepalive allows a complete message and valid ping events',
+    () async {
+      final events = MockResponses.streamingEvents(text: 'complete');
+      final wire = StringBuffer('event: ping\ndata: keepalive\n\n');
+      for (final event in events) {
+        wire.write('event: ${event['type']}\ndata: ${jsonEncode(event)}\n\n');
+      }
+      wire.write(
+        'event: ping\ndata: {"type":"ping"}\n\n'
+        'event: future_event\ndata: {"type":"future_event"}\n\n',
+      );
+      final transport = MockClient(
+        (_) async => http.Response(wire.toString(), 200),
+      );
+      addTearDown(transport.close);
+      final client = AnthropicClient(httpClient: transport);
+      addTearDown(client.close);
+      final stream = client.messages.createStream(_request);
+      expect((await stream.finalMessage()).text, 'complete');
+      final raw = await client.messages.createStream(_request).toList();
+      expect(raw[raw.length - 2], isA<PingEvent>());
+      expect(raw.last, isA<UnknownMessageStreamEvent>());
+    },
+  );
+
+  test(
+    'a content delta after message_stop cannot alter the final text',
+    () async {
+      final events = MockResponses.streamingEvents(text: 'complete')
+        ..add({
+          'type': 'content_block_delta',
+          'index': 0,
+          'delta': {'type': 'text_delta', 'text': 'unexpected suffix'},
+        });
+      final transport = MockHttpClient()..queueStreamingResponse(events);
+      final client = AnthropicClient(httpClient: transport);
+      addTearDown(client.close);
+      await expectLater(
+        client.messages.createStream(_request).finalMessage(),
+        throwsStateError,
+      );
+    },
+  );
+
+  test(
     'raw terminal event releases body while caller pauses on the event',
     () async {
       final transport = _Stalled(jsonEncode(_knownError));

@@ -68,6 +68,12 @@ class MessageStreamAccumulator {
 
   /// Adds a streaming event to the accumulator.
   void add(MessageStreamEvent event) {
+    if (_receivedStop &&
+        event is! PingEvent &&
+        event is! UnknownMessageStreamEvent &&
+        event is! ErrorEvent) {
+      throw StateError('Message stream changed after message_stop');
+    }
     switch (event) {
       case MessageStartEvent(:final message):
         if (_id != null) {

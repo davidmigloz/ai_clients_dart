@@ -9,7 +9,7 @@ class SseParser {
   /// Parses a byte stream into SSE events.
   ///
   /// Returns a stream of parsed JSON objects from SSE data lines.
-  /// [strictJson] reports malformed non-error frames as stream errors.
+  /// [strictJson] reports malformed data frames and ignores plain-text pings.
   Stream<Map<String, dynamic>> parse(
     Stream<List<int>> bytes, {
     bool strictJson = false,
@@ -74,7 +74,7 @@ class _SseSink implements EventSink<String> {
     } on FormatException catch (error, stackTrace) {
       if (_event == 'error') {
         _output.add({'_event': 'error', '_rawData': data, 'type': 'error'});
-      } else if (_strictJson) {
+      } else if (_strictJson && _event != 'ping') {
         _output.addError(error, stackTrace);
       }
     }
