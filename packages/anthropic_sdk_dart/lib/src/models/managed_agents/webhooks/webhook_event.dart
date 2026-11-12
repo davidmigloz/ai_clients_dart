@@ -51,7 +51,8 @@ class WebhookEvent {
   /// Supply the untouched HTTP body and the endpoint's signing secret. The
   /// delivery timestamp must be within five minutes of the trusted local
   /// [receivedAt] time, which defaults to now. Throws [FormatException] for
-  /// missing or invalid signatures. Deduplicate deliveries by the event [id].
+  /// missing or invalid signatures or event payloads. Deduplicate deliveries by
+  /// the event [id].
   factory WebhookEvent.unwrap(
     String payload, {
     required Map<String, String> headers,
@@ -68,12 +69,17 @@ class WebhookEvent {
   }
 
   /// Parses a webhook body after the caller has verified its signature.
+  /// Throws [FormatException] if the payload is invalid.
   factory WebhookEvent.parseUnverified(String payload) {
     final json = jsonDecode(payload);
     if (json is! Map<String, dynamic>) {
       throw const FormatException('Expected a webhook event object');
     }
-    return WebhookEvent.fromJson(json);
+    try {
+      return WebhookEvent.fromJson(json);
+    } on TypeError {
+      throw const FormatException('Invalid webhook event fields');
+    }
   }
 
   /// Converts to JSON.

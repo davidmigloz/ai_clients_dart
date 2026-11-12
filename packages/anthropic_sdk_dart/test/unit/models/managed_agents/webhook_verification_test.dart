@@ -38,6 +38,33 @@ void main() {
     expect(data.enforcementActionId, 'enf_fixture');
   });
 
+  test('rejects a validly signed event missing required fields', () {
+    const missingId =
+        '{"type":"event","created_at":"2026-11-11T21:00:00Z",'
+        '"data":{"type":"future"}}';
+    final headers = Map<String, String>.of(_headers)
+      ..['webhook-signature'] =
+          'v1,ra4moyOyOxdX8j4sK/v9shkre07j6lW3y1v0zcClf1c=';
+    expect(
+      () => WebhookEvent.unwrap(
+        missingId,
+        headers: headers,
+        signingSecret: _key,
+        receivedAt: _receivedAt,
+      ),
+      throwsA(isA<FormatException>().having((e) => e.source, 'source', isNull)),
+    );
+    expect(
+      WebhookEvent.unwrap(
+        _payload,
+        headers: _headers,
+        signingSecret: _key,
+        receivedAt: _receivedAt,
+      ).id,
+      'evt_fixture',
+    );
+  });
+
   test('checks the timestamp and rejects a modified body or delivery ID', () {
     WebhookEvent verify({
       String payload = _payload,
