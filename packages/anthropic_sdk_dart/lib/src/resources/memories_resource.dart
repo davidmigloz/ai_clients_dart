@@ -12,6 +12,10 @@ import 'base_resource.dart';
 
 /// Beta header for the Agent Memory API.
 const _betaHeader = 'agent-memory-2026-07-22';
+final _unsupportedPathCharacters = RegExp(
+  r'[\p{Cc}\p{Cf}\u2028\u2029]',
+  unicode: true,
+);
 
 /// Resource for memories within a single [MemoryStore] (Beta).
 ///
@@ -42,6 +46,7 @@ class MemoriesResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
+    _validatePath(request.path);
     final queryParams = <String, dynamic>{'view': ?view?.toJson()};
 
     final url = requestBuilder.buildUrl(
@@ -69,8 +74,7 @@ class MemoriesResource extends ResourceBase {
   /// - [pathPrefix]: Restrict results to memories whose path starts with this
   ///   prefix. Must end with `/` and matches whole path segments.
   /// - [depth]: Roll up entries deeper than this into [MemoryPrefix] items.
-  ///   Only `0`, `1`, or omitted are accepted; other values return a `400`
-  ///   error.
+  ///   Only `0`, `1`, or omitted are accepted.
   /// - [orderBy]: Field to sort by (e.g., `path`, `updated_at`). Ignored by
   ///   the server — results are returned in a stable, server-defined order.
   /// - [order]: Sort order. Ignored by the server — results are returned in
@@ -92,6 +96,12 @@ class MemoriesResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
+    if (pathPrefix != null && !pathPrefix.endsWith('/')) {
+      throw ArgumentError('Memory path prefixes must end with /');
+    }
+    if (depth != null && depth != 0 && depth != 1) {
+      throw ArgumentError.value(depth, 'depth', 'Expected 0 or 1');
+    }
     final queryParams = <String, dynamic>{
       'path_prefix': ?pathPrefix,
       'depth': ?depth?.toString(),
@@ -166,6 +176,7 @@ class MemoriesResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
+    if (request.path case final path?) _validatePath(path);
     final queryParams = <String, dynamic>{'view': ?view?.toJson()};
 
     final url = requestBuilder.buildUrl(
@@ -220,6 +231,21 @@ class MemoriesResource extends ResourceBase {
 
     return DeletedMemory.fromJson(
       jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+}
+
+void _validatePath(String path) {
+  final segments = path.split('/').skip(1);
+  if (!path.startsWith('/') ||
+      segments.isEmpty ||
+      segments.length > 20 ||
+      segments.any((s) => s.isEmpty || s == '.' || s == '..') ||
+      utf8.encode(path).length > 1024 ||
+      _unsupportedPathCharacters.hasMatch(path)) {
+    throw ArgumentError(
+      'Memory paths must contain 1 to 20 nonempty segments, start with /, '
+      'fit in 1024 UTF-8 bytes, and use no dot segments or control characters',
     );
   }
 }

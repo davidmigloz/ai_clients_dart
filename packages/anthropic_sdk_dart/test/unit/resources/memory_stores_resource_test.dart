@@ -89,6 +89,51 @@ void main() {
   });
 
   group('MemoryStoresResource', () {
+    test('current and older memory store shapes both remain usable', () async {
+      final older = _MemoryStoreFixtures.store()
+        ..remove('description')
+        ..remove('metadata');
+      mockHttpClient
+        ..queueJsonResponse({
+          ..._MemoryStoreFixtures.store(),
+          'description': '',
+          'metadata': <String, String>{},
+          'archived_at': null,
+        })
+        ..queueJsonResponse(older);
+      final current = await client.memoryStores.retrieve('memstore_test123');
+      expect(current.description, '');
+      expect(current.metadata, isEmpty);
+      expect(current.copyWith().toJson(), containsPair('archived_at', null));
+      expect(current.copyWith(metadata: {}).metadata, isEmpty);
+      final previous = await client.memoryStores.retrieve('memstore_test123');
+      expect(previous.description, isNull);
+      expect(previous.metadata, isNull);
+      expect(previous.toJson(), isNot(contains('archived_at')));
+      for (final request in mockHttpClient.requests) {
+        expect(request.headers['anthropic-beta'], 'agent-memory-2026-07-22');
+      }
+    });
+
+    test('empty metadata copy is included on memory store creation', () async {
+      mockHttpClient.queueJsonResponse(_MemoryStoreFixtures.store());
+      final input = CreateMemoryStoreParams(
+        name: 'Store',
+        metadata: const {'key': 'value'},
+      );
+      await client.memoryStores.create(input.copyWith(metadata: {}));
+      final request = mockHttpClient.lastRequest!;
+      final body =
+          jsonDecode((request as dynamic).body as String)
+              as Map<String, dynamic>;
+      expect(body, containsPair('metadata', isEmpty));
+      expect(
+        input.copyWith(metadata: null).toJson(),
+        isNot(contains('metadata')),
+      );
+      expect(request.headers['anthropic-beta'], 'agent-memory-2026-07-22');
+    });
+
     test('create sends correct request and parses response', () async {
       mockHttpClient.queueJsonResponse(_MemoryStoreFixtures.store());
 
@@ -234,6 +279,55 @@ void main() {
   });
 
   group('MemoriesResource', () {
+    test('invalid memory paths and list bounds fail before dispatch', () async {
+      final memories = client.memoryStores.memories('memstore_test123');
+      for (final path in [
+        'relative.md',
+        '/dir//note.md',
+        '/dir/../note.md',
+        '/dir/note.md/',
+        '/control\u0000.md',
+        '/format\u200D.md',
+        '/newline\u2028.md',
+        '/${'é' * 512}',
+        '/${List.filled(21, 'a').join('/')}',
+      ]) {
+        await expectLater(
+          memories.create(CreateMemoryParams(path: path, content: null)),
+          throwsArgumentError,
+        );
+        await expectLater(
+          memories.update('mem_test123', UpdateMemoryParams(path: path)),
+          throwsArgumentError,
+        );
+      }
+      await expectLater(
+        memories.list(pathPrefix: '/notes'),
+        throwsArgumentError,
+      );
+      await expectLater(memories.list(depth: 2), throwsArgumentError);
+      expect(mockHttpClient.requests, isEmpty);
+    });
+
+    test('renaming a memory sends the validated Unicode path', () async {
+      mockHttpClient.queueJsonResponse({
+        ..._MemoryStoreFixtures.memory(),
+        'path': '/café/note.md',
+      });
+      final memory = await client.memoryStores
+          .memories('memstore_test123')
+          .update(
+            'mem_test123',
+            const UpdateMemoryParams(path: '/café/note.md'),
+          );
+      expect(memory.path, '/café/note.md');
+      final request = mockHttpClient.lastRequest!;
+      expect(request.headers['anthropic-beta'], 'agent-memory-2026-07-22');
+      expect(jsonDecode((request as dynamic).body as String), {
+        'path': '/café/note.md',
+      });
+    });
+
     test('create sends correct request and view query', () async {
       mockHttpClient.queueJsonResponse(_MemoryStoreFixtures.memory());
 
@@ -262,8 +356,8 @@ void main() {
     test('list sends all query params and parses sealed list items', () async {
       mockHttpClient.queueJsonResponse({
         'data': [
-          _MemoryStoreFixtures.memory(),
-          {'type': 'memory_prefix', 'path': '/sub/'},
+          {..._MemoryStoreFixtures.memory(), 'path': '/sub/notes.md'},
+          {'type': 'memory_prefix', 'path': '/sub/deeper/'},
           {'type': 'something_new', 'foo': 'bar'},
         ],
         'next_page': null,
@@ -272,8 +366,8 @@ void main() {
       final response = await client.memoryStores
           .memories('memstore_test123')
           .list(
-            pathPrefix: '/sub',
-            depth: 2,
+            pathPrefix: '/sub/',
+            depth: 1,
             orderBy: 'path',
             order: ListOrder.asc,
             limit: 50,
@@ -290,8 +384,8 @@ void main() {
       final request = mockHttpClient.lastRequest!;
       expect(request.url.path, '/v1/memory_stores/memstore_test123/memories');
       expect(request.method, 'GET');
-      expect(request.url.queryParameters['path_prefix'], '/sub');
-      expect(request.url.queryParameters['depth'], '2');
+      expect(request.url.queryParameters['path_prefix'], '/sub/');
+      expect(request.url.queryParameters['depth'], '1');
       expect(request.url.queryParameters['order_by'], 'path');
       expect(request.url.queryParameters['order'], 'asc');
       expect(request.url.queryParameters['limit'], '50');
@@ -376,6 +470,39 @@ void main() {
   });
 
   group('MemoryVersionsResource', () {
+    test(
+      'preserves a future memory version operation through the public list',
+      () async {
+        mockHttpClient.queueJsonResponse({
+          'data': [
+            {..._MemoryStoreFixtures.memoryVersion(), 'operation': 'future_op'},
+          ],
+          'next_page': 'page_versions',
+        });
+        final page = await client.memoryStores
+            .memoryVersions('memstore_test123')
+            .list(
+              page: 'page_previous',
+              operation: MemoryVersionOperation.modified,
+            );
+        final version = page.data.single;
+        expect(version.operation, MemoryVersionOperation.unknown);
+        expect(version.rawOperation, 'future_op');
+        expect(version.copyWith().toJson()['operation'], 'future_op');
+        expect(
+          version
+              .copyWith(operation: MemoryVersionOperation.created)
+              .rawOperation,
+          'created',
+        );
+        expect(page.nextPage, 'page_versions');
+        final request = mockHttpClient.lastRequest!;
+        expect(request.url.queryParameters['operation'], 'modified');
+        expect(request.url.queryParameters['page'], 'page_previous');
+        expect(request.headers['anthropic-beta'], 'agent-memory-2026-07-22');
+      },
+    );
+
     test('list sends all query params and parses response', () async {
       mockHttpClient.queueJsonResponse({
         'data': [_MemoryStoreFixtures.memoryVersion()],

@@ -17,12 +17,9 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// Note: Memory Stores are a beta feature and require the
 /// `anthropic-beta: agent-memory-2026-07-22` header (sent automatically by
 /// the SDK).
-void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+/// Set ANTHROPIC_API_KEY and run `dart run example/memory_stores_example.dart`.
+Future<void> main() async {
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // 1. Create a memory store.
@@ -68,7 +65,7 @@ void main() async {
 
     // 4. List memories under a path prefix, rolled up to depth=1.
     print('\n=== List Memories ===');
-    final memoryList = await notes.list(pathPrefix: '/preferences', depth: 1);
+    final memoryList = await notes.list(pathPrefix: '/preferences/', depth: 1);
     for (final item in memoryList.data) {
       switch (item) {
         case Memory(:final path, :final contentSizeBytes):

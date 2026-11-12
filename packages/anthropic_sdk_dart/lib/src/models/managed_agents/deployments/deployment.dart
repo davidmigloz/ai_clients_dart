@@ -57,6 +57,10 @@ class Deployment {
   /// Computed status of the deployment: `active` or `paused`. Archived
   /// deployments report `active` with `archived_at` set.
   final DeploymentStatus status;
+  final String? _rawStatus;
+
+  /// The provider value, including future variants.
+  String get rawStatus => _rawStatus ?? status.value;
 
   /// Why the deployment is paused. Non-null exactly when status is paused; null
   /// otherwise.
@@ -89,6 +93,7 @@ class Deployment {
     required this.metadata,
     required this.schedule,
     required this.status,
+    this._rawStatus,
     required this.pausedReason,
     required this.createdAt,
     required this.updatedAt,
@@ -121,6 +126,7 @@ class Deployment {
           ? Schedule.fromJson(json['schedule'] as Map<String, dynamic>)
           : null,
       status: DeploymentStatus.fromJson(json['status'] as String),
+      rawStatus: json['status'] as String,
       pausedReason: json['paused_reason'] != null
           ? DeploymentPausedReason.fromJson(
               json['paused_reason'] as Map<String, dynamic>,
@@ -150,7 +156,7 @@ class Deployment {
     'resources': resources.map((e) => e.toJson()).toList(),
     'metadata': metadata,
     'schedule': schedule?.toJson(),
-    'status': status.toJson(),
+    'status': rawStatus,
     'paused_reason': pausedReason?.toJson(),
     'created_at': createdAt.toUtc().toIso8601String(),
     'updated_at': updatedAt.toUtc().toIso8601String(),
@@ -195,6 +201,7 @@ class Deployment {
           ? this.schedule
           : schedule as Schedule?,
       status: status ?? this.status,
+      rawStatus: status == null ? _rawStatus : null,
       pausedReason: pausedReason == unsetCopyWithValue
           ? this.pausedReason
           : pausedReason as DeploymentPausedReason?,
@@ -224,6 +231,7 @@ class Deployment {
           mapsEqual(metadata, other.metadata) &&
           schedule == other.schedule &&
           status == other.status &&
+          rawStatus == other.rawStatus &&
           pausedReason == other.pausedReason &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt &&
@@ -244,6 +252,7 @@ class Deployment {
     mapHash(metadata),
     schedule,
     status,
+    rawStatus,
     pausedReason,
     createdAt,
     updatedAt,

@@ -1989,6 +1989,21 @@ void main() {
   });
 
   group('VaultsResource', () {
+    test('vault create copies an untyped empty metadata map', () async {
+      mockHttpClient.queueJsonResponse(ManagedAgentsFixtures.vault());
+      final input = const CreateVaultParams(
+        displayName: 'Vault',
+        metadata: {'key': 'value'},
+      ).copyWith(metadata: {});
+      await client.vaults.create(input);
+      final request = mockHttpClient.lastRequest!;
+      final body =
+          jsonDecode((request as dynamic).body as String)
+              as Map<String, dynamic>;
+      expect(body['metadata'], isEmpty);
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
+    });
+
     test('create sends correct request and parses response', () async {
       mockHttpClient.queueJsonResponse(ManagedAgentsFixtures.vault());
 
@@ -2085,6 +2100,55 @@ void main() {
   });
 
   group('VaultCredentialsResource', () {
+    test('credential create copies an untyped empty metadata map', () async {
+      mockHttpClient.queueJsonResponse(ManagedAgentsFixtures.credential());
+      const input = CreateCredentialParams(
+        auth: StaticBearerCreateParams(
+          token: 'fixture',
+          mcpServerUrl: 'https://mcp.example.com',
+        ),
+        metadata: {'key': 'value'},
+      );
+      await client.vaults
+          .credentials('vault_test123')
+          .create(input.copyWith(metadata: {}));
+      final request = mockHttpClient.lastRequest!;
+      final body =
+          jsonDecode((request as dynamic).body as String)
+              as Map<String, dynamic>;
+      expect(body['metadata'], isEmpty);
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
+    });
+
+    test('validation keeps unknown overall and refresh statuses', () async {
+      mockHttpClient.queueJsonResponse({
+        ...ManagedAgentsFixtures.credentialValidation(),
+        'status': 'future_validation',
+        'refresh': {'status': 'future_refresh', 'http_response': null},
+      });
+
+      final validation = await client.vaults
+          .credentials('vault_test123')
+          .validateCredential('cred_test123');
+      expect(validation.status, CredentialValidationStatus.unknown);
+      expect(validation.rawStatus, 'future_validation');
+      expect(validation.refresh?.status, CredentialRefreshStatus.unknown);
+      expect(validation.refresh?.rawStatus, 'future_refresh');
+      expect(validation.copyWith().toJson()['status'], 'future_validation');
+      expect(validation.refresh?.copyWith().toJson(), {
+        'status': 'future_refresh',
+        'http_response': null,
+      });
+      expect(
+        validation.copyWith(status: CredentialValidationStatus.valid).rawStatus,
+        'valid',
+      );
+      expect(
+        mockHttpClient.lastRequest?.headers['anthropic-beta'],
+        'managed-agents-2026-04-01',
+      );
+    });
+
     test('create sends correct request and parses response', () async {
       mockHttpClient.queueJsonResponse(ManagedAgentsFixtures.credential());
 

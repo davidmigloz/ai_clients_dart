@@ -87,6 +87,65 @@ void main() {
   });
 
   group('DeploymentsResource', () {
+    test(
+      'deployment create copies empty resources, vaults and metadata',
+      () async {
+        mockHttpClient.queueJsonResponse(DeploymentFixtures.deployment());
+        const original = CreateDeploymentParams(
+          agent: AgentParamsId(id: 'agent_test123'),
+          environmentId: 'env_test123',
+          name: 'Deployment',
+          initialEvents: [
+            DeploymentUserMessageEventParams(
+              UserMessageEventParams(
+                content: [
+                  {'type': 'text', 'text': 'Hello'},
+                ],
+              ),
+            ),
+          ],
+          vaultIds: ['vault_abc'],
+          metadata: {'key': 'value'},
+        );
+        await client.deployments.create(
+          original.copyWith(resources: [], vaultIds: [], metadata: {}),
+        );
+        final request = mockHttpClient.lastRequest!;
+        final body =
+            jsonDecode((request as dynamic).body as String)
+                as Map<String, dynamic>;
+        expect(body['resources'], isEmpty);
+        expect(body['vault_ids'], isEmpty);
+        expect(body['metadata'], isEmpty);
+        expect(
+          original.copyWith(vaultIds: null).toJson(),
+          isNot(contains('vault_ids')),
+        );
+        expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
+      },
+    );
+
+    test(
+      'deployment retrieve preserves a future status through copy and JSON',
+      () async {
+        mockHttpClient.queueJsonResponse(
+          DeploymentFixtures.deployment(status: 'future_status'),
+        );
+        final deployment = await client.deployments.retrieve('dpl_test123');
+        expect(deployment.status, DeploymentStatus.unknown);
+        expect(deployment.rawStatus, 'future_status');
+        expect(deployment.copyWith().toJson()['status'], 'future_status');
+        expect(
+          deployment.copyWith(status: DeploymentStatus.active).rawStatus,
+          'active',
+        );
+        expect(
+          mockHttpClient.lastRequest?.headers['anthropic-beta'],
+          'managed-agents-2026-04-01',
+        );
+      },
+    );
+
     test('create sends correct request and parses response', () async {
       mockHttpClient.queueJsonResponse(DeploymentFixtures.deployment());
 

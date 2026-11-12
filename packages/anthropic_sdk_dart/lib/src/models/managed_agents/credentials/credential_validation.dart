@@ -150,18 +150,27 @@ class RefreshHttpResponse {
 class RefreshObject {
   /// Outcome of the refresh attempt.
   final CredentialRefreshStatus status;
+  final String? _rawStatus;
+
+  /// The provider value, including future variants.
+  String get rawStatus => _rawStatus ?? status.value;
 
   /// Captured HTTP response. Populated only when [status] is
   /// [CredentialRefreshStatus.failed]; otherwise null.
   final RefreshHttpResponse? httpResponse;
 
   /// Creates a [RefreshObject].
-  const RefreshObject({required this.status, this.httpResponse});
+  const RefreshObject({
+    required this.status,
+    this.httpResponse,
+    this._rawStatus,
+  });
 
   /// Creates a [RefreshObject] from JSON.
   factory RefreshObject.fromJson(Map<String, dynamic> json) {
     return RefreshObject(
       status: CredentialRefreshStatus.fromJson(json['status'] as String),
+      rawStatus: json['status'] as String,
       httpResponse: json['http_response'] != null
           ? RefreshHttpResponse.fromJson(
               json['http_response'] as Map<String, dynamic>,
@@ -172,7 +181,7 @@ class RefreshObject {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    'status': status.toJson(),
+    'status': rawStatus,
     'http_response': httpResponse?.toJson(),
   };
 
@@ -186,6 +195,7 @@ class RefreshObject {
   }) {
     return RefreshObject(
       status: status ?? this.status,
+      rawStatus: status == null ? _rawStatus : null,
       httpResponse: httpResponse == unsetCopyWithValue
           ? this.httpResponse
           : httpResponse as RefreshHttpResponse?,
@@ -198,10 +208,11 @@ class RefreshObject {
       other is RefreshObject &&
           runtimeType == other.runtimeType &&
           status == other.status &&
+          rawStatus == other.rawStatus &&
           httpResponse == other.httpResponse;
 
   @override
-  int get hashCode => Object.hash(status, httpResponse);
+  int get hashCode => Object.hash(status, rawStatus, httpResponse);
 
   @override
   String toString() =>
@@ -286,6 +297,10 @@ class CredentialValidation {
 
   /// Overall validation status.
   final CredentialValidationStatus status;
+  final String? _rawStatus;
+
+  /// The provider value, including future variants.
+  String get rawStatus => _rawStatus ?? status.value;
 
   /// When the validation was performed.
   final BetaTimestamp validatedAt;
@@ -305,6 +320,7 @@ class CredentialValidation {
     required this.credentialId,
     required this.vaultId,
     required this.status,
+    this._rawStatus,
     required this.validatedAt,
     required this.hasRefreshToken,
     this.mcpProbe,
@@ -318,6 +334,7 @@ class CredentialValidation {
       credentialId: json['credential_id'] as String,
       vaultId: json['vault_id'] as String,
       status: CredentialValidationStatus.fromJson(json['status'] as String),
+      rawStatus: json['status'] as String,
       validatedAt: DateTime.parse(json['validated_at'] as String),
       hasRefreshToken: json['has_refresh_token'] as bool,
       mcpProbe: json['mcp_probe'] != null
@@ -334,7 +351,7 @@ class CredentialValidation {
     'type': type,
     'credential_id': credentialId,
     'vault_id': vaultId,
-    'status': status.toJson(),
+    'status': rawStatus,
     'validated_at': validatedAt.toUtc().toIso8601String(),
     'has_refresh_token': hasRefreshToken,
     'mcp_probe': mcpProbe?.toJson(),
@@ -360,6 +377,7 @@ class CredentialValidation {
       credentialId: credentialId ?? this.credentialId,
       vaultId: vaultId ?? this.vaultId,
       status: status ?? this.status,
+      rawStatus: status == null ? _rawStatus : null,
       validatedAt: validatedAt ?? this.validatedAt,
       hasRefreshToken: hasRefreshToken ?? this.hasRefreshToken,
       mcpProbe: mcpProbe == unsetCopyWithValue
@@ -380,6 +398,7 @@ class CredentialValidation {
           credentialId == other.credentialId &&
           vaultId == other.vaultId &&
           status == other.status &&
+          rawStatus == other.rawStatus &&
           validatedAt == other.validatedAt &&
           hasRefreshToken == other.hasRefreshToken &&
           mcpProbe == other.mcpProbe &&
@@ -391,6 +410,7 @@ class CredentialValidation {
     credentialId,
     vaultId,
     status,
+    rawStatus,
     validatedAt,
     hasRefreshToken,
     mcpProbe,

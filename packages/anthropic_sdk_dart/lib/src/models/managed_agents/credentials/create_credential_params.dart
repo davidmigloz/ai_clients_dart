@@ -58,7 +58,7 @@ class CreateCredentialParams {
           : displayName as String?,
       metadata: metadata == unsetCopyWithValue
           ? this.metadata
-          : metadata as Map<String, String>?,
+          : (metadata as Map?)?.cast<String, String>(),
     );
   }
 

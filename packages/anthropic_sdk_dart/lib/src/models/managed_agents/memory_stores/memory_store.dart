@@ -19,10 +19,12 @@ class MemoryStore {
   /// Display name of the memory store.
   final String name;
 
-  /// Optional description.
+  /// Description. The current API returns an empty string when unset.
+  /// An older response may omit this field.
   final String? description;
 
   /// Custom metadata. Limited to 16 keys (≤64 chars), values up to 512 chars.
+  /// An older response may omit this field.
   final Map<String, String>? metadata;
 
   /// ISO 8601 timestamp of when the store was created.
@@ -33,6 +35,7 @@ class MemoryStore {
 
   /// ISO 8601 timestamp of when the store was archived, if applicable.
   final DateTime? archivedAt;
+  final bool _includeNullArchivedAt;
 
   /// Creates a [MemoryStore].
   MemoryStore({
@@ -44,6 +47,7 @@ class MemoryStore {
     required this.createdAt,
     required this.updatedAt,
     this.archivedAt,
+    this._includeNullArchivedAt = false,
   }) : metadata = metadata != null ? Map.unmodifiable(metadata) : null;
 
   /// Creates a [MemoryStore] from JSON.
@@ -58,6 +62,7 @@ class MemoryStore {
       ),
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
+      includeNullArchivedAt: json.containsKey('archived_at'),
       archivedAt: json['archived_at'] != null
           ? DateTime.parse(json['archived_at'] as String)
           : null,
@@ -73,8 +78,8 @@ class MemoryStore {
     if (metadata != null) 'metadata': metadata,
     'created_at': createdAt.toUtc().toIso8601String(),
     'updated_at': updatedAt.toUtc().toIso8601String(),
-    if (archivedAt != null)
-      'archived_at': archivedAt!.toUtc().toIso8601String(),
+    if (archivedAt != null || _includeNullArchivedAt)
+      'archived_at': archivedAt?.toUtc().toIso8601String(),
   };
 
   /// Creates a copy with replaced values.
@@ -97,9 +102,11 @@ class MemoryStore {
           : description as String?,
       metadata: metadata == unsetCopyWithValue
           ? this.metadata
-          : metadata as Map<String, String>?,
+          : (metadata as Map?)?.cast<String, String>(),
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      includeNullArchivedAt:
+          archivedAt != unsetCopyWithValue || _includeNullArchivedAt,
       archivedAt: archivedAt == unsetCopyWithValue
           ? this.archivedAt
           : archivedAt as DateTime?,
@@ -118,7 +125,9 @@ class MemoryStore {
           mapsEqual(metadata, other.metadata) &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt &&
-          archivedAt == other.archivedAt;
+          archivedAt == other.archivedAt &&
+          (archivedAt != null ||
+              _includeNullArchivedAt == other._includeNullArchivedAt);
 
   @override
   int get hashCode => Object.hash(
@@ -130,6 +139,7 @@ class MemoryStore {
     createdAt,
     updatedAt,
     archivedAt,
+    archivedAt == null && _includeNullArchivedAt,
   );
 
   @override

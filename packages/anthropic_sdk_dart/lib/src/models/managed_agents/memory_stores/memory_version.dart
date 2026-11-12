@@ -65,6 +65,10 @@ class MemoryVersion {
 
   /// Operation that produced this version.
   final MemoryVersionOperation operation;
+  final String? _rawOperation;
+
+  /// The provider value, including future variants.
+  String get rawOperation => _rawOperation ?? operation.value;
 
   /// Actor that created this version.
   final ManagedAgentActor? createdBy;
@@ -89,6 +93,7 @@ class MemoryVersion {
     this.contentSizeBytes,
     this.contentSha256,
     required this.operation,
+    this._rawOperation,
     this.createdBy,
     this.redactedBy,
     required this.createdAt,
@@ -107,6 +112,7 @@ class MemoryVersion {
       contentSizeBytes: json['content_size_bytes'] as int?,
       contentSha256: json['content_sha256'] as String?,
       operation: MemoryVersionOperation.fromJson(json['operation'] as String),
+      rawOperation: json['operation'] as String,
       createdBy: json['created_by'] != null
           ? ManagedAgentActor.fromJson(
               json['created_by'] as Map<String, dynamic>,
@@ -134,7 +140,7 @@ class MemoryVersion {
     if (content != null) 'content': content,
     if (contentSizeBytes != null) 'content_size_bytes': contentSizeBytes,
     if (contentSha256 != null) 'content_sha256': contentSha256,
-    'operation': operation.toJson(),
+    'operation': rawOperation,
     if (createdBy != null) 'created_by': createdBy!.toJson(),
     if (redactedBy != null) 'redacted_by': redactedBy!.toJson(),
     'created_at': createdAt.toUtc().toIso8601String(),
@@ -174,6 +180,7 @@ class MemoryVersion {
           ? this.contentSha256
           : contentSha256 as String?,
       operation: operation ?? this.operation,
+      rawOperation: operation == null ? _rawOperation : null,
       createdBy: createdBy == unsetCopyWithValue
           ? this.createdBy
           : createdBy as ManagedAgentActor?,
@@ -201,6 +208,7 @@ class MemoryVersion {
           contentSizeBytes == other.contentSizeBytes &&
           contentSha256 == other.contentSha256 &&
           operation == other.operation &&
+          rawOperation == other.rawOperation &&
           createdBy == other.createdBy &&
           redactedBy == other.redactedBy &&
           createdAt == other.createdAt &&
@@ -217,6 +225,7 @@ class MemoryVersion {
     contentSizeBytes,
     contentSha256,
     operation,
+    rawOperation,
     createdBy,
     redactedBy,
     createdAt,
