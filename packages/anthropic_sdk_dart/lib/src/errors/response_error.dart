@@ -127,6 +127,17 @@ ResponseMetadata createSafeResponseMetadata({
   bodyRequestId: redactPercentEncodedCredentialEcho(bodyRequestId, credentials),
 );
 
+/// Reads a non-blank provider identifier without retaining a credential echo.
+String? safeResponseIdentifier(
+  Map<String, String> headers,
+  String name,
+  Set<String> credentials,
+) {
+  final value = _headerValue(headers, name);
+  if (value == null || value.trim().isEmpty) return null;
+  return redactPercentEncodedCredentialEcho(value, credentials);
+}
+
 /// Omits diagnostic values that echo an effective request credential.
 String? redactCredentialEcho(String? value, Set<String> credentials) =>
     value != null && credentials.any(value.contains) ? null : value;

@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../auth/request_auth.dart';
 import '../errors/response_error.dart';
 import '../models/messages/message.dart';
 import '../models/messages/message_create_request.dart';
+import '../models/messages/message_response.dart';
 import '../models/streaming/message_stream_event.dart';
 import '../models/tokens/token_count.dart';
 import 'base_resource.dart';
@@ -56,6 +58,73 @@ class MessagesResource extends ResourceBase with StreamingResource {
     String? userProfileId,
     String? workspaceId,
   }) async {
+    final response = await _sendCreateRequest(
+      request,
+      abortTrigger: abortTrigger,
+      betas: betas,
+      userProfileId: userProfileId,
+      workspaceId: workspaceId,
+    );
+    return decodeApiJsonResponse(response, Message.fromJson);
+  }
+
+  /// Creates a message with the HTTP status and safe provider identifiers.
+  ///
+  /// Uses the same request, decoding, and cancellation as [create]. The
+  /// response's identifiers can be null if the server omits them.
+  ///
+  /// [userProfileId] attributes this request to an end-user profile.
+  /// [workspaceId] selects the workspace for this request. The returned
+  /// [MessageResponse.workspaceId] comes from the response header.
+  Future<MessageResponse> createWithResponse(
+    MessageCreateRequest request, {
+    Future<void>? abortTrigger,
+    List<String> betas = const [],
+    String? userProfileId,
+    String? workspaceId,
+  }) async {
+    final response = await _sendCreateRequest(
+      request,
+      abortTrigger: abortTrigger,
+      betas: betas,
+      userProfileId: userProfileId,
+      workspaceId: workspaceId,
+    );
+    final credentials = responseCredentialValues(response);
+    final headers = response.headers;
+    final awsRequestId =
+        safeResponseIdentifier(headers, 'x-amzn-requestid', credentials) ??
+        safeResponseIdentifier(headers, 'x-amzn-request-id', credentials) ??
+        safeResponseIdentifier(headers, 'x-amz-request-id', credentials);
+    final azureRequestId = safeResponseIdentifier(
+      headers,
+      'apim-request-id',
+      credentials,
+    );
+    return MessageResponse(
+      message: decodeApiJsonResponse(response, Message.fromJson),
+      statusCode: response.statusCode,
+      requestId:
+          safeResponseIdentifier(headers, 'request-id', credentials) ??
+          awsRequestId ??
+          azureRequestId,
+      workspaceId: safeResponseIdentifier(
+        headers,
+        'anthropic-workspace-id',
+        credentials,
+      ),
+      awsRequestId: awsRequestId,
+      azureRequestId: azureRequestId,
+    );
+  }
+
+  Future<http.Response> _sendCreateRequest(
+    MessageCreateRequest request, {
+    required Future<void>? abortTrigger,
+    required List<String> betas,
+    required String? userProfileId,
+    required String? workspaceId,
+  }) {
     ensureNotClosed?.call();
     final body = request.toJson()..remove('stream'); // Ensure non-streaming
     final url = requestBuilder.buildUrl('/v1/messages');
@@ -70,13 +139,7 @@ class MessagesResource extends ResourceBase with StreamingResource {
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(body);
-
-    final response = await interceptorChain.execute(
-      httpRequest,
-      abortTrigger: abortTrigger,
-    );
-
-    return decodeApiJsonResponse(response, Message.fromJson);
+    return interceptorChain.execute(httpRequest, abortTrigger: abortTrigger);
   }
 
   /// Creates a streaming message.

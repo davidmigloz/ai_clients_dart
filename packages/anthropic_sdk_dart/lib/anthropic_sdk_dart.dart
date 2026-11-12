@@ -214,6 +214,7 @@ export 'src/models/messages/input_message.dart';
 export 'src/models/messages/input_transformation.dart';
 export 'src/models/messages/message.dart';
 export 'src/models/messages/message_create_request.dart';
+export 'src/models/messages/message_response.dart';
 export 'src/models/messages/message_role.dart';
 export 'src/models/messages/message_thread_param.dart';
 export 'src/models/messages/thinking_config.dart';

@@ -63,3 +63,22 @@ failed threshold summary with null content leaves tool availability unchanged.
 Signed blocks are reused unchanged and unusable summaries remain inspectable.
 
 [Claude on-demand compaction](https://platform.claude.com/docs/en/build-with-claude/compaction-on-demand) · [Messages thread limits](https://platform.claude.com/docs/en/build-with-claude/message-threads#compaction) · [Signed replay and tool changes](https://platform.claude.com/docs/en/build-with-claude/compaction-thinking-blocks#change-the-system-prompt-or-tools) · [Pinned Python runner](https://github.com/anthropics/anthropic-sdk-python/blob/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/src/anthropic/lib/tools/_beta_runner.py) · [Pinned TypeScript runner](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/src/lib/tools/BetaToolRunner.ts)
+
+## Successful Messages diagnostics
+
+The pinned Python and TypeScript SDKs attach provider request and workspace
+IDs to decoded objects. TypeScript also exposes the HTTP response through
+`withResponse()`. Dart exposes a separate `MessageResponse` through
+`client.messages.createWithResponse()`, with the same decoded `Message` plus
+HTTP status and the two provider identifiers. Read identifiers from the
+successful response headers. The request's correlation ID and workspace
+selection describe outgoing routing and stay separate.
+
+The buffered transport captures effective credentials at dispatch, including
+credentials applied by provider adapters and across retries. Diagnostic
+identifiers that echo those values are dropped even if the borrowed transport
+omits request metadata. The opt-in wrapper uses the ordinary Messages decoder
+and retains safe AWS and Azure request IDs independently, with a platform ID
+fallback when Claude's ID is unavailable.
+[AWS request IDs](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws#request-ids) · [Pinned AWS header aliases](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/packages/bedrock-sdk/src/AWS_restJson1.ts#L286-L288) · [Foundry correlation request IDs](https://platform.claude.com/docs/en/build-with-claude/claude-in-microsoft-foundry#correlation-request-ids)
+[Python response model fields](https://github.com/anthropics/anthropic-sdk-python/blob/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/src/anthropic/_models.py#L193-L217) · [TypeScript metadata attachment](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/src/internal/parse.ts#L73-L93) · [TypeScript APIPromise](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/src/core/api-promise.ts#L73-L99)

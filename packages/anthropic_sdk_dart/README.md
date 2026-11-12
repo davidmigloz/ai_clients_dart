@@ -272,7 +272,15 @@ Future<void> main() async {
 }
 ```
 
-→ [Full example](example/messages_example.dart)
+Use `client.messages.createWithResponse(...)` when you need the HTTP
+status or provider identifiers from a successful response. Read
+`response.message` for the decoded message. `requestId` and `workspaceId`
+are available when the server supplies them and they are safe to expose.
+On AWS or Foundry, `awsRequestId` and `azureRequestId` preserve platform
+tracing alongside the Claude request ID. Browser proxies must expose the
+relevant response headers through CORS.
+
+[Basic Messages example](example/messages_example.dart) · [Response metadata example](example/message_response_metadata_example.dart)
 
 </details>
 
@@ -1633,6 +1641,7 @@ See the [example/](example/) directory for complete examples:
 | Example | Description |
 |---------|-------------|
 | [`messages_example.dart`](example/messages_example.dart) | Basic message creation |
+| [`message_response_metadata_example.dart`](example/message_response_metadata_example.dart) | Read status and provider IDs from a Messages response |
 | [`federation_issuers_example.dart`](example/federation_issuers_example.dart) | List OIDC issuers with an organization OAuth token |
 | [`federation_rules_example.dart`](example/federation_rules_example.dart) | List federation rules and workspace bindings |
 | [`workload_identity_example.dart`](example/workload_identity_example.dart) | Exchange a workload identity JWT and call Messages |
