@@ -73,24 +73,14 @@ mixin StreamingResource on ResourceBase {
       ResponseMetadata responseMetadata,
     )?
     errorFactoryWithMetadata,
-  }) => _stream(
-    'GET',
+  }) => getResourceJsonlStream(
+    this,
     path,
+    (item) => item,
     abortTrigger: abortTrigger,
     headers: headers,
     errorFactory: errorFactory,
     errorFactoryWithMetadata: errorFactoryWithMetadata,
-    jsonlMedia: true,
-    decode: (body, _, _, credentials) => body
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .where((line) => line.trim().isNotEmpty)
-        .map(
-          (line) => _redactJsonlBatchError(
-            jsonDecode(line) as Map<String, dynamic>,
-            credentials,
-          ),
-        ),
   );
 
   /// Creates an exception for streaming errors.
@@ -142,13 +132,13 @@ mixin StreamingResource on ResourceBase {
     Map<String, dynamic>? queryParams,
     Map<String, String>? headers,
     Future<void>? abortTrigger,
-  }) => _stream(
-    'GET',
+  }) => getResourceEventStream(
+    this,
     path,
+    (event) => event,
     queryParams: queryParams,
     headers: headers,
     abortTrigger: abortTrigger,
-    decode: (body, _, _, credentials) => _decodeSse(body, credentials),
   );
 
   Stream<T> _stream<T>(
@@ -369,9 +359,7 @@ mixin StreamingResource on ResourceBase {
                   if (terminal) unawaited(controller.close());
                 },
                 onError: (Object error, StackTrace stackTrace) => finish(
-                  error is FormatException
-                      ? redactApiFormatException(error, credentials)
-                      : error,
+                  redactApiDecoderError(error, credentials),
                   stackTrace,
                 ),
                 onDone: finish,
@@ -422,6 +410,56 @@ mixin StreamingResource on ResourceBase {
     );
   }
 }
+
+/// Decodes typed GET SSE events within the transport's diagnostic boundary.
+Stream<T> getResourceEventStream<T>(
+  StreamingResource resource,
+  String path,
+  T Function(Map<String, dynamic>) decodeEvent, {
+  Map<String, dynamic>? queryParams,
+  Map<String, String>? headers,
+  Future<void>? abortTrigger,
+}) => resource._stream(
+  'GET',
+  path,
+  queryParams: queryParams,
+  headers: headers,
+  abortTrigger: abortTrigger,
+  decode: (body, _, _, credentials) =>
+      _decodeSse(body, credentials).map(decodeEvent),
+);
+
+/// Decodes typed JSONL items within the transport's diagnostic boundary.
+Stream<T> getResourceJsonlStream<T>(
+  StreamingResource resource,
+  String path,
+  T Function(Map<String, dynamic>) decodeItem, {
+  Future<void>? abortTrigger,
+  Map<String, String>? headers,
+  AnthropicException Function(int statusCode, String body)? errorFactory,
+  AnthropicException Function(int, String, ResponseMetadata)?
+  errorFactoryWithMetadata,
+}) => resource._stream(
+  'GET',
+  path,
+  abortTrigger: abortTrigger,
+  headers: headers,
+  errorFactory: errorFactory,
+  errorFactoryWithMetadata: errorFactoryWithMetadata,
+  jsonlMedia: true,
+  decode: (body, _, _, credentials) => body
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .where((line) => line.trim().isNotEmpty)
+      .map(
+        (line) => decodeItem(
+          _redactJsonlBatchError(
+            jsonDecode(line) as Map<String, dynamic>,
+            credentials,
+          ),
+        ),
+      ),
+);
 
 /// Decodes Messages SSE with handshake metadata and immediate terminal cleanup.
 Stream<T> postResourceEventStream<T>(
