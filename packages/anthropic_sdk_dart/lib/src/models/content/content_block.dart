@@ -8,6 +8,8 @@ import '../tools/tool_caller.dart';
 import '../tools/tool_change_reference.dart';
 import '../tools/toolset_action.dart';
 
+import 'web_fetch_result_error.dart';
+
 /// Content block in a response message.
 ///
 /// Response content blocks represent different types of content
@@ -561,6 +563,15 @@ class WebFetchToolResultBlock extends ContentBlock {
 
   /// Tool result content payload.
   final Map<String, dynamic> content;
+
+  /// Exact provider error code, or null on a successful fetch.
+  String? get rawErrorCode => webFetchRawErrorCode(content);
+
+  /// Recognized error code, including a fallback for future values.
+  WebFetchToolResultErrorCode? get errorCode => switch (rawErrorCode) {
+    final value? => WebFetchToolResultErrorCode.fromJson(value),
+    null => null,
+  };
 
   /// Creates a [WebFetchToolResultBlock].
   const WebFetchToolResultBlock({

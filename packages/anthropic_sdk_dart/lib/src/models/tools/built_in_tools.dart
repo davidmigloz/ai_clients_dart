@@ -6,11 +6,13 @@ import '../content/citations_config.dart';
 import '../metadata/cache_control.dart';
 import 'response_inclusion.dart';
 import 'toolsets.dart';
+import 'web_fetch_url_sources.dart';
 
 // RequestCitationsConfig now lives in content/citations_config.dart but is part
 // of this library's API surface (e.g. WebFetchTool.citations), so re-export it
 // to preserve the import surface for consumers of this sublibrary.
 export '../content/citations_config.dart';
+export 'web_fetch_url_sources.dart';
 
 // Include beta tools as part of this library to allow them to extend BuiltInTool
 part '../beta/tools/advisor_tool.dart';
@@ -151,6 +153,7 @@ sealed class BuiltInTool {
     bool? strict,
     bool? useCache,
     ResponseInclusion? responseInclusion,
+    WebFetchUrlSources? urlSources,
   }) = WebFetchTool;
 
   /// Creates a memory tool.
@@ -1058,6 +1061,9 @@ class WebFetchTool extends BuiltInTool {
   /// `web_fetch_20260318` and normalized to `null` for other versions.
   final ResponseInclusion? responseInclusion;
 
+  /// Restricts which prior conversation sources make URLs fetchable.
+  final WebFetchUrlSources? urlSources;
+
   /// Creates a [WebFetchTool].
   ///
   /// [useCache] is only supported for `web_fetch_20260309` and
@@ -1075,6 +1081,7 @@ class WebFetchTool extends BuiltInTool {
     this.allowedCallers,
     this.deferLoading,
     this.strict,
+    this.urlSources,
     bool? useCache,
     ResponseInclusion? responseInclusion,
   }) : type = type ?? 'web_fetch_20260309',
@@ -1110,6 +1117,13 @@ class WebFetchTool extends BuiltInTool {
       deferLoading: json['defer_loading'] as bool?,
       strict: json['strict'] as bool?,
       useCache: json['use_cache'] as bool?,
+      urlSources: switch (json['url_sources']) {
+        null => null,
+        final Map<String, dynamic> value => WebFetchUrlSources.fromJson(value),
+        _ => throw const FormatException(
+          'Expected a web fetch url_sources object',
+        ),
+      },
       responseInclusion: json['response_inclusion'] != null
           ? ResponseInclusion.fromJson(json['response_inclusion'] as String)
           : null,
@@ -1129,6 +1143,7 @@ class WebFetchTool extends BuiltInTool {
     if (allowedCallers != null) 'allowed_callers': allowedCallers,
     if (deferLoading != null) 'defer_loading': deferLoading,
     if (strict != null) 'strict': strict,
+    'url_sources': ?urlSources?.toJson(),
     if (useCache != null &&
         (type == 'web_fetch_20260309' || type == 'web_fetch_20260318'))
       'use_cache': useCache,
@@ -1152,7 +1167,8 @@ class WebFetchTool extends BuiltInTool {
           deferLoading == other.deferLoading &&
           strict == other.strict &&
           useCache == other.useCache &&
-          responseInclusion == other.responseInclusion;
+          responseInclusion == other.responseInclusion &&
+          urlSources == other.urlSources;
 
   /// Creates a copy with replaced values.
   WebFetchTool copyWith({
@@ -1168,15 +1184,16 @@ class WebFetchTool extends BuiltInTool {
     Object? strict = unsetCopyWithValue,
     Object? useCache = unsetCopyWithValue,
     Object? responseInclusion = unsetCopyWithValue,
+    Object? urlSources = unsetCopyWithValue,
   }) {
     return WebFetchTool(
       type: type ?? this.type,
       allowedDomains: allowedDomains == unsetCopyWithValue
           ? this.allowedDomains
-          : allowedDomains as List<String>?,
+          : (allowedDomains as List<Object?>?)?.cast<String>().toList(),
       blockedDomains: blockedDomains == unsetCopyWithValue
           ? this.blockedDomains
-          : blockedDomains as List<String>?,
+          : (blockedDomains as List<Object?>?)?.cast<String>().toList(),
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
           : cacheControl as CacheControlEphemeral?,
@@ -1189,7 +1206,7 @@ class WebFetchTool extends BuiltInTool {
           : citations as RequestCitationsConfig?,
       allowedCallers: allowedCallers == unsetCopyWithValue
           ? this.allowedCallers
-          : allowedCallers as List<String>?,
+          : (allowedCallers as List<Object?>?)?.cast<String>().toList(),
       deferLoading: deferLoading == unsetCopyWithValue
           ? this.deferLoading
           : deferLoading as bool?,
@@ -1197,6 +1214,9 @@ class WebFetchTool extends BuiltInTool {
       useCache: useCache == unsetCopyWithValue
           ? this.useCache
           : useCache as bool?,
+      urlSources: urlSources == unsetCopyWithValue
+          ? this.urlSources
+          : urlSources as WebFetchUrlSources?,
       responseInclusion: responseInclusion == unsetCopyWithValue
           ? this.responseInclusion
           : responseInclusion as ResponseInclusion?,
@@ -1217,6 +1237,7 @@ class WebFetchTool extends BuiltInTool {
     strict,
     useCache,
     responseInclusion,
+    urlSources,
   );
 
   @override
@@ -1226,7 +1247,7 @@ class WebFetchTool extends BuiltInTool {
       'maxUses: $maxUses, maxContentTokens: $maxContentTokens, '
       'citations: $citations, allowedCallers: $allowedCallers, '
       'deferLoading: $deferLoading, strict: $strict, useCache: $useCache, '
-      'responseInclusion: $responseInclusion)';
+      'responseInclusion: $responseInclusion, urlSources: $urlSources)';
 }
 
 /// Memory built-in tool.

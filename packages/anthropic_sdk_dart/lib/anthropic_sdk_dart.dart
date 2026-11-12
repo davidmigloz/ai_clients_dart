@@ -92,6 +92,8 @@ export 'src/models/content/citations_config.dart';
 export 'src/models/content/content_block.dart';
 export 'src/models/content/image_transformations.dart';
 export 'src/models/content/input_content_block.dart';
+export 'src/models/content/web_fetch_result_error.dart'
+    show WebFetchToolResultErrorCode;
 
 // Models - Dreams (Beta, research preview)
 export 'src/models/dreams/create_dream_request.dart';

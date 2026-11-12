@@ -473,6 +473,49 @@ final legacy = Map<String, dynamic>.of(
 
 ---
 
+## Handle custom document and uploaded image sources
+
+Exhaustive switches over `DocumentSource` now include
+`ContentBlockDocumentSource`. Exhaustive switches over `ImageSource` now
+include `FileImageSource`.
+
+```dart
+// Before, image sources covered inline data and URLs.
+final imageKind = switch (source) {
+  Base64ImageSource() => 'inline',
+  UrlImageSource() => 'url',
+};
+
+// After, handle an uploaded image reference as well.
+final imageKind = switch (source) {
+  Base64ImageSource() => 'inline',
+  UrlImageSource() => 'url',
+  FileImageSource() => 'uploaded',
+};
+```
+
+```dart
+// Before
+final documentKind = switch (document) {
+  Base64PdfSource() || UrlPdfSource() => 'pdf',
+  PlainTextSource() => 'text',
+  FileDocumentSource() => 'uploaded',
+};
+
+// After
+final documentKind = switch (document) {
+  Base64PdfSource() || UrlPdfSource() => 'pdf',
+  PlainTextSource() => 'text',
+  FileDocumentSource() => 'uploaded',
+  ContentBlockDocumentSource(:final blocks) =>
+    blocks == null ? 'custom text' : 'custom blocks',
+};
+```
+
+[Claude Files API](https://platform.claude.com/docs/en/build-with-claude/files) · [Claude citations](https://platform.claude.com/docs/en/build-with-claude/citations)
+
+---
+
 ## Migrating from v9.x to v10.0.0
 
 v10.0.0 adds document sources that reference uploaded files. `DocumentSource` is sealed, so exhaustive switches must handle the new `FileDocumentSource` variant.

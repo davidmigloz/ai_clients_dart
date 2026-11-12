@@ -42,7 +42,7 @@ enum ImageMediaType {
 
 /// Source for image content.
 ///
-/// Images can be provided as base64-encoded data or as URLs.
+/// Images can be provided as base64-encoded data, URLs, or uploaded files.
 sealed class ImageSource {
   const ImageSource();
 
@@ -55,12 +55,16 @@ sealed class ImageSource {
   /// Creates a URL-based image source.
   factory ImageSource.url(String url) = UrlImageSource;
 
+  /// Creates a source referencing an image uploaded through the Files API.
+  factory ImageSource.file(String fileId) = FileImageSource;
+
   /// Creates an [ImageSource] from JSON.
   factory ImageSource.fromJson(Map<String, dynamic> json) {
     final type = json['type'] as String;
     return switch (type) {
       'base64' => Base64ImageSource.fromJson(json),
       'url' => UrlImageSource.fromJson(json),
+      'file' => FileImageSource.fromJson(json),
       _ => throw FormatException('Unknown ImageSource type: $type'),
     };
   }
@@ -160,4 +164,42 @@ class UrlImageSource extends ImageSource {
 
   @override
   String toString() => 'UrlImageSource(url: $url)';
+}
+
+/// Image source that references a file uploaded through the Files API.
+@immutable
+final class FileImageSource extends ImageSource {
+  /// Creates a source for the uploaded file.
+  const FileImageSource(this.fileId);
+
+  /// Parses an uploaded file reference.
+  factory FileImageSource.fromJson(Map<String, dynamic> json) {
+    if (json case {'type': 'file', 'file_id': final String fileId}) {
+      return FileImageSource(fileId);
+    }
+    throw const FormatException('Expected an uploaded image file reference');
+  }
+
+  /// The source discriminator.
+  String get type => 'file';
+
+  /// The uploaded image file's ID.
+  final String fileId;
+
+  @override
+  Map<String, dynamic> toJson() => {'type': type, 'file_id': fileId};
+
+  /// Copies this source with an optional replacement file ID.
+  FileImageSource copyWith({String? fileId}) =>
+      FileImageSource(fileId ?? this.fileId);
+
+  @override
+  bool operator ==(Object other) =>
+      other is FileImageSource && fileId == other.fileId;
+
+  @override
+  int get hashCode => fileId.hashCode;
+
+  @override
+  String toString() => 'FileImageSource(fileId: $fileId)';
 }
