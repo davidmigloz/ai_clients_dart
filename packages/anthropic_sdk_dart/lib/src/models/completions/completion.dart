@@ -168,6 +168,11 @@ class CompletionResponse {
   /// The stop reason.
   final StopReason? stopReason;
 
+  final String? _rawStopReason;
+
+  /// The original provider stop reason, including an unfamiliar value.
+  String? get stopReasonValue => _rawStopReason ?? stopReason?.value;
+
   /// The model used.
   final String model;
 
@@ -179,18 +184,32 @@ class CompletionResponse {
     required this.completion,
     this.stopReason,
     required this.model,
-  });
+  }) : _rawStopReason = null;
+
+  @Deprecated('Use Message instead')
+  const CompletionResponse._({
+    required this.id,
+    this.type = 'completion',
+    required this.completion,
+    this.stopReason,
+    String? stopReasonValue,
+    required this.model,
+  }) : _rawStopReason = stopReason == StopReason.unknown
+           ? stopReasonValue
+           : null;
 
   /// Creates a [CompletionResponse] from JSON.
   @Deprecated('Use Message instead')
   factory CompletionResponse.fromJson(Map<String, dynamic> json) {
-    return CompletionResponse(
+    final stopReasonValue = json['stop_reason'] as String?;
+    return CompletionResponse._(
       id: json['id'] as String,
       type: json['type'] as String? ?? 'completion',
       completion: json['completion'] as String,
-      stopReason: json['stop_reason'] != null
-          ? StopReason.fromJson(json['stop_reason'] as String)
-          : null,
+      stopReason: stopReasonValue == null
+          ? null
+          : StopReason.fromJson(stopReasonValue),
+      stopReasonValue: stopReasonValue,
       model: json['model'] as String,
     );
   }
@@ -200,7 +219,7 @@ class CompletionResponse {
     'id': id,
     'type': type,
     'completion': completion,
-    if (stopReason != null) 'stop_reason': stopReason!.toJson(),
+    'stop_reason': ?stopReasonValue,
     'model': model,
   };
 
@@ -212,13 +231,14 @@ class CompletionResponse {
     Object? stopReason = unsetCopyWithValue,
     String? model,
   }) {
-    return CompletionResponse(
+    return CompletionResponse._(
       id: id ?? this.id,
       type: type ?? this.type,
       completion: completion ?? this.completion,
       stopReason: stopReason == unsetCopyWithValue
           ? this.stopReason
           : stopReason as StopReason?,
+      stopReasonValue: stopReason == unsetCopyWithValue ? _rawStopReason : null,
       model: model ?? this.model,
     );
   }
@@ -232,14 +252,16 @@ class CompletionResponse {
           type == other.type &&
           completion == other.completion &&
           stopReason == other.stopReason &&
+          stopReasonValue == other.stopReasonValue &&
           model == other.model;
 
   @override
-  int get hashCode => Object.hash(id, type, completion, stopReason, model);
+  int get hashCode =>
+      Object.hash(id, type, completion, stopReason, stopReasonValue, model);
 
   @override
   String toString() =>
       'CompletionResponse(id: $id, type: $type, '
       'completion: [${completion.length} chars], '
-      'stopReason: $stopReason, model: $model)';
+      'stopReason: $stopReasonValue, model: $model)';
 }

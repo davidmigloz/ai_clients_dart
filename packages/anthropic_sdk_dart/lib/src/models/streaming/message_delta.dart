@@ -17,6 +17,11 @@ class MessageDelta {
   /// The stop reason if the message has finished.
   final StopReason? stopReason;
 
+  final String? _rawStopReason;
+
+  /// The original provider stop reason, including an unfamiliar value.
+  String? get stopReasonValue => _rawStopReason ?? stopReason?.value;
+
   /// Structured information about why model output stopped.
   ///
   /// This is non-null when [stopReason] is [StopReason.refusal].
@@ -31,17 +36,29 @@ class MessageDelta {
     this.stopReason,
     this.stopDetails,
     this.stopSequence,
-  });
+  }) : _rawStopReason = null;
+
+  const MessageDelta._({
+    this.container,
+    this.stopReason,
+    String? stopReasonValue,
+    this.stopDetails,
+    this.stopSequence,
+  }) : _rawStopReason = stopReason == StopReason.unknown
+           ? stopReasonValue
+           : null;
 
   /// Creates a [MessageDelta] from JSON.
   factory MessageDelta.fromJson(Map<String, dynamic> json) {
-    return MessageDelta(
+    final stopReasonValue = json['stop_reason'] as String?;
+    return MessageDelta._(
       container: json['container'] != null
           ? Container.fromJson(json['container'] as Map<String, dynamic>)
           : null,
-      stopReason: json['stop_reason'] != null
-          ? StopReason.fromJson(json['stop_reason'] as String)
-          : null,
+      stopReason: stopReasonValue == null
+          ? null
+          : StopReason.fromJson(stopReasonValue),
+      stopReasonValue: stopReasonValue,
       stopDetails: json['stop_details'] != null
           ? RefusalStopDetails.fromJson(
               json['stop_details'] as Map<String, dynamic>,
@@ -54,7 +71,7 @@ class MessageDelta {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (container != null) 'container': container!.toJson(),
-    if (stopReason != null) 'stop_reason': stopReason!.toJson(),
+    'stop_reason': ?stopReasonValue,
     if (stopDetails != null) 'stop_details': stopDetails!.toJson(),
     if (stopSequence != null) 'stop_sequence': stopSequence,
   };
@@ -66,13 +83,14 @@ class MessageDelta {
     Object? stopDetails = unsetCopyWithValue,
     Object? stopSequence = unsetCopyWithValue,
   }) {
-    return MessageDelta(
+    return MessageDelta._(
       container: container == unsetCopyWithValue
           ? this.container
           : container as Container?,
       stopReason: stopReason == unsetCopyWithValue
           ? this.stopReason
           : stopReason as StopReason?,
+      stopReasonValue: stopReason == unsetCopyWithValue ? _rawStopReason : null,
       stopDetails: stopDetails == unsetCopyWithValue
           ? this.stopDetails
           : stopDetails as RefusalStopDetails?,
@@ -89,16 +107,22 @@ class MessageDelta {
           runtimeType == other.runtimeType &&
           container == other.container &&
           stopReason == other.stopReason &&
+          stopReasonValue == other.stopReasonValue &&
           stopDetails == other.stopDetails &&
           stopSequence == other.stopSequence;
 
   @override
-  int get hashCode =>
-      Object.hash(container, stopReason, stopDetails, stopSequence);
+  int get hashCode => Object.hash(
+    container,
+    stopReason,
+    stopReasonValue,
+    stopDetails,
+    stopSequence,
+  );
 
   @override
   String toString() =>
-      'MessageDelta(container: $container, stopReason: $stopReason, '
+      'MessageDelta(container: $container, stopReason: $stopReasonValue, '
       'stopDetails: $stopDetails, stopSequence: $stopSequence)';
 }
 

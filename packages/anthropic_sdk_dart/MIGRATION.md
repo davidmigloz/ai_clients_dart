@@ -396,6 +396,35 @@ terminal `ErrorEvent`.
 
 ---
 
+## Handle unfamiliar stop reasons
+
+`StopReason` adds `unknown`. Add that case to exhaustive switches. Read
+`Message.stopReasonValue` or `MessageDelta.stopReasonValue` for the original
+wire string. Completed Messages, streams and batch results preserve it.
+
+```dart
+// Before
+String stopStatus(StopReason? reason) => switch (reason) {
+  null => 'pending',
+  StopReason.endTurn => 'complete',
+  StopReason.maxTokens || StopReason.stopSequence || StopReason.toolUse ||
+      StopReason.pauseTurn || StopReason.compaction ||
+      StopReason.modelContextWindowExceeded || StopReason.refusal => 'stopped',
+};
+
+// After
+String stopStatus(StopReason? reason) => switch (reason) {
+  null => 'pending',
+  StopReason.endTurn => 'complete',
+  StopReason.maxTokens || StopReason.stopSequence || StopReason.toolUse ||
+      StopReason.pauseTurn || StopReason.compaction ||
+      StopReason.modelContextWindowExceeded || StopReason.refusal => 'stopped',
+  StopReason.unknown => 'unfamiliar provider stop',
+};
+```
+
+---
+
 ## Migrating from v9.x to v10.0.0
 
 v10.0.0 adds document sources that reference uploaded files. `DocumentSource` is sealed, so exhaustive switches must handle the new `FileDocumentSource` variant.

@@ -72,3 +72,9 @@ A slash in `Files.retrieve` becomes a second route component, and
 `batches.retrieve('..')` sends to the parent endpoint. OpenAI Admin and Safety
 already use guarded encoded identifiers for their own routes.
 [Pinned OpenAI Files](https://github.com/davidmigloz/ai_clients_dart/blob/65b53e07324c13973fa3045d919630bd79a144af/packages/openai_dart/lib/src/resources/files_resource.dart) · [Pinned OpenAI Batches](https://github.com/davidmigloz/ai_clients_dart/blob/65b53e07324c13973fa3045d919630bd79a144af/packages/openai_dart/lib/src/resources/batches_resource.dart)
+
+## Unfamiliar stop reasons
+
+The baseline strict `StopReason` enum rejected new provider values in buffered Messages, SSE deltas, batch items and the exported legacy Completion DTO. The official SDKs declare the known strings but preserve response fields as received. Dart exposes the typed `unknown` value alongside the original `stopReasonValue`, including through streaming accumulation and copies. The cross-client baseline records that OpenAI Chat normalizes an unrecognized finish reason to `unknown` and loses its original text.
+
+[Claude stop reasons](https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons) · [Pinned TypeScript Messages types](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/src/resources/messages/messages.ts)

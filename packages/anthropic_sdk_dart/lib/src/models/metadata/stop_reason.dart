@@ -26,7 +26,10 @@ enum StopReason {
   modelContextWindowExceeded('model_context_window_exceeded'),
 
   /// The model refused to generate content.
-  refusal('refusal');
+  refusal('refusal'),
+
+  /// A stop reason introduced by the service after this SDK release.
+  unknown('unknown');
 
   const StopReason(this.value);
 
@@ -43,7 +46,7 @@ enum StopReason {
     'compaction' => StopReason.compaction,
     'model_context_window_exceeded' => StopReason.modelContextWindowExceeded,
     'refusal' => StopReason.refusal,
-    _ => throw FormatException('Unknown StopReason: $value'),
+    _ => StopReason.unknown,
   };
 
   /// Converts to JSON string.
