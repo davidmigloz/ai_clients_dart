@@ -230,6 +230,7 @@ export 'src/models/models/model_info.dart';
 
 // Organization Admin API
 export 'src/models/organization/federation_issuer.dart';
+export 'src/models/organization/federation_rule.dart';
 export 'src/models/organization/organization_api_key.dart';
 export 'src/models/organization/organization_limits.dart';
 export 'src/models/organization/organization_page.dart';
@@ -307,6 +308,7 @@ export 'src/resources/messages_resource.dart';
 export 'src/resources/models_resource.dart';
 export 'src/resources/organization/organization_access_resources.dart';
 export 'src/resources/organization/organization_federation_resource.dart';
+export 'src/resources/organization/organization_federation_rules_resource.dart';
 export 'src/resources/organization/organization_rbac_resources.dart';
 export 'src/resources/organization/organization_resource.dart';
 export 'src/resources/organization/organization_service_accounts_resource.dart';

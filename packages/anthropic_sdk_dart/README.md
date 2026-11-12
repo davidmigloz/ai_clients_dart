@@ -50,6 +50,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 
 - OAuth bearer authentication and Workload Identity Federation with token refresh
 - OIDC federation issuer management, signing-key sources, and polling status
+- Workload Identity Federation rules and workspace bindings
 - Message batches for large-scale offline processing
 - Compliance Activity Feed, directory, organization settings, app content, sessions, and artifact downloads. Security Posture is beta.
 - Model discovery with lifecycle filters, model lines, and thinking and server-tool capabilities
@@ -207,6 +208,25 @@ try {
 ```
 
 [Manage WIF with the Admin API](https://platform.claude.com/docs/en/manage-claude/wif-admin-api) · [Runnable issuer example](example/federation_issuers_example.dart)
+
+Inspect organization federation rules through `client.organization.federation.rules`
+with the same `org:admin` OAuth scope. A rule binds an issuer and
+service account to a scope, workspace selection, and JWT claim matches.
+OAuth callers can modify `workspace:developer` and `workspace:inference`
+rules. Configure rules for higher scopes in Claude Console.
+
+```dart
+final page = await client.organization.federation.rules.list(
+  issuerId: federationIssuerId,
+  includeArchived: false,
+  limit: 20,
+);
+```
+
+Use `rules.workspaces` to list, add, or remove individual workspace
+bindings. Rules with `appliesToAllWorkspaces` also cover future workspaces.
+
+[Runnable federation rules example](example/federation_rules_example.dart)
 
 </details>
 
@@ -1220,6 +1240,7 @@ See the [example/](example/) directory for complete examples:
 |---------|-------------|
 | [`messages_example.dart`](example/messages_example.dart) | Basic message creation |
 | [`federation_issuers_example.dart`](example/federation_issuers_example.dart) | List OIDC issuers with an organization OAuth token |
+| [`federation_rules_example.dart`](example/federation_rules_example.dart) | List federation rules and workspace bindings |
 | [`workload_identity_example.dart`](example/workload_identity_example.dart) | Exchange a workload identity JWT and call Messages |
 | [`api_version_example.dart`](example/api_version_example.dart) | Current API version and legacy opt-out |
 | [`mid_conversation_system_example.dart`](example/mid_conversation_system_example.dart) | Mid-conversation, turn-scoped, and effort-only system messages |

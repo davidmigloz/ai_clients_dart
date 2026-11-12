@@ -1,15 +1,20 @@
 import '../../models/organization/federation_issuer.dart';
 import '../../models/organization/organization_page.dart';
+import 'organization_federation_rules_resource.dart';
 import 'organization_transport.dart';
 
 /// Workload Identity Federation resources in the Admin API.
 final class OrganizationFederationResource {
   /// Creates the federation resource.
   OrganizationFederationResource(OrganizationTransport transport)
-    : issuers = OrganizationFederationIssuersResource(transport);
+    : issuers = OrganizationFederationIssuersResource(transport),
+      rules = OrganizationFederationRulesResource(transport);
 
   /// Registered OpenID Connect identity providers.
   final OrganizationFederationIssuersResource issuers;
+
+  /// Rules authorizing workloads to act as service accounts.
+  final OrganizationFederationRulesResource rules;
 }
 
 /// Registers and manages OpenID Connect identity providers.
