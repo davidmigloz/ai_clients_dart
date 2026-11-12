@@ -23,12 +23,9 @@ const _stubScreenshotBase64 =
 /// Your application is responsible for executing each member action against
 /// a real (or virtual) display and returning the result — this example uses
 /// a stub handler that fabricates results instead.
-void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+/// Set ANTHROPIC_API_KEY before running.
+Future<void> main() async {
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // The computer toolset carries no `name` — it's a single `tools[]` entry
@@ -51,7 +48,7 @@ void main() async {
     while (true) {
       final response = await client.messages.create(
         MessageCreateRequest(
-          model: 'claude-sonnet-5',
+          model: 'claude-sonnet-5-5',
           maxTokens: 4096,
           tools: tools,
           messages: messages,
@@ -66,19 +63,20 @@ void main() async {
       messages = [...messages, response.toInputMessage()];
 
       // Each toolset member tool_use carries `toolsetName` identifying the
-      // family it belongs to (here, `computer_toolset_20260801`).
+      // family it belongs to (here, `computer`).
       final results = <ToolResultInputBlock>[];
       for (final toolUse in response.toolUseBlocks) {
+        final action = toolUse.toolsetAction;
         print(
           'Computer toolset action: ${toolUse.name} '
-          '(toolset: ${toolUse.toolsetName}), input: ${toolUse.input}',
+          '(toolset: ${toolUse.toolsetName})',
         );
 
         // Execute the action against a real display, then report the
         // result. A `tool_result` answering a toolset member echoes the
         // paired tool_use's `toolsetName`.
-        final content = switch (toolUse.name) {
-          'screenshot' => [
+        final content = switch (action) {
+          ComputerScreenshotAction() => [
             ToolResultContent.image(
               ImageSource.base64(
                 data: _stubScreenshotBase64,
@@ -86,13 +84,16 @@ void main() async {
               ),
             ),
           ],
-          _ => [ToolResultContent.text('ok')],
+          _ => [
+            ToolResultContent.text('The stub does not execute this action.'),
+          ],
         };
 
         results.add(
           ToolResultInputBlock(
             toolUseId: toolUse.id,
             content: content,
+            isError: action is! ComputerScreenshotAction,
             toolsetName: toolUse.toolsetName,
           ),
         );

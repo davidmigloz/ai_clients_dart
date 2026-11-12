@@ -4,7 +4,7 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~12.3k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~12.5k tokens): Primary package documentation with installation, configuration, and usage examples.
 - [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/CHANGELOG.md) (~12.9k tokens): Release history and version-by-version changes.
 - [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) (~13.6k tokens): Upgrade notes and breaking-change guidance.
 
@@ -16,6 +16,8 @@
 - [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/streaming_example.dart) (~1.3k tokens): Streaming responses.
 - [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/tool_calling_example.dart) (~685 tokens): Tool calling with schemas.
 - [inline_tools_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/inline_tools_example.dart) (~302 tokens): Define a client tool partway through a conversation (beta).
+- [browser_use_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/browser_use_example.dart) (~837 tokens): Browser-use toolset with `browser_state` tool results.
+- [computer_use_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/computer_use_example.dart) (~897 tokens): Computer-use toolset (`computer_toolset_20260801`).
 - [mcp_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/mcp_example.dart) (~537 tokens): Connect an MCP server and pin its tool listing (beta).
 - [thinking_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/thinking_example.dart) (~2.2k tokens): Adaptive thinking, progress updates, block binding, and multi-turn replay.
 - [message_threads_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/message_threads_example.dart) (~276 tokens): Create and continue a Messages thread (beta).
@@ -46,8 +48,6 @@
 - [mid_conversation_system_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/mid_conversation_system_example.dart) (~1.1k tokens): Mid-conversation, turn-scoped, and effort-only system messages.
 - [web_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/web_search_example.dart) (~791 tokens): Web search tool.
 - [advisor_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/advisor_example.dart) (~922 tokens): Advisor tool (beta).
-- [computer_use_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/computer_use_example.dart) (~894 tokens): Computer-use toolset (`computer_toolset_20260801`).
-- [browser_use_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/browser_use_example.dart) (~782 tokens): Browser-use toolset with `browser_state` tool results.
 - [diagnostics_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/diagnostics_example.dart) (~596 tokens): Prompt-cache diagnostics on the Claude API.
 - [fallback_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/fallback_example.dart) (~933 tokens): Server-side fallback chain and refusal credit-token retry (beta).
 - [document_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/document_example.dart) (~929 tokens): Document inputs with citations.
@@ -62,4 +62,4 @@
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/anthropic_sdk_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~70k tokens**
+**Total: ~70.3k tokens**

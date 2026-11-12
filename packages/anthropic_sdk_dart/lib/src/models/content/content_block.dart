@@ -6,6 +6,7 @@ import '../messages/fallback_config.dart';
 import '../tools/built_in_tools.dart' show McpListedTool;
 import '../tools/tool_caller.dart';
 import '../tools/tool_change_reference.dart';
+import '../tools/toolset_action.dart';
 
 /// Content block in a response message.
 ///
@@ -235,6 +236,13 @@ class ToolUseBlock extends ContentBlock {
 
   /// For a toolset member tool use, the toolset family.
   final String? toolsetName;
+
+  /// Typed browser or computer input once the tool use is complete.
+  /// Returns null for a tool use that has no toolset family.
+  ToolsetAction? get toolsetAction => switch (toolsetName) {
+    final family? => ToolsetAction.decode(family, name, input),
+    null => null,
+  };
 
   /// Creates a [ToolUseBlock].
   const ToolUseBlock({

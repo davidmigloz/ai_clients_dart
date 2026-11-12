@@ -9,6 +9,7 @@ import '../sources/image_source.dart';
 import '../tools/built_in_tools.dart' show McpListedTool;
 import '../tools/tool_caller.dart';
 import '../tools/tool_change_reference.dart';
+import '../tools/toolset_action.dart';
 import 'browser_state.dart';
 import 'citations_config.dart';
 import 'content_block.dart';
@@ -759,6 +760,13 @@ class ToolUseInputBlock extends InputContentBlock {
   /// For a toolset member tool use, the toolset family this member belongs
   /// to.
   final String? toolsetName;
+
+  /// Typed browser or computer input once the tool use is complete.
+  /// Returns null for a tool use that has no toolset family.
+  ToolsetAction? get toolsetAction => switch (toolsetName) {
+    final family? => ToolsetAction.decode(family, name, input),
+    null => null,
+  };
 
   /// Creates a [ToolUseInputBlock].
   const ToolUseInputBlock({

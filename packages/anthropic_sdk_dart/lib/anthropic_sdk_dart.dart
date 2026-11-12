@@ -269,6 +269,7 @@ export 'src/models/tools/tool_caller.dart';
 export 'src/models/tools/tool_change_reference.dart';
 export 'src/models/tools/tool_choice.dart';
 export 'src/models/tools/tool_definition.dart';
+export 'src/models/tools/toolset_action.dart';
 export 'src/models/tools/toolsets.dart';
 
 // Models - User Profiles (Beta)

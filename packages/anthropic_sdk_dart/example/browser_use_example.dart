@@ -13,12 +13,9 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 ///
 /// This example uses a stub browser that fakes `navigate`, `screenshot`, and
 /// `read_page` handlers instead of driving a real one.
-void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+/// Set ANTHROPIC_API_KEY before running.
+Future<void> main() async {
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // The browser toolset carries no `name` — it's a single `tools[]` entry
@@ -34,7 +31,7 @@ void main() async {
     while (true) {
       final response = await client.messages.create(
         MessageCreateRequest(
-          model: 'claude-sonnet-5',
+          model: 'claude-sonnet-5-5',
           maxTokens: 4096,
           tools: tools,
           messages: messages,
@@ -50,27 +47,33 @@ void main() async {
 
       final results = <ToolResultInputBlock>[];
       for (final toolUse in response.toolUseBlocks) {
+        final action = toolUse.toolsetAction;
         print(
           'Browser toolset action: ${toolUse.name} '
-          '(toolset: ${toolUse.toolsetName}), input: ${toolUse.input}',
+          '(toolset: ${toolUse.toolsetName})',
         );
 
         // Execute the action against the stub browser, then report the page
         // text (or acknowledgement) alongside a `browser_state` block
         // describing the caller's open tabs after the call.
         final content = <ToolResultContent>[
-          switch (toolUse.name) {
-            'navigate' => ToolResultContent.text(
-              'Navigated to ${toolUse.input['url']}.',
+          switch (action) {
+            BrowserNavigateAction(:final url) => ToolResultContent.text(
+              'Navigated to $url.',
             ),
-            'read_page' => ToolResultContent.text(
+            BrowserReadPageAction() => ToolResultContent.text(
               'Example Domain\nThis domain is for use in illustrative '
               'examples.',
             ),
-            'screenshot' => ToolResultContent.text(
+            BrowserNewTabAction() => ToolResultContent.text(
+              'Opened a stub tab.',
+            ),
+            BrowserScreenshotAction() => ToolResultContent.text(
               '[stub screenshot of the current page]',
             ),
-            _ => ToolResultContent.text('ok'),
+            _ => ToolResultContent.text(
+              'The stub does not execute this action.',
+            ),
           },
           ToolResultContent.browserState(
             tabs: const [
@@ -83,7 +86,7 @@ void main() async {
             ],
             // "Nothing to report" is expressed by omitting `stateChanges`
             // entirely; report `tab_opened` only when this call opened one.
-            stateChanges: toolUse.name == 'new_tab'
+            stateChanges: action is BrowserNewTabAction
                 ? const [BrowserStateChangeTabOpened(tabId: 'tab_1')]
                 : null,
           ),
@@ -93,6 +96,11 @@ void main() async {
           ToolResultInputBlock(
             toolUseId: toolUse.id,
             content: content,
+            isError:
+                action is! BrowserNavigateAction &&
+                action is! BrowserReadPageAction &&
+                action is! BrowserNewTabAction &&
+                action is! BrowserScreenshotAction,
             toolsetName: toolUse.toolsetName,
           ),
         );
