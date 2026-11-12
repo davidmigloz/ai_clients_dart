@@ -416,7 +416,7 @@ class BashTool extends BuiltInTool {
       strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
       inputExamples: inputExamples == unsetCopyWithValue
           ? this.inputExamples
-          : copyWithList<Map<String, dynamic>>(inputExamples),
+          : copyWithJsonObjectList(inputExamples),
     );
   }
 
@@ -543,7 +543,7 @@ class TextEditorTool20250124 extends TextEditorToolBase {
       strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
       inputExamples: inputExamples == unsetCopyWithValue
           ? this.inputExamples
-          : copyWithList<Map<String, dynamic>>(inputExamples),
+          : copyWithJsonObjectList(inputExamples),
     );
   }
 
@@ -659,7 +659,7 @@ class TextEditorTool20250429 extends TextEditorToolBase {
       strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
       inputExamples: inputExamples == unsetCopyWithValue
           ? this.inputExamples
-          : copyWithList<Map<String, dynamic>>(inputExamples),
+          : copyWithJsonObjectList(inputExamples),
     );
   }
 
@@ -789,7 +789,7 @@ class TextEditorTool extends TextEditorToolBase {
       strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
       inputExamples: inputExamples == unsetCopyWithValue
           ? this.inputExamples
-          : copyWithList<Map<String, dynamic>>(inputExamples),
+          : copyWithJsonObjectList(inputExamples),
     );
   }
 
@@ -1345,7 +1345,7 @@ class MemoryTool extends BuiltInTool {
       strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
       inputExamples: inputExamples == unsetCopyWithValue
           ? this.inputExamples
-          : copyWithList<Map<String, dynamic>>(inputExamples),
+          : copyWithJsonObjectList(inputExamples),
     );
   }
 

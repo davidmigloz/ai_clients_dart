@@ -15,6 +15,84 @@ const _compaction = <String, dynamic>{
 };
 
 void main() {
+  test(
+    'empty fallback trigger copy preserves explicitly empty request JSON',
+    () async {
+      final original = FallbackInputBlock(
+        from: const FallbackHopInfo(model: 'claude-opus-5-5'),
+        to: const FallbackHopInfo(model: 'claude-sonnet-5-5'),
+      );
+      expect(original.toJson(), isNot(contains('trigger')));
+      expect(
+        original.copyWith(trigger: null).toJson(),
+        containsPair('trigger', null),
+      );
+      final copied = original.copyWith(trigger: {});
+      expect(copied.toJson(), containsPair('trigger', <String, dynamic>{}));
+      final transport = MockHttpClient()
+        ..queueJsonResponse(MockResponses.message());
+      final client = AnthropicClient(httpClient: transport);
+      addTearDown(client.close);
+      await client.messages.create(
+        MessageCreateRequest(
+          model: 'claude-sonnet-5-5',
+          maxTokens: 16,
+          messages: [
+            InputMessage.user('First'),
+            InputMessage.assistantBlocks([copied]),
+            InputMessage.user('Continue'),
+          ],
+        ),
+        betas: ['server-side-fallback-2026-07-01'],
+      );
+      final request = transport.lastRequest! as http.Request;
+      final payload = jsonDecode(request.body) as Map<String, dynamic>;
+      final messages = payload['messages'] as List<dynamic>;
+      final assistant = messages[1] as Map<String, dynamic>;
+      final content = assistant['content'] as List<dynamic>;
+      expect(content.single, containsPair('trigger', <String, dynamic>{}));
+    },
+  );
+
+  test('no-argument tool examples accept a nested empty object', () {
+    const tool = Tool(name: 'zero_argument', inputSchema: InputSchema());
+    final copied = tool.copyWith(inputExamples: [<dynamic, dynamic>{}]);
+    expect(copied.toJson()['input_examples'], [<String, dynamic>{}]);
+    final typedExamples = <Map<String, dynamic>>[{}];
+    expect(
+      tool.copyWith(inputExamples: typedExamples).inputExamples,
+      same(typedExamples),
+    );
+    expect(
+      () => tool.copyWith(
+        inputExamples: [
+          {1: true},
+        ],
+      ),
+      throwsA(isA<TypeError>()),
+    );
+    expect(
+      () => tool.copyWith(inputExamples: [null]),
+      throwsA(isA<TypeError>()),
+    );
+  });
+
+  test('legacy profile metadata copy accepts an empty patch', () {
+    const original = UpdateUserProfileRequest(metadata: {'tier': 'old'});
+    expect(original.copyWith().metadata, {'tier': 'old'});
+    expect(original.copyWith(metadata: {}).toJson(), {
+      'metadata': <String, String>{},
+    });
+    expect(
+      () => original.copyWith(metadata: {'tier': 1}),
+      throwsA(isA<TypeError>()),
+    );
+    expect(
+      () => original.copyWith(metadata: null),
+      throwsA(isA<AssertionError>()),
+    );
+  });
+
   test('legacy tool schema copies preserve empty and typed collections', () {
     const schema = InputSchema(
       required: ['value'],

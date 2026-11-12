@@ -128,7 +128,7 @@ class Tool {
       strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
       inputExamples: inputExamples == unsetCopyWithValue
           ? this.inputExamples
-          : copyWithList<Map<String, dynamic>>(inputExamples),
+          : copyWithJsonObjectList(inputExamples),
       eagerInputStreaming: eagerInputStreaming == unsetCopyWithValue
           ? this.eagerInputStreaming
           : eagerInputStreaming as bool?,

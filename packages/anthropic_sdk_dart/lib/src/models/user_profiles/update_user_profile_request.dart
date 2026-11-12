@@ -167,7 +167,11 @@ class UpdateUserProfileRequest {
       externalUserOnboardedAt: externalUserOnboardedAt == unsetCopyWithValue
           ? _externalUserOnboardedAt
           : externalUserOnboardedAt,
-      metadata: metadata == unsetCopyWithValue ? _metadata : metadata,
+      metadata: metadata == unsetCopyWithValue
+          ? _metadata
+          : metadata is Map
+          ? copyWithMap<String, String>(metadata)
+          : metadata,
     );
   }
 

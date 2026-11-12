@@ -2147,7 +2147,7 @@ class CompactionInputBlock extends InputContentBlock {
           : signature as String?,
       toolChanges: toolChanges == unsetCopyWithValue
           ? this.toolChanges
-          : copyWithList<Map<String, dynamic>>(toolChanges),
+          : copyWithJsonObjectList(toolChanges),
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
           : cacheControl as CacheControlEphemeral?,
@@ -2418,7 +2418,7 @@ class FallbackInputBlock extends InputContentBlock {
   }) : hasTrigger = trigger != unsetCopyWithValue,
        trigger = (trigger == unsetCopyWithValue || trigger == null)
            ? null
-           : deepUnmodifiableMap(trigger as Map<String, dynamic>);
+           : deepUnmodifiableMap(copyWithMap<String, dynamic>(trigger)!);
 
   /// Object type. Always "fallback".
   String get type => 'fallback';

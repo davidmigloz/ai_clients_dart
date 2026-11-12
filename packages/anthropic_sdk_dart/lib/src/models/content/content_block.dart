@@ -1027,7 +1027,7 @@ class CompactionBlock extends ContentBlock {
           : signature as String?,
       toolChanges: toolChanges == unsetCopyWithValue
           ? this.toolChanges
-          : copyWithList<Map<String, dynamic>>(toolChanges),
+          : copyWithJsonObjectList(toolChanges),
     );
   }
 

@@ -355,7 +355,7 @@ class UserCustomToolResultEventParams extends EventParams {
       customToolUseId: customToolUseId ?? this.customToolUseId,
       content: content == unsetCopyWithValue
           ? this.content
-          : copyWithList<Map<String, dynamic>>(content),
+          : copyWithJsonObjectList(content),
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
     );
   }
@@ -430,7 +430,7 @@ class UserToolResultEventParams extends EventParams {
       toolUseId: toolUseId ?? this.toolUseId,
       content: content == unsetCopyWithValue
           ? this.content
-          : copyWithList<Map<String, dynamic>>(content),
+          : copyWithJsonObjectList(content),
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
     );
   }

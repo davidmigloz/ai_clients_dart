@@ -172,7 +172,7 @@ class ComputerUseTool extends BuiltInTool {
       strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
       inputExamples: inputExamples == unsetCopyWithValue
           ? this.inputExamples
-          : copyWithList<Map<String, dynamic>>(inputExamples),
+          : copyWithJsonObjectList(inputExamples),
       enableZoom: enableZoom == unsetCopyWithValue
           ? this.enableZoom
           : enableZoom as bool?,

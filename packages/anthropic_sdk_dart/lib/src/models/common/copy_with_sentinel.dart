@@ -17,3 +17,14 @@ Map<K, V>? copyWithMap<K, V>(Object? value) => switch (value) {
   final Map<K, V> typed => typed,
   _ => Map<K, V>.from(value as Map<Object?, Object?>),
 };
+
+/// Checks nested JSON object literals while retaining an already typed list.
+List<Map<String, dynamic>>? copyWithJsonObjectList(Object? value) =>
+    switch (value) {
+      null => null,
+      final List<Map<String, dynamic>> typed => typed,
+      _ => [
+        for (final item in value as List<Object?>)
+          copyWithMap<String, dynamic>(item)!,
+      ],
+    };
