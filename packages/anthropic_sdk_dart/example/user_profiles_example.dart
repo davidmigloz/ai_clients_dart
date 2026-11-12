@@ -10,12 +10,10 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 ///
 /// Requires the `user-profiles-2026-08-18` beta header, which the
 /// [UserProfilesResource] sets automatically.
+///
+/// Set ANTHROPIC_API_KEY before running.
 void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // 1. Create a user profile.

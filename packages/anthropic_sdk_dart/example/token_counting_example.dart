@@ -7,12 +7,10 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// - Counting tokens in messages
 /// - Estimating token usage before sending
 /// - Understanding token limits
+///
+/// Set ANTHROPIC_API_KEY before running.
 void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // Example 1: Count tokens in a simple message

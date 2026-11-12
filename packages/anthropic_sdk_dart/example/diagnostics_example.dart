@@ -1,4 +1,6 @@
 // ignore_for_file: avoid_print
+import 'dart:io';
+
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 
 /// Prompt-cache diagnostics example.
@@ -9,8 +11,17 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// a [Diagnostics.cacheMissReason] on the response explaining where the prompt
 /// diverged.
 ///
-/// On the Claude API, enable diagnostics with the request parameter.
-Future<void> main() async {
+/// Set ANTHROPIC_API_KEY for the Claude API and pass a local text file that
+/// meets your model’s minimum cacheable prompt length.
+Future<void> main(List<String> arguments) async {
+  if (arguments.length != 1) {
+    throw ArgumentError('Usage: diagnostics_example.dart context.txt');
+  }
+  final context = await File(arguments.single).readAsString();
+  final firstTurn = InputMessage.userBlocks([
+    TextInputBlock(context, cacheControl: const CacheControlEphemeral()),
+    const TextInputBlock('Summarize this text.'),
+  ]);
   final client = AnthropicClient.fromEnvironment();
 
   try {
@@ -21,7 +32,7 @@ Future<void> main() async {
         model: 'claude-sonnet-5-5',
         maxTokens: 1024,
         diagnostics: const DiagnosticsParam(),
-        messages: [InputMessage.user('Summarize the rules of chess.')],
+        messages: [firstTurn],
       ),
     );
     print('First message id: ${first.id}');
@@ -34,9 +45,9 @@ Future<void> main() async {
         maxTokens: 1024,
         diagnostics: DiagnosticsParam(previousMessageId: first.id),
         messages: [
-          InputMessage.user('Summarize the rules of chess.'),
+          firstTurn,
           first.toInputMessage(),
-          InputMessage.user('Now explain en passant.'),
+          InputMessage.user('What is the main conclusion?'),
         ],
       ),
     );

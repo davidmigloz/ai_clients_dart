@@ -9,6 +9,12 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// Set ANTHROPIC_TUNNEL_WIF_TOKEN. ANTHROPIC_WORKSPACE_ID may select the same
 /// workspace as the token. Optionally pass a CA certificate path in PEM format.
 Future<void> main(List<String> arguments) async {
+  if (arguments.length > 1) {
+    throw ArgumentError('Usage: mcp_tunnels_example.dart [certificate.pem]');
+  }
+  final caCertificatePem = arguments.isEmpty
+      ? null
+      : await File(arguments.single).readAsString();
   final token = Platform.environment['ANTHROPIC_TUNNEL_WIF_TOKEN'];
   final workspace = Platform.environment['ANTHROPIC_WORKSPACE_ID'];
   if (token == null || token.isEmpty) {
@@ -24,10 +30,10 @@ Future<void> main(List<String> arguments) async {
     try {
       final credential = await tunnels.revealToken(tunnel.id);
       print('Tunnel: ${tunnel.id}, proxy token ID: ${credential.id}');
-      if (arguments.isNotEmpty) {
+      if (caCertificatePem != null) {
         final certificates = tunnels.certificates(tunnel.id);
         final certificate = await certificates.create(
-          caCertificatePem: await File(arguments.single).readAsString(),
+          caCertificatePem: caCertificatePem,
         );
         print('Certificate fingerprint: ${certificate.fingerprint}');
         await certificates.archive(certificate.id);

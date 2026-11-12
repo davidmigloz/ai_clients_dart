@@ -8,6 +8,7 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 ///
 /// Pass the deployment name. Set ANTHROPIC_FOUNDRY_RESOURCE and either
 /// ANTHROPIC_FOUNDRY_API_KEY or an Entra token in AZURE_ACCESS_TOKEN.
+/// Set ANTHROPIC_FOUNDRY_AZURE_HOSTED=true for an Azure-hosted deployment.
 Future<void> main(List<String> arguments) async {
   if (arguments.length != 1) {
     throw ArgumentError('Usage: foundry_example.dart deployment-name');

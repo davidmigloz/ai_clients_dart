@@ -9,11 +9,7 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// Make sure to set the ANTHROPIC_API_KEY environment variable before running.
 void main() async {
   // Create client (reads ANTHROPIC_API_KEY from environment)
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // --- Basic Message ---

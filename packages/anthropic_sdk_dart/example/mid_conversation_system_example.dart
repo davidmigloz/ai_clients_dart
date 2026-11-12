@@ -18,12 +18,10 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// Mid-conversation system messages, the turn-scoped `clear_at`, and
 /// per-message effort are supported on Claude Opus 4.8 and later Opus/Fable
 /// models — not on Sonnet 5, so this example targets `claude-opus-5`.
+///
+/// Set ANTHROPIC_API_KEY before running.
 void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // A content-carrying system message must follow a user turn / tool_result

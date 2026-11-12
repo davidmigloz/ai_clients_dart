@@ -89,15 +89,15 @@ class AnthropicClient {
 
   /// Resource for the Message Batches API.
   ///
-  /// **Deprecated:** Use [messages.batches] instead for consistency with the
+  /// **Deprecated:** Use `client.messages.batches` instead for consistency with the
   /// API structure.
   @Deprecated('Use client.messages.batches instead')
   MessageBatchesResource get batches => messages.batches;
 
-  /// Resource for the Files API (Beta).
+  /// Resource for the Files API.
   late final FilesResource files;
 
-  /// Resource for the Skills API (Beta).
+  /// Resource for the Skills API.
   late final SkillsResource skills;
 
   /// Resource for the Agents API (Beta).

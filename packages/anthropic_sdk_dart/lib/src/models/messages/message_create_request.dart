@@ -258,9 +258,8 @@ class MessageCreateRequest {
 
   /// Ordered chain of fallback models to attempt if the primary [model]
   /// declines ([FallbacksParam.list]), or a request for the model's
-  /// server-defined default fallback configuration ([FallbacksParam
-  /// .defaultMode], requires the `server-side-fallback-2026-07-01` beta
-  /// header).
+  /// server-defined default fallback configuration ([FallbacksParam.defaultMode]),
+  /// which requires the `server-side-fallback-2026-07-01` beta header.
   final FallbacksParam? fallbacks;
 
   /// Opaque credit token to redeem on a fallback retry.

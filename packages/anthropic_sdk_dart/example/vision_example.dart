@@ -11,12 +11,14 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// - Analyzing images from URLs
 /// - Multi-image analysis
 /// - Combining text and image inputs
-void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+///
+/// Set ANTHROPIC_API_KEY. Optionally pass a path to a local JPEG.
+/// The URL examples need a Claude deployment that accepts URL image sources.
+Future<void> main(List<String> arguments) async {
+  if (arguments.length > 1) {
+    throw ArgumentError('Usage: vision_example.dart [image.jpg]');
+  }
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // Example 1: Image from URL
@@ -127,7 +129,7 @@ void main() async {
 
     // Example 5: Load local image (if running with a local image)
     print('\n=== Local Image (if available) ===');
-    const localImagePath = 'example/sample_image.jpg';
+    final localImagePath = arguments.firstOrNull ?? 'example/sample_image.jpg';
     final localImageFile = File(localImagePath);
 
     if (localImageFile.existsSync()) {

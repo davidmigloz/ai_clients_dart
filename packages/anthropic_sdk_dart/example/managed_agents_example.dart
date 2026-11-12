@@ -1,4 +1,6 @@
 // ignore_for_file: avoid_print
+import 'dart:io';
+
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 
 /// Managed Agents API example (Beta).
@@ -11,12 +13,11 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// - Multiagent coordinator rosters and outcome evaluations
 ///
 /// Note: The Managed Agents API is a beta feature.
+///
+/// Set ANTHROPIC_API_KEY before running. Set MCP_SERVER_URL and
+/// MCP_AUTHORIZATION_TOKEN to also validate an MCP OAuth credential.
 void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // =========================================================================
@@ -29,14 +30,14 @@ void main() async {
     final agent = await client.agents.create(
       CreateAgentParams(
         name: 'Helper Agent',
-        model: const ModelParamsId(id: 'claude-sonnet-4-6'),
+        model: const ModelParamsId(id: 'claude-sonnet-5-5'),
         system: 'You are a helpful assistant.',
         executionIdentity: const AgentExecutionIdentity.serviceAccount(),
         tools: [
           AgentToolset20260401Params(
             configs: [
               AgentToolConfigParams.webSearch(
-                allowedDomains: ['docs.anthropic.com'],
+                allowedDomains: ['platform.claude.com'],
               ),
             ],
           ),
@@ -74,7 +75,12 @@ void main() async {
         events: [
           UserMessageEventParams(
             content: [
-              {'type': 'text', 'text': 'What is 2 + 2?'},
+              {
+                'type': 'text',
+                'text':
+                    'Search platform.claude.com for the Claude API '
+                    'quickstart and summarize its first step.',
+              },
             ],
           ),
         ],
@@ -120,7 +126,7 @@ void main() async {
     final worker = await client.agents.create(
       const CreateAgentParams(
         name: 'Worker',
-        model: ModelParamsId(id: 'claude-sonnet-4-5'),
+        model: ModelParamsId(id: 'claude-sonnet-5-5'),
       ),
     );
 
@@ -128,7 +134,7 @@ void main() async {
     final coordinator = await client.agents.create(
       CreateAgentParams(
         name: 'Coordinator',
-        model: const ModelParamsId(id: 'claude-sonnet-4-5'),
+        model: const ModelParamsId(id: 'claude-sonnet-5-5'),
         multiagent: MultiagentCoordinatorParams(
           agents: [
             MultiagentRosterEntryAgent(agent: AgentParamsId(id: worker.id)),
@@ -198,23 +204,21 @@ void main() async {
         print('Webhook: ${webhookEvent.data.runtimeType}');
     }
 
-    // Validate a vault credential's MCP-OAuth setup. The mcp_oauth_validate
-    // endpoint only accepts MCP-OAuth credentials (a static-bearer credential
-    // is rejected with a 400), so create one of those.
-    final credential = await client.vaults
-        .credentials(vault.id)
-        .create(
-          const CreateCredentialParams(
-            auth: McpOauthCreateParams(
-              accessToken: 'access-token',
-              mcpServerUrl: 'https://mcp.example.com',
-            ),
+    final mcpUrl = Platform.environment['MCP_SERVER_URL'];
+    final mcpToken = Platform.environment['MCP_AUTHORIZATION_TOKEN'];
+    if (mcpUrl != null && mcpToken != null) {
+      final credentials = client.vaults.credentials(vault.id);
+      final credential = await credentials.create(
+        CreateCredentialParams(
+          auth: McpOauthCreateParams(
+            accessToken: mcpToken,
+            mcpServerUrl: mcpUrl,
           ),
-        );
-    final validation = await client.vaults
-        .credentials(vault.id)
-        .validateCredential(credential.id);
-    print('Credential validation status: ${validation.status.value}');
+        ),
+      );
+      final validation = await credentials.validateCredential(credential.id);
+      print('Credential validation status: ${validation.status.value}');
+    }
 
     // =========================================================================
     // 6. Cleanup

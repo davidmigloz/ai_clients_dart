@@ -12,22 +12,21 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// 1. Create a dream from a memory store and session transcripts
 /// 2. Poll until the dream finishes
 /// 3. List dreams filtered by status
-/// 4. Archive a finished dream
+/// 4. Archive the dream once it reaches a terminal status
 ///
 /// Note: the Dreams API is in research preview — request and response shapes
 /// are volatile and may change without the deprecation period that applies
 /// to generally-available endpoints. This is a beta feature and requires the
 /// `anthropic-beta: dreaming-2026-04-21` header (sent automatically by the
 /// SDK).
-/// Request research-preview access on the Claude API and set
-/// ANTHROPIC_API_KEY. Pass an existing memory store ID followed by session IDs:
-/// `dart run example/dreams_example.dart memstore_... sesn_...`.
-Future<void> main(List<String> args) async {
-  if (args.length < 2 || args.length > 101) {
-    print(
-      'Usage: dart run example/dreams_example.dart STORE_ID SESSION_ID [...]',
+///
+/// Set ANTHROPIC_API_KEY on an organization enrolled in the research preview.
+/// Pass an existing memory store ID and 1 to 100 completed session IDs.
+Future<void> main(List<String> arguments) async {
+  if (arguments.length < 2 || arguments.length > 101) {
+    throw ArgumentError(
+      'Usage: dreams_example.dart memory-store-id session-id [session-id ...]',
     );
-    return;
   }
   final client = AnthropicClient.fromEnvironment();
 
@@ -39,8 +38,8 @@ Future<void> main(List<String> args) async {
     var dream = await client.dreams.create(
       CreateDreamRequest(
         inputs: [
-          DreamMemoryStoreInput(memoryStoreId: args.first),
-          DreamSessionsInput(sessionIds: args.sublist(1)),
+          DreamMemoryStoreInput(memoryStoreId: arguments.first),
+          DreamSessionsInput(sessionIds: arguments.sublist(1)),
         ],
         instructions: 'Consolidate notes about user preferences.',
         model: const DreamModelParamsId(id: 'claude-sonnet-5'),
@@ -57,8 +56,11 @@ Future<void> main(List<String> args) async {
 
     // 2. Poll until the dream finishes.
     print('\n=== Poll Dream ===');
-    while (dream.status == DreamStatus.pending ||
-        dream.status == DreamStatus.running) {
+    for (var attempt = 0; attempt < 30; attempt++) {
+      if (dream.status != DreamStatus.pending &&
+          dream.status != DreamStatus.running) {
+        break;
+      }
       await Future<void>.delayed(const Duration(seconds: 2));
       dream = await client.dreams.retrieve(dream.id);
       print('  status: ${dream.status}');
@@ -74,10 +76,12 @@ Future<void> main(List<String> args) async {
       case DreamStatus.failed:
         print('Dream failed: ${dream.error?.message}');
       case DreamStatus.canceled:
+        print('Dream ended with status: ${dream.status}');
       case DreamStatus.pending:
       case DreamStatus.running:
       case DreamStatus.unknown:
-        print('Dream ended with status: ${dream.status}');
+        print('Retrieve ${dream.id} to check the latest status.');
+        return;
     }
     print(
       'Usage: ${dream.usage.inputTokens} input, '
@@ -94,7 +98,7 @@ Future<void> main(List<String> args) async {
       print('  ${d.id}: ${d.status}');
     }
 
-    // 4. Archive the finished dream (or cancel it, if it were still running).
+    // 4. Archive the finished dream.
     print('\n=== Archive Dream ===');
     final archived = await client.dreams.archive(dream.id);
     print('Archived at: ${archived.archivedAt}');

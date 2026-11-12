@@ -4,19 +4,18 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// Error handling example demonstrating exception handling.
 ///
 /// This example shows how to handle various API errors gracefully.
+///
+/// Set ANTHROPIC_API_KEY before running.
 void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // Example 1: Authentication error (invalid API key)
     print('=== Authentication Error ===');
     final invalidClient = AnthropicClient(
-      config: const AnthropicConfig(
-        authProvider: ApiKeyProvider('invalid-api-key'),
+      config: AnthropicConfig(
+        baseUrl: client.config.baseUrl,
+        authProvider: const ApiKeyProvider('invalid-api-key'),
       ),
     );
 

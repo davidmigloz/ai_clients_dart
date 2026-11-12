@@ -9,12 +9,10 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 ///
 /// Use this when you run your own retrieval/RAG system and want Claude to cite
 /// the passages you provide (rather than the built-in web search tool).
+///
+/// Set ANTHROPIC_API_KEY before running.
 void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // Build a search_result block from passages your retrieval system returned.

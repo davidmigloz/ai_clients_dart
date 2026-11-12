@@ -17,16 +17,19 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// - Archiving a thread
 ///
 /// Note: The Managed Agents API is a beta feature.
-void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
-
-  // Replace with a real session id from `client.sessions.create(...)` or
-  // `client.sessions.list()`.
-  const sessionId = 'sesn_REPLACE_ME';
+///
+/// Set ANTHROPIC_API_KEY and pass the ID of an existing multiagent session.
+/// Pass --archive to archive an idle child outside a workflow run.
+Future<void> main(List<String> arguments) async {
+  if (arguments.isEmpty ||
+      arguments.length > 2 ||
+      (arguments.length == 2 && arguments.last != '--archive')) {
+    throw ArgumentError(
+      'Usage: session_threads_example.dart session-id [--archive]',
+    );
+  }
+  final sessionId = arguments.first;
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // =========================================================================
@@ -49,7 +52,10 @@ void main() async {
     // =========================================================================
     // 2. Retrieve a single thread
     // =========================================================================
-    final firstThread = threads.data.first;
+    final children = threads.data.where(
+      (thread) => thread.parentThreadId != null,
+    );
+    final firstThread = children.firstOrNull ?? threads.data.first;
     print('\n=== Retrieve ${firstThread.id} ===');
     final thread = await client.sessions
         .threads(sessionId)
@@ -68,52 +74,59 @@ void main() async {
     // 3. Stream live thread events
     // =========================================================================
     print('\n=== Stream events for ${thread.id} (up to 5s) ===');
-    final stream = client.sessions
-        .threads(sessionId)
-        .events(thread.id)
-        .stream();
-
-    final subscription = stream.listen((event) {
-      switch (event) {
-        case SessionThreadCreatedEvent():
-          print('  thread created: ${event.sessionThreadId}');
-        case SessionThreadStatusRunningEvent():
-          print('  thread running');
-        case SessionThreadStatusIdleEvent():
-          print('  thread idle (${event.stopReason})');
-        case SessionThreadStatusRescheduledEvent():
-          print('  thread rescheduled');
-        case SessionThreadStatusTerminatedEvent():
-          print('  thread terminated');
-        case AgentThreadMessageReceivedEvent():
-          print(
-            '  message from ${event.fromAgentName ?? event.fromSessionThreadId}',
-          );
-        case AgentThreadMessageSentEvent():
-          print(
-            '  message sent to ${event.toAgentName ?? event.toSessionThreadId}',
-          );
-        case AgentMessageEvent():
-          print('  agent message in thread');
-        case UnknownSessionEvent():
-          print('  (unrecognized event type)');
-        default:
-          // Other SessionEvent variants are still possible inside a thread.
-          break;
+    final abort = Completer<void>();
+    final timer = Timer(const Duration(seconds: 5), abort.complete);
+    try {
+      await for (final event
+          in client.sessions
+              .threads(sessionId)
+              .events(thread.id)
+              .stream(abortTrigger: abort.future)) {
+        switch (event) {
+          case SessionThreadCreatedEvent():
+            print('  thread created: ${event.sessionThreadId}');
+          case SessionThreadStatusRunningEvent():
+            print('  thread running');
+          case SessionThreadStatusIdleEvent():
+            print('  thread idle (${event.stopReason})');
+          case SessionThreadStatusRescheduledEvent():
+            print('  thread rescheduled');
+          case SessionThreadStatusTerminatedEvent():
+            print('  thread terminated');
+          case AgentThreadMessageReceivedEvent():
+            print(
+              '  message from ${event.fromAgentName ?? event.fromSessionThreadId}',
+            );
+          case AgentThreadMessageSentEvent():
+            print(
+              '  message sent to ${event.toAgentName ?? event.toSessionThreadId}',
+            );
+          case AgentMessageEvent():
+            print('  agent message in thread');
+          case UnknownSessionEvent():
+            print('  (unrecognized event type)');
+          default:
+            // Other SessionEvent variants are still possible inside a thread.
+            break;
+        }
       }
-    });
+    } on AbortedException {
+      print('Stopped reading thread events.');
+    } finally {
+      timer.cancel();
+    }
 
-    await Future<void>.delayed(const Duration(seconds: 5));
-    await subscription.cancel();
-
-    // =========================================================================
-    // 4. Archive the thread
-    // =========================================================================
-    print('\n=== Archive ${thread.id} ===');
-    final archived = await client.sessions
-        .threads(sessionId)
-        .archive(thread.id);
-    print('Archived at: ${archived.archivedAt}');
+    if (arguments.length == 2) {
+      final threadResource = client.sessions.threads(sessionId);
+      final latest = await threadResource.retrieve(thread.id);
+      if (latest.parentThreadId != null &&
+          latest.status == SessionStatus.idle) {
+        final archived = await threadResource.archive(thread.id);
+        print('Archived at: ${archived.archivedAt}');
+      } else {
+        print('Archiving requires an idle child outside a workflow run.');
+      }
+    }
   } finally {
     client.close();
   }
