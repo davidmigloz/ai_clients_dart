@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../errors/exceptions.dart';
 import '../interceptors/interceptor.dart';
 import '../utils/request_id.dart';
+import 'buffered_http_attempt.dart';
 import 'retry_wrapper.dart';
 
 /// Builds and executes an interceptor chain.
@@ -18,6 +19,9 @@ class InterceptorChain {
   /// Retry wrapper for transport execution.
   final RetryWrapper? retryWrapper;
 
+  /// Deadline for a single buffered HTTP attempt.
+  final Duration? timeout;
+
   /// Callback to check if the client has been closed.
   final void Function()? ensureNotClosed;
 
@@ -26,6 +30,7 @@ class InterceptorChain {
     required this.interceptors,
     required this.httpClient,
     this.retryWrapper,
+    this.timeout,
     this.ensureNotClosed,
   });
 
@@ -45,17 +50,26 @@ class InterceptorChain {
       abortTrigger: abortTrigger,
     );
 
-    if (abortTrigger == null) return _buildChain(0)(context);
+    final nativeRequest = request is http.Abortable ? request : null;
+    if (abortTrigger == null) {
+      return _buildChain(0, nativeRequest: nativeRequest)(context);
+    }
 
     final admission = _TransportAdmission(request.headers['X-Request-ID']);
     return admission.run(
       abortTrigger,
-      () => _buildChain(0, admission)(context),
+      () => _buildChain(0, admission: admission, nativeRequest: nativeRequest)(
+        context,
+      ),
     );
   }
 
   /// Builds the interceptor chain recursively.
-  InterceptorNext _buildChain(int index, [_TransportAdmission? admission]) {
+  InterceptorNext _buildChain(
+    int index, {
+    _TransportAdmission? admission,
+    http.Abortable? nativeRequest,
+  }) {
     if (index >= interceptors.length) {
       // Terminal: execute the actual HTTP request
       // Per spec, retry wraps the transport execution
@@ -76,68 +90,53 @@ class InterceptorChain {
         }
 
         // Creates a fresh request for each attempt (required for retries).
-        http.BaseRequest createRequest() {
+        http.BaseRequest createRequest([Future<void>? abortTrigger]) {
           if (originalRequest is http.Request) {
-            return http.Request(originalRequest.method, originalRequest.url)
+            return (abortTrigger == null
+                  ? http.Request(originalRequest.method, originalRequest.url)
+                  : http.AbortableRequest(
+                      originalRequest.method,
+                      originalRequest.url,
+                      abortTrigger: abortTrigger,
+                    ))
               ..headers.addAll(originalRequest.headers)
               ..followRedirects = originalRequest.followRedirects
               ..maxRedirects = originalRequest.maxRedirects
               ..persistentConnection = originalRequest.persistentConnection
               ..bodyBytes = bodyBytes ?? [];
           }
-          // Non-cloneable request types (MultipartRequest, etc.) are returned
-          // as-is and will not be retried.
-          return originalRequest;
+          // Non-cloneable requests are sent only once.
+          return abortTrigger == null
+              ? originalRequest
+              : _AbortableRequestWrapper(originalRequest, abortTrigger);
         }
 
-        // Transport execution function
+        final correlationId =
+            context.metadata['correlationId'] as String? ??
+            context.request.headers['X-Request-ID'] ??
+            generateRequestId();
+
         Future<http.Response> executeTransport() async {
           ensureNotClosed?.call();
-          final requestToSend = createRequest();
-          if (context.abortTrigger != null) {
-            // Wrap request to enable http client's native abort support
-            final abortableRequest = _AbortableRequestWrapper(
-              requestToSend,
-              context.abortTrigger,
+          if (timeout == null &&
+              context.abortTrigger == null &&
+              nativeRequest?.abortTrigger == null) {
+            return http.Response.fromStream(
+              await httpClient.send(createRequest()),
             );
-
-            // Track stage for accurate abort reporting
-            var stage = AbortionStage.beforeRequest;
-
-            try {
-              final streamedResponse = await httpClient.send(abortableRequest);
-              // If we get here, request was sent successfully
-              stage = AbortionStage.duringResponse;
-              return await http.Response.fromStream(streamedResponse);
-            } on http.RequestAbortedException catch (e) {
-              // Convert http package's abort exception to our AbortedException
-              final correlationId =
-                  context.metadata['correlationId'] as String? ??
-                  context.request.headers['X-Request-ID'] ??
-                  generateRequestId();
-              throw AbortedException(
-                message: 'Request aborted by user',
-                correlationId: correlationId,
-                timestamp: DateTime.now(),
-                stage: stage,
-                reason: e,
-              );
-            }
-          } else {
-            // No abort trigger - normal execution
-            final streamedResponse = await httpClient.send(requestToSend);
-            return http.Response.fromStream(streamedResponse);
           }
+          return sendBufferedHttpAttempt(
+            send: (abortTrigger) =>
+                httpClient.send(createRequest(abortTrigger)),
+            timeout: timeout,
+            abortTrigger: context.abortTrigger,
+            correlationId: correlationId,
+            nativeRequest: nativeRequest,
+          );
         }
 
         // Execute with or without retry wrapper
         if (retryWrapper != null && originalRequest is http.Request) {
-          // Extract correlation ID for retry wrapper tracing
-          final correlationId =
-              context.metadata['correlationId'] as String? ??
-              context.request.headers['X-Request-ID'] ??
-              generateRequestId();
-
           // Per spec: Retry wraps transport execution
           return retryWrapper!.executeWithRetry(
             originalRequest,
@@ -154,7 +153,11 @@ class InterceptorChain {
     // Recursive: call current interceptor with next in chain
     return (context) {
       final interceptor = interceptors[index];
-      final next = _buildChain(index + 1, admission);
+      final next = _buildChain(
+        index + 1,
+        admission: admission,
+        nativeRequest: nativeRequest,
+      );
 
       return interceptor.intercept(context, next);
     };
@@ -247,7 +250,11 @@ class _AbortableRequestWrapper extends http.BaseRequest
 
   @override
   http.ByteStream finalize() {
+    final stream = _inner.finalize();
+    // Multipart requests set their boundary during finalization.
+    headers.addAll(_inner.headers);
+    contentLength = _inner.contentLength;
     super.finalize();
-    return _inner.finalize();
+    return stream;
   }
 }

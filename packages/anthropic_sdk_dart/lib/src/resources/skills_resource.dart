@@ -80,7 +80,11 @@ class SkillsResource extends ResourceBase {
     await _applyAuthentication(request);
     ensureNotClosed?.call();
 
-    final response = await sendResourceRequest(httpClient, request);
+    final response = await sendResourceRequest(
+      httpClient,
+      request,
+      timeout: config.timeout,
+    );
 
     final json = jsonDecode(response.body) as Map<String, dynamic>;
     return Skill.fromJson(json);
@@ -219,7 +223,11 @@ class SkillsResource extends ResourceBase {
     await _applyAuthentication(request);
     ensureNotClosed?.call();
 
-    final response = await sendResourceRequest(httpClient, request);
+    final response = await sendResourceRequest(
+      httpClient,
+      request,
+      timeout: config.timeout,
+    );
 
     final json = jsonDecode(response.body) as Map<String, dynamic>;
     return SkillVersion.fromJson(json);

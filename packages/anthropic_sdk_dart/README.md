@@ -128,6 +128,13 @@ Future<void> main() async {
 }
 ```
 
+`AnthropicConfig.timeout` defaults to ten minutes. Each buffered HTTP attempt
+uses one deadline for response headers and body reads. Streams use the same
+duration to wait for headers and for each subsequent gap between incoming
+chunks. The first timer starts after authentication. A timeout throws
+`TimeoutException`. The retry policy can retry idempotent requests sent
+through the buffered client pipeline.
+
 Environment variables:
 
 - `ANTHROPIC_API_KEY`

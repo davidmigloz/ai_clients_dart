@@ -134,6 +134,9 @@ class RetryWrapper {
         await _delayWithAbortCheck(delay, abortTrigger, correlationId);
         attempt++;
         delay = _exponentialBackoff(delay);
+      } on http.RequestAbortedException {
+        // An advanced request's native abort is also terminal.
+        rethrow;
       } on http.ClientException {
         // Retry on HTTP client errors for idempotent methods only.
         // This also handles SocketException on IO platforms (wrapped by http package)

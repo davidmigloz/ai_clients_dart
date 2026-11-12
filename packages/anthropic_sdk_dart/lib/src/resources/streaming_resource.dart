@@ -48,7 +48,7 @@ mixin StreamingResource on ResourceBase {
     headers: headers,
     abortTrigger: abortTrigger,
     validateHeaders: validateHeaders,
-    decode: (response) => SseParser().parse(response.stream),
+    decode: (body, _) => SseParser().parse(body),
   );
 
   /// Makes a streaming GET request whose response contains JSON lines.
@@ -78,7 +78,7 @@ mixin StreamingResource on ResourceBase {
     errorFactory: errorFactory,
     errorFactoryWithMetadata: errorFactoryWithMetadata,
     jsonlMedia: true,
-    decode: (response) => response.stream
+    decode: (body, _) => body
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .where((line) => line.trim().isNotEmpty)
@@ -141,7 +141,7 @@ mixin StreamingResource on ResourceBase {
     queryParams: queryParams,
     headers: headers,
     abortTrigger: abortTrigger,
-    decode: (response) => SseParser().parse(response.stream),
+    decode: (body, _) => SseParser().parse(body),
   );
 
   Stream<T> _stream<T>(
@@ -152,7 +152,11 @@ mixin StreamingResource on ResourceBase {
     Map<String, String>? headers,
     Future<void>? abortTrigger,
     void Function(Map<String, String>)? validateHeaders,
-    required Stream<T> Function(http.StreamedResponse response) decode,
+    required Stream<T> Function(
+      Stream<List<int>> body,
+      Map<String, String> headers,
+    )
+    decode,
     Map<String, String> Function()? buildRequestHeaders,
     bool followRedirects = true,
     bool jsonlMedia = false,
@@ -168,6 +172,7 @@ mixin StreamingResource on ResourceBase {
     // Canceled by stop when the stream terminates or its listener cancels.
     // ignore: cancel_subscriptions
     StreamSubscription<dynamic>? subscription;
+    Timer? headerTimer;
     var correlationId = generateRequestId();
     var stopped = false;
     late StreamController<T> controller;
@@ -175,6 +180,7 @@ mixin StreamingResource on ResourceBase {
     void stop({bool abort = true}) {
       if (stopped) return;
       stopped = true;
+      headerTimer?.cancel();
       if (abort && !requestAbort.isCompleted) requestAbort.complete();
       final current = subscription;
       current?.cancel().ignore();
@@ -228,7 +234,18 @@ mixin StreamingResource on ResourceBase {
         ensureNotClosed?.call();
         correlationId = request.headers['X-Request-ID'] ?? correlationId;
         final stopwatch = Stopwatch()..start();
+        headerTimer = Timer(
+          config.timeout,
+          () => finish(
+            TimeoutException(
+              message: 'Timed out waiting for HTTP response headers',
+              timeout: config.timeout,
+              elapsed: stopwatch.elapsed,
+            ),
+          ),
+        );
         final response = await httpClient.send(request);
+        headerTimer?.cancel();
         stopwatch.stop();
         if (stopped) {
           await response.stream.listen(null).cancel();
@@ -251,9 +268,21 @@ mixin StreamingResource on ResourceBase {
           );
           return;
         }
+        final responseBodyStream = response.stream.timeout(
+          config.timeout,
+          onTimeout: (sink) => sink
+            ..addError(
+              TimeoutException(
+                message: 'Timed out waiting for response body data',
+                timeout: config.timeout,
+                elapsed: config.timeout,
+              ),
+            )
+            ..close(),
+        );
         if (response.statusCode >= 400) {
           final responseBody = BytesBuilder();
-          subscription = response.stream.listen(
+          subscription = responseBodyStream.listen(
             responseBody.add,
             onError: finish,
             onDone: () {
@@ -288,7 +317,7 @@ mixin StreamingResource on ResourceBase {
             },
           );
         } else {
-          final decoded = decode(response);
+          final decoded = decode(responseBodyStream, response.headers);
           if (stopped) {
             await decoded.listen(null).cancel();
             return;
@@ -360,12 +389,12 @@ Stream<List<int>> getResourceByteStream(
   buildRequestHeaders: headers,
   followRedirects: false,
   abortTrigger: abortTrigger,
-  decode: (response) {
+  decode: (body, headers) {
     try {
-      onResponse?.call(response.headers);
-      return response.stream;
+      onResponse?.call(headers);
+      return body;
     } catch (_) {
-      response.stream.listen(null).cancel().ignore();
+      body.listen(null).cancel().ignore();
       rethrow;
     }
   },
