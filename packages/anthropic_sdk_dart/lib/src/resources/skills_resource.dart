@@ -88,6 +88,7 @@ class SkillsResource extends ResourceBase {
       httpClient,
       request,
       timeout: config.timeout,
+      ensureNotClosed: ensureNotClosed,
     );
 
     final json = jsonDecode(response.body) as Map<String, dynamic>;
@@ -259,6 +260,7 @@ class SkillsResource extends ResourceBase {
       httpClient,
       request,
       timeout: config.timeout,
+      ensureNotClosed: ensureNotClosed,
     );
 
     final json = jsonDecode(response.body) as Map<String, dynamic>;

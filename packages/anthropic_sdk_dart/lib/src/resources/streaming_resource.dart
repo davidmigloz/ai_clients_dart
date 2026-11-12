@@ -249,7 +249,11 @@ mixin StreamingResource on ResourceBase {
             ),
           ),
         );
-        final response = await sendApiRequest(httpClient, request);
+        final response = await sendApiRequest(
+          httpClient,
+          request,
+          ensureNotClosed: ensureNotClosed,
+        );
         headerTimer?.cancel();
         stopwatch.stop();
         if (stopped) {

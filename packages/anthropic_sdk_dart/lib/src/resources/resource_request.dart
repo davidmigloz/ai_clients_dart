@@ -11,6 +11,7 @@ Future<http.Response> sendResourceRequest(
   http.Client client,
   http.BaseRequest request, {
   required Duration timeout,
+  required void Function()? ensureNotClosed,
 }) async {
   final stopwatch = Stopwatch()..start();
   final response = await sendBufferedHttpAttempt(
@@ -18,6 +19,7 @@ Future<http.Response> sendResourceRequest(
       final streamedResponse = await sendApiRequest(
         client,
         _abortable(request, abortTrigger),
+        ensureNotClosed: ensureNotClosed,
       );
       stopwatch.stop();
       return streamedResponse;

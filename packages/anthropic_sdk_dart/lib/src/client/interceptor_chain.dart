@@ -123,12 +123,19 @@ class InterceptorChain {
               context.abortTrigger == null &&
               nativeRequest?.abortTrigger == null) {
             return http.Response.fromStream(
-              await sendApiRequest(httpClient, createRequest()),
+              await sendApiRequest(
+                httpClient,
+                createRequest(),
+                ensureNotClosed: ensureNotClosed,
+              ),
             );
           }
           return sendBufferedHttpAttempt(
-            send: (abortTrigger) =>
-                sendApiRequest(httpClient, createRequest(abortTrigger)),
+            send: (abortTrigger) => sendApiRequest(
+              httpClient,
+              createRequest(abortTrigger),
+              ensureNotClosed: ensureNotClosed,
+            ),
             timeout: timeout,
             abortTrigger: context.abortTrigger,
             correlationId: correlationId,

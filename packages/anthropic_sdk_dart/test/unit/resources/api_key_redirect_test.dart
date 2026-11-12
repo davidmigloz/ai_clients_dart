@@ -229,6 +229,271 @@ void main() {
     await Future<void>.delayed(Duration.zero);
     expect(requests.map((url) => url.path), ['/v1/messages']);
   });
+
+  for (final (route, call)
+      in <(String, Future<void> Function(AnthropicClient))>[
+        ('buffered', cases['Models buffered GET']!),
+        ('Files direct', cases['Files direct download GET']!),
+        ('Skills multipart', cases['Skills multipart POST']!),
+        ('Messages SSE', cases['Messages SSE POST']!),
+        ('JSONL', cases['Batch results JSONL GET']!),
+      ]) {
+    test('$route redirect cannot dispatch after client close', () async {
+      final started = Completer<void>();
+      final respond = Completer<http.Response>();
+      final requests = <String>[];
+      final transport = MockClient((request) async {
+        requests.add(request.url.path);
+        if (requests.length == 1) {
+          started.complete();
+          return respond.future;
+        }
+        return http.Response('{"error":{"message":"late hop"}}', 418);
+      });
+      addTearDown(transport.close);
+      final client = AnthropicClient.withApiKey(
+        _fixtureKey,
+        httpClient: transport,
+      );
+      addTearDown(client.close);
+      final outcome = call(
+        client,
+      ).then<Object?>((_) => null, onError: (Object error) => error);
+      await started.future;
+      client.close();
+      respond.complete(
+        http.Response(
+          '',
+          route.endsWith('multipart') || route.endsWith('SSE') ? 303 : 302,
+          headers: {'Location': '/late-hop'},
+        ),
+      );
+      expect(await outcome, isA<StateError>());
+      expect(requests, hasLength(1));
+    });
+  }
+
+  test(
+    'native Authorization follows another hostname on the same port without credentials',
+    () async {
+      final server = await io.HttpServer.bind(
+        io.InternetAddress.loopbackIPv4,
+        0,
+      );
+      addTearDown(() => server.close(force: true));
+      final headers = <String?>[];
+      server.listen((request) async {
+        headers.add(request.headers.value('authorization'));
+        await request.drain<void>();
+        if (request.uri.path == '/v1/models/claude-fixture') {
+          request.response
+            ..statusCode = 302
+            ..headers.set(
+              'location',
+              'http://localhost:${server.port}/followed',
+            );
+        } else {
+          request.response
+            ..statusCode = 418
+            ..headers.contentType = io.ContentType.json
+            ..write('{"error":{"message":"followed"}}');
+        }
+        await request.response.close();
+      });
+      final client = AnthropicClient(
+        config: AnthropicConfig(
+          baseUrl: 'http://127.0.0.1:${server.port}',
+          defaultHeaders: const {'Authorization': 'Bearer $_fixtureKey'},
+          retryPolicy: const RetryPolicy(maxRetries: 0),
+        ),
+      );
+      addTearDown(client.close);
+      await expectLater(
+        client.models.retrieve('claude-fixture'),
+        throwsA(
+          isA<ApiException>().having(
+            (error) => error.statusCode,
+            'status',
+            418,
+          ),
+        ),
+      );
+      expect(headers, ['Bearer $_fixtureKey', null]);
+    },
+  );
+
+  test(
+    'native Authorization and cookies stay at the original origin across a same-port subdomain redirect',
+    () async {
+      const base = 'http://fixture.invalid:45678';
+      final requests = <http.Request>[];
+      final transport = MockClient((request) async {
+        requests.add(request);
+        expect(request.followRedirects, isFalse);
+        final location = switch (requests.length) {
+          1 => '/same-origin',
+          2 => 'http://sub.fixture.invalid:45678/different-origin',
+          3 => '$base/back',
+          _ => null,
+        };
+        return location == null
+            ? http.Response('{"error":{"message":"done"}}', 418)
+            : http.Response('', 302, headers: {'location': location});
+      });
+      addTearDown(transport.close);
+      final client = AnthropicClient(
+        config: const AnthropicConfig(
+          baseUrl: base,
+          defaultHeaders: {
+            'Authorization': 'Bearer $_fixtureKey',
+            'Cookie': 'fixture-cookie=synthetic',
+            'Proxy-Authorization': 'Basic fixture',
+            'Host': 'fixture.invalid:45678',
+          },
+          retryPolicy: RetryPolicy(maxRetries: 0),
+        ),
+        httpClient: transport,
+      );
+      addTearDown(client.close);
+      await expectLater(
+        client.models.retrieve('claude-fixture'),
+        throwsA(
+          isA<ApiException>().having(
+            (error) => error.statusCode,
+            'status',
+            418,
+          ),
+        ),
+      );
+      expect(requests.map((request) => request.url.path), [
+        '/v1/models/claude-fixture',
+        '/same-origin',
+        '/different-origin',
+        '/back',
+      ]);
+      for (final header in [
+        'authorization',
+        'cookie',
+        'proxy-authorization',
+        'host',
+      ]) {
+        expect(requests[0].headers[header], isNotNull);
+        expect(requests[1].headers[header], requests[0].headers[header]);
+        expect(requests[2].headers[header], isNull);
+        expect(requests[3].headers[header], isNull);
+      }
+    },
+  );
+
+  test('redirect diagnostics do not retain a submitted API key echo', () async {
+    final transport = MockClient(
+      (_) async => http.Response(
+        '',
+        302,
+        headers: {
+          'Location': 'https://other.invalid/$_fixtureKey',
+          'request-id': 'echo-$_fixtureKey',
+          'retry-after': _fixtureKey,
+          'retry-after-ms': '30',
+        },
+      ),
+    );
+    addTearDown(transport.close);
+    final client = AnthropicClient.withApiKey(
+      _fixtureKey,
+      httpClient: transport,
+    );
+    addTearDown(client.close);
+    await expectLater(
+      client.models.retrieve('claude-fixture'),
+      throwsA(
+        isA<ApiException>()
+            .having((error) => error.requestId, 'request ID', isNull)
+            .having(
+              (error) => error.responseMetadata?.headers,
+              'sanitized response metadata',
+              {'retry-after-ms': '30'},
+            ),
+      ),
+    );
+  });
+
+  test('native lowercase GET keeps same-origin redirect behavior', () async {
+    final server = await io.HttpServer.bind(io.InternetAddress.loopbackIPv4, 0);
+    addTearDown(() => server.close(force: true));
+    final sent = <String>[];
+    server.listen((request) async {
+      sent.add(request.uri.path);
+      await request.drain<void>();
+      if (request.uri.path == '/initial') {
+        request.response
+          ..statusCode = 302
+          ..headers.set('location', '/followed');
+      } else {
+        request.response.write('result');
+      }
+      await request.response.close();
+    });
+    final client = AnthropicClient.withApiKey(_fixtureKey);
+    addTearDown(client.close);
+    final request = http.Request(
+      'get',
+      Uri.parse('http://127.0.0.1:${server.port}/initial'),
+    );
+    final response = await client.interceptorChain.execute(request);
+    expect(sent, ['/initial', '/followed']);
+    expect(response.body, 'result');
+  });
+
+  for (final target in [
+    'https://fixture.invalid/unsafe',
+    'http://other.invalid/unsafe',
+    'http://fixture.invalid:45678/unsafe',
+    'http://user:password@fixture.invalid/unsafe',
+    'http://[',
+  ]) {
+    test(
+      'same-origin first hop never bypasses the guard for $target',
+      () async {
+        final requests = <Uri>[];
+        final transport = MockClient((request) async {
+          expect(request.followRedirects, isFalse);
+          expect(request.headers['X-API-KEY'], _fixtureKey);
+          requests.add(request.url);
+          return http.Response(
+            '',
+            302,
+            headers: {
+              'Location': requests.length == 1 ? '../../inside' : target,
+              'request-id': 'req_hop',
+            },
+          );
+        });
+        addTearDown(transport.close);
+        final client = AnthropicClient(
+          config: const AnthropicConfig(
+            baseUrl: 'http://fixture.invalid/proxy',
+            defaultHeaders: {'X-API-KEY': _fixtureKey},
+            retryPolicy: RetryPolicy(maxRetries: 0),
+          ),
+          httpClient: transport,
+        );
+        addTearDown(client.close);
+        await expectLater(
+          client.models.retrieve('claude-fixture'),
+          throwsA(
+            isA<ApiException>()
+                .having((error) => error.statusCode, 'status', 302)
+                .having((error) => error.requestId, 'request ID', 'req_hop'),
+          ),
+        );
+        expect(requests.map((request) => request.path), [
+          '/proxy/v1/models/claude-fixture',
+          '/proxy/inside',
+        ]);
+      },
+    );
+  }
 }
 
 class _Origins {
