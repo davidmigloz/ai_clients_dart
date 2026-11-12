@@ -145,6 +145,7 @@ class FilesResource extends ResourceBase {
       httpClient,
       request,
       timeout: config.timeout,
+      ensureNotClosed: ensureNotClosed,
     );
 
     final json = jsonDecode(response.body) as Map<String, dynamic>;
@@ -334,6 +335,7 @@ class FilesResource extends ResourceBase {
       httpClient,
       request,
       timeout: config.timeout,
+      ensureNotClosed: ensureNotClosed,
     );
 
     return response.bodyBytes;

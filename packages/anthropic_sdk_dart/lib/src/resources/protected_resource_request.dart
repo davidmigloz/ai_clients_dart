@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../auth/request_auth.dart';
 import '../client/interceptor_chain.dart';
 import '../errors/exceptions.dart';
 import '../errors/response_error.dart';
@@ -46,22 +47,14 @@ Future<Object?> sendProtectedResourceRequest(
   if (status < 200 || status >= 300) {
     final body = decodeApiErrorResponse(response);
     final parsed = parseApiErrorBody(body);
-    bool containsCredential(String? value) =>
-        value != null && credentials.any(value.contains);
     final metadata = createSafeResponseMetadata(
       statusCode: status,
-      headers: {
-        for (final header in response.headers.entries)
-          if (!containsCredential(header.value)) header.key: header.value,
-      },
+      headers: response.headers,
       latency: watch.elapsed,
-      bodyRequestId: containsCredential(parsed.requestId)
-          ? null
-          : parsed.requestId,
+      bodyRequestId: parsed.requestId,
+      credentials: credentials,
     );
-    final errorCode = containsCredential(parsed.errorCode)
-        ? null
-        : parsed.errorCode;
+    final errorCode = redactCredentialEcho(parsed.errorCode, credentials);
     final specific = handleError?.call(body, metadata);
     if (specific != null) throw specific;
     final message = 'HTTP $status from the Claude API';
@@ -106,17 +99,7 @@ final class _CaptureProtectedCredentials implements Interceptor {
     RequestContext context,
     InterceptorNext next,
   ) {
-    final headers = context.request.headers;
-    final authorization = headers['authorization'];
-    final apiKey = headers['x-api-key'];
-    if (authorization != null && authorization.isNotEmpty) {
-      _credentials.add(authorization);
-      if (authorization.toLowerCase().startsWith('bearer ')) {
-        final token = authorization.substring(7).trim();
-        if (token.isNotEmpty) _credentials.add(token);
-      }
-    }
-    if (apiKey != null && apiKey.isNotEmpty) _credentials.add(apiKey);
+    _credentials.addAll(requestCredentialValues(context.request.headers));
     return next(context);
   }
 }

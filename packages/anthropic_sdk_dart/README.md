@@ -110,6 +110,12 @@ Future<void> main() async {
 
 Use `AnthropicClient.fromEnvironment()` when `ANTHROPIC_API_KEY` is available. Switch to `AnthropicConfig` when you need a proxy, custom timeout, or a non-default retry policy.
 
+Configure `baseUrl` as the final API or proxy URL. Requests carrying an
+`x-api-key` follow redirects only within the same origin on native transports.
+Browsers cannot inspect redirect targets, so a redirect fails when the
+request carries `x-api-key`. Native requests remove `Authorization` before
+following a redirect to another origin.
+
 ```dart
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 

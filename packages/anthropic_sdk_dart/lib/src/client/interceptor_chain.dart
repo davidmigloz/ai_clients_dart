@@ -6,6 +6,7 @@ import '../errors/exceptions.dart';
 import '../interceptors/interceptor.dart';
 import '../utils/request_id.dart';
 import 'buffered_http_attempt.dart';
+import 'request_redirects.dart';
 import 'retry_wrapper.dart';
 
 /// Builds and executes an interceptor chain.
@@ -122,12 +123,19 @@ class InterceptorChain {
               context.abortTrigger == null &&
               nativeRequest?.abortTrigger == null) {
             return http.Response.fromStream(
-              await httpClient.send(createRequest()),
+              await sendApiRequest(
+                httpClient,
+                createRequest(),
+                ensureNotClosed: ensureNotClosed,
+              ),
             );
           }
           return sendBufferedHttpAttempt(
-            send: (abortTrigger) =>
-                httpClient.send(createRequest(abortTrigger)),
+            send: (abortTrigger) => sendApiRequest(
+              httpClient,
+              createRequest(abortTrigger),
+              ensureNotClosed: ensureNotClosed,
+            ),
             timeout: timeout,
             abortTrigger: context.abortTrigger,
             correlationId: correlationId,

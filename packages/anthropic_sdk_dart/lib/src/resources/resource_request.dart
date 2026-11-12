@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 
 import '../client/buffered_http_attempt.dart';
+import '../client/request_redirects.dart';
 import '../errors/response_error.dart';
 import '../utils/request_id.dart';
 
@@ -10,12 +11,15 @@ Future<http.Response> sendResourceRequest(
   http.Client client,
   http.BaseRequest request, {
   required Duration timeout,
+  required void Function()? ensureNotClosed,
 }) async {
   final stopwatch = Stopwatch()..start();
   final response = await sendBufferedHttpAttempt(
     send: (abortTrigger) async {
-      final streamedResponse = await client.send(
+      final streamedResponse = await sendApiRequest(
+        client,
         _abortable(request, abortTrigger),
+        ensureNotClosed: ensureNotClosed,
       );
       stopwatch.stop();
       return streamedResponse;
