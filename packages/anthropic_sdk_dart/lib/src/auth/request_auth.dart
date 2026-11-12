@@ -33,20 +33,42 @@ Future<Map<String, String>> resolveCredentialHeaders(
 }
 
 /// Values that must stay out of diagnostics for the effective request.
-Set<String> requestCredentialValues(Map<String, String> headers) {
-  final authorization = headers['authorization']?.trim();
-  final apiKey = headers['x-api-key']?.trim();
-  final credentials = <String>{
-    if (authorization != null && authorization.isNotEmpty) authorization,
-    if (apiKey != null && apiKey.isNotEmpty) apiKey,
-  };
-  if (authorization != null &&
-      authorization.toLowerCase().startsWith('bearer ')) {
-    final token = authorization.substring(7).trim();
-    if (token.isNotEmpty) credentials.add(token);
+///
+/// A cloud transport can attach the request it actually sent to the response.
+/// Its credential headers are applied after the ordinary client interceptors.
+Set<String> requestCredentialValues(
+  Map<String, String> headers, {
+  Map<String, String>? sentHeaders,
+}) {
+  final values = <String>{};
+  for (final source in [headers, ?sentHeaders]) {
+    for (final entry in source.entries) {
+      final key = entry.key.toLowerCase();
+      final value = entry.value.trim();
+      if (value.isEmpty) continue;
+      if (const {
+        'authorization',
+        'x-api-key',
+        'api-key',
+        'x-amz-security-token',
+      }.contains(key)) {
+        values.add(value);
+      }
+      if (key != 'authorization') continue;
+      final lower = value.toLowerCase();
+      if (lower.startsWith('bearer ')) {
+        final token = value.substring(7).trim();
+        if (token.isNotEmpty) values.add(token);
+      } else if (lower.startsWith('aws4-hmac-sha256 ')) {
+        final signature = _awsSignature.firstMatch(value)?.group(1);
+        if (signature != null) values.add(signature);
+      }
+    }
   }
-  return credentials;
+  return values;
 }
+
+final _awsSignature = RegExp(r'\bSignature=([a-fA-F0-9]{64})\b');
 
 void _checkWorkspace(Map<String, String> headers) {
   if (headers.containsKey('anthropic-workspace-id')) {

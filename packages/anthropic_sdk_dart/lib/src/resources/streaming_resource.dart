@@ -267,6 +267,9 @@ mixin StreamingResource on ResourceBase {
           await response.stream.listen(null).cancel();
           return;
         }
+        credentials.addAll(
+          requestCredentialValues(response.request?.headers ?? const {}),
+        );
         if (!followRedirects &&
             response.statusCode >= 300 &&
             response.statusCode < 400) {

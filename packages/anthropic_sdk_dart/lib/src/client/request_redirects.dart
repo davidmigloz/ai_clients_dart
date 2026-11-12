@@ -147,7 +147,11 @@ ApiException _redirectException(
     statusCode: response.statusCode,
     headers: response.headers,
     latency: watch.elapsed,
-    credentials: credentials,
+    credentials: {
+      ...credentials,
+      if (response.request?.headers case final sentHeaders?)
+        ...requestCredentialValues(sentHeaders),
+    },
   ),
 );
 

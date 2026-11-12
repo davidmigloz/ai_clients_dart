@@ -109,6 +109,7 @@ ResponseMetadata createSafeResponseMetadata({
     for (final entry in headers.entries)
       if (const {
         'request-id',
+        'x-amzn-requestid',
         'retry-after',
         'retry-after-ms',
       }.contains(entry.key.toLowerCase()))
@@ -151,7 +152,9 @@ bool _containsCredential(Object? value, Set<String> credentials) =>
 /// Redacts effective credentials in decoded provider diagnostics.
 String redactDiagnosticText(String value, Set<String> credentials) {
   var redacted = value;
-  for (final credential in credentials) {
+  final longestFirst = credentials.toList()
+    ..sort((a, b) => b.length.compareTo(a.length));
+  for (final credential in longestFirst) {
     redacted = redacted.replaceAll(credential, '[REDACTED]');
   }
   return redacted;

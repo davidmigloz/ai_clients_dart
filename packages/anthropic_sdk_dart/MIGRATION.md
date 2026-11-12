@@ -6,6 +6,21 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Claude Platform on AWS
+
+Use `AnthropicAwsClient` for the native regional Claude endpoint. Use the workspace's AWS region and ID, and supply an AWS-issued key or an IAM credential provider. A first-party Claude API key is replaced by the AWS credential when you change clients.
+
+```dart
+final client = AnthropicAwsClient(
+  region: 'us-east-1',
+  workspaceId: workspaceId,
+  credentials: loadAwsCredentials,
+);
+```
+
+Messages and streaming use the same Dart request types and Claude API version. AWS IAM determines available Admin and Compliance operations. [Claude Platform on AWS](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws)
+
+
 ## Claude API version 2026-10-21
 
 The default API version changes from `2023-06-01` to `2026-10-21`. Every

@@ -49,6 +49,9 @@ Future<Object?> sendProtectedResourceRequest(
   watch.stop();
   final status = response.statusCode;
   if (status < 200 || status >= 300) {
+    credentials.addAll(
+      requestCredentialValues(response.request?.headers ?? const {}),
+    );
     final body = decodeApiErrorResponse(response);
     final parsed = parseApiErrorBody(body);
     final metadata = createSafeResponseMetadata(
