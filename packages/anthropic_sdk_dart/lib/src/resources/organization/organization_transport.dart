@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
@@ -47,10 +48,73 @@ final class OrganizationTransport {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl(
-      '/v1/organizations$path',
-      queryParams: query,
+    final request = http.Request(method, _url(path, query))
+      ..followRedirects = false
+      ..headers.addAll(_headers(beta: beta, requiredBeta: requiredBeta));
+    if (body != null) request.body = jsonEncode(body);
+    final result = await _sendJson(
+      request,
+      decode,
+      diagnosticField: diagnosticField,
+      diagnosticCredentials: diagnosticCredentials,
+      sanitizeResponseDiagnostics: sanitizeResponseDiagnostics,
+      sensitiveResponse: sensitiveResponse,
+      abortTrigger: abortTrigger,
     );
+    return result;
+  }
+
+  /// Uploads multipart data through the normal Admin request pipeline.
+  Future<T> sendMultipart<T>(
+    String path,
+    T Function(Map<String, dynamic>) decode, {
+    required List<http.MultipartFile> files,
+    Map<String, String> fields = const {},
+    String? beta,
+    String? requiredBeta,
+    void Function(Map<String, dynamic>, Set<String>)?
+    sanitizeResponseDiagnostics,
+    Future<void>? abortTrigger,
+  }) async {
+    ensureNotClosed?.call();
+    final request = http.MultipartRequest('POST', _url(path, null))
+      ..followRedirects = false
+      ..headers.addAll(
+        _headers(beta: beta, requiredBeta: requiredBeta)
+          ..remove('content-type'),
+      )
+      ..fields.addAll(fields)
+      ..files.addAll(files);
+    final result = await _sendJson(
+      request,
+      decode,
+      sanitizeResponseDiagnostics: sanitizeResponseDiagnostics,
+      abortTrigger: abortTrigger,
+    );
+    return result;
+  }
+
+  /// Downloads an Admin response as raw bytes.
+  Future<Uint8List> sendBytes(
+    String path, {
+    Map<String, dynamic>? query,
+    String? accept,
+    String? beta,
+    String? requiredBeta,
+    Future<void>? abortTrigger,
+  }) async {
+    ensureNotClosed?.call();
+    final request = http.Request('GET', _url(path, query))
+      ..followRedirects = false
+      ..headers.addAll(_headers(beta: beta, requiredBeta: requiredBeta));
+    if (accept != null) request.headers['accept'] = accept;
+    return (await _execute(request, abortTrigger)).bodyBytes;
+  }
+
+  Uri _url(String path, Map<String, dynamic>? query) =>
+      requestBuilder.buildUrl('/v1/organizations$path', queryParams: query);
+
+  Map<String, String> _headers({String? beta, String? requiredBeta}) {
     final headers = requestBuilder.buildHeaders(
       includeWorkspace: false,
       additionalHeaders: {'anthropic-beta': ?beta},
@@ -63,22 +127,40 @@ final class OrganizationTransport {
         requiredBeta,
       }.join(',');
     }
-    final request = http.Request(method, url)
-      ..followRedirects = false
-      ..headers.addAll(headers);
-    if (body != null) request.body = jsonEncode(body);
-    withRequestDiagnosticCredentials(request, diagnosticCredentials);
+    return headers;
+  }
 
+  Future<http.Response> _execute(
+    http.BaseRequest request,
+    Future<void>? abortTrigger, {
+    void Function(Map<String, String>)? onTransportRequest,
+  }) => interceptorChain.execute(
+    request,
+    abortTrigger: abortTrigger,
+    redirectErrorMessage: 'Unexpected redirect from the Admin API',
+    onTransportRequest: onTransportRequest,
+  );
+
+  Future<T> _sendJson<T>(
+    http.BaseRequest request,
+    T Function(Map<String, dynamic>) decode, {
+    String? diagnosticField,
+    Set<String> diagnosticCredentials = const {},
+    void Function(Map<String, dynamic>, Set<String>)?
+    sanitizeResponseDiagnostics,
+    bool sensitiveResponse = false,
+    Future<void>? abortTrigger,
+  }) async {
+    withRequestDiagnosticCredentials(request, diagnosticCredentials);
     final credentials =
         diagnosticField != null ||
             sanitizeResponseDiagnostics != null ||
             diagnosticCredentials.isNotEmpty
         ? {...diagnosticCredentials}
         : null;
-    final response = await interceptorChain.execute(
+    final response = await _execute(
       request,
-      abortTrigger: abortTrigger,
-      redirectErrorMessage: 'Unexpected redirect from the Admin API',
+      abortTrigger,
       onTransportRequest: credentials == null
           ? null
           : (headers) => credentials.addAll(requestCredentialValues(headers)),

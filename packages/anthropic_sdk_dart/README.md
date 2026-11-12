@@ -63,6 +63,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Organization webhook endpoint management and signed event verification (beta)
 - Organization OpenTelemetry destination setup, test spans, and workspace selection (beta)
 - Claude Tag Slack settings, inheritance and access bundle attachments for Claude Enterprise (beta)
+- Claude Enterprise plugins, version archives, installation settings and marketplace validation (beta)
 - Files (expiration, cursor pagination) and skills (multi-file uploads, container skills)
 - Managed agents with environments, self-hosted work, sessions, thread status filters, execution principals, tool permission evaluation, vaults, and streaming events (beta)
 - Scheduled deployments on the Claude API, Claude Platform on AWS, and Anthropic-managed Claude Models on Google Cloud (beta)
@@ -1496,6 +1497,38 @@ Removing a channel deletes its Claude Tag data, including sessions and memory.
 
 </details>
 
+### How do I inventory and validate Claude Enterprise plugins?
+
+<details>
+<summary><b>List plugins and validate a marketplace</b></summary>
+
+Use `client.organization.plugins` and `client.organization.pluginMarketplaces`.
+Both resources add the required `ce-plugins-2026-09-01` beta header.
+The API is available in beta for Claude Enterprise organizations without HIPAA
+readiness. Reads accept `read:plugins`, `read:org_audit`, or a Compliance Access
+Key with `read:compliance_org_data`. Writes require `write:plugins`. Either
+plugin scope can validate a marketplace. A key with audit or Compliance access
+for linked organizations can select a child organization on read endpoints.
+
+```dart
+final plugins = await admin.organization.plugins.list(ownerType: 'organization');
+final report = await admin.organization.pluginMarketplaces.validateRepository(
+  repositoryUrl: 'https://github.com/example-org/example-marketplace',
+  ref: 'main',
+);
+print('${plugins.data.length} plugins on this page, marketplace valid=${report.valid}');
+```
+
+Upload `.claude-plugin/plugin.json` with the other plugin files, or pass a
+complete archive as one file. Pin an existing version to control which version
+members receive. `versions.download` returns the exact ZIP bytes for a
+specific version. Member-owned archive downloads are recorded in the
+Compliance Activity Feed. A plugin deletion removes every stored version.
+
+[Runnable plugins example](example/organization_plugins_example.dart) · [Claude Plugins API](https://platform.claude.com/docs/en/manage-claude/plugins-api)
+
+</details>
+
 ### How do I use the Compliance API?
 
 <details>
@@ -1700,6 +1733,7 @@ See the [example/](example/) directory for complete examples:
 | [`organization_webhook_receiver_example.dart`](example/organization_webhook_receiver_example.dart) | Verify and parse signed webhook deliveries |
 | [`organization_telemetry_example.dart`](example/organization_telemetry_example.dart) | Page through OpenTelemetry destinations and inspect delivery health (beta) |
 | [`organization_claude_tag_example.dart`](example/organization_claude_tag_example.dart) | Audit Slack channel settings and inheritance in Claude Tag (beta) |
+| [`organization_plugins_example.dart`](example/organization_plugins_example.dart) | List plugins and optionally validate a marketplace repository (beta) |
 | [`models_example.dart`](example/models_example.dart) | Model lifecycle filters, pagination, and capabilities |
 | [`compliance_example.dart`](example/compliance_example.dart) | Scoped Compliance Activity Feed |
 | [`compliance_content_example.dart`](example/compliance_content_example.dart) | Scoped Compliance app content and artifact downloads |

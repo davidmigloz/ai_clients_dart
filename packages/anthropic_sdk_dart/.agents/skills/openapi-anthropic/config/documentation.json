@@ -33,6 +33,8 @@
     "organizationWebhooks": "organization_webhooks",
     "organizationTelemetryDestinations": "organization_telemetry",
     "organizationClaudeTag": "organization_claude_tag",
+    "organizationPlugins": "organization_plugins",
+    "organizationPluginMarketplaces": "organization_plugins",
     "messages": "messages",
     "models": "models",
     "agents": "managed_agents",
