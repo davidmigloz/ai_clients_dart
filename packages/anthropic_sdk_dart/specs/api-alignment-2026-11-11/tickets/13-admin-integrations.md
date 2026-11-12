@@ -54,3 +54,22 @@ setup leaves the channel configured with unset settings and returns its
 `slack_channel_id` in the error details.
 
 [Pinned Python Claude Tag resource](https://github.com/anthropics/anthropic-sdk-python/tree/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/src/anthropic/resources/beta/organization/claude_tag) · [Pinned TypeScript Claude Tag resource](https://github.com/anthropics/anthropic-sdk-typescript/tree/590783078cd961a0df698d9fddc0275c65ff3afd/src/resources/beta/organization/claude-tag) · [Claude Tag API](https://platform.claude.com/docs/en/manage-claude/claude-tag-api)
+
+## Enterprise plugins
+
+The eighteen plugin, version, installation, share and marketplace operations
+use `ce-plugins-2026-09-01`. The Dart resource retains the documented
+organization and Compliance access boundaries. Linked organization selection
+is available on read operations where the source accepts `organization_id`.
+The pinned SDKs send direct uploads as repeated `files[]` parts and a
+marketplace validation archive as one `archive` part. The archive download
+requires a specific version, sends `Accept: application/binary`, and returns
+unaltered ZIP bytes. Organization-wide installation changes require the
+organization target. Group targets validate the `rbac_group_` ID before sending
+either a write or a removal.
+
+Admin redirects are rejected on receipt of headers. Validation diagnostics
+preserve safe report data and remove effective request credentials from
+provider diagnostic names, messages and codes, including URL-encoded echoes.
+
+[Pinned Python plugin resources](https://github.com/anthropics/anthropic-sdk-python/tree/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/src/anthropic/resources/beta/organization/plugins) · [Pinned TypeScript plugin resources](https://github.com/anthropics/anthropic-sdk-typescript/tree/590783078cd961a0df698d9fddc0275c65ff3afd/src/resources/beta/organization/plugins) · [Plugins API](https://platform.claude.com/docs/en/manage-claude/plugins-api)

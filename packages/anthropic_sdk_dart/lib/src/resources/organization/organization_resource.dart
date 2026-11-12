@@ -6,6 +6,7 @@ import 'organization_analytics_resource.dart';
 import 'organization_claude_tag_resource.dart';
 import 'organization_external_keys_resource.dart';
 import 'organization_federation_resource.dart';
+import 'organization_plugins_resource.dart';
 import 'organization_rbac_resources.dart';
 import 'organization_service_accounts_resource.dart';
 import 'organization_settings_resources.dart';
@@ -42,6 +43,8 @@ final class OrganizationResource {
       rbacRoles = OrganizationRbacRolesResource(_transport),
       spendLimits = OrganizationSpendLimitsResource(_transport),
       webhooks = OrganizationWebhooksResource(_transport),
+      plugins = OrganizationPluginsResource(_transport),
+      pluginMarketplaces = OrganizationPluginMarketplacesResource(_transport),
       claudeTag = OrganizationClaudeTagResource(_transport),
       telemetryDestinations = OrganizationTelemetryDestinationsResource(
         _transport,
@@ -95,6 +98,12 @@ final class OrganizationResource {
 
   /// Claude Tag Slack settings and access bundles.
   final OrganizationClaudeTagResource claudeTag;
+
+  /// Claude Enterprise plugin inventory and version management.
+  final OrganizationPluginsResource plugins;
+
+  /// Claude Enterprise marketplace inventory and validation.
+  final OrganizationPluginMarketplacesResource pluginMarketplaces;
 
   /// Organization webhook subscriptions and signing secret rotation.
   final OrganizationWebhooksResource webhooks;
