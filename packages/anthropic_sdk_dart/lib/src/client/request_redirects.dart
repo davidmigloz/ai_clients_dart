@@ -52,7 +52,8 @@ Future<http.StreamedResponse> _sendWithoutRedirect(
   http.BaseRequest request,
   String redirectErrorMessage,
 ) async {
-  final credentials = requestCredentialValues(request.headers);
+  final credentials = requestCredentialValues(request.headers)
+    ..addAll(requestDiagnosticCredentials(request));
   final watch = Stopwatch()..start();
   final response = await client.send(request);
   if (response.statusCode >= 300 && response.statusCode < 400) {
@@ -75,7 +76,8 @@ Future<http.StreamedResponse> _sendGuardedRequest(
 }) async {
   var current = request..followRedirects = false;
   final followedTargets = <Uri>{};
-  final credentials = requestCredentialValues(request.headers);
+  final credentials = requestCredentialValues(request.headers)
+    ..addAll(requestDiagnosticCredentials(request));
   final watch = Stopwatch()..start();
   final abort = request is http.Abortable ? request.abortTrigger : null;
   var aborted = false;

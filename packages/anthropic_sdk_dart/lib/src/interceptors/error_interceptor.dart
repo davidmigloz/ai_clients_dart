@@ -47,7 +47,7 @@ class ErrorInterceptor implements Interceptor {
     final credentials = requestCredentialValues(
       context.request.headers,
       sentHeaders: response.request?.headers,
-    );
+    )..addAll(requestDiagnosticCredentials(context.request));
     final body = decodeApiErrorResponse(response);
     final parsed = parseApiErrorBody(body, credentials: credentials);
     final responseMetadata = ResponseMetadata(

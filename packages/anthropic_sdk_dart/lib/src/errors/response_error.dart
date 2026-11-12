@@ -36,14 +36,17 @@ ParsedApiErrorBody parseApiErrorBody(
     final decoded = jsonDecode(body);
     requestId = switch (decoded) {
       {'request_id': final String id} when id.trim().isNotEmpty =>
-        redactCredentialEcho(id, credentials),
+        redactPercentEncodedCredentialEcho(id, credentials),
       _ => null,
     };
     if (decoded case {'error': final Map<String, dynamic> error}) {
       final message = error['message'] as String?;
       final type = legacyResourceMessage
           ? null
-          : redactCredentialEcho(error['type'] as String?, credentials);
+          : redactPercentEncodedCredentialEcho(
+              error['type'] as String?,
+              credentials,
+            );
       final details = error['details'];
       return (
         message: message != null
@@ -55,7 +58,7 @@ ParsedApiErrorBody parseApiErrorBody(
         errorDetails: details is Map<String, dynamic>
             ? _redactDiagnosticMap(details, credentials)
             : null,
-        errorCode: redactCredentialEcho(
+        errorCode: redactPercentEncodedCredentialEcho(
           _providerErrorCode(details),
           credentials,
         ),

@@ -28,6 +28,8 @@ final class OrganizationTransport {
 
   /// Sends an organization-scoped request and decodes its JSON body.
   /// [diagnosticField] identifies an in-band error message to sanitize.
+  /// [diagnosticCredentials] adds secrets sent outside the HTTP auth headers.
+  /// [sanitizeResponseDiagnostics] protects nested in-band diagnostics.
   /// Set [sensitiveResponse] if a successful body contains a new secret.
   Future<T> send<T>(
     String method,
@@ -38,6 +40,9 @@ final class OrganizationTransport {
     String? beta,
     String? requiredBeta,
     String? diagnosticField,
+    Set<String> diagnosticCredentials = const {},
+    void Function(Map<String, dynamic>, Set<String>)?
+    sanitizeResponseDiagnostics,
     bool sensitiveResponse = false,
     Future<void>? abortTrigger,
   }) async {
@@ -62,8 +67,14 @@ final class OrganizationTransport {
       ..followRedirects = false
       ..headers.addAll(headers);
     if (body != null) request.body = jsonEncode(body);
+    withRequestDiagnosticCredentials(request, diagnosticCredentials);
 
-    final credentials = diagnosticField == null ? null : <String>{};
+    final credentials =
+        diagnosticField != null ||
+            sanitizeResponseDiagnostics != null ||
+            diagnosticCredentials.isNotEmpty
+        ? {...diagnosticCredentials}
+        : null;
     final response = await interceptorChain.execute(
       request,
       abortTrigger: abortTrigger,
@@ -86,6 +97,9 @@ final class OrganizationTransport {
       if (json[diagnosticField] case final String value
           when diagnosticField != null && credentials != null) {
         json[diagnosticField] = redactDiagnosticText(value, credentials);
+      }
+      if (credentials != null) {
+        sanitizeResponseDiagnostics?.call(json, credentials);
       }
       return decode(json);
     } on FormatException catch (error, stackTrace) {

@@ -1,3 +1,5 @@
+import 'package:http/http.dart' as http;
+
 import 'auth_provider.dart';
 import 'workload_identity.dart';
 
@@ -56,8 +58,8 @@ Set<String> requestCredentialValues(
       }
       if (key != 'authorization') continue;
       final lower = value.toLowerCase();
-      if (lower.startsWith('bearer ')) {
-        final token = value.substring(7).trim();
+      if (lower.startsWith('bearer ') || lower.startsWith('basic ')) {
+        final token = value.substring(value.indexOf(' ') + 1).trim();
         if (token.isNotEmpty) values.add(token);
       } else if (lower.startsWith('aws4-hmac-sha256 ')) {
         final signature = _awsSignature.firstMatch(value)?.group(1);
@@ -69,6 +71,24 @@ Set<String> requestCredentialValues(
 }
 
 final _awsSignature = RegExp(r'\bSignature=([a-fA-F0-9]{64})\b');
+
+// Transport-only metadata. Body credentials never become HTTP headers.
+final _requestDiagnosticCredentials = Expando<Set<String>>();
+
+/// Credentials supplied in the request body and withheld from diagnostics.
+Set<String> requestDiagnosticCredentials(http.BaseRequest request) =>
+    _requestDiagnosticCredentials[request] ?? const {};
+
+/// Keeps diagnostic credentials with this request through local copies.
+T withRequestDiagnosticCredentials<T extends http.BaseRequest>(
+  T request,
+  Set<String> credentials,
+) {
+  if (credentials.isNotEmpty) {
+    _requestDiagnosticCredentials[request] = credentials;
+  }
+  return request;
+}
 
 void _checkWorkspace(Map<String, String> headers) {
   if (headers.containsKey('anthropic-workspace-id')) {
