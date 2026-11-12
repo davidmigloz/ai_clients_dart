@@ -547,6 +547,29 @@ final event = AgentToolUseEvent.fromJson({
 
 ---
 
+## Handle organization webhook event data
+
+Exhaustive switches over `WebhookEventData` now include
+`WebhookUserProfileEventData`. Its `event` identifies opened and resolved
+profile enforcement actions and program-status updates. The first two event
+types include `enforcementActionId`.
+
+```dart
+// Before, user-profile events reached the unknown payload case.
+case UnknownWebhookEventData(:final rawJson):
+  handleUnknown(rawJson);
+
+// After, handle user-profile events with typed fields before the fallback.
+case WebhookUserProfileEventData(:final event, :final id):
+  handleProfileEvent(event, id);
+case UnknownWebhookEventData(:final rawJson):
+  handleUnknown(rawJson);
+```
+
+[Claude organization webhooks](https://platform.claude.com/docs/en/manage-claude/organization-webhooks)
+
+---
+
 ## Migrating from v9.x to v10.0.0
 
 v10.0.0 adds document sources that reference uploaded files. `DocumentSource` is sealed, so exhaustive switches must handle the new `FileDocumentSource` variant.

@@ -59,6 +59,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Service account lifecycle and workspace memberships with scoped OAuth
 - Customer-managed encryption keys and validation through the Admin API
 - Usage and cost analytics with actor, workspace, and organization dimensions (beta)
+- Organization webhook endpoint management and signed event verification (beta)
 - Files (expiration, cursor pagination) and skills (multi-file uploads, container skills)
 - Managed agents with environments, self-hosted work, sessions, thread status filters, execution principals, tool permission evaluation, vaults, and streaming events (beta)
 - Scheduled deployments on the Claude API, Claude Platform on AWS, and Anthropic-managed Claude Models on Google Cloud (beta)
@@ -1194,6 +1195,44 @@ and validates the key when attaching it to a workspace.
 
 </details>
 
+### How do I subscribe to organization webhook events?
+
+<details>
+<summary><b>Manage an endpoint and verify signed deliveries</b></summary>
+
+Use `client.organization.webhooks` with an Admin API key, an `org:admin`
+OAuth token, or a personal or service-account key without workspace scope.
+Anthropic must enable organization webhooks for your account. They require
+a default workspace and are unavailable with HIPAA readiness or
+customer-managed encryption on that workspace. The guide documents enforcement
+opened and resolved subscriptions and says those deliveries are not yet live.
+The pinned SDK types also include `program_status_updated` without a
+documented delivery guarantee.
+
+Register a receiver with a public DNS name over HTTPS on port 443 using
+`create`. Endpoint writes require an admin or owner role. Store its signing secret when
+Anthropic returns it. `regenerateSigningSecret` replaces the credential and
+invalidates the previous one immediately. The resource adds the required beta
+header to each request.
+
+Verify the untouched UTF-8 request body before using the event. Use the event
+ID to deduplicate deliveries.
+
+```dart
+final event = WebhookEvent.unwrap(
+  rawRequestBody,
+  headers: deliveryHeaders,
+  signingSecret: webhookSecret,
+);
+if (event.data case WebhookUserProfileEventData(:final event, :final id)) {
+  print('${event.value} for $id');
+}
+```
+
+[Webhook endpoint example](example/organization_webhooks_example.dart) · [Receiver example](example/organization_webhook_receiver_example.dart) · [Claude organization webhooks](https://platform.claude.com/docs/en/manage-claude/organization-webhooks)
+
+</details>
+
 ### How do I use the Compliance API?
 
 <details>
@@ -1373,6 +1412,8 @@ See the [example/](example/) directory for complete examples:
 | [`organization_analytics_example.dart`](example/organization_analytics_example.dart) | Dimensioned organization usage and cost with cursor pagination (beta) |
 | [`organization_rbac_example.dart`](example/organization_rbac_example.dart) | List RBAC groups, members, roles and permissions |
 | [`organization_spend_example.dart`](example/organization_spend_example.dart) | List effective spend limits and pending increase requests |
+| [`organization_webhooks_example.dart`](example/organization_webhooks_example.dart) | List organization webhook endpoints (beta) |
+| [`organization_webhook_receiver_example.dart`](example/organization_webhook_receiver_example.dart) | Verify and parse signed webhook deliveries |
 | [`models_example.dart`](example/models_example.dart) | Model lifecycle filters, pagination, and capabilities |
 | [`compliance_example.dart`](example/compliance_example.dart) | Scoped Compliance Activity Feed |
 | [`compliance_content_example.dart`](example/compliance_content_example.dart) | Scoped Compliance app content and artifact downloads |

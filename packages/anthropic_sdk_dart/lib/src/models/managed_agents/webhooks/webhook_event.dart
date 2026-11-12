@@ -1,11 +1,18 @@
+import 'dart:convert';
+
 import 'package:meta/meta.dart';
 
+import '../../../utils/organization_parsing.dart';
+import '../../../utils/webhook_signatures.dart';
 import '../../beta_timestamp.dart';
 import '../../common/equality_helpers.dart';
+import '../../organization/organization_webhook.dart';
+
+part 'user_profile_events.dart';
 
 /// A webhook event delivered to a configured endpoint (Beta).
 ///
-/// Parse an inbound webhook request body with [WebhookEvent.fromJson]; the
+/// Verify and parse an inbound delivery with [WebhookEvent.unwrap]. The
 /// typed payload is available via [data].
 @immutable
 class WebhookEvent {
@@ -37,6 +44,42 @@ class WebhookEvent {
       createdAt: DateTime.parse(json['created_at'] as String),
       data: WebhookEventData.fromJson(json['data'] as Map<String, dynamic>),
     );
+  }
+
+  /// Verifies the signature of the original UTF-8 [payload], then parses it.
+  ///
+  /// Supply the untouched HTTP body and the endpoint's signing secret. The
+  /// delivery timestamp must be within five minutes of the trusted local
+  /// [receivedAt] time, which defaults to now. Throws [FormatException] for
+  /// missing or invalid signatures or event payloads. Deduplicate deliveries by
+  /// the event [id].
+  factory WebhookEvent.unwrap(
+    String payload, {
+    required Map<String, String> headers,
+    required String signingSecret,
+    DateTime? receivedAt,
+  }) {
+    verifyWebhookSignature(
+      payload,
+      headers,
+      signingSecret,
+      receivedAt ?? DateTime.now(),
+    );
+    return WebhookEvent.parseUnverified(payload);
+  }
+
+  /// Parses a webhook body after the caller has verified its signature.
+  /// Throws [FormatException] if the payload is invalid.
+  factory WebhookEvent.parseUnverified(String payload) {
+    final json = jsonDecode(payload);
+    if (json is! Map<String, dynamic>) {
+      throw const FormatException('Expected a webhook event object');
+    }
+    try {
+      return WebhookEvent.fromJson(json);
+    } on TypeError {
+      throw const FormatException('Invalid webhook event fields');
+    }
   }
 
   /// Converts to JSON.
@@ -127,6 +170,7 @@ class WebhookEvent {
 /// - [WebhookMemoryStoreArchivedEventData] — `memory_store.archived`.
 /// - [WebhookMemoryStoreCreatedEventData] — `memory_store.created`.
 /// - [WebhookMemoryStoreDeletedEventData] — `memory_store.deleted`.
+/// - [WebhookUserProfileEventData] — user-profile enforcement and program events.
 /// - [UnknownWebhookEventData] — unrecognized event-data type, for forward
 ///   compatibility.
 sealed class WebhookEventData {
@@ -224,6 +268,10 @@ sealed class WebhookEventData {
       'memory_store.deleted' => WebhookMemoryStoreDeletedEventData.fromJson(
         json,
       ),
+      'user_profile.enforcement_action_opened' ||
+      'user_profile.enforcement_action_resolved' ||
+      'user_profile.program_status_updated' =>
+        WebhookUserProfileEventData.fromJson(json),
       _ => UnknownWebhookEventData(rawJson: json),
     };
   }

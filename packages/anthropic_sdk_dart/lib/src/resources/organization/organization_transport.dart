@@ -28,6 +28,7 @@ final class OrganizationTransport {
 
   /// Sends an organization-scoped request and decodes its JSON body.
   /// [diagnosticField] identifies an in-band error message to sanitize.
+  /// Set [sensitiveResponse] if a successful body contains a new secret.
   Future<T> send<T>(
     String method,
     String path,
@@ -37,6 +38,7 @@ final class OrganizationTransport {
     String? beta,
     String? requiredBeta,
     String? diagnosticField,
+    bool sensitiveResponse = false,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
@@ -74,24 +76,31 @@ final class OrganizationTransport {
     if (credentials != null && sentHeaders != null) {
       credentials.addAll(requestCredentialValues(sentHeaders));
     }
-    final Object? json;
     try {
-      json = jsonDecode(utf8.decode(response.bodyBytes));
+      final json = jsonDecode(utf8.decode(response.bodyBytes));
+      if (json is! Map<String, dynamic>) {
+        throw const FormatException(
+          'Expected a JSON object from the Admin API',
+        );
+      }
+      if (json[diagnosticField] case final String value
+          when diagnosticField != null && credentials != null) {
+        json[diagnosticField] = redactDiagnosticText(value, credentials);
+      }
+      return decode(json);
     } on FormatException catch (error, stackTrace) {
+      if (sensitiveResponse) {
+        Error.throwWithStackTrace(
+          const FormatException('Invalid sensitive Admin API response'),
+          stackTrace,
+        );
+      }
       if (credentials == null) rethrow;
       Error.throwWithStackTrace(
         redactApiFormatException(error, credentials),
         stackTrace,
       );
     }
-    if (json is! Map<String, dynamic>) {
-      throw const FormatException('Expected a JSON object from the Admin API');
-    }
-    if (json[diagnosticField] case final String value
-        when diagnosticField != null && credentials != null) {
-      json[diagnosticField] = redactDiagnosticText(value, credentials);
-    }
-    return decode(json);
   }
 }
 

@@ -10,6 +10,7 @@ import 'organization_service_accounts_resource.dart';
 import 'organization_settings_resources.dart';
 import 'organization_spend_resources.dart';
 import 'organization_transport.dart';
+import 'organization_webhooks_resource.dart';
 import 'organization_workspaces_resource.dart';
 
 /// Organization-scoped Claude Admin API operations.
@@ -38,6 +39,7 @@ final class OrganizationResource {
       rbacGroups = OrganizationRbacGroupsResource(_transport),
       rbacRoles = OrganizationRbacRolesResource(_transport),
       spendLimits = OrganizationSpendLimitsResource(_transport),
+      webhooks = OrganizationWebhooksResource(_transport),
       complianceSettings = OrganizationComplianceSettingsResource(_transport),
       federation = OrganizationFederationResource(_transport),
       serviceAccounts = OrganizationServiceAccountsResource(_transport),
@@ -81,6 +83,9 @@ final class OrganizationResource {
 
   /// Configured and effective spend limits and increase requests.
   final OrganizationSpendLimitsResource spendLimits;
+
+  /// Organization webhook subscriptions and signing secret rotation.
+  final OrganizationWebhooksResource webhooks;
 
   /// Workspaces and workspace membership.
   final OrganizationWorkspacesResource workspaces;
