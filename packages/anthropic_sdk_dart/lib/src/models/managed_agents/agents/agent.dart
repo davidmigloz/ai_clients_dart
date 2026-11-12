@@ -176,7 +176,7 @@ class Agent {
       skills: skills ?? this.skills,
       metadata: metadata == unsetCopyWithValue
           ? this.metadata
-          : metadata as Map<String, String>?,
+          : copyWithMap<String, String>(metadata),
       multiagent: multiagent == unsetCopyWithValue
           ? this.multiagent
           : multiagent as Multiagent?,

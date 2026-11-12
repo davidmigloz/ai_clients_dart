@@ -61,16 +61,26 @@ class TextBlock extends ContentBlock {
   /// Citations supporting this text block.
   final List<Citation>? citations;
 
+  final bool _includeNullCitations;
+
   /// Creates a [TextBlock].
-  const TextBlock({required this.text, this.citations});
+  const TextBlock({required this.text, this.citations})
+    : _includeNullCitations = false;
+
+  const TextBlock._({
+    required this.text,
+    required this.citations,
+    required this._includeNullCitations,
+  });
 
   /// Creates a [TextBlock] from JSON.
   factory TextBlock.fromJson(Map<String, dynamic> json) {
-    return TextBlock(
+    return TextBlock._(
       text: json['text'] as String,
       citations: (json['citations'] as List?)
           ?.map((e) => Citation.fromJson(e as Map<String, dynamic>))
           .toList(),
+      includeNullCitations: json.containsKey('citations'),
     );
   }
 
@@ -78,17 +88,18 @@ class TextBlock extends ContentBlock {
   Map<String, dynamic> toJson() => {
     'type': 'text',
     'text': text,
-    if (citations != null)
-      'citations': citations!.map((e) => e.toJson()).toList(),
+    if (citations != null || _includeNullCitations)
+      'citations': citations?.map((e) => e.toJson()).toList(),
   };
 
   /// Creates a copy with replaced values.
   TextBlock copyWith({String? text, Object? citations = unsetCopyWithValue}) {
-    return TextBlock(
+    return TextBlock._(
       text: text ?? this.text,
       citations: citations == unsetCopyWithValue
           ? this.citations
-          : citations as List<Citation>?,
+          : copyWithList<Citation>(citations),
+      includeNullCitations: _includeNullCitations,
     );
   }
 
@@ -1016,7 +1027,7 @@ class CompactionBlock extends ContentBlock {
           : signature as String?,
       toolChanges: toolChanges == unsetCopyWithValue
           ? this.toolChanges
-          : toolChanges as List<Map<String, dynamic>>?,
+          : copyWithJsonObjectList(toolChanges),
     );
   }
 

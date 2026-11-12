@@ -609,7 +609,7 @@ class UnknownManagedAgentError {
       retryStatus: retryStatus ?? this.retryStatus,
       rawJson: rawJson == unsetCopyWithValue
           ? this.rawJson
-          : rawJson as Map<String, dynamic>?,
+          : copyWithMap<String, dynamic>(rawJson),
     );
   }
 

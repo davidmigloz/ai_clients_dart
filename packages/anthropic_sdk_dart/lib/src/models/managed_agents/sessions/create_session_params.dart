@@ -237,13 +237,13 @@ class AgentParamsWithOverrides extends AgentParams {
       system: system == unsetCopyWithValue ? _system : system,
       tools: tools == unsetCopyWithValue
           ? this.tools
-          : tools as List<AgentToolParams>?,
+          : copyWithList<AgentToolParams>(tools),
       mcpServers: mcpServers == unsetCopyWithValue
           ? this.mcpServers
-          : mcpServers as List<MCPServerParams>?,
+          : copyWithList<MCPServerParams>(mcpServers),
       skills: skills == unsetCopyWithValue
           ? this.skills
-          : skills as List<AgentSkillParams>?,
+          : copyWithList<AgentSkillParams>(skills),
     );
   }
 
@@ -386,16 +386,16 @@ class CreateSessionParams {
       title: title == unsetCopyWithValue ? this.title : title as String?,
       metadata: metadata == unsetCopyWithValue
           ? this.metadata
-          : metadata as Map<String, String>?,
+          : copyWithMap<String, String>(metadata),
       vaultIds: vaultIds == unsetCopyWithValue
           ? this.vaultIds
-          : vaultIds as List<String>?,
+          : copyWithList<String>(vaultIds),
       resources: resources == unsetCopyWithValue
           ? this.resources
-          : resources as List<SessionResourceParams>?,
+          : copyWithList<SessionResourceParams>(resources),
       initialEvents: initialEvents == unsetCopyWithValue
           ? this.initialEvents
-          : initialEvents as List<SessionInitialEventParams>?,
+          : copyWithList<SessionInitialEventParams>(initialEvents),
       budget: budget == unsetCopyWithValue ? this.budget : budget as Budget?,
     );
   }

@@ -85,13 +85,13 @@ class InputSchema {
       type: type ?? this.type,
       properties: properties == unsetCopyWithValue
           ? this.properties
-          : properties as Map<String, dynamic>?,
+          : copyWithMap<String, dynamic>(properties),
       required: required == unsetCopyWithValue
           ? this.required
-          : required as List<String>?,
+          : copyWithList<String>(required),
       extra: extra == unsetCopyWithValue
           ? this.extra
-          : extra as Map<String, dynamic>?,
+          : copyWithMap<String, dynamic>(extra),
     );
   }
 

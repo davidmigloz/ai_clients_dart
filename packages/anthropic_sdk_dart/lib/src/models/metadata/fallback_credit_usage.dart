@@ -236,7 +236,7 @@ class FallbackCreditNotApplied extends FallbackCreditStatus {
     rawReason: reason?.value ?? rawReason,
     removeToRedeem: removeToRedeem == unsetCopyWithValue
         ? this.removeToRedeem
-        : removeToRedeem as List<String>?,
+        : copyWithList<String>(removeToRedeem),
   );
 
   @override

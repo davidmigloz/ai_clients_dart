@@ -409,14 +409,14 @@ class BashTool extends BuiltInTool {
           : cacheControl as CacheControlEphemeral?,
       allowedCallers: allowedCallers == unsetCopyWithValue
           ? this.allowedCallers
-          : allowedCallers as List<String>?,
+          : copyWithList<String>(allowedCallers),
       deferLoading: deferLoading == unsetCopyWithValue
           ? this.deferLoading
           : deferLoading as bool?,
       strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
       inputExamples: inputExamples == unsetCopyWithValue
           ? this.inputExamples
-          : inputExamples as List<Map<String, dynamic>>?,
+          : copyWithJsonObjectList(inputExamples),
     );
   }
 
@@ -536,14 +536,14 @@ class TextEditorTool20250124 extends TextEditorToolBase {
           : cacheControl as CacheControlEphemeral?,
       allowedCallers: allowedCallers == unsetCopyWithValue
           ? this.allowedCallers
-          : allowedCallers as List<String>?,
+          : copyWithList<String>(allowedCallers),
       deferLoading: deferLoading == unsetCopyWithValue
           ? this.deferLoading
           : deferLoading as bool?,
       strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
       inputExamples: inputExamples == unsetCopyWithValue
           ? this.inputExamples
-          : inputExamples as List<Map<String, dynamic>>?,
+          : copyWithJsonObjectList(inputExamples),
     );
   }
 
@@ -652,14 +652,14 @@ class TextEditorTool20250429 extends TextEditorToolBase {
           : cacheControl as CacheControlEphemeral?,
       allowedCallers: allowedCallers == unsetCopyWithValue
           ? this.allowedCallers
-          : allowedCallers as List<String>?,
+          : copyWithList<String>(allowedCallers),
       deferLoading: deferLoading == unsetCopyWithValue
           ? this.deferLoading
           : deferLoading as bool?,
       strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
       inputExamples: inputExamples == unsetCopyWithValue
           ? this.inputExamples
-          : inputExamples as List<Map<String, dynamic>>?,
+          : copyWithJsonObjectList(inputExamples),
     );
   }
 
@@ -782,14 +782,14 @@ class TextEditorTool extends TextEditorToolBase {
           : maxCharacters as int?,
       allowedCallers: allowedCallers == unsetCopyWithValue
           ? this.allowedCallers
-          : allowedCallers as List<String>?,
+          : copyWithList<String>(allowedCallers),
       deferLoading: deferLoading == unsetCopyWithValue
           ? this.deferLoading
           : deferLoading as bool?,
       strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
       inputExamples: inputExamples == unsetCopyWithValue
           ? this.inputExamples
-          : inputExamples as List<Map<String, dynamic>>?,
+          : copyWithJsonObjectList(inputExamples),
     );
   }
 
@@ -950,10 +950,10 @@ class WebSearchTool extends BuiltInTool {
       type: type ?? this.type,
       allowedDomains: allowedDomains == unsetCopyWithValue
           ? this.allowedDomains
-          : allowedDomains as List<String>?,
+          : copyWithList<String>(allowedDomains),
       blockedDomains: blockedDomains == unsetCopyWithValue
           ? this.blockedDomains
-          : blockedDomains as List<String>?,
+          : copyWithList<String>(blockedDomains),
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
           : cacheControl as CacheControlEphemeral?,
@@ -963,7 +963,7 @@ class WebSearchTool extends BuiltInTool {
           : userLocation as UserLocation?,
       allowedCallers: allowedCallers == unsetCopyWithValue
           ? this.allowedCallers
-          : allowedCallers as List<String>?,
+          : copyWithList<String>(allowedCallers),
       deferLoading: deferLoading == unsetCopyWithValue
           ? this.deferLoading
           : deferLoading as bool?,
@@ -1338,14 +1338,14 @@ class MemoryTool extends BuiltInTool {
           : cacheControl as CacheControlEphemeral?,
       allowedCallers: allowedCallers == unsetCopyWithValue
           ? this.allowedCallers
-          : allowedCallers as List<String>?,
+          : copyWithList<String>(allowedCallers),
       deferLoading: deferLoading == unsetCopyWithValue
           ? this.deferLoading
           : deferLoading as bool?,
       strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
       inputExamples: inputExamples == unsetCopyWithValue
           ? this.inputExamples
-          : inputExamples as List<Map<String, dynamic>>?,
+          : copyWithJsonObjectList(inputExamples),
     );
   }
 
@@ -1449,7 +1449,7 @@ class ToolSearchToolBm25 extends ToolSearchTool {
           : cacheControl as CacheControlEphemeral?,
       allowedCallers: allowedCallers == unsetCopyWithValue
           ? this.allowedCallers
-          : allowedCallers as List<String>?,
+          : copyWithList<String>(allowedCallers),
       deferLoading: deferLoading == unsetCopyWithValue
           ? this.deferLoading
           : deferLoading as bool?,
@@ -1551,7 +1551,7 @@ class ToolSearchToolRegex extends ToolSearchTool {
           : cacheControl as CacheControlEphemeral?,
       allowedCallers: allowedCallers == unsetCopyWithValue
           ? this.allowedCallers
-          : allowedCallers as List<String>?,
+          : copyWithList<String>(allowedCallers),
       deferLoading: deferLoading == unsetCopyWithValue
           ? this.deferLoading
           : deferLoading as bool?,
@@ -1653,7 +1653,7 @@ class CodeExecutionBuiltInTool extends BuiltInTool {
           : cacheControl as CacheControlEphemeral?,
       allowedCallers: allowedCallers == unsetCopyWithValue
           ? this.allowedCallers
-          : allowedCallers as List<String>?,
+          : copyWithList<String>(allowedCallers),
       deferLoading: deferLoading == unsetCopyWithValue
           ? this.deferLoading
           : deferLoading as bool?,

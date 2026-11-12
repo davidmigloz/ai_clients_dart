@@ -161,7 +161,7 @@ class MessageDeltaEvent extends MessageStreamEvent {
       usage: usage ?? this.usage,
       inputTransformations: inputTransformations == unsetCopyWithValue
           ? this.inputTransformations
-          : inputTransformations as List<InputTransformation>?,
+          : copyWithList<InputTransformation>(inputTransformations),
       hasContextManagement: hasContextManagement,
       contextManagement: contextManagement == unsetCopyWithValue
           ? this.contextManagement

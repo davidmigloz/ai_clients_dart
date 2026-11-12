@@ -298,7 +298,7 @@ class TextInputBlock extends InputContentBlock {
       text ?? this.text,
       citations: citations == unsetCopyWithValue
           ? this.citations
-          : citations as List<InputCitation>?,
+          : copyWithList<InputCitation>(citations),
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
           : cacheControl as CacheControlEphemeral?,
@@ -1189,7 +1189,7 @@ class ToolResultBrowserStateContent extends ToolResultContent {
       tabs: tabs ?? this.tabs,
       stateChanges: stateChanges == unsetCopyWithValue
           ? this.stateChanges
-          : stateChanges as List<BrowserStateChange>?,
+          : copyWithList<BrowserStateChange>(stateChanges),
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
           : cacheControl as CacheControlEphemeral?,
@@ -1329,7 +1329,7 @@ class ToolResultInputBlock extends InputContentBlock {
       toolUseId: toolUseId ?? this.toolUseId,
       content: content == unsetCopyWithValue
           ? this.content
-          : content as List<ToolResultContent>?,
+          : copyWithList<ToolResultContent>(content),
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
@@ -2147,7 +2147,7 @@ class CompactionInputBlock extends InputContentBlock {
           : signature as String?,
       toolChanges: toolChanges == unsetCopyWithValue
           ? this.toolChanges
-          : toolChanges as List<Map<String, dynamic>>?,
+          : copyWithJsonObjectList(toolChanges),
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
           : cacheControl as CacheControlEphemeral?,
@@ -2418,7 +2418,7 @@ class FallbackInputBlock extends InputContentBlock {
   }) : hasTrigger = trigger != unsetCopyWithValue,
        trigger = (trigger == unsetCopyWithValue || trigger == null)
            ? null
-           : deepUnmodifiableMap(trigger as Map<String, dynamic>);
+           : deepUnmodifiableMap(copyWithMap<String, dynamic>(trigger)!);
 
   /// Object type. Always "fallback".
   String get type => 'fallback';

@@ -594,7 +594,7 @@ class AgentToolResultEvent extends SessionEvent {
       toolUseId: toolUseId ?? this.toolUseId,
       content: content == unsetCopyWithValue
           ? this.content
-          : content as List<Map<String, dynamic>>?,
+          : copyWithJsonObjectList(content),
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
       processedAt: processedAt ?? this.processedAt,
     );
@@ -856,7 +856,7 @@ class AgentMcpToolResultEvent extends SessionEvent {
       mcpToolUseId: mcpToolUseId ?? this.mcpToolUseId,
       content: content == unsetCopyWithValue
           ? this.content
-          : content as List<Map<String, dynamic>>?,
+          : copyWithJsonObjectList(content),
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
       processedAt: processedAt ?? this.processedAt,
     );
@@ -1500,7 +1500,7 @@ class UserCustomToolResultEvent extends SessionEvent {
       customToolUseId: customToolUseId ?? this.customToolUseId,
       content: content == unsetCopyWithValue
           ? this.content
-          : content as List<Map<String, dynamic>>?,
+          : copyWithJsonObjectList(content),
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
       processedAt: processedAt == unsetCopyWithValue
           ? this.processedAt
@@ -1617,7 +1617,7 @@ class UserToolResultEvent extends SessionEvent {
       toolUseId: toolUseId ?? this.toolUseId,
       content: content == unsetCopyWithValue
           ? this.content
-          : content as List<Map<String, dynamic>>?,
+          : copyWithJsonObjectList(content),
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
       processedAt: processedAt == unsetCopyWithValue
           ? this.processedAt
@@ -2398,7 +2398,7 @@ class SessionUpdatedEvent extends SessionEvent {
       agent: agent == unsetCopyWithValue ? this.agent : agent as SessionAgent?,
       metadata: metadata == unsetCopyWithValue
           ? this.metadata
-          : metadata as Map<String, String>?,
+          : copyWithMap<String, String>(metadata),
       title: title == unsetCopyWithValue ? this.title : title as String?,
       budget: budget == unsetCopyWithValue ? this.budget : budget as Budget?,
     );

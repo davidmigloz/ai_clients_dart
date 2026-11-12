@@ -290,7 +290,7 @@ class MessageDeltaUsage {
           : serverToolUse as ServerToolUsage?,
       iterations: iterations == unsetCopyWithValue
           ? this.iterations
-          : iterations as List<IterationUsage>?,
+          : copyWithList<IterationUsage>(iterations),
       speed: speed == unsetCopyWithValue ? this.speed : speed as Speed?,
       fallbackCredit: fallbackCredit == unsetCopyWithValue
           ? this.fallbackCredit
