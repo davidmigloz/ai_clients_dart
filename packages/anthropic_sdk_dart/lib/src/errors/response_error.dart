@@ -113,18 +113,39 @@ ResponseMetadata createSafeResponseMetadata({
         'retry-after',
         'retry-after-ms',
       }.contains(entry.key.toLowerCase()))
-        if (redactCredentialEcho(entry.value, credentials)
+        if (redactPercentEncodedCredentialEcho(entry.value, credentials)
             case final String value)
           entry.key.toLowerCase(): value,
   }),
   bodyExcerpt: '',
   latency: latency,
-  bodyRequestId: redactCredentialEcho(bodyRequestId, credentials),
+  bodyRequestId: redactPercentEncodedCredentialEcho(bodyRequestId, credentials),
 );
 
 /// Omits diagnostic values that echo an effective request credential.
 String? redactCredentialEcho(String? value, Set<String> credentials) =>
     value != null && credentials.any(value.contains) ? null : value;
+
+final _percentEscapes = RegExp(r'(?:%[0-9a-fA-F]{2})+');
+
+/// Drops diagnostics that echo credentials directly or as percent escapes.
+/// Returns the original value when safe so encoded identifiers and filenames
+/// retain their wire representation.
+String? redactPercentEncodedCredentialEcho(
+  String? value,
+  Set<String> credentials,
+) {
+  final safe = redactCredentialEcho(value, credentials);
+  if (safe == null || credentials.isEmpty || !safe.contains('%')) return safe;
+  final decoded = safe.replaceAllMapped(_percentEscapes, (match) {
+    final encoded = match[0]!;
+    return utf8.decode([
+      for (var offset = 0; offset < encoded.length; offset += 3)
+        int.parse(encoded.substring(offset + 1, offset + 3), radix: 16),
+    ], allowMalformed: true);
+  });
+  return redactCredentialEcho(decoded, credentials) == null ? null : safe;
+}
 
 /// A bounded excerpt that omits responses containing echoed credentials.
 String apiErrorBodyExcerpt(String body, Set<String> credentials) {

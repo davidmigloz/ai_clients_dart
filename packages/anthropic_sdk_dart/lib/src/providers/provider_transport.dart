@@ -132,11 +132,13 @@ abstract base class ProviderTransport extends http.BaseClient {
     Set<String> credentials,
   ) {
     final uri = error.uri;
-    final safeUri = redactCredentialEcho(uri?.toString(), credentials) == null
+    final safeUri =
+        redactPercentEncodedCredentialEcho(uri?.toString(), credentials) == null
         ? null
         : uri;
     if (safeUri == uri &&
-        redactCredentialEcho(error.message, credentials) != null) {
+        redactPercentEncodedCredentialEcho(error.message, credentials) !=
+            null) {
       return error;
     }
     return error is http.RequestAbortedException

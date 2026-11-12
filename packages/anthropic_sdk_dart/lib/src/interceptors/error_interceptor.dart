@@ -54,8 +54,9 @@ class ErrorInterceptor implements Interceptor {
       statusCode: response.statusCode,
       headers: Map.unmodifiable({
         for (final entry in response.headers.entries)
-          if (redactCredentialEcho(entry.key, credentials) != null)
-            if (redactCredentialEcho(entry.value, credentials)
+          if (redactPercentEncodedCredentialEcho(entry.key, credentials) !=
+              null)
+            if (redactPercentEncodedCredentialEcho(entry.value, credentials)
                 case final String value)
               entry.key: value,
       }),

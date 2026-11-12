@@ -534,29 +534,12 @@ Stream<List<int>> getResourceByteStream(
       ? null
       : (response, credentials) => onResponse({
           for (final entry in response.headers.entries)
-            if (_safeDownloadHeader(entry.value, credentials)
+            if (redactPercentEncodedCredentialEcho(entry.value, credentials)
                 case final String value)
               entry.key: value,
         }),
   decode: (body, _, _, _) => body,
 );
-
-final _downloadHeaderEscapes = RegExp(r'(?:%[0-9a-fA-F]{2})+');
-
-String? _safeDownloadHeader(String value, Set<String> credentials) {
-  if (redactCredentialEcho(value, credentials) == null) return null;
-  if (credentials.isEmpty || !value.contains('%')) return value;
-  // RFC 8187 filenames can carry credentials as percent-encoded bytes. Scan
-  // the decoded value while preserving the original encoding for safe headers.
-  final decoded = value.replaceAllMapped(_downloadHeaderEscapes, (match) {
-    final encoded = match[0]!;
-    return utf8.decode([
-      for (var offset = 0; offset < encoded.length; offset += 3)
-        int.parse(encoded.substring(offset + 1, offset + 3), radix: 16),
-    ], allowMalformed: true);
-  });
-  return redactCredentialEcho(decoded, credentials) == null ? null : value;
-}
 
 class _MappedEventSink<T> implements EventSink<Map<String, dynamic>> {
   final EventSink<T> _output;

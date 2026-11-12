@@ -214,6 +214,44 @@ void main() {
     });
   }
 
+  for (final mode in ['before headers', 'during body']) {
+    test('encoded SigV4 session token stays out of errors $mode', () async {
+      const token = 'fixture-aws-temporary+/=';
+      final transport = _Transport((request) {
+        expect(request.headers['x-amz-security-token'], token);
+        final echo = request.url.replace(queryParameters: {'echo': token});
+        expect(echo.toString(), contains('fixture-aws-temporary%2B%2F%3D'));
+        final failure = http.ClientException('Upstream returned $echo', echo);
+        if (mode == 'before headers') throw failure;
+        return http.StreamedResponse(Stream<List<int>>.error(failure), 200);
+      });
+      final client = AnthropicAwsClient(
+        region: 'us-west-2',
+        workspaceId: 'wrkspc_fixture',
+        credentials: () => const ClaudeAwsCredentials(
+          accessKeyId: 'AKIDEXAMPLE',
+          secretAccessKey: 'fixture-iam-secret',
+          sessionToken: token,
+        ),
+        config: _config,
+        httpClient: transport,
+      );
+      addTearDown(client.close);
+      await expectLater(
+        client.models.list(),
+        throwsA(
+          isA<http.ClientException>()
+              .having((e) => e.uri, 'URI', isNull)
+              .having(
+                (e) => e.message,
+                'diagnostic',
+                'Provider transport error contained a redacted credential',
+              ),
+        ),
+      );
+    });
+  }
+
   test('cloud transport exception cannot echo its own bearer', () async {
     final transport = _Transport((request) {
       expect(request.headers['authorization'], 'Bearer $_awsKey');
