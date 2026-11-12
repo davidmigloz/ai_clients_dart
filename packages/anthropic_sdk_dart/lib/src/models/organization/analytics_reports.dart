@@ -52,7 +52,11 @@ final class AnalyticsReportPage<T> extends AnalyticsResponseRecord {
         'Report page',
       ),
       dataRefreshedAt = _optionalReportTime(json['data_refreshed_at']),
-      organizationId = json['organization_id'] as String?;
+      organizationId = json['organization_id'] as String? {
+    if (hasMore && nextPage?.isNotEmpty != true) {
+      throw const FormatException('Missing analytics continuation token');
+    }
+  }
 
   /// Rows on this page.
   final List<T> data;

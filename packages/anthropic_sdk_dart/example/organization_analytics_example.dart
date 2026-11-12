@@ -34,7 +34,7 @@ Future<void> main(List<String> args) async {
           '${row.startingAt} ${row.group.model}: ${row.usage.totalTokens} tokens',
         );
       }
-      page = usage.nextPage;
+      page = usage.hasMore ? usage.nextPage : null;
     } while (page != null);
 
     page = null;
@@ -45,7 +45,7 @@ Future<void> main(List<String> args) async {
           '${row.group.model}: ${row.cost.amount} minor units (${row.cost.currency})',
         );
       }
-      page = costs.nextPage;
+      page = costs.hasMore ? costs.nextPage : null;
     } while (page != null);
   } finally {
     client.close();

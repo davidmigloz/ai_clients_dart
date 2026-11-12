@@ -201,6 +201,69 @@ void main() {
   );
 
   test(
+    'continuing a report snapshots the original filters and dimensions',
+    () async {
+      final models = ['original-model'];
+      final filters = {AnalyticsFilter.model: models};
+      final dimensions = ['model'];
+      final query = UsageCostAnalyticsQuery(
+        startingAt: DateTime.parse(_start),
+        filters: filters,
+        groupBy: dimensions,
+      );
+      transport
+        ..queueJsonResponse({
+          'data': <Object>[],
+          'has_more': true,
+          'next_page': 'keep + / =',
+        })
+        ..queueJsonResponse({
+          'data': <Object>[],
+          'has_more': false,
+          'next_page': null,
+        });
+      final analytics = client.organization.analytics;
+      final report = await analytics.usage(query);
+      models.add('another-model');
+      filters.clear();
+      dimensions.add('actor');
+      expect(query.filters.clear, throwsUnsupportedError);
+      expect(
+        () => query.filters[AnalyticsFilter.model]!.clear(),
+        throwsUnsupportedError,
+      );
+      expect(query.groupBy.clear, throwsUnsupportedError);
+      await analytics.usage(query.withPage(report.nextPage));
+      expect(transport.requests.last.url.queryParametersAll, {
+        ...transport.requests.first.url.queryParametersAll,
+        'page': ['keep + / ='],
+      });
+    },
+  );
+
+  test('a continuing report with a null or empty cursor fails', () async {
+    final analytics = client.organization.analytics;
+    final query = UsageCostAnalyticsQuery(startingAt: DateTime.parse(_start));
+    for (final cursor in [null, '']) {
+      transport.queueJsonResponse({
+        'data': <Object>[],
+        'has_more': true,
+        'next_page': cursor,
+      });
+      await expectLater(
+        analytics.cost(query),
+        throwsA(
+          isA<FormatException>().having(
+            (error) => error.message,
+            'message',
+            'Missing analytics continuation token',
+          ),
+        ),
+      );
+    }
+  });
+
+  test(
     'cost preserves precise amounts, provider identity and nullable dimensions',
     () async {
       const cost = {

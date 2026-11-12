@@ -94,18 +94,22 @@ enum AnalyticsFilter {
 @immutable
 final class UsageCostAnalyticsQuery {
   /// Creates a dimensioned report query.
-  const UsageCostAnalyticsQuery({
+  UsageCostAnalyticsQuery({
     required this.startingAt,
     this.endingAt,
     this.timeBucketWidth,
-    this.filters = const {},
-    this.groupBy = const [],
+    Map<AnalyticsFilter, List<String>> filters = const {},
+    List<String> groupBy = const [],
     this.orderBy,
     this.order,
     this.excludeDeletedUsers,
     this.limit,
     this.page,
-  });
+  }) : filters = Map.unmodifiable({
+         for (final entry in filters.entries)
+           entry.key: List<String>.unmodifiable(entry.value),
+       }),
+       groupBy = List.unmodifiable(groupBy);
 
   /// Start of the range, inclusive.
   final DateTime startingAt;
