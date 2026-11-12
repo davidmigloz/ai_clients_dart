@@ -234,7 +234,11 @@ class _AbortableRequestWrapper extends http.BaseRequest
 
   @override
   http.ByteStream finalize() {
+    final stream = _inner.finalize();
+    // Multipart requests set their boundary during finalization.
+    headers.addAll(_inner.headers);
+    contentLength = _inner.contentLength;
     super.finalize();
-    return _inner.finalize();
+    return stream;
   }
 }
