@@ -227,12 +227,18 @@ class EnvironmentWorkResource extends ResourceBase {
         '/v1/environments/${encodePathSegment(environmentId, 'environmentId')}/work$suffix';
     final headers = requestBuilder.buildHeaders(
       includeWorkspace: includeWorkspace,
+      betas: betas,
       additionalHeaders: {
-        'anthropic-beta': {...betas, 'managed-agents-2026-04-01'}.join(','),
         'anthropic-workspace-id': ?workspaceId,
         'anthropic-worker-id': ?workerId,
       },
     );
+    headers['anthropic-beta'] = {
+      for (final beta
+          in headers['anthropic-beta']?.split(',') ?? const <String>[])
+        if (beta.trim().isNotEmpty) beta.trim(),
+      'managed-agents-2026-04-01',
+    }.join(',');
     if (!includeWorkspace) headers.remove('anthropic-workspace-id');
     final request = http.Request(
       method,

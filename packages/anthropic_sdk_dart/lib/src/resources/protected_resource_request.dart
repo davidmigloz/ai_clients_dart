@@ -41,7 +41,11 @@ Future<Object?> sendProtectedResourceRequest(
     ensureNotClosed: resource.ensureNotClosed,
   );
   final watch = Stopwatch()..start();
-  final response = await chain.execute(request, abortTrigger: abortTrigger);
+  final response = await chain.execute(
+    request,
+    abortTrigger: abortTrigger,
+    redirectErrorMessage: 'Unexpected redirect from the Claude API',
+  );
   watch.stop();
   final status = response.statusCode;
   if (status < 200 || status >= 300) {
