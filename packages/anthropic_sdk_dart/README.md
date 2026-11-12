@@ -470,6 +470,51 @@ The runnable examples use stub executors.
 
 </details>
 
+### How do I run a loop with custom tools?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Register a custom `Tool`, a Dart input decoder, and a callback with `client.messages.runTools`. The runner sends the assistant reply and its paired tool results to Claude until it reaches a terminal stop or the request budget.
+
+```dart
+final square = RunnableMessageTool<int>(
+  definition: const Tool(
+    name: 'square',
+    description: 'Square an integer.',
+    inputSchema: InputSchema(
+      properties: {'number': {'type': 'integer'}},
+      required: ['number'],
+      extra: {'additionalProperties': false},
+    ),
+    strict: true,
+  ),
+  decode: (input) => switch (input) {
+    {'number': final int value} => value,
+    _ => throw const FormatException('Expected an integer.'),
+  },
+  run: (value, call) => MessageToolResult.text('${value * value}'),
+);
+final result = await client.messages.runTools(
+  MessageCreateRequest(
+    model: 'claude-sonnet-5',
+    maxTokens: 512,
+    messages: [InputMessage.user('Use the square tool to calculate 17².')],
+  ),
+  tools: [square],
+  maxIterations: 4,
+);
+print(result.message.text);
+```
+
+Use `onEvent` for streamed events and `onTurn` for completed responses. `useThread: true` opts into the Messages threads beta. A tool request on the last permitted iteration remains available in the raw reply. Toolset member calls, such as browser or computer use, also return the raw reply for your executor to handle. The runner supports server-side threshold compaction through `contextManagement`.
+
+The runner passes an expired thread continuation error to the caller. Use the default stateless mode when your provider or context edit requires full conversation replay.
+
+→ [Full example](example/message_tool_runner_example.dart)
+
+</details>
+
 ### How do I connect a remote MCP server?
 
 <details>
@@ -1519,6 +1564,7 @@ See the [example/](example/) directory for complete examples:
 | [`streaming_example.dart`](example/streaming_example.dart) | Streaming responses |
 | [`structured_output_example.dart`](example/structured_output_example.dart) | Typed JSON output with buffered or streamed responses |
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Tool calling with schemas |
+| [`message_tool_runner_example.dart`](example/message_tool_runner_example.dart) | Bounded typed custom tool loop with optional streaming and threads |
 | [`web_search_example.dart`](example/web_search_example.dart) | Web search tool |
 | [`advisor_example.dart`](example/advisor_example.dart) | Advisor tool (beta) |
 | [`computer_use_example.dart`](example/computer_use_example.dart) | Computer-use toolset (`computer_toolset_20260801`) |

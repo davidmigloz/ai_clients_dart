@@ -95,6 +95,7 @@ final class MessageThread {
   String? _previousMessageId;
   Message? _lastMessage;
   ContainerParam? _container;
+  bool _hasCompletedTurn = false;
 
   /// Completed response ID available for a continuation, if any.
   String? get previousMessageId => _previousMessageId;
@@ -108,7 +109,11 @@ final class MessageThread {
 
   /// Request settings and the full local conversation.
   MessageCreateRequest get params =>
-      _request.copyWith(messages: messages, container: _container);
+      _turnSettings.copyWith(messages: messages, container: _container);
+
+  MessageCreateRequest get _turnSettings => _hasCompletedTurn
+      ? _request.copyWith(fallbackCreditToken: null)
+      : _request;
 
   /// Adds messages to the next turn without making a request.
   void append(Iterable<InputMessage> messages) {
@@ -121,7 +126,7 @@ final class MessageThread {
     _ensureIdle();
     return MessageThread._(
       resource: _resource,
-      request: _request.copyWith(messages: _staged, container: _container),
+      request: _turnSettings.copyWith(messages: _staged, container: _container),
       betas: _betas,
       userProfileId: _userProfileId,
       workspaceId: _workspaceId,
@@ -288,7 +293,7 @@ final class MessageThread {
   MessageCreateRequest _turnRequest(_ThreadTurn turn, {bool replay = false}) {
     final previousId = turn.previousMessageId;
     if (previousId != null && !replay) {
-      return _request.copyWith(
+      return _turnSettings.copyWith(
         messages: turn.inputs,
         system: null,
         tools: null,
@@ -296,7 +301,7 @@ final class MessageThread {
         container: _container,
       );
     }
-    return _request.copyWith(
+    return _turnSettings.copyWith(
       messages: [
         for (final message in turn.history)
           InputMessage.fromJson(_withoutCacheControl(message.toJson())),
@@ -320,6 +325,7 @@ final class MessageThread {
       };
 
   void _recordReply(_ThreadTurn turn, Message reply) {
+    _hasCompletedTurn = true;
     if (reply.stopReason == StopReason.refusal) {
       _dropRefusedTurn(turn);
       return;
