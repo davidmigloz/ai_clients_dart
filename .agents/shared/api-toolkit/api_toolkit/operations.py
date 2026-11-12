@@ -18,6 +18,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
+from urllib.parse import unquote
 from urllib.request import Request, urlopen
 
 from . import config as toolkit_config
@@ -2569,7 +2570,12 @@ def _readme_example_path(target: str, package_url: str | None) -> str | None:
     path = target.removeprefix("./")
     if package_url:
         path = path.removeprefix(f"{package_url}/")
-    return path if path.startswith("example/") else None
+    if not path.startswith("example/"):
+        return None
+    decoded_path = unquote(path)
+    if "\\" in decoded_path or any(part in {".", ".."} for part in decoded_path.split("/")):
+        return None
+    return path
 
 
 def _readme_example_links(section: str, package_url: str | None = None) -> list[str]:

@@ -75,6 +75,9 @@ class ReadmeUsageTests(unittest.TestCase):
 | --- | --- |
 | [Local]({package_url}/example/one.dart) | Own package |
 | [Other](https://github.com/owner/project/blob/main/packages/another_dart/example/two.dart) | Other package |
+| [Absolute traversal]({package_url}/example/../../another_dart/example/two.dart) | Outside package |
+| [Encoded traversal]({package_url}/example/%2e%2e/%2e%2e/another_dart/example/two.dart) | Outside package |
+| [Relative traversal](example/../../another_dart/example/two.dart) | Outside package |
 | [Local duplicate](./example/one.dart) | Same example |
 """
         self.assertEqual(
