@@ -93,6 +93,22 @@ class MemoryVersion {
     this.contentSizeBytes,
     this.contentSha256,
     required this.operation,
+    this.createdBy,
+    this.redactedBy,
+    required this.createdAt,
+    this.redactedAt,
+  }) : _rawOperation = null;
+
+  const MemoryVersion._({
+    this.type = 'memory_version',
+    required this.id,
+    required this.memoryStoreId,
+    required this.memoryId,
+    this.path,
+    this.content,
+    this.contentSizeBytes,
+    this.contentSha256,
+    required this.operation,
     this._rawOperation,
     this.createdBy,
     this.redactedBy,
@@ -102,7 +118,7 @@ class MemoryVersion {
 
   /// Creates a [MemoryVersion] from JSON.
   factory MemoryVersion.fromJson(Map<String, dynamic> json) {
-    return MemoryVersion(
+    return MemoryVersion._(
       type: json['type'] as String? ?? 'memory_version',
       id: json['id'] as String,
       memoryStoreId: json['memory_store_id'] as String,
@@ -164,7 +180,7 @@ class MemoryVersion {
     DateTime? createdAt,
     Object? redactedAt = unsetCopyWithValue,
   }) {
-    return MemoryVersion(
+    return MemoryVersion._(
       type: type ?? this.type,
       id: id ?? this.id,
       memoryStoreId: memoryStoreId ?? this.memoryStoreId,

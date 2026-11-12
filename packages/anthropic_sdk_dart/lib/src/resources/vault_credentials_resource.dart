@@ -7,6 +7,7 @@ import '../models/managed_agents/credentials/credential.dart';
 import '../models/managed_agents/credentials/credential_list_response.dart';
 import '../models/managed_agents/credentials/credential_validation.dart';
 import '../models/managed_agents/credentials/update_credential_params.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 
 /// Beta header for the Managed Agents API.
@@ -37,7 +38,9 @@ class VaultCredentialsResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/vaults/$vaultId/credentials');
+    final url = requestBuilder.buildUrl(
+      '/v1/vaults/${encodePathSegment(vaultId, 'vaultId')}/credentials',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );
@@ -76,7 +79,7 @@ class VaultCredentialsResource extends ResourceBase {
     };
 
     final url = requestBuilder.buildUrl(
-      '/v1/vaults/$vaultId/credentials',
+      '/v1/vaults/${encodePathSegment(vaultId, 'vaultId')}/credentials',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
     final headers = requestBuilder.buildHeaders(
@@ -105,7 +108,8 @@ class VaultCredentialsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/vaults/$vaultId/credentials/$credentialId',
+      '/v1/vaults/${encodePathSegment(vaultId, 'vaultId')}/credentials'
+      '/${encodePathSegment(credentialId, 'credentialId')}',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
@@ -135,7 +139,8 @@ class VaultCredentialsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/vaults/$vaultId/credentials/$credentialId',
+      '/v1/vaults/${encodePathSegment(vaultId, 'vaultId')}/credentials'
+      '/${encodePathSegment(credentialId, 'credentialId')}',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
@@ -165,7 +170,8 @@ class VaultCredentialsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/vaults/$vaultId/credentials/$credentialId',
+      '/v1/vaults/${encodePathSegment(vaultId, 'vaultId')}/credentials'
+      '/${encodePathSegment(credentialId, 'credentialId')}',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
@@ -193,7 +199,8 @@ class VaultCredentialsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/vaults/$vaultId/credentials/$credentialId/archive',
+      '/v1/vaults/${encodePathSegment(vaultId, 'vaultId')}/credentials'
+      '/${encodePathSegment(credentialId, 'credentialId')}/archive',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
@@ -227,7 +234,8 @@ class VaultCredentialsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/vaults/$vaultId/credentials/$credentialId/mcp_oauth_validate',
+      '/v1/vaults/${encodePathSegment(vaultId, 'vaultId')}/credentials'
+      '/${encodePathSegment(credentialId, 'credentialId')}/mcp_oauth_validate',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},

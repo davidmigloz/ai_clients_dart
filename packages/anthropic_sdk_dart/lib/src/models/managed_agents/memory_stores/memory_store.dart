@@ -47,12 +47,24 @@ class MemoryStore {
     required this.createdAt,
     required this.updatedAt,
     this.archivedAt,
+  }) : _includeNullArchivedAt = false,
+       metadata = metadata != null ? Map.unmodifiable(metadata) : null;
+
+  MemoryStore._({
+    this.type = 'memory_store',
+    required this.id,
+    required this.name,
+    this.description,
+    Map<String, String>? metadata,
+    required this.createdAt,
+    required this.updatedAt,
+    this.archivedAt,
     this._includeNullArchivedAt = false,
   }) : metadata = metadata != null ? Map.unmodifiable(metadata) : null;
 
   /// Creates a [MemoryStore] from JSON.
   factory MemoryStore.fromJson(Map<String, dynamic> json) {
-    return MemoryStore(
+    return MemoryStore._(
       type: json['type'] as String? ?? 'memory_store',
       id: json['id'] as String,
       name: json['name'] as String,
@@ -93,7 +105,7 @@ class MemoryStore {
     DateTime? updatedAt,
     Object? archivedAt = unsetCopyWithValue,
   }) {
-    return MemoryStore(
+    return MemoryStore._(
       type: type ?? this.type,
       id: id ?? this.id,
       name: name ?? this.name,

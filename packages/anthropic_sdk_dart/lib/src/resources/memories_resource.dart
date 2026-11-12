@@ -8,6 +8,7 @@ import '../models/managed_agents/memory_stores/memory.dart';
 import '../models/managed_agents/memory_stores/memory_list_response.dart';
 import '../models/managed_agents/memory_stores/memory_view.dart';
 import '../models/managed_agents/memory_stores/update_memory_params.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 
 /// Beta header for the Agent Memory API.
@@ -50,7 +51,7 @@ class MemoriesResource extends ResourceBase {
     final queryParams = <String, dynamic>{'view': ?view?.toJson()};
 
     final url = requestBuilder.buildUrl(
-      '/v1/memory_stores/$memoryStoreId/memories',
+      '/v1/memory_stores/${encodePathSegment(memoryStoreId, 'memoryStoreId')}/memories',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
     final headers = requestBuilder.buildHeaders(
@@ -113,7 +114,7 @@ class MemoriesResource extends ResourceBase {
     };
 
     final url = requestBuilder.buildUrl(
-      '/v1/memory_stores/$memoryStoreId/memories',
+      '/v1/memory_stores/${encodePathSegment(memoryStoreId, 'memoryStoreId')}/memories',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
     final headers = requestBuilder.buildHeaders(
@@ -146,7 +147,8 @@ class MemoriesResource extends ResourceBase {
     final queryParams = <String, dynamic>{'view': ?view?.toJson()};
 
     final url = requestBuilder.buildUrl(
-      '/v1/memory_stores/$memoryStoreId/memories/$memoryId',
+      '/v1/memory_stores/${encodePathSegment(memoryStoreId, 'memoryStoreId')}'
+      '/memories/${encodePathSegment(memoryId, 'memoryId')}',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
     final headers = requestBuilder.buildHeaders(
@@ -180,7 +182,8 @@ class MemoriesResource extends ResourceBase {
     final queryParams = <String, dynamic>{'view': ?view?.toJson()};
 
     final url = requestBuilder.buildUrl(
-      '/v1/memory_stores/$memoryStoreId/memories/$memoryId',
+      '/v1/memory_stores/${encodePathSegment(memoryStoreId, 'memoryStoreId')}'
+      '/memories/${encodePathSegment(memoryId, 'memoryId')}',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
     final headers = requestBuilder.buildHeaders(
@@ -216,7 +219,8 @@ class MemoriesResource extends ResourceBase {
     };
 
     final url = requestBuilder.buildUrl(
-      '/v1/memory_stores/$memoryStoreId/memories/$memoryId',
+      '/v1/memory_stores/${encodePathSegment(memoryStoreId, 'memoryStoreId')}'
+      '/memories/${encodePathSegment(memoryId, 'memoryId')}',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
     final headers = requestBuilder.buildHeaders(

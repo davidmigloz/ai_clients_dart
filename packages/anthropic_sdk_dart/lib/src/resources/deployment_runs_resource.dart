@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../models/managed_agents/deployments/deployment_run.dart';
 import '../models/managed_agents/deployments/deployment_run_list_response.dart';
 import '../models/managed_agents/deployments/trigger_type.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 
 /// Beta header for the Managed Agents API.
@@ -34,7 +35,9 @@ class DeploymentRunsResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/deployment_runs/$deploymentRunId');
+    final url = requestBuilder.buildUrl(
+      '/v1/deployment_runs/${encodePathSegment(deploymentRunId, 'deploymentRunId')}',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );

@@ -8,6 +8,7 @@ import '../models/managed_agents/deployments/deployment_list_response.dart';
 import '../models/managed_agents/deployments/deployment_run.dart';
 import '../models/managed_agents/deployments/deployment_status.dart';
 import '../models/managed_agents/deployments/update_deployment_params.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 
 /// Beta header for the Managed Agents API.
@@ -115,7 +116,9 @@ class DeploymentsResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/deployments/$deploymentId');
+    final url = requestBuilder.buildUrl(
+      '/v1/deployments/${encodePathSegment(deploymentId, 'deploymentId')}',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );
@@ -143,7 +146,9 @@ class DeploymentsResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/deployments/$deploymentId');
+    final url = requestBuilder.buildUrl(
+      '/v1/deployments/${encodePathSegment(deploymentId, 'deploymentId')}',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );
@@ -172,7 +177,7 @@ class DeploymentsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/deployments/$deploymentId/archive',
+      '/v1/deployments/${encodePathSegment(deploymentId, 'deploymentId')}/archive',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
@@ -201,7 +206,9 @@ class DeploymentsResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/deployments/$deploymentId/pause');
+    final url = requestBuilder.buildUrl(
+      '/v1/deployments/${encodePathSegment(deploymentId, 'deploymentId')}/pause',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );
@@ -230,7 +237,7 @@ class DeploymentsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/deployments/$deploymentId/unpause',
+      '/v1/deployments/${encodePathSegment(deploymentId, 'deploymentId')}/unpause',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
@@ -259,7 +266,9 @@ class DeploymentsResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/deployments/$deploymentId/run');
+    final url = requestBuilder.buildUrl(
+      '/v1/deployments/${encodePathSegment(deploymentId, 'deploymentId')}/run',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );

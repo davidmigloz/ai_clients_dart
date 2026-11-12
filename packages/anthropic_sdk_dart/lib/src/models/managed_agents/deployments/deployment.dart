@@ -93,6 +93,26 @@ class Deployment {
     required this.metadata,
     required this.schedule,
     required this.status,
+    required this.pausedReason,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.archivedAt,
+    this.budget,
+  }) : _rawStatus = null;
+
+  const Deployment._({
+    this.type = 'deployment',
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.agent,
+    required this.environmentId,
+    required this.vaultIds,
+    required this.initialEvents,
+    required this.resources,
+    required this.metadata,
+    required this.schedule,
+    required this.status,
     this._rawStatus,
     required this.pausedReason,
     required this.createdAt,
@@ -103,7 +123,7 @@ class Deployment {
 
   /// Creates a [Deployment] from JSON.
   factory Deployment.fromJson(Map<String, dynamic> json) {
-    return Deployment(
+    return Deployment._(
       type: json['type'] as String? ?? 'deployment',
       id: json['id'] as String,
       name: json['name'] as String,
@@ -184,7 +204,7 @@ class Deployment {
     Object? archivedAt = unsetCopyWithValue,
     Object? budget = unsetCopyWithValue,
   }) {
-    return Deployment(
+    return Deployment._(
       type: type ?? this.type,
       id: id ?? this.id,
       name: name ?? this.name,

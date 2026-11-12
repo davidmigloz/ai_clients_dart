@@ -6,6 +6,7 @@ import '../models/managed_agents/vaults/create_vault_params.dart';
 import '../models/managed_agents/vaults/update_vault_params.dart';
 import '../models/managed_agents/vaults/vault.dart';
 import '../models/managed_agents/vaults/vault_list_response.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 import 'vault_credentials_resource.dart';
 
@@ -108,7 +109,9 @@ class VaultsResource extends ResourceBase {
   /// - [abortTrigger]: Allows canceling the request.
   Future<Vault> retrieve(String vaultId, {Future<void>? abortTrigger}) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/vaults/$vaultId');
+    final url = requestBuilder.buildUrl(
+      '/v1/vaults/${encodePathSegment(vaultId, 'vaultId')}',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );
@@ -134,7 +137,9 @@ class VaultsResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/vaults/$vaultId');
+    final url = requestBuilder.buildUrl(
+      '/v1/vaults/${encodePathSegment(vaultId, 'vaultId')}',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );
@@ -160,7 +165,9 @@ class VaultsResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/vaults/$vaultId');
+    final url = requestBuilder.buildUrl(
+      '/v1/vaults/${encodePathSegment(vaultId, 'vaultId')}',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );
@@ -183,7 +190,9 @@ class VaultsResource extends ResourceBase {
   /// - [abortTrigger]: Allows canceling the request.
   Future<Vault> archive(String vaultId, {Future<void>? abortTrigger}) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/vaults/$vaultId/archive');
+    final url = requestBuilder.buildUrl(
+      '/v1/vaults/${encodePathSegment(vaultId, 'vaultId')}/archive',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );

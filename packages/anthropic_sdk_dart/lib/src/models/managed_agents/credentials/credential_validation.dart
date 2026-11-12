@@ -160,7 +160,10 @@ class RefreshObject {
   final RefreshHttpResponse? httpResponse;
 
   /// Creates a [RefreshObject].
-  const RefreshObject({
+  const RefreshObject({required this.status, this.httpResponse})
+    : _rawStatus = null;
+
+  const RefreshObject._({
     required this.status,
     this.httpResponse,
     this._rawStatus,
@@ -168,7 +171,7 @@ class RefreshObject {
 
   /// Creates a [RefreshObject] from JSON.
   factory RefreshObject.fromJson(Map<String, dynamic> json) {
-    return RefreshObject(
+    return RefreshObject._(
       status: CredentialRefreshStatus.fromJson(json['status'] as String),
       rawStatus: json['status'] as String,
       httpResponse: json['http_response'] != null
@@ -193,7 +196,7 @@ class RefreshObject {
     CredentialRefreshStatus? status,
     Object? httpResponse = unsetCopyWithValue,
   }) {
-    return RefreshObject(
+    return RefreshObject._(
       status: status ?? this.status,
       rawStatus: status == null ? _rawStatus : null,
       httpResponse: httpResponse == unsetCopyWithValue
@@ -320,6 +323,17 @@ class CredentialValidation {
     required this.credentialId,
     required this.vaultId,
     required this.status,
+    required this.validatedAt,
+    required this.hasRefreshToken,
+    this.mcpProbe,
+    this.refresh,
+  }) : _rawStatus = null;
+
+  const CredentialValidation._({
+    this.type = 'vault_credential_validation',
+    required this.credentialId,
+    required this.vaultId,
+    required this.status,
     this._rawStatus,
     required this.validatedAt,
     required this.hasRefreshToken,
@@ -329,7 +343,7 @@ class CredentialValidation {
 
   /// Creates a [CredentialValidation] from JSON.
   factory CredentialValidation.fromJson(Map<String, dynamic> json) {
-    return CredentialValidation(
+    return CredentialValidation._(
       type: json['type'] as String? ?? 'vault_credential_validation',
       credentialId: json['credential_id'] as String,
       vaultId: json['vault_id'] as String,
@@ -372,7 +386,7 @@ class CredentialValidation {
     Object? mcpProbe = unsetCopyWithValue,
     Object? refresh = unsetCopyWithValue,
   }) {
-    return CredentialValidation(
+    return CredentialValidation._(
       type: type ?? this.type,
       credentialId: credentialId ?? this.credentialId,
       vaultId: vaultId ?? this.vaultId,

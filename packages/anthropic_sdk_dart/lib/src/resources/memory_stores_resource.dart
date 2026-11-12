@@ -6,6 +6,7 @@ import '../models/managed_agents/memory_stores/create_memory_store_params.dart';
 import '../models/managed_agents/memory_stores/memory_store.dart';
 import '../models/managed_agents/memory_stores/memory_store_list_response.dart';
 import '../models/managed_agents/memory_stores/update_memory_store_params.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 import 'memories_resource.dart';
 import 'memory_versions_resource.dart';
@@ -133,7 +134,9 @@ class MemoryStoresResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/memory_stores/$memoryStoreId');
+    final url = requestBuilder.buildUrl(
+      '/v1/memory_stores/${encodePathSegment(memoryStoreId, 'memoryStoreId')}',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );
@@ -161,7 +164,9 @@ class MemoryStoresResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/memory_stores/$memoryStoreId');
+    final url = requestBuilder.buildUrl(
+      '/v1/memory_stores/${encodePathSegment(memoryStoreId, 'memoryStoreId')}',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );
@@ -189,7 +194,9 @@ class MemoryStoresResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/memory_stores/$memoryStoreId');
+    final url = requestBuilder.buildUrl(
+      '/v1/memory_stores/${encodePathSegment(memoryStoreId, 'memoryStoreId')}',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );
@@ -216,7 +223,7 @@ class MemoryStoresResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/memory_stores/$memoryStoreId/archive',
+      '/v1/memory_stores/${encodePathSegment(memoryStoreId, 'memoryStoreId')}/archive',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},

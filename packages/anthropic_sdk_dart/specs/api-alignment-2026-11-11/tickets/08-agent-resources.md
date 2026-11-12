@@ -37,3 +37,5 @@ Use public-entry-point fixtures and the package review checklist. Keep live API 
 - Scheduled deployments require the Managed Agents beta and support the Claude API, Claude Platform on AWS and Anthropic-managed Claude Models on Google Cloud. Dreams require approved research preview access on the Claude API. The examples use runtime credentials and retain the selected workspace and beta contracts.
 
 [Agent memory](https://platform.claude.com/docs/en/managed-agents/memory) · [Scheduled deployments](https://platform.claude.com/docs/en/managed-agents/scheduled-deployments) · [Dreams preview](https://platform.claude.com/docs/en/managed-agents/dreams)
+
+Opaque resource IDs use the shared safe-segment encoder on deployment, run, Dreams, memory and vault routes. Internal response-only state stays in private constructors. Public constructors serialize their typed state consistently.
