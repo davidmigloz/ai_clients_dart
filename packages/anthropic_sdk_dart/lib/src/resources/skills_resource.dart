@@ -10,6 +10,7 @@ import '../models/skills/skill_file.dart';
 import '../models/skills/skill_list_response.dart';
 import '../models/skills/skill_source.dart';
 import '../models/skills/skill_version.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 import 'media_type.dart';
 import 'resource_request.dart';
@@ -157,7 +158,7 @@ class SkillsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/skills/${Uri.encodeComponent(skillId)}',
+      '/v1/skills/${encodePathSegment(skillId, 'skillId')}',
     );
     final headers = requestBuilder.buildHeaders(
       betas: betas,
@@ -188,7 +189,7 @@ class SkillsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/skills/${Uri.encodeComponent(skillId)}',
+      '/v1/skills/${encodePathSegment(skillId, 'skillId')}',
     );
     final headers = requestBuilder.buildHeaders(
       betas: betas,
@@ -228,7 +229,7 @@ class SkillsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final uri = requestBuilder.buildUrl(
-      '/v1/skills/${Uri.encodeComponent(skillId)}/versions',
+      '/v1/skills/${encodePathSegment(skillId, 'skillId')}/versions',
     );
     // Remove content-type as multipart will set its own
     final headers = requestBuilder.buildHeaders(
@@ -295,7 +296,7 @@ class SkillsResource extends ResourceBase {
     };
 
     final url = requestBuilder.buildUrl(
-      '/v1/skills/${Uri.encodeComponent(skillId)}/versions',
+      '/v1/skills/${encodePathSegment(skillId, 'skillId')}/versions',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
     final headers = requestBuilder.buildHeaders(
@@ -334,7 +335,7 @@ class SkillsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/skills/${Uri.encodeComponent(skillId)}/versions/${Uri.encodeComponent(version)}',
+      '/v1/skills/${encodePathSegment(skillId, 'skillId')}/versions/${encodePathSegment(version, 'version')}',
     );
     final headers = requestBuilder.buildHeaders(
       betas: betas,
@@ -382,7 +383,7 @@ class SkillsResource extends ResourceBase {
 
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/skills/${Uri.encodeComponent(skillId)}/versions/${Uri.encodeComponent(version)}/content',
+      '/v1/skills/${encodePathSegment(skillId, 'skillId')}/versions/${encodePathSegment(version, 'version')}/content',
     );
     // The response is a binary ZIP archive. Widen Accept and drop the default
     // JSON content-type (this GET has no request body), matching the binary
@@ -426,7 +427,7 @@ class SkillsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/skills/${Uri.encodeComponent(skillId)}/versions/${Uri.encodeComponent(version)}',
+      '/v1/skills/${encodePathSegment(skillId, 'skillId')}/versions/${encodePathSegment(version, 'version')}',
     );
     final headers = requestBuilder.buildHeaders(
       betas: betas,

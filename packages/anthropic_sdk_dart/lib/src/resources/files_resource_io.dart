@@ -8,6 +8,7 @@ import '../auth/request_auth.dart';
 import '../models/files/file_delete_response.dart';
 import '../models/files/file_list_response.dart';
 import '../models/files/file_metadata.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 import 'media_type.dart';
 import 'resource_request.dart';
@@ -168,8 +169,9 @@ class FilesResource extends ResourceBase {
   /// that scope (e.g., a session ID). This requires the Managed Agents beta.
   /// The current Managed Agents beta header is sent for scoped listings
   /// unless a Managed Agents beta is already configured.
-  /// The [beforeId] and [afterId] cursors are only supported with legacy Files
-  /// or Managed Agents headers. They cannot be combined with [page] or [ids].
+  /// The [beforeId] and [afterId] cursors require the `files-api-2025-04-14`
+  /// or `managed-agents-2026-04-01` beta header.
+  /// They cannot be combined with [page] or [ids].
   /// The [betas] and [workspaceId] override configured routing for this call.
   ///
   /// Returns a [FileListResponse] with the list of files and pagination info.
@@ -209,7 +211,7 @@ class FilesResource extends ResourceBase {
       betas: betas,
       workspaceId: workspaceId,
     );
-    if (scopeId != null) {
+    if (url.queryParameters.containsKey('scope_id')) {
       final selected =
           headers['anthropic-beta']
               ?.split(',')
@@ -250,7 +252,7 @@ class FilesResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/files/${Uri.encodeComponent(fileId)}',
+      '/v1/files/${encodePathSegment(fileId, 'fileId')}',
     );
     final headers = requestBuilder.buildHeaders(
       betas: betas,
@@ -283,7 +285,7 @@ class FilesResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/files/${Uri.encodeComponent(fileId)}',
+      '/v1/files/${encodePathSegment(fileId, 'fileId')}',
     );
     final headers = requestBuilder.buildHeaders(
       betas: betas,
@@ -316,7 +318,7 @@ class FilesResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final uri = requestBuilder.buildUrl(
-      '/v1/files/${Uri.encodeComponent(fileId)}/content',
+      '/v1/files/${encodePathSegment(fileId, 'fileId')}/content',
     );
     final headers =
         requestBuilder.buildHeaders(betas: betas, workspaceId: workspaceId)
