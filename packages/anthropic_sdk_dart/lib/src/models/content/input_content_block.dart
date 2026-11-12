@@ -861,12 +861,17 @@ sealed class ToolResultContent {
   const ToolResultContent();
 
   /// Creates a text result.
-  factory ToolResultContent.text(String text) = ToolResultTextContent;
+  factory ToolResultContent.text(
+    String text, {
+    List<InputCitation>? citations,
+    CacheControlEphemeral? cacheControl,
+  }) = ToolResultTextContent;
 
   /// Creates an image result.
   factory ToolResultContent.image(
     ImageSource source, {
     ImageTransformations? transformations,
+    CacheControlEphemeral? cacheControl,
   }) = ToolResultImageContent;
 
   /// Creates a document result.
@@ -916,26 +921,43 @@ class ToolResultTextContent extends ToolResultContent {
   /// The text content.
   final String text;
 
+  /// Citations attached to this text under a compatible API version.
+  final List<InputCitation>? citations;
+
+  /// Creates a cache breakpoint at this text block.
+  final CacheControlEphemeral? cacheControl;
+
   /// Creates a [ToolResultTextContent].
-  const ToolResultTextContent(this.text);
+  const ToolResultTextContent(this.text, {this.citations, this.cacheControl});
 
   /// Creates a [ToolResultTextContent] from JSON.
   factory ToolResultTextContent.fromJson(Map<String, dynamic> json) {
-    return ToolResultTextContent(json['text'] as String);
+    final block = TextInputBlock.fromJson(json);
+    return ToolResultTextContent(
+      block.text,
+      citations: block.citations,
+      cacheControl: block.cacheControl,
+    );
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'text', 'text': text};
+  Map<String, dynamic> toJson() => TextInputBlock(
+    text,
+    citations: citations,
+    cacheControl: cacheControl,
+  ).toJson();
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ToolResultTextContent &&
           runtimeType == other.runtimeType &&
-          text == other.text;
+          text == other.text &&
+          listsEqual(citations, other.citations) &&
+          cacheControl == other.cacheControl;
 
   @override
-  int get hashCode => text.hashCode;
+  int get hashCode => Object.hash(text, listHash(citations), cacheControl);
 
   @override
   String toString() => 'ToolResultTextContent(text: [${text.length} chars])';
@@ -951,27 +973,32 @@ class ToolResultImageContent extends ToolResultContent {
   /// the model observes it.
   final ImageTransformations? transformations;
 
+  /// Creates a cache breakpoint at this image block.
+  final CacheControlEphemeral? cacheControl;
+
   /// Creates a [ToolResultImageContent].
-  const ToolResultImageContent(this.source, {this.transformations});
+  const ToolResultImageContent(
+    this.source, {
+    this.transformations,
+    this.cacheControl,
+  });
 
   /// Creates a [ToolResultImageContent] from JSON.
   factory ToolResultImageContent.fromJson(Map<String, dynamic> json) {
+    final block = ImageInputBlock.fromJson(json);
     return ToolResultImageContent(
-      ImageSource.fromJson(json['source'] as Map<String, dynamic>),
-      transformations: json['transformations'] != null
-          ? ImageTransformations.fromJson(
-              json['transformations'] as Map<String, dynamic>,
-            )
-          : null,
+      block.source,
+      transformations: block.transformations,
+      cacheControl: block.cacheControl,
     );
   }
 
   @override
-  Map<String, dynamic> toJson() => {
-    'type': 'image',
-    'source': source.toJson(),
-    if (transformations != null) 'transformations': transformations!.toJson(),
-  };
+  Map<String, dynamic> toJson() => ImageInputBlock(
+    source,
+    transformations: transformations,
+    cacheControl: cacheControl,
+  ).toJson();
 
   @override
   bool operator ==(Object other) =>
@@ -979,10 +1006,11 @@ class ToolResultImageContent extends ToolResultContent {
       other is ToolResultImageContent &&
           runtimeType == other.runtimeType &&
           source == other.source &&
-          transformations == other.transformations;
+          transformations == other.transformations &&
+          cacheControl == other.cacheControl;
 
   @override
-  int get hashCode => Object.hash(source, transformations);
+  int get hashCode => Object.hash(source, transformations, cacheControl);
 
   @override
   String toString() =>
