@@ -28,7 +28,11 @@ Future<http.StreamedResponse> sendApiRequest(
   http.Client client,
   http.BaseRequest request, {
   required void Function()? ensureNotClosed,
+  String? redirectErrorMessage,
 }) {
+  if (!request.followRedirects && redirectErrorMessage != null) {
+    return _sendWithoutRedirect(client, request, redirectErrorMessage);
+  }
   final hasApiKey = request.headers['x-api-key']?.isNotEmpty == true;
   final nativeAuthorization =
       _usesDartIo && request.headers['authorization']?.isNotEmpty == true;
@@ -41,6 +45,26 @@ Future<http.StreamedResponse> sendApiRequest(
     sameOriginOnly: hasApiKey,
     ensureNotClosed: ensureNotClosed,
   );
+}
+
+Future<http.StreamedResponse> _sendWithoutRedirect(
+  http.Client client,
+  http.BaseRequest request,
+  String redirectErrorMessage,
+) async {
+  final credentials = requestCredentialValues(request.headers);
+  final watch = Stopwatch()..start();
+  final response = await client.send(request);
+  if (response.statusCode >= 300 && response.statusCode < 400) {
+    _releaseRedirectBody(response);
+    throw _redirectException(
+      response,
+      redirectErrorMessage,
+      credentials,
+      watch,
+    );
+  }
+  return response;
 }
 
 Future<http.StreamedResponse> _sendGuardedRequest(
@@ -64,10 +88,7 @@ Future<http.StreamedResponse> _sendGuardedRequest(
       final response = await client.send(current);
       final method = _redirectMethod(current.method, response.statusCode);
       if (method == null) return response;
-      response.stream
-          .listen(null, onError: (Object _, StackTrace _) {})
-          .cancel()
-          .ignore();
+      _releaseRedirectBody(response);
 
       if (abort != null) {
         // A deadline or caller abort can complete alongside this response.
@@ -87,16 +108,7 @@ Future<http.StreamedResponse> _sendGuardedRequest(
         _ => null,
       };
       if (error != null) {
-        throw ApiException(
-          statusCode: response.statusCode,
-          message: error,
-          responseMetadata: createSafeResponseMetadata(
-            statusCode: response.statusCode,
-            headers: response.headers,
-            latency: watch.elapsed,
-            credentials: credentials,
-          ),
-        );
+        throw _redirectException(response, error, credentials, watch);
       }
       ensureNotClosed?.call();
       current = http.AbortableRequest(method, target!, abortTrigger: abort)
@@ -115,6 +127,29 @@ Future<http.StreamedResponse> _sendGuardedRequest(
     unawaited(subscription?.cancel());
   }
 }
+
+void _releaseRedirectBody(http.StreamedResponse response) {
+  response.stream
+      .listen(null, onError: (Object _, StackTrace _) {})
+      .cancel()
+      .ignore();
+}
+
+ApiException _redirectException(
+  http.StreamedResponse response,
+  String message,
+  Set<String> credentials,
+  Stopwatch watch,
+) => ApiException(
+  statusCode: response.statusCode,
+  message: message,
+  responseMetadata: createSafeResponseMetadata(
+    statusCode: response.statusCode,
+    headers: response.headers,
+    latency: watch.elapsed,
+    credentials: credentials,
+  ),
+);
 
 // Keep Dart IO's method handling. These redirect hops carry no body.
 String? _redirectMethod(String method, int status) => switch ((

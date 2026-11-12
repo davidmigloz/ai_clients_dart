@@ -2,8 +2,6 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../errors/exceptions.dart';
-import '../errors/response_error.dart';
 import '../models/compliance/compliance_models.dart';
 import '../utils/path_segment.dart';
 import 'base_resource.dart';
@@ -337,30 +335,18 @@ class ComplianceResource extends ResourceBase with StreamingResource {
     Map<String, dynamic>? query,
     bool allowQuery = true,
     Future<void>? abortTrigger,
-  }) async {
+  }) {
     final request = _request(
       method,
       path,
       query: query,
       allowQuery: allowQuery,
     );
-    final watch = Stopwatch()..start();
-    final response = await interceptorChain.execute(
+    return interceptorChain.execute(
       request,
       abortTrigger: abortTrigger,
+      redirectErrorMessage: 'Unexpected redirect from the Compliance API',
     );
-    if (response.statusCode >= 300 && response.statusCode < 400) {
-      throw ApiException(
-        statusCode: response.statusCode,
-        message: 'Unexpected redirect from the Compliance API',
-        responseMetadata: createSafeResponseMetadata(
-          statusCode: response.statusCode,
-          headers: response.headers,
-          latency: watch.elapsed,
-        ),
-      );
-    }
-    return response;
   }
 
   static Map<String, dynamic> _decodeObject(http.Response response) {

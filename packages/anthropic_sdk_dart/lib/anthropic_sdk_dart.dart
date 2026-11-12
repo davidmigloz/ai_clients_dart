@@ -237,6 +237,7 @@ export 'src/models/organization/organization_rbac.dart';
 export 'src/models/organization/organization_records.dart';
 export 'src/models/organization/organization_spend.dart';
 export 'src/models/organization/organization_workspace.dart';
+export 'src/models/organization/service_account.dart';
 
 // Models - Skills
 export 'src/models/skills/deleted_skill.dart';
@@ -307,6 +308,7 @@ export 'src/resources/organization/organization_access_resources.dart';
 export 'src/resources/organization/organization_federation_resource.dart';
 export 'src/resources/organization/organization_rbac_resources.dart';
 export 'src/resources/organization/organization_resource.dart';
+export 'src/resources/organization/organization_service_accounts_resource.dart';
 export 'src/resources/organization/organization_settings_resources.dart';
 export 'src/resources/organization/organization_spend_resources.dart';
 export 'src/resources/organization/organization_workspaces_resource.dart';
