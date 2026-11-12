@@ -68,8 +68,19 @@ class MessageStreamAccumulator {
 
   /// Adds a streaming event to the accumulator.
   void add(MessageStreamEvent event) {
+    if (_receivedStop &&
+        event is! PingEvent &&
+        event is! UnknownMessageStreamEvent &&
+        event is! ErrorEvent) {
+      throw StateError('Message stream changed after message_stop');
+    }
     switch (event) {
       case MessageStartEvent(:final message):
+        if (_id != null) {
+          throw StateError(
+            'Message stream contained multiple message_start events',
+          );
+        }
         _id = message.id;
         _model = message.model;
         _role = message.role;
@@ -103,8 +114,14 @@ class MessageStreamAccumulator {
         _hasContextManagement = hasContextManagement || _hasContextManagement;
         _mergeUsage(usage);
       case MessageStopEvent():
+        if (_id == null) {
+          throw StateError(
+            'Message stream received message_stop before message_start',
+          );
+        }
         _receivedStop = true;
       case PingEvent():
+      case UnknownMessageStreamEvent():
         break;
       case ErrorEvent():
         _streamError = event;
@@ -351,7 +368,7 @@ class MessageStreamAccumulator {
   /// Use [toMessage] to inspect a partial snapshot.
   Message toFinalMessage() {
     if (_streamError case final error?) {
-      throw StateError('Message stream failed: ${error.errorType}');
+      throw MessageStreamFailure(error);
     }
     if (!_receivedStop) {
       throw StateError('Message stream ended before message_stop');

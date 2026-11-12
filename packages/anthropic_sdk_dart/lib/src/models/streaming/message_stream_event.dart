@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../../errors/exceptions.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../content/content_block.dart';
@@ -14,8 +15,17 @@ sealed class MessageStreamEvent {
   const MessageStreamEvent();
 
   /// Creates a [MessageStreamEvent] from JSON.
-  factory MessageStreamEvent.fromJson(Map<String, dynamic> json) {
-    final type = json['type'] as String;
+  factory MessageStreamEvent.fromJson(
+    Map<String, dynamic> json, {
+    ResponseMetadata? responseMetadata,
+  }) {
+    final type = json['type'];
+    if (json['_event'] == 'error' || type == 'error') {
+      return ErrorEvent.fromJson(json, responseMetadata: responseMetadata);
+    }
+    if (type is! String || type.isEmpty) {
+      throw const FormatException('Missing message stream event type');
+    }
     return switch (type) {
       'message_start' => MessageStartEvent.fromJson(json),
       'message_delta' => MessageDeltaEvent.fromJson(json),
@@ -24,8 +34,7 @@ sealed class MessageStreamEvent {
       'content_block_delta' => ContentBlockDeltaEvent.fromJson(json),
       'content_block_stop' => ContentBlockStopEvent.fromJson(json),
       'ping' => PingEvent.fromJson(json),
-      'error' => ErrorEvent.fromJson(json),
-      _ => throw FormatException('Unknown MessageStreamEvent type: $type'),
+      _ => UnknownMessageStreamEvent.fromJson(json),
     };
   }
 
@@ -407,33 +416,99 @@ class ErrorEvent extends MessageStreamEvent {
   /// The error message.
   final String message;
 
+  /// Safe metadata from the successful HTTP handshake.
+  final ResponseMetadata? responseMetadata;
+
+  final Map<String, dynamic>? _raw;
+
   /// Creates an [ErrorEvent].
-  const ErrorEvent({required this.errorType, required this.message});
+  const ErrorEvent({
+    required this.errorType,
+    required this.message,
+    this.responseMetadata,
+  }) : _raw = null;
+
+  const ErrorEvent._(
+    this.errorType,
+    this.message,
+    this.responseMetadata,
+    this._raw,
+  );
 
   /// Creates an [ErrorEvent] from JSON.
-  factory ErrorEvent.fromJson(Map<String, dynamic> json) {
+  factory ErrorEvent.fromJson(
+    Map<String, dynamic> json, {
+    ResponseMetadata? responseMetadata,
+  }) {
     final error = json['error'];
-    if (error is Map<String, dynamic>) {
+    if (json case {
+      '_event': 'error',
+      '_rawData': final String text,
+    } when json.length == 3 && json['type'] == 'error') {
       return ErrorEvent(
-        errorType: error['type'] as String? ?? 'unknown',
-        message: error['message'] as String? ?? 'Unknown error',
+        errorType: 'stream_error',
+        message: text.isEmpty ? 'Unknown stream error' : text,
+        responseMetadata: responseMetadata,
       );
     }
-    if (error is String) {
-      return ErrorEvent(errorType: 'stream_error', message: error);
-    }
-    // Handle non-JSON SSE error events (e.g., plain-text payloads)
-    return ErrorEvent(
-      errorType: 'stream_error',
-      message: (json['_rawData'] as String?) ?? 'Unknown stream error',
+    final errorType = switch (error) {
+      {'type': final String type} => type,
+      Map() => 'unknown',
+      _ => 'stream_error',
+    };
+    final message = switch (error) {
+      {'message': final String text} => text,
+      final String text => text,
+      _ => switch (json) {
+        {'message': final String text} => text,
+        _ => 'Unknown stream error',
+      },
+    };
+    final metadata = responseMetadata;
+    final bodyRequestId = _bodyRequestId(json);
+    return ErrorEvent._(
+      errorType,
+      message,
+      metadata == null || bodyRequestId == null
+          ? metadata
+          : ResponseMetadata(
+              statusCode: metadata.statusCode,
+              headers: metadata.headers,
+              bodyExcerpt: metadata.bodyExcerpt,
+              latency: metadata.latency,
+              bodyRequestId: bodyRequestId,
+            ),
+      deepUnmodifiableMap(Map.of(json)..remove('_event')),
     );
   }
 
-  @override
-  Map<String, dynamic> toJson() => {
-    'type': 'error',
-    'error': {'type': errorType, 'message': message},
+  static String? _bodyRequestId(Map<String, dynamic>? json) => switch (json) {
+    {'request_id': final String id} when id.trim().isNotEmpty => id,
+    _ => null,
   };
+
+  /// The real provider ID. The HTTP handshake header takes precedence.
+  String? get requestId => responseMetadata?.requestId ?? _bodyRequestId(_raw);
+
+  /// Details supplied by the provider, when available.
+  Map<String, dynamic>? get details => switch (_raw) {
+    {'error': {'details': final Map<String, dynamic> details}} => details,
+    _ => null,
+  };
+
+  /// Provider error code from the structured details, when available.
+  String? get errorCode => switch (details) {
+    {'error_code': final String code} => code,
+    _ => null,
+  };
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _raw ??
+      {
+        'type': 'error',
+        'error': {'type': errorType, 'message': message},
+      };
 
   @override
   bool operator ==(Object other) =>
@@ -441,11 +516,54 @@ class ErrorEvent extends MessageStreamEvent {
       other is ErrorEvent &&
           runtimeType == other.runtimeType &&
           errorType == other.errorType &&
-          message == other.message;
+          message == other.message &&
+          requestId == other.requestId &&
+          mapsDeepEqual(toJson(), other.toJson());
 
   @override
-  int get hashCode => Object.hash(errorType, message);
+  int get hashCode =>
+      Object.hash(errorType, message, requestId, mapDeepHashCode(toJson()));
 
   @override
   String toString() => 'ErrorEvent(errorType: $errorType, message: $message)';
+}
+
+/// Failure raised by stream convenience helpers for an in-band SSE error.
+final class MessageStreamFailure extends StateError {
+  /// Creates a failure retaining the original provider error event.
+  MessageStreamFailure(this.event)
+    : super('Message stream failed: ${event.errorType}');
+
+  /// The provider's terminal event, including its error details.
+  final ErrorEvent event;
+
+  /// Provider request ID, when available.
+  String? get requestId => event.requestId;
+}
+
+/// An event type introduced by the server that this version does not model.
+@immutable
+final class UnknownMessageStreamEvent extends MessageStreamEvent {
+  /// The event's original JSON without SSE parser metadata.
+  final Map<String, dynamic> raw;
+
+  /// Creates an unknown event from its JSON.
+  UnknownMessageStreamEvent.fromJson(Map<String, dynamic> json)
+    : raw = deepUnmodifiableMap(Map.of(json)..remove('_event'));
+
+  /// The original wire discriminator.
+  String get type => raw['type'] as String;
+
+  @override
+  Map<String, dynamic> toJson() => raw;
+
+  @override
+  bool operator ==(Object other) =>
+      other is UnknownMessageStreamEvent && mapsDeepEqual(raw, other.raw);
+
+  @override
+  int get hashCode => mapDeepHashCode(raw);
+
+  @override
+  String toString() => 'UnknownMessageStreamEvent(type: $type)';
 }

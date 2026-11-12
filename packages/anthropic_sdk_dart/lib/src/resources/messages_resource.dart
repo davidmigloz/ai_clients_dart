@@ -97,7 +97,8 @@ class MessagesResource extends ResourceBase with StreamingResource {
     final body = request.toJson();
     body['stream'] = true;
 
-    final eventStream = postStream(
+    return postResourceEventStream<MessageStreamEvent>(
+      this,
       '/v1/messages',
       body: body,
       headers: _requestHeaders(
@@ -108,9 +109,10 @@ class MessagesResource extends ResourceBase with StreamingResource {
       validateHeaders: (headers) =>
           validateMessageRequestVersion(headers['anthropic-version'], body),
       abortTrigger: abortTrigger,
+      decodeEvent: (event, metadata) =>
+          MessageStreamEvent.fromJson(event, responseMetadata: metadata),
+      isTerminal: (event) => event is ErrorEvent,
     );
-
-    return mapStream(eventStream, MessageStreamEvent.fromJson);
   }
 
   /// Counts the number of tokens in a message.

@@ -88,6 +88,8 @@ void main() async {
             print('  Canceled');
           case BatchResultExpired():
             print('  Expired');
+          case UnknownBatchResult(:final type):
+            print('Unknown batch result: $type');
         }
       }
     } else {

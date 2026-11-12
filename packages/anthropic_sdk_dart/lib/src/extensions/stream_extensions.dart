@@ -8,18 +8,16 @@ import '../models/streaming/message_stream_event.dart';
 
 /// Convenience extensions on [Stream<MessageStreamEvent>].
 extension MessageStreamExtension on Stream<MessageStreamEvent> {
-  /// Collects all text deltas into a single string.
+  /// Collects all text deltas and throws [MessageStreamFailure] on API errors.
   Future<String> collectText() async {
     final buffer = StringBuffer();
-    await for (final event in this) {
-      if (event is ContentBlockDeltaEvent && event.delta is TextDelta) {
-        buffer.write((event.delta as TextDelta).text);
-      }
-    }
+    await textDeltas().forEach(buffer.write);
     return buffer.toString();
   }
 
   /// Yields individual text delta strings as they arrive.
+  ///
+  /// An in-band API error ends the stream with [MessageStreamFailure].
   Stream<String> textDeltas() => transform(
     _deltaStrings(
       (event) => switch (event) {
@@ -30,6 +28,8 @@ extension MessageStreamExtension on Stream<MessageStreamEvent> {
   );
 
   /// Yields individual thinking delta strings as they arrive.
+  ///
+  /// An in-band API error ends the stream with [MessageStreamFailure].
   Stream<String> thinkingDeltas() => transform(
     _deltaStrings(
       (event) => switch (event) {
@@ -41,6 +41,8 @@ extension MessageStreamExtension on Stream<MessageStreamEvent> {
   );
 
   /// Yields individual input JSON delta strings as they arrive (for tool use).
+  ///
+  /// An in-band API error ends the stream with [MessageStreamFailure].
   Stream<String> inputJsonDeltas() => transform(
     _deltaStrings(
       (event) => switch (event) {
@@ -78,9 +80,11 @@ extension MessageStreamExtension on Stream<MessageStreamEvent> {
   /// Consumes the entire stream and returns the last stop reason.
   ///
   /// Returns `null` if no [MessageDeltaEvent] with a stop reason was received.
+  /// Throws [MessageStreamFailure] on an in-band API error.
   Future<StopReason?> get stopReason async {
     StopReason? result;
     await for (final event in this) {
+      if (event is ErrorEvent) throw MessageStreamFailure(event);
       if (event is MessageDeltaEvent) {
         final reason = event.delta.stopReason;
         if (reason != null) result = reason;
@@ -94,6 +98,12 @@ StreamTransformer<MessageStreamEvent, String> _deltaStrings(
   String? Function(MessageStreamEvent) select,
 ) => StreamTransformer<MessageStreamEvent, String>.fromHandlers(
   handleData: (event, sink) {
+    if (event is ErrorEvent) {
+      sink
+        ..addError(MessageStreamFailure(event), StackTrace.current)
+        ..close();
+      return;
+    }
     final delta = select(event);
     if (delta != null) sink.add(delta);
   },

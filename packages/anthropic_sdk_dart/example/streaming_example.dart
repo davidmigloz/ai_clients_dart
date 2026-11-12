@@ -58,6 +58,8 @@ void main() async {
           break;
         case ErrorEvent(:final errorType, :final message):
           print('[Error] $errorType: $message');
+        case UnknownMessageStreamEvent(:final type):
+          print('Unknown stream event: $type');
       }
     }
 

@@ -23,7 +23,7 @@ mixin StreamingResource on ResourceBase {
     T Function(Map<String, dynamic>) decode,
   ) => Stream<T>.eventTransformed(
     source,
-    (sink) => _MappedEventSink(sink, decode),
+    (sink) => _MappedEventSink<T>(sink, decode),
   );
 
   /// Makes a streaming POST request.
@@ -48,7 +48,7 @@ mixin StreamingResource on ResourceBase {
     headers: headers,
     abortTrigger: abortTrigger,
     validateHeaders: validateHeaders,
-    decode: (body, _) => SseParser().parse(body),
+    decode: (body, _, _) => SseParser().parse(body),
   );
 
   /// Makes a streaming GET request whose response contains JSON lines.
@@ -78,7 +78,7 @@ mixin StreamingResource on ResourceBase {
     errorFactory: errorFactory,
     errorFactoryWithMetadata: errorFactoryWithMetadata,
     jsonlMedia: true,
-    decode: (body, _) => body
+    decode: (body, _, _) => body
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .where((line) => line.trim().isNotEmpty)
@@ -141,7 +141,7 @@ mixin StreamingResource on ResourceBase {
     queryParams: queryParams,
     headers: headers,
     abortTrigger: abortTrigger,
-    decode: (body, _) => SseParser().parse(body),
+    decode: (body, _, _) => SseParser().parse(body),
   );
 
   Stream<T> _stream<T>(
@@ -154,9 +154,12 @@ mixin StreamingResource on ResourceBase {
     void Function(Map<String, String>)? validateHeaders,
     required Stream<T> Function(
       Stream<List<int>> body,
-      Map<String, String> headers,
+      http.StreamedResponse response,
+      Duration latency,
     )
     decode,
+    bool Function(T)? isTerminal,
+    void Function(http.StreamedResponse, Duration)? onResponse,
     Map<String, String> Function()? buildRequestHeaders,
     bool followRedirects = true,
     bool jsonlMedia = false,
@@ -317,16 +320,28 @@ mixin StreamingResource on ResourceBase {
             },
           );
         } else {
-          final decoded = decode(responseBodyStream, response.headers);
+          try {
+            onResponse?.call(response, stopwatch.elapsed);
+          } catch (_) {
+            response.stream.listen(null).cancel().ignore();
+            rethrow;
+          }
           if (stopped) {
-            await decoded.listen(null).cancel();
+            await response.stream.listen(null).cancel();
             return;
           }
-          subscription = decoded.listen(
-            controller.add,
-            onError: finish,
-            onDone: finish,
-          );
+          subscription = decode(responseBodyStream, response, stopwatch.elapsed)
+              .listen(
+                (event) {
+                  if (stopped) return;
+                  final terminal = isTerminal?.call(event) == true;
+                  if (terminal) stop();
+                  controller.add(event);
+                  if (terminal) unawaited(controller.close());
+                },
+                onError: finish,
+                onDone: finish,
+              );
         }
         // A custom response stream can abort synchronously from its onListen
         // callback, before its subscription is available to stop().
@@ -374,6 +389,36 @@ mixin StreamingResource on ResourceBase {
   }
 }
 
+/// Decodes Messages SSE with handshake metadata and immediate terminal cleanup.
+Stream<T> postResourceEventStream<T>(
+  StreamingResource resource,
+  String path, {
+  required Map<String, dynamic> body,
+  required T Function(Map<String, dynamic>, ResponseMetadata) decodeEvent,
+  required bool Function(T) isTerminal,
+  Map<String, String>? headers,
+  Future<void>? abortTrigger,
+  void Function(Map<String, String>)? validateHeaders,
+}) => resource._stream(
+  'POST',
+  path,
+  body: body,
+  headers: headers,
+  abortTrigger: abortTrigger,
+  validateHeaders: validateHeaders,
+  isTerminal: isTerminal,
+  decode: (body, response, latency) {
+    final metadata = createSafeResponseMetadata(
+      statusCode: response.statusCode,
+      headers: response.headers,
+      latency: latency,
+    );
+    return SseParser()
+        .parse(body, strictJson: true)
+        .map((event) => decodeEvent(event, metadata));
+  },
+);
+
 /// Opens a raw response body using the same lifecycle as SSE and JSONL streams.
 Stream<List<int>> getResourceByteStream(
   StreamingResource resource,
@@ -389,15 +434,10 @@ Stream<List<int>> getResourceByteStream(
   buildRequestHeaders: headers,
   followRedirects: false,
   abortTrigger: abortTrigger,
-  decode: (body, headers) {
-    try {
-      onResponse?.call(headers);
-      return body;
-    } catch (_) {
-      body.listen(null).cancel().ignore();
-      rethrow;
-    }
-  },
+  onResponse: onResponse == null
+      ? null
+      : (response, _) => onResponse(response.headers),
+  decode: (body, _, _) => body,
 );
 
 class _MappedEventSink<T> implements EventSink<Map<String, dynamic>> {

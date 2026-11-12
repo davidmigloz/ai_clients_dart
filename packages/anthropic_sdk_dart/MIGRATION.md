@@ -339,6 +339,63 @@ version, pass `version: 'latest'` to `retrieveVersion` and use its returned
 
 ---
 
+## Handle future stream events and batch results
+
+`MessageStreamEvent` and `BatchResult` each gain a sealed case. Include the new
+case in exhaustive switches. Use `toJson()` to retain the original payload
+when forwarding an unfamiliar event or result.
+
+```dart
+// Before
+switch (event) {
+  case MessageStartEvent() || MessageDeltaEvent() || MessageStopEvent() ||
+      ContentBlockStartEvent() || ContentBlockDeltaEvent() || ContentBlockStopEvent() ||
+      PingEvent():
+    updateView(event);
+  case ErrorEvent():
+    recordFailure(event.message);
+}
+
+// After
+switch (event) {
+  case MessageStartEvent() || MessageDeltaEvent() || MessageStopEvent() ||
+      ContentBlockStartEvent() || ContentBlockDeltaEvent() || ContentBlockStopEvent() ||
+      PingEvent():
+    updateView(event);
+  case ErrorEvent():
+    recordFailure(event.message);
+  case UnknownMessageStreamEvent():
+    recordUnknownType(event.type);
+}
+```
+
+```dart
+// Before
+final outcome = switch (batchItem.result) {
+  BatchResultSucceeded() => 'succeeded',
+  BatchResultErrored() => 'errored',
+  BatchResultCanceled() => 'canceled',
+  BatchResultExpired() => 'expired',
+};
+
+// After
+final outcome = switch (batchItem.result) {
+  BatchResultSucceeded() => 'succeeded',
+  BatchResultErrored() => 'errored',
+  BatchResultCanceled() => 'canceled',
+  BatchResultExpired() => 'expired',
+  UnknownBatchResult(:final type) => type,
+};
+```
+
+`finalMessage()`, `collectText()`, the delta helpers, and `stopReason` report
+in-band API failures as `MessageStreamFailure`. The exception extends
+`StateError` and exposes the provider event, request ID and structured error
+code. Use raw events or `accumulate()` to inspect partial output and the
+terminal `ErrorEvent`.
+
+---
+
 ## Migrating from v9.x to v10.0.0
 
 v10.0.0 adds document sources that reference uploaded files. `DocumentSource` is sealed, so exhaustive switches must handle the new `FileDocumentSource` variant.

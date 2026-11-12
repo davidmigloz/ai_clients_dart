@@ -361,18 +361,48 @@ sealed class BatchResult {
 
   /// Creates a [BatchResult] from JSON.
   factory BatchResult.fromJson(Map<String, dynamic> json) {
-    final type = json['type'] as String;
+    final type = json['type'];
+    if (type is! String || type.isEmpty) {
+      throw const FormatException('Missing batch result type');
+    }
     return switch (type) {
       'succeeded' => BatchResultSucceeded.fromJson(json),
       'errored' => BatchResultErrored.fromJson(json),
       'canceled' => BatchResultCanceled.fromJson(json),
       'expired' => BatchResultExpired.fromJson(json),
-      _ => throw FormatException('Unknown BatchResult type: $type'),
+      _ => UnknownBatchResult.fromJson(json),
     };
   }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson();
+}
+
+/// A batch result type introduced by the server.
+@immutable
+final class UnknownBatchResult extends BatchResult {
+  /// The original JSON.
+  final Map<String, dynamic> raw;
+
+  /// Creates an unknown batch result.
+  UnknownBatchResult.fromJson(Map<String, dynamic> json)
+    : raw = deepUnmodifiableMap(json);
+
+  /// The original wire discriminator.
+  String get type => raw['type'] as String;
+
+  @override
+  Map<String, dynamic> toJson() => raw;
+
+  @override
+  bool operator ==(Object other) =>
+      other is UnknownBatchResult && mapsDeepEqual(raw, other.raw);
+
+  @override
+  int get hashCode => mapDeepHashCode(raw);
+
+  @override
+  String toString() => 'UnknownBatchResult(type: $type)';
 }
 
 /// Successful batch result.
@@ -425,30 +455,62 @@ class BatchError {
   /// The error message.
   final String message;
 
-  /// Creates a [BatchError].
-  const BatchError({required this.type, required this.message});
+  final Map<String, dynamic>? _raw;
 
-  /// Creates a [BatchError] from JSON.
+  /// Creates a [BatchError] with the legacy flat shape.
+  const BatchError({required this.type, required this.message}) : _raw = null;
+
+  const BatchError._(this.type, this.message, this._raw);
+
+  /// Creates a [BatchError] from a current envelope or legacy flat JSON.
   factory BatchError.fromJson(Map<String, dynamic> json) {
-    return BatchError(
-      type: json['type'] as String,
-      message: json['message'] as String,
+    final error = _errorPayload(json);
+    return BatchError._(
+      error['type'] as String,
+      error['message'] as String,
+      deepUnmodifiableMap(json),
     );
   }
 
-  /// Converts to JSON.
-  Map<String, dynamic> toJson() => {'type': type, 'message': message};
+  static Map<String, dynamic> _errorPayload(Map<String, dynamic> json) =>
+      switch (json) {
+        {'type': 'error', 'error': final Map<String, dynamic> error} => error,
+        _ => json,
+      };
+
+  /// The request ID reported for the failed batch item.
+  String? get requestId => switch (_raw) {
+    {'request_id': final String id} when id.trim().isNotEmpty => id,
+    _ => null,
+  };
+
+  /// Provider error details, if available.
+  Map<String, dynamic>? get details {
+    final raw = _raw;
+    if (raw == null) return null;
+    return switch (_errorPayload(raw)) {
+      {'details': final Map<String, dynamic> details} => details,
+      _ => null,
+    };
+  }
+
+  /// Provider error code from the structured details, if available.
+  String? get errorCode => switch (details) {
+    {'error_code': final String code} => code,
+    _ => null,
+  };
+
+  /// Converts to the original JSON shape.
+  Map<String, dynamic> toJson() => _raw ?? {'type': type, 'message': message};
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) ||
       other is BatchError &&
-          runtimeType == other.runtimeType &&
-          type == other.type &&
-          message == other.message;
+      runtimeType == other.runtimeType &&
+      mapsDeepEqual(toJson(), other.toJson());
 
   @override
-  int get hashCode => Object.hash(type, message);
+  int get hashCode => mapDeepHashCode(toJson());
 
   @override
   String toString() => 'BatchError(type: $type, message: $message)';
