@@ -29,10 +29,10 @@ Dart client for the **[Anthropic API](https://platform.claude.com/docs/en/api/ov
 
 ## Quickstart
 
-Requires Dart 3.12 or later. Set `ANTHROPIC_API_KEY` in your environment or set `ANTHROPIC_AUTH_TOKEN` to a scoped OAuth access token, then add the package. See the [Migration Guide](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) for upgrade instructions.
+Requires Dart 3.12 or later. Set `ANTHROPIC_API_KEY` to your API key or `ANTHROPIC_AUTH_TOKEN` to a scoped OAuth access token. See the [Migration Guide](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) for upgrade instructions.
 
 ```sh
-dart pub add anthropic_sdk_dart
+dart pub add 'anthropic_sdk_dart:^11.0.0'
 ```
 
 ```dart

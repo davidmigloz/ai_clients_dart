@@ -6,72 +6,23 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
-## Claude Platform on AWS
+## Migrating from v10.x to v11.0.0
 
-Use `AnthropicAwsClient` for the native regional Claude endpoint. Use the workspace's AWS region and ID, and supply an AWS-issued key or an IAM credential provider. A first-party Claude API key is replaced by the AWS credential when you change clients.
+The new default API version changes which inputs Messages accepts. Update your
+requests and add the new cases to any exhaustive switches over SDK types.
 
-```dart
-final client = AnthropicAwsClient(
-  region: 'us-east-1',
-  workspaceId: workspaceId,
-  credentials: loadAwsCredentials,
-);
-```
+### 1) Update requests for Claude API 2026-10-21
 
-Messages and streaming use the same Dart request types and Claude API version. AWS IAM determines available Admin and Compliance operations. [Claude Platform on AWS](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws)
+#### Claude API version 2026-10-21
 
+The SDK changes the default API version from `2023-06-01` to `2026-10-21`.
+If you set `anthropic-version` in `defaultHeaders`, that header takes precedence
+over `apiVersion` regardless of its letter case.
 
-## Bedrock model API versions
+##### Use the current Messages contract
 
-Bedrock uses `2026-10-21` by default for Claude models that accept it. For Claude 4.6 and earlier, retain the version your deployed model already uses. Runtime moves that value into `anthropic_version` in the JSON request. Mantle sends it in the `anthropic-version` header.
-
-```dart
-final runtime = AnthropicBedrockClient(
-  region: 'us-east-1',
-  config: const AnthropicConfig(apiVersion: 'bedrock-2023-05-31'),
-);
-final mantle = AnthropicBedrockMantleClient(
-  region: 'us-east-1',
-  config: const AnthropicConfig(apiVersion: AnthropicConfig.legacyApiVersion),
-);
-```
-
-The Bedrock clients expose Messages inference. Mantle uses the Claude count-tokens request and Runtime uses `countInvokeTokens` with the original InvokeModel body. Runtime stream exceptions surface as typed Claude error events. [Claude API version migration](https://platform.claude.com/docs/en/api/migration-2026-10-21) · [AWS token counting](https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_CountTokens.html)
-
-
-## Select a cloud provider client
-
-Use the provider class that matches your deployment when migrating a custom `baseUrl` configuration. Keep the same Dart Messages types and obtain credentials from that provider.
-
-| Provider | Authentication | Routing and API version |
-| --- | --- | --- |
-| Anthropic-managed Google Cloud | Google OAuth callback or access token | Project and workspace are in the URL. Organization and user profiles use the project gateway. The API version remains a header. |
-| Google-managed Vertex | Google OAuth callback or access token | Vertex uses the publisher model or token-counting route. The API version moves into the body. Use `vertex-2023-10-16` for the legacy contract. |
-| Microsoft Foundry | Azure API key or Entra token callback | Use the Foundry resource and deployment name. The API version remains a header. Set `azureHosted: true` for an Azure-hosted deployment. |
-
-For example, replace manual Vertex URL and body rewriting with the provider client. Request code still uses `client.messages.create(request)`.
-
-```dart
-final client = AnthropicVertexClient(
-  projectId: 'my-project',
-  region: 'global',
-  tokenProvider: refreshGoogleAccessToken,
-  config: const AnthropicConfig(apiVersion: 'vertex-2023-10-16'),
-);
-```
-
-For regional and model-specific version support, see [Vertex](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/google-managed), [Anthropic-managed Google Cloud](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/anthropic-managed), and [Foundry](https://platform.claude.com/docs/en/build-with-claude/claude-in-microsoft-foundry).
-
-## Claude API version 2026-10-21
-
-The default API version changes from `2023-06-01` to `2026-10-21`. Every
-request uses the configured version. A case-insensitive `anthropic-version`
-entry in `defaultHeaders` takes precedence over `apiVersion`.
-
-### Use the current Messages contract
-
-Remove `temperature`, `topP` and `topK` from message creation and batch
-parameters, including parameters set to their defaults.
+Remove `temperature`, `topP`, and `topK` from Messages and batch creation
+requests, even if you set them to their default values.
 
 ```dart
 // Before
@@ -91,15 +42,14 @@ final current = MessageCreateRequest(
 ```
 
 Move direct `document` blocks from assistant turns to user turns. Remove
-nonempty citations from user text blocks, including text in search results, tool
-results and structured document sources.
-Assistant text citations, nested documents in tool results, and the
-`citations: {enabled: true}` setting on a document or search result are still
-supported. The Dart client raises `ValidationException` before sending these
-incompatible inputs in Messages create, streaming, token count where applicable,
-and batch create.
+nonempty citations from user text blocks in search results, tool results, and
+structured document sources as well as from top-level user text.
 
-Move the document to the user turn that supplies it.
+The SDK raises `ValidationException` before dispatch if a Messages or batch
+request contains these inputs. The same checks apply to streaming and token
+counting where the inputs are supported. You can still send assistant text
+citations, documents nested in tool results, and `citations: {enabled: true}`
+on documents and search results.
 
 **Before**
 
@@ -166,12 +116,11 @@ Keep the user tool result and omit its nested text citations.
 }
 ```
 
-### Keep the legacy behavior when required
+##### Keep the legacy behavior when required
 
-Select the legacy version explicitly if your application still needs the
-previous sampling controls. The following example uses the first-party Claude
-API. Separately configured Bedrock transports must keep their previous API
-version for models older than Claude 4.7.
+If you still use legacy sampling controls, pin the previous API version for
+the first-party Claude API. For Bedrock models older than Claude 4.7, keep the
+API version your deployed model uses.
 
 ```dart
 final client = AnthropicClient(
@@ -181,14 +130,12 @@ final client = AnthropicClient(
 );
 ```
 
-`ApiKeyProvider` continues to send the API key in `x-api-key`, which the Claude
-API accepts. The pinned official SDKs send keys as Bearer by default.
+`ApiKeyProvider` sends the key in `x-api-key`. The pinned official SDKs send
+keys as bearer credentials by default.
 
 The server migration also renames Admin and Enterprise Analytics response fields. [Claude API migration guide](https://platform.claude.com/docs/en/api/migration-2026-10-21) · [Runnable version example](example/api_version_example.dart)
 
----
-
-## Move Text Completions to Messages
+#### Move Text Completions to Messages
 
 Anthropic documents `POST /v1/complete` as deprecated. The pinned Python and
 TypeScript SDKs omit that resource, and Dart exposes `CompletionRequest` and
@@ -198,14 +145,12 @@ Move any legacy `Human:` and `Assistant:` prompt delimiters to message roles,
 and use `maxTokens` and `response.text`.
 [Anthropic migration guidance](https://platform.claude.com/docs/en/api/migration-2026-10-21#sdk-text-completions) · [Runnable Messages example](example/messages_example.dart)
 
----
+#### Move structured output to output_config.format
 
-## Move structured output to output_config.format
-
-JSON deserialization for Messages creation, token counting, and batch items
-accepts the deprecated beta `output_format` field. It converts that field to
-`output_config.format` on the wire. When both fields contain a format, parsing
-throws a `FormatException`.
+Messages creation, token counting, and batch item decoders accept stored JSON
+with the deprecated beta `output_format` field. The SDK writes that format to
+`output_config.format` when it sends the request. If both fields contain a
+format, decoding throws a `FormatException`.
 
 ```dart
 // Before, a stored request could contain both format keys.
@@ -235,112 +180,9 @@ For `client.messages.parse` and `parseStream`, provide the schema through
 the request's effort and task budget. Task budgets require a supported model
 and `task-budgets-2026-03-13` in the call's beta flags.
 
----
+### 2) Update Messages types and stream handling
 
-## Handle automatic Managed Agents permissions
-
-The Managed Agents beta adds `AutoPolicy` to the sealed `PermissionPolicy` type.
-Handle it in exhaustive switches. This policy asks the server to evaluate
-each tool call.
-
-Before
-
-```dart
-String policyLabel(PermissionPolicy policy) => switch (policy) {
-  AlwaysAllowPolicy() => 'Allow',
-  AlwaysAskPolicy() => 'Ask',
-  UnknownPermissionPolicy() => 'Other',
-};
-```
-
-After
-
-```dart
-String policyLabel(PermissionPolicy policy) => switch (policy) {
-  AlwaysAllowPolicy() => 'Allow',
-  AlwaysAskPolicy() => 'Ask',
-  AutoPolicy() => 'Evaluate each tool call',
-  UnknownPermissionPolicy() => 'Other',
-};
-```
-
----
-
-## Handle Managed Agents workflow variants
-
-Existing coordinator configuration is still accepted. Use
-`Multiagent20261001Params` to configure dynamic workflows and subagents.
-Switches over the following sealed types need the new cases.
-
-| Sealed type | New case |
-| --- | --- |
-| `MultiagentParams` | `Multiagent20261001Params` |
-| `Multiagent` | `Multiagent20261001` |
-| `SessionMultiagent` | `SessionMultiagent20261001` |
-| `SessionEvent` | `WorkflowRunEvent` |
-| `SessionStopReason` | `SessionRefusal` |
-
-```dart
-// Before
-final mode = switch (config) {
-  MultiagentCoordinatorParams() => 'Coordinator',
-  UnknownMultiagentParams() => 'Unknown',
-};
-
-// After
-final mode = switch (config) {
-  MultiagentCoordinatorParams() => 'Coordinator',
-  Multiagent20261001Params() => 'Dynamic workflows and subagents',
-  UnknownMultiagentParams() => 'Unknown',
-};
-```
-
-A session keeps the topology copied at creation. Create a new session to use
-changes to the saved agent. Thread snapshots may contain `SessionInlineAgent`
-without a saved ID or version. `SessionErrorEvent.errorDetails` adds typed access
-while retaining the raw `error` object. Read paginated event history after a
-disconnect. The Managed Agents stream delivers live events.
-[Managed Agents workflow example](example/managed_agents_workflow_example.dart)
-
----
-
-## Generally available User Profiles
-
-Existing `client.userProfiles` calls use the legacy beta contract. Use
-`client.userProfiles.current` to adopt the generally available contract.
-
-```dart
-// Legacy beta
-final legacy = await client.userProfiles.create(
-  const CreateUserProfileRequest(externalId: 'customer_123'),
-);
-
-// Generally available
-final profile = await client.userProfiles.current.create(
-  const CreateCurrentUserProfileRequest(
-    externalUserDetails: UserProfileExternalUserDetails(referenceId: 'customer_123'),
-  ),
-);
-```
-
-When an existing profile already has an ID, retrieve that ID through the new
-resource. The create endpoint creates a distinct profile on each successful
-call. Under the current contract `referenceId` and `onboardedAt` are part of
-`externalUserDetails`. Omit an external detail on update to keep it.
-`programs` reports program status and `enforcementStatus` reports Anthropic's
-overall enforcement state.
-
-Use `createActionUrl(profile.id, action: UserProfileAction.enrollEndUser)` for
-a current enrollment action. The URL is short-lived and grants access to the
-recipient until expiration. Keep it out of application logs. Access to GA action
-URLs is organization-gated. A 404 can indicate that the organization has no
-access. On Claude Platform on AWS, use the legacy `createEnrollmentUrl` route.
-[Verification Portal guide](https://platform.claude.com/docs/en/manage-claude/user-profiles-verification-portal#create-the-link)
-[User Profiles reference](https://platform.claude.com/docs/en/api/user_profiles)
-
----
-
-## Handle the between-tools thinking variant
+#### Handle the between-tools thinking variant
 
 The exported `ThinkingConfig` sealed type now includes `ThinkingBetweenTools`. Add a case to exhaustive switches over `ThinkingConfig`.
 
@@ -367,9 +209,7 @@ String describeThinking(ThinkingConfig config) => switch (config) {
 
 Use `ThinkingConfig.betweenTools()` when the model accepts this setting. Check `model.capabilities?.thinking.types.betweenTools?.supported` and the model's effort restrictions before requesting it. [Claude Sonnet 5.5 migration guide](https://platform.claude.com/docs/en/models/sonnet-5-5/migration-guide)
 
----
-
-## Handle thinking binding reports
+#### Handle thinking binding reports
 
 `InputTransformation` now includes `ThinkingMismatchAllowedInputTransformation`. It reports a block that reached the model after a binding check failed. Add a case to exhaustive switches.
 
@@ -394,31 +234,7 @@ String describeReport(InputTransformation report) => switch (report) {
 
 For legacy auto-compaction, the latest `compaction_delta` replaces the earlier summary. A null summary marks a failed compaction. When a delta omits encrypted content, the accumulator retains the earlier payload. On-demand signed compaction arrives as a complete block at `content_block_start`. Use `finalMessage()` when replay depends on reaching `message_stop`.
 
----
-
-## Read Admin scope and rate-limit groups
-
-The current API version returns an API key's `scope`, including a real
-`workspace_id` for a key scoped to the Default Workspace. The older
-`workspace_id: null` shape can represent a Default Workspace key or an
-organization-wide key. Read `scope?.type` to distinguish those cases in
-current responses. For rate limits, use `groupType` to read both the current
-`group.type` and the older top-level `group_type` response shape.
-
-```dart
-final key = await client.organization.apiKeys.retrieve(apiKeyId);
-final scope = key.scope;
-if (scope?.type == 'workspace') {
-  final workspaceId = scope?.workspaceId;
-  print(workspaceId);
-}
-```
-
-[Claude Admin version migration](https://platform.claude.com/docs/en/api/migration-2026-10-21)
-
----
-
-## Use the current Messages MCP connector
+#### Use the current Messages MCP connector
 
 Declare each server in `MessageCreateRequest.mcpServers`, and reference its
 name from a `McpConnectorToolset` in `tools`. Move enablement and allowlists
@@ -452,66 +268,7 @@ Handle `McpConnectorToolset` in exhaustive `BuiltInTool` switches and
 switches. `Message.toInputMessage()` converts the listing for replay.
 [Runnable MCP example](example/mcp_example.dart)
 
----
-
-## Handle OAuth bearer credentials
-
-`AuthCredentials` adds the sealed `BearerTokenCredentials` case. Include
-it in exhaustive switches. Avoid logging any credential value.
-
-Before
-
-```dart
-String authKind(AuthCredentials credentials) => switch (credentials) {
-  ApiKeyCredentials() => 'API key',
-  NoAuthCredentials() => 'None',
-};
-```
-
-After
-
-```dart
-String authKind(AuthCredentials credentials) => switch (credentials) {
-  ApiKeyCredentials() => 'API key',
-  BearerTokenCredentials() => 'OAuth',
-  NoAuthCredentials() => 'None',
-};
-```
-
----
-
-## Use current Files and Skills responses
-
-Use `page` and `nextPage` for current Files and Skills pagination. Current
-Files and Skills calls omit the historical beta headers by default, including
-the official SDKs’ beta aliases. Pass beta names per call when using a current
-beta capability. Scoped Files listing adds the Managed Agents beta header.
-
-```dart
-// Historical Files paging while explicitly opting into the old response.
-const legacyFiles = ['files-api-2025-04-14'];
-final previous = await client.files.list(betas: legacyFiles);
-if (previous.hasMore == true) {
-  await client.files.list(betas: legacyFiles, afterId: previous.lastId);
-}
-
-// Current Files paging.
-final current = await client.files.list();
-if (current.nextPage case final nextPage?) {
-  await client.files.list(page: nextPage);
-}
-```
-
-The historical `skills-2025-10-02` header returns a different Skill shape.
-Remove it when using the current Dart Skill models. They use
-`displayName`, `latestVersionId`, and `source.type`. To resolve the newest
-version, pass `version: 'latest'` to `retrieveVersion` and use its returned
-`id`. Deleting a skill on the current API deletes its versions too.
-[Files migration](https://platform.claude.com/docs/en/build-with-claude/files#migrate-from-files-api-2025-04-14) · [Skills migration](https://platform.claude.com/docs/en/build-with-claude/skills-guide#migrate-from-skills-2025-10-02)
-
----
-
-## Handle future stream events and batch results
+#### Handle future stream events and batch results
 
 `MessageStreamEvent` and `BatchResult` each gain a sealed case. Include the new
 case in exhaustive switches. Use `toJson()` to retain the original payload
@@ -566,9 +323,7 @@ in-band API failures as `MessageStreamFailure`. The exception extends
 code. Use raw events or `accumulate()` to inspect partial output and the
 terminal `ErrorEvent`.
 
----
-
-## Handle unfamiliar stop reasons
+#### Handle unfamiliar stop reasons
 
 `StopReason` adds `unknown`. Add that case to exhaustive switches. Read
 `Message.stopReasonValue` or `MessageDelta.stopReasonValue` for the original
@@ -599,9 +354,7 @@ String stopStatus(StopReason? reason) => switch (reason) {
 };
 ```
 
----
-
-## Handle inline tool definitions
+#### Handle inline tool definitions
 
 `ToolChangeReference` adds `ToolChangeInlineDefinition`. Add a case to
 exhaustive switches. `definition` exposes a known tool declaration, and
@@ -626,15 +379,14 @@ final kind = switch (tool) {
 };
 ```
 
-## Preserve nullable response citation fields
+#### Preserve nullable response citation fields
 
-Copies of current document citations serialize `file_id` and `document_title`
-as null when you clear either field. To export the historical omitted-key
-shape, remove the cleared key explicitly. Use `message.toInputMessage()` to
-replay the response as a request.
+When you clear `file_id` or `document_title` on a decoded citation, `toJson()`
+keeps it as null if the response contained that key. To omit the cleared key,
+remove it from the serialized map.
 
 ```dart
-// Before
+// v10 omitted the cleared key when it serialized the citation.
 final legacy = citation.copyWith(fileId: null).toJson();
 
 // After, when exporting the historical shape
@@ -643,9 +395,10 @@ final legacy = Map<String, dynamic>.of(
 )..remove('file_id');
 ```
 
----
+The SDK also preserves `citations: null` on decoded text blocks. Use
+`message.toInputMessage()` to replay the response as a request.
 
-## Handle custom document and uploaded image sources
+#### Handle custom document and uploaded image sources
 
 Exhaustive switches over `DocumentSource` now include
 `ContentBlockDocumentSource`. Exhaustive switches over `ImageSource` now
@@ -686,27 +439,79 @@ final documentKind = switch (document) {
 
 [Claude Files API](https://platform.claude.com/docs/en/build-with-claude/files) · [Claude citations](https://platform.claude.com/docs/en/build-with-claude/citations)
 
----
+### 3) Update Managed Agents and webhook handling
 
-## Preserve future Managed Agents event values
+#### Handle automatic Managed Agents permissions
 
-Construct typed events with their public typed arguments. To preserve a
-future provider permission value, decode its wire event with `fromJson`.
-Decode and copy provider data to retain unknown session and thread statuses
-and omitted or explicit null `workflow_run_id`, `stop_details`, and
-`url_sources` fields.
+The Managed Agents beta adds `AutoPolicy` to the sealed `PermissionPolicy` type.
+Handle it in exhaustive switches. This policy asks the server to evaluate
+each tool call.
+
+Before
 
 ```dart
-// Before, Dart exposed the parser-only constructor argument.
-final event = AgentToolUseEvent(
-  id: 'toolu_example',
-  name: 'search',
-  input: const {},
-  rawEvaluatedPermission: 'future_permission',
-  processedAt: DateTime.utc(2026, 11, 11),
-);
+String policyLabel(PermissionPolicy policy) => switch (policy) {
+  AlwaysAllowPolicy() => 'Allow',
+  AlwaysAskPolicy() => 'Ask',
+  UnknownPermissionPolicy() => 'Other',
+};
+```
 
-// After, decode a provider event to retain its original permission value.
+After
+
+```dart
+String policyLabel(PermissionPolicy policy) => switch (policy) {
+  AlwaysAllowPolicy() => 'Allow',
+  AlwaysAskPolicy() => 'Ask',
+  AutoPolicy() => 'Evaluate each tool call',
+  UnknownPermissionPolicy() => 'Other',
+};
+```
+
+#### Handle Managed Agents workflow variants
+
+Existing coordinator configuration is still accepted. Use
+`Multiagent20261001Params` to configure dynamic workflows and subagents.
+Switches over the following sealed types need the new cases.
+
+| Sealed type | New case |
+| --- | --- |
+| `MultiagentParams` | `Multiagent20261001Params` |
+| `Multiagent` | `Multiagent20261001` |
+| `SessionMultiagent` | `SessionMultiagent20261001` |
+| `SessionEvent` | `WorkflowRunEvent` |
+| `SessionStopReason` | `SessionRefusal` |
+
+```dart
+// Before
+final mode = switch (config) {
+  MultiagentCoordinatorParams() => 'Coordinator',
+  UnknownMultiagentParams() => 'Unknown',
+};
+
+// After
+final mode = switch (config) {
+  MultiagentCoordinatorParams() => 'Coordinator',
+  Multiagent20261001Params() => 'Dynamic workflows and subagents',
+  UnknownMultiagentParams() => 'Unknown',
+};
+```
+
+A session keeps the topology copied at creation. Create a new session to use
+changes to the saved agent. Thread snapshots may contain `SessionInlineAgent`
+without a saved ID or version. `SessionErrorEvent.errorDetails` adds typed access
+while retaining the raw `error` object. Read paginated event history after a
+disconnect. The Managed Agents stream delivers live events.
+[Managed Agents workflow example](example/managed_agents_workflow_example.dart)
+
+#### Preserve future Managed Agents event values
+
+Decode a provider event with `fromJson` to keep an unfamiliar permission
+value. Decoding and copying provider data also retains unknown session and
+thread statuses. It preserves the difference between omitted and explicit
+null values for `workflow_run_id`, `stop_details`, and `url_sources`.
+
+```dart
 final event = AgentToolUseEvent.fromJson({
   'type': 'agent.tool_use',
   'id': 'toolu_example',
@@ -717,9 +522,7 @@ final event = AgentToolUseEvent.fromJson({
 });
 ```
 
----
-
-## Handle organization webhook event data
+#### Handle organization webhook event data
 
 Exhaustive switches over `WebhookEventData` now include
 `WebhookUserProfileEventData`. Its `event` identifies opened and resolved
@@ -740,14 +543,194 @@ case UnknownWebhookEventData(:final rawJson):
 
 [Claude organization webhooks](https://platform.claude.com/docs/en/manage-claude/organization-webhooks)
 
----
+### 4) Check authentication and custom gateways
 
-## Move usage and cost reports to dimensioned analytics
+#### Handle OAuth bearer credentials
 
-The legacy Console and Enterprise reports remain available. Use
-`client.organization.analytics.usage` or `cost` for dimensioned rows,
-including reports grouped by actor or child organization. They add the
-`analytics-usage-cost-2026-08-24` beta header.
+`AuthCredentials` adds the sealed `BearerTokenCredentials` case. Include
+it in exhaustive switches. Avoid logging any credential value.
+
+Before
+
+```dart
+String authKind(AuthCredentials credentials) => switch (credentials) {
+  ApiKeyCredentials() => 'API key',
+  NoAuthCredentials() => 'None',
+};
+```
+
+After
+
+```dart
+String authKind(AuthCredentials credentials) => switch (credentials) {
+  ApiKeyCredentials() => 'API key',
+  BearerTokenCredentials() => 'OAuth',
+  NoAuthCredentials() => 'None',
+};
+```
+
+#### Configure the final gateway URL
+
+If your gateway redirects Claude requests, set `AnthropicConfig.baseUrl` to
+the final API or proxy URL. On native platforms, requests with `x-api-key`
+can follow same-origin redirects. On the web, the SDK rejects redirects on
+requests with `x-api-key`. Native cross-origin redirects remove `Authorization`
+before sending the next request.
+
+Pass resource IDs as the original strings from the API. The SDK encodes each
+ID as one path segment and rejects empty IDs and dot segments before dispatch.
+
+Review `AnthropicConfig.timeout` if you use long-running streams or downloads.
+The SDK now applies the configured timeout to HTTP attempts and to idle gaps
+between incoming stream chunks.
+
+### 5) Use provider clients and updated endpoints
+
+#### Claude Platform on AWS
+
+Use `AnthropicAwsClient` for the regional Claude Platform on AWS endpoint.
+Set the workspace's AWS region and ID. Supply an AWS-issued key or an IAM
+credential provider.
+
+```dart
+final client = AnthropicAwsClient(
+  region: 'us-east-1',
+  workspaceId: workspaceId,
+  credentials: loadAwsCredentials,
+);
+```
+
+Messages and streaming use the same Dart request types and Claude API version. AWS IAM determines available Admin and Compliance operations. [Claude Platform on AWS](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws)
+
+#### Bedrock model API versions
+
+Bedrock uses `2026-10-21` by default for Claude models that accept it. For Claude 4.6 and earlier, retain the version your deployed model already uses. Runtime moves that value into `anthropic_version` in the JSON request. Mantle sends it in the `anthropic-version` header.
+
+```dart
+final runtime = AnthropicBedrockClient(
+  region: 'us-east-1',
+  config: const AnthropicConfig(apiVersion: 'bedrock-2023-05-31'),
+);
+final mantle = AnthropicBedrockMantleClient(
+  region: 'us-east-1',
+  config: const AnthropicConfig(apiVersion: AnthropicConfig.legacyApiVersion),
+);
+```
+
+The Bedrock clients expose Messages inference. Mantle uses the Claude count-tokens request and Runtime uses `countInvokeTokens` with the original InvokeModel body. Runtime stream exceptions surface as typed Claude error events. [Claude API version migration](https://platform.claude.com/docs/en/api/migration-2026-10-21) · [AWS token counting](https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_CountTokens.html)
+
+#### Select a cloud provider client
+
+Use the provider class that matches your deployment when migrating a custom `baseUrl` configuration. Keep the same Dart Messages types and obtain credentials from that provider.
+
+| Provider | Authentication | Routing and API version |
+| --- | --- | --- |
+| Anthropic-managed Google Cloud | Google OAuth callback or access token | Project and workspace are in the URL. Organization and user profiles use the project gateway. The API version remains a header. |
+| Google-managed Vertex | Google OAuth callback or access token | Vertex uses the publisher model or token-counting route. The API version moves into the body. Use `vertex-2023-10-16` for the legacy contract. |
+| Microsoft Foundry | Azure API key or Entra token callback | Use the Foundry resource and deployment name. The API version remains a header. Set `azureHosted: true` for an Azure-hosted deployment. |
+
+For example, replace manual Vertex URL and body rewriting with the provider client. Request code still uses `client.messages.create(request)`.
+
+```dart
+final client = AnthropicVertexClient(
+  projectId: 'my-project',
+  region: 'global',
+  tokenProvider: refreshGoogleAccessToken,
+  config: const AnthropicConfig(apiVersion: 'vertex-2023-10-16'),
+);
+```
+
+For regional and model-specific version support, see [Vertex](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/google-managed), [Anthropic-managed Google Cloud](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/anthropic-managed), and [Foundry](https://platform.claude.com/docs/en/build-with-claude/claude-in-microsoft-foundry).
+
+#### Generally available User Profiles
+
+Existing `client.userProfiles` calls use the legacy beta contract. Use
+`client.userProfiles.current` to adopt the generally available contract.
+
+```dart
+// Legacy beta
+final legacy = await client.userProfiles.create(
+  const CreateUserProfileRequest(externalId: 'customer_123'),
+);
+
+// Generally available
+final profile = await client.userProfiles.current.create(
+  const CreateCurrentUserProfileRequest(
+    externalUserDetails: UserProfileExternalUserDetails(referenceId: 'customer_123'),
+  ),
+);
+```
+
+If you already have a profile ID, retrieve it through the new resource. Each
+successful create call adds a profile. Under the current contract, `referenceId`
+and `onboardedAt` are part of `externalUserDetails`. Omit an external detail on
+update to keep its current value.
+`programs` reports program status and `enforcementStatus` reports Anthropic's
+overall enforcement state.
+
+Use `createActionUrl(profile.id, action: UserProfileAction.enrollEndUser)` for
+a current enrollment action. The URL is short-lived and grants access to the
+recipient until expiration. Keep it out of application logs. Access to GA action
+URLs is organization-gated. A 404 can indicate that the organization has no
+access. On Claude Platform on AWS, use the legacy `createEnrollmentUrl` route.
+[Verification Portal guide](https://platform.claude.com/docs/en/manage-claude/user-profiles-verification-portal#create-the-link)
+[User Profiles reference](https://platform.claude.com/docs/en/api/user_profiles)
+
+#### Use current Files and Skills responses
+
+Use `page` and `nextPage` for current Files and Skills pagination. The SDK
+omits the historical beta headers by default. Pass beta names per call
+when you use a beta feature. The SDK adds the Managed Agents beta header to
+scoped Files listings.
+
+```dart
+// Opt into the historical Files response format in v11.
+const legacyFiles = ['files-api-2025-04-14'];
+final previous = await client.files.list(betas: legacyFiles);
+if (previous.hasMore == true) {
+  await client.files.list(betas: legacyFiles, afterId: previous.lastId);
+}
+
+// Current Files paging.
+final current = await client.files.list();
+if (current.nextPage case final nextPage?) {
+  await client.files.list(page: nextPage);
+}
+```
+
+The historical `skills-2025-10-02` header returns a different Skill shape.
+Remove it when using the current Dart Skill models. They use
+`displayName`, `latestVersionId`, and `source.type`. To resolve the newest
+version, pass `version: 'latest'` to `retrieveVersion` and use its returned
+`id`. Deleting a skill on the current API deletes its versions too.
+[Files migration](https://platform.claude.com/docs/en/build-with-claude/files#migrate-from-files-api-2025-04-14) · [Skills migration](https://platform.claude.com/docs/en/build-with-claude/skills-guide#migrate-from-skills-2025-10-02)
+
+#### Read Admin scope and rate-limit groups
+
+The current API version returns an API key's `scope`, including a real
+`workspace_id` for a key scoped to the Default Workspace. The older
+`workspace_id: null` shape can represent a Default Workspace key or an
+organization-wide key. Read `scope?.type` to distinguish those cases in
+current responses. For rate limits, use `groupType` to read both the current
+`group.type` and the older top-level `group_type` response shape.
+
+```dart
+final key = await client.organization.apiKeys.retrieve(apiKeyId);
+final scope = key.scope;
+if (scope?.type == 'workspace') {
+  final workspaceId = scope?.workspaceId;
+  print(workspaceId);
+}
+```
+
+[Claude Admin version migration](https://platform.claude.com/docs/en/api/migration-2026-10-21)
+
+#### Move usage and cost reports to dimensioned analytics
+
+Version 11 exposes both legacy Console and Enterprise reports and the current
+analytics endpoints. Use `client.organization.analytics.usage` or `cost` to
+group rows by dimensions such as actor or child organization. These methods
+add the `analytics-usage-cost-2026-08-24` beta header.
 
 ```dart
 // Legacy Console report with nested time buckets.
@@ -787,7 +770,7 @@ by `actor` and filter `AnalyticsFilter.actorType` to `user_actor`. Read
 `email_address` field. Cost values retain their original decimal strings.
 [Usage and cost migration guide](https://platform.claude.com/docs/en/manage-claude/usage-cost-analytics-api#migrate-from-usage-cost-api)
 
-### Read Enterprise summary rows from `data`
+##### Read Enterprise summary rows from `data`
 
 The `2026-10-21` API version returns Enterprise summaries under `data` and
 includes a nullable `next_page` cursor. `AnalyticsActivityPage.data` accepts
