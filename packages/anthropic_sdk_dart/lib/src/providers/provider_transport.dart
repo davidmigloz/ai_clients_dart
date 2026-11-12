@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import '../auth/request_auth.dart';
 import '../client/anthropic_client.dart';
 import '../client/config.dart';
+import '../client/request_redirects.dart';
 import '../errors/response_error.dart';
 import '../platform/environment.dart';
 
@@ -84,22 +85,18 @@ abstract base class ProviderTransport extends http.BaseClient {
           ..persistentConnection = request.persistentConnection
           ..headers.addAll(prepared.headers)
           ..bodyBytes = prepared.body;
+    final credentials = requestCredentialValues(outbound.headers);
     final http.StreamedResponse response;
     try {
-      response = await _client.send(outbound);
+      response = await sendApiRequest(
+        _client,
+        outbound,
+        ensureNotClosed: _ensureOpen,
+        redirectErrorMessage: 'Unexpected redirect from the cloud provider',
+      );
     } on http.ClientException catch (error, stackTrace) {
-      if (redactCredentialEcho(
-            error.message,
-            requestCredentialValues(outbound.headers),
-          ) !=
-          null) {
-        rethrow;
-      }
       Error.throwWithStackTrace(
-        http.ClientException(
-          'Provider transport error contained a redacted credential',
-          outbound.url,
-        ),
+        _safeClientError(error, credentials),
         stackTrace,
       );
     }
@@ -107,7 +104,19 @@ abstract base class ProviderTransport extends http.BaseClient {
     // Borrowed transports may omit request metadata. Record the exact sent
     // request so response diagnostics can redact late-bound cloud credentials.
     return http.StreamedResponse(
-      adapted.stream,
+      adapted.stream.transform(
+        StreamTransformer.fromHandlers(
+          handleError:
+              (Object error, StackTrace stack, EventSink<List<int>> sink) {
+                sink.addError(
+                  error is http.ClientException
+                      ? _safeClientError(error, credentials)
+                      : error,
+                  stack,
+                );
+              },
+        ),
+      ),
       adapted.statusCode,
       request: outbound,
       headers: adapted.headers,
@@ -116,6 +125,26 @@ abstract base class ProviderTransport extends http.BaseClient {
       persistentConnection: adapted.persistentConnection,
       reasonPhrase: adapted.reasonPhrase,
     );
+  }
+
+  http.ClientException _safeClientError(
+    http.ClientException error,
+    Set<String> credentials,
+  ) {
+    final uri = error.uri;
+    final safeUri = redactCredentialEcho(uri?.toString(), credentials) == null
+        ? null
+        : uri;
+    if (safeUri == uri &&
+        redactCredentialEcho(error.message, credentials) != null) {
+      return error;
+    }
+    return error is http.RequestAbortedException
+        ? http.RequestAbortedException(safeUri)
+        : http.ClientException(
+            'Provider transport error contained a redacted credential',
+            safeUri,
+          );
   }
 
   Future<ProviderRequest> _prepareRequest(
@@ -199,6 +228,12 @@ Uri validateProviderBase(String value) {
 
 /// Returns logical API path segments after the configured proxy prefix.
 List<String> providerPath(Uri uri, Uri base) {
+  if (uri.scheme != base.scheme ||
+      uri.host != base.host ||
+      uri.port != base.port ||
+      uri.userInfo.isNotEmpty) {
+    throw ArgumentError('Request is outside the configured provider origin');
+  }
   final prefix = base.pathSegments;
   final offset = prefix.isNotEmpty && prefix.last.isEmpty
       ? prefix.length - 1

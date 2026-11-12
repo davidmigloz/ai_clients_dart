@@ -76,9 +76,9 @@ final class AwsRequestAuth {
 
   /// Adds authentication to the final outbound request.
   Future<void> apply(ProviderRequest request) async {
-    request.headers.remove('x-api-key');
     if (skipAuth) return;
     request.headers
+      ..remove('x-api-key')
       ..remove('authorization')
       ..remove('x-amz-security-token');
     if (apiKey case final key?) {

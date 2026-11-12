@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -110,6 +111,109 @@ void main() {
     expect(result.error, 'KMS denied [REDACTED] [REDACTED] [REDACTED]');
   });
 
+  for (final (name, invoke)
+      in <(String, Future<void> Function(AnthropicAwsClient))>[
+        (
+          'buffered',
+          (client) async {
+            await client.models.list();
+          },
+        ),
+        (
+          'SSE',
+          (client) => client.messages.createStream(_request).drain<void>(),
+        ),
+        (
+          'binary',
+          (client) async {
+            await client.files.download(fileId: 'file_fixture');
+          },
+        ),
+      ]) {
+    test(
+      '$name rejects provider redirects before reading or following them',
+      () async {
+        var sends = 0;
+        var cancels = 0;
+        final body = StreamController<List<int>>(onCancel: () => cancels++);
+        addTearDown(body.close);
+        final transport = _Transport((request) {
+          sends++;
+          expect(request.url.host, 'source.invalid');
+          expect(request.headers['authorization'], 'Bearer $_awsKey');
+          return http.StreamedResponse(
+            body.stream,
+            302,
+            headers: {
+              'location': 'https://target.invalid/proxy/v1/models',
+              'request-id': 'req_redirect',
+              'x-amzn-requestid': _awsKey,
+            },
+          );
+        });
+        final client = AnthropicAwsClient(
+          region: 'us-west-2',
+          workspaceId: 'wrkspc_fixture',
+          apiKey: _awsKey,
+          baseUrl: 'https://source.invalid/proxy',
+          config: const AnthropicConfig(
+            defaultHeaders: {'Authorization': 'Bearer proxy-authorization'},
+            retryPolicy: RetryPolicy(maxRetries: 0),
+          ),
+          httpClient: transport,
+        );
+        addTearDown(client.close);
+        await expectLater(
+          invoke(client).timeout(const Duration(seconds: 2)),
+          throwsA(
+            isA<ApiException>()
+                .having((e) => e.statusCode, 'status', 302)
+                .having((e) => e.requestId, 'request ID', 'req_redirect')
+                .having((e) => e.responseMetadata?.headers, 'headers', {
+                  'request-id': 'req_redirect',
+                }),
+          ),
+        );
+        expect(sends, 1);
+        expect(cancels, 1);
+      },
+    );
+
+    test('$name protects borrowed transport errors after headers', () async {
+      final transport = _Transport((request) {
+        expect(request.headers['authorization'], 'Bearer $_awsKey');
+        return http.StreamedResponse(
+          Stream<List<int>>.error(
+            http.ClientException(
+              'connection interrupted',
+              request.url.replace(queryParameters: {'echo': _awsKey}),
+            ),
+          ),
+          200,
+          headers: {'content-type': 'text/event-stream'},
+        );
+      });
+      final client = AnthropicAwsClient(
+        region: 'us-west-2',
+        workspaceId: 'wrkspc_fixture',
+        apiKey: _awsKey,
+        config: _config,
+        httpClient: transport,
+      );
+      addTearDown(client.close);
+      await expectLater(
+        invoke(client),
+        throwsA(
+          isA<http.ClientException>().having(
+            (e) => e.toString(),
+            'safe error',
+            isNot(contains(_awsKey)),
+          ),
+        ),
+      );
+    });
+  }
+
   test('cloud transport exception cannot echo its own bearer', () async {
     final transport = _Transport((request) {
       expect(request.headers['authorization'], 'Bearer $_awsKey');
@@ -198,7 +302,12 @@ void main() {
       );
       addTearDown(client.close);
       final request =
-          http.Request('POST', Uri.parse('https://fixture.invalid/v1/messages'))
+          http.Request(
+              'POST',
+              Uri.parse(
+                'https://aws-external-anthropic.us-west-2.api.aws/v1/messages',
+              ),
+            )
             ..headers['x-local-header'] = 'caller-value'
             ..headers['anthropic-workspace-id'] = 'wrkspc_fixture';
       final originalHeaders = Map<String, String>.of(request.headers);

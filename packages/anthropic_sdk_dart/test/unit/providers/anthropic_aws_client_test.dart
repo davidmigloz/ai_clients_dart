@@ -25,6 +25,97 @@ final _message = MessageCreateRequest(
 
 void main() {
   _sseRequestIdTests();
+  test(
+    'worker poll uses the resolved workspace and AWS authentication',
+    () async {
+      final client = AnthropicAwsClient(
+        region: 'us-west-2',
+        workspaceId: _workspace,
+        credentials: () => _iam,
+        httpClient: MockClient((request) async {
+          expect(request.url.path, '/v1/environments/env_fixture/work/poll');
+          expect(request.headers['anthropic-workspace-id'], _workspace);
+          expect(
+            request.headers['authorization'],
+            startsWith('AWS4-HMAC-SHA256 '),
+          );
+          expect(request.headers['x-amz-security-token'], _iam.sessionToken);
+          return http.Response('null', 200);
+        }),
+      );
+      addTearDown(client.close);
+      expect(await client.environments.work('env_fixture').poll(), isNull);
+    },
+  );
+
+  test(
+    'resolved workspace overrides defaults and keeps call overrides',
+    () async {
+      final workspaces = <String?>[];
+      final client = AnthropicAwsClient(
+        region: 'us-west-2',
+        workspaceId: _workspace,
+        apiKey: _key,
+        config: const AnthropicConfig(
+          defaultHeaders: {'Anthropic-Workspace-ID': 'wrkspc_old_default'},
+        ),
+        httpClient: MockClient((request) async {
+          workspaces.add(request.headers['anthropic-workspace-id']);
+          return _messageResponse();
+        }),
+      );
+      addTearDown(client.close);
+      await client.messages.create(_message);
+      await client.messages.create(_message, workspaceId: 'wrkspc_override');
+      expect(workspaces, [_workspace, 'wrkspc_override']);
+    },
+  );
+
+  test(
+    'action URLs and untrusted absolute request URLs fail before send',
+    () async {
+      final transport = _Borrowed();
+      final client = AnthropicAwsClient(
+        region: 'us-west-2',
+        workspaceId: _workspace,
+        apiKey: _key,
+        httpClient: transport,
+      );
+      addTearDown(client.close);
+      await expectLater(
+        client.userProfiles.current.createActionUrl(
+          'uprof_fixture',
+          action: UserProfileAction.enrollEndUser,
+        ),
+        throwsUnsupportedError,
+      );
+      await expectLater(
+        client.interceptorChain.execute(
+          http.Request('GET', Uri.https('untrusted.invalid', '/v1/models')),
+        ),
+        throwsArgumentError,
+      );
+      expect(transport.requests, isEmpty);
+    },
+  );
+
+  test('skipAuth keeps explicit gateway authentication', () async {
+    final client = AnthropicAwsClient(
+      baseUrl: 'https://gateway.invalid/proxy',
+      skipAuth: true,
+      config: const AnthropicConfig(
+        defaultHeaders: {'X-Api-Key': 'gateway-fixture'},
+      ),
+      httpClient: MockClient((request) async {
+        expect(request.headers['x-api-key'], 'gateway-fixture');
+        expect(request.headers['authorization'], isNull);
+        return _messageResponse();
+      }),
+    );
+    addTearDown(client.close);
+    expect((await client.messages.create(_message)).id, 'msg_fixture');
+  });
+
   test('SigV4 signs the final body, escaped path and repeated query', () {
     // Expected signature produced by AWS botocore SigV4Auth 1.41.5.
     final request = ProviderRequest(

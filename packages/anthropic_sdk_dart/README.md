@@ -840,7 +840,7 @@ final client = AnthropicAwsClient(
 );
 ```
 
-The callback returns `ClaudeAwsCredentials` with an access key ID, secret access key, and optional session token. Use your AWS credential provider for SSO, shared profiles, instance metadata, and role renewal. Workspace resource calls select the workspace, while organization Admin and Compliance Activity Feed routes use organization scope. AWS IAM controls the available APIs and actions. [Claude Platform on AWS](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws)
+The callback returns `ClaudeAwsCredentials` with an access key ID, secret access key, and optional session token. Use your AWS credential provider for SSO, shared profiles, instance metadata, and role renewal. The configured workspace covers resource calls, including self-hosted work queues. AWS workers use IAM or an AWS-issued key. Organization Admin and Compliance Activity Feed routes use organization scope. User Profile action URLs are unavailable on AWS. AWS IAM controls the available APIs and actions. [Claude Platform on AWS](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws)
 
 → [Full example](example/claude_aws_example.dart)
 
