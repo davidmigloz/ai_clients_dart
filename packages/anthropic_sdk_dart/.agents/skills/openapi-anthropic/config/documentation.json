@@ -17,6 +17,7 @@
   ],
   "resource_to_example": {
     "environments": "environments",
+    "tunnels": "mcp_tunnels",
     "environmentWork": "environment_work",
     "organization": "organization_admin",
     "organizationWorkspaces": "organization_admin",

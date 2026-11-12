@@ -291,22 +291,23 @@ Future<T> _sendTunnelRequest<T>(
             additionalHeaders: {'anthropic-workspace-id': ?workspaceId},
           ),
         );
+  final auth = request.headers['authorization'];
+  final configuredBearer = auth?.toLowerCase().startsWith('bearer ') ?? false
+      ? auth!.substring(7)
+      : null;
+  final effectiveBearer = bearerToken ?? configuredBearer;
   request.headers['anthropic-beta'] = {
     for (final beta in (request.headers['anthropic-beta'] ?? '').split(','))
       if (beta.trim().isNotEmpty) beta.trim(),
     ...betas,
     'mcp-tunnels-2026-06-22',
-    if (bearerToken != null) oauthBetaHeader,
+    if (effectiveBearer != null) oauthBetaHeader,
   }.join(',');
   if (body != null) request.body = jsonEncode(body);
-  final auth = request.headers['authorization'];
-  final configuredBearer = auth?.toLowerCase().startsWith('bearer ') ?? false
-      ? auth!.substring(7)
-      : null;
   final result = await sendProtectedResourceRequest(
     resource,
     request,
-    bearerToken: bearerToken ?? configuredBearer,
+    bearerToken: effectiveBearer,
     abortTrigger: abortTrigger,
   );
   return parse(result! as Map<String, dynamic>);

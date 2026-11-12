@@ -172,7 +172,6 @@ void main() {
         expect(request.headers['anthropic-version'], '2026-10-21');
         expect(request.headers['anthropic-beta'], switch (i) {
           0 => 'inherited-beta,extra-beta,$_beta,oauth-2025-04-20',
-          12 => 'inherited-beta,$_beta',
           _ => 'inherited-beta,$_beta,oauth-2025-04-20',
         });
         expect(
@@ -224,6 +223,77 @@ void main() {
     }
     expect(requests, 0);
   });
+
+  test(
+    'provider-issued WIF token does not leak through tunnel metadata',
+    () async {
+      const mintedToken = 'fixture-minted-workspace-bearer';
+      final paths = <String>[];
+      final client = AnthropicClient.withWorkloadIdentity(
+        identityTokenProvider: () => 'fixture.jwt.assertion',
+        federationRuleId: 'fdrl_fixture',
+        organizationId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        serviceAccountId: 'svac_fixture',
+        workspaceId: 'wrkspc_fixture',
+        config: const AnthropicConfig(retryPolicy: RetryPolicy(maxRetries: 0)),
+        httpClient: _RequestlessResponse(
+          MockClient((request) async {
+            paths.add(request.url.path);
+            if (request.url.path == '/v1/oauth/token') {
+              expect(
+                jsonDecode(request.body),
+                containsPair('workspace_id', 'wrkspc_fixture'),
+              );
+              return _json({
+                'access_token': mintedToken,
+                'expires_in': 600,
+                'token_type': 'Bearer',
+                'scope': 'workspace:manage_beta',
+              });
+            }
+            expect(request.headers['authorization'], 'Bearer $mintedToken');
+            expect(request.headers['anthropic-workspace-id'], isNull);
+            expect(
+              request.headers['anthropic-beta']?.split(','),
+              containsAll(['oauth-2025-04-20', _beta]),
+            );
+            return _json(
+              {
+                'request_id': 'req_safe',
+                'error': {
+                  'details': {'error_code': 'echo-$mintedToken'},
+                },
+              },
+              status: 401,
+              headers: {
+                'request-id': 'echo-$mintedToken',
+                'retry-after': mintedToken,
+              },
+            );
+          }),
+        ),
+      );
+      addTearDown(client.close);
+      await expectLater(
+        client.tunnels.list(),
+        throwsA(
+          isA<AuthenticationException>()
+              .having((error) => error.requestId, 'safe body ID', 'req_safe')
+              .having(
+                (error) => error.errorCode,
+                'credential-free code',
+                isNull,
+              )
+              .having(
+                (error) => error.responseMetadata?.headers,
+                'safe headers',
+                isEmpty,
+              ),
+        ),
+      );
+      expect(paths, ['/v1/oauth/token', '/v1/tunnels']);
+    },
+  );
 
   test('echoed scoped bearer is removed from error metadata', () async {
     final client = AnthropicClient(
@@ -332,3 +402,22 @@ http.Response _json(
   status,
   headers: {'content-type': 'application/json', ...headers},
 );
+
+class _RequestlessResponse extends http.BaseClient {
+  _RequestlessResponse(this.delegate);
+
+  final http.Client delegate;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    final response = await delegate.send(request);
+    return http.StreamedResponse(
+      response.stream,
+      response.statusCode,
+      headers: response.headers,
+    );
+  }
+
+  @override
+  void close() => delegate.close();
+}

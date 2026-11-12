@@ -6,15 +6,13 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 
 /// Creates and archives a test tunnel in a workspace with preview access.
 ///
-/// Set ANTHROPIC_TUNNEL_WIF_TOKEN and ANTHROPIC_WORKSPACE_ID. Optionally pass
-/// the path to a CA certificate in PEM format to upload it to the tunnel.
+/// Set ANTHROPIC_TUNNEL_WIF_TOKEN. ANTHROPIC_WORKSPACE_ID may select the same
+/// workspace as the token. Optionally pass a CA certificate path in PEM format.
 Future<void> main(List<String> arguments) async {
   final token = Platform.environment['ANTHROPIC_TUNNEL_WIF_TOKEN'];
   final workspace = Platform.environment['ANTHROPIC_WORKSPACE_ID'];
-  if (token == null || workspace == null) {
-    throw StateError(
-      'Set ANTHROPIC_TUNNEL_WIF_TOKEN and ANTHROPIC_WORKSPACE_ID',
-    );
+  if (token == null || token.isEmpty) {
+    throw StateError('Set ANTHROPIC_TUNNEL_WIF_TOKEN.');
   }
 
   final client = AnthropicClient(
