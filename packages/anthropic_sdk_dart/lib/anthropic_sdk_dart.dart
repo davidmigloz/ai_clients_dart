@@ -61,6 +61,7 @@ export 'src/errors/exceptions.dart'
 // Extensions
 export 'src/extensions/content_block_extensions.dart';
 export 'src/extensions/message_extensions.dart';
+export 'src/extensions/message_tool_runner.dart';
 export 'src/extensions/stream_extensions.dart';
 export 'src/extensions/structured_messages.dart';
 
