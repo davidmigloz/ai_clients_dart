@@ -14,7 +14,7 @@ Tracking issue [#477](https://github.com/davidmigloz/ai_clients_dart/issues/477)
 | TypeScript | [sdk-v1.8.0](https://github.com/anthropics/anthropic-sdk-typescript/releases/tag/sdk-v1.8.0), [source](https://github.com/anthropics/anthropic-sdk-typescript/tree/590783078cd961a0df698d9fddc0275c65ff3afd) |
 | Candidate OpenAPI | [Python bundle](https://raw.githubusercontent.com/anthropics/anthropic-sdk-python/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/scripts/mock-spec.json.gz) and [TypeScript bundle](https://raw.githubusercontent.com/anthropics/anthropic-sdk-typescript/590783078cd961a0df698d9fddc0275c65ff3afd/scripts/mock-spec.json.gz). Identical compressed SHA-256 `3e2a4bbb5c9cfad58b39bb801086ce65436a7f88c6b04b9dca0f626d6113537e`. Decompressed JSON SHA-256 `690622377a5eedc0e9f2265ed755ee34dc0c52d35b47327f425777a550f45e1e`. |
 
-The toolkit's remote fetch reaches HTTP 404 for the September Stainless URL. Anthropic's [source change](https://github.com/anthropics/anthropic-sdk-python/commit/f9b0cf281932512e6b40cd1a887a44542c883468) removed the public spec URL from `.stats.yml` and added the bundled OpenAPI fixture. The current official mock servers use that bundle. For candidate review, verify both pinned digests, decompress to the toolkit's `/tmp/openapi-anthropic-dart/latest-main.json`, and run `review` with the package config. Promote the snapshot and update the fetch instructions in the closeout. The canonical spec remains at the September pin during implementation.
+The September Stainless URL returns HTTP 404. Anthropic's [source change](https://github.com/anthropics/anthropic-sdk-python/commit/f9b0cf281932512e6b40cd1a887a44542c883468) removed the public spec URL from `.stats.yml` and added the bundled OpenAPI fixture. The current official mock servers use that bundle. For candidate review, verify both pinned digests, decompress to the toolkit's `/tmp/openapi-anthropic-dart/latest-main.json`, and run `review` with the package config. The canonical spec used the September pin during implementation. The closeout promotes the exact decompressed bundle bytes, records both SDK archives in [spec metadata](../spec_metadata.json), and uses the committed snapshot as the toolkit's offline source.
 
 Use the HTTP reference for request/response shapes, the guide for workflow and access, and the generated resources for the official SDK's actual headers, routes and helpers. The OpenAPI keys ending in `?beta=true` identify variants. Both pinned SDKs use the same URL path on the wire and select the beta contract with headers when required. Keep the original keys in the snapshot and preserve the distinction in the inventory.
 
@@ -34,6 +34,8 @@ No existing open Anthropic tickets were found. The repository's only open issue 
 - Candidate review reports 2,155 errors, 81 warnings and 1,026 missing manifest entries before implementation. Use it as discovery output and compare the exact diagnostics at closeout.
 
 ## Work and verification
+
+The [reconciliation command](reconciliation.md) reproduces the merged inventory. The [release-readiness report](reviews/release-readiness.md) records verification, toolkit diagnostics and migrations. [SDK helper decisions](reviews/sdk-helper-decisions.md) document the Dart behavior and [remaining work](https://github.com/davidmigloz/ai_clients_dart/issues/558).
 
 | Issue | Slice | Dependencies |
 | --- | --- | --- |

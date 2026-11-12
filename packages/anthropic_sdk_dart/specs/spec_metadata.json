@@ -2,10 +2,34 @@
   "specs": {
     "main": {
       "current_version": "unknown",
-      "last_fetched": "2026-09-01T22:18:01.828488Z",
-      "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic/anthropic-e50cf35b74cc0471a2b5af7ea03765aa81c035f82588e9a1ba1b29aeaa17d064.yml",
+      "file_sha256": "690622377a5eedc0e9f2265ed755ee34dc0c52d35b47327f425777a550f45e1e",
+      "last_fetched": "2026-11-11T21:30:36Z",
+      "source_bundles": {
+        "python": {
+          "ref": "5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9",
+          "release": "v2.8.0",
+          "repository": "anthropics/anthropic-sdk-python",
+          "url": "https://raw.githubusercontent.com/anthropics/anthropic-sdk-python/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/scripts/mock-spec.json.gz"
+        },
+        "typescript": {
+          "ref": "590783078cd961a0df698d9fddc0275c65ff3afd",
+          "release": "sdk-v1.8.0",
+          "repository": "anthropics/anthropic-sdk-typescript",
+          "url": "https://raw.githubusercontent.com/anthropics/anthropic-sdk-typescript/590783078cd961a0df698d9fddc0275c65ff3afd/scripts/mock-spec.json.gz"
+        }
+      },
+      "source_cutoff": "2026-11-11",
+      "source_sha256": "3e2a4bbb5c9cfad58b39bb801086ce65436a7f88c6b04b9dca0f626d6113537e",
+      "source_url": "https://raw.githubusercontent.com/anthropics/anthropic-sdk-python/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/scripts/mock-spec.json.gz",
       "title": "Anthropic API",
       "version_history": [
+        {
+          "fetched_at": "2026-09-01T22:18:01.828488Z",
+          "file_sha256": "a247996d52c269f7ec74f8c1129206fa2360fecaa3d109eac462cce10c188bd0",
+          "pinned_hash": "e50cf35b74cc0471a2b5af7ea03765aa81c035f82588e9a1ba1b29aeaa17d064",
+          "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic/anthropic-e50cf35b74cc0471a2b5af7ea03765aa81c035f82588e9a1ba1b29aeaa17d064.yml",
+          "version": "unknown"
+        },
         {
           "fetched_at": "2026-07-31T21:20:04.243480Z",
           "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic/anthropic-6d5c96a475b06ff067a4491fc2258181f0426af6c64bcfd4be5d167a8c0d9d16.yml",

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from hashlib import sha256
 import json
 import sys
 import unittest
@@ -46,59 +47,6 @@ DEAD_SPEC_KEYS = {
 
 
 EXPECTED_SKIP_KEYS = {
-    "anthropic_sdk_dart/openapi-anthropic": [
-        "AddSessionResource",
-        "AddSessionResourceParams",
-        "Base64DocumentSource",
-        "Base64ImageSource",
-        "BetaAdvisorMessageIterationUsage",
-        "BetaCreateMessageParams",
-        "BetaEffortCapability",
-        "BetaEffortLevel",
-        "BetaFileMetadataSchema",
-        "BetaOutputConfig",
-        "BetaRefusalStopDetails",
-        "BetaRequestAdvisorRedactedResultBlock",
-        "BetaRequestAdvisorResultBlock",
-        "BetaRequestAdvisorToolResultError",
-        "BuiltInTool",
-        "CapabilitySupport",
-        "ContextManagementCapability",
-        "DirectToolCaller",
-        "DocumentBlock",
-        "DocumentSource",
-        "EffortCapability",
-        "EffortLevel",
-        "ErrorEvent",
-        "FileDocumentSource",
-        "FileImageSource",
-        "GetSessionResource",
-        "ImageBlock",
-        "ImageSource",
-        "InputEvent",
-        "Model",
-        "ModelCapabilities",
-        "ModelConfigParams",
-        "PingEvent",
-        "PlainTextDocumentSource",
-        "ResponseWebSearchToolResultError",
-        "Struct",
-        "TextBlock",
-        "ThinkingCapability",
-        "ThinkingDisplayMode",
-        "ThinkingTypes",
-        "Tool",
-        "ToolDefinition",
-        "ToolResultBlockParamContentVariant0",
-        "ToolResultBlockParamContentVariant1",
-        "ToolResultContentBlock",
-        "URLDocumentSource",
-        "URLImageSource",
-        "UpdateSessionResource",
-        "UserContentBlock",
-        "array of ResponseWebSearchResultBlock",
-        "various built-in tool schemas",
-    ],
     "chromadb/openapi-chromadb": [
         "DeleteCollectionRecordsPayload",
         "DeleteCollectionResponse",
@@ -491,14 +439,30 @@ class MigratedSkillContractTests(unittest.TestCase):
         self.assertTrue(payload["types"])
         self.assertTrue(all(item["spec"] == "interactions" for item in payload["types"].values()))
 
-    def test_real_preflight_config_loads_for_supported_packages(self) -> None:
-        for package in ("openai_dart", "anthropic_sdk_dart"):
-            config_dir = ROOT / "packages" / package / ".agents" / "skills" / (
-                "openapi-openai" if package == "openai_dart" else "openapi-anthropic"
-            ) / "config"
-            config = load_toolkit_config(config_dir)
-            self.assertIn("stats_url", config.preflight)
-            self.assertIn("stats_field", config.preflight)
+    def test_openai_uses_remote_openapi_source(self) -> None:
+        config_dir = ROOT / "packages" / "openai_dart" / ".agents" / "skills" / "openapi-openai" / "config"
+        config = load_toolkit_config(config_dir)
+        _, spec = config.get_spec("main")
+        self.assertEqual(spec.fetch_mode, "remote")
+        self.assertEqual(
+            spec.url,
+            "https://raw.githubusercontent.com/openai/openai-openapi/main/openapi.json",
+        )
+        self.assertEqual(config.preflight, {})
+
+    def test_anthropic_stages_hash_pinned_local_snapshot(self) -> None:
+        config_dir = ROOT / "packages" / "anthropic_sdk_dart" / ".agents" / "skills" / "openapi-anthropic" / "config"
+        config = load_toolkit_config(config_dir)
+        spec_name, spec = config.get_spec("main")
+        raw = json.loads((config_dir / "specs.json").read_text())["specs"][spec_name]
+        canonical = config.canonical_spec_path(spec_name)
+        self.assertEqual(spec.fetch_mode, "local_file")
+        self.assertEqual(spec.source_file, "specs/openapi.yaml")
+        self.assertEqual(config.resolve_package_path(spec.source_file), canonical)
+        self.assertEqual(config.preflight, {})
+        self.assertEqual(sha256(canonical.read_bytes()).hexdigest(), raw["pinned_hash"])
+        metadata = json.loads((canonical.parent / "spec_metadata.json").read_text())["specs"][spec_name]
+        self.assertEqual(metadata["file_sha256"], raw["pinned_hash"])
 
     def test_websocket_schema_lives_under_package_specs(self) -> None:
         package_specs_dir = ROOT / "packages" / "googleai_dart" / "specs"
@@ -631,8 +595,8 @@ class MigratedSkillContractTests(unittest.TestCase):
     def test_real_manifest_coverage_aliases_match_audited_grouped_resources(self) -> None:
         expected = {
             ROOT / "packages" / "anthropic_sdk_dart" / ".agents" / "skills" / "openapi-anthropic" / "config": {
-                "resource_aliases": {},
-                "excluded_resources": ["complete", "environments"],
+                "resource_aliases": {"organizations": "organization"},
+                "excluded_resources": [],
             },
             ROOT / "packages" / "chromadb" / ".agents" / "skills" / "openapi-chromadb" / "config": {
                 "resource_aliases": {
@@ -669,19 +633,33 @@ class MigratedSkillContractTests(unittest.TestCase):
             },
         }
         for config_dir, coverage_expectation in expected.items():
-            raw = json.loads((config_dir / "manifest.json").read_text())
-            coverage = raw["coverage"]
-            self.assertEqual(coverage.get("resource_aliases", {}), coverage_expectation["resource_aliases"], msg=f"Unexpected resource_aliases in {config_dir}")
-            self.assertEqual(coverage.get("excluded_resources", []), coverage_expectation["excluded_resources"], msg=f"Unexpected excluded_resources in {config_dir}")
+            with self.subTest(config=_config_label(config_dir)):
+                raw = json.loads((config_dir / "manifest.json").read_text())
+                coverage = raw["coverage"]
+                self.assertEqual(coverage.get("resource_aliases", {}), coverage_expectation["resource_aliases"], msg=f"Unexpected resource_aliases in {config_dir}")
+                self.assertEqual(coverage.get("excluded_resources", []), coverage_expectation["excluded_resources"], msg=f"Unexpected excluded_resources in {config_dir}")
 
     def test_real_manifest_skip_keys_match_audited_snapshot(self) -> None:
         actual = {}
         for config_dir in CONFIG_DIRS:
+            label = _config_label(config_dir)
+            if label == "anthropic_sdk_dart/openapi-anthropic":
+                continue
             config = load_toolkit_config(config_dir)
             skipped = sorted(entry.key for entry in config.manifest.types.values() if entry.kind == "skip")
             if skipped:
-                actual[_config_label(config_dir)] = skipped
+                actual[label] = skipped
         self.assertEqual(actual, EXPECTED_SKIP_KEYS)
+
+    def test_anthropic_manifest_skip_keys_match_promoted_snapshot(self) -> None:
+        config_dir = ROOT / "packages" / "anthropic_sdk_dart" / ".agents" / "skills" / "openapi-anthropic" / "config"
+        config = load_toolkit_config(config_dir)
+        skipped = sorted(entry.key for entry in config.manifest.types.values() if entry.kind == "skip")
+        self.assertEqual(len(skipped), 957)
+        self.assertEqual(
+            sha256("\n".join(skipped).encode()).hexdigest(),
+            "38c70bf01f11f47363b293729758cc7cbd607062878fdb626ae87509e7d1e9d2",
+        )
 
     def test_real_documentation_exclusions_match_audited_snapshot(self) -> None:
         actual = {}
