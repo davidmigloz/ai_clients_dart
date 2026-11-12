@@ -2321,12 +2321,13 @@ class ToolRemovalInputBlock extends InputContentBlock {
 
   @override
   Map<String, dynamic> toJson() {
-    if (tool is ToolChangeInlineDefinition) {
+    final toolJson = tool.toJson();
+    if (toolJson['type'] == 'tool_definition') {
       throw ArgumentError('A tool removal requires a tool reference');
     }
     return {
       'type': 'tool_removal',
-      'tool': tool.toJson(),
+      'tool': toolJson,
       if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
     };
   }

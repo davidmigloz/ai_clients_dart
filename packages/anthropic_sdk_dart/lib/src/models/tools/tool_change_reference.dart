@@ -243,7 +243,13 @@ final class ToolChangeInlineDefinition extends ToolChangeReference {
 
   static ToolDefinition? _parseDefinition(Map<String, dynamic> json) {
     try {
-      return ToolDefinition.fromJson(json);
+      final definition = ToolDefinition.fromJson(json);
+      if (definition is CustomToolDefinition &&
+          json.containsKey('type') &&
+          json['type'] != 'custom') {
+        return null;
+      }
+      return definition;
     } on FormatException {
       return null;
     } on TypeError {

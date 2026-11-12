@@ -1326,8 +1326,8 @@ class CharLocationCitation extends Citation {
           ? this.documentTitle
           : documentTitle as String?,
       fileId: fileId == unsetCopyWithValue ? this.fileId : fileId as String?,
-      nullTitle: documentTitle == unsetCopyWithValue && _nullTitle,
-      nullFileId: fileId == unsetCopyWithValue && _nullFileId,
+      nullTitle: _nullTitle,
+      nullFileId: _nullFileId,
       startCharIndex: startCharIndex ?? this.startCharIndex,
       endCharIndex: endCharIndex ?? this.endCharIndex,
     );
@@ -1452,8 +1452,8 @@ class PageLocationCitation extends Citation {
           ? this.documentTitle
           : documentTitle as String?,
       fileId: fileId == unsetCopyWithValue ? this.fileId : fileId as String?,
-      nullTitle: documentTitle == unsetCopyWithValue && _nullTitle,
-      nullFileId: fileId == unsetCopyWithValue && _nullFileId,
+      nullTitle: _nullTitle,
+      nullFileId: _nullFileId,
       startPageNumber: startPageNumber ?? this.startPageNumber,
       endPageNumber: endPageNumber ?? this.endPageNumber,
     );
@@ -1578,8 +1578,8 @@ class ContentBlockLocationCitation extends Citation {
           ? this.documentTitle
           : documentTitle as String?,
       fileId: fileId == unsetCopyWithValue ? this.fileId : fileId as String?,
-      nullTitle: documentTitle == unsetCopyWithValue && _nullTitle,
-      nullFileId: fileId == unsetCopyWithValue && _nullFileId,
+      nullTitle: _nullTitle,
+      nullFileId: _nullFileId,
       startBlockIndex: startBlockIndex ?? this.startBlockIndex,
       endBlockIndex: endBlockIndex ?? this.endBlockIndex,
     );

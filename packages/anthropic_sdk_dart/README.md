@@ -363,7 +363,9 @@ name. To withdraw a tool, send a tool-removal block with its reference.
 
 Keep the original `tools` array and earlier messages to reuse the cached
 prefix. Retain signed compaction blocks as returned. `toolChangeBlocks`
-provides typed inspection of the tool changes contained in those blocks.
+provides typed inspection of the tool changes contained in those blocks. Keep
+the original compaction and task-budget beta headers when replaying a signed
+block.
 
 [Runnable inline tool example](example/inline_tools_example.dart) · [Tool changes guide](https://platform.claude.com/docs/en/build-with-claude/mid-conversation-system-messages)
 

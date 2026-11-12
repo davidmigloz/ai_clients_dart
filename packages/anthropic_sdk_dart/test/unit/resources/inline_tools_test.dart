@@ -7,6 +7,11 @@ import 'package:test/test.dart';
 import '../../mocks/mock_http_client.dart';
 
 const _betas = ['inline-tools-2026-09-15', 'mcp-client-2026-09-15', 'extra'];
+const List<String> _signedBetas = [
+  ..._betas,
+  'compact-2026-09-04',
+  'task-budgets-2026-03-13',
+];
 const _custom = Tool(
   name: 'lookup',
   description: 'Look up an item',
@@ -24,6 +29,7 @@ const Map<String, Object> _futureTool = {
     'definition': {
       'type': 'future_server_tool',
       'name': 'future',
+      'input_schema': {'type': 'object'},
       'new_config': {'marker': 1},
     },
   },
@@ -136,7 +142,10 @@ void main() {
         maxTokens: 256,
         messages: [InputMessage.user('Summarize')],
       );
-      final response = await client.messages.create(request, betas: _betas);
+      final response = await client.messages.create(
+        request,
+        betas: _signedBetas,
+      );
       final block = response.content.single as CompactionBlock;
       final change = block.toolChangeBlocks!.single;
       final tool = change.tool! as ToolChangeInlineDefinition;
@@ -158,8 +167,11 @@ void main() {
             InputMessage.user('Continue'),
           ],
         ),
-        betas: _betas,
+        betas: _signedBetas,
       );
+      for (final sent in transport.requests) {
+        expect(sent.headers['anthropic-beta'], _signedBetas.join(','));
+      }
       final messages =
           _body(transport.requests.last)['messages'] as List<dynamic>;
       expect(messages[1], {
@@ -208,6 +220,29 @@ void main() {
       );
       final response = await client.messages.create(request);
       expect(response.content.single.toJson()['citations'], citations);
+      for (final citation in citations) {
+        final present = Citation.fromJson({
+          ...citation,
+          'document_title': 'Fixture',
+          'file_id': 'file_fixture',
+        });
+        final cleared = switch (present) {
+          CharLocationCitation() => present.copyWith(
+            documentTitle: null,
+            fileId: null,
+          ),
+          PageLocationCitation() => present.copyWith(
+            documentTitle: null,
+            fileId: null,
+          ),
+          ContentBlockLocationCitation() => present.copyWith(
+            documentTitle: null,
+            fileId: null,
+          ),
+          _ => throw StateError('Expected a document citation'),
+        };
+        expect(cleared.toJson(), citation);
+      }
       await client.messages.create(
         request.copyWith(
           messages: [
@@ -249,5 +284,41 @@ void main() {
       () => InputContentBlock.toolRemoval(tool: original).toJson(),
       throwsArgumentError,
     );
+  });
+
+  test('raw inline removal fails before every Messages dispatch', () async {
+    final transport = MockHttpClient();
+    final client = AnthropicClient(httpClient: transport);
+    addTearDown(client.close);
+    final request = MessageCreateRequest(
+      model: 'claude-sonnet-5-5',
+      maxTokens: 256,
+      messages: [
+        InputMessage.user('Use the tool'),
+        InputMessage.systemBlocks([
+          InputContentBlock.toolRemoval(
+            tool: UnknownToolChangeReference(
+              rawJson: _futureTool['tool']! as Map<String, dynamic>,
+            ),
+          ),
+        ]),
+      ],
+    );
+    await expectLater(
+      client.messages.create(request, betas: _betas),
+      throwsArgumentError,
+    );
+    await expectLater(
+      client.messages.countTokens(
+        TokenCountRequest.fromMessageCreateRequest(request),
+        betas: _betas,
+      ),
+      throwsArgumentError,
+    );
+    expect(
+      () => client.messages.createStream(request, betas: _betas),
+      throwsArgumentError,
+    );
+    expect(transport.requests, isEmpty);
   });
 }
