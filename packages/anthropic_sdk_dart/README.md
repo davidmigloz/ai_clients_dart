@@ -378,6 +378,7 @@ block.
 <summary><b>Read typed toolset actions and send results</b></summary>
 
 Declare `BuiltInTool.browserToolset()` or `BuiltInTool.computerToolset()`.
+Browser use is generally available on supported Messages models.
 After a message or streamed tool input completes, inspect `toolsetAction` on
 each `ToolUseBlock` to read its typed fields. A custom tool has no toolset
 family. Unknown member names preserve their input for inspection.
@@ -392,7 +393,9 @@ for (final call in response.toolUseBlocks) {
 
 Your application executes supported actions. Send the result with the matching
 `toolUseId` and `toolsetName`. For browser actions, include `browser_state` when
-reporting tabs or side effects. The runnable examples use stub executors.
+reporting tabs or side effects. Successful tab management returns one
+`browser_state` block, and a successful screenshot includes image content.
+The runnable examples use stub executors.
 
 [Browser example](example/browser_use_example.dart) · [Computer example](example/computer_use_example.dart) · [Claude toolset guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/browser-use-sdk)
 

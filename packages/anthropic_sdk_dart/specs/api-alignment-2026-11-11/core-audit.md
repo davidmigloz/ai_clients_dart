@@ -41,6 +41,13 @@ Both SDKs stopped publishing `openapi_spec_url` in `.stats.yml`, and the configu
 
 [Inline tools](https://platform.claude.com/docs/en/build-with-claude/mid-conversation-system-messages#define-tools-in-a-message-beta) · [Browser/computer SDK toolsets](https://platform.claude.com/docs/en/agents-and-tools/tool-use/browser-use-sdk) · [Error shapes and IDs](https://platform.claude.com/docs/en/api/errors) · [Python helpers](https://github.com/anthropics/anthropic-sdk-python/blob/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/helpers.md) · [Python tool runner](https://github.com/anthropics/anthropic-sdk-python/blob/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/tools.md) · [TS SSE handling](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/src/core/streaming.ts)
 
+The tool reference accepts a toolset-level `allowed_callers: ["direct"]` and
+uses the same default when it is omitted. The pinned Messages schemas and SDK
+declarations omit the field. Dart uses the default and declares the toolset
+through `type`, `cache_control`, and `configs`. Use standard SSE for the dated
+toolsets. Fixtures split input across deltas to exercise local accumulation.
+[Claude client toolset reference](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-reference#client-toolsets)
+
 ### User profiles
 
 - Existing Dart beta `user-profiles-2026-08-18` create/list/get/update and `enrollment_url` helper. GA `/v1/user_profiles` now has create, list, get, update (POST), delete, and `action_urls` (POST). Keep a compatible explicit path for users depending on the beta schema. Add GA external-user details, programs and requirements, enforcement status/actions and repeated `enforcement_status[]` filters, cursor and workspace routing. Preserve old omitted vs explicit null update behavior. Action URL uses action discriminator `enroll_end_user`; URLs are single-use and should stay out of logs. Preserve beta-only enrollment behavior where upstream still supports it, and add new beta action/delete and external-user shapes where documented. Test all methods' headers, paging, missing optional fields, explicit null update, and unrecognized response variants. Coordinate related organization webhook lifecycle/program status events and external keys with Admin ticket.

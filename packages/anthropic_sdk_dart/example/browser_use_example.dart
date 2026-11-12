@@ -1,6 +1,11 @@
 // ignore_for_file: avoid_print
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 
+// A 1x1 transparent PNG used as a stand-in for a screenshot.
+const _stubScreenshotBase64 =
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42'
+    'YAAAAASUVORK5CYII=';
+
 /// Browser toolset example.
 ///
 /// This example demonstrates the browser toolset
@@ -11,16 +16,23 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// including a `browser_state` block describing the caller's open tabs and
 /// any side effects (tabs opened, downloads) the call produced.
 ///
-/// This example uses a stub browser that fakes `navigate`, `screenshot`, and
-/// `read_page` handlers instead of driving a real one.
+/// The stub browser handles navigation, screenshots, reading, and opening tabs.
 /// Set ANTHROPIC_API_KEY before running.
 Future<void> main() async {
   final client = AnthropicClient.fromEnvironment();
 
   try {
-    // The browser toolset carries no `name` — it's a single `tools[]` entry
-    // declaring the whole family. Every member is enabled by default.
+    // One tools entry declares the browser family. File upload, JavaScript,
+    // console reads, and network reads require explicit enablement.
     final tools = [ToolDefinition.builtIn(BuiltInTool.browserToolset())];
+    var tabs = <BrowserStateTabEntry>[
+      const BrowserStateTabEntry(
+        tabId: 'tab_1',
+        title: '',
+        url: 'about:blank',
+        active: true,
+      ),
+    ];
 
     var messages = <InputMessage>[
       InputMessage.user(
@@ -53,54 +65,75 @@ Future<void> main() async {
           '(toolset: ${toolUse.toolsetName})',
         );
 
-        // Execute the action against the stub browser, then report the page
-        // text (or acknowledgement) alongside a `browser_state` block
-        // describing the caller's open tabs after the call.
-        final content = <ToolResultContent>[
-          switch (action) {
-            BrowserNavigateAction(:final url) => ToolResultContent.text(
-              'Navigated to $url.',
-            ),
-            BrowserReadPageAction() => ToolResultContent.text(
-              'Example Domain\nThis domain is for use in illustrative '
-              'examples.',
-            ),
-            BrowserNewTabAction() => ToolResultContent.text(
-              'Opened a stub tab.',
-            ),
-            BrowserScreenshotAction() => ToolResultContent.text(
-              '[stub screenshot of the current page]',
-            ),
-            _ => ToolResultContent.text(
-              'The stub does not execute this action.',
-            ),
-          },
-          ToolResultContent.browserState(
-            tabs: const [
+        final List<ToolResultContent> content;
+        var isError = false;
+        switch (action) {
+          case BrowserNavigateAction(:final url, :final tabId):
+            final targetId =
+                tabId ?? tabs.firstWhere((tab) => tab.active).tabId;
+            if (!tabs.any((tab) => tab.tabId == targetId)) {
+              content = [ToolResultContent.text('Unknown tab $targetId.')];
+              isError = true;
+              break;
+            }
+            tabs = [
+              for (final tab in tabs)
+                if (tab.tabId == targetId)
+                  tab.copyWith(url: url, title: 'Example Domain')
+                else
+                  tab,
+            ];
+            content = [
+              ToolResultContent.text('Navigated to $url.'),
+              ToolResultContent.browserState(tabs: tabs),
+            ];
+          case BrowserReadPageAction():
+            content = [
+              ToolResultContent.text(
+                'Example Domain\nThis domain is for use in illustrative examples.',
+              ),
+              ToolResultContent.browserState(tabs: tabs),
+            ];
+          case BrowserNewTabAction():
+            final newTabId = 'tab_${tabs.length + 1}';
+            tabs = [
+              for (final tab in tabs) tab.copyWith(active: false),
               BrowserStateTabEntry(
-                tabId: 'tab_1',
-                title: 'Example Domain',
-                url: 'https://example.com',
+                tabId: newTabId,
+                title: '',
+                url: 'about:blank',
                 active: true,
               ),
-            ],
-            // "Nothing to report" is expressed by omitting `stateChanges`
-            // entirely; report `tab_opened` only when this call opened one.
-            stateChanges: action is BrowserNewTabAction
-                ? const [BrowserStateChangeTabOpened(tabId: 'tab_1')]
-                : null,
-          ),
-        ];
+            ];
+            // Successful tab management returns one browser_state block.
+            content = [
+              ToolResultContent.browserState(
+                tabs: tabs,
+                stateChanges: [BrowserStateChangeTabOpened(tabId: newTabId)],
+              ),
+            ];
+          case BrowserScreenshotAction():
+            content = [
+              ToolResultContent.image(
+                ImageSource.base64(
+                  data: _stubScreenshotBase64,
+                  mediaType: ImageMediaType.png,
+                ),
+              ),
+              ToolResultContent.browserState(tabs: tabs),
+            ];
+          case _:
+            content = [
+              ToolResultContent.text('Unsupported action in this stub.'),
+            ];
+            isError = true;
+        }
 
         results.add(
           ToolResultInputBlock(
             toolUseId: toolUse.id,
             content: content,
-            isError:
-                action is! BrowserNavigateAction &&
-                action is! BrowserReadPageAction &&
-                action is! BrowserNewTabAction &&
-                action is! BrowserScreenshotAction,
+            isError: isError,
             toolsetName: toolUse.toolsetName,
           ),
         );
