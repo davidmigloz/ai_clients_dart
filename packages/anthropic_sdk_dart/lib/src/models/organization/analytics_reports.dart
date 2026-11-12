@@ -4,6 +4,7 @@ import '../../utils/organization_parsing.dart';
 import '../common/equality_helpers.dart';
 import '../metadata/usage.dart' show CacheCreation, ServerToolUsage;
 
+part 'analytics_activity.dart';
 part 'analytics_legacy_reports.dart';
 
 /// A report record that retains all provider fields for forward compatibility.

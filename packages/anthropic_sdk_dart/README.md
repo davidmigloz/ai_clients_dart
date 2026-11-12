@@ -59,6 +59,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Service account lifecycle and workspace memberships with scoped OAuth
 - Customer-managed encryption keys and validation through the Admin API
 - Usage and cost analytics with actor, workspace, and organization dimensions (beta)
+- Claude Enterprise activity reports for users, projects, skills, connectors, plugins, and artifacts
 - Organization webhook endpoint management and signed event verification (beta)
 - Files (expiration, cursor pagination) and skills (multi-file uploads, container skills)
 - Managed agents with environments, self-hosted work, sessions, thread status filters, execution principals, tool permission evaluation, vaults, and streaming events (beta)
@@ -1410,6 +1411,13 @@ Their buckets and filters differ from the dimensioned routes.
 
 [Runnable analytics example](example/organization_analytics_example.dart) · [Legacy reports example](example/organization_legacy_analytics_example.dart) · [Usage and cost analytics](https://platform.claude.com/docs/en/manage-claude/usage-cost-analytics-api)
 
+Claude Enterprise activity reports cover daily adoption summaries, users, Chat
+projects, skills, connectors, plugins, and artifacts. Use a key with
+`read:analytics`. Pass UTC dates as `YYYY-MM-DD`. Activity summaries include
+Claude Tag active-user counts when the organization reports them.
+
+[Runnable activity example](example/organization_activity_example.dart) · [Claude Enterprise Analytics](https://platform.claude.com/docs/en/manage-claude/analytics-api)
+
 </details>
 
 ## Error Handling
@@ -1506,6 +1514,7 @@ See the [example/](example/) directory for complete examples:
 | [`external_keys_example.dart`](example/external_keys_example.dart) | List registered customer-managed encryption keys |
 | [`organization_analytics_example.dart`](example/organization_analytics_example.dart) | Dimensioned organization usage and cost with cursor pagination (beta) |
 | [`organization_legacy_analytics_example.dart`](example/organization_legacy_analytics_example.dart) | Legacy Console or Enterprise usage report with time buckets |
+| [`organization_activity_example.dart`](example/organization_activity_example.dart) | Claude Enterprise daily summaries and paginated user activity |
 | [`organization_rbac_example.dart`](example/organization_rbac_example.dart) | List RBAC groups, members, roles and permissions |
 | [`organization_spend_example.dart`](example/organization_spend_example.dart) | List effective spend limits and pending increase requests |
 | [`organization_webhooks_example.dart`](example/organization_webhooks_example.dart) | List organization webhook endpoints (beta) |
