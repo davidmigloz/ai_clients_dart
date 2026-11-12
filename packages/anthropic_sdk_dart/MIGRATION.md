@@ -80,6 +80,42 @@ The server migration also renames Admin and Enterprise Analytics response fields
 
 ---
 
+## Move structured output to output_config.format
+
+JSON deserialization for Messages creation, token counting, and batch items
+accepts the deprecated beta `output_format` field. It converts that field to
+`output_config.format` on the wire. When both fields contain a format, parsing
+throws a `FormatException`.
+
+```dart
+// Before, a stored request could contain both format keys.
+final duplicateFormat = {
+  ...request.toJson(),
+  'output_format': format.toJson(),
+};
+
+// After, keep the canonical format and remove the duplicate field.
+final current = MessageCreateRequest.fromJson(
+  Map<String, dynamic>.of(duplicateFormat)..remove('output_format'),
+);
+```
+
+```dart
+final format = JsonOutputFormat(schema: schema);
+final request = MessageCreateRequest(
+  model: 'claude-sonnet-5',
+  maxTokens: 128,
+  messages: [InputMessage.user('What is 2 + 2?')],
+  outputConfig: OutputConfig(format: format, effort: EffortLevel.low),
+);
+```
+
+For `client.messages.parse` and `parseStream`, provide the schema through
+`StructuredOutput<T>` and leave the request's format unset. The helpers retain
+the request's effort and task budget.
+
+---
+
 ## Handle automatic Managed Agents permissions
 
 The Managed Agents beta adds `AutoPolicy` to the sealed `PermissionPolicy` type.

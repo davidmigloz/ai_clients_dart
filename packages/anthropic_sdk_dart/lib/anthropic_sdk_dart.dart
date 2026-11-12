@@ -62,6 +62,7 @@ export 'src/errors/exceptions.dart'
 export 'src/extensions/content_block_extensions.dart';
 export 'src/extensions/message_extensions.dart';
 export 'src/extensions/stream_extensions.dart';
+export 'src/extensions/structured_messages.dart';
 
 // Models - Batches
 export 'src/models/batches/batch_request.dart';

@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../../utils/message_output_config.dart';
 import '../beta/config/output_config.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
@@ -128,9 +129,7 @@ class TokenCountRequest {
       tools: (json['tools'] as List?)
           ?.map((e) => ToolDefinition.fromJson(e as Map<String, dynamic>))
           .toList(),
-      outputConfig: json['output_config'] != null
-          ? OutputConfig.fromJson(json['output_config'] as Map<String, dynamic>)
-          : null,
+      outputConfig: parseMessageOutputConfig(json),
       speed: json['speed'] != null
           ? Speed.fromJson(json['speed'] as String)
           : null,
