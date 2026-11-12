@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from api_toolkit.operations import _render_readme_scaffold, _verify_readme
+from api_toolkit.operations import _readme_example_entries, _render_readme_scaffold, _verify_readme
 
 
 class ReadmeUsageTests(unittest.TestCase):
@@ -45,6 +45,42 @@ class ReadmeUsageTests(unittest.TestCase):
         self.assertEqual(result["summary"]["usage_subsections"], 1)
         self.assertIn("### Common tasks", self.scaffold)
         self.assertIn("<summary><b>How do I make my first request?</b></summary>", self.scaffold)
+
+    def test_quickstart_first_accepts_same_package_source_links(self) -> None:
+        (self.package / "pubspec.yaml").write_text(
+            "name: sample_dart\nrepository: https://github.com/owner/project\n"
+        )
+        package_url = "https://github.com/owner/project/blob/main"
+        before, content = self.scaffold.split("## Features", 1)
+        features, content = content.split("## Quickstart", 1)
+        quickstart, after = content.split("## Configuration", 1)
+        readme = (
+            before + "## Quickstart" + quickstart + "## Features" + features + "## Configuration" + after
+        ).replace("(./llms.txt)", f"({package_url}/llms.txt)").replace(
+            "(example/example.dart)", f"({package_url}/example/example.dart)"
+        )
+        (self.package / "README.md").write_text(readme)
+        code, result = _verify_readme(SimpleNamespace(package_root=self.package, repo_root=self.package))
+        self.assertEqual(code, 0)
+        self.assertEqual(result["issues"], [])
+        self.assertEqual(
+            [entry["path"] for entry in _readme_example_entries(readme, [], package_url)],
+            ["example/example.dart"],
+        )
+
+    def test_index_does_not_treat_other_packages_as_local_examples(self) -> None:
+        package_url = "https://github.com/owner/project/blob/main/packages/sample_dart"
+        readme = f"""
+| Example | Description |
+| --- | --- |
+| [Local]({package_url}/example/one.dart) | Own package |
+| [Other](https://github.com/owner/project/blob/main/packages/another_dart/example/two.dart) | Other package |
+| [Local duplicate](./example/one.dart) | Same example |
+"""
+        self.assertEqual(
+            _readme_example_entries(readme, [], package_url),
+            [{"path": "example/one.dart", "description": "Same example."}],
+        )
 
     def test_groups_and_link_only_topics_are_counted_individually(self) -> None:
         code, result = self.verify("""

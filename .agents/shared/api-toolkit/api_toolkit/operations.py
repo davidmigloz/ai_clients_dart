@@ -82,7 +82,7 @@ DART_QUOTED_PATH_RE = re.compile(r"""(['"])([^'"]+\.dart)\1""")
 DART_RESOURCE_GETTER_RE = re.compile(r"\b([A-Z]\w*Resource)\??\s+get\s+(\w+)\s*(?:=>|{)")
 README_HEADING_RE = re.compile(r"^(#{1,3})\s+(.+?)\s*$")
 README_FENCE_RE = re.compile(r"^```")
-README_EXAMPLE_LINK_RE = re.compile(r"\[[^\]]+\]\(((?:\./)?example/[^)\n]+\.dart)\)")
+README_EXAMPLE_LINK_RE = re.compile(r"\[[^\]]+\]\(((?:\./|https://[^\s)]+/)?example/[^)\n]+\.dart)\)")
 README_CODE_BLOCK_RE = re.compile(r"```([^\n`]*)\n([\s\S]*?)\n```")
 README_EMOJI_RE = re.compile(r"[\U0001F300-\U0001FAFF]")
 README_LLMS_LINK_RE = re.compile(r"\[llms\.txt\]\(\./llms\.txt\)", re.IGNORECASE)
@@ -2565,9 +2565,20 @@ def _strip_readme_code_spans(markdown: str) -> str:
     return _mask_readme_matches(r"(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)", markdown)
 
 
-def _readme_example_links(section: str) -> list[str]:
+def _readme_example_path(target: str, package_url: str | None) -> str | None:
+    path = target.removeprefix("./")
+    if package_url:
+        path = path.removeprefix(f"{package_url}/")
+    return path if path.startswith("example/") else None
+
+
+def _readme_example_links(section: str, package_url: str | None = None) -> list[str]:
     content = _strip_readme_code_spans(_strip_readme_comments(_strip_fenced_code_blocks(section)))
-    return [match.group(1).removeprefix("./") for match in README_EXAMPLE_LINK_RE.finditer(content)]
+    return [
+        path
+        for match in README_EXAMPLE_LINK_RE.finditer(content)
+        if (path := _readme_example_path(match.group(1), package_url)) is not None
+    ]
 
 
 class _ReadmeDetailsParser(HTMLParser):
@@ -2628,7 +2639,9 @@ class _ReadmeDetailsParser(HTMLParser):
             self.summary["title"] += data
 
 
-def _readme_usage_topics(section: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def _readme_usage_topics(
+    section: str, package_url: str | None = None
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Support summary topics, H3 groups, and the legacy H3 + disclosure layout."""
     parser = _ReadmeDetailsParser(section)
     parser.feed(_strip_readme_code_spans(_strip_fenced_code_blocks(section)))
@@ -2677,7 +2690,7 @@ def _readme_usage_topics(section: str) -> tuple[list[dict[str, Any]], list[dict[
         end = boundaries[index + 1][1] if index + 1 < len(boundaries) else len(section)
         body = visible_text[start:end]
         has_disclosure = any(start <= block["start"] < end for block in parser.blocks)
-        if _section_has_code_block(body) or _readme_example_links(body) or (index > 0 and not has_disclosure):
+        if _section_has_code_block(body) or _readme_example_links(body, package_url) or (index > 0 and not has_disclosure):
             topics.append({"title": title, "body": body})
             issues.append(_type_issue("warning", title, "Usage topic should be collapsible inside <details>", file="README.md"))
     return topics, issues
@@ -2699,7 +2712,9 @@ def _is_readme_badge_line(line: str) -> bool:
     return stripped.startswith("[![") or stripped.startswith("![")
 
 
-def _readme_has_leading_llms_callout(markdown: str) -> bool:
+def _readme_has_leading_llms_callout(
+    markdown: str, llms_link_re: re.Pattern[str] = README_LLMS_LINK_RE
+) -> bool:
     lines = markdown.splitlines()
     headings = _readme_headings(markdown)
     h1_line = next((heading["line"] for heading in headings if heading["level"] == 1), None)
@@ -2719,7 +2734,7 @@ def _readme_has_leading_llms_callout(markdown: str) -> bool:
             while index < len(lines) and lines[index].lstrip().startswith(">"):
                 block.append(lines[index])
                 index += 1
-            if README_LLMS_LINK_RE.search("\n".join(block)) is not None:
+            if llms_link_re.search("\n".join(block)) is not None:
                 return True
             continue
         index += 1
@@ -2789,6 +2804,9 @@ def _verify_readme(config: ToolkitConfig) -> tuple[int, dict[str, Any]]:
                 )
             )
 
+    if h2_positions.get("Quickstart", len(readme)) < h2_positions.get("Features", -1):
+        required_h2.remove("Quickstart")
+        required_h2.insert(0, "Quickstart")
     existing_positions = [h2_positions[title] for title in required_h2 if title in h2_positions]
     if existing_positions != sorted(existing_positions):
         issues.append(
@@ -2820,8 +2838,21 @@ def _verify_readme(config: ToolkitConfig) -> tuple[int, dict[str, Any]]:
             )
         )
 
+    package_url = None
+    if (repo_root := getattr(config, "repo_root", None)) is not None:
+        try:
+            package_url = _blob_url(repo_root, readme_path).removesuffix("/README.md")
+        except ToolkitError:
+            # Standalone package verification can still check relative links.
+            pass
+    llms_link_re = README_LLMS_LINK_RE
+    if package_url:
+        absolute_llms_url = re.escape(f"{package_url}/llms.txt")
+        llms_link_re = re.compile(
+            rf"\[llms\.txt\]\((?:\./llms\.txt|{absolute_llms_url})\)", re.IGNORECASE
+        )
     top_matter = _readme_top_matter(readme, headings, before_h2_titles=(required_h2[0],))
-    if not README_LLMS_LINK_RE.search(top_matter):
+    if not llms_link_re.search(top_matter):
         issues.append(
             _type_issue(
                 "warning",
@@ -2830,7 +2861,7 @@ def _verify_readme(config: ToolkitConfig) -> tuple[int, dict[str, Any]]:
                 file="README.md",
             )
         )
-    elif not _readme_has_leading_llms_callout(readme):
+    elif not _readme_has_leading_llms_callout(readme, llms_link_re):
         issues.append(
             _type_issue(
                 "warning",
@@ -2851,10 +2882,12 @@ def _verify_readme(config: ToolkitConfig) -> tuple[int, dict[str, Any]]:
             )
         )
 
-    usage_topics, usage_issues = _readme_usage_topics(_section_from_heading(readme, headings, "Usage"))
+    usage_topics, usage_issues = _readme_usage_topics(
+        _section_from_heading(readme, headings, "Usage"), package_url
+    )
     issues.extend(usage_issues)
     for topic in usage_topics:
-        example_links = _readme_example_links(topic["body"])
+        example_links = _readme_example_links(topic["body"], package_url)
         if not example_links:
             issues.append(
                 _type_issue(
@@ -4806,11 +4839,15 @@ def _table_cell_description(readme: str, match: re.Match[str]) -> str | None:
     return desc
 
 
-def _readme_example_entries(readme: str, headings: list[dict[str, Any]]) -> list[dict[str, str]]:
+def _readme_example_entries(
+    readme: str, headings: list[dict[str, Any]], package_url: str
+) -> list[dict[str, str]]:
     examples: list[dict[str, str]] = []
     seen: dict[str, int] = {}  # path -> index in examples list
     for match in README_EXAMPLE_LINK_RE.finditer(readme):
-        example_path = match.group(1).removeprefix("./")
+        example_path = _readme_example_path(match.group(1), package_url)
+        if example_path is None:
+            continue
         table_desc = _table_cell_description(readme, match)
         if example_path in seen:
             # Upgrade to table-cell description if the earlier entry used a
@@ -4956,7 +4993,8 @@ def _package_snapshot(repo_root: Path, package_root: Path) -> dict[str, Any]:
         )
 
     examples: list[dict[str, Any]] = []
-    for example in _readme_example_entries(readme, headings):
+    package_url = _blob_url(repo_root, readme_path).removesuffix("/README.md")
+    for example in _readme_example_entries(readme, headings, package_url):
         example_path = package_root / example["path"]
         if not example_path.exists():
             continue
