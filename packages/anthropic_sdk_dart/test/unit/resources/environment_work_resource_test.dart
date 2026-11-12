@@ -39,6 +39,31 @@ final _item = <String, Object?>{
 
 void main() {
   test(
+    'malformed work item hides newly issued credentials in decoder errors',
+    () async {
+      final client = AnthropicClient(
+        httpClient: MockClient(
+          (_) async => _json({..._item, 'type': _secret, 'secret': _secret}),
+        ),
+      );
+      addTearDown(client.close);
+
+      await expectLater(
+        client.environments.work(_env, bearerToken: _key).poll(),
+        throwsA(
+          isA<FormatException>()
+              .having((error) => error.source, 'decoder source', isNull)
+              .having(
+                (error) => error.toString(),
+                'diagnostic',
+                isNot(contains(_secret)),
+              ),
+        ),
+      );
+    },
+  );
+
+  test(
     'all eight work operations follow auth, beta, and wire contracts',
     () async {
       final requests = <http.Request>[];

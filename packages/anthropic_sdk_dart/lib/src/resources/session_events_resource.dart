@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../errors/response_error.dart';
 import '../models/managed_agents/common/list_order.dart';
 import '../models/managed_agents/events/send_event_params.dart';
 import '../models/managed_agents/events/session_event.dart';
@@ -80,9 +81,7 @@ class SessionEventsResource extends ResourceBase with StreamingResource {
       abortTrigger: abortTrigger,
     );
 
-    return ListSessionEventsResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, ListSessionEventsResponse.fromJson);
   }
 
   /// Sends events to the session.
@@ -108,9 +107,7 @@ class SessionEventsResource extends ResourceBase with StreamingResource {
       abortTrigger: abortTrigger,
     );
 
-    return SendSessionEventsResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, SendSessionEventsResponse.fromJson);
   }
 
   /// Streams events from the session via SSE.

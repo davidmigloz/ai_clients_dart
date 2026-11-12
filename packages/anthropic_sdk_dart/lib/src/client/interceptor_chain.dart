@@ -99,6 +99,10 @@ class InterceptorChain {
           admission.enter();
         }
         final originalRequest = context.request;
+        final retryCredentials =
+            retryWrapper != null && originalRequest is http.Request
+            ? <String>{}
+            : null;
 
         // For retries, clone the request since http.BaseRequest can only be
         // finalized once. Capture body bytes before the first finalize().
@@ -126,9 +130,12 @@ class InterceptorChain {
                   ..maxRedirects = originalRequest.maxRedirects
                   ..persistentConnection = originalRequest.persistentConnection
                   ..bodyBytes = bodyBytes ?? [];
-            return withRequestDiagnosticCredentials(
-              request,
-              requestDiagnosticCredentials(originalRequest),
+            return withRequestCredentialObserver(
+              withRequestDiagnosticCredentials(
+                request,
+                requestDiagnosticCredentials(originalRequest),
+              ),
+              retryCredentials?.addAll,
             );
           }
           // Non-cloneable requests are sent only once.
@@ -151,13 +158,15 @@ class InterceptorChain {
           if (timeout == null &&
               context.abortTrigger == null &&
               nativeRequest?.abortTrigger == null) {
-            return http.Response.fromStream(
-              await sendApiRequest(
-                httpClient,
-                createRequest(),
-                ensureNotClosed: ensureNotClosed,
-                redirectErrorMessage: redirectErrorMessage,
-              ),
+            final response = await sendApiRequest(
+              httpClient,
+              createRequest(),
+              ensureNotClosed: ensureNotClosed,
+              redirectErrorMessage: redirectErrorMessage,
+            );
+            return withResponseDiagnosticCredentials(
+              await http.Response.fromStream(response),
+              responseCredentialValues(response),
             );
           }
           return sendBufferedHttpAttempt(
@@ -175,11 +184,18 @@ class InterceptorChain {
         }
 
         // Execute with or without retry wrapper
-        if (retryWrapper != null && originalRequest is http.Request) {
+        if (retryCredentials != null && originalRequest is http.Request) {
           // Per spec: Retry wraps transport execution
           return retryWrapper!.executeWithRetry(
             originalRequest,
-            executeTransport,
+            () async {
+              final response = await executeTransport();
+              retryCredentials.addAll(responseCredentialValues(response));
+              return withResponseDiagnosticCredentials(
+                response,
+                retryCredentials,
+              );
+            },
             context.abortTrigger,
             correlationId,
           );

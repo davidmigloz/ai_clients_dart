@@ -83,35 +83,33 @@ final class OrganizationTransport {
           ? null
           : (headers) => credentials.addAll(requestCredentialValues(headers)),
     );
-    final sentHeaders = response.request?.headers;
-    if (credentials != null && sentHeaders != null) {
-      credentials.addAll(requestCredentialValues(sentHeaders));
+    if (credentials != null) {
+      credentials.addAll(responseCredentialValues(response));
     }
     try {
-      final json = jsonDecode(utf8.decode(response.bodyBytes));
-      if (json is! Map<String, dynamic>) {
-        throw const FormatException(
-          'Expected a JSON object from the Admin API',
-        );
+      return decodeApiJsonResponse<T>(
+        response,
+        (json) {
+          if (credentials != null) {
+            if (json[diagnosticField] case final String value
+                when diagnosticField != null) {
+              json[diagnosticField] = redactDiagnosticText(value, credentials);
+            }
+            sanitizeResponseDiagnostics?.call(json, credentials);
+          }
+          return decode(json);
+        },
+        utf8Body: true,
+        nonObjectMessage: 'Expected a JSON object from the Admin API',
+        additionalCredentials: credentials ?? const [],
+      );
+    } on Object catch (error, stackTrace) {
+      if (!sensitiveResponse ||
+          (error is! FormatException && error is! TypeError)) {
+        rethrow;
       }
-      if (json[diagnosticField] case final String value
-          when diagnosticField != null && credentials != null) {
-        json[diagnosticField] = redactDiagnosticText(value, credentials);
-      }
-      if (credentials != null) {
-        sanitizeResponseDiagnostics?.call(json, credentials);
-      }
-      return decode(json);
-    } on FormatException catch (error, stackTrace) {
-      if (sensitiveResponse) {
-        Error.throwWithStackTrace(
-          const FormatException('Invalid sensitive Admin API response'),
-          stackTrace,
-        );
-      }
-      if (credentials == null) rethrow;
       Error.throwWithStackTrace(
-        redactApiFormatException(error, credentials),
+        const FormatException('Invalid sensitive Admin API response'),
         stackTrace,
       );
     }

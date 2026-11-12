@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../errors/response_error.dart';
 import '../models/managed_agents/resources/session_resource.dart';
 import '../models/managed_agents/resources/session_resource_params.dart';
 import '../utils/path_segment.dart';
@@ -51,9 +52,7 @@ class SessionResourcesResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return SessionResource.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, SessionResource.fromJson);
   }
 
   /// Lists resources in the session.
@@ -87,8 +86,9 @@ class SessionResourcesResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return ListSessionResourcesResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
+    return decodeApiJsonResponse(
+      response,
+      ListSessionResourcesResponse.fromJson,
     );
   }
 
@@ -116,9 +116,7 @@ class SessionResourcesResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return SessionResource.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, SessionResource.fromJson);
   }
 
   /// Updates a resource.
@@ -149,9 +147,7 @@ class SessionResourcesResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return SessionResource.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, SessionResource.fromJson);
   }
 
   /// Deletes a resource.
@@ -178,8 +174,6 @@ class SessionResourcesResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return DeletedSessionResource.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, DeletedSessionResource.fromJson);
   }
 }

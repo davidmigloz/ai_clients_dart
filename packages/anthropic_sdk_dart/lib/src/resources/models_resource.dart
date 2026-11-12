@@ -1,7 +1,6 @@
-import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 
+import '../errors/response_error.dart';
 import '../models/models/model_info.dart';
 import '../utils/path_segment.dart';
 import 'base_resource.dart';
@@ -68,9 +67,7 @@ class ModelsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return ModelListResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, ModelListResponse.fromJson);
   }
 
   /// Retrieves a specific model.
@@ -101,9 +98,7 @@ class ModelsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return ModelInfo.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, ModelInfo.fromJson);
   }
 
   Map<String, String> _headers({

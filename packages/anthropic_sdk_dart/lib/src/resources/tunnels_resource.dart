@@ -274,7 +274,7 @@ Future<T> _sendTunnelRequest<T>(
   required List<String> betas,
   required String? bearerToken,
   required Future<void>? abortTrigger,
-}) async {
+}) => Future<T>.sync(() {
   resource.ensureNotClosed?.call();
   final request =
       http.Request(
@@ -299,11 +299,11 @@ Future<T> _sendTunnelRequest<T>(
     if (effectiveBearer != null) oauthBetaHeader,
   }.join(',');
   if (body != null) request.body = jsonEncode(body);
-  final result = await sendProtectedResourceRequest(
+  return sendProtectedResourceRequest(
     resource,
     request,
+    (json) => parse(json! as Map<String, dynamic>),
     bearerToken: effectiveBearer,
     abortTrigger: abortTrigger,
   );
-  return parse(result! as Map<String, dynamic>);
-}
+});

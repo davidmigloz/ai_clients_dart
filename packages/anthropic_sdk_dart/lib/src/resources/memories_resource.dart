@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../errors/response_error.dart';
 import '../models/managed_agents/common/list_order.dart';
 import '../models/managed_agents/memory_stores/create_memory_params.dart';
 import '../models/managed_agents/memory_stores/memory.dart';
@@ -66,7 +67,7 @@ class MemoriesResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Memory.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Memory.fromJson);
   }
 
   /// Lists memories in this store, optionally rolled up by path prefix.
@@ -127,9 +128,7 @@ class MemoriesResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return MemoryListResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, MemoryListResponse.fromJson);
   }
 
   /// Retrieves a single memory.
@@ -161,7 +160,7 @@ class MemoriesResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Memory.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Memory.fromJson);
   }
 
   /// Updates a memory.
@@ -198,7 +197,7 @@ class MemoriesResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Memory.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Memory.fromJson);
   }
 
   /// Deletes a memory.
@@ -233,9 +232,7 @@ class MemoriesResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return DeletedMemory.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, DeletedMemory.fromJson);
   }
 }
 

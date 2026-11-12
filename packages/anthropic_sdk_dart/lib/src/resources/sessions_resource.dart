@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../errors/response_error.dart';
 import '../models/managed_agents/common/list_order.dart';
 import '../models/managed_agents/sessions/create_session_params.dart';
 import '../models/managed_agents/sessions/session.dart';
@@ -88,7 +89,7 @@ class SessionsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Session.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Session.fromJson);
   }
 
   /// Lists sessions.
@@ -155,9 +156,7 @@ class SessionsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return ListSessionsResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, ListSessionsResponse.fromJson);
   }
 
   /// Retrieves a specific session.
@@ -183,7 +182,7 @@ class SessionsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Session.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Session.fromJson);
   }
 
   /// Updates a session.
@@ -213,7 +212,7 @@ class SessionsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Session.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Session.fromJson);
   }
 
   /// Deletes a session.
@@ -239,9 +238,7 @@ class SessionsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return DeletedSession.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, DeletedSession.fromJson);
   }
 
   /// Archives a session.
@@ -269,6 +266,6 @@ class SessionsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Session.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Session.fromJson);
   }
 }

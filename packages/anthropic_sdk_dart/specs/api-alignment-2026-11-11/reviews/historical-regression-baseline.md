@@ -8,6 +8,8 @@ Existing focused Anthropic cancellation and error suites passed 102 tests. Exist
 
 The shared HTTP failure and retry fix for [#498](https://github.com/davidmigloz/ai_clients_dart/issues/498) adds deterministic tests in `test/unit/resources/http_error_response_test.dart` and `test/unit/client/retry_after_test.dart`. Buffered, SSE and JSONL handshakes, and direct Files and Skills preserve provider request IDs from a response header or a valid top-level body `request_id`. A header wins when both are present. The exception retains the existing ISO-8601 deadline fallback, and the retry scheduler accepts the bounded numeric and HTTP-date guidance. Streaming HTTP errors honor a declared charset and use tolerant UTF-8 when none is usable.
 
+Malformed successful JSON also reached caller-visible decoder diagnostics. Confirmed paths include Models, Managed Agents, Admin, Compliance, Files, Skills, User Profiles, and native provider requests with credentials applied after the normal interceptor chain. Buffered codecs redact effective credentials in JSON and typed decoder failures, including failed Web casts, while valid application fields round-trip unchanged. Protected work and tunnel decoders suppress malformed response diagnostics that could contain newly issued credentials. Borrowed transports without request metadata retain the actual outgoing request. The transport records observed credentials per response when supplied request metadata omits them. Fixtures cover guarded redirects, metadata isolation, stream ownership, strict UTF-8, raw and encoded echoes, and valid success payloads.
+
 ## Path matrix
 
 | Historical family | Anthropic | OpenAI comparison | Decision or remaining verification |

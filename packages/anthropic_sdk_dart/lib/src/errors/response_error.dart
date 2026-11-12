@@ -163,7 +163,8 @@ bool _bodyContainsCredential(String body, Set<String> credentials) =>
 
 bool _containsCredential(Object? value, Set<String> credentials) =>
     switch (value) {
-      String() => redactCredentialEcho(value, credentials) == null,
+      String() =>
+        redactPercentEncodedCredentialEcho(value, credentials) == null,
       List<Object?>() => value.any(
         (item) => _containsCredential(item, credentials),
       ),
@@ -235,17 +236,35 @@ FormatException redactApiFormatException(
   return FormatException(message, unsafeSource ? null : source, error.offset);
 }
 
+/// Removes credential echoes from JSON and typed decoding failures.
+Object redactApiDecoderError(Object error, Set<String> credentials) {
+  if (error is FormatException) {
+    return redactApiFormatException(error, credentials);
+  }
+  if (error is TypeError && credentials.isNotEmpty) {
+    // Web type errors can include the value from a failed JSON field cast.
+    final message = error.toString();
+    final safe = _redactDiagnosticBodyText(message, credentials);
+    if (safe != message) return FormatException(safe);
+  }
+  return error;
+}
+
 Map<String, dynamic> _redactDiagnosticMap(
   Map<String, dynamic> value,
   Set<String> credentials, {
   bool omitEchoedIdentifiers = false,
 }) => Map.unmodifiable({
   for (final entry in value.entries)
-    if (redactCredentialEcho(entry.key, credentials) != null &&
+    if (redactPercentEncodedCredentialEcho(entry.key, credentials) != null &&
         !(omitEchoedIdentifiers &&
             const {'request_id', 'error_code', 'type'}.contains(entry.key) &&
             entry.value is String &&
-            redactCredentialEcho(entry.value as String, credentials) == null))
+            redactPercentEncodedCredentialEcho(
+                  entry.value as String,
+                  credentials,
+                ) ==
+                null))
       entry.key: _redactDiagnosticValue(
         entry.value,
         credentials,
@@ -319,18 +338,25 @@ String redactApiErrorBody(String body, Set<String> credentials) {
 /// in format errors from a provider transport.
 T decodeApiJsonResponse<T>(
   http.Response response,
-  T Function(Map<String, dynamic>) decode,
-) {
+  T Function(Map<String, dynamic>) decode, {
+  bool utf8Body = false,
+  String? nonObjectMessage,
+  Iterable<String> additionalCredentials = const [],
+}) {
   try {
-    return decode(jsonDecode(response.body) as Map<String, dynamic>);
-  } on FormatException catch (error, stackTrace) {
-    final credentials = requestCredentialValues(
-      response.request?.headers ?? const {},
-    );
-    Error.throwWithStackTrace(
-      redactApiFormatException(error, credentials),
-      stackTrace,
-    );
+    final body = utf8Body ? utf8.decode(response.bodyBytes) : response.body;
+    final json = jsonDecode(body);
+    if (nonObjectMessage != null && json is! Map<String, dynamic>) {
+      throw FormatException(nonObjectMessage);
+    }
+    return decode(json as Map<String, dynamic>);
+  } on Object catch (error, stackTrace) {
+    if (error is! FormatException && error is! TypeError) rethrow;
+    final credentials = responseCredentialValues(response)
+      ..addAll(additionalCredentials);
+    final safe = redactApiDecoderError(error, credentials);
+    if (identical(safe, error)) rethrow;
+    Error.throwWithStackTrace(safe, stackTrace);
   }
 }
 

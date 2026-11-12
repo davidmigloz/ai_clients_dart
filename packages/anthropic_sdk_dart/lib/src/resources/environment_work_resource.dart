@@ -54,17 +54,16 @@ class EnvironmentWorkResource extends ResourceBase {
     String? workspaceId,
     List<String> betas = const [],
     Future<void>? abortTrigger,
-  }) async => EnvironmentWorkItem.fromJson(
-    (await _send(
-          'GET',
-          '/${encodePathSegment(workId, 'workId')}',
-          allowBearer: false,
-          includeWorkspace: true,
-          workspaceId: workspaceId,
-          betas: betas,
-          abortTrigger: abortTrigger,
-        ))!
-        as Map<String, dynamic>,
+  }) => _send(
+    'GET',
+    '',
+    (json) => EnvironmentWorkItem.fromJson(json! as Map<String, dynamic>),
+    workId: workId,
+    allowBearer: false,
+    includeWorkspace: true,
+    workspaceId: workspaceId,
+    betas: betas,
+    abortTrigger: abortTrigger,
   );
 
   /// Updates metadata with management credentials. Null values delete keys.
@@ -74,18 +73,17 @@ class EnvironmentWorkResource extends ResourceBase {
     String? workspaceId,
     List<String> betas = const [],
     Future<void>? abortTrigger,
-  }) async => EnvironmentWorkItem.fromJson(
-    (await _send(
-          'POST',
-          '/${encodePathSegment(workId, 'workId')}',
-          allowBearer: false,
-          includeWorkspace: true,
-          workspaceId: workspaceId,
-          body: {'metadata': metadata},
-          betas: betas,
-          abortTrigger: abortTrigger,
-        ))!
-        as Map<String, dynamic>,
+  }) => _send(
+    'POST',
+    '',
+    (json) => EnvironmentWorkItem.fromJson(json! as Map<String, dynamic>),
+    workId: workId,
+    allowBearer: false,
+    includeWorkspace: true,
+    workspaceId: workspaceId,
+    body: {'metadata': metadata},
+    betas: betas,
+    abortTrigger: abortTrigger,
   );
 
   /// Lists work items. Pass the returned cursor to continue pagination.
@@ -94,15 +92,14 @@ class EnvironmentWorkResource extends ResourceBase {
     String? page,
     List<String> betas = const [],
     Future<void>? abortTrigger,
-  }) async => EnvironmentWorkListResponse.fromJson(
-    (await _send(
-          'GET',
-          '',
-          query: {'limit': ?limit?.toString(), 'page': ?page},
-          betas: betas,
-          abortTrigger: abortTrigger,
-        ))!
-        as Map<String, dynamic>,
+  }) => _send(
+    'GET',
+    '',
+    (json) =>
+        EnvironmentWorkListResponse.fromJson(json! as Map<String, dynamic>),
+    query: {'limit': ?limit?.toString(), 'page': ?page},
+    betas: betas,
+    abortTrigger: abortTrigger,
   );
 
   /// Acknowledges a work item.
@@ -110,14 +107,13 @@ class EnvironmentWorkResource extends ResourceBase {
     String workId, {
     List<String> betas = const [],
     Future<void>? abortTrigger,
-  }) async => EnvironmentWorkItem.fromJson(
-    (await _send(
-          'POST',
-          '/${encodePathSegment(workId, 'workId')}/ack',
-          betas: betas,
-          abortTrigger: abortTrigger,
-        ))!
-        as Map<String, dynamic>,
+  }) => _send(
+    'POST',
+    '/ack',
+    (json) => EnvironmentWorkItem.fromJson(json! as Map<String, dynamic>),
+    workId: workId,
+    betas: betas,
+    abortTrigger: abortTrigger,
   );
 
   /// Extends a work lease. Supply [noHeartbeat] when claiming a fresh lease,
@@ -128,19 +124,18 @@ class EnvironmentWorkResource extends ResourceBase {
     String? expectedLastHeartbeat,
     List<String> betas = const [],
     Future<void>? abortTrigger,
-  }) async => EnvironmentWorkHeartbeat.fromJson(
-    (await _send(
-          'POST',
-          '/${encodePathSegment(workId, 'workId')}/heartbeat',
-          query: {
-            'desired_ttl_seconds': ?desiredTtlSeconds?.toString(),
-            'expected_last_heartbeat': ?expectedLastHeartbeat,
-          },
-          betas: betas,
-          abortTrigger: abortTrigger,
-          handleError: _heartbeatError,
-        ))!
-        as Map<String, dynamic>,
+  }) => _send(
+    'POST',
+    '/heartbeat',
+    (json) => EnvironmentWorkHeartbeat.fromJson(json! as Map<String, dynamic>),
+    workId: workId,
+    query: {
+      'desired_ttl_seconds': ?desiredTtlSeconds?.toString(),
+      'expected_last_heartbeat': ?expectedLastHeartbeat,
+    },
+    betas: betas,
+    abortTrigger: abortTrigger,
+    handleError: _heartbeatError,
   );
 
   /// Polls the queue. A null result means there is no assigned work.
@@ -150,38 +145,34 @@ class EnvironmentWorkResource extends ResourceBase {
     String? workerId,
     List<String> betas = const [],
     Future<void>? abortTrigger,
-  }) async {
-    final data = await _send(
-      'GET',
-      '/poll',
-      query: {
-        'block_ms': ?blockMs?.toString(),
-        'reclaim_older_than_ms': ?reclaimOlderThanMs?.toString(),
-      },
-      workerId: workerId,
-      betas: betas,
-      abortTrigger: abortTrigger,
-    );
-    return data == null
+  }) => _send(
+    'GET',
+    '/poll',
+    (json) => json == null
         ? null
-        : EnvironmentWorkItem.fromJson(data as Map<String, dynamic>);
-  }
+        : EnvironmentWorkItem.fromJson(json as Map<String, dynamic>),
+    query: {
+      'block_ms': ?blockMs?.toString(),
+      'reclaim_older_than_ms': ?reclaimOlderThanMs?.toString(),
+    },
+    workerId: workerId,
+    betas: betas,
+    abortTrigger: abortTrigger,
+  );
 
   /// Retrieves queue statistics.
   Future<EnvironmentWorkQueueStats> stats({
     String? workspaceId,
     List<String> betas = const [],
     Future<void>? abortTrigger,
-  }) async => EnvironmentWorkQueueStats.fromJson(
-    (await _send(
-          'GET',
-          '/stats',
-          includeWorkspace: true,
-          workspaceId: workspaceId,
-          betas: betas,
-          abortTrigger: abortTrigger,
-        ))!
-        as Map<String, dynamic>,
+  }) => _send(
+    'GET',
+    '/stats',
+    (json) => EnvironmentWorkQueueStats.fromJson(json! as Map<String, dynamic>),
+    includeWorkspace: true,
+    workspaceId: workspaceId,
+    betas: betas,
+    abortTrigger: abortTrigger,
   );
 
   /// Requests graceful or forced shutdown for a work item.
@@ -191,22 +182,23 @@ class EnvironmentWorkResource extends ResourceBase {
     String? workspaceId,
     List<String> betas = const [],
     Future<void>? abortTrigger,
-  }) async => EnvironmentWorkItem.fromJson(
-    (await _send(
-          'POST',
-          '/${encodePathSegment(workId, 'workId')}/stop',
-          includeWorkspace: true,
-          workspaceId: workspaceId,
-          body: {'force': ?force},
-          betas: betas,
-          abortTrigger: abortTrigger,
-        ))!
-        as Map<String, dynamic>,
+  }) => _send(
+    'POST',
+    '/stop',
+    (json) => EnvironmentWorkItem.fromJson(json! as Map<String, dynamic>),
+    workId: workId,
+    includeWorkspace: true,
+    workspaceId: workspaceId,
+    body: {'force': ?force},
+    betas: betas,
+    abortTrigger: abortTrigger,
   );
 
-  Future<Object?> _send(
+  Future<T> _send<T>(
     String method,
-    String suffix, {
+    String suffix,
+    T Function(Object?) decode, {
+    String? workId,
     bool allowBearer = true,
     bool includeWorkspace = false,
     String? workspaceId,
@@ -216,7 +208,10 @@ class EnvironmentWorkResource extends ResourceBase {
     required List<String> betas,
     required Future<void>? abortTrigger,
     AnthropicException? Function(String, ResponseMetadata)? handleError,
-  }) {
+  }) => Future<T>.sync(() {
+    final workPath = workId == null
+        ? ''
+        : '/${encodePathSegment(workId, 'workId')}';
     ensureNotClosed?.call();
     if (!allowBearer && _bearerToken != null) {
       throw ArgumentError(
@@ -224,7 +219,7 @@ class EnvironmentWorkResource extends ResourceBase {
       );
     }
     final path =
-        '/v1/environments/${encodePathSegment(environmentId, 'environmentId')}/work$suffix';
+        '/v1/environments/${encodePathSegment(environmentId, 'environmentId')}/work$workPath$suffix';
     final headers = requestBuilder.buildHeaders(
       includeWorkspace: includeWorkspace,
       betas: betas,
@@ -248,11 +243,12 @@ class EnvironmentWorkResource extends ResourceBase {
     return sendProtectedResourceRequest(
       this,
       request,
+      decode,
       bearerToken: _bearerToken,
       abortTrigger: abortTrigger,
       handleError: handleError,
     );
-  }
+  });
 
   AnthropicException? _heartbeatError(String body, ResponseMetadata metadata) {
     if (metadata.statusCode != 412) return null;

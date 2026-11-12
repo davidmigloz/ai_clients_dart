@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../errors/response_error.dart';
 import '../models/managed_agents/memory_stores/memory_version.dart';
 import '../models/managed_agents/memory_stores/memory_version_list_response.dart';
 import '../models/managed_agents/memory_stores/memory_view.dart';
@@ -84,9 +85,7 @@ class MemoryVersionsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return MemoryVersionListResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, MemoryVersionListResponse.fromJson);
   }
 
   /// Retrieves a single memory version.
@@ -118,9 +117,7 @@ class MemoryVersionsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return MemoryVersion.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, MemoryVersion.fromJson);
   }
 
   /// Redacts a memory version, removing its content while preserving the
@@ -151,8 +148,6 @@ class MemoryVersionsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return MemoryVersion.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, MemoryVersion.fromJson);
   }
 }

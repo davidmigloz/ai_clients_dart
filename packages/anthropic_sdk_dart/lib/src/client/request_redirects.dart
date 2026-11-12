@@ -37,13 +37,40 @@ Future<http.StreamedResponse> sendApiRequest(
   final nativeAuthorization =
       _usesDartIo && request.headers['authorization']?.isNotEmpty == true;
   if (!request.followRedirects || !(hasApiKey || nativeAuthorization)) {
-    return client.send(request);
+    return _sendWithRequest(client, request);
   }
   return _sendGuardedRequest(
     client,
     request,
     sameOriginOnly: hasApiKey,
     ensureNotClosed: ensureNotClosed,
+  );
+}
+
+// A borrowed client may omit the request in its response. Retain the actual
+// outgoing request so downstream diagnostics can filter effective credentials.
+Future<http.StreamedResponse> _sendWithRequest(
+  http.Client client,
+  http.BaseRequest request,
+) async {
+  final credentials = requestCredentialValues(request.headers)
+    ..addAll(requestDiagnosticCredentials(request));
+  requestCredentialObserver(request)?.call(credentials);
+  final response = await client.send(request);
+  return withResponseDiagnosticCredentials(
+    response.request != null
+        ? response
+        : http.StreamedResponse(
+            response.stream,
+            response.statusCode,
+            contentLength: response.contentLength,
+            request: request,
+            headers: response.headers,
+            isRedirect: response.isRedirect,
+            persistentConnection: response.persistentConnection,
+            reasonPhrase: response.reasonPhrase,
+          ),
+    credentials,
   );
 }
 
@@ -55,7 +82,7 @@ Future<http.StreamedResponse> _sendWithoutRedirect(
   final credentials = requestCredentialValues(request.headers)
     ..addAll(requestDiagnosticCredentials(request));
   final watch = Stopwatch()..start();
-  final response = await client.send(request);
+  final response = await _sendWithRequest(client, request);
   if (response.statusCode >= 300 && response.statusCode < 400) {
     _releaseRedirectBody(response);
     throw _redirectException(
@@ -87,9 +114,11 @@ Future<http.StreamedResponse> _sendGuardedRequest(
   );
   try {
     for (var redirects = 0; ; redirects++) {
-      final response = await client.send(current);
+      final response = await _sendWithRequest(client, current);
       final method = _redirectMethod(current.method, response.statusCode);
-      if (method == null) return response;
+      if (method == null) {
+        return withResponseDiagnosticCredentials(response, credentials);
+      }
       _releaseRedirectBody(response);
 
       if (abort != null) {
@@ -119,6 +148,10 @@ Future<http.StreamedResponse> _sendGuardedRequest(
         ..headers.addAll(current.headers)
         ..headers.remove('content-length')
         ..headers.remove('transfer-encoding');
+      withRequestCredentialObserver(
+        current,
+        requestCredentialObserver(request),
+      );
       if (crossOrigin) {
         current.headers.removeWhere(
           (name, _) => _crossOriginHeaders.contains(name.toLowerCase()),
@@ -149,11 +182,7 @@ ApiException _redirectException(
     statusCode: response.statusCode,
     headers: response.headers,
     latency: watch.elapsed,
-    credentials: {
-      ...credentials,
-      if (response.request?.headers case final sentHeaders?)
-        ...requestCredentialValues(sentHeaders),
-    },
+    credentials: {...credentials, ...responseCredentialValues(response)},
   ),
 );
 

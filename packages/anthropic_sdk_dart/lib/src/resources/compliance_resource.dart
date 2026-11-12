@@ -1,7 +1,6 @@
-import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 
+import '../errors/response_error.dart';
 import '../models/compliance/compliance_models.dart';
 import '../utils/path_segment.dart';
 import 'base_resource.dart';
@@ -44,29 +43,27 @@ class ComplianceResource extends ResourceBase with StreamingResource {
     ComplianceOrder? order,
     int? limit,
     Future<void>? abortTrigger,
-  }) async {
-    final response = await _get(
-      'activities',
-      query: {
-        'activity_types[]': ?activityTypes,
-        'exclude_activity_types[]': ?excludeActivityTypes,
-        'actor_ids[]': ?actorIds,
-        'user_ids[]': ?userIds,
-        'organization_ids[]': ?organizationIds,
-        ...?createdAt?.toQueryParameters('created_at'),
-        'before_id': ?beforeId,
-        'after_id': ?afterId,
-        'order': ?order?.name,
-        'limit': ?limit?.toString(),
-      },
-      abortTrigger: abortTrigger,
-    );
-    return ComplianceIdPage.fromJson(
-      response,
+  }) => _get(
+    'activities',
+    (json) => ComplianceIdPage.fromJson(
+      json,
       ComplianceActivity.fromJson,
       allowMissingData: true,
-    );
-  }
+    ),
+    query: {
+      'activity_types[]': ?activityTypes,
+      'exclude_activity_types[]': ?excludeActivityTypes,
+      'actor_ids[]': ?actorIds,
+      'user_ids[]': ?userIds,
+      'organization_ids[]': ?organizationIds,
+      ...?createdAt?.toQueryParameters('created_at'),
+      'before_id': ?beforeId,
+      'after_id': ?afterId,
+      'order': ?order?.name,
+      'limit': ?limit?.toString(),
+    },
+    abortTrigger: abortTrigger,
+  );
 
   /// Lists organizations visible to the caller's Compliance key.
   ///
@@ -146,11 +143,10 @@ class ComplianceResource extends ResourceBase with StreamingResource {
     String organizationUuid,
     String roleId, {
     Future<void>? abortTrigger,
-  }) async => ComplianceRole.fromJson(
-    await _get(
-      'organizations/${_segment(organizationUuid)}/roles/${_segment(roleId)}',
-      abortTrigger: abortTrigger,
-    ),
+  }) => _get(
+    'organizations/${_segment(organizationUuid)}/roles/${_segment(roleId)}',
+    ComplianceRole.fromJson,
+    abortTrigger: abortTrigger,
   );
 
   /// Lists an organization role's permissions.
@@ -178,11 +174,10 @@ class ComplianceResource extends ResourceBase with StreamingResource {
   Future<ComplianceOrganizationSettings> retrieveOrganizationSettings(
     String organizationId, {
     Future<void>? abortTrigger,
-  }) async => ComplianceOrganizationSettings.fromJson(
-    await _get(
-      'organizations/${_segment(organizationId)}/settings',
-      abortTrigger: abortTrigger,
-    ),
+  }) => _get(
+    'organizations/${_segment(organizationId)}/settings',
+    ComplianceOrganizationSettings.fromJson,
+    abortTrigger: abortTrigger,
   );
 
   /// Retrieves the organization's current Security Posture results (beta).
@@ -193,12 +188,11 @@ class ComplianceResource extends ResourceBase with StreamingResource {
   Future<ComplianceSecurityPosture> retrieveSecurityPosture(
     String organizationId, {
     Future<void>? abortTrigger,
-  }) async => ComplianceSecurityPosture.fromJson(
-    await _get(
-      'organizations/${_segment(organizationId)}/security_posture',
-      allowQuery: false,
-      abortTrigger: abortTrigger,
-    ),
+  }) => _get(
+    'organizations/${_segment(organizationId)}/security_posture',
+    ComplianceSecurityPosture.fromJson,
+    allowQuery: false,
+    abortTrigger: abortTrigger,
   );
 
   /// Lists the directory groups visible to the caller.
@@ -224,8 +218,10 @@ class ComplianceResource extends ResourceBase with StreamingResource {
   Future<ComplianceGroup> retrieveGroup(
     String groupId, {
     Future<void>? abortTrigger,
-  }) async => ComplianceGroup.fromJson(
-    await _get('groups/${_segment(groupId)}', abortTrigger: abortTrigger),
+  }) => _get(
+    'groups/${_segment(groupId)}',
+    ComplianceGroup.fromJson,
+    abortTrigger: abortTrigger,
   );
 
   /// Lists members of a directory group.
@@ -253,22 +249,22 @@ class ComplianceResource extends ResourceBase with StreamingResource {
     bool allowMissingTerminalCursor = false,
     bool cursorOnly = false,
     Future<void>? abortTrigger,
-  }) async {
-    final body = await _get(
-      path,
-      query: {'page': ?page, 'limit': ?limit?.toString(), ...?query},
-      abortTrigger: abortTrigger,
-    );
-    if (cursorOnly) return ComplianceCursorPage.fromJson(body, decode);
-    return ComplianceCursorPage.directoryFromJson(
-      body,
-      decode,
-      allowMissingTerminalCursor: allowMissingTerminalCursor,
-    );
-  }
+  }) => _get(
+    path,
+    (json) => cursorOnly
+        ? ComplianceCursorPage.fromJson(json, decode)
+        : ComplianceCursorPage.directoryFromJson(
+            json,
+            decode,
+            allowMissingTerminalCursor: allowMissingTerminalCursor,
+          ),
+    query: {'page': ?page, 'limit': ?limit?.toString(), ...?query},
+    abortTrigger: abortTrigger,
+  );
 
-  Future<Map<String, dynamic>> _get(
-    String path, {
+  Future<T> _get<T>(
+    String path,
+    T Function(Map<String, dynamic>) decode, {
     Map<String, dynamic>? query,
     bool allowQuery = true,
     Future<void>? abortTrigger,
@@ -280,6 +276,7 @@ class ComplianceResource extends ResourceBase with StreamingResource {
       allowQuery: allowQuery,
       abortTrigger: abortTrigger,
     ),
+    decode,
   );
 
   http.Request _request(
@@ -349,11 +346,15 @@ class ComplianceResource extends ResourceBase with StreamingResource {
     );
   }
 
-  static Map<String, dynamic> _decodeObject(http.Response response) {
-    final json = jsonDecode(utf8.decode(response.bodyBytes));
-    if (json is Map<String, dynamic>) return json;
-    throw const FormatException('Expected a Compliance API response object');
-  }
+  static T _decodeObject<T>(
+    http.Response response,
+    T Function(Map<String, dynamic>) decode,
+  ) => decodeApiJsonResponse(
+    response,
+    decode,
+    utf8Body: true,
+    nonObjectMessage: 'Expected a Compliance API response object',
+  );
 
   static String _segment(String value) => encodePathSegment(value, 'id');
 }

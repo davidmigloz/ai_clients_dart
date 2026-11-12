@@ -1,7 +1,6 @@
-import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 
+import '../errors/response_error.dart';
 import '../models/managed_agents/events/session_event.dart';
 import '../models/managed_agents/events/session_event_list_response.dart';
 import '../utils/path_segment.dart';
@@ -65,9 +64,7 @@ class SessionThreadEventsResource extends ResourceBase with StreamingResource {
       abortTrigger: abortTrigger,
     );
 
-    return ListSessionEventsResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, ListSessionEventsResponse.fromJson);
   }
 
   /// Streams events from the thread via SSE.

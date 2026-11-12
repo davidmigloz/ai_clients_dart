@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../errors/response_error.dart';
 import '../models/managed_agents/credentials/create_credential_params.dart';
 import '../models/managed_agents/credentials/credential.dart';
 import '../models/managed_agents/credentials/credential_list_response.dart';
@@ -53,9 +54,7 @@ class VaultCredentialsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Credential.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, Credential.fromJson);
   }
 
   /// Lists credentials in the vault.
@@ -92,9 +91,7 @@ class VaultCredentialsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return ListCredentialsResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, ListCredentialsResponse.fromJson);
   }
 
   /// Retrieves a specific credential.
@@ -121,9 +118,7 @@ class VaultCredentialsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Credential.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, Credential.fromJson);
   }
 
   /// Updates a credential.
@@ -154,9 +149,7 @@ class VaultCredentialsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Credential.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, Credential.fromJson);
   }
 
   /// Deletes a credential.
@@ -183,9 +176,7 @@ class VaultCredentialsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return DeletedCredential.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, DeletedCredential.fromJson);
   }
 
   /// Archives a credential.
@@ -214,9 +205,7 @@ class VaultCredentialsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Credential.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, Credential.fromJson);
   }
 
   /// Validates a credential by probing its MCP server (Beta).
@@ -249,8 +238,6 @@ class VaultCredentialsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return CredentialValidation.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, CredentialValidation.fromJson);
   }
 }

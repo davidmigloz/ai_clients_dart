@@ -25,24 +25,25 @@ final class ComplianceAppsResource {
     ComplianceTimeRange? createdAt,
     ComplianceTimeRange? updatedAt,
     Future<void>? abortTrigger,
-  }) async => ComplianceIdPage.fromJson(
-    await _resource._get(
-      'apps/chats',
-      query: {
-        'before_id': ?beforeId,
-        'after_id': ?afterId,
-        'limit': ?limit?.toString(),
-        'order_by': ?orderBy?.wireValue,
-        'organization_ids[]': ?organizationIds,
-        'project_ids[]': ?projectIds,
-        'user_ids[]': ?userIds,
-        ...?createdAt?.toQueryParameters('created_at'),
-        ...?updatedAt?.toQueryParameters('updated_at'),
-      },
-      abortTrigger: abortTrigger,
+  }) => _resource._get(
+    'apps/chats',
+    (json) => ComplianceIdPage.fromJson(
+      json,
+      ComplianceChat.fromJson,
+      requirePagination: true,
     ),
-    ComplianceChat.fromJson,
-    requirePagination: true,
+    query: {
+      'before_id': ?beforeId,
+      'after_id': ?afterId,
+      'limit': ?limit?.toString(),
+      'order_by': ?orderBy?.wireValue,
+      'organization_ids[]': ?organizationIds,
+      'project_ids[]': ?projectIds,
+      'user_ids[]': ?userIds,
+      ...?createdAt?.toQueryParameters('created_at'),
+      ...?updatedAt?.toQueryParameters('updated_at'),
+    },
+    abortTrigger: abortTrigger,
   );
 
   /// Permanently deletes a chat and returns the receipt if supplied.
@@ -445,9 +446,7 @@ final class ComplianceAppsResource {
     T Function(Map<String, dynamic>) decode, {
     Map<String, dynamic>? query,
     Future<void>? abortTrigger,
-  }) async => decode(
-    await _resource._get(path, query: query, abortTrigger: abortTrigger),
-  );
+  }) => _resource._get(path, decode, query: query, abortTrigger: abortTrigger);
 
   Future<ComplianceDeletion?> _delete(
     String path,
@@ -461,8 +460,9 @@ final class ComplianceAppsResource {
       abortTrigger: abortTrigger,
     );
     if (response.bodyBytes.isEmpty) return null;
-    final receipt = ComplianceDeletion.fromJson(
-      ComplianceResource._decodeObject(response),
+    final receipt = ComplianceResource._decodeObject(
+      response,
+      ComplianceDeletion.fromJson,
     );
     if ((requiresType || receipt.type != null) &&
         receipt.type != expectedType) {
