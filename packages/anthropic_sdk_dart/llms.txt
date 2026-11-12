@@ -4,9 +4,9 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~11.8k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~12.1k tokens): Primary package documentation with installation, configuration, and usage examples.
 - [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/CHANGELOG.md) (~12.9k tokens): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) (~13.3k tokens): Upgrade notes and breaking-change guidance.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) (~13.6k tokens): Upgrade notes and breaking-change guidance.
 
 ## Examples
 
@@ -15,6 +15,7 @@
 - [messages_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/messages_example.dart) (~794 tokens): Basic message creation.
 - [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/streaming_example.dart) (~1.3k tokens): Streaming responses.
 - [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/tool_calling_example.dart) (~685 tokens): Tool calling with schemas.
+- [inline_tools_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/inline_tools_example.dart) (~302 tokens): Define a client tool partway through a conversation (beta).
 - [mcp_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/mcp_example.dart) (~537 tokens): Connect an MCP server and pin its tool listing (beta).
 - [thinking_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/thinking_example.dart) (~2.2k tokens): Adaptive thinking, progress updates, block binding, and multi-turn replay.
 - [message_threads_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/message_threads_example.dart) (~276 tokens): Create and continue a Messages thread (beta).
@@ -60,4 +61,4 @@
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/anthropic_sdk_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~68.7k tokens**
+**Total: ~69.6k tokens**

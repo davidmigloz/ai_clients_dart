@@ -51,8 +51,10 @@ void main() {
       };
       expect(preserved, value);
       expect(cleared, isNot(value));
-      expect(cleared.toJson(), fixture);
-      expect(Citation.fromJson(fixture), cleared);
+      expect(cleared.toJson(), {...fixture, 'file_id': null});
+      final legacy = Citation.fromJson(fixture);
+      expect(legacy.toJson(), fixture);
+      expect(legacy, cleared);
       expect(Citation.fromJson({...fixture, 'file_id': null}), cleared);
       expect(
         InputCitation.fromJson(json).toJson().containsKey('file_id'),

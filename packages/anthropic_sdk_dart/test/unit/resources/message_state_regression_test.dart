@@ -63,10 +63,13 @@ void main() {
       final block = message.content.single as CompactionBlock;
       expect(block.content, 'final');
       expect(block.encryptedContent, isNull);
+      expect(message.toInputMessage().toJson()['content'], [
+        {'type': 'compaction', 'content': 'final', 'encrypted_content': null},
+      ]);
     },
   );
 
-  test('replay and copyWith keep explicit null signature and tool_changes', () {
+  test('replay and copyWith keep explicit null signed block fields', () {
     const json = {
       'type': 'compaction',
       'content': 'summary',
@@ -82,8 +85,25 @@ void main() {
     expect(replay.copyWith().toJson(), {
       'type': 'compaction',
       'content': 'revised',
+      'encrypted_content': null,
       'signature': null,
       'tool_changes': null,
+    });
+  });
+
+  test('omitted encrypted content remains absent through SSE replay', () async {
+    final message = await _events(
+      {'type': 'compaction', 'content': null},
+      {'type': 'compaction_delta', 'content': 'summary'},
+    ).finalMessage();
+    expect(message.toInputMessage().toJson()['content'], [
+      {'type': 'compaction', 'content': 'summary'},
+    ]);
+    final minimal = CompactionInputBlock.fromJson(const {'type': 'compaction'});
+    expect(minimal.copyWith().toJson(), {'type': 'compaction'});
+    expect(minimal.copyWith(content: null).toJson(), {
+      'type': 'compaction',
+      'content': null,
     });
   });
 

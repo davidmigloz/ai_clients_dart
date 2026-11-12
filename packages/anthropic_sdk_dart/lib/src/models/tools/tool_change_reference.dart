@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
+import 'tool_definition.dart';
 
 /// Reference to a tool (or MCP toolset) affected by a mid-conversation
 /// tool-change directive.
@@ -9,6 +10,7 @@ import '../common/equality_helpers.dart';
 /// - [ToolChangeToolReference] — a tool declared directly in `tools[]`.
 /// - [ToolChangeMCPToolReference] — a single MCP tool by server and name.
 /// - [ToolChangeMCPToolsetReference] — every tool in an MCP server's toolset.
+/// - [ToolChangeInlineDefinition] — an inline tool declaration.
 /// - [UnknownToolChangeReference] — unrecognized type, for forward
 ///   compatibility (preserves raw JSON).
 sealed class ToolChangeReference {
@@ -27,6 +29,10 @@ sealed class ToolChangeReference {
   factory ToolChangeReference.mcpToolset(String serverName) =
       ToolChangeMCPToolsetReference;
 
+  /// Defines a tool by value in a tool-addition block.
+  factory ToolChangeReference.definition(ToolDefinition definition) =
+      ToolChangeInlineDefinition;
+
   /// Creates a [ToolChangeReference] from JSON.
   ///
   /// Dispatches on the `type` discriminator; unrecognized values fall back to
@@ -37,6 +43,7 @@ sealed class ToolChangeReference {
       'tool_reference' => ToolChangeToolReference.fromJson(json),
       'mcp_tool_reference' => ToolChangeMCPToolReference.fromJson(json),
       'mcp_toolset_reference' => ToolChangeMCPToolsetReference.fromJson(json),
+      'tool_definition' => ToolChangeInlineDefinition.fromJson(json),
       _ => UnknownToolChangeReference(rawJson: json),
     };
   }
@@ -197,6 +204,103 @@ class ToolChangeMCPToolsetReference extends ToolChangeReference {
 
   @override
   String toString() => 'ToolChangeMCPToolsetReference(serverName: $serverName)';
+}
+
+/// A tool carried by value rather than referenced by name.
+///
+/// Use it in a tool-addition block with `inline-tools-2026-09-15`. For an MCP
+/// connector toolset, also send `mcp-client-2026-09-15`.
+@immutable
+final class ToolChangeInlineDefinition extends ToolChangeReference {
+  /// Creates an inline definition from a typed Messages tool declaration.
+  const ToolChangeInlineDefinition(ToolDefinition this.definition)
+    : _raw = null;
+
+  const ToolChangeInlineDefinition._(this.definition, this._raw);
+
+  /// Decodes an inline definition and retains its original JSON for replay.
+  factory ToolChangeInlineDefinition.fromJson(Map<String, dynamic> json) {
+    if (json case {
+      'type': 'tool_definition',
+      'definition': Map<String, dynamic> _,
+    }) {
+      final raw = deepUnmodifiableMap(json);
+      final wireDefinition = raw['definition'] as Map<String, dynamic>;
+      return ToolChangeInlineDefinition._(
+        _parseDefinition(wireDefinition),
+        raw,
+      );
+    }
+    throw const FormatException('Expected an inline tool definition object');
+  }
+
+  /// The decoded tool declaration when its schema is known to this client.
+  ///
+  /// Unrecognized declarations remain available through [toJson].
+  final ToolDefinition? definition;
+
+  final Map<String, dynamic>? _raw;
+
+  static ToolDefinition? _parseDefinition(Map<String, dynamic> json) {
+    try {
+      final definition = ToolDefinition.fromJson(json);
+      if (definition is CustomToolDefinition &&
+          json.containsKey('type') &&
+          json['type'] != 'custom') {
+        return null;
+      }
+      return definition;
+    } on FormatException {
+      return null;
+    } on TypeError {
+      return null;
+    }
+  }
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _raw ?? {'type': 'tool_definition', 'definition': definition!.toJson()};
+
+  @override
+  bool operator ==(Object other) =>
+      other is ToolChangeInlineDefinition &&
+      mapsDeepEqual(toJson(), other.toJson());
+
+  @override
+  int get hashCode => mapDeepHashCode(toJson());
+
+  @override
+  String toString() => 'ToolChangeInlineDefinition()';
+}
+
+/// A tool directive recorded inside a server compaction block.
+@immutable
+final class CompactionToolChange {
+  /// Reads a directive while preserving the original JSON for signed replay.
+  CompactionToolChange.fromJson(Map<String, dynamic> json)
+    : raw = deepUnmodifiableMap(json);
+
+  /// The server discriminator, normally `tool_addition` or `tool_removal`.
+  String? get type => raw['type'] as String?;
+
+  /// A tool definition or reference, when one is present.
+  ToolChangeReference? get tool => switch (raw['tool']) {
+    final Map<String, dynamic> value => ToolChangeReference.fromJson(value),
+    _ => null,
+  };
+
+  /// The original provider payload.
+  final Map<String, dynamic> raw;
+
+  /// Returns the original provider payload.
+  Map<String, dynamic> toJson() => raw;
+
+  @override
+  bool operator ==(Object other) =>
+      other is CompactionToolChange && mapsDeepEqual(raw, other.raw);
+
+  @override
+  int get hashCode => mapDeepHashCode(raw);
 }
 
 /// Unrecognized [ToolChangeReference] — preserves raw JSON for forward

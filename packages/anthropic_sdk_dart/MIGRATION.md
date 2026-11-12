@@ -429,6 +429,50 @@ String stopStatus(StopReason? reason) => switch (reason) {
 
 ---
 
+## Handle inline tool definitions
+
+`ToolChangeReference` adds `ToolChangeInlineDefinition`. Add a case to
+exhaustive switches. `definition` exposes a known tool declaration, and
+`toJson()` retains the original declaration including future variants.
+
+```dart
+// Before
+final kind = switch (tool) {
+  ToolChangeToolReference() => 'tool',
+  ToolChangeMCPToolReference() => 'MCP tool',
+  ToolChangeMCPToolsetReference() => 'MCP toolset',
+  UnknownToolChangeReference() => 'unknown',
+};
+
+// After
+final kind = switch (tool) {
+  ToolChangeToolReference() => 'tool',
+  ToolChangeMCPToolReference() => 'MCP tool',
+  ToolChangeMCPToolsetReference() => 'MCP toolset',
+  ToolChangeInlineDefinition() => 'inline definition',
+  UnknownToolChangeReference() => 'unknown',
+};
+```
+
+## Preserve nullable response citation fields
+
+Copies of current document citations serialize `file_id` and `document_title`
+as null when you clear either field. To export the historical omitted-key
+shape, remove the cleared key explicitly. Use `message.toInputMessage()` to
+replay the response as a request.
+
+```dart
+// Before
+final legacy = citation.copyWith(fileId: null).toJson();
+
+// After, when exporting the historical shape
+final legacy = Map<String, dynamic>.of(
+  citation.copyWith(fileId: null).toJson(),
+)..remove('file_id');
+```
+
+---
+
 ## Migrating from v9.x to v10.0.0
 
 v10.0.0 adds document sources that reference uploaded files. `DocumentSource` is sealed, so exhaustive switches must handle the new `FileDocumentSource` variant.
