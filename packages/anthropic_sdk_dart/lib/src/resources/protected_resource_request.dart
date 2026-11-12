@@ -55,7 +55,10 @@ Future<Object?> sendProtectedResourceRequest(
       credentials: credentials,
     );
     final errorCode = redactCredentialEcho(parsed.errorCode, credentials);
-    final specific = handleError?.call(body, metadata);
+    final specific = handleError?.call(
+      redactApiErrorBody(body, credentials),
+      metadata,
+    );
     if (specific != null) throw specific;
     final message = 'HTTP $status from the Claude API';
     throw switch (status) {

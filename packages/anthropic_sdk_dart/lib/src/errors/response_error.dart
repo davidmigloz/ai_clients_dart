@@ -5,19 +5,25 @@ import 'package:http/http.dart' as http;
 import '../client/retry_after.dart';
 import 'exceptions.dart';
 
-/// Reads the provider error envelope, retaining existing message and type
-/// behavior for malformed or legacy responses.
-({
+/// Parsed and sanitized provider error diagnostics.
+typedef ParsedApiErrorBody = ({
   String message,
   List<Object> details,
   Map<String, dynamic>? errorDetails,
   String? errorCode,
   String? requestId,
-})
-parseApiErrorBody(String body, {Set<String> credentials = const {}}) {
+});
+
+/// Reads the provider error envelope, retaining existing message and type
+/// behavior for malformed or legacy responses.
+ParsedApiErrorBody parseApiErrorBody(
+  String body, {
+  Set<String> credentials = const {},
+  bool legacyResourceMessage = false,
+}) {
   if (body.isEmpty) {
     return (
-      message: 'Unknown error',
+      message: legacyResourceMessage ? body : 'Unknown error',
       details: const [],
       errorDetails: null,
       errorCode: null,
@@ -33,11 +39,17 @@ parseApiErrorBody(String body, {Set<String> credentials = const {}}) {
       _ => null,
     };
     if (decoded case {'error': final Map<String, dynamic> error}) {
-      final message = error['message'] as String? ?? 'Unknown error';
-      final type = redactCredentialEcho(error['type'] as String?, credentials);
+      final message = error['message'] as String?;
+      final type = legacyResourceMessage
+          ? null
+          : redactCredentialEcho(error['type'] as String?, credentials);
       final details = error['details'];
       return (
-        message: _redactDiagnosticText(message, credentials),
+        message: message != null
+            ? _redactDiagnosticText(message, credentials)
+            : legacyResourceMessage
+            ? _safeFallbackMessage(body, credentials)
+            : 'Unknown error',
         details: type == null ? const [] : <Object>[type],
         errorDetails: details is Map<String, dynamic>
             ? _redactDiagnosticMap(details, credentials)
@@ -49,7 +61,9 @@ parseApiErrorBody(String body, {Set<String> credentials = const {}}) {
         requestId: requestId,
       );
     }
-    if (decoded case {'message': final String message}) {
+    if (decoded case {
+      'message': final String message,
+    } when !legacyResourceMessage) {
       return (
         message: _redactDiagnosticText(message, credentials),
         details: const [],
@@ -64,15 +78,18 @@ parseApiErrorBody(String body, {Set<String> credentials = const {}}) {
     // Preserve the fallback if the error envelope has unexpected types.
   }
   return (
-    message: _bodyContainsCredential(body, credentials)
-        ? 'API error response contained a redacted credential'
-        : body,
+    message: _safeFallbackMessage(body, credentials),
     details: const [],
     errorDetails: null,
     errorCode: null,
     requestId: requestId,
   );
 }
+
+String _safeFallbackMessage(String body, Set<String> credentials) =>
+    _bodyContainsCredential(body, credentials)
+    ? 'API error response contained a redacted credential'
+    : body;
 
 String? _providerErrorCode(Object? details) => switch (details) {
   {'error_code': final String code} => code,
@@ -148,22 +165,76 @@ String _redactDiagnosticText(String value, Set<String> credentials) {
 
 Map<String, dynamic> _redactDiagnosticMap(
   Map<String, dynamic> value,
-  Set<String> credentials,
-) => Map.unmodifiable({
+  Set<String> credentials, {
+  bool omitEchoedIdentifiers = false,
+}) => Map.unmodifiable({
   for (final entry in value.entries)
-    if (redactCredentialEcho(entry.key, credentials) != null)
-      entry.key: _redactDiagnosticValue(entry.value, credentials),
+    if (redactCredentialEcho(entry.key, credentials) != null &&
+        !(omitEchoedIdentifiers &&
+            const {'request_id', 'error_code', 'type'}.contains(entry.key) &&
+            entry.value is String &&
+            redactCredentialEcho(entry.value as String, credentials) == null))
+      entry.key: _redactDiagnosticValue(
+        entry.value,
+        credentials,
+        omitEchoedIdentifiers: omitEchoedIdentifiers,
+      ),
 });
 
-Object? _redactDiagnosticValue(Object? value, Set<String> credentials) =>
-    switch (value) {
-      String() => _redactDiagnosticText(value, credentials),
-      List<Object?>() => List<Object?>.unmodifiable(
-        value.map((item) => _redactDiagnosticValue(item, credentials)),
+Object? _redactDiagnosticValue(
+  Object? value,
+  Set<String> credentials, {
+  bool omitEchoedIdentifiers = false,
+}) => switch (value) {
+  String() => _redactDiagnosticText(value, credentials),
+  List<Object?>() => List<Object?>.unmodifiable(
+    value.map(
+      (item) => _redactDiagnosticValue(
+        item,
+        credentials,
+        omitEchoedIdentifiers: omitEchoedIdentifiers,
       ),
-      Map<String, dynamic>() => _redactDiagnosticMap(value, credentials),
-      _ => value,
-    };
+    ),
+  ),
+  Map<String, dynamic>() => _redactDiagnosticMap(
+    value,
+    credentials,
+    omitEchoedIdentifiers: omitEchoedIdentifiers,
+  ),
+  _ => value,
+};
+
+/// Sanitizes the error envelope before handing it to an event decoder.
+Map<String, dynamic> redactApiErrorEnvelope(
+  Map<String, dynamic> envelope,
+  Set<String> credentials,
+) {
+  if (credentials.isEmpty || !_containsCredential(envelope, credentials)) {
+    return envelope;
+  }
+  return {
+    ..._redactDiagnosticMap(envelope, credentials, omitEchoedIdentifiers: true),
+    // Protocol discriminators are independent of the provider diagnostics.
+    if (envelope['type'] == 'error') 'type': 'error',
+    if (envelope['_event'] == 'error') '_event': 'error',
+  };
+}
+
+/// Provides a safe body to custom error factories while retaining its shape.
+String redactApiErrorBody(String body, Set<String> credentials) {
+  if (credentials.isEmpty) return body;
+  try {
+    final decoded = jsonDecode(body);
+    if (!_containsCredential(decoded, credentials)) return body;
+    return jsonEncode(
+      decoded is Map<String, dynamic>
+          ? redactApiErrorEnvelope(decoded, credentials)
+          : _redactDiagnosticValue(decoded, credentials),
+    );
+  } on FormatException {
+    return _redactDiagnosticText(body, credentials);
+  }
+}
 
 /// Reads HTTP error text even when the response charset decoder fails.
 String decodeApiErrorResponse(http.Response response) {
@@ -216,47 +287,41 @@ String? _headerValue(Map<String, String> headers, String name) {
 AnthropicException createResourceException(
   int statusCode,
   String body,
-  ResponseMetadata responseMetadata,
-) {
-  String message;
-  String? errorCode;
-  Map<String, dynamic>? errorDetails;
-  try {
-    final json = jsonDecode(body) as Map<String, dynamic>;
-    final error = json['error'] as Map<String, dynamic>?;
-    message = error?['message'] as String? ?? body;
-    final providerDetails = error?['details'];
-    errorCode = _providerErrorCode(providerDetails);
-    if (providerDetails is Map<String, dynamic>) {
-      errorDetails = Map.unmodifiable(providerDetails);
-    }
-  } catch (_) {
-    message = body;
-  }
+  ResponseMetadata responseMetadata, {
+  Set<String> credentials = const {},
+}) {
+  final parsed = parseApiErrorBody(
+    body,
+    credentials: credentials,
+    legacyResourceMessage: true,
+  );
   return switch (statusCode) {
     400 => ValidationException(
-      message: message,
-      errorCode: errorCode,
-      errorDetails: errorDetails,
+      message: parsed.message,
+      errorCode: parsed.errorCode,
+      errorDetails: parsed.errorDetails,
       fieldErrors: const {},
       responseMetadata: responseMetadata,
     ),
     401 => AuthenticationException(
-      message: message,
-      errorCode: errorCode,
+      message: parsed.message,
+      errorCode: parsed.errorCode,
+      errorDetails: parsed.errorDetails,
       responseMetadata: responseMetadata,
     ),
     429 => RateLimitException(
       statusCode: statusCode,
-      message: message,
-      errorCode: errorCode,
+      message: parsed.message,
+      errorCode: parsed.errorCode,
+      errorDetails: parsed.errorDetails,
       responseMetadata: responseMetadata,
       retryAfter: retryAfterTime(responseMetadata.headers),
     ),
     _ => ApiException(
       statusCode: statusCode,
-      message: message,
-      errorCode: errorCode,
+      message: parsed.message,
+      errorCode: parsed.errorCode,
+      errorDetails: parsed.errorDetails,
       responseMetadata: responseMetadata,
     ),
   };

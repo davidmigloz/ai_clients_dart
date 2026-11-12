@@ -2,6 +2,7 @@
 library;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -145,6 +146,22 @@ void _expectRequest(_Operation operation, List<http.Request> requests) {
   });
 }
 
+const Map<String, Object> _echoedError = {
+  'type': 'error',
+  'request_id': 'req_real_body',
+  'error': {
+    'type': 'fixture_error',
+    'message': 'Rejected fixture-key',
+    'details': {
+      'error_code': 'real_code',
+      'nested': [
+        {'field': 'prefix fixture-key suffix', 'fixture-key': true},
+        {'number': 17},
+      ],
+    },
+  },
+};
+
 void main() {
   for (final operation in _Operation.values) {
     for (final status in [400, 401, 429, 503]) {
@@ -174,6 +191,52 @@ void main() {
         }
       });
     }
+
+    test(
+      '${operation.name} redacts echoed credentials from requestless errors',
+      () async {
+        final status = switch (operation) {
+          _Operation.fileDownload => 401,
+          _Operation.skillCreate => 503,
+          _Operation.skillCreateVersion => 429,
+          _ => 400,
+        };
+        final harness = _harness(
+          status,
+          body: jsonEncode(_echoedError),
+          headers: const {
+            'request-id': 'header fixture-key',
+            'retry-after': '17',
+            'set-cookie': 'cookie fixture-key',
+          },
+        );
+        final error = await _failure(() => _invoke(operation, harness.client));
+        _expectTypeAndStatus(error, status);
+        _expectRequest(operation, harness.requests);
+        expect(error.message, 'Rejected [REDACTED]');
+        expect(_requestId(error), 'req_real_body');
+        expect(_metadata(error)!.headers, {'retry-after': '17'});
+        expect(_metadata(error)!.bodyExcerpt, isEmpty);
+        final (code, details) = switch (error) {
+          ApiException(:final errorCode, :final errorDetails) ||
+          ValidationException(
+            :final errorCode,
+            :final errorDetails,
+          ) => (errorCode, errorDetails),
+          _ => (null, null),
+        };
+        expect(code, 'real_code');
+        expect(details, {
+          'error_code': 'real_code',
+          'nested': [
+            {'field': 'prefix [REDACTED] suffix'},
+            {'number': 17},
+          ],
+        });
+        expect(() => details!['new'] = true, throwsUnsupportedError);
+        expect(error.toString(), isNot(contains('fixture-key')));
+      },
+    );
 
     test(
       '${operation.name} does not substitute the client request ID',
@@ -331,6 +394,60 @@ void main() {
       expect(harness.requests, hasLength(1));
     },
   );
+
+  for (final useMetadata in [false, true]) {
+    test(
+      'JSONL factory receives sanitized body (metadata: $useMetadata)',
+      () async {
+        final harness = _harness(
+          503,
+          body: jsonEncode(_echoedError),
+          headers: const {'request-id': 'fixture-key'},
+        );
+        const expected = ApiException(statusCode: 503, message: 'custom');
+        var calls = 0;
+        ApiException factory(String body) {
+          calls++;
+          expect(body, isNot(contains('fixture-key')));
+          expect(jsonDecode(body), {
+            'type': 'error',
+            'request_id': 'req_real_body',
+            'error': {
+              'type': 'fixture_error',
+              'message': 'Rejected [REDACTED]',
+              'details': {
+                'error_code': 'real_code',
+                'nested': [
+                  {'field': 'prefix [REDACTED] suffix'},
+                  {'number': 17},
+                ],
+              },
+            },
+          });
+          return expected;
+        }
+
+        final error = await _failure(
+          () => harness.client.messages
+              .getJsonlStream(
+                '/fixture',
+                errorFactory: useMetadata ? null : (_, body) => factory(body),
+                errorFactoryWithMetadata: useMetadata
+                    ? (status, body, metadata) {
+                        expect(status, 503);
+                        expect(metadata.headers, isEmpty);
+                        expect(metadata.requestId, 'req_real_body');
+                        return factory(body);
+                      }
+                    : null,
+              )
+              .toList(),
+        );
+        expect(error, same(expected));
+        expect(calls, 1);
+      },
+    );
+  }
 
   test('batch cancellation cancels a stalled HTTP 429 error body', () async {
     final transport = _PendingClient();

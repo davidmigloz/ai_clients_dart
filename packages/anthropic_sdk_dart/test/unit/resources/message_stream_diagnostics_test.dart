@@ -65,6 +65,138 @@ void main() {
   }
 
   test(
+    'in-band error preserves non-echoed raw fields and closes transport',
+    () async {
+      const token = 'fixture-sse-bearer-secret';
+      final transport = _StalledStream(
+        header: 'echo:$token',
+        data: jsonEncode({
+          'type': 'error',
+          'request_id': 'req_real_body',
+          'error': {
+            'type': 'fixture_error',
+            'message': 'Rejected Bearer $token',
+            'details': {
+              'error_code': 'fixture_code',
+              'nested': [
+                {'name': 'echo $token', 'remove-$token': true},
+                {'number': 7},
+              ],
+            },
+          },
+          'unrecognized': {'still_present': true},
+        }),
+      );
+      final client = AnthropicClient(
+        config: const AnthropicConfig(authProvider: BearerTokenProvider(token)),
+        httpClient: transport,
+      );
+      addTearDown(client.close);
+      addTearDown(transport.dispose);
+
+      final events = await client.messages
+          .createStream(_request)
+          .toList()
+          .timeout(_timeout);
+      final event = events.single as ErrorEvent;
+      expect(event.requestId, 'req_real_body');
+      expect(event.errorCode, 'fixture_code');
+      expect(event.message, 'Rejected [REDACTED]');
+      expect(event.responseMetadata!.headers, isEmpty);
+      expect(event.toJson(), {
+        'type': 'error',
+        'request_id': 'req_real_body',
+        'error': {
+          'type': 'fixture_error',
+          'message': 'Rejected [REDACTED]',
+          'details': {
+            'error_code': 'fixture_code',
+            'nested': [
+              {'name': 'echo [REDACTED]'},
+              {'number': 7},
+            ],
+          },
+        },
+        'unrecognized': {'still_present': true},
+      });
+      expect(transport.request?.headers['authorization'], 'Bearer $token');
+      await transport.canceled.future.timeout(_timeout);
+      expect(transport.cancelCount, 1);
+      expect(transport.closeCount, 0);
+    },
+  );
+
+  test(
+    'in-band echoed identifiers are omitted while a real header ID remains',
+    () async {
+      const key = 'fixture-sse-key';
+      final transport = _StalledStream(
+        header: 'req_real_header',
+        data: jsonEncode({
+          'type': 'error',
+          'request_id': 'echo:$key',
+          'error': {
+            'type': 'echo:$key',
+            'message': 'Diagnostic',
+            'details': {'error_code': 'echo:$key', 'keep': true},
+          },
+        }),
+      );
+      final client = AnthropicClient(
+        config: const AnthropicConfig(authProvider: ApiKeyProvider(key)),
+        httpClient: transport,
+      );
+      addTearDown(client.close);
+      addTearDown(transport.dispose);
+      final event =
+          await client.messages.createStream(_request).single.timeout(_timeout)
+              as ErrorEvent;
+      expect(event.requestId, 'req_real_header');
+      expect(event.responseMetadata?.bodyRequestId, isNull);
+      expect(event.errorCode, isNull);
+      expect(event.errorType, 'unknown');
+      expect(event.toJson(), {
+        'type': 'error',
+        'error': {
+          'message': 'Diagnostic',
+          'details': {'keep': true},
+        },
+      });
+      await transport.canceled.future.timeout(_timeout);
+    },
+  );
+
+  test('plain-text in-band error does not expose the API key', () async {
+    final transport = _StalledStream(data: 'Rejected fixture-sse-key');
+    final client = AnthropicClient(
+      config: const AnthropicConfig(
+        authProvider: ApiKeyProvider('fixture-sse-key'),
+      ),
+      httpClient: transport,
+    );
+    addTearDown(client.close);
+    addTearDown(transport.dispose);
+
+    await expectLater(
+      client.messages.createStream(_request).finalMessage().timeout(_timeout),
+      throwsA(
+        isA<MessageStreamFailure>()
+            .having(
+              (failure) => failure.event.message,
+              'message',
+              'Rejected [REDACTED]',
+            )
+            .having(
+              (failure) => failure.event.errorType,
+              'type',
+              'stream_error',
+            ),
+      ),
+    );
+    await transport.canceled.future.timeout(_timeout);
+  });
+
+  test(
     'finalMessage retains the provider error and cannot return partial output',
     () async {
       final transport = _StalledStream(body: 'req_failed');
@@ -172,7 +304,9 @@ void main() {
 }
 
 class _StalledStream extends http.BaseClient {
-  _StalledStream({this.header, this.body});
+  _StalledStream({this.header, this.body, this.data});
+
+  final String? data;
 
   final String? header;
   final String? body;
@@ -191,11 +325,9 @@ class _StalledStream extends http.BaseClient {
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     this.request = request;
-    final event = jsonEncode({
-      'type': 'error',
-      'error': _error,
-      'request_id': body,
-    });
+    final event =
+        data ??
+        jsonEncode({'type': 'error', 'error': _error, 'request_id': body});
     controller.add(utf8.encode('event: error\ndata: $event\n\n'));
     return http.StreamedResponse(
       controller.stream,

@@ -49,7 +49,7 @@ mixin StreamingResource on ResourceBase {
     headers: headers,
     abortTrigger: abortTrigger,
     validateHeaders: validateHeaders,
-    decode: (body, _, _) => SseParser().parse(body),
+    decode: (body, _, _, _) => SseParser().parse(body),
   );
 
   /// Makes a streaming GET request whose response contains JSON lines.
@@ -60,6 +60,8 @@ mixin StreamingResource on ResourceBase {
   /// precedence over [errorFactory] when both are provided. The legacy
   /// [errorFactory] receives only the status and body; its exception is returned
   /// unchanged, so that factory remains responsible for its own metadata.
+  /// Both factories receive the error body with echoed request credentials
+  /// removed.
   Stream<Map<String, dynamic>> getJsonlStream(
     String path, {
     Future<void>? abortTrigger,
@@ -79,7 +81,7 @@ mixin StreamingResource on ResourceBase {
     errorFactory: errorFactory,
     errorFactoryWithMetadata: errorFactoryWithMetadata,
     jsonlMedia: true,
-    decode: (body, _, _) => body
+    decode: (body, _, _, _) => body
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .where((line) => line.trim().isNotEmpty)
@@ -89,11 +91,9 @@ mixin StreamingResource on ResourceBase {
   /// Creates an exception for streaming errors.
   AnthropicException _createStreamException(
     int statusCode,
-    String body,
+    ParsedApiErrorBody parsed,
     ResponseMetadata responseMetadata,
   ) {
-    final parsed = parseApiErrorBody(body);
-
     if (statusCode == 401) {
       return AuthenticationException(
         message: parsed.message,
@@ -143,7 +143,7 @@ mixin StreamingResource on ResourceBase {
     queryParams: queryParams,
     headers: headers,
     abortTrigger: abortTrigger,
-    decode: (body, _, _) => SseParser().parse(body),
+    decode: (body, _, _, _) => SseParser().parse(body),
   );
 
   Stream<T> _stream<T>(
@@ -158,6 +158,7 @@ mixin StreamingResource on ResourceBase {
       Stream<List<int>> body,
       http.StreamedResponse response,
       Duration latency,
+      Set<String> credentials,
     )
     decode,
     bool Function(T)? isTerminal,
@@ -238,6 +239,7 @@ mixin StreamingResource on ResourceBase {
         if (stopped) return;
         ensureNotClosed?.call();
         correlationId = request.headers['X-Request-ID'] ?? correlationId;
+        final credentials = requestCredentialValues(request.headers);
         final stopwatch = Stopwatch()..start();
         headerTimer = Timer(
           config.timeout,
@@ -272,6 +274,7 @@ mixin StreamingResource on ResourceBase {
                 statusCode: response.statusCode,
                 headers: response.headers,
                 latency: stopwatch.elapsed,
+                credentials: credentials,
               ),
             ),
           );
@@ -301,22 +304,31 @@ mixin StreamingResource on ResourceBase {
                   responseBody.takeBytes(),
                   response.headers,
                 );
+                final parsed = parseApiErrorBody(
+                  body,
+                  credentials: credentials,
+                );
                 final responseMetadata = createSafeResponseMetadata(
                   statusCode: response.statusCode,
                   headers: response.headers,
                   latency: stopwatch.elapsed,
-                  bodyRequestId: parseApiErrorBody(body).requestId,
+                  bodyRequestId: parsed.requestId,
+                  credentials: credentials,
                 );
+                final callbackBody =
+                    errorFactoryWithMetadata == null && errorFactory == null
+                    ? body
+                    : redactApiErrorBody(body, credentials);
                 finish(
                   errorFactoryWithMetadata?.call(
                         response.statusCode,
-                        body,
+                        callbackBody,
                         responseMetadata,
                       ) ??
-                      errorFactory?.call(response.statusCode, body) ??
+                      errorFactory?.call(response.statusCode, callbackBody) ??
                       _createStreamException(
                         response.statusCode,
-                        body,
+                        parsed,
                         responseMetadata,
                       ),
                 );
@@ -336,8 +348,13 @@ mixin StreamingResource on ResourceBase {
             await response.stream.listen(null).cancel();
             return;
           }
-          subscription = decode(responseBodyStream, response, stopwatch.elapsed)
-              .listen(
+          subscription =
+              decode(
+                responseBodyStream,
+                response,
+                stopwatch.elapsed,
+                credentials,
+              ).listen(
                 (event) {
                   if (stopped) return;
                   final terminal = isTerminal?.call(event) == true;
@@ -413,15 +430,19 @@ Stream<T> postResourceEventStream<T>(
   abortTrigger: abortTrigger,
   validateHeaders: validateHeaders,
   isTerminal: isTerminal,
-  decode: (body, response, latency) {
+  decode: (body, response, latency, credentials) {
     final metadata = createSafeResponseMetadata(
       statusCode: response.statusCode,
       headers: response.headers,
       latency: latency,
+      credentials: credentials,
     );
-    return SseParser()
-        .parse(body, strictJson: true)
-        .map((event) => decodeEvent(event, metadata));
+    return SseParser().parse(body, strictJson: true).map((event) {
+      final safeEvent = event['_event'] == 'error' || event['type'] == 'error'
+          ? redactApiErrorEnvelope(event, credentials)
+          : event;
+      return decodeEvent(safeEvent, metadata);
+    });
   },
 );
 
@@ -443,7 +464,7 @@ Stream<List<int>> getResourceByteStream(
   onResponse: onResponse == null
       ? null
       : (response, _) => onResponse(response.headers),
-  decode: (body, _, _) => body,
+  decode: (body, _, _, _) => body,
 );
 
 class _MappedEventSink<T> implements EventSink<Map<String, dynamic>> {
