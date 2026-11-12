@@ -1,8 +1,11 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
+import '../content/input_content_block.dart';
+
 /// Source for document content.
 ///
-/// Documents can be provided as base64-encoded PDF data, plain text, URLs, or uploaded files.
+/// Supply PDF data or URLs, plain text, custom content, or uploaded files.
 sealed class DocumentSource {
   const DocumentSource();
 
@@ -11,6 +14,13 @@ sealed class DocumentSource {
 
   /// Creates a plain text source.
   factory DocumentSource.text(String data) = PlainTextSource;
+
+  /// Creates a custom content document from a single string.
+  factory DocumentSource.content(String text) = ContentBlockDocumentSource.text;
+
+  /// Creates a custom content document from text and image blocks.
+  factory DocumentSource.contentBlocks(List<InputContentBlock> blocks) =
+      ContentBlockDocumentSource.blocks;
 
   /// Creates a URL-based PDF source.
   factory DocumentSource.url(String url) = UrlPdfSource;
@@ -24,6 +34,7 @@ sealed class DocumentSource {
     return switch (type) {
       'base64' => Base64PdfSource.fromJson(json),
       'text' => PlainTextSource.fromJson(json),
+      'content' => ContentBlockDocumentSource.fromJson(json),
       'url' => UrlPdfSource.fromJson(json),
       'file' => FileDocumentSource.fromJson(json),
       _ => throw FormatException('Unknown DocumentSource type: $type'),
@@ -202,4 +213,96 @@ class FileDocumentSource extends DocumentSource {
 
   @override
   String toString() => 'FileDocumentSource(fileId: $fileId)';
+}
+
+/// Custom content document whose text blocks define the citation boundaries.
+///
+/// Content can be one string or an ordered list of text and image blocks.
+/// Claude can cite text but does not generate citations for images.
+@immutable
+final class ContentBlockDocumentSource extends DocumentSource {
+  /// Creates a source with one unchunked text string.
+  const ContentBlockDocumentSource.text(String this.text) : blocks = null;
+
+  /// Creates a source whose blocks are each passed through as a single chunk.
+  ///
+  /// Accepts [TextInputBlock] and [ImageInputBlock] entries.
+  ContentBlockDocumentSource.blocks(List<InputContentBlock> blocks)
+    : text = null,
+      blocks = List.unmodifiable(blocks) {
+    for (final block in blocks) {
+      if (block is! TextInputBlock && block is! ImageInputBlock) {
+        throw ArgumentError('Custom documents accept text and image blocks');
+      }
+    }
+  }
+
+  /// Parses a string or ordered content blocks.
+  factory ContentBlockDocumentSource.fromJson(Map<String, dynamic> json) {
+    if (json['type'] != 'content') {
+      throw const FormatException('Expected a custom content document source');
+    }
+    return switch (json['content']) {
+      final String value => ContentBlockDocumentSource.text(value),
+      final List<Object?> values => ContentBlockDocumentSource.blocks([
+        for (final value in values) _parseBlock(value),
+      ]),
+      _ => throw const FormatException(
+        'Expected a custom document string or blocks',
+      ),
+    };
+  }
+
+  /// The source discriminator.
+  String get type => 'content';
+
+  /// Content when it was supplied as a single string.
+  final String? text;
+
+  /// Ordered content when it was supplied as blocks.
+  final List<InputContentBlock>? blocks;
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'content': text ?? [for (final block in blocks!) block.toJson()],
+  };
+
+  /// Copies the source, optionally replacing its content representation.
+  ContentBlockDocumentSource copyWith({
+    String? text,
+    List<InputContentBlock>? blocks,
+  }) {
+    if (text != null && blocks != null) {
+      throw ArgumentError('Specify text or blocks for a custom document');
+    }
+    if (text != null) return ContentBlockDocumentSource.text(text);
+    if (blocks != null) return ContentBlockDocumentSource.blocks(blocks);
+    return this;
+  }
+
+  static InputContentBlock _parseBlock(Object? block) => switch (block) {
+    final Map<String, dynamic> json when json['type'] == 'text' =>
+      TextInputBlock.fromJson(json),
+    final Map<String, dynamic> json when json['type'] == 'image' =>
+      ImageInputBlock.fromJson(json),
+    _ => throw const FormatException(
+      'Custom documents accept text and image blocks',
+    ),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ContentBlockDocumentSource &&
+          text == other.text &&
+          listsEqual(blocks, other.blocks);
+
+  @override
+  int get hashCode => Object.hash(text, listHash(blocks));
+
+  @override
+  String toString() =>
+      'ContentBlockDocumentSource(textLength: ${text?.length}, '
+      'blockCount: ${blocks?.length})';
 }

@@ -459,6 +459,32 @@ availability and data-handling limits before selecting a beta.
 
 </details>
 
+### How do I restrict URLs Claude can fetch?
+
+<details>
+<summary><b>Choose which prior conversation sources allow a URL</b></summary>
+
+`BuiltInTool.webFetch` accepts `WebFetchUrlSources` on every supported Messages
+web fetch version. A source left out allows eligible URLs from that source.
+Use `only` or `except` to select named tools in the request. Only web search
+and web fetch results contribute URLs from server tools.
+
+```dart
+final tool = BuiltInTool.webFetch(
+  urlSources: const WebFetchUrlSources(
+    clientToolResults: WebFetchUrlToolFilter.none(),
+  ),
+);
+```
+
+Inspect `WebFetchToolResultBlock.errorCode` for a failed fetch. For example,
+`contentTooLarge` means a fetched PDF would exceed the request's page or size
+limit. `rawErrorCode` retains the original provider value.
+
+[Runnable web fetch example](example/web_fetch_example.dart) · [Claude web fetch guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-fetch-tool)
+
+</details>
+
 ### How do I enable extended thinking?
 
 <details>
@@ -590,7 +616,12 @@ Future<void> main() async {
 }
 ```
 
-→ [Full example](example/vision_example.dart)
+Use `ImageSource.file(fileId)` for an image uploaded through the Files API.
+Use `DocumentSource.content` for an unchunked string or
+`DocumentSource.contentBlocks` for ordered text and image blocks. Enable
+document citations to reference the text at its original block boundaries.
+
+[Vision example](example/vision_example.dart) · [Custom document example](example/custom_content_document_example.dart) · [Claude citations guide](https://platform.claude.com/docs/en/build-with-claude/citations)
 
 </details>
 
@@ -1261,6 +1292,8 @@ See the [example/](example/) directory for complete examples:
 | [`fallback_example.dart`](example/fallback_example.dart) | Server-side fallback chain and refusal credit-token retry (beta) |
 | [`vision_example.dart`](example/vision_example.dart) | Image and document inputs |
 | [`document_example.dart`](example/document_example.dart) | Document inputs with citations |
+| [`custom_content_document_example.dart`](example/custom_content_document_example.dart) | Cite custom document chunks by block index |
+| [`web_fetch_example.dart`](example/web_fetch_example.dart) | Restrict URL sources and inspect web fetch results |
 | [`search_result_example.dart`](example/search_result_example.dart) | Supplying your own cited `search_result` blocks (RAG) |
 | [`token_counting_example.dart`](example/token_counting_example.dart) | Token counting |
 | [`message_batches_example.dart`](example/message_batches_example.dart) | Batch processing |

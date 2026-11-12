@@ -14,6 +14,7 @@ import 'browser_state.dart';
 import 'citations_config.dart';
 import 'content_block.dart';
 import 'image_transformations.dart';
+import 'web_fetch_result_error.dart';
 
 /// Content block for input messages.
 ///
@@ -1578,6 +1579,15 @@ class WebFetchToolResultInputBlock extends InputContentBlock {
 
   /// Cache control for this block.
   final CacheControlEphemeral? cacheControl;
+
+  /// Exact provider error code, or null on a successful fetch.
+  String? get rawErrorCode => webFetchRawErrorCode(content);
+
+  /// Recognized error code, including a fallback for future values.
+  WebFetchToolResultErrorCode? get errorCode => switch (rawErrorCode) {
+    final value? => WebFetchToolResultErrorCode.fromJson(value),
+    null => null,
+  };
 
   /// Creates a [WebFetchToolResultInputBlock].
   const WebFetchToolResultInputBlock({
