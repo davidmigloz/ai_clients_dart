@@ -50,7 +50,8 @@ final class OrganizationSpendLimitsResource {
   /// Sets a user, organization, or workspace limit for the selected period.
   ///
   /// [amount] is a non-negative integer string in billing minor units.
-  /// Explicit null removes the numeric cap for the selected period.
+  /// A user override can pass null to remove the numeric cap for that period.
+  /// Console organization and workspace limits are monthly and need an amount.
   Future<OrganizationSpendLimit> set({
     required OrganizationSpendScope scope,
     required String? amount,
@@ -68,6 +69,14 @@ final class OrganizationSpendLimitsResource {
         'Unsupported write scope',
       ),
     };
+    if (scope.type != 'user') {
+      if (amount == null) {
+        throw ArgumentError.notNull('amount');
+      }
+      if (period != null && period != OrganizationSpendPeriod.monthly) {
+        throw ArgumentError.value(period, 'period', 'Expected monthly');
+      }
+    }
     return _transport.send(
       'POST',
       '/spend_limits',

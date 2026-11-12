@@ -912,8 +912,9 @@ Use a Claude Enterprise Admin key with `read:spend_limits` for reads and
 spend-limit reads preview. Set or approve a cap using an integer string in
 billing minor units. The Enterprise guide supports setting a per-user
 override. The pinned API reference also defines organization and workspace
-write scopes, whose availability depends on the organization. Set `amount:
-null` to remove the numeric cap for the selected scope and period.
+write scopes for Console early access. Console writes require a numeric monthly
+cap. Set `amount: null` on an Enterprise per-user override to remove the numeric
+cap for that period.
 Approving an increase request applies the new cap and may notify the requester.
 Denying the request leaves the member's cap as configured.
 

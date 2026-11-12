@@ -143,6 +143,7 @@ void main() {
   test('retrieve, set and delete use documented scope and receipt', () async {
     transport
       ..queueJsonResponse(_limit)
+      ..queueJsonResponse(_limit)
       ..queueJsonResponse({..._limit, 'amount': null})
       ..queueJsonResponse({'type': 'spend_limit_deleted', 'id': 'spl_fixture'});
     final configured = await spend.retrieve('spl_fixture');
@@ -154,14 +155,29 @@ void main() {
     sent('GET', '/spend_limits/spl_fixture');
     await spend.set(
       scope: OrganizationSpendScope.workspace('workspace-fixture'),
-      amount: null,
-      period: OrganizationSpendPeriod.weekly,
+      amount: '25000',
+      period: OrganizationSpendPeriod.monthly,
     );
     sent(
       'POST',
       '/spend_limits',
       body: {
         'scope': {'type': 'workspace', 'workspace_id': 'workspace-fixture'},
+        'amount': '25000',
+        'period': 'monthly',
+      },
+    );
+    final unlimited = await spend.set(
+      scope: OrganizationSpendScope.user('user_fixture'),
+      amount: null,
+      period: OrganizationSpendPeriod.weekly,
+    );
+    expect(unlimited.amount, isNull);
+    sent(
+      'POST',
+      '/spend_limits',
+      body: {
+        'scope': {'type': 'user', 'user_id': 'user_fixture'},
         'amount': null,
         'period': 'weekly',
       },
@@ -188,6 +204,41 @@ void main() {
         throwsArgumentError,
       );
       expect(transport.requests, isEmpty);
+    },
+  );
+
+  test(
+    'Console writes require a numeric monthly cap before dispatch',
+    () async {
+      final consoleScopes = [
+        OrganizationSpendScope.organization(),
+        OrganizationSpendScope.workspace('workspace-fixture'),
+      ];
+      for (final scope in consoleScopes) {
+        expect(
+          () => spend.set(scope: scope, amount: null),
+          throwsArgumentError,
+        );
+        expect(
+          () => spend.set(
+            scope: scope,
+            amount: '25000',
+            period: OrganizationSpendPeriod.weekly,
+          ),
+          throwsArgumentError,
+        );
+      }
+      expect(transport.requests, isEmpty);
+      transport.queueJsonResponse(_limit);
+      await spend.set(scope: consoleScopes.first, amount: '25000');
+      sent(
+        'POST',
+        '/spend_limits',
+        body: {
+          'scope': {'type': 'organization'},
+          'amount': '25000',
+        },
+      );
     },
   );
 
