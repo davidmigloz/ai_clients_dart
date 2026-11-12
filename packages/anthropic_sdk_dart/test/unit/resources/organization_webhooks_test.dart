@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:test/test.dart';
 
 import '../../mocks/mock_http_client.dart';
@@ -118,6 +119,65 @@ void main() {
           'enabled_events': _endpoint['enabled_events'],
         },
       );
+    },
+  );
+
+  test(
+    'malformed create and rotation responses omit one-time secrets',
+    () async {
+      const truncated = '{"signing_secret": "$_secret",';
+      final responses = [
+        utf8.encode(truncated),
+        [...utf8.encode(truncated), 0xff],
+        utf8.encode(
+          jsonEncode({
+            ..._endpoint,
+            'created_at': _secret,
+            'signing_secret': _secret,
+          }),
+        ),
+        utf8.encode(truncated),
+        [...utf8.encode(truncated), 0xff],
+      ];
+      final isolated = AnthropicClient.withApiKey(
+        'fixture-admin-key',
+        httpClient: MockClient(
+          (_) async => http.Response.bytes(
+            responses.removeAt(0),
+            200,
+            headers: {'content-type': 'application/json'},
+          ),
+        ),
+      );
+      addTearDown(isolated.close);
+      final webhooks = isolated.organization.webhooks;
+      final invalidResponse = throwsA(
+        isA<FormatException>()
+            .having((error) => error.source, 'source', isNull)
+            .having(
+              (error) => error.toString(),
+              'diagnostic',
+              isNot(contains(_secret)),
+            ),
+      );
+      for (var index = 0; index < 3; index++) {
+        await expectLater(
+          webhooks.create(
+            url: 'https://example.test/anthropic',
+            enabledEvents: [
+              OrganizationWebhookEventType.enforcementActionOpened,
+            ],
+          ),
+          invalidResponse,
+        );
+      }
+      for (var index = 0; index < 2; index++) {
+        await expectLater(
+          webhooks.regenerateSigningSecret('wep_fixture'),
+          invalidResponse,
+        );
+      }
+      expect(responses, isEmpty);
     },
   );
 

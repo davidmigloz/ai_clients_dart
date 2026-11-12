@@ -32,6 +32,7 @@ final class OrganizationWebhooksResource {
       'POST',
       _webhooksPath,
       NewOrganizationWebhookEndpoint.fromJson,
+      sensitiveResponse: true,
       body: {
         'url': url,
         'enabled_events': enabledEvents.map((event) => event.value).toList(),
@@ -124,6 +125,7 @@ final class OrganizationWebhooksResource {
     'POST',
     '${_endpointPath(endpointId)}/regenerate_signing_secret',
     OrganizationWebhookSigningSecret.fromJson,
+    sensitiveResponse: true,
     betas: betas,
     abortTrigger: abortTrigger,
   );
@@ -134,6 +136,7 @@ final class OrganizationWebhooksResource {
     T Function(Map<String, dynamic>) decode, {
     Map<String, dynamic>? body,
     Map<String, dynamic>? query,
+    bool sensitiveResponse = false,
     List<String> betas = const [],
     Future<void>? abortTrigger,
   }) => _transport.send(
@@ -144,6 +147,7 @@ final class OrganizationWebhooksResource {
     query: query,
     beta: betas.isEmpty ? null : betas.join(','),
     requiredBeta: _webhooksBeta,
+    sensitiveResponse: sensitiveResponse,
     abortTrigger: abortTrigger,
   );
 

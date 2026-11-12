@@ -1204,11 +1204,13 @@ Use `client.organization.webhooks` with an Admin API key, an `org:admin`
 OAuth token, or a personal or service-account key without workspace scope.
 Anthropic must enable organization webhooks for your account. They require
 a default workspace and are unavailable with HIPAA readiness or
-customer-managed encryption on that workspace. The pinned guide documents
-enforcement opened and resolved subscriptions and says those deliveries are
-not yet live. The pinned SDK types also include `program_status_updated`.
+customer-managed encryption on that workspace. The guide documents enforcement
+opened and resolved subscriptions and says those deliveries are not yet live.
+The pinned SDK types also include `program_status_updated` without a
+documented delivery guarantee.
 
-Register a public HTTPS receiver with `create`. Store its signing secret when
+Register a receiver with a public DNS name over HTTPS on port 443 using
+`create`. Endpoint writes require an admin or owner role. Store its signing secret when
 Anthropic returns it. `regenerateSigningSecret` replaces the credential and
 invalidates the previous one immediately. The resource adds the required beta
 header to each request.
