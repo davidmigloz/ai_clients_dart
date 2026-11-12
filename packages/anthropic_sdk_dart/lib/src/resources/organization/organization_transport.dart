@@ -33,6 +33,7 @@ final class OrganizationTransport {
     Map<String, dynamic>? query,
     Map<String, dynamic>? body,
     String? beta,
+    String? requiredBeta,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
@@ -44,6 +45,14 @@ final class OrganizationTransport {
       includeWorkspace: false,
       additionalHeaders: {'anthropic-beta': ?beta},
     )..remove('anthropic-workspace-id');
+    if (requiredBeta != null) {
+      final configured = headers['anthropic-beta']?.split(',');
+      headers['anthropic-beta'] = {
+        for (final value in configured ?? const <String>[])
+          if (value.trim().isNotEmpty) value.trim(),
+        requiredBeta,
+      }.join(',');
+    }
     final request = http.Request(method, url)
       ..followRedirects = false
       ..headers.addAll(headers);
@@ -89,5 +98,11 @@ Map<String, dynamic> organizationPageQuery(
 ) => {
   'before_id': ?beforeId,
   'after_id': ?afterId,
+  'limit': ?limit?.toString(),
+};
+
+/// Produces opaque-cursor paging parameters for Admin lists.
+Map<String, dynamic> organizationCursorQuery(String? page, int? limit) => {
+  'page': ?page,
   'limit': ?limit?.toString(),
 };

@@ -51,7 +51,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Message batches for large-scale offline processing
 - Compliance Activity Feed, directory, organization settings, app content, sessions, and artifact downloads. Security Posture is beta.
 - Model discovery with lifecycle filters, model lines, and thinking and server-tool capabilities
-- Organization Admin API for keys, users, invites, workspaces, rate limits and compliance settings
+- Organization Admin API for keys, users, invites, workspaces, rate limits, compliance settings, RBAC and spend limits
 - Files (expiration, cursor pagination) and skills (multi-file uploads, container skills)
 - Managed agents with environments, self-hosted work, sessions, thread status filters, execution principals, tool permission evaluation, vaults, and streaming events (beta)
 - Scheduled deployments: run agent sessions on a cron schedule, with deployment runs, pause/resume, and run-now (beta)
@@ -879,6 +879,69 @@ try {
 
 </details>
 
+<details>
+<summary><b>Inspect RBAC groups, roles and permissions</b></summary>
+
+Use a Claude Enterprise Admin key with `read:rbac_groups` for groups and
+`read:members` for roles, or `read:org_audit` for both. Group members and role
+permissions have separate cursors. Group writes require `write:rbac_groups`
+and can change member access. Change SCIM group membership in the identity
+provider and custom role assignments in Claude Enterprise settings. The Dart
+models accept legacy RBAC response aliases and serialize the current names.
+
+```dart
+final groups = await admin.organization.rbacGroups.list(limit: 10);
+if (groups.data.isNotEmpty) {
+  final members = await admin.organization.rbacGroups.listMembers(
+    groups.data.first.id,
+    limit: 10,
+  );
+  print('${members.data.length} members on the first page');
+}
+```
+
+[Runnable RBAC example](example/organization_rbac_example.dart) · [Claude RBAC API](https://platform.claude.com/docs/en/manage-claude/user-management#groups)
+
+</details>
+
+<details>
+<summary><b>Inspect and manage spend limits</b></summary>
+
+Use a Claude Enterprise Admin key with `read:spend_limits` for reads and
+`write:spend_limits` for changes. The configured-list endpoint uses the
+spend-limit reads preview. Set or approve a cap using an integer string in
+billing minor units. The Enterprise guide supports setting a per-user
+override. The pinned API reference also defines organization and workspace
+write scopes, whose availability depends on the organization. Set `amount:
+null` to remove the numeric cap for the selected scope and period.
+Approving an increase request applies the new cap and may notify the requester.
+Denying the request leaves the member's cap as configured.
+
+```dart
+final limits = await admin.organization.spendLimits.listEffective(
+  periods: [OrganizationSpendPeriod.monthly],
+  limit: 10,
+);
+print('${limits.data.length} effective limits on the first page');
+```
+
+[Runnable spend example](example/organization_spend_example.dart) · [Claude spend limits API](https://platform.claude.com/docs/en/manage-claude/spend-limits-api)
+
+</details>
+
+<details>
+<summary><b>Sign out a Claude Enterprise member</b></summary>
+
+`admin.organization.users.signOut(userId)` revokes the member's active Claude
+sessions, trusted devices, and OAuth tokens scoped to the organization while
+preserving their membership. This Enterprise beta requires an Admin API key
+with `write:members`. The organization primary owner cannot be signed out by
+an Admin API key. Retry a temporary `503` using the configured retry policy.
+
+[Claude Enterprise sign-out API](https://platform.claude.com/docs/en/manage-claude/user-management#sign-a-member-out-everywhere)
+
+</details>
+
 ### How do I use the Compliance API?
 
 <details>
@@ -1016,6 +1079,8 @@ See the [example/](example/) directory for complete examples:
 | [`current_user_profiles_example.dart`](example/current_user_profiles_example.dart) | Inspect enforcement status and paginate user profiles |
 | [`user_profiles_example.dart`](example/user_profiles_example.dart) | Legacy user profiles and enrollment URLs (beta) |
 | [`organization_admin_example.dart`](example/organization_admin_example.dart) | Read-only organization and workspace administration |
+| [`organization_rbac_example.dart`](example/organization_rbac_example.dart) | List RBAC groups, members, roles and permissions |
+| [`organization_spend_example.dart`](example/organization_spend_example.dart) | List effective spend limits and pending increase requests |
 | [`models_example.dart`](example/models_example.dart) | Model lifecycle filters, pagination, and capabilities |
 | [`compliance_example.dart`](example/compliance_example.dart) | Scoped Compliance Activity Feed |
 | [`compliance_content_example.dart`](example/compliance_content_example.dart) | Scoped Compliance app content and artifact downloads |

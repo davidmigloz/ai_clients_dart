@@ -142,6 +142,23 @@ final class OrganizationUsersResource {
     DeletedOrganizationUser.fromJson,
     abortTrigger: abortTrigger,
   );
+
+  /// Signs a member out of Claude everywhere without removing membership.
+  ///
+  /// This Claude Enterprise beta requires a key with `write:members`.
+  /// A successful response returns the existing membership record.
+  Future<OrganizationUser> signOut(
+    String userId, {
+    List<String> betas = const [],
+    Future<void>? abortTrigger,
+  }) => _transport.send(
+    'POST',
+    '/users/${organizationIdSegment(userId, 'userId')}/sign_out',
+    OrganizationUser.fromJson,
+    beta: betas.isEmpty ? null : betas.join(','),
+    requiredBeta: 'admin-user-sign-out-2026-10-08',
+    abortTrigger: abortTrigger,
+  );
 }
 
 /// Read and manage organization invitations.
