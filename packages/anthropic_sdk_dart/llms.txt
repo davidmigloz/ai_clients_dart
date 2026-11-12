@@ -4,9 +4,9 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~13.7k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~14.1k tokens): Primary package documentation with installation, configuration, and usage examples.
 - [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/CHANGELOG.md) (~12.9k tokens): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) (~13.9k tokens): Upgrade notes and breaking-change guidance.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) (~14.1k tokens): Upgrade notes and breaking-change guidance.
 
 ## Examples
 
@@ -45,9 +45,11 @@
 - [organization_rbac_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_rbac_example.dart) (~308 tokens): List RBAC groups, members, roles and permissions.
 - [organization_spend_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_spend_example.dart) (~233 tokens): List effective spend limits and pending increase requests.
 - [external_keys_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/external_keys_example.dart) (~220 tokens): List registered customer-managed encryption keys.
+- [organization_webhooks_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_webhooks_example.dart) (~217 tokens): List organization webhook endpoints (beta).
+- [organization_webhook_receiver_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_webhook_receiver_example.dart) (~336 tokens): Verify and parse signed webhook deliveries.
 - [compliance_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/compliance_example.dart) (~209 tokens): Scoped Compliance Activity Feed.
 - [compliance_content_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/compliance_content_example.dart) (~273 tokens): Scoped Compliance app content and artifact downloads.
-- [organization_analytics_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_analytics_example.dart) (~411 tokens): Dimensioned organization usage and cost with cursor pagination (beta).
+- [organization_analytics_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/organization_analytics_example.dart) (~423 tokens): Dimensioned organization usage and cost with cursor pagination (beta).
 - [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/error_handling_example.dart) (~624 tokens): Exception handling patterns.
 - [api_version_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/api_version_example.dart) (~226 tokens): Current API version and legacy opt-out.
 - [mid_conversation_system_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/mid_conversation_system_example.dart) (~1.1k tokens): Mid-conversation, turn-scoped, and effort-only system messages.
@@ -67,4 +69,4 @@
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/anthropic_sdk_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~73.5k tokens**
+**Total: ~74.6k tokens**

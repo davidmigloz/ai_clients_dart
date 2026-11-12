@@ -242,6 +242,7 @@ export 'src/models/organization/organization_page.dart';
 export 'src/models/organization/organization_rbac.dart';
 export 'src/models/organization/organization_records.dart';
 export 'src/models/organization/organization_spend.dart';
+export 'src/models/organization/organization_webhook.dart';
 export 'src/models/organization/organization_workspace.dart';
 export 'src/models/organization/service_account.dart';
 
@@ -321,6 +322,7 @@ export 'src/resources/organization/organization_resource.dart';
 export 'src/resources/organization/organization_service_accounts_resource.dart';
 export 'src/resources/organization/organization_settings_resources.dart';
 export 'src/resources/organization/organization_spend_resources.dart';
+export 'src/resources/organization/organization_webhooks_resource.dart';
 export 'src/resources/organization/organization_workspaces_resource.dart';
 export 'src/resources/session_events_resource.dart';
 export 'src/resources/session_resources_resource.dart';

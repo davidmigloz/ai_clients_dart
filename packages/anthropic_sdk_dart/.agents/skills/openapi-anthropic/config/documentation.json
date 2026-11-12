@@ -30,6 +30,7 @@
     "organizationServiceAccountWorkspaces": "service_accounts",
     "organizationWorkspaceServiceAccounts": "service_accounts",
     "organizationWorkspaces": "organization_admin",
+    "organizationWebhooks": "organization_webhooks",
     "messages": "messages",
     "models": "models",
     "agents": "managed_agents",
