@@ -66,19 +66,27 @@ final class OrganizationCursorPage<T> {
   /// Parses a page and its records.
   OrganizationCursorPage.fromJson(
     Map<String, dynamic> json,
-    T Function(Map<String, dynamic>) decode,
-  ) : data = List.unmodifiable(
-        requiredOrganizationField<List<Object?>>(
-          json,
-          'data',
-          'Admin page',
-        ).map((entry) => decode(entry! as Map<String, dynamic>)),
-      ),
-      nextPage = requiredOrganizationField<String?>(
-        json,
-        'next_page',
-        'Admin page',
-      );
+    T Function(Map<String, dynamic>) decode, {
+    bool requireHasMore = false,
+  }) : data = List.unmodifiable(
+         requiredOrganizationField<List<Object?>>(
+           json,
+           'data',
+           'Admin page',
+         ).map((entry) => decode(entry! as Map<String, dynamic>)),
+       ),
+       _serverHasMore = requireHasMore || json.containsKey('has_more')
+           ? requiredOrganizationField<bool>(json, 'has_more', 'Admin page')
+           : null,
+       nextPage = requiredOrganizationField<String?>(
+         json,
+         'next_page',
+         'Admin page',
+       ) {
+    if (hasMore && nextPage?.isNotEmpty != true) {
+      throw const FormatException('Missing Admin continuation token');
+    }
+  }
 
   /// Records returned on this page.
   final List<T> data;
@@ -86,10 +94,16 @@ final class OrganizationCursorPage<T> {
   /// Cursor for the next page, or null when exhausted.
   final String? nextPage;
 
+  final bool? _serverHasMore;
+
+  /// Whether the provider has another page.
+  bool get hasMore => _serverHasMore ?? nextPage != null;
+
   /// Converts the page and its entries to JSON.
   Map<String, dynamic> toJson(Map<String, dynamic> Function(T) encode) => {
     'data': data.map(encode).toList(),
     'next_page': nextPage,
+    'has_more': ?_serverHasMore,
   };
 
   @override
@@ -97,8 +111,9 @@ final class OrganizationCursorPage<T> {
       other is OrganizationCursorPage<T> &&
       other.runtimeType == runtimeType &&
       listsEqual(data, other.data) &&
-      nextPage == other.nextPage;
+      nextPage == other.nextPage &&
+      _serverHasMore == other._serverHasMore;
 
   @override
-  int get hashCode => Object.hash(listHash(data), nextPage);
+  int get hashCode => Object.hash(listHash(data), nextPage, _serverHasMore);
 }

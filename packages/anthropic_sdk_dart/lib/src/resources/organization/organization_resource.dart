@@ -2,7 +2,9 @@ import '../../client/interceptor_chain.dart';
 import '../../client/request_builder.dart';
 import '../../models/organization/organization_records.dart';
 import 'organization_access_resources.dart';
+import 'organization_rbac_resources.dart';
 import 'organization_settings_resources.dart';
+import 'organization_spend_resources.dart';
 import 'organization_transport.dart';
 import 'organization_workspaces_resource.dart';
 
@@ -29,6 +31,9 @@ final class OrganizationResource {
       users = OrganizationUsersResource(_transport),
       workspaces = OrganizationWorkspacesResource(_transport),
       rateLimits = OrganizationRateLimitsResource(_transport),
+      rbacGroups = OrganizationRbacGroupsResource(_transport),
+      rbacRoles = OrganizationRbacRolesResource(_transport),
+      spendLimits = OrganizationSpendLimitsResource(_transport),
       complianceSettings = OrganizationComplianceSettingsResource(_transport);
 
   final OrganizationTransport _transport;
@@ -47,6 +52,15 @@ final class OrganizationResource {
 
   /// Organization compliance settings.
   final OrganizationComplianceSettingsResource complianceSettings;
+
+  /// Role-based access groups and their members.
+  final OrganizationRbacGroupsResource rbacGroups;
+
+  /// Custom roles and permissions.
+  final OrganizationRbacRolesResource rbacRoles;
+
+  /// Configured and effective spend limits and increase requests.
+  final OrganizationSpendLimitsResource spendLimits;
 
   /// Workspaces and workspace membership.
   final OrganizationWorkspacesResource workspaces;

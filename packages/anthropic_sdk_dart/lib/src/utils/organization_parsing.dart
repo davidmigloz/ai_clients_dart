@@ -2,10 +2,12 @@
 T requiredOrganizationField<T>(
   Map<String, dynamic> json,
   String key,
-  String model,
-) {
-  final value = json[key];
-  if (json.containsKey(key) && value is T) return value;
+  String model, {
+  String? legacyKey,
+}) {
+  final responseKey = json.containsKey(key) ? key : legacyKey ?? key;
+  final value = json[responseKey];
+  if (json.containsKey(responseKey) && value is T) return value;
   throw FormatException('$model: missing or invalid "$key"');
 }
 
