@@ -12,6 +12,8 @@ Malformed successful JSON also reached caller-visible decoder diagnostics. Confi
 
 Typed mapping for batch JSONL results and Managed Agents session and thread SSE also exposed reflected credentials in malformed response fields. Their typed decoders now run within the shared streaming diagnostic boundary. Fixtures preserve application text, terminate on the first decoder failure and cancel a stalled borrowed body. Web checks exercise the same credential-bearing typed cast failures.
 
+The final constructor sweep reproduced `const UpdateUserProfileRequest(metadata: {})` on the legacy beta route. The public `Object?` parameter gives the literal no string-map context. The constructor now accepts it, validates map entries before dispatch, and serializes the explicit empty map. The pinned SDKs describe a metadata merge, so an empty map preserves stored keys. Fixtures cover omission, explicit null on other fields, and malformed metadata values. [Pinned Python parameters](https://github.com/anthropics/anthropic-sdk-python/blob/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/src/anthropic/types/beta/user_profile_update_params.py#L50-L56)
+
 ## Path matrix
 
 | Historical family | Anthropic | OpenAI comparison | Decision or remaining verification |

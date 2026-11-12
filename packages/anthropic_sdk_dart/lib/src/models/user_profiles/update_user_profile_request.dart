@@ -70,7 +70,7 @@ class UpdateUserProfileRequest {
   /// Set a key's value to the empty string to delete it server-side.
   /// Keys not included are preserved.
   Map<String, String>? get metadata =>
-      _metadata == _notSet ? null : (_metadata as Map?)?.cast<String, String>();
+      _metadata == _notSet ? null : copyWithMap<String, String>(_metadata);
 
   /// Whether a metadata update was provided.
   bool get hasMetadata => _metadata != _notSet;
@@ -92,7 +92,7 @@ class UpdateUserProfileRequest {
     Object? externalUserOnboardedAt = _notSet,
     Object? metadata = _notSet,
   }) : assert(
-         metadata == _notSet || metadata is Map<String, String>,
+         metadata == _notSet || metadata is Map,
          'metadata must be a Map<String, String> when provided; use empty-string values to remove keys, or omit the metadata parameter to leave it unchanged',
        ),
        assert(
@@ -146,7 +146,7 @@ class UpdateUserProfileRequest {
       'external_user_onboarded_at': (_externalUserOnboardedAt as DateTime?)
           ?.toUtc()
           .toIso8601String(),
-    if (_metadata != _notSet) 'metadata': _metadata,
+    if (_metadata != _notSet) 'metadata': metadata,
   };
 
   /// Creates a copy with replaced values.
