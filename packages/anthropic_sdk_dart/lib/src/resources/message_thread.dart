@@ -10,6 +10,7 @@ import '../models/messages/message_thread_param.dart';
 import '../models/metadata/stop_reason.dart';
 import '../models/streaming/message_stream_accumulator.dart';
 import '../models/streaming/message_stream_event.dart';
+import 'base_resource.dart';
 import 'messages_resource.dart';
 
 const _threadsBeta = 'message-threads-2026-08-12';
@@ -33,6 +34,9 @@ extension MessageThreadResource on MessagesResource {
     bool replayOnThreadError = false,
   }) {
     ensureNotClosed?.call();
+    if (httpClient case final MessageThreadSupport support) {
+      support.ensureMessageThreadsSupported();
+    }
     if (request.thread != null || request.compaction != null) {
       throw ArgumentError(
         'createThread requires a request without thread or compaction',

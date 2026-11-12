@@ -35,3 +35,9 @@ abstract class ResourceBase {
     this.ensureNotClosed,
   });
 }
+
+/// Lets a transport report that its provider cannot create Messages threads.
+abstract interface class MessageThreadSupport {
+  /// Throws [UnsupportedError] for a provider without server-held threads.
+  void ensureMessageThreadsSupported();
+}

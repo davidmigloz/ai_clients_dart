@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../errors/response_error.dart';
 import '../models/messages/message.dart';
 import '../models/messages/message_create_request.dart';
 import '../models/streaming/message_stream_event.dart';
@@ -75,7 +76,7 @@ class MessagesResource extends ResourceBase with StreamingResource {
       abortTrigger: abortTrigger,
     );
 
-    return Message.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Message.fromJson);
   }
 
   /// Creates a streaming message.
@@ -151,9 +152,7 @@ class MessagesResource extends ResourceBase with StreamingResource {
       abortTrigger: abortTrigger,
     );
 
-    return TokenCountResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, TokenCountResponse.fromJson);
   }
 
   /// Builds the per-request beta, attribution and workspace headers.

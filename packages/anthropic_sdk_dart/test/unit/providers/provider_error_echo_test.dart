@@ -354,14 +354,38 @@ void main() {
       expect(result.headers, {'x-provider-header': 'response-value'});
     },
   );
+
+  // Bedrock transports
+  _verifyProvider(
+    'Bedrock Mantle signature and session',
+    (transport) => AnthropicBedrockMantleClient(
+      region: 'us-west-2',
+      credentials: () => _awsCredentials,
+      config: _config,
+      httpClient: transport,
+    ),
+    _signedValues,
+  );
+  _verifyProvider(
+    'Bedrock Runtime signature and session',
+    (transport) => AnthropicBedrockClient(
+      region: 'us-west-2',
+      credentials: () => _awsCredentials,
+      config: _config,
+      httpClient: transport,
+    ),
+    _signedValues,
+    supportsSseFixture: false,
+  );
 }
 
 void _verifyProvider(
   String name,
   AnthropicClient Function(http.Client) connect,
-  List<String> Function(http.BaseRequest) credentials,
-) {
-  for (final mode in ['buffered', 'handshake', 'SSE']) {
+  List<String> Function(http.BaseRequest) credentials, {
+  bool supportsSseFixture = true,
+}) {
+  for (final mode in ['buffered', 'handshake', if (supportsSseFixture) 'SSE']) {
     test('$name redacts effective credentials in $mode errors', () async {
       final inBand = mode == 'SSE';
       late List<String> sentValues;
