@@ -1008,11 +1008,16 @@ try {
 [Runnable Admin example](example/organization_admin_example.dart) · [Claude Admin API](https://platform.claude.com/docs/en/manage-claude/admin-api)
 
 Use an `org:admin` OAuth token for
-`client.organization.serviceAccounts`. Memberships can be listed from the
-account via `serviceAccounts.workspaces`, or from the workspace via
-`organization.workspaces.serviceAccounts`. The Default Workspace membership
-is implicit unless you add an explicit membership. Use an interactive OAuth
-token to create an admin service account or change an account to admin.
+`client.organization.serviceAccounts`. The account's `workspaces.list`
+includes its implicit Default Workspace membership. The workspace's
+`serviceAccounts.list` lists active accounts with explicit memberships. A
+direct lookup can return the implicit `workspace_user` membership.
+
+Use `create` or `add` to make a Default Workspace membership explicit before
+updating its role. Removing an explicit Default Workspace membership restores
+the implicit membership. Supplying the admin role on creation or update
+requires interactive OAuth, even when the role already matches. Archive active
+federation rules before archiving their service account.
 
 [Service account example](example/service_accounts_example.dart) · [Manage WIF with the Admin API](https://platform.claude.com/docs/en/manage-claude/wif-admin-api)
 

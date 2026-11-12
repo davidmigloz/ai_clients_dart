@@ -313,8 +313,127 @@ void main() {
         }
         expect(requests, isEmpty);
       });
+
+      test(
+        'Default Workspace supports both implicit and explicit views',
+        () async {
+          response = {
+            'data': [_member(implicit: true)],
+            'next_page': null,
+          };
+          final accountPage = await accountWorkspaces.list(
+            _accountId,
+            betas: betas,
+          );
+          expect(accountPage.data.single.implicit, isTrue);
+          expectRequest('GET', '$_account/workspaces');
+
+          response = {'data': <Object>[], 'next_page': null};
+          final workspacePage = await workspaceAccounts.list(
+            _workspaceId,
+            betas: betas,
+          );
+          expect(workspacePage.data, isEmpty);
+          expectRequest('GET', _workspace);
+
+          response = _member(implicit: false)
+            ..['workspace_role'] = 'workspace_admin';
+          final explicit = await workspaceAccounts.create(
+            _workspaceId,
+            serviceAccountId: _accountId,
+            workspaceRole: ServiceAccountWorkspaceRole.admin,
+            betas: betas,
+          );
+          expect(explicit.implicit, isFalse);
+          expectRequest(
+            'POST',
+            _workspace,
+            body: {
+              'service_account_id': _accountId,
+              'workspace_role': 'workspace_admin',
+            },
+          );
+
+          response = _deleted();
+          await accountWorkspaces.remove(
+            _accountId,
+            _workspaceId,
+            betas: betas,
+          );
+          expectRequest('DELETE', '$_account/workspaces/$_workspaceId');
+
+          response = _member(implicit: true);
+          final restored = await workspaceAccounts.retrieve(
+            _workspaceId,
+            _accountId,
+            betas: betas,
+          );
+          expect(restored.implicit, isTrue);
+          expect(restored.workspaceRole, 'workspace_user');
+          expectRequest('GET', _membership);
+          expect(requests, hasLength(5));
+        },
+      );
     });
   }
+
+  test(
+    'federated Admin keeps the exchange workspace and sends scoped OAuth',
+    () async {
+      final paths = <String>[];
+      final transport = MockClient((request) async {
+        paths.add(request.url.path);
+        if (request.url.path.endsWith('/oauth/token')) {
+          expect(
+            jsonDecode(request.body),
+            containsPair('workspace_id', 'wrkspc_exchange'),
+          );
+          return http.Response(
+            jsonEncode({
+              'access_token': 'fixture-token',
+              'expires_in': 600,
+              'token_type': 'Bearer',
+              'scope': 'org:admin',
+            }),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }
+        expect(request.headers['authorization'], 'Bearer fixture-token');
+        expect(request.headers['x-api-key'], isNull);
+        expect(request.headers['anthropic-workspace-id'], isNull);
+        expect(
+          request.headers['anthropic-beta'],
+          'caller-beta,oauth-2025-04-20',
+        );
+        return http.Response(
+          '{"data":[],"next_page":null}',
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+      addTearDown(transport.close);
+      final client = AnthropicClient.withWorkloadIdentity(
+        identityTokenProvider: () => 'fixture.jwt.assertion',
+        federationRuleId: 'fdrl_fixture',
+        organizationId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        serviceAccountId: _accountId,
+        workspaceId: 'wrkspc_exchange',
+        config: const AnthropicConfig(
+          baseUrl: 'https://fixture.invalid/proxy',
+          defaultHeaders: {'Anthropic-Workspace-ID': 'ignored-header'},
+        ),
+        httpClient: transport,
+      );
+      addTearDown(client.close);
+      await client.organization.serviceAccounts.list(betas: ['caller-beta']);
+      await client.organization.workspaces.serviceAccounts.list(
+        _workspaceId,
+        betas: ['caller-beta'],
+      );
+      expect(paths, ['/proxy/v1/oauth/token', _accounts, _workspace]);
+    },
+  );
 
   test('nullable response data and future roles round-trip', () {
     final json = _record()..['organization_role'] = 'future_role';

@@ -6,7 +6,7 @@ import 'organization_transport.dart';
 /// Manages non-human organization identities and their federation memberships.
 ///
 /// Use an OAuth token with `org:admin`. An interactive token is required to
-/// create an admin account or assign the admin organization role.
+/// supply the admin organization role on creation or update.
 final class OrganizationServiceAccountsResource {
   /// Creates the service accounts resource.
   OrganizationServiceAccountsResource(this._transport)
@@ -37,6 +37,7 @@ final class OrganizationServiceAccountsResource {
   );
 
   /// Creates a service account. The default organization role is developer.
+  /// Supplying the admin role requires interactive OAuth.
   Future<ServiceAccount> create({
     required String name,
     String? description,
@@ -70,6 +71,7 @@ final class OrganizationServiceAccountsResource {
   );
 
   /// Updates the description and role. Pass null to clear [description].
+  /// Supplying the admin role requires interactive OAuth even if it is set.
   Future<ServiceAccount> update(
     String serviceAccountId, {
     Object? description = unsetCopyWithValue,
@@ -90,6 +92,8 @@ final class OrganizationServiceAccountsResource {
   );
 
   /// Archives a service account and prevents future use by federation rules.
+  /// Archive active rules using this account first. Repeating the operation
+  /// returns the archived account.
   Future<ServiceAccount> archive(
     String serviceAccountId, {
     List<String> betas = const [],
@@ -147,6 +151,8 @@ final class OrganizationServiceAccountWorkspacesResource {
   );
 
   /// Removes an explicit workspace membership. The implicit one is a no-op.
+  /// Removing an explicit Default Workspace membership restores the implicit
+  /// membership.
   Future<DeletedServiceAccountWorkspaceMember> remove(
     String serviceAccountId,
     String workspaceId, {
@@ -169,7 +175,7 @@ final class OrganizationWorkspaceServiceAccountsResource {
   const OrganizationWorkspaceServiceAccountsResource(this._transport);
   final OrganizationTransport _transport;
 
-  /// Lists service accounts in a workspace.
+  /// Lists active service accounts with explicit membership in the workspace.
   Future<OrganizationCursorPage<ServiceAccountWorkspaceMember>> list(
     String workspaceId, {
     String? page,
@@ -205,6 +211,7 @@ final class OrganizationWorkspaceServiceAccountsResource {
   );
 
   /// Retrieves a workspace membership.
+  /// The Default Workspace can return an implicit `workspace_user` membership.
   Future<ServiceAccountWorkspaceMember> retrieve(
     String workspaceId,
     String serviceAccountId, {
@@ -218,7 +225,7 @@ final class OrganizationWorkspaceServiceAccountsResource {
     abortTrigger: abortTrigger,
   );
 
-  /// Changes the workspace role of a service account.
+  /// Updates the role of an explicit service account workspace membership.
   Future<ServiceAccountWorkspaceMember> update(
     String workspaceId,
     String serviceAccountId, {
@@ -235,6 +242,8 @@ final class OrganizationWorkspaceServiceAccountsResource {
   );
 
   /// Removes an explicit membership. The implicit one is a no-op.
+  /// Removing an explicit Default Workspace membership restores the implicit
+  /// membership.
   Future<DeletedServiceAccountWorkspaceMember> delete(
     String workspaceId,
     String serviceAccountId, {
