@@ -63,7 +63,14 @@ class ResponseMetadata {
         return entry.value;
       }
     }
-    return bodyRequestId;
+    if (bodyRequestId case final id?) return id;
+    for (final entry in headers.entries) {
+      if (entry.key.toLowerCase() == 'x-amzn-requestid' &&
+          entry.value.trim().isNotEmpty) {
+        return entry.value;
+      }
+    }
+    return null;
   }
 }
 

@@ -68,6 +68,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Memory stores for persistent agent memories with versioning and redaction (beta)
 - Dreams: asynchronous memory-consolidation jobs over memory stores and session transcripts, with `create_new`/`update_existing` output behavior (Claude API research preview with access approval)
 - Generally available user profiles with end-customer attribution, enforcement filters, program status, and action URLs. The legacy beta profile methods remain available.
+- Claude Platform on AWS transport with AWS-issued Bearer and SigV4 authentication
 
 ## Why choose this client?
 
@@ -144,7 +145,9 @@ Future<void> main() async {
 `AnthropicConfig.timeout` defaults to ten minutes. Each buffered HTTP attempt
 uses one deadline for response headers and body reads. Streams use the same
 duration to wait for headers and for each subsequent gap between incoming
-chunks. The first timer starts after authentication. A timeout throws
+chunks. The first timer starts after a configured `AuthProvider` resolves.
+Cloud credentials acquired by a provider transport count toward the HTTP
+attempt. A timeout throws
 `TimeoutException`. The retry policy can retry idempotent requests sent
 through the buffered client pipeline.
 
@@ -822,6 +825,27 @@ Future<void> main() async {
 
 </details>
 
+### How do I use Claude Platform on AWS?
+
+<details>
+<summary><b>Send a message from an AWS workspace</b></summary>
+
+Use `AnthropicAwsClient` with your workspace's AWS region and workspace ID. Supply an AWS-issued API key, or inject a callback that obtains AWS IAM credentials for SigV4. The client also reads `AWS_REGION`, `AWS_DEFAULT_REGION`, `ANTHROPIC_AWS_WORKSPACE_ID`, and the standard credential environment variables.
+
+```dart
+final client = AnthropicAwsClient(
+  region: 'us-east-1',
+  workspaceId: workspaceId,
+  credentials: loadAwsCredentials,
+);
+```
+
+The callback returns `ClaudeAwsCredentials` with an access key ID, secret access key, and optional session token. Use your AWS credential provider for SSO, shared profiles, instance metadata, and role renewal. The configured workspace covers resource calls, including self-hosted work queues. AWS workers use IAM or an AWS-issued key. Organization Admin and Compliance Activity Feed routes use organization scope. User Profile action URLs are unavailable on AWS. AWS IAM controls the available APIs and actions. [Claude Platform on AWS](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws)
+
+→ [Full example](example/claude_aws_example.dart)
+
+</details>
+
 ### How do I use managed agents?
 
 <details>
@@ -1395,6 +1419,7 @@ See the [example/](example/) directory for complete examples:
 | [`skills_example.dart`](example/skills_example.dart) | Skills management |
 | [`inline_tools_example.dart`](example/inline_tools_example.dart) | Define a client tool partway through a conversation (beta) |
 | [`mcp_example.dart`](example/mcp_example.dart) | Connect an MCP server and pin its tool listing (beta) |
+| [`claude_aws_example.dart`](example/claude_aws_example.dart) | Native Claude Platform on AWS authentication and Messages |
 | [`managed_agents_example.dart`](example/managed_agents_example.dart) | Managed agents: agents, sessions, vaults, multiagent rosters, outcomes, webhooks, credential validation (beta) |
 | [`managed_agents_workflow_example.dart`](example/managed_agents_workflow_example.dart) | Configure dynamic workflows and follow workflow run events (Managed Agents beta) |
 | [`environments_example.dart`](example/environments_example.dart) | Managed Agents cloud and self-hosted environment lifecycle (beta) |

@@ -61,7 +61,10 @@ class AnthropicConfig {
   /// Default query parameters to include in all requests.
   final Map<String, String> defaultQueryParams;
 
-  /// HTTP timeout, starting after credentials resolve.
+  /// HTTP timeout per attempt.
+  ///
+  /// A first-party [authProvider] resolves before the timer starts.
+  /// Credential callbacks run by cloud transports count toward it.
   ///
   /// Defaults to 10 minutes. Buffered attempts include headers and body reads.
   /// Streams use separate deadlines for headers and gaps between body chunks.

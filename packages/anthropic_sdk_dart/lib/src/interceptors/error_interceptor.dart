@@ -44,15 +44,19 @@ class ErrorInterceptor implements Interceptor {
       timestamp: DateTime.now(),
     );
 
-    final credentials = requestCredentialValues(context.request.headers);
+    final credentials = requestCredentialValues(
+      context.request.headers,
+      sentHeaders: response.request?.headers,
+    );
     final body = decodeApiErrorResponse(response);
     final parsed = parseApiErrorBody(body, credentials: credentials);
     final responseMetadata = ResponseMetadata(
       statusCode: response.statusCode,
       headers: Map.unmodifiable({
         for (final entry in response.headers.entries)
-          if (redactCredentialEcho(entry.key, credentials) != null)
-            if (redactCredentialEcho(entry.value, credentials)
+          if (redactPercentEncodedCredentialEcho(entry.key, credentials) !=
+              null)
+            if (redactPercentEncodedCredentialEcho(entry.value, credentials)
                 case final String value)
               entry.key: value,
       }),
