@@ -33,8 +33,12 @@ export 'src/auth/auth_provider.dart'
         ApiKeyProvider,
         AuthCredentials,
         AuthProvider,
+        BearerTokenCredentials,
+        BearerTokenProvider,
         NoAuthCredentials,
         NoAuthProvider;
+export 'src/auth/workload_identity.dart'
+    show WorkloadIdentityAccessToken, WorkloadIdentityTokenExchange;
 
 // Client
 export 'src/client/anthropic_client.dart' show AnthropicClient;

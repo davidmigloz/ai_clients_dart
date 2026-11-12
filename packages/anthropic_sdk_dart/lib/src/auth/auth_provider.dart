@@ -1,3 +1,6 @@
+/// API beta enabling OAuth bearer authentication.
+const oauthBetaHeader = 'oauth-2025-04-20';
+
 /// Authentication provider interface for the Anthropic client.
 ///
 /// This interface allows for dynamic authentication credential retrieval.
@@ -21,6 +24,22 @@ class ApiKeyCredentials extends AuthCredentials {
 
   /// Creates [ApiKeyCredentials].
   const ApiKeyCredentials(this.apiKey);
+}
+
+/// OAuth credentials sent in the Authorization header.
+final class BearerTokenCredentials extends AuthCredentials {
+  /// Creates bearer credentials. A workspace-scoped token cannot be rerouted
+  /// with an `anthropic-workspace-id` header.
+  const BearerTokenCredentials(this.token, {this.workspaceScoped = false});
+
+  /// The OAuth access token.
+  final String token;
+
+  /// Whether the token already identifies its workspace.
+  final bool workspaceScoped;
+
+  @override
+  String toString() => 'BearerTokenCredentials([REDACTED])';
 }
 
 /// No authentication credentials.
@@ -52,6 +71,22 @@ class ApiKeyProvider implements AuthProvider {
   Future<AuthCredentials> getCredentials() async {
     return ApiKeyCredentials(apiKey);
   }
+}
+
+/// Provider for an existing OAuth access token.
+final class BearerTokenProvider implements AuthProvider {
+  /// Creates a provider for [token].
+  const BearerTokenProvider(this.token);
+
+  /// The OAuth access token.
+  final String token;
+
+  @override
+  Future<AuthCredentials> getCredentials() async =>
+      BearerTokenCredentials(token);
+
+  @override
+  String toString() => 'BearerTokenProvider([REDACTED])';
 }
 
 /// Provider that returns no authentication credentials.

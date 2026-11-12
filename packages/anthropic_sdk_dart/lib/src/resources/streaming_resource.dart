@@ -4,7 +4,7 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
-import '../auth/auth_provider.dart';
+import '../auth/request_auth.dart';
 import '../errors/exceptions.dart';
 import '../errors/response_error.dart';
 import '../utils/request_id.dart';
@@ -339,16 +339,9 @@ mixin StreamingResource on ResourceBase {
     final provider = config.authProvider;
     if (provider == null) return;
 
-    final credentials = await provider.getCredentials();
-    switch (credentials) {
-      case ApiKeyCredentials(:final apiKey):
-        if (!request.headers.containsKey('x-api-key')) {
-          request.headers['x-api-key'] = apiKey;
-        }
-      case NoAuthCredentials():
-        // No authentication needed
-        break;
-    }
+    request.headers.addAll(
+      await resolveCredentialHeaders(request.headers, provider),
+    );
   }
 }
 

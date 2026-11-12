@@ -4,7 +4,7 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
-import '../auth/auth_provider.dart';
+import '../auth/request_auth.dart';
 import '../models/files/file_delete_response.dart';
 import '../models/files/file_list_response.dart';
 import '../models/files/file_metadata.dart';
@@ -297,15 +297,8 @@ class FilesResource extends ResourceBase {
     final authProvider = config.authProvider;
     if (authProvider == null) return;
 
-    final credentials = await authProvider.getCredentials();
-    switch (credentials) {
-      case ApiKeyCredentials(:final apiKey):
-        if (!request.headers.containsKey('x-api-key')) {
-          request.headers['x-api-key'] = apiKey;
-        }
-      case NoAuthCredentials():
-        // No authentication needed
-        break;
-    }
+    request.headers.addAll(
+      await resolveCredentialHeaders(request.headers, authProvider),
+    );
   }
 }

@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
-import '../auth/auth_provider.dart';
+import '../auth/request_auth.dart';
 import '../models/skills/deleted_skill.dart';
 import '../models/skills/skill.dart';
 import '../models/skills/skill_file.dart';
@@ -386,15 +386,8 @@ class SkillsResource extends ResourceBase {
     final authProvider = config.authProvider;
     if (authProvider == null) return;
 
-    final credentials = await authProvider.getCredentials();
-    switch (credentials) {
-      case ApiKeyCredentials(:final apiKey):
-        if (!request.headers.containsKey('x-api-key')) {
-          request.headers['x-api-key'] = apiKey;
-        }
-      case NoAuthCredentials():
-        // No authentication needed
-        break;
-    }
+    request.headers.addAll(
+      await resolveCredentialHeaders(request.headers, authProvider),
+    );
   }
 }
