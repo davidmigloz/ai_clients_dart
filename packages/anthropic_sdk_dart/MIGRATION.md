@@ -622,6 +622,53 @@ case UnknownWebhookEventData(:final rawJson):
 
 ---
 
+## Move usage and cost reports to dimensioned analytics
+
+The legacy Console and Enterprise reports remain available. Use
+`client.organization.analytics.usage` or `cost` for dimensioned rows,
+including reports grouped by actor or child organization. They add the
+`analytics-usage-cost-2026-08-24` beta header.
+
+```dart
+// Legacy Console report with nested time buckets.
+final legacy = await client.organization.analytics.messagesUsageReport(
+  startingAt: start,
+  endingAt: end,
+  bucketWidth: AnalyticsBucketWidth.day,
+  groupBy: const ['model'],
+);
+for (final bucket in legacy.data) {
+  for (final row in bucket.results) {
+    print('${bucket.startingAt} ${row.group.model}: ${row.usage.outputTokens}');
+  }
+}
+
+// Dimensioned report with one row per bucket and dimension combination.
+final current = await client.organization.analytics.usage(
+  UsageCostAnalyticsQuery(
+    startingAt: start,
+    endingAt: end,
+    timeBucketWidth: AnalyticsBucketWidth.day,
+    groupBy: const ['model'],
+    orderBy: 'time',
+    order: 'asc',
+  ),
+);
+for (final row in current.data) {
+  print('${row.startingAt} ${row.group.model}: ${row.usage.outputTokens}');
+}
+```
+
+Fill missing time buckets when comparing a dimensioned time series with a
+legacy bucketed report. Use `AnalyticsFilter.actorId` in place of legacy
+account or user ID filters. To reproduce an Enterprise per-user report, group
+by `actor` and filter `AnalyticsFilter.actorType` to `user_actor`. Read
+`row.group.actor?.emailAddress` for either the older `email` or the current
+`email_address` field. Cost values retain their original decimal strings.
+[Usage and cost migration guide](https://platform.claude.com/docs/en/manage-claude/usage-cost-analytics-api#migrate-from-the-usage-and-cost-api)
+
+---
+
 ## Migrating from v9.x to v10.0.0
 
 v10.0.0 adds document sources that reference uploaded files. `DocumentSource` is sealed, so exhaustive switches must handle the new `FileDocumentSource` variant.

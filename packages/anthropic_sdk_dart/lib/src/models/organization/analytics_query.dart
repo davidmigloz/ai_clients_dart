@@ -77,7 +77,10 @@ enum AnalyticsFilter {
   apiKeyId('api_key_ids[]'),
 
   /// Child organization UUID for an authorized parent-organization report.
-  organizationId('organization_ids[]');
+  organizationId('organization_ids[]'),
+
+  /// User ID for the legacy Enterprise reports that accept a user filter.
+  userId('user_ids[]');
 
   const AnalyticsFilter(this.key);
 
@@ -105,10 +108,7 @@ final class UsageCostAnalyticsQuery {
     this.excludeDeletedUsers,
     this.limit,
     this.page,
-  }) : filters = Map.unmodifiable({
-         for (final entry in filters.entries)
-           entry.key: List<String>.unmodifiable(entry.value),
-       }),
+  }) : filters = _snapshotFilters(filters),
        groupBy = List.unmodifiable(groupBy);
 
   /// Start of the range, inclusive.
@@ -143,6 +143,9 @@ final class UsageCostAnalyticsQuery {
 
   /// Returns the query using Anthropic's repeated-key syntax.
   Map<String, dynamic> toQuery() {
+    if (filters[AnalyticsFilter.userId]?.isNotEmpty ?? false) {
+      throw ArgumentError('Use the actorId filter for dimensioned analytics');
+    }
     if (timeBucketWidth != null && endingAt == null) {
       throw ArgumentError('endingAt is required with timeBucketWidth');
     }
@@ -175,3 +178,94 @@ final class UsageCostAnalyticsQuery {
     page: cursor,
   );
 }
+
+/// Options shared by legacy Enterprise usage and cost reports.
+@immutable
+final class LegacyEnterpriseAnalyticsQuery {
+  /// Creates a legacy Enterprise report query.
+  LegacyEnterpriseAnalyticsQuery({
+    required this.startingAt,
+    this.endingAt,
+    this.bucketWidth,
+    Map<AnalyticsFilter, List<String>> filters = const {},
+    List<String> groupBy = const [],
+    this.limit,
+    this.page,
+  }) : filters = _snapshotFilters(filters),
+       groupBy = List.unmodifiable(groupBy);
+
+  /// Start of the report range, inclusive.
+  final DateTime startingAt;
+
+  /// End of the report range, exclusive.
+  final DateTime? endingAt;
+
+  /// Granularity for bucketed or per-user reports, when specified.
+  final AnalyticsBucketWidth? bucketWidth;
+
+  /// Repeated filters accepted by the legacy endpoint.
+  final Map<AnalyticsFilter, List<String>> filters;
+
+  /// Dimensions to group by, using the endpoint's wire names.
+  final List<String> groupBy;
+
+  /// Maximum number of rows or buckets on a page.
+  final int? limit;
+
+  /// Opaque cursor from the same report and filter options.
+  final String? page;
+
+  /// Serializes this query using the legacy `bucket_width` parameter.
+  Map<String, dynamic> toQuery() {
+    const sharedFilters = {
+      AnalyticsFilter.product,
+      AnalyticsFilter.model,
+      AnalyticsFilter.contextWindow,
+      AnalyticsFilter.inferenceGeo,
+      AnalyticsFilter.speed,
+      AnalyticsFilter.slackChannelId,
+      AnalyticsFilter.claudeTagCategory,
+      AnalyticsFilter.claudeTagUserId,
+      AnalyticsFilter.rbacGroupId,
+      AnalyticsFilter.userId,
+    };
+    for (final filter in filters.entries) {
+      if (filter.value.isNotEmpty && !sharedFilters.contains(filter.key)) {
+        throw ArgumentError.value(
+          filter.key,
+          'filters',
+          'Filter not supported by this legacy report',
+        );
+      }
+    }
+    return {
+      'starting_at': startingAt.toUtc().toIso8601String(),
+      'ending_at': ?endingAt?.toUtc().toIso8601String(),
+      'bucket_width': ?bucketWidth?.value,
+      for (final entry in filters.entries)
+        if (entry.value.isNotEmpty) entry.key.key: entry.value,
+      if (groupBy.isNotEmpty) 'group_by[]': groupBy,
+      'limit': ?limit?.toString(),
+      'page': ?page,
+    };
+  }
+
+  /// Creates the same report query with a different page cursor.
+  LegacyEnterpriseAnalyticsQuery withPage(String? cursor) =>
+      LegacyEnterpriseAnalyticsQuery(
+        startingAt: startingAt,
+        endingAt: endingAt,
+        bucketWidth: bucketWidth,
+        filters: filters,
+        groupBy: groupBy,
+        limit: limit,
+        page: cursor,
+      );
+}
+
+Map<AnalyticsFilter, List<String>> _snapshotFilters(
+  Map<AnalyticsFilter, List<String>> filters,
+) => Map.unmodifiable({
+  for (final entry in filters.entries)
+    entry.key: List<String>.unmodifiable(entry.value),
+});
