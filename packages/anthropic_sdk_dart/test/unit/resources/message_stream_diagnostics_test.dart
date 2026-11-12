@@ -52,6 +52,8 @@ void main() {
           'request_id': body,
         });
         expect(error.responseMetadata?.statusCode, 200);
+        expect(error.responseMetadata?.bodyRequestId, body);
+        expect(error.responseMetadata?.requestId, expected);
         expect(error.responseMetadata?.headers, isNot(contains('set-cookie')));
         expect(error.responseMetadata?.bodyExcerpt, isEmpty);
         expect(transport.request?.headers['X-Request-ID'], 'client-only');

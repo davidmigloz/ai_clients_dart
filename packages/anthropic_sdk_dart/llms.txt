@@ -59,4 +59,4 @@
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/anthropic_sdk_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~67.8k tokens**
+**Total: ~67.9k tokens**

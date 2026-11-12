@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../errors/exceptions.dart';
 import '../models/messages/message.dart';
 import '../models/messages/message_create_request.dart';
 import '../models/streaming/message_stream_event.dart';
@@ -98,8 +97,8 @@ class MessagesResource extends ResourceBase with StreamingResource {
     final body = request.toJson();
     body['stream'] = true;
 
-    ResponseMetadata? responseMetadata;
-    final eventStream = postStream(
+    return postResourceEventStream<MessageStreamEvent>(
+      this,
       '/v1/messages',
       body: body,
       headers: _requestHeaders(
@@ -110,15 +109,8 @@ class MessagesResource extends ResourceBase with StreamingResource {
       validateHeaders: (headers) =>
           validateMessageRequestVersion(headers['anthropic-version'], body),
       abortTrigger: abortTrigger,
-      onResponse: (metadata) => responseMetadata = metadata,
-    );
-
-    return mapStream(
-      eventStream,
-      (event) => MessageStreamEvent.fromJson(
-        event,
-        responseMetadata: responseMetadata,
-      ),
+      decodeEvent: (event, metadata) =>
+          MessageStreamEvent.fromJson(event, responseMetadata: metadata),
       isTerminal: (event) => event is ErrorEvent,
     );
   }

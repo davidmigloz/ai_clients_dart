@@ -464,9 +464,7 @@ class BatchError {
 
   /// Creates a [BatchError] from a current envelope or legacy flat JSON.
   factory BatchError.fromJson(Map<String, dynamic> json) {
-    final error = json['type'] == 'error'
-        ? json['error'] as Map<String, dynamic>
-        : json;
+    final error = _errorPayload(json);
     return BatchError._(
       error['type'] as String,
       error['message'] as String,
@@ -474,18 +472,23 @@ class BatchError {
     );
   }
 
+  static Map<String, dynamic> _errorPayload(Map<String, dynamic> json) =>
+      switch (json) {
+        {'type': 'error', 'error': final Map<String, dynamic> error} => error,
+        _ => json,
+      };
+
   /// The request ID reported for the failed batch item.
   String? get requestId => switch (_raw) {
-    {'type': 'error', 'request_id': final String id}
-        when id.trim().isNotEmpty =>
-      id,
+    {'request_id': final String id} when id.trim().isNotEmpty => id,
     _ => null,
   };
 
   /// Provider error details, if available.
   Map<String, dynamic>? get details {
-    final error = _raw?['type'] == 'error' ? (_raw?['error']) : _raw;
-    return switch (error) {
+    final raw = _raw;
+    if (raw == null) return null;
+    return switch (_errorPayload(raw)) {
       {'details': final Map<String, dynamic> details} => details,
       _ => null,
     };

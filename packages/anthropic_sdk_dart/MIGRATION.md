@@ -388,9 +388,11 @@ final outcome = switch (batchItem.result) {
 };
 ```
 
-`finalMessage()` throws `MessageStreamFailure` on an in-band error. It remains
-a `StateError` and exposes the provider event, request ID and structured error
-code. The raw stream still emits an `ErrorEvent` before ending.
+`finalMessage()`, `collectText()`, the delta helpers, and `stopReason` report
+in-band API failures as `MessageStreamFailure`. The exception extends
+`StateError` and exposes the provider event, request ID and structured error
+code. Use raw events or `accumulate()` to inspect partial output and the
+terminal `ErrorEvent`.
 
 ---
 

@@ -70,6 +70,11 @@ class MessageStreamAccumulator {
   void add(MessageStreamEvent event) {
     switch (event) {
       case MessageStartEvent(:final message):
+        if (_id != null) {
+          throw StateError(
+            'Message stream contained multiple message_start events',
+          );
+        }
         _id = message.id;
         _model = message.model;
         _role = message.role;
@@ -103,6 +108,11 @@ class MessageStreamAccumulator {
         _hasContextManagement = hasContextManagement || _hasContextManagement;
         _mergeUsage(usage);
       case MessageStopEvent():
+        if (_id == null) {
+          throw StateError(
+            'Message stream received message_stop before message_start',
+          );
+        }
         _receivedStop = true;
       case PingEvent():
       case UnknownMessageStreamEvent():

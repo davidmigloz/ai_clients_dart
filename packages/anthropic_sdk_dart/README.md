@@ -255,8 +255,9 @@ Future<void> main() async {
 ```
 
 The stream emits a terminal `ErrorEvent` for an in-band API error. Its
-`requestId` and `errorCode` help diagnose the failure. `finalMessage()` throws
-`MessageStreamFailure` carrying the same event. Future event types arrive as
+`requestId` and `errorCode` help diagnose the failure. The `finalMessage()`,
+`collectText()`, and delta helpers raise `MessageStreamFailure` carrying the
+same event. Future event types arrive as
 `UnknownMessageStreamEvent` and retain their JSON payload.
 
 → [Full example](example/streaming_example.dart)

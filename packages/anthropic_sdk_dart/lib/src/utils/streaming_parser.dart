@@ -9,12 +9,16 @@ class SseParser {
   /// Parses a byte stream into SSE events.
   ///
   /// Returns a stream of parsed JSON objects from SSE data lines.
-  Stream<Map<String, dynamic>> parse(Stream<List<int>> bytes) {
+  /// [strictJson] reports malformed non-error frames as stream errors.
+  Stream<Map<String, dynamic>> parse(
+    Stream<List<int>> bytes, {
+    bool strictJson = false,
+  }) {
     StreamSubscription<String>? subscription;
     late StreamController<Map<String, dynamic>> controller;
     controller = StreamController<Map<String, dynamic>>(
       onListen: () {
-        final sink = _SseSink(controller.sink);
+        final sink = _SseSink(controller.sink, strictJson: strictJson);
         subscription = bytes
             .transform(utf8.decoder)
             .transform(const LineSplitter())
@@ -30,11 +34,12 @@ class SseParser {
 
 class _SseSink implements EventSink<String> {
   final EventSink<Map<String, dynamic>> _output;
+  final bool _strictJson;
   final _data = StringBuffer();
   String? _event;
   bool _closed = false;
 
-  _SseSink(this._output);
+  _SseSink(this._output, {required this._strictJson});
 
   @override
   void add(String line) {
@@ -43,7 +48,7 @@ class _SseSink implements EventSink<String> {
       _event = line.substring(6).trim();
     } else if (line.startsWith('data:')) {
       final data = line.substring(5).trim();
-      if (data == '[DONE]') {
+      if (data == '[DONE]' && _event != 'error') {
         close();
         return;
       }
@@ -56,16 +61,21 @@ class _SseSink implements EventSink<String> {
   }
 
   void _flush() {
-    if (_data.isEmpty) return;
+    if (_data.isEmpty && (!_strictJson || _event != 'error')) return;
     final data = _data.toString();
     _data.clear();
     try {
-      final json = jsonDecode(data) as Map<String, dynamic>;
+      final json = jsonDecode(data);
+      if (json is! Map<String, dynamic>) {
+        throw const FormatException('Expected a JSON object in the SSE frame');
+      }
       if (_event != null) json['_event'] = _event;
       _output.add(json);
-    } catch (_) {
+    } on FormatException catch (error, stackTrace) {
       if (_event == 'error') {
         _output.add({'_event': 'error', '_rawData': data, 'type': 'error'});
+      } else if (_strictJson) {
+        _output.addError(error, stackTrace);
       }
     }
   }
