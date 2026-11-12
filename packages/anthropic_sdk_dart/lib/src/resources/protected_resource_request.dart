@@ -12,9 +12,10 @@ import 'base_resource.dart';
 
 /// Sends a secret-bearing request without copying credentials or response
 /// bodies into diagnostics. Uses the normal request-scoped transport pipeline.
-Future<Object?> sendProtectedResourceRequest(
+Future<T> sendProtectedResourceRequest<T>(
   ResourceBase resource,
-  http.Request request, {
+  http.Request request,
+  T Function(Object?) decode, {
   String? bearerToken,
   Future<void>? abortTrigger,
   AnthropicException? Function(String, ResponseMetadata)? handleError,
@@ -49,11 +50,9 @@ Future<Object?> sendProtectedResourceRequest(
   watch.stop();
   final status = response.statusCode;
   if (status < 200 || status >= 300) {
-    credentials.addAll(
-      requestCredentialValues(response.request?.headers ?? const {}),
-    );
+    credentials.addAll(responseCredentialValues(response));
     final body = decodeApiErrorResponse(response);
-    final parsed = parseApiErrorBody(body);
+    final parsed = parseApiErrorBody(body, credentials: credentials);
     final metadata = createSafeResponseMetadata(
       statusCode: status,
       headers: response.headers,
@@ -61,7 +60,6 @@ Future<Object?> sendProtectedResourceRequest(
       bodyRequestId: parsed.requestId,
       credentials: credentials,
     );
-    final errorCode = redactCredentialEcho(parsed.errorCode, credentials);
     final specific = handleError?.call(
       redactApiErrorBody(body, credentials),
       metadata,
@@ -71,29 +69,33 @@ Future<Object?> sendProtectedResourceRequest(
     throw switch (status) {
       401 => AuthenticationException(
         message: message,
-        errorCode: errorCode,
+        errorCode: parsed.errorCode,
         responseMetadata: metadata,
       ),
       429 => RateLimitException(
         statusCode: status,
         message: message,
-        errorCode: errorCode,
+        errorCode: parsed.errorCode,
         responseMetadata: metadata,
         retryAfter: retryAfterTime(metadata.headers),
       ),
       _ => ApiException(
         statusCode: status,
         message: message,
-        errorCode: errorCode,
+        errorCode: parsed.errorCode,
         responseMetadata: metadata,
       ),
     };
   }
   try {
-    return jsonDecode(response.body);
-  } on FormatException {
-    // A decoder may attach the entire response body to the exception.
-    throw const FormatException('Invalid JSON in protected API response');
+    return decode(jsonDecode(response.body));
+  } on Object catch (error, stackTrace) {
+    if (error is! FormatException && error is! TypeError) rethrow;
+    // Both JSON and model decoding can attach newly issued secrets.
+    Error.throwWithStackTrace(
+      const FormatException('Invalid JSON in protected API response'),
+      stackTrace,
+    );
   }
 }
 

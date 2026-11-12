@@ -59,9 +59,7 @@ class MessageBatchesResource extends ResourceBase with StreamingResource {
       abortTrigger: abortTrigger,
     );
 
-    return MessageBatch.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, MessageBatch.fromJson);
   }
 
   /// Lists message batches.
@@ -101,9 +99,7 @@ class MessageBatchesResource extends ResourceBase with StreamingResource {
       abortTrigger: abortTrigger,
     );
 
-    return MessageBatchListResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, MessageBatchListResponse.fromJson);
   }
 
   /// Retrieves a specific message batch.
@@ -131,9 +127,7 @@ class MessageBatchesResource extends ResourceBase with StreamingResource {
       abortTrigger: abortTrigger,
     );
 
-    return MessageBatch.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, MessageBatch.fromJson);
   }
 
   /// Cancels a message batch.
@@ -165,9 +159,7 @@ class MessageBatchesResource extends ResourceBase with StreamingResource {
       abortTrigger: abortTrigger,
     );
 
-    return MessageBatch.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, MessageBatch.fromJson);
   }
 
   /// Deletes a message batch.
@@ -197,9 +189,7 @@ class MessageBatchesResource extends ResourceBase with StreamingResource {
       abortTrigger: abortTrigger,
     );
 
-    return DeletedMessageBatch.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, DeletedMessageBatch.fromJson);
   }
 
   /// Streams batch results.

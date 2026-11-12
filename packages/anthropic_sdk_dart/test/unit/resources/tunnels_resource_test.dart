@@ -36,6 +36,28 @@ const Map<String, Object?> _token = {
 };
 
 void main() {
+  test('malformed tunnel token fields cannot echo the issued token', () async {
+    final client = AnthropicClient(
+      httpClient: MockClient(
+        (_) async => _json({..._token, 'type': _tunnelSecret}),
+      ),
+    );
+    addTearDown(client.close);
+
+    await expectLater(
+      client.tunnels.withToken(_wif).revealToken(_tunnelId),
+      throwsA(
+        isA<FormatException>()
+            .having((error) => error.source, 'decoder source', isNull)
+            .having(
+              (error) => error.toString(),
+              'diagnostic',
+              isNot(contains(_tunnelSecret)),
+            ),
+      ),
+    );
+  });
+
   test(
     'every tunnel and certificate route sends scoped credentials and beta',
     () async {

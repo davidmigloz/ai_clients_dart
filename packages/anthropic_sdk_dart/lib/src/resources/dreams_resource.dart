@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../errors/response_error.dart';
 import '../models/dreams/create_dream_request.dart';
 import '../models/dreams/dream.dart';
 import '../models/dreams/dream_status.dart';
@@ -51,7 +52,7 @@ class DreamsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Dream.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Dream.fromJson);
   }
 
   /// Lists dreams.
@@ -99,9 +100,7 @@ class DreamsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return ListDreamsResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, ListDreamsResponse.fromJson);
   }
 
   /// Retrieves a specific dream.
@@ -124,7 +123,7 @@ class DreamsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Dream.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Dream.fromJson);
   }
 
   /// Archives a dream.
@@ -149,7 +148,7 @@ class DreamsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Dream.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Dream.fromJson);
   }
 
   /// Cancels a pending or running dream.
@@ -174,6 +173,6 @@ class DreamsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Dream.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Dream.fromJson);
   }
 }

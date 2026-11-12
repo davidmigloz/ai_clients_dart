@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../errors/response_error.dart';
 import '../models/managed_agents/environments/agent_environment.dart';
 import '../models/managed_agents/environments/environment_params.dart';
 import '../utils/path_segment.dart';
@@ -169,6 +170,6 @@ class EnvironmentsResource extends ResourceBase {
       request,
       abortTrigger: abortTrigger,
     );
-    return parse(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, parse);
   }
 }

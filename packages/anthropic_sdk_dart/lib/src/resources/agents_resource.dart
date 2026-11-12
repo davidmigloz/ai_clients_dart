@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../errors/response_error.dart';
 import '../models/managed_agents/agents/agent.dart';
 import '../models/managed_agents/agents/agent_list_response.dart';
 import '../models/managed_agents/agents/create_agent_params.dart';
@@ -48,7 +49,7 @@ class AgentsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Agent.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Agent.fromJson);
   }
 
   /// Lists agents.
@@ -91,9 +92,7 @@ class AgentsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return ListAgentsResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, ListAgentsResponse.fromJson);
   }
 
   /// Retrieves a specific agent.
@@ -124,7 +123,7 @@ class AgentsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Agent.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Agent.fromJson);
   }
 
   /// Updates an agent.
@@ -154,7 +153,7 @@ class AgentsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Agent.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Agent.fromJson);
   }
 
   /// Archives an agent.
@@ -179,7 +178,7 @@ class AgentsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Agent.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Agent.fromJson);
   }
 
   /// Lists versions of an agent.
@@ -215,8 +214,6 @@ class AgentsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return ListAgentVersionsResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, ListAgentVersionsResponse.fromJson);
   }
 }

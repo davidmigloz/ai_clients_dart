@@ -1,7 +1,6 @@
-import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 
+import '../errors/response_error.dart';
 import '../models/managed_agents/deployments/deployment_run.dart';
 import '../models/managed_agents/deployments/deployment_run_list_response.dart';
 import '../models/managed_agents/deployments/trigger_type.dart';
@@ -48,9 +47,7 @@ class DeploymentRunsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return DeploymentRun.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, DeploymentRun.fromJson);
   }
 
   /// Lists deployment runs.
@@ -105,8 +102,6 @@ class DeploymentRunsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return DeploymentRunListResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, DeploymentRunListResponse.fromJson);
   }
 }

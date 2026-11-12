@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../errors/response_error.dart';
 import '../models/managed_agents/deployments/create_deployment_params.dart';
 import '../models/managed_agents/deployments/deployment.dart';
 import '../models/managed_agents/deployments/deployment_list_response.dart';
@@ -50,9 +51,7 @@ class DeploymentsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Deployment.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, Deployment.fromJson);
   }
 
   /// Lists deployments.
@@ -101,9 +100,7 @@ class DeploymentsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return DeploymentListResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, DeploymentListResponse.fromJson);
   }
 
   /// Retrieves a specific deployment.
@@ -129,9 +126,7 @@ class DeploymentsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Deployment.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, Deployment.fromJson);
   }
 
   /// Updates a deployment.
@@ -161,9 +156,7 @@ class DeploymentsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Deployment.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, Deployment.fromJson);
   }
 
   /// Archives a deployment.
@@ -191,9 +184,7 @@ class DeploymentsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Deployment.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, Deployment.fromJson);
   }
 
   /// Pauses a deployment, halting its schedule from firing runs.
@@ -221,9 +212,7 @@ class DeploymentsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Deployment.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, Deployment.fromJson);
   }
 
   /// Unpauses a deployment, resuming its schedule.
@@ -251,9 +240,7 @@ class DeploymentsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Deployment.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, Deployment.fromJson);
   }
 
   /// Triggers a manual run of the deployment.
@@ -281,8 +268,6 @@ class DeploymentsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return DeploymentRun.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, DeploymentRun.fromJson);
   }
 }

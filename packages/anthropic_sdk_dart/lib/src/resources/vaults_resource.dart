@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../errors/response_error.dart';
 import '../models/managed_agents/vaults/create_vault_params.dart';
 import '../models/managed_agents/vaults/update_vault_params.dart';
 import '../models/managed_agents/vaults/vault.dart';
@@ -60,7 +61,7 @@ class VaultsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Vault.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Vault.fromJson);
   }
 
   /// Lists vaults.
@@ -97,9 +98,7 @@ class VaultsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return ListVaultsResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, ListVaultsResponse.fromJson);
   }
 
   /// Retrieves a specific vault.
@@ -122,7 +121,7 @@ class VaultsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Vault.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Vault.fromJson);
   }
 
   /// Updates a vault.
@@ -152,7 +151,7 @@ class VaultsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Vault.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Vault.fromJson);
   }
 
   /// Deletes a vault.
@@ -178,9 +177,7 @@ class VaultsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return DeletedVault.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, DeletedVault.fromJson);
   }
 
   /// Archives a vault.
@@ -205,6 +202,6 @@ class VaultsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return Vault.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Vault.fromJson);
   }
 }

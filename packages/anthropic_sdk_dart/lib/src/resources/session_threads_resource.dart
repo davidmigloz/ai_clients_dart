@@ -1,7 +1,6 @@
-import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 
+import '../errors/response_error.dart';
 import '../models/managed_agents/sessions/session.dart' show SessionStatus;
 import '../models/managed_agents/sessions/session_thread.dart';
 import '../models/managed_agents/sessions/session_thread_list_response.dart';
@@ -66,9 +65,7 @@ class SessionThreadsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return SessionThread.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, SessionThread.fromJson);
   }
 
   /// Lists threads under the session.
@@ -109,9 +106,7 @@ class SessionThreadsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return ListSessionThreadsResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, ListSessionThreadsResponse.fromJson);
   }
 
   /// Archives a thread. Returns the updated thread with `archivedAt` set.
@@ -136,8 +131,6 @@ class SessionThreadsResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return SessionThread.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, SessionThread.fromJson);
   }
 }

@@ -87,6 +87,7 @@ abstract base class ProviderTransport extends http.BaseClient {
           ..bodyBytes = prepared.body;
     final bodyCredentials = requestDiagnosticCredentials(request);
     withRequestDiagnosticCredentials(outbound, bodyCredentials);
+    withRequestCredentialObserver(outbound, requestCredentialObserver(request));
     final credentials = requestCredentialValues(outbound.headers)
       ..addAll(bodyCredentials);
     final http.StreamedResponse response;
@@ -111,7 +112,7 @@ abstract base class ProviderTransport extends http.BaseClient {
     final adapted = adaptResponse(prepared, response);
     // Borrowed transports may omit request metadata. Record the exact sent
     // request so response diagnostics can redact late-bound cloud credentials.
-    return http.StreamedResponse(
+    final wrapped = http.StreamedResponse(
       adapted.stream.transform(
         StreamTransformer.fromHandlers(
           handleError:
@@ -137,6 +138,10 @@ abstract base class ProviderTransport extends http.BaseClient {
       isRedirect: adapted.isRedirect,
       persistentConnection: adapted.persistentConnection,
       reasonPhrase: adapted.reasonPhrase,
+    );
+    return withResponseDiagnosticCredentials(
+      wrapped,
+      responseCredentialValues(response)..addAll(credentials),
     );
   }
 

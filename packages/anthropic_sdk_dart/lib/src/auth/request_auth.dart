@@ -74,6 +74,8 @@ final _awsSignature = RegExp(r'\bSignature=([a-fA-F0-9]{64})\b');
 
 // Transport-only metadata. Body credentials never become HTTP headers.
 final _requestDiagnosticCredentials = Expando<Set<String>>();
+final _responseDiagnosticCredentials = Expando<Set<String>>();
+final _requestCredentialObservers = Expando<void Function(Set<String>)>();
 
 /// Credentials supplied in the request body and withheld from diagnostics.
 Set<String> requestDiagnosticCredentials(http.BaseRequest request) =>
@@ -88,6 +90,43 @@ T withRequestDiagnosticCredentials<T extends http.BaseRequest>(
     _requestDiagnosticCredentials[request] = credentials;
   }
   return request;
+}
+
+/// Attaches a logical request's credential observer to one transport attempt.
+T withRequestCredentialObserver<T extends http.BaseRequest>(
+  T request,
+  void Function(Set<String>)? observe,
+) {
+  if (observe != null) _requestCredentialObservers[request] = observe;
+  return request;
+}
+
+/// Returns the observer to carry through redirects and provider adaptation.
+void Function(Set<String>)? requestCredentialObserver(
+  http.BaseRequest request,
+) => _requestCredentialObservers[request];
+
+/// Combines credentials observed at dispatch with optional response metadata.
+Set<String> responseCredentialValues(http.BaseResponse response) => {
+  ...?_responseDiagnosticCredentials[response],
+  if (response.request case final request?) ...{
+    ...requestCredentialValues(request.headers),
+    ...requestDiagnosticCredentials(request),
+  },
+};
+
+/// Records effective credentials while retaining the transport's response.
+T withResponseDiagnosticCredentials<T extends http.BaseResponse>(
+  T response,
+  Set<String> credentials,
+) {
+  if (credentials.isNotEmpty) {
+    _responseDiagnosticCredentials[response] = {
+      ...?_responseDiagnosticCredentials[response],
+      ...credentials,
+    };
+  }
+  return response;
 }
 
 void _checkWorkspace(Map<String, String> headers) {

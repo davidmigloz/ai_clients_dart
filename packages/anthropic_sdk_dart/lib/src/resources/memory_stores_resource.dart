@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../errors/response_error.dart';
 import '../models/managed_agents/memory_stores/create_memory_store_params.dart';
 import '../models/managed_agents/memory_stores/memory_store.dart';
 import '../models/managed_agents/memory_stores/memory_store_list_response.dart';
@@ -74,9 +75,7 @@ class MemoryStoresResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return MemoryStore.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, MemoryStore.fromJson);
   }
 
   /// Lists memory stores.
@@ -119,9 +118,7 @@ class MemoryStoresResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return MemoryStoreListResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, MemoryStoreListResponse.fromJson);
   }
 
   /// Retrieves a single memory store.
@@ -147,9 +144,7 @@ class MemoryStoresResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return MemoryStore.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, MemoryStore.fromJson);
   }
 
   /// Updates a memory store.
@@ -179,9 +174,7 @@ class MemoryStoresResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return MemoryStore.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, MemoryStore.fromJson);
   }
 
   /// Deletes a memory store.
@@ -207,9 +200,7 @@ class MemoryStoresResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return DeletedMemoryStore.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, DeletedMemoryStore.fromJson);
   }
 
   /// Archives a memory store.
@@ -237,8 +228,6 @@ class MemoryStoresResource extends ResourceBase {
       abortTrigger: abortTrigger,
     );
 
-    return MemoryStore.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, MemoryStore.fromJson);
   }
 }

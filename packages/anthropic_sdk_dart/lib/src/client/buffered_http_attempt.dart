@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
+import '../auth/request_auth.dart';
 import '../errors/exceptions.dart';
 
 /// Sends one buffered attempt, with a deadline covering headers and body.
@@ -89,14 +90,17 @@ class _BufferedAttempt {
         onDone: () {
           if (_result.isCompleted) return;
           _result.complete(
-            http.Response.bytes(
-              bytes.takeBytes(),
-              response.statusCode,
-              request: response.request,
-              headers: response.headers,
-              isRedirect: response.isRedirect,
-              persistentConnection: response.persistentConnection,
-              reasonPhrase: response.reasonPhrase,
+            withResponseDiagnosticCredentials(
+              http.Response.bytes(
+                bytes.takeBytes(),
+                response.statusCode,
+                request: response.request,
+                headers: response.headers,
+                isRedirect: response.isRedirect,
+                persistentConnection: response.persistentConnection,
+                reasonPhrase: response.reasonPhrase,
+              ),
+              responseCredentialValues(response),
             ),
           );
         },

@@ -31,9 +31,7 @@ Future<http.Response> sendResourceRequest(
     correlationId: request.headers['x-request-id'] ?? generateRequestId(),
   );
   if (response.statusCode >= 400) {
-    credentials.addAll(
-      requestCredentialValues(response.request?.headers ?? const {}),
-    );
+    credentials.addAll(responseCredentialValues(response));
     final body = decodeApiErrorResponse(response);
     throw createResourceException(
       response.statusCode,
