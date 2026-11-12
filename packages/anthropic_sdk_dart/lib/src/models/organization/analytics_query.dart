@@ -269,3 +269,64 @@ Map<AnalyticsFilter, List<String>> _snapshotFilters(
   for (final entry in filters.entries)
     entry.key: List<String>.unmodifiable(entry.value),
 });
+
+/// Day or date-range options for Enterprise activity reports.
+///
+/// Dates are UTC calendar dates in YYYY-MM-DD form. Use [date] for one day
+/// or [startingDate] and an optional exclusive [endingDate] for a rollup.
+@immutable
+final class AnalyticsActivityQuery {
+  /// Creates an activity query.
+  AnalyticsActivityQuery({
+    this.date,
+    this.startingDate,
+    this.endingDate,
+    List<String> filters = const [],
+    List<String> groupBy = const [],
+    this.orderBy,
+    this.order,
+    this.limit,
+    this.page,
+  }) : filters = List.unmodifiable(filters),
+       groupBy = List.unmodifiable(groupBy);
+
+  /// The UTC day to report.
+  final String? date;
+
+  /// Inclusive start of a range.
+  final String? startingDate;
+
+  /// Exclusive end of a range.
+  final String? endingDate;
+
+  /// Repeated dimension filters, such as `rbac_group_id:rbac_group_example`.
+  final List<String> filters;
+
+  /// Dimensions supported by the selected activity endpoint.
+  final List<String> groupBy;
+
+  /// Endpoint-specific sort metric.
+  final String? orderBy;
+
+  /// Sort direction, `asc` or `desc`.
+  final String? order;
+
+  /// Maximum number of rows per page.
+  final int? limit;
+
+  /// Cursor from a previous page of the same query.
+  final String? page;
+
+  /// Creates a copy with a different cursor.
+  AnalyticsActivityQuery withPage(String? cursor) => AnalyticsActivityQuery(
+    date: date,
+    startingDate: startingDate,
+    endingDate: endingDate,
+    filters: filters,
+    groupBy: groupBy,
+    orderBy: orderBy,
+    order: order,
+    limit: limit,
+    page: cursor,
+  );
+}

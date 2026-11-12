@@ -179,6 +179,145 @@ final class OrganizationAnalyticsResource {
     'page': ?page,
   }, abortTrigger);
 
+  /// Gets daily activity summaries, including Claude Tag counts when available.
+  ///
+  /// The requested range is inclusive at [startingDate] and exclusive at
+  /// [endingDate]. Use a Claude Enterprise key with `read:analytics`.
+  Future<AnalyticsActivityPage<AnalyticsSingleDayActivitySummary>> summaries({
+    required String startingDate,
+    String? endingDate,
+    List<String> filters = const [],
+    int? limit,
+    String? page,
+    List<String> betas = const [],
+    Future<void>? abortTrigger,
+  }) => _activityReport(
+    '/analytics/summaries',
+    AnalyticsSingleDayActivitySummary.fromJson,
+    _activityQuery(
+      AnalyticsActivityQuery(
+        startingDate: startingDate,
+        endingDate: endingDate,
+        filters: filters,
+        limit: limit,
+        page: page,
+      ),
+    ),
+    betas,
+    abortTrigger,
+    allowLegacySummaries: true,
+  );
+
+  /// Lists activity by Enterprise user or grouped dimensions.
+  Future<AnalyticsActivityPage<AnalyticsUserActivity>> users(
+    AnalyticsActivityQuery query, {
+    List<String> betas = const [],
+    Future<void>? abortTrigger,
+  }) => _activityReport(
+    '/analytics/users',
+    AnalyticsUserActivity.fromJson,
+    _activityQuery(query),
+    betas,
+    abortTrigger,
+  );
+
+  /// Lists Chat project activity.
+  Future<AnalyticsActivityPage<AnalyticsProjectActivity>> projects(
+    AnalyticsActivityQuery query, {
+    List<String> betas = const [],
+    Future<void>? abortTrigger,
+  }) => _activityReport(
+    '/analytics/apps/chat/projects',
+    AnalyticsProjectActivity.fromJson,
+    _activityQuery(query),
+    betas,
+    abortTrigger,
+  );
+
+  /// Lists skill activity and attributed cost.
+  Future<AnalyticsActivityPage<AnalyticsSkillActivity>> skills(
+    AnalyticsActivityQuery query, {
+    List<String> betas = const [],
+    Future<void>? abortTrigger,
+  }) => _activityReport(
+    '/analytics/skills',
+    AnalyticsSkillActivity.fromJson,
+    _activityQuery(query),
+    betas,
+    abortTrigger,
+  );
+
+  /// Lists connector activity and managed-auth attribution.
+  Future<AnalyticsActivityPage<AnalyticsConnectorActivity>> connectors(
+    AnalyticsActivityQuery query, {
+    List<String> betas = const [],
+    Future<void>? abortTrigger,
+  }) => _activityReport(
+    '/analytics/connectors',
+    AnalyticsConnectorActivity.fromJson,
+    _activityQuery(query),
+    betas,
+    abortTrigger,
+  );
+
+  /// Lists plugin installation and invocation activity.
+  Future<AnalyticsActivityPage<AnalyticsPluginActivity>> plugins(
+    AnalyticsActivityQuery query, {
+    List<String> betas = const [],
+    Future<void>? abortTrigger,
+  }) => _activityReport(
+    '/analytics/plugins',
+    AnalyticsPluginActivity.fromJson,
+    _activityQuery(query),
+    betas,
+    abortTrigger,
+  );
+
+  /// Lists artifacts created on the UTC [date].
+  Future<AnalyticsActivityPage<AnalyticsArtifactActivity>> artifacts({
+    required String date,
+    List<String> filters = const [],
+    List<String> groupBy = const [],
+    int? limit,
+    String? page,
+    List<String> betas = const [],
+    Future<void>? abortTrigger,
+  }) => _activityReport(
+    '/analytics/artifacts',
+    AnalyticsArtifactActivity.fromJson,
+    _activityQuery(
+      AnalyticsActivityQuery(
+        date: date,
+        filters: filters,
+        groupBy: groupBy,
+        limit: limit,
+        page: page,
+      ),
+    ),
+    betas,
+    abortTrigger,
+  );
+
+  Future<AnalyticsActivityPage<T>> _activityReport<T>(
+    String path,
+    T Function(Map<String, dynamic>) decode,
+    Map<String, dynamic> query,
+    List<String> betas,
+    Future<void>? abortTrigger, {
+    bool allowLegacySummaries = false,
+  }) => _transport.send(
+    'GET',
+    path,
+    (json) => AnalyticsActivityPage.fromJson(
+      json,
+      decode,
+      allowLegacySummaries: allowLegacySummaries,
+    ),
+    query: query,
+    beta: betas.isEmpty ? null : betas.join(','),
+    abortTrigger: abortTrigger,
+  );
+
   Future<AnalyticsReportPage<T>> _report<T>(
     String path,
     T Function(Map<String, dynamic>) decode,
@@ -219,6 +358,28 @@ Map<String, dynamic> _legacyUserQuery(
     'order_by': ?orderBy,
     'order': ?order,
     'exclude_deleted_users': ?excludeDeletedUsers?.toString(),
+  };
+}
+
+Map<String, dynamic> _activityQuery(AnalyticsActivityQuery query) {
+  if (query.date != null && query.startingDate != null) {
+    throw ArgumentError('Specify either date or startingDate');
+  }
+  if (query.endingDate != null && query.startingDate == null) {
+    throw ArgumentError('endingDate requires startingDate');
+  }
+  return {
+    if (query.date case final date?) 'date': _utcDay(date, 'date'),
+    if (query.startingDate case final start?)
+      'starting_date': _utcDay(start, 'startingDate'),
+    if (query.endingDate case final end?)
+      'ending_date': _utcDay(end, 'endingDate'),
+    if (query.filters.isNotEmpty) 'filter[]': query.filters,
+    if (query.groupBy.isNotEmpty) 'group_by[]': query.groupBy,
+    'order_by': ?query.orderBy,
+    'order': ?query.order,
+    'limit': ?query.limit?.toString(),
+    'page': ?query.page,
   };
 }
 

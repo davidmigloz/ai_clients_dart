@@ -685,6 +685,29 @@ by `actor` and filter `AnalyticsFilter.actorType` to `user_actor`. Read
 `email_address` field. Cost values retain their original decimal strings.
 [Usage and cost migration guide](https://platform.claude.com/docs/en/manage-claude/usage-cost-analytics-api#migrate-from-the-usage-and-cost-api)
 
+### Read Enterprise summary rows from `data`
+
+The `2026-10-21` API version returns Enterprise summaries under `data` and
+includes a nullable `next_page` cursor. `AnalyticsActivityPage.data` accepts
+both the older `summaries` envelope and the current `data` envelope. If you
+need the provider's original field names, use `page.toJson()`.
+
+```dart
+// Before, when decoding the older HTTP response directly.
+final summaryRows = oldResponseJson['summaries'] as List<Object?>;
+
+// After, the typed accessor works with either API version.
+final page = await client.organization.analytics.summaries(
+  startingDate: '2026-10-01',
+  endingDate: '2026-10-02',
+);
+for (final summary in page.data) {
+  print(summary.claudeTagDailyActiveUserCount);
+}
+```
+
+[Claude API version migration](https://platform.claude.com/docs/en/api/migration-2026-10-21)
+
 ---
 
 ## Migrating from v9.x to v10.0.0
