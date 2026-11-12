@@ -720,22 +720,9 @@ class MigratedSkillContractTests(unittest.TestCase):
             "name": "BatchJobStatus",
         }])
 
-    def _assert_anthropic_type_scoped_fallback_gap(self, exit_code: int, payload: dict) -> None:
-        self.assertEqual(exit_code, 1)
-        self.assertEqual(payload["summary"]["failing_checks"], ["implementation"])
-        errors = [issue for issue in payload["results"]["implementation"]["issues"] if issue["level"] == "error"]
-        self.assertEqual(errors, [{
-            "file": "lib/src/models/metadata/stop_reason.dart",
-            "level": "error",
-            "message": "Enum fallback value ('unknown' or 'unspecified') not found",
-            "name": "StopReason",
-        }])
-
     def test_real_implementation_verify_reports_skip_summary(self) -> None:
         for config_dir in CONFIG_DIRS:
             label = _config_label(config_dir)
-            if label in self._KNOWN_VERIFY_FAILURES and label != "anthropic_sdk_dart/openapi-anthropic":
-                continue
             exit_code, payload = command_verify(
                 type(
                     "Args",
@@ -755,8 +742,6 @@ class MigratedSkillContractTests(unittest.TestCase):
                 self._assert_google_untracked_enum_gap(exit_code, payload)
             elif label == "mistralai_dart/openapi-mistral":
                 self._assert_mistral_untracked_enum_gap(exit_code, payload)
-            elif label == "anthropic_sdk_dart/openapi-anthropic":
-                self._assert_anthropic_type_scoped_fallback_gap(exit_code, payload)
             else:
                 self.assertEqual(exit_code, 0, msg=f"{config_dir}: {payload['summary']}")
             result = payload["results"]["implementation"]
@@ -782,8 +767,6 @@ class MigratedSkillContractTests(unittest.TestCase):
     def test_real_docs_verify_reports_exclusion_summary(self) -> None:
         for config_dir in CONFIG_DIRS:
             label = _config_label(config_dir)
-            if label in self._KNOWN_VERIFY_FAILURES:
-                continue
             exit_code, payload = command_verify(
                 type(
                     "Args",
@@ -807,13 +790,6 @@ class MigratedSkillContractTests(unittest.TestCase):
             if result["coverage_summary"]["partial_coverage"]:
                 self.assertIn("docs", payload["summary"]["warning_checks"], msg=f"{config_dir}: missing docs warning summary")
 
-    # Known implementation/docs issues from main that cause verify failures:
-    # - anthropic_sdk_dart: implementation errors in beta resources, README missing
-    #   sessionEvents/vaultCredentials, and example files missing for several resources
-    _KNOWN_VERIFY_FAILURES = {
-        "anthropic_sdk_dart/openapi-anthropic",
-    }
-
     def test_full_verify_passes_for_all_real_skills(self) -> None:
         for config_dir in CONFIG_DIRS:
             label = _config_label(config_dir)
@@ -836,10 +812,6 @@ class MigratedSkillContractTests(unittest.TestCase):
                 self._assert_google_untracked_enum_gap(exit_code, payload)
             elif label == "mistralai_dart/openapi-mistral":
                 self._assert_mistral_untracked_enum_gap(exit_code, payload)
-            elif label == "anthropic_sdk_dart/openapi-anthropic":
-                self._assert_anthropic_type_scoped_fallback_gap(exit_code, payload)
-            elif label in self._KNOWN_VERIFY_FAILURES:
-                self.assertNotEqual(exit_code, 0, msg=f"{label}: expected known failure but verify passed — remove from _KNOWN_VERIFY_FAILURES")
             else:
                 self.assertEqual(exit_code, 0, msg=f"{config_dir}: {payload['summary']}")
 

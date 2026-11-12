@@ -32,6 +32,11 @@ class Message {
   /// The reason the model stopped generating.
   final StopReason? stopReason;
 
+  final String? _rawStopReason;
+
+  /// The original provider stop reason, including an unfamiliar value.
+  String? get stopReasonValue => _rawStopReason ?? stopReason?.value;
+
   /// Structured information about why model output stopped.
   ///
   /// This is non-null when [stopReason] is [StopReason.refusal].
@@ -80,11 +85,34 @@ class Message {
     this.contextManagement,
     bool hasContextManagement = false,
     this.inputTransformations,
-  }) : hasContextManagement = hasContextManagement || contextManagement != null;
+  }) : _rawStopReason = null,
+       hasContextManagement = hasContextManagement || contextManagement != null;
+
+  const Message._({
+    required this.id,
+    this.type = 'message',
+    this.role = MessageRole.assistant,
+    required this.content,
+    required this.model,
+    this.stopReason,
+    String? stopReasonValue,
+    this.stopDetails,
+    this.stopSequence,
+    required this.usage,
+    this.container,
+    this.diagnostics,
+    this.contextManagement,
+    bool hasContextManagement = false,
+    this.inputTransformations,
+  }) : _rawStopReason = stopReason == StopReason.unknown
+           ? stopReasonValue
+           : null,
+       hasContextManagement = hasContextManagement || contextManagement != null;
 
   /// Creates a [Message] from JSON.
   factory Message.fromJson(Map<String, dynamic> json) {
-    return Message(
+    final stopReasonValue = json['stop_reason'] as String?;
+    return Message._(
       id: json['id'] as String,
       type: json['type'] as String? ?? 'message',
       role: json['role'] != null
@@ -94,9 +122,10 @@ class Message {
           .map((e) => ContentBlock.fromJson(e as Map<String, dynamic>))
           .toList(),
       model: json['model'] as String,
-      stopReason: json['stop_reason'] != null
-          ? StopReason.fromJson(json['stop_reason'] as String)
-          : null,
+      stopReason: stopReasonValue == null
+          ? null
+          : StopReason.fromJson(stopReasonValue),
+      stopReasonValue: stopReasonValue,
       stopDetails: json['stop_details'] != null
           ? RefusalStopDetails.fromJson(
               json['stop_details'] as Map<String, dynamic>,
@@ -129,7 +158,7 @@ class Message {
     'role': role.toJson(),
     'content': content.map((e) => e.toJson()).toList(),
     'model': model,
-    if (stopReason != null) 'stop_reason': stopReason!.toJson(),
+    'stop_reason': ?stopReasonValue,
     if (stopDetails != null) 'stop_details': stopDetails!.toJson(),
     if (stopSequence != null) 'stop_sequence': stopSequence,
     'usage': usage.toJson(),
@@ -143,6 +172,9 @@ class Message {
   };
 
   /// Creates a copy with replaced values.
+  ///
+  /// A supplied [stopReasonValue] takes precedence over [stopReason]. Pass a
+  /// string to decode the reason or null to clear it.
   Message copyWith({
     String? id,
     String? type,
@@ -150,6 +182,7 @@ class Message {
     List<ContentBlock>? content,
     String? model,
     Object? stopReason = unsetCopyWithValue,
+    Object? stopReasonValue = unsetCopyWithValue,
     Object? stopDetails = unsetCopyWithValue,
     Object? stopSequence = unsetCopyWithValue,
     Usage? usage,
@@ -158,15 +191,23 @@ class Message {
     Object? contextManagement = unsetCopyWithValue,
     Object? inputTransformations = unsetCopyWithValue,
   }) {
-    return Message(
+    final replaceWireReason = !identical(stopReasonValue, unsetCopyWithValue);
+    final replaceTypedReason = !identical(stopReason, unsetCopyWithValue);
+    final wireReason = replaceWireReason ? stopReasonValue as String? : null;
+    return Message._(
       id: id ?? this.id,
       type: type ?? this.type,
       role: role ?? this.role,
       content: content ?? this.content,
       model: model ?? this.model,
-      stopReason: stopReason == unsetCopyWithValue
-          ? this.stopReason
-          : stopReason as StopReason?,
+      stopReason: replaceWireReason
+          ? (wireReason == null ? null : StopReason.fromJson(wireReason))
+          : replaceTypedReason
+          ? stopReason as StopReason?
+          : this.stopReason,
+      stopReasonValue: replaceWireReason || replaceTypedReason
+          ? wireReason
+          : _rawStopReason,
       stopDetails: stopDetails == unsetCopyWithValue
           ? this.stopDetails
           : stopDetails as RefusalStopDetails?,
@@ -203,6 +244,7 @@ class Message {
           listsEqual(content, other.content) &&
           model == other.model &&
           stopReason == other.stopReason &&
+          stopReasonValue == other.stopReasonValue &&
           stopDetails == other.stopDetails &&
           stopSequence == other.stopSequence &&
           usage == other.usage &&
@@ -220,6 +262,7 @@ class Message {
     listHash(content),
     model,
     stopReason,
+    stopReasonValue,
     stopDetails,
     stopSequence,
     usage,
@@ -233,7 +276,7 @@ class Message {
   @override
   String toString() =>
       'Message(id: $id, type: $type, role: $role, '
-      'content: $content, model: $model, stopReason: $stopReason, '
+      'content: $content, model: $model, stopReason: $stopReasonValue, '
       'stopDetails: $stopDetails, stopSequence: $stopSequence, '
       'usage: $usage, container: $container, diagnostics: $diagnostics, '
       'contextManagement: $contextManagement, '

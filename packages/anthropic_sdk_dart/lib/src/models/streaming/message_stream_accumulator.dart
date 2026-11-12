@@ -55,6 +55,7 @@ class MessageStreamAccumulator {
   MessageRole? _role;
   Usage? _usage;
   StopReason? _stopReason;
+  String? _stopReasonValue;
   RefusalStopDetails? _stopDetails;
   String? _stopSequence;
   Container? _container;
@@ -84,6 +85,10 @@ class MessageStreamAccumulator {
         _id = message.id;
         _model = message.model;
         _role = message.role;
+        _stopReason = message.stopReason;
+        _stopReasonValue = message.stopReasonValue;
+        _stopDetails = message.stopDetails;
+        _stopSequence = message.stopSequence;
         _usage = message.usage;
         _container = message.container;
         _diagnostics = message.diagnostics;
@@ -105,9 +110,12 @@ class MessageStreamAccumulator {
         :final contextManagement,
         :final hasContextManagement,
       ):
-        _stopReason = delta.stopReason ?? _stopReason;
-        _stopDetails = delta.stopDetails ?? _stopDetails;
-        _stopSequence = delta.stopSequence ?? _stopSequence;
+        if (delta.hasStopReason) {
+          _stopReason = delta.stopReason;
+          _stopReasonValue = delta.stopReasonValue;
+        }
+        if (delta.hasStopDetails) _stopDetails = delta.stopDetails;
+        if (delta.hasStopSequence) _stopSequence = delta.stopSequence;
         _container = delta.container ?? _container;
         _inputTransformations = inputTransformations ?? _inputTransformations;
         _contextManagement = contextManagement ?? _contextManagement;
@@ -342,7 +350,7 @@ class MessageStreamAccumulator {
     if (_usage == null) {
       throw StateError('Cannot build Message: no usage information available.');
     }
-    return Message(
+    final message = Message(
       id: _id!,
       model: _model!,
       role: _role ?? MessageRole.assistant,
@@ -359,6 +367,9 @@ class MessageStreamAccumulator {
       hasContextManagement: _hasContextManagement,
       inputTransformations: _inputTransformations,
     );
+    return _stopReason == StopReason.unknown
+        ? message.copyWith(stopReasonValue: _stopReasonValue)
+        : message;
   }
 
   /// Builds a complete message for use as conversation history.
@@ -383,6 +394,7 @@ class MessageStreamAccumulator {
     _role = null;
     _usage = null;
     _stopReason = null;
+    _stopReasonValue = null;
     _stopDetails = null;
     _stopSequence = null;
     _container = null;
