@@ -14,7 +14,7 @@ const _legacyBeta = 'user-profiles-2026-08-18';
 
 void main() {
   test(
-    'GA filters the legacy profile selectors while retaining other betas',
+    'profile routes keep other flags and select their own profile contract',
     () async {
       final transport = MockHttpClient();
       final client = AnthropicClient(
@@ -30,16 +30,28 @@ void main() {
       addTearDown(client.close);
       transport
         ..queueJsonResponse({'data': <Object>[], 'next_page': null})
+        ..queueJsonResponse({'data': <Object>[], 'next_page': null})
         ..queueJsonResponse(UserProfilesFixtures.enrollmentUrl());
 
       expect((await client.userProfiles.current.list()).data, isEmpty);
-      final legacy = await client.userProfiles.createEnrollmentUrl(_id);
+      await client.userProfiles.list();
+      final legacy = await client.userProfiles.createEnrollmentUrl(
+        _id,
+        betas: ['user-profiles-2026-09-04', 'caller-flag', _legacyBeta],
+      );
 
       expect(
         transport.requests.first.headers['anthropic-beta'],
         'feature-flag',
       );
-      expect(transport.requests.last.headers['anthropic-beta'], _legacyBeta);
+      expect(
+        transport.requests[1].headers['anthropic-beta'],
+        'feature-flag,$_legacyBeta',
+      );
+      expect(
+        transport.requests.last.headers['anthropic-beta'],
+        'caller-flag,$_legacyBeta',
+      );
       expect((transport.requests.last as http.Request).body, isEmpty);
       expect(legacy.toString(), isNot(contains(legacy.url)));
     },
@@ -243,8 +255,9 @@ void main() {
     },
   );
 
-  test('keeps all legacy routes under the existing beta header', () async {
+  test('all legacy operations accept beta flags', () async {
     final legacy = client.userProfiles;
+    const betas = ['caller-flag'];
     final data = UserProfilesFixtures.userProfile(id: _id);
     transport
       ..queueJsonResponse(data)
@@ -260,20 +273,27 @@ void main() {
 
     await legacy.create(
       const CreateUserProfileRequest(externalId: 'old-id'),
+      betas: betas,
       workspaceId: _workspace,
     );
-    await legacy.list(workspaceId: _workspace);
-    await legacy.retrieve(_id, workspaceId: _workspace);
+    await legacy.list(betas: betas, workspaceId: _workspace);
+    await legacy.retrieve(_id, betas: betas, workspaceId: _workspace);
     await legacy.update(
       _id,
       const UpdateUserProfileRequest(externalId: null),
+      betas: betas,
       workspaceId: _workspace,
     );
-    await legacy.createEnrollmentUrl(_id, workspaceId: _workspace);
-    await legacy.delete(_id, workspaceId: _workspace);
+    await legacy.createEnrollmentUrl(
+      _id,
+      betas: betas,
+      workspaceId: _workspace,
+    );
+    await legacy.delete(_id, betas: betas, workspaceId: _workspace);
     await legacy.createActionUrl(
       _id,
       action: UserProfileAction.enrollEndUser,
+      betas: betas,
       workspaceId: _workspace,
     );
 
@@ -287,7 +307,7 @@ void main() {
       'POST $_profiles/$_id/action_urls',
     ]);
     for (final request in transport.requests) {
-      expect(request.headers['anthropic-beta'], _legacyBeta);
+      expect(request.headers['anthropic-beta'], 'caller-flag,$_legacyBeta');
       expect(request.headers['anthropic-workspace-id'], _workspace);
     }
     final bodies = transport.requests

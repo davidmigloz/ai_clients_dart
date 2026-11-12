@@ -145,6 +145,92 @@ void main() {
       expect(request.url.queryParameters, isEmpty);
     });
 
+    test(
+      'legacy profile lists preserve explicit null fields from responses',
+      () async {
+        final current = UserProfilesFixtures.userProfile()
+          ..['external_user_onboarded_at'] = null;
+        final previous = UserProfilesFixtures.userProfile();
+        mockHttpClient
+          ..queueJsonResponse({
+            'data': [current],
+            'next_page': null,
+          })
+          ..queueJsonResponse({
+            'data': [previous],
+          });
+
+        final page = await client.userProfiles.list();
+        expect(page.toJson(), containsPair('next_page', null));
+        expect(page.copyWith().toJson(), containsPair('next_page', null));
+        expect(
+          page.data.single.toJson(),
+          containsPair('external_user_onboarded_at', null),
+        );
+        expect(
+          page.data.single.copyWith().toJson(),
+          containsPair('external_user_onboarded_at', null),
+        );
+
+        final oldPage = await client.userProfiles.list();
+        expect(oldPage.toJson(), isNot(contains('next_page')));
+        expect(
+          oldPage.data.single.toJson(),
+          isNot(contains('external_user_onboarded_at')),
+        );
+        expect({oldPage.data.single, page.data.single}, hasLength(2));
+        expect({oldPage.copyWith(data: page.data), page}, hasLength(2));
+        expect(
+          oldPage.data.single.copyWith(externalUserOnboardedAt: null),
+          page.data.single,
+        );
+        expect(oldPage.copyWith(data: page.data, nextPage: null), page);
+      },
+    );
+
+    test(
+      'explicit clears match for parsed and directly constructed models',
+      () {
+        const directPage = ListUserProfilesResponse(
+          data: [],
+          nextPage: 'cursor',
+        );
+        final parsedPage = ListUserProfilesResponse.fromJson(
+          directPage.toJson(),
+        );
+        expect(directPage, parsedPage);
+        expect(directPage.hashCode, parsedPage.hashCode);
+        expect(
+          directPage.copyWith(nextPage: null),
+          parsedPage.copyWith(nextPage: null),
+        );
+
+        final profile = UserProfile.fromJson(
+          UserProfilesFixtures.userProfile(),
+        );
+        final onboardedAt = DateTime.utc(2026, 10, 4);
+        final directProfile = UserProfile(
+          id: profile.id,
+          type: profile.type,
+          externalId: profile.externalId,
+          name: profile.name,
+          accessType: profile.accessType,
+          externalUserOnboardedAt: onboardedAt,
+          metadata: profile.metadata,
+          trustGrants: profile.trustGrants,
+          createdAt: profile.createdAt,
+          updatedAt: profile.updatedAt,
+        );
+        final parsedProfile = UserProfile.fromJson(directProfile.toJson());
+        expect(directProfile, parsedProfile);
+        expect(directProfile.hashCode, parsedProfile.hashCode);
+        expect(
+          directProfile.copyWith(externalUserOnboardedAt: null).toJson(),
+          parsedProfile.copyWith(externalUserOnboardedAt: null).toJson(),
+        );
+      },
+    );
+
     test('retrieve sends correct request and parses response', () async {
       mockHttpClient.queueJsonResponse(UserProfilesFixtures.userProfile());
 

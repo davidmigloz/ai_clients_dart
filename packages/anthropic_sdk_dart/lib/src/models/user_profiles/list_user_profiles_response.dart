@@ -12,26 +12,30 @@ class ListUserProfilesResponse {
 
   /// Cursor for the next page, or `null` when there are no more results.
   final String? nextPage;
+  final bool _hasNextPage;
 
   /// Creates a [ListUserProfilesResponse].
-  const ListUserProfilesResponse({required this.data, this.nextPage});
+  const ListUserProfilesResponse({required this.data, this.nextPage})
+    : _hasNextPage = nextPage != null;
+
+  const ListUserProfilesResponse._(this.data, this.nextPage, this._hasNextPage);
 
   /// Creates a [ListUserProfilesResponse] from JSON.
   factory ListUserProfilesResponse.fromJson(Map<String, dynamic> json) {
-    return ListUserProfilesResponse(
-      data:
-          (json['data'] as List?)
+    return ListUserProfilesResponse._(
+      (json['data'] as List?)
               ?.map((e) => UserProfile.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
-      nextPage: json['next_page'] as String?,
+      json['next_page'] as String?,
+      json.containsKey('next_page'),
     );
   }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'data': data.map((e) => e.toJson()).toList(),
-    if (nextPage != null) 'next_page': nextPage,
+    if (_hasNextPage) 'next_page': nextPage,
   };
 
   /// Creates a copy with replaced values.
@@ -39,11 +43,11 @@ class ListUserProfilesResponse {
     List<UserProfile>? data,
     Object? nextPage = unsetCopyWithValue,
   }) {
-    return ListUserProfilesResponse(
-      data: data ?? this.data,
-      nextPage: nextPage == unsetCopyWithValue
-          ? this.nextPage
-          : nextPage as String?,
+    final replacesNextPage = !identical(nextPage, unsetCopyWithValue);
+    return ListUserProfilesResponse._(
+      data ?? this.data,
+      replacesNextPage ? nextPage as String? : this.nextPage,
+      _hasNextPage || replacesNextPage,
     );
   }
 
@@ -53,10 +57,11 @@ class ListUserProfilesResponse {
       other is ListUserProfilesResponse &&
           runtimeType == other.runtimeType &&
           listsEqual(data, other.data) &&
+          _hasNextPage == other._hasNextPage &&
           nextPage == other.nextPage;
 
   @override
-  int get hashCode => Object.hash(listHash(data), nextPage);
+  int get hashCode => Object.hash(listHash(data), nextPage, _hasNextPage);
 
   @override
   String toString() =>

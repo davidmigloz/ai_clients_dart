@@ -35,6 +35,7 @@ class UserProfile {
   /// platform, as stated by the platform. `null` until the platform
   /// supplies one.
   final BetaTimestamp? externalUserOnboardedAt;
+  final bool _hasExternalUserOnboardedAt;
 
   /// Arbitrary key-value metadata. Maximum 16 pairs, keys up to 64 chars,
   /// values up to 512 chars. Always present; may be empty.
@@ -65,12 +66,26 @@ class UserProfile {
     required this.trustGrants,
     required this.createdAt,
     required this.updatedAt,
+  }) : _hasExternalUserOnboardedAt = externalUserOnboardedAt != null;
+
+  const UserProfile._({
+    required this.id,
+    required this.type,
+    required this.externalId,
+    required this.name,
+    required this.accessType,
+    required this.externalUserOnboardedAt,
+    required this.metadata,
+    required this.trustGrants,
+    required this.createdAt,
+    required this.updatedAt,
+    required this._hasExternalUserOnboardedAt,
   });
 
   /// Creates a [UserProfile] from JSON.
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     final trustGrantsJson = json['trust_grants'] as Map<String, dynamic>?;
-    return UserProfile(
+    return UserProfile._(
       id: json['id'] as String,
       type: json['type'] as String? ?? 'user_profile',
       externalId: json['external_id'] as String?,
@@ -81,6 +96,9 @@ class UserProfile {
       externalUserOnboardedAt: json['external_user_onboarded_at'] != null
           ? DateTime.parse(json['external_user_onboarded_at'] as String)
           : null,
+      hasExternalUserOnboardedAt: json.containsKey(
+        'external_user_onboarded_at',
+      ),
       metadata:
           (json['metadata'] as Map<String, dynamic>?)?.map(
             (k, v) => MapEntry(k, v as String),
@@ -106,9 +124,9 @@ class UserProfile {
     'external_id': externalId,
     'name': name,
     if (accessType != null) 'access_type': accessType!.toJson(),
-    if (externalUserOnboardedAt != null)
-      'external_user_onboarded_at': externalUserOnboardedAt!
-          .toUtc()
+    if (_hasExternalUserOnboardedAt)
+      'external_user_onboarded_at': externalUserOnboardedAt
+          ?.toUtc()
           .toIso8601String(),
     'metadata': metadata,
     'trust_grants': trustGrants.map((k, v) => MapEntry(k, v.toJson())),
@@ -134,7 +152,11 @@ class UserProfile {
     BetaTimestamp? createdAt,
     BetaTimestamp? updatedAt,
   }) {
-    return UserProfile(
+    final replacesOnboardingTime = !identical(
+      externalUserOnboardedAt,
+      unsetCopyWithValue,
+    );
+    return UserProfile._(
       id: id ?? this.id,
       type: type ?? this.type,
       externalId: externalId == unsetCopyWithValue
@@ -144,9 +166,11 @@ class UserProfile {
       accessType: accessType == unsetCopyWithValue
           ? this.accessType
           : accessType as UserProfileAccessType?,
-      externalUserOnboardedAt: externalUserOnboardedAt == unsetCopyWithValue
-          ? this.externalUserOnboardedAt
-          : externalUserOnboardedAt as BetaTimestamp?,
+      externalUserOnboardedAt: replacesOnboardingTime
+          ? externalUserOnboardedAt as BetaTimestamp?
+          : this.externalUserOnboardedAt,
+      hasExternalUserOnboardedAt:
+          _hasExternalUserOnboardedAt || replacesOnboardingTime,
       metadata: metadata ?? this.metadata,
       trustGrants: trustGrants ?? this.trustGrants,
       createdAt: createdAt ?? this.createdAt,
@@ -164,6 +188,7 @@ class UserProfile {
           externalId == other.externalId &&
           name == other.name &&
           accessType == other.accessType &&
+          _hasExternalUserOnboardedAt == other._hasExternalUserOnboardedAt &&
           externalUserOnboardedAt == other.externalUserOnboardedAt &&
           mapsEqual(metadata, other.metadata) &&
           mapsEqual(trustGrants, other.trustGrants) &&
@@ -177,6 +202,7 @@ class UserProfile {
     externalId,
     name,
     accessType,
+    _hasExternalUserOnboardedAt,
     externalUserOnboardedAt,
     mapHash(metadata),
     mapHash(trustGrants),
