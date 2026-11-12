@@ -4,6 +4,7 @@ import '../../models/organization/organization_records.dart';
 import 'organization_access_resources.dart';
 import 'organization_federation_resource.dart';
 import 'organization_rbac_resources.dart';
+import 'organization_service_accounts_resource.dart';
 import 'organization_settings_resources.dart';
 import 'organization_spend_resources.dart';
 import 'organization_transport.dart';
@@ -36,7 +37,8 @@ final class OrganizationResource {
       rbacRoles = OrganizationRbacRolesResource(_transport),
       spendLimits = OrganizationSpendLimitsResource(_transport),
       complianceSettings = OrganizationComplianceSettingsResource(_transport),
-      federation = OrganizationFederationResource(_transport);
+      federation = OrganizationFederationResource(_transport),
+      serviceAccounts = OrganizationServiceAccountsResource(_transport);
 
   final OrganizationTransport _transport;
 
@@ -57,6 +59,9 @@ final class OrganizationResource {
 
   /// Workload Identity Federation configuration.
   final OrganizationFederationResource federation;
+
+  /// Service accounts and their workspace memberships.
+  final OrganizationServiceAccountsResource serviceAccounts;
 
   /// Role-based access groups and their members.
   final OrganizationRbacGroupsResource rbacGroups;

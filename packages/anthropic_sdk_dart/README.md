@@ -55,6 +55,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Model discovery with lifecycle filters, model lines, and thinking and server-tool capabilities
 - MCP tunnel and certificate management in approved Claude API workspaces (research preview)
 - Organization Admin API for keys, users, invites, workspaces, rate limits, compliance settings, RBAC and spend limits
+- Service account lifecycle and workspace memberships with scoped OAuth
 - Files (expiration, cursor pagination) and skills (multi-file uploads, container skills)
 - Managed agents with environments, self-hosted work, sessions, thread status filters, execution principals, tool permission evaluation, vaults, and streaming events (beta)
 - Scheduled deployments on the Claude API, Claude Platform on AWS, and Anthropic-managed Claude Models on Google Cloud (beta)
@@ -1006,6 +1007,15 @@ try {
 
 [Runnable Admin example](example/organization_admin_example.dart) · [Claude Admin API](https://platform.claude.com/docs/en/manage-claude/admin-api)
 
+Use an `org:admin` OAuth token for
+`client.organization.serviceAccounts`. Memberships can be listed from the
+account via `serviceAccounts.workspaces`, or from the workspace via
+`organization.workspaces.serviceAccounts`. The Default Workspace membership
+is implicit unless you add an explicit membership. Use an interactive OAuth
+token to create an admin service account or change an account to admin.
+
+[Service account example](example/service_accounts_example.dart) · [Manage WIF with the Admin API](https://platform.claude.com/docs/en/manage-claude/wif-admin-api)
+
 </details>
 
 <details>
@@ -1212,6 +1222,7 @@ See the [example/](example/) directory for complete examples:
 | [`dreams_example.dart`](example/dreams_example.dart) | Dreams: memory-consolidation jobs — create, poll, list, archive (beta, research preview) |
 | [`current_user_profiles_example.dart`](example/current_user_profiles_example.dart) | Inspect enforcement status and paginate user profiles |
 | [`user_profiles_example.dart`](example/user_profiles_example.dart) | Legacy user profiles and enrollment URLs (beta) |
+| [`service_accounts_example.dart`](example/service_accounts_example.dart) | List service accounts and their workspace memberships |
 | [`organization_admin_example.dart`](example/organization_admin_example.dart) | Read-only organization and workspace administration |
 | [`organization_rbac_example.dart`](example/organization_rbac_example.dart) | List RBAC groups, members, roles and permissions |
 | [`organization_spend_example.dart`](example/organization_spend_example.dart) | List effective spend limits and pending increase requests |

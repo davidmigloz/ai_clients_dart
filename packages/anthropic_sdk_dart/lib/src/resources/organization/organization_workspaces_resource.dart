@@ -2,6 +2,7 @@ import '../../models/common/copy_with_sentinel.dart';
 import '../../models/organization/organization_page.dart';
 import '../../models/organization/organization_records.dart';
 import '../../models/organization/organization_workspace.dart';
+import 'organization_service_accounts_resource.dart';
 import 'organization_settings_resources.dart';
 import 'organization_transport.dart';
 
@@ -10,12 +11,18 @@ final class OrganizationWorkspacesResource {
   /// Creates the workspaces resource.
   OrganizationWorkspacesResource(this._transport)
     : members = OrganizationWorkspaceMembersResource(_transport),
-      rateLimits = OrganizationWorkspaceRateLimitsResource(_transport);
+      rateLimits = OrganizationWorkspaceRateLimitsResource(_transport),
+      serviceAccounts = OrganizationWorkspaceServiceAccountsResource(
+        _transport,
+      );
 
   final OrganizationTransport _transport;
 
   /// Workspace rate-limit overrides.
   final OrganizationWorkspaceRateLimitsResource rateLimits;
+
+  /// Service account memberships in a workspace.
+  final OrganizationWorkspaceServiceAccountsResource serviceAccounts;
 
   /// Workspace membership operations.
   final OrganizationWorkspaceMembersResource members;
