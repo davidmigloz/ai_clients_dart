@@ -2,6 +2,7 @@ import '../../client/interceptor_chain.dart';
 import '../../client/request_builder.dart';
 import '../../models/organization/organization_records.dart';
 import 'organization_access_resources.dart';
+import 'organization_federation_resource.dart';
 import 'organization_rbac_resources.dart';
 import 'organization_settings_resources.dart';
 import 'organization_spend_resources.dart';
@@ -34,7 +35,8 @@ final class OrganizationResource {
       rbacGroups = OrganizationRbacGroupsResource(_transport),
       rbacRoles = OrganizationRbacRolesResource(_transport),
       spendLimits = OrganizationSpendLimitsResource(_transport),
-      complianceSettings = OrganizationComplianceSettingsResource(_transport);
+      complianceSettings = OrganizationComplianceSettingsResource(_transport),
+      federation = OrganizationFederationResource(_transport);
 
   final OrganizationTransport _transport;
 
@@ -52,6 +54,9 @@ final class OrganizationResource {
 
   /// Organization compliance settings.
   final OrganizationComplianceSettingsResource complianceSettings;
+
+  /// Workload Identity Federation configuration.
+  final OrganizationFederationResource federation;
 
   /// Role-based access groups and their members.
   final OrganizationRbacGroupsResource rbacGroups;

@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 
+import '../auth/request_auth.dart';
 import '../errors/exceptions.dart';
 import '../errors/response_error.dart';
 import 'interceptor.dart';
@@ -43,24 +44,30 @@ class ErrorInterceptor implements Interceptor {
       timestamp: DateTime.now(),
     );
 
+    final credentials = requestCredentialValues(context.request.headers);
     final body = decodeApiErrorResponse(response);
-    final (:message, :details, :errorCode, :requestId) = parseApiErrorBody(
-      body,
-    );
+    final parsed = parseApiErrorBody(body, credentials: credentials);
     final responseMetadata = ResponseMetadata(
       statusCode: response.statusCode,
-      headers: response.headers,
-      bodyExcerpt: _truncateBody(body),
+      headers: Map.unmodifiable({
+        for (final entry in response.headers.entries)
+          if (redactCredentialEcho(entry.key, credentials) != null)
+            if (redactCredentialEcho(entry.value, credentials)
+                case final String value)
+              entry.key: value,
+      }),
+      bodyExcerpt: apiErrorBodyExcerpt(body, credentials),
       latency: latency,
-      bodyRequestId: requestId,
+      bodyRequestId: parsed.requestId,
     );
 
     // Handle authentication errors
     if (response.statusCode == 401) {
       return AuthenticationException(
-        message: message,
-        details: details,
-        errorCode: errorCode,
+        message: parsed.message,
+        details: parsed.details,
+        errorCode: parsed.errorCode,
+        errorDetails: parsed.errorDetails,
         requestMetadata: requestMetadata,
         responseMetadata: responseMetadata,
       );
@@ -70,30 +77,26 @@ class ErrorInterceptor implements Interceptor {
     if (response.statusCode == 429) {
       return RateLimitException(
         statusCode: response.statusCode,
-        message: message,
-        details: details,
-        errorCode: errorCode,
+        message: parsed.message,
+        details: parsed.details,
+        errorCode: parsed.errorCode,
+        errorDetails: parsed.errorDetails,
         requestMetadata: requestMetadata,
         responseMetadata: responseMetadata,
-        retryAfter: retryAfterTime(response.headers),
+        retryAfter: retryAfterTime(responseMetadata.headers),
       );
     }
 
     // General API error
     return ApiException(
       statusCode: response.statusCode,
-      message: message,
-      details: details,
-      errorCode: errorCode,
+      message: parsed.message,
+      details: parsed.details,
+      errorCode: parsed.errorCode,
+      errorDetails: parsed.errorDetails,
       requestMetadata: requestMetadata,
       responseMetadata: responseMetadata,
     );
-  }
-
-  /// Truncates body to 200 characters.
-  String _truncateBody(String body) {
-    if (body.length <= 200) return body;
-    return '${body.substring(0, 200)}...';
   }
 
   /// Redacts sensitive headers.

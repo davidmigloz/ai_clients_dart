@@ -32,6 +32,22 @@ Future<Map<String, String>> resolveCredentialHeaders(
   }
 }
 
+/// Values that must stay out of diagnostics for the effective request.
+Set<String> requestCredentialValues(Map<String, String> headers) {
+  final authorization = headers['authorization']?.trim();
+  final apiKey = headers['x-api-key']?.trim();
+  final credentials = <String>{
+    if (authorization != null && authorization.isNotEmpty) authorization,
+    if (apiKey != null && apiKey.isNotEmpty) apiKey,
+  };
+  if (authorization != null &&
+      authorization.toLowerCase().startsWith('bearer ')) {
+    final token = authorization.substring(7).trim();
+    if (token.isNotEmpty) credentials.add(token);
+  }
+  return credentials;
+}
+
 void _checkWorkspace(Map<String, String> headers) {
   if (headers.containsKey('anthropic-workspace-id')) {
     throw ArgumentError(
