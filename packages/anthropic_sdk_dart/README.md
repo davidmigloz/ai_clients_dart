@@ -1380,7 +1380,12 @@ for (final row in report.data) {
 
 Cost amounts are decimal strings in the currency's minor unit.
 
-[Runnable analytics example](example/organization_analytics_example.dart) · [Usage and cost analytics](https://platform.claude.com/docs/en/manage-claude/usage-cost-analytics-api)
+The legacy Console reports remain available as `messagesUsageReport`,
+`consoleCostReport` and `claudeCodeUsageReport`. Enterprise reports retain
+`usageReport`, `costReport`, `userUsageReport` and `userCostReport`.
+Their buckets and filters differ from the dimensioned routes.
+
+[Runnable analytics example](example/organization_analytics_example.dart) · [Legacy reports example](example/organization_legacy_analytics_example.dart) · [Usage and cost analytics](https://platform.claude.com/docs/en/manage-claude/usage-cost-analytics-api)
 
 </details>
 
@@ -1476,6 +1481,7 @@ See the [example/](example/) directory for complete examples:
 | [`organization_admin_example.dart`](example/organization_admin_example.dart) | Read-only organization and workspace administration |
 | [`external_keys_example.dart`](example/external_keys_example.dart) | List registered customer-managed encryption keys |
 | [`organization_analytics_example.dart`](example/organization_analytics_example.dart) | Dimensioned organization usage and cost with cursor pagination (beta) |
+| [`organization_legacy_analytics_example.dart`](example/organization_legacy_analytics_example.dart) | Legacy Console or Enterprise usage report with time buckets |
 | [`organization_rbac_example.dart`](example/organization_rbac_example.dart) | List RBAC groups, members, roles and permissions |
 | [`organization_spend_example.dart`](example/organization_spend_example.dart) | List effective spend limits and pending increase requests |
 | [`organization_webhooks_example.dart`](example/organization_webhooks_example.dart) | List organization webhook endpoints (beta) |

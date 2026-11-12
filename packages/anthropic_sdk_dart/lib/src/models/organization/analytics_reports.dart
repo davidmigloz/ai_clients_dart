@@ -4,6 +4,8 @@ import '../../utils/organization_parsing.dart';
 import '../common/equality_helpers.dart';
 import '../metadata/usage.dart' show CacheCreation, ServerToolUsage;
 
+part 'analytics_legacy_reports.dart';
+
 /// A report record that retains all provider fields for forward compatibility.
 @immutable
 abstract base class AnalyticsResponseRecord {
@@ -114,6 +116,9 @@ final class AnalyticsActor extends AnalyticsResponseRecord {
   /// API key actor's identifier.
   String? get apiKeyId => rawJson['api_key_id'] as String?;
 
+  /// API key name in a Claude Code usage report.
+  String? get apiKeyName => rawJson['api_key_name'] as String?;
+
   /// Federated identity's subject.
   String? get subject => rawJson['subject'] as String?;
 }
@@ -173,6 +178,15 @@ final class AnalyticsDimensions extends AnalyticsResponseRecord {
 
   /// API key identifier.
   String? get apiKeyId => rawJson['api_key_id'] as String?;
+
+  /// User account ID in the legacy Messages usage report.
+  String? get accountId => rawJson['account_id'] as String?;
+
+  /// Service account ID in the legacy Messages usage report.
+  String? get serviceAccountId => rawJson['service_account_id'] as String?;
+
+  /// Line item description in the legacy Console cost report.
+  String? get description => rawJson['description'] as String?;
 
   /// Context-window class.
   String? get contextWindow => rawJson['context_window'] as String?;
