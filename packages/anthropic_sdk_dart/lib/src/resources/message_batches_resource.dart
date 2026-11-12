@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import '../errors/response_error.dart';
 import '../models/batches/batch_request.dart';
 import '../models/batches/message_batch.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 import 'message_request_validation.dart';
 import 'streaming_resource.dart';
@@ -117,7 +118,9 @@ class MessageBatchesResource extends ResourceBase with StreamingResource {
     List<String> betas = const [],
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/messages/batches/$batchId');
+    final url = requestBuilder.buildUrl(
+      '/v1/messages/batches/${encodePathSegment(batchId, 'batchId')}',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: _requestHeaders(betas, workspaceId),
     );
@@ -147,7 +150,9 @@ class MessageBatchesResource extends ResourceBase with StreamingResource {
     List<String> betas = const [],
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/messages/batches/$batchId/cancel');
+    final url = requestBuilder.buildUrl(
+      '/v1/messages/batches/${encodePathSegment(batchId, 'batchId')}/cancel',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: _requestHeaders(betas, workspaceId),
     );
@@ -179,7 +184,9 @@ class MessageBatchesResource extends ResourceBase with StreamingResource {
     List<String> betas = const [],
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/messages/batches/$batchId');
+    final url = requestBuilder.buildUrl(
+      '/v1/messages/batches/${encodePathSegment(batchId, 'batchId')}',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: _requestHeaders(betas, workspaceId),
     );
@@ -209,7 +216,7 @@ class MessageBatchesResource extends ResourceBase with StreamingResource {
     List<String> betas = const [],
   }) => mapStream(
     getJsonlStream(
-      '/v1/messages/batches/$batchId/results',
+      '/v1/messages/batches/${encodePathSegment(batchId, 'batchId')}/results',
       abortTrigger: abortTrigger,
       headers: _requestHeaders(betas, workspaceId),
       errorFactoryWithMetadata: createResourceException,

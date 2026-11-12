@@ -6,6 +6,7 @@ import '../models/managed_agents/common/list_order.dart';
 import '../models/managed_agents/events/send_event_params.dart';
 import '../models/managed_agents/events/session_event.dart';
 import '../models/managed_agents/events/session_event_list_response.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 import 'streaming_resource.dart';
 
@@ -66,7 +67,7 @@ class SessionEventsResource extends ResourceBase with StreamingResource {
     };
 
     final url = requestBuilder.buildUrl(
-      '/v1/sessions/$sessionId/events',
+      '/v1/sessions/${encodePathSegment(sessionId, 'sessionId')}/events',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
     final headers = requestBuilder.buildHeaders(
@@ -92,7 +93,9 @@ class SessionEventsResource extends ResourceBase with StreamingResource {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/sessions/$sessionId/events');
+    final url = requestBuilder.buildUrl(
+      '/v1/sessions/${encodePathSegment(sessionId, 'sessionId')}/events',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );
@@ -146,7 +149,7 @@ class SessionEventsResource extends ResourceBase with StreamingResource {
     };
 
     final eventStream = getStream(
-      '/v1/sessions/$sessionId/events/stream',
+      '/v1/sessions/${encodePathSegment(sessionId, 'sessionId')}/events/stream',
       queryParams: queryParams.isEmpty ? null : queryParams,
       headers: {'anthropic-beta': _betaHeader},
       abortTrigger: abortTrigger,

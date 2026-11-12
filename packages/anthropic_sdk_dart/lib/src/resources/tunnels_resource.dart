@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../auth/auth_provider.dart';
 import '../models/managed_agents/tunnels/tunnel.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 import 'protected_resource_request.dart';
 
@@ -201,7 +202,7 @@ class TunnelCertificatesResource extends ResourceBase {
   }) => _sendTunnelRequest(
     this,
     'GET',
-    '$_path/${_encodeId(certificateId)}',
+    '$_path/${encodePathSegment(certificateId, 'certificateId')}',
     TunnelCertificate.fromJson,
     workspaceId: workspaceId,
     betas: betas,
@@ -238,7 +239,7 @@ class TunnelCertificatesResource extends ResourceBase {
   }) => _sendTunnelRequest(
     this,
     'POST',
-    '$_path/${_encodeId(certificateId)}/archive',
+    '$_path/${encodePathSegment(certificateId, 'certificateId')}/archive',
     TunnelCertificate.fromJson,
     workspaceId: workspaceId,
     betas: betas,
@@ -249,14 +250,8 @@ class TunnelCertificatesResource extends ResourceBase {
   String get _path => '${_tunnelPath(tunnelId)}/certificates';
 }
 
-String _tunnelPath(String id) => '/v1/tunnels/${_encodeId(id)}';
-
-String _encodeId(String id) {
-  if (id.isEmpty || id == '.' || id == '..') {
-    throw ArgumentError('Expected a tunnel or certificate identifier');
-  }
-  return Uri.encodeComponent(id);
-}
+String _tunnelPath(String id) =>
+    '/v1/tunnels/${encodePathSegment(id, 'tunnelId')}';
 
 Map<String, String> _pageQuery(
   int? limit,

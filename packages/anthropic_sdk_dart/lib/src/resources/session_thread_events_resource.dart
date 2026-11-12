@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../models/managed_agents/events/session_event.dart';
 import '../models/managed_agents/events/session_event_list_response.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 import 'streaming_resource.dart';
 
@@ -50,7 +51,8 @@ class SessionThreadEventsResource extends ResourceBase with StreamingResource {
     };
 
     final url = requestBuilder.buildUrl(
-      '/v1/sessions/$sessionId/threads/$threadId/events',
+      '/v1/sessions/${encodePathSegment(sessionId, 'sessionId')}/threads'
+      '/${encodePathSegment(threadId, 'threadId')}/events',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
     final headers = requestBuilder.buildHeaders(
@@ -103,7 +105,8 @@ class SessionThreadEventsResource extends ResourceBase with StreamingResource {
     };
 
     final eventStream = getStream(
-      '/v1/sessions/$sessionId/threads/$threadId/stream',
+      '/v1/sessions/${encodePathSegment(sessionId, 'sessionId')}/threads'
+      '/${encodePathSegment(threadId, 'threadId')}/stream',
       queryParams: queryParams.isEmpty ? null : queryParams,
       headers: {'anthropic-beta': _betaHeader},
       abortTrigger: abortTrigger,

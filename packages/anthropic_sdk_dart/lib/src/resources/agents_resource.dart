@@ -6,6 +6,7 @@ import '../models/managed_agents/agents/agent.dart';
 import '../models/managed_agents/agents/agent_list_response.dart';
 import '../models/managed_agents/agents/create_agent_params.dart';
 import '../models/managed_agents/agents/update_agent_params.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 
 /// Beta header for the Managed Agents API.
@@ -110,7 +111,7 @@ class AgentsResource extends ResourceBase {
     final queryParams = <String, dynamic>{'version': ?version?.toString()};
 
     final url = requestBuilder.buildUrl(
-      '/v1/agents/$agentId',
+      '/v1/agents/${encodePathSegment(agentId, 'agentId')}',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
     final headers = requestBuilder.buildHeaders(
@@ -138,7 +139,9 @@ class AgentsResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/agents/$agentId');
+    final url = requestBuilder.buildUrl(
+      '/v1/agents/${encodePathSegment(agentId, 'agentId')}',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );
@@ -161,7 +164,9 @@ class AgentsResource extends ResourceBase {
   /// - [abortTrigger]: Allows canceling the request.
   Future<Agent> archive(String agentId, {Future<void>? abortTrigger}) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/agents/$agentId/archive');
+    final url = requestBuilder.buildUrl(
+      '/v1/agents/${encodePathSegment(agentId, 'agentId')}/archive',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );
@@ -197,7 +202,7 @@ class AgentsResource extends ResourceBase {
     };
 
     final url = requestBuilder.buildUrl(
-      '/v1/agents/$agentId/versions',
+      '/v1/agents/${encodePathSegment(agentId, 'agentId')}/versions',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
     final headers = requestBuilder.buildHeaders(

@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../models/managed_agents/sessions/session.dart' show SessionStatus;
 import '../models/managed_agents/sessions/session_thread.dart';
 import '../models/managed_agents/sessions/session_thread_list_response.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 import 'session_thread_events_resource.dart';
 
@@ -52,7 +53,8 @@ class SessionThreadsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/sessions/$sessionId/threads/$threadId',
+      '/v1/sessions/${encodePathSegment(sessionId, 'sessionId')}/threads'
+      '/${encodePathSegment(threadId, 'threadId')}',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
@@ -94,7 +96,7 @@ class SessionThreadsResource extends ResourceBase {
     };
 
     final url = requestBuilder.buildUrl(
-      '/v1/sessions/$sessionId/threads',
+      '/v1/sessions/${encodePathSegment(sessionId, 'sessionId')}/threads',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
     final headers = requestBuilder.buildHeaders(
@@ -121,7 +123,8 @@ class SessionThreadsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/sessions/$sessionId/threads/$threadId/archive',
+      '/v1/sessions/${encodePathSegment(sessionId, 'sessionId')}/threads'
+      '/${encodePathSegment(threadId, 'threadId')}/archive',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},

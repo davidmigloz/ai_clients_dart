@@ -13,6 +13,7 @@ import '../models/user_profiles/user_profile_action.dart';
 import '../models/user_profiles/user_profile_enforcement.dart';
 import '../models/user_profiles/user_profile_list_order.dart';
 import '../models/user_profiles/user_profile_list_order_by.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 
 const _profilesPath = '/v1/user_profiles';
@@ -312,12 +313,8 @@ abstract class _UserProfilesBase extends ResourceBase {
   }
 }
 
-String _profilePath(String id) {
-  if (id.isEmpty || id == '.' || id == '..') {
-    throw ArgumentError.value(id, 'userProfileId', 'expected a profile ID');
-  }
-  return '$_profilesPath/${Uri.encodeComponent(id)}';
-}
+String _profilePath(String id) =>
+    '$_profilesPath/${encodePathSegment(id, 'userProfileId')}';
 
 Map<String, dynamic> _listQuery(
   int? limit,
