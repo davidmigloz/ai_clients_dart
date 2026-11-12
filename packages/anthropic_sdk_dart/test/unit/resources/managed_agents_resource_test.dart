@@ -189,6 +189,218 @@ class ManagedAgentsFixtures {
 }
 
 void main() {
+  test('public tool event subclasses keep permission getter behavior', () {
+    final tool = _TypedPermissionOverride();
+    expect(tool.evaluatedPermission, AgentEvaluatedPermission.allow);
+    expect(tool.toJson()['evaluated_permission'], 'allow');
+    expect(tool.copyWith().rawEvaluatedPermission, 'allow');
+
+    final mcp = _RawPermissionOverride();
+    expect(mcp.evaluatedPermission, AgentEvaluatedPermission.unknown);
+    expect(mcp.toJson()['evaluated_permission'], 'future_permission');
+    expect(mcp.copyWith().rawEvaluatedPermission, 'future_permission');
+  });
+
+  group('public constructor invariants', () {
+    final time = DateTime.utc(2026, 11, 11);
+
+    test('session status cannot disagree with a raw constructor argument', () {
+      final session = Session.fromJson(
+        ManagedAgentsFixtures.session(status: 'future_session_status'),
+      );
+      final sessionArgs = <Symbol, Object?>{
+        #id: session.id,
+        #status: SessionStatus.running,
+        #agent: session.agent,
+        #environmentId: session.environmentId,
+        #title: null,
+        #metadata: const <String, String>{},
+        #resources: const <SessionResource>[],
+        #vaultIds: const <String>[],
+        #stats: session.stats,
+        #usage: session.usage,
+        #createdAt: time,
+        #updatedAt: time,
+        #archivedAt: null,
+      };
+      final constructed =
+          _withoutPrivateArguments(Session.new, sessionArgs, const {
+                #rawStatus: 'terminated',
+              })
+              as Session;
+      expect(constructed.toJson()['status'], 'running');
+      expect(session.status, SessionStatus.unknown);
+      expect(session.copyWith().rawStatus, 'future_session_status');
+      expect(session.copyWith(status: SessionStatus.idle).rawStatus, 'idle');
+
+      final thread = SessionThread.fromJson({
+        ...ManagedAgentsFixtures.sessionThread(status: 'future_thread_status'),
+        'workflow_run_id': null,
+      });
+      final threadArgs = <Symbol, Object?>{
+        #id: thread.id,
+        #sessionId: thread.sessionId,
+        #status: SessionStatus.running,
+        #agent: thread.agent,
+        #parentThreadId: null,
+        #createdAt: time,
+        #updatedAt: time,
+        #archivedAt: null,
+        #usage: null,
+        #stats: null,
+      };
+      final constructedThread =
+          _withoutPrivateArguments(SessionThread.new, threadArgs, const {
+                #rawStatus: 'terminated',
+                #includeNullWorkflowRunId: true,
+              })
+              as SessionThread;
+      expect(constructedThread.toJson()['status'], 'running');
+      expect(constructedThread.toJson(), isNot(contains('workflow_run_id')));
+      expect(thread.status, SessionStatus.unknown);
+      expect(thread.copyWith().toJson(), containsPair('workflow_run_id', null));
+      expect(thread.copyWith().rawStatus, 'future_thread_status');
+    });
+
+    test(
+      'tool events accept typed permissions and preserve parsed wire values',
+      () {
+        final arguments = <Symbol, Object?>{
+          #id: 'evt_fixture',
+          #name: 'fetch',
+          #input: const <String, Object?>{},
+          #evaluatedPermission: AgentEvaluatedPermission.allow,
+          #processedAt: time,
+        };
+        final tool =
+            _withoutPrivateArguments(AgentToolUseEvent.new, arguments, const {
+                  #rawEvaluatedPermission: 'deny',
+                })
+                as AgentToolUseEvent;
+        final mcp =
+            _withoutPrivateArguments(
+                  AgentMcpToolUseEvent.new,
+                  {...arguments, #mcpServerName: 'fixture'},
+                  const {#rawEvaluatedPermission: 'deny'},
+                )
+                as AgentMcpToolUseEvent;
+        expect(tool.toJson()['evaluated_permission'], 'allow');
+        expect(mcp.toJson()['evaluated_permission'], 'allow');
+
+        final parsedTool = AgentToolUseEvent.fromJson({
+          ...tool.toJson(),
+          'evaluated_permission': 'future_permission',
+        });
+        final parsedMcp = AgentMcpToolUseEvent.fromJson({
+          ...mcp.toJson(),
+          'evaluated_permission': 'future_permission',
+        });
+        expect(
+          parsedTool.evaluatedPermission,
+          AgentEvaluatedPermission.unknown,
+        );
+        expect(parsedMcp.evaluatedPermission, AgentEvaluatedPermission.unknown);
+        expect(
+          parsedTool.copyWith().rawEvaluatedPermission,
+          'future_permission',
+        );
+        expect(
+          parsedMcp.copyWith().rawEvaluatedPermission,
+          'future_permission',
+        );
+        expect(
+          parsedTool
+              .copyWith(evaluatedPermission: AgentEvaluatedPermission.ask)
+              .rawEvaluatedPermission,
+          'ask',
+        );
+        expect(
+          parsedMcp.copyWith(evaluatedPermission: null).toJson(),
+          isNot(contains('evaluated_permission')),
+        );
+      },
+    );
+
+    test('public event constructors preserve canonical defaults', () {
+      final base = <Symbol, Object?>{#id: 'evt_fixture', #processedAt: time};
+      final thread = {
+        ...base,
+        #agentName: 'agent',
+        #sessionThreadId: 'sthr_id',
+      };
+      final idle =
+          _withoutPrivateArguments(
+                SessionStatusIdleEvent.new,
+                {...base, #stopReason: const SessionEndTurn()},
+                const {#includeNullStopDetails: true},
+              )
+              as SessionStatusIdleEvent;
+      final threadIdle =
+          _withoutPrivateArguments(
+                SessionThreadStatusIdleEvent.new,
+                {...thread, #stopReason: const SessionEndTurn()},
+                const {#includeNullStopDetails: true},
+              )
+              as SessionThreadStatusIdleEvent;
+      final created =
+          _withoutPrivateArguments(
+                SessionThreadCreatedEvent.new,
+                thread,
+                const {#includeNullWorkflowRunId: true},
+              )
+              as SessionThreadCreatedEvent;
+      expect(idle.toJson(), isNot(contains('stop_details')));
+      expect(threadIdle.toJson(), isNot(contains('stop_details')));
+      expect(created.toJson(), isNot(contains('workflow_run_id')));
+      expect(
+        SessionStatusIdleEvent.fromJson({
+          ...idle.toJson(),
+          'stop_details': null,
+        }).copyWith().toJson(),
+        containsPair('stop_details', null),
+      );
+      expect(
+        SessionThreadStatusIdleEvent.fromJson({
+          ...threadIdle.toJson(),
+          'stop_details': null,
+        }).copyWith().toJson(),
+        containsPair('stop_details', null),
+      );
+      expect(
+        SessionThreadCreatedEvent.fromJson({
+          ...created.toJson(),
+          'workflow_run_id': null,
+        }).copyWith().toJson(),
+        containsPair('workflow_run_id', null),
+      );
+    });
+
+    test(
+      'web fetch response constructor emits its canonical nullable field',
+      () {
+        final config =
+            _withoutPrivateArguments(
+                  WebFetchToolConfig.new,
+                  const {
+                    #enabled: true,
+                    #permissionPolicy: AlwaysAllowPolicy(),
+                  },
+                  const {#includeNullUrlSources: false},
+                )
+                as WebFetchToolConfig;
+        expect(config.toJson(), containsPair('url_sources', null));
+        final legacy = WebFetchToolConfig.fromJson(
+          config.toJson()..remove('url_sources'),
+        );
+        expect(legacy.copyWith().toJson(), isNot(contains('url_sources')));
+        expect(
+          WebFetchToolConfig.fromJson(config.toJson()).copyWith().toJson(),
+          containsPair('url_sources', null),
+        );
+      },
+    );
+  });
+
   late MockHttpClient mockHttpClient;
   late AnthropicClient client;
 
@@ -2416,4 +2628,51 @@ void main() {
       expect(a, isNot(equals(c)));
     });
   });
+}
+
+Object _withoutPrivateArguments(
+  Function constructor,
+  Map<Symbol, Object?> arguments,
+  Map<Symbol, Object?> privateArguments,
+) {
+  final Object? result = Function.apply(constructor, const [], arguments);
+  for (final MapEntry(:key, :value) in privateArguments.entries) {
+    expect(
+      () => Function.apply(constructor, const [], {...arguments, key: value}),
+      throwsA(isA<NoSuchMethodError>()),
+    );
+  }
+  return result!;
+}
+
+final class _TypedPermissionOverride extends AgentToolUseEvent {
+  _TypedPermissionOverride()
+    : super(
+        id: 'toolu_fixture',
+        name: 'search',
+        input: const {},
+        evaluatedPermission: AgentEvaluatedPermission.allow,
+        processedAt: DateTime.utc(2026, 11, 11),
+      );
+
+  @override
+  AgentEvaluatedPermission? get evaluatedPermission {
+    final raw = rawEvaluatedPermission;
+    return raw == null ? null : AgentEvaluatedPermission.fromJson(raw);
+  }
+}
+
+final class _RawPermissionOverride extends AgentMcpToolUseEvent {
+  _RawPermissionOverride()
+    : super(
+        id: 'toolu_fixture',
+        mcpServerName: 'search_server',
+        name: 'search',
+        input: const {},
+        evaluatedPermission: AgentEvaluatedPermission.allow,
+        processedAt: DateTime.utc(2026, 11, 11),
+      );
+
+  @override
+  String get rawEvaluatedPermission => 'future_permission';
 }

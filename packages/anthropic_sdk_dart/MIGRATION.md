@@ -516,6 +516,37 @@ final documentKind = switch (document) {
 
 ---
 
+## Preserve future Managed Agents event values
+
+Construct typed events with their public typed arguments. To preserve a
+future provider permission value, decode its wire event with `fromJson`.
+Decode and copy provider data to retain unknown session and thread statuses
+and omitted or explicit null `workflow_run_id`, `stop_details`, and
+`url_sources` fields.
+
+```dart
+// Before, Dart exposed the parser-only constructor argument.
+final event = AgentToolUseEvent(
+  id: 'toolu_example',
+  name: 'search',
+  input: const {},
+  rawEvaluatedPermission: 'future_permission',
+  processedAt: DateTime.utc(2026, 11, 11),
+);
+
+// After, decode a provider event to retain its original permission value.
+final event = AgentToolUseEvent.fromJson({
+  'type': 'agent.tool_use',
+  'id': 'toolu_example',
+  'name': 'search',
+  'input': <String, dynamic>{},
+  'evaluated_permission': 'future_permission',
+  'processed_at': '2026-11-11T00:00:00Z',
+});
+```
+
+---
+
 ## Migrating from v9.x to v10.0.0
 
 v10.0.0 adds document sources that reference uploaded files. `DocumentSource` is sealed, so exhaustive switches must handle the new `FileDocumentSource` variant.
