@@ -4,7 +4,7 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
-const int _maxPayloadBytes = 16 * 1024 * 1024;
+const int _maxPayloadBytes = 24 * 1024 * 1024;
 const int _maxHeaderBytes = 128 * 1024;
 const _preludeBytes = 12;
 const _checksumBytes = 4;
@@ -100,42 +100,52 @@ Map<String, dynamic>? _decodeFrame(Uint8List frame, int headerLength) {
   if (_crc32(frame, 0, checksumOffset) != data.getUint32(checksumOffset)) {
     throw const FormatException('Invalid AWS event stream checksum');
   }
-  final payloadOffset = _preludeBytes + headerLength;
-  final headers = _decodeHeaders(data, frame, payloadOffset);
-  final payload = Uint8List.sublistView(frame, payloadOffset, checksumOffset);
-  final messageType = headers[':message-type'];
-  if (messageType == 'exception' || messageType == 'error') {
-    final type =
-        headers[':exception-type'] ?? headers[':error-code'] ?? 'api_error';
-    var message = headers[':error-message'];
-    if (message == null && payload.isNotEmpty) {
-      try {
-        if (jsonDecode(utf8.decode(payload)) case {
-          'message': final String text,
-        }) {
-          message = text;
+  try {
+    final payloadOffset = _preludeBytes + headerLength;
+    final headers = _decodeHeaders(data, frame, payloadOffset);
+    final payload = Uint8List.sublistView(frame, payloadOffset, checksumOffset);
+    final messageType = headers[':message-type'];
+    if (messageType == 'exception' || messageType == 'error') {
+      final type =
+          headers[':exception-type'] ?? headers[':error-code'] ?? 'api_error';
+      var message = headers[':error-message'];
+      if (message == null && payload.isNotEmpty) {
+        try {
+          if (jsonDecode(utf8.decode(payload)) case {
+            'message': final String text,
+          }) {
+            message = text;
+          }
+        } on FormatException {
+          // Preserve the service error discriminator with a safe message.
         }
-      } on FormatException {
-        // Preserve the service error discriminator with a safe message.
       }
+      return {
+        'type': 'error',
+        'error': {'type': type, 'message': message ?? 'Bedrock stream error'},
+      };
     }
-    return {
-      'type': 'error',
-      'error': {'type': type, 'message': message ?? 'Bedrock stream error'},
-    };
-  }
-  if (messageType != 'event' || headers[':event-type'] != 'chunk') return null;
+    if (messageType != 'event' || headers[':event-type'] != 'chunk') {
+      return null;
+    }
 
-  final envelope = jsonDecode(utf8.decode(payload));
-  if (envelope case {'bytes': final String encoded}) {
-    final decoded = jsonDecode(utf8.decode(base64Decode(encoded)));
-    if (decoded case final Map<String, dynamic> json
-        when json['type'] is String) {
-      return json;
+    final envelope = jsonDecode(utf8.decode(payload));
+    if (envelope case {'bytes': final String encoded}) {
+      final decoded = jsonDecode(utf8.decode(base64Decode(encoded)));
+      if (decoded case final Map<String, dynamic> json
+          when json['type'] is String) {
+        return json;
+      }
+      return null;
     }
-    return null;
+    throw const FormatException('AWS event stream chunk is missing bytes');
+  } on FormatException catch (_, stackTrace) {
+    // Decoder sources may include an echoed credential encoded in the frame.
+    Error.throwWithStackTrace(
+      const FormatException('Invalid AWS event stream frame'),
+      stackTrace,
+    );
   }
-  throw const FormatException('AWS event stream chunk is missing bytes');
 }
 
 Map<String, String> _decodeHeaders(ByteData data, Uint8List frame, int end) {

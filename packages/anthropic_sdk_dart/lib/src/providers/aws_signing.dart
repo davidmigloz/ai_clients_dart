@@ -82,19 +82,26 @@ final class AwsRequestAuth {
       ..remove('authorization')
       ..remove('x-amz-security-token');
     if (apiKey case final key?) {
-      if (key.trim().isEmpty || key.contains(RegExp(r'[\r\n]'))) {
+      if (!_validAwsHeaderToken(key)) {
         throw ArgumentError('Invalid AWS-issued API key');
       }
       request.headers['authorization'] = 'Bearer $key';
       return;
     }
 
+    final signingRegion = region;
+    if (signingRegion == null || !_awsRegion.hasMatch(signingRegion)) {
+      throw ArgumentError('Invalid AWS signing region');
+    }
     final provider = credentials ?? ClaudeAwsCredentials.fromEnvironment;
     final ClaudeAwsCredentials resolved;
     try {
       resolved = await provider();
-      if (resolved.accessKeyId.isEmpty || resolved.secretAccessKey.isEmpty) {
-        throw StateError('Incomplete AWS credentials');
+      final token = resolved.sessionToken;
+      if (!_validAwsHeaderToken(resolved.accessKeyId) ||
+          resolved.secretAccessKey.isEmpty ||
+          (token != null && !_validAwsHeaderToken(token))) {
+        throw StateError('Invalid AWS credentials');
       }
     } catch (_) {
       throw http.ClientException(
@@ -105,12 +112,18 @@ final class AwsRequestAuth {
     signAwsRequest(
       request,
       credentials: resolved,
-      region: region!,
+      region: signingRegion,
       service: service,
       now: DateTime.now(),
     );
   }
 }
+
+final _awsRegion = RegExp(r'^[a-z0-9-]+$');
+final _invalidAwsHeaderByte = RegExp(r'[^\x21-\x7e]');
+
+bool _validAwsHeaderToken(String value) =>
+    value.isNotEmpty && !_invalidAwsHeaderByte.hasMatch(value);
 
 /// Signs a finalized non-S3 AWS service request with SigV4.
 ///

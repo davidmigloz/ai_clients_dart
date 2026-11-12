@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../auth/request_auth.dart';
 import '../client/retry_after.dart';
 import 'exceptions.dart';
 
@@ -178,7 +179,9 @@ String redactDiagnosticText(String value, Set<String> credentials) {
   for (final credential in longestFirst) {
     redacted = redacted.replaceAll(credential, '[REDACTED]');
   }
-  return redacted;
+  return redactPercentEncodedCredentialEcho(redacted, credentials) == null
+      ? 'API error response contained a redacted credential'
+      : redacted;
 }
 
 final _jsonDiagnosticEscape = RegExp(r'\\(?:u[0-9a-fA-F]{4}|["\\/bfnrt])');
@@ -201,7 +204,8 @@ String _redactDiagnosticBodyText(String text, Set<String> credentials) {
       final char => char,
     };
   });
-  if (decoded != text && redactCredentialEcho(decoded, credentials) == null) {
+  if (decoded != text &&
+      redactPercentEncodedCredentialEcho(decoded, credentials) == null) {
     return 'API error response contained a redacted credential';
   }
   return redactDiagnosticText(text, credentials);
@@ -304,6 +308,25 @@ String redactApiErrorBody(String body, Set<String> credentials) {
     );
   } on FormatException {
     return safeText;
+  }
+}
+
+/// Decodes a JSON API response without exposing reflected request credentials
+/// in format errors from a provider transport.
+T decodeApiJsonResponse<T>(
+  http.Response response,
+  T Function(Map<String, dynamic>) decode,
+) {
+  try {
+    return decode(jsonDecode(response.body) as Map<String, dynamic>);
+  } on FormatException catch (error, stackTrace) {
+    final credentials = requestCredentialValues(
+      response.request?.headers ?? const {},
+    );
+    Error.throwWithStackTrace(
+      redactApiFormatException(error, credentials),
+      stackTrace,
+    );
   }
 }
 

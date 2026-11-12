@@ -4,8 +4,10 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 import '../client/config.dart';
+import '../errors/response_error.dart';
 import '../models/messages/message_create_request.dart';
 import '../models/tokens/token_count.dart';
+import '../resources/base_resource.dart';
 import '../resources/message_request_validation.dart';
 import 'aws_signing.dart';
 import 'bedrock_event_stream.dart';
@@ -33,7 +35,7 @@ final class AnthropicBedrockMantleClient extends ProviderAnthropicClient {
       runtime: false,
     );
     return AnthropicBedrockMantleClient._(
-      config.copyWith(baseUrl: settings.base.toString(), workspaceId: null),
+      config.copyWith(baseUrl: settings.base.toString()),
       _MantleTransport(httpClient, settings.base, settings.auth),
     );
   }
@@ -100,8 +102,11 @@ final class AnthropicBedrockClient extends ProviderAnthropicClient {
       outbound,
       abortTrigger: abortTrigger,
     );
-    final json = jsonDecode(response.body) as Map<String, dynamic>;
-    return TokenCountResponse.fromJson({'input_tokens': json['inputTokens']});
+    return decodeApiJsonResponse(
+      response,
+      (json) =>
+          TokenCountResponse.fromJson({'input_tokens': json['inputTokens']}),
+    );
   }
 }
 
@@ -160,11 +165,28 @@ final class AnthropicBedrockClient extends ProviderAnthropicClient {
   );
 }
 
-abstract base class _BedrockTransport extends ProviderTransport {
+abstract base class _BedrockTransport extends ProviderTransport
+    implements MessageThreadSupport {
   _BedrockTransport(super.client, this.base, this.auth);
 
   final Uri base;
   final AwsRequestAuth auth;
+
+  @override
+  void ensureMessageThreadsSupported() {
+    throw UnsupportedError(
+      'Messages threads are unavailable on Amazon Bedrock',
+    );
+  }
+
+  Map<String, dynamic> _messageBody(ProviderRequest request) {
+    final body = _jsonRequest(request);
+    if (body['thread'] != null) ensureMessageThreadsSupported();
+    if (body['fallbacks'] != null) {
+      throw UnsupportedError('Server-side fallback is unavailable on Bedrock');
+    }
+    return body;
+  }
 }
 
 final class _MantleTransport extends _BedrockTransport {
@@ -179,13 +201,8 @@ final class _MantleTransport extends _BedrockTransport {
         'Bedrock Mantle supports Messages and token counting',
       );
     }
-    final profile = (request.headers..remove('anthropic-workspace-id')).remove(
-      'anthropic-user-profile-id',
-    );
-    final body = _jsonRequest(request);
-    if (body['fallbacks'] != null) {
-      throw UnsupportedError('Server-side fallback is unavailable on Bedrock');
-    }
+    final profile = request.headers.remove('anthropic-user-profile-id');
+    final body = _messageBody(request);
     if (profile != null) {
       body.putIfAbsent('user_profile_id', () => profile);
       request.body = Uint8List.fromList(utf8.encode(jsonEncode(body)));
@@ -207,15 +224,12 @@ final class _RuntimeTransport extends _BedrockTransport {
       );
     }
     request.headers.remove('anthropic-workspace-id');
-    final body = _jsonRequest(request);
+    final body = _messageBody(request);
     if (request.headers.containsKey('anthropic-user-profile-id') ||
         body.containsKey('user_profile_id')) {
       throw UnsupportedError(
         'User profile attribution is unavailable on Bedrock Runtime',
       );
-    }
-    if (body['fallbacks'] != null) {
-      throw UnsupportedError('Server-side fallback is unavailable on Bedrock');
     }
     final model = body.remove('model');
     final streaming = body.remove('stream') == true;

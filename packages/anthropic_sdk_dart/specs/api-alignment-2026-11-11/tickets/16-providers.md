@@ -25,3 +25,20 @@ Align provider-specific routing and authentication exposed by the pinned officia
 - [Claude platform access](https://platform.claude.com/docs/en/api/overview)
 - [Pinned Python platform clients](https://github.com/anthropics/anthropic-sdk-python/tree/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/src/anthropic/lib)
 - [Pinned TypeScript platform packages](https://github.com/anthropics/anthropic-sdk-typescript/tree/590783078cd961a0df698d9fddc0275c65ff3afd/packages)
+
+## Bedrock source decisions
+
+Both Bedrock transports reject server-held thread creation and raw thread
+requests, matching the pinned SDK capability. Mantle preserves configured and
+per-call workspace IDs, while Runtime moves model and API version into the
+AWS request shape. [AWS workspace routing](https://docs.aws.amazon.com/bedrock/latest/userguide/workspaces.html) · [Pinned TypeScript Bedrock adapters](https://github.com/anthropics/anthropic-sdk-typescript/tree/590783078cd961a0df698d9fddc0275c65ff3afd/packages/bedrock-sdk)
+
+Mantle uses `Authorization: Bearer` for the configured Bedrock API key, as
+both pinned SDKs do. The public guide also describes sending the separately
+minted short-lived Mantle key in `x-api-key`. An explicitly authenticated
+custom gateway can use `skipAuth` with its required headers.
+[Claude on Bedrock Mantle](https://platform.claude.com/docs/en/build-with-claude/claude-in-amazon-bedrock)
+
+Runtime accepts conformant AWS EventStream frame sizes and validates the
+prelude and message checksums. Partial transport reads reset the body idle
+timeout while a frame is assembled. [AWS EventStream format](https://smithy.io/2.0/aws/amazon-eventstream.html#message-format)

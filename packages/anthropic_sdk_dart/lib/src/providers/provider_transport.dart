@@ -99,6 +99,11 @@ abstract base class ProviderTransport extends http.BaseClient {
         _safeClientError(error, credentials),
         stackTrace,
       );
+    } on FormatException catch (error, stackTrace) {
+      Error.throwWithStackTrace(
+        redactApiFormatException(error, credentials),
+        stackTrace,
+      );
     }
     final adapted = adaptResponse(prepared, response);
     // Borrowed transports may omit request metadata. Record the exact sent
@@ -108,12 +113,17 @@ abstract base class ProviderTransport extends http.BaseClient {
         StreamTransformer.fromHandlers(
           handleError:
               (Object error, StackTrace stack, EventSink<List<int>> sink) {
-                sink.addError(
-                  error is http.ClientException
-                      ? _safeClientError(error, credentials)
-                      : error,
-                  stack,
-                );
+                sink.addError(switch (error) {
+                  http.ClientException() => _safeClientError(
+                    error,
+                    credentials,
+                  ),
+                  FormatException() => redactApiFormatException(
+                    error,
+                    credentials,
+                  ),
+                  _ => error,
+                }, stack);
               },
         ),
       ),

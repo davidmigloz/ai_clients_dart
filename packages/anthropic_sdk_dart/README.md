@@ -899,6 +899,10 @@ final client = AnthropicBedrockClient(region: 'us-east-1');
 final message = await client.messages.create(request);
 ```
 
+Mantle sends the configured or per-call workspace ID when supplied. Bedrock
+Mantle and Runtime use stateless Messages. Server-held Message threads and
+server-side fallback are unavailable on these endpoints.
+
 Use `countInvokeTokens(request)` for a Runtime model that supports AWS CountTokens. It takes the same body as InvokeModel, including `maxTokens`. Model and region support differ, especially for models available only through cross-region inference. Use Mantle's Claude token-counting endpoint where Runtime lacks it. Mantle maps `userProfileId` to the request body's `user_profile_id`. Runtime does not support profile attribution. [Amazon Bedrock token counting](https://docs.aws.amazon.com/bedrock/latest/userguide/count-tokens.html)
 
 → [Full example](example/bedrock_example.dart)

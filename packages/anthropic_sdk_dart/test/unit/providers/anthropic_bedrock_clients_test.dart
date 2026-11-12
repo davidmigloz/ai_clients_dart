@@ -21,6 +21,8 @@ const _keepAlive =
     'AAAAewAAAEsKLpavDTptZXNzYWdlLXR5cGUHAAVldmVudAs6ZXZlbnQtdHlwZQcABWNodW5rDTpjb250ZW50LXR5cGUHABBhcHBsaWNhdGlvbi9qc29ueyJieXRlcyI6ImV5SjFiblZ6WldRaU9uUnlkV1Y5In0WajL5';
 const _error =
     'AAAAkAAAAGGOkam3DTptZXNzYWdlLXR5cGUHAAlleGNlcHRpb24POmV4Y2VwdGlvbi10eXBlBwATdGhyb3R0bGluZ0V4Y2VwdGlvbg06Y29udGVudC10eXBlBwAQYXBwbGljYXRpb24vanNvbnsibWVzc2FnZSI6ImZpeHR1cmUgdGhyb3R0bGVkIn0KF40f';
+const _malformedCredentialFrame =
+    'AAAAYwAAACpgCxsiDTptZXNzYWdlLXR5cGUHAAVldmVudAs6ZXZlbnQtdHlwZQcABWNodW5reyJieXRlcyI6IlptbDRkSFZ5WlMxaVpXUnliMk5yTFd0bGVRPT0hIn1+ggid';
 const _credentialError =
     'AAAAqAAAAGEfwFrwDTptZXNzYWdlLXR5cGUHAAlleGNlcHRpb24POmV4Y2VwdGlvbi10eXBlBwATdGhyb3R0bGluZ0V4Y2VwdGlvbg06Y29udGVudC10eXBlBwAQYXBwbGljYXRpb24vanNvbnsibWVzc2FnZSI6ImZpeHR1cmUgdGhyb3R0bGVkIGZvciBmaXh0dXJlLWJlZHJvY2sta2V5In2r17GP';
 
@@ -31,12 +33,179 @@ MessageCreateRequest _request([String model = _arn]) => MessageCreateRequest(
 );
 
 void main() {
+  for (final runtime in [false, true]) {
+    test(
+      'Bedrock runtime=$runtime rejects unsupported threads before send',
+      () async {
+        var sends = 0;
+        final transport = MockClient((_) async {
+          sends++;
+          return _json(_fixture);
+        });
+        final client = runtime
+            ? AnthropicBedrockClient(
+                region: 'us-west-2',
+                apiKey: _token,
+                httpClient: transport,
+              )
+            : AnthropicBedrockMantleClient(
+                region: 'us-west-2',
+                apiKey: _token,
+                httpClient: transport,
+              );
+        addTearDown(client.close);
+        expect(
+          () => client.messages.createThread(_request()),
+          throwsUnsupportedError,
+        );
+        final threaded = _request().copyWith(
+          thread: const MessageThreadParam.create(),
+        );
+        const betas = ['message-threads-2026-08-12'];
+        await expectLater(
+          client.messages.create(threaded, betas: betas),
+          throwsUnsupportedError,
+        );
+        await expectLater(
+          client.messages.createStream(threaded, betas: betas).drain<void>(),
+          throwsUnsupportedError,
+        );
+        expect(sends, 0);
+        expect((await client.messages.create(_request())).id, 'msg_fixture');
+        expect(sends, 1);
+      },
+    );
+
+    test(
+      'Bedrock runtime=$runtime protects credentials in malformed responses',
+      () async {
+        final responses = [
+          utf8.encode('{"echo":"$_token",'),
+          [...utf8.encode('{"echo":"fixture%2Dbedrock%2Dkey",'), 0xff],
+        ];
+        final transport = MockClient((request) async {
+          expect(request.headers['authorization'], 'Bearer $_token');
+          return http.Response.bytes(
+            responses.removeAt(0),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        });
+        final client = runtime
+            ? AnthropicBedrockClient(
+                region: 'us-west-2',
+                apiKey: _token,
+                httpClient: transport,
+              )
+            : AnthropicBedrockMantleClient(
+                region: 'us-west-2',
+                apiKey: _token,
+                httpClient: transport,
+              );
+        addTearDown(client.close);
+        final safe = throwsA(
+          isA<FormatException>()
+              .having((error) => error.source, 'source', isNull)
+              .having(
+                (error) => error.toString(),
+                'credential',
+                isNot(contains('fixture')),
+              ),
+        );
+        await expectLater(client.messages.create(_request()), safe);
+        if (client is AnthropicBedrockClient) {
+          await expectLater(client.countInvokeTokens(_request()), safe);
+        } else {
+          await expectLater(
+            client.messages.countTokens(
+              TokenCountRequest(
+                model: _arn,
+                messages: [InputMessage.user('Hello')],
+              ),
+            ),
+            safe,
+          );
+        }
+        expect(responses, isEmpty);
+      },
+    );
+  }
+
+  test(
+    'invalid IAM header credential values fail before native send',
+    () async {
+      var sends = 0;
+      final transport = MockClient((_) async {
+        sends++;
+        return _json(_fixture);
+      });
+      for (final bad in [
+        const ClaudeAwsCredentials(
+          accessKeyId: 'hidden-id\nfixture',
+          secretAccessKey: 'secret',
+        ),
+        const ClaudeAwsCredentials(
+          accessKeyId: 'ID',
+          secretAccessKey: 'secret',
+          sessionToken: 'hidden-session\nfixture',
+        ),
+      ]) {
+        final client = AnthropicBedrockClient(
+          region: 'us-west-2',
+          credentials: () => bad,
+          httpClient: transport,
+        );
+        addTearDown(client.close);
+        await expectLater(
+          client.messages.create(_request()),
+          throwsA(
+            isA<http.ClientException>().having(
+              (error) => error.toString(),
+              'safe diagnostic',
+              isNot(contains('hidden-')),
+            ),
+          ),
+        );
+      }
+      expect(sends, 0);
+    },
+  );
+
+  test('malformed binary chunk hides its encoded source', () async {
+    final transport = MockClient(
+      (_) async => http.Response.bytes(
+        base64Decode(_malformedCredentialFrame),
+        200,
+        headers: {'content-type': 'application/vnd.amazon.eventstream'},
+      ),
+    );
+    final client = AnthropicBedrockClient(
+      region: 'us-west-2',
+      apiKey: _token,
+      httpClient: transport,
+    );
+    addTearDown(client.close);
+    final encoded = base64Encode(utf8.encode(_token));
+    await expectLater(
+      client.messages.createStream(_request()).toList(),
+      throwsA(
+        isA<FormatException>()
+            .having((error) => error.source, 'source', isNull)
+            .having(
+              (error) => error.toString(),
+              'safe diagnostic',
+              isNot(contains(encoded)),
+            ),
+      ),
+    );
+  });
+
   test('Mantle sends native Messages and token-counting routes', () async {
     final requests = <http.Request>[];
     final client = AnthropicBedrockMantleClient(
       region: 'us-west-2',
       apiKey: _token,
-      config: const AnthropicConfig(workspaceId: 'unused-workspace'),
+      config: const AnthropicConfig(workspaceId: 'wrkspc_configured'),
       httpClient: MockClient((request) async {
         requests.add(request);
         if (request.url.path.endsWith('/count_tokens')) {
@@ -56,7 +225,10 @@ void main() {
     addTearDown(client.close);
     const mantleModel = 'anthropic.claude-sonnet-5-5';
     expect(
-      (await client.messages.create(_request(mantleModel))).id,
+      (await client.messages.create(
+        _request(mantleModel),
+        workspaceId: 'wrkspc_per_call',
+      )).id,
       'msg_fixture',
     );
     expect(
@@ -75,11 +247,15 @@ void main() {
       '/anthropic/v1/messages',
       '/anthropic/v1/messages/count_tokens',
     ]);
+    expect(requests.map((r) => r.headers['anthropic-workspace-id']), [
+      'wrkspc_per_call',
+      'wrkspc_configured',
+      'wrkspc_configured',
+    ]);
     for (final r in requests) {
       expect(r.url.host, 'bedrock-mantle.us-west-2.api.aws');
       expect(r.headers['authorization'], 'Bearer $_token');
       expect(r.headers['x-api-key'], isNull);
-      expect(r.headers['anthropic-workspace-id'], isNull);
       expect(r.headers['anthropic-version'], '2026-10-21');
       expect(jsonDecode(r.body), containsPair('model', mantleModel));
     }
