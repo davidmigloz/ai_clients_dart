@@ -605,7 +605,19 @@ Pass `betas: ['compact-2026-09-04']` to `list` or `retrieve` to request the beta
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.files` to upload, list, and delete files. The Files API is generally available on the Claude API and supported first-party cloud platforms. It lets you reference stored files in Messages without uploading them again. This Dart resource requires a platform with `dart:io`.
+Use `client.files` to upload, list, retrieve, download, and delete files.
+The Files API is generally available on the Claude API and supported
+first-party cloud platforms. Reference stored files in Messages to reuse them
+across requests.
+
+On Web, use `uploadBytes` for browser-selected files. Listing, metadata,
+deletion, and byte downloads also work when the endpoint permits the browser's
+origin and request headers through CORS. Set `AnthropicConfig.baseUrl` to a
+CORS-enabled application backend that authenticates to Claude on the server
+and enforces each user's file and workspace access. To expose provider request
+IDs in browser errors, include `request-id` in `Access-Control-Expose-Headers`.
+The Files example accepts `ANTHROPIC_PROXY_URL` at build time. Local
+`upload(filePath: ...)` requires `dart:io`.
 
 Use `client.files.list(scopeId: sessionId)` to list Managed Agents outputs. The scoped request adds the Managed Agents beta header. Only files whose metadata reports `downloadable` can be downloaded.
 

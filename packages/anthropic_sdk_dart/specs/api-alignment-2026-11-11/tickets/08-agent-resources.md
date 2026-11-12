@@ -39,3 +39,7 @@ Use public-entry-point fixtures and the package review checklist. Keep live API 
 [Agent memory](https://platform.claude.com/docs/en/managed-agents/memory) · [Scheduled deployments](https://platform.claude.com/docs/en/managed-agents/scheduled-deployments) · [Dreams preview](https://platform.claude.com/docs/en/managed-agents/dreams)
 
 Opaque resource IDs use the shared safe-segment encoder on deployment, run, Dreams, memory and vault routes. Internal response-only state stays in private constructors. Public constructors serialize their typed state consistently.
+
+## Files on Web
+
+Native and browser builds share all HTTP-only Files operations. Local file-path upload uses a conditional reader. Browser fixtures exercise byte upload, list, retrieve, delete and download, including binary payloads and scoped headers. A local CORS server verifies the default browser transport without live Claude calls.
