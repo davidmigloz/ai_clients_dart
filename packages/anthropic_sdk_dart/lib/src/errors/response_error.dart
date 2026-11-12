@@ -46,7 +46,7 @@ ParsedApiErrorBody parseApiErrorBody(
       final details = error['details'];
       return (
         message: message != null
-            ? _redactDiagnosticText(message, credentials)
+            ? redactDiagnosticText(message, credentials)
             : legacyResourceMessage
             ? _safeFallbackMessage(body, credentials)
             : 'Unknown error',
@@ -65,7 +65,7 @@ ParsedApiErrorBody parseApiErrorBody(
       'message': final String message,
     } when !legacyResourceMessage) {
       return (
-        message: _redactDiagnosticText(message, credentials),
+        message: redactDiagnosticText(message, credentials),
         details: const [],
         errorDetails: null,
         errorCode: null,
@@ -148,7 +148,8 @@ bool _containsCredential(Object? value, Set<String> credentials) =>
       _ => false,
     };
 
-String _redactDiagnosticText(String value, Set<String> credentials) {
+/// Redacts effective credentials in decoded provider diagnostics.
+String redactDiagnosticText(String value, Set<String> credentials) {
   var redacted = value;
   for (final credential in credentials) {
     redacted = redacted.replaceAll(credential, '[REDACTED]');
@@ -179,7 +180,7 @@ String _redactDiagnosticBodyText(String text, Set<String> credentials) {
   if (decoded != text && redactCredentialEcho(decoded, credentials) == null) {
     return 'API error response contained a redacted credential';
   }
-  return _redactDiagnosticText(text, credentials);
+  return redactDiagnosticText(text, credentials);
 }
 
 /// Keeps the parse error and position while removing an unsafe decoder source.
@@ -225,7 +226,7 @@ Object? _redactDiagnosticValue(
   Set<String> credentials, {
   bool omitEchoedIdentifiers = false,
 }) => switch (value) {
-  String() => _redactDiagnosticText(value, credentials),
+  String() => redactDiagnosticText(value, credentials),
   List<Object?>() => List<Object?>.unmodifiable(
     value.map(
       (item) => _redactDiagnosticValue(
