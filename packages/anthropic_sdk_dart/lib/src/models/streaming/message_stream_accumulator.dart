@@ -18,6 +18,7 @@ class _AccumulatedContentBlock {
   _AccumulatedContentBlock(this.initialBlock);
 
   final ContentBlock initialBlock;
+  bool stopped = false;
 
   // Type-specific buffers (only the relevant one is used per block type).
   final StringBuffer textBuffer = StringBuffer();
@@ -63,6 +64,8 @@ class MessageStreamAccumulator {
   ContextManagementResult? _contextManagement;
   bool _hasContextManagement = false;
   bool _receivedStop = false;
+  bool _receivedMessageDelta = false;
+  bool _invalidBlockSequence = false;
   ErrorEvent? _streamError;
   List<InputTransformation>? _inputTransformations;
   final List<_AccumulatedContentBlock> _blocks = [];
@@ -95,14 +98,25 @@ class MessageStreamAccumulator {
         _contextManagement = message.contextManagement;
         _hasContextManagement = message.hasContextManagement;
         _inputTransformations = message.inputTransformations;
-      case ContentBlockStartEvent(:final contentBlock):
+      case ContentBlockStartEvent(:final index, :final contentBlock):
+        if (_id == null || index != _blocks.length) {
+          _invalidBlockSequence = true;
+        }
         _blocks.add(_AccumulatedContentBlock(contentBlock));
       case ContentBlockDeltaEvent(:final index, :final delta):
-        if (index >= 0 && index < _blocks.length) {
-          _addDelta(_blocks[index], delta);
+        if (index < 0 || index >= _blocks.length) {
+          _invalidBlockSequence = true;
+        } else {
+          final block = _blocks[index];
+          if (block.stopped) _invalidBlockSequence = true;
+          _addDelta(block, delta);
         }
-      case ContentBlockStopEvent():
-        break;
+      case ContentBlockStopEvent(:final index):
+        if (index < 0 || index >= _blocks.length || _blocks[index].stopped) {
+          _invalidBlockSequence = true;
+        } else {
+          _blocks[index].stopped = true;
+        }
       case MessageDeltaEvent(
         :final delta,
         :final usage,
@@ -110,6 +124,7 @@ class MessageStreamAccumulator {
         :final contextManagement,
         :final hasContextManagement,
       ):
+        _receivedMessageDelta = _id != null;
         if (delta.hasStopReason) {
           _stopReason = delta.stopReason;
           _stopReasonValue = delta.stopReasonValue;
@@ -372,8 +387,9 @@ class MessageStreamAccumulator {
 
   /// Builds a complete message for use as conversation history.
   ///
-  /// Throws [StateError] if the stream ended before `message_stop` or sent
-  /// an [ErrorEvent], or [FormatException] when tool input is malformed.
+  /// Throws [StateError] for an incomplete terminal sequence,
+  /// [MessageStreamFailure] for an [ErrorEvent], or [FormatException] when
+  /// tool input is malformed.
   /// Use [toMessage] to inspect a partial snapshot.
   Message toFinalMessage() {
     if (_streamError case final error?) {
@@ -381,6 +397,14 @@ class MessageStreamAccumulator {
     }
     if (!_receivedStop) {
       throw StateError('Message stream ended before message_stop');
+    }
+    if (_invalidBlockSequence || _blocks.any((block) => !block.stopped)) {
+      throw StateError(
+        'Message stream has an incomplete content block sequence',
+      );
+    }
+    if (!_receivedMessageDelta) {
+      throw StateError('Message stream ended without message_delta');
     }
     return _buildMessage(strict: true);
   }
@@ -400,6 +424,8 @@ class MessageStreamAccumulator {
     _contextManagement = null;
     _hasContextManagement = false;
     _receivedStop = false;
+    _receivedMessageDelta = false;
+    _invalidBlockSequence = false;
     _streamError = null;
     _inputTransformations = null;
     _blocks.clear();

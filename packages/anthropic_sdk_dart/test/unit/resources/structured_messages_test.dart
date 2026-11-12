@@ -30,7 +30,7 @@ void main() {
       httpClient: httpClient,
     );
     request = MessageCreateRequest(
-      model: 'claude-sonnet-5',
+      model: 'claude-sonnet-5-5',
       maxTokens: 128,
       messages: [InputMessage.user('What is 2 + 2?')],
     );
@@ -46,7 +46,7 @@ void main() {
       final input = request.copyWith(
         outputConfig: const OutputConfig(
           effort: EffortLevel.low,
-          taskBudget: TokenTaskBudget(total: 4096, remaining: 2048),
+          taskBudget: TokenTaskBudget(total: 24000, remaining: 22000),
         ),
       );
       httpClient.queueJsonResponse({
@@ -61,7 +61,7 @@ void main() {
       final result = await client.messages.parse(
         input,
         output: output,
-        betas: ['example-beta'],
+        betas: ['task-budgets-2026-03-13'],
         workspaceId: 'wrk_test',
         userProfileId: 'uprof_test',
       );
@@ -78,14 +78,14 @@ void main() {
       expect(sent.url.path, '/v1/messages');
       expect(sent.headers['x-api-key'], 'test-key');
       expect(sent.headers['anthropic-version'], '2026-10-21');
-      expect(sent.headers['anthropic-beta'], 'example-beta');
+      expect(sent.headers['anthropic-beta'], 'task-budgets-2026-03-13');
       expect(sent.headers['anthropic-workspace-id'], 'wrk_test');
       expect(sent.headers['anthropic-user-profile-id'], 'uprof_test');
       expect(jsonDecode(sent.body), {
         ...request.toJson(),
         'output_config': {
           'effort': 'low',
-          'task_budget': {'type': 'tokens', 'total': 4096, 'remaining': 2048},
+          'task_budget': {'type': 'tokens', 'total': 24000, 'remaining': 22000},
           'format': {'type': 'json_schema', 'schema': _schema},
         },
       });
@@ -231,6 +231,56 @@ void main() {
     );
     expect(decoderCalls, 0);
   });
+
+  for (final missingType in ['content_block_stop', 'message_delta']) {
+    test('message_stop without $missingType cannot complete', () async {
+      final malformed = MockResponses.streamingEvents(text: '{"answer":4}')
+        ..removeWhere((event) => event['type'] == missingType);
+      var decoderCalls = 0;
+      final counted = StructuredOutput<int>(
+        schema: _schema,
+        decode: (json) {
+          decoderCalls++;
+          return _answer(json);
+        },
+      );
+      httpClient.queueStreamingResponse(malformed);
+      await expectLater(
+        client.messages
+            .parseStream(request, output: counted)
+            .finalParsedMessage(),
+        throwsA(isA<StateError>()),
+      );
+      expect(decoderCalls, 0);
+
+      httpClient.queueStreamingResponse(malformed);
+      await expectLater(
+        client.messages.createStream(request).finalMessage(),
+        throwsA(isA<StateError>()),
+      );
+    });
+  }
+
+  test(
+    'mismatched block stop and explicit null terminal reason fail',
+    () async {
+      for (final (eventType, field, value) in [
+        ('content_block_stop', 'index', 1),
+        ('message_delta', 'delta', {'stop_reason': null}),
+      ]) {
+        final events = MockResponses.streamingEvents(text: '{"answer":4}');
+        events.singleWhere((event) => event['type'] == eventType)[field] =
+            value;
+        httpClient.queueStreamingResponse(events);
+        await expectLater(
+          client.messages
+              .parseStream(request, output: output)
+              .finalParsedMessage(),
+          throwsA(isA<StateError>()),
+        );
+      }
+    },
+  );
 
   test('rejects conflicting typed formats before sending', () async {
     final conflicting = request.copyWith(

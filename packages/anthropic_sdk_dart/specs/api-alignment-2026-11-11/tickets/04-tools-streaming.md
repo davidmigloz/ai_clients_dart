@@ -32,6 +32,15 @@ Decoder errors on completed text retain the original message and block index.
 
 Persisted request JSON accepts a single deprecated top-level `output_format`
 and emits `output_config.format`. Dart rejects both format values together,
-as both pinned SDKs do. The Dart helper takes a JSON Schema and caller decoder,
-preserving effort and task-budget settings.
+matching the pinned beta Messages request transforms. Python GA `messages.parse`
+merges its typed format over an existing format. TypeScript beta batch creation
+passes stored request items through. Dart applies one rule to persisted JSON for
+Messages, token counts, and batches. The Dart helper takes a JSON Schema and
+caller decoder, preserving effort and task-budget settings.
+
+Completed Messages stream helpers require `message_stop`, a matching stop for
+each started content block, and `message_delta`. The structured helper also
+requires a non-null terminal stop reason before decoding. Ordinary stream
+completion still preserves explicit null updates for compatibility. Snapshots
+can be read during the stream. [Claude streaming event order](https://platform.claude.com/docs/en/build-with-claude/streaming) · [Streaming stop reasons](https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons)
 [Pinned Python conflict check](https://github.com/anthropics/anthropic-sdk-python/blob/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/src/anthropic/lib/_parse/_transform.py) · [Pinned TypeScript request transform](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/src/lib/internal/beta-messages-request.ts)

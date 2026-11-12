@@ -112,7 +112,8 @@ final request = MessageCreateRequest(
 
 For `client.messages.parse` and `parseStream`, provide the schema through
 `StructuredOutput<T>` and leave the request's format unset. The helpers retain
-the request's effort and task budget.
+the request's effort and task budget. Task budgets require a supported model
+and `task-budgets-2026-03-13` in the call's beta flags.
 
 ---
 

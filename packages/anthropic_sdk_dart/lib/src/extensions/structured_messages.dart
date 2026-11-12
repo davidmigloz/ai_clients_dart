@@ -125,13 +125,20 @@ final class StructuredMessageStream<T> extends StreamView<MessageStreamEvent> {
   Future<ParsedMessage<T>> finalParsedMessage({
     void Function(MessageStreamEvent event)? onEvent,
   }) async {
-    final events = onEvent == null
-        ? this
-        : map((event) {
-            onEvent(event);
-            return event;
-          });
-    return _output.parseMessage(await events.finalMessage());
+    StopReason? terminalReason;
+    final message = await map((event) {
+      if (event case MessageDeltaEvent(:final delta) when delta.hasStopReason) {
+        terminalReason = delta.stopReason;
+      }
+      onEvent?.call(event);
+      return event;
+    }).finalMessage();
+    if (terminalReason == null) {
+      throw StateError(
+        'Structured stream ended without a terminal stop reason',
+      );
+    }
+    return _output.parseMessage(message);
   }
 }
 
