@@ -213,9 +213,17 @@ void main() {
     () async {
       const token = 'fixture-plugin+/=token';
       final encoded = Uri.encodeComponent(token);
+      final malformed = '{"manifest_error":"Bearer $encoded';
+      late final int? offset;
+      try {
+        jsonDecode(malformed);
+        fail('Expected invalid fixture JSON to throw');
+      } on FormatException catch (error) {
+        offset = error.offset;
+      }
       final transport = MockClient((request) async {
         expect(request.headers['authorization'], 'Bearer $token');
-        return http.Response('{"manifest_error":"Bearer $encoded', 200);
+        return http.Response(malformed, 200);
       });
       final client = AnthropicClient(
         config: const AnthropicConfig(authProvider: BearerTokenProvider(token)),
@@ -228,7 +236,7 @@ void main() {
         ),
         throwsA(
           isA<FormatException>()
-              .having((error) => error.offset, 'offset', isNotNull)
+              .having((error) => error.offset, 'offset', offset)
               .having((error) => error.source, 'source', isNull)
               .having(
                 (error) => error.toString(),
