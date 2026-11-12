@@ -34,3 +34,12 @@ Sources
 - [Pinned Python exchange](https://github.com/anthropics/anthropic-sdk-python/blob/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/src/anthropic/lib/credentials/_workload.py)
 - [Pinned TypeScript exchange](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/src/lib/credentials/oidc-federation.ts)
 - [WIF HTTP contract](https://platform.claude.com/docs/en/manage-claude/wif-reference)
+
+## Federation rules source decisions
+
+The pinned HTTP response includes nullable `workspace_id` and `attributes`.
+The GA Python and TypeScript rule types omit those fields. Dart accepts the
+GA SDK projection and serializes the HTTP shape with explicit null fields.
+Rule listing uses a cursor. The workspace binding list returns explicit
+bindings with a null cursor and accepts the compatibility page parameters.
+[WIF Admin guide](https://platform.claude.com/docs/en/manage-claude/wif-admin-api) · [Pinned Python rules](https://github.com/anthropics/anthropic-sdk-python/blob/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/src/anthropic/resources/organization/federation/rules/rules.py) · [Pinned TypeScript rule workspaces](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/src/resources/organization/federation/rules/workspaces.ts)
