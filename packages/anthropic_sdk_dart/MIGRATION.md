@@ -39,6 +39,29 @@ final mantle = AnthropicBedrockMantleClient(
 The Bedrock clients expose Messages inference. Mantle uses the Claude count-tokens request and Runtime uses `countInvokeTokens` with the original InvokeModel body. Runtime stream exceptions surface as typed Claude error events. [Claude API version migration](https://platform.claude.com/docs/en/api/migration-2026-10-21) · [AWS token counting](https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_CountTokens.html)
 
 
+## Select a cloud provider client
+
+Use the provider class that matches your deployment when migrating a custom `baseUrl` configuration. Keep the same Dart Messages types and obtain credentials from that provider.
+
+| Provider | Authentication | Routing and API version |
+| --- | --- | --- |
+| Anthropic-managed Google Cloud | Google OAuth callback or access token | Project and workspace are in the URL. Organization and user profiles use the project gateway. The API version remains a header. |
+| Google-managed Vertex | Google OAuth callback or access token | Vertex uses the publisher model or token-counting route. The API version moves into the body. Use `vertex-2023-10-16` for the legacy contract. |
+| Microsoft Foundry | Azure API key or Entra token callback | Use the Foundry resource and deployment name. The API version remains a header. Set `azureHosted: true` for an Azure-hosted deployment. |
+
+For example, replace manual Vertex URL and body rewriting with the provider client. Request code still uses `client.messages.create(request)`.
+
+```dart
+final client = AnthropicVertexClient(
+  projectId: 'my-project',
+  region: 'global',
+  tokenProvider: refreshGoogleAccessToken,
+  config: const AnthropicConfig(apiVersion: 'vertex-2023-10-16'),
+);
+```
+
+For regional and model-specific version support, see [Vertex](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/google-managed), [Anthropic-managed Google Cloud](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/anthropic-managed), and [Foundry](https://platform.claude.com/docs/en/build-with-claude/claude-in-microsoft-foundry).
+
 ## Claude API version 2026-10-21
 
 The default API version changes from `2023-06-01` to `2026-10-21`. Every

@@ -4,9 +4,9 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~15.4k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~16.1k tokens): Primary package documentation with installation, configuration, and usage examples.
 - [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/CHANGELOG.md) (~12.9k tokens): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) (~15.6k tokens): Upgrade notes and breaking-change guidance.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) (~15.9k tokens): Upgrade notes and breaking-change guidance.
 
 ## Examples
 
@@ -36,6 +36,8 @@
 - [skills_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/skills_example.dart) (~1.1k tokens): Skills management.
 - [claude_aws_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/claude_aws_example.dart) (~170 tokens): Native Claude Platform on AWS authentication and Messages.
 - [bedrock_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/bedrock_example.dart) (~346 tokens): Stream Claude through Bedrock Mantle or Runtime.
+- [google_cloud_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/google_cloud_example.dart) (~384 tokens): Send a message through Anthropic-managed Google Cloud or Vertex.
+- [foundry_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/foundry_example.dart) (~284 tokens): Stream a Foundry deployment with Azure authentication.
 - [managed_agents_workflow_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/managed_agents_workflow_example.dart) (~734 tokens): Configure dynamic workflows and follow workflow run events (Managed Agents beta).
 - [managed_agents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/managed_agents_example.dart) (~1.7k tokens): Managed agents: agents, sessions, vaults, multiagent rosters, outcomes, webhooks, credential validation (beta).
 - [environments_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/environments_example.dart) (~206 tokens): Managed Agents cloud and self-hosted environment lifecycle (beta).
@@ -74,4 +76,4 @@
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/anthropic_sdk_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~79k tokens**
+**Total: ~80.8k tokens**

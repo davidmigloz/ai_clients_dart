@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../errors/response_error.dart';
 import '../models/user_profiles/create_user_profile_request.dart';
 import '../models/user_profiles/current_user_profile.dart';
 import '../models/user_profiles/current_user_profile_requests.dart';
@@ -321,7 +322,7 @@ abstract class _UserProfilesBase extends ResourceBase {
       request,
       abortTrigger: abortTrigger,
     );
-    return decode(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, decode);
   }
 }
 

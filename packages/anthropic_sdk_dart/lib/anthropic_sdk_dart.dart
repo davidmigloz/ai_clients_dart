@@ -301,8 +301,13 @@ export 'src/models/user_profiles/user_profile_trust_grant.dart';
 export 'src/providers/anthropic_aws_client.dart' show AnthropicAwsClient;
 export 'src/providers/anthropic_bedrock_clients.dart'
     show AnthropicBedrockClient, AnthropicBedrockMantleClient;
+export 'src/providers/anthropic_foundry_client.dart'
+    show AnthropicFoundryClient;
+export 'src/providers/anthropic_google_clients.dart'
+    show AnthropicGoogleCloudClient, AnthropicVertexClient;
 export 'src/providers/aws_signing.dart'
     show ClaudeAwsCredentialProvider, ClaudeAwsCredentials;
+export 'src/providers/cloud_access_token.dart' show CloudAccessTokenProvider;
 
 // Resources
 export 'src/resources/agents_resource.dart';

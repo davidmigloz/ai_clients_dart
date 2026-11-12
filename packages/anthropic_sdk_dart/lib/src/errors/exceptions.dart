@@ -65,7 +65,10 @@ class ResponseMetadata {
     }
     if (bodyRequestId case final id?) return id;
     for (final entry in headers.entries) {
-      if (entry.key.toLowerCase() == 'x-amzn-requestid' &&
+      if (const {
+            'x-amzn-requestid',
+            'apim-request-id',
+          }.contains(entry.key.toLowerCase()) &&
           entry.value.trim().isNotEmpty) {
         return entry.value;
       }

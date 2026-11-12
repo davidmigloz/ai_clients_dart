@@ -111,6 +111,7 @@ ResponseMetadata createSafeResponseMetadata({
       if (const {
         'request-id',
         'x-amzn-requestid',
+        'apim-request-id',
         'retry-after',
         'retry-after-ms',
       }.contains(entry.key.toLowerCase()))
