@@ -3,6 +3,27 @@ import 'package:http/http.dart' as http;
 import 'auth_provider.dart';
 import 'workload_identity.dart';
 
+const _credentialHeaderNames = {
+  'authorization',
+  'x-api-key',
+  'api-key',
+  'x-amz-security-token',
+};
+final _invalidCredentialHeaderByte = RegExp(r'[^\x09\x20-\x7e]');
+
+/// A provider transport that replaces credentials before its own dispatch.
+abstract interface class DeferredCredentialHeaders {}
+
+/// Rejects unsafe auth field values before an HTTP client can report them.
+void validateRequestCredentialHeaders(Map<String, String> headers) {
+  for (final entry in headers.entries) {
+    if (_credentialHeaderNames.contains(entry.key.toLowerCase()) &&
+        _invalidCredentialHeaderByte.hasMatch(entry.value)) {
+      throw const FormatException('Invalid authentication header value');
+    }
+  }
+}
+
 /// Adds provider credentials without overwriting explicit auth headers.
 Future<Map<String, String>> resolveCredentialHeaders(
   Map<String, String> headers,
@@ -48,12 +69,7 @@ Set<String> requestCredentialValues(
       final key = entry.key.toLowerCase();
       final value = entry.value.trim();
       if (value.isEmpty) continue;
-      if (const {
-        'authorization',
-        'x-api-key',
-        'api-key',
-        'x-amz-security-token',
-      }.contains(key)) {
+      if (_credentialHeaderNames.contains(key)) {
         values.add(value);
       }
       if (key != 'authorization') continue;

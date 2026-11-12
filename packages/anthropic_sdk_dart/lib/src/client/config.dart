@@ -115,22 +115,30 @@ class AnthropicConfig {
 
   /// Creates an [AnthropicConfig] using runtime environment variables.
   ///
-  /// Reads `ANTHROPIC_API_KEY` for the API key (required).
+  /// Reads `ANTHROPIC_API_KEY` or, if it is absent or empty,
+  /// `ANTHROPIC_AUTH_TOKEN` for an OAuth access token.
   /// Optionally reads `ANTHROPIC_BASE_URL` for a custom base URL.
   ///
-  /// Throws [StateError] if `ANTHROPIC_API_KEY` is not set.
+  /// Throws [StateError] if both credential variables are absent or empty.
   /// Throws [UnsupportedError] on web platforms.
   factory AnthropicConfig.fromEnvironment() {
     final apiKey = getEnvironmentVariable('ANTHROPIC_API_KEY');
-    if (apiKey == null || apiKey.isEmpty) {
-      throw StateError(
-        'Environment variable ANTHROPIC_API_KEY is not set. '
-        'Set it to your Anthropic API key.',
-      );
+    final AuthProvider authProvider;
+    if (apiKey != null && apiKey.isNotEmpty) {
+      authProvider = ApiKeyProvider(apiKey);
+    } else {
+      final authToken = getEnvironmentVariable('ANTHROPIC_AUTH_TOKEN');
+      if (authToken == null || authToken.isEmpty) {
+        throw StateError(
+          'Set ANTHROPIC_API_KEY to an Anthropic API key or '
+          'ANTHROPIC_AUTH_TOKEN to an OAuth access token.',
+        );
+      }
+      authProvider = BearerTokenProvider(authToken);
     }
     final baseUrl = getEnvironmentVariable('ANTHROPIC_BASE_URL');
     return AnthropicConfig(
-      authProvider: ApiKeyProvider(apiKey),
+      authProvider: authProvider,
       baseUrl: (baseUrl != null && baseUrl.isNotEmpty)
           ? baseUrl
           : 'https://api.anthropic.com',

@@ -53,6 +53,9 @@ Future<http.StreamedResponse> _sendWithRequest(
   http.Client client,
   http.BaseRequest request,
 ) async {
+  if (client is! DeferredCredentialHeaders) {
+    validateRequestCredentialHeaders(request.headers);
+  }
   final credentials = requestCredentialValues(request.headers)
     ..addAll(requestDiagnosticCredentials(request));
   requestCredentialObserver(request)?.call(credentials);

@@ -118,7 +118,13 @@ Future<void> main() async {
 <details>
 <summary><b>Configure auth, retries, and custom Anthropic endpoints</b></summary>
 
-Use `AnthropicClient.fromEnvironment()` when `ANTHROPIC_API_KEY` is available. Switch to `AnthropicConfig` when you need a proxy, custom timeout, or a non-default retry policy.
+Use `AnthropicClient.fromEnvironment()` to read `ANTHROPIC_API_KEY` or an
+`ANTHROPIC_AUTH_TOKEN` OAuth access token. The API key takes precedence when
+both are set. To run the quickstart with OAuth, set `ANTHROPIC_AUTH_TOKEN` to a
+token with inference access and unset `ANTHROPIC_API_KEY`. The factory reads a
+static token. Use `AnthropicClient.withWorkloadIdentity()` for automatic
+federation exchange and refresh. Use `AnthropicConfig` for a custom timeout or
+retry policy.
 
 Configure `baseUrl` as the final API or proxy URL. Requests carrying an
 `x-api-key` follow redirects only within the same origin on native transports.
@@ -157,8 +163,9 @@ through the buffered client pipeline.
 
 Environment variables:
 
-- `ANTHROPIC_API_KEY`
-- `ANTHROPIC_BASE_URL`
+- `ANTHROPIC_API_KEY` for an API key
+- `ANTHROPIC_AUTH_TOKEN` for a scoped OAuth access token
+- `ANTHROPIC_BASE_URL` for a custom API or proxy URL
 
 The client defaults to Claude API version `2026-10-21`. If your requests rely
 on sampling parameters or other legacy input behavior, set
