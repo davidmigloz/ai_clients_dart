@@ -57,6 +57,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - MCP tunnel and certificate management in approved Claude API workspaces (research preview)
 - Organization Admin API for keys, users, invites, workspaces, rate limits, compliance settings, RBAC and spend limits
 - Service account lifecycle and workspace memberships with scoped OAuth
+- Customer-managed encryption keys and validation through the Admin API
 - Files (expiration, cursor pagination) and skills (multi-file uploads, container skills)
 - Managed agents with environments, self-hosted work, sessions, thread status filters, execution principals, tool permission evaluation, vaults, and streaming events (beta)
 - Scheduled deployments on the Claude API, Claude Platform on AWS, and Anthropic-managed Claude Models on Google Cloud (beta)
@@ -1169,6 +1170,29 @@ an Admin API key. Retry a temporary `503` using the configured retry policy.
 
 </details>
 
+<details>
+<summary><b>Inspect organization external keys</b></summary>
+
+Enable customer-managed encryption keys for your organization and use a
+Claude Platform Admin key. `client.organization.externalKeys` supports AWS
+KMS, Google Cloud KMS, and Azure Key Vault or Managed HSM where available.
+Specify a user profile at key registration when binding a key to a customer.
+
+```dart
+final page = await admin.organization.externalKeys.list(limit: 10);
+for (final key in page.data) {
+  print('${key.providerConfig.type}: ${key.attachment.type}');
+}
+```
+
+The standalone `externalKeys.validate` call applies to supported Claude
+Platform accounts. Claude Platform on AWS uses the full KMS ARN as the key ID
+and validates the key when attaching it to a workspace.
+
+[Runnable external keys example](example/external_keys_example.dart) · [Claude CMEK Admin API](https://platform.claude.com/docs/en/manage-claude/cmek-admin-api)
+
+</details>
+
 ### How do I use the Compliance API?
 
 <details>
@@ -1314,6 +1338,7 @@ See the [example/](example/) directory for complete examples:
 | [`user_profiles_example.dart`](example/user_profiles_example.dart) | Legacy user profiles and enrollment URLs (beta) |
 | [`service_accounts_example.dart`](example/service_accounts_example.dart) | List service accounts and their workspace memberships |
 | [`organization_admin_example.dart`](example/organization_admin_example.dart) | Read-only organization and workspace administration |
+| [`external_keys_example.dart`](example/external_keys_example.dart) | List registered customer-managed encryption keys |
 | [`organization_rbac_example.dart`](example/organization_rbac_example.dart) | List RBAC groups, members, roles and permissions |
 | [`organization_spend_example.dart`](example/organization_spend_example.dart) | List effective spend limits and pending increase requests |
 | [`models_example.dart`](example/models_example.dart) | Model lifecycle filters, pagination, and capabilities |

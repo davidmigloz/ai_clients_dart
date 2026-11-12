@@ -2,6 +2,7 @@ import '../../client/interceptor_chain.dart';
 import '../../client/request_builder.dart';
 import '../../models/organization/organization_records.dart';
 import 'organization_access_resources.dart';
+import 'organization_external_keys_resource.dart';
 import 'organization_federation_resource.dart';
 import 'organization_rbac_resources.dart';
 import 'organization_service_accounts_resource.dart';
@@ -38,7 +39,8 @@ final class OrganizationResource {
       spendLimits = OrganizationSpendLimitsResource(_transport),
       complianceSettings = OrganizationComplianceSettingsResource(_transport),
       federation = OrganizationFederationResource(_transport),
-      serviceAccounts = OrganizationServiceAccountsResource(_transport);
+      serviceAccounts = OrganizationServiceAccountsResource(_transport),
+      externalKeys = OrganizationExternalKeysResource(_transport);
 
   final OrganizationTransport _transport;
 
@@ -62,6 +64,9 @@ final class OrganizationResource {
 
   /// Service accounts and their workspace memberships.
   final OrganizationServiceAccountsResource serviceAccounts;
+
+  /// Customer-managed encryption keys.
+  final OrganizationExternalKeysResource externalKeys;
 
   /// Role-based access groups and their members.
   final OrganizationRbacGroupsResource rbacGroups;

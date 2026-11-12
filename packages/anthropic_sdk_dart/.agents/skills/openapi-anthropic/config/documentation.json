@@ -20,6 +20,7 @@
     "tunnels": "mcp_tunnels",
     "environmentWork": "environment_work",
     "organization": "organization_admin",
+    "organizationExternalKeys": "external_keys",
     "organizationFederation": "federation_issuers",
     "organizationFederationIssuers": "federation_issuers",
     "organizationFederationRules": "federation_rules",
