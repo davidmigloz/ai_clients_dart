@@ -56,11 +56,11 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Organization Admin API for keys, users, invites, workspaces, rate limits, compliance settings, RBAC and spend limits
 - Files (expiration, cursor pagination) and skills (multi-file uploads, container skills)
 - Managed agents with environments, self-hosted work, sessions, thread status filters, execution principals, tool permission evaluation, vaults, and streaming events (beta)
-- Scheduled deployments: run agent sessions on a cron schedule, with deployment runs, pause/resume, and run-now (beta)
+- Scheduled deployments on the Claude API, Claude Platform on AWS, and Anthropic-managed Claude Models on Google Cloud (beta)
 - Multiagent orchestration with dynamic workflows, subagents, and an advisor, plus per-tool configs, session budgets, and outcome evaluations (beta)
 - Typed webhook event parsing and MCP-OAuth / static-bearer / environment-variable credential validation (beta)
 - Memory stores for persistent agent memories with versioning and redaction (beta)
-- Dreams: asynchronous memory-consolidation jobs over memory stores and session transcripts, with `create_new`/`update_existing` output behavior (beta, research preview)
+- Dreams: asynchronous memory-consolidation jobs over memory stores and session transcripts, with `create_new`/`update_existing` output behavior (Claude API research preview with access approval)
 - Generally available user profiles with end-customer attribution, enforcement filters, program status, and action URLs. The legacy beta profile methods remain available.
 
 ## Why choose this client?
@@ -817,7 +817,7 @@ For existing Admin integrations, migrate the organization-prefixed tunnel URLs t
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.memoryStores` to create persistent memory stores that can be mounted into agent sessions. The API supports memory CRUD, append-only versioning, and per-version redaction. This is a beta feature and the SDK sends the required `anthropic-beta` header automatically.
+Use `client.memoryStores` to create persistent memory stores that can be mounted into agent sessions. The API supports memory CRUD, append-only versioning, and per-version redaction. This is a beta feature and the SDK sends the required `anthropic-beta` header automatically. For directory-style listings, use a prefix ending in `/` and `depth: 1` to group deeper paths. Memory paths start with `/`, use up to 20 nonempty segments, and must be NFC-normalized UTF-8 of at most 1,024 bytes. [Agent memory guide](https://platform.claude.com/docs/en/managed-agents/memory)
 
 ```dart
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';

@@ -186,7 +186,7 @@ class UpdateDeploymentParams {
       name: name == unsetCopyWithValue ? this.name : name as String?,
       initialEvents: initialEvents == unsetCopyWithValue
           ? this.initialEvents
-          : initialEvents as List<DeploymentInitialEventParams>?,
+          : (initialEvents as List?)?.cast<DeploymentInitialEventParams>(),
       description: description == unsetCopyWithValue
           ? _description
           : description,

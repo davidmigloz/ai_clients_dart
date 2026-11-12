@@ -12,19 +12,24 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// 1. Create a dream from a memory store and session transcripts
 /// 2. Poll until the dream finishes
 /// 3. List dreams filtered by status
-/// 4. Cancel a still-running dream, or archive a finished one
+/// 4. Archive a finished dream
 ///
 /// Note: the Dreams API is in research preview — request and response shapes
 /// are volatile and may change without the deprecation period that applies
 /// to generally-available endpoints. This is a beta feature and requires the
 /// `anthropic-beta: dreaming-2026-04-21` header (sent automatically by the
 /// SDK).
-void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
-    ),
-  );
+/// Request research-preview access on the Claude API and set
+/// ANTHROPIC_API_KEY. Pass an existing memory store ID followed by session IDs:
+/// `dart run example/dreams_example.dart memstore_... sesn_...`.
+Future<void> main(List<String> args) async {
+  if (args.length < 2 || args.length > 101) {
+    print(
+      'Usage: dart run example/dreams_example.dart STORE_ID SESSION_ID [...]',
+    );
+    return;
+  }
+  final client = AnthropicClient.fromEnvironment();
 
   try {
     // 1. Create a dream that reads an existing memory store plus a couple of
@@ -32,17 +37,17 @@ void main() async {
     //    output memory store.
     print('=== Create Dream ===');
     var dream = await client.dreams.create(
-      const CreateDreamRequest(
+      CreateDreamRequest(
         inputs: [
-          DreamMemoryStoreInput(memoryStoreId: 'memstore_source123'),
-          DreamSessionsInput(sessionIds: ['session_a', 'session_b']),
+          DreamMemoryStoreInput(memoryStoreId: args.first),
+          DreamSessionsInput(sessionIds: args.sublist(1)),
         ],
         instructions: 'Consolidate notes about user preferences.',
-        model: DreamModelParamsId(id: 'claude-sonnet-5'),
+        model: const DreamModelParamsId(id: 'claude-sonnet-5'),
         // Defaults to creating a new output memory store; pass
         // `OutputBehavior.updateExisting(memoryStoreId)` to consolidate an
         // existing store in place instead.
-        outputBehavior: OutputBehaviorCreateNew(),
+        outputBehavior: const OutputBehaviorCreateNew(),
       ),
     );
     print(

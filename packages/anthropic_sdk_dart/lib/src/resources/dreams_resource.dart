@@ -6,6 +6,7 @@ import '../models/dreams/create_dream_request.dart';
 import '../models/dreams/dream.dart';
 import '../models/dreams/dream_status.dart';
 import '../models/dreams/list_dreams_response.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 
 /// Beta header for the Dreams API.
@@ -110,7 +111,9 @@ class DreamsResource extends ResourceBase {
   /// - [abortTrigger]: Allows canceling the request.
   Future<Dream> retrieve(String dreamId, {Future<void>? abortTrigger}) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/dreams/$dreamId');
+    final url = requestBuilder.buildUrl(
+      '/v1/dreams/${encodePathSegment(dreamId, 'dreamId')}',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );
@@ -131,7 +134,9 @@ class DreamsResource extends ResourceBase {
   /// - [abortTrigger]: Allows canceling the request.
   Future<Dream> archive(String dreamId, {Future<void>? abortTrigger}) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/dreams/$dreamId/archive');
+    final url = requestBuilder.buildUrl(
+      '/v1/dreams/${encodePathSegment(dreamId, 'dreamId')}/archive',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );
@@ -154,7 +159,9 @@ class DreamsResource extends ResourceBase {
   /// - [abortTrigger]: Allows canceling the request.
   Future<Dream> cancel(String dreamId, {Future<void>? abortTrigger}) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/dreams/$dreamId/cancel');
+    final url = requestBuilder.buildUrl(
+      '/v1/dreams/${encodePathSegment(dreamId, 'dreamId')}/cancel',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
     );

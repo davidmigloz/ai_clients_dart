@@ -29,3 +29,13 @@ Use public-entry-point fixtures and the package review checklist. Keep live API 
 - File upload, file download, skill multipart upload and ZIP download now have fixtures on the normal public paths using non-UTF-8 bytes and real finalized multipart headers. Response-body request IDs and known error codes survive 404 expired downloads and 400 duplicate skill failures. Earlier cancellation and malformed response fixtures remain in #501 and #502.
 - Documentation inventory verified package README Files and Skills Usage, `files_example.dart`, `skills_example.dart`, their example-index entries, and Dartdoc in FilesResource, SkillsResource, FileListResponse, SkillFile, and SkillSource. Regenerated llms.txt in scratch and verified toolkit docs and README. Runnable examples document ANTHROPIC_API_KEY and arguments. The Dart Files resource still requires dart:io, documented in its Usage section.
 - The final `scope_id` query controls the Managed Agents beta, including base-URL and configured query parameters. Files and Skills encode each identifier as one segment and reject empty or dot-only identifiers before dispatch, including dot prefixes followed by semicolon parameters. [Pinned TypeScript path encoder](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/src/internal/utils/path.ts)
+
+## Managed Agents ancillary source decisions
+
+- The pinned SDKs and current wire schema use `archived_at` as a required nullable memory-store field. Current responses round-trip explicit null. Preserve historical payloads without the field. Keep opaque memory path prefixes and local bounds in line with the documented path and depth rules.
+- Deployment status, memory-version operation and credential validation statuses retain unknown wire values for later serialization. Empty collection literals can clear inherited metadata and lists without a runtime cast failure.
+- Scheduled deployments require the Managed Agents beta and support the Claude API, Claude Platform on AWS and Anthropic-managed Claude Models on Google Cloud. Dreams require approved research preview access on the Claude API. The examples use runtime credentials and retain the selected workspace and beta contracts.
+
+[Agent memory](https://platform.claude.com/docs/en/managed-agents/memory) · [Scheduled deployments](https://platform.claude.com/docs/en/managed-agents/scheduled-deployments) · [Dreams preview](https://platform.claude.com/docs/en/managed-agents/dreams)
+
+Opaque resource IDs use the shared safe-segment encoder on deployment, run, Dreams, memory and vault routes. Internal response-only state stays in private constructors. Public constructors serialize their typed state consistently.

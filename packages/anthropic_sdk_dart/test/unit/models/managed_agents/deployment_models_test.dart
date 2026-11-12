@@ -431,7 +431,34 @@ void main() {
     });
   });
 
+  test('schedule copy accepts an untyped empty timestamp list', () {
+    final schedule = CronSchedule(
+      expression: '0 9 * * *',
+      timezone: 'UTC',
+      upcomingRunsAt: [DateTime.utc(2026, 11, 12)],
+    );
+    final cleared = schedule.copyWith(upcomingRunsAt: []);
+    expect(cleared.upcomingRunsAt, isEmpty);
+    expect(cleared.toJson()['upcoming_runs_at'], isEmpty);
+    expect(schedule.copyWith(upcomingRunsAt: null).upcomingRunsAt, isNull);
+  });
+
   group('UpdateDeploymentParams', () {
+    test('initial events copy accepts a list produced by dynamic code', () {
+      const event = DeploymentUserMessageEventParams(
+        UserMessageEventParams(
+          content: [
+            {'type': 'text', 'text': 'Start work'},
+          ],
+        ),
+      );
+      final update = const UpdateDeploymentParams().copyWith(
+        initialEvents: <Object>[event],
+      );
+      expect(update.initialEvents, [event]);
+      expect(update.toJson()['initial_events'], [event.toJson()]);
+    });
+
     test('empty params emit an empty body', () {
       const params = UpdateDeploymentParams();
       expect(params.toJson(), isEmpty);

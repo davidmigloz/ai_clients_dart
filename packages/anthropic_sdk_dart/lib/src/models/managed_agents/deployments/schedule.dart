@@ -118,7 +118,7 @@ class CronSchedule extends Schedule {
           : lastRunAt as BetaTimestamp?,
       upcomingRunsAt: upcomingRunsAt == unsetCopyWithValue
           ? this.upcomingRunsAt
-          : upcomingRunsAt as List<BetaTimestamp>?,
+          : (upcomingRunsAt as List?)?.cast<BetaTimestamp>(),
     );
   }
 

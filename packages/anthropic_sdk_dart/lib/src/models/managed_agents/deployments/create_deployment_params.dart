@@ -137,16 +137,16 @@ class CreateDeploymentParams {
           : description as String?,
       metadata: metadata == unsetCopyWithValue
           ? this.metadata
-          : metadata as Map<String, String>?,
+          : (metadata as Map?)?.cast<String, String>(),
       resources: resources == unsetCopyWithValue
           ? this.resources
-          : resources as List<SessionResourceParams>?,
+          : (resources as List?)?.cast<SessionResourceParams>(),
       schedule: schedule == unsetCopyWithValue
           ? this.schedule
           : schedule as ScheduleParams?,
       vaultIds: vaultIds == unsetCopyWithValue
           ? this.vaultIds
-          : vaultIds as List<String>?,
+          : (vaultIds as List?)?.cast<String>(),
       budget: budget == unsetCopyWithValue ? this.budget : budget as Budget?,
     );
   }

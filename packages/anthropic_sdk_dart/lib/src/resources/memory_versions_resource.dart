@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../models/managed_agents/memory_stores/memory_version.dart';
 import '../models/managed_agents/memory_stores/memory_version_list_response.dart';
 import '../models/managed_agents/memory_stores/memory_view.dart';
+import '../utils/path_segment.dart';
 import 'base_resource.dart';
 
 /// Beta header for the Agent Memory API.
@@ -70,7 +71,7 @@ class MemoryVersionsResource extends ResourceBase {
     };
 
     final url = requestBuilder.buildUrl(
-      '/v1/memory_stores/$memoryStoreId/memory_versions',
+      '/v1/memory_stores/${encodePathSegment(memoryStoreId, 'memoryStoreId')}/memory_versions',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
     final headers = requestBuilder.buildHeaders(
@@ -103,7 +104,8 @@ class MemoryVersionsResource extends ResourceBase {
     final queryParams = <String, dynamic>{'view': ?view?.toJson()};
 
     final url = requestBuilder.buildUrl(
-      '/v1/memory_stores/$memoryStoreId/memory_versions/$memoryVersionId',
+      '/v1/memory_stores/${encodePathSegment(memoryStoreId, 'memoryStoreId')}'
+      '/memory_versions/${encodePathSegment(memoryVersionId, 'memoryVersionId')}',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
     final headers = requestBuilder.buildHeaders(
@@ -133,7 +135,9 @@ class MemoryVersionsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/memory_stores/$memoryStoreId/memory_versions/$memoryVersionId/redact',
+      '/v1/memory_stores/${encodePathSegment(memoryStoreId, 'memoryStoreId')}'
+      '/memory_versions/${encodePathSegment(memoryVersionId, 'memoryVersionId')}'
+      '/redact',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'anthropic-beta': _betaHeader},
