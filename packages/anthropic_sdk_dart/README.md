@@ -33,7 +33,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 
 - Messages with typed inputs, system prompts, and multi-turn history
 - Mid-conversation system messages (`InputMessage.system`), turn-scoped reminders (`clearAt`), and per-message effort (`InputMessage.systemEffort`) inside the messages array, no user turn required
-- SSE streaming with cancelation and token counting
+- SSE streaming with cancelation, token counting, and typed structured output
 - Adaptive and extended thinking controls, with `outputTokensDetails` reasoning-token breakdown, typed `thinking`/`redacted_thinking` input blocks, `Message.toInputMessage()` for multi-turn replay, `display: updates` progress updates, and preserved-thinking block-binding controls with `inputTransformations` reporting (beta)
 - Prompt-cache diagnostics on the Claude API report where the cache prefix diverged between turns
 - Server-held Messages threads, context editing, threshold compaction, and signed on-demand compaction (beta)
@@ -315,6 +315,46 @@ same event. Future event types arrive as
 `UnknownMessageStreamEvent` and retain their JSON payload.
 
 → [Full example](example/streaming_example.dart)
+
+</details>
+
+### How do I decode a structured response?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Give Claude a [supported JSON Schema](https://platform.claude.com/docs/en/build-with-claude/structured-outputs) and supply a Dart decoder for the result.
+
+```dart
+final answer = StructuredOutput<int>(
+  schema: {
+    'type': 'object',
+    'properties': {
+      'answer': {'type': 'integer'},
+    },
+    'required': ['answer'],
+    'additionalProperties': false,
+  },
+  decode: (json) => switch (json) {
+    {'answer': final int value} => value,
+    _ => throw const FormatException('Expected an integer answer.'),
+  },
+);
+
+final result = await client.messages.parse(
+  MessageCreateRequest(
+    model: 'claude-sonnet-5',
+    maxTokens: 128,
+    messages: [InputMessage.user('What is 2 + 2?')],
+  ),
+  output: answer,
+);
+print(result.parsedOutput);
+```
+
+`parseStream(...).finalParsedMessage()` decodes after streaming finishes. The result keeps the original message, including refusal details and token usage. For a refusal, tool request, or truncated generation, inspect the raw stop reason. The decoder handles application validation. Supply a schema compatible with your selected model and platform.
+
+→ [Full example](example/structured_output_example.dart)
 
 </details>
 
@@ -1396,6 +1436,7 @@ See the [example/](example/) directory for complete examples:
 | [`api_version_example.dart`](example/api_version_example.dart) | Current API version and legacy opt-out |
 | [`mid_conversation_system_example.dart`](example/mid_conversation_system_example.dart) | Mid-conversation, turn-scoped, and effort-only system messages |
 | [`streaming_example.dart`](example/streaming_example.dart) | Streaming responses |
+| [`structured_output_example.dart`](example/structured_output_example.dart) | Typed JSON output with buffered or streamed responses |
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Tool calling with schemas |
 | [`web_search_example.dart`](example/web_search_example.dart) | Web search tool |
 | [`advisor_example.dart`](example/advisor_example.dart) | Advisor tool (beta) |
