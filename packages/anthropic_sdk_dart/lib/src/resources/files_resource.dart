@@ -1,9 +1,9 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
 import '../auth/request_auth.dart';
+import '../errors/response_error.dart';
 import '../models/files/file_delete_response.dart';
 import '../models/files/file_list_response.dart';
 import '../models/files/file_metadata.dart';
@@ -148,8 +148,7 @@ class FilesResource extends ResourceBase {
       ensureNotClosed: ensureNotClosed,
     );
 
-    final json = jsonDecode(response.body) as Map<String, dynamic>;
-    return FileMetadata.fromJson(json);
+    return decodeApiJsonResponse(response, FileMetadata.fromJson);
   }
 
   /// Lists uploaded files.
@@ -226,9 +225,7 @@ class FilesResource extends ResourceBase {
 
     final response = await interceptorChain.execute(httpRequest);
 
-    return FileListResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, FileListResponse.fromJson);
   }
 
   /// Gets metadata for a specific file.
@@ -259,9 +256,7 @@ class FilesResource extends ResourceBase {
 
     final response = await interceptorChain.execute(httpRequest);
 
-    return FileMetadata.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, FileMetadata.fromJson);
   }
 
   /// Deletes a file.
@@ -292,9 +287,7 @@ class FilesResource extends ResourceBase {
 
     final response = await interceptorChain.execute(httpRequest);
 
-    return FileDeleteResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, FileDeleteResponse.fromJson);
   }
 
   /// Downloads the content of a file.

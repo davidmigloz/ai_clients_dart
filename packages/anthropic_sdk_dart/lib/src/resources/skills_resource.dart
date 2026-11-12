@@ -1,9 +1,9 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
 import '../auth/request_auth.dart';
+import '../errors/response_error.dart';
 import '../models/skills/deleted_skill.dart';
 import '../models/skills/skill.dart';
 import '../models/skills/skill_file.dart';
@@ -91,8 +91,7 @@ class SkillsResource extends ResourceBase {
       ensureNotClosed: ensureNotClosed,
     );
 
-    final json = jsonDecode(response.body) as Map<String, dynamic>;
-    return Skill.fromJson(json);
+    return decodeApiJsonResponse(response, Skill.fromJson);
   }
 
   /// Lists skills.
@@ -136,9 +135,7 @@ class SkillsResource extends ResourceBase {
 
     final response = await interceptorChain.execute(httpRequest);
 
-    return SkillListResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, SkillListResponse.fromJson);
   }
 
   /// Gets a specific skill.
@@ -169,7 +166,7 @@ class SkillsResource extends ResourceBase {
 
     final response = await interceptorChain.execute(httpRequest);
 
-    return Skill.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return decodeApiJsonResponse(response, Skill.fromJson);
   }
 
   /// Deletes a skill and all of its versions.
@@ -200,9 +197,7 @@ class SkillsResource extends ResourceBase {
 
     final response = await interceptorChain.execute(httpRequest);
 
-    return DeletedSkill.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, DeletedSkill.fromJson);
   }
 
   /// Creates a new version of a skill.
@@ -263,8 +258,7 @@ class SkillsResource extends ResourceBase {
       ensureNotClosed: ensureNotClosed,
     );
 
-    final json = jsonDecode(response.body) as Map<String, dynamic>;
-    return SkillVersion.fromJson(json);
+    return decodeApiJsonResponse(response, SkillVersion.fromJson);
   }
 
   /// Lists versions of a skill.
@@ -309,9 +303,7 @@ class SkillsResource extends ResourceBase {
 
     final response = await interceptorChain.execute(httpRequest);
 
-    return SkillVersionListResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, SkillVersionListResponse.fromJson);
   }
 
   /// Gets a specific version of a skill.
@@ -347,9 +339,7 @@ class SkillsResource extends ResourceBase {
 
     final response = await interceptorChain.execute(httpRequest);
 
-    return SkillVersion.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, SkillVersion.fromJson);
   }
 
   /// Downloads the content of a specific version of a skill.
@@ -439,9 +429,7 @@ class SkillsResource extends ResourceBase {
 
     final response = await interceptorChain.execute(httpRequest);
 
-    return DeletedSkillVersion.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return decodeApiJsonResponse(response, DeletedSkillVersion.fromJson);
   }
 
   /// Applies authentication to a request.

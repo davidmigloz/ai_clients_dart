@@ -8,6 +8,9 @@ import 'package:test/test.dart';
 
 const _awsKey = 'fixture-aws-bearer-key';
 const _sessionToken = 'fixture-aws-session-token';
+const _googleToken = 'fixture-google-oauth-token';
+const _foundryKey = 'fixture-foundry-api-key';
+const _foundryToken = 'fixture-foundry-entra-token';
 const _config = AnthropicConfig(retryPolicy: RetryPolicy(maxRetries: 0));
 const _awsCredentials = ClaudeAwsCredentials(
   accessKeyId: 'AKIDEXAMPLE',
@@ -376,6 +379,54 @@ void main() {
     ),
     _signedValues,
     supportsSseFixture: false,
+  );
+
+  // Google and Foundry transports
+  _verifyProvider(
+    'Anthropic-managed Google bearer',
+    (transport) => AnthropicGoogleCloudClient(
+      projectId: 'project-fixture',
+      workspaceId: 'wrkspc_fixture',
+      tokenProvider: () => _googleToken,
+      config: _config,
+      httpClient: transport,
+    ),
+    (request) => _bearerValues(request, _googleToken),
+  );
+  _verifyProvider(
+    'Vertex bearer',
+    (transport) => AnthropicVertexClient(
+      projectId: 'project-fixture',
+      region: 'global',
+      tokenProvider: () => _googleToken,
+      config: _config,
+      httpClient: transport,
+    ),
+    (request) => _bearerValues(request, _googleToken),
+  );
+  _verifyProvider(
+    'Foundry API key',
+    (transport) => AnthropicFoundryClient(
+      resource: 'fixture',
+      apiKey: _foundryKey,
+      config: _config,
+      httpClient: transport,
+    ),
+    (request) {
+      expect(request.headers['x-api-key'], _foundryKey);
+      expect(request.headers['authorization'], isNull);
+      return [_foundryKey];
+    },
+  );
+  _verifyProvider(
+    'Foundry Entra bearer',
+    (transport) => AnthropicFoundryClient(
+      resource: 'fixture',
+      tokenProvider: () => _foundryToken,
+      config: _config,
+      httpClient: transport,
+    ),
+    (request) => _bearerValues(request, _foundryToken),
   );
 }
 

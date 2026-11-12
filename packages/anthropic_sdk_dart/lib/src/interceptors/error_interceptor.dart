@@ -106,7 +106,7 @@ class ErrorInterceptor implements Interceptor {
   /// Redacts sensitive headers.
   Map<String, String> _redactHeaders(Map<String, String> headers) {
     const sensitiveKeys = [
-      'x-api-key',
+      'api-key',
       'authorization',
       'token',
       'password',

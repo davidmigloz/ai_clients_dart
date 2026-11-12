@@ -69,7 +69,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Memory stores for persistent agent memories with versioning and redaction (beta)
 - Dreams: asynchronous memory-consolidation jobs over memory stores and session transcripts, with `create_new`/`update_existing` output behavior (Claude API research preview with access approval)
 - Generally available user profiles with end-customer attribution, enforcement filters, program status, and action URLs. The legacy beta profile methods remain available.
-- Claude Platform on AWS and Amazon Bedrock Mantle and Runtime transports with AWS-issued Bearer or SigV4
+- Claude Platform on AWS, Amazon Bedrock Mantle and Runtime, Anthropic-managed Google Cloud, Vertex AI, and Microsoft Foundry transports
 
 ## Why choose this client?
 
@@ -910,6 +910,51 @@ Use `countInvokeTokens(request)` for a Runtime model that supports AWS CountToke
 
 </details>
 
+### How do I use Claude on Google Cloud?
+
+<details>
+<summary><b>Choose an Anthropic-managed or Google-managed project</b></summary>
+
+Use `AnthropicGoogleCloudClient` for the native Claude gateway through your Google Cloud project. Provide the project and workspace IDs. Organization routes and user profile management use the project-level gateway automatically. Managed Agents remain subject to beta and IAM access. MCP tunnels and prebuilt sandbox workers are unavailable on this provider. [Anthropic-managed Google Cloud](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/anthropic-managed)
+
+```dart
+final client = AnthropicGoogleCloudClient(
+  projectId: 'my-project',
+  workspaceId: workspaceId,
+  tokenProvider: refreshGoogleAccessToken,
+);
+final message = await client.messages.create(request);
+```
+
+Use `AnthropicVertexClient` for Google-managed Vertex. Select the project, region, and publisher model ID. Vertex supports Messages, streaming, and token counting. For Files, Batches, Managed Agents, Admin, Compliance, and profile management, check the availability of each API on the native gateway or Claude API. The Vertex transport puts `anthropic_version` in the request body and uses the provider's model-specific route. To attribute a request, create the profile on the Claude API or Claude Platform on AWS and link the Google Cloud project as documented. [User profile attribution](https://platform.claude.com/docs/en/manage-claude/user-profiles#attribute-requests-on-claude-models-on-google-cloud-google-managed-and-amazon-bedrock) [Google-managed Vertex](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/google-managed)
+
+Both clients accept a Google OAuth access token or a callback that refreshes it with your Google credentials. Connect the callback to your Application Default Credentials or service-account provider in a long-running application.
+
+→ [Full example](example/google_cloud_example.dart)
+
+</details>
+
+### How do I use Claude in Microsoft Foundry?
+
+<details>
+<summary><b>Send a message to a Foundry deployment</b></summary>
+
+Use `AnthropicFoundryClient` with your Foundry resource and an Azure API key or Entra token provider. Set `model` in the Messages request to the deployment name. The Entra callback should obtain a token for `https://ai.azure.com/.default`.
+
+```dart
+final client = AnthropicFoundryClient(
+  resource: 'my-foundry-resource',
+  tokenProvider: refreshEntraToken,
+);
+final message = await client.messages.create(request);
+```
+
+Set `azureHosted: true` for an Azure-hosted deployment. Files, Skills, code execution, programmatic tool calling, and newer web search and web fetch versions require an Anthropic-hosted deployment. Foundry omits Admin, Compliance, Models, Message Batches, user profile management, Managed Agents, and the advisor tool. Use client-side model fallback. Profile attribution requires an Anthropic-hosted deployment and an Anthropic-linked Foundry resource. [Foundry feature support](https://platform.claude.com/docs/en/build-with-claude/claude-in-microsoft-foundry#feature-support)
+
+→ [Full example](example/foundry_example.dart)
+
+</details>
+
 ### How do I use managed agents?
 
 <details>
@@ -1498,6 +1543,8 @@ See the [example/](example/) directory for complete examples:
 | [`mcp_example.dart`](example/mcp_example.dart) | Connect an MCP server and pin its tool listing (beta) |
 | [`claude_aws_example.dart`](example/claude_aws_example.dart) | Native Claude Platform on AWS authentication and Messages |
 | [`bedrock_example.dart`](example/bedrock_example.dart) | Stream Claude through Bedrock Mantle or Runtime |
+| [`google_cloud_example.dart`](example/google_cloud_example.dart) | Send a message through Anthropic-managed Google Cloud or Vertex |
+| [`foundry_example.dart`](example/foundry_example.dart) | Stream a Foundry deployment with Azure authentication |
 | [`managed_agents_example.dart`](example/managed_agents_example.dart) | Managed agents: agents, sessions, vaults, multiagent rosters, outcomes, webhooks, credential validation (beta) |
 | [`managed_agents_workflow_example.dart`](example/managed_agents_workflow_example.dart) | Configure dynamic workflows and follow workflow run events (Managed Agents beta) |
 | [`environments_example.dart`](example/environments_example.dart) | Managed Agents cloud and self-hosted environment lifecycle (beta) |

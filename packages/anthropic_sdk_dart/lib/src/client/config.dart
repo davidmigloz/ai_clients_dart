@@ -103,6 +103,7 @@ class AnthropicConfig {
     this.logLevel = Level.INFO,
     this.redactionList = const [
       'x-api-key',
+      'api-key',
       'authorization',
       'token',
       'password',

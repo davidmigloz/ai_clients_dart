@@ -42,3 +42,32 @@ custom gateway can use `skipAuth` with its required headers.
 Runtime accepts conformant AWS EventStream frame sizes and validates the
 prelude and message checksums. Partial transport reads reset the body idle
 timeout while a frame is assembled. [AWS EventStream format](https://smithy.io/2.0/aws/amazon-eventstream.html#message-format)
+
+## Google Cloud and Foundry source decisions
+
+The Anthropic-managed gateway scopes the URL with the constructor workspace
+and routes organization and user-profile operations to the project gateway.
+Per-request workspace headers do not change that URL. An explicit base URL
+owns both routes. OAuth requests preserve a caller's explicit Authorization
+header, and gateway mode preserves caller-managed credentials. The native
+gateway supports the worker queue with Google credentials and carries the
+Messages thread beta on its native Messages route.
+[Pinned Google Cloud client](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/packages/google-cloud-sdk/src/client.ts)
+
+Vertex moves the API version and inference model to their publisher API
+locations. Token counting keeps the model in the body. The Vertex client
+rejects server-held threads and automatic model fallback before acquiring
+credentials. [Pinned Vertex client](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/packages/vertex-sdk/src/client.ts)
+
+Foundry sends the documented `x-api-key`, as in TypeScript. Python also
+sends the legacy `api-key` alias. An explicitly configured Azure key takes
+precedence over default authentication headers. Entra mode supports a token
+callback and a caller-supplied Authorization override. The transport
+preserves safe Azure and Claude trace IDs and supports the native Messages
+thread shape where the deployment enables the beta.
+[Pinned Python Foundry client](https://github.com/anthropics/anthropic-sdk-python/blob/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/src/anthropic/lib/foundry.py) · [Pinned TypeScript Foundry client](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/packages/foundry-sdk/src/client.ts)
+
+Dart accepts a credential callback so applications can use their existing
+cloud identity libraries. Provider-managed default credential discovery
+would need a compatible Google or Azure identity dependency for the
+supported Dart platforms.
