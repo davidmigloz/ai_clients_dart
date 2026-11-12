@@ -8,9 +8,10 @@ up-to-date document for navigating breaking changes across versions.
 
 ### Source material
 
-Use the `breaking_changes` field from the PR summaries collected in Step 4b.
-This contains the `## Breaking Changes` section from the PR description,
-which includes migration paths with before/after code examples.
+Use the `breaking_changes` field from Step 4b as a starting point. Compare each
+change with the last published package. Omit migration instructions for APIs
+introduced and removed between releases. Include verified changes in defaults,
+validation, or serialization that affect existing callers.
 
 If `breaking_changes` is empty for a package that has breaking commits (e.g.,
 older PRs without a `## Breaking Changes` section), synthesize migration
@@ -74,7 +75,13 @@ If `## Migrating from v{prev}.x to v{new_version}` already exists
 (e.g., manually added), review and merge. Prefer the existing text where it
 conflicts but add any missing migration paths from the PR descriptions.
 
+If the guide already contains unversioned sections for this release, move them
+under the new version heading and merge overlapping instructions. Preserve
+linked heading anchors or update the links when a heading changes.
+
 ### Quality check
 
-Verify that before/after code examples reference correct class names and
-method signatures from the actual released package version.
+Check each **before** example against the last published version and each
+**after** example against the release candidate. Use a temporary Dart package
+to analyze snippets when the public API changed. Use local fixtures or mocks
+to check behavior when a signature check is insufficient.
