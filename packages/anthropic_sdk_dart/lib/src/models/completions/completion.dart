@@ -101,7 +101,7 @@ class CompletionRequest {
       maxTokensToSample: maxTokensToSample ?? this.maxTokensToSample,
       stopSequences: stopSequences == unsetCopyWithValue
           ? this.stopSequences
-          : stopSequences as List<String>?,
+          : copyWithList<String>(stopSequences),
       stream: stream == unsetCopyWithValue ? this.stream : stream as bool?,
       temperature: temperature == unsetCopyWithValue
           ? this.temperature

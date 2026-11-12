@@ -121,14 +121,14 @@ class Tool {
           : cacheControl as CacheControlEphemeral?,
       allowedCallers: allowedCallers == unsetCopyWithValue
           ? this.allowedCallers
-          : allowedCallers as List<String>?,
+          : copyWithList<String>(allowedCallers),
       deferLoading: deferLoading == unsetCopyWithValue
           ? this.deferLoading
           : deferLoading as bool?,
       strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
       inputExamples: inputExamples == unsetCopyWithValue
           ? this.inputExamples
-          : inputExamples as List<Map<String, dynamic>>?,
+          : copyWithList<Map<String, dynamic>>(inputExamples),
       eagerInputStreaming: eagerInputStreaming == unsetCopyWithValue
           ? this.eagerInputStreaming
           : eagerInputStreaming as bool?,

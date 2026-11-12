@@ -284,7 +284,7 @@ class AgentToolset20260401Params extends AgentToolParams {
           : defaultConfig as AgentToolsetDefaultConfigParams?,
       configs: configs == unsetCopyWithValue
           ? this.configs
-          : configs as List<AgentToolConfigParams>?,
+          : copyWithList<AgentToolConfigParams>(configs),
     );
   }
 
@@ -459,7 +459,7 @@ class MCPToolsetParams extends AgentToolParams {
           : defaultConfig as MCPToolsetDefaultConfigParams?,
       configs: configs == unsetCopyWithValue
           ? this.configs
-          : configs as List<MCPToolConfigParams>?,
+          : copyWithList<MCPToolConfigParams>(configs),
     );
   }
 
@@ -1589,10 +1589,10 @@ class WebFetchToolConfig extends AgentToolConfig {
       permissionPolicy: permissionPolicy ?? this.permissionPolicy,
       allowedDomains: allowedDomains == unsetCopyWithValue
           ? this.allowedDomains
-          : allowedDomains as List<String>?,
+          : copyWithList<String>(allowedDomains),
       blockedDomains: blockedDomains == unsetCopyWithValue
           ? this.blockedDomains
-          : blockedDomains as List<String>?,
+          : copyWithList<String>(blockedDomains),
       maxContentTokens: maxContentTokens == unsetCopyWithValue
           ? this.maxContentTokens
           : maxContentTokens as int?,
@@ -1729,10 +1729,10 @@ class WebSearchToolConfig extends AgentToolConfig {
       permissionPolicy: permissionPolicy ?? this.permissionPolicy,
       allowedDomains: allowedDomains == unsetCopyWithValue
           ? this.allowedDomains
-          : allowedDomains as List<String>?,
+          : copyWithList<String>(allowedDomains),
       blockedDomains: blockedDomains == unsetCopyWithValue
           ? this.blockedDomains
-          : blockedDomains as List<String>?,
+          : copyWithList<String>(blockedDomains),
       userLocation: userLocation == unsetCopyWithValue
           ? this.userLocation
           : userLocation as UserLocation?,
@@ -2562,10 +2562,10 @@ class WebFetchToolConfigParams extends AgentToolConfigParams {
           : permissionPolicy as PermissionPolicy?,
       allowedDomains: allowedDomains == unsetCopyWithValue
           ? this.allowedDomains
-          : allowedDomains as List<String>?,
+          : copyWithList<String>(allowedDomains),
       blockedDomains: blockedDomains == unsetCopyWithValue
           ? this.blockedDomains
-          : blockedDomains as List<String>?,
+          : copyWithList<String>(blockedDomains),
       maxContentTokens: maxContentTokens == unsetCopyWithValue
           ? this.maxContentTokens
           : maxContentTokens as int?,
@@ -2692,10 +2692,10 @@ class WebSearchToolConfigParams extends AgentToolConfigParams {
           : permissionPolicy as PermissionPolicy?,
       allowedDomains: allowedDomains == unsetCopyWithValue
           ? this.allowedDomains
-          : allowedDomains as List<String>?,
+          : copyWithList<String>(allowedDomains),
       blockedDomains: blockedDomains == unsetCopyWithValue
           ? this.blockedDomains
-          : blockedDomains as List<String>?,
+          : copyWithList<String>(blockedDomains),
       userLocation: userLocation == unsetCopyWithValue
           ? this.userLocation
           : userLocation as UserLocation?,
@@ -2921,13 +2921,13 @@ class CustomToolInputSchema {
       type: type ?? this.type,
       properties: properties == unsetCopyWithValue
           ? this.properties
-          : properties as Map<String, dynamic>?,
+          : copyWithMap<String, dynamic>(properties),
       required: required == unsetCopyWithValue
           ? this.required
-          : required as List<String>?,
+          : copyWithList<String>(required),
       extra: extra == unsetCopyWithValue
           ? this.extra
-          : extra as Map<String, dynamic>?,
+          : copyWithMap<String, dynamic>(extra),
     );
   }
 

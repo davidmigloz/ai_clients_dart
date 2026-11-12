@@ -193,7 +193,7 @@ class ModelInfo {
           : maxTokens as int?,
       allowedFallbackModels: allowedFallbackModels == unsetCopyWithValue
           ? this.allowedFallbackModels
-          : allowedFallbackModels as List<String>?,
+          : copyWithList<String>(allowedFallbackModels),
     );
   }
 

@@ -117,7 +117,7 @@ class FallbackConfigV2 {
       speed: speed == unsetCopyWithValue ? this.speed : speed as Speed?,
       extra: extra == unsetCopyWithValue
           ? this.extra
-          : extra as Map<String, dynamic>?,
+          : copyWithMap<String, dynamic>(extra),
     );
   }
 

@@ -137,7 +137,7 @@ class AdvisorTool extends BuiltInTool {
           : cacheControl as CacheControlEphemeral?,
       allowedCallers: allowedCallers == unsetCopyWithValue
           ? this.allowedCallers
-          : allowedCallers as List<String>?,
+          : copyWithList<String>(allowedCallers),
       deferLoading: deferLoading == unsetCopyWithValue
           ? this.deferLoading
           : deferLoading as bool?,

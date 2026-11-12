@@ -132,7 +132,7 @@ class CurrentUserProfile {
         : enforcementStatusValue as String?,
     enforcementActions: enforcementActions == unsetCopyWithValue
         ? this.enforcementActions
-        : enforcementActions as List<UserProfileEnforcementAction>?,
+        : copyWithList<UserProfileEnforcementAction>(enforcementActions),
     programs: programs ?? this.programs,
     metadata: metadata ?? this.metadata,
     createdAt: createdAt ?? this.createdAt,

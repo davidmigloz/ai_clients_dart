@@ -155,7 +155,7 @@ class ContainerParams {
       id: id == unsetCopyWithValue ? this.id : id as String?,
       skills: skills == unsetCopyWithValue
           ? this.skills
-          : skills as List<ContainerSkillParams>?,
+          : copyWithList<ContainerSkillParams>(skills),
     );
   }
 
@@ -382,7 +382,7 @@ class Container {
       expiresAt: expiresAt ?? this.expiresAt,
       skills: skills == unsetCopyWithValue
           ? this.skills
-          : skills as List<ContainerSkill>?,
+          : copyWithList<ContainerSkill>(skills),
     );
   }
 
