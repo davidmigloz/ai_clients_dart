@@ -32,6 +32,7 @@
     "organizationWorkspaces": "organization_admin",
     "organizationWebhooks": "organization_webhooks",
     "organizationTelemetryDestinations": "organization_telemetry",
+    "organizationClaudeTag": "organization_claude_tag",
     "messages": "messages",
     "models": "models",
     "agents": "managed_agents",

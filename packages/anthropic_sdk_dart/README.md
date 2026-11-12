@@ -62,6 +62,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Claude Enterprise activity reports for users, projects, skills, connectors, plugins, and artifacts
 - Organization webhook endpoint management and signed event verification (beta)
 - Organization OpenTelemetry destination setup, test spans, and workspace selection (beta)
+- Claude Tag Slack settings, inheritance and access bundle attachments for Claude Enterprise (beta)
 - Files (expiration, cursor pagination) and skills (multi-file uploads, container skills)
 - Managed agents with environments, self-hosted work, sessions, thread status filters, execution principals, tool permission evaluation, vaults, and streaming events (beta)
 - Scheduled deployments on the Claude API, Claude Platform on AWS, and Anthropic-managed Claude Models on Google Cloud (beta)
@@ -1446,6 +1447,41 @@ is reported in the result of a successful API request.
 
 </details>
 
+### How do I audit Claude Tag settings in Slack?
+
+<details>
+<summary><b>Read effective settings and where they come from</b></summary>
+
+Use `client.organization.claudeTag` for a Claude Enterprise organization with
+Claude Tag and Slack set up. Use an organization-level Admin API key with
+`read:claude_tag` for reads and `write:claude_tag` for writes. Anthropic must
+enable writes separately. Use API version `2026-10-21`. The resource adds the
+required `experimental-claude-tag-2026-10-21` beta header.
+
+```dart
+final channels = await admin.organization.claudeTag.slackChannels.list(
+  slackWorkspaceId: slackWorkspaceId,
+  includeInherited: true,
+);
+for (final channel in channels.data) {
+  print('${channel.id}: ${channel.settings.enabled} from ${channel.sources.enabled?.type}');
+}
+```
+
+List filters use Slack's own IDs. Retrieve, update, and attach bundles using
+the `slch_...` or `slws_...` IDs from the response. An update leaves omitted
+settings unchanged. Send `null` to clear an inheritable setting.
+For a stored channel reply mode, send `ClaudeTagReplyMode.automatic` to
+restore default behavior. A null reply mode leaves an unset mode unchanged.
+Omit the reply mode on workspace updates.
+If channel setup succeeds and applying settings fails, read `slack_channel_id`
+from the API exception's `errorDetails` to identify the channel.
+Removing a channel deletes its Claude Tag data, including sessions and memory.
+
+[Runnable Claude Tag example](example/organization_claude_tag_example.dart) · [Claude Tag API](https://platform.claude.com/docs/en/manage-claude/claude-tag-api)
+
+</details>
+
 ### How do I use the Compliance API?
 
 <details>
@@ -1648,6 +1684,7 @@ See the [example/](example/) directory for complete examples:
 | [`organization_webhooks_example.dart`](example/organization_webhooks_example.dart) | List organization webhook endpoints (beta) |
 | [`organization_webhook_receiver_example.dart`](example/organization_webhook_receiver_example.dart) | Verify and parse signed webhook deliveries |
 | [`organization_telemetry_example.dart`](example/organization_telemetry_example.dart) | Page through OpenTelemetry destinations and inspect delivery health (beta) |
+| [`organization_claude_tag_example.dart`](example/organization_claude_tag_example.dart) | Audit Slack channel settings and inheritance in Claude Tag (beta) |
 | [`models_example.dart`](example/models_example.dart) | Model lifecycle filters, pagination, and capabilities |
 | [`compliance_example.dart`](example/compliance_example.dart) | Scoped Compliance Activity Feed |
 | [`compliance_content_example.dart`](example/compliance_content_example.dart) | Scoped Compliance app content and artifact downloads |

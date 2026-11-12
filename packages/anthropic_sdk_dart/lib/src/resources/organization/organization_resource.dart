@@ -3,6 +3,7 @@ import '../../client/request_builder.dart';
 import '../../models/organization/organization_records.dart';
 import 'organization_access_resources.dart';
 import 'organization_analytics_resource.dart';
+import 'organization_claude_tag_resource.dart';
 import 'organization_external_keys_resource.dart';
 import 'organization_federation_resource.dart';
 import 'organization_rbac_resources.dart';
@@ -41,6 +42,7 @@ final class OrganizationResource {
       rbacRoles = OrganizationRbacRolesResource(_transport),
       spendLimits = OrganizationSpendLimitsResource(_transport),
       webhooks = OrganizationWebhooksResource(_transport),
+      claudeTag = OrganizationClaudeTagResource(_transport),
       telemetryDestinations = OrganizationTelemetryDestinationsResource(
         _transport,
       ),
@@ -90,6 +92,9 @@ final class OrganizationResource {
 
   /// Server-side OpenTelemetry destinations.
   final OrganizationTelemetryDestinationsResource telemetryDestinations;
+
+  /// Claude Tag Slack settings and access bundles.
+  final OrganizationClaudeTagResource claudeTag;
 
   /// Organization webhook subscriptions and signing secret rotation.
   final OrganizationWebhooksResource webhooks;
