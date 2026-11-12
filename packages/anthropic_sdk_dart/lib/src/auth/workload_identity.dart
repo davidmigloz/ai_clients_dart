@@ -1,4 +1,4 @@
-import 'dart:async' show Completer, FutureOr, StreamIterator, unawaited;
+import 'dart:async' show Completer, FutureOr, StreamIterator, Timer, unawaited;
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -66,6 +66,21 @@ final class WorkloadIdentityTokenExchange {
     required String organizationId,
     required String serviceAccountId,
     String? workspaceId,
+  }) => _exchangeJwt(
+    assertion: assertion,
+    federationRuleId: federationRuleId,
+    organizationId: organizationId,
+    serviceAccountId: serviceAccountId,
+    workspaceId: workspaceId,
+  );
+
+  Future<WorkloadIdentityAccessToken> _exchangeJwt({
+    required String assertion,
+    required String federationRuleId,
+    required String organizationId,
+    required String serviceAccountId,
+    String? workspaceId,
+    Future<void>? ownerClosed,
   }) {
     if (assertion.isEmpty ||
         utf8.encode(assertion).length > _maxAssertionBytes) {
@@ -97,28 +112,57 @@ final class WorkloadIdentityTokenExchange {
             'service_account_id': serviceAccountId,
             'workspace_id': ?workspaceId,
           });
+    final result = Completer<WorkloadIdentityAccessToken>();
     final watch = Stopwatch()..start();
-    return _exchange(
-      request,
-      abort,
-      watch,
-      (iterator) => responseBody = iterator,
-    ).timeout(
+
+    void stop(Object error) {
+      if (result.isCompleted) return;
+      result.completeError(error);
+      abort.complete();
+      responseBody?.cancel().ignore();
+    }
+
+    final closed = ownerClosed?.asStream().listen(
+      (_) => stop(StateError('Client has been closed')),
+    );
+    final timer = Timer(
       _timeout,
-      onTimeout: () {
-        abort.complete();
-        responseBody?.cancel().ignore();
-        throw TimeoutException(
+      () => stop(
+        TimeoutException(
           message: 'Workload identity token exchange timed out',
           timeout: _timeout,
           elapsed: watch.elapsed,
-        );
-      },
+        ),
+      ),
     );
+
+    Future<void> run() async {
+      try {
+        final token = await _exchange(
+          request,
+          assertion,
+          abort,
+          watch,
+          (iterator) => responseBody = iterator,
+        );
+        if (!result.isCompleted) result.complete(token);
+      } catch (error, stackTrace) {
+        if (!result.isCompleted) result.completeError(error, stackTrace);
+      }
+    }
+
+    unawaited(run());
+    return result.future.whenComplete(() {
+      timer.cancel();
+      watch.stop();
+      responseBody = null;
+      unawaited(closed?.cancel());
+    });
   }
 
   Future<WorkloadIdentityAccessToken> _exchange(
     http.AbortableRequest request,
+    String assertion,
     Completer<void> abort,
     Stopwatch watch,
     void Function(StreamIterator<List<int>>) onResponseBody,
@@ -136,9 +180,14 @@ final class WorkloadIdentityTokenExchange {
     ResponseMetadata metadata([String? bodyRequestId]) =>
         createSafeResponseMetadata(
           statusCode: response.statusCode,
-          headers: response.headers,
+          headers: {
+            for (final entry in response.headers.entries)
+              if (!entry.value.contains(assertion)) entry.key: entry.value,
+          },
           latency: watch.elapsed,
-          bodyRequestId: bodyRequestId,
+          bodyRequestId: bodyRequestId?.contains(assertion) ?? false
+              ? null
+              : bodyRequestId,
         );
 
     if (abort.isCompleted ||
@@ -155,7 +204,7 @@ final class WorkloadIdentityTokenExchange {
     onResponseBody(iterator);
     final bytes = BytesBuilder(copy: false);
     try {
-      while (await iterator.moveNext()) {
+      while (!abort.isCompleted && await iterator.moveNext()) {
         final chunk = iterator.current;
         if (bytes.length + chunk.length > _maxResponseBytes) {
           throw ApiException(
@@ -263,24 +312,28 @@ final class WorkloadIdentityAuthProvider implements AuthProvider {
     required String serviceAccountId,
     String? workspaceId,
     DateTime Function()? now,
-  }) : _exchange = ((assertion) => exchange.exchange(
+  }) : _exchange = ((assertion, ownerClosed) => exchange._exchangeJwt(
          assertion: assertion,
          federationRuleId: federationRuleId,
          organizationId: organizationId,
          serviceAccountId: serviceAccountId,
          workspaceId: workspaceId,
+         ownerClosed: ownerClosed,
        )),
        _now = now ?? DateTime.now;
 
   final FutureOr<String> Function() _identityTokenProvider;
-  final Future<WorkloadIdentityAccessToken> Function(String) _exchange;
+  final Future<WorkloadIdentityAccessToken> Function(String, Future<void>)
+  _exchange;
   final DateTime Function() _now;
+  final _closed = Completer<void>();
   ({BearerTokenCredentials credentials, DateTime expiresAt})? _cached;
-  Future<BearerTokenCredentials>? _pending;
+  Completer<BearerTokenCredentials>? _pending;
   DateTime? _retryAdvisoryAt;
 
   @override
   Future<BearerTokenCredentials> getCredentials() async {
+    _ensureOpen();
     final cached = _cached;
     final now = _now();
     if (cached == null ||
@@ -294,7 +347,9 @@ final class WorkloadIdentityAuthProvider implements AuthProvider {
         _refresh().then<void>(
           (_) {},
           onError: (Object _, StackTrace _) {
-            _retryAdvisoryAt = _now().add(const Duration(seconds: 5));
+            if (!_closed.isCompleted) {
+              _retryAdvisoryAt = _now().add(const Duration(seconds: 5));
+            }
           },
         ),
       );
@@ -302,18 +357,51 @@ final class WorkloadIdentityAuthProvider implements AuthProvider {
     return cached.credentials;
   }
 
-  Future<BearerTokenCredentials> _refresh() =>
-      _pending ??= Future<BearerTokenCredentials>.microtask(() async {
-        final token = await _exchange(await _identityTokenProvider());
-        final credentials = BearerTokenCredentials(
-          token.accessToken,
-          workspaceScoped: true,
-        );
-        _cached = (
-          credentials: credentials,
-          expiresAt: _now().add(token.expiresIn),
-        );
-        _retryAdvisoryAt = null;
-        return credentials;
-      }).whenComplete(() => _pending = null);
+  /// Stops credential acquisition and releases the owner's cached token.
+  void close() {
+    if (_closed.isCompleted) return;
+    _closed.complete();
+    _cached = null;
+    final pending = _pending;
+    if (pending != null && !pending.isCompleted) {
+      pending.completeError(StateError('Client has been closed'));
+    }
+  }
+
+  void _ensureOpen() {
+    if (_closed.isCompleted) throw StateError('Client has been closed');
+  }
+
+  Future<BearerTokenCredentials> _refresh() {
+    final current = _pending;
+    if (current != null) return current.future;
+
+    final pending = _pending = Completer<BearerTokenCredentials>();
+    unawaited(
+      Future<void>.microtask(() async {
+        try {
+          _ensureOpen();
+          final assertion = await _identityTokenProvider();
+          _ensureOpen();
+          final token = await _exchange(assertion, _closed.future);
+          _ensureOpen();
+          final credentials = BearerTokenCredentials(
+            token.accessToken,
+            workspaceScoped: true,
+          );
+          _cached = (
+            credentials: credentials,
+            expiresAt: _now().add(token.expiresIn),
+          );
+          _retryAdvisoryAt = null;
+          pending.complete(credentials);
+        } catch (error, stackTrace) {
+          if (!pending.isCompleted) pending.completeError(error, stackTrace);
+        } finally {
+          _pending = null;
+        }
+      }),
+    );
+    return pending.future;
+  }
 }

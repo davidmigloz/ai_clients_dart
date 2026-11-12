@@ -63,6 +63,8 @@ class AnthropicClient {
   /// Whether this client owns the HTTP client (and should close it).
   final bool _ownsHttpClient;
 
+  final void Function()? _closeAuth;
+
   /// Whether the client has been closed.
   bool _closed = false;
 
@@ -142,6 +144,7 @@ class AnthropicClient {
     this.config,
     this._httpClient, {
     required this._ownsHttpClient,
+    this._closeAuth,
   }) {
     _initialize();
   }
@@ -222,6 +225,7 @@ class AnthropicClient {
         config.copyWith(authProvider: auth),
         transport,
         ownsHttpClient: httpClient == null,
+        closeAuth: auth.close,
       );
     } catch (_) {
       if (httpClient == null) transport.close();
@@ -378,6 +382,7 @@ class AnthropicClient {
   void close() {
     if (_closed) return;
     _closed = true;
+    _closeAuth?.call();
     if (_ownsHttpClient) {
       _httpClient.close();
     }

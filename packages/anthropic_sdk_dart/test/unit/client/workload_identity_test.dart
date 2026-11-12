@@ -101,6 +101,70 @@ void main() {
     );
   });
 
+  test('removes the submitted assertion from error metadata', () async {
+    final transport = MockClient(
+      (_) async => _json(
+        {
+          'request_id': _assertion,
+          'error': {'type': 'rate_limit_error', 'message': _assertion},
+        },
+        status: 429,
+        headers: {
+          'request-id': 'proxy-$_assertion',
+          'retry-after': _assertion,
+          'retry-after-ms': '2000',
+        },
+      ),
+    );
+    addTearDown(transport.close);
+    await expectLater(
+      _mint(_exchange(transport)),
+      throwsA(
+        isA<RateLimitException>()
+            .having((error) => error.requestId, 'provider ID', isNull)
+            .having(
+              (error) => error.responseMetadata?.headers,
+              'safe headers',
+              {'retry-after-ms': '2000'},
+            )
+            .having(
+              (error) => error.responseMetadata?.bodyRequestId,
+              'body ID',
+              isNull,
+            )
+            .having((error) => error.retryAfter, 'retry deadline', isNotNull),
+      ),
+    );
+  });
+
+  test('retains a safe body ID when the header echoes the assertion', () async {
+    final transport = MockClient(
+      (_) async => _json(
+        {
+          'request_id': 'req_safe_body',
+          'error': {'type': 'invalid_request_error', 'message': _assertion},
+        },
+        status: 400,
+        headers: {'request-id': 'proxy-$_assertion'},
+      ),
+    );
+    addTearDown(transport.close);
+    final client = _client(transport, () => _assertion);
+    addTearDown(client.close);
+    await expectLater(
+      client.messages.countTokens(_countRequest),
+      throwsA(
+        isA<ApiException>()
+            .having((error) => error.requestId, 'provider ID', 'req_safe_body')
+            .having(
+              (error) => error.responseMetadata?.headers,
+              'headers',
+              isEmpty,
+            ),
+      ),
+    );
+  });
+
   test('does not follow redirects or retain Location', () async {
     var sends = 0;
     final transport = MockClient((request) async {
@@ -203,6 +267,84 @@ void main() {
       await expectLater(_mint(exchange), throwsA(isA<TimeoutException>()));
       await transport.canceled.future.timeout(const Duration(seconds: 2));
       expect(transport.body.hasListener, isFalse);
+    },
+  );
+
+  test(
+    'client close releases blocked identity waiters without late dispatch',
+    () async {
+      final started = Completer<void>();
+      final identity = Completer<String>();
+      var sends = 0;
+      final transport = MockClient((request) async {
+        sends++;
+        return _tokenResponse();
+      });
+      addTearDown(transport.close);
+      final client = _client(transport, () {
+        started.complete();
+        return identity.future;
+      });
+      addTearDown(client.close);
+      final first = expectLater(
+        client.messages.countTokens(_countRequest),
+        throwsStateError,
+      );
+      final sibling = expectLater(
+        client.messages.countTokens(_countRequest),
+        throwsStateError,
+      );
+      await started.future;
+      client.close();
+      await Future.wait([first, sibling]).timeout(const Duration(seconds: 2));
+      identity.complete(_assertion);
+      await Future<void>.delayed(Duration.zero);
+      expect(sends, 0);
+    },
+  );
+
+  test(
+    'client close aborts token exchange and discards late response headers',
+    () async {
+      final transport = _PendingTransport();
+      final client = _client(transport, () => _assertion);
+      addTearDown(client.close);
+      final result = expectLater(
+        client.messages.countTokens(_countRequest),
+        throwsStateError,
+      );
+      await transport.started.future;
+      client.close();
+      await result.timeout(const Duration(seconds: 2));
+      await transport.abortTrigger!.timeout(const Duration(seconds: 2));
+
+      final canceled = Completer<void>();
+      final body = StreamController<List<int>>(onCancel: canceled.complete);
+      transport.complete(body.stream);
+      await canceled.future.timeout(const Duration(seconds: 2));
+      await body.close();
+      expect(transport.closed, isFalse);
+    },
+  );
+
+  test(
+    'client close cancels an in-progress borrowed token response body',
+    () async {
+      final transport = _StalledBodyTransport();
+      final client = _client(transport, () => _assertion);
+      addTearDown(client.close);
+      final result = expectLater(
+        client.messages.countTokens(_countRequest),
+        throwsStateError,
+      );
+      await transport.listening.future;
+      client.close();
+      await result.timeout(const Duration(seconds: 2));
+      await transport.abortTrigger!.timeout(const Duration(seconds: 2));
+      await transport.canceled.future.timeout(const Duration(seconds: 2));
+      expect(transport.body.hasListener, isFalse);
+      expect(transport.closed, isFalse);
+      await transport.body.close();
     },
   );
 
@@ -499,27 +641,40 @@ http.Response _json(
 
 class _PendingTransport extends http.BaseClient {
   final _response = Completer<http.StreamedResponse>();
+  final started = Completer<void>();
   Future<void>? abortTrigger;
   bool closed = false;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) {
     abortTrigger = (request as http.Abortable).abortTrigger;
+    started.complete();
     return _response.future;
   }
 
-  void complete() =>
-      _response.complete(http.StreamedResponse(const Stream.empty(), 200));
+  void complete([Stream<List<int>> body = const Stream.empty()]) =>
+      _response.complete(http.StreamedResponse(body, 200));
 
   @override
   void close() => closed = true;
 }
 
 class _StalledBodyTransport extends http.BaseClient {
+  final listening = Completer<void>();
   final canceled = Completer<void>();
-  late final body = StreamController<List<int>>(onCancel: canceled.complete);
+  late final body = StreamController<List<int>>(
+    onListen: listening.complete,
+    onCancel: canceled.complete,
+  );
+  Future<void>? abortTrigger;
+  bool closed = false;
 
   @override
-  Future<http.StreamedResponse> send(http.BaseRequest request) async =>
-      http.StreamedResponse(body.stream, 200);
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    abortTrigger = (request as http.Abortable).abortTrigger;
+    return http.StreamedResponse(body.stream, 200);
+  }
+
+  @override
+  void close() => closed = true;
 }
