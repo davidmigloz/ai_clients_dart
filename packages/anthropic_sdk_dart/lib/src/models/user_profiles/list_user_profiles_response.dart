@@ -12,26 +12,34 @@ class ListUserProfilesResponse {
 
   /// Cursor for the next page, or `null` when there are no more results.
   final String? nextPage;
+  final bool _includeNullNextPage;
 
   /// Creates a [ListUserProfilesResponse].
-  const ListUserProfilesResponse({required this.data, this.nextPage});
+  const ListUserProfilesResponse({required this.data, this.nextPage})
+    : _includeNullNextPage = false;
+
+  const ListUserProfilesResponse._(
+    this.data,
+    this.nextPage,
+    this._includeNullNextPage,
+  );
 
   /// Creates a [ListUserProfilesResponse] from JSON.
   factory ListUserProfilesResponse.fromJson(Map<String, dynamic> json) {
-    return ListUserProfilesResponse(
-      data:
-          (json['data'] as List?)
+    return ListUserProfilesResponse._(
+      (json['data'] as List?)
               ?.map((e) => UserProfile.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
-      nextPage: json['next_page'] as String?,
+      json['next_page'] as String?,
+      json.containsKey('next_page'),
     );
   }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'data': data.map((e) => e.toJson()).toList(),
-    if (nextPage != null) 'next_page': nextPage,
+    if (nextPage != null || _includeNullNextPage) 'next_page': nextPage,
   };
 
   /// Creates a copy with replaced values.
@@ -39,11 +47,10 @@ class ListUserProfilesResponse {
     List<UserProfile>? data,
     Object? nextPage = unsetCopyWithValue,
   }) {
-    return ListUserProfilesResponse(
-      data: data ?? this.data,
-      nextPage: nextPage == unsetCopyWithValue
-          ? this.nextPage
-          : nextPage as String?,
+    return ListUserProfilesResponse._(
+      data ?? this.data,
+      nextPage == unsetCopyWithValue ? this.nextPage : nextPage as String?,
+      _includeNullNextPage,
     );
   }
 

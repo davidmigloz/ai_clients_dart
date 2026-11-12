@@ -145,6 +145,42 @@ void main() {
       expect(request.url.queryParameters, isEmpty);
     });
 
+    test(
+      'legacy profile lists preserve explicit null fields from responses',
+      () async {
+        final current = UserProfilesFixtures.userProfile()
+          ..['external_user_onboarded_at'] = null;
+        final previous = UserProfilesFixtures.userProfile();
+        mockHttpClient
+          ..queueJsonResponse({
+            'data': [current],
+            'next_page': null,
+          })
+          ..queueJsonResponse({
+            'data': [previous],
+          });
+
+        final page = await client.userProfiles.list();
+        expect(page.toJson(), containsPair('next_page', null));
+        expect(page.copyWith().toJson(), containsPair('next_page', null));
+        expect(
+          page.data.single.toJson(),
+          containsPair('external_user_onboarded_at', null),
+        );
+        expect(
+          page.data.single.copyWith().toJson(),
+          containsPair('external_user_onboarded_at', null),
+        );
+
+        final oldPage = await client.userProfiles.list();
+        expect(oldPage.toJson(), isNot(contains('next_page')));
+        expect(
+          oldPage.data.single.toJson(),
+          isNot(contains('external_user_onboarded_at')),
+        );
+      },
+    );
+
     test('retrieve sends correct request and parses response', () async {
       mockHttpClient.queueJsonResponse(UserProfilesFixtures.userProfile());
 

@@ -23,6 +23,7 @@ const _legacyBetaHeader = 'user-profiles-2026-08-18';
 ///
 /// Use [current] for the generally available User Profiles API. This resource
 /// continues to send the legacy beta header and use the corresponding models.
+/// Pass `betas` to add other feature flags for an individual request.
 class UserProfilesResource extends _UserProfilesBase {
   /// Creates a [UserProfilesResource].
   UserProfilesResource({
@@ -45,12 +46,14 @@ class UserProfilesResource extends _UserProfilesBase {
   /// Creates a user profile using the legacy beta request shape.
   Future<UserProfile> create(
     CreateUserProfileRequest request, {
+    List<String> betas = const [],
     String? workspaceId,
     Future<void>? abortTrigger,
   }) => _send(
     'POST',
     UserProfile.fromJson,
     body: request.toJson,
+    betas: betas,
     workspaceId: workspaceId,
     abortTrigger: abortTrigger,
   );
@@ -61,12 +64,14 @@ class UserProfilesResource extends _UserProfilesBase {
     String? page,
     UserProfileListOrder? order,
     UserProfileListOrderBy? orderBy,
+    List<String> betas = const [],
     String? workspaceId,
     Future<void>? abortTrigger,
   }) => _send(
     'GET',
     ListUserProfilesResponse.fromJson,
     query: () => _listQuery(limit, page, order, orderBy),
+    betas: betas,
     workspaceId: workspaceId,
     abortTrigger: abortTrigger,
   );
@@ -74,12 +79,14 @@ class UserProfilesResource extends _UserProfilesBase {
   /// Retrieves a legacy user profile by its ID.
   Future<UserProfile> retrieve(
     String userProfileId, {
+    List<String> betas = const [],
     String? workspaceId,
     Future<void>? abortTrigger,
   }) => _send(
     'GET',
     UserProfile.fromJson,
     profileId: userProfileId,
+    betas: betas,
     workspaceId: workspaceId,
     abortTrigger: abortTrigger,
   );
@@ -88,6 +95,7 @@ class UserProfilesResource extends _UserProfilesBase {
   Future<UserProfile> update(
     String userProfileId,
     UpdateUserProfileRequest request, {
+    List<String> betas = const [],
     String? workspaceId,
     Future<void>? abortTrigger,
   }) => _send(
@@ -95,6 +103,7 @@ class UserProfilesResource extends _UserProfilesBase {
     UserProfile.fromJson,
     profileId: userProfileId,
     body: request.toJson,
+    betas: betas,
     workspaceId: workspaceId,
     abortTrigger: abortTrigger,
   );
@@ -102,6 +111,7 @@ class UserProfilesResource extends _UserProfilesBase {
   /// Creates a short-lived legacy enrollment URL.
   Future<EnrollmentUrl> createEnrollmentUrl(
     String userProfileId, {
+    List<String> betas = const [],
     String? workspaceId,
     Future<void>? abortTrigger,
   }) => _send(
@@ -109,6 +119,7 @@ class UserProfilesResource extends _UserProfilesBase {
     EnrollmentUrl.fromJson,
     profileId: userProfileId,
     subpath: '/enrollment_url',
+    betas: betas,
     workspaceId: workspaceId,
     abortTrigger: abortTrigger,
   );
@@ -116,12 +127,14 @@ class UserProfilesResource extends _UserProfilesBase {
   /// Deletes a profile using the legacy beta route.
   Future<DeletedUserProfile> delete(
     String userProfileId, {
+    List<String> betas = const [],
     String? workspaceId,
     Future<void>? abortTrigger,
   }) => _send(
     'DELETE',
     DeletedUserProfile.fromJson,
     profileId: userProfileId,
+    betas: betas,
     workspaceId: workspaceId,
     abortTrigger: abortTrigger,
   );
@@ -130,6 +143,7 @@ class UserProfilesResource extends _UserProfilesBase {
   Future<UserProfileActionUrl> createActionUrl(
     String userProfileId, {
     required UserProfileAction action,
+    List<String> betas = const [],
     String? workspaceId,
     Future<void>? abortTrigger,
   }) => _send(
@@ -138,6 +152,7 @@ class UserProfilesResource extends _UserProfilesBase {
     profileId: userProfileId,
     subpath: '/action_urls',
     body: () => {'action': action.toJson()},
+    betas: betas,
     workspaceId: workspaceId,
     abortTrigger: abortTrigger,
   );
@@ -273,6 +288,7 @@ abstract class _UserProfilesBase extends ResourceBase {
     String subpath = '',
     Map<String, dynamic> Function()? body,
     Map<String, dynamic> Function()? query,
+    List<String> betas = const [],
     String? workspaceId,
     Future<void>? abortTrigger,
   }) async {
@@ -282,26 +298,24 @@ abstract class _UserProfilesBase extends ResourceBase {
         : '${_profilePath(profileId)}$subpath';
     final url = requestBuilder.buildUrl(path, queryParams: query?.call());
     final headers = requestBuilder.buildHeaders(
+      workspaceId: workspaceId,
       additionalHeaders: {
-        if (_legacyBeta) 'anthropic-beta': _legacyBetaHeader,
-        'anthropic-workspace-id': ?workspaceId,
+        if (betas.isNotEmpty) 'anthropic-beta': betas.join(','),
       },
     );
-    if (headers['anthropic-beta'] case final String features
-        when !_legacyBeta) {
-      final gaFeatures = features
-          .split(',')
-          .map((feature) => feature.trim())
-          .where(
-            (feature) =>
-                feature.isNotEmpty && !feature.startsWith('user-profiles-'),
-          )
-          .join(',');
-      if (gaFeatures.isEmpty) {
-        headers.remove('anthropic-beta');
-      } else {
-        headers['anthropic-beta'] = gaFeatures;
-      }
+    // The selected resource owns the profile API version.
+    final features = {
+      for (final feature
+          in headers['anthropic-beta']?.split(',') ?? const <String>[])
+        if (feature.trim() case final value
+            when value.isNotEmpty && !value.startsWith('user-profiles-'))
+          value,
+      if (_legacyBeta) _legacyBetaHeader,
+    };
+    if (features.isEmpty) {
+      headers.remove('anthropic-beta');
+    } else {
+      headers['anthropic-beta'] = features.join(',');
     }
     final request = http.Request(method, url)..headers.addAll(headers);
     if (body != null) request.body = jsonEncode(body());

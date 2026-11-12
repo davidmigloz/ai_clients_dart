@@ -18,3 +18,15 @@ Expose the GA profile routes and current enforcement fields, filtering, action U
 - [ ] Independently reviewed against the pinned sources; exact-head CI passes before squash merge.
 
 Use public-entry-point fixtures and the package review checklist. Keep live API calls outside this work.
+
+## Legacy response and beta flags
+
+The legacy selector keeps the required `user-profiles-2026-08-18` flag and
+accepts other feature flags. An explicit list supplies the request flags.
+Otherwise, the client's configured flags apply. Both access paths filter
+profile selectors that would switch their wire contract.
+
+Legacy list responses preserve an explicit null `next_page`, and profile
+responses preserve an explicit null `external_user_onboarded_at`. Historical
+responses that omitted the fields still round-trip.
+[Pinned Python beta profiles](https://github.com/anthropics/anthropic-sdk-python/blob/5139cf2e7d07aa618a6c30b7e0c712f10ccb5ad9/src/anthropic/resources/beta/user_profiles/user_profiles.py) · [Pinned TypeScript beta profiles](https://github.com/anthropics/anthropic-sdk-typescript/blob/590783078cd961a0df698d9fddc0275c65ff3afd/src/resources/beta/user-profiles/user-profiles.ts)
