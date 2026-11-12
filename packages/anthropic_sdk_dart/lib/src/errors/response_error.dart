@@ -137,7 +137,7 @@ bool _bodyContainsCredential(String body, Set<String> credentials) {
   try {
     return _containsCredential(jsonDecode(body), credentials);
   } on FormatException {
-    return false;
+    return _redactMalformedDiagnosticText(body, credentials) != body;
   }
 }
 
@@ -161,6 +161,52 @@ String _redactDiagnosticText(String value, Set<String> credentials) {
     redacted = redacted.replaceAll(credential, '[REDACTED]');
   }
   return redacted;
+}
+
+final _jsonDiagnosticEscape = RegExp(r'\\(?:u[0-9a-fA-F]{4}|["\\/bfnrt])');
+
+/// Redacts plain credentials and detects standard JSON escapes in malformed
+/// diagnostics. Clean text is returned verbatim.
+String _redactMalformedDiagnosticText(String text, Set<String> credentials) {
+  if (credentials.isEmpty) return text;
+  // Decode escape tokens independently so a truncated JSON envelope remains
+  // checkable without relying on its quotes or structural delimiters.
+  final decoded = text.replaceAllMapped(_jsonDiagnosticEscape, (match) {
+    final escape = match[0]!;
+    return switch (escape[1]) {
+      'u' => String.fromCharCode(int.parse(escape.substring(2), radix: 16)),
+      'b' => '\b',
+      'f' => '\f',
+      'n' => '\n',
+      'r' => '\r',
+      't' => '\t',
+      final char => char,
+    };
+  });
+  if (decoded != text && redactCredentialEcho(decoded, credentials) == null) {
+    return 'API error response contained a redacted credential';
+  }
+  return _redactDiagnosticText(text, credentials);
+}
+
+/// Keeps the parse error and position while removing an unsafe decoder source.
+FormatException redactApiFormatException(
+  FormatException error,
+  Set<String> credentials,
+) {
+  if (credentials.isEmpty) return error;
+  final message = _redactMalformedDiagnosticText(error.message, credentials);
+  final Object? source = error.source;
+  final sourceText = switch (source) {
+    String() => source,
+    List<int>() => utf8.decode(source, allowMalformed: true),
+    _ => null,
+  };
+  final unsafeSource =
+      sourceText != null &&
+      _redactMalformedDiagnosticText(sourceText, credentials) != sourceText;
+  if (message == error.message && !unsafeSource) return error;
+  return FormatException(message, unsafeSource ? null : source, error.offset);
 }
 
 Map<String, dynamic> _redactDiagnosticMap(
@@ -209,9 +255,16 @@ Map<String, dynamic> redactApiErrorEnvelope(
   Map<String, dynamic> envelope,
   Set<String> credentials,
 ) {
-  if (credentials.isEmpty || !_containsCredential(envelope, credentials)) {
-    return envelope;
+  if (credentials.isEmpty) return envelope;
+  if (envelope case {
+    '_event': 'error',
+    'type': 'error',
+    '_rawData': final String raw,
+  } when envelope.length == 3) {
+    final safe = _redactMalformedDiagnosticText(raw, credentials);
+    return safe == raw ? envelope : {...envelope, '_rawData': safe};
   }
+  if (!_containsCredential(envelope, credentials)) return envelope;
   return {
     ..._redactDiagnosticMap(envelope, credentials, omitEchoedIdentifiers: true),
     // Protocol discriminators are independent of the provider diagnostics.
@@ -232,7 +285,7 @@ String redactApiErrorBody(String body, Set<String> credentials) {
           : _redactDiagnosticValue(decoded, credentials),
     );
   } on FormatException {
-    return _redactDiagnosticText(body, credentials);
+    return _redactMalformedDiagnosticText(body, credentials);
   }
 }
 

@@ -49,7 +49,7 @@ mixin StreamingResource on ResourceBase {
     headers: headers,
     abortTrigger: abortTrigger,
     validateHeaders: validateHeaders,
-    decode: (body, _, _, _) => SseParser().parse(body),
+    decode: (body, _, _, credentials) => _decodeSse(body, credentials),
   );
 
   /// Makes a streaming GET request whose response contains JSON lines.
@@ -81,11 +81,16 @@ mixin StreamingResource on ResourceBase {
     errorFactory: errorFactory,
     errorFactoryWithMetadata: errorFactoryWithMetadata,
     jsonlMedia: true,
-    decode: (body, _, _, _) => body
+    decode: (body, _, _, credentials) => body
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .where((line) => line.trim().isNotEmpty)
-        .map((line) => jsonDecode(line) as Map<String, dynamic>),
+        .map(
+          (line) => _redactJsonlBatchError(
+            jsonDecode(line) as Map<String, dynamic>,
+            credentials,
+          ),
+        ),
   );
 
   /// Creates an exception for streaming errors.
@@ -143,7 +148,7 @@ mixin StreamingResource on ResourceBase {
     queryParams: queryParams,
     headers: headers,
     abortTrigger: abortTrigger,
-    decode: (body, _, _, _) => SseParser().parse(body),
+    decode: (body, _, _, credentials) => _decodeSse(body, credentials),
   );
 
   Stream<T> _stream<T>(
@@ -362,7 +367,12 @@ mixin StreamingResource on ResourceBase {
                   controller.add(event);
                   if (terminal) unawaited(controller.close());
                 },
-                onError: finish,
+                onError: (Object error, StackTrace stackTrace) => finish(
+                  error is FormatException
+                      ? redactApiFormatException(error, credentials)
+                      : error,
+                  stackTrace,
+                ),
                 onDone: finish,
               );
         }
@@ -437,14 +447,70 @@ Stream<T> postResourceEventStream<T>(
       latency: latency,
       credentials: credentials,
     );
-    return SseParser().parse(body, strictJson: true).map((event) {
-      final safeEvent = event['_event'] == 'error' || event['type'] == 'error'
-          ? redactApiErrorEnvelope(event, credentials)
-          : event;
-      return decodeEvent(safeEvent, metadata);
-    });
+    return _decodeSse(
+      body,
+      credentials,
+      strictJson: true,
+    ).map((event) => decodeEvent(event, metadata));
   },
 );
+
+Stream<Map<String, dynamic>> _decodeSse(
+  Stream<List<int>> body,
+  Set<String> credentials, {
+  bool strictJson = false,
+}) => SseParser().parse(body, strictJson: strictJson).map((event) {
+  if (event['_event'] == 'error' || event['type'] == 'error') {
+    return redactApiErrorEnvelope(event, credentials);
+  }
+  return event;
+});
+
+Map<String, dynamic> _redactJsonlBatchError(
+  Map<String, dynamic> item,
+  Set<String> credentials,
+) {
+  if (credentials.isEmpty || item['result'] is! Map<String, dynamic>) {
+    return item;
+  }
+  final result = item['result'] as Map<String, dynamic>;
+  if (result case {
+    'type': 'errored',
+    'error': final Map<String, dynamic> error,
+  }) {
+    final safe = redactApiErrorEnvelope(error, credentials);
+    if (identical(safe, error)) return item;
+
+    // BatchError requires a string type and message, including for legacy
+    // flat items. Keep the result and envelope discriminators intact.
+    Map<String, dynamic> typedPayload(
+      Map<String, dynamic> original,
+      Map<String, dynamic> redacted,
+    ) => {
+      ...redacted,
+      if (original['type'] is String && !redacted.containsKey('type'))
+        'type': 'unknown',
+      if (original['message'] is String && !redacted.containsKey('message'))
+        'message': '[REDACTED]',
+    };
+
+    final safeError = switch (error) {
+      {'type': 'error', 'error': final Map<String, dynamic> payload} => {
+        ...safe,
+        'error': typedPayload(
+          payload,
+          (safe['error'] as Map<String, dynamic>?) ?? const {},
+        ),
+      },
+      _ => typedPayload(error, safe),
+    };
+    return {
+      ...item,
+      'result': {...result, 'error': safeError},
+    };
+  }
+  return item;
+}
 
 /// Opens a raw response body using the same lifecycle as SSE and JSONL streams.
 Stream<List<int>> getResourceByteStream(
