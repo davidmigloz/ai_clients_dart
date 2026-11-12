@@ -204,14 +204,13 @@ class MessageBatchesResource extends ResourceBase with StreamingResource {
     Future<void>? abortTrigger,
     String? workspaceId,
     List<String> betas = const [],
-  }) => mapStream(
-    getJsonlStream(
-      '/v1/messages/batches/${encodePathSegment(batchId, 'batchId')}/results',
-      abortTrigger: abortTrigger,
-      headers: _requestHeaders(betas, workspaceId),
-      errorFactoryWithMetadata: createResourceException,
-    ),
+  }) => getResourceJsonlStream(
+    this,
+    '/v1/messages/batches/${encodePathSegment(batchId, 'batchId')}/results',
     BatchIndividualResponse.fromJson,
+    abortTrigger: abortTrigger,
+    headers: _requestHeaders(betas, workspaceId),
+    errorFactoryWithMetadata: createResourceException,
   );
 
   static Map<String, String> _requestHeaders(

@@ -145,13 +145,13 @@ class SessionEventsResource extends ResourceBase with StreamingResource {
       'event_deltas[]': ?eventDeltas,
     };
 
-    final eventStream = getStream(
+    return getResourceEventStream(
+      this,
       '/v1/sessions/${encodePathSegment(sessionId, 'sessionId')}/events/stream',
+      SessionEvent.fromJson,
       queryParams: queryParams.isEmpty ? null : queryParams,
       headers: {'anthropic-beta': _betaHeader},
       abortTrigger: abortTrigger,
     );
-
-    return mapStream(eventStream, SessionEvent.fromJson);
   }
 }

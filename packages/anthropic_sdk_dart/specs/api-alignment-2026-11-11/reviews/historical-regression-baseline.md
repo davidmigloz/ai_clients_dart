@@ -10,6 +10,8 @@ The shared HTTP failure and retry fix for [#498](https://github.com/davidmigloz/
 
 Malformed successful JSON also reached caller-visible decoder diagnostics. Confirmed paths include Models, Managed Agents, Admin, Compliance, Files, Skills, User Profiles, and native provider requests with credentials applied after the normal interceptor chain. Buffered codecs redact effective credentials in JSON and typed decoder failures, including failed Web casts, while valid application fields round-trip unchanged. Protected work and tunnel decoders suppress malformed response diagnostics that could contain newly issued credentials. Borrowed transports without request metadata retain the actual outgoing request. The transport records observed credentials per response when supplied request metadata omits them. Fixtures cover guarded redirects, metadata isolation, stream ownership, strict UTF-8, raw and encoded echoes, and valid success payloads.
 
+Typed mapping for batch JSONL results and Managed Agents session and thread SSE also exposed reflected credentials in malformed response fields. Their typed decoders now run within the shared streaming diagnostic boundary. Fixtures preserve application text, terminate on the first decoder failure and cancel a stalled borrowed body. Web checks exercise the same credential-bearing typed cast failures.
+
 ## Path matrix
 
 | Historical family | Anthropic | OpenAI comparison | Decision or remaining verification |
