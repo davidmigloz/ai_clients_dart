@@ -15,7 +15,16 @@ enum OpenAIDataResidency {
   eu('https://eu.api.openai.com/v1'),
 
   /// United Arab Emirates endpoint; processing has model/service restrictions.
-  ae('https://ae.api.openai.com/v1');
+  ae('https://ae.api.openai.com/v1'),
+
+  /// Australia regional endpoint.
+  au('https://au.api.openai.com/v1'),
+
+  /// India regional endpoint.
+  india('https://in.api.openai.com/v1'),
+
+  /// Japan regional endpoint.
+  jp('https://jp.api.openai.com/v1');
 
   const OpenAIDataResidency(this.baseUrl);
 

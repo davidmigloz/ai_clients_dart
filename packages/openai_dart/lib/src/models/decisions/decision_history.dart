@@ -659,7 +659,7 @@ class DecisionFunctionCall extends DecisionInputItem {
         namespace!,
         'namespace',
         min: 1,
-        max: 64,
+        max: 128,
         pattern: r'^[a-zA-Z0-9_-]+$',
       );
     }
@@ -679,7 +679,7 @@ class DecisionFunctionCall extends DecisionInputItem {
   /// The id history field.
   final String? id;
 
-  /// The namespace history field.
+  /// The namespace history field, up to 128 characters.
   final String? namespace;
 
   /// The status history field.

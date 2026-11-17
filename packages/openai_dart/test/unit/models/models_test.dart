@@ -20,6 +20,25 @@ void main() {
       expect(model.createdAt, isA<DateTime>());
     });
 
+    test('shutdown dates retain their date-only wire representation', () {
+      final announced = Model.fromJson(const {
+        'id': 'retiring-model',
+        'object': 'model',
+        'shutdown_date': '2027-02-10',
+      });
+      final unannounced = Model.fromJson(const {
+        'id': 'retiring-model',
+        'object': 'model',
+        'shutdown_date': null,
+      });
+      expect(announced.shutdownDate, '2027-02-10');
+      expect(announced.toJson()['shutdown_date'], '2027-02-10');
+      expect(unannounced.shutdownDate, isNull);
+      expect(unannounced.toJson(), isNot(contains('shutdown_date')));
+      expect(announced, unannounced);
+      expect(announced.hashCode, unannounced.hashCode);
+    });
+
     test('fromJson handles missing created (Cohere compatibility)', () {
       final json = {
         'id': 'command-r-plus',
@@ -68,6 +87,7 @@ void main() {
       expect(json['object'], 'model');
       expect(json.containsKey('created'), isFalse);
       expect(json.containsKey('owned_by'), isFalse);
+      expect(json.containsKey('shutdown_date'), isFalse);
     });
 
     test('toJson includes non-null fields', () {

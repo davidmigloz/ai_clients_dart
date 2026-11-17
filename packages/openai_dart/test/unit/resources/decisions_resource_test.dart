@@ -200,7 +200,7 @@ void main() {
             'call_id': 'f',
             'name': 'order.lookup',
             'arguments': '{}',
-            'namespace': 'orders',
+            'namespace': 'n' * 128,
             'id': 'item_f',
             'status': 'completed',
           },

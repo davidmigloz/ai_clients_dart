@@ -22,6 +22,82 @@ http.Response _list() => http.Response(
 
 void main() {
   test(
+    'regional routing keeps pending requests and credentials isolated',
+    () async {
+      final entered = Completer<void>();
+      final release = Completer<void>();
+      final sent = <http.Request>[];
+      const model = {
+        'id': 'retiring-model',
+        'object': 'model',
+        'shutdown_date': '2027-02-10',
+      };
+      final transport = MockClient((request) async {
+        sent.add(request);
+        if (sent.length == 1) {
+          entered.complete();
+          await release.future;
+          return http.Response(jsonEncode(model), 200);
+        }
+        return http.Response(
+          jsonEncode({
+            'object': 'list',
+            'data': [model],
+          }),
+          200,
+        );
+      });
+      final client = OpenAIClient(
+        config: OpenAIConfig.forDataResidency(
+          OpenAIDataResidency.au,
+          authProvider: const ApiKeyProvider('regional-a'),
+          project: 'project-a',
+        ),
+        httpClient: transport,
+      );
+      addTearDown(transport.close);
+      addTearDown(client.close);
+      addTearDown(() {
+        if (!release.isCompleted) release.complete();
+      });
+
+      final pending = client.models.retrieve('retiring-model');
+      await entered.future;
+      client.updateConfig(
+        baseUrl: OpenAIDataResidency.india.baseUrl,
+        authProvider: const ApiKeyProvider('regional-b'),
+        project: 'project-b',
+      );
+      final listing = await client.models.list();
+      expect(listing.data.single.shutdownDate, '2027-02-10');
+      release.complete();
+      expect((await pending).shutdownDate, '2027-02-10');
+
+      client.updateConfig(
+        baseUrl: 'https://proxy.invalid/root/v1?tenant=fixture',
+        authProvider: null,
+        project: null,
+      );
+      await client.models.list();
+      expect(sent.map((r) => r.url.toString()), [
+        'https://au.api.openai.com/v1/models/retiring-model',
+        'https://in.api.openai.com/v1/models',
+        'https://proxy.invalid/root/v1/models?tenant=fixture',
+      ]);
+      expect(sent.map((r) => r.headers['authorization']), [
+        'Bearer regional-a',
+        'Bearer regional-b',
+        null,
+      ]);
+      expect(sent.map((r) => r.headers['openai-project']), [
+        'project-a',
+        'project-b',
+        null,
+      ]);
+    },
+  );
+
+  test(
     'retained and newly acquired resources use separate complete snapshots',
     () async {
       final sent = <http.Request>[];

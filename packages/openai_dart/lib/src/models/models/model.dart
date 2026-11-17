@@ -23,6 +23,7 @@ class Model {
     required this.object,
     this.created,
     this.ownedBy,
+    this.shutdownDate,
   });
 
   /// Creates a [Model] from JSON.
@@ -32,6 +33,7 @@ class Model {
       object: json['object'] as String,
       created: json['created'] as int?,
       ownedBy: json['owned_by'] as String?,
+      shutdownDate: json['shutdown_date'] as String?,
     );
   }
 
@@ -57,6 +59,9 @@ class Model {
   ///
   /// May be null with some OpenAI-compatible providers.
   final String? ownedBy;
+
+  /// The announced shutdown date as `YYYY-MM-DD`, if available.
+  final String? shutdownDate;
 
   /// The creation time as a [DateTime], or null if [created] is null.
   DateTime? get createdAt => created != null
@@ -90,6 +95,7 @@ class Model {
     'object': object,
     if (created != null) 'created': created,
     if (ownedBy != null) 'owned_by': ownedBy,
+    if (shutdownDate != null) 'shutdown_date': shutdownDate,
   };
 
   @override

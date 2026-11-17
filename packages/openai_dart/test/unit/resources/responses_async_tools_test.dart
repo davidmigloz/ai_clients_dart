@@ -176,6 +176,7 @@ void main() {
           () async {
             var sends = 0;
             final output = _outputJson(flag, beta: beta);
+            final namespace = 'n' * 128;
             final client = _client(
               MockClient((request) async {
                 sends++;
@@ -193,6 +194,7 @@ void main() {
                       'type': 'function_call_output',
                       'call_id': 'call_function',
                       'output': '{"answer":42}',
+                      'namespace': namespace,
                     },
                     {
                       'type': 'custom_tool_call_output',
@@ -215,6 +217,22 @@ void main() {
             final function =
                 response.output[0] as FunctionCallOutputItemResponse;
             final custom = response.output[1] as CustomToolCallItem;
+            final functionOutput = FunctionCallOutputItem.string(
+              callId: function.callId,
+              output: '{"answer":42}',
+              namespace: namespace,
+            );
+            final replayed =
+                Item.fromJson(functionOutput.toJson())
+                    as FunctionCallOutputItem;
+            expect(replayed.namespace, namespace);
+            expect(replayed, functionOutput);
+            expect(replayed.hashCode, functionOutput.hashCode);
+            expect(replayed.copyWith(namespace: null), isNot(replayed));
+            expect(
+              replayed.copyWith(namespace: null).toJson(),
+              isNot(contains('namespace')),
+            );
             await client.responses.create(
               CreateResponseRequest(
                 model: 'fixture-model',
@@ -222,10 +240,7 @@ void main() {
                 input: ResponseInput.items([
                   function.toFunctionCallItem(),
                   custom.toCustomToolCallInputItem(),
-                  FunctionCallOutputItem.string(
-                    callId: function.callId,
-                    output: '{"answer":42}',
-                  ),
+                  replayed,
                   CustomToolCallOutputInputItem.string(
                     callId: custom.callId,
                     output: 'saved custom result',

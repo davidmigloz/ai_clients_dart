@@ -250,6 +250,24 @@ void main() {
         () => DecisionCustomToolCall(callId: 'x' * 65, name: 'f', input: ''),
         throwsArgumentError,
       );
+      expect(
+        () => DecisionFunctionCall(
+          callId: 'c',
+          name: 'f',
+          arguments: '',
+          namespace: 'n' * 129,
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => DecisionCustomToolCall(
+          callId: 'c',
+          name: 'f',
+          input: '',
+          namespace: 'n' * 65,
+        ),
+        throwsArgumentError,
+      );
     });
   });
 

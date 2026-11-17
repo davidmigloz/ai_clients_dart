@@ -71,7 +71,7 @@
       "review_pinned_sources": 6
     },
     "inventory_records_per_ticket": {
-      "01-responses": 29,
+      "01-responses": 27,
       "02-images": 35,
       "03-moderation": 3,
       "04-agent-sessions": 49,
@@ -79,7 +79,7 @@
       "06-live": 20,
       "07-admin": 10,
       "08-federation": 30,
-      "09-routing": 8,
+      "09-routing": 10,
       "10-toolkit": 1,
       "11-closure": 443
     }
@@ -125,7 +125,7 @@
     },
     "09-routing": {
       "issue": 577,
-      "scope": "Regional routing, permanent HTTP spend errors, Model.shutdown_date and shared wire corrections"
+      "scope": "Regional routing, permanent HTTP spend errors, Model.shutdown_date and shared wire corrections including function namespaces"
     },
     "10-toolkit": {
       "issue": 578,
@@ -794,7 +794,7 @@
     {
       "schema": "BetaFunctionCallOutputItemParam",
       "change": "modified",
-      "primary_ticket": "01-responses",
+      "primary_ticket": "09-routing",
       "baseline_sha256": "061375a90496f39620451aba01b93a48883f1bf76df60ff6710ad1e48520b655",
       "source_sha256": "9f52f97c40a912ad2127f4c6c57703088e0953d8784056d85180a7757bf6bef5",
       "changed_sections": [
@@ -807,8 +807,12 @@
         }
       ],
       "toolkit_changed_type": false,
+      "related_tickets": [
+        "01-responses"
+      ],
       "disposition": {
-        "kind": "review_contract"
+        "kind": "review_contract",
+        "note": "Transferred to the shared function namespace alignment in #577. The same typed input model serves GA and beta."
       }
     },
     {
@@ -3565,7 +3569,7 @@
     {
       "schema": "FunctionCallOutputItemParam",
       "change": "modified",
-      "primary_ticket": "01-responses",
+      "primary_ticket": "09-routing",
       "baseline_sha256": "ffd54c8f756076c51bb26a559fac661a909372c26041e9971a3a2d3988524261",
       "source_sha256": "35850bffea636e12df455b509729f19479468f6de3d417fd60cc2e5d1afe5816",
       "changed_sections": [
@@ -3578,8 +3582,12 @@
         }
       ],
       "toolkit_changed_type": false,
+      "related_tickets": [
+        "01-responses"
+      ],
       "disposition": {
-        "kind": "review_contract"
+        "kind": "review_contract",
+        "note": "Transferred to the shared function namespace alignment in #577. The same typed input model serves GA and beta."
       }
     },
     {
