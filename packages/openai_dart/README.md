@@ -755,7 +755,7 @@ Set `complexity` to control planning effort independently of quality. Select `Im
 
 Standalone GIF and SVG requests use buffered output. The general image guide describes SVG generation only. For SVG edits with an eligible model and project, follow the endpoint reference as implemented by the official SDKs. With a Responses GIF tool, lifecycle events can still stream without partial frames. [Image edit reference](https://developers.openai.com/api/reference/resources/images/methods/edit)
 
-GPT Image 1 retired on October 23, 2026. GPT Image 1.5, GPT Image 1 Mini and `chatgpt-image-latest` retire on December 1, 2026. GPT Image 2 and its April 21 snapshot retire on February 10, 2027. Use GPT Image 2.6 Sunburst or Flare. [Deprecation schedule](https://developers.openai.com/api/docs/deprecations)
+GPT Image 1 retired on October 23, 2026. `gpt-image-1.5`, `gpt-image-1.5-2025-12-16`, `gpt-image-1-mini` and `chatgpt-image-latest` retire on December 1, 2026. `gpt-image-2` and `gpt-image-2-2026-04-21` retire on February 10, 2027. Use GPT Image 2.6 Sunburst or Flare. [Deprecation schedule](https://developers.openai.com/api/docs/deprecations)
 
 → [Full example](example/images_example.dart) · [Model selection](example/image_model_selection_example.dart)
 
@@ -1708,7 +1708,7 @@ The Videos API and Sora 2 shut down on September 24, 2026. Retained types and th
 <details>
 <summary><b>What is the Evals retirement timeline?</b></summary>
 
-Evals became read-only on October 31 and is scheduled to shut down on November 30, 2026. Plan a migration using the [official retirement guidance](https://developers.openai.com/api/docs/deprecations). The retained example documents the historical API.
+Evals became read-only on October 31 and is scheduled to shut down on November 30, 2026. The retained example documents the historical API. [Promptfoo migration guide](https://developers.openai.com/cookbook/examples/evaluation/moving-from-openai-evals-to-promptfoo)
 
 → [Historical example](example/evals_example.dart)
 
