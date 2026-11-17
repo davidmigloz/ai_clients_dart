@@ -1680,8 +1680,8 @@ identity provider and OpenAI's token exchange.
 <details>
 <summary><b>Which models and APIs are retiring?</b></summary>
 
-Read `Model.shutdownDate` from model listing or retrieval when the API has
-announced a retirement. The field uses the `YYYY-MM-DD` date format.
+When model listing or retrieval returns a shutdown date, read it from
+`Model.shutdownDate` in `YYYY-MM-DD` format.
 
 - Reusable prompt objects and Agent Builder retire on November 30, 2026.
   Move prompt content into application code and follow the Agent Builder

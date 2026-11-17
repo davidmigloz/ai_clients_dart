@@ -43,8 +43,9 @@ disagree, record the discrepancy and the contract the Dart public path follows.
 | [#578](https://github.com/davidmigloz/ai_clients_dart/issues/578) | Toolkit extraction, verification and scaffold for nullable enums | Independent |
 | [#579](https://github.com/davidmigloz/ai_clients_dart/issues/579) | Canonical spec and manifest promotion, current docs and integrated verification | #569–#578 |
 
-Begin with #569. The [inventory](inventory.json) gives the HTTP operations,
-webhook changes and schemas a primary owner. A shared type can have secondary
+The [verification record](verification.md) links each issue to its merged PR,
+public-path evidence and final checks. The [inventory](inventory.json) assigns
+a primary owner to every changed HTTP operation, webhook and schema. A shared type can have secondary
 consumers. Validate the affected callers under its owner and coordinate where
 two tickets touch the same public path.
 
@@ -112,8 +113,8 @@ Stock toolkit review crashes when it sorts the new top-level `complexity`
 enum containing strings and JSON null. A local in-memory sort override
 preserved the source and produced diagnostic counts. This provisional review
 found 155 changed toolkit-visible schema types, 83 missing manifest entries,
-582 errors and 52 warnings. The final pass requires #578 and a comparison
-against the October baseline. Counts include toolkit and historical findings.
+582 errors and 52 warnings. The [final verification](verification.md#integrated-checks) uses the toolkit
+fix from #578 and compares with the October baseline.
 
 Use public-path offline fixtures and independent adversarial review for each
 implementation. Run Dart formatting, analysis and unit tests. Check
@@ -121,6 +122,6 @@ implementation. Run Dart formatting, analysis and unit tests. Check
 changes. Keep common Responses usage first, keep usage topics collapsible, and
 include runnable examples and migration guidance where applicable.
 
-#579 owns source promotion and integrated verification. Record exact-head CI and
-merged evidence when closing #568. Changes published after November 17 and
-release preparation belong to separate work.
+The [closeout issue](https://github.com/davidmigloz/ai_clients_dart/issues/579)
+records the reviewed CI head. This alignment covers upstream changes through
+November 17, 2026.

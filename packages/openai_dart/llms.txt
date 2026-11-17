@@ -102,7 +102,7 @@ Multipart markup is transparent PNG bytes plus optional markupFilename; JSON mar
 
 ImageGenerationCallOutputItem.status now uses ImageGenerationCallStatus with in_progress/generating/completed/failed and exact future strings. Required nullable result always emits its key. GA and beta calls share ImageGenerationCallError with required nullable code/param and optional nonnull ImageGenerationModerationDetails; stages and future public categories remain available, with finite immutable extras. Keep image token/tool accounting separate from top-level Responses tokens. GPT Image 1 shut down October 23, 2026; choose supported explicit models. inputFidelity supports high/low on gpt-image-1.5, low on gpt-image-1-mini; omit for gpt-image-2.
 
-GPT Image 2.6 generation and editing support complexity, animated GIF settings, and project-gated SVG author settings. Use buffered Images methods for GIF/SVG. Responses GIF tools can stream lifecycle events without partial frames. svgUsage is separate from raster token usage and is available on matching Images results and Responses/Conversation image call items. Responses create and compact accept image context compression, with the resolved setting on the returned item.
+GPT Image 2.6 generation and editing support complexity, animated GIF settings, and project-gated SVG author settings. Use buffered Images methods for GIF/SVG. Responses GIF tools can stream lifecycle events without partial frames. svgUsage is separate from raster token usage and is available on matching Images results and Responses/Conversation image call items. Responses create and compact accept image context compression, with the resolved setting in `Response.image` or `ResponseCompaction.image`.
 
 ## Voice consent management
 
