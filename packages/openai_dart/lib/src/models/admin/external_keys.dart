@@ -1,7 +1,8 @@
 import 'admin_enums.dart';
 import 'admin_json.dart';
 
-/// Native variants: [AwsExternalKeyParams], [AzureExternalKeyParams], [GcpExternalKeyParams] and [UnknownExternalKeyParams].
+/// Native variants: [AwsExternalKeyParams], [AzureExternalKeyParams],
+/// [GcpExternalKeyParams], [OciExternalKeyParams] and [UnknownExternalKeyParams].
 sealed class ExternalKeyParams extends AdminJsonValue {
   const ExternalKeyParams();
 
@@ -16,6 +17,7 @@ sealed class ExternalKeyParams extends AdminJsonValue {
         'aws' => AwsExternalKeyParams.fromJson(json),
         'azure' => AzureExternalKeyParams.fromJson(json),
         'gcp' => GcpExternalKeyParams.fromJson(json),
+        'oci' => OciExternalKeyParams.fromJson(json),
         _ => UnknownExternalKeyParams.fromJson(json),
       };
 }
@@ -27,7 +29,7 @@ final class UnknownExternalKeyParams extends ExternalKeyParams {
   /// Captures finite future JSON without printing it.
   factory UnknownExternalKeyParams.fromJson(Map<String, dynamic> json) {
     final type = adminString(json['type'], 'UnknownExternalKeyParams.type');
-    if (['aws', 'azure', 'gcp'].contains(type)) {
+    if (const ['aws', 'azure', 'gcp', 'oci'].contains(type)) {
       throw const FormatException(
         'UnknownExternalKeyParams: expected a future type',
       );
@@ -613,7 +615,138 @@ final class GcpExternalKeyParams extends ExternalKeyParams {
   );
 }
 
-/// ExternalKey
+/// Registers encryption key metadata from an Oracle Cloud Infrastructure vault.
+final class OciExternalKeyParams extends ExternalKeyParams {
+  /// Creates an OCI external key registration.
+  OciExternalKeyParams({
+    required this.name,
+    required this.region,
+    required this.vaultOcid,
+    required this.keyOcid,
+    this.purpose,
+    this.keyVersionOcid,
+    Map<String, dynamic> rawJson = const {},
+  }) : rawJson = adminExtras(rawJson, const {
+         'type',
+         'name',
+         'region',
+         'vault_ocid',
+         'key_ocid',
+         'purpose',
+         'key_version_ocid',
+       }, 'OciExternalKeyParams') {
+    validate();
+  }
+
+  /// A friendly name for the registration.
+  final String name;
+
+  /// The OCI region that contains the vault.
+  final String region;
+
+  /// The OCI vault identifier.
+  final String vaultOcid;
+
+  /// The OCI vault key identifier.
+  final String keyOcid;
+
+  /// How the key is used.
+  final ExternalKeyPurpose? purpose;
+
+  /// The exact key version identifier for PSP decryption.
+  final String? keyVersionOcid;
+
+  /// Detached additional registration fields.
+  final Map<String, dynamic> rawJson;
+
+  @override
+  String get type => 'oci';
+
+  /// Parses the OCI registration wire shape.
+  factory OciExternalKeyParams.fromJson(Map<String, dynamic> json) {
+    adminTag(json, 'type', 'oci', 'OciExternalKeyParams');
+    return OciExternalKeyParams(
+      name: adminString(json['name'], 'OciExternalKeyParams.name'),
+      region: adminString(json['region'], 'OciExternalKeyParams.region'),
+      vaultOcid: adminString(
+        json['vault_ocid'],
+        'OciExternalKeyParams.vaultOcid',
+      ),
+      keyOcid: adminString(json['key_ocid'], 'OciExternalKeyParams.keyOcid'),
+      purpose: json.containsKey('purpose')
+          ? ExternalKeyPurpose.fromJson(json['purpose'])
+          : null,
+      keyVersionOcid: adminOptional(
+        json,
+        'key_version_ocid',
+        'OciExternalKeyParams.keyVersionOcid',
+        adminString,
+      ),
+      rawJson: json,
+    );
+  }
+
+  @override
+  void validate() {
+    adminLength(region, 'OciExternalKeyParams.region', min: 1, max: 64);
+    adminLength(vaultOcid, 'OciExternalKeyParams.vaultOcid', min: 1, max: 512);
+    adminLength(keyOcid, 'OciExternalKeyParams.keyOcid', min: 1, max: 512);
+    if (keyVersionOcid case final version?) {
+      adminLength(
+        version,
+        'OciExternalKeyParams.keyVersionOcid',
+        min: 1,
+        max: 512,
+      );
+    }
+    if (purpose != null && !purpose!.isKnown) {
+      throw const FormatException(
+        'OciExternalKeyParams.purpose: unsupported request value',
+      );
+    }
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    ...rawJson,
+    'type': type,
+    'name': name,
+    'region': region,
+    'vault_ocid': vaultOcid,
+    'key_ocid': keyOcid,
+    if (purpose != null) 'purpose': purpose!.toJson(),
+    if (keyVersionOcid != null) 'key_version_ocid': keyVersionOcid,
+  };
+
+  /// Copies the registration. Explicit null clears optional fields.
+  OciExternalKeyParams copyWith({
+    String? name,
+    String? region,
+    String? vaultOcid,
+    String? keyOcid,
+    Object? purpose = unsetCopyWithValue,
+    Object? keyVersionOcid = unsetCopyWithValue,
+    Map<String, dynamic>? rawJson,
+  }) => OciExternalKeyParams(
+    name: name ?? this.name,
+    region: region ?? this.region,
+    vaultOcid: vaultOcid ?? this.vaultOcid,
+    keyOcid: keyOcid ?? this.keyOcid,
+    purpose: adminCopy<ExternalKeyPurpose>(
+      purpose,
+      this.purpose,
+      'OciExternalKeyParams.purpose',
+    ),
+    keyVersionOcid: adminCopy<String>(
+      keyVersionOcid,
+      this.keyVersionOcid,
+      'OciExternalKeyParams.keyVersionOcid',
+    ),
+    rawJson: rawJson ?? this.rawJson,
+  );
+}
+
+/// A registered external encryption key.
 final class ExternalKey extends AdminJsonValue {
   /// Captures typed fields and immutable permitted overflow JSON.
   ExternalKey({
@@ -637,6 +770,10 @@ final class ExternalKey extends AdminJsonValue {
     this.kmsKeyName,
     this.kmsKeyLocation,
     this.kmsKeyVersion,
+    this.region,
+    this.vaultOcid,
+    this.keyOcid,
+    this.keyVersionOcid,
     this.tenantId,
     this.vaultUri,
     this.keyName,
@@ -664,6 +801,10 @@ final class ExternalKey extends AdminJsonValue {
          'kms_key_name',
          'kms_key_location',
          'kms_key_version',
+         'region',
+         'vault_ocid',
+         'key_ocid',
+         'key_version_ocid',
          'tenant_id',
          'vault_uri',
          'key_name',
@@ -731,6 +872,18 @@ final class ExternalKey extends AdminJsonValue {
 
   /// Exact `kms_key_version` wire value.
   final String? kmsKeyVersion;
+
+  /// The OCI vault region.
+  final String? region;
+
+  /// The OCI vault identifier.
+  final String? vaultOcid;
+
+  /// The OCI vault key identifier.
+  final String? keyOcid;
+
+  /// The exact OCI key version identifier.
+  final String? keyVersionOcid;
 
   /// Exact `tenant_id` wire value.
   final String? tenantId;
@@ -893,6 +1046,25 @@ final class ExternalKey extends AdminJsonValue {
         adminString,
         nullable: false,
       ),
+      region: adminOptional(json, 'region', 'ExternalKey.region', adminString),
+      vaultOcid: adminOptional(
+        json,
+        'vault_ocid',
+        'ExternalKey.vaultOcid',
+        adminString,
+      ),
+      keyOcid: adminOptional(
+        json,
+        'key_ocid',
+        'ExternalKey.keyOcid',
+        adminString,
+      ),
+      keyVersionOcid: adminOptional(
+        json,
+        'key_version_ocid',
+        'ExternalKey.keyVersionOcid',
+        adminString,
+      ),
       tenantId: adminOptional<String>(
         json,
         'tenant_id',
@@ -958,6 +1130,10 @@ final class ExternalKey extends AdminJsonValue {
     if (kmsKeyName != null) 'kms_key_name': kmsKeyName,
     if (kmsKeyLocation != null) 'kms_key_location': kmsKeyLocation,
     if (kmsKeyVersion != null) 'kms_key_version': kmsKeyVersion,
+    if (region != null) 'region': region,
+    if (vaultOcid != null) 'vault_ocid': vaultOcid,
+    if (keyOcid != null) 'key_ocid': keyOcid,
+    if (keyVersionOcid != null) 'key_version_ocid': keyVersionOcid,
     if (tenantId != null) 'tenant_id': tenantId,
     if (vaultUri != null) 'vault_uri': vaultUri,
     if (keyName != null) 'key_name': keyName,
@@ -986,6 +1162,10 @@ final class ExternalKey extends AdminJsonValue {
     Object? kmsKeyName = unsetCopyWithValue,
     Object? kmsKeyLocation = unsetCopyWithValue,
     Object? kmsKeyVersion = unsetCopyWithValue,
+    Object? region = unsetCopyWithValue,
+    Object? vaultOcid = unsetCopyWithValue,
+    Object? keyOcid = unsetCopyWithValue,
+    Object? keyVersionOcid = unsetCopyWithValue,
     Object? tenantId = unsetCopyWithValue,
     Object? vaultUri = unsetCopyWithValue,
     Object? keyName = unsetCopyWithValue,
@@ -1055,6 +1235,18 @@ final class ExternalKey extends AdminJsonValue {
       kmsKeyVersion,
       this.kmsKeyVersion,
       'ExternalKey.kmsKeyVersion',
+    ),
+    region: adminCopy<String>(region, this.region, 'ExternalKey.region'),
+    vaultOcid: adminCopy<String>(
+      vaultOcid,
+      this.vaultOcid,
+      'ExternalKey.vaultOcid',
+    ),
+    keyOcid: adminCopy<String>(keyOcid, this.keyOcid, 'ExternalKey.keyOcid'),
+    keyVersionOcid: adminCopy<String>(
+      keyVersionOcid,
+      this.keyVersionOcid,
+      'ExternalKey.keyVersionOcid',
     ),
     tenantId: adminCopy<String>(
       tenantId,

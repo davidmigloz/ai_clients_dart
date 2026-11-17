@@ -1,6 +1,6 @@
 import 'package:http/http.dart' as http;
 
-/// Exactly the twelve implemented organization administration operations.
+/// Recognizes the organization operations routed through the Admin client.
 bool isAdminRequest(http.BaseRequest? request) {
   if (request == null) return false;
   final s = request.url.pathSegments;
@@ -26,6 +26,9 @@ bool isAdminRequest(http.BaseRequest? request) {
   if (suffix(['organization', 'external_keys', null, 'validate']) ||
       suffix(['organization', 'external_storage', null, 'validate'])) {
     return request.method == 'POST';
+  }
+  if (suffix(['organization', 'projects', null, 'service_tier_settings'])) {
+    return const {'GET', 'POST'}.contains(request.method);
   }
   return (request.method == 'POST' &&
           suffix(['organization', 'projects', null, 'api_keys', null])) ||

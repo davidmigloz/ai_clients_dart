@@ -7,9 +7,9 @@ import 'admin_http.dart';
 
 /// Organization administration with an explicit, separate credential realm.
 ///
-/// This bounded namespace exposes external keys/storage, project API-key updates
-/// and Decisions usage. It has no inference resources and never reads project
-/// API credentials. Redirects are disabled to avoid forwarding Admin tokens.
+/// This namespace exposes external keys and storage, project API-key updates
+/// and service-tier settings, and Decisions usage. It uses only Admin
+/// credentials and disables redirects to protect them.
 final class OpenAIAdminClient {
   /// Uses only [config]'s Admin credentials. An injected transport is borrowed.
   OpenAIAdminClient({
