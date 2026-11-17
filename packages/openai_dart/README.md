@@ -927,6 +927,14 @@ Future<void> main() async {
 
 → [Full example](example/moderation_example.dart)
 
+Organizations approved for OpenAI's [image classifier](https://developers.openai.com/api/docs/guides/csam-classifier)
+can use `client.moderations.classifyImage(imageUrl)` with one still image URL
+or base64 image data URL from their approved workflow. Read the overall flag
+and the category maps from the response's `result`. Missing categories stay
+absent, and the maps preserve additional category keys returned by the API.
+
+→ [Offline classifier example](example/image_classifier_example.dart)
+
 </details>
 
 <a id="how-do-i-investigate-verified-safety-notifications"></a>
@@ -1729,6 +1737,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [evals_example.dart](example/evals_example.dart) | Historical Evals reference; read-only until November 30, 2026 |
 | [models_example.dart](example/models_example.dart) | Model listing and retrieval |
 | [moderation_example.dart](example/moderation_example.dart) | Content moderation |
+| [image_classifier_example.dart](example/image_classifier_example.dart) | **Offline.** Image classifier response decoding |
 | [content_provenance_checks_example.dart](example/content_provenance_checks_example.dart) | Content provenance (C2PA/SynthID) detection |
 | [error_handling_example.dart](example/error_handling_example.dart) | Exception handling patterns |
 | [retry_guidance_example.dart](example/retry_guidance_example.dart) | Local transient, permanent-quota, and long-hint scenarios without API calls |
