@@ -2,8 +2,8 @@
   "specs": {
     "main": {
       "current_version": "2.3.0",
-      "last_fetched": "2026-11-04T22:23:04.765168Z",
-      "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce/openapi.json",
+      "last_fetched": "2026-11-17T21:43:24.612857Z",
+      "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/b2fe5a5d9eb3a580da5aed1d3ff2a03b3853e4f8/openapi.json",
       "title": "OpenAI API",
       "version_history": [
         {
@@ -107,24 +107,45 @@
           "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/0ef225c4f701046f8fe88cae9d29d0df4d1a9fa9/openapi.json",
           "version": "2.3.0",
           "note": "Replaced under #427 with the fixed October31 snapshot after bounded #413 implementation. Historical Admin/legacy gaps remain explicit; no complete API/SDK parity claim."
+        },
+        {
+          "fetched_at": "2026-11-04T22:23:04.765168Z",
+          "source_url": "https://raw.githubusercontent.com/openai/openai-openapi/2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce/openapi.json",
+          "version": "2.3.0",
+          "note": "Frozen candidate reverified and promoted under #427; normalized JSON hash differs from immutable raw-source hash. This bounded round is not complete historical Admin/legacy/helper parity. Feature receipts and inventory retain dispositions and existing scanner/baseline failures.",
+          "source_commit": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
+          "cutoff_date": "2026-10-31",
+          "raw_source_sha256": "73d582b052d0e86f222717799377a73c7f5023ea7e50333e3e893b91bb51e3bc",
+          "canonical_sha256": "5ff86e04f91cfa85158340ed8edcd9a352ad11b108743222851661606f35aeaa",
+          "verified_sdks": {
+            "python": {
+              "version": "3.42.0",
+              "commit": "0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f"
+            },
+            "node": {
+              "version": "7.47.0",
+              "commit": "c717857c3151bde92e07e4d396301a9c67163e68"
+            }
+          },
+          "verification_receipt": "api-alignment-2026-10-31/reviews/14-docs-verification.md"
         }
       ],
-      "source_commit": "2e9ebb365c2e8332c73f3ee8b562dca8dc0047ce",
-      "cutoff_date": "2026-10-31",
-      "raw_source_sha256": "73d582b052d0e86f222717799377a73c7f5023ea7e50333e3e893b91bb51e3bc",
-      "canonical_sha256": "5ff86e04f91cfa85158340ed8edcd9a352ad11b108743222851661606f35aeaa",
+      "source_commit": "b2fe5a5d9eb3a580da5aed1d3ff2a03b3853e4f8",
+      "cutoff_date": "2026-11-17",
+      "raw_source_sha256": "0e4f742c62eac450b2d169250ac04831a048998cf9bdf7bbc47d9ec2f6819896",
+      "canonical_sha256": "04f87e2fc53cc499388d593c8d957e7da9303bb31c4657faefea42f47db1dd51",
       "verified_sdks": {
         "python": {
-          "version": "3.42.0",
-          "commit": "0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f"
+          "version": "3.53.0",
+          "commit": "793cb761332de34fc4832668c12e6298e7ed2043"
         },
         "node": {
-          "version": "7.47.0",
-          "commit": "c717857c3151bde92e07e4d396301a9c67163e68"
+          "version": "7.58.0",
+          "commit": "68ae47ce196b2885a2f5efa6e9df89444efcca88"
         }
       },
-      "verification_receipt": "api-alignment-2026-10-31/reviews/14-docs-verification.md",
-      "note": "Frozen candidate reverified and promoted under #427; normalized JSON hash differs from immutable raw-source hash. This bounded round is not complete historical Admin/legacy/helper parity. Feature receipts and inventory retain dispositions and existing scanner/baseline failures."
+      "verification_receipt": "api-alignment-2026-11-17/verification.md",
+      "note": "Frozen November 17 candidate promoted under #579 with the bounded #568 implementation. The toolkit-normalized JSON has the same content as the immutable source and a different byte digest. See the inventory for scope and the verification receipt for validation results."
     }
   }
 }
