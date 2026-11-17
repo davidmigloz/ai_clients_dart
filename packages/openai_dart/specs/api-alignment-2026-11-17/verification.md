@@ -31,8 +31,8 @@ normalized modified schema components.
 | [#574](https://github.com/davidmigloz/ai_clients_dart/issues/574) | Live Responses delegation, startup safety identifier, signed transport webhook, protected MCP credentials and shared Live image, cache and namespace replay. [PR #586](https://github.com/davidmigloz/ai_clients_dart/pull/586) |
 | [#575](https://github.com/davidmigloz/ai_clients_dart/issues/575) | Both project service-tier routes, partial updates, OCI external-key registration and bodyless validation. [PR #587](https://github.com/davidmigloz/ai_clients_dart/pull/587) |
 | [#576](https://github.com/davidmigloz/ai_clients_dart/issues/576) | Ten workload identity routes, paging, nullable updates and credential isolation. [PR #588](https://github.com/davidmigloz/ai_clients_dart/pull/588) |
-| [#577](https://github.com/davidmigloz/ai_clients_dart/issues/577) | AU, IN and JP routing, spend-cap errors, model shutdown dates and shared function output namespaces. |
-| [#578](https://github.com/davidmigloz/ai_clients_dart/issues/578) | Nullable OpenAPI enum review, verification and Dart codec scaffolding, including an escaped Unicode round trip. |
+| [#577](https://github.com/davidmigloz/ai_clients_dart/issues/577) | AU, IN and JP routing, spend-cap errors, model shutdown dates and shared function output namespaces. [PR #589](https://github.com/davidmigloz/ai_clients_dart/pull/589) |
+| [#578](https://github.com/davidmigloz/ai_clients_dart/issues/578) | Nullable OpenAPI enum review, verification and Dart codec scaffolding, including an escaped Unicode round trip. [PR #590](https://github.com/davidmigloz/ai_clients_dart/pull/590) |
 
 The 12 newly declared HTTP operations are all exercised through the public
 Admin client. The [project fixtures](../../test/unit/resources/admin/admin_service_tiers_and_oci_test.dart)
