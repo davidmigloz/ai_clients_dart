@@ -1315,6 +1315,17 @@ Connect primary or sideband Live WebSockets to observe typed events and control 
 
 </details>
 
+<details>
+<summary><b>How do I give a Live Responses session MCP tools?</b></summary>
+
+Set `LiveResponsesDelegationParam.responses.tools` to `LiveMCPTool` values. Use `allowedCallers` to select direct or programmatic calls and `requireApproval` to require approval by default or by tool filter. Supply MCP credentials on startup or update. Received session snapshots omit `authorization` and `headers`.
+
+Set a stable, privacy-preserving `safetyIdentifier` at session startup or SIP accept. Subscribe to `WebhookEventType.liveTransportConnected` for WebRTC activation. Verify the webhook signature, then use `LiveTransportConnectedWebhookEvent.data.sessionId` with `client.live.attach`.
+
+→ [Offline Responses delegation example](example/live_responses_delegation_example.dart)
+
+</details>
+
 <a id="how-do-i-connect-live-to-decisions"></a>
 <details>
 <summary><b>How do I connect Live to Decisions?</b></summary>
@@ -1750,6 +1761,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [live_http_example.dart](example/live_http_example.dart) | **Offline.** WebRTC/SIP signaling, explicit call controls, verified incoming notice, WAV downloads and REST fork |
 | [live_media_example.dart](example/live_media_example.dart) | **Offline.** raw audio fixture acceptance/drain, independent mute, and SIP DTMF directions |
 | [live_websocket_example.dart](example/live_websocket_example.dart) | **Offline.** primary/sideband Live, concurrent event taps, manual delegation and graceful finalization |
+| [live_responses_delegation_example.dart](example/live_responses_delegation_example.dart) | **Offline.** typed MCP tool selection and approvals, startup identifier, and WebRTC activation |
 | [live_decisions_example.dart](example/live_decisions_example.dart) | **Offline.** native Decisions delegation, shared items, and a correlated transcript trigger |
 | [live_workflows_example.dart](example/live_workflows_example.dart) | **Offline.** stored forks, inherited state, compact Responses, caption grouping and borrowed-channel cleanup |
 | [voice_consents_example.dart](example/voice_consents_example.dart) | **Offline.** upload/list/retrieve/rename/delete consent lifecycle and explicit pagination |

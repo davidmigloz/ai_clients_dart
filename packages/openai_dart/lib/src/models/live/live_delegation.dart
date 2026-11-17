@@ -1334,6 +1334,19 @@ sealed class LiveDelegation extends LiveJsonModel {
       };
 }
 
+/// Sanitizes a typed Responses delegation retained in a received session.
+LiveDelegation? liveDelegationWithoutMcpCredentials(
+  LiveDelegation? delegation,
+) {
+  if (delegation is! LiveResponsesDelegationParam) return delegation;
+  final session = <String, dynamic>{'delegation': delegation.toJson()};
+  final sanitized = liveSessionWithoutMcpCredentials(session);
+  if (identical(sanitized, session)) return delegation;
+  return LiveDelegation.fromJson(
+    requireLiveObject(sanitized['delegation'], 'Live session delegation'),
+  );
+}
+
 /// Backend settings updates; startup delegation mode remains immutable.
 sealed class LiveDelegationUpdate {
   /// Creates a delegation update value.

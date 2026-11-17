@@ -86,6 +86,19 @@ in `AgentSessionInput` switches. For webhook summaries, add
 On returned function tools, read the optional `async` field from the typed
 model in place of `rawJson['async']`.
 
+### Live webhook dispatch and MCP configuration
+
+Exhaustive switches over `WebhookEvent` and `WebhookEventType` need a connected
+Live transport branch. Match `LiveTransportConnectedWebhookEvent` and use
+`data.sessionId` for sideband attachment after authenticating the webhook.
+
+`LiveMCPTool` now validates the declared MCP fields supplied through
+`rawJson`. Prefer its typed constructor arguments. Supply credentials with the
+request when replacing a configuration. Received sessions omit MCP
+`authorization` and `headers`, including from their raw snapshots.
+Use `tool.copyWith(authorization: null, headers: null)` to remove saved
+credentials before a request.
+
 ---
 
 ## Migrating from v11.x to v12.0.0

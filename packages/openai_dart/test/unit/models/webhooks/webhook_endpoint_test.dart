@@ -1183,12 +1183,13 @@ void main() {
       'agent.session.idle',
       'agent.session.failed',
       'safety.alert.created',
+      'live.transport.connected',
     ];
     test(
-      'contains exactly all 27 canonical choices including environment notifications',
+      'contains all 28 canonical choices including the connected transport',
       () {
         expect(WebhookEventType.values.map((value) => value.value), expected);
-        expect(WebhookEventType.values.length, 27);
+        expect(WebhookEventType.values.length, 28);
       },
     );
     for (final wire in expected) {

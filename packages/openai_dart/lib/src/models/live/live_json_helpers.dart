@@ -206,6 +206,63 @@ Map<String, dynamic> mergeLiveJson(
   ...typed,
 };
 
+/// Removes write-only MCP fields from a received Live session snapshot.
+///
+/// Only the declared MCP credentials in Responses delegation are removed.
+/// Other branches and future metadata are preserved.
+Map<String, dynamic> liveSessionWithoutMcpCredentials(
+  Map<String, dynamic> session,
+) {
+  final delegation = session['delegation'];
+  if (delegation is! Map || delegation['type'] != 'responses') return session;
+  final responses = delegation['responses'];
+  if (responses is! Map) return session;
+  final tools = responses['tools'];
+  if (tools is! List) return session;
+
+  var removed = false;
+  final sanitizedTools = <Object?>[];
+  for (final tool in tools) {
+    if (tool is Map &&
+        tool['type'] == 'mcp' &&
+        (tool.containsKey('authorization') || tool.containsKey('headers'))) {
+      removed = true;
+      sanitizedTools.add(
+        requireLiveObject(tool, 'Live session MCP tool')
+          ..remove('authorization')
+          ..remove('headers'),
+      );
+    } else {
+      sanitizedTools.add(tool);
+    }
+  }
+  if (!removed) return session;
+  return {
+    ...session,
+    'delegation': {
+      ...requireLiveObject(delegation, 'Live session delegation'),
+      'responses': {
+        ...requireLiveObject(responses, 'Live session Responses settings'),
+        'tools': sanitizedTools,
+      },
+    },
+  };
+}
+
+/// Sanitizes the nested session before retaining a received event or result.
+Map<String, dynamic> liveEnvelopeWithoutMcpCredentials(
+  Map<String, dynamic> envelope,
+) {
+  final session = envelope['session'];
+  if (session is! Map) return envelope;
+  return {
+    ...envelope,
+    'session': liveSessionWithoutMcpCredentials(
+      requireLiveObject(session, 'Live response session'),
+    ),
+  };
+}
+
 /// Checks schema character limits using Unicode code points.
 void validateLiveLength(String value, String context, {int? min, int? max}) {
   final length = value.runes.length;

@@ -1,6 +1,8 @@
 import 'live_delegation.dart';
 import 'live_json_helpers.dart';
 
+part 'live_mcp_tools.dart';
+
 /// Canonical Live tool input branches, independent of Responses tool models.
 ///
 /// Open schemas preserve finite, deeply immutable [rawJson] extras. A branch
@@ -56,8 +58,33 @@ sealed class LiveTool extends LiveJsonModel {
       LiveImageGenerationTool(rawJson: rawJson);
 
   /// Creates the canonical `mcp` branch.
-  factory LiveTool.mcp({Map<String, dynamic> rawJson = const {}}) =>
-      LiveMCPTool(rawJson: rawJson);
+  factory LiveTool.mcp({
+    String? serverLabel,
+    String? serverUrl,
+    String? serverDescription,
+    String? authorization,
+    Map<String, String>? headers,
+    LiveMCPAllowedTools? allowedTools,
+    LiveMCPApproval? requireApproval,
+    String? connectorId,
+    String? tunnelId,
+    List<LiveCallableToolAllowedCaller>? allowedCallers,
+    bool? deferLoading,
+    Map<String, dynamic> rawJson = const {},
+  }) => LiveMCPTool(
+    serverLabel: serverLabel,
+    serverUrl: serverUrl,
+    serverDescription: serverDescription,
+    authorization: authorization,
+    headers: headers,
+    allowedTools: allowedTools,
+    requireApproval: requireApproval,
+    connectorId: connectorId,
+    tunnelId: tunnelId,
+    allowedCallers: allowedCallers,
+    deferLoading: deferLoading,
+    rawJson: rawJson,
+  );
 
   /// Creates the canonical `custom` branch.
   factory LiveTool.custom({Map<String, dynamic> rawJson = const {}}) =>
@@ -748,47 +775,6 @@ final class LiveImageGenerationTool extends LiveTool {
   /// Copies fields; null clears nullable fields and `hasField: false` omits them.
   LiveImageGenerationTool copyWith({Map<String, dynamic>? rawJson}) =>
       LiveImageGenerationTool(rawJson: rawJson ?? this.rawJson);
-
-  @override
-  Map<String, dynamic> toJson() =>
-      mergeLiveJson(rawJson, _knownKeys, {'type': type});
-}
-
-/// Canonical `LiveMCPToolInputParam` object with finite immutable open extras.
-final class LiveMCPTool extends LiveTool {
-  /// Creates the canonical object; typed fields override stale known raw keys.
-  LiveMCPTool({Map<String, dynamic> rawJson = const {}})
-    : rawJson = snapshotLiveJson(
-        rawJson,
-        'LiveMCPTool',
-        knownKeys: _knownKeys,
-      ) {
-    validate();
-  }
-
-  /// Parses strict declared fields while retaining finite future fields.
-  factory LiveMCPTool.fromJson(Map<String, dynamic> json) {
-    requireLiveType(json, 'mcp', 'LiveMCPTool');
-
-    return LiveMCPTool(rawJson: json);
-  }
-
-  static const Set<String> _knownKeys = {'type'};
-
-  /// Canonical fixed `type` value.
-  @override
-  String get type => 'mcp';
-
-  /// Deeply immutable complete source JSON; typed fields govern serialization.
-  @override
-  final Map<String, dynamic> rawJson;
-
-  @override
-  void validate() {}
-
-  /// Copies fields; null clears nullable fields and `hasField: false` omits them.
-  LiveMCPTool copyWith({Map<String, dynamic>? rawJson}) =>
-      LiveMCPTool(rawJson: rawJson ?? this.rawJson);
 
   @override
   Map<String, dynamic> toJson() =>

@@ -32,6 +32,7 @@ part 'webhook_json_helpers.dart';
 /// - [FineTuningJobFailedWebhookEvent]
 /// - [FineTuningJobSucceededWebhookEvent]
 /// - [LiveCallIncomingWebhookEvent]
+/// - [LiveTransportConnectedWebhookEvent]
 /// - [LiveTransportIncomingWebhookEvent]
 /// - [RealtimeCallIncomingWebhookEvent]
 /// - [ResponseCancelledWebhookEvent]
@@ -107,6 +108,9 @@ sealed class WebhookEvent with _WebhookValue {
       'fine_tuning.job.succeeded' =>
         FineTuningJobSucceededWebhookEvent.fromJson(snapshot),
       'live.call.incoming' => LiveCallIncomingWebhookEvent.fromJson(snapshot),
+      'live.transport.connected' => LiveTransportConnectedWebhookEvent.fromJson(
+        snapshot,
+      ),
       'live.transport.incoming' => LiveTransportIncomingWebhookEvent.fromJson(
         snapshot,
       ),
@@ -2322,6 +2326,84 @@ class LiveCallIncomingWebhookEvent extends WebhookEvent {
   @override
   String toString() =>
       'LiveCallIncomingWebhookEvent(id: [REDACTED], createdAt: [REDACTED], data: [REDACTED], object: $object, rawJson: ${rawJson.length} entries)';
+}
+
+/// Notifies that a direct or Instant Connect Live WebRTC session activated.
+@immutable
+final class LiveTransportConnectedWebhookEvent extends WebhookEvent {
+  /// Creates an event carrying the session ID for a sideband connection.
+  LiveTransportConnectedWebhookEvent({
+    required this.id,
+    required this.createdAt,
+    required this.data,
+    Map<String, dynamic> rawJson = const {},
+  }) : rawJson = _snapshotWebhookJson(
+         rawJson,
+         'LiveTransportConnectedWebhookEvent.rawJson',
+       );
+
+  /// Parses a notification without authenticating its signature.
+  factory LiveTransportConnectedWebhookEvent.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    const context = 'LiveTransportConnectedWebhookEvent';
+    final snapshot = _snapshotWebhookJson(json, context);
+    requireJsonType(snapshot, 'live.transport.connected', context);
+    _requireEventObject(snapshot, context, required: true);
+    return LiveTransportConnectedWebhookEvent(
+      id: requireJsonString(snapshot['id'], '$context.id'),
+      createdAt: requireJsonInt(snapshot['created_at'], '$context.created_at'),
+      data: LiveTransportConnectedWebhookData.fromJson(
+        requireJsonObject(snapshot['data'], '$context.data'),
+      ),
+      rawJson: snapshot,
+    );
+  }
+
+  @override
+  final String id;
+
+  @override
+  final int createdAt;
+
+  @override
+  final LiveTransportConnectedWebhookData data;
+
+  @override
+  String get type => 'live.transport.connected';
+
+  @override
+  String get object => 'event';
+
+  /// Immutable received wire data, including optional metadata.
+  @override
+  final Map<String, dynamic> rawJson;
+
+  /// Copies the event with any replacement fields.
+  LiveTransportConnectedWebhookEvent copyWith({
+    String? id,
+    int? createdAt,
+    LiveTransportConnectedWebhookData? data,
+    Map<String, dynamic>? rawJson,
+  }) => LiveTransportConnectedWebhookEvent(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    data: data ?? this.data,
+    rawJson: rawJson ?? this.rawJson,
+  );
+
+  @override
+  Map<String, dynamic> _valueJson() => _mergeWebhookJson(
+    rawJson,
+    {'id', 'created_at', 'data', 'type', 'object'},
+    {
+      'id': id,
+      'created_at': createdAt,
+      'data': data.toJson(),
+      'type': type,
+      'object': object,
+    },
+  );
 }
 
 /// Received notification for `live.transport.incoming`.

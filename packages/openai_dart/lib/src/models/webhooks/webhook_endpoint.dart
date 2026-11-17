@@ -92,7 +92,10 @@ enum WebhookEventType {
   agentSessionFailed('agent.session.failed'),
 
   /// The `safety.alert.created` project notification.
-  safetyAlertCreated('safety.alert.created');
+  safetyAlertCreated('safety.alert.created'),
+
+  /// The `live.transport.connected` project notification.
+  liveTransportConnected('live.transport.connected');
 
   const WebhookEventType(this.value);
 
@@ -116,6 +119,7 @@ enum WebhookEventType {
     'fine_tuning.job.failed' => WebhookEventType.fineTuningJobFailed,
     'fine_tuning.job.cancelled' => WebhookEventType.fineTuningJobCancelled,
     'realtime.call.incoming' => WebhookEventType.realtimeCallIncoming,
+    'live.transport.connected' => WebhookEventType.liveTransportConnected,
     'video.completed' => WebhookEventType.videoCompleted,
     'video.failed' => WebhookEventType.videoFailed,
     'agent.environment.ready' => WebhookEventType.agentEnvironmentReady,

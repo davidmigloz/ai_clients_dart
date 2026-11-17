@@ -755,10 +755,15 @@ abstract class _LiveDecisionToolCallParam extends LiveDecisionInputItemParam {
     _validateDecisionName(
       name,
       'LiveDecisionToolCallParam.name',
-      function: type == 'function_call',
+      maxLength: type == 'function_call' ? 128 : 64,
+      allowDot: type == 'function_call',
     );
     if (namespace != null) {
-      _validateDecisionName(namespace!, 'LiveDecisionToolCallParam.namespace');
+      _validateDecisionName(
+        namespace!,
+        'LiveDecisionToolCallParam.namespace',
+        maxLength: type == 'function_call' ? 128 : 64,
+      );
     }
     _validateDecisionStatus(status);
   }
@@ -1216,11 +1221,12 @@ String? _optionalDecisionString(
 void _validateDecisionName(
   String value,
   String context, {
-  bool function = false,
+  int maxLength = 64,
+  bool allowDot = false,
 }) {
-  validateLiveLength(value, context, min: 1, max: function ? 128 : 64);
+  validateLiveLength(value, context, min: 1, max: maxLength);
   if (!RegExp(
-    function ? r'^[a-zA-Z0-9_.-]+$' : r'^[a-zA-Z0-9_-]+$',
+    allowDot ? r'^[a-zA-Z0-9_.-]+$' : r'^[a-zA-Z0-9_-]+$',
   ).hasMatch(value)) {
     throw FormatException('$context: invalid name');
   }

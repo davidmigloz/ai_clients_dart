@@ -628,7 +628,7 @@ final class LiveCreatedSession extends LiveJsonModel {
     required this.id,
     Map<String, dynamic> rawJson = const {},
   }) : rawJson = snapshotLiveJson(
-         rawJson,
+         liveSessionWithoutMcpCredentials(rawJson),
          'LiveCreatedSession',
          knownKeys: _fields,
        );
@@ -664,7 +664,7 @@ final class LiveSessionCreateResponse extends LiveJsonModel {
     required this.transport,
     Map<String, dynamic> rawJson = const {},
   }) : rawJson = snapshotLiveJson(
-         rawJson,
+         liveEnvelopeWithoutMcpCredentials(rawJson),
          'LiveSessionCreateResponse',
          knownKeys: _fields,
        );
@@ -724,7 +724,7 @@ final class LiveCreateResponse extends LiveJsonModel {
     required this.transport,
     Map<String, dynamic> rawJson = const {},
   }) : rawJson = snapshotLiveJson(
-         rawJson,
+         liveEnvelopeWithoutMcpCredentials(rawJson),
          'LiveCreateResponse',
          knownKeys: _fields,
        );
