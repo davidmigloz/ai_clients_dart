@@ -99,6 +99,13 @@ request when replacing a configuration. Received sessions omit MCP
 Use `tool.copyWith(authorization: null, headers: null)` to remove saved
 credentials before a request.
 
+### OCI external keys
+
+Handle `OciExternalKeyParams` in exhaustive switches over
+`ExternalKeyParams`. For received OCI keys, read `region`, `vaultOcid`,
+`keyOcid` and `keyVersionOcid` from `ExternalKey`. These fields had
+previously appeared only in `rawJson`.
+
 ---
 
 ## Migrating from v11.x to v12.0.0
