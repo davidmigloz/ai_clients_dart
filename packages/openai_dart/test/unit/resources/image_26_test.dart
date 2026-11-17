@@ -437,12 +437,33 @@ void main() {
       final json = _call()
         ..['status'] = status.toJson()
         ..['result'] = null;
+      if (status == ImageGenerationCallStatus.failed) {
+        json['error'] = {
+          'code': 'moderation_blocked',
+          'type': 'image_generation_error',
+          'message': 'Fixture rejection',
+          'param': null,
+          'moderation_details': {
+            'moderation_stage': 'output',
+            'categories': ['fixture_category'],
+          },
+        };
+      }
       final item =
           ConversationItem.fromJson(json)
               as ConversationImageGenerationCallItem;
       expect(item.status, status);
       expect(item.result, isNull);
+      expect(
+        item.error?.code,
+        status == ImageGenerationCallStatus.failed
+            ? 'moderation_blocked'
+            : null,
+      );
       expect(item.toJson(), json);
+      final rebuilt = ConversationItem.fromJson(item.toJson());
+      expect(rebuilt, item);
+      expect(rebuilt.hashCode, item.hashCode);
     }
   });
 

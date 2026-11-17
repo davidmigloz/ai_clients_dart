@@ -614,6 +614,9 @@ class ConversationImageGenerationCallItem extends ConversationItem {
   /// Can be absent on older saved items.
   final ImageGenerationCallStatus? status;
 
+  /// Failure details returned by the image tool.
+  final ImageGenerationCallError? error;
+
   /// The generated image format, when present.
   final ImageOutputFormat? outputFormat;
 
@@ -627,6 +630,7 @@ class ConversationImageGenerationCallItem extends ConversationItem {
     this.revisedPrompt,
     this.result,
     this.status,
+    this.error,
     this.outputFormat,
     this.svgUsage,
   });
@@ -642,6 +646,14 @@ class ConversationImageGenerationCallItem extends ConversationItem {
       result: json['result'] as String?,
       status: json['status'] != null
           ? ImageGenerationCallStatus.fromJson(json['status'])
+          : null,
+      error: json.containsKey('error')
+          ? ImageGenerationCallError.fromJson(
+              requireJsonObject(
+                json['error'],
+                'ConversationImageGenerationCallItem.error',
+              ),
+            )
           : null,
       outputFormat: json['output_format'] == null
           ? null
@@ -670,6 +682,7 @@ class ConversationImageGenerationCallItem extends ConversationItem {
     if (revisedPrompt != null) 'revised_prompt': revisedPrompt,
     'result': result,
     if (status != null) 'status': status!.toJson(),
+    if (error != null) 'error': error!.toJson(),
     if (outputFormat != null) 'output_format': outputFormat!.toJson(),
     if (svgUsage != null) 'svg_usage': svgUsage!.toJson(),
   };
@@ -684,6 +697,7 @@ class ConversationImageGenerationCallItem extends ConversationItem {
           revisedPrompt == other.revisedPrompt &&
           result == other.result &&
           status == other.status &&
+          error == other.error &&
           outputFormat == other.outputFormat &&
           svgUsage == other.svgUsage;
 
@@ -694,6 +708,7 @@ class ConversationImageGenerationCallItem extends ConversationItem {
     revisedPrompt,
     result,
     status,
+    error,
     outputFormat,
     svgUsage,
   );
