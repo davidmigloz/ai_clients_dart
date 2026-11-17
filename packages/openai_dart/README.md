@@ -1658,6 +1658,22 @@ The Admin models are also available through `package:openai_dart/openai_dart_adm
 
 </details>
 
+<a id="how-do-i-manage-workload-identity-federation"></a>
+<details>
+<summary><b>How do I manage workload identity federation?</b></summary>
+
+Use `admin.organization.workloadIdentityProviders` to manage OIDC providers.
+Use its `federationRules` resource to map selected identity attributes to
+project service accounts. Provider and rule lists expose cursor pages.
+
+For inference, a Dart `AuthProvider` can supply a current bearer token to
+`OpenAIClient`. Obtain and refresh that token in your application using your
+identity provider and OpenAI's token exchange.
+
+→ [Offline Admin example](example/workload_identity_example.dart) · [Workload identity guide](https://developers.openai.com/api/docs/guides/workload-identity-federation)
+
+</details>
+
 ### Legacy and retiring APIs
 
 <a id="how-do-i-generate-videos"></a>

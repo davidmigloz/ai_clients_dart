@@ -1,5 +1,6 @@
 import '../../client/admin_http.dart';
 import '../../models/admin/admin.dart';
+import 'workload_identity_resource.dart';
 
 /// Bounded organization operations, authenticated only by OpenAIAdminClient.
 final class AdminOrganizationResource {
@@ -10,6 +11,7 @@ final class AdminOrganizationResource {
   AdminExternalStorageResource? _externalStorage;
   AdminProjectsResource? _projects;
   AdminUsageResource? _usage;
+  AdminWorkloadIdentityProvidersResource? _workloadIdentityProviders;
 
   /// External key registration, inspection, validation and removal.
   AdminExternalKeysResource get externalKeys {
@@ -33,6 +35,13 @@ final class AdminOrganizationResource {
   AdminUsageResource get usage {
     _http.ensureOpen();
     return _usage ??= AdminUsageResource(_http);
+  }
+
+  /// Workload identity provider and federation rule administration.
+  AdminWorkloadIdentityProvidersResource get workloadIdentityProviders {
+    _http.ensureOpen();
+    return _workloadIdentityProviders ??=
+        AdminWorkloadIdentityProvidersResource(_http);
   }
 }
 
