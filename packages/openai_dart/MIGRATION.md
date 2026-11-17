@@ -106,6 +106,15 @@ Handle `OciExternalKeyParams` in exhaustive switches over
 `keyOcid` and `keyVersionOcid` from `ExternalKey`. These fields had
 previously appeared only in `rawJson`.
 
+### Regional endpoints and function call output
+
+Update exhaustive switches over `OpenAIDataResidency` to handle `au`, `india`
+and `jp`. The existing selections use the same URLs.
+
+If your subclass overrides `FunctionCallOutputItem.copyWith`, add the optional
+`namespace` argument with the same omission and explicit-null behavior as the
+base method. Set `namespace` when returning an output for a namespaced function.
+
 ---
 
 ## Migrating from v11.x to v12.0.0

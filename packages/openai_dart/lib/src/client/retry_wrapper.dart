@@ -192,6 +192,7 @@ class RetryWrapper {
       'credit_balance_exhausted',
       'organization_spend_limit_exceeded',
       'project_spend_limit_exceeded',
+      'api_key_spend_limit_exceeded',
       'organization_usage_limit_exceeded',
       'insufficient_quota',
     };

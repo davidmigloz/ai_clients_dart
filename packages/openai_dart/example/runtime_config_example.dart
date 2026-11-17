@@ -14,7 +14,7 @@ Future<void> main() async {
   final requests = <http.Request>[];
   final transport = MockClient((request) async {
     requests.add(request);
-    final expected = request.url.host == 'first.invalid'
+    final expected = request.url.host == 'jp.api.openai.com'
         ? currentToken
         : 'synthetic_second';
     if (request.headers['authorization'] != 'Bearer $expected') {
@@ -27,8 +27,8 @@ Future<void> main() async {
     );
   });
   final client = OpenAIClient(
-    config: OpenAIConfig(
-      baseUrl: 'https://first.invalid/v1',
+    config: OpenAIConfig.forDataResidency(
+      OpenAIDataResidency.jp,
       authProvider: _RotatingAuth(() => currentToken),
     ),
     httpClient: transport,
@@ -49,7 +49,7 @@ Future<void> main() async {
     await retained.list(); // Keeps the first route/provider configuration.
     await client.models.list(); // Newly acquired handle uses the new settings.
     if (requests.map((r) => r.url.host).join(',') !=
-        'first.invalid,first.invalid,second.invalid') {
+        'jp.api.openai.com,jp.api.openai.com,second.invalid') {
       throw StateError('Configuration snapshots were mixed.');
     }
     stdout.writeln(

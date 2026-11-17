@@ -68,6 +68,9 @@ Future<void> main() async {
     print('  Object: ${model.object}');
     print('  Owned by: ${model.ownedBy}');
     print('  Created: ${model.createdAt}');
+    if (model.shutdownDate case final date?) {
+      print('  Announced shutdown: $date');
+    }
     print('');
 
     // Group models by owner

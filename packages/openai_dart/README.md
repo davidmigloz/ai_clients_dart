@@ -209,23 +209,19 @@ CORS, access permissions and model availability remain service-controlled.
 ```dart
 final client = OpenAIClient(
   config: OpenAIConfig.forDataResidency(
-    OpenAIDataResidency.eu,
-    authProvider: ApiKeyProvider(euProjectApiKey),
+    OpenAIDataResidency.jp,
+    authProvider: ApiKeyProvider(jpProjectApiKey),
   ),
 );
 ```
 
-The named SDK mapping supports `global`, `us`, `eu` and `ae`. US/EU support eligible
-regional processing; UAE processing is limited to supported model/service
-combinations. The official guide also lists storage-only regional endpoints
-(Australia, Canada, Japan, India, Singapore, South Korea and the UK); select their
-complete root through ordinary `OpenAIConfig(baseUrl: ...)` when applicable.
-Regional storage does not imply regional processing. A matching project, approved
-account settings and eligible models/features are still required; endpoint or
-credential selection alone provides no residency guarantee. Google Vertex
-locations are a separate provider setting.
+The named SDK mapping supports `global`, `us`, `eu`, `ae`, `au`, `india` and
+`jp`. The India selection uses `in.api.openai.com`. Check the guide for your
+project's eligibility and which models and services support regional storage
+and processing. For another supported root, use
+`OpenAIConfig(baseUrl: ...)`. Configure Google Vertex locations separately.
 
-→ [Official data controls and regional support](https://developers.openai.com/api/docs/guides/your-data)
+→ [Offline routing example](example/runtime_config_example.dart) · [Official data residency guide](https://developers.openai.com/api/docs/guides/data-residency)
 
 </details>
 
@@ -1728,7 +1724,11 @@ Future<void> main() async {
 }
 ```
 
-Cloneable requests retry transient 429 responses; 5xx, timeout, and connection retries require an idempotent method. Billing/quota errors require action, and POST 5xx, multipart requests, and streams are not automatically replayed. Server retry hints are exposed as `retryAfter`; `maxRetries: 0` disables automatic retries.
+Cloneable requests retry transient HTTP 429 responses. Spending-limit failures
+such as `api_key_spend_limit_exceeded` surface immediately with their error
+code. Server and transport retries require an idempotent method. Multipart
+requests and streams use a single attempt. Server retry hints are exposed as
+`retryAfter`. Set `maxRetries: 0` to disable automatic retries.
 
 → [Full example](example/error_handling_example.dart) · [Retry and quota example](example/retry_guidance_example.dart)
 
@@ -1800,7 +1800,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [batches_example.dart](example/batches_example.dart) | Batch processing for async jobs |
 | [fine_tuning_example.dart](example/fine_tuning_example.dart) | Fine-tuning job management |
 | [evals_example.dart](example/evals_example.dart) | Historical Evals reference; read-only until November 30, 2026 |
-| [models_example.dart](example/models_example.dart) | Model listing and retrieval |
+| [models_example.dart](example/models_example.dart) | Model listing, retrieval and announced shutdown dates |
 | [moderation_example.dart](example/moderation_example.dart) | Content moderation |
 | [image_classifier_example.dart](example/image_classifier_example.dart) | **Offline.** Image classifier response decoding |
 | [content_provenance_checks_example.dart](example/content_provenance_checks_example.dart) | Content provenance (C2PA/SynthID) detection |

@@ -1753,6 +1753,11 @@ class FunctionCallOutputItem extends Item {
   /// The output content.
   final FunctionCallOutput output;
 
+  /// The originating tool's namespace, if known.
+  ///
+  /// The API accepts up to 128 letters, digits, underscores or hyphens.
+  final String? namespace;
+
   /// The status of the function call.
   final FunctionCallStatus? status;
 
@@ -1766,6 +1771,7 @@ class FunctionCallOutputItem extends Item {
     this.agent,
     required this.callId,
     required this.output,
+    this.namespace,
     this.status,
     this.caller,
   });
@@ -1776,6 +1782,7 @@ class FunctionCallOutputItem extends Item {
     AgentTag? agent,
     required String callId,
     required String output,
+    String? namespace,
     FunctionCallStatus? status,
     ToolCallCaller? caller,
   }) {
@@ -1784,6 +1791,7 @@ class FunctionCallOutputItem extends Item {
       agent: agent,
       callId: callId,
       output: FunctionCallOutputString(output),
+      namespace: namespace,
       status: status,
       caller: caller,
     );
@@ -1798,6 +1806,7 @@ class FunctionCallOutputItem extends Item {
           : null,
       callId: json['call_id'] as String,
       output: FunctionCallOutput.fromJson(json['output']),
+      namespace: json['namespace'] as String?,
       status: json['status'] != null
           ? FunctionCallStatus.fromJson(json['status'] as String)
           : null,
@@ -1814,6 +1823,7 @@ class FunctionCallOutputItem extends Item {
     if (agent != null) 'agent': agent!.toJson(),
     'call_id': callId,
     'output': output.toJson(),
+    if (namespace != null) 'namespace': namespace,
     if (status != null) 'status': status!.toJson(),
     if (caller != null) 'caller': caller!.toJson(),
   };
@@ -1826,6 +1836,7 @@ class FunctionCallOutputItem extends Item {
     Object? agent = unsetCopyWithValue,
     String? callId,
     FunctionCallOutput? output,
+    Object? namespace = unsetCopyWithValue,
     Object? status = unsetCopyWithValue,
     Object? caller = unsetCopyWithValue,
   }) {
@@ -1834,6 +1845,9 @@ class FunctionCallOutputItem extends Item {
       agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
       callId: callId ?? this.callId,
       output: output ?? this.output,
+      namespace: identical(namespace, unsetCopyWithValue)
+          ? this.namespace
+          : namespace as String?,
       status: status == unsetCopyWithValue
           ? this.status
           : status as FunctionCallStatus?,
@@ -1852,15 +1866,17 @@ class FunctionCallOutputItem extends Item {
           agent == other.agent &&
           callId == other.callId &&
           output == other.output &&
+          namespace == other.namespace &&
           status == other.status &&
           caller == other.caller;
 
   @override
-  int get hashCode => Object.hash(id, agent, callId, output, status, caller);
+  int get hashCode =>
+      Object.hash(id, agent, callId, output, namespace, status, caller);
 
   @override
   String toString() =>
-      'FunctionCallOutputItem(id: $id, agent: $agent, callId: $callId, output: $output, status: $status, caller: $caller)';
+      'FunctionCallOutputItem(id: $id, agent: $agent, callId: $callId, output: $output, namespace: $namespace, status: $status, caller: $caller)';
 }
 
 /// Reference to a previously created item.

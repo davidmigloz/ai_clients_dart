@@ -12,6 +12,7 @@ void main() {
     'credit_balance_exhausted',
     'organization_spend_limit_exceeded',
     'project_spend_limit_exceeded',
+    'api_key_spend_limit_exceeded',
     'organization_usage_limit_exceeded',
     'insufficient_quota',
   ];
@@ -52,6 +53,48 @@ void main() {
         },
       );
     }
+    test(
+      'streaming exposes the key spend limit error without replay',
+      () async {
+        var sends = 0;
+        final transport = MockClient((request) async {
+          sends++;
+          return _failure(
+            _errorJson(code: 'api_key_spend_limit_exceeded'),
+            429,
+            {'retry-after-ms': '10'},
+          );
+        });
+        final client = _client(transport);
+        addTearDown(transport.close);
+        addTearDown(client.close);
+
+        await expectLater(
+          client.responses
+              .createStream(
+                const CreateResponseRequest(
+                  model: 'fixture-model',
+                  input: ResponseInput.text('Test'),
+                ),
+              )
+              .toList(),
+          throwsA(
+            isA<RateLimitException>()
+                .having(
+                  (error) => error.code,
+                  'code',
+                  'api_key_spend_limit_exceeded',
+                )
+                .having(
+                  (error) => error.retryAfter,
+                  'retryAfter',
+                  const Duration(milliseconds: 10),
+                ),
+          ),
+        );
+        expect(sends, 1);
+      },
+    );
     for (final error in <Map<String, dynamic>>[
       {
         'code': 'unknown',

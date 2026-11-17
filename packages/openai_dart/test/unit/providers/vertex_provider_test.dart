@@ -143,6 +143,9 @@ void main() {
           'https://us.api.openai.com/v1',
           'https://eu.api.openai.com/v1',
           'https://ae.api.openai.com/v1',
+          'https://au.api.openai.com/v1',
+          'https://in.api.openai.com/v1',
+          'https://jp.api.openai.com/v1',
         ]);
       },
     );
