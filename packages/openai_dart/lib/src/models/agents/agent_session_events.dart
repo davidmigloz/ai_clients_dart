@@ -11,6 +11,9 @@ sealed class AgentSessionEvent extends AgentJsonModel {
       'agent.output.command_execution_output.delta' =>
         AgentSessionAgentOutputCommandExecutionOutputDeltaEvent.fromJson(json),
       'agent.session.created' => AgentSessionCreatedEvent.fromJson(json),
+      'agent.session.budget_reached' => AgentSessionBudgetReachedEvent.fromJson(
+        json,
+      ),
       'agent.session.environment.connected' =>
         AgentSessionEnvironmentConnectedEvent.fromJson(json),
       'agent.session.environment.disconnected' =>
@@ -78,6 +81,16 @@ sealed class AgentSessionEvent extends AgentJsonModel {
 
   /// Canonical `type` discriminator.
   String get type;
+
+  /// Detached extra fields, including padding present on the wire.
+  Map<String, dynamic> get rawJson;
+
+  /// Optional server-generated event padding.
+  String? get obfuscation => switch (rawJson['obfuscation']) {
+    final String padding => padding,
+    _ => null,
+  };
+
   @override
   Map<String, dynamic> toJson();
 
@@ -91,6 +104,13 @@ sealed class AgentSessionEvent extends AgentJsonModel {
     required String? turnId,
     Map<String, dynamic> rawJson,
   }) = AgentSessionAgentOutputCommandExecutionOutputDeltaEvent;
+
+  /// Builds the `agent.session.budget_reached` contract.
+  factory AgentSessionEvent.budgetReached({
+    required String eventId,
+    required AgentSession session,
+    Map<String, dynamic> rawJson,
+  }) = AgentSessionBudgetReachedEvent;
 
   /// Builds the `agent.session.created` contract.
   factory AgentSessionEvent.created({
@@ -408,6 +428,7 @@ final class UnknownAgentSessionEvent extends AgentSessionEvent {
     if (const [
       'agent.output.command_execution_output.delta',
       'agent.session.created',
+      'agent.session.budget_reached',
       'agent.session.environment.connected',
       'agent.session.environment.disconnected',
       'agent.session.environment.expired',
@@ -450,6 +471,7 @@ final class UnknownAgentSessionEvent extends AgentSessionEvent {
   }
 
   /// Finite detached received snapshot; never an executable instruction.
+  @override
   final Map<String, dynamic> rawJson;
   @override
   String get type => rawJson['type'] as String;
@@ -475,7 +497,7 @@ final class AgentSessionAgentOutputCommandExecutionOutputDeltaEvent
     required this.sessionId,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'delta',
          'event_id',
          'item_id',
@@ -510,6 +532,7 @@ final class AgentSessionAgentOutputCommandExecutionOutputDeltaEvent
   String get type => 'agent.output.command_execution_output.delta';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionAgentOutputCommandExecutionOutputDeltaEvent] with contextual, payload-free errors.
@@ -662,7 +685,7 @@ final class AgentSessionCreatedEvent extends AgentSessionEvent {
     required this.eventId,
     required this.session,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'event_id',
          'session',
          'type',
@@ -681,6 +704,7 @@ final class AgentSessionCreatedEvent extends AgentSessionEvent {
   String get type => 'agent.session.created';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionCreatedEvent] with contextual, payload-free errors.
@@ -740,6 +764,98 @@ final class AgentSessionCreatedEvent extends AgentSessionEvent {
   );
 }
 
+/// Emitted when the spending cap pauses a Managed Agents session.
+///
+/// Diagnostics redact all payloads. Collections are detached and immutable.
+final class AgentSessionBudgetReachedEvent extends AgentSessionEvent {
+  /// Creates a validated [AgentSessionBudgetReachedEvent].
+  AgentSessionBudgetReachedEvent({
+    required this.eventId,
+    required this.session,
+    Map<String, dynamic> rawJson = const {},
+  }) : rawJson = _agentEventExtras(rawJson, const [
+         'event_id',
+         'session',
+         'type',
+       ], 'AgentSessionBudgetReachedEvent') {
+    validate();
+  }
+
+  /// The unique ID of the event.
+  final String eventId;
+
+  /// The paused session.
+  final AgentSession session;
+
+  /// The type of the object. Always `agent.session.budget_reached`.
+  @override
+  String get type => 'agent.session.budget_reached';
+
+  /// Detached received extras; declared fields cannot be overridden.
+  @override
+  final Map<String, dynamic> rawJson;
+
+  /// Parses [AgentSessionBudgetReachedEvent] with contextual, payload-free errors.
+  factory AgentSessionBudgetReachedEvent.fromJson(Map<String, dynamic> json) {
+    requireAgentTag(
+      json,
+      'type',
+      'agent.session.budget_reached',
+      'AgentSessionBudgetReachedEvent',
+    );
+    return AgentSessionBudgetReachedEvent(
+      eventId: requiredAgentValue(
+        json,
+        'event_id',
+        'AgentSessionBudgetReachedEvent.eventId',
+        requireAgentString,
+        nullable: false,
+      )!,
+      session: requiredAgentValue(
+        json,
+        'session',
+        'AgentSessionBudgetReachedEvent.session',
+        (value, context) =>
+            AgentSession.fromJson(requireAgentObject(value, context)),
+        nullable: false,
+      )!,
+      rawJson: {
+        for (final entry in json.entries)
+          if (!const ['event_id', 'session', 'type'].contains(entry.key))
+            entry.key: entry.value,
+      },
+    );
+  }
+  @override
+  void validate() {
+    validateAgentLength(
+      eventId,
+      'AgentSessionBudgetReachedEvent.eventId',
+      min: 0,
+    );
+    session.validate();
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    ...rawJson,
+    'event_id': eventId,
+    'session': session.toJson(),
+    'type': type,
+  };
+
+  /// Copies values; omitted arguments retain their values and null presence.
+  AgentSessionBudgetReachedEvent copyWith({
+    String? eventId,
+    AgentSession? session,
+    Map<String, dynamic>? rawJson,
+  }) => AgentSessionBudgetReachedEvent(
+    eventId: eventId ?? this.eventId,
+    session: session ?? this.session,
+    rawJson: rawJson ?? this.rawJson,
+  );
+}
+
 /// Emitted when a session environment connects.
 ///
 /// Diagnostics redact all payloads. Collections are detached and immutable.
@@ -751,7 +867,7 @@ final class AgentSessionEnvironmentConnectedEvent extends AgentSessionEvent {
     required this.sessionId,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'environment',
          'event_id',
          'session_id',
@@ -778,6 +894,7 @@ final class AgentSessionEnvironmentConnectedEvent extends AgentSessionEvent {
   String get type => 'agent.session.environment.connected';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionEnvironmentConnectedEvent] with contextual, payload-free errors.
@@ -897,7 +1014,7 @@ final class AgentSessionEnvironmentDisconnectedEvent extends AgentSessionEvent {
     required this.sessionId,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'environment',
          'event_id',
          'session_id',
@@ -924,6 +1041,7 @@ final class AgentSessionEnvironmentDisconnectedEvent extends AgentSessionEvent {
   String get type => 'agent.session.environment.disconnected';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionEnvironmentDisconnectedEvent] with contextual, payload-free errors.
@@ -1043,7 +1161,7 @@ final class AgentSessionEnvironmentExpiredEvent extends AgentSessionEvent {
     required this.sessionId,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'environment',
          'event_id',
          'session_id',
@@ -1070,6 +1188,7 @@ final class AgentSessionEnvironmentExpiredEvent extends AgentSessionEvent {
   String get type => 'agent.session.environment.expired';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionEnvironmentExpiredEvent] with contextual, payload-free errors.
@@ -1189,7 +1308,7 @@ final class AgentSessionEnvironmentFailedEvent extends AgentSessionEvent {
     required this.sessionId,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'environment',
          'event_id',
          'session_id',
@@ -1216,6 +1335,7 @@ final class AgentSessionEnvironmentFailedEvent extends AgentSessionEvent {
   String get type => 'agent.session.environment.failed';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionEnvironmentFailedEvent] with contextual, payload-free errors.
@@ -1335,7 +1455,7 @@ final class AgentSessionEnvironmentPendingEvent extends AgentSessionEvent {
     required this.sessionId,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'environment',
          'event_id',
          'session_id',
@@ -1362,6 +1482,7 @@ final class AgentSessionEnvironmentPendingEvent extends AgentSessionEvent {
   String get type => 'agent.session.environment.pending';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionEnvironmentPendingEvent] with contextual, payload-free errors.
@@ -1481,7 +1602,7 @@ final class AgentSessionEnvironmentReadyEvent extends AgentSessionEvent {
     required this.sessionId,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'environment',
          'event_id',
          'session_id',
@@ -1508,6 +1629,7 @@ final class AgentSessionEnvironmentReadyEvent extends AgentSessionEvent {
   String get type => 'agent.session.environment.ready';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionEnvironmentReadyEvent] with contextual, payload-free errors.
@@ -1628,7 +1750,7 @@ final class AgentSessionEnvironmentResetEvent extends AgentSessionEvent {
     required this.sessionId,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'environment_id',
          'event_id',
          'reset_count',
@@ -1659,6 +1781,7 @@ final class AgentSessionEnvironmentResetEvent extends AgentSessionEvent {
   String get type => 'agent.session.environment.reset';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionEnvironmentResetEvent] with contextual, payload-free errors.
@@ -1796,7 +1919,7 @@ final class AgentSessionEnvironmentSuspendedEvent extends AgentSessionEvent {
     required this.sessionId,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'environment',
          'event_id',
          'session_id',
@@ -1823,6 +1946,7 @@ final class AgentSessionEnvironmentSuspendedEvent extends AgentSessionEvent {
   String get type => 'agent.session.environment.suspended';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionEnvironmentSuspendedEvent] with contextual, payload-free errors.
@@ -1940,7 +2064,7 @@ final class AgentSessionFailedEvent extends AgentSessionEvent {
     required this.eventId,
     required this.session,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'event_id',
          'session',
          'type',
@@ -1959,6 +2083,7 @@ final class AgentSessionFailedEvent extends AgentSessionEvent {
   String get type => 'agent.session.failed';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionFailedEvent] with contextual, payload-free errors.
@@ -2027,7 +2152,7 @@ final class AgentSessionIdleEvent extends AgentSessionEvent {
     required this.eventId,
     required this.session,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'event_id',
          'session',
          'type',
@@ -2046,6 +2171,7 @@ final class AgentSessionIdleEvent extends AgentSessionEvent {
   String get type => 'agent.session.idle';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionIdleEvent] with contextual, payload-free errors.
@@ -2114,7 +2240,7 @@ final class AgentSessionInProgressEvent extends AgentSessionEvent {
     required this.eventId,
     required this.session,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'event_id',
          'session',
          'type',
@@ -2133,6 +2259,7 @@ final class AgentSessionInProgressEvent extends AgentSessionEvent {
   String get type => 'agent.session.in_progress';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionInProgressEvent] with contextual, payload-free errors.
@@ -2201,7 +2328,7 @@ final class AgentSessionRequiresActionEvent extends AgentSessionEvent {
     required this.eventId,
     required this.session,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'event_id',
          'session',
          'type',
@@ -2220,6 +2347,7 @@ final class AgentSessionRequiresActionEvent extends AgentSessionEvent {
   String get type => 'agent.session.requires_action';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionRequiresActionEvent] with contextual, payload-free errors.
@@ -2292,7 +2420,7 @@ final class AgentSessionSubagentActiveEvent extends AgentSessionEvent {
     required this.eventId,
     required this.subagent,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'event_id',
          'subagent',
          'type',
@@ -2311,6 +2439,7 @@ final class AgentSessionSubagentActiveEvent extends AgentSessionEvent {
   String get type => 'agent.session.subagent.active';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionSubagentActiveEvent] with contextual, payload-free errors.
@@ -2383,7 +2512,7 @@ final class AgentSessionSubagentClosedEvent extends AgentSessionEvent {
     required this.eventId,
     required this.subagent,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'event_id',
          'subagent',
          'type',
@@ -2402,6 +2531,7 @@ final class AgentSessionSubagentClosedEvent extends AgentSessionEvent {
   String get type => 'agent.session.subagent.closed';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionSubagentClosedEvent] with contextual, payload-free errors.
@@ -2474,7 +2604,7 @@ final class AgentSessionSubagentCreatedEvent extends AgentSessionEvent {
     required this.eventId,
     required this.subagent,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'event_id',
          'subagent',
          'type',
@@ -2493,6 +2623,7 @@ final class AgentSessionSubagentCreatedEvent extends AgentSessionEvent {
   String get type => 'agent.session.subagent.created';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionSubagentCreatedEvent] with contextual, payload-free errors.
@@ -2568,7 +2699,7 @@ final class AgentSessionTurnCancelledEvent extends AgentSessionEvent {
     required this.turnId,
     required this.usage,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'event_id',
          'session_id',
          'turn',
@@ -2599,6 +2730,7 @@ final class AgentSessionTurnCancelledEvent extends AgentSessionEvent {
   final AgentSessionTokenUsageResource? usage;
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionTurnCancelledEvent] with contextual, payload-free errors.
@@ -2730,7 +2862,7 @@ final class AgentSessionTurnCompletedEvent extends AgentSessionEvent {
     required this.turnId,
     required this.usage,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'event_id',
          'session_id',
          'turn',
@@ -2761,6 +2893,7 @@ final class AgentSessionTurnCompletedEvent extends AgentSessionEvent {
   final AgentSessionTokenUsageResource? usage;
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionTurnCompletedEvent] with contextual, payload-free errors.
@@ -2894,7 +3027,7 @@ final class AgentSessionTurnContentPartAddedEvent extends AgentSessionEvent {
     required this.sessionId,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'content_index',
          'event_id',
          'item_id',
@@ -2933,6 +3066,7 @@ final class AgentSessionTurnContentPartAddedEvent extends AgentSessionEvent {
   String get type => 'agent.session.turn.content_part.added';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionTurnContentPartAddedEvent] with contextual, payload-free errors.
@@ -3105,7 +3239,7 @@ final class AgentSessionTurnContentPartDoneEvent extends AgentSessionEvent {
     required this.sessionId,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'content_index',
          'event_id',
          'item_id',
@@ -3144,6 +3278,7 @@ final class AgentSessionTurnContentPartDoneEvent extends AgentSessionEvent {
   String get type => 'agent.session.turn.content_part.done';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionTurnContentPartDoneEvent] with contextual, payload-free errors.
@@ -3313,7 +3448,7 @@ final class AgentSessionTurnCreatedEvent extends AgentSessionEvent {
     required this.turn,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'event_id',
          'session_id',
          'turn',
@@ -3340,6 +3475,7 @@ final class AgentSessionTurnCreatedEvent extends AgentSessionEvent {
   String get type => 'agent.session.turn.created';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionTurnCreatedEvent] with contextual, payload-free errors.
@@ -3447,7 +3583,7 @@ final class AgentSessionTurnFailedEvent extends AgentSessionEvent {
     required this.turnId,
     required this.usage,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'event_id',
          'session_id',
          'turn',
@@ -3478,6 +3614,7 @@ final class AgentSessionTurnFailedEvent extends AgentSessionEvent {
   final AgentSessionTokenUsageResource? usage;
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionTurnFailedEvent] with contextual, payload-free errors.
@@ -3600,7 +3737,7 @@ final class AgentSessionTurnInProgressEvent extends AgentSessionEvent {
     required this.turn,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'event_id',
          'session_id',
          'turn',
@@ -3627,6 +3764,7 @@ final class AgentSessionTurnInProgressEvent extends AgentSessionEvent {
   String get type => 'agent.session.turn.in_progress';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionTurnInProgressEvent] with contextual, payload-free errors.
@@ -3738,7 +3876,7 @@ final class AgentSessionTurnItemAddedEvent extends AgentSessionEvent {
     required this.sessionId,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'event_id',
          'item',
          'output_index',
@@ -3769,6 +3907,7 @@ final class AgentSessionTurnItemAddedEvent extends AgentSessionEvent {
   String get type => 'agent.session.turn.item.added';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionTurnItemAddedEvent] with contextual, payload-free errors.
@@ -3909,7 +4048,7 @@ final class AgentSessionTurnItemDoneEvent extends AgentSessionEvent {
     required this.sessionId,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'event_id',
          'item',
          'output_index',
@@ -3940,6 +4079,7 @@ final class AgentSessionTurnItemDoneEvent extends AgentSessionEvent {
   String get type => 'agent.session.turn.item.done';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionTurnItemDoneEvent] with contextual, payload-free errors.
@@ -4076,7 +4216,7 @@ final class AgentSessionTurnOutputTextDeltaEvent extends AgentSessionEvent {
     required this.sessionId,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'content_index',
          'delta',
          'event_id',
@@ -4115,6 +4255,7 @@ final class AgentSessionTurnOutputTextDeltaEvent extends AgentSessionEvent {
   String get type => 'agent.session.turn.output_text.delta';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionTurnOutputTextDeltaEvent] with contextual, payload-free errors.
@@ -4289,7 +4430,7 @@ final class AgentSessionTurnOutputTextDoneEvent extends AgentSessionEvent {
     required this.text,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'content_index',
          'event_id',
          'item_id',
@@ -4328,6 +4469,7 @@ final class AgentSessionTurnOutputTextDoneEvent extends AgentSessionEvent {
   String get type => 'agent.session.turn.output_text.done';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionTurnOutputTextDoneEvent] with contextual, payload-free errors.
@@ -4503,7 +4645,7 @@ final class AgentSessionTurnReasoningSummaryPartAddedEvent
     required this.summaryIndex,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'event_id',
          'item_id',
          'output_index',
@@ -4542,6 +4684,7 @@ final class AgentSessionTurnReasoningSummaryPartAddedEvent
   String get type => 'agent.session.turn.reasoning_summary_part.added';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionTurnReasoningSummaryPartAddedEvent] with contextual, payload-free errors.
@@ -4716,7 +4859,7 @@ final class AgentSessionTurnReasoningSummaryPartDoneEvent
     required this.summaryIndex,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'event_id',
          'item_id',
          'output_index',
@@ -4759,6 +4902,7 @@ final class AgentSessionTurnReasoningSummaryPartDoneEvent
   String get type => 'agent.session.turn.reasoning_summary_part.done';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionTurnReasoningSummaryPartDoneEvent] with contextual, payload-free errors.
@@ -4957,7 +5101,7 @@ final class AgentSessionTurnReasoningSummaryTextDeltaEvent
     required this.summaryIndex,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'delta',
          'event_id',
          'item_id',
@@ -4996,6 +5140,7 @@ final class AgentSessionTurnReasoningSummaryTextDeltaEvent
   String get type => 'agent.session.turn.reasoning_summary_text.delta';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionTurnReasoningSummaryTextDeltaEvent] with contextual, payload-free errors.
@@ -5171,7 +5316,7 @@ final class AgentSessionTurnReasoningSummaryTextDoneEvent
     required this.text,
     required this.turnId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'event_id',
          'item_id',
          'output_index',
@@ -5210,6 +5355,7 @@ final class AgentSessionTurnReasoningSummaryTextDoneEvent
   String get type => 'agent.session.turn.reasoning_summary_text.done';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionTurnReasoningSummaryTextDoneEvent] with contextual, payload-free errors.
@@ -5380,7 +5526,7 @@ final class AgentSessionErrorEvent extends AgentSessionEvent {
     required this.eventId,
     required this.sessionId,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : rawJson = _agentEventExtras(rawJson, const [
          'error',
          'event_id',
          'session_id',
@@ -5403,6 +5549,7 @@ final class AgentSessionErrorEvent extends AgentSessionEvent {
   String get type => 'error';
 
   /// Detached received extras; declared fields cannot be overridden.
+  @override
   final Map<String, dynamic> rawJson;
 
   /// Parses [AgentSessionErrorEvent] with contextual, payload-free errors.
@@ -5472,4 +5619,15 @@ final class AgentSessionErrorEvent extends AgentSessionEvent {
     sessionId: sessionId ?? this.sessionId,
     rawJson: rawJson ?? this.rawJson,
   );
+}
+
+Map<String, dynamic> _agentEventExtras(
+  Map<String, dynamic> json,
+  List<String> knownKeys,
+  String context,
+) {
+  if (json.containsKey('obfuscation')) {
+    requireAgentString(json['obfuscation'], '$context.obfuscation');
+  }
+  return agentExtras(json, knownKeys, context);
 }

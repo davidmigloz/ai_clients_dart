@@ -83,6 +83,7 @@ Stream<Uint8List> openPrivateByteStream({
   required RequestBuilder requestBuilder,
   required String method,
   required String endpoint,
+  Map<String, String>? query,
   Map<String, dynamic>? body,
   Map<String, String>? additionalHeaders,
   String? betaFeature,
@@ -103,6 +104,7 @@ Stream<Uint8List> openPrivateByteStream({
   requestBuilder: requestBuilder,
   method: method,
   endpoint: endpoint,
+  query: query,
   context: context,
   body: body,
   additionalHeaders: additionalHeaders,
@@ -318,7 +320,9 @@ class _PrivateByteOperation {
     Map<String, String>? additionalHeaders,
     this.betaFeature,
     this.idempotencyKey,
-  }) : additionalHeaders = additionalHeaders == null
+    Map<String, String>? query,
+  }) : query = query == null ? null : Map<String, String>.unmodifiable(query),
+       additionalHeaders = additionalHeaders == null
            ? null
            : Map<String, String>.unmodifiable(additionalHeaders) {
     _controller = StreamController<Uint8List>(
@@ -342,6 +346,7 @@ class _PrivateByteOperation {
   final RequestBuilder requestBuilder;
   final String method;
   final String endpoint;
+  final Map<String, String>? query;
   final String context;
   final Map<String, dynamic>? body;
   final Map<String, String>? additionalHeaders;
@@ -395,7 +400,7 @@ class _PrivateByteOperation {
         () =>
             http.AbortableRequest(
                 method,
-                requestBuilder.buildUrl(endpoint),
+                requestBuilder.buildUrl(endpoint, queryParams: query),
                 abortTrigger: _cancelSignal.future,
               )
               ..headers.addAll(

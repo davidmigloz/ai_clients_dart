@@ -116,42 +116,45 @@ void main() {
       );
     });
 
-    test(
-      'removed spend fields are rejected instead of translated to review',
-      () {
-        for (final spend in [
-          null,
-          <String, Object?>{},
-          {'limit': 100},
-        ]) {
-          expect(
-            () => CreateAgentSessionRequest.fromJson({
-              ..._wire('CreateAgentSessionParams'),
-              'spend_control': spend,
-            }),
-            throwsFormatException,
-          );
-          expect(
-            () => UpdateAgentSessionRequest.fromJson({'spend_control': spend}),
-            throwsFormatException,
-          );
-        }
+    test('spending settings round-trip independently of review', () {
+      for (final spend in [
+        null,
+        const {'limit': null},
+        const {'limit': 100},
+      ]) {
+        final create = CreateAgentSessionRequest.fromJson({
+          ..._wire('CreateAgentSessionParams'),
+          'spend_control': spend,
+        });
+        expect(create.toJson()['spend_control'], spend);
+        expect(create.copyWith(), create);
+        final update = UpdateAgentSessionRequest.fromJson({
+          'spend_control': spend,
+        });
+        expect(update.toJson(), {'spend_control': spend});
+        expect(update.copyWith(), update);
+      }
+      expect(
+        UpdateAgentSessionRequest(
+          review: SessionReviewParam.autoReview,
+        ).toJson().containsKey('spend_control'),
+        isFalse,
+      );
+      for (final invalid in [0, -1, 4503599627370496]) {
         expect(
-          CreateAgentSessionRequest.fromJson(
-            _wire('CreateAgentSessionParams'),
-          ).toJson().containsKey('spend_control'),
-          isFalse,
+          () => AgentSessionSpendControlConfig(limit: invalid),
+          throwsFormatException,
         );
-        expect(
-          UpdateAgentSessionRequest(
-            review: SessionReviewParam.autoReview,
-          ).toJson().containsKey('spend_control'),
-          isFalse,
-        );
-      },
-    );
+      }
+      expect(
+        () => UpdateAgentSessionRequest.fromJson(const {
+          'spend_control': <String, dynamic>{},
+        }),
+        throwsFormatException,
+      );
+    });
 
-    test('historical received spend remains detached opaque metadata', () {
+    test('history preserves typed spending and detached future metadata', () {
       final legacy = <String, dynamic>{
         'limit': 100,
         'consumed': 5,
@@ -162,20 +165,14 @@ void main() {
         'spend_control': legacy,
       });
       (legacy['future'] as List<String>).add('changed');
-      expect(received.rawJson['spend_control'], {
-        'limit': 100,
-        'consumed': 5,
-        'future': ['PRIVATE'],
-      });
-      expect(
-        received.toJson()['spend_control'],
-        received.rawJson['spend_control'],
-      );
+      final spend = received.spendControl!;
+      expect(spend.limit, 100);
+      expect(spend.consumed, 5);
+      expect(spend.rawJson['future'], ['PRIVATE']);
+      expect(received.rawJson, isNot(contains('spend_control')));
+      expect(received.toJson()['spend_control'], spend.toJson());
       expect(received.review, isNull);
-      expect(
-        () => (received.rawJson['spend_control'] as Map)['limit'] = 7,
-        throwsUnsupportedError,
-      );
+      expect(() => spend.rawJson['future'] = 'changed', throwsUnsupportedError);
       expect(received.copyWith(), received);
     });
   });

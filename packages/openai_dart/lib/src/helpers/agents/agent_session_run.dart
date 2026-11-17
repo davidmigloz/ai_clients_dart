@@ -31,8 +31,8 @@ part 'agent_session_run_result.dart';
 /// Original events retain arrival order. Delivery IDs use a 1,024-entry recent
 /// window; queued progress has explicit count/byte limits. Overflow is a local
 /// error, never silent loss or an invented backend failure. A selected root turn
-/// ending followed by session idle, or session failure, ends observation. EOF
-/// before that boundary is a local observation failure.
+/// ending followed by session idle, session failure, or a reached spending cap
+/// ends observation. EOF before a boundary is a local observation failure.
 ///
 /// [abort]/[close] release local observation, not backend work or compute. No
 /// cancellation input, session deletion, replay or reconnection is sent. Request
@@ -49,6 +49,7 @@ final class AgentSessionRun {
     required this._sessions,
     required String sessionId,
     required AgentSessionInitialInput input,
+    this.includeObfuscation,
     String? idempotencyKey,
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
@@ -113,6 +114,7 @@ final class AgentSessionRun {
     this.maxBufferedEvents = 256,
     this.maxBufferedBytes = 1024 * 1024,
   }) : _sessionId = null,
+       includeObfuscation = null,
        _headers = Map<String, String>.unmodifiable(
          additionalHeaders ?? const {},
        ) {
@@ -160,6 +162,9 @@ final class AgentSessionRun {
   /// Creation identity from the canonical session.created event, or null before it.
   String? get observedSessionId => _sessionId;
   String? _sessionId;
+
+  /// The optional SSE padding override for a follow-up observation.
+  final bool? includeObfuscation;
   CreateAgentSessionRequest? _creation;
 
   /// Maximum distinct registered calls captured for this invocation.
@@ -197,8 +202,10 @@ final class AgentSessionRun {
   var _requestStarted = false;
   var _subscribed = false;
   var _boundarySeen = false;
+  var _eofBeforeBoundary = false;
   var _terminalDelivered = false;
   var _turnEnded = false;
+  var _dispatching = false;
   var _cancelRequested = false;
   var _closed = false;
   var _pauseDepth = 0;
@@ -412,6 +419,7 @@ final class AgentSessionRun {
       final source = creation == null
           ? _sessions.events.stream(
               sessionId,
+              includeObfuscation: includeObfuscation,
               additionalHeaders: _headers,
               abortTrigger: _abortSignal.future,
               onReady: _markReady,
@@ -427,14 +435,15 @@ final class AgentSessionRun {
         onError: _sourceError,
         onDone: () {
           if (!_boundarySeen && _failure == null) {
-            _fail(
-              const StreamException(
-                message:
-                    'Session observation ended before the selected turn reached idle or failed',
-                redactDiagnostics: true,
-              ),
-              StackTrace.current,
-            );
+            // Pending input and registered tool work need live observation.
+            if (_input != null ||
+                _dispatching ||
+                !(_ready?.isCompleted ?? false)) {
+              _failPrematureEof();
+            } else {
+              _eofBeforeBoundary = true;
+              _wake();
+            }
           }
         },
       );
@@ -448,6 +457,8 @@ final class AgentSessionRun {
         _creation = null;
         return;
       }
+      if (_eofBeforeBoundary) _failPrematureEof();
+      _throwFailure();
       await _race(
         _sessions.events.create(
           sessionId,
@@ -515,10 +526,15 @@ final class AgentSessionRun {
             'Agent session run requires an encodable session ID',
           );
         }
-        if (_sessionId != null && _sessionId != event.session.id) {
+        if (_sessionId != null && _sessionId != id) {
           throw StateError('Observed session identity changed');
         }
-        _sessionId = event.session.id;
+        _sessionId = id;
+      }
+      if (event is AgentSessionBudgetReachedEvent &&
+          _sessionId != null &&
+          _sessionId != event.session.id) {
+        throw StateError('Observed session identity changed');
       }
       final eventId = json['event_id'];
       if (eventId is String) {
@@ -550,6 +566,7 @@ final class AgentSessionRun {
       }
       final terminal =
           event is AgentSessionFailedEvent ||
+          event is AgentSessionBudgetReachedEvent ||
           (event is AgentSessionIdleEvent && _turnEnded);
       final dispatch = _dispatcher.prepare(event);
       _queue.add(
@@ -570,7 +587,8 @@ final class AgentSessionRun {
     _progressStarted = true;
     final dispatch = _pendingDispatch;
     _pendingDispatch = null;
-    if (dispatch != null) {
+    if (dispatch != null && !_eofBeforeBoundary) {
+      _dispatching = true;
       try {
         _throwFailure();
         await dispatch();
@@ -579,6 +597,8 @@ final class AgentSessionRun {
         _fail(error, stack);
         _discardQueue();
         _throwFailure();
+      } finally {
+        _dispatching = false;
       }
     }
     if (_cursorPaused) {
@@ -607,6 +627,7 @@ final class AgentSessionRun {
         _pendingDispatch = next.dispatch;
         return next.event;
       }
+      if (_eofBeforeBoundary) _failPrematureEof();
       _throwFailure();
       final change = _changed ??= Completer<void>();
       await change.future;
@@ -617,6 +638,16 @@ final class AgentSessionRun {
     if (_failure case final error?) {
       Error.throwWithStackTrace(error, _failureStack ?? StackTrace.current);
     }
+  }
+
+  void _failPrematureEof() {
+    _fail(
+      const StreamException(
+        message: 'Session observation ended before its lifecycle boundary',
+        redactDiagnostics: true,
+      ),
+      StackTrace.current,
+    );
   }
 
   void _sourceError(Object error, StackTrace stack) {

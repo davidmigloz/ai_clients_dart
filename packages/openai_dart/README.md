@@ -1396,6 +1396,8 @@ Use `client.agents.sessions` to create sessions, observe events, and submit func
 
 For reconnecting observers, subscribe with `events.stream(..., onReady: ...)`, buffer updates, restore current session/history by item ID, then resume live handling. There is no replay cursor. Refresh `requiredActions` before an explicit browser decision; authentication values use only dedicated typed inputs with automatic retries disabled. An empty HTTP 202 confirms acceptance, so continue observing current state.
 
+Use `AgentSessionStreamOptions(includeObfuscation: false)` for streamed creation or `events.stream(sessionId, includeObfuscation: false)` for a GET observer. Typed `AgentSessionErrorEvent` values arrive alongside lifecycle events. A managed run surfaces a spending pause as `AgentSessionBudgetReachedEvent`.
+
 → Offline [browser actions](example/agent_browser_actions_example.dart) and [current-state recovery](example/agent_session_recovery_example.dart) examples
 
 </details>
@@ -1404,9 +1406,11 @@ For reconnecting observers, subscribe with `events.stream(..., onReady: ...)`, b
 <details>
 <summary><b>How do I configure Agent context and action review?</b></summary>
 
-Use `AgentCompactionConfig(async: false)` for blocking compaction and `AgentExperimentalConfig(timeAwareness: true)` for periodic current-time reminders. Compaction updates replace the configuration; null or `{}` restores background compaction. Experimental updates merge supplied keys, preserving omitted values. Request `AgentServiceTierParam.ultrafast` with a supported model when appropriate.
+Use `AgentCompactionConfig(async: true)` to run compaction in the background and `AgentExperimentalConfig(timeAwareness: true)` for periodic current-time reminders. Compaction updates replace the configuration. Null or `{}` restores the service's blocking default. Experimental updates merge supplied keys, preserving omitted values. Request `AgentServiceTierParam.ultrafast` with a supported model when appropriate.
 
 Set session `review` to `SessionReviewParam.autoReview` to review eligible actions automatically, or `.none` for existing execution behavior. Updates apply to new root turns; existing turns and their subagents keep their mode. Action review is independent of spending limits. Replace session tools through `AgentSessionAgentUpdate`; omission keeps them, while null or `[]` clears them. Function/MCP changes apply on the next model call, and built-in changes by the next turn.
+
+Set `AgentSessionSpendControlConfig(limit: 500)` for a 500-cent session cap. Omit the option on update to retain it, or use `clearSpendControl: true` to remove it. Use `AgentSessionPromptCacheConfig(ttl: AgentSessionPromptCacheTtl.hours12)` to set the default for future turns and inspect each turn's `promptCacheOptions` for the recorded lifetime.
 
 Filter session lists with `metadata: {'project': 'demo'}`; all pairs must match, and updates may take time to appear in filtered results. Keep the same filters when advancing a cursor.
 
@@ -1421,6 +1425,8 @@ Filter session lists with `metadata: {'project': 'demo'}`; all pairs must match,
 Use `client.agents.automations` for one-time or cron schedules targeting a new session or an existing conversation. Creating, updating, pausing, and resuming a schedule do not invoke it immediately; call `.invocations.create(automationId)` explicitly for a manual delivery, including while paused.
 
 Inspect `.invocations.list` or `.retrieve` for delivery status and the session ID. A completed delivery means the session accepted the input; follow session events for the Agent's result. Pausing or deleting a schedule leaves accepted session work running. Enable `AgentTool.automations()` or `AgentSessionTool.automations()` to let an Agent schedule follow-ups itself.
+
+Read `pauseReason` on the schedule to see why the service paused it.
 
 → [Offline schedule and invocation example](example/agent_automations_example.dart)
 

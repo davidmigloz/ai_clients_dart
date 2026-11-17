@@ -63,7 +63,10 @@ void main() {
     () async {
       final t = _Transport();
       final ready = Completer<http.StreamedResponse>();
-      t.observe = (_) => ready.future;
+      t.observe = (request) {
+        expect(request.url.queryParameters, {'include_obfuscation': 'false'});
+        return ready.future;
+      };
       final client = _client(t);
       final content = [
         AgentSessionInputContent.inputText(text: 'PRIVATE-first'),
@@ -76,6 +79,7 @@ void main() {
       final run = client.agents.sessions.stream(
         'session',
         input: AgentSessionInitialInput.items(messages),
+        includeObfuscation: false,
         idempotencyKey: 'named-key',
         additionalHeaders: headers,
       );
@@ -879,6 +883,33 @@ void main() {
     },
   );
 
+  test(
+    'premature EOF stops even while input acceptance remains pending',
+    () async {
+      final transport = _Transport();
+      final client = _client(transport);
+      addTearDown(client.close);
+      addTearDown(transport.dispose);
+      final sessions = _PendingInputSessions(client.agents.sessions);
+      final run = sessions.stream(
+        'session',
+        input: AgentSessionInitialInput.text('hello'),
+      );
+      addTearDown(run.close);
+      final stopped = expectLater(
+        run.events.toList(),
+        throwsA(isA<StreamException>()),
+      );
+
+      await sessions.observer.inputEntered.future;
+      sessions.observer.source.done();
+      await stopped.timeout(const Duration(seconds: 2));
+      expect(sessions.observer.inputAccepted.isCompleted, isFalse);
+      expect(sessions.observer.source.canceled, isTrue);
+      sessions.observer.inputAccepted.complete();
+    },
+  );
+
   for (final late in ['error', 'eof', 'input-failure']) {
     test(
       'source boundary before input acceptance distinguishes late $late',
@@ -1108,6 +1139,7 @@ final class _PendingInputEvents extends AgentSessionEventsResource {
   @override
   Stream<AgentSessionEvent> stream(
     String sessionId, {
+    bool? includeObfuscation,
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
     void Function()? onReady,

@@ -586,6 +586,10 @@ final class AgentSessionStatusResource extends AgentJsonModel {
     'failed',
   );
 
+  /// The session is paused because its spending cap was reached.
+  static const AgentSessionStatusResource budgetReached =
+      AgentSessionStatusResource._('budget_reached');
+
   /// The exact wire value.
   final String value;
 
@@ -597,6 +601,7 @@ final class AgentSessionStatusResource extends AgentJsonModel {
       'in_progress' => inProgress,
       'requires_action' => requiresAction,
       'failed' => failed,
+      'budget_reached' => budgetReached,
       _ => AgentSessionStatusResource._(value),
     };
   }
@@ -607,6 +612,7 @@ final class AgentSessionStatusResource extends AgentJsonModel {
     'in_progress',
     'requires_action',
     'failed',
+    'budget_reached',
   ].contains(value);
 
   @override
@@ -628,6 +634,10 @@ final class AgentSessionTurnErrorCodeResource extends AgentJsonModel {
   static const AgentSessionTurnErrorCodeResource contextLengthExceeded =
       AgentSessionTurnErrorCodeResource._('context_length_exceeded');
 
+  /// The model reached its output token limit.
+  static const AgentSessionTurnErrorCodeResource maxOutputTokens =
+      AgentSessionTurnErrorCodeResource._('max_output_tokens');
+
   /// The `session_budget_exceeded` wire value.
   static const AgentSessionTurnErrorCodeResource sessionBudgetExceeded =
       AgentSessionTurnErrorCodeResource._('session_budget_exceeded');
@@ -635,6 +645,10 @@ final class AgentSessionTurnErrorCodeResource extends AgentJsonModel {
   /// The `usage_limit_exceeded` wire value.
   static const AgentSessionTurnErrorCodeResource usageLimitExceeded =
       AgentSessionTurnErrorCodeResource._('usage_limit_exceeded');
+
+  /// The API key reached its enforced spending cap.
+  static const AgentSessionTurnErrorCodeResource apiKeySpendLimitExceeded =
+      AgentSessionTurnErrorCodeResource._('api_key_spend_limit_exceeded');
 
   /// The `project_spend_limit_exceeded` wire value.
   static const AgentSessionTurnErrorCodeResource projectSpendLimitExceeded =
@@ -728,8 +742,10 @@ final class AgentSessionTurnErrorCodeResource extends AgentJsonModel {
     final value = requireAgentString(json, 'AgentSessionTurnErrorCodeResource');
     return switch (value) {
       'context_length_exceeded' => contextLengthExceeded,
+      'max_output_tokens' => maxOutputTokens,
       'session_budget_exceeded' => sessionBudgetExceeded,
       'usage_limit_exceeded' => usageLimitExceeded,
+      'api_key_spend_limit_exceeded' => apiKeySpendLimitExceeded,
       'project_spend_limit_exceeded' => projectSpendLimitExceeded,
       'organization_spend_limit_exceeded' => organizationSpendLimitExceeded,
       'organization_usage_limit_exceeded' => organizationUsageLimitExceeded,
@@ -757,8 +773,10 @@ final class AgentSessionTurnErrorCodeResource extends AgentJsonModel {
   /// Whether the value belongs to the pinned source enum.
   bool get isKnown => const [
     'context_length_exceeded',
+    'max_output_tokens',
     'session_budget_exceeded',
     'usage_limit_exceeded',
+    'api_key_spend_limit_exceeded',
     'project_spend_limit_exceeded',
     'organization_spend_limit_exceeded',
     'organization_usage_limit_exceeded',

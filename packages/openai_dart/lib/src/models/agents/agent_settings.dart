@@ -3,7 +3,7 @@ import 'agent_json_helpers.dart';
 
 /// Writable context compaction settings shared by Agents and session overrides.
 ///
-/// Omitted or null `async` selects background compaction. No client default is
+/// Omitted or null `async` selects blocking compaction. No client default is
 /// inserted. A supplied settings object replaces the current compaction object;
 /// omitting the enclosing update field keeps the current settings.
 final class AgentCompactionConfig extends AgentJsonModel {
@@ -15,7 +15,7 @@ final class AgentCompactionConfig extends AgentJsonModel {
   /// Whether compaction runs in the background; false selects blocking mode.
   final bool? async;
 
-  /// Sends `async:null`; background compaction may increase token usage.
+  /// Sends `async: null`, which selects blocking compaction.
   final bool clearAsync;
 
   /// Parses the closed writable settings without coercing booleans.

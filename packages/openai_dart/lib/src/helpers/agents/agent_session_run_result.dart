@@ -92,6 +92,9 @@ enum AgentSessionRunResultReason {
   /// The service reported selected turn cancellation.
   cancelled,
 
+  /// The service paused the session because its spending cap was reached.
+  budgetReached,
+
   /// Required actions need explicit application handling.
   requiresAction,
 
@@ -280,6 +283,7 @@ final class _AgentRunCollector {
   var _terminal = false;
   var _idle = false;
   var _sessionFailed = false;
+  var _budgetReached = false;
   bool get ready => _terminal && _idle;
 
   List<AgentSessionAssistantMessageItemResource> get messages {
@@ -299,6 +303,7 @@ final class _AgentRunCollector {
     if (event is AgentSessionInProgressEvent) session = event.session;
     if (event is AgentSessionRequiresActionEvent) session = event.session;
     if (event is AgentSessionFailedEvent) session = event.session;
+    if (event is AgentSessionBudgetReachedEvent) session = event.session;
     if (session != null) {
       _identity(session.id == run.observedSessionId);
       final next = session.requiredActions
@@ -307,6 +312,7 @@ final class _AgentRunCollector {
       _budget(turn, next, _messageBytes);
       actions = next;
       _sessionFailed |= event is AgentSessionFailedEvent;
+      _budgetReached |= event is AgentSessionBudgetReachedEvent;
       _idle |= event is AgentSessionIdleEvent && _terminal;
     }
     AgentSessionTurn? updated;
@@ -416,6 +422,9 @@ final class _AgentRunCollector {
             !run._dispatcher.canHandle(action.name),
       );
   void checkAction({bool checkRequiredActions = true}) {
+    if (_budgetReached) {
+      throw error(AgentSessionRunResultReason.budgetReached);
+    }
     if (_sessionFailed || turn?.status.value == 'failed') {
       throw error(AgentSessionRunResultReason.failed);
     }
