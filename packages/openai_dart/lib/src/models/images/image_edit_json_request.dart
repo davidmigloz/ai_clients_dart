@@ -5,6 +5,7 @@ import '../common/equality_helpers.dart';
 import '../common/json_helpers.dart';
 import 'image_common.dart';
 import 'image_json_helpers.dart';
+import 'svg_options.dart';
 
 /// An image URL, data URL or uploaded file ID. Exactly one must be selected.
 @immutable
@@ -116,6 +117,10 @@ class ImageEditJsonRequest {
     @Deprecated('Use safetyIdentifier instead.') this.user,
     this.safetyIdentifier,
     this.outputFormat,
+    this.complexity,
+    this.frameCount,
+    this.frameDurationMs,
+    this.svg,
     this.outputCompression,
     this.moderation,
     this.background,
@@ -161,6 +166,18 @@ class ImageEditJsonRequest {
 
   /// Output image format.
   final ImageOutputFormat? outputFormat;
+
+  /// Planning effort, independently of rendering quality.
+  final ImageComplexity? complexity;
+
+  /// Number of GIF animation frames (2–16). Requires GIF output.
+  final int? frameCount;
+
+  /// Requested GIF frame duration in milliseconds. Requires GIF output.
+  final int? frameDurationMs;
+
+  /// Optional SVG author configuration. Requires SVG output.
+  final SvgOptions? svg;
 
   /// Compression level for JPEG/WebP output.
   final int? outputCompression;
@@ -247,6 +264,24 @@ class ImageEditJsonRequest {
               ),
             ),
       outputCompression: json['output_compression'] as int?,
+      complexity: readImageComplexity(json, 'ImageEditJsonRequest'),
+      frameCount: json['frame_count'] == null
+          ? null
+          : requireJsonInt(
+              json['frame_count'],
+              'ImageEditJsonRequest.frameCount',
+            ),
+      frameDurationMs: json['frame_duration_ms'] == null
+          ? null
+          : requireJsonInt(
+              json['frame_duration_ms'],
+              'ImageEditJsonRequest.frameDurationMs',
+            ),
+      svg: json['svg'] == null
+          ? null
+          : SvgOptions.fromJson(
+              requireJsonObject(json['svg'], 'ImageEditJsonRequest.svg'),
+            ),
       moderation: json['moderation'] == null
           ? null
           : ImageModerationLevel.fromJson(
@@ -271,6 +306,17 @@ class ImageEditJsonRequest {
   /// Validates the selected encoding before authentication or dispatch.
   void validate() {
     validateImageSafetyIdentifier(safetyIdentifier);
+    validateImageOutputSettings(
+      format: outputFormat?.toJson(),
+      frameCount: frameCount,
+      frameDurationMs: frameDurationMs,
+      svg: svg,
+      compression: outputCompression,
+      partialImages: partialImages,
+      stream: stream ?? false,
+      hasMask: mask != null,
+      n: n,
+    );
     if (mask != null && markup != null) {
       throw const FormatException(
         'ImageEditJsonRequest: mask and markup are mutually exclusive',
@@ -314,6 +360,10 @@ class ImageEditJsonRequest {
       if (user != null) 'user': user,
       if (safetyIdentifier != null) 'safety_identifier': safetyIdentifier,
       if (outputFormat != null) 'output_format': outputFormat!.toJson(),
+      if (complexity != null) 'complexity': complexity!.toJson(),
+      if (frameCount != null) 'frame_count': frameCount,
+      if (frameDurationMs != null) 'frame_duration_ms': frameDurationMs,
+      if (svg != null) 'svg': svg!.toJson(),
       if (outputCompression != null) 'output_compression': outputCompression,
       if (moderation != null) 'moderation': moderation!.toJson(),
       if (background != null) 'background': background!.toJson(),
@@ -336,6 +386,10 @@ class ImageEditJsonRequest {
     Object? user = unsetCopyWithValue,
     Object? safetyIdentifier = unsetCopyWithValue,
     Object? outputFormat = unsetCopyWithValue,
+    Object? complexity = unsetCopyWithValue,
+    Object? frameCount = unsetCopyWithValue,
+    Object? frameDurationMs = unsetCopyWithValue,
+    Object? svg = unsetCopyWithValue,
     Object? outputCompression = unsetCopyWithValue,
     Object? moderation = unsetCopyWithValue,
     Object? background = unsetCopyWithValue,
@@ -391,6 +445,22 @@ class ImageEditJsonRequest {
       this.outputCompression,
       'ImageEditJsonRequest.outputCompression',
     ),
+    complexity: copyImageValue<ImageComplexity>(
+      complexity,
+      this.complexity,
+      'ImageEditJsonRequest.complexity',
+    ),
+    frameCount: copyImageValue<int>(
+      frameCount,
+      this.frameCount,
+      'ImageEditJsonRequest.frameCount',
+    ),
+    frameDurationMs: copyImageValue<int>(
+      frameDurationMs,
+      this.frameDurationMs,
+      'ImageEditJsonRequest.frameDurationMs',
+    ),
+    svg: copyImageValue<SvgOptions>(svg, this.svg, 'ImageEditJsonRequest.svg'),
     moderation: copyImageValue<ImageModerationLevel>(
       moderation,
       this.moderation,

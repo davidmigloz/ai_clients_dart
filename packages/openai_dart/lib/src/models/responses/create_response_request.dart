@@ -106,6 +106,9 @@ class CreateResponseRequest {
   /// The service tier for request processing.
   final ServiceTier? serviceTier;
 
+  /// Request-level image context options.
+  final ImageOptions? image;
+
   /// Custom metadata for the request.
   ///
   /// Values can be of any type and will be automatically converted to strings
@@ -196,6 +199,7 @@ class CreateResponseRequest {
     this.contextManagement,
     this.parallelToolCalls,
     this.serviceTier,
+    this.image,
     this.metadata,
     this.include,
     this.store,
@@ -301,6 +305,11 @@ class CreateResponseRequest {
       serviceTier: json['service_tier'] != null
           ? ServiceTier.fromJson(json['service_tier'] as String)
           : null,
+      image: json['image'] == null
+          ? null
+          : ImageOptions.fromJson(
+              requireJsonObject(json['image'], 'CreateResponseRequest.image'),
+            ),
       metadata: (json['metadata'] as Map?)?.cast<String, dynamic>(),
       include: (json['include'] as List?)
           ?.map((e) => Include.fromJson(e as String))
@@ -363,6 +372,7 @@ class CreateResponseRequest {
             .toList(),
       if (parallelToolCalls != null) 'parallel_tool_calls': parallelToolCalls,
       if (serviceTier != null) 'service_tier': serviceTier!.toJson(),
+      if (image != null) 'image': image!.toJson(),
       if (metadata case final metadata?
           when metadata.values.any((v) => v != null))
         'metadata': {
@@ -412,6 +422,7 @@ class CreateResponseRequest {
     Object? contextManagement = unsetCopyWithValue,
     Object? parallelToolCalls = unsetCopyWithValue,
     Object? serviceTier = unsetCopyWithValue,
+    Object? image = unsetCopyWithValue,
     Object? metadata = unsetCopyWithValue,
     Object? include = unsetCopyWithValue,
     Object? store = unsetCopyWithValue,
@@ -475,6 +486,7 @@ class CreateResponseRequest {
       serviceTier: serviceTier == unsetCopyWithValue
           ? this.serviceTier
           : serviceTier as ServiceTier?,
+      image: image == unsetCopyWithValue ? this.image : image as ImageOptions?,
       metadata: metadata == unsetCopyWithValue
           ? this.metadata
           : metadata as Map<String, dynamic>?,
@@ -543,6 +555,7 @@ class CreateResponseRequest {
         listsEqual(contextManagement, other.contextManagement) &&
         parallelToolCalls == other.parallelToolCalls &&
         serviceTier == other.serviceTier &&
+        image == other.image &&
         mapsDeepEqual(metadata, other.metadata) &&
         listsEqual(include, other.include) &&
         store == other.store &&
@@ -580,6 +593,7 @@ class CreateResponseRequest {
     if (contextManagement != null) Object.hashAll(contextManagement!) else null,
     parallelToolCalls,
     serviceTier,
+    image,
     mapDeepHashCode(metadata),
     if (include != null) Object.hashAll(include!) else null,
     store,

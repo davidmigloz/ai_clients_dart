@@ -7,6 +7,7 @@ import '../common/equality_helpers.dart';
 import '../common/json_helpers.dart';
 import 'image_common.dart';
 import 'image_json_helpers.dart';
+import 'svg_options.dart';
 
 /// A request to generate images from a text prompt.
 ///
@@ -40,6 +41,10 @@ class ImageGenerationRequest {
     this.background,
     this.moderation,
     this.outputFormat,
+    this.complexity,
+    this.frameCount,
+    this.frameDurationMs,
+    this.svg,
     this.outputCompression,
     this.stream,
     this.partialImages,
@@ -81,6 +86,24 @@ class ImageGenerationRequest {
       outputFormat: json['output_format'] != null
           ? ImageOutputFormat.fromJson(json['output_format'] as String)
           : null,
+      complexity: readImageComplexity(json, 'ImageGenerationRequest'),
+      frameCount: json['frame_count'] == null
+          ? null
+          : requireJsonInt(
+              json['frame_count'],
+              'ImageGenerationRequest.frameCount',
+            ),
+      frameDurationMs: json['frame_duration_ms'] == null
+          ? null
+          : requireJsonInt(
+              json['frame_duration_ms'],
+              'ImageGenerationRequest.frameDurationMs',
+            ),
+      svg: json['svg'] == null
+          ? null
+          : SvgOptions.fromJson(
+              requireJsonObject(json['svg'], 'ImageGenerationRequest.svg'),
+            ),
       outputCompression: json['output_compression'] as int?,
       stream: json['stream'] as bool?,
       partialImages: json['partial_images'] as int?,
@@ -160,6 +183,18 @@ class ImageGenerationRequest {
   /// Only supported for GPT image models.
   final ImageOutputFormat? outputFormat;
 
+  /// Planning effort, independently of rendering quality.
+  final ImageComplexity? complexity;
+
+  /// Number of GIF animation frames (2–16). Requires GIF output.
+  final int? frameCount;
+
+  /// Requested GIF frame duration in milliseconds. Requires GIF output.
+  final int? frameDurationMs;
+
+  /// Optional SVG author configuration. Requires SVG output.
+  final SvgOptions? svg;
+
   /// Compression level (0-100) for `jpeg`/`webp` outputs.
   ///
   /// Only supported for GPT image models.
@@ -191,14 +226,31 @@ class ImageGenerationRequest {
       if (background != null) 'background': background!.toJson(),
       if (moderation != null) 'moderation': moderation!.toJson(),
       if (outputFormat != null) 'output_format': outputFormat!.toJson(),
+      if (complexity != null) 'complexity': complexity!.toJson(),
+      if (frameCount != null) 'frame_count': frameCount,
+      if (frameDurationMs != null) 'frame_duration_ms': frameDurationMs,
+      if (svg != null) 'svg': svg!.toJson(),
       if (outputCompression != null) 'output_compression': outputCompression,
       if (stream != null) 'stream': stream,
       if (partialImages != null) 'partial_images': partialImages,
     };
   }
 
-  /// Validates new safety settings before authentication or dispatch.
-  void validate() => validateImageSafetyIdentifier(safetyIdentifier);
+  /// Validates safety and format-specific settings before dispatch.
+  void validate() {
+    validateImageSafetyIdentifier(safetyIdentifier);
+    validateImageOutputSettings(
+      format: outputFormat?.toJson(),
+      frameCount: frameCount,
+      frameDurationMs: frameDurationMs,
+      svg: svg,
+      compression: outputCompression,
+      partialImages: partialImages,
+      stream: stream ?? false,
+      n: n,
+      requireSvgModel: true,
+    );
+  }
 
   /// Creates a copy with the given fields replaced.
   ///
@@ -217,6 +269,10 @@ class ImageGenerationRequest {
     Object? background = unsetCopyWithValue,
     Object? moderation = unsetCopyWithValue,
     Object? outputFormat = unsetCopyWithValue,
+    Object? complexity = unsetCopyWithValue,
+    Object? frameCount = unsetCopyWithValue,
+    Object? frameDurationMs = unsetCopyWithValue,
+    Object? svg = unsetCopyWithValue,
     Object? outputCompression = unsetCopyWithValue,
     Object? stream = unsetCopyWithValue,
     Object? partialImages = unsetCopyWithValue,
@@ -248,6 +304,26 @@ class ImageGenerationRequest {
       outputFormat: outputFormat == unsetCopyWithValue
           ? this.outputFormat
           : outputFormat as ImageOutputFormat?,
+      complexity: copyImageValue<ImageComplexity>(
+        complexity,
+        this.complexity,
+        'ImageGenerationRequest.complexity',
+      ),
+      frameCount: copyImageValue<int>(
+        frameCount,
+        this.frameCount,
+        'ImageGenerationRequest.frameCount',
+      ),
+      frameDurationMs: copyImageValue<int>(
+        frameDurationMs,
+        this.frameDurationMs,
+        'ImageGenerationRequest.frameDurationMs',
+      ),
+      svg: copyImageValue<SvgOptions>(
+        svg,
+        this.svg,
+        'ImageGenerationRequest.svg',
+      ),
       outputCompression: outputCompression == unsetCopyWithValue
           ? this.outputCompression
           : outputCompression as int?,
@@ -275,6 +351,10 @@ class ImageGenerationRequest {
           background == other.background &&
           moderation == other.moderation &&
           outputFormat == other.outputFormat &&
+          complexity == other.complexity &&
+          frameCount == other.frameCount &&
+          frameDurationMs == other.frameDurationMs &&
+          svg == other.svg &&
           outputCompression == other.outputCompression &&
           stream == other.stream &&
           partialImages == other.partialImages;
@@ -293,6 +373,10 @@ class ImageGenerationRequest {
     background,
     moderation,
     outputFormat,
+    complexity,
+    frameCount,
+    frameDurationMs,
+    svg,
     outputCompression,
     stream,
     partialImages,
@@ -346,6 +430,10 @@ class ImageEditRequest {
     this.inputFidelity,
     this.quality,
     this.outputFormat,
+    this.complexity,
+    this.frameCount,
+    this.frameDurationMs,
+    this.svg,
     this.outputCompression,
     this.moderation,
     this.stream,
@@ -427,6 +515,18 @@ class ImageEditRequest {
   /// Output format. GPT image models only.
   final ImageOutputFormat? outputFormat;
 
+  /// Planning effort, independently of rendering quality.
+  final ImageComplexity? complexity;
+
+  /// Number of GIF animation frames (2–16). Requires GIF output.
+  final int? frameCount;
+
+  /// Requested GIF frame duration in milliseconds. Requires GIF output.
+  final int? frameDurationMs;
+
+  /// Optional SVG author configuration. Requires SVG output.
+  final SvgOptions? svg;
+
   /// Compression level (0-100) for `jpeg`/`webp`. GPT image models only.
   final int? outputCompression;
 
@@ -442,6 +542,17 @@ class ImageEditRequest {
   /// Validates mutually exclusive overlays and the safety identifier.
   void validate() {
     validateImageSafetyIdentifier(safetyIdentifier);
+    validateImageOutputSettings(
+      format: outputFormat?.toJson(),
+      frameCount: frameCount,
+      frameDurationMs: frameDurationMs,
+      svg: svg,
+      compression: outputCompression,
+      partialImages: partialImages,
+      stream: stream ?? false,
+      n: n,
+      hasMask: mask != null,
+    );
     if (inputFidelity == ImageInputFidelity.unknown) {
       throw const FormatException(
         'ImageEditRequest.inputFidelity: unsupported request value',
@@ -477,6 +588,10 @@ class ImageEditRequest {
     Object? inputFidelity = unsetCopyWithValue,
     Object? quality = unsetCopyWithValue,
     Object? outputFormat = unsetCopyWithValue,
+    Object? complexity = unsetCopyWithValue,
+    Object? frameCount = unsetCopyWithValue,
+    Object? frameDurationMs = unsetCopyWithValue,
+    Object? svg = unsetCopyWithValue,
     Object? outputCompression = unsetCopyWithValue,
     Object? moderation = unsetCopyWithValue,
     Object? stream = unsetCopyWithValue,
@@ -524,6 +639,22 @@ class ImageEditRequest {
       outputFormat: outputFormat == unsetCopyWithValue
           ? this.outputFormat
           : outputFormat as ImageOutputFormat?,
+      complexity: copyImageValue<ImageComplexity>(
+        complexity,
+        this.complexity,
+        'ImageEditRequest.complexity',
+      ),
+      frameCount: copyImageValue<int>(
+        frameCount,
+        this.frameCount,
+        'ImageEditRequest.frameCount',
+      ),
+      frameDurationMs: copyImageValue<int>(
+        frameDurationMs,
+        this.frameDurationMs,
+        'ImageEditRequest.frameDurationMs',
+      ),
+      svg: copyImageValue<SvgOptions>(svg, this.svg, 'ImageEditRequest.svg'),
       outputCompression: outputCompression == unsetCopyWithValue
           ? this.outputCompression
           : outputCompression as int?,
@@ -559,6 +690,10 @@ class ImageEditRequest {
           inputFidelity == other.inputFidelity &&
           quality == other.quality &&
           outputFormat == other.outputFormat &&
+          complexity == other.complexity &&
+          frameCount == other.frameCount &&
+          frameDurationMs == other.frameDurationMs &&
+          svg == other.svg &&
           outputCompression == other.outputCompression &&
           moderation == other.moderation &&
           stream == other.stream &&
@@ -583,6 +718,10 @@ class ImageEditRequest {
     inputFidelity,
     quality,
     outputFormat,
+    complexity,
+    frameCount,
+    frameDurationMs,
+    svg,
     outputCompression,
     moderation,
     stream,

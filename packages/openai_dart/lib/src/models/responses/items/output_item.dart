@@ -8,6 +8,7 @@ import '../../common/json_helpers.dart';
 import '../../images/image_common.dart';
 import '../../images/image_json_helpers.dart';
 import '../../images/image_tool_error.dart';
+import '../../images/svg_options.dart';
 import '../config/function_call_output_status.dart';
 import '../config/item_status.dart';
 import '../config/message_phase.dart';
@@ -1114,6 +1115,7 @@ class ImageGenerationCallOutputItem extends OutputItem {
     this.action,
     this.background,
     this.outputFormat,
+    this.svgUsage,
   });
 
   /// Unique call identifier.
@@ -1151,6 +1153,9 @@ class ImageGenerationCallOutputItem extends OutputItem {
 
   /// The generated image output format.
   final ImageOutputFormat? outputFormat;
+
+  /// SVG author token usage, when provided.
+  final SvgUsage? svgUsage;
 
   /// Parses the shared GA/beta contract, including required nullable result.
   factory ImageGenerationCallOutputItem.fromJson(Map<String, dynamic> json) {
@@ -1239,6 +1244,14 @@ class ImageGenerationCallOutputItem extends OutputItem {
                 'ImageGenerationCallOutputItem.outputFormat',
               ),
             ),
+      svgUsage: json['svg_usage'] == null
+          ? null
+          : SvgUsage.fromJson(
+              requireJsonObject(
+                json['svg_usage'],
+                'ImageGenerationCallOutputItem.svg_usage',
+              ),
+            ),
     );
   }
   @override
@@ -1256,6 +1269,7 @@ class ImageGenerationCallOutputItem extends OutputItem {
     if (action != null) 'action': action,
     if (background != null) 'background': background!.toJson(),
     if (outputFormat != null) 'output_format': outputFormat!.toJson(),
+    if (svgUsage != null) 'svg_usage': svgUsage!.toJson(),
   };
 
   /// Copies all fields, clearing nullable values explicitly.
@@ -1272,6 +1286,7 @@ class ImageGenerationCallOutputItem extends OutputItem {
     Object? action = unsetCopyWithValue,
     Object? background = unsetCopyWithValue,
     Object? outputFormat = unsetCopyWithValue,
+    Object? svgUsage = unsetCopyWithValue,
   }) => ImageGenerationCallOutputItem(
     id: id ?? this.id,
     status: status ?? this.status,
@@ -1324,6 +1339,11 @@ class ImageGenerationCallOutputItem extends OutputItem {
       outputFormat,
       this.outputFormat,
       'ImageGenerationCallOutputItem.outputFormat',
+    ),
+    svgUsage: copyImageValue<SvgUsage>(
+      svgUsage,
+      this.svgUsage,
+      'ImageGenerationCallOutputItem.svgUsage',
     ),
   );
   @override

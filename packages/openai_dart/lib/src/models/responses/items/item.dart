@@ -27,6 +27,7 @@ import '../tools/tool_call_caller.dart';
 import '../websocket/websocket_json_helpers.dart';
 import 'output_item.dart'
     show
+        ImageGenerationCallOutputItem,
         ReasoningSummaryContent,
         ShellCallAction,
         ShellCallOutcome,
@@ -46,6 +47,7 @@ import 'web_search_result.dart';
 /// - [MessageItem] - A message from a user or assistant
 /// - [FunctionCallItem] - A function call from the model
 /// - [ReasoningInputItem] - Reasoning replayed without converting it to a message
+/// - [ImageGenerationCallItem] - A retained image call and its author usage
 /// - [CustomToolCallInputItem] - A custom tool call replayed as input
 /// - [WebSearchCallItem] - Web search actions and results retained in input history
 /// - [ShellCallInputItem] - Writable shell call history
@@ -84,6 +86,7 @@ sealed class Item {
       'message' => MessageItem.fromJson(json),
       'function_call' => FunctionCallItem.fromJson(json),
       'reasoning' => ReasoningInputItem.fromJson(json),
+      'image_generation_call' => ImageGenerationCallItem.fromJson(json),
       'custom_tool_call' => CustomToolCallInputItem.fromJson(json),
       'web_search_call' => WebSearchCallItem.fromJson(json),
       'shell_call' => ShellCallInputItem.fromJson(json),
@@ -125,6 +128,32 @@ sealed class Item {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson();
+}
+
+/// An image-generation call replayed in input or returned in input history.
+@immutable
+final class ImageGenerationCallItem extends Item {
+  /// Creates an input-history item from a Responses image call.
+  const ImageGenerationCallItem({required this.call});
+
+  /// The shared image call data, including any SVG author usage.
+  final ImageGenerationCallOutputItem call;
+
+  /// Parses the same wire shape as a Responses image call output.
+  factory ImageGenerationCallItem.fromJson(Map<String, dynamic> json) =>
+      ImageGenerationCallItem(
+        call: ImageGenerationCallOutputItem.fromJson(json),
+      );
+
+  @override
+  Map<String, dynamic> toJson() => call.toJson();
+
+  @override
+  bool operator ==(Object other) =>
+      other is ImageGenerationCallItem && call == other.call;
+
+  @override
+  int get hashCode => call.hashCode;
 }
 
 /// Reasoning replayed as typed Responses input.

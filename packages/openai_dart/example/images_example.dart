@@ -1,10 +1,11 @@
 // ignore_for_file: avoid_print
-/// Example demonstrating GPT Image 2.5 generation and editing.
+/// Example demonstrating GPT Image generation and editing.
 ///
 /// Generation and multipart editing require an explicit model. JSON editing
 /// permits omission; see image_model_selection_example.dart for a local demo.
 /// This example makes paid image requests when run with OPENAI_API_KEY.
 /// Run with: dart run example/images_example.dart
+/// Pass --svg or --gif to generate one Image 2.6 vector or animation instead.
 library;
 
 import 'dart:convert';
@@ -12,10 +13,15 @@ import 'dart:io';
 
 import 'package:openai_dart/openai_dart.dart';
 
-Future<void> main() async {
+Future<void> main(List<String> args) async {
   final client = OpenAIClient.fromEnvironment();
 
   try {
+    if (args.contains('--svg') || args.contains('--gif')) {
+      await _generateImage26(client, svg: args.contains('--svg'));
+      return;
+    }
+
     // Basic GPT Image 2.5 generation.
     print('=== GPT Image 2.5 — Basic Generation ===\n');
 
@@ -131,6 +137,25 @@ Future<void> main() async {
     _printUsage(multi);
   } finally {
     client.close();
+  }
+}
+
+Future<void> _generateImage26(OpenAIClient client, {required bool svg}) async {
+  final response = await client.images.generate(
+    ImageGenerationRequest(
+      model: ImageModels.gptImage26Flare,
+      prompt: svg
+          ? 'A simple vector illustration of a daisy'
+          : 'A daisy swaying gently in a seamless animation loop',
+      outputFormat: svg ? ImageOutputFormat.svg : ImageOutputFormat.gif,
+      complexity: ImageComplexity.medium,
+      frameCount: svg ? null : 9,
+      frameDurationMs: svg ? null : 200,
+    ),
+  );
+  _saveFirstImage(response, path: svg ? 'daisy.svg' : 'daisy.gif');
+  if (response.svgUsage case final usage?) {
+    print('SVG author: ${usage.totalTokens} tokens');
   }
 }
 

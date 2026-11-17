@@ -1,6 +1,8 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/json_helpers.dart';
+import 'config/image_options.dart';
 import 'config/prompt_cache_options.dart';
 import 'config/prompt_cache_retention.dart';
 import 'config/service_tier.dart';
@@ -41,6 +43,9 @@ class CompactResponseRequest {
   /// The service tier for request processing.
   final ServiceTier? serviceTier;
 
+  /// Request-level image context options.
+  final ImageOptions? image;
+
   /// Creates a [CompactResponseRequest].
   const CompactResponseRequest({
     required this.model,
@@ -51,6 +56,7 @@ class CompactResponseRequest {
     this.promptCacheRetention,
     this.promptCacheOptions,
     this.serviceTier,
+    this.image,
   });
 
   /// Creates a [CompactResponseRequest] from JSON.
@@ -76,6 +82,11 @@ class CompactResponseRequest {
       serviceTier: json['service_tier'] != null
           ? ServiceTier.fromJson(json['service_tier'] as String)
           : null,
+      image: json['image'] == null
+          ? null
+          : ImageOptions.fromJson(
+              requireJsonObject(json['image'], 'CompactResponseRequest.image'),
+            ),
     );
   }
 
@@ -91,6 +102,7 @@ class CompactResponseRequest {
     if (promptCacheOptions != null)
       'prompt_cache_options': promptCacheOptions!.toJson(),
     if (serviceTier != null) 'service_tier': serviceTier!.toJson(),
+    if (image != null) 'image': image!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -105,6 +117,7 @@ class CompactResponseRequest {
     Object? promptCacheRetention = unsetCopyWithValue,
     Object? promptCacheOptions = unsetCopyWithValue,
     Object? serviceTier = unsetCopyWithValue,
+    Object? image = unsetCopyWithValue,
   }) {
     return CompactResponseRequest(
       model: model ?? this.model,
@@ -127,6 +140,7 @@ class CompactResponseRequest {
       serviceTier: serviceTier == unsetCopyWithValue
           ? this.serviceTier
           : serviceTier as ServiceTier?,
+      image: image == unsetCopyWithValue ? this.image : image as ImageOptions?,
     );
   }
 
@@ -142,7 +156,8 @@ class CompactResponseRequest {
           promptCacheKey == other.promptCacheKey &&
           promptCacheRetention == other.promptCacheRetention &&
           promptCacheOptions == other.promptCacheOptions &&
-          serviceTier == other.serviceTier;
+          serviceTier == other.serviceTier &&
+          image == other.image;
 
   @override
   int get hashCode => Object.hash(
@@ -154,6 +169,7 @@ class CompactResponseRequest {
     promptCacheRetention,
     promptCacheOptions,
     serviceTier,
+    image,
   );
 
   @override

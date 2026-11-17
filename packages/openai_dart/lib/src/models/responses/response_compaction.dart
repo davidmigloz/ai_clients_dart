@@ -1,6 +1,8 @@
 import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
+import '../common/json_helpers.dart';
+import 'config/image_options.dart';
 import 'items/output_item.dart';
 import 'response_input.dart';
 import 'response_usage.dart';
@@ -23,6 +25,9 @@ class ResponseCompaction {
   /// Token usage for the compaction pass.
   final ResponseUsage usage;
 
+  /// Effective image context options when returned by the service.
+  final ResolvedImageOptions? image;
+
   /// Creates a [ResponseCompaction].
   const ResponseCompaction({
     required this.id,
@@ -30,6 +35,7 @@ class ResponseCompaction {
     required this.output,
     required this.createdAt,
     required this.usage,
+    this.image,
   });
 
   /// Creates a [ResponseCompaction] from JSON.
@@ -42,6 +48,11 @@ class ResponseCompaction {
           .toList(),
       createdAt: json['created_at'] as int,
       usage: ResponseUsage.fromJson(json['usage'] as Map<String, dynamic>),
+      image: json['image'] == null
+          ? null
+          : ResolvedImageOptions.fromJson(
+              requireJsonObject(json['image'], 'ResponseCompaction.image'),
+            ),
     );
   }
 
@@ -61,6 +72,7 @@ class ResponseCompaction {
     'output': output.map((e) => e.toJson()).toList(),
     'created_at': createdAt,
     'usage': usage.toJson(),
+    if (image != null) 'image': image!.toJson(),
   };
 
   @override
@@ -72,11 +84,12 @@ class ResponseCompaction {
           object == other.object &&
           listsEqual(output, other.output) &&
           createdAt == other.createdAt &&
-          usage == other.usage;
+          usage == other.usage &&
+          image == other.image;
 
   @override
   int get hashCode =>
-      Object.hash(id, object, Object.hashAll(output), createdAt, usage);
+      Object.hash(id, object, Object.hashAll(output), createdAt, usage, image);
 
   @override
   String toString() =>
