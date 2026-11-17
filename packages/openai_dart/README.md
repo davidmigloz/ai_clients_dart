@@ -1883,7 +1883,8 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [agent_file_helpers_example.dart](example/agent_file_helpers_example.dart) | **Offline.** selected bytes, explicit staging, completed run identity and binary artifact sink |
 | [agent_files_io_example.dart](example/agent_files_io_example.dart) | **Local only.** explicit regular-file selection beneath an application-owned directory; no API calls |
 | [agent_files_artifacts_example.dart](example/agent_files_artifacts_example.dart) | **Offline.** Agent environment files and published artifacts |
-| [admin_example.dart](example/admin_example.dart) | **Offline.** isolated Admin credentials, external keys, OCI storage, key updates, and Decisions usage |
+| [admin_example.dart](example/admin_example.dart) | **Offline.** Admin credentials, project service tiers, external keys and storage, API-key updates, and Decisions usage |
+| [workload_identity_example.dart](example/workload_identity_example.dart) | **Offline.** workload identity providers, service account mappings, and paginated federation rules |
 | [vaults_example.dart](example/vaults_example.dart) | **Offline.** Vault CRUD and write-only credential create/rotate with safe inspection |
 | [chatkit_example.dart](example/chatkit_example.dart) | ChatKit sessions and threads |
 | [skills_example.dart](example/skills_example.dart) | Skills management |
