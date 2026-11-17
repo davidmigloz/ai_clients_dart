@@ -15,37 +15,32 @@ Future<void> main() async {
   final client = OpenAIClient.fromEnvironment();
 
   try {
-    // 1. Simple chat completion
-    print('=== Chat Completion ===\n');
+    // 1. Simple Responses request
+    print('=== Responses ===\n');
 
-    final response = await client.chat.completions.create(
-      ChatCompletionCreateRequest(
-        model: 'gpt-5.5',
-        messages: [
-          ChatMessage.system('You are a helpful assistant.'),
-          ChatMessage.user('What is Dart programming language?'),
-        ],
-        maxTokens: 150,
+    final response = await client.responses.create(
+      const CreateResponseRequest(
+        model: 'gpt-6.2-sol',
+        input: ResponseInput.text('What is the Dart programming language?'),
+        maxOutputTokens: 150,
       ),
     );
 
-    print('Response: ${response.text}\n');
+    print('Response: ${response.outputText}\n');
 
     // 2. Streaming
     print('=== Streaming ===\n');
 
-    final stream = client.chat.completions.createStream(
-      ChatCompletionCreateRequest(
-        model: 'gpt-5.5',
-        messages: [ChatMessage.user('Count from 1 to 5')],
-        maxTokens: 50,
+    final stream = client.responses.createStream(
+      const CreateResponseRequest(
+        model: 'gpt-6.2-sol',
+        input: ResponseInput.text('Count from 1 to 5'),
+        maxOutputTokens: 50,
       ),
     );
 
     stdout.write('Streaming: ');
-    await for (final event in stream) {
-      stdout.write(event.textDelta ?? '');
-    }
+    await stream.textDeltas().forEach(stdout.write);
     print('\n');
 
     // 3. Embeddings

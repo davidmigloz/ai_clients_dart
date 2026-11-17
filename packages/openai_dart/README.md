@@ -69,7 +69,7 @@ Future<void> main() async {
   try {
     final response = await client.responses.create(
       const CreateResponseRequest(
-        model: 'gpt-5.5',
+        model: 'gpt-6.2-sol',
         input: ResponseInput.text('What is the capital of France?'),
       ),
     );
@@ -81,6 +81,10 @@ Future<void> main() async {
 ```
 
 Keep API keys on trusted infrastructure. For a distributed Flutter or web app, route requests through your backend.
+
+Use `gpt-6.2-sol` for everyday requests or `gpt-6.2-astra` for harder
+reasoning tasks. Both accept basic Chat Completions requests. Use Responses
+for tool calling with these models. [GPT-6.2 guide](https://developers.openai.com/api/docs/guides/latest-model)
 
 ## Configuration
 
@@ -751,7 +755,7 @@ Set `complexity` to control planning effort independently of quality. Select `Im
 
 Standalone GIF and SVG requests use buffered output. The general image guide describes SVG generation only. For SVG edits with an eligible model and project, follow the endpoint reference as implemented by the official SDKs. With a Responses GIF tool, lifecycle events can still stream without partial frames. [Image edit reference](https://developers.openai.com/api/reference/resources/images/methods/edit)
 
-GPT Image 1 retired on October 23, 2026. Older `gpt-image-1.5`, `gpt-image-1-mini` and `chatgpt-image-latest` retire on December 1. Use GPT Image 2.6 Sunburst or Flare. [Deprecation schedule](https://developers.openai.com/api/docs/deprecations)
+GPT Image 1 retired on October 23, 2026. GPT Image 1.5, GPT Image 1 Mini and `chatgpt-image-latest` retire on December 1, 2026. GPT Image 2 and its April 21 snapshot retire on February 10, 2027. Use GPT Image 2.6 Sunburst or Flare. [Deprecation schedule](https://developers.openai.com/api/docs/deprecations)
 
 → [Full example](example/images_example.dart) · [Model selection](example/image_model_selection_example.dart)
 
@@ -1671,6 +1675,22 @@ identity provider and OpenAI's token exchange.
 </details>
 
 ### Legacy and retiring APIs
+
+<a id="upcoming-openai-retirements"></a>
+<details>
+<summary><b>Which models and APIs are retiring?</b></summary>
+
+Read `Model.shutdownDate` from model listing or retrieval when the API has
+announced a retirement. The field uses the `YYYY-MM-DD` date format.
+
+- Reusable prompt objects and Agent Builder retire on November 30, 2026.
+  Move prompt content into application code and follow the Agent Builder
+  migration guide for existing workflows. ChatKit remains available.
+  [Prompt migration](https://developers.openai.com/api/docs/guides/prompting/migrate-from-prompt-object) · [Agent Builder migration](https://developers.openai.com/api/docs/guides/agent-builder/migrate-from-agent-builder)
+- `gpt-5.5-cyber-preview` retires on February 1, 2027. Access to its
+  replacements depends on the project. [Retirement schedule](https://developers.openai.com/api/docs/deprecations)
+
+</details>
 
 <a id="how-do-i-generate-videos"></a>
 <details>

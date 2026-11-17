@@ -57,6 +57,13 @@ can be added to a typed response history with
 constructing or checking a conversation image call. When a result is
 unavailable, the serializer emits `"result": null`.
 
+### Image classifier requests
+
+Use `client.moderations.classifyImage(imageUrl)` for
+`omni-moderation-csam-latest`. Read the flags and scores from
+`response.result.categories` and `response.result.categoryScores`. Classes and
+mocks that implement `ModerationsResource` need the new method.
+
 ### Agent session budgets and observation
 
 - For background compaction, set `AgentCompactionConfig(async: true)`.
