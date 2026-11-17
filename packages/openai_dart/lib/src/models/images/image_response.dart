@@ -5,6 +5,7 @@ import '../common/equality_helpers.dart';
 import '../common/json_helpers.dart';
 import 'image_common.dart';
 import 'image_json_helpers.dart';
+import 'svg_options.dart';
 
 /// A response from the images API.
 ///
@@ -38,6 +39,7 @@ class ImageResponse {
     this.quality,
     this.size,
     this.usage,
+    this.svgUsage,
     this.safetyIdentifier,
   }) : data = List<GeneratedImage>.unmodifiable(data) {
     if (!hasData && data.isNotEmpty) {
@@ -82,6 +84,11 @@ class ImageResponse {
       usage: json['usage'] != null
           ? ImagesUsage.fromJson(json['usage'] as Map<String, dynamic>)
           : null,
+      svgUsage: json['svg_usage'] == null
+          ? null
+          : SvgUsage.fromJson(
+              requireJsonObject(json['svg_usage'], 'ImageResponse.svg_usage'),
+            ),
     );
   }
 
@@ -113,6 +120,9 @@ class ImageResponse {
   /// Token usage (GPT image models only).
   final ImagesUsage? usage;
 
+  /// Token usage for the SVG author, separate from [usage].
+  final SvgUsage? svgUsage;
+
   /// Gets the first generated image.
   GeneratedImage get first => data.first;
 
@@ -136,6 +146,7 @@ class ImageResponse {
     if (quality != null) 'quality': quality!.toJson(),
     if (size != null) 'size': size!.toJson(),
     if (usage != null) 'usage': usage!.toJson(),
+    if (svgUsage != null) 'svg_usage': svgUsage!.toJson(),
   };
 
   /// Copies the response; explicit null clears nullable fields locally.
@@ -149,6 +160,7 @@ class ImageResponse {
     Object? quality = unsetCopyWithValue,
     Object? size = unsetCopyWithValue,
     Object? usage = unsetCopyWithValue,
+    Object? svgUsage = unsetCopyWithValue,
   }) => ImageResponse(
     created: created ?? this.created,
     data: data ?? this.data,
@@ -179,6 +191,11 @@ class ImageResponse {
       this.usage,
       'ImageResponse.usage',
     ),
+    svgUsage: copyImageValue<SvgUsage>(
+      svgUsage,
+      this.svgUsage,
+      'ImageResponse.svgUsage',
+    ),
   );
 
   @override
@@ -194,7 +211,8 @@ class ImageResponse {
           outputFormat == other.outputFormat &&
           quality == other.quality &&
           size == other.size &&
-          usage == other.usage;
+          usage == other.usage &&
+          svgUsage == other.svgUsage;
 
   @override
   int get hashCode => Object.hash(
@@ -207,6 +225,7 @@ class ImageResponse {
     quality,
     size,
     usage,
+    svgUsage,
   );
 
   @override
@@ -462,6 +481,12 @@ class ImagesUsageOutputTokensDetails {
 /// generation and editing. Legacy models carry deprecation
 /// annotations (see the [deprecations page](https://developers.openai.com/api/docs/deprecations)).
 abstract final class ImageModels {
+  /// GPT Image 2.6 Sunburst.
+  static const String gptImage26Sunburst = 'gpt-image-2.6-sunburst';
+
+  /// GPT Image 2.6 Flare.
+  static const String gptImage26Flare = 'gpt-image-2.6-flare';
+
   /// GPT Image 2.5 Sunburst, for precise editing and detailed creative work.
   static const String gptImage25Sunburst = 'gpt-image-2.5-sunburst';
 

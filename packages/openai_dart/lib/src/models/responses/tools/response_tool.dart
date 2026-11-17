@@ -4,7 +4,9 @@ import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../../common/json_helpers.dart';
 import '../../images/image_common.dart'
-    show ImageInputFidelity, ImageModerationLevel;
+    show ImageComplexity, ImageInputFidelity, ImageModerationLevel;
+import '../../images/image_json_helpers.dart';
+import '../../images/svg_options.dart';
 import '../config/search_content_type.dart';
 import '../config/tool_search_execution_type.dart';
 import '../config/web_search_return_token_budget.dart';
@@ -204,6 +206,10 @@ sealed class ResponseTool {
     ImageModerationLevel? moderation,
     int? outputCompression,
     String? outputFormat,
+    ImageComplexity? complexity,
+    int? frameCount,
+    int? frameDurationMs,
+    SvgOptions? svg,
     int? partialImages,
     String? quality,
     String? size,
@@ -216,6 +222,10 @@ sealed class ResponseTool {
     moderation: moderation,
     outputCompression: outputCompression,
     outputFormat: outputFormat,
+    complexity: complexity,
+    frameCount: frameCount,
+    frameDurationMs: frameDurationMs,
+    svg: svg,
     partialImages: partialImages,
     quality: quality,
     size: size,
@@ -1153,6 +1163,18 @@ class ImageGenerationTool extends ResponseTool {
   /// The format for output images.
   final String? outputFormat;
 
+  /// Planning effort for image generation. Overrides supported outer reasoning.
+  final ImageComplexity? complexity;
+
+  /// Number of GIF frames (2–16). Requires GIF output.
+  final int? frameCount;
+
+  /// Requested GIF frame duration (20–2000 ms). Requires GIF output.
+  final int? frameDurationMs;
+
+  /// SVG author settings. Requires SVG output.
+  final SvgOptions? svg;
+
   /// Number of partial images to return during generation (0–3).
   final int? partialImages;
 
@@ -1172,6 +1194,10 @@ class ImageGenerationTool extends ResponseTool {
     this.moderation,
     this.outputCompression,
     this.outputFormat,
+    this.complexity,
+    this.frameCount,
+    this.frameDurationMs,
+    this.svg,
     this.partialImages,
     this.quality,
     this.size,
@@ -1228,6 +1254,24 @@ class ImageGenerationTool extends ResponseTool {
               'ImageGenerationTool.output_compression',
             ),
       outputFormat: json['output_format'] as String?,
+      complexity: readImageComplexity(json, 'ImageGenerationTool'),
+      frameCount: json['frame_count'] == null
+          ? null
+          : requireJsonInt(
+              json['frame_count'],
+              'ImageGenerationTool.frameCount',
+            ),
+      frameDurationMs: json['frame_duration_ms'] == null
+          ? null
+          : requireJsonInt(
+              json['frame_duration_ms'],
+              'ImageGenerationTool.frameDurationMs',
+            ),
+      svg: json['svg'] == null
+          ? null
+          : SvgOptions.fromJson(
+              requireJsonObject(json['svg'], 'ImageGenerationTool.svg'),
+            ),
       partialImages: json['partial_images'] as int?,
       quality: json['quality'] as String?,
       size: json['size'] as String?,
@@ -1242,6 +1286,16 @@ class ImageGenerationTool extends ResponseTool {
         'Unknown image request enum values cannot be serialized.',
       );
     }
+    validateImageOutputSettings(
+      format: outputFormat,
+      frameCount: frameCount,
+      frameDurationMs: frameDurationMs,
+      svg: svg,
+      compression: outputCompression,
+      partialImages: partialImages,
+      hasMask: inputImageMask != null,
+      responsesTool: true,
+    );
     return {
       'type': 'image_generation',
       if (action != null) 'action': action,
@@ -1252,6 +1306,10 @@ class ImageGenerationTool extends ResponseTool {
       if (moderation != null) 'moderation': moderation!.toJson(),
       if (outputCompression != null) 'output_compression': outputCompression,
       if (outputFormat != null) 'output_format': outputFormat,
+      if (complexity != null) 'complexity': complexity!.toJson(),
+      if (frameCount != null) 'frame_count': frameCount,
+      if (frameDurationMs != null) 'frame_duration_ms': frameDurationMs,
+      if (svg != null) 'svg': svg!.toJson(),
       if (partialImages != null) 'partial_images': partialImages,
       if (quality != null) 'quality': quality,
       if (size != null) 'size': size,
@@ -1271,6 +1329,10 @@ class ImageGenerationTool extends ResponseTool {
           moderation == other.moderation &&
           outputCompression == other.outputCompression &&
           outputFormat == other.outputFormat &&
+          complexity == other.complexity &&
+          frameCount == other.frameCount &&
+          frameDurationMs == other.frameDurationMs &&
+          svg == other.svg &&
           partialImages == other.partialImages &&
           quality == other.quality &&
           size == other.size;
@@ -1285,6 +1347,10 @@ class ImageGenerationTool extends ResponseTool {
     moderation,
     outputCompression,
     outputFormat,
+    complexity,
+    frameCount,
+    frameDurationMs,
+    svg,
     partialImages,
     quality,
     size,

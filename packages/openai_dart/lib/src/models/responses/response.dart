@@ -5,6 +5,7 @@ import '../common/equality_helpers.dart';
 import '../common/json_helpers.dart';
 import '../moderations/completion_moderation.dart';
 import 'config/access_programs.dart';
+import 'config/image_options.dart';
 import 'config/prompt_cache_diagnostics.dart';
 import 'config/prompt_cache_options.dart';
 import 'config/prompt_cache_retention.dart';
@@ -68,6 +69,9 @@ class Response {
 
   /// The service tier used for the request.
   final ServiceTier? serviceTier;
+
+  /// Effective image context options when returned by the service.
+  final ResolvedImageOptions? image;
 
   /// Custom metadata from the request.
   final Map<String, String>? metadata;
@@ -142,6 +146,7 @@ class Response {
     this.instructions,
     this.previousResponseId,
     this.serviceTier,
+    this.image,
     this.metadata,
     this.maxOutputTokens,
     this.temperature,
@@ -229,6 +234,11 @@ class Response {
       serviceTier: json['service_tier'] != null
           ? ServiceTier.fromJson(json['service_tier'] as String)
           : null,
+      image: json['image'] == null
+          ? null
+          : ResolvedImageOptions.fromJson(
+              requireJsonObject(json['image'], 'Response.image'),
+            ),
       metadata: (json['metadata'] as Map?)?.cast<String, String>(),
       maxOutputTokens: json['max_output_tokens'] as int?,
       temperature: (json['temperature'] as num?)?.toDouble(),
@@ -280,6 +290,7 @@ class Response {
     if (instructions != null) 'instructions': instructions,
     if (previousResponseId != null) 'previous_response_id': previousResponseId,
     if (serviceTier != null) 'service_tier': serviceTier!.toJson(),
+    if (image != null) 'image': image!.toJson(),
     if (metadata != null) 'metadata': metadata,
     if (maxOutputTokens != null) 'max_output_tokens': maxOutputTokens,
     if (temperature != null) 'temperature': temperature,
@@ -317,6 +328,7 @@ class Response {
     Object? instructions = unsetCopyWithValue,
     Object? previousResponseId = unsetCopyWithValue,
     Object? serviceTier = unsetCopyWithValue,
+    Object? image = unsetCopyWithValue,
     Object? metadata = unsetCopyWithValue,
     Object? maxOutputTokens = unsetCopyWithValue,
     Object? temperature = unsetCopyWithValue,
@@ -358,6 +370,9 @@ class Response {
     serviceTier: serviceTier == unsetCopyWithValue
         ? this.serviceTier
         : serviceTier as ServiceTier?,
+    image: image == unsetCopyWithValue
+        ? this.image
+        : image as ResolvedImageOptions?,
     metadata: metadata == unsetCopyWithValue
         ? this.metadata
         : metadata == null
@@ -529,6 +544,7 @@ class Response {
           instructions == other.instructions &&
           previousResponseId == other.previousResponseId &&
           serviceTier == other.serviceTier &&
+          image == other.image &&
           mapsEqual(metadata, other.metadata) &&
           maxOutputTokens == other.maxOutputTokens &&
           temperature == other.temperature &&
@@ -563,6 +579,7 @@ class Response {
     instructions,
     previousResponseId,
     serviceTier,
+    image,
     mapHash(metadata),
     maxOutputTokens,
     temperature,

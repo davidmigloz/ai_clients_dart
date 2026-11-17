@@ -70,8 +70,14 @@
 library;
 
 export '../images/image_common.dart'
-    show ImageBackground, ImageOutputFormat, ImageQuality, ImageSize;
+    show
+        ImageBackground,
+        ImageComplexity,
+        ImageOutputFormat,
+        ImageQuality,
+        ImageSize;
 export '../images/image_tool_error.dart';
+export '../images/svg_options.dart';
 export 'compact_response_request.dart';
 export 'config/config.dart';
 export 'content/content.dart';

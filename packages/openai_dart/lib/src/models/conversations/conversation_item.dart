@@ -3,6 +3,9 @@ import 'package:meta/meta.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../common/json_helpers.dart';
+import '../images/image_common.dart';
+import '../images/image_tool_error.dart';
+import '../images/svg_options.dart';
 import '../responses/config/configuration_update_reasoning.dart';
 import '../responses/config/configuration_update_text.dart';
 import '../responses/config/function_call_status.dart';
@@ -606,8 +609,16 @@ class ConversationImageGenerationCallItem extends ConversationItem {
   /// The generated image result (base64 or URL).
   final String? result;
 
-  /// Item status.
-  final ItemStatus? status;
+  /// Image call status, including generating and failed.
+  ///
+  /// Can be absent on older saved items.
+  final ImageGenerationCallStatus? status;
+
+  /// The generated image format, when present.
+  final ImageOutputFormat? outputFormat;
+
+  /// SVG author token usage, when present.
+  final SvgUsage? svgUsage;
 
   /// Creates a [ConversationImageGenerationCallItem].
   const ConversationImageGenerationCallItem({
@@ -616,6 +627,8 @@ class ConversationImageGenerationCallItem extends ConversationItem {
     this.revisedPrompt,
     this.result,
     this.status,
+    this.outputFormat,
+    this.svgUsage,
   });
 
   /// Creates a [ConversationImageGenerationCallItem] from JSON.
@@ -628,8 +641,24 @@ class ConversationImageGenerationCallItem extends ConversationItem {
       revisedPrompt: json['revised_prompt'] as String?,
       result: json['result'] as String?,
       status: json['status'] != null
-          ? ItemStatus.fromJson(json['status'] as String)
+          ? ImageGenerationCallStatus.fromJson(json['status'])
           : null,
+      outputFormat: json['output_format'] == null
+          ? null
+          : ImageOutputFormat.fromJson(
+              requireJsonString(
+                json['output_format'],
+                'ConversationImageGenerationCallItem.output_format',
+              ),
+            ),
+      svgUsage: json['svg_usage'] == null
+          ? null
+          : SvgUsage.fromJson(
+              requireJsonObject(
+                json['svg_usage'],
+                'ConversationImageGenerationCallItem.svg_usage',
+              ),
+            ),
     );
   }
 
@@ -639,8 +668,10 @@ class ConversationImageGenerationCallItem extends ConversationItem {
     'id': id,
     if (prompt != null) 'prompt': prompt,
     if (revisedPrompt != null) 'revised_prompt': revisedPrompt,
-    if (result != null) 'result': result,
+    'result': result,
     if (status != null) 'status': status!.toJson(),
+    if (outputFormat != null) 'output_format': outputFormat!.toJson(),
+    if (svgUsage != null) 'svg_usage': svgUsage!.toJson(),
   };
 
   @override
@@ -652,10 +683,20 @@ class ConversationImageGenerationCallItem extends ConversationItem {
           prompt == other.prompt &&
           revisedPrompt == other.revisedPrompt &&
           result == other.result &&
-          status == other.status;
+          status == other.status &&
+          outputFormat == other.outputFormat &&
+          svgUsage == other.svgUsage;
 
   @override
-  int get hashCode => Object.hash(id, prompt, revisedPrompt, result, status);
+  int get hashCode => Object.hash(
+    id,
+    prompt,
+    revisedPrompt,
+    result,
+    status,
+    outputFormat,
+    svgUsage,
+  );
 
   @override
   String toString() =>

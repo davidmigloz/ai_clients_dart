@@ -11,6 +11,7 @@ export 'context_management.dart';
 export 'cyber_access_program.dart';
 export 'function_call_output_status.dart';
 export 'function_call_status.dart';
+export 'image_options.dart';
 export 'include.dart';
 export 'item_status.dart';
 export 'message_phase.dart';

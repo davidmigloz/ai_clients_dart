@@ -720,7 +720,7 @@ Future<void> main() async {
 
 <a id="how-do-i-generate-and-edit-images-with-gpt-image-25"></a>
 <details>
-<summary><b>How do I generate and edit images with GPT Image 2.5?</b></summary>
+<summary><b>How do I generate and edit images with GPT Image 2.6?</b></summary>
 
 Use `client.images.generate` or `edit` with an explicit model. Use `editJson` for URL, data URL, or file-ID inputs; generation and editing also have streaming variants.
 
@@ -736,7 +736,7 @@ Future<void> main() async {
   try {
     final response = await client.images.generate(
       const ImageGenerationRequest(
-        model: ImageModels.gptImage25Flare,
+        model: ImageModels.gptImage26Flare,
         prompt: 'A cute robot holding a flower',
         size: ImageSize.size1024x1024,
       ),
@@ -751,7 +751,11 @@ Future<void> main() async {
 }
 ```
 
-GPT Image 1 retired on October 23, 2026. Older `gpt-image-1.5`, `gpt-image-1-mini` and `chatgpt-image-latest` retire on December 1; use Sunburst or Flare. See the [deprecation schedule](https://developers.openai.com/api/docs/deprecations).
+Set `complexity` to control planning effort independently of quality. Select `ImageOutputFormat.gif` with optional `frameCount` and `frameDurationMs`, or `ImageOutputFormat.svg` with optional `SvgOptions` if your project can select an SVG author. Read author token counts from `response.svgUsage`.
+
+Standalone GIF and SVG requests use buffered output. The general image guide describes SVG generation only. For SVG edits with an eligible model and project, follow the endpoint reference as implemented by the official SDKs. With a Responses GIF tool, lifecycle events can still stream without partial frames. [Image edit reference](https://developers.openai.com/api/reference/resources/images/methods/edit)
+
+GPT Image 1 retired on October 23, 2026. Older `gpt-image-1.5`, `gpt-image-1-mini` and `chatgpt-image-latest` retire on December 1. Use GPT Image 2.6 Sunburst or Flare. [Deprecation schedule](https://developers.openai.com/api/docs/deprecations)
 
 → [Full example](example/images_example.dart) · [Model selection](example/image_model_selection_example.dart)
 
@@ -1155,6 +1159,8 @@ Configure a hosted shell through Responses tools, or execute local commands in y
 <summary><b>How do I observe compaction progress?</b></summary>
 
 Watch typed compaction events in the Responses stream. Progress events are nonterminal; preserve the complete returned compacted output for continuation.
+
+Set `image: ImageOptions(contextCompression: ImageContextCompression.enabled)` on `CreateResponseRequest` or `CompactResponseRequest` to require image context compression. Read the effective policy from the result's `image?.contextCompression`.
 
 → [Full example](example/compaction_progress_example.dart)
 

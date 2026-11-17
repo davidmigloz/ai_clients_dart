@@ -165,7 +165,13 @@ enum ImageOutputFormat {
   jpeg._('jpeg'),
 
   /// WebP output.
-  webp._('webp');
+  webp._('webp'),
+
+  /// Animated GIF output.
+  gif._('gif'),
+
+  /// Scalable vector graphics output.
+  svg._('svg');
 
   const ImageOutputFormat._(this._value);
   final String _value;
@@ -179,6 +185,27 @@ enum ImageOutputFormat {
 
   /// Converts to JSON string.
   String toJson() => _value;
+}
+
+/// Planning effort for the image model, independent of rendering quality.
+enum ImageComplexity {
+  /// Low planning effort.
+  low,
+
+  /// Medium planning effort.
+  medium,
+
+  /// High planning effort.
+  high;
+
+  /// Parses the complexity of an image request.
+  factory ImageComplexity.fromJson(String json) => values.firstWhere(
+    (value) => value.name == json,
+    orElse: () => throw const FormatException('Unknown image complexity'),
+  );
+
+  /// Converts to the API value.
+  String toJson() => name;
 }
 
 /// Moderation level for GPT image models.

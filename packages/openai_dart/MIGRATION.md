@@ -26,6 +26,37 @@ const options = ResponsePromptCacheOptionsParam(
 );
 ```
 
+### Image output format switches
+
+`ImageOutputFormat` now includes `.gif` and `.svg`. Handle both in exhaustive
+switches. Receiving either format now returns its enum case instead of
+`.unknown`.
+
+```dart
+String imageExtension(ImageOutputFormat format) => switch (format) {
+  ImageOutputFormat.png => 'png',
+  ImageOutputFormat.jpeg => 'jpeg',
+  ImageOutputFormat.webp => 'webp',
+  ImageOutputFormat.gif => 'gif',
+  ImageOutputFormat.svg => 'svg',
+  ImageOutputFormat.unknown => 'bin',
+};
+```
+
+Use the buffered Images methods for GIF or SVG. A Responses image-generation
+tool configured for GIF can still stream lifecycle events.
+
+Exhaustive switches over Responses `Item` also need to handle
+`ImageGenerationCallItem`. It is returned by `responses.inputItems.list` and
+can be added to a typed response history with
+`ImageGenerationCallItem(call: response.imageGenerationCalls.single)`.
+
+`ConversationImageGenerationCallItem.status` now uses
+`ImageGenerationCallStatus?` for accurate status comparisons. Use
+`ImageGenerationCallStatus.completed` in place of `ItemStatus.completed` when
+constructing or checking a conversation image call. When a result is
+unavailable, the serializer emits `"result": null`.
+
 ---
 
 ## Migrating from v11.x to v12.0.0

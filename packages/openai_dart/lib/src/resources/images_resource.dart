@@ -146,7 +146,7 @@ class ImagesResource extends ResourceBase with StreamingResource {
     Future<void>? abortTrigger,
   }) {
     ensureNotClosed?.call();
-    final body = request.toJson()..['stream'] = true;
+    final body = _streamingBody(request.toJson());
     return streamSseEvents(
       endpoint: _generateEndpoint,
       body: body,
@@ -274,7 +274,7 @@ class ImagesResource extends ResourceBase with StreamingResource {
     Future<void>? abortTrigger,
   }) {
     ensureNotClosed?.call();
-    final body = request.toJson()..['stream'] = true;
+    final body = _streamingBody(request.toJson());
     return streamSseEvents(
       endpoint: _editEndpoint,
       body: body,
@@ -328,6 +328,16 @@ class ImagesResource extends ResourceBase with StreamingResource {
         },
       ),
     );
+  }
+
+  Map<String, dynamic> _streamingBody(Map<String, dynamic> body) {
+    final format = body['output_format'];
+    if (format == 'gif' || format == 'svg') {
+      throw const FormatException(
+        'GIF and SVG Images output cannot be streamed',
+      );
+    }
+    return {...body, 'stream': true};
   }
 
   ImageEditStreamEvent _mapEditEvent(Map<String, dynamic> json) {
@@ -475,6 +485,21 @@ class ImagesResource extends ResourceBase with StreamingResource {
     }
     if (request.outputFormat != null) {
       httpRequest.fields['output_format'] = request.outputFormat!.toJson();
+    }
+    if (request.complexity case final complexity?) {
+      httpRequest.fields['complexity'] = complexity.toJson();
+    }
+    if (request.frameCount case final frameCount?) {
+      httpRequest.fields['frame_count'] = frameCount.toString();
+    }
+    if (request.frameDurationMs case final frameDurationMs?) {
+      httpRequest.fields['frame_duration_ms'] = frameDurationMs.toString();
+    }
+    if (request.svg?.model case final model?) {
+      httpRequest.fields['svg[model]'] = model;
+    }
+    if (request.svg?.reasoning?.effort case final effort?) {
+      httpRequest.fields['svg[reasoning][effort]'] = effort.toJson();
     }
     if (request.outputCompression != null) {
       httpRequest.fields['output_compression'] = request.outputCompression
