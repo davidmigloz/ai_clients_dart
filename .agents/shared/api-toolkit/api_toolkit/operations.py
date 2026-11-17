@@ -4110,7 +4110,10 @@ def _dart_enum_member_name(value: str) -> str:
 
 
 def _dart_enum_string_literal(value: str) -> str:
-    escaped = json.dumps(value)[1:-1].replace("'", r"\'").replace("$", r"\$")
+    escaped = json.dumps(value, ensure_ascii=False)[1:-1]
+    # Dart supports escapes for complete Unicode code points, including non-BMP values.
+    escaped = re.sub(r"[^\x20-\x7e]", lambda match: f"\\u{{{ord(match.group()):X}}}", escaped)
+    escaped = escaped.replace("'", r"\'").replace("$", r"\$")
     return f"'{escaped}'"
 
 

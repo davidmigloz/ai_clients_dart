@@ -2928,6 +2928,26 @@ class ApiToolkitCommandTests(unittest.TestCase):
             with self.assertRaisesRegex(ToolkitError, "requires string values"):
                 command_scaffold(args)
 
+    def test_scaffolded_enum_verifies_unicode_and_escaped_wire_values(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            _, config = self._enum_audit_fixture(Path(tmp_dir), {
+                "UnicodeMode": {
+                    "type": ["string", "null"],
+                    "enum": [None, "null", "'$value", "préfixe", "🚀", "👩‍💻", "a\u2028b", r"\u{1F680}"],
+                },
+            }, {}, manifest_types={"UnicodeMode": {
+                "spec": "main", "kind": "enum", "dart_class": "UnicodeMode",
+                "file": "lib/src/models/common/unicode_mode.dart",
+            }})
+            scaffold_code, _ = command_scaffold(SimpleNamespace(
+                config_dir=config, target="enum", name="UnicodeMode",
+                spec_name="main", output=None, dry_run=False,
+            ))
+            self.assertEqual(scaffold_code, toolkit_config.EXIT_SUCCESS)
+            code, payload = self._verify_enum_audit(config, scope="type", type_name="UnicodeMode")
+            self.assertEqual(payload["results"]["implementation"]["issues"], [])
+            self.assertEqual(code, toolkit_config.EXIT_SUCCESS)
+
     def test_verify_all_catches_unchanged_untracked_message_roles_without_mutation(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             roles = ["unknown", "user", "assistant", "system", "critic", "discriminator", "developer", "tool"]
