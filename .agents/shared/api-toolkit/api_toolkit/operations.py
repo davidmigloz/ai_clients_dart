@@ -74,6 +74,14 @@ HTTP_METHODS = ("get", "post", "put", "patch", "delete", "head", "options", "tra
 # treated as a schema reference (e.g. "Tool", "Content") rather than a primitive.
 _OPENAPI_BUILTIN_TYPES = frozenset({"string", "integer", "number", "boolean", "array", "object", "null"})
 UNKNOWN_ENUM_FALLBACKS = {"unknown", "unspecified"}
+# Dart keywords that cannot be identifiers, plus the names reserved by Enum.
+_DART_RESERVED_ENUM_MEMBERS = frozenset({
+    "assert", "break", "case", "catch", "class", "const", "continue", "default",
+    "do", "else", "enum", "extends", "false", "final", "finally", "for", "if",
+    "in", "is", "new", "null", "rethrow", "return", "super", "switch", "this",
+    "throw", "true", "try", "var", "void", "while", "with",
+    "hashCode", "index", "noSuchMethod", "runtimeType", "toString", "values",
+})
 MAX_VERSION_HISTORY = 10
 VERSION_SEGMENT_RE = re.compile(r"^v\d+")
 PART_OF_RE = re.compile(r"\bpart of\b")
@@ -419,10 +427,17 @@ def _empty_flattened_schema() -> dict[str, Any]:
         "type": "object",
         "properties": {},
         "required": set(),
-        "enum_values": set(),
+        "enum_values": {},
         "union_members": set(),
         "description": "",
     }
+
+
+def _openapi_enum_value_key(value: Any) -> tuple[str, Any]:
+    # Python bools and numbers can compare equal. Keep the JSON types distinct
+    # and use the same typed key both for sorting and for comparing spec pins.
+    comparable = value if isinstance(value, (str, int, float)) else json.dumps(value, sort_keys=True)
+    return type(value).__name__, comparable
 
 
 def _flatten_schema(schema: dict[str, Any], all_schemas: dict[str, Any], resolving_refs: tuple[str, ...] = ()) -> dict[str, Any]:
@@ -430,7 +445,7 @@ def _flatten_schema(schema: dict[str, Any], all_schemas: dict[str, Any], resolvi
         "type": schema.get("type", "object"),
         "properties": {},
         "required": set(schema.get("required", [])),
-        "enum_values": set(schema.get("enum", [])),
+        "enum_values": {_openapi_enum_value_key(value): value for value in schema.get("enum", [])},
         "union_members": set(),
         "description": schema.get("description", ""),
     }
@@ -471,7 +486,7 @@ def _extract_openapi_schemas(spec: dict[str, Any]) -> dict[str, dict[str, Any]]:
             "type": flattened["type"],
             "properties": flattened["properties"],
             "required": sorted(flattened["required"]),
-            "enum_values": sorted(flattened["enum_values"]),
+            "enum_values": [value for _, value in sorted(flattened["enum_values"].items())],
             "union_members": sorted(flattened["union_members"]),
         }
     return results
@@ -517,11 +532,13 @@ def _compare_openapi(old_spec: dict[str, Any], new_spec: dict[str, Any]) -> dict
             changes.append({"type": "property_added", "property": prop, "breaking": prop in new_schema["required"]})
         for prop in sorted(old_props - new_props):
             changes.append({"type": "property_removed", "property": prop, "breaking": True})
-        if old_schema["enum_values"] != new_schema["enum_values"]:
+        old_values = old_schema["enum_values"]
+        new_values = new_schema["enum_values"]
+        if list(map(_openapi_enum_value_key, old_values)) != list(map(_openapi_enum_value_key, new_values)):
             changes.append({
                 "type": "enum_changed",
-                "old": old_schema["enum_values"],
-                "new": new_schema["enum_values"],
+                "old": old_values,
+                "new": new_values,
             })
         if old_schema["union_members"] != new_schema["union_members"]:
             changes.append({
@@ -1554,17 +1571,26 @@ def _verify_enum_entry(
     issues: list[dict[str, Any]] = []
     if not values:
         issues.append(_type_issue("error", entry.key, f"No enum values found in spec for '{entry.schema_name}'", file=entry.file))
+    elif all(value is None for value in values):
+        return [_type_issue("error", entry.key, f"Enum '{entry.schema_name}' has no non-null values to map", file=entry.file)]
     for value in values:
-        if isinstance(value, int) and not isinstance(value, bool):
-            found = re.search(rf"(?<!\d){re.escape(str(value))}(?!\d)", code) is not None
-        else:
+        if value is None:
+            # A Dart enum value is nullable at its use site or in its codec.
+            continue
+        if isinstance(value, str):
             # Values must be exact literals in this representation. Actual Dart
             # enums can also serialize an implicit member name via .name.
             found = value in literals or (
-                kind == "enum" and isinstance(value, str)
+                kind == "enum"
                 and re.fullmatch(r"[A-Za-z_]\w*", value) is not None
                 and value in dart_enum_constant_names(code)
             )
+        elif isinstance(value, (int, float)):
+            primitive = re.escape(json.dumps(value))
+            found = re.search(rf"(?<![\w.$+-]){primitive}(?![\w.$])", code) is not None
+        else:
+            issues.append(_type_issue("error", entry.key, f"Enum value {value!r} is not a Dart scalar literal", file=entry.file))
+            continue
         if not found:
             issues.append(_type_issue("error", entry.key, f"Enum value '{value}' not found in file", file=entry.file))
     # Value wrappers may preserve future raw strings and sealed request choices
@@ -1591,7 +1617,7 @@ def _discover_untracked_string_enums(
     unmatched: list[str] = []
     acknowledged: list[str] = []
     for name, schema in sorted(spec_payload.get("components", {}).get("schemas", {}).items()):
-        values = schema.get("enum")
+        values = [value for value in schema.get("enum", []) if value is not None]
         if not values or not all(isinstance(value, str) for value in values):
             continue
         if schema.get("type") not in (None, "string", ["string", "null"], ["null", "string"]):
@@ -4066,15 +4092,41 @@ def _scaffold_enum_fallback_member(seen: set[str]) -> str:
     return candidate
 
 
-def _scaffold_enum_source(class_name: str, values: list[str]) -> str:
-    members = []
-    for value in values:
-        member = snake_case(value).replace("_", " ").title().replace(" ", "")
-        member = member[:1].lower() + member[1:] if member else "value"
-        members.append((member, value))
+def _has_scaffoldable_enum_values(values: list[Any]) -> bool:
+    return any(isinstance(value, str) for value in values) and all(
+        value is None or isinstance(value, str) for value in values
+    )
+
+
+def _dart_enum_member_name(value: str) -> str:
+    identifier = re.sub(r"[^A-Za-z0-9_]+", "_", value)
+    member = snake_case(identifier).replace("_", " ").title().replace(" ", "")
+    member = member[:1].lower() + member[1:] if member else "value"
+    if member[0].isdigit():
+        member = f"value{member}"
+    if member in _DART_RESERVED_ENUM_MEMBERS:
+        member = f"{member}Value"
+    return member
+
+
+def _dart_enum_string_literal(value: str) -> str:
+    escaped = json.dumps(value, ensure_ascii=False)[1:-1]
+    # Dart supports escapes for complete Unicode code points, including non-BMP values.
+    escaped = re.sub(r"[^\x20-\x7e]", lambda match: f"\\u{{{ord(match.group()):X}}}", escaped)
+    escaped = escaped.replace("'", r"\'").replace("$", r"\$")
+    return f"'{escaped}'"
+
+
+def _scaffold_enum_source(class_name: str, values: list[Any]) -> str:
+    if not _has_scaffoldable_enum_values(values):
+        raise ToolkitError(f"Dart enum scaffold for '{class_name}' requires string values, optionally with null")
+    nullable = None in values
     unique_members: list[tuple[str, str]] = []
     seen = set()
-    for member, raw in members:
+    for raw in values:
+        if raw is None:
+            continue
+        member = _dart_enum_member_name(raw)
         while member in seen:
             member = f"{member}Value"
         seen.add(member)
@@ -4086,18 +4138,23 @@ def _scaffold_enum_source(class_name: str, values: list[str]) -> str:
     lines.append(f"  {fallback_member},")
     lines.append("}")
     lines.append("")
-    lines.append(f"{class_name} {camel_case(class_name)}FromString(String? value) {{")
+    nullable_suffix = "?" if nullable else ""
+    lines.append(f"{class_name}{nullable_suffix} {camel_case(class_name)}FromString(String? value) {{")
     lines.append("  return switch (value) {")
+    if nullable:
+        lines.append("    null => null,")
     for member, raw in unique_members:
-        lines.append(f"    '{raw}' => {class_name}.{member},")
+        lines.append(f"    {_dart_enum_string_literal(raw)} => {class_name}.{member},")
     lines.append(f"    _ => {class_name}.{fallback_member},")
     lines.append("  };")
     lines.append("}")
     lines.append("")
-    lines.append(f"String {camel_case(class_name)}ToString({class_name} value) {{")
+    lines.append(f"String{nullable_suffix} {camel_case(class_name)}ToString({class_name}{nullable_suffix} value) {{")
     lines.append("  return switch (value) {")
+    if nullable:
+        lines.append("    null => null,")
     for member, raw in unique_members:
-        lines.append(f"    {class_name}.{member} => '{raw}',")
+        lines.append(f"    {class_name}.{member} => {_dart_enum_string_literal(raw)},")
     lines.append(f"    {class_name}.{fallback_member} => 'unknown',")
     lines.append("  };")
     lines.append("}")
@@ -4311,12 +4368,14 @@ def _render_scaffold(config: ToolkitConfig, target: str, spec_name: str, name: s
         entry = None
     schema_name = entry.schema_name if entry else name
     if config.manifest.surface == "openapi":
-        schema = spec_payload.get("components", {}).get("schemas", {}).get(schema_name)
+        schemas = spec_payload.get("components", {}).get("schemas", {})
+        schema = schemas.get(schema_name)
         if target == "enum":
-            if not schema or not schema.get("enum"):
+            values = list(_flatten_schema(schema or {}, schemas)["enum_values"].values())
+            if not values:
                 raise ToolkitError(f"Schema '{schema_name}' is not an enum")
-            class_name = entry.dart_class if entry else ManifestEntry(schema_name, spec_name, "enum", schema_name, "").dart_class
-            return _scaffold_enum_source(class_name, list(schema.get("enum", []))), class_name
+            class_name = entry.dart_class if entry else to_pascal_case(schema_name)
+            return _scaffold_enum_source(class_name, values), class_name
         if target == "schema":
             if not schema:
                 raise ToolkitError(f"Unknown schema '{schema_name}'")
@@ -5672,7 +5731,12 @@ def command_review(args: Any) -> tuple[int, dict[str, Any]]:
     actions = []
     for name in missing_manifest:
         schema_info = new_schemas.get(name)
-        target = "enum" if (config.manifest.surface == "openapi" and schema_info and schema_info["enum_values"]) else "schema"
+        target = "schema"
+        if schema_info and schema_info["enum_values"]:
+            if not _has_scaffoldable_enum_values(schema_info["enum_values"]):
+                actions.append(f"Review the enum values for `{name}` and add a manifest mapping for its Dart representation.")
+                continue
+            target = "enum"
         if config.manifest.surface == "websocket":
             if name in new_payload.get("enums", {}):
                 target = "enum"
