@@ -70,10 +70,11 @@ Dart 3.13.7 formatted 891 package files with zero changes. Fatal-info analysis
 passed for `openai_dart` and `open_responses`. The VM unit suites passed
 26,899 and 547 tests respectively, with two and three environment-dependent
 skips. Unsetting the credential environment variable exercised the opposite
-configuration branches in both packages. The five selected public request
-fixture files passed 32 tests each on Chrome with JavaScript and WebAssembly.
+configuration branches in both packages. Five public-request fixture files
+passed 32 tests on each Chrome target, JavaScript and WebAssembly.
 The background, classifier, Agent settings and approvals, Live delegation,
-Admin, federation and runtime configuration examples ran offline.
+Admin, federation and runtime configuration examples ran offline. The Dart
+package publication dry run reported zero warnings.
 
 Stock toolkit `review`, `verify --checks all` at both scopes, and the
 `complexity` enum scaffold dry run ran against the frozen candidate.
