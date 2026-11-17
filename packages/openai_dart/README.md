@@ -601,6 +601,20 @@ Future<void> main() async {
 
 → [Full example](example/chat_example.dart)
 
+For an OpenAI-compatible provider, pass provider-specific fields using the per-call `extraBody` argument on `create`, `createStream`, or `createStreamWithAccumulator`.
+
+```dart
+final response = await client.chat.completions.create(
+  ChatCompletionCreateRequest(
+    model: 'qwen3.8-flash',
+    messages: [ChatMessage.user('Summarize this text...')],
+  ),
+  extraBody: {'enable_thinking': false},
+);
+```
+
+Extra fields become top-level JSON keys. On a collision, the extra value replaces the full serialized value. The `stream` key is reserved for the SDK.
+
 </details>
 
 <a id="how-do-i-stream-chat-completions"></a>

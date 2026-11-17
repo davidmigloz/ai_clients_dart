@@ -97,6 +97,10 @@ class ChatCompletionsResource extends ResourceBase with StreamingResource {
   /// ## Parameters
   ///
   /// - [request] - The chat completion request parameters.
+  /// - [extraBody] - Additional top-level JSON fields for this call. If a key
+  ///   is present in both maps, the extra value replaces the serialized request
+  ///   value, including nested objects as a whole. The `stream` key is reserved
+  ///   and causes an [ArgumentError]. Use [createStream] for streaming.
   /// - [abortTrigger] - Optional future that cancels the request when completed.
   ///
   /// ## Returns
@@ -120,6 +124,7 @@ class ChatCompletionsResource extends ResourceBase with StreamingResource {
   /// ```
   Future<ChatCompletion> create(
     ChatCompletionCreateRequest request, {
+    Map<String, Object?>? extraBody,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
@@ -127,7 +132,7 @@ class ChatCompletionsResource extends ResourceBase with StreamingResource {
     final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
+      ..body = jsonEncode(_buildCreateBody(request, extraBody, stream: false));
     final response = await interceptorChain.execute(
       httpRequest,
       abortTrigger: abortTrigger,
@@ -174,6 +179,8 @@ class ChatCompletionsResource extends ResourceBase with StreamingResource {
   /// ## Parameters
   ///
   /// - [request] - The chat completion request parameters.
+  /// - [extraBody] - Additional top-level JSON fields. See [create] for the
+  ///   merge rules.
   /// - [abortTrigger] - Optional future that cancels the stream when completed.
   ///
   /// ## Returns
@@ -199,15 +206,12 @@ class ChatCompletionsResource extends ResourceBase with StreamingResource {
   /// ```
   Stream<ChatStreamEvent> createStream(
     ChatCompletionCreateRequest request, {
+    Map<String, Object?>? extraBody,
     Future<void>? abortTrigger,
   }) {
-    // Ensure stream is enabled in the request body
-    final requestBody = request.toJson();
-    requestBody['stream'] = true;
-
     return streamSseEvents(
       endpoint: _endpoint,
-      body: requestBody,
+      body: _buildCreateBody(request, extraBody, stream: true),
       abortTrigger: abortTrigger,
     ).map((json) {
       final sseEvent = json['_event'] as String?;
@@ -242,6 +246,8 @@ class ChatCompletionsResource extends ResourceBase with StreamingResource {
   /// ## Parameters
   ///
   /// - [request] - The chat completion request parameters.
+  /// - [extraBody] - Additional top-level JSON fields. See [create] for the
+  ///   merge rules.
   /// - [abortTrigger] - Optional future that cancels the stream when completed.
   ///
   /// ## Example
@@ -262,12 +268,31 @@ class ChatCompletionsResource extends ResourceBase with StreamingResource {
   /// ```
   Stream<ChatStreamAccumulator> createStreamWithAccumulator(
     ChatCompletionCreateRequest request, {
+    Map<String, Object?>? extraBody,
     Future<void>? abortTrigger,
   }) {
     final accumulator = ChatStreamAccumulator();
-    return createStream(request, abortTrigger: abortTrigger).map((event) {
+    return createStream(
+      request,
+      extraBody: extraBody,
+      abortTrigger: abortTrigger,
+    ).map((event) {
       accumulator.add(event);
       return accumulator;
     });
+  }
+
+  static Map<String, dynamic> _buildCreateBody(
+    ChatCompletionCreateRequest request,
+    Map<String, Object?>? extraBody, {
+    required bool stream,
+  }) {
+    if (extraBody?.containsKey('stream') ?? false) {
+      throw ArgumentError(
+        'The "stream" key is reserved for the SDK.',
+        'extraBody',
+      );
+    }
+    return {...request.toJson(), ...?extraBody, if (stream) 'stream': true};
   }
 }
