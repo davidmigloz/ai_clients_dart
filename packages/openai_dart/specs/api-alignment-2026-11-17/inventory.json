@@ -71,10 +71,10 @@
       "review_pinned_sources": 6
     },
     "inventory_records_per_ticket": {
-      "01-responses": 27,
+      "01-responses": 23,
       "02-images": 35,
       "03-moderation": 3,
-      "04-agent-sessions": 49,
+      "04-agent-sessions": 53,
       "05-agent-tools": 14,
       "06-live": 20,
       "07-admin": 10,
@@ -133,7 +133,8 @@
     },
     "11-closure": {
       "issue": 579,
-      "scope": "Canonical promotion, source reconciliation and documentation/verification"
+      "scope": "Canonical promotion, source reconciliation and documentation/verification",
+      "verification_receipt": "verification.md"
     }
   },
   "toolkit_observations": {
@@ -808,7 +809,8 @@
       ],
       "toolkit_changed_type": false,
       "related_tickets": [
-        "01-responses"
+        "01-responses",
+        "06-live"
       ],
       "disposition": {
         "kind": "review_contract",
@@ -2369,6 +2371,9 @@
       "primary_ticket": "01-responses",
       "source_sha256": "edf06af1fc01976368d1e2de76eea89a9e423d802ecfc07263cbcb07ecdb3f58",
       "toolkit_changed_type": true,
+      "related_tickets": [
+        "06-live"
+      ],
       "disposition": {
         "kind": "review_contract"
       }
@@ -3583,7 +3588,8 @@
       ],
       "toolkit_changed_type": false,
       "related_tickets": [
-        "01-responses"
+        "01-responses",
+        "06-live"
       ],
       "disposition": {
         "kind": "review_contract",
@@ -3668,6 +3674,9 @@
         }
       ],
       "toolkit_changed_type": true,
+      "related_tickets": [
+        "06-live"
+      ],
       "disposition": {
         "kind": "review_contract"
       }
@@ -3688,6 +3697,9 @@
         }
       ],
       "toolkit_changed_type": true,
+      "related_tickets": [
+        "06-live"
+      ],
       "disposition": {
         "kind": "review_contract"
       }
@@ -3732,6 +3744,9 @@
         }
       ],
       "toolkit_changed_type": true,
+      "related_tickets": [
+        "06-live"
+      ],
       "disposition": {
         "kind": "review_contract"
       }
@@ -4579,6 +4594,9 @@
         }
       ],
       "toolkit_changed_type": false,
+      "related_tickets": [
+        "06-live"
+      ],
       "disposition": {
         "kind": "review_contract"
       }
@@ -4600,7 +4618,7 @@
     {
       "schema": "PromptCacheOptionsParam-2",
       "change": "added",
-      "primary_ticket": "01-responses",
+      "primary_ticket": "04-agent-sessions",
       "source_sha256": "a6eb0500a6f031e773108c5aeee4301b80bb6b73def092043fca03e8c6f056db",
       "toolkit_changed_type": true,
       "disposition": {
@@ -4610,7 +4628,7 @@
     {
       "schema": "PromptCacheOptionsResource",
       "change": "added",
-      "primary_ticket": "01-responses",
+      "primary_ticket": "04-agent-sessions",
       "source_sha256": "08a122cc48843ff637ad7797b9f8bfaef70a3be08f765c96018786c978df2a27",
       "toolkit_changed_type": true,
       "disposition": {
@@ -4620,7 +4638,7 @@
     {
       "schema": "PromptCacheTtlParam",
       "change": "added",
-      "primary_ticket": "01-responses",
+      "primary_ticket": "04-agent-sessions",
       "source_sha256": "3f7c8e6c614894708a6e70f90cbafcc220333b5a26fb290fa05fd769aa30462f",
       "toolkit_changed_type": true,
       "disposition": {
@@ -4630,7 +4648,7 @@
     {
       "schema": "PromptCacheTtlResource",
       "change": "added",
-      "primary_ticket": "01-responses",
+      "primary_ticket": "04-agent-sessions",
       "source_sha256": "d1f425e8725a115841e28ef18e0ccaf9414890a8e63348e69b7dd1676513ab83",
       "toolkit_changed_type": true,
       "disposition": {
@@ -7731,6 +7749,9 @@
         }
       ],
       "toolkit_changed_type": false,
+      "related_tickets": [
+        "06-live"
+      ],
       "disposition": {
         "kind": "review_contract"
       }
@@ -8763,6 +8784,9 @@
       "primary_ticket": "02-images",
       "source_sha256": "b3e3482249be4cb2b982b5c194fa4bb9e0dcb29de14701144878b40452d215da",
       "toolkit_changed_type": true,
+      "related_tickets": [
+        "06-live"
+      ],
       "disposition": {
         "kind": "review_contract"
       }
@@ -8773,6 +8797,9 @@
       "primary_ticket": "02-images",
       "source_sha256": "d4221f75c1c9ebe1b240c2ec160d8c1e4ce00865210bb5988e17206243e62ecd",
       "toolkit_changed_type": true,
+      "related_tickets": [
+        "06-live"
+      ],
       "disposition": {
         "kind": "review_contract"
       }
@@ -8783,6 +8810,9 @@
       "primary_ticket": "02-images",
       "source_sha256": "2138307f710d5a34ae1fe084fc6856a13ee38f23b17651e6beb5597a3f2e45b3",
       "toolkit_changed_type": true,
+      "related_tickets": [
+        "06-live"
+      ],
       "disposition": {
         "kind": "review_contract"
       }

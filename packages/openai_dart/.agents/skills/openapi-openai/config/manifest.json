@@ -289,7 +289,8 @@
       "dart_class": "ModerationResultBody",
       "file": "lib/src/models/moderations/completion_moderation.dart",
       "schema": "ModerationResultBody",
-      "parent": "ModerationOutcome"
+      "parent": "ModerationOutcome",
+      "note": "The discriminator chooses the top-level result body. Its received scores support the existing safety result and the new image-classifier shape."
     },
     "ModerationErrorBody": {
       "spec": "main",
@@ -349,7 +350,7 @@
       "dart_class": "CreateResponseRequest",
       "file": "lib/src/models/responses/create_response_request.dart",
       "schema": "CreateResponse",
-      "note": "Real allOf parent mapping. Access programs have complete public GA/beta fixtures; returned outer omission/null tolerance follows Python and existing Dart conventions. Other pre-existing parent gaps stay visible."
+      "note": "Real allOf parent mapping. Access programs have complete public GA/beta fixtures; returned outer omission/null tolerance follows Python and existing Dart conventions. Other pre-existing parent gaps stay visible. Uses BackgroundOptions and ImageOptions. CreateModelResponseProperties and BetaCreateModelResponseProperties are OpenAPI composition shared with Chat. Each request Dart class owns its final field set and cache options."
     },
     "Response": {
       "spec": "main",
@@ -532,7 +533,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Actual allOf request mapping; existing narrow fields and full value/copy contracts retain public regression evidence. Inline audio has no standalone component: ChatAudioConfig now admits VoiceIdsOrCustomVoice through AudioVoice and all six canonical formats including AAC. Known/open/custom voice and direct/subresource create/stream fixtures verify affected inline contracts."
+      "note": "Actual allOf request mapping; existing narrow fields and full value/copy contracts retain public regression evidence. Inline audio has no standalone component: ChatAudioConfig now admits VoiceIdsOrCustomVoice through AudioVoice and all six canonical formats including AAC. Known/open/custom voice and direct/subresource create/stream fixtures verify affected inline contracts. The composed Chat body owns its narrower prompt-cache options."
     },
     "CreateChatCompletionResponse": {
       "spec": "main",
@@ -582,7 +583,8 @@
       "schema": "CreateImageRequest",
       "kind": "object",
       "dart_class": "ImageGenerationRequest",
-      "file": "lib/src/models/images/image_request.dart"
+      "file": "lib/src/models/images/image_request.dart",
+      "note": "The frame_count and frame_duration_ms components map to nullable int fields, with format and range validation in the request codec. The svg object uses SvgOptions."
     },
     "CreateSpeechRequest": {
       "spec": "main",
@@ -1774,7 +1776,8 @@
       "dart_class": "CompactResponseRequest",
       "file": "lib/src/models/responses/compact_response_request.dart",
       "schema": "CompactResponseMethodPublicBody",
-      "tags": []
+      "tags": [],
+      "note": "Optional image context settings share the same typed codec as Responses creation."
     },
     "ModerationMode": {
       "spec": "main",
@@ -1822,7 +1825,7 @@
       "dart_class": "PromptCacheOptions",
       "file": "lib/src/models/responses/config/prompt_cache_options.dart",
       "schema": "PromptCacheOptions",
-      "note": "Response echo: required mode/ttl and optional nullable comparison_response_id. Shares canonical/beta implementation; prewarm is request-only."
+      "note": "Response echo: required mode/ttl and optional nullable comparison_response_id. Shares canonical/beta implementation; prewarm is request-only. Responses creation and result cache TTLs use ResponsePromptCacheTtl (30m or 12h). Chat and compact retain the narrower PromptCacheTtl."
     },
     "PromptCacheOptionsParam": {
       "spec": "main",
@@ -2540,7 +2543,8 @@
       "kind": "object",
       "dart_class": "ResponsePromptCacheOptionsParam",
       "file": "lib/src/models/responses/config/prompt_cache_options.dart",
-      "schema": "ResponsePromptCacheOptionsParam"
+      "schema": "ResponsePromptCacheOptionsParam",
+      "note": "Responses creation and result cache TTLs use ResponsePromptCacheTtl (30m or 12h). Chat and compact retain the narrower PromptCacheTtl."
     },
     "PromptCacheDiagnostics": {
       "spec": "main",
@@ -2613,7 +2617,7 @@
       "dart_class": "ResponsePromptCacheOptionsParam",
       "file": "lib/src/models/responses/config/prompt_cache_options.dart",
       "schema": "BetaResponsePromptCacheOptionsParam",
-      "note": "Identical canonical/beta contract; shares the canonical Dart implementation. "
+      "note": "Identical canonical/beta contract; shares the canonical Dart implementation.  Responses creation and result cache TTLs use ResponsePromptCacheTtl (30m or 12h). Chat and compact retain the narrower PromptCacheTtl."
     },
     "BetaPromptCacheOptionsParam": {
       "spec": "main",
@@ -2629,7 +2633,7 @@
       "dart_class": "PromptCacheOptions",
       "file": "lib/src/models/responses/config/prompt_cache_options.dart",
       "schema": "BetaPromptCacheOptions",
-      "note": "Identical canonical/beta contract; shares the canonical Dart implementation. Response echo: required mode/ttl and optional nullable comparison_response_id. Shares canonical/beta implementation; prewarm is request-only."
+      "note": "Identical canonical/beta contract; shares the canonical Dart implementation. Response echo: required mode/ttl and optional nullable comparison_response_id. Shares canonical/beta implementation; prewarm is request-only. Responses creation and result cache TTLs use ResponsePromptCacheTtl (30m or 12h). Chat and compact retain the narrower PromptCacheTtl."
     },
     "BetaPromptCacheModeEnum": {
       "spec": "main",
@@ -2788,7 +2792,7 @@
       "kind": "object",
       "dart_class": "ImageEditRequest",
       "file": "lib/src/models/images/image_request.dart",
-      "note": "Multipart bytes are serialized by ImagesResource; owned immutable image/mask/markup buffers and PNG markup content type. No fabricated JSON byte field."
+      "note": "Multipart bytes are serialized by ImagesResource; owned immutable image/mask/markup buffers and PNG markup content type. No fabricated JSON byte field. The frame_count and frame_duration_ms components map to nullable int fields, with format and range validation in the request codec. The svg object uses SvgOptions."
     },
     "EditImageBodyJsonParam": {
       "spec": "main",
@@ -2796,7 +2800,7 @@
       "kind": "object",
       "dart_class": "ImageEditJsonRequest",
       "file": "lib/src/models/images/image_edit_json_request.dart",
-      "note": "JSON references remain distinct from multipart. Optional nullable model and safety ID preserve service defaults; mask/markup are mutually exclusive."
+      "note": "JSON references remain distinct from multipart. Optional nullable model and safety ID preserve service defaults; mask/markup are mutually exclusive. The frame_count and frame_duration_ms components map to nullable int fields, with format and range validation in the request codec. The svg object uses SvgOptions."
     },
     "FunctionTool": {
       "spec": "main",
@@ -3860,7 +3864,7 @@
       "dart_class": "CreateResponseRequest",
       "file": "lib/src/models/responses/create_response_request.dart",
       "schema": "BetaCreateResponse",
-      "note": "Real allOf parent mapping. Access programs have complete public GA/beta fixtures; returned outer omission/null tolerance follows Python and existing Dart conventions. Other pre-existing parent gaps stay visible."
+      "note": "Real allOf parent mapping. Access programs have complete public GA/beta fixtures; returned outer omission/null tolerance follows Python and existing Dart conventions. Other pre-existing parent gaps stay visible. Uses BackgroundOptions and ImageOptions. CreateModelResponseProperties and BetaCreateModelResponseProperties are OpenAPI composition shared with Chat. Each request Dart class owns its final field set and cache options."
     },
     "BetaResponse": {
       "spec": "main",
@@ -5013,7 +5017,7 @@
       "dart_class": "WebhookEvent",
       "file": "lib/src/models/webhooks/webhook_event.dart",
       "schema": null,
-      "note": "Dart sealed aggregate for26 top-level OpenAPI webhook components; no invented aggregate component. Unknown discriminators remain finite raw data."
+      "note": "Dart sealed aggregate for pinned webhook components and typed transport-connected notifications. Unknown discriminators retain immutable JSON."
     },
     "UnknownWebhookEvent": {
       "schema": null,
@@ -5063,7 +5067,7 @@
       "file": "lib/src/models/webhooks/webhook_endpoint.dart",
       "dart_class": "WebhookEventType",
       "spec": "main",
-      "note": "Writable project subscription/test choices remain the exact closed canonical 23 choices; returned/discovery strings are open."
+      "note": "Closed writable webhook choices include live.transport.connected from the official Live documentation. The November pin defines its webhook separately from this enum. Received discovery strings remain open."
     },
     "PublicCreateEndpointBody": {
       "schema": "PublicCreateEndpointBody",
@@ -5400,7 +5404,7 @@
       "kind": "object",
       "dart_class": "LiveCallAcceptSession",
       "file": "lib/src/models/live/live_config.dart",
-      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs. The safety_identifier value uses the nullable String safetyIdentifier field and presence tracking."
     },
     "LiveCallReferRequest": {
       "spec": "main",
@@ -5625,7 +5629,7 @@
       "kind": "object",
       "dart_class": "LiveMediaSessionCreateParams",
       "file": "lib/src/models/live/live_config.dart",
-      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs. The safety_identifier value uses the nullable String safetyIdentifier field and presence tracking."
     },
     "LiveMediaSessionForkParams": {
       "spec": "main",
@@ -5771,7 +5775,7 @@
       "kind": "object",
       "dart_class": "LiveSessionCreateParams",
       "file": "lib/src/models/live/live_config.dart",
-      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs. The safety_identifier value uses the nullable String safetyIdentifier field and presence tracking."
     },
     "LiveSessionCreateRequest": {
       "spec": "main",
@@ -5795,7 +5799,7 @@
       "kind": "object",
       "dart_class": "LiveSessionResourceParam",
       "file": "lib/src/models/live/live_config.dart",
-      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs."
+      "note": "Native frozen Live Decisions contract; canonical fields and direction validated with public codecs. The safety_identifier value uses the nullable String safetyIdentifier field and presence tracking."
     },
     "LiveSessionUpdateParams": {
       "spec": "main",
@@ -5911,9 +5915,9 @@
       "spec": "main",
       "kind": "sealed_variant",
       "dart_class": "LiveMCPTool",
-      "file": "lib/src/models/live/live_tools.dart",
+      "file": "lib/src/models/live/live_mcp_tools.dart",
       "schema": "LiveMCPToolInputParam",
-      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures.",
+      "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures. The MCP configuration uses LiveMCPTool with typed callers, tool filters and approval policies.",
       "parent": "LiveTool"
     },
     "LiveCustomToolInputParam": {
@@ -10684,7 +10688,7 @@
       "kind": "object",
       "dart_class": "CreateAgentSessionRequest",
       "file": "lib/src/models/agents/agent_session_core.dart",
-      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths. Budget, stream options and cache options are verified through the create request."
     },
     "CreateSessionEventsParams": {
       "spec": "main",
@@ -11355,7 +11359,7 @@
       "dart_class": "AgentSessionEvent",
       "file": "lib/src/models/agents/agent_session_events.dart",
       "schema": "SessionEvent",
-      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape."
+      "note": "Actual frozen durable-session contract. Separate session request/received tools and environments; finite deeply owned JSON, required nullable keys, tri-state clear/copy and private diagnostics. Canonical wire fixtures and public requests validate the source shape. Shared obfuscation is carried by event decoding and serialization. The budget event is included in the public dispatcher."
     },
     "SessionEventAgentOutputCommandExecutionOutputDelta": {
       "spec": "main",
@@ -11755,23 +11759,23 @@
       "kind": "object",
       "dart_class": "AgentSession",
       "file": "lib/src/models/agents/agent_session_core.dart",
-      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths. Returned budget and cache options use distinct received objects."
     },
     "SessionStatusResource": {
       "spec": "main",
-      "kind": "object",
+      "kind": "enum",
       "dart_class": "AgentSessionStatusResource",
       "file": "lib/src/models/agents/agent_session_enums.dart",
       "schema": "SessionStatusResource",
-      "note": "Actual string-valued session wrapper class, not a Dart enum or object wire value. Preserves future strings; request validators enforce known canonical members. Source fixture and platform tests cover values; object inspection cannot extract scalar fields."
+      "note": "String-valued Managed Agent wrapper with named known values and preservation of new received strings."
     },
     "SessionTurnErrorCodeResource": {
       "spec": "main",
-      "kind": "object",
+      "kind": "enum",
       "dart_class": "AgentSessionTurnErrorCodeResource",
       "file": "lib/src/models/agents/agent_session_enums.dart",
       "schema": "SessionTurnErrorCodeResource",
-      "note": "Actual string-valued session wrapper class, not a Dart enum or object wire value. Preserves future strings; request validators enforce known canonical members. Source fixture and platform tests cover values; object inspection cannot extract scalar fields."
+      "note": "String-valued Managed Agent wrapper with named known values and preservation of new received strings."
     },
     "SessionTurnErrorResource": {
       "spec": "main",
@@ -11867,7 +11871,7 @@
       "kind": "object",
       "dart_class": "UpdateAgentSessionRequest",
       "file": "lib/src/models/agents/agent_session_core.dart",
-      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths."
+      "note": "Frozen Agent settings contract; explicit omitted/null/default semantics, immutable value/copy behavior and private diagnostics are validated through public paths. Budget and cache options use the same typed write values as create."
     },
     "UpdateSessionAgentParam": {
       "spec": "main",
@@ -14144,7 +14148,7 @@
       "dart_class": "ImageGenerationTool",
       "file": "lib/src/models/responses/tools/response_tool.dart",
       "parent": "ResponseTool",
-      "note": "GA and beta share the existing image-generation tool configuration; model-scoped input fidelity documentation is current."
+      "note": "GA and beta share ImageGenerationTool with typed image complexity and SVG options, and nullable integer GIF frame count and duration."
     },
     "ImageGenTool": {
       "spec": "main",
@@ -14153,7 +14157,7 @@
       "dart_class": "ImageGenerationTool",
       "file": "lib/src/models/responses/tools/response_tool.dart",
       "parent": "ResponseTool",
-      "note": "GA and beta share the existing image-generation tool configuration; model-scoped input fidelity documentation is current."
+      "note": "GA and beta share ImageGenerationTool with typed image complexity and SVG options, and nullable integer GIF frame count and duration."
     },
     "BetaImageGenToolCall": {
       "spec": "main",
@@ -14162,7 +14166,7 @@
       "dart_class": "ImageGenerationCallOutputItem",
       "file": "lib/src/models/responses/items/output_item.dart",
       "parent": "OutputItem",
-      "note": "Canonical required status and nullable result; complete GA/beta optional metadata and error details. Shared exact-string status preserves future values."
+      "note": "Canonical required status and nullable result; complete GA/beta optional metadata and error details. Shared exact-string status preserves future values. The svg_usage property uses SvgUsage and remains separate from raster usage."
     },
     "ImageGenToolCall": {
       "spec": "main",
@@ -14171,7 +14175,7 @@
       "dart_class": "ImageGenerationCallOutputItem",
       "file": "lib/src/models/responses/items/output_item.dart",
       "parent": "OutputItem",
-      "note": "Canonical required status and nullable result; complete GA/beta optional metadata and error details. Shared exact-string status preserves future values."
+      "note": "Canonical required status and nullable result; complete GA/beta optional metadata and error details. Shared exact-string status preserves future values. The svg_usage property uses SvgUsage and remains separate from raster usage."
     },
     "BetaImageGenToolCallError": {
       "spec": "main",
@@ -14239,7 +14243,7 @@
       "kind": "object",
       "dart_class": "ImageResponse",
       "file": "lib/src/models/images/image_response.dart",
-      "note": "Nullable safety ID plus canonical optional data. hasData retains missing versus present empty list without changing the data getter type."
+      "note": "Nullable safety ID plus canonical optional data. hasData retains missing versus present empty list without changing the data getter type. The svg_usage property uses SvgUsage and remains separate from raster usage."
     },
     "AwsExternalKeyParams": {
       "spec": "main",
@@ -14343,7 +14347,8 @@
       "schema": "ExternalKeyResource",
       "kind": "object",
       "dart_class": "ExternalKey",
-      "file": "lib/src/models/admin/external_keys.dart"
+      "file": "lib/src/models/admin/external_keys.dart",
+      "note": "Received OCI fields are optional, with the existing external key decoder retaining extra metadata."
     },
     "ExternalStorageDeletedResource": {
       "spec": "main",
@@ -14479,7 +14484,8 @@
         "mapping": {
           "AwsExternalKeyParams": "aws",
           "AzureExternalKeyParams": "azure",
-          "GcpExternalKeyParams": "gcp"
+          "GcpExternalKeyParams": "gcp",
+          "OciExternalKeyParams": "oci"
         }
       }
     },
@@ -14824,6 +14830,699 @@
       "file": "lib/src/helpers/agents/agent_session_run.dart",
       "schema": null,
       "note": "Stateful Dart-only lazy follow-up/cursor, not a wire DTO or canonical operation. Public events/nextEvent/start/abort/close and explicit count/byte limits; no JSON serialization, model facade or backend action."
+    },
+    "BackgroundCompletionWindowEnum": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "BackgroundCompletionWindow",
+      "file": "lib/src/models/responses/config/background_options.dart",
+      "schema": "BackgroundCompletionWindowEnum",
+      "note": "Shared GA and beta request enum. Unsupported wire values are rejected."
+    },
+    "BetaBackgroundCompletionWindowEnum": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "BackgroundCompletionWindow",
+      "file": "lib/src/models/responses/config/background_options.dart",
+      "schema": "BetaBackgroundCompletionWindowEnum",
+      "note": "Shared GA and beta request enum. Unsupported wire values are rejected."
+    },
+    "BackgroundOptionsParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "BackgroundOptions",
+      "file": "lib/src/models/responses/config/background_options.dart",
+      "schema": "BackgroundOptionsParam",
+      "note": "Shared GA and beta request options. CreateResponseRequest validates the background-mode requirement."
+    },
+    "BetaBackgroundOptionsParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "BackgroundOptions",
+      "file": "lib/src/models/responses/config/background_options.dart",
+      "schema": "BetaBackgroundOptionsParam",
+      "note": "Shared GA and beta request options. CreateResponseRequest validates the background-mode requirement."
+    },
+    "CacheWriteTokensDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CacheWriteTokensDetails",
+      "file": "lib/src/models/responses/response_usage.dart",
+      "schema": "CacheWriteTokensDetails",
+      "note": "GA and beta share the same cache-write token counters."
+    },
+    "BetaCacheWriteTokensDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CacheWriteTokensDetails",
+      "file": "lib/src/models/responses/response_usage.dart",
+      "schema": "BetaCacheWriteTokensDetails",
+      "note": "GA and beta share the same cache-write token counters."
+    },
+    "ResponseUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseUsage",
+      "file": "lib/src/models/responses/response_usage.dart",
+      "schema": "ResponseUsage",
+      "note": "Shared GA and beta usage, with nested InputTokensDetails.cacheWriteTokensDetails."
+    },
+    "BetaResponseUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseUsage",
+      "file": "lib/src/models/responses/response_usage.dart",
+      "schema": "BetaResponseUsage",
+      "note": "Shared GA and beta usage, with nested InputTokensDetails.cacheWriteTokensDetails."
+    },
+    "InputRemovalReason": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "InputRemovalReason",
+      "file": "lib/src/models/responses/reasoning_input_transformation.dart",
+      "schema": "InputRemovalReason",
+      "note": "Shared GA and beta result value preserves unknown server strings."
+    },
+    "BetaInputRemovalReason": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "InputRemovalReason",
+      "file": "lib/src/models/responses/reasoning_input_transformation.dart",
+      "schema": "BetaInputRemovalReason",
+      "note": "Shared GA and beta result value preserves unknown server strings."
+    },
+    "ReasoningInputTransformation": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ReasoningInputTransformation",
+      "file": "lib/src/models/responses/reasoning_input_transformation.dart",
+      "schema": "ReasoningInputTransformation",
+      "note": "Shared GA and beta response item."
+    },
+    "BetaReasoningInputTransformation": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ReasoningInputTransformation",
+      "file": "lib/src/models/responses/reasoning_input_transformation.dart",
+      "schema": "BetaReasoningInputTransformation",
+      "note": "Shared GA and beta response item."
+    },
+    "CompactResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseCompaction",
+      "file": "lib/src/models/responses/response_compaction.dart",
+      "schema": "CompactResource",
+      "note": "Shared GA and beta compaction envelope with optional resolved image context settings."
+    },
+    "BetaCompactResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseCompaction",
+      "file": "lib/src/models/responses/response_compaction.dart",
+      "schema": "BetaCompactResource",
+      "note": "Shared GA and beta compaction envelope with optional resolved image context settings."
+    },
+    "BetaCompactResponseMethodPublicBody": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CompactResponseRequest",
+      "file": "lib/src/models/responses/compact_response_request.dart",
+      "schema": "BetaCompactResponseMethodPublicBody",
+      "note": "Shared GA and beta compaction request with optional image context settings."
+    },
+    "ImageContextCompression": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ImageContextCompression",
+      "file": "lib/src/models/responses/config/image_options.dart",
+      "schema": "ImageContextCompression",
+      "note": "Shared strict GA and beta request policy."
+    },
+    "BetaImageContextCompression": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ImageContextCompression",
+      "file": "lib/src/models/responses/config/image_options.dart",
+      "schema": "BetaImageContextCompression",
+      "note": "Shared strict GA and beta request policy."
+    },
+    "ImageOptionsParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ImageOptions",
+      "file": "lib/src/models/responses/config/image_options.dart",
+      "schema": "ImageOptionsParam",
+      "note": "Shared GA and beta request configuration."
+    },
+    "BetaImageOptionsParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ImageOptions",
+      "file": "lib/src/models/responses/config/image_options.dart",
+      "schema": "BetaImageOptionsParam",
+      "note": "Shared GA and beta request configuration."
+    },
+    "ResolvedImageContextCompressionEnum": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ResolvedImageContextCompression",
+      "file": "lib/src/models/responses/config/image_options.dart",
+      "schema": "ResolvedImageContextCompressionEnum",
+      "note": "Shared GA and beta policy resolved by the service."
+    },
+    "BetaResolvedImageContextCompressionEnum": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ResolvedImageContextCompression",
+      "file": "lib/src/models/responses/config/image_options.dart",
+      "schema": "BetaResolvedImageContextCompressionEnum",
+      "note": "Shared GA and beta policy resolved by the service."
+    },
+    "ResolvedImageOptions": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResolvedImageOptions",
+      "file": "lib/src/models/responses/config/image_options.dart",
+      "schema": "ResolvedImageOptions",
+      "note": "Shared GA and beta resolved image context settings."
+    },
+    "BetaResolvedImageOptions": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResolvedImageOptions",
+      "file": "lib/src/models/responses/config/image_options.dart",
+      "schema": "BetaResolvedImageOptions",
+      "note": "Shared GA and beta resolved image context settings."
+    },
+    "ImagesApiOutputFormat": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ImageOutputFormat",
+      "file": "lib/src/models/images/image_common.dart",
+      "schema": "ImagesApiOutputFormat",
+      "note": "Shared Images and Responses values. Each request codec determines which formats it accepts for its transport."
+    },
+    "ImageOutputFormat": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ImageOutputFormat",
+      "file": "lib/src/models/images/image_common.dart",
+      "schema": "ImageOutputFormat",
+      "note": "Shared Images and Responses values. Each request codec determines which formats it accepts for its transport."
+    },
+    "BetaImageOutputFormat": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ImageOutputFormat",
+      "file": "lib/src/models/images/image_common.dart",
+      "schema": "BetaImageOutputFormat",
+      "note": "Shared Images and Responses values. Each request codec determines which formats it accepts for its transport."
+    },
+    "ReasoningEffortEnum": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ReasoningEffort",
+      "file": "lib/src/models/responses/config/reasoning_effort.dart",
+      "schema": "ReasoningEffortEnum",
+      "note": "Shared GA and beta reasoning-effort value used by SVG authoring."
+    },
+    "BetaReasoningEffortEnum": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ReasoningEffort",
+      "file": "lib/src/models/responses/config/reasoning_effort.dart",
+      "schema": "BetaReasoningEffortEnum",
+      "note": "Shared GA and beta reasoning-effort value used by SVG authoring."
+    },
+    "SvgParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SvgOptions",
+      "file": "lib/src/models/images/svg_options.dart",
+      "schema": "SvgParam",
+      "note": "SVG author options for GA and beta Responses image tools."
+    },
+    "BetaSvgParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SvgOptions",
+      "file": "lib/src/models/images/svg_options.dart",
+      "schema": "BetaSvgParam",
+      "note": "SVG author options for GA and beta Responses image tools."
+    },
+    "svg": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SvgOptions",
+      "file": "lib/src/models/images/svg_options.dart",
+      "schema": "svg",
+      "note": "Non-null object value of Images request svg. Images request codecs own outer nullability and model selection validation."
+    },
+    "SvgReasoningParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SvgReasoning",
+      "file": "lib/src/models/images/svg_options.dart",
+      "schema": "SvgReasoningParam",
+      "note": "Shared SVG-specific reasoning settings."
+    },
+    "BetaSvgReasoningParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SvgReasoning",
+      "file": "lib/src/models/images/svg_options.dart",
+      "schema": "BetaSvgReasoningParam",
+      "note": "Shared SVG-specific reasoning settings."
+    },
+    "SvgUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SvgUsage",
+      "file": "lib/src/models/images/svg_options.dart",
+      "schema": "SvgUsage",
+      "note": "Shared SVG author token counts, separate from raster input/output usage."
+    },
+    "BetaSvgUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SvgUsage",
+      "file": "lib/src/models/images/svg_options.dart",
+      "schema": "BetaSvgUsage",
+      "note": "Shared SVG author token counts, separate from raster input/output usage."
+    },
+    "complexity": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ImageComplexity",
+      "file": "lib/src/models/images/image_common.dart",
+      "schema": "complexity",
+      "note": "Non-null values of the nullable Images request property. Containing request codecs own null handling."
+    },
+    "PromptCacheOptionsParam-2": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionPromptCacheConfig",
+      "file": "lib/src/models/agents/agent_session_options.dart",
+      "schema": "PromptCacheOptionsParam-2",
+      "note": "Managed Agent create and update cache options. Request validation accepts the Agent session TTL values."
+    },
+    "PromptCacheOptionsResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionPromptCacheOptions",
+      "file": "lib/src/models/agents/agent_session_options.dart",
+      "schema": "PromptCacheOptionsResource",
+      "note": "Managed Agent session and turn cache options returned by the server."
+    },
+    "PromptCacheTtlParam": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AgentSessionPromptCacheTtl",
+      "file": "lib/src/models/agents/agent_session_options.dart",
+      "schema": "PromptCacheTtlParam",
+      "note": "The same Agent session value type accepts known write values and preserves future received values."
+    },
+    "PromptCacheTtlResource": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AgentSessionPromptCacheTtl",
+      "file": "lib/src/models/agents/agent_session_options.dart",
+      "schema": "PromptCacheTtlResource",
+      "note": "The same Agent session value type accepts known write values and preserves future received values."
+    },
+    "SessionBudgetControlParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionSpendControlConfig",
+      "file": "lib/src/models/agents/agent_session_options.dart",
+      "schema": "SessionBudgetControlParams",
+      "note": "Managed Agent request spend limit. A present null limit clears the configured cap."
+    },
+    "SessionBudgetControlResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionSpendControl",
+      "file": "lib/src/models/agents/agent_session_options.dart",
+      "schema": "SessionBudgetControlResource",
+      "note": "Managed Agent spend limit and consumption returned by the service."
+    },
+    "SessionEventAgentSessionBudgetReached": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionBudgetReachedEvent",
+      "file": "lib/src/models/agents/agent_session_events.dart",
+      "schema": "SessionEventAgentSessionBudgetReached",
+      "parent": "SessionEvent",
+      "note": "Typed budget notification with the session snapshot and shared event obfuscation."
+    },
+    "SessionStreamOptionsParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentSessionStreamOptions",
+      "file": "lib/src/models/agents/agent_session_options.dart",
+      "schema": "SessionStreamOptionsParam",
+      "note": "Managed Agent stream configuration. Event-list query handling is also checked by resource fixtures."
+    },
+    "McpApprovalRequestResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionMcpApprovalRequest",
+      "file": "lib/src/models/agents/agent_session_mcp_approvals.dart",
+      "schema": "McpApprovalRequestResource",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "McpApprovalRequestResourceMcpToolCall": "mcp_tool_call"
+        }
+      },
+      "note": "The single pinned discriminated branch is represented by the same concrete Dart decoder."
+    },
+    "McpApprovalRequestResourceMcpToolCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionMcpApprovalRequest",
+      "file": "lib/src/models/agents/agent_session_mcp_approvals.dart",
+      "schema": "McpApprovalRequestResourceMcpToolCall",
+      "parent": "McpApprovalRequestResource",
+      "note": "Concrete MCP tool call branch of the pinned discriminated union."
+    },
+    "McpApprovalResponseParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSessionMcpApprovalResponse",
+      "file": "lib/src/models/agents/agent_session_mcp_approvals.dart",
+      "schema": "McpApprovalResponseParam",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "McpApprovalResponseParamMcpToolCall": "mcp_tool_call"
+        }
+      },
+      "note": "The single pinned discriminated branch is represented by the same concrete Dart decoder."
+    },
+    "McpApprovalResponseParamMcpToolCall": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionMcpApprovalResponse",
+      "file": "lib/src/models/agents/agent_session_mcp_approvals.dart",
+      "schema": "McpApprovalResponseParamMcpToolCall",
+      "parent": "McpApprovalResponseParam",
+      "note": "Concrete MCP tool call branch of the pinned discriminated union."
+    },
+    "McpApprovalDecisionParam": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AgentSessionMcpApprovalDecision",
+      "file": "lib/src/models/agents/agent_session_mcp_approvals.dart",
+      "schema": "McpApprovalDecisionParam",
+      "note": "Closed writable MCP approval decision."
+    },
+    "SessionInputParamAgentSessionInputMcpApprovalRequestResult": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionMcpApprovalResultInput",
+      "file": "lib/src/models/agents/agent_session_mcp_approvals.dart",
+      "schema": "SessionInputParamAgentSessionInputMcpApprovalRequestResult",
+      "parent": "SessionInputParam",
+      "note": "Sends a decision for an outstanding Managed Agent request."
+    },
+    "SessionRequiredActionResourceMcpApprovalRequest": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentSessionMcpApprovalRequiredAction",
+      "file": "lib/src/models/agents/agent_session_mcp_approvals.dart",
+      "schema": "SessionRequiredActionResourceMcpApprovalRequest",
+      "parent": "SessionRequiredActionResource",
+      "note": "Returns the outstanding Managed Agent MCP approval request."
+    },
+    "LiveCallableToolAllowedCaller": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "LiveCallableToolAllowedCaller",
+      "file": "lib/src/models/live/live_mcp_tools.dart",
+      "schema": "LiveCallableToolAllowedCaller",
+      "note": "Strict Live delegation request caller. Unknown request values are rejected."
+    },
+    "LiveMCPRequireApprovalApiEnum": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "LiveMCPApproval",
+      "file": "lib/src/models/live/live_mcp_tools.dart",
+      "schema": "LiveMCPRequireApprovalApiEnum",
+      "note": "The LiveMCPApprovalMode branch carries scalar always/never; LiveMCPApproval also dispatches object filters."
+    },
+    "LiveMCPRequireApprovalFilterParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveMCPApprovalFilter",
+      "file": "lib/src/models/live/live_mcp_tools.dart",
+      "schema": "LiveMCPRequireApprovalFilterParam",
+      "note": "Object branch of the Live MCP approval policy."
+    },
+    "LiveMCPToolFilterParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LiveMCPToolFilter",
+      "file": "lib/src/models/live/live_mcp_tools.dart",
+      "schema": "LiveMCPToolFilterParam",
+      "note": "Object branch selecting allowed MCP tools and filtering approval."
+    },
+    "WebhookLiveTransportConnected": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "LiveTransportConnectedWebhookEvent",
+      "file": "lib/src/models/webhooks/webhook_event.dart",
+      "schema": "WebhookLiveTransportConnected",
+      "parent": "WebhookEvent",
+      "note": "Typed direct and Instant Connect WebRTC notification."
+    },
+    "OciExternalKeyParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OciExternalKeyParams",
+      "file": "lib/src/models/admin/external_keys.dart",
+      "schema": "OciExternalKeyParams",
+      "parent": "V1OrganizationExternalKeysPostRequest",
+      "note": "Admin OCI request uses distinct region, vault/key identifiers and optional key version."
+    },
+    "ProjectDefaultServiceTier": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ProjectDefaultServiceTier",
+      "file": "lib/src/models/admin/project_service_tiers.dart",
+      "schema": "ProjectDefaultServiceTier",
+      "note": "Default tier value with future read strings kept intact."
+    },
+    "ProjectOptionalServiceTier": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ProjectOptionalServiceTier",
+      "file": "lib/src/models/admin/project_service_tiers.dart",
+      "schema": "ProjectOptionalServiceTier",
+      "note": "Optional tier value with future read strings kept intact."
+    },
+    "ProjectServiceTierSettingsResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ProjectServiceTierSettings",
+      "file": "lib/src/models/admin/project_service_tiers.dart",
+      "schema": "ProjectServiceTierSettingsResource",
+      "note": "The default wire key is represented by defaultTier. enabledTiers uses ProjectEnabledServiceTiers for all or a list."
+    },
+    "UpdateProjectServiceTierSettingsBody": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateProjectServiceTierSettingsRequest",
+      "file": "lib/src/models/admin/project_service_tiers.dart",
+      "schema": "UpdateProjectServiceTierSettingsBody",
+      "note": "Partial updates require at least one setting. The default wire key is represented by defaultTier."
+    },
+    "PlatformProvider": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkloadIdentityProvider",
+      "file": "lib/src/models/admin/workload_identity_provider.dart",
+      "schema": "PlatformProvider",
+      "note": "Admin OIDC provider response."
+    },
+    "CreatePlatformWorkloadIdentityProviderBody": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateWorkloadIdentityProviderRequest",
+      "file": "lib/src/models/admin/workload_identity_provider.dart",
+      "schema": "CreatePlatformWorkloadIdentityProviderBody",
+      "note": "Admin provider create requires name, type, issuer, audience and verification. Request codecs validate configuration."
+    },
+    "UpdatePlatformWorkloadIdentityProviderBody": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateWorkloadIdentityProviderRequest",
+      "file": "lib/src/models/admin/workload_identity_provider.dart",
+      "schema": "UpdatePlatformWorkloadIdentityProviderBody",
+      "note": "Admin provider partial update validates writable fields."
+    },
+    "PlatformFederationRule": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkloadIdentityFederationRule",
+      "file": "lib/src/models/admin/workload_identity_federation_rule.dart",
+      "schema": "PlatformFederationRule",
+      "note": "Admin federation rule response."
+    },
+    "CreatePlatformWorkloadIdentityFederationRuleBody": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateWorkloadIdentityFederationRuleRequest",
+      "file": "lib/src/models/admin/workload_identity_federation_rule.dart",
+      "schema": "CreatePlatformWorkloadIdentityFederationRuleBody",
+      "note": "Admin federation rule create checks project/service account, matchers and permissions."
+    },
+    "UpdatePlatformWorkloadIdentityFederationRuleBody": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateWorkloadIdentityFederationRuleRequest",
+      "file": "lib/src/models/admin/workload_identity_federation_rule.dart",
+      "schema": "UpdatePlatformWorkloadIdentityFederationRuleBody",
+      "note": "Admin federation rule partial update validates writable fields."
+    },
+    "PlatformProviderListResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkloadIdentityCursorPage",
+      "file": "lib/src/models/admin/workload_identity.dart",
+      "schema": "PlatformProviderListResource",
+      "note": "Shared cursor envelope instantiated with WorkloadIdentityProvider."
+    },
+    "PlatformFederationRuleListResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkloadIdentityCursorPage",
+      "file": "lib/src/models/admin/workload_identity.dart",
+      "schema": "PlatformFederationRuleListResource",
+      "note": "Shared cursor envelope instantiated with WorkloadIdentityFederationRule."
+    },
+    "PlatformProviderDeletedResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkloadIdentityDeletion",
+      "file": "lib/src/models/admin/workload_identity.dart",
+      "schema": "PlatformProviderDeletedResource",
+      "note": "Shared delete response decoder receives the operation-specific expected object tag."
+    },
+    "PlatformFederationRuleDeletedResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkloadIdentityDeletion",
+      "file": "lib/src/models/admin/workload_identity.dart",
+      "schema": "PlatformFederationRuleDeletedResource",
+      "note": "Shared delete response decoder receives the operation-specific expected object tag."
+    },
+    "DefaultPermissions": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkloadIdentityDefaultPermissions",
+      "file": "lib/src/models/admin/workload_identity.dart",
+      "schema": "DefaultPermissions",
+      "note": "Default permissions branch of WorkloadIdentityPermissions, which dispatches the type tag."
+    },
+    "DefaultPermissionsParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkloadIdentityDefaultPermissions",
+      "file": "lib/src/models/admin/workload_identity.dart",
+      "schema": "DefaultPermissionsParam",
+      "note": "Default permissions branch of WorkloadIdentityPermissions, which dispatches the type tag."
+    },
+    "RestrictedPermissions": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkloadIdentityRestrictedPermissions",
+      "file": "lib/src/models/admin/workload_identity.dart",
+      "schema": "RestrictedPermissions",
+      "note": "Explicit scope branch of WorkloadIdentityPermissions. Write requests validate the scope list."
+    },
+    "RestrictedPermissionsParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkloadIdentityRestrictedPermissions",
+      "file": "lib/src/models/admin/workload_identity.dart",
+      "schema": "RestrictedPermissionsParam",
+      "note": "Explicit scope branch of WorkloadIdentityPermissions. Write requests validate the scope list."
+    },
+    "DiscoveryVerification": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkloadIdentityDiscoveryVerification",
+      "file": "lib/src/models/admin/workload_identity.dart",
+      "schema": "DiscoveryVerification",
+      "note": "OIDC discovery branch of WorkloadIdentityVerification, which dispatches the type tag."
+    },
+    "DiscoveryVerificationParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkloadIdentityDiscoveryVerification",
+      "file": "lib/src/models/admin/workload_identity.dart",
+      "schema": "DiscoveryVerificationParam",
+      "note": "OIDC discovery branch of WorkloadIdentityVerification, which dispatches the type tag."
+    },
+    "UploadedJwksVerification": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkloadIdentityUploadedJwksVerification",
+      "file": "lib/src/models/admin/workload_identity.dart",
+      "schema": "UploadedJwksVerification",
+      "note": "Uploaded JWKS branch of WorkloadIdentityVerification, which dispatches the type tag."
+    },
+    "UploadedJwksVerificationParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkloadIdentityUploadedJwksVerification",
+      "file": "lib/src/models/admin/workload_identity.dart",
+      "schema": "UploadedJwksVerificationParam",
+      "note": "Uploaded JWKS branch of WorkloadIdentityVerification, which dispatches the type tag."
+    },
+    "Transformation": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkloadIdentityTransformation",
+      "file": "lib/src/models/admin/workload_identity.dart",
+      "schema": "Transformation",
+      "note": "Shared transformation value. Write requests validate the attribute and expression bounds."
+    },
+    "TransformationParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkloadIdentityTransformation",
+      "file": "lib/src/models/admin/workload_identity.dart",
+      "schema": "TransformationParam",
+      "note": "Shared transformation value. Write requests validate the attribute and expression bounds."
+    },
+    "Model": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Model",
+      "file": "lib/src/models/models/model.dart",
+      "schema": "Model",
+      "note": "Date-only shutdown metadata. Existing decoder tolerates optional created and owner metadata from compatible providers."
+    },
+    "FunctionCallOutputItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FunctionCallOutputItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "FunctionCallOutputItemParam",
+      "parent": "Item",
+      "note": "GA and beta Responses use the same function result, including the optional namespace. Live owns its separate input adapter."
+    },
+    "BetaFunctionCallOutputItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FunctionCallOutputItem",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "BetaFunctionCallOutputItemParam",
+      "parent": "Item",
+      "note": "GA and beta Responses use the same function result, including the optional namespace. Live owns its separate input adapter."
     }
   }
 }

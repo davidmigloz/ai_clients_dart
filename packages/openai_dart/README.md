@@ -69,7 +69,7 @@ Future<void> main() async {
   try {
     final response = await client.responses.create(
       const CreateResponseRequest(
-        model: 'gpt-5.5',
+        model: 'gpt-6.2-sol',
         input: ResponseInput.text('What is the capital of France?'),
       ),
     );
@@ -81,6 +81,10 @@ Future<void> main() async {
 ```
 
 Keep API keys on trusted infrastructure. For a distributed Flutter or web app, route requests through your backend.
+
+Use `gpt-6.2-sol` for everyday requests or `gpt-6.2-astra` for harder
+reasoning tasks. Both accept basic Chat Completions requests. Use Responses
+for tool calling with these models. [GPT-6.2 guide](https://developers.openai.com/api/docs/guides/latest-model)
 
 ## Configuration
 
@@ -246,7 +250,7 @@ Future<void> main() async {
   try {
     final response = await client.responses.create(
       const CreateResponseRequest(
-        model: 'gpt-5.5',
+        model: 'gpt-6.2-sol',
         input: ResponseInput.text('What is the capital of France?'),
       ),
     );
@@ -278,7 +282,7 @@ Future<void> main() async {
   try {
     final stream = client.responses.createStream(
       const CreateResponseRequest(
-        model: 'gpt-5.5',
+        model: 'gpt-6.2-sol',
         input: ResponseInput.text('Tell me a short story.'),
       ),
     );
@@ -751,7 +755,7 @@ Set `complexity` to control planning effort independently of quality. Select `Im
 
 Standalone GIF and SVG requests use buffered output. The general image guide describes SVG generation only. For SVG edits with an eligible model and project, follow the endpoint reference as implemented by the official SDKs. With a Responses GIF tool, lifecycle events can still stream without partial frames. [Image edit reference](https://developers.openai.com/api/reference/resources/images/methods/edit)
 
-GPT Image 1 retired on October 23, 2026. Older `gpt-image-1.5`, `gpt-image-1-mini` and `chatgpt-image-latest` retire on December 1. Use GPT Image 2.6 Sunburst or Flare. [Deprecation schedule](https://developers.openai.com/api/docs/deprecations)
+GPT Image 1 retired on October 23, 2026. `gpt-image-1.5`, `gpt-image-1.5-2025-12-16`, `gpt-image-1-mini` and `chatgpt-image-latest` retire on December 1, 2026. `gpt-image-2` and `gpt-image-2-2026-04-21` retire on February 10, 2027. Use GPT Image 2.6 Sunburst or Flare. [Deprecation schedule](https://developers.openai.com/api/docs/deprecations)
 
 → [Full example](example/images_example.dart) · [Model selection](example/image_model_selection_example.dart)
 
@@ -1672,6 +1676,24 @@ identity provider and OpenAI's token exchange.
 
 ### Legacy and retiring APIs
 
+<a id="upcoming-openai-retirements"></a>
+<details>
+<summary><b>Which models and APIs are retiring?</b></summary>
+
+When model listing or retrieval returns a shutdown date, read it from
+`Model.shutdownDate` in `YYYY-MM-DD` format.
+
+- Reusable prompt objects and Agent Builder retire on November 30, 2026.
+  Move prompt content into application code and follow the Agent Builder
+  migration guide for existing workflows. ChatKit remains available.
+  [Prompt migration](https://developers.openai.com/api/docs/guides/prompting/migrate-from-prompt-object) · [Agent Builder migration](https://developers.openai.com/api/docs/guides/agent-builder/migrate-from-agent-builder)
+- `gpt-5.5-cyber-preview` retires on February 1, 2027. Access to its
+  replacements depends on the project. [Retirement schedule](https://developers.openai.com/api/docs/deprecations)
+
+→ [Model listing and retrieval example](example/models_example.dart)
+
+</details>
+
 <a id="how-do-i-generate-videos"></a>
 <details>
 <summary><b>What remains of the Videos API?</b></summary>
@@ -1686,7 +1708,7 @@ The Videos API and Sora 2 shut down on September 24, 2026. Retained types and th
 <details>
 <summary><b>What is the Evals retirement timeline?</b></summary>
 
-Evals became read-only on October 31 and is scheduled to shut down on November 30, 2026. Plan a migration using the [official retirement guidance](https://developers.openai.com/api/docs/deprecations). The retained example documents the historical API.
+Evals became read-only on October 31 and is scheduled to shut down on November 30, 2026. The retained example documents the historical API. [Promptfoo migration guide](https://developers.openai.com/cookbook/examples/evaluation/moving-from-openai-evals-to-promptfoo)
 
 → [Historical example](example/evals_example.dart)
 
@@ -1861,7 +1883,8 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [agent_file_helpers_example.dart](example/agent_file_helpers_example.dart) | **Offline.** selected bytes, explicit staging, completed run identity and binary artifact sink |
 | [agent_files_io_example.dart](example/agent_files_io_example.dart) | **Local only.** explicit regular-file selection beneath an application-owned directory; no API calls |
 | [agent_files_artifacts_example.dart](example/agent_files_artifacts_example.dart) | **Offline.** Agent environment files and published artifacts |
-| [admin_example.dart](example/admin_example.dart) | **Offline.** isolated Admin credentials, external keys, OCI storage, key updates, and Decisions usage |
+| [admin_example.dart](example/admin_example.dart) | **Offline.** Admin credentials, project service tiers, external keys and storage, API-key updates, and Decisions usage |
+| [workload_identity_example.dart](example/workload_identity_example.dart) | **Offline.** workload identity providers, service account mappings, and paginated federation rules |
 | [vaults_example.dart](example/vaults_example.dart) | **Offline.** Vault CRUD and write-only credential create/rotate with safe inspection |
 | [chatkit_example.dart](example/chatkit_example.dart) | ChatKit sessions and threads |
 | [skills_example.dart](example/skills_example.dart) | Skills management |
@@ -1889,7 +1912,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | Files and Uploads | File management and large multipart uploads |
 | Batches | Asynchronous batch processing |
 | Models | Listing and retrieval |
-| Moderations | Text and image moderation |
+| Moderations | Text and image moderation, plus model-specific image classification |
 | Fine-tuning | Job management; some grader/checkpoint operations pending |
 | Evals | Read-only since October 31; scheduled shutdown November 30, 2026 |
 | Conversations | Conversation and item management |
@@ -1899,7 +1922,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | Safety | Read-only project alerts, organization cases, and typed monitoring details |
 | Agents | Saved agents, context settings, action review, durable sessions, scheduled automations and invocations, metadata filters, root/child history, hosted environments, portable file preparation, explicit staging, and completed-result artifacts |
 | Vaults | Vault management and write-only credentials |
-| Organization Admin | Separate Admin credentials; external keys/storage, project API-key updates, and Decisions usage (12 operations) |
+| Organization Admin | Separate Admin credentials for project service tiers and API keys, external keys and storage, workload identity federation, and Decisions usage |
 | ChatKit Beta and Skills | Sessions/threads and skills management |
 | Assistants, Threads, Messages, and Runs | Historical types; Assistants API retired; separate import |
 | Vector Stores | File search storage and ingestion; separate Assistants import |
