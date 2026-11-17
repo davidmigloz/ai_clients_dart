@@ -147,6 +147,9 @@ final class CreateWorkloadIdentityProviderRequest extends AdminJsonValue {
   /// Whether to enable the registration.
   final bool? enabled;
 
+  /// Fixed provider type.
+  String get type => 'oidc';
+
   /// Parses a provider registration request.
   factory CreateWorkloadIdentityProviderRequest.fromJson(
     Map<String, dynamic> json,
@@ -193,7 +196,7 @@ final class CreateWorkloadIdentityProviderRequest extends AdminJsonValue {
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'oidc',
+    'type': type,
     'name': name,
     'issuer': issuer,
     'audience': audience,

@@ -196,6 +196,9 @@ final class WorkloadIdentityCursorPage<T extends AdminJsonValue>
   /// The resources in this page.
   final List<T> data;
 
+  /// Fixed page discriminator.
+  String get object => 'list';
+
   /// The first ID in the page, or null if empty.
   final String? firstId;
 
@@ -242,7 +245,7 @@ final class WorkloadIdentityCursorPage<T extends AdminJsonValue>
 
   @override
   Map<String, dynamic> toJson() => {
-    'object': 'list',
+    'object': object,
     'data': [for (final value in data) value.toJson()],
     'first_id': firstId,
     'last_id': lastId,

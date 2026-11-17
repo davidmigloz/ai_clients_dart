@@ -79,6 +79,8 @@ void main() {
       after: 'cursor / % ?',
     );
     expect(created.toJson(), _provider);
+    expect(create.type, 'oidc');
+    expect(page.object, 'list');
     expect(page.data.single, created);
     expect(page.lastId, _providerId);
     expect(page.hasMore, isTrue);
