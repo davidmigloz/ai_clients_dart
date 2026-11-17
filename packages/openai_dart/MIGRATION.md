@@ -6,6 +6,28 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Upcoming release
+
+### Responses prompt-cache TTL
+
+Use `ResponsePromptCacheTtl` for the `ttl` in
+`ResponsePromptCacheOptionsParam` and `PromptCacheOptions`. The Responses
+enum has both `minutes30` and `hours12`. Existing 30-minute payloads retain
+the same JSON. `PromptCacheOptionsParam` for Chat Completions and Responses
+compaction continues to use `PromptCacheTtl`.
+
+```dart
+// Before
+const options = ResponsePromptCacheOptionsParam(ttl: PromptCacheTtl.minutes30);
+
+// After
+const options = ResponsePromptCacheOptionsParam(
+  ttl: ResponsePromptCacheTtl.minutes30,
+);
+```
+
+---
+
 ## Migrating from v11.x to v12.0.0
 
 v12.0.0 expands Decisions, Live, Realtime and Agent workflows while correcting

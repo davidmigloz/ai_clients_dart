@@ -356,7 +356,7 @@ void main() {
         input: ResponseInput.text('Hello!'),
         promptCacheOptions: ResponsePromptCacheOptionsParam(
           mode: PromptCacheMode.explicit,
-          ttl: PromptCacheTtl.minutes30,
+          ttl: ResponsePromptCacheTtl.minutes30,
         ),
       );
 
@@ -4418,7 +4418,7 @@ void main() {
         equals(
           const PromptCacheOptions(
             mode: PromptCacheMode.implicit,
-            ttl: PromptCacheTtl.minutes30,
+            ttl: ResponsePromptCacheTtl.minutes30,
           ),
         ),
       );

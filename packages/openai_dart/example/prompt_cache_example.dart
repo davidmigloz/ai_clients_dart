@@ -30,7 +30,7 @@ Future<void> main() async {
     store: true,
     promptCacheOptions: const ResponsePromptCacheOptionsParam(
       mode: PromptCacheMode.implicit,
-      ttl: PromptCacheTtl.minutes30,
+      ttl: ResponsePromptCacheTtl.minutes30,
       prewarm: true,
     ),
   );
@@ -45,7 +45,7 @@ Future<void> main() async {
       request.copyWith(
         promptCacheOptions: ResponsePromptCacheOptionsParam(
           mode: PromptCacheMode.implicit,
-          ttl: PromptCacheTtl.minutes30,
+          ttl: ResponsePromptCacheTtl.minutes30,
           comparisonResponseId: baseline.id,
           prewarm: false,
         ),

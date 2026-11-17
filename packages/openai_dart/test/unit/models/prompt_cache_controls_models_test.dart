@@ -5,7 +5,7 @@ void main() {
   group('Cache controls', () {
     const wide = ResponsePromptCacheOptionsParam(
       mode: PromptCacheMode.explicit,
-      ttl: PromptCacheTtl.minutes30,
+      ttl: ResponsePromptCacheTtl.minutes30,
       comparisonResponseId: 'resp_baseline',
       prewarm: false,
     );
@@ -42,7 +42,7 @@ void main() {
       expect(wide.copyWith(prewarm: true), isNot(wide));
       expect(wide.copyWith(comparisonResponseId: 'other'), isNot(wide));
       expect(wide.copyWith(mode: PromptCacheMode.implicit), isNot(wide));
-      expect(wide.copyWith(ttl: PromptCacheTtl.unknown), isNot(wide));
+      expect(wide.copyWith(ttl: ResponsePromptCacheTtl.unknown), isNot(wide));
     });
     test(
       'narrow options keep an empty object and strict nonnullable members',

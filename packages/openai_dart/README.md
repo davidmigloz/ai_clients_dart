@@ -299,6 +299,20 @@ Future<void> main() async {
 
 </details>
 
+<a id="how-do-i-run-a-response-in-the-background"></a>
+<details>
+<summary><b>How do I run a response in the background?</b></summary>
+
+Set `background: true` and retrieve the response by ID to check its status.
+For eligible models, pass `BackgroundOptions(completionWindow: BackgroundCompletionWindow.twoHours)`
+or choose `eightHours` for discounted processing. These windows require a
+nonstreaming HTTP request on Standard. Use `ServiceTier.defaultTier` to
+select Standard explicitly.
+
+→ [Offline example](example/responses_background_example.dart) · [Background guide](https://developers.openai.com/api/docs/guides/background)
+
+</details>
+
 <a id="how-do-i-continue-a-conversation"></a>
 <details>
 <summary><b>How do I continue a conversation?</b></summary>
@@ -1108,7 +1122,7 @@ Insert a `ConfigurationUpdateItem` before the next user input to change subseque
 
 Use `ResponsePromptCacheOptionsParam` for Responses prewarming, TTL, and comparison diagnostics. Chat uses the narrower `PromptCacheOptionsParam`; returned usage counters report actual cached tokens.
 
-Set `PromptCacheBreakpointConfig(ttl: PromptCacheBreakpointTtl.hours12)` on stable shared content for a 12-hour boundary. Omit `ttl` to inherit the request. The pinned top-level `PromptCacheTtl` still permits only `30m`; Decisions uses separate cache controls.
+Use `ResponsePromptCacheTtl.hours12` to request 12-hour retention in Responses creation, or set `PromptCacheBreakpointConfig(ttl: PromptCacheBreakpointTtl.hours12)` on a content part. Omit the breakpoint TTL to inherit the request. Chat Completions and Responses compaction use the 30-minute `PromptCacheTtl`; Decisions has separate controls.
 
 Read `response.toolUsage` separately from `response.usage` for hosted image-generation tokens and billable web searches. Missing tool usage or cached counts mean unknown, not zero.
 
@@ -1675,6 +1689,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [vertex_responses_example.dart](example/vertex_responses_example.dart) | **Offline.** injected Google tokens, exact Vertex root and all six Responses lifecycle paths |
 | [runtime_config_example.dart](example/runtime_config_example.dart) | **Offline.** configuration snapshots, refreshed handles and request-local credential rotation |
 | [responses_example.dart](example/responses_example.dart) | Responses API with built-in tools |
+| [responses_background_example.dart](example/responses_background_example.dart) | **Offline.** Schedule a background response and inspect completed metadata |
 | [openai_dart_example.dart](example/openai_dart_example.dart) | Quick-start overview |
 | [web_search_example.dart](example/web_search_example.dart) | Web search with Responses API |
 | [input_tokens_example.dart](example/input_tokens_example.dart) | Input token counting |

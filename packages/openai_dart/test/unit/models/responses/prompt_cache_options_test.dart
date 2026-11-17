@@ -30,7 +30,7 @@ void main() {
     test('round-trip with both fields', () {
       const options = PromptCacheOptions(
         mode: PromptCacheMode.implicit,
-        ttl: PromptCacheTtl.minutes30,
+        ttl: ResponsePromptCacheTtl.minutes30,
       );
       final json = options.toJson();
 
@@ -43,15 +43,15 @@ void main() {
     test('equality and hashCode', () {
       const a = PromptCacheOptions(
         mode: PromptCacheMode.explicit,
-        ttl: PromptCacheTtl.minutes30,
+        ttl: ResponsePromptCacheTtl.minutes30,
       );
       const b = PromptCacheOptions(
         mode: PromptCacheMode.explicit,
-        ttl: PromptCacheTtl.minutes30,
+        ttl: ResponsePromptCacheTtl.minutes30,
       );
       const c = PromptCacheOptions(
         mode: PromptCacheMode.implicit,
-        ttl: PromptCacheTtl.minutes30,
+        ttl: ResponsePromptCacheTtl.minutes30,
       );
 
       expect(a, equals(b));

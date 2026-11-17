@@ -16,7 +16,8 @@ import 'websocket_json_helpers.dart';
 /// [streamId] selects a FIFO lane; the request's `previousResponseId` selects
 /// ancestry. [generate] can be false for a documented cache warm-up. Neither
 /// field is added to the HTTP request. `stream` is implicit and omitted;
-/// `background: true` is unsupported. `stream_options` is retained.
+/// `background: true` and `background_options` are unsupported.
+/// `stream_options` is retained.
 @immutable
 class ResponsesCreateEvent {
   /// The ordinary Responses request.
@@ -49,6 +50,7 @@ class ResponsesCreateEvent {
   factory ResponsesCreateEvent.fromJson(Map<String, dynamic> json) {
     requireJsonType(json, 'response.create', 'ResponsesCreateEvent');
     final snapshot = snapshotResponsesJson(json, 'ResponsesCreateEvent');
+    _rejectBackgroundOptions(snapshot);
     final streamId = optionalJsonString(
       snapshot,
       'stream_id',
@@ -117,9 +119,10 @@ class ResponsesCreateEvent {
   /// Converts to a validated WebSocket frame without changing [request].
   Map<String, dynamic> toJson() {
     _validateCreate(streamId, request.background);
-    final body = request.toJson()
+    final body = Map<String, dynamic>.of(request.toJson())
       ..remove('stream')
       ..remove('background');
+    _rejectBackgroundOptions(body);
     return {
       ...body,
       'type': type,
@@ -161,6 +164,14 @@ class ResponsesCreateEvent {
 }
 
 final _createLanePattern = RegExp(r'^[A-Za-z0-9_.-]+$');
+
+void _rejectBackgroundOptions(Map<String, dynamic> frame) {
+  if (frame.containsKey('background_options')) {
+    throw const FormatException(
+      'ResponsesCreateEvent.request.background_options is HTTP-only',
+    );
+  }
+}
 
 void _validateCreate(String? streamId, bool? background) {
   if (background == true) {

@@ -34,7 +34,7 @@ enum PromptCacheMode {
   String toJson() => value;
 }
 
-/// The minimum lifetime applied to a prompt cache breakpoint.
+/// The minimum cache lifetime for Chat Completions and Responses compaction.
 enum PromptCacheTtl {
   /// Unknown TTL (fallback for unrecognized values).
   unknown('unknown'),
@@ -61,6 +61,33 @@ enum PromptCacheTtl {
   String toJson() => value;
 }
 
+/// The minimum cache lifetime for creation and results in the Responses API.
+enum ResponsePromptCacheTtl {
+  /// Fallback for an unrecognized value.
+  unknown('unknown'),
+
+  /// 30-minute cache retention, the default.
+  minutes30('30m'),
+
+  /// 12-hour cache retention.
+  hours12('12h');
+
+  const ResponsePromptCacheTtl(this.value);
+
+  /// The API value.
+  final String value;
+
+  /// Parses an API value.
+  factory ResponsePromptCacheTtl.fromJson(String value) => switch (value) {
+    '30m' => minutes30,
+    '12h' => hours12,
+    _ => unknown,
+  };
+
+  /// Returns the API value.
+  String toJson() => value;
+}
+
 /// The prompt-caching options that were applied to the response.
 ///
 /// Supported for `gpt-5.6` and later models.
@@ -70,7 +97,7 @@ class PromptCacheOptions {
   final PromptCacheMode mode;
 
   /// The minimum lifetime applied to each cache breakpoint.
-  final PromptCacheTtl ttl;
+  final ResponsePromptCacheTtl ttl;
 
   /// The requested baseline response ID, when supplied for diagnostics.
   final String? comparisonResponseId;
@@ -88,7 +115,7 @@ class PromptCacheOptions {
       mode: PromptCacheMode.fromJson(
         requireJsonString(json['mode'], 'PromptCacheOptions.mode'),
       ),
-      ttl: PromptCacheTtl.fromJson(
+      ttl: ResponsePromptCacheTtl.fromJson(
         requireJsonString(json['ttl'], 'PromptCacheOptions.ttl'),
       ),
       comparisonResponseId: optionalJsonString(
@@ -111,7 +138,7 @@ class PromptCacheOptions {
   /// Creates a copy with the given fields replaced.
   PromptCacheOptions copyWith({
     PromptCacheMode? mode,
-    PromptCacheTtl? ttl,
+    ResponsePromptCacheTtl? ttl,
     Object? comparisonResponseId = unsetCopyWithValue,
   }) => PromptCacheOptions(
     mode: mode ?? this.mode,
@@ -226,8 +253,9 @@ class PromptCacheOptionsParam {
 
 /// Responses-specific prompt-cache controls.
 ///
-/// Supported for `gpt-5.6` and later models. [mode] and [ttl] have the same
-/// semantics as [PromptCacheOptionsParam]. [prewarm] prepares the cache without
+/// Supported for `gpt-5.6` and later models. [mode] controls implicit
+/// breakpoints and [ttl] chooses a 30-minute or 12-hour lifetime.
+/// [prewarm] prepares the cache without
 /// generating output, and [comparisonResponseId] requests diagnostics against
 /// a completed response in the same organization. It does not load conversation
 /// history or change cache matching.
@@ -237,7 +265,7 @@ class ResponsePromptCacheOptionsParam {
   final PromptCacheMode? mode;
 
   /// Minimum lifetime of each written breakpoint. Defaults to 30 minutes.
-  final PromptCacheTtl? ttl;
+  final ResponsePromptCacheTtl? ttl;
 
   /// A completed response ID to compare for cache diagnostics.
   final String? comparisonResponseId;
@@ -265,7 +293,7 @@ class ResponsePromptCacheOptionsParam {
               )
             : null,
         ttl: json.containsKey('ttl')
-            ? PromptCacheTtl.fromJson(
+            ? ResponsePromptCacheTtl.fromJson(
                 requireJsonString(
                   json['ttl'],
                   'ResponsePromptCacheOptionsParam.ttl',
@@ -302,7 +330,7 @@ class ResponsePromptCacheOptionsParam {
     Object? prewarm = unsetCopyWithValue,
   }) => ResponsePromptCacheOptionsParam(
     mode: mode == unsetCopyWithValue ? this.mode : mode as PromptCacheMode?,
-    ttl: ttl == unsetCopyWithValue ? this.ttl : ttl as PromptCacheTtl?,
+    ttl: ttl == unsetCopyWithValue ? this.ttl : ttl as ResponsePromptCacheTtl?,
     comparisonResponseId: comparisonResponseId == unsetCopyWithValue
         ? this.comparisonResponseId
         : comparisonResponseId as String?,

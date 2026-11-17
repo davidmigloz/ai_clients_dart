@@ -92,11 +92,11 @@ Future<void> main() async {
             InputTextContent('Current question, after the last cached prefix.'),
           ]),
         ]),
-        // The pinned top-level schema/SDK only allow 30m. The breakpoint above
+        // This request defaults to 30m. The breakpoint above
         // independently supports the documented 12h override. Decisions has its
         // own cache type and does not accept a TTL override on its markers.
         promptCacheOptions: const ResponsePromptCacheOptionsParam(
-          ttl: PromptCacheTtl.minutes30,
+          ttl: ResponsePromptCacheTtl.minutes30,
           mode: PromptCacheMode.explicit,
         ),
       ),

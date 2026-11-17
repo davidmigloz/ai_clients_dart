@@ -103,14 +103,26 @@ class InputTokensDetails {
   /// May be absent on older responses and compatible provider payloads.
   final int? cacheWriteTokens;
 
+  /// Per-retention cache writes, when the server supplies the breakdown.
+  final CacheWriteTokensDetails? cacheWriteTokensDetails;
+
   /// Creates an [InputTokensDetails].
-  const InputTokensDetails({this.cachedTokens, this.cacheWriteTokens});
+  const InputTokensDetails({
+    this.cachedTokens,
+    this.cacheWriteTokens,
+    this.cacheWriteTokensDetails,
+  });
 
   /// Creates an [InputTokensDetails] from JSON.
   factory InputTokensDetails.fromJson(Map<String, dynamic> json) {
     return InputTokensDetails(
       cachedTokens: json['cached_tokens'] as int?,
       cacheWriteTokens: json['cache_write_tokens'] as int?,
+      cacheWriteTokensDetails: json['cache_write_tokens_details'] == null
+          ? null
+          : CacheWriteTokensDetails.fromJson(
+              json['cache_write_tokens_details'] as Map<String, dynamic>,
+            ),
     );
   }
 
@@ -118,6 +130,8 @@ class InputTokensDetails {
   Map<String, dynamic> toJson() => {
     if (cachedTokens != null) 'cached_tokens': cachedTokens,
     if (cacheWriteTokens != null) 'cache_write_tokens': cacheWriteTokens,
+    if (cacheWriteTokensDetails != null)
+      'cache_write_tokens_details': cacheWriteTokensDetails!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -126,6 +140,7 @@ class InputTokensDetails {
   InputTokensDetails copyWith({
     Object? cachedTokens = unsetCopyWithValue,
     Object? cacheWriteTokens = unsetCopyWithValue,
+    Object? cacheWriteTokensDetails = unsetCopyWithValue,
   }) => InputTokensDetails(
     cachedTokens: cachedTokens == unsetCopyWithValue
         ? this.cachedTokens
@@ -133,6 +148,10 @@ class InputTokensDetails {
     cacheWriteTokens: cacheWriteTokens == unsetCopyWithValue
         ? this.cacheWriteTokens
         : cacheWriteTokens as int?,
+    cacheWriteTokensDetails:
+        identical(cacheWriteTokensDetails, unsetCopyWithValue)
+        ? this.cacheWriteTokensDetails
+        : cacheWriteTokensDetails as CacheWriteTokensDetails?,
   );
 
   @override
@@ -141,14 +160,67 @@ class InputTokensDetails {
       other is InputTokensDetails &&
           runtimeType == other.runtimeType &&
           cachedTokens == other.cachedTokens &&
-          cacheWriteTokens == other.cacheWriteTokens;
+          cacheWriteTokens == other.cacheWriteTokens &&
+          cacheWriteTokensDetails == other.cacheWriteTokensDetails;
 
   @override
-  int get hashCode => Object.hash(cachedTokens, cacheWriteTokens);
+  int get hashCode =>
+      Object.hash(cachedTokens, cacheWriteTokens, cacheWriteTokensDetails);
 
   @override
   String toString() =>
-      'InputTokensDetails(cachedTokens: $cachedTokens, cacheWriteTokens: $cacheWriteTokens)';
+      'InputTokensDetails(cachedTokens: $cachedTokens, '
+      'cacheWriteTokens: $cacheWriteTokens, '
+      'cacheWriteTokensDetails: $cacheWriteTokensDetails)';
+}
+
+/// Prompt cache writes grouped by retention window.
+@immutable
+final class CacheWriteTokensDetails {
+  /// Input tokens written with 30-minute retention.
+  final int ttl30mTokens;
+
+  /// Input tokens written with 12-hour retention.
+  final int ttl12hTokens;
+
+  /// Creates a breakdown with both required counts.
+  const CacheWriteTokensDetails({
+    required this.ttl30mTokens,
+    required this.ttl12hTokens,
+  });
+
+  /// Parses the required counts.
+  factory CacheWriteTokensDetails.fromJson(Map<String, dynamic> json) =>
+      CacheWriteTokensDetails(
+        ttl30mTokens: json['ttl_30m_tokens'] as int,
+        ttl12hTokens: json['ttl_12h_tokens'] as int,
+      );
+
+  /// Returns the wire counts.
+  Map<String, dynamic> toJson() => {
+    'ttl_30m_tokens': ttl30mTokens,
+    'ttl_12h_tokens': ttl12hTokens,
+  };
+
+  /// Copies the breakdown with replacement counts.
+  CacheWriteTokensDetails copyWith({int? ttl30mTokens, int? ttl12hTokens}) =>
+      CacheWriteTokensDetails(
+        ttl30mTokens: ttl30mTokens ?? this.ttl30mTokens,
+        ttl12hTokens: ttl12hTokens ?? this.ttl12hTokens,
+      );
+
+  @override
+  bool operator ==(Object other) =>
+      other is CacheWriteTokensDetails &&
+      ttl30mTokens == other.ttl30mTokens &&
+      ttl12hTokens == other.ttl12hTokens;
+
+  @override
+  int get hashCode => Object.hash(ttl30mTokens, ttl12hTokens);
+
+  @override
+  String toString() =>
+      'CacheWriteTokensDetails(ttl30mTokens: $ttl30mTokens, ttl12hTokens: $ttl12hTokens)';
 }
 
 /// Detailed breakdown of output tokens.

@@ -126,6 +126,9 @@ class CreateResponseRequest {
   /// used to poll for completion.
   final bool? background;
 
+  /// HTTP-only background scheduling options.
+  final BackgroundOptions? backgroundOptions;
+
   /// Maximum number of tool calls to allow.
   final int? maxToolCalls;
 
@@ -197,6 +200,7 @@ class CreateResponseRequest {
     this.include,
     this.store,
     this.background,
+    this.backgroundOptions,
     this.maxToolCalls,
     this.safetyIdentifier,
     this.moderation,
@@ -303,6 +307,14 @@ class CreateResponseRequest {
           .toList(),
       store: json['store'] as bool?,
       background: json['background'] as bool?,
+      backgroundOptions: json.containsKey('background_options')
+          ? BackgroundOptions.fromJson(
+              requireJsonObject(
+                json['background_options'],
+                'CreateResponseRequest.background_options',
+              ),
+            )
+          : null,
       maxToolCalls: json['max_tool_calls'] as int?,
       safetyIdentifier: json['safety_identifier'] as String?,
       moderation: json['moderation'] != null
@@ -360,6 +372,8 @@ class CreateResponseRequest {
       if (include != null) 'include': include!.map((e) => e.toJson()).toList(),
       if (store != null) 'store': store,
       if (background != null) 'background': background,
+      if (backgroundOptions != null)
+        'background_options': backgroundOptions!.toJson(),
       if (maxToolCalls != null) 'max_tool_calls': maxToolCalls,
       if (safetyIdentifier != null) 'safety_identifier': safetyIdentifier,
       if (moderation != null) 'moderation': moderation!.toJson(),
@@ -402,6 +416,7 @@ class CreateResponseRequest {
     Object? include = unsetCopyWithValue,
     Object? store = unsetCopyWithValue,
     Object? background = unsetCopyWithValue,
+    Object? backgroundOptions = unsetCopyWithValue,
     Object? maxToolCalls = unsetCopyWithValue,
     Object? safetyIdentifier = unsetCopyWithValue,
     Object? moderation = unsetCopyWithValue,
@@ -470,6 +485,9 @@ class CreateResponseRequest {
       background: background == unsetCopyWithValue
           ? this.background
           : background as bool?,
+      backgroundOptions: identical(backgroundOptions, unsetCopyWithValue)
+          ? this.backgroundOptions
+          : backgroundOptions as BackgroundOptions?,
       maxToolCalls: maxToolCalls == unsetCopyWithValue
           ? this.maxToolCalls
           : maxToolCalls as int?,
@@ -529,6 +547,7 @@ class CreateResponseRequest {
         listsEqual(include, other.include) &&
         store == other.store &&
         background == other.background &&
+        backgroundOptions == other.backgroundOptions &&
         maxToolCalls == other.maxToolCalls &&
         safetyIdentifier == other.safetyIdentifier &&
         moderation == other.moderation &&
@@ -565,6 +584,7 @@ class CreateResponseRequest {
     if (include != null) Object.hashAll(include!) else null,
     store,
     background,
+    backgroundOptions,
     maxToolCalls,
     safetyIdentifier,
     moderation,
@@ -593,6 +613,7 @@ class CreateResponseRequest {
       'parallelToolCalls: $parallelToolCalls, serviceTier: $serviceTier, '
       'metadata: ${metadata == null ? 'null' : '${metadata!.length} entries'}, '
       'include: ${_collectionSummary(include)}, store: $store, background: $background, '
+      'backgroundOptions: $backgroundOptions, '
       'maxToolCalls: $maxToolCalls, '
       'safetyIdentifier: ${_identifierSummary(safetyIdentifier)}, '
       'moderation: ${_presenceSummary(moderation)}, '
