@@ -8,3 +8,4 @@ export 'src/client/openai_admin_client.dart';
 export 'src/errors/exceptions.dart';
 export 'src/models/admin/admin.dart';
 export 'src/resources/admin/organization_resource.dart';
+export 'src/resources/admin/workload_identity_resource.dart';

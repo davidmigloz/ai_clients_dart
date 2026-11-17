@@ -15,6 +15,25 @@ bool isAdminRequest(http.BaseRequest? request) {
     return true;
   }
 
+  if (suffix(const ['organization', 'workload_identity_providers']) ||
+      suffix(const [
+        'organization',
+        'workload_identity_providers',
+        null,
+        'federation_rules',
+      ])) {
+    return const {'GET', 'POST'}.contains(request.method);
+  }
+  if (suffix(const ['organization', 'workload_identity_providers', null]) ||
+      suffix(const [
+        'organization',
+        'workload_identity_providers',
+        null,
+        'federation_rules',
+        null,
+      ])) {
+    return const {'GET', 'POST', 'DELETE'}.contains(request.method);
+  }
   if (suffix(['organization', 'external_keys']) ||
       suffix(['organization', 'external_storage'])) {
     return const {'GET', 'POST'}.contains(request.method);
