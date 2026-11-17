@@ -77,6 +77,15 @@ unavailable, the serializer emits `"result": null`.
   `bool? includeObfuscation` named parameter. Forward it to preserve the
   caller's per-connection padding preference.
 
+### Agent MCP approval switches
+
+Handle `AgentSessionMcpApprovalRequiredAction` in exhaustive
+`AgentSessionRequiredAction` switches and `AgentSessionMcpApprovalResultInput`
+in `AgentSessionInput` switches. For webhook summaries, add
+`AgentSessionRequiredActionTypeResource.mcpApprovalRequest`.
+On returned function tools, read the optional `async` field from the typed
+model in place of `rawJson['async']`.
+
 ---
 
 ## Migrating from v11.x to v12.0.0

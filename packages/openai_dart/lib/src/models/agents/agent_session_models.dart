@@ -16,6 +16,7 @@ part 'agent_session_events.dart';
 part 'agent_session_inputs.dart';
 part 'agent_session_history.dart';
 part 'agent_session_items.dart';
+part 'agent_session_mcp_approvals.dart';
 part 'agent_session_options.dart';
 part 'agent_session_tools.dart';
 part 'agent_session_validation.dart';

@@ -1400,6 +1400,10 @@ Use `AgentSessionStreamOptions(includeObfuscation: false)` for streamed creation
 
 → Offline [browser actions](example/agent_browser_actions_example.dart) and [current-state recovery](example/agent_session_recovery_example.dart) examples
 
+When a session requires MCP tool-call approval, show its typed request to the reviewer. Submit an explicit `approve`, `deny` or `cancel` decision with `AgentSessionInput.mcpApprovalRequestResult`. A webhook identifies the session and action kind. Retrieve the session for the approval details.
+
+→ [Offline MCP approval example](example/agent_mcp_approvals_example.dart)
+
 </details>
 
 <a id="how-do-i-configure-agent-context-and-action-review"></a>
@@ -1411,6 +1415,8 @@ Use `AgentCompactionConfig(async: true)` to run compaction in the background and
 Set session `review` to `SessionReviewParam.autoReview` to review eligible actions automatically, or `.none` for existing execution behavior. Updates apply to new root turns; existing turns and their subagents keep their mode. Action review is independent of spending limits. Replace session tools through `AgentSessionAgentUpdate`; omission keeps them, while null or `[]` clears them. Function/MCP changes apply on the next model call, and built-in changes by the next turn.
 
 Set `AgentSessionSpendControlConfig(limit: 500)` for a 500-cent session cap. Omit the option on update to retain it, or use `clearSpendControl: true` to remove it. Use `AgentSessionPromptCacheConfig(ttl: AgentSessionPromptCacheTtl.hours12)` to set the default for future turns and inspect each turn's `promptCacheOptions` for the recorded lifetime.
+
+Set `async: true` on a saved or inline Agent function declaration to let the service continue before the function result arrives. The optional local dispatch helper still invokes registered callbacks sequentially.
 
 Filter session lists with `metadata: {'project': 'demo'}`; all pairs must match, and updates may take time to appear in filtered results. Keep the same filters when advancing a cursor.
 
@@ -1810,6 +1816,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | [saved_agents_example.dart](example/saved_agents_example.dart) | **Offline.** saved-agent CRUD, tool configuration, pagination, replacement and clear/reset |
 | [agent_settings_example.dart](example/agent_settings_example.dart) | **Offline.** compaction, time awareness, session review/tools, ultrafast and exact metadata filters |
 | [agent_automations_example.dart](example/agent_automations_example.dart) | **Offline.** once/cron schedules, new/existing session targets, pause/resume, explicit invocation and delivery history |
+| [agent_mcp_approvals_example.dart](example/agent_mcp_approvals_example.dart) | **Offline.** Async function configuration and manual MCP approval decisions |
 | [agent_sessions_example.dart](example/agent_sessions_example.dart) | **Offline.** durable sessions, persistent observation, manual function result and explicit cancellation |
 | [agent_browser_actions_example.dart](example/agent_browser_actions_example.dart) | **Offline.** explicit origin decisions, private authentication and observed acceptance |
 | [agent_session_recovery_example.dart](example/agent_session_recovery_example.dart) | **Offline.** subscribe/buffer, current-state/history reconciliation and local observer cleanup |

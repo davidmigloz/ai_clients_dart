@@ -34,6 +34,7 @@ sealed class AgentSessionTool extends AgentJsonModel {
 
   /// Builds the `function` contract.
   factory AgentSessionTool.function({
+    bool? async,
     bool? deferLoading,
     required String description,
     required String name,
@@ -209,6 +210,7 @@ final class AgentSessionComputerUseTool extends AgentSessionTool {
 final class AgentSessionFunctionTool extends AgentSessionTool {
   /// Creates a validated [AgentSessionFunctionTool].
   AgentSessionFunctionTool({
+    this.async,
     this.deferLoading,
     required this.description,
     required this.name,
@@ -219,6 +221,9 @@ final class AgentSessionFunctionTool extends AgentSessionTool {
        ) {
     validate();
   }
+
+  /// Whether the agent can continue before receiving the function result.
+  final bool? async;
 
   /// Whether this function is deferred and discovered through tool search. Defaults to `false`.
   final bool? deferLoading;
@@ -239,6 +244,7 @@ final class AgentSessionFunctionTool extends AgentSessionTool {
   /// Parses [AgentSessionFunctionTool] with contextual, payload-free errors.
   factory AgentSessionFunctionTool.fromJson(Map<String, dynamic> json) {
     requireClosedAgentJson(json, const [
+      'async',
       'defer_loading',
       'description',
       'name',
@@ -247,6 +253,13 @@ final class AgentSessionFunctionTool extends AgentSessionTool {
     ], 'AgentSessionFunctionTool');
     requireAgentTag(json, 'type', 'function', 'AgentSessionFunctionTool');
     return AgentSessionFunctionTool(
+      async: optionalAgentValue(
+        json,
+        'async',
+        'AgentSessionFunctionTool.async',
+        requireAgentBool,
+        nullable: false,
+      ),
       deferLoading: optionalAgentValue(
         json,
         'defer_loading',
@@ -309,6 +322,7 @@ final class AgentSessionFunctionTool extends AgentSessionTool {
 
   @override
   Map<String, dynamic> toJson() => {
+    'async': ?async,
     'defer_loading': ?deferLoading,
     'description': description,
     'name': name,
@@ -318,11 +332,17 @@ final class AgentSessionFunctionTool extends AgentSessionTool {
 
   /// Copies values; omitted arguments retain their values and null presence.
   AgentSessionFunctionTool copyWith({
+    Object? async = unsetCopyWithValue,
     Object? deferLoading = unsetCopyWithValue,
     String? description,
     String? name,
     Map<String, dynamic>? parameters,
   }) => AgentSessionFunctionTool(
+    async: copyAgentValue<bool>(
+      async,
+      this.async,
+      'AgentSessionFunctionTool.async',
+    ),
     deferLoading: copyAgentValue<bool>(
       deferLoading,
       this.deferLoading,
@@ -978,6 +998,7 @@ sealed class AgentSessionToolResource extends AgentJsonModel {
 
   /// Builds the `function` contract.
   factory AgentSessionToolResource.function({
+    bool? async,
     required bool deferLoading,
     required String description,
     required String name,
@@ -1170,6 +1191,7 @@ final class AgentSessionComputerUseToolResource
 final class AgentSessionFunctionToolResource extends AgentSessionToolResource {
   /// Creates a validated [AgentSessionFunctionToolResource].
   AgentSessionFunctionToolResource({
+    this.async,
     required this.deferLoading,
     required this.description,
     required this.name,
@@ -1180,6 +1202,7 @@ final class AgentSessionFunctionToolResource extends AgentSessionToolResource {
          'AgentSessionFunctionToolResource.parameters',
        ),
        rawJson = agentExtras(rawJson, const [
+         'async',
          'defer_loading',
          'description',
          'name',
@@ -1188,6 +1211,9 @@ final class AgentSessionFunctionToolResource extends AgentSessionToolResource {
        ], 'AgentSessionFunctionToolResource') {
     validate();
   }
+
+  /// Whether the agent can continue before receiving the function result.
+  final bool? async;
 
   /// Whether the function is deferred and discovered through tool search.
   final bool deferLoading;
@@ -1217,6 +1243,13 @@ final class AgentSessionFunctionToolResource extends AgentSessionToolResource {
       'AgentSessionFunctionToolResource',
     );
     return AgentSessionFunctionToolResource(
+      async: optionalAgentValue(
+        json,
+        'async',
+        'AgentSessionFunctionToolResource.async',
+        requireAgentBool,
+        nullable: false,
+      ),
       deferLoading: requiredAgentValue(
         json,
         'defer_loading',
@@ -1248,6 +1281,7 @@ final class AgentSessionFunctionToolResource extends AgentSessionToolResource {
       rawJson: {
         for (final entry in json.entries)
           if (!const [
+            'async',
             'defer_loading',
             'description',
             'name',
@@ -1283,6 +1317,7 @@ final class AgentSessionFunctionToolResource extends AgentSessionToolResource {
   @override
   Map<String, dynamic> toJson() => {
     ...rawJson,
+    'async': ?async,
     'defer_loading': deferLoading,
     'description': description,
     'name': name,
@@ -1292,12 +1327,18 @@ final class AgentSessionFunctionToolResource extends AgentSessionToolResource {
 
   /// Copies values; omitted arguments retain their values and null presence.
   AgentSessionFunctionToolResource copyWith({
+    Object? async = unsetCopyWithValue,
     bool? deferLoading,
     String? description,
     String? name,
     Map<String, dynamic>? parameters,
     Map<String, dynamic>? rawJson,
   }) => AgentSessionFunctionToolResource(
+    async: copyAgentValue<bool>(
+      async,
+      this.async,
+      'AgentSessionFunctionToolResource.async',
+    ),
     deferLoading: deferLoading ?? this.deferLoading,
     description: description ?? this.description,
     name: name ?? this.name,

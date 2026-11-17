@@ -775,6 +775,8 @@ sealed class AgentSessionInput extends AgentJsonModel {
       'agent.session.input.cancel' => AgentSessionCancelInput.fromJson(json),
       'agent.session.input.computer_use_approval_request_result' =>
         AgentSessionApprovalResultInput.fromJson(json),
+      'agent.session.input.mcp_approval_request_result' =>
+        AgentSessionMcpApprovalResultInput.fromJson(json),
       'agent.session.input.message' => AgentSessionMessageInput.fromJson(json),
       'agent.session.input.tool_result' => AgentSessionToolResultInput.fromJson(
         json,
@@ -796,6 +798,12 @@ sealed class AgentSessionInput extends AgentJsonModel {
     required String requestId,
     required AgentSessionComputerUseApprovalResponse response,
   }) = AgentSessionApprovalResultInput;
+
+  /// Submits an explicit decision for a pending MCP approval.
+  factory AgentSessionInput.mcpApprovalRequestResult({
+    required String requestId,
+    required AgentSessionMcpApprovalResponse response,
+  }) = AgentSessionMcpApprovalResultInput;
 
   /// Builds the `agent.session.input.message` contract.
   factory AgentSessionInput.message({
@@ -827,6 +835,7 @@ final class UnknownAgentSessionInput extends AgentSessionInput {
     if (const [
       'agent.session.input.cancel',
       'agent.session.input.computer_use_approval_request_result',
+      'agent.session.input.mcp_approval_request_result',
       'agent.session.input.message',
       'agent.session.input.tool_result',
     ].contains(tag)) {

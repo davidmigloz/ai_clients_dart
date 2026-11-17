@@ -9,13 +9,16 @@ enum AgentSessionRequiredActionTypeResource {
   functionCall('function_call'),
 
   /// The session needs an environment connection.
-  environmentConnection('environment_connection');
+  environmentConnection('environment_connection'),
+
+  /// The session needs approval for an MCP tool call.
+  mcpApprovalRequest('mcp_approval_request');
 
   /// Canonical wire spelling.
   final String value;
   const AgentSessionRequiredActionTypeResource(this.value);
 
-  /// Parses one of the three declared action summaries.
+  /// Parses a declared action summary.
   static AgentSessionRequiredActionTypeResource fromJson(Object? json) {
     for (final value in values) {
       if (json == value.value) return value;
