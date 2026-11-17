@@ -2,7 +2,9 @@ import 'dart:collection';
 import 'package:meta/meta.dart';
 import '../common/equality_helpers.dart';
 import '../common/prompt_cache_breakpoint.dart' show PromptCacheBreakpointTtl;
+import '../images/image_common.dart' show ImageComplexity;
 import '../images/image_tool_error.dart';
+import '../images/svg_options.dart' show SvgOptions, SvgUsage;
 import '../responses/config/configuration_update_text.dart';
 import '../responses/items/item.dart' show Item;
 import '../responses/items/output_item.dart' show OutputItem;
@@ -5250,6 +5252,9 @@ final class LiveInputImageGenTool extends LiveInputValue {
   static const Set<String> _knownKeys = {
     'action',
     'background',
+    'complexity',
+    'frame_count',
+    'frame_duration_ms',
     'input_fidelity',
     'input_image_mask',
     'model',
@@ -5259,6 +5264,7 @@ final class LiveInputImageGenTool extends LiveInputValue {
     'partial_images',
     'quality',
     'size',
+    'svg',
     'type',
   };
 
@@ -5279,6 +5285,26 @@ final class LiveInputImageGenTool extends LiveInputValue {
 
   /// Distinguishes absent `background` from an explicit null.
   bool get hasBackground => rawJson.containsKey('background');
+
+  /// Image planning effort, independent of rendering quality.
+  ImageComplexity? get complexity => rawJson['complexity'] == null
+      ? null
+      : ImageComplexity.fromJson(rawJson['complexity'] as String);
+
+  /// Whether image planning effort was supplied.
+  bool get hasComplexity => rawJson.containsKey('complexity');
+
+  /// Number of GIF frames.
+  int? get frameCount => rawJson['frame_count'] as int?;
+
+  /// Whether a GIF frame count was supplied.
+  bool get hasFrameCount => rawJson.containsKey('frame_count');
+
+  /// Duration of each GIF frame in milliseconds.
+  int? get frameDurationMs => rawJson['frame_duration_ms'] as int?;
+
+  /// Whether a GIF frame duration was supplied.
+  bool get hasFrameDurationMs => rawJson.containsKey('frame_duration_ms');
 
   /// Canonical `input_fidelity` value.
   LiveInputFidelity? get inputFidelity => rawJson['input_fidelity'] == null
@@ -5353,6 +5379,16 @@ final class LiveInputImageGenTool extends LiveInputValue {
   /// Distinguishes absent `size` from an explicit null.
   bool get hasSize => rawJson.containsKey('size');
 
+  /// Model and reasoning options for SVG authoring.
+  SvgOptions? get svg => hasSvg
+      ? SvgOptions.fromJson(
+          requireLiveObject(rawJson['svg'], 'LiveInputImageGenTool.svg'),
+        )
+      : null;
+
+  /// Whether SVG authoring options were supplied.
+  bool get hasSvg => rawJson.containsKey('svg');
+
   /// Canonical `type` value.
   String get type => rawJson['type'] as String;
   @override
@@ -5367,6 +5403,12 @@ final class LiveInputImageGenTool extends LiveInputValue {
     bool clearAction = false,
     Object? background = liveUnset,
     bool clearBackground = false,
+    Object? complexity = liveUnset,
+    bool clearComplexity = false,
+    Object? frameCount = liveUnset,
+    bool clearFrameCount = false,
+    Object? frameDurationMs = liveUnset,
+    bool clearFrameDurationMs = false,
     Object? inputFidelity = liveUnset,
     bool clearInputFidelity = false,
     Object? inputImageMask = liveUnset,
@@ -5385,6 +5427,8 @@ final class LiveInputImageGenTool extends LiveInputValue {
     bool clearQuality = false,
     Object? size = liveUnset,
     bool clearSize = false,
+    Object? svg = liveUnset,
+    bool clearSvg = false,
     Map<String, dynamic>? rawJson,
 
     /// Parses and validates the canonical value.
@@ -5396,6 +5440,9 @@ final class LiveInputImageGenTool extends LiveInputValue {
       {
         'action': action,
         'background': background,
+        'complexity': complexity,
+        'frame_count': frameCount,
+        'frame_duration_ms': frameDurationMs,
         'input_fidelity': inputFidelity,
         'input_image_mask': inputImageMask,
         'model': model,
@@ -5405,10 +5452,14 @@ final class LiveInputImageGenTool extends LiveInputValue {
         'partial_images': partialImages,
         'quality': quality,
         'size': size,
+        'svg': svg,
       },
       <String>{
         if (clearAction) 'action',
         if (clearBackground) 'background',
+        if (clearComplexity) 'complexity',
+        if (clearFrameCount) 'frame_count',
+        if (clearFrameDurationMs) 'frame_duration_ms',
         if (clearInputFidelity) 'input_fidelity',
         if (clearInputImageMask) 'input_image_mask',
         if (clearModel) 'model',
@@ -5418,13 +5469,20 @@ final class LiveInputImageGenTool extends LiveInputValue {
         if (clearPartialImages) 'partial_images',
         if (clearQuality) 'quality',
         if (clearSize) 'size',
+        if (clearSvg) 'svg',
       },
       'LiveInputImageGenTool',
     ),
   );
   @override
   String toString() =>
-      'LiveInputImageGenTool(action: [REDACTED], background: [REDACTED], input_fidelity: [REDACTED], input_image_mask: [REDACTED], model: [REDACTED], moderation: [REDACTED], output_compression: [REDACTED], output_format: [REDACTED], partial_images: [REDACTED], quality: [REDACTED], size: [REDACTED], type: [REDACTED], rawJson: [REDACTED])';
+      'LiveInputImageGenTool(action: [REDACTED], background: [REDACTED], '
+      'complexity: [REDACTED], frame_count: [REDACTED], '
+      'frame_duration_ms: [REDACTED], input_fidelity: [REDACTED], '
+      'input_image_mask: [REDACTED], model: [REDACTED], moderation: [REDACTED], '
+      'output_compression: [REDACTED], output_format: [REDACTED], '
+      'partial_images: [REDACTED], quality: [REDACTED], size: [REDACTED], '
+      'svg: [REDACTED], type: [REDACTED], rawJson: [REDACTED])';
 }
 
 /// Immutable typed adapter for ImageGenToolCall.
@@ -5450,6 +5508,7 @@ final class LiveInputImageGenToolCall extends LiveInputItem {
     'revised_prompt',
     'size',
     'status',
+    'svg_usage',
     'type',
   };
 
@@ -5530,6 +5589,19 @@ final class LiveInputImageGenToolCall extends LiveInputItem {
   /// Canonical `status` value.
   String get status => rawJson['status'] as String;
 
+  /// SVG author token usage, when supplied.
+  SvgUsage? get svgUsage => hasSvgUsage
+      ? SvgUsage.fromJson(
+          requireLiveObject(
+            rawJson['svg_usage'],
+            'LiveInputImageGenToolCall.svg_usage',
+          ),
+        )
+      : null;
+
+  /// Whether SVG author token usage was supplied.
+  bool get hasSvgUsage => rawJson.containsKey('svg_usage');
+
   /// Canonical `type` value.
   String get type => rawJson['type'] as String;
   @override
@@ -5560,6 +5632,8 @@ final class LiveInputImageGenToolCall extends LiveInputItem {
     Object? size = liveUnset,
     bool clearSize = false,
     Object? status = liveUnset,
+    Object? svgUsage = liveUnset,
+    bool clearSvgUsage = false,
     Map<String, dynamic>? rawJson,
 
     /// Parses and validates the canonical value.
@@ -5579,6 +5653,7 @@ final class LiveInputImageGenToolCall extends LiveInputItem {
         'revised_prompt': revisedPrompt,
         'size': size,
         'status': status,
+        'svg_usage': svgUsage,
       },
       <String>{
         if (clearAction) 'action',
@@ -5588,13 +5663,18 @@ final class LiveInputImageGenToolCall extends LiveInputItem {
         if (clearQuality) 'quality',
         if (clearRevisedPrompt) 'revised_prompt',
         if (clearSize) 'size',
+        if (clearSvgUsage) 'svg_usage',
       },
       'LiveInputImageGenToolCall',
     ),
   );
   @override
   String toString() =>
-      'LiveInputImageGenToolCall(action: [REDACTED], background: [REDACTED], error: [REDACTED], id: [REDACTED], output_format: [REDACTED], quality: [REDACTED], result: [REDACTED], revised_prompt: [REDACTED], size: [REDACTED], status: [REDACTED], type: [REDACTED], rawJson: [REDACTED])';
+      'LiveInputImageGenToolCall(action: [REDACTED], background: [REDACTED], '
+      'error: [REDACTED], id: [REDACTED], output_format: [REDACTED], '
+      'quality: [REDACTED], result: [REDACTED], revised_prompt: [REDACTED], '
+      'size: [REDACTED], status: [REDACTED], svg_usage: [REDACTED], '
+      'type: [REDACTED], rawJson: [REDACTED])';
 }
 
 /// Immutable typed adapter for the canonical inline payload.
@@ -16085,20 +16165,7 @@ sealed class LiveInputImageGenToolModelValue extends LiveInputValue {
     );
     final tagged = _inputTaggedBranch([
       {'type': 'string'},
-      {
-        'enum': [
-          'gpt-image-1',
-          'gpt-image-1-mini',
-          'gpt-image-1.5',
-          'gpt-image-2',
-          'gpt-image-2-2026-04-21',
-          'gpt-image-2.5-sunburst',
-          'gpt-image-2.5-sunburst-2026-09-08',
-          'gpt-image-2.5-flare',
-          'gpt-image-2.5-flare-2026-09-08',
-        ],
-        'type': 'string',
-      },
+      {'enum': liveResponsesImageModels, 'type': 'string'},
     ], wireValue);
     if (tagged == 0) {
       return LiveInputImageGenToolModelValueBranch0.fromJson(wireValue);
@@ -16110,17 +16177,7 @@ sealed class LiveInputImageGenToolModelValue extends LiveInputValue {
       return LiveInputImageGenToolModelValueBranch0.fromJson(wireValue);
     }
     if (_matchesInputSchema({
-      'enum': [
-        'gpt-image-1',
-        'gpt-image-1-mini',
-        'gpt-image-1.5',
-        'gpt-image-2',
-        'gpt-image-2-2026-04-21',
-        'gpt-image-2.5-sunburst',
-        'gpt-image-2.5-sunburst-2026-09-08',
-        'gpt-image-2.5-flare',
-        'gpt-image-2.5-flare-2026-09-08',
-      ],
+      'enum': liveResponsesImageModels,
       'type': 'string',
     }, wireValue)) {
       return LiveInputImageGenToolModelValueBranch1.fromJson(wireValue);
@@ -16202,20 +16259,7 @@ final class LiveInputImageGenToolModelValueBranch1
   Object? toJson() => rawValue;
   @override
   void validate() => _validateInputSchema(
-    {
-      'enum': [
-        'gpt-image-1',
-        'gpt-image-1-mini',
-        'gpt-image-1.5',
-        'gpt-image-2',
-        'gpt-image-2-2026-04-21',
-        'gpt-image-2.5-sunburst',
-        'gpt-image-2.5-sunburst-2026-09-08',
-        'gpt-image-2.5-flare',
-        'gpt-image-2.5-flare-2026-09-08',
-      ],
-      'type': 'string',
-    },
+    {'enum': liveResponsesImageModels, 'type': 'string'},
     rawValue,
     'LiveInputImageGenToolModelValueBranch1',
   );
@@ -19768,7 +19812,10 @@ Object? _inputWire(
   if (value is LiveInputValue) return value.toJson();
   if (value is LiveJsonModel) return value.toJson();
   if (value is ImageGenerationCallError) return value.toJson();
+  if (value is ImageComplexity) return value.toJson();
   if (value is PromptCacheBreakpointTtl) return value.toJson();
+  if (value is SvgOptions) return value.toJson();
+  if (value is SvgUsage) return value.toJson();
   final seen = ancestors ?? HashSet<Object>.identity();
   if (value is List || value is Map) {
     if (!seen.add(value!)) {
@@ -21047,7 +21094,7 @@ const Map<String, dynamic> _inputSchemas = {
       'namespace': {
         'anyOf': [
           {
-            'maxLength': 64,
+            'maxLength': 128,
             'minLength': 1,
             'pattern': r'^[a-zA-Z0-9_-]+$',
             'type': 'string',
@@ -21463,20 +21510,7 @@ const Map<String, dynamic> _inputSchemas = {
       'model': {
         'anyOf': [
           {'type': 'string'},
-          {
-            'enum': [
-              'gpt-image-1',
-              'gpt-image-1-mini',
-              'gpt-image-1.5',
-              'gpt-image-2',
-              'gpt-image-2-2026-04-21',
-              'gpt-image-2.5-sunburst',
-              'gpt-image-2.5-sunburst-2026-09-08',
-              'gpt-image-2.5-flare',
-              'gpt-image-2.5-flare-2026-09-08',
-            ],
-            'type': 'string',
-          },
+          {'enum': liveResponsesImageModels, 'type': 'string'},
         ],
       },
       'moderation': {
@@ -21484,10 +21518,7 @@ const Map<String, dynamic> _inputSchemas = {
         'type': 'string',
       },
       'output_compression': {'maximum': 100, 'minimum': 0, 'type': 'integer'},
-      'output_format': {
-        'enum': ['png', 'webp', 'jpeg'],
-        'type': 'string',
-      },
+      ...liveResponsesImageToolFields,
       'partial_images': {'maximum': 3, 'minimum': 0, 'type': 'integer'},
       'quality': {
         'enum': ['low', 'medium', 'high', 'xhigh', 'max', 'auto'],
@@ -21512,6 +21543,7 @@ const Map<String, dynamic> _inputSchemas = {
   },
   'ImageGenToolCall': {
     'properties': {
+      'svg_usage': {r'$ref': '#/components/schemas/SvgUsage'},
       'action': {
         'anyOf': [
           {r'$ref': '#/components/schemas/ImageGenActionEnum'},
@@ -21616,10 +21648,7 @@ const Map<String, dynamic> _inputSchemas = {
     'required': ['moderation_stage', 'categories'],
     'type': 'object',
   },
-  'ImageOutputFormat': {
-    'enum': ['png', 'webp', 'jpeg'],
-    'type': 'string',
-  },
+  ...liveResponsesImageSchemas,
   'InlineSkillParam': {
     'properties': {
       'description': {'type': 'string'},

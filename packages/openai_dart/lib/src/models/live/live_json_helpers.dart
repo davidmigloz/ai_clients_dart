@@ -283,3 +283,77 @@ T? copyLiveValue<T>(Object? value, T? current, String context) {
   }
   return value as T;
 }
+
+/// Closed list of explicitly named models in the Responses image tool schema.
+const liveResponsesImageModels = [
+  'gpt-image-1',
+  'gpt-image-1-mini',
+  'gpt-image-2',
+  'gpt-image-2-2026-04-21',
+  'gpt-image-2.5-sunburst',
+  'gpt-image-2.5-sunburst-2026-09-08',
+  'gpt-image-2.5-flare',
+  'gpt-image-2.5-flare-2026-09-08',
+  'gpt-image-2.6-sunburst',
+  'gpt-image-2.6-flare',
+  'gpt-image-1.5',
+  'chatgpt-image-latest',
+];
+
+/// Image tool field shapes shared by Live item and event validation.
+const Map<String, dynamic> liveResponsesImageToolFields = {
+  'output_format': {r'$ref': '#/components/schemas/ImageOutputFormat'},
+  'complexity': {
+    'type': 'string',
+    'enum': ['low', 'medium', 'high'],
+  },
+  'frame_count': {'type': 'integer', 'minimum': 2, 'maximum': 16},
+  'frame_duration_ms': {'type': 'integer', 'minimum': 20, 'maximum': 2000},
+  'svg': {r'$ref': '#/components/schemas/SvgParam'},
+};
+
+/// Referenced Responses image schemas shared by Live item and event validation.
+const Map<String, dynamic> liveResponsesImageSchemas = {
+  'ImageOutputFormat': {
+    'type': 'string',
+    'enum': ['png', 'webp', 'jpeg', 'gif', 'svg'],
+  },
+  'SvgParam': {
+    'type': 'object',
+    'properties': {
+      'model': {'type': 'string', 'minLength': 1},
+      'reasoning': {
+        'anyOf': [
+          {r'$ref': '#/components/schemas/SvgReasoningParam'},
+          {'type': 'null'},
+        ],
+      },
+    },
+  },
+  'SvgReasoningParam': {
+    'type': 'object',
+    'properties': {
+      'effort': {
+        'type': 'string',
+        'enum': ['none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max'],
+      },
+    },
+  },
+  'SvgUsage': {
+    'type': 'object',
+    'properties': {
+      'model': {'type': 'string'},
+      'input_tokens': {'type': 'integer'},
+      'output_tokens': {'type': 'integer'},
+      'total_tokens': {'type': 'integer'},
+      'reasoning_tokens': {'type': 'integer'},
+    },
+    'required': [
+      'model',
+      'input_tokens',
+      'output_tokens',
+      'total_tokens',
+      'reasoning_tokens',
+    ],
+  },
+};

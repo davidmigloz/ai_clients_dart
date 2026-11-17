@@ -1322,6 +1322,8 @@ Set `LiveResponsesDelegationParam.responses.tools` to `LiveMCPTool` values. Use 
 
 Set a stable, privacy-preserving `safetyIdentifier` at session startup or SIP accept. Subscribe to `WebhookEventType.liveTransportConnected` for WebRTC activation. Verify the webhook signature, then use `LiveTransportConnectedWebhookEvent.data.sessionId` with `client.live.attach`.
 
+For Live Responses history, `LiveInputItem` preserves GIF and SVG image calls, SVG author usage, and function output namespaces up to 128 characters. Compact Responses events preserve the applied 12-hour cache TTL and per-TTL write counts when returned.
+
 → [Offline Responses delegation example](example/live_responses_delegation_example.dart)
 
 </details>

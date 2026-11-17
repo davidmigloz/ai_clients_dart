@@ -2421,7 +2421,7 @@ const Map<String, dynamic> _responseSchemas = {
         'anyOf': [
           {
             'type': 'string',
-            'maxLength': 64,
+            'maxLength': 128,
             'minLength': 1,
             'pattern': r'^[a-zA-Z0-9_-]+$',
           },
@@ -3002,20 +3002,7 @@ const Map<String, dynamic> _responseSchemas = {
       'model': {
         'anyOf': [
           {'type': 'string'},
-          {
-            'type': 'string',
-            'enum': [
-              'gpt-image-1',
-              'gpt-image-1-mini',
-              'gpt-image-1.5',
-              'gpt-image-2',
-              'gpt-image-2-2026-04-21',
-              'gpt-image-2.5-sunburst',
-              'gpt-image-2.5-sunburst-2026-09-08',
-              'gpt-image-2.5-flare',
-              'gpt-image-2.5-flare-2026-09-08',
-            ],
-          },
+          {'type': 'string', 'enum': liveResponsesImageModels},
         ],
       },
       'quality': {
@@ -3031,10 +3018,7 @@ const Map<String, dynamic> _responseSchemas = {
           },
         ],
       },
-      'output_format': {
-        'type': 'string',
-        'enum': ['png', 'webp', 'jpeg'],
-      },
+      ...liveResponsesImageToolFields,
       'output_compression': {'type': 'integer', 'minimum': 0, 'maximum': 100},
       'moderation': {
         'type': 'string',
@@ -3066,6 +3050,7 @@ const Map<String, dynamic> _responseSchemas = {
   },
   'ImageGenToolCall': {
     'properties': {
+      'svg_usage': {r'$ref': '#/components/schemas/SvgUsage'},
       'type': {
         'type': 'string',
         'enum': ['image_generation_call'],
@@ -3132,10 +3117,7 @@ const Map<String, dynamic> _responseSchemas = {
     'type': 'object',
     'required': ['type', 'id', 'status', 'result'],
   },
-  'ImageOutputFormat': {
-    'type': 'string',
-    'enum': ['png', 'webp', 'jpeg'],
-  },
+  ...liveResponsesImageSchemas,
   'InlineSkillParam': {
     'properties': {
       'type': {
@@ -4404,7 +4386,7 @@ const Map<String, dynamic> _responseSchemas = {
   },
   'PromptCacheTTLEnum': {
     'type': 'string',
-    'enum': ['30m'],
+    'enum': ['30m', '12h'],
   },
   'PromptCacheUnavailableDiagnosticsBody': {
     'properties': {
@@ -5609,6 +5591,14 @@ const Map<String, dynamic> _responseSchemas = {
         'properties': {
           'cached_tokens': {'type': 'integer'},
           'cache_write_tokens': {'type': 'integer'},
+          'cache_write_tokens_details': {
+            'type': 'object',
+            'properties': {
+              'ttl_30m_tokens': {'type': 'integer'},
+              'ttl_12h_tokens': {'type': 'integer'},
+            },
+            'required': ['ttl_30m_tokens', 'ttl_12h_tokens'],
+          },
         },
         'required': ['cached_tokens', 'cache_write_tokens'],
       },
