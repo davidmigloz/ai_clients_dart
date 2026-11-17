@@ -72,8 +72,9 @@ retirements. Use the dated deprecation entries and current model references.
   and Standard service. Use `default` explicitly, or let the project select
   Standard when the tier is automatic or omitted. Preserve the existing
   response status, retrieval, cancellation and guide-defined storage behavior.
-  Keep per-TTL cache-write counts distinct from aggregate usage and preserve
-  the existing TTL contracts for Chat, Decisions and Live.
+  Keep per-TTL cache-write counts distinct from aggregate usage. Chat and
+  Decisions retain distinct TTL contracts. Live accepts applied Responses TTLs
+  and per-TTL accounting in received or replayed history.
   [Background guide](https://developers.openai.com/api/docs/guides/background#use-discounted-completion-windows)
 - The image generation guide and pinned edits reference disagree on SVG editing.
   Check the endpoint wire contract and bracketed multipart fields against both

@@ -15,6 +15,12 @@ Each record has one primary owner. Shared image, cache and namespace models
 also name Live as a consumer where required. Each implementation below had
 an independent adversarial review, including a re-review of subsequent fixes.
 
+The normalized toolkit diff identifies 12 added and one modified HTTP
+operation. The modified operation is Agent event streaming with the new
+`include_obfuscation` query parameter. The full inventory also captures
+three raw operation revisions, the new webhook, and 77 added and 78
+normalized modified schema components.
+
 | Issue | Public-path evidence |
 | --- | --- |
 | [#569](https://github.com/davidmigloz/ai_clients_dart/issues/569) | HTTP background completion windows and constraints, continuation IDs, input transformations and distinct Responses TTLs and cache usage. [PR #581](https://github.com/davidmigloz/ai_clients_dart/pull/581) |
