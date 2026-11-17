@@ -33,7 +33,7 @@ enum PromptCacheBreakpointTtl {
 /// Marks the exact end of a reusable prompt prefix.
 ///
 /// An omitted [ttl] inherits `prompt_cache_options.ttl`. Responses breakpoints
-/// support `30m` and `12h`; the pinned top-level options still admit only `30m`.
+/// support `30m` and `12h`. Top-level TTLs depend on the endpoint.
 /// This shared content model is also used by Chat; model/API support is validated
 /// by the server. Decisions has a separate marker without a TTL override.
 /// Boundaries are exact, rather than rounded to token blocks. The marker can be

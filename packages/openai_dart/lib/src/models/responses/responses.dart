@@ -81,6 +81,7 @@ export 'input_token_count.dart';
 export 'items/items.dart';
 export 'misalignment_details.dart';
 export 'multi_agent/multi_agent.dart';
+export 'reasoning_input_transformation.dart';
 export 'response.dart';
 export 'response_compaction.dart';
 export 'response_error.dart';

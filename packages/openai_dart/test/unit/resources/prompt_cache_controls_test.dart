@@ -56,7 +56,7 @@ void main() {
                 promptCacheRetention: PromptCacheRetention.h24,
                 promptCacheOptions: ResponsePromptCacheOptionsParam(
                   mode: PromptCacheMode.explicit,
-                  ttl: PromptCacheTtl.minutes30,
+                  ttl: ResponsePromptCacheTtl.minutes30,
                   comparisonResponseId: 'resp_previous',
                   prewarm: prewarm,
                 ),

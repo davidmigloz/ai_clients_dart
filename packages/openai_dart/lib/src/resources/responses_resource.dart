@@ -378,6 +378,8 @@ class ResponsesResource extends ResourceBase with StreamingResource {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
+    final body = request.toJson();
+    _validateBackgroundWindow(body);
     final url = requestBuilder.buildUrl(
       _endpoint,
       queryParams: beta ? const {'beta': 'true'} : null,
@@ -387,7 +389,7 @@ class ResponsesResource extends ResourceBase with StreamingResource {
         : requestBuilder.buildHeaders();
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
+      ..body = jsonEncode(body);
     final response = await interceptorChain.execute(
       httpRequest,
       abortTrigger: abortTrigger,
@@ -474,9 +476,8 @@ class ResponsesResource extends ResourceBase with StreamingResource {
     bool beta = false,
     Future<void>? abortTrigger,
   }) {
-    // Ensure stream is enabled in the request body
-    final requestBody = request.toJson();
-    requestBody['stream'] = true;
+    final requestBody = {...request.toJson(), 'stream': true};
+    _validateBackgroundWindow(requestBody);
 
     return streamSseEvents(
       endpoint: _endpoint,
@@ -485,6 +486,17 @@ class ResponsesResource extends ResourceBase with StreamingResource {
       additionalHeaders: beta ? {'OpenAI-Beta': _multiAgentBetaFeature} : null,
       abortTrigger: abortTrigger,
     ).map(ResponseStreamEvent.fromJson);
+  }
+
+  void _validateBackgroundWindow(Map<String, dynamic> body) {
+    if (body['background_options'] case {
+      'completion_window': '2h' || '8h',
+    } when body['stream'] == true || body['background'] != true) {
+      throw ArgumentError(
+        'Discounted background completion windows require background: true '
+        'and a nonstreaming request.',
+      );
+    }
   }
 
   /// Creates a streaming response with accumulated events.

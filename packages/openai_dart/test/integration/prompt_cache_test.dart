@@ -55,7 +55,7 @@ void main() {
         store: true,
         promptCacheOptions: const ResponsePromptCacheOptionsParam(
           mode: PromptCacheMode.implicit,
-          ttl: PromptCacheTtl.minutes30,
+          ttl: ResponsePromptCacheTtl.minutes30,
           prewarm: true,
         ),
       );
@@ -67,14 +67,14 @@ void main() {
       expect(baseline.usage!.outputTokens, 0);
       if (baseline.promptCacheOptions case final options?) {
         expect(options.mode, PromptCacheMode.implicit);
-        expect(options.ttl, PromptCacheTtl.minutes30);
+        expect(options.ttl, ResponsePromptCacheTtl.minutes30);
       }
 
       final compared = await client.responses.create(
         request.copyWith(
           promptCacheOptions: ResponsePromptCacheOptionsParam(
             mode: PromptCacheMode.implicit,
-            ttl: PromptCacheTtl.minutes30,
+            ttl: ResponsePromptCacheTtl.minutes30,
             comparisonResponseId: baseline.id,
             prewarm: false,
           ),
@@ -86,7 +86,7 @@ void main() {
       );
       if (compared.promptCacheOptions case final options?) {
         expect(options.mode, PromptCacheMode.implicit);
-        expect(options.ttl, PromptCacheTtl.minutes30);
+        expect(options.ttl, ResponsePromptCacheTtl.minutes30);
         if (options.comparisonResponseId != null) {
           expect(options.comparisonResponseId, baseline.id);
         }

@@ -78,7 +78,7 @@ void main() {
               ]),
             ]),
             promptCacheOptions: const ResponsePromptCacheOptionsParam(
-              ttl: PromptCacheTtl.minutes30,
+              ttl: ResponsePromptCacheTtl.minutes30,
               mode: PromptCacheMode.explicit,
             ),
           );

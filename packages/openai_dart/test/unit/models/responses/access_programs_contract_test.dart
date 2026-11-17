@@ -439,7 +439,7 @@ const _fullRequest = CreateResponseRequest(
   promptCacheKey: 'cache-private',
   promptCacheOptions: ResponsePromptCacheOptionsParam(
     mode: PromptCacheMode.explicit,
-    ttl: PromptCacheTtl.minutes30,
+    ttl: ResponsePromptCacheTtl.minutes30,
     comparisonResponseId: 'comparison-private',
     prewarm: false,
   ),
@@ -478,7 +478,7 @@ const _fullResponse = Response(
   promptCacheRetention: PromptCacheRetention.h24,
   promptCacheOptions: PromptCacheOptions(
     mode: PromptCacheMode.explicit,
-    ttl: PromptCacheTtl.minutes30,
+    ttl: ResponsePromptCacheTtl.minutes30,
     comparisonResponseId: 'comparison-private',
   ),
   promptCacheDiagnostics: PromptCacheDiagnostics.cacheHit(),
@@ -985,7 +985,7 @@ void _parentContractTests() {
             replace: (r) => r.copyWith(
               promptCacheOptions: const PromptCacheOptions(
                 mode: PromptCacheMode.implicit,
-                ttl: PromptCacheTtl.minutes30,
+                ttl: ResponsePromptCacheTtl.minutes30,
               ),
             ),
             clear: (r) => r.copyWith(promptCacheOptions: null),

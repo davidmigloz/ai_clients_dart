@@ -2,6 +2,7 @@
 library;
 
 export 'access_programs.dart';
+export 'background_options.dart';
 export 'click_button.dart';
 export 'computer_call_output_status.dart';
 export 'configuration_update_reasoning.dart';
