@@ -21,8 +21,9 @@ Future<void> main() async {
     final response = await client.responses.create(
       const CreateResponseRequest(
         model: 'gpt-6.2-sol',
-        input: ResponseInput.text('What is the Dart programming language?'),
-        maxOutputTokens: 150,
+        input: ResponseInput.text(
+          'Describe the Dart programming language in one sentence.',
+        ),
       ),
     );
 
@@ -35,7 +36,6 @@ Future<void> main() async {
       const CreateResponseRequest(
         model: 'gpt-6.2-sol',
         input: ResponseInput.text('Count from 1 to 5'),
-        maxOutputTokens: 50,
       ),
     );
 
