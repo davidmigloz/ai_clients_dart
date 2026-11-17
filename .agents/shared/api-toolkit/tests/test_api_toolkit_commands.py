@@ -2820,6 +2820,114 @@ class ApiToolkitCommandTests(unittest.TestCase):
     def _verify_enum_audit(self, config_dir: Path, scope: str = "all", type_name: str | None = None):
         return command_verify(SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope=scope, type_name=type_name, baseline=None, git_ref=None))
 
+    def test_review_reports_mixed_openapi_enum_values_without_coercion(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            mixed_values = [None, "null", True, 1, 1.5, "1", False, 0]
+            package, config = self._enum_audit_fixture(root, {
+                "Mixed": {"enum": mixed_values},
+                "ScalarChange": {"enum": [1]},
+            }, {})
+            candidate = json.loads((package / "specs/openapi.json").read_text())
+            candidate["components"]["schemas"] = {
+                "Mixed": {"enum": list(reversed(mixed_values))},
+                "ScalarChange": {"enum": [True]},
+                "complexity": {"type": ["string", "null"], "enum": ["low", "high", None, "null"]},
+                "Unscaffoldable": {"enum": [None, 2]},
+            }
+            (root / "tmp/sample/latest-main.json").write_text(json.dumps(candidate))
+            exit_code, payload = command_review(SimpleNamespace(
+                config_dir=config, spec_name=None, baseline=None, git_ref=None,
+                changelog_out=None, plan_out=None,
+            ))
+            self.assertEqual(exit_code, toolkit_config.EXIT_FAILURE)
+            schema_diff = payload["diff"]["schemas"]
+            self.assertEqual([entry["schema"]["name"] for entry in schema_diff["modified"]], ["ScalarChange"])
+            change = schema_diff["modified"][0]["changes"][0]
+            self.assertEqual(json.dumps(change["old"]), "[1]")
+            self.assertEqual(json.dumps(change["new"]), "[true]")
+            added = {record["name"]: record for record in schema_diff["added"]}
+            self.assertEqual(added["complexity"]["enum_values"], [None, "high", "low", "null"])
+            recorded = toolkit_operations._extract_openapi_schemas(candidate)["Mixed"]["enum_values"]
+            self.assertCountEqual(map(json.dumps, recorded), map(json.dumps, mixed_values))
+            self.assertTrue(any("--target enum --name complexity" in action for action in payload["actions"]))
+            self.assertTrue(any("Review the enum values for `Unscaffoldable`" in action for action in payload["actions"]))
+
+    def test_verify_nullable_string_enum_still_requires_the_wire_string_null(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            package, config = self._enum_audit_fixture(Path(tmp_dir), {
+                "Complexity": {"type": ["string", "null"], "enum": ["low", None, "null"]},
+            }, {
+                "complexity.dart": "enum Complexity { low, unknown }",
+            })
+            code, payload = self._verify_enum_audit(config)
+            implementation = payload["results"]["implementation"]
+            self.assertEqual(code, toolkit_config.EXIT_FAILURE)
+            self.assertEqual(implementation["enum_discovery"]["checked_untracked_enums"], ["Complexity"])
+            self.assertEqual(
+                [issue["message"] for issue in implementation["issues"]],
+                ["Enum value 'null' not found in file"],
+            )
+            (package / "lib/src/models/common/complexity.dart").write_text(
+                "enum Complexity { low, nullValue, unknown }\n"
+                "String? complexityToString(Complexity? value) => "
+                "switch (value) { null => null, Complexity.nullValue => 'null', _ => value.name };\n"
+            )
+            self.assertEqual(self._verify_enum_audit(config)[0], toolkit_config.EXIT_SUCCESS)
+
+    def test_verify_tracked_mixed_enum_matches_non_string_values_as_code(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            package, config = self._enum_audit_fixture(Path(tmp_dir), {
+                "Mixed": {"enum": [None, "null", False, 1, 1.5]},
+            }, {
+                "mixed.dart": "class Mixed { final wireValues = ['null', 'false', /* false 1 */ -1, 1.5]; }",
+            }, manifest_types={"Mixed": {
+                "spec": "main", "kind": "enum", "dart_class": "Mixed",
+                "file": "lib/src/models/common/mixed.dart",
+            }})
+            code, payload = self._verify_enum_audit(config)
+            self.assertEqual(code, toolkit_config.EXIT_FAILURE)
+            self.assertCountEqual(
+                [issue["message"] for issue in payload["results"]["implementation"]["issues"]],
+                ["Enum value 'False' not found in file", "Enum value '1' not found in file"],
+            )
+            (package / "lib/src/models/common/mixed.dart").write_text(
+                "class Mixed { final wireValues = ['null', false, 1, 1.5]; }"
+            )
+            self.assertEqual(self._verify_enum_audit(config)[0], toolkit_config.EXIT_SUCCESS)
+
+    def test_scaffold_nullable_string_enum_and_reject_non_string_scaffold(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            _, config = self._enum_audit_fixture(Path(tmp_dir), {
+                "complexity": {
+                    "type": ["string", "null"],
+                    "enum": ["low", None, "null", "nullValue", "null-value", "2h", "'$value", "values", "toString"],
+                },
+                "Mixed": {"enum": [1, "one"]},
+            }, {})
+            args = SimpleNamespace(
+                config_dir=config, target="enum", name="complexity",
+                spec_name="main", output=None, dry_run=True,
+            )
+            exit_code, payload = command_scaffold(args)
+            self.assertEqual(exit_code, toolkit_config.EXIT_SUCCESS)
+            source = payload["preview"]
+            self.assertIn("Complexity? complexityFromString(String? value)", source)
+            self.assertIn("String? complexityToString(Complexity? value)", source)
+            self.assertEqual(source.count("null => null"), 2)
+            self.assertNotIn("  null,", source)
+            self.assertIn("'null' => Complexity.nullValue", source)
+            self.assertIn("Complexity.nullValue => 'null'", source)
+            self.assertIn("'nullValue' => Complexity.nullValueValue", source)
+            self.assertIn("'null-value' => Complexity.nullValueValueValue", source)
+            self.assertIn("'2h' => Complexity.value2H", source)
+            self.assertIn(r"'\'\$value' => Complexity.value", source)
+            self.assertIn("'values' => Complexity.valuesValue", source)
+            self.assertIn("'toString' => Complexity.toStringValue", source)
+            args.name = "Mixed"
+            with self.assertRaisesRegex(ToolkitError, "requires string values"):
+                command_scaffold(args)
+
     def test_verify_all_catches_unchanged_untracked_message_roles_without_mutation(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             roles = ["unknown", "user", "assistant", "system", "critic", "discriminator", "developer", "tool"]
