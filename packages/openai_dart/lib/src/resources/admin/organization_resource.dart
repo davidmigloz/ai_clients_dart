@@ -23,7 +23,7 @@ final class AdminOrganizationResource {
     return _externalStorage ??= AdminExternalStorageResource(_http);
   }
 
-  /// Project administration limited to API-key updates.
+  /// Project API-key updates and service-tier settings.
   AdminProjectsResource get projects {
     _http.ensureOpen();
     return _projects ??= AdminProjectsResource(_http);
@@ -42,7 +42,7 @@ final class AdminExternalKeysResource {
   AdminExternalKeysResource(this._http);
   final AdminHttp _http;
 
-  /// Registers AWS, Azure or GCP key metadata. Provider validation is explicit.
+  /// Registers AWS, Azure, GCP or OCI key metadata. Provider validation is explicit.
   Future<ExternalKey> create(
     ExternalKeyParams request, {
     Map<String, String>? additionalHeaders,
@@ -241,11 +241,60 @@ final class AdminProjectsResource {
   AdminProjectsResource(this._http);
   final AdminHttp _http;
   AdminProjectApiKeysResource? _apiKeys;
+  AdminProjectServiceTierSettingsResource? _serviceTierSettings;
 
   /// API-key permission/expiry updates, including service-account-owned keys.
   AdminProjectApiKeysResource get apiKeys {
     _http.ensureOpen();
     return _apiKeys ??= AdminProjectApiKeysResource(_http);
+  }
+
+  /// The project's default tier and allowed additional tiers.
+  AdminProjectServiceTierSettingsResource get serviceTierSettings {
+    _http.ensureOpen();
+    return _serviceTierSettings ??= AdminProjectServiceTierSettingsResource(
+      _http,
+    );
+  }
+}
+
+/// Reads and updates a project's service-tier settings.
+final class AdminProjectServiceTierSettingsResource {
+  /// Creates a resource sharing the Admin HTTP policy.
+  AdminProjectServiceTierSettingsResource(this._http);
+  final AdminHttp _http;
+
+  /// Retrieves the effective settings for [projectId].
+  Future<ProjectServiceTierSettings> retrieve(
+    String projectId, {
+    Map<String, String>? additionalHeaders,
+    Future<void>? abortTrigger,
+  }) => _http.json(
+    'GET',
+    _path(projectId),
+    ProjectServiceTierSettings.fromJson,
+    additionalHeaders: additionalHeaders,
+    abortTrigger: abortTrigger,
+  );
+
+  /// Updates only the fields provided in [request].
+  Future<ProjectServiceTierSettings> update(
+    String projectId,
+    UpdateProjectServiceTierSettingsRequest request, {
+    Map<String, String>? additionalHeaders,
+    Future<void>? abortTrigger,
+  }) => _http.json(
+    'POST',
+    _path(projectId),
+    ProjectServiceTierSettings.fromJson,
+    body: request.toJson(),
+    additionalHeaders: additionalHeaders,
+    abortTrigger: abortTrigger,
+  );
+
+  String _path(String id) {
+    _http.ensureOpen();
+    return '/organization/projects/${adminPathId(id, 'projectId')}/service_tier_settings';
   }
 }
 

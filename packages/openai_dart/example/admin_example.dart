@@ -44,6 +44,12 @@ Future<void> main() async {
           },
         ],
       };
+    } else if (path.endsWith('/service_tier_settings')) {
+      result = {
+        'object': 'project.service_tier_settings',
+        'default': 'standard',
+        'enabled_tiers': request.method == 'GET' ? 'all' : ['flex'],
+      };
     } else if (path.contains('/api_keys/')) {
       result = {
         'object': 'organization.project.api_key',
@@ -86,11 +92,14 @@ Future<void> main() async {
       result = {
         'object': 'organization.external_key',
         'id': 'key_fixture',
-        'type': 'aws',
+        'type': 'oci',
         'name': 'Synthetic key',
         'api_project_ids': <String>[],
         'workspace_id': 'organization_fixture',
         'created_at': 0,
+        'region': 'synthetic-region',
+        'vault_ocid': 'synthetic-vault',
+        'key_ocid': 'synthetic-key',
       };
     }
     return http.Response(
@@ -110,11 +119,11 @@ Future<void> main() async {
   );
   try {
     final key = await admin.organization.externalKeys.create(
-      AwsExternalKeyParams(
+      OciExternalKeyParams(
         name: 'Synthetic key',
-        roleArn: 'arn:aws:iam::123456789012:role/synthetic',
-        kmsArn: 'synthetic-kms-arn',
-        externalId: 'synthetic-external-id',
+        region: 'synthetic-region',
+        vaultOcid: 'synthetic-vault',
+        keyOcid: 'synthetic-key',
         purpose: ExternalKeyPurpose.ekm,
       ),
     );
@@ -142,6 +151,19 @@ Future<void> main() async {
       'key_fixture',
       UpdateProjectApiKeyRequest(scopes: const [], expiresInSeconds: 300),
     );
+
+    final settings = admin.organization.projects.serviceTierSettings;
+    final before = await settings.retrieve('project_fixture');
+    stdout.writeln('Current default tier: ${before.defaultTier.value}');
+    final after = await settings.update(
+      'project_fixture',
+      UpdateProjectServiceTierSettingsRequest(
+        enabledTiers: ProjectEnabledServiceTiers.selected(const [
+          ProjectOptionalServiceTier.flex,
+        ]),
+      ),
+    );
+    stdout.writeln('Updated enabled tiers: ${after.enabledTiers.toJson()}');
 
     final usage = await admin.organization.usage.decisions(
       startTime: 0,

@@ -1632,7 +1632,7 @@ Use `client.vaults` and `.credentials` to store or rotate OAuth, bearer, and hos
 ### Organization administration
 
 <details>
-<summary><b>How do I use Admin keys, storage, and Decisions usage?</b></summary>
+<summary><b>How do I use Admin keys, storage, service tiers, and Decisions usage?</b></summary>
 
 Use a separate `OpenAIAdminClient`. `fromEnvironment()` reads **`OPENAI_ADMIN_KEY`**; project client credentials and defaults are never inherited. Admin credentials are used only by this bounded administration namespace. Custom providers supply a Bearer Authorization header; configure organization/routing headers explicitly in `OpenAIAdminConfig`.
 
@@ -1650,9 +1650,11 @@ try {
 }
 ```
 
-The 12 supported operations cover AWS/Azure/GCP external keys, AWS/Azure/GCP/OCI external storage, project API-key scope/relative-expiry updates, and Decisions usage. Empty key scopes means **All permissions** within the owner's effective access; eligible HTTP retries reapply relative expiry. Storage status and deletion effects remain service-owned. Historical Admin APIs are outside this slice. Redirects are disabled; automatic diagnostics redact key/provider metadata, IDs, and usage filters.
+The client supports AWS, Azure, GCP and OCI external keys and storage, project API-key scope and relative-expiry updates, project service-tier settings, and Decisions usage. Empty key scopes grant **All permissions** within the owner's effective access. Redirects are disabled, and diagnostics redact key metadata, IDs, and filters.
 
-See [the offline Admin example](example/admin_example.dart) for synthetic key validation, OCI storage, service-account-owned key updates, and 30-minute cache-write usage. It uses only `MockClient`, with no real key registration, cloud access, or billing queries. The narrower import `package:openai_dart/openai_dart_admin.dart` is also available.
+Use `admin.organization.projects.serviceTierSettings` to read and update processing tiers. Pass `ProjectEnabledServiceTiers.all()` to permit all additional tiers or `ProjectEnabledServiceTiers.selected([])` to allow Standard only. Organization policy and project eligibility still apply.
+
+The Admin models are also available through `package:openai_dart/openai_dart_admin.dart`. [Offline Admin example](example/admin_example.dart)
 
 </details>
 
