@@ -57,6 +57,26 @@ can be added to a typed response history with
 constructing or checking a conversation image call. When a result is
 unavailable, the serializer emits `"result": null`.
 
+### Agent session budgets and observation
+
+- For background compaction, set `AgentCompactionConfig(async: true)`.
+  Omitted and null values still go to the service as supplied. The current
+  service default is blocking compaction.
+- Read received spending from `session.spendControl`. Its `limit` is nullable
+  for unlimited sessions, and its `consumed` is nullable when recorded
+  spending is unavailable. Move lookups of `rawJson['spend_control']` to this
+  typed model. Nested extra fields reside on `session.spendControl?.rawJson`.
+- Read `session.promptCacheOptions`, `turn.promptCacheOptions` and
+  `automation.pauseReason` in place of matching raw metadata keys. The
+  corresponding presence getters distinguish explicit null from omission.
+- Handle `AgentSessionBudgetReachedEvent` in exhaustive event switches and
+  `AgentSessionRunResultReason.budgetReached` in result-failure switches.
+  A spending pause ends the managed observation with no completed result.
+- If you override `AgentSessionsResource.stream` or
+  `AgentSessionEventsResource.stream`, add its new optional
+  `bool? includeObfuscation` named parameter. Forward it to preserve the
+  caller's per-connection padding preference.
+
 ---
 
 ## Migrating from v11.x to v12.0.0

@@ -9,6 +9,30 @@ import 'agent_json_helpers.dart';
 import 'agent_session_models.dart';
 import 'agent_settings.dart';
 
+/// Why the service paused an Agent automation.
+final class AgentAutomationPauseReason extends AgentJsonModel {
+  const AgentAutomationPauseReason._(this.value);
+
+  /// The session targeted by the schedule failed.
+  static const targetSessionFailed = AgentAutomationPauseReason._(
+    'target_session_failed',
+  );
+
+  /// Reads a known or future reason.
+  factory AgentAutomationPauseReason.fromJson(Object? json) {
+    final value = requireAgentString(json, 'AgentAutomationPauseReason');
+    return value == targetSessionFailed.value
+        ? targetSessionFailed
+        : AgentAutomationPauseReason._(value);
+  }
+
+  /// The received wire value.
+  final String value;
+
+  @override
+  String toJson() => value;
+}
+
 /// Exact schedule status: [AgentAutomationOnceStatus],
 /// [AgentAutomationPeriodicStatus], or [AgentAutomationFutureStatus].
 sealed class AgentAutomationStatus extends AgentJsonModel {
@@ -211,6 +235,12 @@ sealed class AgentAutomation extends AgentJsonModel {
 
   /// The received status field.
   AgentAutomationStatus get status;
+
+  /// Why the service paused this schedule, when supplied.
+  AgentAutomationPauseReason? get pauseReason;
+
+  /// Whether the server included the pause reason, even as null.
+  bool get hasPauseReason;
 }
 
 /// Detached future AgentAutomation variant; not a writable request.
@@ -292,6 +322,18 @@ final class UnknownAgentAutomation extends AgentAutomation {
   @override
   AgentAutomationStatus get status =>
       AgentAutomationFutureStatus.fromJson(rawJson['status']);
+
+  @override
+  AgentAutomationPauseReason? get pauseReason => optionalAgentValue(
+    rawJson,
+    'pause_reason',
+    'UnknownAgentAutomation.pauseReason',
+    (value, _) => AgentAutomationPauseReason.fromJson(value),
+    nullable: true,
+  );
+
+  @override
+  bool get hasPauseReason => rawJson.containsKey('pause_reason');
 }
 
 /// Saved target: [AgentAutomationExistingSessionTargetResource],
@@ -1873,8 +1915,11 @@ final class AgentAutomationOnce extends AgentAutomation {
     required this.createdBy,
     required this.runAt,
     required this.status,
+    this.pauseReason,
+    bool hasPauseReason = false,
     Map<String, dynamic> rawJson = const {},
-  }) : metadata = Map<String, String>.unmodifiable(metadata),
+  }) : hasPauseReason = hasPauseReason || pauseReason != null,
+       metadata = Map<String, String>.unmodifiable(metadata),
        rawJson = agentExtras(rawJson, const [
          'type',
          'id',
@@ -1886,6 +1931,7 @@ final class AgentAutomationOnce extends AgentAutomation {
          'created_by',
          'run_at',
          'status',
+         'pause_reason',
        ], 'AgentAutomationOnce') {
     validate();
   }
@@ -1920,6 +1966,12 @@ final class AgentAutomationOnce extends AgentAutomation {
   /// The received `status` field.
   @override
   final AgentAutomationOnceStatus status;
+
+  @override
+  final AgentAutomationPauseReason? pauseReason;
+
+  @override
+  final bool hasPauseReason;
 
   /// Fixed `type` discriminator.
   @override
@@ -1996,6 +2048,14 @@ final class AgentAutomationOnce extends AgentAutomation {
         (value, context) => AgentAutomationOnceStatus.fromJson(value),
         nullable: false,
       )!,
+      pauseReason: optionalAgentValue(
+        json,
+        'pause_reason',
+        'AgentAutomationOnce.pauseReason',
+        (value, _) => AgentAutomationPauseReason.fromJson(value),
+        nullable: true,
+      ),
+      hasPauseReason: json.containsKey('pause_reason'),
       rawJson: {
         for (final entry in json.entries)
           if (!const [
@@ -2009,6 +2069,7 @@ final class AgentAutomationOnce extends AgentAutomation {
             'created_by',
             'run_at',
             'status',
+            'pause_reason',
           ].contains(entry.key))
             entry.key: entry.value,
       },
@@ -2040,6 +2101,7 @@ final class AgentAutomationOnce extends AgentAutomation {
     'created_by': createdBy.toJson(),
     'run_at': runAt,
     'status': status.toJson(),
+    if (hasPauseReason) 'pause_reason': pauseReason?.toJson(),
     'type': type,
     'object': object,
   };
@@ -2054,6 +2116,8 @@ final class AgentAutomationOnce extends AgentAutomation {
     AgentAutomationCreator? createdBy,
     int? runAt,
     AgentAutomationOnceStatus? status,
+    Object? pauseReason = unsetCopyWithValue,
+    bool? hasPauseReason,
     Map<String, dynamic>? rawJson,
   }) => AgentAutomationOnce(
     id: id ?? this.id,
@@ -2064,6 +2128,16 @@ final class AgentAutomationOnce extends AgentAutomation {
     createdBy: createdBy ?? this.createdBy,
     runAt: runAt ?? this.runAt,
     status: status ?? this.status,
+    pauseReason: copyAgentValue<AgentAutomationPauseReason>(
+      pauseReason,
+      this.pauseReason,
+      'AgentAutomationOnce.pauseReason',
+    ),
+    hasPauseReason:
+        hasPauseReason ??
+        (identical(pauseReason, unsetCopyWithValue)
+            ? this.hasPauseReason
+            : pauseReason == null),
     rawJson: rawJson ?? this.rawJson,
   );
 }
@@ -2081,8 +2155,11 @@ final class AgentAutomationPeriodic extends AgentAutomation {
     required this.expression,
     required this.timezone,
     required this.status,
+    this.pauseReason,
+    bool hasPauseReason = false,
     Map<String, dynamic> rawJson = const {},
-  }) : metadata = Map<String, String>.unmodifiable(metadata),
+  }) : hasPauseReason = hasPauseReason || pauseReason != null,
+       metadata = Map<String, String>.unmodifiable(metadata),
        rawJson = agentExtras(rawJson, const [
          'type',
          'id',
@@ -2095,6 +2172,7 @@ final class AgentAutomationPeriodic extends AgentAutomation {
          'expression',
          'timezone',
          'status',
+         'pause_reason',
        ], 'AgentAutomationPeriodic') {
     validate();
   }
@@ -2132,6 +2210,12 @@ final class AgentAutomationPeriodic extends AgentAutomation {
   /// The received `status` field.
   @override
   final AgentAutomationPeriodicStatus status;
+
+  @override
+  final AgentAutomationPauseReason? pauseReason;
+
+  @override
+  final bool hasPauseReason;
 
   /// Fixed `type` discriminator.
   @override
@@ -2220,6 +2304,14 @@ final class AgentAutomationPeriodic extends AgentAutomation {
         (value, context) => AgentAutomationPeriodicStatus.fromJson(value),
         nullable: false,
       )!,
+      pauseReason: optionalAgentValue(
+        json,
+        'pause_reason',
+        'AgentAutomationPeriodic.pauseReason',
+        (value, _) => AgentAutomationPauseReason.fromJson(value),
+        nullable: true,
+      ),
+      hasPauseReason: json.containsKey('pause_reason'),
       rawJson: {
         for (final entry in json.entries)
           if (!const [
@@ -2234,6 +2326,7 @@ final class AgentAutomationPeriodic extends AgentAutomation {
             'expression',
             'timezone',
             'status',
+            'pause_reason',
           ].contains(entry.key))
             entry.key: entry.value,
       },
@@ -2279,6 +2372,7 @@ final class AgentAutomationPeriodic extends AgentAutomation {
     'expression': expression,
     'timezone': timezone,
     'status': status.toJson(),
+    if (hasPauseReason) 'pause_reason': pauseReason?.toJson(),
     'type': type,
     'object': object,
   };
@@ -2294,6 +2388,8 @@ final class AgentAutomationPeriodic extends AgentAutomation {
     String? expression,
     String? timezone,
     AgentAutomationPeriodicStatus? status,
+    Object? pauseReason = unsetCopyWithValue,
+    bool? hasPauseReason,
     Map<String, dynamic>? rawJson,
   }) => AgentAutomationPeriodic(
     id: id ?? this.id,
@@ -2305,6 +2401,16 @@ final class AgentAutomationPeriodic extends AgentAutomation {
     expression: expression ?? this.expression,
     timezone: timezone ?? this.timezone,
     status: status ?? this.status,
+    pauseReason: copyAgentValue<AgentAutomationPauseReason>(
+      pauseReason,
+      this.pauseReason,
+      'AgentAutomationPeriodic.pauseReason',
+    ),
+    hasPauseReason:
+        hasPauseReason ??
+        (identical(pauseReason, unsetCopyWithValue)
+            ? this.hasPauseReason
+            : pauseReason == null),
     rawJson: rawJson ?? this.rawJson,
   );
 }

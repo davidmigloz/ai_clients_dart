@@ -17,7 +17,7 @@ Future<void> main() async {
     final saved = await client.agents.create(
       CreateAgentRequest(
         model: 'gpt-6.1-sol',
-        compaction: const AgentCompactionConfig(async: false),
+        compaction: const AgentCompactionConfig(async: true),
         experimental: const AgentExperimentalConfig(timeAwareness: true),
         serviceTier: AgentServiceTierParam.ultrafast,
         tools: [
@@ -29,12 +29,12 @@ Future<void> main() async {
         ],
       ),
     );
-    if (saved.compaction?.async != false ||
+    if (saved.compaction?.async != true ||
         saved.experimental?.timeAwareness != true) {
       throw StateError('Synthetic create settings were lost.');
     }
-    // Compaction null resets background mode; empty experimental overrides
-    // preserve keys instead of replacing them with default values.
+    // Compaction null restores blocking mode. Empty experimental overrides
+    // preserve configured keys.
     final reset = await client.agents.update(
       saved.id,
       UpdateAgentRequest(
@@ -42,7 +42,7 @@ Future<void> main() async {
         experimental: const AgentExperimentalOverridesConfig(),
       ),
     );
-    if (reset.compaction?.async != true ||
+    if (reset.compaction?.async != false ||
         reset.experimental?.timeAwareness != true) {
       throw StateError('Synthetic update semantics changed.');
     }
@@ -61,12 +61,29 @@ Future<void> main() async {
         ),
         metadata: const {'project': 'demo', 'owner': 'example'},
         review: SessionReviewParam.autoReview,
+        spendControl: AgentSessionSpendControlConfig(limit: 500),
+        promptCacheOptions: const AgentSessionPromptCacheConfig(
+          ttl: AgentSessionPromptCacheTtl.hours12,
+        ),
       ),
     );
     if (session.review != SessionReviewResource.autoReview ||
-        session.agent.experimental?.timeAwareness != false) {
+        session.agent.experimental?.timeAwareness != false ||
+        session.spendControl?.limit != 500 ||
+        session.promptCacheOptions?.ttl != AgentSessionPromptCacheTtl.hours12) {
       throw StateError('Synthetic session overrides were lost.');
     }
+    final event = await client.agents.sessions.events
+        .stream(session.id, includeObfuscation: false)
+        .single;
+    if (event case AgentSessionBudgetReachedEvent(:final session)) {
+      stdout.writeln(
+        'Session paused at ${session.spendControl?.consumed} cents.',
+      );
+    } else {
+      throw StateError('Expected synthetic budget event.');
+    }
+
     // Action review is independent of spending limits. Updates affect new root
     // turns; already-running turns and their subagents retain their review mode.
     final updated = await client.agents.sessions.update(
@@ -74,10 +91,16 @@ Future<void> main() async {
       UpdateAgentSessionRequest(
         review: SessionReviewParam.none,
         agent: AgentSessionAgentUpdate(clearTools: true),
+        clearSpendControl: true,
+        clearPromptCacheOptions: true,
       ),
     );
-    if (updated.agent.tools.isNotEmpty || updated.review != null) {
-      throw StateError('Synthetic tool clear/review update changed.');
+    if (updated.agent.tools.isNotEmpty ||
+        updated.review != null ||
+        updated.spendControl?.limit != null ||
+        updated.spendControl?.consumed != 500 ||
+        updated.promptCacheOptions != null) {
+      throw StateError('Synthetic session update changed.');
     }
 
     // Every pair must match; keep the same filters when advancing a cursor.
@@ -86,9 +109,7 @@ Future<void> main() async {
       order: AgentListOrder.asc,
       limit: 10,
     );
-    if (page.data.single.id != session.id ||
-        !peer.sawExactFilter ||
-        peer.sawRemovedSpendField) {
+    if (page.data.single.id != session.id || !peer.sawExactFilter) {
       throw StateError('Synthetic metadata query or request shape changed.');
     }
     stdout
@@ -109,7 +130,6 @@ class _Peer {
   Map<String, dynamic> saved = {};
   Map<String, dynamic> session = {};
   bool sawExactFilter = false;
-  bool sawRemovedSpendField = false;
 
   Future<http.Response> handle(http.Request request) async {
     if (request.headers['openai-beta'] != 'agents=v1') {
@@ -118,7 +138,6 @@ class _Peer {
     final body = request.body.isEmpty
         ? <String, dynamic>{}
         : jsonDecode(request.body) as Map<String, dynamic>;
-    sawRemovedSpendField |= body.containsKey('spend_control');
     switch ((request.method, request.url.path)) {
       case ('POST', '/v1/agents'):
         saved = {
@@ -161,6 +180,11 @@ class _Peer {
           'status': 'idle',
           'usage': null,
           'vault_ids': <String>[],
+          'spend_control': {
+            'limit': (body['spend_control'] as Map<String, dynamic>?)?['limit'],
+            'consumed': 0,
+          },
+          'prompt_cache_options': body['prompt_cache_options'],
           if (body['review'] != null && body['review'] != 'none')
             'review': body['review'],
         };
@@ -176,7 +200,25 @@ class _Peer {
           (session['agent'] as Map<String, dynamic>)['tools'] =
               agent!['tools'] ?? <Object?>[];
         }
+        if (body.containsKey('spend_control')) {
+          (session['spend_control'] as Map<String, dynamic>)['limit'] =
+              (body['spend_control'] as Map<String, dynamic>?)?['limit'];
+        }
+        if (body.containsKey('prompt_cache_options')) {
+          session['prompt_cache_options'] = body['prompt_cache_options'];
+        }
         return _json(session);
+      case ('GET', '/v1/agents/sessions/session_fixture/events'):
+        if (request.url.queryParameters['include_obfuscation'] != 'false') {
+          throw StateError('Expected padding override.');
+        }
+        (session['spend_control'] as Map<String, dynamic>)['consumed'] = 500;
+        final paused = {...session, 'status': 'budget_reached'};
+        return http.Response(
+          'data: ${jsonEncode({'type': 'agent.session.budget_reached', 'event_id': 'event_fixture', 'session': paused})}\n\n',
+          200,
+          headers: {'content-type': 'text/event-stream'},
+        );
       case ('GET', '/v1/agents/sessions'):
         final query = request.url.queryParameters;
         sawExactFilter =
@@ -223,7 +265,7 @@ Map<String, dynamic> _resolvedAgent(Map<String, dynamic> input) => {
   },
 };
 Map<String, dynamic> _compaction(Object? value) => {
-  'async': (value as Map<String, dynamic>?)?['async'] ?? true,
+  'async': (value as Map<String, dynamic>?)?['async'] ?? false,
 };
 http.Response _json(Map<String, dynamic> value, [int status = 200]) =>
     http.Response(

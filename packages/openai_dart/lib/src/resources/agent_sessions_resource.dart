@@ -128,6 +128,7 @@ class AgentSessionsResource extends ResourceBase with _AgentSessionHttp {
   AgentSessionRun stream(
     String sessionId, {
     required AgentSessionInitialInput input,
+    bool? includeObfuscation,
     String? idempotencyKey,
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
@@ -143,6 +144,7 @@ class AgentSessionsResource extends ResourceBase with _AgentSessionHttp {
       sessions: this,
       sessionId: sessionId,
       input: input,
+      includeObfuscation: includeObfuscation,
       idempotencyKey: idempotencyKey,
       additionalHeaders: additionalHeaders,
       abortTrigger: abortTrigger,
@@ -328,12 +330,13 @@ class AgentSessionsResource extends ResourceBase with _AgentSessionHttp {
     );
   }
 
-  /// Updates metadata, subsequent-turn agent settings and action review.
+  /// Updates metadata, settings for future turns, and the session spending cap.
   ///
   /// Omission retains state. Metadata replaces the full map; explicit null clears
   /// it. Agent tools may be omitted, replaced, or cleared with null/an empty list.
   /// Review applies to new root turns; existing turns and their subagents keep
-  /// their review mode. Action review does not configure spending limits.
+  /// their review mode. A null spending cap removes the limit without resetting
+  /// recorded spend.
   Future<AgentSession> update(
     String sessionId,
     UpdateAgentSessionRequest request, {
@@ -392,12 +395,14 @@ class AgentSessionEventsResource extends ResourceBase with _AgentSessionHttp {
   /// Cancel/abort releases only this observer; no cancel/delete input is sent.
   /// [onReady] runs synchronously once successful SSE headers have been checked,
   /// before event delivery. It does not wait for a first event or promise replay.
+  /// Set [includeObfuscation] to override server-generated event padding.
   /// When awaiting readiness, also handle the stream's error/completion path;
   /// failed or canceled setup never calls [onReady]. A callback failure closes
   /// the observation with private diagnostics and the original explicit cause.
   /// Its return is ignored; use it only to complete a local readiness signal.
   Stream<AgentSessionEvent> stream(
     String sessionId, {
+    bool? includeObfuscation,
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
     void Function()? onReady,
@@ -406,6 +411,9 @@ class AgentSessionEventsResource extends ResourceBase with _AgentSessionHttp {
     return _observe(
       'GET',
       '${_sessionPath(sessionId)}/events',
+      query: includeObfuscation == null
+          ? null
+          : {'include_obfuscation': includeObfuscation.toString()},
       additionalHeaders: additionalHeaders,
       abortTrigger: abortTrigger,
       onReady: onReady,
@@ -593,6 +601,7 @@ mixin _AgentSessionHttp on ResourceBase {
     String path, {
     int expectedStatus = 200,
     Map<String, dynamic>? body,
+    Map<String, String>? query,
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
     void Function()? onReady,
@@ -617,6 +626,7 @@ mixin _AgentSessionHttp on ResourceBase {
         requestBuilder: requestBuilder,
         method: method,
         endpoint: path,
+        query: query,
         body: body,
         additionalHeaders: additionalHeaders,
         idempotencyKey: callerKey,

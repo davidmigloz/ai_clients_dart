@@ -513,7 +513,7 @@ final class CreateAgentRequest extends AgentJsonModel {
   }
 
   /// Optional compaction object. Updates replace it; omitted updates keep it.
-  /// Null or an empty object enables background compaction without a client default.
+  /// Null or an empty object restores the service’s blocking default.
   final AgentCompactionConfig? compaction;
 
   /// Sends compaction:null rather than omitting the setting.
@@ -1216,7 +1216,7 @@ final class UpdateAgentRequest extends AgentJsonModel {
   }
 
   /// Optional compaction object. Updates replace it; omitted updates keep it.
-  /// Null or an empty object enables background compaction without a client default.
+  /// Null or an empty object restores the service’s blocking default.
   final AgentCompactionConfig? compaction;
 
   /// Sends compaction:null rather than omitting the setting.

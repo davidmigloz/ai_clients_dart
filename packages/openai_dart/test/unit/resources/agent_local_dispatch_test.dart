@@ -397,6 +397,40 @@ void main() {
   }
 
   test(
+    'premature EOF stops an active local handler before result submission',
+    () async {
+      final peer = _Peer();
+      final client = _client(peer);
+      addTearDown(client.close);
+      final entered = Completer<void>();
+      final waiting = Completer<Object?>();
+      final run = client.agents.sessions.stream(
+        'session',
+        input: AgentSessionInitialInput.text('go'),
+        toolHandlers: {
+          'local': (_) {
+            entered.complete();
+            return waiting.future;
+          },
+        },
+      );
+      addTearDown(run.close);
+      final stopped = expectLater(
+        run.events.toList(),
+        throwsA(isA<StreamException>()),
+      );
+      await entered.future;
+      unawaited(peer.body.close());
+
+      await stopped.timeout(const Duration(seconds: 2));
+      expect(waiting.isCompleted, isFalse);
+      waiting.complete('late fixture result');
+      await Future<void>.delayed(Duration.zero);
+      expect(peer.results, isEmpty);
+    },
+  );
+
+  test(
     'registration race exactly four transport attempts, fixed body/key, exact delays, one handler',
     () async {
       final delays = <int>[];

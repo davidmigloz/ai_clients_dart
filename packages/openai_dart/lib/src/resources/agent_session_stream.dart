@@ -84,6 +84,12 @@ class _AgentSessionEventOperation {
       if (decoded is! Map<String, dynamic>) {
         throw const FormatException('Expected a JSON object');
       }
+      if (raw.event == 'error') {
+        decoded.putIfAbsent('type', () => 'error');
+        if (decoded['type'] != 'error') {
+          throw const FormatException('Expected an Agent session error event');
+        }
+      }
       _controller.add(AgentSessionEvent.fromJson(decoded));
     } on FormatException catch (_, stackTrace) {
       _fail(

@@ -3803,14 +3803,19 @@ final class AgentSessionTurn extends AgentJsonModel {
     required this.status,
     required this.subagentId,
     required this.usage,
+    this.promptCacheOptions,
+    bool hasPromptCacheOptions = false,
     Map<String, dynamic> rawJson = const {},
-  }) : rawJson = agentExtras(rawJson, const [
+  }) : hasPromptCacheOptions =
+           hasPromptCacheOptions || promptCacheOptions != null,
+       rawJson = agentExtras(rawJson, const [
          'agent_id',
          'completed_at',
          'created_at',
          'error',
          'id',
          'object',
+         'prompt_cache_options',
          'session_id',
          'started_at',
          'status',
@@ -3837,6 +3842,12 @@ final class AgentSessionTurn extends AgentJsonModel {
 
   /// The object type. Always `agent.session.turn`.
   final AgentSessionTurnObjectResource object;
+
+  /// The recorded prompt cache lifetime, or null when the model default applies.
+  final AgentSessionPromptCacheOptions? promptCacheOptions;
+
+  /// Whether the cache field was present, including explicit null.
+  final bool hasPromptCacheOptions;
 
   /// The ID of the session that owns the turn.
   final String sessionId;
@@ -3903,6 +3914,16 @@ final class AgentSessionTurn extends AgentJsonModel {
         (value, context) => AgentSessionTurnObjectResource.fromJson(value),
         nullable: false,
       )!,
+      promptCacheOptions: optionalAgentValue(
+        json,
+        'prompt_cache_options',
+        'AgentSessionTurn.promptCacheOptions',
+        (value, context) => AgentSessionPromptCacheOptions.fromJson(
+          requireAgentObject(value, context),
+        ),
+        nullable: true,
+      ),
+      hasPromptCacheOptions: json.containsKey('prompt_cache_options'),
       sessionId: requiredAgentValue(
         json,
         'session_id',
@@ -3949,6 +3970,7 @@ final class AgentSessionTurn extends AgentJsonModel {
             'error',
             'id',
             'object',
+            'prompt_cache_options',
             'session_id',
             'started_at',
             'status',
@@ -3994,6 +4016,8 @@ final class AgentSessionTurn extends AgentJsonModel {
     'error': error?.toJson(),
     'id': id,
     'object': object.toJson(),
+    if (hasPromptCacheOptions)
+      'prompt_cache_options': promptCacheOptions?.toJson(),
     'session_id': sessionId,
     'started_at': startedAt,
     'status': status.toJson(),
@@ -4009,6 +4033,8 @@ final class AgentSessionTurn extends AgentJsonModel {
     Object? error = unsetCopyWithValue,
     String? id,
     AgentSessionTurnObjectResource? object,
+    Object? promptCacheOptions = unsetCopyWithValue,
+    bool? hasPromptCacheOptions,
     String? sessionId,
     Object? startedAt = unsetCopyWithValue,
     AgentSessionTurnStatusResource? status,
@@ -4030,6 +4056,16 @@ final class AgentSessionTurn extends AgentJsonModel {
     ),
     id: id ?? this.id,
     object: object ?? this.object,
+    promptCacheOptions: copyAgentValue<AgentSessionPromptCacheOptions>(
+      promptCacheOptions,
+      this.promptCacheOptions,
+      'AgentSessionTurn.promptCacheOptions',
+    ),
+    hasPromptCacheOptions:
+        hasPromptCacheOptions ??
+        (identical(promptCacheOptions, unsetCopyWithValue)
+            ? this.hasPromptCacheOptions
+            : promptCacheOptions == null),
     sessionId: sessionId ?? this.sessionId,
     startedAt: copyAgentValue<int>(
       startedAt,

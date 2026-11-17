@@ -15,11 +15,17 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
     bool clearInput = false,
     Map<String, String>? metadata,
     bool clearMetadata = false,
+    AgentSessionPromptCacheConfig? promptCacheOptions,
+    bool clearPromptCacheOptions = false,
+    AgentSessionSpendControlConfig? spendControl,
+    bool clearSpendControl = false,
     this.review,
-    this.stream,
+    bool? stream,
+    this.streamOptions,
     List<String>? vaultIds,
     bool clearVaultIds = false,
-  }) : clearInput = clearInput,
+  }) : stream = stream ?? (streamOptions == null ? null : true),
+       clearInput = clearInput,
        input = clearInput ? null : input,
        clearMetadata = clearMetadata,
        metadata = ownAgentValue<Map<String, String>>(
@@ -27,6 +33,10 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
          Map<String, String>.unmodifiable,
        ),
 
+       clearPromptCacheOptions = clearPromptCacheOptions,
+       promptCacheOptions = clearPromptCacheOptions ? null : promptCacheOptions,
+       clearSpendControl = clearSpendControl,
+       spendControl = clearSpendControl ? null : spendControl,
        clearVaultIds = clearVaultIds,
        vaultIds = ownAgentValue<List<String>>(
          clearVaultIds ? null : vaultIds,
@@ -56,12 +66,27 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
   /// Sends `metadata: null`, rather than omitting it.
   final bool clearMetadata;
 
+  /// Default cache lifetime for future session turns.
+  final AgentSessionPromptCacheConfig? promptCacheOptions;
+
+  /// Sends `prompt_cache_options: null`.
+  final bool clearPromptCacheOptions;
+
+  /// Session spending cap in USD cents.
+  final AgentSessionSpendControlConfig? spendControl;
+
+  /// Sends `spend_control: null`.
+  final bool clearSpendControl;
+
   /// Action review mode. Omission preserves the current mode on update and
   /// uses none when creating a session. This is independent of spending limits.
   final SessionReviewParam? review;
 
   /// Whether to stream session events as server-sent events. Defaults to `false`.
   final bool? stream;
+
+  /// SSE options. Supplying options selects streaming when [stream] is omitted.
+  final AgentSessionStreamOptions? streamOptions;
 
   /// The IDs of vaults made available to the session.
   final List<String>? vaultIds;
@@ -77,10 +102,18 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
       'environment',
       'input',
       'metadata',
+      'prompt_cache_options',
+      'spend_control',
       'review',
       'stream',
+      'stream_options',
       'vault_ids',
     ], 'CreateAgentSessionRequest');
+    if (json.containsKey('stream_options') && json['stream'] != true) {
+      throw const FormatException(
+        'CreateAgentSessionRequest.stream_options requires stream: true',
+      );
+    }
     return CreateAgentSessionRequest(
       agent: optionalAgentValue(
         json,
@@ -123,6 +156,29 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
         nullable: true,
       ),
       clearMetadata: json.containsKey('metadata') && json['metadata'] == null,
+      promptCacheOptions: optionalAgentValue(
+        json,
+        'prompt_cache_options',
+        'CreateAgentSessionRequest.promptCacheOptions',
+        (value, context) => AgentSessionPromptCacheConfig.fromJson(
+          requireAgentObject(value, context),
+        ),
+        nullable: true,
+      ),
+      clearPromptCacheOptions:
+          json.containsKey('prompt_cache_options') &&
+          json['prompt_cache_options'] == null,
+      spendControl: optionalAgentValue(
+        json,
+        'spend_control',
+        'CreateAgentSessionRequest.spendControl',
+        (value, context) => AgentSessionSpendControlConfig.fromJson(
+          requireAgentObject(value, context),
+        ),
+        nullable: true,
+      ),
+      clearSpendControl:
+          json.containsKey('spend_control') && json['spend_control'] == null,
       review: optionalAgentValue(
         json,
         'review',
@@ -135,6 +191,15 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
         'stream',
         'CreateAgentSessionRequest.stream',
         requireAgentBool,
+        nullable: false,
+      ),
+      streamOptions: optionalAgentValue(
+        json,
+        'stream_options',
+        'CreateAgentSessionRequest.streamOptions',
+        (value, context) => AgentSessionStreamOptions.fromJson(
+          requireAgentObject(value, context),
+        ),
         nullable: false,
       ),
       vaultIds: optionalAgentValue(
@@ -152,6 +217,11 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
   }
   @override
   void validate() {
+    if (streamOptions != null && stream != true) {
+      throw const FormatException(
+        'CreateAgentSessionRequest.stream_options requires stream: true',
+      );
+    }
     _validateAgentSessionCreation(
       agentId: agentId,
       agent: agent,
@@ -199,6 +269,8 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
         );
       }
     }
+    promptCacheOptions?.validate();
+    spendControl?.validate();
     if (review != null) {
       validateAgentEnum(review!.value, const [
         'none',
@@ -233,8 +305,17 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
     else if (input != null)
       'input': input!.toJson(),
     if (clearMetadata) 'metadata': null else 'metadata': ?metadata,
+    if (clearPromptCacheOptions)
+      'prompt_cache_options': null
+    else
+      'prompt_cache_options': ?promptCacheOptions?.toJson(),
+    if (clearSpendControl)
+      'spend_control': null
+    else
+      'spend_control': ?spendControl?.toJson(),
     'review': ?review?.toJson(),
     'stream': ?stream,
+    'stream_options': ?streamOptions?.toJson(),
     if (clearVaultIds)
       'vault_ids': null
     else if (vaultIds != null)
@@ -250,8 +331,13 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
     bool? clearInput,
     Object? metadata = unsetCopyWithValue,
     bool? clearMetadata,
+    Object? promptCacheOptions = unsetCopyWithValue,
+    bool? clearPromptCacheOptions,
+    Object? spendControl = unsetCopyWithValue,
+    bool? clearSpendControl,
     Object? review = unsetCopyWithValue,
     Object? stream = unsetCopyWithValue,
+    Object? streamOptions = unsetCopyWithValue,
     Object? vaultIds = unsetCopyWithValue,
     bool? clearVaultIds,
   }) => CreateAgentSessionRequest(
@@ -286,6 +372,26 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
         (identical(metadata, unsetCopyWithValue)
             ? this.clearMetadata
             : metadata == null),
+    promptCacheOptions: copyAgentValue<AgentSessionPromptCacheConfig>(
+      promptCacheOptions,
+      this.promptCacheOptions,
+      'CreateAgentSessionRequest.promptCacheOptions',
+    ),
+    clearPromptCacheOptions:
+        clearPromptCacheOptions ??
+        (identical(promptCacheOptions, unsetCopyWithValue)
+            ? this.clearPromptCacheOptions
+            : promptCacheOptions == null),
+    spendControl: copyAgentValue<AgentSessionSpendControlConfig>(
+      spendControl,
+      this.spendControl,
+      'CreateAgentSessionRequest.spendControl',
+    ),
+    clearSpendControl:
+        clearSpendControl ??
+        (identical(spendControl, unsetCopyWithValue)
+            ? this.clearSpendControl
+            : spendControl == null),
     review: copyAgentValue<SessionReviewParam>(
       review,
       this.review,
@@ -295,6 +401,11 @@ final class CreateAgentSessionRequest extends AgentJsonModel {
       stream,
       this.stream,
       'CreateAgentSessionRequest.stream',
+    ),
+    streamOptions: copyAgentValue<AgentSessionStreamOptions>(
+      streamOptions,
+      this.streamOptions,
+      'CreateAgentSessionRequest.streamOptions',
     ),
     vaultIds: copyAgentValue<List<String>>(
       vaultIds,
@@ -727,7 +838,7 @@ final class AgentSessionAgentConfig extends AgentJsonModel {
   }
 
   /// Context compaction settings. Omit to inherit; an object replaces them.
-  /// Null or an empty object enables background compaction.
+  /// Null or an empty object restores blocking compaction.
   final AgentCompactionConfig? compaction;
 
   /// Sends explicit `compaction: null` instead of omitting the override.
@@ -2141,8 +2252,13 @@ final class AgentSession extends AgentJsonModel {
     required this.status,
     required this.usage,
     required List<String> vaultIds,
+    this.promptCacheOptions,
+    bool hasPromptCacheOptions = false,
+    this.spendControl,
     Map<String, dynamic> rawJson = const {},
-  }) : metadata = Map<String, String>.unmodifiable(metadata),
+  }) : hasPromptCacheOptions =
+           hasPromptCacheOptions || promptCacheOptions != null,
+       metadata = Map<String, String>.unmodifiable(metadata),
        requiredActions = List.unmodifiable(requiredActions),
        vaultIds = List.unmodifiable(vaultIds),
        rawJson = agentExtras(rawJson, const [
@@ -2155,6 +2271,8 @@ final class AgentSession extends AgentJsonModel {
          'metadata',
          'object',
          'required_actions',
+         'prompt_cache_options',
+         'spend_control',
          'review',
          'status',
          'usage',
@@ -2189,6 +2307,15 @@ final class AgentSession extends AgentJsonModel {
 
   /// Actions that must be completed before the session can continue.
   final List<AgentSessionRequiredAction> requiredActions;
+
+  /// The recorded prompt cache lifetime, or null when the model default applies.
+  final AgentSessionPromptCacheOptions? promptCacheOptions;
+
+  /// Whether the cache field was present, including explicit null.
+  final bool hasPromptCacheOptions;
+
+  /// Session-wide spending cap and best-effort consumption, if provided.
+  final AgentSessionSpendControl? spendControl;
 
   /// Action review applied in this session. Omission means none.
   final SessionReviewResource? review;
@@ -2274,6 +2401,25 @@ final class AgentSession extends AgentJsonModel {
             .toList(),
         nullable: false,
       )!,
+      promptCacheOptions: optionalAgentValue(
+        json,
+        'prompt_cache_options',
+        'AgentSession.promptCacheOptions',
+        (value, context) => AgentSessionPromptCacheOptions.fromJson(
+          requireAgentObject(value, context),
+        ),
+        nullable: true,
+      ),
+      hasPromptCacheOptions: json.containsKey('prompt_cache_options'),
+      spendControl: optionalAgentValue(
+        json,
+        'spend_control',
+        'AgentSession.spendControl',
+        (value, context) => AgentSessionSpendControl.fromJson(
+          requireAgentObject(value, context),
+        ),
+        nullable: false,
+      ),
       review: optionalAgentValue(
         json,
         'review',
@@ -2319,6 +2465,8 @@ final class AgentSession extends AgentJsonModel {
             'metadata',
             'object',
             'required_actions',
+            'prompt_cache_options',
+            'spend_control',
             'review',
             'status',
             'usage',
@@ -2381,6 +2529,9 @@ final class AgentSession extends AgentJsonModel {
     'metadata': metadata,
     'object': object,
     'required_actions': requiredActions.map((value) => value.toJson()).toList(),
+    if (hasPromptCacheOptions)
+      'prompt_cache_options': promptCacheOptions?.toJson(),
+    'spend_control': ?spendControl?.toJson(),
     'review': ?review?.toJson(),
     'status': status.toJson(),
     'usage': usage?.toJson(),
@@ -2397,6 +2548,9 @@ final class AgentSession extends AgentJsonModel {
     int? lastActiveAt,
     Map<String, String>? metadata,
     List<AgentSessionRequiredAction>? requiredActions,
+    Object? promptCacheOptions = unsetCopyWithValue,
+    bool? hasPromptCacheOptions,
+    Object? spendControl = unsetCopyWithValue,
     Object? review = unsetCopyWithValue,
     AgentSessionStatusResource? status,
     Object? usage = unsetCopyWithValue,
@@ -2411,6 +2565,21 @@ final class AgentSession extends AgentJsonModel {
     lastActiveAt: lastActiveAt ?? this.lastActiveAt,
     metadata: metadata ?? this.metadata,
     requiredActions: requiredActions ?? this.requiredActions,
+    promptCacheOptions: copyAgentValue<AgentSessionPromptCacheOptions>(
+      promptCacheOptions,
+      this.promptCacheOptions,
+      'AgentSession.promptCacheOptions',
+    ),
+    hasPromptCacheOptions:
+        hasPromptCacheOptions ??
+        (identical(promptCacheOptions, unsetCopyWithValue)
+            ? this.hasPromptCacheOptions
+            : promptCacheOptions == null),
+    spendControl: copyAgentValue<AgentSessionSpendControl>(
+      spendControl,
+      this.spendControl,
+      'AgentSession.spendControl',
+    ),
     review: copyAgentValue<SessionReviewResource>(
       review,
       this.review,
@@ -2793,12 +2962,20 @@ final class UpdateAgentSessionRequest extends AgentJsonModel {
     this.agent,
     Map<String, String>? metadata,
     bool clearMetadata = false,
+    AgentSessionPromptCacheConfig? promptCacheOptions,
+    bool clearPromptCacheOptions = false,
+    AgentSessionSpendControlConfig? spendControl,
+    bool clearSpendControl = false,
     this.review,
   }) : clearMetadata = clearMetadata,
        metadata = ownAgentValue<Map<String, String>>(
          clearMetadata ? null : metadata,
          Map<String, String>.unmodifiable,
-       ) {
+       ),
+       clearPromptCacheOptions = clearPromptCacheOptions,
+       promptCacheOptions = clearPromptCacheOptions ? null : promptCacheOptions,
+       clearSpendControl = clearSpendControl,
+       spendControl = clearSpendControl ? null : spendControl {
     validate();
   }
 
@@ -2811,6 +2988,18 @@ final class UpdateAgentSessionRequest extends AgentJsonModel {
   /// Sends `metadata: null`, rather than omitting it.
   final bool clearMetadata;
 
+  /// Default cache lifetime for future session turns.
+  final AgentSessionPromptCacheConfig? promptCacheOptions;
+
+  /// Sends `prompt_cache_options: null`.
+  final bool clearPromptCacheOptions;
+
+  /// Session spending cap in USD cents.
+  final AgentSessionSpendControlConfig? spendControl;
+
+  /// Sends `spend_control: null`.
+  final bool clearSpendControl;
+
   /// Action review mode. Omission preserves the current mode on update and
   /// uses none when creating a session. This is independent of spending limits.
   final SessionReviewParam? review;
@@ -2820,6 +3009,8 @@ final class UpdateAgentSessionRequest extends AgentJsonModel {
     requireClosedAgentJson(json, const [
       'agent',
       'metadata',
+      'prompt_cache_options',
+      'spend_control',
       'review',
     ], 'UpdateAgentSessionRequest');
     return UpdateAgentSessionRequest(
@@ -2840,6 +3031,29 @@ final class UpdateAgentSessionRequest extends AgentJsonModel {
         nullable: true,
       ),
       clearMetadata: json.containsKey('metadata') && json['metadata'] == null,
+      promptCacheOptions: optionalAgentValue(
+        json,
+        'prompt_cache_options',
+        'UpdateAgentSessionRequest.promptCacheOptions',
+        (value, context) => AgentSessionPromptCacheConfig.fromJson(
+          requireAgentObject(value, context),
+        ),
+        nullable: true,
+      ),
+      clearPromptCacheOptions:
+          json.containsKey('prompt_cache_options') &&
+          json['prompt_cache_options'] == null,
+      spendControl: optionalAgentValue(
+        json,
+        'spend_control',
+        'UpdateAgentSessionRequest.spendControl',
+        (value, context) => AgentSessionSpendControlConfig.fromJson(
+          requireAgentObject(value, context),
+        ),
+        nullable: true,
+      ),
+      clearSpendControl:
+          json.containsKey('spend_control') && json['spend_control'] == null,
       review: optionalAgentValue(
         json,
         'review',
@@ -2878,6 +3092,8 @@ final class UpdateAgentSessionRequest extends AgentJsonModel {
         );
       }
     }
+    promptCacheOptions?.validate();
+    spendControl?.validate();
     if (review != null) {
       validateAgentEnum(review!.value, const [
         'none',
@@ -2890,6 +3106,14 @@ final class UpdateAgentSessionRequest extends AgentJsonModel {
   Map<String, dynamic> toJson() => {
     if (agent != null) 'agent': agent!.toJson(),
     if (clearMetadata) 'metadata': null else 'metadata': ?metadata,
+    if (clearPromptCacheOptions)
+      'prompt_cache_options': null
+    else
+      'prompt_cache_options': ?promptCacheOptions?.toJson(),
+    if (clearSpendControl)
+      'spend_control': null
+    else
+      'spend_control': ?spendControl?.toJson(),
     'review': ?review?.toJson(),
   };
 
@@ -2898,6 +3122,10 @@ final class UpdateAgentSessionRequest extends AgentJsonModel {
     Object? agent = unsetCopyWithValue,
     Object? metadata = unsetCopyWithValue,
     bool? clearMetadata,
+    Object? promptCacheOptions = unsetCopyWithValue,
+    bool? clearPromptCacheOptions,
+    Object? spendControl = unsetCopyWithValue,
+    bool? clearSpendControl,
     Object? review = unsetCopyWithValue,
   }) => UpdateAgentSessionRequest(
     agent: copyAgentValue<AgentSessionAgentUpdate>(
@@ -2915,6 +3143,26 @@ final class UpdateAgentSessionRequest extends AgentJsonModel {
         (identical(metadata, unsetCopyWithValue)
             ? this.clearMetadata
             : metadata == null),
+    promptCacheOptions: copyAgentValue<AgentSessionPromptCacheConfig>(
+      promptCacheOptions,
+      this.promptCacheOptions,
+      'UpdateAgentSessionRequest.promptCacheOptions',
+    ),
+    clearPromptCacheOptions:
+        clearPromptCacheOptions ??
+        (identical(promptCacheOptions, unsetCopyWithValue)
+            ? this.clearPromptCacheOptions
+            : promptCacheOptions == null),
+    spendControl: copyAgentValue<AgentSessionSpendControlConfig>(
+      spendControl,
+      this.spendControl,
+      'UpdateAgentSessionRequest.spendControl',
+    ),
+    clearSpendControl:
+        clearSpendControl ??
+        (identical(spendControl, unsetCopyWithValue)
+            ? this.clearSpendControl
+            : spendControl == null),
     review: copyAgentValue<SessionReviewParam>(
       review,
       this.review,
