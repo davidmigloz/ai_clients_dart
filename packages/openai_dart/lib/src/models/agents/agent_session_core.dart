@@ -1939,6 +1939,9 @@ sealed class AgentSessionRequiredAction extends AgentJsonModel {
       'environment_connection' =>
         AgentSessionEnvironmentConnectionRequiredAction.fromJson(json),
       'function_call' => AgentSessionFunctionCallRequiredAction.fromJson(json),
+      'mcp_approval_request' => AgentSessionMcpApprovalRequiredAction.fromJson(
+        json,
+      ),
       _ => UnknownAgentSessionRequiredAction.fromJson(json),
     };
   }
@@ -1970,6 +1973,14 @@ sealed class AgentSessionRequiredAction extends AgentJsonModel {
     required String turnId,
     Map<String, dynamic> rawJson,
   }) = AgentSessionFunctionCallRequiredAction;
+
+  /// Builds a pending `mcp_approval_request`.
+  factory AgentSessionRequiredAction.mcpApprovalRequest({
+    required String requestId,
+    required String turnId,
+    required AgentSessionMcpApprovalRequest request,
+    Map<String, dynamic> rawJson,
+  }) = AgentSessionMcpApprovalRequiredAction;
 }
 
 /// Detached future `type` value with private diagnostics.
@@ -1989,6 +2000,7 @@ final class UnknownAgentSessionRequiredAction
       'computer_use_approval_request',
       'environment_connection',
       'function_call',
+      'mcp_approval_request',
     ].contains(tag)) {
       throw const FormatException(
         'UnknownAgentSessionRequiredAction: expected a future discriminator',

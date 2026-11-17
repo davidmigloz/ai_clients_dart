@@ -181,6 +181,8 @@ AgentSessionAgentUpdate.tools replaces the list: omission retains, null/[] clear
 
 Session list metadata uses deepObject metadata[key]=value with exact AND matching, at most 16 pairs, keys 1–64 code points and values up to 512. Empty filters emit no pairs. Malformed Unicode rejects privately before authentication; valid strings stay exact. Retain filters/order/agent/cursor while paginating; filter visibility can lag metadata updates. Requests still force agents=v1.
 
+Saved and inline Agent function tools accept async:true to let the service continue before the function result. The opt-in local dispatcher remains sequential. AgentSessionMcpApprovalRequiredAction carries the pending request; its name and JSON arguments can be null. Read the action kind from agent.session.action_required webhooks and retrieve the session for the full action. Submit the reviewer's explicit approve, deny or cancel with AgentSessionInput.mcpApprovalRequestResult. Cancel dismisses the approval request while the turn and session stay intact. [Offline MCP approval example](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/agent_mcp_approvals_example.dart)
+
 Hosted Artifact SDK/document skills are server-image capabilities. Existing environment creation/template flows prewarm before session attachment; environment and session lifetimes remain independent. See the settings, environment and artifact examples.
 
 - [agent_settings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/agent_settings_example.dart): Offline context settings, independent review/tools updates, ultrafast and metadata filters; no model execution or compute charges.
