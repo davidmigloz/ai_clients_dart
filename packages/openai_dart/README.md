@@ -1690,6 +1690,8 @@ announced a retirement. The field uses the `YYYY-MM-DD` date format.
 - `gpt-5.5-cyber-preview` retires on February 1, 2027. Access to its
   replacements depends on the project. [Retirement schedule](https://developers.openai.com/api/docs/deprecations)
 
+→ [Model listing and retrieval example](example/models_example.dart)
+
 </details>
 
 <a id="how-do-i-generate-videos"></a>
