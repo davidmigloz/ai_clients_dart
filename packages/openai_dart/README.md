@@ -1911,7 +1911,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | Files and Uploads | File management and large multipart uploads |
 | Batches | Asynchronous batch processing |
 | Models | Listing and retrieval |
-| Moderations | Text and image moderation |
+| Moderations | Text and image moderation, plus model-specific image classification |
 | Fine-tuning | Job management; some grader/checkpoint operations pending |
 | Evals | Read-only since October 31; scheduled shutdown November 30, 2026 |
 | Conversations | Conversation and item management |
@@ -1921,7 +1921,7 @@ Complete runnable workflows are in [example/](example/). Examples marked **offli
 | Safety | Read-only project alerts, organization cases, and typed monitoring details |
 | Agents | Saved agents, context settings, action review, durable sessions, scheduled automations and invocations, metadata filters, root/child history, hosted environments, portable file preparation, explicit staging, and completed-result artifacts |
 | Vaults | Vault management and write-only credentials |
-| Organization Admin | Separate Admin credentials; external keys/storage, project API-key updates, and Decisions usage (12 operations) |
+| Organization Admin | Separate Admin credentials for project service tiers and API keys, external keys and storage, workload identity federation, and Decisions usage |
 | ChatKit Beta and Skills | Sessions/threads and skills management |
 | Assistants, Threads, Messages, and Runs | Historical types; Assistants API retired; separate import |
 | Vector Stores | File search storage and ingestion; separate Assistants import |

@@ -5915,7 +5915,7 @@
       "spec": "main",
       "kind": "sealed_variant",
       "dart_class": "LiveMCPTool",
-      "file": "lib/src/models/live/live_tools.dart",
+      "file": "lib/src/models/live/live_mcp_tools.dart",
       "schema": "LiveMCPToolInputParam",
       "note": "Actual f6 Live component. Complete declared fields and contextual admission; immutable finite JSON, private diagnostics and serialized-value copy/equality/hash verified by public canonical fixtures. The MCP configuration uses LiveMCPTool with typed callers, tool filters and approval policies.",
       "parent": "LiveTool"
