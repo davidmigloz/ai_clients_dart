@@ -132,7 +132,7 @@ final class LiveSessionStarted extends LiveServerEvent {
          nullable: false,
        ),
        rawJson = snapshotLiveJson(
-         rawJson,
+         liveEnvelopeWithoutMcpCredentials(rawJson),
          'LiveSessionStarted',
          knownKeys: _knownKeys,
        ) {
@@ -242,7 +242,7 @@ final class LiveSessionUpdated extends LiveServerEvent {
          nullable: false,
        ),
        rawJson = snapshotLiveJson(
-         rawJson,
+         liveEnvelopeWithoutMcpCredentials(rawJson),
          'LiveSessionUpdated',
          knownKeys: _knownKeys,
        ) {
@@ -1967,7 +1967,7 @@ final class LiveSessionClosed extends LiveServerEvent {
          nullable: false,
        ),
        rawJson = snapshotLiveJson(
-         rawJson,
+         liveEnvelopeWithoutMcpCredentials(rawJson),
          'LiveSessionClosed',
          knownKeys: _knownKeys,
        ) {

@@ -664,6 +664,61 @@ class LiveCallIncomingWebhookData with _WebhookValue {
       'LiveCallIncomingWebhookData(sessionId: [REDACTED], sipHeaders: ${sipHeaders.length} items, sipMediaSecurity: ${sipMediaSecurity == null ? null : "[REDACTED]"}, rawJson: ${rawJson.length} entries)';
 }
 
+/// Identifies a connected WebRTC session for a sideband attachment.
+@immutable
+final class LiveTransportConnectedWebhookData with _WebhookValue {
+  /// Creates a connected transport payload.
+  LiveTransportConnectedWebhookData({
+    required this.sessionId,
+    Map<String, dynamic> rawJson = const {},
+  }) : rawJson = _snapshotWebhookJson(
+         rawJson,
+         'LiveTransportConnectedWebhookData.rawJson',
+       );
+
+  /// Parses the opaque session ID and its required WebRTC discriminator.
+  factory LiveTransportConnectedWebhookData.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    const context = 'LiveTransportConnectedWebhookData';
+    final snapshot = _snapshotWebhookJson(json, context);
+    requireJsonType(snapshot, 'webrtc', context);
+    return LiveTransportConnectedWebhookData(
+      sessionId: requireJsonString(
+        snapshot['session_id'],
+        '$context.session_id',
+      ),
+      rawJson: snapshot,
+    );
+  }
+
+  /// The ID to pass to the Live sideband attach endpoint.
+  final String sessionId;
+
+  /// Fixed WebRTC transport type.
+  String get type => 'webrtc';
+
+  /// Immutable received metadata.
+  @override
+  final Map<String, dynamic> rawJson;
+
+  /// Replaces the session ID or retained metadata.
+  LiveTransportConnectedWebhookData copyWith({
+    String? sessionId,
+    Map<String, dynamic>? rawJson,
+  }) => LiveTransportConnectedWebhookData(
+    sessionId: sessionId ?? this.sessionId,
+    rawJson: rawJson ?? this.rawJson,
+  );
+
+  @override
+  Map<String, dynamic> _valueJson() => _mergeWebhookJson(
+    rawJson,
+    {'session_id', 'type'},
+    {'session_id': sessionId, 'type': type},
+  );
+}
+
 /// Notification payload for `LiveTransportIncomingWebhookData`.
 ///
 /// Future received metadata is preserved as a finite immutable JSON snapshot.

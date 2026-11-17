@@ -206,6 +206,63 @@ Map<String, dynamic> mergeLiveJson(
   ...typed,
 };
 
+/// Removes write-only MCP fields from a received Live session snapshot.
+///
+/// Only the declared MCP credentials in Responses delegation are removed.
+/// Other branches and future metadata are preserved.
+Map<String, dynamic> liveSessionWithoutMcpCredentials(
+  Map<String, dynamic> session,
+) {
+  final delegation = session['delegation'];
+  if (delegation is! Map || delegation['type'] != 'responses') return session;
+  final responses = delegation['responses'];
+  if (responses is! Map) return session;
+  final tools = responses['tools'];
+  if (tools is! List) return session;
+
+  var removed = false;
+  final sanitizedTools = <Object?>[];
+  for (final tool in tools) {
+    if (tool is Map &&
+        tool['type'] == 'mcp' &&
+        (tool.containsKey('authorization') || tool.containsKey('headers'))) {
+      removed = true;
+      sanitizedTools.add(
+        requireLiveObject(tool, 'Live session MCP tool')
+          ..remove('authorization')
+          ..remove('headers'),
+      );
+    } else {
+      sanitizedTools.add(tool);
+    }
+  }
+  if (!removed) return session;
+  return {
+    ...session,
+    'delegation': {
+      ...requireLiveObject(delegation, 'Live session delegation'),
+      'responses': {
+        ...requireLiveObject(responses, 'Live session Responses settings'),
+        'tools': sanitizedTools,
+      },
+    },
+  };
+}
+
+/// Sanitizes the nested session before retaining a received event or result.
+Map<String, dynamic> liveEnvelopeWithoutMcpCredentials(
+  Map<String, dynamic> envelope,
+) {
+  final session = envelope['session'];
+  if (session is! Map) return envelope;
+  return {
+    ...envelope,
+    'session': liveSessionWithoutMcpCredentials(
+      requireLiveObject(session, 'Live response session'),
+    ),
+  };
+}
+
 /// Checks schema character limits using Unicode code points.
 void validateLiveLength(String value, String context, {int? min, int? max}) {
   final length = value.runes.length;
@@ -226,3 +283,77 @@ T? copyLiveValue<T>(Object? value, T? current, String context) {
   }
   return value as T;
 }
+
+/// Closed list of explicitly named models in the Responses image tool schema.
+const liveResponsesImageModels = [
+  'gpt-image-1',
+  'gpt-image-1-mini',
+  'gpt-image-2',
+  'gpt-image-2-2026-04-21',
+  'gpt-image-2.5-sunburst',
+  'gpt-image-2.5-sunburst-2026-09-08',
+  'gpt-image-2.5-flare',
+  'gpt-image-2.5-flare-2026-09-08',
+  'gpt-image-2.6-sunburst',
+  'gpt-image-2.6-flare',
+  'gpt-image-1.5',
+  'chatgpt-image-latest',
+];
+
+/// Image tool field shapes shared by Live item and event validation.
+const Map<String, dynamic> liveResponsesImageToolFields = {
+  'output_format': {r'$ref': '#/components/schemas/ImageOutputFormat'},
+  'complexity': {
+    'type': 'string',
+    'enum': ['low', 'medium', 'high'],
+  },
+  'frame_count': {'type': 'integer', 'minimum': 2, 'maximum': 16},
+  'frame_duration_ms': {'type': 'integer', 'minimum': 20, 'maximum': 2000},
+  'svg': {r'$ref': '#/components/schemas/SvgParam'},
+};
+
+/// Referenced Responses image schemas shared by Live item and event validation.
+const Map<String, dynamic> liveResponsesImageSchemas = {
+  'ImageOutputFormat': {
+    'type': 'string',
+    'enum': ['png', 'webp', 'jpeg', 'gif', 'svg'],
+  },
+  'SvgParam': {
+    'type': 'object',
+    'properties': {
+      'model': {'type': 'string', 'minLength': 1},
+      'reasoning': {
+        'anyOf': [
+          {r'$ref': '#/components/schemas/SvgReasoningParam'},
+          {'type': 'null'},
+        ],
+      },
+    },
+  },
+  'SvgReasoningParam': {
+    'type': 'object',
+    'properties': {
+      'effort': {
+        'type': 'string',
+        'enum': ['none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max'],
+      },
+    },
+  },
+  'SvgUsage': {
+    'type': 'object',
+    'properties': {
+      'model': {'type': 'string'},
+      'input_tokens': {'type': 'integer'},
+      'output_tokens': {'type': 'integer'},
+      'total_tokens': {'type': 'integer'},
+      'reasoning_tokens': {'type': 'integer'},
+    },
+    'required': [
+      'model',
+      'input_tokens',
+      'output_tokens',
+      'total_tokens',
+      'reasoning_tokens',
+    ],
+  },
+};

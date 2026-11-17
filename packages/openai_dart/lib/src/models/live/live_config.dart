@@ -269,12 +269,15 @@ class LiveSessionCreateParams extends LiveJsonModel {
     this.instructions,
     bool hasInstructions = false,
     required this.model,
+    this.safetyIdentifier,
+    bool hasSafetyIdentifier = false,
     this.store,
     Map<String, dynamic> rawJson = const {},
   }) : triggers = triggers == null ? null : List.unmodifiable(triggers),
        hasDelegation = hasDelegation || delegation != null,
        input = input == null ? null : List.unmodifiable(input),
        hasInstructions = hasInstructions || instructions != null,
+       hasSafetyIdentifier = hasSafetyIdentifier || safetyIdentifier != null,
        rawJson = snapshotLiveJson(
          rawJson,
          'LiveSessionCreateParams',
@@ -291,6 +294,7 @@ class LiveSessionCreateParams extends LiveJsonModel {
     'input',
     'instructions',
     'model',
+    'safety_identifier',
     'store',
   };
 
@@ -323,6 +327,12 @@ class LiveSessionCreateParams extends LiveJsonModel {
 
   /// The Live model. Required in the session configuration for every transport; do not pass it as a URL query parameter.
   final String model;
+
+  /// Stable end-user identifier for safety monitoring, up to 128 characters.
+  final String? safetyIdentifier;
+
+  /// Whether the wire supplied an identifier or an explicit null.
+  final bool hasSafetyIdentifier;
 
   /// Whether to store the session for later forking and recording download. Defaults to false for new sessions.
   final bool? store;
@@ -387,6 +397,14 @@ class LiveSessionCreateParams extends LiveJsonModel {
       ),
       hasInstructions: json.containsKey('instructions'),
       model: requireLiveString(json['model'], 'LiveSessionCreateParams.model'),
+      safetyIdentifier: optionalLiveValue(
+        json,
+        'safety_identifier',
+        'LiveSessionCreateParams',
+        requireLiveString,
+        nullable: true,
+      ),
+      hasSafetyIdentifier: json.containsKey('safety_identifier'),
       store: optionalLiveValue(
         json,
         'store',
@@ -400,6 +418,13 @@ class LiveSessionCreateParams extends LiveJsonModel {
 
   @override
   void validate() {
+    if (safetyIdentifier != null) {
+      validateLiveLength(
+        safetyIdentifier!,
+        'LiveSessionCreateParams.safety_identifier',
+        max: 128,
+      );
+    }
     _validateLiveTriggers(triggers, 'LiveSessionCreateParams.triggers');
     validateLiveLength(model, 'LiveSessionCreateParams.model', min: 1);
     audio?.validate();
@@ -443,6 +468,7 @@ class LiveSessionCreateParams extends LiveJsonModel {
     if (input != null) 'input': input!.map((item) => item.toJson()).toList(),
     if (hasInstructions) 'instructions': instructions,
     'model': model,
+    if (hasSafetyIdentifier) 'safety_identifier': safetyIdentifier,
     if (store != null) 'store': store,
   });
 
@@ -458,6 +484,8 @@ class LiveSessionCreateParams extends LiveJsonModel {
     Object? instructions = liveUnset,
     bool clearInstructions = false,
     String? model,
+    Object? safetyIdentifier = liveUnset,
+    bool clearSafetyIdentifier = false,
     Object? store = liveUnset,
     Map<String, dynamic>? rawJson,
   }) => LiveSessionCreateParams(
@@ -502,6 +530,16 @@ class LiveSessionCreateParams extends LiveJsonModel {
         !clearInstructions &&
         (!identical(instructions, liveUnset) || hasInstructions),
     model: model ?? this.model,
+    safetyIdentifier: clearSafetyIdentifier
+        ? null
+        : copyLiveValue<String>(
+            safetyIdentifier,
+            this.safetyIdentifier,
+            'LiveSessionCreateParams.safety_identifier',
+          ),
+    hasSafetyIdentifier:
+        !clearSafetyIdentifier &&
+        (!identical(safetyIdentifier, liveUnset) || hasSafetyIdentifier),
     store: copyLiveValue<bool>(
       store,
       this.store,
@@ -534,7 +572,7 @@ class LiveSessionResourceParam extends LiveJsonModel {
     List<LiveDecisionTriggerInputParam>? triggers,
     this.audio,
     this.client,
-    this.delegation,
+    LiveDelegation? delegation,
     bool hasDelegation = false,
     required this.expiresAt,
     required this.id,
@@ -542,14 +580,18 @@ class LiveSessionResourceParam extends LiveJsonModel {
     this.instructions,
     bool hasInstructions = false,
     required this.model,
+    this.safetyIdentifier,
+    bool hasSafetyIdentifier = false,
     this.store,
     Map<String, dynamic> rawJson = const {},
   }) : triggers = triggers == null ? null : List.unmodifiable(triggers),
+       delegation = liveDelegationWithoutMcpCredentials(delegation),
        hasDelegation = hasDelegation || delegation != null,
        input = input == null ? null : List.unmodifiable(input),
        hasInstructions = hasInstructions || instructions != null,
+       hasSafetyIdentifier = hasSafetyIdentifier || safetyIdentifier != null,
        rawJson = snapshotLiveJson(
-         rawJson,
+         liveSessionWithoutMcpCredentials(rawJson),
          'LiveSessionResourceParam',
          knownKeys: _knownKeys,
        ) {
@@ -566,6 +608,7 @@ class LiveSessionResourceParam extends LiveJsonModel {
     'input',
     'instructions',
     'model',
+    'safety_identifier',
     'status',
     'store',
   };
@@ -606,6 +649,12 @@ class LiveSessionResourceParam extends LiveJsonModel {
   /// The Live model. Required in the session configuration for every transport; do not pass it as a URL query parameter.
   final String model;
 
+  /// Stable end-user identifier for safety monitoring, up to 128 characters.
+  final String? safetyIdentifier;
+
+  /// Whether the wire supplied an identifier or an explicit null.
+  final bool hasSafetyIdentifier;
+
   /// The status of the session snapshot. Always `active`, including the final snapshot in session.closed; use the event type to determine that the session has closed.
   String get status => 'active';
 
@@ -616,7 +665,8 @@ class LiveSessionResourceParam extends LiveJsonModel {
   final Map<String, dynamic> rawJson;
 
   /// Parses LiveSessionResourceParam with contextual validation.
-  factory LiveSessionResourceParam.fromJson(Map<String, dynamic> json) {
+  factory LiveSessionResourceParam.fromJson(Map<String, dynamic> rawJson) {
+    final json = liveSessionWithoutMcpCredentials(rawJson);
     requireLiveType(
       json,
       'active',
@@ -684,6 +734,14 @@ class LiveSessionResourceParam extends LiveJsonModel {
       ),
       hasInstructions: json.containsKey('instructions'),
       model: requireLiveString(json['model'], 'LiveSessionResourceParam.model'),
+      safetyIdentifier: optionalLiveValue(
+        json,
+        'safety_identifier',
+        'LiveSessionResourceParam',
+        requireLiveString,
+        nullable: true,
+      ),
+      hasSafetyIdentifier: json.containsKey('safety_identifier'),
       store: optionalLiveValue(
         json,
         'store',
@@ -697,6 +755,13 @@ class LiveSessionResourceParam extends LiveJsonModel {
 
   @override
   void validate() {
+    if (safetyIdentifier != null) {
+      validateLiveLength(
+        safetyIdentifier!,
+        'LiveSessionResourceParam.safety_identifier',
+        max: 128,
+      );
+    }
     _validateLiveTriggers(triggers, 'LiveSessionResourceParam.triggers');
     requireLiveInt(expiresAt, 'LiveSessionResourceParam.expires_at');
     validateLiveLength(model, 'LiveSessionResourceParam.model', min: 1);
@@ -743,6 +808,7 @@ class LiveSessionResourceParam extends LiveJsonModel {
     if (input != null) 'input': input!.map((item) => item.toJson()).toList(),
     if (hasInstructions) 'instructions': instructions,
     'model': model,
+    if (hasSafetyIdentifier) 'safety_identifier': safetyIdentifier,
     'status': status,
     if (store != null) 'store': store,
   });
@@ -761,6 +827,8 @@ class LiveSessionResourceParam extends LiveJsonModel {
     Object? instructions = liveUnset,
     bool clearInstructions = false,
     String? model,
+    Object? safetyIdentifier = liveUnset,
+    bool clearSafetyIdentifier = false,
     Object? store = liveUnset,
     Map<String, dynamic>? rawJson,
   }) => LiveSessionResourceParam(
@@ -807,6 +875,16 @@ class LiveSessionResourceParam extends LiveJsonModel {
         !clearInstructions &&
         (!identical(instructions, liveUnset) || hasInstructions),
     model: model ?? this.model,
+    safetyIdentifier: clearSafetyIdentifier
+        ? null
+        : copyLiveValue<String>(
+            safetyIdentifier,
+            this.safetyIdentifier,
+            'LiveSessionResourceParam.safety_identifier',
+          ),
+    hasSafetyIdentifier:
+        !clearSafetyIdentifier &&
+        (!identical(safetyIdentifier, liveUnset) || hasSafetyIdentifier),
     store: copyLiveValue<bool>(
       store,
       this.store,
@@ -893,6 +971,11 @@ class LiveSessionUpdateParams extends LiveJsonModel {
 
   @override
   void validate() {
+    if (rawJson.containsKey('safety_identifier')) {
+      throw const FormatException(
+        'LiveSessionUpdateParams.safety_identifier: startup configuration only',
+      );
+    }
     _validateLiveTriggers(triggers, 'LiveSessionUpdateParams.triggers');
     delegation?.validate();
     if (rawJson.keys.any(_immutableStartupFields.contains)) {
@@ -971,12 +1054,15 @@ class LiveMediaSessionCreateParams extends LiveJsonModel {
     this.instructions,
     bool hasInstructions = false,
     required this.model,
+    this.safetyIdentifier,
+    bool hasSafetyIdentifier = false,
     this.store,
     Map<String, dynamic> rawJson = const {},
   }) : triggers = triggers == null ? null : List.unmodifiable(triggers),
        hasDelegation = hasDelegation || delegation != null,
        input = input == null ? null : List.unmodifiable(input),
        hasInstructions = hasInstructions || instructions != null,
+       hasSafetyIdentifier = hasSafetyIdentifier || safetyIdentifier != null,
        rawJson = snapshotLiveJson(
          rawJson,
          'LiveMediaSessionCreateParams',
@@ -993,6 +1079,7 @@ class LiveMediaSessionCreateParams extends LiveJsonModel {
     'input',
     'instructions',
     'model',
+    'safety_identifier',
     'store',
   };
 
@@ -1025,6 +1112,12 @@ class LiveMediaSessionCreateParams extends LiveJsonModel {
 
   /// The Live model. Required in the session configuration for every transport; do not pass it as a URL query parameter.
   final String model;
+
+  /// Stable end-user identifier for safety monitoring, up to 128 characters.
+  final String? safetyIdentifier;
+
+  /// Whether the wire supplied an identifier or an explicit null.
+  final bool hasSafetyIdentifier;
 
   /// Whether to store the session for later forking and recording download. Defaults to false for new sessions.
   final bool? store;
@@ -1093,6 +1186,14 @@ class LiveMediaSessionCreateParams extends LiveJsonModel {
         json['model'],
         'LiveMediaSessionCreateParams.model',
       ),
+      safetyIdentifier: optionalLiveValue(
+        json,
+        'safety_identifier',
+        'LiveMediaSessionCreateParams',
+        requireLiveString,
+        nullable: true,
+      ),
+      hasSafetyIdentifier: json.containsKey('safety_identifier'),
       store: optionalLiveValue(
         json,
         'store',
@@ -1106,6 +1207,13 @@ class LiveMediaSessionCreateParams extends LiveJsonModel {
 
   @override
   void validate() {
+    if (safetyIdentifier != null) {
+      validateLiveLength(
+        safetyIdentifier!,
+        'LiveMediaSessionCreateParams.safety_identifier',
+        max: 128,
+      );
+    }
     _validateLiveTriggers(triggers, 'LiveMediaSessionCreateParams.triggers');
     validateLiveLength(model, 'LiveMediaSessionCreateParams.model', min: 1);
     requireClosedLiveJson(rawJson, _knownKeys, 'LiveMediaSessionCreateParams');
@@ -1150,6 +1258,7 @@ class LiveMediaSessionCreateParams extends LiveJsonModel {
     if (input != null) 'input': input!.map((item) => item.toJson()).toList(),
     if (hasInstructions) 'instructions': instructions,
     'model': model,
+    if (hasSafetyIdentifier) 'safety_identifier': safetyIdentifier,
     if (store != null) 'store': store,
   });
 
@@ -1165,6 +1274,8 @@ class LiveMediaSessionCreateParams extends LiveJsonModel {
     Object? instructions = liveUnset,
     bool clearInstructions = false,
     String? model,
+    Object? safetyIdentifier = liveUnset,
+    bool clearSafetyIdentifier = false,
     Object? store = liveUnset,
     Map<String, dynamic>? rawJson,
   }) => LiveMediaSessionCreateParams(
@@ -1209,6 +1320,16 @@ class LiveMediaSessionCreateParams extends LiveJsonModel {
         !clearInstructions &&
         (!identical(instructions, liveUnset) || hasInstructions),
     model: model ?? this.model,
+    safetyIdentifier: clearSafetyIdentifier
+        ? null
+        : copyLiveValue<String>(
+            safetyIdentifier,
+            this.safetyIdentifier,
+            'LiveMediaSessionCreateParams.safety_identifier',
+          ),
+    hasSafetyIdentifier:
+        !clearSafetyIdentifier &&
+        (!identical(safetyIdentifier, liveUnset) || hasSafetyIdentifier),
     store: copyLiveValue<bool>(
       store,
       this.store,
@@ -1298,6 +1419,11 @@ class LiveMediaSessionForkParams extends LiveJsonModel {
 
   @override
   void validate() {
+    if (rawJson.containsKey('safety_identifier')) {
+      throw const FormatException(
+        'LiveMediaSessionForkParams.safety_identifier: startup configuration only',
+      );
+    }
     requireClosedLiveJson(rawJson, _knownKeys, 'LiveMediaSessionForkParams');
     client?.validate();
     delegation?.validate();
@@ -1368,12 +1494,15 @@ class LiveCallAcceptSession extends LiveJsonModel {
     this.instructions,
     bool hasInstructions = false,
     required this.model,
+    this.safetyIdentifier,
+    bool hasSafetyIdentifier = false,
     this.store,
     Map<String, dynamic> rawJson = const {},
   }) : triggers = triggers == null ? null : List.unmodifiable(triggers),
        hasDelegation = hasDelegation || delegation != null,
        input = input == null ? null : List.unmodifiable(input),
        hasInstructions = hasInstructions || instructions != null,
+       hasSafetyIdentifier = hasSafetyIdentifier || safetyIdentifier != null,
        rawJson = snapshotLiveJson(
          rawJson,
          'LiveCallAcceptSession',
@@ -1389,6 +1518,7 @@ class LiveCallAcceptSession extends LiveJsonModel {
     'input',
     'instructions',
     'model',
+    'safety_identifier',
     'store',
     'type',
   };
@@ -1419,6 +1549,12 @@ class LiveCallAcceptSession extends LiveJsonModel {
 
   /// The Live model to use for the accepted call.
   final String model;
+
+  /// Stable end-user identifier for safety monitoring, up to 128 characters.
+  final String? safetyIdentifier;
+
+  /// Whether the wire supplied an identifier or an explicit null.
+  final bool hasSafetyIdentifier;
 
   /// Whether to store the session for later forking and recording download. Defaults to false for new sessions.
   final bool? store;
@@ -1486,6 +1622,14 @@ class LiveCallAcceptSession extends LiveJsonModel {
       ),
       hasInstructions: json.containsKey('instructions'),
       model: requireLiveString(json['model'], 'LiveCallAcceptSession.model'),
+      safetyIdentifier: optionalLiveValue(
+        json,
+        'safety_identifier',
+        'LiveCallAcceptSession',
+        requireLiveString,
+        nullable: true,
+      ),
+      hasSafetyIdentifier: json.containsKey('safety_identifier'),
       store: optionalLiveValue(
         json,
         'store',
@@ -1499,6 +1643,13 @@ class LiveCallAcceptSession extends LiveJsonModel {
 
   @override
   void validate() {
+    if (safetyIdentifier != null) {
+      validateLiveLength(
+        safetyIdentifier!,
+        'LiveCallAcceptSession.safety_identifier',
+        max: 128,
+      );
+    }
     _validateLiveTriggers(triggers, 'LiveCallAcceptSession.triggers');
     validateLiveLength(model, 'LiveCallAcceptSession.model', min: 1);
     requireClosedLiveJson(rawJson, _knownKeys, 'LiveCallAcceptSession');
@@ -1526,6 +1677,7 @@ class LiveCallAcceptSession extends LiveJsonModel {
     if (input != null) 'input': input!.map((item) => item.toJson()).toList(),
     if (hasInstructions) 'instructions': instructions,
     'model': model,
+    if (hasSafetyIdentifier) 'safety_identifier': safetyIdentifier,
     if (store != null) 'store': store,
     'type': type,
   });
@@ -1541,6 +1693,8 @@ class LiveCallAcceptSession extends LiveJsonModel {
     Object? instructions = liveUnset,
     bool clearInstructions = false,
     String? model,
+    Object? safetyIdentifier = liveUnset,
+    bool clearSafetyIdentifier = false,
     Object? store = liveUnset,
     Map<String, dynamic>? rawJson,
   }) => LiveCallAcceptSession(
@@ -1580,6 +1734,16 @@ class LiveCallAcceptSession extends LiveJsonModel {
         !clearInstructions &&
         (!identical(instructions, liveUnset) || hasInstructions),
     model: model ?? this.model,
+    safetyIdentifier: clearSafetyIdentifier
+        ? null
+        : copyLiveValue<String>(
+            safetyIdentifier,
+            this.safetyIdentifier,
+            'LiveCallAcceptSession.safety_identifier',
+          ),
+    hasSafetyIdentifier:
+        !clearSafetyIdentifier &&
+        (!identical(safetyIdentifier, liveUnset) || hasSafetyIdentifier),
     store: copyLiveValue<bool>(
       store,
       this.store,
@@ -1680,6 +1844,11 @@ class LiveForkSessionConfigParam extends LiveJsonModel {
 
   @override
   void validate() {
+    if (rawJson.containsKey('safety_identifier')) {
+      throw const FormatException(
+        'LiveForkSessionConfigParam.safety_identifier: startup configuration only',
+      );
+    }
     audio?.validate();
     client?.validate();
     delegation?.validate();

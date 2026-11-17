@@ -662,17 +662,26 @@ sealed class LiveVoice extends LiveJsonModel {
   /// The named Live voice `brise`.
   static const brise = LiveNamedVoice('brise');
 
+  /// The named Live voice `calandria`.
+  static const calandria = LiveNamedVoice('calandria');
+
   /// The named Live voice `cedar`.
   static const cedar = LiveNamedVoice('cedar');
 
   /// The named Live voice `cinder`.
   static const cinder = LiveNamedVoice('cinder');
 
+  /// The named Live voice `compas`.
+  static const compas = LiveNamedVoice('compas');
+
   /// The named Live voice `coral`.
   static const coral = LiveNamedVoice('coral');
 
   /// The named Live voice `delta`.
   static const delta = LiveNamedVoice('delta');
+
+  /// The named Live voice `destello`.
+  static const destello = LiveNamedVoice('destello');
 
   /// The named Live voice `echo`.
   static const echo = LiveNamedVoice('echo');
@@ -683,11 +692,20 @@ sealed class LiveVoice extends LiveJsonModel {
   /// The named Live voice `gleam`.
   static const gleam = LiveNamedVoice('gleam');
 
+  /// The named Live voice `halo`.
+  static const halo = LiveNamedVoice('halo');
+
   /// The named Live voice `harema`.
   static const harema = LiveNamedVoice('harema');
 
+  /// The named Live voice `hornero`.
+  static const hornero = LiveNamedVoice('hornero');
+
   /// The named Live voice `juni`.
   static const juni = LiveNamedVoice('juni');
+
+  /// The named Live voice `luciernaga`.
+  static const luciernaga = LiveNamedVoice('luciernaga');
 
   /// The named Live voice `marin`.
   static const marin = LiveNamedVoice('marin');
@@ -703,6 +721,9 @@ sealed class LiveVoice extends LiveJsonModel {
 
   /// The named Live voice `nuri`.
   static const nuri = LiveNamedVoice('nuri');
+
+  /// The named Live voice `pearl`.
+  static const pearl = LiveNamedVoice('pearl');
 
   /// The named Live voice `quartz`.
   static const quartz = LiveNamedVoice('quartz');
