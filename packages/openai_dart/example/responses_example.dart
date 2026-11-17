@@ -10,13 +10,15 @@ import 'package:openai_dart/openai_dart.dart';
 Future<void> main() async {
   final client = OpenAIClient.fromEnvironment();
 
-  await simpleResponse(client);
-  await streamingResponse(client);
-  await responseWithTools(client);
-  await responseWithWebSearch(client);
-  await multiTurnConversation(client);
-
-  client.close();
+  try {
+    await simpleResponse(client);
+    await streamingResponse(client);
+    await responseWithTools(client);
+    await responseWithWebSearch(client);
+    await multiTurnConversation(client);
+  } finally {
+    client.close();
+  }
 }
 
 /// Simple response example.
@@ -25,7 +27,7 @@ Future<void> simpleResponse(OpenAIClient client) async {
 
   final response = await client.responses.create(
     const CreateResponseRequest(
-      model: 'gpt-5.5',
+      model: 'gpt-6.2-sol',
       input: ResponseInput.text('What is 2 + 2?'),
     ),
   );
@@ -41,7 +43,7 @@ Future<void> streamingResponse(OpenAIClient client) async {
 
   final stream = client.responses.createStream(
     const CreateResponseRequest(
-      model: 'gpt-5.5',
+      model: 'gpt-6.2-sol',
       input: ResponseInput.text('Tell me a very short joke.'),
     ),
   );
@@ -76,7 +78,7 @@ Future<void> responseWithTools(OpenAIClient client) async {
 
   final response = await client.responses.create(
     CreateResponseRequest(
-      model: 'gpt-5.5',
+      model: 'gpt-6.2-sol',
       input: const ResponseInput.text('What is the weather in San Francisco?'),
       tools: [weatherTool],
     ),
@@ -97,7 +99,7 @@ Future<void> responseWithWebSearch(OpenAIClient client) async {
 
   final response = await client.responses.create(
     CreateResponseRequest(
-      model: 'gpt-5.5',
+      model: 'gpt-6.2-sol',
       input: const ResponseInput.text('What are the latest news about AI?'),
       tools: [ResponseTool.webSearch()],
     ),
@@ -114,7 +116,7 @@ Future<void> multiTurnConversation(OpenAIClient client) async {
   // First turn
   final response1 = await client.responses.create(
     const CreateResponseRequest(
-      model: 'gpt-5.5',
+      model: 'gpt-6.2-sol',
       input: ResponseInput.text('My name is Alice.'),
     ),
   );
@@ -124,7 +126,7 @@ Future<void> multiTurnConversation(OpenAIClient client) async {
   // Second turn - continue the conversation using previous response ID
   final response2 = await client.responses.create(
     CreateResponseRequest(
-      model: 'gpt-5.5',
+      model: 'gpt-6.2-sol',
       input: const ResponseInput.items([
         MessageItem(
           role: MessageRole.user,

@@ -250,7 +250,7 @@ Future<void> main() async {
   try {
     final response = await client.responses.create(
       const CreateResponseRequest(
-        model: 'gpt-5.5',
+        model: 'gpt-6.2-sol',
         input: ResponseInput.text('What is the capital of France?'),
       ),
     );
@@ -282,7 +282,7 @@ Future<void> main() async {
   try {
     final stream = client.responses.createStream(
       const CreateResponseRequest(
-        model: 'gpt-5.5',
+        model: 'gpt-6.2-sol',
         input: ResponseInput.text('Tell me a short story.'),
       ),
     );
