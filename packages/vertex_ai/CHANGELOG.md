@@ -1,3 +1,12 @@
+## 0.5.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+`vertex_ai` now requires [googleapis 19.x](https://pub.dev/packages/googleapis/versions/19.0.0/changelog). If you declare `googleapis` directly, set its constraint to `^19.0.0`.
+
+- **BREAKING** **CHORE**: Upgrade googleapis to 19.0.0 ([#566](https://github.com/davidmigloz/ai_clients_dart/issues/566)). ([1f92e7fa](https://github.com/davidmigloz/ai_clients_dart/commit/1f92e7faea3f9351a5666266785e7933d36006b8))
+
 ## 0.4.0
 
 > [!CAUTION]

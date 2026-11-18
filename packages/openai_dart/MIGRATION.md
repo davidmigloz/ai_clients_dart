@@ -6,15 +6,43 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
-## Upcoming release
+## Migrating from v12.x to v13.0.0
 
-### Responses prompt-cache TTL
+Set `openai_dart: ^13.0.0` in your pubspec. Run `dart pub get` or
+`flutter pub get`. If you use Responses cache options or conversation image
+calls, update the enum types. Check your resource overrides and exhaustive
+switches for the new parameters and cases below.
 
-Use `ResponsePromptCacheTtl` for the `ttl` in
-`ResponsePromptCacheOptionsParam` and `PromptCacheOptions`. The Responses
-enum has both `minutes30` and `hours12`. Existing 30-minute payloads retain
-the same JSON. `PromptCacheOptionsParam` for Chat Completions and Responses
-compaction continues to use `PromptCacheTtl`.
+### 1) Chat Completions overrides
+
+If you override or implement `ChatCompletionsResource.create`, `createStream`,
+or `createStreamWithAccumulator`, add the optional named parameter
+`Map<String, Object?>? extraBody`. Pass it through when you call the base method.
+Regenerate mocks that implement these methods.
+
+```dart
+// Before
+@override
+Future<ChatCompletion> create(
+  ChatCompletionCreateRequest request, {
+  Future<void>? abortTrigger,
+}) => super.create(request, abortTrigger: abortTrigger);
+
+// After
+@override
+Future<ChatCompletion> create(
+  ChatCompletionCreateRequest request, {
+  Map<String, Object?>? extraBody,
+  Future<void>? abortTrigger,
+}) => super.create(request, extraBody: extraBody, abortTrigger: abortTrigger);
+```
+
+### 2) Responses prompt-cache TTL and usage
+
+Use `ResponsePromptCacheTtl` for `ttl` in `ResponsePromptCacheOptionsParam`
+and `PromptCacheOptions`. The enum supports `minutes30` and `hours12`. A
+30-minute TTL still produces the same JSON. `PromptCacheOptionsParam` for
+Chat Completions and Responses compaction continues to use `PromptCacheTtl`.
 
 ```dart
 // Before
@@ -26,11 +54,15 @@ const options = ResponsePromptCacheOptionsParam(
 );
 ```
 
-### Image output format switches
+If you override `InputTokensDetails.copyWith`, accept the new optional
+`cacheWriteTokensDetails` parameter. If the caller omits it, keep the existing
+value. If the caller passes `null`, clear the value.
 
-`ImageOutputFormat` now includes `.gif` and `.svg`. Handle both in exhaustive
-switches. Receiving either format now returns its enum case instead of
-`.unknown`.
+### 3) Image formats and conversation history
+
+Handle `.gif` and `.svg` in exhaustive switches over `ImageOutputFormat`.
+The decoder returns the matching enum case. It still uses `.unknown` for
+unrecognized formats.
 
 ```dart
 String imageExtension(ImageOutputFormat format) => switch (format) {
@@ -46,33 +78,33 @@ String imageExtension(ImageOutputFormat format) => switch (format) {
 Use the buffered Images methods for GIF or SVG. A Responses image-generation
 tool configured for GIF can still stream lifecycle events.
 
-Exhaustive switches over Responses `Item` also need to handle
-`ImageGenerationCallItem`. It is returned by `responses.inputItems.list` and
-can be added to a typed response history with
+Handle `ImageGenerationCallItem` in exhaustive switches over Responses
+`Item`. The `responses.inputItems.list` method returns this type for image
+calls. To add a call to a typed response history, use
 `ImageGenerationCallItem(call: response.imageGenerationCalls.single)`.
 
 `ConversationImageGenerationCallItem.status` now uses
-`ImageGenerationCallStatus?` for accurate status comparisons. Use
+`ImageGenerationCallStatus?`. Use
 `ImageGenerationCallStatus.completed` in place of `ItemStatus.completed` when
 constructing or checking a conversation image call. When a result is
 unavailable, the serializer emits `"result": null`.
 
-### Image classifier requests
+### 4) Image classifier requests
 
 Use `client.moderations.classifyImage(imageUrl)` for
-`omni-moderation-csam-latest`. Read the flags and scores from
-`response.result.categories` and `response.result.categoryScores`. Classes and
-mocks that implement `ModerationsResource` need the new method.
+`omni-moderation-csam-latest`. The generic `moderations.create` method rejects
+this model before sending a request. Read the flags and scores from
+`response.result.categories` and `response.result.categoryScores`. Add
+`classifyImage` to your implementations and mocks of `ModerationsResource`.
 
-### Agent session budgets and observation
+### 5) Agent session budgets and observation
 
 - For background compaction, set `AgentCompactionConfig(async: true)`.
-  Omitted and null values still go to the service as supplied. The current
-  service default is blocking compaction.
-- Read received spending from `session.spendControl`. Its `limit` is nullable
-  for unlimited sessions, and its `consumed` is nullable when recorded
-  spending is unavailable. Move lookups of `rawJson['spend_control']` to this
-  typed model. Nested extra fields reside on `session.spendControl?.rawJson`.
+  The service currently defaults to blocking compaction.
+- Replace `rawJson['spend_control']` lookups with `session.spendControl`. A
+  null `limit` indicates an unlimited session. A null `consumed` indicates
+  that the response has no spending amount. Read extra fields from
+  `session.spendControl?.rawJson`.
 - Read `session.promptCacheOptions`, `turn.promptCacheOptions` and
   `automation.pauseReason` in place of matching raw metadata keys. The
   corresponding presence getters distinguish explicit null from omission.
@@ -82,9 +114,9 @@ mocks that implement `ModerationsResource` need the new method.
 - If you override `AgentSessionsResource.stream` or
   `AgentSessionEventsResource.stream`, add its new optional
   `bool? includeObfuscation` named parameter. Forward it to preserve the
-  caller's per-connection padding preference.
+  caller's padding setting for that connection.
 
-### Agent MCP approval switches
+### 6) Agent MCP approval switches
 
 Handle `AgentSessionMcpApprovalRequiredAction` in exhaustive
 `AgentSessionRequiredAction` switches and `AgentSessionMcpApprovalResultInput`
@@ -93,34 +125,40 @@ in `AgentSessionInput` switches. For webhook summaries, add
 On returned function tools, read the optional `async` field from the typed
 model in place of `rawJson['async']`.
 
-### Live webhook dispatch and MCP configuration
+### 7) Live webhook dispatch and MCP configuration
 
 Exhaustive switches over `WebhookEvent` and `WebhookEventType` need a connected
 Live transport branch. Match `LiveTransportConnectedWebhookEvent` and use
 `data.sessionId` for sideband attachment after authenticating the webhook.
 
-`LiveMCPTool` now validates the declared MCP fields supplied through
-`rawJson`. Prefer its typed constructor arguments. Supply credentials with the
-request when replacing a configuration. Received sessions omit MCP
+If you supply declared MCP fields through `rawJson`, `LiveMCPTool` now
+validates them. Prefer its typed constructor arguments. When you replace a
+configuration, supply credentials with the request. Received sessions omit MCP
 `authorization` and `headers`, including from their raw snapshots.
 Use `tool.copyWith(authorization: null, headers: null)` to remove saved
 credentials before a request.
 
-### OCI external keys
+### 8) OCI external keys
 
 Handle `OciExternalKeyParams` in exhaustive switches over
 `ExternalKeyParams`. For received OCI keys, read `region`, `vaultOcid`,
 `keyOcid` and `keyVersionOcid` from `ExternalKey`. These fields had
 previously appeared only in `rawJson`.
 
-### Regional endpoints and function call output
+### 9) Regional endpoints and function call output
 
 Update exhaustive switches over `OpenAIDataResidency` to handle `au`, `india`
-and `jp`. The existing selections use the same URLs.
+and `jp`.
 
 If your subclass overrides `FunctionCallOutputItem.copyWith`, add the optional
 `namespace` argument with the same omission and explicit-null behavior as the
 base method. Set `namespace` when returning an output for a namespaced function.
+
+### 10) API key spending limits
+
+The SDK skips retries for HTTP 429 with `api_key_spend_limit_exceeded`.
+If your application retries 429 responses, exclude this code from retries.
+Check the key's spending limit before sending another request.
 
 ---
 

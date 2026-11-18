@@ -19,7 +19,7 @@ Requires Dart 3.12 or later. See the [Migration Guide](MIGRATION.md) for upgrade
 
 ```yaml
 dependencies:
-  vertex_ai: ^0.4.0
+  vertex_ai: ^0.5.0
 ```
 
 ## Features

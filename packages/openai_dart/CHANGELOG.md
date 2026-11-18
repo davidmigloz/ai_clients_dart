@@ -1,3 +1,23 @@
+## 13.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+> Check custom resource overrides and exhaustive switches for new parameters and cases. Responses cache options and conversation image calls use new enum types.
+
+Responses adds a 12-hour cache TTL and [discounted background completion windows](https://developers.openai.com/api/docs/guides/background#use-discounted-completion-windows). [GPT Image 2.6](https://developers.openai.com/api/docs/guides/image-generation#gpt-image-26) adds GIF and SVG output. Agent sessions report spending pauses and MCP approvals, and Live can delegate to Responses.
+
+- **BREAKING** **FEAT**: Add regional routes and permanent spend errors ([#589](https://github.com/davidmigloz/ai_clients_dart/issues/589)). ([9686a9ef](https://github.com/davidmigloz/ai_clients_dart/commit/9686a9ef8fdf5e65004b6e5f5ffee6d30d5d8900))
+- **BREAKING** **FEAT**: Add project service tiers and OCI keys ([#587](https://github.com/davidmigloz/ai_clients_dart/issues/587)). ([d955dd02](https://github.com/davidmigloz/ai_clients_dart/commit/d955dd02058ae2ee19fcb586ee6783ab3debf80b))
+- **BREAKING** **FEAT**: Align Live MCP delegation and WebRTC activation ([#586](https://github.com/davidmigloz/ai_clients_dart/issues/586)). ([d7bc1460](https://github.com/davidmigloz/ai_clients_dart/commit/d7bc1460db56fa989d9f94814022d2a304b909b2))
+- **BREAKING** **FEAT**: Add Agent async tools and MCP approvals ([#585](https://github.com/davidmigloz/ai_clients_dart/issues/585)). ([dfe2868d](https://github.com/davidmigloz/ai_clients_dart/commit/dfe2868d1b2964fdffd19852d95b88e48af76b36))
+- **BREAKING** **FEAT**: Add Agent session budgets and stream controls ([#584](https://github.com/davidmigloz/ai_clients_dart/issues/584)). ([92b55f04](https://github.com/davidmigloz/ai_clients_dart/commit/92b55f042c1d0cee6ac2d08c2a84b056ff316ba1))
+- **BREAKING** **FEAT**: Decode image classifier moderation results ([#583](https://github.com/davidmigloz/ai_clients_dart/issues/583)). ([f651b8c0](https://github.com/davidmigloz/ai_clients_dart/commit/f651b8c082ec9986e03043e039a02210ad6a8851))
+- **BREAKING** **FEAT**: Add GPT Image 2.6 formats and context controls ([#582](https://github.com/davidmigloz/ai_clients_dart/issues/582)). ([0c1c59f2](https://github.com/davidmigloz/ai_clients_dart/commit/0c1c59f2b476fdc84f5028c4943b97500d70122e))
+- **BREAKING** **FEAT**: Add Responses background windows and cache TTLs ([#581](https://github.com/davidmigloz/ai_clients_dart/issues/581)). ([9a2078c8](https://github.com/davidmigloz/ai_clients_dart/commit/9a2078c8621c6781f9c49fc3ee572a9a4820e3f7))
+- **BREAKING** **FEAT**: Support extraBody on Chat Completions ([#567](https://github.com/davidmigloz/ai_clients_dart/issues/567)). ([0770be9f](https://github.com/davidmigloz/ai_clients_dart/commit/0770be9fc76b56fbf3528d5ba7f3f276e18877be))
+- **FEAT**: Manage workload identity federation ([#588](https://github.com/davidmigloz/ai_clients_dart/issues/588)). ([c821b492](https://github.com/davidmigloz/ai_clients_dart/commit/c821b49270c7f1695502c5c9c862f75df18aab6b))
+- **DOCS**: Verify and close November API alignment ([#591](https://github.com/davidmigloz/ai_clients_dart/issues/591)). ([f0896e9c](https://github.com/davidmigloz/ai_clients_dart/commit/f0896e9c907b63607d0c1de6f42e423570837692))
+
 ## 12.0.0
 
 > [!CAUTION]

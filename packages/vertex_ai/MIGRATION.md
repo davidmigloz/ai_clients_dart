@@ -6,6 +6,34 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v0.4.x to v0.5.0
+
+`vertex_ai` 0.5.0 requires `googleapis` 19.x. If you declare `googleapis`
+directly, update both constraints in your pubspec.
+
+### 1) Update dependency constraints
+
+```yaml
+# Before
+dependencies:
+  vertex_ai: ^0.4.0
+  googleapis: ^17.0.0
+```
+
+```yaml
+# After
+dependencies:
+  vertex_ai: ^0.5.0
+  googleapis: ^19.0.0
+```
+
+If another dependency requires `googleapis` 17.x or 18.x, upgrade it to a
+version that accepts 19.x. Then run `dart pub get` or `flutter pub get`.
+If you use other generated Google API clients, check for removals and
+deprecations in the [googleapis changelog](https://pub.dev/packages/googleapis/versions/19.0.0/changelog).
+
+---
+
 ## Migrating from v0.3.x to v0.4.0
 
 v0.4.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.
