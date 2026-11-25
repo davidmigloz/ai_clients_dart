@@ -51,6 +51,8 @@ melos:
         test: ^1.31.1
         mocktail: ^1.0.4
         coverage: ^1.15.0
+        # Keep HTTP/2 evaluation fixtures on a reproducible version.
+        http2: 3.2.0
 
   scripts:
     test:

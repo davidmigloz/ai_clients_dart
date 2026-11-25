@@ -212,7 +212,7 @@ Future<void> _run(List<String> arguments) async {
         'version',
       ])).stdout.toString().trim(),
       'http': '1.6.0',
-      'http2': '3.1.0',
+      'http2': '3.2.0',
       'samples_per_cell': samples,
       'limits': {
         'requests_per_batch': 8,
