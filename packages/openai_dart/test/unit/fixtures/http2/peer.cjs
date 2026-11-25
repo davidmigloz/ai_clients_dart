@@ -45,12 +45,14 @@ function handler(req, res) {
     }, 10);
     res.on('close', () => clearInterval(timer)); return;
   }
-  if (mode === 'download') {
+  if (mode === 'download' || mode === 'download-large') {
     res.writeHead(200, {'content-type':'application/octet-stream'});
-    let remaining=64; const chunk=Buffer.alloc(65536, 65);
+    let remaining=mode === 'download-large' ? 128 : 64; const chunk=Buffer.alloc(65536, 65);
     const pump=() => { while (remaining>0 && !res.destroyed) {remaining--; if (!write(chunk)) {res.once('drain', () => {record.drains++; pump();});return;}}
       if (!remaining && !res.destroyed) end(); };
-    pump(); return;
+    if (mode === 'download-large') { res.flushHeaders(); hold(pump); }
+    else pump();
+    return;
   }
   // Fully consume uploads before returning valid Files API metadata.
   if (req.url === '/v1/files') {

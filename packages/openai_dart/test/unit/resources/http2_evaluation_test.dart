@@ -405,11 +405,14 @@ void main() {
   );
 
   test(
-    'paused candidate response admits bounded 4MiB before consumer resumes',
+    'paused candidate response stalls the peer until the consumer resumes',
     () async {
+      const streamWindow = 4 * 1024 * 1024;
+      const peerChunk = 64 * 1024;
+      const payloadSize = 8 * 1024 * 1024;
       final transport = candidate();
       final request = http.Request('GET', Uri.parse('${peer.baseUrl}/download'))
-        ..headers['x-fixture-mode'] = 'download';
+        ..headers['x-fixture-mode'] = 'download-large';
       final response = await transport.send(request);
       final done = Completer<void>();
       var bytes = 0;
@@ -420,16 +423,28 @@ void main() {
         onDone: done.complete,
         onError: done.completeError,
       )..pause();
-      final stats = await _records(
-        peer,
-        (records) => records.single['finished'] == true,
-      );
-      expect(requestRecords(stats).single['sentBytes'], 4 * 1024 * 1024);
-      expect(bytes, 0);
-      subscription.resume();
-      await done.future;
-      expect(bytes, 4 * 1024 * 1024);
-      await subscription.cancel();
+      try {
+        // The peer sends headers first and waits for the consumer to pause.
+        await peer.command('release');
+        await _records(
+          peer,
+          (records) => (records.single['sentBytes'] as int) >= streamWindow,
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        final record = requestRecords(await peer.command('stats')).single;
+        // The peer may enqueue one chunk beyond its available window.
+        expect(
+          record['sentBytes'],
+          lessThanOrEqualTo(streamWindow + peerChunk),
+        );
+        expect(record['finished'], isFalse);
+        expect(bytes, 0);
+        subscription.resume();
+        await done.future.timeout(const Duration(seconds: 3));
+        expect(bytes, payloadSize);
+      } finally {
+        await subscription.cancel();
+      }
     },
   );
 
@@ -475,19 +490,26 @@ void main() {
   });
 
   test(
-    'reusing public SSE h2 connection reproduces local interoperability failure',
+    'sequential and concurrent public SSE calls reuse one h2 connection',
     () async {
       final transport = candidate();
       final api = peer.openai(transport, mode: 'sse');
-      expect(
-        await api.responses.createStream(fixtureRequest()).toList(),
-        hasLength(10),
-      );
-      await peer.command('stats');
-      await expectLater(
-        api.responses.createStream(fixtureRequest()).toList(),
-        throwsA(isA<http.ClientException>()),
-      );
+      for (var i = 0; i < 2; i++) {
+        expect(
+          await api.responses.createStream(fixtureRequest()).toList(),
+          hasLength(10),
+        );
+      }
+      final responses = await Future.wait([
+        for (var i = 0; i < 8; i++)
+          api.responses.createStream(fixtureRequest()).toList(),
+      ]);
+      expect(responses, everyElement(hasLength(10)));
+      final stats = await peer.command('stats');
+      expect(stats['requests'], 10);
+      expect(stats['connections'], 1);
+      expect(stats['h2Sessions'], 1);
+      expect(stats['sessionEvents'], isEmpty);
       api.close();
     },
   );
