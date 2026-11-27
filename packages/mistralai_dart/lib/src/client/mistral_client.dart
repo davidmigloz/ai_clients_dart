@@ -17,6 +17,7 @@ import '../resources/files/files_resource.dart';
 import '../resources/fim_resource.dart';
 import '../resources/fine_tuning/fine_tuning_resource.dart';
 import '../resources/libraries/libraries_resource.dart';
+import '../resources/managed_search_indexes_resource.dart';
 import '../resources/models_resource.dart';
 import '../resources/moderations_resource.dart';
 import '../resources/observability/observability_resource.dart';
@@ -56,7 +57,8 @@ import 'retry_wrapper.dart';
 /// - [prompts] - Registered prompt templates (Beta)
 /// - [skills] - Registered reusable model instructions (Beta)
 /// - [users] - Current authenticated user identity (Beta)
-/// - [rag] - RAG ingestion pipelines and search indexes (Beta)
+/// - [rag] - RAG ingestion pipelines and legacy index registration (Beta)
+/// - [managedSearchIndexes] - Managed Search indexes (Public Preview)
 /// - [workflows] - Workflow execution, scheduling, and management
 /// - [models] - Model listing and management
 /// - [moderations] - Content moderation
@@ -190,6 +192,9 @@ class MistralClient {
 
   /// Resource for RAG ingestion pipelines and search indexes (Beta).
   late final RagResource rag;
+
+  /// Managed Search indexes and content operations (Public Preview).
+  late final ManagedSearchIndexesResource managedSearchIndexes;
 
   /// Resource for workflow operations (Beta).
   late final WorkflowsResource workflows;
@@ -392,6 +397,13 @@ class MistralClient {
       ensureNotClosed: _ensureNotClosed,
     );
 
+    managedSearchIndexes = ManagedSearchIndexesResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
     rag = RagResource(
       config: this.config,
       httpClient: _httpClient,

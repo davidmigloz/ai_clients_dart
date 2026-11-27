@@ -31,7 +31,8 @@
     "models": "models",
     "moderations": "moderation",
     "fineTuningModels": "fine_tuning",
-    "transcriptions": "audio"
+    "transcriptions": "audio",
+    "managed_search_indexes": "managed_search_indexes"
   },
   "excluded_from_examples": [],
   "drift_patterns": []

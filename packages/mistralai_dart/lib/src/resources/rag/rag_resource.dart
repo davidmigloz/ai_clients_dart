@@ -44,6 +44,7 @@ class RagResource {
   ingestionPipelineConfigurations;
 
   /// Sub-resource for search indexes.
+  /// For Mistral-hosted indexes, use the main client's managed Search resource.
   late final SearchIndexesResource searchIndexes;
 
   /// Creates a [RagResource].

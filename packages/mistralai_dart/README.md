@@ -27,7 +27,7 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 
 ## Features
 
-> **Coverage:** This client covers the full Mistral AI API surface. See [API Coverage](#api-coverage) for details.
+> **Coverage:** See [API Coverage](#api-coverage) for supported resources and availability.
 
 ### Generation and streaming
 
@@ -48,7 +48,8 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 - Prompts and skills: versioned, shareable templates and instructions (beta)
 - Observability: campaigns, datasets, judges, and chat completion events (beta)
 - Workflows: execution, scheduling, management, and managed deployments (Public Preview)
-- RAG: ingestion pipeline configuration and search index management (beta)
+- Managed Search indexes, document ingestion, and retrieval (Mistral-hosted Public Preview)
+- RAG ingestion pipeline configuration (beta)
 - Users: current authenticated user identity (beta)
 
 ## Why choose this client?
@@ -56,7 +57,7 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 - Pure Dart with no Flutter dependency — works in mobile apps, backends, and CLIs.
 - Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
 - Streaming, retries, interceptors, and error handling built into the client.
-- Covers the full Mistral AI API surface, including beta agents, conversations, connectors, libraries, prompts, skills, observability, workflows, RAG, and users.
+- Resource APIs for inference, media, workflows, document storage, and managed search.
 - Strict [semver](https://semver.org/) versioning so downstream packages can depend on stable, predictable version ranges.
 
 ## Quickstart
@@ -1068,25 +1069,57 @@ final logs = await client.observability.logs.search();
 
 </details>
 
-### How do I use RAG?
+### How do I use Managed Search?
 
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.rag` to configure document ingestion pipelines and manage the Vespa-backed search indexes used for retrieval (Beta). The `ingestionPipelineConfigurations` sub-resource registers and lists pipeline configurations, while the `searchIndexes` sub-resource registers, inspects, and unregisters search indexes.
+Managed Search runs on Mistral-hosted infrastructure in Public Preview. Use
+a workspace API key with access to the index. Creating, updating, and
+deleting an index initiate asynchronous operations. Use its status to
+check when it is ready.
 
 ```dart
-// List ingestion pipeline configurations
-final configs = await client.rag.ingestionPipelineConfigurations.list();
+final index = await client.managedSearchIndexes.get(indexName: 'team-notes');
 
-// Register a configuration
+if (index.status == ManagedSearchIndexStatus.ready) {
+  final results = await client.managedSearchIndexes.search(
+    indexName: index.name,
+    request: const ManagedSearchRequest(
+      retriever: KeywordRetriever(query: 'release checklist', topK: 5),
+    ),
+  );
+  for (final hit in results.hits) {
+    print(hit.chunk.content);
+  }
+}
+```
+
+Use `client.managedSearchIndexes` for index CRUD, document ingestion, keyword
+and vector search, navigation, and streamed summary generation. The old
+`client.rag.searchIndexes` wrappers refer to external index registration
+routes from an earlier API snapshot. Managed indexes require their own
+configuration and ingestion.
+
+→ [Full example](example/managed_search_indexes_example.dart)
+
+</details>
+
+### How do I configure a RAG ingestion pipeline?
+
+<details>
+<summary><b>Show example</b></summary>
+
+The beta `client.rag.ingestionPipelineConfigurations` resource registers
+pipeline metadata and reports ingestion runs.
+
+```dart
 final config = await client.rag.ingestionPipelineConfigurations.register(
   request: const CreateIngestionPipelineConfigurationRequest(
     name: 'My ingestion pipeline',
   ),
 );
 
-// Update the run info after a pipeline run
 await client.rag.ingestionPipelineConfigurations.updateRunInfo(
   id: config.id,
   request: UpdateRunInfo(
@@ -1094,30 +1127,6 @@ await client.rag.ingestionPipelineConfigurations.updateRunInfo(
     chunksCount: 128,
   ),
 );
-
-// Register a Vespa-backed search index
-final registered = await client.rag.searchIndexes.register(
-  request: const RegisterSearchIndexRequest(
-    name: 'My search index',
-    index: RegisterVespaIndexRequest(
-      k8sCluster: 'cluster',
-      k8sNamespace: 'namespace',
-      vespaInstanceName: 'instance',
-      vespaVersion: '8.0.0',
-      queryUrl: 'https://vespa.example.com',
-      schemas: [],
-    ),
-  ),
-);
-
-// Fetch detailed information and list summaries
-final detail = await client.rag.searchIndexes.getDetail(
-  indexId: registered.id,
-);
-final summaries = await client.rag.searchIndexes.listSummaries();
-
-// Unregister the search index
-await client.rag.searchIndexes.unregister(indexId: registered.id);
 ```
 
 → [Full example](example/rag_index_example.dart)
@@ -1297,7 +1306,8 @@ See the [example/](example/) directory for complete examples:
 | [`observability_example.dart`](example/observability_example.dart) | Observability: datasets, judges, campaigns (beta) |
 | [`workflows_example.dart`](example/workflows_example.dart) | Workflow execution, scheduling, and management |
 | [`workflow_deployment_archive_example.dart`](example/workflow_deployment_archive_example.dart) | Signed archive upload and managed deployment (Public Preview) |
-| [`rag_index_example.dart`](example/rag_index_example.dart) | RAG ingestion pipelines and search indexes (beta) |
+| [`managed_search_indexes_example.dart`](example/managed_search_indexes_example.dart) | Mistral-hosted Managed Search |
+| [`rag_index_example.dart`](example/rag_index_example.dart) | RAG ingestion pipeline configuration (beta) |
 | [`users_example.dart`](example/users_example.dart) | Current authenticated user identity (beta) |
 | [`models_example.dart`](example/models_example.dart) | Model listing |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
@@ -1331,7 +1341,8 @@ See the [example/](example/) directory for complete examples:
 | Skills (Beta) | ✅ Full |
 | Observability (Beta) | ✅ Full |
 | Workflows | ✅ Supported |
-| RAG (Beta) | ✅ Full |
+| Managed Search | Mistral-hosted Public Preview |
+| RAG (Beta) | Ingestion pipeline configuration and legacy index wrappers |
 | Users (Beta) | ✅ Full |
 
 ## Official Documentation
