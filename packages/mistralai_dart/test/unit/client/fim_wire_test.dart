@@ -11,7 +11,7 @@ const _request = FimCompletionRequest(
   suffix: ';',
 );
 
-const _logprobs = {
+const Map<String, Object> _logprobs = {
   'content': [
     {
       'token': 'value',
