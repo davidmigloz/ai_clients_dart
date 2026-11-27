@@ -49,7 +49,7 @@ void main() {
         'id': 'batch-123',
         'agent_id': 'agent-123',
         'model': null,
-        'endpoint': '/v1/agents/completions',
+        'endpoint': '/v1/conversations',
         'input_files': <String>[],
         'status': 'QUEUED',
         'created_at': 1705312800,
@@ -63,7 +63,7 @@ void main() {
 
       final result = await client.batch.jobs.create(
         request: const CreateBatchJobRequest(
-          endpoint: '/v1/agents/completions',
+          endpoint: '/v1/conversations',
           agentId: 'agent-123',
           timeoutHours: 5,
           requests: [
@@ -75,7 +75,7 @@ void main() {
       expect(captured.method, 'POST');
       expect(captured.url.path, '/v1/batch/jobs');
       expect(jsonDecode((captured as http.Request).body), {
-        'endpoint': '/v1/agents/completions',
+        'endpoint': '/v1/conversations',
         'agent_id': 'agent-123',
         'timeout_hours': 5,
         'requests': [
