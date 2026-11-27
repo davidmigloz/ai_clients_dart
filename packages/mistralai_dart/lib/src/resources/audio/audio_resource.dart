@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../../client/config.dart';
 import '../../client/interceptor_chain.dart';
 import '../../client/request_builder.dart';
+import '../realtime/realtime_audio.dart';
 import 'speech_resource.dart';
 import 'transcriptions_resource.dart';
 import 'voices_resource.dart';
@@ -10,7 +11,7 @@ import 'voices_resource.dart';
 /// Resource for Audio API operations.
 ///
 /// Provides audio processing capabilities including transcription, speech
-/// synthesis, and voice management.
+/// synthesis, voice management, and realtime WebSockets.
 ///
 /// Example usage:
 /// ```dart
@@ -56,6 +57,12 @@ class AudioResource {
   /// Sub-resource for speech synthesis.
   late final SpeechResource speech;
 
+  /// Realtime transcription over an audio-input WebSocket.
+  late final RealtimeTranscriptionResource realtime;
+
+  /// Realtime speech synthesis over a text-input WebSocket.
+  late final RealtimeSpeechResource realtimeSpeech;
+
   /// Sub-resource for voice management.
   late final VoicesResource voices;
 
@@ -78,6 +85,16 @@ class AudioResource {
       config: config,
       httpClient: httpClient,
       interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+    realtime = RealtimeTranscriptionResource(
+      config: config,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+    realtimeSpeech = RealtimeSpeechResource(
+      config: config,
       requestBuilder: requestBuilder,
       ensureNotClosed: ensureNotClosed,
     );
