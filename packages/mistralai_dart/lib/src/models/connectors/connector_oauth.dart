@@ -809,7 +809,7 @@ class ConnectorOAuthMetadataSecrets {
       'clientId: $clientId, '
       'clientIdIssuedAt: $clientIdIssuedAt, '
       'clientSecret: ${clientSecret == null ? null : '[redacted]'}, '
-      'clientSecretExpiresAt: ${clientSecret == null ? null : '[redacted]'}ExpiresAt)';
+      'clientSecretExpiresAt: $clientSecretExpiresAt)';
 }
 
 /// The OAuth2ClientCredentialsInput wire payload.

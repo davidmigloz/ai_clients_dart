@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:logging/logging.dart';
 import 'package:mistralai_dart/mistralai_dart.dart';
 import 'package:test/test.dart';
 
@@ -461,4 +462,133 @@ void main() {
       ),
     );
   });
+  group('credential diagnostics', () {
+    const credentials = CredentialsCreateOrUpdate(
+      name: 'example',
+      credentials: ConnectionCredentials(bearerToken: _clientSecret),
+    );
+    final writes = <String, Future<Object> Function(MistralClient)>{
+      'create': (client) => client.connectors.create(
+        request: const CreateConnectorRequest(
+          name: 'reader',
+          description: 'Read catalog',
+          server: 'https://example.com',
+          authData: AuthData(clientId: 'client', clientSecret: _clientSecret),
+        ),
+      ),
+      'update': (client) => client.connectors.update(
+        connectorId: 'connector-1',
+        request: const UpdateConnectorRequest(
+          authMethods: [
+            ConnectorAuthMethodPatch(
+              methodType: OutboundAuthenticationType.oauth2,
+              oauth2MetadataSecrets: ConnectorOAuthMetadataSecrets(
+                clientSecret: _clientSecret,
+              ),
+            ),
+          ],
+        ),
+      ),
+      'create credentials': (client) => client.connectors.createCredentials(
+        connectorIdOrName: 'connector-1',
+        scope: ConnectorConsumerScope.user,
+        request: credentials,
+      ),
+      'update credentials': (client) => client.connectors.updateCredentials(
+        connectorIdOrName: 'connector-1',
+        scope: ConnectorConsumerScope.organization,
+        request: credentials,
+      ),
+    };
+
+    for (final entry in writes.entries) {
+      test('${entry.key} suppresses an echoed secret', () async {
+        final records = <LogRecord>[];
+        final subscription = Logger.root.onRecord.listen(records.add);
+        addTearDown(subscription.cancel);
+        final transport = _EchoingConnectorTransport();
+        final client = MistralClient.withApiKey(
+          'offline-key',
+          httpClient: transport,
+        );
+        addTearDown(client.close);
+
+        await expectLater(
+          entry.value(client),
+          throwsA(
+            isA<ApiException>()
+                .having((error) => error.statusCode, 'status', 422)
+                .having((error) => error.details, 'details', isEmpty)
+                .having(
+                  (error) => error.message,
+                  'message',
+                  isNot(contains(_clientSecret)),
+                )
+                .having(
+                  (error) => error.toString(),
+                  'diagnostic',
+                  isNot(contains(_clientSecret)),
+                )
+                .having(
+                  (error) => error.responseMetadata?.bodyExcerpt,
+                  'body',
+                  '[REDACTED]',
+                )
+                .having(
+                  (error) => error.responseMetadata?.headers,
+                  'headers',
+                  isEmpty,
+                ),
+          ),
+        );
+        expect(transport.requests, 1);
+        final messages = records.where(
+          (record) => record.loggerName == 'mistralai_dart',
+        );
+        expect(
+          messages.any((record) => record.message.contains('HTTP 422 error')),
+          isTrue,
+        );
+        expect(
+          messages.every((record) => !record.message.contains(_clientSecret)),
+          isTrue,
+        );
+      });
+    }
+  });
+
+  test('OAuth diagnostics display expiry without the secret', () {
+    const metadata = ConnectorOAuthMetadataSecrets(
+      clientSecret: _clientSecret,
+      clientSecretExpiresAt: 1795770000,
+    );
+    expect(metadata.toString(), contains('clientSecretExpiresAt: 1795770000'));
+    expect(metadata.toString(), isNot(contains(_clientSecret)));
+  });
+}
+
+class _EchoingConnectorTransport extends http.BaseClient {
+  int requests = 0;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    requests++;
+    expect(request.followRedirects, isFalse);
+    final body = await request.finalize().bytesToString();
+    expect(body, contains(_clientSecret));
+    return http.StreamedResponse(
+      Stream.value(
+        utf8.encode(
+          jsonEncode({
+            'detail': {'message': 'Rejected $body'},
+          }),
+        ),
+      ),
+      422,
+      headers: {
+        'content-type': 'application/json',
+        'x-echoed-credential': _clientSecret,
+      },
+    );
+  }
 }

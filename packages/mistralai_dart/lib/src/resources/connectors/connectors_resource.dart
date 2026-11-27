@@ -18,6 +18,7 @@ import '../../models/connectors/public_authentication_method.dart';
 import '../../models/connectors/tool_execution_configuration.dart';
 import '../../models/connectors/update_connector_request.dart';
 import '../base_resource.dart';
+import '../platform_resource.dart';
 
 /// Resource for managing MCP and HTTP connectors (Public Preview).
 ///
@@ -46,7 +47,7 @@ import '../base_resource.dart';
 /// );
 ///
 /// ```
-class ConnectorsResource extends ResourceBase {
+class ConnectorsResource extends ResourceBase with PlatformResource {
   /// Creates a [ConnectorsResource].
   ConnectorsResource({
     required super.config,
@@ -66,21 +67,8 @@ class ConnectorsResource extends ResourceBase {
   /// (`POST /v1/connectors`).
   ///
   /// [request] contains the connector configuration.
-  Future<Connector> create({required CreateConnectorRequest request}) async {
-    ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/connectors');
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
-    );
-
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
-
-    final response = await interceptorChain.execute(httpRequest);
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return Connector.fromJson(responseBody);
-  }
+  Future<Connector> create({required CreateConnectorRequest request}) async =>
+      _writeConnector('POST', '/v1/connectors', request.toJson());
 
   /// Lists all connectors with keyset pagination and filters.
   ///
@@ -162,22 +150,31 @@ class ConnectorsResource extends ResourceBase {
   Future<Connector> update({
     required String connectorId,
     required UpdateConnectorRequest request,
-  }) async {
-    ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl(
-      '/v1/connectors/${Uri.encodeComponent(connectorId)}',
-    );
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
-    );
+  }) async => _writeConnector(
+    'PATCH',
+    '/v1/connectors/${Uri.encodeComponent(connectorId)}',
+    request.toJson(),
+  );
 
-    final httpRequest = http.Request('PATCH', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
-
-    final response = await interceptorChain.execute(httpRequest);
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return Connector.fromJson(responseBody);
+  Future<Connector> _writeConnector(
+    String method,
+    String path,
+    Map<String, dynamic> body,
+  ) {
+    const credentialFields = {
+      'auth_methods',
+      'global_headers',
+      'headers',
+      'oauth2_server_metadata',
+      'oauth2_server_metadata_url',
+    };
+    return requestPlatform(
+      method,
+      path,
+      (json) => Connector.fromJson(json as Map<String, dynamic>),
+      body: body,
+      redactErrorBody: credentialFields.any((key) => body[key] != null),
+    );
   }
 
   /// Deletes a connector by its ID.
@@ -531,6 +528,7 @@ class ConnectorsResource extends ResourceBase {
     method,
     '/v1/connectors/${Uri.encodeComponent(connectorIdOrName)}/${scope.value}/credentials',
     body: request.toJson(),
+    redactErrorBody: true,
   );
 
   /// Deletes a named credential at the selected scope.
@@ -785,21 +783,12 @@ class ConnectorsResource extends ResourceBase {
     String method,
     String path, {
     Map<String, dynamic>? body,
-  }) async {
-    ensureNotClosed?.call();
-    final request = http.Request(method, requestBuilder.buildUrl(path))
-      ..headers.addAll(
-        requestBuilder.buildHeaders(
-          additionalHeaders: {
-            'Accept': 'application/json',
-            if (body != null) 'Content-Type': 'application/json',
-          },
-        ),
-      );
-    if (body != null) request.body = jsonEncode(body);
-    final response = await interceptorChain.execute(request);
-    return MessageResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
-  }
+    bool redactErrorBody = false,
+  }) => requestPlatform(
+    method,
+    path,
+    (json) => MessageResponse.fromJson(json as Map<String, dynamic>),
+    body: body,
+    redactErrorBody: redactErrorBody,
+  );
 }
