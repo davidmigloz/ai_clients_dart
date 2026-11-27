@@ -7,6 +7,9 @@ Mistral's public API and official SDKs through November 27. The Dart baseline is
 including the streamed content chunk fix in [#594](https://github.com/davidmigloz/ai_clients_dart/pull/594).
 The August 2 snapshot was promoted in [#287](https://github.com/davidmigloz/ai_clients_dart/pull/287).
 
+The [verification record](verification.md) links each implemented slice and
+its public entry-point evidence.
+
 ## Source pins
 
 | Source | Pin |
@@ -22,7 +25,7 @@ Both OpenAPI documents advertise version 1.0.0. The YAML 1.2 candidate uses the 
 initial PyYAML conversion represented three Admin page-size bounds as
 strings. The independent YAML 1.2 conversion identified each as the number
 1,000,000. The initial toolkit digest is retained in the inventory. The
-closeout will verify those numeric constraints and promote the corrected pin. The November pin
+promoted snapshot preserves those numeric constraints. The November pin
 includes 345 operation records and 1,117 named schemas. The August pin
 contains 293 operation records and 719 schemas. A fragment such as
 `#stream` on a spec path identifies an alternate shape of the HTTP
