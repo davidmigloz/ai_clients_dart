@@ -486,6 +486,23 @@ void main() {
     expect(current, OtelFieldDefinition.fromJson(current.toJson()));
   });
 
+  test('generation copies accept untyped empty score lists', () {
+    final timestamp = DateTime.utc(2026, 11, 27);
+    final generation = EvaluationRunGeneration(
+      createdAt: timestamp,
+      deletedAt: null,
+      id: 'generation',
+      metadata: const {},
+      output: null,
+      status: 'completed',
+      updatedAt: timestamp,
+    );
+    final empty = generation.copyWith(scores: {'evaluator': <Object>[]});
+    expect(empty.scores!['evaluator'], isEmpty);
+    expect(empty.toJson()['scores'], {'evaluator': <Object>[]});
+    expect(empty.copyWith(scores: null).scores, isNull);
+  });
+
   test('leaves an optional run search body absent', () async {
     final client = _client((
       method: 'POST',

@@ -182,7 +182,12 @@ class EvaluationRunGeneration {
     output: output == unsetCopyWithValue ? this.output : output,
     scores: scores == unsetCopyWithValue
         ? this.scores
-        : (scores as Map?)?.cast<String, List<EvaluationRecordScore>>(),
+        : (scores as Map<Object?, Object?>?)?.map(
+            (key, value) => MapEntry(
+              key! as String,
+              List<EvaluationRecordScore>.from(value! as Iterable<Object?>),
+            ),
+          ),
     statistics: statistics == unsetCopyWithValue
         ? this.statistics
         : (statistics as Map?)?.cast<String, EvaluatorStatistics>(),
