@@ -21,7 +21,8 @@
   },
   "excluded_resources": [
     "base_resource",
-    "streaming_resource"
+    "streaming_resource",
+    "platform_resource"
   ],
   "resource_to_example": {
     "chat": "chat",
@@ -44,7 +45,12 @@
     "evaluations": "observability",
     "scorers": "observability",
     "pipelines": "observability",
-    "optimizations": "observability"
+    "optimizations": "observability",
+    "billing": "platform_identity",
+    "users": "platform_identity",
+    "serviceAccounts": "platform_identity",
+    "triggers": "workflow_trigger",
+    "webhooks": "workflow_trigger"
   },
   "excluded_from_examples": [],
   "drift_patterns": []

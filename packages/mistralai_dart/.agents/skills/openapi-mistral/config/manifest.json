@@ -7940,6 +7940,316 @@
       "schema": "FunctionRequest",
       "tags": [],
       "note": "Voice tools require a typed function declaration including strict and a parameter schema."
+    },
+    "UserOrganization": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UserOrganization",
+      "file": "lib/src/models/users/user_memberships.dart",
+      "schema": "UserOrganization",
+      "tags": []
+    },
+    "UserWorkspace": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UserWorkspace",
+      "file": "lib/src/models/users/user_memberships.dart",
+      "schema": "UserWorkspace",
+      "tags": []
+    },
+    "ListOrganizationsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UserOrganizations",
+      "file": "lib/src/models/users/user_memberships.dart",
+      "schema": "ListOrganizationsResponse",
+      "tags": []
+    },
+    "ListWorkspacesResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UserWorkspaces",
+      "file": "lib/src/models/users/user_memberships.dart",
+      "schema": "ListWorkspacesResponse",
+      "tags": []
+    },
+    "WhoamiResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WhoamiResponse",
+      "file": "lib/src/models/users/whoami_response.dart",
+      "schema": "WhoamiResponse",
+      "tags": []
+    },
+    "WhoamiOrganization": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WhoamiOrganization",
+      "file": "lib/src/models/users/whoami_response.dart",
+      "schema": "WhoamiOrganization",
+      "tags": []
+    },
+    "WhoamiUserPrincipal": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WhoamiUserPrincipal",
+      "file": "lib/src/models/users/whoami_response.dart",
+      "schema": "WhoamiUserPrincipal",
+      "tags": [],
+      "parent": "WhoamiPrincipal"
+    },
+    "WhoamiServiceAccountPrincipal": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WhoamiServiceAccountPrincipal",
+      "file": "lib/src/models/users/whoami_response.dart",
+      "schema": "WhoamiServiceAccountPrincipal",
+      "tags": [],
+      "parent": "WhoamiPrincipal"
+    },
+    "GetBudgetResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "BillingBudget",
+      "file": "lib/src/models/billing/billing.dart",
+      "schema": "GetBudgetResponse",
+      "tags": []
+    },
+    "BudgetDetail": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "BillingBudgetDetail",
+      "file": "lib/src/models/billing/billing.dart",
+      "schema": "BudgetDetail",
+      "tags": []
+    },
+    "GetSubscriptionResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "BillingSubscription",
+      "file": "lib/src/models/billing/billing.dart",
+      "schema": "GetSubscriptionResponse",
+      "tags": []
+    },
+    "ServiceAccount": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ServiceAccount",
+      "file": "lib/src/models/service_accounts/service_account.dart",
+      "schema": "ServiceAccount",
+      "tags": []
+    },
+    "ListServiceAccountsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ServiceAccountList",
+      "file": "lib/src/models/service_accounts/service_account.dart",
+      "schema": "ListServiceAccountsResponse",
+      "tags": []
+    },
+    "SortOrder": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ServiceAccountSortOrder",
+      "file": "lib/src/models/service_accounts/service_account.dart",
+      "schema": "SortOrder",
+      "tags": []
+    },
+    "CreateServiceAccountRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateServiceAccountRequest",
+      "file": "lib/src/models/service_accounts/service_account.dart",
+      "schema": "CreateServiceAccountRequest",
+      "tags": []
+    },
+    "AssignableServiceAccountRole": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AssignableServiceAccountRole",
+      "file": "lib/src/models/service_accounts/service_account.dart",
+      "schema": "AssignableServiceAccountRole",
+      "tags": []
+    },
+    "ListAssignableServiceAccountRolesResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AssignableServiceAccountRoles",
+      "file": "lib/src/models/service_accounts/service_account.dart",
+      "schema": "ListAssignableServiceAccountRolesResponse",
+      "tags": []
+    },
+    "ServiceAccountRole": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ServiceAccountRole",
+      "file": "lib/src/models/service_accounts/service_account.dart",
+      "schema": "ServiceAccountRole",
+      "tags": []
+    },
+    "ListServiceAccountRolesResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ServiceAccountRoles",
+      "file": "lib/src/models/service_accounts/service_account.dart",
+      "schema": "ListServiceAccountRolesResponse",
+      "tags": []
+    },
+    "SetServiceAccountRolesRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SetServiceAccountRolesRequest",
+      "file": "lib/src/models/service_accounts/service_account.dart",
+      "schema": "SetServiceAccountRolesRequest",
+      "tags": []
+    },
+    "Trigger": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Trigger",
+      "file": "lib/src/models/triggers/trigger.dart",
+      "schema": "Trigger",
+      "tags": []
+    },
+    "TriggerAction": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TriggerAction",
+      "file": "lib/src/models/triggers/trigger.dart",
+      "schema": "TriggerAction",
+      "tags": []
+    },
+    "CreateTrigger": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateTriggerRequest",
+      "file": "lib/src/models/triggers/trigger.dart",
+      "schema": "CreateTrigger",
+      "tags": []
+    },
+    "TriggerHandler": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "TriggerHandler",
+      "file": "lib/src/models/triggers/trigger.dart",
+      "schema": "TriggerHandler",
+      "tags": []
+    },
+    "TriggerActionType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "TriggerActionType",
+      "file": "lib/src/models/triggers/trigger.dart",
+      "schema": "TriggerActionType",
+      "tags": []
+    },
+    "TriggerEventList": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TriggerEventList",
+      "file": "lib/src/models/triggers/trigger.dart",
+      "schema": "TriggerEventList",
+      "tags": []
+    },
+    "TriggerEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TriggerEvent",
+      "file": "lib/src/models/triggers/trigger.dart",
+      "schema": "TriggerEvent",
+      "tags": []
+    },
+    "TriggerStatusValue": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "TriggerStatus",
+      "file": "lib/src/models/triggers/trigger.dart",
+      "schema": "TriggerStatusValue",
+      "tags": []
+    },
+    "CreateWebhook": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateWebhookRequest",
+      "file": "lib/src/models/webhooks/webhook.dart",
+      "schema": "CreateWebhook",
+      "tags": []
+    },
+    "Webhook": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Webhook",
+      "file": "lib/src/models/webhooks/webhook.dart",
+      "schema": "Webhook",
+      "tags": []
+    },
+    "WebhookSigningSecret": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WebhookSigningSecret",
+      "file": "lib/src/models/webhooks/webhook.dart",
+      "schema": "WebhookSigningSecret",
+      "tags": []
+    },
+    "WebhookProvider": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "WebhookProvider",
+      "file": "lib/src/models/webhooks/webhook.dart",
+      "schema": "WebhookProvider",
+      "tags": []
+    },
+    "TriggersOwnerType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "TriggerOwnerType",
+      "file": "lib/src/models/webhooks/webhook.dart",
+      "schema": "TriggersOwnerType",
+      "tags": []
+    },
+    "WebhookSignatureEncoding": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "WebhookSignatureEncoding",
+      "file": "lib/src/models/webhooks/webhook.dart",
+      "schema": "WebhookSignatureEncoding",
+      "tags": []
+    },
+    "WebhookSignatureHashAlgorithm": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "WebhookSignatureHashAlgorithm",
+      "file": "lib/src/models/webhooks/webhook.dart",
+      "schema": "WebhookSignatureHashAlgorithm",
+      "tags": []
+    },
+    "WhoamiPrincipal": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "WhoamiPrincipal",
+      "file": "lib/src/models/users/whoami_response.dart",
+      "schema": "WhoamiResponse",
+      "discriminator": {
+        "field": "principal_type"
+      },
+      "tags": [],
+      "note": "Discriminated member of WhoamiResponse."
+    },
+    "CreateTriggerAction": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TriggerAction",
+      "file": "lib/src/models/triggers/trigger.dart",
+      "schema": "CreateTriggerAction",
+      "tags": []
+    },
+    "UpdateServiceAccountRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateServiceAccountRequest",
+      "file": "lib/src/models/service_accounts/update_service_account_request.dart",
+      "schema": "UpdateServiceAccountRequest",
+      "tags": []
     }
   }
 }

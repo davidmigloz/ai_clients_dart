@@ -120,6 +120,8 @@ export 'src/models/batch/batch_job_status.dart';
 export 'src/models/batch/batch_request.dart';
 export 'src/models/batch/create_batch_job_request.dart';
 export 'src/models/batch/delete_batch_job_response.dart';
+// --- Models: Billing (Beta) ---
+export 'src/models/billing/billing.dart';
 // --- Models: Chat ---
 export 'src/models/chat/chat_choice.dart';
 export 'src/models/chat/chat_choice_delta.dart';
@@ -415,6 +417,9 @@ export 'src/models/responses/response_tool.dart';
 export 'src/models/search/managed_index.dart';
 export 'src/models/search/search_documents.dart';
 export 'src/models/search/search_query.dart';
+// --- Models: Service Accounts (Beta) ---
+export 'src/models/service_accounts/service_account.dart';
+export 'src/models/service_accounts/update_service_account_request.dart';
 // --- Models: Skills (Beta) ---
 export 'src/models/skills/create_skill_request.dart';
 export 'src/models/skills/create_skill_version_request.dart';
@@ -436,11 +441,17 @@ export 'src/models/tools/tool_call.dart';
 export 'src/models/tools/tool_call_confirmation.dart';
 export 'src/models/tools/tool_choice.dart';
 export 'src/models/tools/tool_configuration.dart';
+// --- Models: Triggers (Beta) ---
+export 'src/models/triggers/trigger.dart';
 // --- Models: Users (Beta) ---
 export 'src/models/users/user_identity.dart';
 export 'src/models/users/user_identity_api_key.dart';
 export 'src/models/users/user_identity_organization.dart';
 export 'src/models/users/user_identity_workspace.dart';
+export 'src/models/users/user_memberships.dart';
+export 'src/models/users/whoami_response.dart';
+// --- Models: Webhooks (Beta) ---
+export 'src/models/webhooks/webhook.dart';
 // --- Models: Workflows (Beta) ---
 export 'src/models/workflows/activity_task_completed_attributes_response.dart';
 export 'src/models/workflows/activity_task_completed_response.dart';
@@ -610,9 +621,14 @@ export 'src/resources/admin/admin_users_resource.dart';
 export 'src/resources/admin/admin_workspaces_resource.dart';
 export 'src/resources/audio_agents/audio_agents_resource.dart';
 export 'src/resources/audio_agents/voice_agent_connection.dart';
+export 'src/resources/billing/billing_resource.dart';
 export 'src/resources/managed_search_indexes_resource.dart';
 export 'src/resources/realtime/realtime_audio.dart';
 export 'src/resources/realtime/realtime_resource.dart';
+export 'src/resources/service_accounts/service_accounts_resource.dart';
+export 'src/resources/triggers/triggers_resource.dart';
+export 'src/resources/users/users_resource.dart';
+export 'src/resources/webhooks/webhooks_resource.dart';
 // --- Utils ---
 export 'src/utils/job_poller.dart';
 export 'src/utils/paginator.dart';
