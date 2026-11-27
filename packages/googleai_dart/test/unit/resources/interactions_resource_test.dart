@@ -191,7 +191,7 @@ void main() {
           ),
         );
         await client.interactions.get('int_1', includeInput: false);
-        await client.interactions.cancel('int_1');
+        await client.interactions.cancel('int_background');
         await client.interactions.delete('int_1');
         await client.models.generateContent(
           model: 'gemini-4-hydrogen',
@@ -208,7 +208,7 @@ void main() {
           [
             'POST /v1/interactions',
             'GET /v1/interactions/int_1',
-            'POST /v1/interactions/int_1/cancel',
+            'POST /v1/interactions/int_background/cancel',
             'DELETE /v1/interactions/int_1',
             'POST /v1beta/models/gemini-4-hydrogen:generateContent',
           ],
@@ -229,6 +229,27 @@ void main() {
             {'type': 'harassment', 'threshold': 'block_only_high'},
           ],
           'response_format': {'type': 'text'},
+        });
+      },
+    );
+
+    test(
+      'stable stateless interactions send an explicit false store flag',
+      () async {
+        final client = makeClient(
+          const GoogleAIConfig(interactionsApiVersion: ApiVersion.v1),
+        );
+
+        await client.interactions.create(
+          model: 'gemini-4-hydrogen',
+          input: const InteractionInput.text('Say hello.'),
+          store: false,
+        );
+
+        expect(jsonDecode(requests.single.body), {
+          'model': 'gemini-4-hydrogen',
+          'input': 'Say hello.',
+          'store': false,
         });
       },
     );
@@ -300,7 +321,11 @@ void main() {
       );
 
       final first = await client.interactions
-          .createStream(model: 'gemini-4-hydrogen', store: false)
+          .createStream(
+            model: 'gemini-4-hydrogen',
+            input: const InteractionInput.text('Say hello.'),
+            store: true,
+          )
           .single;
       final replayed = await client.interactions
           .resumeStream('int_1', lastEventId: 'cursor/1', includeInput: true)
@@ -313,7 +338,8 @@ void main() {
       expect(requests.first.url.queryParameters, isEmpty);
       expect(jsonDecode(requests.first.body), {
         'model': 'gemini-4-hydrogen',
-        'store': false,
+        'input': 'Say hello.',
+        'store': true,
         'stream': true,
       });
       expect(requests.last.url.path, '/v1/interactions/int_1');

@@ -225,10 +225,10 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   ///
   /// [input] supplies the prompt or content for the agent.
   ///
-  /// [background] lets supported agents continue on the server after the
-  /// stream disconnects. Use [resumeStream] with the interaction ID to attach
-  /// again. [abortTrigger] cancels the local stream and [cancel] stops the
-  /// background interaction on the server.
+  /// Deep Research requires [background] to be true. Background execution
+  /// can continue after the stream disconnects. Use [resumeStream] with the
+  /// interaction ID to attach again. [abortTrigger] cancels the local stream
+  /// and [cancel] stops the background interaction on the server.
   Stream<InteractionEvent> createWithAgentStream({
     required String agent,
     required InteractionInput input,

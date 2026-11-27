@@ -100,6 +100,7 @@ Stream<dynamic> startStream(
   'agent-interaction' => client.interactions.createWithAgentStream(
     agent: 'deep-research-preview-04-2026',
     input: const InteractionInput.text('Summarize the release notes.'),
+    background: true,
     abortTrigger: abortTrigger,
   ),
   _ => client.interactions.resumeStream('test', abortTrigger: abortTrigger),
