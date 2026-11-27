@@ -60,6 +60,24 @@ case ResourceLinkContentPart(:final uri):
   print(uri);
 ```
 
+### Handle the maximum reasoning effort
+
+Add `ReasoningEffort.max` to exhaustive switches. Use this effort only
+with models that support it.
+
+Before:
+
+```dart
+ReasoningEffort.high => 'High',
+```
+
+After:
+
+```dart
+ReasoningEffort.high => 'High',
+ReasoningEffort.max => 'Maximum',
+```
+
 ### Read structured FIM responses
 
 `FimChoice.message` and `FimChoiceDelta.delta` still return generated

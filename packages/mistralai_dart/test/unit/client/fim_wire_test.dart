@@ -11,10 +11,26 @@ const _request = FimCompletionRequest(
   suffix: ';',
 );
 
+const _logprobs = {
+  'content': [
+    {
+      'token': 'value',
+      'logprob': -0.25,
+      'bytes': [118, 97],
+      'token_id': 42,
+    },
+  ],
+};
+
 void main() {
   test('FIM reads an assistant message and keeps the text getter', () async {
     const message = {'role': 'assistant', 'prefix': false, 'content': 'value'};
-    const choice = {'index': 0, 'message': message, 'finish_reason': 'stop'};
+    const choice = {
+      'index': 0,
+      'message': message,
+      'finish_reason': 'stop',
+      'prompt_logprobs': _logprobs,
+    };
     final payload = {
       'id': 'fim-1',
       'object': 'chat.completion',
@@ -40,6 +56,7 @@ void main() {
     final response = await client.fim.create(request: _request);
     expect(response.choices.single.message, 'value');
     expect(response.choices.single.assistantMessage!.prefix, isFalse);
+    expect(response.choices.single.promptLogprobs!.content.single.tokenId, 42);
     expect(response.choices.single.toJson(), choice);
     expect(response.usage!.totalTokens, 9);
   });
@@ -52,7 +69,12 @@ void main() {
       ],
       'role': 'assistant',
     };
-    const choice = {'index': 0, 'delta': delta, 'finish_reason': null};
+    const choice = {
+      'index': 0,
+      'delta': delta,
+      'finish_reason': null,
+      'logprobs': _logprobs,
+    };
     final client = MistralClient(
       config: const MistralConfig(authProvider: ApiKeyProvider('test-key')),
       httpClient: MockClient((request) async {
@@ -94,6 +116,7 @@ void main() {
     expect(chunks, hasLength(2));
     expect(chunks.first.choices.single.delta, 'value + 1');
     expect(chunks.first.choices.single.messageDelta!.role, 'assistant');
+    expect(chunks.first.choices.single.logprobs!.content.single.logprob, -0.25);
     expect(chunks.first.choices.single.toJson(), choice);
     expect(chunks.last.choices, isEmpty);
     expect(chunks.last.usage!.totalTokens, 11);

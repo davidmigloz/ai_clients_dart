@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../chat/chat_choice_delta.dart';
+import '../chat/chat_choice_logprobs.dart';
 import '../chat/message_content.dart';
 import '../metadata/finish_reason.dart';
 
@@ -19,18 +20,32 @@ class FimChoiceDelta {
   final DeltaContent? messageDelta;
 
   /// The reason the model stopped generating.
+
   final FinishReason? finishReason;
 
+  /// Log probabilities for generated tokens, when returned.
+  final ChatChoiceLogprobs? logprobs;
+
+  /// Log probabilities for prompt tokens, when returned.
+  final ChatChoiceLogprobs? promptLogprobs;
+
   /// Creates a [FimChoiceDelta] with a legacy plain-text delta.
-  const FimChoiceDelta({required this.index, String? delta, this.finishReason})
-    : _legacyDelta = delta,
-      messageDelta = null;
+  const FimChoiceDelta({
+    required this.index,
+    String? delta,
+    this.finishReason,
+    this.logprobs,
+    this.promptLogprobs,
+  }) : _legacyDelta = delta,
+       messageDelta = null;
 
   /// Creates a [FimChoiceDelta] with a structured message delta.
   const FimChoiceDelta.structured({
     required this.index,
     required DeltaContent this.messageDelta,
     this.finishReason,
+    this.logprobs,
+    this.promptLogprobs,
   }) : _legacyDelta = null;
 
   /// Creates a [FimChoiceDelta] from JSON.
@@ -39,24 +54,38 @@ class FimChoiceDelta {
     final finishReason = finishReasonFromString(
       json['finish_reason'] as String?,
     );
+    final logprobs = json['logprobs'] as Map<String, dynamic>?;
+    final promptLogprobs = json['prompt_logprobs'] as Map<String, dynamic>?;
+    final generated = logprobs == null
+        ? null
+        : ChatChoiceLogprobs.fromJson(logprobs);
+    final prompt = promptLogprobs == null
+        ? null
+        : ChatChoiceLogprobs.fromJson(promptLogprobs);
     final delta = json['delta'];
     if (delta is Map<String, dynamic>) {
       return FimChoiceDelta.structured(
         index: index,
         messageDelta: DeltaContent.fromJson(delta),
         finishReason: finishReason,
+        logprobs: generated,
+        promptLogprobs: prompt,
       );
     }
     return FimChoiceDelta(
       index: index,
       delta: delta as String?,
       finishReason: finishReason,
+      logprobs: generated,
+      promptLogprobs: prompt,
     );
   }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'index': index,
+    'logprobs': ?logprobs?.toJson(),
+    'prompt_logprobs': ?promptLogprobs?.toJson(),
     if (_legacyDelta != null || messageDelta != null)
       'delta': _legacyDelta ?? messageDelta!.toJson(),
     if (messageDelta != null || finishReason != null)
@@ -73,14 +102,23 @@ class FimChoiceDelta {
           index == other.index &&
           _legacyDelta == other._legacyDelta &&
           messageDelta == other.messageDelta &&
-          finishReason == other.finishReason;
+          finishReason == other.finishReason &&
+          logprobs == other.logprobs &&
+          promptLogprobs == other.promptLogprobs;
 
   @override
-  int get hashCode =>
-      Object.hash(index, _legacyDelta, messageDelta, finishReason);
+  int get hashCode => Object.hash(
+    index,
+    _legacyDelta,
+    messageDelta,
+    finishReason,
+    logprobs,
+    promptLogprobs,
+  );
 
   @override
   String toString() =>
       'FimChoiceDelta(index: $index, delta: $delta, '
-      'messageDelta: ${messageDelta != null}, finishReason: $finishReason)';
+      'messageDelta: ${messageDelta != null}, finishReason: $finishReason, '
+      'logprobs: $logprobs, promptLogprobs: $promptLogprobs)';
 }

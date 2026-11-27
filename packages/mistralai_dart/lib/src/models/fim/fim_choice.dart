@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../chat/chat_choice_delta.dart';
+import '../chat/chat_choice_logprobs.dart';
 import '../chat/chat_message.dart';
 import '../chat/message_content.dart';
 import '../common/equality_helpers.dart';
@@ -28,13 +29,22 @@ class FimChoice {
   final List<DeltaContent>? messages;
 
   /// The reason the model stopped generating.
+
   final FinishReason? finishReason;
+
+  /// Log probabilities for generated tokens, when returned.
+  final ChatChoiceLogprobs? logprobs;
+
+  /// Log probabilities for prompt tokens, when returned.
+  final ChatChoiceLogprobs? promptLogprobs;
 
   /// Creates a [FimChoice] with a legacy plain-text message.
   const FimChoice({
     required this.index,
     required String message,
     this.finishReason,
+    this.logprobs,
+    this.promptLogprobs,
   }) : _legacyMessage = message,
        assistantMessage = null,
        messages = null;
@@ -45,6 +55,8 @@ class FimChoice {
     this.assistantMessage,
     this.messages,
     this.finishReason,
+    this.logprobs,
+    this.promptLogprobs,
   }) : _legacyMessage = null;
 
   /// Creates a [FimChoice] from JSON.
@@ -53,12 +65,22 @@ class FimChoice {
     final finishReason = finishReasonFromString(
       json['finish_reason'] as String?,
     );
+    final logprobs = json['logprobs'] as Map<String, dynamic>?;
+    final promptLogprobs = json['prompt_logprobs'] as Map<String, dynamic>?;
+    final generated = logprobs == null
+        ? null
+        : ChatChoiceLogprobs.fromJson(logprobs);
+    final prompt = promptLogprobs == null
+        ? null
+        : ChatChoiceLogprobs.fromJson(promptLogprobs);
     final message = json['message'];
     if (message is String) {
       return FimChoice(
         index: index,
         message: message,
         finishReason: finishReason,
+        logprobs: generated,
+        promptLogprobs: prompt,
       );
     }
     return FimChoice.structured(
@@ -72,12 +94,16 @@ class FimChoice {
           )
           .toList(),
       finishReason: finishReason,
+      logprobs: generated,
+      promptLogprobs: prompt,
     );
   }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'index': index,
+    'logprobs': ?logprobs?.toJson(),
+    'prompt_logprobs': ?promptLogprobs?.toJson(),
     if (_legacyMessage != null || assistantMessage != null)
       'message': _legacyMessage ?? assistantMessage!.toJson(),
     if (messages != null) 'messages': messages!.map((e) => e.toJson()).toList(),
@@ -94,7 +120,9 @@ class FimChoice {
           _legacyMessage == other._legacyMessage &&
           assistantMessage == other.assistantMessage &&
           listsEqual(messages, other.messages) &&
-          finishReason == other.finishReason;
+          finishReason == other.finishReason &&
+          logprobs == other.logprobs &&
+          promptLogprobs == other.promptLogprobs;
 
   @override
   int get hashCode => Object.hash(
@@ -103,11 +131,14 @@ class FimChoice {
     assistantMessage,
     listHash(messages),
     finishReason,
+    logprobs,
+    promptLogprobs,
   );
 
   @override
   String toString() =>
       'FimChoice(index: $index, message: ${message.length} chars, '
       'assistantMessage: ${assistantMessage != null}, '
-      'messages: ${messages?.length}, finishReason: $finishReason)';
+      'messages: ${messages?.length}, finishReason: $finishReason, '
+      'logprobs: $logprobs, promptLogprobs: $promptLogprobs)';
 }
