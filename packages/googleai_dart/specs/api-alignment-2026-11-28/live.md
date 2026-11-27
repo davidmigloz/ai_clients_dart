@@ -56,3 +56,28 @@ Live #643 owns Live-only envelopes, configuration and session lifecycle. Core #6
 - WebSocket `/{version}/interactions/live`; first outbound map has `event_type: interaction.connect` and `id`. Use text or binary UTF-8 handling as appropriate, input envelopes for world_setup (top-level world_prompt/reference_image), user_action (key events), input text, and event batches. Server accepts singleton or `{events:[...]}` and typed/error/unknown events, including connect and step.delta. Pinned native SDK sends `x-goog-api-key` header (incl scoped token); JS browser uses scoped token in `auth_token` query because upgrade headers are unavailable. Do not forward a raw long-lived key in browser mode. Handle explicit complete/cancel versus detach, transport errors/timeouts, single active receive and cancellation, and 24 fps JPEG / 48 kHz stereo PCM media without assuming browser-only types on IO.
 - WebRTC browser signaling `POST /{version}/interactions/{id}:webrtc` with `offer_sdp` -> `answer_sdp`, scoped credential, no `api-revision` header (pinned SDK comment explains CORS). Use recvonly audio/video, `events` RTCDataChannel created before the offer, answer validation, ICE/transport events and cleanup, media tracks without JSON/base64 frame assumptions. Preserve native/stub support through a conditional adapter or explain and track a verified blocker. Test fake signaling/peer plus a relevant Chrome browser test. Docs say 65,536-byte data channel cap and recommends WebSocket for larger seed images.
 - Explicit `interaction.complete` ends inference/billing and waits for completion; `interaction.cancel` aborts server generation; `interaction.disconnect`/detach merely ends the local transport. The Genie model does not support session resumption. Verify completion versus detach with independent terminal, cancellation, error and close fixtures. Do not run actual paid sessions under this authorization.
+
+## Live Music
+
+[#647](https://github.com/davidmigloz/ai_clients_dart/issues/647) owns the
+experimental `lyria-realtime-exp` model on the Developer `v1beta` preview
+protocol. Dart has no BidiGenerateMusic transport or schemas. Cloud's Lyria
+REST models are a separate contract.
+[Developer Live Music reference](https://aistudio.google.com/api-reference/live-music) ·
+[Generation guide](https://aistudio.google.com/docs/realtime-music-generation) ·
+[Cloud music guide](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/music/generate-music)
+
+Open `/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateMusic`
+with API-key auth. Python sends a header and JavaScript uses the `key` query
+parameter. Test setup and `setupComplete` ordering, fully qualified model name,
+weighted prompts, generation configuration, and PLAY, PAUSE, STOP and
+RESET_CONTEXT controls. Decode audio chunks, source metadata, filtered prompts,
+warnings and unknown frames. Test cancellation, failures and idempotent
+close. The protocol guide specifies 48 kHz stereo 16-bit PCM.
+[Pinned Python transport](https://github.com/googleapis/python-genai/blob/aa813f8bf805b6f4f3e57abb8f04b91d769e23e6/google/genai/live_music.py) ·
+[Pinned JavaScript transport](https://github.com/googleapis/js-genai/blob/719dffc91dbf38f8a5f2d90bf93efa5dc8207999/src/music.ts)
+
+The Markdown protocol and guide pins are
+`21fa98c24bd62a0a8a612aa502f0d17e1d67fa309f296617b68b5fc34e1f210f` and
+`e75053a3a24ccc63da76f62e7113949f0a83710f7d3283f30c9272df77de895f`,
+respectively, as SHA-256.

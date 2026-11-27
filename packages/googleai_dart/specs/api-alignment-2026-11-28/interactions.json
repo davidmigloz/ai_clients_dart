@@ -20,17 +20,36 @@
       "schemas": 213
     },
     "wire_route_renames": 4,
-    "operation_delta_counts": {
+    "note": "The v1 and v1beta reference pages distinguish the public route and schema. The download URL returns the same v1beta document when queried for v1.",
+    "toolkit_operation_delta_counts": {
       "added": 16,
       "modified": 15,
       "removed": 4
     },
-    "schema_delta_counts": {
+    "toolkit_schema_delta_counts": {
       "added": 67,
       "modified": 32,
       "removed": 33
     },
-    "note": "The v1 and v1beta reference pages distinguish the public route and schema. The download URL returns the same v1beta document when queried for v1."
+    "operation_delta_counts": {
+      "added": 16,
+      "modified": 22,
+      "removed": 4
+    },
+    "schema_delta_counts": {
+      "modified": 112,
+      "removed": 33,
+      "added": 67
+    },
+    "operation_delta_scope_counts": {
+      "wire": 37,
+      "metadata_or_prose_only": 5
+    },
+    "schema_delta_scope_counts": {
+      "metadata_or_prose_only": 57,
+      "wire": 155
+    },
+    "comparison": "Direct parsed JSON operation and schema comparison, including inherited path parameters and response bodies. A row can have both wire and metadata changes. Descriptions, examples, generator extensions and non-semantic reorderings are listed as metadata. The published OpenAPI has generated path/parameter aliases. Wire-classified rows still require source and SDK confirmation. Redundant path parameter aliases and an explicit empty parameter list are classified as metadata when the effective contract matches."
   },
   "sdk_revisions": {
     "https://github.com/googleapis/python-genai": {
@@ -45,27 +64,131 @@
   "operations": [
     {
       "change": "added",
+      "method": "PUT",
+      "path": "/upload/{api_version}/environments/{environment}/files/{path}",
+      "operation_id": "StartEnvironmentFileUpload",
+      "issue": 638,
+      "disposition": "Missing in Dart.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "method": "GET",
+      "path": "/{api_version}/agents",
+      "operation_id": "ListAgents",
+      "issue": 638,
+      "disposition": "The parent query parameter becomes required in the candidate. Verify the Gemini and Cloud resource naming separately against the pinned SDKs before enforcing it.",
+      "direct_wire_changes": [
+        {
+          "path": "/operation/parameters/query:parent/required",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/parameters/query:parent/description",
+          "change": "added"
+        },
+        {
+          "path": "/operation/responses/default/content/application~1json/examples",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/tags",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-codeSamples",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-group",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "method": "POST",
+      "path": "/{api_version}/agents",
+      "operation_id": "CreateAgent",
+      "issue": 638,
+      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
+      "details": [
+        {
+          "name": "parent",
+          "type": "parameter_added"
+        }
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/operation/parameters/query:parent",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/requestBody/description",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/responses/default/content/application~1json/examples",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/tags",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-codeSamples",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-group",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
       "method": "DELETE",
       "path": "/{api_version}/agents/{agentsId}",
       "operation_id": "DeleteAgent",
       "issue": 638,
-      "disposition": "Wire path unchanged. OpenAPI placeholder rename."
-    },
-    {
-      "change": "added",
-      "method": "DELETE",
-      "path": "/{api_version}/credentials/{id}",
-      "operation_id": "DeleteCredential",
-      "issue": 638,
-      "disposition": "Missing in Dart."
-    },
-    {
-      "change": "added",
-      "method": "DELETE",
-      "path": "/{api_version}/voices/{voicesId}",
-      "operation_id": "DeleteVoice",
-      "issue": 641,
-      "disposition": "Missing in Dart."
+      "disposition": "Wire path unchanged. OpenAPI placeholder rename.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "added",
@@ -73,7 +196,47 @@
       "path": "/{api_version}/agents/{agentsId}",
       "operation_id": "GetAgent",
       "issue": 638,
-      "disposition": "Wire path unchanged. OpenAPI placeholder rename."
+      "disposition": "Wire path unchanged. OpenAPI placeholder rename.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "method": "DELETE",
+      "path": "/{api_version}/agents/{id}",
+      "operation_id": "DeleteAgent",
+      "issue": 638,
+      "disposition": "Wire path unchanged. OpenAPI placeholder rename.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "method": "GET",
+      "path": "/{api_version}/agents/{id}",
+      "operation_id": "GetAgent",
+      "issue": 638,
+      "disposition": "Wire path unchanged. OpenAPI placeholder rename.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "added",
@@ -81,55 +244,15 @@
       "path": "/{api_version}/credentials",
       "operation_id": "ListCredentials",
       "issue": 638,
-      "disposition": "Missing in Dart."
-    },
-    {
-      "change": "added",
-      "method": "GET",
-      "path": "/{api_version}/credentials/{id}",
-      "operation_id": "GetCredential",
-      "issue": 638,
-      "disposition": "Missing in Dart."
-    },
-    {
-      "change": "added",
-      "method": "GET",
-      "path": "/{api_version}/environments/{environment}/files/{path}",
-      "operation_id": "GetEnvironmentFiles",
-      "issue": 638,
-      "disposition": "Missing in Dart."
-    },
-    {
-      "change": "added",
-      "method": "GET",
-      "path": "/{api_version}/triggers/{triggerId}/executions",
-      "operation_id": "ListTriggerExecutions",
-      "issue": 638,
-      "disposition": "Wire path unchanged. OpenAPI placeholder rename."
-    },
-    {
-      "change": "added",
-      "method": "GET",
-      "path": "/{api_version}/voices",
-      "operation_id": "ListVoices",
-      "issue": 641,
-      "disposition": "Missing in Dart."
-    },
-    {
-      "change": "added",
-      "method": "GET",
-      "path": "/{api_version}/voices/{voicesId}",
-      "operation_id": "GetVoice",
-      "issue": 641,
-      "disposition": "Missing in Dart."
-    },
-    {
-      "change": "added",
-      "method": "PATCH",
-      "path": "/{api_version}/credentials/{id}",
-      "operation_id": "UpdateCredential",
-      "issue": 638,
-      "disposition": "Missing in Dart."
+      "disposition": "Missing in Dart.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "added",
@@ -137,7 +260,63 @@
       "path": "/{api_version}/credentials",
       "operation_id": "CreateCredential",
       "issue": 638,
-      "disposition": "Missing in Dart."
+      "disposition": "Missing in Dart.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "method": "DELETE",
+      "path": "/{api_version}/credentials/{id}",
+      "operation_id": "DeleteCredential",
+      "issue": 638,
+      "disposition": "Missing in Dart.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "method": "GET",
+      "path": "/{api_version}/credentials/{id}",
+      "operation_id": "GetCredential",
+      "issue": 638,
+      "disposition": "Missing in Dart.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "method": "PATCH",
+      "path": "/{api_version}/credentials/{id}",
+      "operation_id": "UpdateCredential",
+      "issue": 638,
+      "disposition": "Missing in Dart.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "added",
@@ -145,73 +324,15 @@
       "path": "/{api_version}/decisions",
       "operation_id": "CreateDecision",
       "issue": 640,
-      "disposition": "Missing in Dart."
-    },
-    {
-      "change": "added",
-      "method": "POST",
-      "path": "/{api_version}/triggers/{triggerId}/executions",
-      "operation_id": "RunTrigger",
-      "issue": 638,
-      "disposition": "Wire path unchanged. OpenAPI placeholder rename."
-    },
-    {
-      "change": "added",
-      "method": "POST",
-      "path": "/{api_version}/voices",
-      "operation_id": "CreateVoice",
-      "issue": 641,
-      "disposition": "Missing in Dart."
-    },
-    {
-      "change": "added",
-      "method": "PUT",
-      "path": "/upload/{api_version}/environments/{environment}/files/{path}",
-      "operation_id": "StartEnvironmentFileUpload",
-      "issue": 638,
-      "disposition": "Missing in Dart."
-    },
-    {
-      "change": "modified",
-      "method": "DELETE",
-      "path": "/{api_version}/environments/{id}",
-      "operation_id": "DeleteEnvironment",
-      "issue": 638,
-      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
-      "details": [
+      "disposition": "Missing in Dart.",
+      "direct_wire_changes": [
         {
-          "name": "id",
-          "type": "parameter_added"
+          "path": "",
+          "change": "added"
         }
-      ]
-    },
-    {
-      "change": "modified",
-      "method": "DELETE",
-      "path": "/{api_version}/interactions/{id}",
-      "operation_id": "deleteInteraction",
-      "issue": 637,
-      "disposition": "Dart already sends the wire path. Added OpenAPI path placeholder is a generator alias.",
-      "details": [
-        {
-          "name": "interactionsId",
-          "type": "parameter_added"
-        }
-      ]
-    },
-    {
-      "change": "modified",
-      "method": "DELETE",
-      "path": "/{api_version}/triggers/{id}",
-      "operation_id": "DeleteTrigger",
-      "issue": 638,
-      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
-      "details": [
-        {
-          "name": "id",
-          "type": "parameter_added"
-        }
-      ]
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -225,7 +346,119 @@
           "name": "mode",
           "type": "parameter_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/operation/parameters/query:mode",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/parameters/query:page_size/description",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/tags",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-codeSamples",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-speakeasy-group",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "method": "POST",
+      "path": "/{api_version}/environments",
+      "operation_id": "CreateEnvironment",
+      "issue": 638,
+      "disposition": "The candidate adds an explicit empty operation parameters list. The inherited API version and create wire request remain unchanged.",
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/requestBody/description",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/tags",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-codeSamples",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-speakeasy-group",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/parameters",
+          "change": "added"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "added",
+      "method": "GET",
+      "path": "/{api_version}/environments/{environment}/files/{path}",
+      "operation_id": "GetEnvironmentFiles",
+      "issue": 638,
+      "disposition": "Missing in Dart.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "method": "DELETE",
+      "path": "/{api_version}/environments/{id}",
+      "operation_id": "DeleteEnvironment",
+      "issue": 638,
+      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
+      "details": [
+        {
+          "name": "id",
+          "type": "parameter_added"
+        }
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/operation/parameters",
+          "change": "added"
+        },
+        {
+          "path": "/path_parameters/path:id",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/tags",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-codeSamples",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-speakeasy-group",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -239,7 +472,91 @@
           "name": "id",
           "type": "parameter_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/operation/parameters",
+          "change": "added"
+        },
+        {
+          "path": "/path_parameters/path:id",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/tags",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-codeSamples",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-speakeasy-group",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "method": "POST",
+      "path": "/{api_version}/interactions",
+      "operation_id": "CreateInteraction",
+      "issue": 637,
+      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
+      "details": [
+        {
+          "breaking": true,
+          "name": "",
+          "type": "parameter_removed"
+        }
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/operation/parameters",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/responses/200/content/application~1json/examples",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/x-codeSamples",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "method": "DELETE",
+      "path": "/{api_version}/interactions/{id}",
+      "operation_id": "deleteInteraction",
+      "issue": 637,
+      "disposition": "Dart already sends the wire path. Added OpenAPI path placeholder is a generator alias.",
+      "details": [
+        {
+          "name": "interactionsId",
+          "type": "parameter_added"
+        }
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/operation/parameters/path:interactionsId",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/x-codeSamples",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -254,7 +571,212 @@
           "name": "include_input",
           "type": "parameter_removed"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/operation/parameters/query:include_input",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/responses/200/content/application~1json/examples",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/x-codeSamples",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "method": "POST",
+      "path": "/{api_version}/interactions/{id}/cancel",
+      "operation_id": "cancelInteractionById",
+      "issue": 637,
+      "disposition": "Compare the updated cancel response description. The same JSON Interaction schema and response codes remain.",
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/responses/200/content/application~1json/examples",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/responses/200/description",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/x-codeSamples",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "method": "GET",
+      "path": "/{api_version}/triggers",
+      "operation_id": "ListTriggers",
+      "issue": 638,
+      "disposition": "The page_size adds a format and the response moves from the explicit 200 key to default. Retain deterministic pagination and decode the listed response model.",
+      "direct_wire_changes": [
+        {
+          "path": "/operation/parameters/query:page_size/schema/format",
+          "change": "added"
+        },
+        {
+          "path": "/operation/responses/200",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/responses/default",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/parameters/query:page_token/description",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/tags",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-group",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "method": "POST",
+      "path": "/{api_version}/triggers",
+      "operation_id": "CreateTrigger",
+      "issue": 638,
+      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
+      "details": [
+        {
+          "new": "Trigger",
+          "old": "TriggerCreateParams",
+          "type": "request_schema_changed"
+        }
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/operation/parameters",
+          "change": "added"
+        },
+        {
+          "path": "/operation/requestBody/content/application~1json/schema/$ref",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/responses/200",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/responses/default",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/description",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/requestBody/description",
+          "change": "added"
+        },
+        {
+          "path": "/operation/tags",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-codeSamples",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-group",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "method": "DELETE",
+      "path": "/{api_version}/triggers/{id}",
+      "operation_id": "DeleteTrigger",
+      "issue": 638,
+      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
+      "details": [
+        {
+          "name": "id",
+          "type": "parameter_added"
+        }
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/operation/parameters",
+          "change": "added"
+        },
+        {
+          "path": "/operation/responses/200",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/responses/default",
+          "change": "added"
+        },
+        {
+          "path": "/path_parameters/path:id",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/tags",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-group",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -268,7 +790,44 @@
           "name": "id",
           "type": "parameter_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/operation/parameters",
+          "change": "added"
+        },
+        {
+          "path": "/operation/responses/200",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/responses/default",
+          "change": "added"
+        },
+        {
+          "path": "/path_parameters/path:id",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/tags",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-group",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -287,7 +846,336 @@
           "name": "id",
           "type": "parameter_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/operation/parameters",
+          "change": "added"
+        },
+        {
+          "path": "/operation/requestBody/content/application~1json/schema/$ref",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/responses/200",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/responses/default",
+          "change": "added"
+        },
+        {
+          "path": "/path_parameters/path:id",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/requestBody/description",
+          "change": "added"
+        },
+        {
+          "path": "/operation/tags",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-group",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "method": "GET",
+      "path": "/{api_version}/triggers/{triggerId}/executions",
+      "operation_id": "ListTriggerExecutions",
+      "issue": 638,
+      "disposition": "Wire path unchanged. OpenAPI placeholder rename.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "method": "POST",
+      "path": "/{api_version}/triggers/{triggerId}/executions",
+      "operation_id": "RunTrigger",
+      "issue": 638,
+      "disposition": "Wire path unchanged. OpenAPI placeholder rename.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "method": "GET",
+      "path": "/{api_version}/triggers/{trigger_id}/executions",
+      "operation_id": "ListTriggerExecutions",
+      "issue": 638,
+      "disposition": "Wire path unchanged. OpenAPI placeholder rename.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "method": "POST",
+      "path": "/{api_version}/triggers/{trigger_id}/executions",
+      "operation_id": "RunTrigger",
+      "issue": 638,
+      "disposition": "Wire path unchanged. OpenAPI placeholder rename.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "method": "GET",
+      "path": "/{api_version}/voices",
+      "operation_id": "ListVoices",
+      "issue": 641,
+      "disposition": "Missing in Dart.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "method": "POST",
+      "path": "/{api_version}/voices",
+      "operation_id": "CreateVoice",
+      "issue": 641,
+      "disposition": "Missing in Dart.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "method": "DELETE",
+      "path": "/{api_version}/voices/{voicesId}",
+      "operation_id": "DeleteVoice",
+      "issue": 641,
+      "disposition": "Missing in Dart.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "method": "GET",
+      "path": "/{api_version}/voices/{voicesId}",
+      "operation_id": "GetVoice",
+      "issue": 641,
+      "disposition": "Missing in Dart.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "method": "GET",
+      "path": "/{api_version}/webhooks",
+      "operation_id": "ListWebhooks",
+      "issue": 638,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/parameters/query:page_size/description",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/parameters/query:page_token/description",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/tags",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-group",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "method": "POST",
+      "path": "/{api_version}/webhooks",
+      "operation_id": "CreateWebhook",
+      "issue": 638,
+      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
+      "details": [
+        {
+          "new": "CreateWebhookRequest",
+          "old": "Webhook",
+          "type": "request_schema_changed"
+        },
+        {
+          "name": "webhook_id",
+          "type": "parameter_added"
+        }
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/operation/parameters/query:webhook_id",
+          "change": "added"
+        },
+        {
+          "path": "/operation/requestBody/content/application~1json/schema/$ref",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/requestBody/description",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/tags",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-group",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "method": "DELETE",
+      "path": "/{api_version}/webhooks/{id}",
+      "operation_id": "DeleteWebhook",
+      "issue": 638,
+      "disposition": "The duplicate inherited id path parameter is removed. The operation still has the same required id parameter and wire path.",
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/parameters/path:id/description",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/tags",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-group",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-name-override",
+          "change": "removed"
+        },
+        {
+          "path": "/path_parameters/path:id",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "method": "GET",
+      "path": "/{api_version}/webhooks/{id}",
+      "operation_id": "GetWebhook",
+      "issue": 638,
+      "disposition": "The duplicate inherited id path parameter is removed. The operation still has the same required id parameter and wire path.",
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/tags",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-group",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-name-override",
+          "change": "removed"
+        },
+        {
+          "path": "/path_parameters/path:id",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
     },
     {
       "change": "modified",
@@ -307,70 +1195,44 @@
           "name": "update_mask",
           "type": "parameter_removed"
         }
-      ]
-    },
-    {
-      "change": "modified",
-      "method": "POST",
-      "path": "/{api_version}/agents",
-      "operation_id": "CreateAgent",
-      "issue": 638,
-      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
-      "details": [
+      ],
+      "direct_wire_changes": [
         {
-          "name": "parent",
-          "type": "parameter_added"
-        }
-      ]
-    },
-    {
-      "change": "modified",
-      "method": "POST",
-      "path": "/{api_version}/interactions",
-      "operation_id": "CreateInteraction",
-      "issue": 637,
-      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
-      "details": [
-        {
-          "breaking": true,
-          "name": "",
-          "type": "parameter_removed"
-        }
-      ]
-    },
-    {
-      "change": "modified",
-      "method": "POST",
-      "path": "/{api_version}/triggers",
-      "operation_id": "CreateTrigger",
-      "issue": 638,
-      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
-      "details": [
-        {
-          "new": "Trigger",
-          "old": "TriggerCreateParams",
-          "type": "request_schema_changed"
-        }
-      ]
-    },
-    {
-      "change": "modified",
-      "method": "POST",
-      "path": "/{api_version}/webhooks",
-      "operation_id": "CreateWebhook",
-      "issue": 638,
-      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
-      "details": [
-        {
-          "new": "CreateWebhookRequest",
-          "old": "Webhook",
-          "type": "request_schema_changed"
+          "path": "/operation/parameters/query:update_mask",
+          "change": "removed"
         },
         {
-          "name": "webhook_id",
-          "type": "parameter_added"
+          "path": "/operation/requestBody/content/application~1json/schema/$ref",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/requestBody/required",
+          "change": "added"
+        },
+        {
+          "path": "/path_parameters/path:id",
+          "change": "removed"
         }
-      ]
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/requestBody/description",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/tags",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-speakeasy-group",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -385,7 +1247,36 @@
           "old": "PingWebhookRequest",
           "type": "request_schema_changed"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/operation/requestBody",
+          "change": "removed"
+        },
+        {
+          "path": "/path_parameters/path:id",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/parameters/path:id/description",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/tags",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-speakeasy-group",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -400,443 +1291,63 @@
           "old": "RotateSigningSecretRequest",
           "type": "request_schema_changed"
         }
-      ]
-    },
-    {
-      "change": "removed",
-      "method": "DELETE",
-      "path": "/{api_version}/agents/{id}",
-      "operation_id": "DeleteAgent",
-      "issue": 638,
-      "disposition": "Wire path unchanged. OpenAPI placeholder rename."
-    },
-    {
-      "change": "removed",
-      "method": "GET",
-      "path": "/{api_version}/agents/{id}",
-      "operation_id": "GetAgent",
-      "issue": 638,
-      "disposition": "Wire path unchanged. OpenAPI placeholder rename."
-    },
-    {
-      "change": "removed",
-      "method": "GET",
-      "path": "/{api_version}/triggers/{trigger_id}/executions",
-      "operation_id": "ListTriggerExecutions",
-      "issue": 638,
-      "disposition": "Wire path unchanged. OpenAPI placeholder rename."
-    },
-    {
-      "change": "removed",
-      "method": "POST",
-      "path": "/{api_version}/triggers/{trigger_id}/executions",
-      "operation_id": "RunTrigger",
-      "issue": 638,
-      "disposition": "Wire path unchanged. OpenAPI placeholder rename."
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/operation/requestBody",
+          "change": "removed"
+        },
+        {
+          "path": "/path_parameters/path:id",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/operation/parameters/path:id/description",
+          "change": "changed"
+        },
+        {
+          "path": "/operation/tags",
+          "change": "added"
+        },
+        {
+          "path": "/operation/x-speakeasy-group",
+          "change": "removed"
+        },
+        {
+          "path": "/operation/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
     }
   ],
   "schemas": [
     {
-      "change": "added",
-      "schema": "Answer",
-      "issue": 640,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "AudioData",
-      "issue": 641,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "AudioMediaProcessing",
-      "issue": 639,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "AudioStaticMediaProcessing",
-      "issue": 639,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "ChoiceAnswer",
-      "issue": 640,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "ChoiceQuestion",
-      "issue": 640,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "CreateDecisionRequest",
-      "issue": 640,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "CreateDecisionResponse",
-      "issue": 640,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "CreateVoiceRequest",
-      "issue": 641,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "CreateWebhookRequest",
+      "change": "modified",
+      "schema": "Agent",
       "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "Credential",
-      "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "CredentialCreateParams",
-      "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "CredentialUpdateParams",
-      "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "Criteria",
-      "issue": 640,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "DecisionInputContent",
-      "issue": 640,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "DecisionInstructionContent",
-      "issue": 640,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "DeleteVoiceResponse",
-      "issue": 641,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "DocumentMediaProcessing",
-      "issue": 639,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "DocumentStaticMediaProcessing",
-      "issue": 639,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "EgressRule",
-      "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "EnvVar",
-      "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "EnvironmentFile",
-      "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "EnvironmentVariableConfig",
-      "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "EnvironmentVariableUpdateConfig",
-      "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "GetEnvironmentFilesResponse",
-      "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "HttpBearerConfig",
-      "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "HttpBearerUpdateConfig",
-      "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "HttpBody",
-      "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "InjectionLocation",
-      "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "ListCredentialsResponse",
-      "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "ListVoicesResponse",
-      "issue": 641,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "MediaProcessing",
-      "issue": 639,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "NoulAnswer",
-      "issue": 640,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "NoulQuestion",
-      "issue": 640,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "OAuth2Config",
-      "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "OAuth2UpdateConfig",
-      "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "PageProcessingOptions",
-      "issue": 639,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "Pitch",
-      "issue": 641,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "ProcessingCallDelta",
-      "issue": 639,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "ProcessingCallStep",
-      "issue": 639,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "ProcessingResultDelta",
-      "issue": 639,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "ProcessingResultStep",
-      "issue": 639,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "PromptFeedback",
-      "issue": 637,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "PromptedVoice",
-      "issue": 641,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "Question",
-      "issue": 640,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "ReplicatedVoice",
-      "issue": 641,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "ScoreAnswer",
-      "issue": 640,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "ScoreQuestion",
-      "issue": 640,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "SmartTranscriptionMode",
-      "issue": 641,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "SpeakerConfig",
-      "issue": 641,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "SpeechAnnotation",
-      "issue": 641,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "SpreadsheetProcessingOptions",
-      "issue": 639,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "StaticMediaProcessing",
-      "issue": 639,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "ToolSearch",
-      "issue": 639,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "ToolSearchCallDelta",
-      "issue": 639,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "ToolSearchCallStep",
-      "issue": 639,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "ToolSearchCallStepArguments",
-      "issue": 639,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "ToolSearchResultDelta",
-      "issue": 639,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "ToolSearchResultStep",
-      "issue": 639,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "TranscriptionMode",
-      "issue": 641,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "UpdateTriggerRequest",
-      "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "UpdateWebhookRequest",
-      "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "UploadEnvironmentFileRequest",
-      "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "UploadEnvironmentFileResponse",
-      "issue": 638,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "VerbatimTranscriptionMode",
-      "issue": 641,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "Voice",
-      "issue": 641,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
-    },
-    {
-      "change": "added",
-      "schema": "VoiceType",
-      "issue": 641,
-      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "Agent"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/description",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-model-namespace",
+          "change": "changed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
     },
     {
       "change": "modified",
@@ -862,7 +1373,84 @@
           ],
           "type": "enum_changed"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/enum",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-enum-descriptions",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "AgentTool",
+      "issue": 638,
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "dart_manifest_entries": [
+        "AgentTool"
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/type",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-model-namespace",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "AllowedTools",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "AllowedTools"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/mode/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "removed",
+      "schema": "AllowlistEntry",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "AllowlistEntry"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -889,7 +1477,51 @@
           ],
           "type": "union_members_changed"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/oneOf/SpeechAnnotation",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "Answer",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "AntigravityAgentConfig",
+      "issue": 638,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "AntigravityAgentConfig"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
     },
     {
       "change": "modified",
@@ -905,7 +1537,362 @@
           "property": "processing",
           "type": "property_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/mime_type/enum",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/processing",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/mime_type/x-google-enum-descriptions",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "AudioData",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "AudioDelta",
+      "issue": 639,
+      "disposition": "Add audio/webm to the recognized MIME list and preserve unknown MIME values per Dart conventions.",
+      "dart_manifest_entries": [
+        "AudioDelta"
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/mime_type/enum",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/mime_type/x-google-enum-descriptions",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "AudioMediaProcessing",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "AudioResponseFormat",
+      "issue": 641,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "interactions:AudioResponseFormat"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "added",
+      "schema": "AudioStaticMediaProcessing",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "ChoiceAnswer",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "ChoiceQuestion",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "CodeExecution",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "interactions:CodeExecution"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-codeSamples",
+          "change": "changed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "CodeExecutionCallArguments",
+      "issue": 639,
+      "disposition": "Recognize bash in addition to python, while preserving unknown language handling.",
+      "direct_wire_changes": [
+        {
+          "path": "/properties/language/enum",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/language/x-google-enum-descriptions",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "CodeExecutionCallStep",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "CodeExecutionCallStep"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "CodeExecutionCallStepArguments",
+      "issue": 639,
+      "disposition": "Recognize bash in addition to python, while preserving unknown language handling.",
+      "dart_manifest_entries": [
+        "CodeExecutionCallStepArguments"
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/language/enum",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/language/x-google-enum-descriptions",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "CodeExecutionResultStep",
+      "issue": 639,
+      "disposition": "Decode result as a string or the documented content array.",
+      "dart_manifest_entries": [
+        "CodeExecutionResultStep"
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/result/oneOf",
+          "change": "added"
+        },
+        {
+          "path": "/properties/result/type",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/result/description",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "CodeMenderAgentConfig",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "CodeMenderAgentConfig"
+      ],
+      "disposition": "Absent from candidate. Check public support before changing the existing Dart type.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "ComputerUse",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "interactions:ComputerUse"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-codeSamples",
+          "change": "changed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "Content",
+      "issue": 637,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "interactions:Content"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "removed",
+      "schema": "ContentDelta",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "ContentDelta"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "ContentDeltaData",
+      "issue": 637,
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "ContentStart",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "ContentStart"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "ContentStop",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "ContentStop"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -921,7 +1908,104 @@
           "property": "continuation_token",
           "type": "property_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/agent_config/discriminator",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/agent_config/oneOf/CodeMenderAgentConfig",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/continuation_token",
+          "change": "added"
+        },
+        {
+          "path": "/properties/created/format",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/status/enum",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/updated/format",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/environment/description",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/labels/description",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/response_format/description",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/response_format/oneOf/1/example",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/response_format/oneOf/1/title",
+          "change": "added"
+        },
+        {
+          "path": "/properties/response_format/oneOf/1/x-speakeasy-model-namespace",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/response_modalities/deprecated",
+          "change": "added"
+        },
+        {
+          "path": "/properties/status/x-google-enum-deprecated",
+          "change": "added"
+        },
+        {
+          "path": "/properties/status/x-google-enum-descriptions",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "CreateDecisionRequest",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "CreateDecisionResponse",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -957,7 +2041,44 @@
           "property": "system_instruction",
           "type": "property_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/custom_config",
+          "change": "added"
+        },
+        {
+          "path": "/properties/env",
+          "change": "added"
+        },
+        {
+          "path": "/properties/from_environment",
+          "change": "added"
+        },
+        {
+          "path": "/properties/mode",
+          "change": "added"
+        },
+        {
+          "path": "/properties/system_instruction",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/description",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-model-namespace",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -973,7 +2094,184 @@
           "property": "continuation_token",
           "type": "property_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/continuation_token",
+          "change": "added"
+        },
+        {
+          "path": "/properties/created/format",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/status/enum",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/updated/format",
+          "change": "removed"
+        },
+        {
+          "path": "/required",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/environment/description",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/labels/description",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/response_format/description",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/response_format/oneOf/1/example",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/response_format/oneOf/1/title",
+          "change": "added"
+        },
+        {
+          "path": "/properties/response_format/oneOf/1/x-speakeasy-model-namespace",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/response_modalities/deprecated",
+          "change": "added"
+        },
+        {
+          "path": "/properties/status/x-google-enum-deprecated",
+          "change": "added"
+        },
+        {
+          "path": "/properties/status/x-google-enum-descriptions",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "CreateVoiceRequest",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "CreateWebhookRequest",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "Credential",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "CredentialCreateParams",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "CredentialUpdateParams",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "Criteria",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "DecisionInputContent",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "DecisionInstructionContent",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -989,7 +2287,51 @@
           "property": "enable_bigquery_tool",
           "type": "property_removed"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/enable_bigquery_tool",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "DeleteInteractionResponse",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "DeleteInteractionResponse"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "DeleteVoiceResponse",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -1010,7 +2352,148 @@
           "property": "resolution",
           "type": "property_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/mime_type/enum",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/processing",
+          "change": "added"
+        },
+        {
+          "path": "/properties/resolution",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/mime_type/x-google-enum-descriptions",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "DocumentDelta",
+      "issue": 639,
+      "disposition": "Expand accepted document delta MIME types beyond PDF to include the documented Office, OpenDocument and CSV formats.",
+      "dart_manifest_entries": [
+        "DocumentDelta"
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/mime_type/enum",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/mime_type/x-google-enum-descriptions",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "DocumentMediaProcessing",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "DocumentStaticMediaProcessing",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "DynamicAgentConfig",
+      "issue": 638,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "DynamicAgentConfig"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "added",
+      "schema": "EgressRule",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "Empty",
+      "issue": 637,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "Empty"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-stainless-empty-object",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "added",
+      "schema": "EnvVar",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -1036,7 +2519,32 @@
           "property": "mode",
           "type": "property_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/custom_config",
+          "change": "added"
+        },
+        {
+          "path": "/properties/environment_key",
+          "change": "added"
+        },
+        {
+          "path": "/properties/mode",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-model-namespace",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -1062,7 +2570,50 @@
           "property": "mode",
           "type": "property_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/custom_config",
+          "change": "added"
+        },
+        {
+          "path": "/properties/env",
+          "change": "added"
+        },
+        {
+          "path": "/properties/mode",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/environment_id/description",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "EnvironmentFile",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -1086,7 +2637,234 @@
           ],
           "type": "union_members_changed"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/oneOf",
+          "change": "removed"
+        },
+        {
+          "path": "/properties",
+          "change": "added"
+        },
+        {
+          "path": "/type",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/description",
+          "change": "changed"
+        },
+        {
+          "path": "/example",
+          "change": "removed"
+        },
+        {
+          "path": "/examples",
+          "change": "added"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "EnvironmentVariableConfig",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "EnvironmentVariableUpdateConfig",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "ErrorEvent",
+      "issue": 637,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "ErrorEvent"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "removed",
+      "schema": "ExaAISearchConfig",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:ExaAISearchConfig"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "FileCitation",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "FileCitation"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "removed",
+      "schema": "FileContent",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "FileContent"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "FileSearch",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "interactions:FileSearch"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-codeSamples",
+          "change": "changed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "FileSearchCallStep",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "FileSearchCallStep"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "FileSearchResultStep",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "FileSearchResultStep"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "removed",
+      "schema": "Filter",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:Filter"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "FindRequest",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "FindRequest"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "FixRequest",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "FixRequest"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -1107,7 +2885,66 @@
           "property": "short_description",
           "type": "property_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/defer_loading",
+          "change": "added"
+        },
+        {
+          "path": "/properties/short_description",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/parameters/description",
+          "change": "changed"
+        },
+        {
+          "path": "/x-codeSamples",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "FunctionCallDelta",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "FunctionCallDelta"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "FunctionCallStep",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "FunctionCallStep"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
     },
     {
       "change": "modified",
@@ -1123,7 +2960,69 @@
           "property": "call_id",
           "type": "property_removed"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/call_id",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/result/oneOf/0/items/oneOf/AudioContent",
+          "change": "added"
+        },
+        {
+          "path": "/properties/result/oneOf/0/items/oneOf/DocumentContent",
+          "change": "added"
+        },
+        {
+          "path": "/properties/result/oneOf/0/items/oneOf/Function",
+          "change": "added"
+        },
+        {
+          "path": "/properties/result/oneOf/0/items/oneOf/VideoContent",
+          "change": "added"
+        },
+        {
+          "path": "/required",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "FunctionResultStep",
+      "issue": 639,
+      "disposition": "Extend structured result parsing to the added audio, document, function, and video union members.",
+      "dart_manifest_entries": [
+        "FunctionResultStep"
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/result/oneOf/0/items/oneOf/AudioContent",
+          "change": "added"
+        },
+        {
+          "path": "/properties/result/oneOf/0/items/oneOf/DocumentContent",
+          "change": "added"
+        },
+        {
+          "path": "/properties/result/oneOf/0/items/oneOf/Function",
+          "change": "added"
+        },
+        {
+          "path": "/properties/result/oneOf/0/items/oneOf/VideoContent",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -1154,7 +3053,260 @@
           "property": "speech_config",
           "type": "property_removed"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/speech_config",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/structured_speech_config",
+          "change": "added"
+        },
+        {
+          "path": "/properties/temperature",
+          "change": "added"
+        },
+        {
+          "path": "/properties/top_p",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/tool_choice/oneOf/1/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "GetEnvironmentFilesResponse",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "GoogleMaps",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "interactions:GoogleMaps"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-codeSamples",
+          "change": "changed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "GoogleMapsCallStep",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "GoogleMapsCallStep"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "GoogleMapsCallStepArguments",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "GoogleMapsCallStepArguments"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "GoogleMapsResultItem",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "GoogleMapsResultItem"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "GoogleMapsResultStep",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "GoogleMapsResultStep"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "GoogleSearch",
+      "issue": 639,
+      "disposition": "Update search type values against both the declarations and returned GoogleSearchCallStep.",
+      "dart_manifest_entries": [
+        "interactions:GoogleSearch"
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/search_types/items/enum",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/search_types/items/x-google-enum-descriptions",
+          "change": "changed"
+        },
+        {
+          "path": "/x-codeSamples",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "GoogleSearchCallStep",
+      "issue": 639,
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "dart_manifest_entries": [
+        "GoogleSearchCallStep"
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/search_type/enum",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/search_type/x-google-enum-descriptions",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "GoogleSearchCallStepArguments",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "GoogleSearchCallStepArguments"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "GoogleSearchResultItem",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "GoogleSearchResultItem"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "GoogleSearchResultStep",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "GoogleSearchResultStep"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "GroundingToolCount",
+      "issue": 639,
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "dart_manifest_entries": [
+        "GroundingToolCount"
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/type/enum",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/type/x-google-enum-descriptions",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -1187,7 +3339,185 @@
           ],
           "type": "enum_changed"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/enum",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-google-enum-deprecated",
+          "change": "removed"
+        },
+        {
+          "path": "/x-google-enum-descriptions",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "HttpBearerConfig",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "HttpBearerUpdateConfig",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "HttpBody",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "HybridSearch",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:HybridSearch"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "ImageConfig",
+      "issue": 639,
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "dart_manifest_entries": [
+        "interactions:ImageConfig"
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/aspect_ratio/enum",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/aspect_ratio/type",
+          "change": "added"
+        },
+        {
+          "path": "/properties/image_size/enum",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/image_size/type",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/aspect_ratio/description",
+          "change": "added"
+        },
+        {
+          "path": "/properties/aspect_ratio/x-google-enum-descriptions",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/image_size/description",
+          "change": "added"
+        },
+        {
+          "path": "/properties/image_size/x-google-enum-descriptions",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "ImageContent",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "ImageContent"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "ImageResponseFormat",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "interactions:ImageResponseFormat"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "added",
+      "schema": "InjectionLocation",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -1248,7 +3578,204 @@
           "property": "output_video",
           "type": "property_removed"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/agent_config/discriminator",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/agent_config/oneOf/CodeMenderAgentConfig",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/background",
+          "change": "added"
+        },
+        {
+          "path": "/properties/continuation_token",
+          "change": "added"
+        },
+        {
+          "path": "/properties/errors",
+          "change": "added"
+        },
+        {
+          "path": "/properties/max_total_tokens",
+          "change": "added"
+        },
+        {
+          "path": "/properties/output_audio",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/output_image",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/output_text",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/output_video",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/status/enum",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/store",
+          "change": "added"
+        },
+        {
+          "path": "/properties/stream",
+          "change": "added"
+        },
+        {
+          "path": "/required",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/example",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/created/description",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/environment/description",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/labels/description",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/response_format/description",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/response_format/oneOf/1/example",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/response_format/oneOf/1/title",
+          "change": "added"
+        },
+        {
+          "path": "/properties/response_format/oneOf/1/x-speakeasy-model-namespace",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/response_modalities/deprecated",
+          "change": "added"
+        },
+        {
+          "path": "/properties/status/x-google-enum-deprecated",
+          "change": "added"
+        },
+        {
+          "path": "/properties/status/x-google-enum-descriptions",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/steps/description",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/updated/description",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "InteractionCompletedEvent",
+      "issue": 637,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "InteractionCompletedEvent"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/description",
+          "change": "added"
+        },
+        {
+          "path": "/examples",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/interaction/description",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "InteractionCreatedEvent",
+      "issue": 637,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "InteractionCreatedEvent"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/description",
+          "change": "added"
+        },
+        {
+          "path": "/examples",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/interaction/description",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "InteractionSseEvent",
+      "issue": 637,
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "dart_manifest_entries": [
+        "InteractionSseEvent"
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/discriminator",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -1264,7 +3791,15 @@
           "property": "continuation_token",
           "type": "property_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/continuation_token",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -1285,7 +3820,243 @@
           "property": "usage",
           "type": "property_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/continuation_token",
+          "change": "added"
+        },
+        {
+          "path": "/properties/status/enum",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/usage",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/status/x-google-enum-deprecated",
+          "change": "added"
+        },
+        {
+          "path": "/properties/status/x-google-enum-descriptions",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "InteractionsInput",
+      "issue": 637,
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "dart_manifest_entries": [
+        "InteractionsInput"
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/oneOf",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "ListAgentsResponse",
+      "issue": 638,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "ListAgentsResponse"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/agents/description",
+          "change": "added"
+        },
+        {
+          "path": "/properties/next_page_token/description",
+          "change": "added"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-model-namespace",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "added",
+      "schema": "ListCredentialsResponse",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "ListEnvironmentsResponse",
+      "issue": 638,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "interactions:ListEnvironmentsResponse"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/description",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-model-namespace",
+          "change": "changed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "ListTriggerExecutionsResponse",
+      "issue": 638,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "ListTriggerExecutionsResponse"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/description",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/next_page_token/description",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-model-namespace",
+          "change": "changed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "ListTriggersResponse",
+      "issue": 638,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "ListTriggersResponse"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/description",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/next_page_token/description",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-model-namespace",
+          "change": "changed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "added",
+      "schema": "ListVoicesResponse",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "ListWebhooksResponse",
+      "issue": 638,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "ListWebhooksResponse"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/description",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-model-namespace",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "removed",
+      "schema": "LocalEnvironmentConfig",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "LocalEnvironmentConfig"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -1301,7 +4072,152 @@
           "property": "defer_loading",
           "type": "property_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/defer_loading",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-codeSamples",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "McpServerToolCallDelta",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "McpServerToolCallDelta"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "McpServerToolCallStep",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "McpServerToolCallStep"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "McpServerToolResultDelta",
+      "issue": 639,
+      "disposition": "Extend structured result delta parsing to the added audio, document, function, and video union members.",
+      "dart_manifest_entries": [
+        "McpServerToolResultDelta"
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/result/oneOf/0/items/oneOf/AudioContent",
+          "change": "added"
+        },
+        {
+          "path": "/properties/result/oneOf/0/items/oneOf/DocumentContent",
+          "change": "added"
+        },
+        {
+          "path": "/properties/result/oneOf/0/items/oneOf/Function",
+          "change": "added"
+        },
+        {
+          "path": "/properties/result/oneOf/0/items/oneOf/VideoContent",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "McpServerToolResultStep",
+      "issue": 639,
+      "disposition": "Extend structured result parsing to the added audio, document, function, and video union members.",
+      "dart_manifest_entries": [
+        "McpServerToolResultStep"
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/result/oneOf/0/items/oneOf/AudioContent",
+          "change": "added"
+        },
+        {
+          "path": "/properties/result/oneOf/0/items/oneOf/DocumentContent",
+          "change": "added"
+        },
+        {
+          "path": "/properties/result/oneOf/0/items/oneOf/Function",
+          "change": "added"
+        },
+        {
+          "path": "/properties/result/oneOf/0/items/oneOf/VideoContent",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/examples",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "MediaProcessing",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -1380,7 +4296,28 @@
           ],
           "type": "enum_changed"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/enum",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/description",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-enum-descriptions",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -1396,7 +4333,107 @@
           "property": "error",
           "type": "property_removed"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/error",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "NoulAnswer",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "NoulQuestion",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "OAuth2Config",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "OAuth2UpdateConfig",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "PageProcessingOptions",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "ParallelAISearchConfig",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:ParallelAISearchConfig"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -1412,7 +4449,399 @@
           "property": "id",
           "type": "property_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties",
+          "change": "added"
+        },
+        {
+          "path": "/required",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/description",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-model-namespace",
+          "change": "changed"
+        },
+        {
+          "path": "/x-stainless-empty-object",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "PingWebhookResponse",
+      "issue": 638,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "PingWebhookResponse"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/description",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-model-namespace",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-name-override",
+          "change": "removed"
+        },
+        {
+          "path": "/x-stainless-empty-object",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "added",
+      "schema": "Pitch",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "PlaceCitation",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "PlaceCitation"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "added",
+      "schema": "ProcessingCallDelta",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "ProcessingCallStep",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "ProcessingResultDelta",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "ProcessingResultStep",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "PromptFeedback",
+      "issue": 637,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "PromptedVoice",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "Question",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "RagResource",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:RagResource"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "RagRetrievalConfig",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:RagRetrievalConfig"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "RagStoreConfig",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:RagStoreConfig"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "RankService",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:RankService"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "Ranking",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:Ranking"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "ReplicatedVoice",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "Retrieval",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:Retrieval"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "RetrievalCallDelta",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "RetrievalCallDelta"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "RetrievalCallStep",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "RetrievalCallStep"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "RetrievalResultDelta",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "RetrievalResultDelta"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "RetrievalResultStep",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "RetrievalResultStep"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "RetrievalStepArguments",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "RetrievalStepArguments"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -1428,7 +4857,61 @@
           "property": "id",
           "type": "property_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/id",
+          "change": "added"
+        },
+        {
+          "path": "/required",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/description",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-model-namespace",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "RotateSigningSecretResponse",
+      "issue": 638,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "RotateSigningSecretResponse"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/description",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-model-namespace",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-name-override",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
     },
     {
       "change": "modified",
@@ -1444,7 +4927,246 @@
           "property": "id",
           "type": "property_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties",
+          "change": "added"
+        },
+        {
+          "path": "/required",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/description",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "SafetySetting",
+      "issue": 637,
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "dart_manifest_entries": [
+        "interactions:SafetySetting"
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/threshold/enum",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/threshold/x-google-enum-descriptions",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "ScoreAnswer",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "ScoreQuestion",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "SessionConfig",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "SessionConfig"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "SigningSecret",
+      "issue": 638,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "SigningSecret"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-model-namespace",
+          "change": "changed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "added",
+      "schema": "SmartTranscriptionMode",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "Source",
+      "issue": 638,
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "dart_manifest_entries": [
+        "interactions:Source"
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/type/enum",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/source/description",
+          "change": "changed"
+        },
+        {
+          "path": "/properties/type/x-google-enum-descriptions",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "SpeakerConfig",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "SpeechAnnotation",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "SpeechConfig",
+      "issue": 641,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "interactions:SpeechConfig"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "added",
+      "schema": "SpreadsheetProcessingOptions",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "StaticMediaProcessing",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "Status",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "interactions:Status"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -1500,7 +5222,49 @@
           ],
           "type": "union_members_changed"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/oneOf/ProcessingCallStep",
+          "change": "added"
+        },
+        {
+          "path": "/oneOf/ProcessingResultStep",
+          "change": "added"
+        },
+        {
+          "path": "/oneOf/ToolSearchCallStep",
+          "change": "added"
+        },
+        {
+          "path": "/oneOf/ToolSearchResultStep",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "StepDelta",
+      "issue": 637,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "StepDelta"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
     },
     {
       "change": "modified",
@@ -1568,7 +5332,107 @@
           ],
           "type": "union_members_changed"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/oneOf/ProcessingCallDelta",
+          "change": "added"
+        },
+        {
+          "path": "/oneOf/ProcessingResultDelta",
+          "change": "added"
+        },
+        {
+          "path": "/oneOf/RetrievalCallDelta",
+          "change": "removed"
+        },
+        {
+          "path": "/oneOf/RetrievalResultDelta",
+          "change": "removed"
+        },
+        {
+          "path": "/oneOf/ToolSearchCallDelta",
+          "change": "added"
+        },
+        {
+          "path": "/oneOf/ToolSearchResultDelta",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "StepStart",
+      "issue": 637,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "StepStart"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "StepStop",
+      "issue": 637,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "StepStop"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "TextContent",
+      "issue": 637,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "TextContent"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "TextResponseFormat",
+      "issue": 637,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "interactions:TextResponseFormat"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/schema/description",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
     },
     {
       "change": "modified",
@@ -1595,7 +5459,60 @@
           ],
           "type": "enum_changed"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/enum",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-google-enum-descriptions",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "ThoughtContent",
+      "issue": 637,
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "ThoughtStep",
+      "issue": 637,
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "dart_manifest_entries": [
+        "ThoughtStep"
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/summary/items/$ref",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -1631,7 +5548,125 @@
           ],
           "type": "union_members_changed"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/oneOf/Retrieval",
+          "change": "removed"
+        },
+        {
+          "path": "/oneOf/ToolSearch",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "ToolChoiceConfig",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "ToolChoiceConfig"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "added",
+      "schema": "ToolSearch",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "ToolSearchCallDelta",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "ToolSearchCallStep",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "ToolSearchCallStepArguments",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "ToolSearchResultDelta",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "ToolSearchResultStep",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -1647,7 +5682,302 @@
           "property": "mode",
           "type": "property_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/mode",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/diarization_mode/deprecated",
+          "change": "added"
+        },
+        {
+          "path": "/properties/timestamp_granularities/deprecated",
+          "change": "added"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "TranscriptionMode",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "Trigger",
+      "issue": 638,
+      "disposition": "The interaction template references the existing CreateAgentInteractionParams schema. Preserve existing Dart trigger callers while matching the agent create request.",
+      "dart_manifest_entries": [
+        "Trigger"
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/interaction/$ref",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-model-namespace",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "TriggerCreateParams",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "TriggerCreateParams"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "TriggerExecution",
+      "issue": 638,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "TriggerExecution"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-model-namespace",
+          "change": "changed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "TriggerUpdate",
+      "issue": 638,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "TriggerUpdate"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-model-namespace",
+          "change": "changed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "removed",
+      "schema": "Turn",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "Turn"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "UpdateTriggerRequest",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "UpdateWebhookRequest",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "UploadEnvironmentFileRequest",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "UploadEnvironmentFileResponse",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "UrlCitation",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "UrlCitation"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "UrlContext",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "interactions:UrlContext"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-codeSamples",
+          "change": "changed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "UrlContextCallArguments",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "UrlContextCallStepArguments"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "UrlContextCallStep",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "UrlContextCallStep"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "UrlContextResult",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "UrlContextResultItem"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "modified",
+      "schema": "UrlContextResultStep",
+      "issue": 639,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "UrlContextResultStep"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
     },
     {
       "change": "modified",
@@ -1663,7 +5993,94 @@
           "property": "initial_input_tokens",
           "type": "property_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/initial_input_tokens",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "UserInputStep",
+      "issue": 637,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
+      "dart_manifest_entries": [
+        "UserInputStep"
+      ],
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "metadata_or_prose_only"
+    },
+    {
+      "change": "added",
+      "schema": "VerbatimTranscriptionMode",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "removed",
+      "schema": "VertexAISearchConfig",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:VertexAISearchConfig"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "VideoConfig",
+      "issue": 639,
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "dart_manifest_entries": [
+        "interactions:VideoConfig"
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/task/enum",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/task/x-google-enum-descriptions",
+          "change": "changed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -1684,7 +6101,46 @@
           "property": "processing",
           "type": "property_added"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/name",
+          "change": "added"
+        },
+        {
+          "path": "/properties/processing",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "VideoDelta",
+      "issue": 639,
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "dart_manifest_entries": [
+        "VideoDelta"
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/mime_type/enum",
+          "change": "changed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/mime_type/x-google-enum-descriptions",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
     },
     {
       "change": "modified",
@@ -1705,298 +6161,162 @@
           "property": "gcs_uri",
           "type": "property_removed"
         }
-      ]
+      ],
+      "direct_wire_changes": [
+        {
+          "path": "/properties/gcs_uri",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/resolution",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
+      ],
+      "scope": "wire"
     },
     {
-      "change": "removed",
-      "schema": "AllowlistEntry",
+      "change": "added",
+      "schema": "Voice",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "added",
+      "schema": "VoiceType",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract.",
+      "direct_wire_changes": [
+        {
+          "path": "",
+          "change": "added"
+        }
+      ],
+      "direct_metadata_changes": [],
+      "scope": "wire"
+    },
+    {
+      "change": "modified",
+      "schema": "Webhook",
       "issue": 638,
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
       "dart_manifest_entries": [
-        "AllowlistEntry"
+        "Webhook"
       ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+      "direct_wire_changes": [
+        {
+          "path": "/properties/subscribed_events/items/enum",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/subscribed_events/items/x-speakeasy-enum-descriptions",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/subscribed_events/items/x-speakeasy-enum-format",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/subscribed_events/items/x-speakeasy-unknown-values",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-model-namespace",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
     },
     {
-      "change": "removed",
-      "schema": "CodeMenderAgentConfig",
+      "change": "modified",
+      "schema": "WebhookConfig",
       "issue": 638,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
       "dart_manifest_entries": [
-        "CodeMenderAgentConfig"
+        "WebhookConfig"
       ],
-      "disposition": "Absent from candidate. Check public support before changing the existing Dart type."
-    },
-    {
-      "change": "removed",
-      "schema": "ContentDelta",
-      "issue": 637,
-      "dart_manifest_entries": [
-        "ContentDelta"
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
       ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+      "scope": "metadata_or_prose_only"
     },
     {
-      "change": "removed",
-      "schema": "ContentDeltaData",
-      "issue": 637,
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "ContentStart",
-      "issue": 637,
-      "dart_manifest_entries": [
-        "ContentStart"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "ContentStop",
-      "issue": 637,
-      "dart_manifest_entries": [
-        "ContentStop"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "DeleteInteractionResponse",
-      "issue": 637,
-      "dart_manifest_entries": [
-        "DeleteInteractionResponse"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "ExaAISearchConfig",
-      "issue": 642,
-      "dart_manifest_entries": [
-        "interactions:ExaAISearchConfig"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "FileContent",
+      "change": "modified",
+      "schema": "WebhookUpdate",
       "issue": 638,
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
       "dart_manifest_entries": [
-        "FileContent"
+        "WebhookUpdate"
       ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+      "direct_wire_changes": [
+        {
+          "path": "/properties/subscribed_events/items/enum",
+          "change": "removed"
+        }
+      ],
+      "direct_metadata_changes": [
+        {
+          "path": "/properties/subscribed_events/items/x-speakeasy-enum-descriptions",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/subscribed_events/items/x-speakeasy-enum-format",
+          "change": "removed"
+        },
+        {
+          "path": "/properties/subscribed_events/items/x-speakeasy-unknown-values",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        },
+        {
+          "path": "/x-speakeasy-model-namespace",
+          "change": "changed"
+        }
+      ],
+      "scope": "wire"
     },
     {
-      "change": "removed",
-      "schema": "Filter",
-      "issue": 642,
+      "change": "modified",
+      "schema": "WordInfo",
+      "issue": 641,
+      "disposition": "Reference prose or generator metadata changed. Check relevant docs without treating this row as a wire change.",
       "dart_manifest_entries": [
-        "interactions:Filter"
+        "WordInfo"
       ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "FindRequest",
-      "issue": 638,
-      "dart_manifest_entries": [
-        "FindRequest"
+      "direct_wire_changes": [],
+      "direct_metadata_changes": [
+        {
+          "path": "/x-speakeasy-exports",
+          "change": "removed"
+        }
       ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "FixRequest",
-      "issue": 638,
-      "dart_manifest_entries": [
-        "FixRequest"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "FunctionCallDelta",
-      "issue": 637,
-      "dart_manifest_entries": [
-        "FunctionCallDelta"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "HybridSearch",
-      "issue": 642,
-      "dart_manifest_entries": [
-        "interactions:HybridSearch"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "LocalEnvironmentConfig",
-      "issue": 638,
-      "dart_manifest_entries": [
-        "LocalEnvironmentConfig"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "ParallelAISearchConfig",
-      "issue": 642,
-      "dart_manifest_entries": [
-        "interactions:ParallelAISearchConfig"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "RagResource",
-      "issue": 642,
-      "dart_manifest_entries": [
-        "interactions:RagResource"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "RagRetrievalConfig",
-      "issue": 642,
-      "dart_manifest_entries": [
-        "interactions:RagRetrievalConfig"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "RagStoreConfig",
-      "issue": 642,
-      "dart_manifest_entries": [
-        "interactions:RagStoreConfig"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "RankService",
-      "issue": 642,
-      "dart_manifest_entries": [
-        "interactions:RankService"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "Ranking",
-      "issue": 642,
-      "dart_manifest_entries": [
-        "interactions:Ranking"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "Retrieval",
-      "issue": 642,
-      "dart_manifest_entries": [
-        "interactions:Retrieval"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "RetrievalCallDelta",
-      "issue": 642,
-      "dart_manifest_entries": [
-        "RetrievalCallDelta"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "RetrievalCallStep",
-      "issue": 642,
-      "dart_manifest_entries": [
-        "RetrievalCallStep"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "RetrievalResultDelta",
-      "issue": 642,
-      "dart_manifest_entries": [
-        "RetrievalResultDelta"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "RetrievalResultStep",
-      "issue": 642,
-      "dart_manifest_entries": [
-        "RetrievalResultStep"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "RetrievalStepArguments",
-      "issue": 642,
-      "dart_manifest_entries": [
-        "RetrievalStepArguments"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "SessionConfig",
-      "issue": 638,
-      "dart_manifest_entries": [
-        "SessionConfig"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "Status",
-      "issue": 637,
-      "dart_manifest_entries": [
-        "interactions:Status"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "ThoughtContent",
-      "issue": 637,
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "TriggerCreateParams",
-      "issue": 638,
-      "dart_manifest_entries": [
-        "TriggerCreateParams"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "Turn",
-      "issue": 637,
-      "dart_manifest_entries": [
-        "Turn"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
-    },
-    {
-      "change": "removed",
-      "schema": "VertexAISearchConfig",
-      "issue": 642,
-      "dart_manifest_entries": [
-        "interactions:VertexAISearchConfig"
-      ],
-      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+      "scope": "metadata_or_prose_only"
     }
   ],
   "additional_public_contracts": [
@@ -2053,6 +6373,14 @@
       "surface": "Gemini Developer API Genie 4",
       "contract": "Paid v1beta POST create has model genie-4 with no ordinary input. Short-lived per-interaction auth token create/delete at /v1beta/interactions/{id}/auth_tokens[/{token}]. Dedicated WebSocket /v1beta/interactions/live or WebRTC POST /v1beta/interactions/{id}:webrtc. Explicitly complete to stop generation and billing.",
       "source": "https://aistudio.google.com/docs/genie"
+    },
+    {
+      "issue": 642,
+      "surface": "Gemini Enterprise Agent Platform Deferred tier",
+      "availability": "Generally available 2026-11-16",
+      "contract": "Global Vertex API v1 only. Create without a streaming response using service_tier=deferred, background=true and store=true. Poll or resume SSE with GET stream=true and an optional last_event_id. Cancel a queued or in-progress call. Persist prior interaction IDs and continuation tokens for subsequent turns or long decodes as applicable.",
+      "source": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/deferred-tier",
+      "announcement": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/release-notes"
     }
   ]
 }
