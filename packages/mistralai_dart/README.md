@@ -1093,6 +1093,9 @@ final response = await client.chat.create(
 await client.libraries.delete(libraryId: library.id);
 ```
 
+`deleteSharing` returns the deleted access record on HTTP 200 and
+`null` when the API confirms removal with HTTP 204.
+
 → [Full example](example/libraries_example.dart)
 
 </details>
@@ -1308,6 +1311,12 @@ and vector search, navigation, and streamed summary generation. The old
 `client.rag.searchIndexes` wrappers refer to external index registration
 routes from an earlier API snapshot. Managed indexes require their own
 configuration and ingestion.
+
+A rejected search can return several validation issues in
+`ManagedSearchQueryException.errors`. Each issue has typed fields, such as
+`SearchTopKTooLarge.limit` or `SearchIncorrectFieldType.expectedType`.
+`ManagedSearchQueryException` extends `ApiException`, so existing HTTP
+error handlers still catch it.
 
 → [Full example](example/managed_search_indexes_example.dart)
 

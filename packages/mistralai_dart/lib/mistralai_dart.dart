@@ -424,6 +424,7 @@ export 'src/models/responses/response_stream_event.dart';
 export 'src/models/responses/response_tool.dart';
 // --- Models: Managed Search (Public Preview) ---
 export 'src/models/search/managed_index.dart';
+export 'src/models/search/managed_search_query_error.dart';
 export 'src/models/search/search_documents.dart';
 export 'src/models/search/search_query.dart';
 // --- Models: Service Accounts (Beta) ---

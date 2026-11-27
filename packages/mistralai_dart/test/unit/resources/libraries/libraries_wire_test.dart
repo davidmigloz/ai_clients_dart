@@ -400,11 +400,12 @@ void main() {
         'share_with_type': 'Workspace',
       });
 
-      await client.libraries.deleteSharing(
+      final revoked = await client.libraries.deleteSharing(
         libraryId: 'library-1',
         shareWithUuid: 'workspace-2',
         shareWithType: EntityType.workspace,
       );
+      expect(revoked?.toJson(), _share);
       expect(requests.last.method, 'DELETE');
       expect(jsonDecode(requests.last.body), {
         'share_with_uuid': 'workspace-2',
@@ -412,4 +413,23 @@ void main() {
       });
     },
   );
+
+  test('revokes library access when the service returns HTTP 204', () async {
+    final client = clientReturning((_) => null);
+
+    final revoked = await client.libraries.deleteSharing(
+      libraryId: 'library-1',
+      shareWithUuid: 'workspace-2',
+      shareWithType: EntityType.workspace,
+    );
+
+    expect(revoked, isNull);
+    final request = requests.single;
+    expect(request.method, 'DELETE');
+    expect(request.url.path, '/v1/libraries/library-1/share');
+    expect(jsonDecode(request.body), {
+      'share_with_uuid': 'workspace-2',
+      'share_with_type': 'Workspace',
+    });
+  });
 }

@@ -264,6 +264,8 @@ class LibrariesResource extends ResourceBase {
 
   /// Removes sharing for a library.
   ///
+  /// Returns the deleted sharing record on HTTP 200 and null on HTTP 204.
+  ///
   /// An owner cannot delete their own access. You must be the owner of
   /// the library to delete access for others.
   ///
@@ -271,7 +273,7 @@ class LibrariesResource extends ResourceBase {
   /// [shareWithUuid] is the UUID of the entity to remove access for.
   /// [shareWithType] is the type of entity to remove access for.
   /// [orgId] is the optional organization ID.
-  Future<SharingResponse> deleteSharing({
+  Future<SharingResponse?> deleteSharing({
     required String libraryId,
     required String shareWithUuid,
     required EntityType shareWithType,
@@ -295,6 +297,7 @@ class LibrariesResource extends ResourceBase {
       ..body = jsonEncode(body);
 
     final response = await interceptorChain.execute(httpRequest);
+    if (response.statusCode == 204) return null;
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
     return SharingResponse.fromJson(responseBody);
   }
