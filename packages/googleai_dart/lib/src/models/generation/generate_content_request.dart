@@ -37,6 +37,15 @@ class GenerateContentRequest {
   /// Optional. The service tier of the request.
   final ServiceTier? serviceTier;
 
+  /// Opaque token from a previous response candidate for manual long decode.
+  ///
+  /// Send the latest token with the original request contents, instructions,
+  /// tools, and generation configuration. Keep the partial output for the
+  /// final response and leave it out of [contents] on continuation requests.
+  /// Supported for long-decode models, including Gemini 4. On Vertex AI,
+  /// use API version `v1beta1`.
+  final String? continuationToken;
+
   /// Creates a [GenerateContentRequest].
   const GenerateContentRequest({
     required this.contents,
@@ -48,6 +57,7 @@ class GenerateContentRequest {
     this.cachedContent,
     this.store,
     this.serviceTier,
+    this.continuationToken,
   });
 
   /// Creates a [GenerateContentRequest] from JSON.
@@ -84,6 +94,7 @@ class GenerateContentRequest {
         serviceTier: json['serviceTier'] != null
             ? serviceTierFromString(json['serviceTier'] as String)
             : null,
+        continuationToken: json['continuationToken'] as String?,
       );
 
   /// Converts to JSON.
@@ -100,6 +111,7 @@ class GenerateContentRequest {
     if (cachedContent != null) 'cachedContent': cachedContent,
     if (store != null) 'store': store,
     if (serviceTier != null) 'serviceTier': serviceTierToString(serviceTier!),
+    if (continuationToken != null) 'continuationToken': continuationToken,
   };
 
   /// Creates a copy with replaced values.
@@ -113,6 +125,7 @@ class GenerateContentRequest {
     Object? cachedContent = unsetCopyWithValue,
     Object? store = unsetCopyWithValue,
     Object? serviceTier = unsetCopyWithValue,
+    Object? continuationToken = unsetCopyWithValue,
   }) {
     return GenerateContentRequest(
       contents: contents == unsetCopyWithValue
@@ -138,6 +151,9 @@ class GenerateContentRequest {
       serviceTier: serviceTier == unsetCopyWithValue
           ? this.serviceTier
           : serviceTier as ServiceTier?,
+      continuationToken: continuationToken == unsetCopyWithValue
+          ? this.continuationToken
+          : continuationToken as String?,
     );
   }
 }

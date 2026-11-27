@@ -62,6 +62,16 @@ enum FinishReason {
 
   /// The interaction was escalated (e.g. handed off for further handling).
   escalation,
+
+  /// The account is limited or disabled under the Prohibited Use Policy.
+  /// Returned by the Gemini Developer API.
+  pupLimitedDisabled,
+
+  /// The response reached the per-request limit and can continue in a new request.
+  continuation,
+
+  /// The response was blocked by Model Armor on Gemini Enterprise Agent Platform.
+  modelArmor,
 }
 
 /// Converts string to FinishReason enum.
@@ -87,6 +97,9 @@ FinishReason finishReasonFromString(String? value) {
     'MISSING_THOUGHT_SIGNATURE' => FinishReason.missingThoughtSignature,
     'MALFORMED_RESPONSE' => FinishReason.malformedResponse,
     'ESCALATION' => FinishReason.escalation,
+    'PUP_LIMITED_DISABLED' => FinishReason.pupLimitedDisabled,
+    'CONTINUATION' => FinishReason.continuation,
+    'MODEL_ARMOR' => FinishReason.modelArmor,
     _ => FinishReason.unspecified,
   };
 }
@@ -114,6 +127,9 @@ String finishReasonToString(FinishReason reason) {
     FinishReason.missingThoughtSignature => 'MISSING_THOUGHT_SIGNATURE',
     FinishReason.malformedResponse => 'MALFORMED_RESPONSE',
     FinishReason.escalation => 'ESCALATION',
+    FinishReason.pupLimitedDisabled => 'PUP_LIMITED_DISABLED',
+    FinishReason.continuation => 'CONTINUATION',
+    FinishReason.modelArmor => 'MODEL_ARMOR',
     FinishReason.unspecified => 'FINISH_REASON_UNSPECIFIED',
   };
 }

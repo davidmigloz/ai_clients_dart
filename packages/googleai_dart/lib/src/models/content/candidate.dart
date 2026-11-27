@@ -47,6 +47,12 @@ class Candidate {
   /// Metadata related to URL context retrieval tool.
   final Map<String, dynamic>? urlContextMetadata;
 
+  /// Opaque token for continuing an incomplete generation.
+  ///
+  /// If [finishReason] is [FinishReason.continuation], pass this token in the
+  /// next GenerateContent request with the original request inputs.
+  final String? continuationToken;
+
   /// Creates a [Candidate].
   const Candidate({
     this.content,
@@ -61,6 +67,7 @@ class Candidate {
     this.groundingMetadata,
     this.groundingAttributions,
     this.urlContextMetadata,
+    this.continuationToken,
   });
 
   /// Creates a [Candidate] from JSON.
@@ -99,6 +106,7 @@ class Candidate {
         ?.map((e) => GroundingAttribution.fromJson(e as Map<String, dynamic>))
         .toList(),
     urlContextMetadata: json['urlContextMetadata'] as Map<String, dynamic>?,
+    continuationToken: json['continuationToken'] as String?,
   );
 
   /// Converts to JSON.
@@ -122,6 +130,7 @@ class Candidate {
           .map((e) => e.toJson())
           .toList(),
     if (urlContextMetadata != null) 'urlContextMetadata': urlContextMetadata,
+    if (continuationToken != null) 'continuationToken': continuationToken,
   };
 
   /// Creates a copy with replaced values.
@@ -138,6 +147,7 @@ class Candidate {
     Object? groundingMetadata = unsetCopyWithValue,
     Object? groundingAttributions = unsetCopyWithValue,
     Object? urlContextMetadata = unsetCopyWithValue,
+    Object? continuationToken = unsetCopyWithValue,
   }) {
     return Candidate(
       content: content == unsetCopyWithValue
@@ -174,6 +184,9 @@ class Candidate {
       urlContextMetadata: urlContextMetadata == unsetCopyWithValue
           ? this.urlContextMetadata
           : urlContextMetadata as Map<String, dynamic>?,
+      continuationToken: continuationToken == unsetCopyWithValue
+          ? this.continuationToken
+          : continuationToken as String?,
     );
   }
 }

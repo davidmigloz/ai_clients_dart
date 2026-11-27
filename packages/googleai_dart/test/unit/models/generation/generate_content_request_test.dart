@@ -121,6 +121,23 @@ void main() {
       });
     });
 
+    test('round-trips and clears the top-level continuation token', () {
+      const token = 'c29tZS1vcGFxdWUtdG9rZW4=';
+      final request = GenerateContentRequest(
+        contents: [Content.text('Hello')],
+        continuationToken: token,
+      );
+
+      final json = request.toJson();
+      expect(json['continuationToken'], token);
+      expect(GenerateContentRequest.fromJson(json).continuationToken, token);
+      expect(request.copyWith(store: true).continuationToken, token);
+      expect(
+        request.copyWith(continuationToken: null).toJson(),
+        isNot(contains('continuationToken')),
+      );
+    });
+
     test('round-trip preserves serviceTier', () {
       final request = GenerateContentRequest(
         contents: [Content.text('Hello')],

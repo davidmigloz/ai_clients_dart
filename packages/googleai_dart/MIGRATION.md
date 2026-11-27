@@ -35,6 +35,33 @@ For structured output on `v1`, supply an `InteractionResponseFormatConfig`.
 
 ---
 
+## Upcoming GenerateContent changes for v13.x callers
+
+### Update exhaustive enum switches
+
+Add `ThinkingLevel.xhigh` where you handle every thinking level. Add
+`FinishReason.continuation`, `FinishReason.pupLimitedDisabled` (Gemini
+Developer API), and `FinishReason.modelArmor` (Gemini Enterprise Agent
+Platform) where you handle every finish reason. Applications that build URL
+versions with an exhaustive switch can use `ApiVersion.value` to include the
+new Vertex AI version `v1beta1`.
+
+```dart
+// Before
+String versionPath(ApiVersion version) => switch (version) {
+  ApiVersion.v1 => 'v1',
+  ApiVersion.v1beta => 'v1beta',
+};
+
+// After
+String versionPath(ApiVersion version) => version.value;
+```
+
+Vertex AI callers can explicitly select `ApiVersion.v1beta1` for long decode.
+The `GoogleAIConfig.vertexAI` default remains `ApiVersion.v1`.
+
+---
+
 ## Migrating from v12.x to v13.0.0
 
 v13.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.
