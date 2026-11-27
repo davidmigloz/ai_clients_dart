@@ -5,7 +5,7 @@ import 'interceptor.dart';
 
 /// Interceptor that adds authentication credentials to requests.
 ///
-/// For Bearer token auth, adds the Authorization header.
+/// Adds Authorization for bearer auth or x-api-key for dashboard auth.
 /// Auth headers are only added if not already present (respects request-level override).
 class AuthInterceptor implements Interceptor {
   /// Authentication provider.
@@ -22,7 +22,11 @@ class AuthInterceptor implements Interceptor {
     final credentials = await authProvider.getCredentials();
 
     // Clone the request to add auth headers
-    final request = _cloneRequest(context.request, credentials);
+    final request = _cloneRequest(
+      context.request,
+      credentials,
+      authInApiKeyHeader: context.authInApiKeyHeader,
+    );
 
     return next(context.copyWith(request: request));
   }
@@ -30,17 +34,15 @@ class AuthInterceptor implements Interceptor {
   /// Clones a request and adds authentication headers/params.
   http.BaseRequest _cloneRequest(
     http.BaseRequest original,
-    AuthCredentials credentials,
-  ) {
+    AuthCredentials credentials, {
+    required bool authInApiKeyHeader,
+  }) {
     switch (credentials) {
       case BearerTokenCredentials(:final token):
-        // Only add Authorization header if not already set
-        if (!original.headers.containsKey('Authorization')) {
-          final newRequest = _copyRequest(original);
-          newRequest.headers['Authorization'] = 'Bearer $token';
-          return newRequest;
-        }
-        return original;
+        final header = authInApiKeyHeader ? 'x-api-key' : 'Authorization';
+        if (original.headers.containsKey(header)) return original;
+        return _copyRequest(original)
+          ..headers[header] = authInApiKeyHeader ? token : 'Bearer $token';
 
       case NoAuthCredentials():
         // No authentication needed

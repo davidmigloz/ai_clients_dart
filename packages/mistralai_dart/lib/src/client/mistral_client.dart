@@ -8,6 +8,7 @@ import '../interceptors/logging_interceptor.dart';
 import '../resources/agents/agents_resource.dart';
 import '../resources/audio/audio_resource.dart';
 import '../resources/batch/batch_resource.dart';
+import '../resources/billing/billing_resource.dart';
 import '../resources/chat_resource.dart';
 import '../resources/classifications_resource.dart';
 import '../resources/connectors/connectors_resource.dart';
@@ -26,8 +27,11 @@ import '../resources/prompts/prompts_resource.dart';
 import '../resources/rag/rag_resource.dart';
 import '../resources/realtime/realtime_resource.dart';
 import '../resources/responses_resource.dart';
+import '../resources/service_accounts/service_accounts_resource.dart';
 import '../resources/skills/skills_resource.dart';
+import '../resources/triggers/triggers_resource.dart';
 import '../resources/users/users_resource.dart';
+import '../resources/webhooks/webhooks_resource.dart';
 import '../resources/workflows/workflows_resource.dart';
 import 'config.dart';
 import 'interceptor_chain.dart';
@@ -181,6 +185,18 @@ class MistralClient {
 
   /// Resource for conversations (Beta).
   late final ConversationsResource conversations;
+
+  /// Dashboard budget and subscription (beta).
+  late final BillingResource billing;
+
+  /// Workspace service accounts and roles (beta).
+  late final ServiceAccountsResource serviceAccounts;
+
+  /// Trigger rules and events (beta).
+  late final TriggersResource triggers;
+
+  /// Inbound webhook sources for platform triggers (beta).
+  late final WebhooksResource webhooks;
 
   /// Resource for MCP connectors (Beta).
   late final ConnectorsResource connectors;
@@ -408,6 +424,38 @@ class MistralClient {
     );
 
     skills = SkillsResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    billing = BillingResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    serviceAccounts = ServiceAccountsResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    triggers = TriggersResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    webhooks = WebhooksResource(
       config: this.config,
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,
