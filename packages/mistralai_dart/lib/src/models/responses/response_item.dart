@@ -887,13 +887,27 @@ sealed class ResponseItem {
     {'type': 'function_call' || 'reasoning'} => ResponseOutputItem.fromJson(
       json,
     ),
-    {'type': 'message', 'id': final String _, 'role': 'assistant'} =>
+    {
+      'type': 'message',
+      'id': String _,
+      'role': 'assistant',
+      'status': String _,
+      'content': final List<Object?> content,
+    }
+        when !content.any(_isInputPart) =>
       ResponseOutputMessage.fromJson(json),
     {'role': final String _}
         when json['type'] == null || json['type'] == 'message' =>
       ResponseInputMessage.fromJson(json),
     _ => UnknownResponseOutputItem(json),
   };
+
+  static bool _isInputPart(Object? part) =>
+      part is Map &&
+      switch (part['type']) {
+        'input_text' || 'input_image' || 'input_file' => true,
+        _ => false,
+      };
 
   /// Serializes this history item.
   Map<String, dynamic> toJson();

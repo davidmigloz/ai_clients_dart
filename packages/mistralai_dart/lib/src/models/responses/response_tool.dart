@@ -45,7 +45,7 @@ final class UnknownResponseTool extends ResponseTool {
 
 /// A ResponseNestedTool variant.
 ///
-/// [ResponseFunctionTool], [ResponseCustomTool], or [UnknownResponseNestedTool].
+/// [ResponseNestedFunctionTool], [ResponseCustomTool], or [UnknownResponseNestedTool].
 @immutable
 sealed class ResponseNestedTool {
   const ResponseNestedTool();
@@ -53,7 +53,7 @@ sealed class ResponseNestedTool {
   /// Parses an API payload.
   factory ResponseNestedTool.fromJson(Map<String, dynamic> json) =>
       switch (json['type']) {
-        'function' => ResponseFunctionTool.fromJson(json),
+        'function' => ResponseNestedFunctionTool.fromJson(json),
         'custom' => ResponseCustomTool.fromJson(json),
         _ => UnknownResponseNestedTool(json),
       };
@@ -166,7 +166,7 @@ final class UnknownResponseTextFormat extends ResponseTextFormat {
 
 /// The ResponsesFunctionTool wire payload.
 @immutable
-class ResponseFunctionTool extends ResponseTool implements ResponseNestedTool {
+class ResponseFunctionTool extends ResponseTool {
   /// Creates a [ResponseFunctionTool].
   const ResponseFunctionTool({
     this.allowedCallers,
@@ -1232,4 +1232,182 @@ final class ResponseToolChoiceMode extends ResponseToolChoice {
 
   @override
   int get hashCode => value.hashCode;
+}
+
+/// A function inside a Responses namespace.
+@immutable
+class ResponseNestedFunctionTool extends ResponseNestedTool {
+  /// Creates a [ResponseNestedFunctionTool].
+  const ResponseNestedFunctionTool({
+    this.allowedCallers,
+    this.isAsync,
+    this.deferLoading,
+    this.description,
+    required this.name,
+    this.outputSchema,
+    this.parameters,
+    this.strict,
+    this.extra,
+  });
+
+  /// The fixed type discriminator.
+  String get type => 'function';
+
+  /// The allowed_callers field.
+  final List<String>? allowedCallers;
+
+  /// The async field.
+  final bool? isAsync;
+
+  /// The defer_loading field.
+  final bool? deferLoading;
+
+  /// The description field.
+  final String? description;
+
+  /// The name field.
+  final String name;
+
+  /// The output_schema field.
+  final Map<String, dynamic>? outputSchema;
+
+  /// The parameters field.
+  final Object? parameters;
+
+  /// The strict field.
+  final bool? strict;
+
+  /// Additional API fields.
+  final Map<String, dynamic>? extra;
+
+  /// Parses a [ResponseNestedFunctionTool] from JSON.
+  factory ResponseNestedFunctionTool.fromJson(Map<String, dynamic> json) {
+    if (json['type'] case final value? when value != 'function') {
+      throw FormatException(
+        'ResponseNestedFunctionTool: unexpected type $value',
+      );
+    }
+    if (json['name'] == null) {
+      throw const FormatException('ResponseNestedFunctionTool: missing name');
+    }
+    return ResponseNestedFunctionTool(
+      allowedCallers: json['allowed_callers'] == null
+          ? null
+          : (json['allowed_callers'] as List)
+                .map((item) => item as String)
+                .toList(),
+      isAsync: json['async'] == null ? null : json['async'] as bool,
+      deferLoading: json['defer_loading'] == null
+          ? null
+          : json['defer_loading'] as bool,
+      description: json['description'] == null
+          ? null
+          : json['description'] as String,
+      name: json['name'] as String,
+      outputSchema: json['output_schema'] == null
+          ? null
+          : json['output_schema'] as Map<String, dynamic>,
+      parameters: json['parameters'],
+      strict: json['strict'] == null ? null : json['strict'] as bool,
+      extra: additionalJsonFields(json, const {
+        'allowed_callers',
+        'async',
+        'defer_loading',
+        'description',
+        'name',
+        'output_schema',
+        'parameters',
+        'strict',
+        'type',
+      }),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    ...?extra,
+    'type': type,
+    'allowed_callers': ?allowedCallers,
+    'async': ?isAsync,
+    'defer_loading': ?deferLoading,
+    'description': ?description,
+    'name': name,
+    'output_schema': ?outputSchema,
+    'parameters': ?parameters,
+    'strict': ?strict,
+  };
+
+  /// Creates a copy with the given fields replaced.
+  ResponseNestedFunctionTool copyWith({
+    Object? allowedCallers = unsetCopyWithValue,
+    Object? isAsync = unsetCopyWithValue,
+    Object? deferLoading = unsetCopyWithValue,
+    Object? description = unsetCopyWithValue,
+    String? name,
+    Object? outputSchema = unsetCopyWithValue,
+    Object? parameters = unsetCopyWithValue,
+    Object? strict = unsetCopyWithValue,
+    Object? extra = unsetCopyWithValue,
+  }) => ResponseNestedFunctionTool(
+    allowedCallers: allowedCallers == unsetCopyWithValue
+        ? this.allowedCallers
+        : (allowedCallers as List?)?.cast<String>(),
+    isAsync: isAsync == unsetCopyWithValue ? this.isAsync : isAsync as bool?,
+    deferLoading: deferLoading == unsetCopyWithValue
+        ? this.deferLoading
+        : deferLoading as bool?,
+    description: description == unsetCopyWithValue
+        ? this.description
+        : description as String?,
+    name: name ?? this.name,
+    outputSchema: outputSchema == unsetCopyWithValue
+        ? this.outputSchema
+        : (outputSchema as Map?)?.cast<String, dynamic>(),
+    parameters: parameters == unsetCopyWithValue ? this.parameters : parameters,
+    strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
+    extra: extra == unsetCopyWithValue
+        ? this.extra
+        : (extra as Map?)?.cast<String, dynamic>(),
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ResponseNestedFunctionTool &&
+          runtimeType == other.runtimeType &&
+          valuesDeepEqual(allowedCallers, other.allowedCallers) &&
+          isAsync == other.isAsync &&
+          deferLoading == other.deferLoading &&
+          description == other.description &&
+          name == other.name &&
+          valuesDeepEqual(outputSchema, other.outputSchema) &&
+          valuesDeepEqual(parameters, other.parameters) &&
+          strict == other.strict &&
+          valuesDeepEqual(extra, other.extra);
+
+  @override
+  int get hashCode => Object.hashAll([
+    valueDeepHashCode(allowedCallers),
+    isAsync,
+    deferLoading,
+    description,
+    name,
+    valueDeepHashCode(outputSchema),
+    valueDeepHashCode(parameters),
+    strict,
+    valueDeepHashCode(extra),
+  ]);
+
+  @override
+  String toString() =>
+      'ResponseNestedFunctionTool('
+      'allowedCallers: ${allowedCallers?.length}, '
+      'isAsync: $isAsync, '
+      'deferLoading: $deferLoading, '
+      'description: $description, '
+      'name: $name, '
+      'outputSchema: ${outputSchema?.length}, '
+      'parameters: $parameters, '
+      'strict: $strict, '
+      'extra: ${extra?.length})';
 }

@@ -5176,7 +5176,7 @@
     "ResponsesToolFunction": {
       "spec": "main",
       "kind": "object",
-      "dart_class": "ResponseFunctionTool",
+      "dart_class": "ResponseNestedFunctionTool",
       "file": "lib/src/models/responses/response_tool.dart",
       "schema": "ResponsesToolFunction",
       "tags": []

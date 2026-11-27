@@ -241,7 +241,7 @@ await for (final chunk in stream) {
 Use `client.responses` to create a stateless response, stream server-sent
 events, or count input tokens. Keep conversation state in your app. Send the
 ordered history, prior output items and client-executed tool results in the
-next request.
+next request. Requests run in the foreground.
 
 ```dart
 const request = CreateResponseRequest(

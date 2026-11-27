@@ -130,7 +130,7 @@ void main() {
               'name': 'tools',
               'description': 'Weather services',
               'tools': [
-                {'type': 'function', 'name': 'weather'},
+                {'type': 'function', 'name': 'weather', 'parameters': true},
               ],
             },
           ],
@@ -174,11 +174,27 @@ void main() {
           ResponseNamespaceTool(
             name: 'tools',
             description: 'Weather services',
-            tools: [ResponseFunctionTool(name: 'weather')],
+            tools: [
+              ResponseNestedFunctionTool(name: 'weather', parameters: true),
+            ],
           ),
         ],
         toolChoice: const ResponseToolChoiceFunction(name: 'weather'),
       ),
+    );
+    final parsedNamespace =
+        ResponseTool.fromJson(const {
+              'type': 'namespace',
+              'name': 'tools',
+              'description': 'Weather services',
+              'tools': [
+                {'type': 'function', 'name': 'weather', 'parameters': true},
+              ],
+            })
+            as ResponseNamespaceTool;
+    expect(
+      (parsedNamespace.tools.single as ResponseNestedFunctionTool).parameters,
+      isTrue,
     );
     expect(result.outputText, 'The forecast is clear.');
     expect(result.usage!.inputTokensDetails.cacheWriteTokens, 1);
@@ -347,6 +363,29 @@ void main() {
       );
     },
   );
+
+  test('distinguishes assistant history from replayed model output', () {
+    const history = ResponseInput.items([
+      ResponseInputMessage(
+        role: 'assistant',
+        content: ResponseMessageContent.text('Previously said'),
+        extra: {'id': 'local-id'},
+      ),
+      ResponseInputMessage(
+        role: 'assistant',
+        status: 'completed',
+        content: ResponseMessageContent.parts([
+          ResponseInputTextPart(text: 'Another local message'),
+        ]),
+        extra: {'id': 'local-id-2'},
+      ),
+    ]);
+    final decoded =
+        ResponseInput.fromJson(history.toJson()) as ResponseInputItems;
+    expect(decoded.items, everyElement(isA<ResponseInputMessage>()));
+    expect(decoded.toJson(), history.toJson());
+    expect(ResponseItem.fromJson(_outputMessage), isA<ResponseOutputMessage>());
+  });
 
   test('round-trips a function result image without a detail field', () {
     const wire = {
