@@ -722,7 +722,7 @@ class SearchNavigationChunk {
     locator: locator ?? this.locator,
     metadata: metadata == unsetCopyWithValue
         ? this.metadata
-        : metadata as Map<String, dynamic>?,
+        : (metadata as Map?)?.cast<String, dynamic>(),
     parentRef: parentRef == unsetCopyWithValue
         ? this.parentRef
         : parentRef as String?,
@@ -732,7 +732,7 @@ class SearchNavigationChunk {
         : startOffset as int?,
     extra: extra == unsetCopyWithValue
         ? this.extra
-        : extra as Map<String, dynamic>?,
+        : (extra as Map?)?.cast<String, dynamic>(),
   );
 
   @override

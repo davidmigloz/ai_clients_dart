@@ -367,7 +367,9 @@ class NearestNeighbourRetriever extends ManagedLeafRetriever {
     query: query == unsetCopyWithValue ? this.query : query as String?,
     queryEmbedding: queryEmbedding == unsetCopyWithValue
         ? this.queryEmbedding
-        : queryEmbedding as List<double>?,
+        : (queryEmbedding as List?)
+              ?.map((value) => (value as num).toDouble())
+              .toList(),
     topK: topK == unsetCopyWithValue ? this.topK : topK as int?,
   );
 
@@ -494,7 +496,9 @@ class RrfRetriever extends ManagedRetriever {
     topK: topK == unsetCopyWithValue ? this.topK : topK as int?,
     weights: weights == unsetCopyWithValue
         ? this.weights
-        : weights as List<double>?,
+        : (weights as List?)
+              ?.map((value) => (value as num).toDouble())
+              .toList(),
   );
 
   @override
@@ -1023,7 +1027,7 @@ class ManagedSearchHit {
     chunk: chunk ?? this.chunk,
     distance: distance == unsetCopyWithValue
         ? this.distance
-        : distance as double?,
+        : (distance as num?)?.toDouble(),
     indexName: indexName ?? this.indexName,
     score: score ?? this.score,
   );
@@ -1190,7 +1194,7 @@ class ManagedSearchChunk {
     locator: locator ?? this.locator,
     metadata: metadata == unsetCopyWithValue
         ? this.metadata
-        : metadata as Map<String, dynamic>?,
+        : (metadata as Map?)?.cast<String, dynamic>(),
     parentRef: parentRef == unsetCopyWithValue
         ? this.parentRef
         : parentRef as String?,
@@ -1200,7 +1204,7 @@ class ManagedSearchChunk {
         : startOffset as int?,
     extra: extra == unsetCopyWithValue
         ? this.extra
-        : extra as Map<String, dynamic>?,
+        : (extra as Map?)?.cast<String, dynamic>(),
   );
 
   @override

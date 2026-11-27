@@ -218,10 +218,10 @@ class ManagedIndexFields {
   }) => ManagedIndexFields(
     chunkFields: chunkFields == unsetCopyWithValue
         ? this.chunkFields
-        : chunkFields as Map<String, ManagedIndexField>?,
+        : (chunkFields as Map?)?.cast<String, ManagedIndexField>(),
     documentFields: documentFields == unsetCopyWithValue
         ? this.documentFields
-        : documentFields as Map<String, ManagedIndexField>?,
+        : (documentFields as Map?)?.cast<String, ManagedIndexField>(),
   );
 
   @override

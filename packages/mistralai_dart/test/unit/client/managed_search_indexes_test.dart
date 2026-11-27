@@ -429,6 +429,26 @@ void main() {
     expect(ManagedSearchRequest.fromJson(wire).hashCode, request.hashCode);
   });
 
+  test('copyWith accepts numeric and collection literals', () {
+    final vector = const NearestNeighbourRetriever().copyWith(
+      queryEmbedding: [1, 2],
+    );
+    expect(vector.toJson()['query_embedding'], [1.0, 2.0]);
+    expect(vector.copyWith(queryEmbedding: null).toJson(), {
+      'type': 'nearest_neighbour',
+    });
+
+    final hybrid = const RrfRetriever(
+      retrievers: [KeywordRetriever(query: 'release')],
+    ).copyWith(weights: [1]);
+    expect(hybrid.toJson()['weights'], [1.0]);
+
+    final fields = const ManagedIndexFields(
+      chunkFields: {'note': ManagedIndexField(type: 'text')},
+    ).copyWith(chunkFields: {});
+    expect(fields.toJson()['chunk_fields'], isEmpty);
+  });
+
   test(
     'JSON and summary HTTP errors retain normal exception handling',
     () async {
