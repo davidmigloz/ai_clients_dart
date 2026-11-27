@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
 import 'file_object.dart';
 
 /// Response from listing files.
@@ -41,10 +42,11 @@ class FileList {
       other is FileList &&
           runtimeType == other.runtimeType &&
           object == other.object &&
+          listsEqual(data, other.data) &&
           total == other.total;
 
   @override
-  int get hashCode => Object.hash(object, data, total);
+  int get hashCode => Object.hash(object, listHash(data), total);
 
   @override
   String toString() => 'FileList(count: ${data.length}, total: $total)';

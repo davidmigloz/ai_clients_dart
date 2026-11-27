@@ -33,6 +33,8 @@ Future<void> promptLifecycleExample(MistralClient client) async {
   print('Creating a prompt...');
   final prompt = await client.prompts.create(
     request: const CreatePromptRequest(
+      sharingScope: RegistrySharingScope.workspace,
+      workspaceRelation: RegistryShareRelation.reader,
       name: 'greeting',
       title: 'Greeting Prompt',
       definition: PromptDefinition(content: 'Hello, {{name}}!'),
@@ -44,7 +46,12 @@ Future<void> promptLifecycleExample(MistralClient client) async {
   try {
     // List prompts.
     print('Listing prompts...');
-    final prompts = await client.prompts.list(pageSize: 10);
+    final prompts = await client.prompts.list(
+      pageSize: 10,
+      sortBy: 'last_modified_at',
+      sortDirection: 'desc',
+      fields: ['id', 'name', 'createdBy'],
+    );
     print('Found ${prompts.data?.length ?? 0} prompt(s)');
     print('');
 

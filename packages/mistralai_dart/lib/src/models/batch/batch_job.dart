@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
 import 'batch_error.dart';
 import 'batch_job_status.dart';
 
@@ -31,8 +32,14 @@ class BatchJob {
   /// API endpoint being called.
   final String endpoint;
 
-  /// The model to use for processing.
-  final String model;
+  /// The model used for processing, if the job targets a model.
+  final String? model;
+
+  /// Agent used for processing, if the job targets an agent.
+  final String? agentId;
+
+  /// Inline result objects, when requested on retrieval.
+  final List<Map<String, dynamic>>? outputs;
 
   /// File ID containing the output data.
   final String? outputFileId;
@@ -76,7 +83,9 @@ class BatchJob {
     this.object = 'batch',
     required this.inputFiles,
     required this.endpoint,
-    required this.model,
+    this.model,
+    this.agentId,
+    this.outputs,
     this.outputFileId,
     this.errorFileId,
     required this.status,
@@ -97,12 +106,14 @@ class BatchJob {
     object: json['object'] as String? ?? 'batch',
     inputFiles: (json['input_files'] as List?)?.cast<String>() ?? <String>[],
     endpoint: json['endpoint'] as String? ?? '',
-    model: json['model'] as String? ?? '',
+    model: json['model'] as String?,
+    agentId: json['agent_id'] as String?,
+    outputs: (json['outputs'] as List?)?.cast<Map<String, dynamic>>(),
     outputFileId:
-        json['output_file_id'] as String? ?? json['output_file'] as String?,
+        json['output_file'] as String? ?? json['output_file_id'] as String?,
     errorFileId:
-        json['error_file_id'] as String? ?? json['error_file'] as String?,
-    status: BatchJobStatus.fromString(json['status'] as String? ?? 'QUEUED'),
+        json['error_file'] as String? ?? json['error_file_id'] as String?,
+    status: BatchJobStatus.fromString(json['status'] as String? ?? ''),
     totalRequests: json['total_requests'] as int?,
     completedRequests: json['completed_requests'] as int?,
     succeededRequests: json['succeeded_requests'] as int?,
@@ -124,24 +135,31 @@ class BatchJob {
     'object': object,
     'input_files': inputFiles,
     'endpoint': endpoint,
-    'model': model,
-    if (outputFileId != null) 'output_file_id': outputFileId,
-    if (errorFileId != null) 'error_file_id': errorFileId,
+    if (model != null) 'model': model,
+    if (agentId != null) 'agent_id': agentId,
+    if (outputs != null) 'outputs': outputs,
+    if (outputFileId != null) 'output_file': outputFileId,
+    if (errorFileId != null) 'error_file': errorFileId,
     'status': status.value,
     if (totalRequests != null) 'total_requests': totalRequests,
     if (completedRequests != null) 'completed_requests': completedRequests,
     if (succeededRequests != null) 'succeeded_requests': succeededRequests,
     if (failedRequests != null) 'failed_requests': failedRequests,
-    if (startedAt != null) 'started_at': startedAt!.toIso8601String(),
-    if (completedAt != null) 'completed_at': completedAt!.toIso8601String(),
-    if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
-    if (errors.isNotEmpty) 'errors': errors.map((e) => e.toJson()).toList(),
+    if (startedAt != null)
+      'started_at': startedAt!.millisecondsSinceEpoch ~/ 1000,
+    if (completedAt != null)
+      'completed_at': completedAt!.millisecondsSinceEpoch ~/ 1000,
+    if (createdAt != null)
+      'created_at': createdAt!.millisecondsSinceEpoch ~/ 1000,
+    'errors': errors.map((e) => e.toJson()).toList(),
     if (metadata != null) 'metadata': metadata,
   };
 
-  /// Whether the job is still running.
+  /// Whether the job is pending, processing, or stopping.
   bool get isRunning =>
-      status == BatchJobStatus.queued || status == BatchJobStatus.running;
+      status == BatchJobStatus.queued ||
+      status == BatchJobStatus.running ||
+      status == BatchJobStatus.cancellationRequested;
 
   /// Whether the job has completed (success or failure).
   bool get isComplete =>
@@ -167,12 +185,53 @@ class BatchJob {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is BatchJob && runtimeType == other.runtimeType && id == other.id;
+      other is BatchJob &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          object == other.object &&
+          listsEqual(inputFiles, other.inputFiles) &&
+          endpoint == other.endpoint &&
+          model == other.model &&
+          agentId == other.agentId &&
+          listOfMapsDeepEqual(outputs, other.outputs) &&
+          outputFileId == other.outputFileId &&
+          errorFileId == other.errorFileId &&
+          status == other.status &&
+          totalRequests == other.totalRequests &&
+          completedRequests == other.completedRequests &&
+          succeededRequests == other.succeededRequests &&
+          failedRequests == other.failedRequests &&
+          startedAt == other.startedAt &&
+          completedAt == other.completedAt &&
+          createdAt == other.createdAt &&
+          listsEqual(errors, other.errors) &&
+          mapsDeepEqual(metadata, other.metadata);
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => Object.hash(
+    id,
+    object,
+    listHash(inputFiles),
+    endpoint,
+    model,
+    agentId,
+    listOfMapsHashCode(outputs),
+    outputFileId,
+    errorFileId,
+    status,
+    totalRequests,
+    completedRequests,
+    succeededRequests,
+    failedRequests,
+    startedAt,
+    completedAt,
+    createdAt,
+    listHash(errors),
+    mapDeepHashCode(metadata),
+  );
 
   @override
   String toString() =>
-      'BatchJob(id: $id, status: ${status.value}, progress: ${progress.toStringAsFixed(1)}%)';
+      'BatchJob(id: $id, model: $model, agentId: $agentId, outputs: ${outputs?.length}, '
+      'status: ${status.value}, progress: ${progress.toStringAsFixed(1)}%)';
 }

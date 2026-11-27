@@ -48,8 +48,8 @@ sealed class FTModelOut {
   /// Model aliases.
   List<String> get aliases;
 
-  /// The fine-tuning job ID.
-  String get job;
+  /// The fine-tuning job ID, when the API returns it.
+  String? get job;
 
   /// The model type discriminator.
   String get modelType;
@@ -110,7 +110,7 @@ class CompletionFTModelOut implements FTModelOut {
   final List<String> aliases;
 
   @override
-  final String job;
+  final String? job;
 
   @override
   String get modelType => 'completion';
@@ -130,7 +130,7 @@ class CompletionFTModelOut implements FTModelOut {
     required this.capabilities,
     this.maxContextLength = 32768,
     this.aliases = const [],
-    required this.job,
+    this.job,
   });
 
   /// Creates from JSON.
@@ -151,7 +151,7 @@ class CompletionFTModelOut implements FTModelOut {
         ),
         maxContextLength: json['max_context_length'] as int? ?? 32768,
         aliases: (json['aliases'] as List?)?.cast<String>() ?? const [],
-        job: json['job'] as String,
+        job: json['job'] as String?,
       );
 
   @override
@@ -169,7 +169,7 @@ class CompletionFTModelOut implements FTModelOut {
     'capabilities': capabilities.toJson(),
     'max_context_length': maxContextLength,
     'aliases': aliases,
-    'job': job,
+    'job': ?job,
     'model_type': modelType,
   };
 
@@ -234,7 +234,7 @@ class ClassifierFTModelOut implements FTModelOut {
   final List<String> aliases;
 
   @override
-  final String job;
+  final String? job;
 
   /// The classifier targets for this model.
   final List<ClassifierTargetOut> classifierTargets;
@@ -257,7 +257,7 @@ class ClassifierFTModelOut implements FTModelOut {
     required this.capabilities,
     this.maxContextLength = 32768,
     this.aliases = const [],
-    required this.job,
+    this.job,
     required this.classifierTargets,
   });
 
@@ -279,7 +279,7 @@ class ClassifierFTModelOut implements FTModelOut {
         ),
         maxContextLength: json['max_context_length'] as int? ?? 32768,
         aliases: (json['aliases'] as List?)?.cast<String>() ?? const [],
-        job: json['job'] as String,
+        job: json['job'] as String?,
         classifierTargets: (json['classifier_targets'] as List)
             .map((e) => ClassifierTargetOut.fromJson(e as Map<String, dynamic>))
             .toList(),
@@ -300,7 +300,7 @@ class ClassifierFTModelOut implements FTModelOut {
     'capabilities': capabilities.toJson(),
     'max_context_length': maxContextLength,
     'aliases': aliases,
-    'job': job,
+    'job': ?job,
     'classifier_targets': classifierTargets.map((e) => e.toJson()).toList(),
     'model_type': modelType,
   };

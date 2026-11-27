@@ -34,6 +34,8 @@ Future<void> skillLifecycleExample(MistralClient client) async {
   print('Creating a skill...');
   final skill = await client.skills.create(
     request: const CreateSkillRequest(
+      sharingScope: RegistrySharingScope.workspace,
+      workspaceRelation: RegistryShareRelation.reader,
       name: 'summarizer',
       definition: SkillDefinition(
         description: 'Summarizes long documents.',
@@ -52,7 +54,12 @@ Future<void> skillLifecycleExample(MistralClient client) async {
   try {
     // List skills.
     print('Listing skills...');
-    final skills = await client.skills.list(pageSize: 10);
+    final skills = await client.skills.list(
+      pageSize: 10,
+      sortBy: 'last_modified_at',
+      sortDirection: 'desc',
+      fields: ['id', 'name', 'definition.description'],
+    );
     print('Found ${skills.data?.length ?? 0} skill(s)');
     print('');
 

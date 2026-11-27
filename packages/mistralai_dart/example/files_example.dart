@@ -5,9 +5,8 @@ import 'package:mistralai_dart/mistralai_dart.dart';
 
 /// Example demonstrating file upload and management.
 ///
-/// Files can be uploaded for use in fine-tuning, batch processing,
-/// OCR, and audio transcription tasks.
-void main() async {
+/// Use `--upload <path>` to upload a batch file and request a signed URL.
+void main(List<String> args) async {
   final apiKey = Platform.environment['MISTRAL_API_KEY'];
   if (apiKey == null) {
     print('Please set MISTRAL_API_KEY environment variable');
@@ -17,9 +16,11 @@ void main() async {
   final client = MistralClient.withApiKey(apiKey);
 
   try {
-    await listFiles(client);
-    // Uncomment to test file upload (requires a valid JSONL file)
-    // await uploadFile(client);
+    if (args.length == 2 && args.first == '--upload') {
+      await uploadFile(client, args[1]);
+    } else {
+      await listFiles(client);
+    }
   } finally {
     client.close();
   }
@@ -29,7 +30,7 @@ void main() async {
 Future<void> listFiles(MistralClient client) async {
   print('=== List Files ===\n');
 
-  final files = await client.files.list();
+  final files = await client.files.list(sources: ['upload'], pageSize: 20);
 
   print('Total files: ${files.total ?? files.data.length}');
   print('');
@@ -53,12 +54,9 @@ Future<void> listFiles(MistralClient client) async {
   }
 }
 
-/// Upload a file for fine-tuning.
-Future<void> uploadFile(MistralClient client) async {
+/// Upload a batch JSONL file and get a signed URL.
+Future<void> uploadFile(MistralClient client, String filePath) async {
   print('=== Upload File ===\n');
-
-  // Example: Upload a JSONL file for fine-tuning
-  const filePath = 'training_data.jsonl';
 
   if (!File(filePath).existsSync()) {
     print('File not found: $filePath');
@@ -68,9 +66,12 @@ Future<void> uploadFile(MistralClient client) async {
 
   final file = await client.files.upload(
     filePath: filePath,
-    purpose: FilePurpose.fineTune,
+    purpose: FilePurpose.batch,
+    mimeType: 'application/jsonl',
+    visibility: FileVisibility.workspace,
   );
 
+  await getSignedUrl(client, file.id);
   print('File uploaded successfully!');
   print('ID: ${file.id}');
   print('Filename: ${file.filename}');
@@ -107,7 +108,7 @@ Future<void> getSignedUrl(MistralClient client, String fileId) async {
 
   final signedUrl = await client.files.getSignedUrl(
     fileId: fileId,
-    expiresIn: 3600, // 1 hour
+    expiryHours: 1,
   );
 
   print('Signed URL: ${signedUrl.url}');
@@ -125,6 +126,6 @@ Future<void> deleteFile(MistralClient client, String fileId) async {
 
   final file = await client.files.delete(fileId: fileId);
 
-  print('File deleted: ${file.filename}');
+  print('File ${file.id} deleted: ${file.deleted}');
   print('');
 }

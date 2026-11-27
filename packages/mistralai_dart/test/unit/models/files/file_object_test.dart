@@ -117,7 +117,7 @@ void main() {
 
       expect(file.id, '');
       expect(file.object, 'file');
-      expect(file.bytes, 0);
+      expect(file.bytes, isNull);
       expect(file.createdAt, 0);
       expect(file.filename, '');
       expect(file.purpose, FilePurpose.unknown);
