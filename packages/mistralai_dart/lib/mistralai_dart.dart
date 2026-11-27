@@ -111,6 +111,7 @@ export 'src/models/audio_agents/audio_agent_tools.dart';
 export 'src/models/audio_agents/audio_session.dart';
 export 'src/models/audio_agents/audio_session_transcript.dart';
 export 'src/models/audio_agents/voice_agent_event.dart';
+export 'src/models/audio_agents/voice_agent_webhook_event.dart';
 // --- Models: Batch ---
 export 'src/models/batch/batch_error.dart';
 export 'src/models/batch/batch_job.dart';
@@ -605,3 +606,4 @@ export 'src/resources/realtime/realtime_resource.dart';
 // --- Utils ---
 export 'src/utils/job_poller.dart';
 export 'src/utils/paginator.dart';
+export 'src/utils/voice_agent_webhook_verifier.dart';
