@@ -10,6 +10,9 @@ import '../../models/observability/post_judge_in_schema.dart';
 import '../../models/observability/put_judge_in_schema.dart';
 import '../base_resource.dart';
 
+/// Historical API. The current Observability API exposes traces,
+/// scorers, and live evaluation pipelines.
+///
 /// Resource for observability judge operations.
 ///
 /// Judges are used to evaluate conversations using an LLM. They can be

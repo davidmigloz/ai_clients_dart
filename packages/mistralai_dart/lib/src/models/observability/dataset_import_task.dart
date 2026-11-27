@@ -1,7 +1,9 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../workflows/principal_type.dart';
 import 'base_task_status.dart';
+import 'dataset_record_batch.dart';
 
 /// A dataset import task tracking the progress of an import operation.
 @immutable
@@ -36,8 +38,16 @@ class DatasetImportTask {
   /// Progress percentage (0-100).
   final int? progress;
 
+  /// Kind of account that submitted the import.
+  final PrincipalType? creatorType;
+
+  /// Record counts when the import has finished.
+  final DatasetImportResult? result;
+
   /// Creates a [DatasetImportTask].
   const DatasetImportTask({
+    this.creatorType,
+    this.result,
     required this.id,
     required this.createdAt,
     required this.updatedAt,
@@ -53,6 +63,12 @@ class DatasetImportTask {
   /// Creates a [DatasetImportTask] from JSON.
   factory DatasetImportTask.fromJson(Map<String, dynamic> json) =>
       DatasetImportTask(
+        creatorType: PrincipalType.fromJson(json['creator_type'] as String?),
+        result: json['result'] == null
+            ? null
+            : DatasetImportResult.fromJson(
+                json['result'] as Map<String, dynamic>,
+              ),
         id: json['id'] as String? ?? '',
         createdAt:
             DateTime.tryParse(json['created_at'] as String? ?? '') ??
@@ -73,6 +89,8 @@ class DatasetImportTask {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (creatorType != null) 'creator_type': creatorType!.value,
+    if (result != null) 'result': result!.toJson(),
     'id': id,
     'created_at': createdAt.toIso8601String(),
     'updated_at': updatedAt.toIso8601String(),
@@ -87,6 +105,8 @@ class DatasetImportTask {
 
   /// Creates a copy with replaced values.
   DatasetImportTask copyWith({
+    Object? creatorType = unsetCopyWithValue,
+    Object? result = unsetCopyWithValue,
     String? id,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -99,6 +119,12 @@ class DatasetImportTask {
     Object? progress = unsetCopyWithValue,
   }) {
     return DatasetImportTask(
+      creatorType: creatorType == unsetCopyWithValue
+          ? this.creatorType
+          : creatorType as PrincipalType?,
+      result: result == unsetCopyWithValue
+          ? this.result
+          : result as DatasetImportResult?,
       id: id ?? this.id,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -123,7 +149,9 @@ class DatasetImportTask {
     if (identical(this, other)) return true;
     if (other is! DatasetImportTask) return false;
     if (runtimeType != other.runtimeType) return false;
-    return id == other.id &&
+    return creatorType == other.creatorType &&
+        result == other.result &&
+        id == other.id &&
         createdAt == other.createdAt &&
         updatedAt == other.updatedAt &&
         deletedAt == other.deletedAt &&
@@ -136,7 +164,7 @@ class DatasetImportTask {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     createdAt,
     updatedAt,
@@ -147,10 +175,12 @@ class DatasetImportTask {
     status,
     message,
     progress,
-  );
+    creatorType,
+    result,
+  ]);
 
   @override
   String toString() =>
-      'DatasetImportTask(id: $id, datasetId: $datasetId, '
+      'DatasetImportTask(creatorType: $creatorType, result: $result, id: $id, datasetId: $datasetId, '
       'status: ${status.value}, progress: $progress)';
 }

@@ -42,7 +42,12 @@
     "admin_api_keys": "admin_usage",
     "admin_audit_logs": "admin_usage",
     "admin_usage": "admin_usage",
-    "admin_vibe_analytics": "admin_usage"
+    "admin_vibe_analytics": "admin_usage",
+    "projects": "observability",
+    "evaluations": "observability",
+    "scorers": "observability",
+    "pipelines": "observability",
+    "optimizations": "observability"
   },
   "excluded_from_examples": [],
   "drift_patterns": []

@@ -23,6 +23,13 @@ class PostDatasetImportFromDatasetInSchema {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {'dataset_record_ids': datasetRecordIds};
 
+  /// Creates a copy with replaced values.
+  PostDatasetImportFromDatasetInSchema copyWith({
+    List<String>? datasetRecordIds,
+  }) => PostDatasetImportFromDatasetInSchema(
+    datasetRecordIds: datasetRecordIds ?? this.datasetRecordIds,
+  );
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

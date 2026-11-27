@@ -106,6 +106,9 @@ class ErrorInterceptor implements Interceptor {
         if (detail is String) {
           return (detail, [json]);
         }
+        if (detail is Map<String, dynamic> && detail['message'] is String) {
+          return (detail['message'] as String, [json]);
+        }
         if (detail is List) {
           // Validation error details
           return ('Validation error', [json]);
