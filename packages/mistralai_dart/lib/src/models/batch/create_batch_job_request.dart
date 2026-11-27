@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import 'batch_request.dart';
 
@@ -21,7 +22,10 @@ class CreateBatchJobRequest {
   final String endpoint;
 
   /// The model to use for processing all requests.
-  final String model;
+  final String? model;
+
+  /// Agent ID for an agents completion batch.
+  final String? agentId;
 
   /// Optional metadata for the batch job.
   final Map<String, dynamic>? metadata;
@@ -41,7 +45,8 @@ class CreateBatchJobRequest {
   const CreateBatchJobRequest({
     this.inputFiles,
     required this.endpoint,
-    required this.model,
+    this.model,
+    this.agentId,
     this.metadata,
     this.timeoutHours,
     this.requests,
@@ -52,7 +57,8 @@ class CreateBatchJobRequest {
       CreateBatchJobRequest(
         inputFiles: (json['input_files'] as List?)?.cast<String>(),
         endpoint: json['endpoint'] as String? ?? '',
-        model: json['model'] as String? ?? '',
+        model: json['model'] as String?,
+        agentId: json['agent_id'] as String?,
         metadata: json['metadata'] as Map<String, dynamic>?,
         timeoutHours: json['timeout_hours'] as int?,
         requests: (json['requests'] as List?)
@@ -64,7 +70,8 @@ class CreateBatchJobRequest {
   Map<String, dynamic> toJson() => {
     if (inputFiles != null) 'input_files': inputFiles,
     'endpoint': endpoint,
-    'model': model,
+    if (model != null) 'model': model,
+    if (agentId != null) 'agent_id': agentId,
     if (metadata != null) 'metadata': metadata,
     if (timeoutHours != null) 'timeout_hours': timeoutHours,
     if (requests != null) 'requests': requests!.map((e) => e.toJson()).toList(),
@@ -72,19 +79,31 @@ class CreateBatchJobRequest {
 
   /// Creates a copy with the specified fields replaced.
   CreateBatchJobRequest copyWith({
-    List<String>? inputFiles,
+    Object? inputFiles = unsetCopyWithValue,
     String? endpoint,
-    String? model,
-    Map<String, dynamic>? metadata,
-    int? timeoutHours,
-    List<BatchRequest>? requests,
+    Object? model = unsetCopyWithValue,
+    Object? agentId = unsetCopyWithValue,
+    Object? metadata = unsetCopyWithValue,
+    Object? timeoutHours = unsetCopyWithValue,
+    Object? requests = unsetCopyWithValue,
   }) => CreateBatchJobRequest(
-    inputFiles: inputFiles ?? this.inputFiles,
+    inputFiles: identical(inputFiles, unsetCopyWithValue)
+        ? this.inputFiles
+        : inputFiles as List<String>?,
     endpoint: endpoint ?? this.endpoint,
-    model: model ?? this.model,
-    metadata: metadata ?? this.metadata,
-    timeoutHours: timeoutHours ?? this.timeoutHours,
-    requests: requests ?? this.requests,
+    model: identical(model, unsetCopyWithValue) ? this.model : model as String?,
+    agentId: identical(agentId, unsetCopyWithValue)
+        ? this.agentId
+        : agentId as String?,
+    metadata: identical(metadata, unsetCopyWithValue)
+        ? this.metadata
+        : metadata as Map<String, dynamic>?,
+    timeoutHours: identical(timeoutHours, unsetCopyWithValue)
+        ? this.timeoutHours
+        : timeoutHours as int?,
+    requests: identical(requests, unsetCopyWithValue)
+        ? this.requests
+        : requests as List<BatchRequest>?,
   );
 
   @override
@@ -94,13 +113,26 @@ class CreateBatchJobRequest {
           runtimeType == other.runtimeType &&
           listsEqual(inputFiles, other.inputFiles) &&
           endpoint == other.endpoint &&
-          model == other.model;
+          model == other.model &&
+          agentId == other.agentId &&
+          mapsDeepEqual(metadata, other.metadata) &&
+          timeoutHours == other.timeoutHours &&
+          listsEqual(requests, other.requests);
 
   @override
-  int get hashCode =>
-      Object.hash(Object.hashAll(inputFiles ?? []), endpoint, model);
+  int get hashCode => Object.hash(
+    listHash(inputFiles),
+    endpoint,
+    model,
+    agentId,
+    mapDeepHashCode(metadata),
+    timeoutHours,
+    listHash(requests),
+  );
 
   @override
   String toString() =>
-      'CreateBatchJobRequest(inputFiles: $inputFiles, endpoint: $endpoint, model: $model)';
+      'CreateBatchJobRequest(inputFiles: $inputFiles, endpoint: $endpoint, model: $model, '
+      'agentId: $agentId, timeoutHours: $timeoutHours, '
+      'metadata: ${metadata?.length}, requests: ${requests?.length})';
 }

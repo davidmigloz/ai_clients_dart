@@ -17,10 +17,10 @@ void main() {
       });
 
       test('timedOut is terminal', () {
-        expect(BatchJobStatus.timedOut.value, 'TIMED_OUT');
+        expect(BatchJobStatus.timedOut.value, 'TIMEOUT_EXCEEDED');
       });
 
-      test('cancellationRequested is terminal', () {
+      test('cancellationRequested is still stopping', () {
         expect(
           BatchJobStatus.cancellationRequested.value,
           'CANCELLATION_REQUESTED',
@@ -98,8 +98,8 @@ void main() {
       );
     });
 
-    test('fromString defaults to queued for unknown', () {
-      expect(BatchJobStatus.fromString('UNKNOWN'), BatchJobStatus.queued);
+    test('fromString returns unknown for unrecognized values', () {
+      expect(BatchJobStatus.fromString('UNKNOWN'), BatchJobStatus.unknown);
     });
   });
 

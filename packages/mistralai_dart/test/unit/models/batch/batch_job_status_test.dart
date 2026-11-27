@@ -8,7 +8,7 @@ void main() {
       expect(BatchJobStatus.running.value, 'RUNNING');
       expect(BatchJobStatus.success.value, 'SUCCESS');
       expect(BatchJobStatus.failed.value, 'FAILED');
-      expect(BatchJobStatus.timedOut.value, 'TIMED_OUT');
+      expect(BatchJobStatus.timedOut.value, 'TIMEOUT_EXCEEDED');
       expect(BatchJobStatus.cancelled.value, 'CANCELLED');
       expect(
         BatchJobStatus.cancellationRequested.value,
@@ -33,10 +33,10 @@ void main() {
         );
       });
 
-      test('returns queued for unknown values', () {
-        expect(BatchJobStatus.fromString('UNKNOWN'), BatchJobStatus.queued);
-        expect(BatchJobStatus.fromString(''), BatchJobStatus.queued);
-        expect(BatchJobStatus.fromString('invalid'), BatchJobStatus.queued);
+      test('returns unknown for unrecognized values', () {
+        expect(BatchJobStatus.fromString('UNKNOWN'), BatchJobStatus.unknown);
+        expect(BatchJobStatus.fromString(''), BatchJobStatus.unknown);
+        expect(BatchJobStatus.fromString('invalid'), BatchJobStatus.unknown);
       });
     });
   });
