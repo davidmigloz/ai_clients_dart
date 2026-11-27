@@ -6,65 +6,77 @@ import '../common/equality_helpers.dart';
 /// Request to update an existing dataset.
 @immutable
 class PatchDatasetInSchema {
+  /// Creates a dataset patch.
+  ///
+  /// Omit a field to leave it out of the request. An explicit null is sent
+  /// as a JSON null.
+  const PatchDatasetInSchema({
+    this._name = unsetCopyWithValue,
+    this._description = unsetCopyWithValue,
+    this._metadata = unsetCopyWithValue,
+  });
+
+  final Object? _name;
+  final Object? _description;
+  final Object? _metadata;
+
   /// Updated dataset name.
-  final String? name;
+  String? get name => _name == unsetCopyWithValue ? null : _name as String?;
 
   /// Updated dataset description.
-  final String? description;
+  String? get description =>
+      _description == unsetCopyWithValue ? null : _description as String?;
 
   /// Additional JSON metadata supplied by the caller.
-  final Map<String, dynamic>? metadata;
-
-  /// Creates a [PatchDatasetInSchema].
-  const PatchDatasetInSchema({this.name, this.description, this.metadata});
+  Map<String, dynamic>? get metadata => _metadata == unsetCopyWithValue
+      ? null
+      : (_metadata as Map<Object?, Object?>?)?.cast<String, dynamic>();
 
   /// Creates a [PatchDatasetInSchema] from JSON.
   factory PatchDatasetInSchema.fromJson(Map<String, dynamic> json) =>
       PatchDatasetInSchema(
-        metadata: json['metadata'] as Map<String, dynamic>?,
-        name: json['name'] as String?,
-        description: json['description'] as String?,
+        name: json.containsKey('name') ? json['name'] : unsetCopyWithValue,
+        description: json.containsKey('description')
+            ? json['description']
+            : unsetCopyWithValue,
+        metadata: json.containsKey('metadata')
+            ? json['metadata']
+            : unsetCopyWithValue,
       );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    if (metadata != null) 'metadata': metadata,
-    if (name != null) 'name': name,
-    if (description != null) 'description': description,
+    if (_metadata != unsetCopyWithValue) 'metadata': metadata,
+    if (_name != unsetCopyWithValue) 'name': name,
+    if (_description != unsetCopyWithValue) 'description': description,
   };
 
   /// Creates a copy with replaced values.
   PatchDatasetInSchema copyWith({
-    Object? metadata = unsetCopyWithValue,
     Object? name = unsetCopyWithValue,
     Object? description = unsetCopyWithValue,
-  }) {
-    return PatchDatasetInSchema(
-      metadata: metadata == unsetCopyWithValue
-          ? this.metadata
-          : (metadata as Map<Object?, Object?>?)?.cast<String, dynamic>(),
-      name: name == unsetCopyWithValue ? this.name : name as String?,
-      description: description == unsetCopyWithValue
-          ? this.description
-          : description as String?,
-    );
-  }
+    Object? metadata = unsetCopyWithValue,
+  }) => PatchDatasetInSchema(
+    name: name == unsetCopyWithValue ? _name : name,
+    description: description == unsetCopyWithValue ? _description : description,
+    metadata: metadata == unsetCopyWithValue ? _metadata : metadata,
+  );
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! PatchDatasetInSchema) return false;
-    if (runtimeType != other.runtimeType) return false;
-    return mapsDeepEqual(metadata, other.metadata) &&
-        name == other.name &&
-        description == other.description;
-  }
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PatchDatasetInSchema &&
+          runtimeType == other.runtimeType &&
+          _name == other._name &&
+          _description == other._description &&
+          valuesDeepEqual(_metadata, other._metadata);
 
   @override
   int get hashCode =>
-      Object.hashAll([name, description, mapDeepHashCode(metadata)]);
+      Object.hash(_name, _description, valueDeepHashCode(_metadata));
 
   @override
   String toString() =>
-      'PatchDatasetInSchema(metadata: ${metadata?.length}, name: $name, description: $description)';
+      'PatchDatasetInSchema(name: $name, description: $description, '
+      'metadata: ${metadata?.length})';
 }

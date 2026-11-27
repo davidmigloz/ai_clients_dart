@@ -97,15 +97,21 @@ class CreateScorerRequest {
 /// The EditScorerRequest wire payload.
 @immutable
 class EditScorerRequest {
-  /// Creates a [EditScorerRequest].
+  /// Creates a scorer patch.
+  ///
+  /// An omitted field is excluded. An explicit null is sent as JSON null.
   const EditScorerRequest({
-    this.config,
+    this._config = unsetCopyWithValue,
     this._description = unsetCopyWithValue,
-    this.name,
+    this._name = unsetCopyWithValue,
   });
 
   /// The config field.
-  final LlmJudgeConfig? config;
+  final Object? _config;
+
+  /// The replacement scorer configuration.
+  LlmJudgeConfig? get config =>
+      _config == unsetCopyWithValue ? null : _config as LlmJudgeConfig?;
 
   /// The description field.
   final Object? _description;
@@ -115,26 +121,32 @@ class EditScorerRequest {
       _description == unsetCopyWithValue ? null : _description as String?;
 
   /// The name field.
-  final String? name;
+  final Object? _name;
+
+  /// The replacement display name.
+  String? get name => _name == unsetCopyWithValue ? null : _name as String?;
 
   /// Parses a [EditScorerRequest] from JSON.
   factory EditScorerRequest.fromJson(Map<String, dynamic> json) {
     return EditScorerRequest(
-      config: json['config'] == null
-          ? null
-          : LlmJudgeConfig.fromJson(json['config'] as Map<String, dynamic>),
+      config: switch (json['config']) {
+        final Map<String, dynamic> value => LlmJudgeConfig.fromJson(value),
+        null when !json.containsKey('config') => unsetCopyWithValue,
+        null => null,
+        _ => throw const FormatException('Expected scorer config object'),
+      },
       description: json.containsKey('description')
           ? json['description']
           : unsetCopyWithValue,
-      name: json['name'] == null ? null : json['name'] as String,
+      name: json.containsKey('name') ? json['name'] : unsetCopyWithValue,
     );
   }
 
   /// Serializes this model.
   Map<String, dynamic> toJson() => {
-    if (config != null) 'config': config!.toJson(),
+    if (_config != unsetCopyWithValue) 'config': config?.toJson(),
     if (_description != unsetCopyWithValue) 'description': description,
-    'name': ?name,
+    if (_name != unsetCopyWithValue) 'name': name,
   };
 
   /// Creates a copy with the given fields replaced.
@@ -143,11 +155,9 @@ class EditScorerRequest {
     Object? description = unsetCopyWithValue,
     Object? name = unsetCopyWithValue,
   }) => EditScorerRequest(
-    config: config == unsetCopyWithValue
-        ? this.config
-        : config as LlmJudgeConfig?,
+    config: config == unsetCopyWithValue ? _config : config,
     description: description == unsetCopyWithValue ? _description : description,
-    name: name == unsetCopyWithValue ? this.name : name as String?,
+    name: name == unsetCopyWithValue ? _name : name,
   );
 
   @override
@@ -155,12 +165,12 @@ class EditScorerRequest {
       identical(this, other) ||
       other is EditScorerRequest &&
           runtimeType == other.runtimeType &&
-          config == other.config &&
+          _config == other._config &&
           _description == other._description &&
-          name == other.name;
+          _name == other._name;
 
   @override
-  int get hashCode => Object.hashAll([config, _description, name]);
+  int get hashCode => Object.hash(_config, _description, _name);
 
   @override
   String toString() =>

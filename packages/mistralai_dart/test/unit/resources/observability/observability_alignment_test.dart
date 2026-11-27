@@ -503,6 +503,68 @@ void main() {
     expect(empty.copyWith(scores: null).scores, isNull);
   });
 
+  test('dataset updates retain null for fields explicitly present', () async {
+    const payload = {'name': null, 'description': null, 'metadata': null};
+    final client = _client((
+      method: 'PATCH',
+      path: '/v1/observability/datasets/ds-1',
+      query: const {},
+      request: payload,
+      status: 200,
+      response: const {'id': 'ds-1'},
+    ));
+    const omitted = PatchDatasetInSchema();
+    final parsed = PatchDatasetInSchema.fromJson(payload);
+    const constructed = PatchDatasetInSchema(
+      name: null,
+      description: null,
+      metadata: null,
+    );
+    expect(omitted.copyWith().toJson(), isEmpty);
+    expect(parsed, constructed);
+    expect(parsed.hashCode, constructed.hashCode);
+    expect(parsed, isNot(omitted));
+    expect(
+      omitted.copyWith(name: null, description: null, metadata: null),
+      parsed,
+    );
+    await client.observability.datasets.update(
+      datasetId: 'ds-1',
+      request: parsed.copyWith(),
+    );
+  });
+
+  test('scorer patches distinguish explicit null from omissions', () async {
+    const payload = {'name': null, 'description': null, 'config': null};
+    final client = _client((
+      method: 'PATCH',
+      path: '/v1/observability/scorers/example',
+      query: const {},
+      request: payload,
+      status: 200,
+      response: fixtures['scorers.update']!.response,
+    ));
+    const omitted = EditScorerRequest();
+    final parsed = EditScorerRequest.fromJson(payload);
+    const constructed = EditScorerRequest(
+      name: null,
+      description: null,
+      config: null,
+    );
+    expect(omitted.copyWith().toJson(), isEmpty);
+    expect(parsed, constructed);
+    expect(parsed.hashCode, constructed.hashCode);
+    expect(parsed, isNot(omitted));
+    expect(
+      omitted.copyWith(name: null, description: null, config: null),
+      parsed,
+    );
+    await client.observability.scorers.update(
+      scorerSlug: 'example',
+      request: parsed.copyWith(),
+    );
+  });
+
   test('leaves an optional run search body absent', () async {
     final client = _client((
       method: 'POST',
