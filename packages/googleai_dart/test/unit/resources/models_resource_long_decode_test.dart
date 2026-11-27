@@ -152,13 +152,24 @@ void main() {
 
   for (final field in ['continuationToken', 'continuation_token']) {
     test(
-      'redacts a long $field before truncating the HTTP error excerpt',
+      'redacts a long $field in HTTP diagnostics and logged exceptions',
       () async {
+        final logs = <LogRecord>[];
+        final subscription = Logger.root.onRecord.listen(logs.add);
+        addTearDown(subscription.cancel);
+
         final token = 'checkpoint-${List.filled(240, 'x').join()}';
         final error = {
           'message': 'Continuation rejected',
           'details': [
-            {'reason': 'INVALID_TOKEN'},
+            {
+              'reason': 'INVALID_TOKEN',
+              'context': [
+                {field: token, 'retryable': false},
+                '$field: "$token"; request is recoverable',
+                null,
+              ],
+            },
           ],
         };
         final client = GoogleAIClient(
@@ -171,27 +182,38 @@ void main() {
         );
         addTearDown(client.close);
 
+        final expectedException = isA<ApiException>()
+            .having((error) => error.statusCode, 'status', 400)
+            .having(
+              (error) => error.message,
+              'message',
+              'Continuation rejected',
+            )
+            .having((error) => error.details, 'details', [
+              {
+                'reason': 'INVALID_TOKEN',
+                'context': [
+                  {field: '***REDACTED***', 'retryable': false},
+                  '$field: ***REDACTED***; request is recoverable',
+                  null,
+                ],
+              },
+            ])
+            .having(
+              (error) => error.responseMetadata?.bodyExcerpt,
+              'excerpt',
+              allOf(
+                contains('"$field": "***REDACTED***"'),
+                isNot(contains(token.substring(0, 32))),
+              ),
+            );
         await expectLater(
           client.models.generateContent(model: model, request: request),
-          throwsA(
-            isA<ApiException>()
-                .having((error) => error.statusCode, 'status', 400)
-                .having(
-                  (error) => error.message,
-                  'message',
-                  'Continuation rejected',
-                )
-                .having((error) => error.details, 'details', error['details'])
-                .having(
-                  (error) => error.responseMetadata?.bodyExcerpt,
-                  'excerpt',
-                  allOf(
-                    contains('"$field": "***REDACTED***"'),
-                    isNot(contains(token.substring(0, 32))),
-                  ),
-                ),
-          ),
+          throwsA(expectedException),
         );
+        final logged = logs.singleWhere((log) => log.error is ApiException);
+        expect(logged.error, expectedException);
+        expect(logged.message, isNot(contains(token.substring(0, 32))));
       },
     );
   }
@@ -204,8 +226,22 @@ void main() {
     addTearDown(subscription.cancel);
 
     const message = 'Rejected continuationToken=$continuationToken';
+    const escapedToken = 'before"after';
+    final details = [
+      {
+        'Continuation_Token': continuationToken,
+        'context': [
+          'Nested ${jsonEncode({'continuationToken': escapedToken})} trace',
+          'ordinary value',
+        ],
+      },
+    ];
     final error = jsonEncode({
-      'error': {'message': message, 'status': 'INVALID_ARGUMENT'},
+      'error': {
+        'message': message,
+        'status': 'INVALID_ARGUMENT',
+        'details': details,
+      },
     });
     final responses = [
       http.Response(error, 400),
@@ -223,10 +259,21 @@ void main() {
         client.models.streamGenerateContent(model: model, request: request);
 
     const safeMessage = 'Rejected continuationToken=***REDACTED***';
+    const safeDetails = [
+      {
+        'Continuation_Token': '***REDACTED***',
+        'context': [
+          'Nested {"continuationToken": "***REDACTED***"} trace',
+          'ordinary value',
+        ],
+      },
+    ];
     await expectLater(
       openStream().drain<void>(),
       throwsA(
-        isA<ApiException>().having((e) => e.message, 'message', safeMessage),
+        isA<ApiException>()
+            .having((e) => e.message, 'message', safeMessage)
+            .having((e) => e.details, 'details', safeDetails),
       ),
     );
     await expectLater(
@@ -234,11 +281,13 @@ void main() {
       throwsA(
         isA<StreamException>()
             .having((e) => e.message, 'message', safeMessage)
-            .having(
-              (e) => e.partialData,
-              'partial data',
-              contains('INVALID_ARGUMENT'),
-            ),
+            .having((e) => jsonDecode(e.partialData!), 'partial data', {
+              'error': {
+                'message': safeMessage,
+                'status': 'INVALID_ARGUMENT',
+                'details': safeDetails,
+              },
+            }),
       ),
     );
     expect(logs, contains('Inline stream error: $safeMessage'));

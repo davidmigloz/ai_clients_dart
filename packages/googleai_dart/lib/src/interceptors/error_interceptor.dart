@@ -50,12 +50,16 @@ class ErrorInterceptor implements Interceptor {
     final body = response.body;
 
     // Try to parse error details from response body
-    Object? errorDetails;
+    var excerptSource = body;
     var message = 'HTTP $statusCode error';
     final details = <Object>[];
 
     try {
-      errorDetails = jsonDecode(body);
+      final decoded = jsonDecode(body);
+      final errorDetails = Redactor.continuationTokens.redactJson(decoded);
+      if (!identical(decoded, errorDetails)) {
+        excerptSource = jsonEncode(errorDetails);
+      }
       if (errorDetails is Map<String, dynamic>) {
         final error = errorDetails['error'];
         if (error is Map<String, dynamic>) {
@@ -107,7 +111,7 @@ class ErrorInterceptor implements Interceptor {
     );
 
     // Create response metadata
-    final safeBody = redactor.redactString(body);
+    final safeBody = redactor.redactString(excerptSource);
     final responseMetadata = ResponseMetadata(
       statusCode: statusCode,
       headers: response.headers,

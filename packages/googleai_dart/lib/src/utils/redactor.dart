@@ -41,6 +41,42 @@ class Redactor {
     return redacted;
   }
 
+  /// Redacts matching keys and labeled strings anywhere in a JSON value.
+  Object? redactJson(Object? input) => _redactJson(
+    input,
+    redactionList.map((field) => field.toLowerCase()).toSet(),
+  );
+
+  Object? _redactJson(Object? input, Set<String> fields) {
+    if (input is Map<String, dynamic>) {
+      final result = <String, dynamic>{};
+      var changed = false;
+      for (final entry in input.entries) {
+        final value = entry.value;
+        final redacted =
+            value != null && fields.contains(entry.key.toLowerCase())
+            ? replacement
+            : _redactJson(value, fields);
+        result[entry.key] = redacted;
+        changed |= redacted != value;
+      }
+      return changed ? result : input;
+    }
+
+    if (input is List<dynamic>) {
+      final result = <Object?>[];
+      var changed = false;
+      for (final value in input) {
+        final redacted = _redactJson(value, fields);
+        result.add(redacted);
+        changed |= redacted != value;
+      }
+      return changed ? result : input;
+    }
+
+    return input is String ? redactString(input) : input;
+  }
+
   /// Redacts sensitive data from a string.
   ///
   /// This is a simple implementation that looks for key=value patterns.
@@ -48,21 +84,36 @@ class Redactor {
     var result = input;
 
     for (final field in redactionList) {
+      final fieldPattern = RegExp.escape(field);
+      const quotedValue = r'"(?:\\.|[^"\\])*"';
       // Redact JSON-style: "field": "value"
       result = result.replaceAllMapped(
-        RegExp('"$field"\\s*:\\s*"([^"]*)"', caseSensitive: false),
+        RegExp('"$fieldPattern"\\s*:\\s*$quotedValue', caseSensitive: false),
         (match) => '"$field": "$replacement"',
       );
 
+      if (continuationTokenFields.contains(field)) {
+        final label = RegExp(
+          '\\b$fieldPattern([ \\t]*[:=][ \\t]*)'
+          '($quotedValue|[^"\\s&;,)}\\]]+)',
+          caseSensitive: false,
+        );
+        result = result.replaceAllMapped(
+          label,
+          (match) => '$field${match[1]}$replacement',
+        );
+        continue;
+      }
+
       // Redact query param style: field=value
       result = result.replaceAllMapped(
-        RegExp('$field=([^&\\s]*)', caseSensitive: false),
+        RegExp('$fieldPattern=([^&\\s]*)', caseSensitive: false),
         (match) => '$field=$replacement',
       );
 
       // Redact header style: field: value
       result = result.replaceAllMapped(
-        RegExp('$field:\\s*([^\\n]*)', caseSensitive: false),
+        RegExp('$fieldPattern:\\s*([^\\n]*)', caseSensitive: false),
         (match) => '$field: $replacement',
       );
     }

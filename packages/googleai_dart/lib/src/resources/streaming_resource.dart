@@ -414,7 +414,9 @@ mixin StreamingResource on ResourceBase {
     final details = <Object>[];
 
     try {
-      final errorDetails = jsonDecode(body);
+      final errorDetails = Redactor.continuationTokens.redactJson(
+        jsonDecode(body),
+      );
       if (errorDetails is Map<String, dynamic>) {
         final error = errorDetails['error'] as Map<String, dynamic>?;
         message = error?['message']?.toString() ?? message;
@@ -479,12 +481,14 @@ mixin StreamingResource on ResourceBase {
     String? sseEvent,
     Object? error,
   ) {
+    final safeError = Redactor.continuationTokens.redactJson(error);
     String message;
-    if (error is Map<String, dynamic>) {
-      message = (error['message'] ?? error['error'] ?? 'Unknown stream error')
-          .toString();
-    } else if (error is String) {
-      message = error;
+    if (safeError is Map<String, dynamic>) {
+      message =
+          (safeError['message'] ?? safeError['error'] ?? 'Unknown stream error')
+              .toString();
+    } else if (safeError is String) {
+      message = safeError;
     } else if (sseEvent == 'error') {
       message = (json['_rawData'] as String?) ?? 'Stream error event received';
     } else {
@@ -499,7 +503,9 @@ mixin StreamingResource on ResourceBase {
       ..remove('_rawData');
     throw StreamException(
       message: safeMessage,
-      partialData: jsonEncode(cleanJson),
+      partialData: jsonEncode(
+        Redactor.continuationTokens.redactJson(cleanJson),
+      ),
     );
   }
 }
