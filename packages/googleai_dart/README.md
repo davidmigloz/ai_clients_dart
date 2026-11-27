@@ -248,6 +248,20 @@ final next = await client.interactions.create(
 print(next.outputText);
 ```
 
+Gemini 4 foreground long decode may return
+`InteractionStatus.requiresContinuation`. For a stored interaction, send the
+latest `continuationToken` and set `previousInteractionId` to the ID of the hop
+that issued it. Omit `input` and keep the same model and generation settings.
+For a stateless interaction, keep `store: false` and resend the original `input`
+with the latest token.
+
+`InteractionStatusUpdateEvent` can carry a checkpoint token and usage for the
+current hop. `createStream` with a token starts another decoding hop.
+`resumeStream` with an event ID replays the same interaction. To total usage
+across foreground hops, add the final usage from each hop. Within a hop,
+use the latest cumulative usage instead of adding each checkpoint.
+[Long-decode guide](https://aistudio.google.com/docs/long-decode)
+
 Select `ApiVersion.v1beta` for the managed-agent variants
 `createWithAgent(...)` and `createWithAgentStream(...)`.
 [Full example](example/interactions_example.dart) ·

@@ -62,6 +62,45 @@ The `GoogleAIConfig.vertexAI` default remains `ApiVersion.v1`.
 
 ---
 
+## Handling Interactions continuation status
+
+Add `InteractionStatus.requiresContinuation` to exhaustive switches over
+`InteractionStatus`. It means the current request ended at a long-decode
+boundary. Read the interaction's `continuationToken` to submit its next hop.
+
+```dart
+// Before
+bool shouldPoll(InteractionStatus status) => switch (status) {
+  InteractionStatus.inProgress => true,
+  InteractionStatus.requiresAction ||
+  InteractionStatus.completed ||
+  InteractionStatus.failed ||
+  InteractionStatus.cancelled ||
+  InteractionStatus.incomplete ||
+  InteractionStatus.budgetExceeded => false,
+};
+
+// After
+bool shouldPoll(InteractionStatus status) => switch (status) {
+  InteractionStatus.inProgress => true,
+  InteractionStatus.requiresAction ||
+  InteractionStatus.requiresContinuation ||
+  InteractionStatus.completed ||
+  InteractionStatus.failed ||
+  InteractionStatus.cancelled ||
+  InteractionStatus.incomplete ||
+  InteractionStatus.budgetExceeded => false,
+};
+```
+
+Call `create` or `createStream` with `continuationToken` for the next hop.
+`resumeStream` uses `lastEventId` to replay events from the same interaction.
+Each Dart create call submits one hop. Google's Python and JavaScript SDKs
+follow foreground continuation tokens by default.
+[Interactions long-decode guide](https://aistudio.google.com/docs/long-decode)
+
+---
+
 ## Migrating from v12.x to v13.0.0
 
 v13.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.

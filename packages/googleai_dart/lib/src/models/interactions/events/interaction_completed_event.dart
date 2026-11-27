@@ -1,6 +1,9 @@
 part of 'events.dart';
 
-/// An event indicating that an interaction has completed.
+/// An event indicating that an interaction has finished its current hop.
+///
+/// A [InteractionStatus.requiresContinuation] status indicates that the
+/// caller can make another request with [Interaction.continuationToken].
 ///
 /// Carries the completed [Interaction] resource. Per the spec, the `steps`
 /// list is empty on this event to reduce payload size — the caller should
