@@ -24,6 +24,10 @@ class DatasetImportTasks {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {'tasks': tasks.toJson((e) => e.toJson())};
 
+  /// Creates a copy with replaced values.
+  DatasetImportTasks copyWith({PaginatedResult<DatasetImportTask>? tasks}) =>
+      DatasetImportTasks(tasks: tasks ?? this.tasks);
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

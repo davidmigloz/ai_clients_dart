@@ -23,6 +23,10 @@ class UpdateDatasetRecordPayloadRequest {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {'payload': payload.toJson()};
 
+  /// Creates a copy with replaced values.
+  UpdateDatasetRecordPayloadRequest copyWith({DatasetRecordPayload? payload}) =>
+      UpdateDatasetRecordPayloadRequest(payload: payload ?? this.payload);
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

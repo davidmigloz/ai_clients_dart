@@ -19,6 +19,10 @@ class PostDatasetImportFromFileInSchema {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {'file_id': fileId};
 
+  /// Creates a copy with replaced values.
+  PostDatasetImportFromFileInSchema copyWith({String? fileId}) =>
+      PostDatasetImportFromFileInSchema(fileId: fileId ?? this.fileId);
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

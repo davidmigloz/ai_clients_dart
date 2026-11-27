@@ -11,6 +11,9 @@ import '../../models/observability/judge_output.dart';
 import '../../models/observability/post_chat_completion_event_judging_in_schema.dart';
 import '../base_resource.dart';
 
+/// Historical API. The current Observability API exposes traces,
+/// scorers, and live evaluation pipelines.
+///
 /// Resource for chat completion event operations.
 ///
 /// Provides access to search, retrieve, and judge chat completion events

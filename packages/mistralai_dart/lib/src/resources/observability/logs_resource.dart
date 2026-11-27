@@ -99,7 +99,7 @@ class LogsResource extends ResourceBase {
     if (to != null) queryParams['to'] = to;
 
     final url = requestBuilder.buildUrl(
-      '/v1/observability/logs/fields/$fieldName/options',
+      '/v1/observability/logs/fields/${Uri.encodeComponent(fieldName)}/options',
       queryParams: queryParams,
     );
     final headers = requestBuilder.buildHeaders();

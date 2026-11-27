@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 
 /// An evaluation result for a span.
@@ -47,8 +48,12 @@ class GetSpanEvaluation {
   /// The `workspace_id` value.
   final String workspaceId;
 
+  /// Service account that generated the telemetry.
+  final String? serviceAccountId;
+
   /// Creates a [GetSpanEvaluation].
   const GetSpanEvaluation({
+    this.serviceAccountId,
     required this.conversationId,
     required this.customerId,
     required this.evaluationName,
@@ -68,6 +73,7 @@ class GetSpanEvaluation {
   /// Creates a [GetSpanEvaluation] from JSON.
   factory GetSpanEvaluation.fromJson(Map<String, dynamic> json) =>
       GetSpanEvaluation(
+        serviceAccountId: json['service_account_id'] as String?,
         conversationId: json['conversation_id'] as String? ?? '',
         customerId: json['customer_id'] as String? ?? '',
         evaluationName: json['evaluation_name'] as String? ?? '',
@@ -86,6 +92,7 @@ class GetSpanEvaluation {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (serviceAccountId != null) 'service_account_id': serviceAccountId,
     'conversation_id': conversationId,
     'customer_id': customerId,
     'evaluation_name': evaluationName,
@@ -104,6 +111,7 @@ class GetSpanEvaluation {
 
   /// Creates a copy with replaced values.
   GetSpanEvaluation copyWith({
+    Object? serviceAccountId = unsetCopyWithValue,
     String? conversationId,
     String? customerId,
     String? evaluationName,
@@ -120,6 +128,9 @@ class GetSpanEvaluation {
     String? workspaceId,
   }) {
     return GetSpanEvaluation(
+      serviceAccountId: serviceAccountId == unsetCopyWithValue
+          ? this.serviceAccountId
+          : serviceAccountId as String?,
       conversationId: conversationId ?? this.conversationId,
       customerId: customerId ?? this.customerId,
       evaluationName: evaluationName ?? this.evaluationName,
@@ -142,7 +153,8 @@ class GetSpanEvaluation {
     if (identical(this, other)) return true;
     if (other is! GetSpanEvaluation) return false;
     if (runtimeType != other.runtimeType) return false;
-    return conversationId == other.conversationId &&
+    return serviceAccountId == other.serviceAccountId &&
+        conversationId == other.conversationId &&
         customerId == other.customerId &&
         evaluationName == other.evaluationName &&
         explanation == other.explanation &&
@@ -160,25 +172,28 @@ class GetSpanEvaluation {
 
   @override
   int get hashCode => Object.hashAll([
-    conversationId,
-    customerId,
-    evaluationName,
-    explanation,
-    mapDeepHashCode(metadata),
-    organizationId,
-    responseId,
-    scoreLabel,
-    scoreValue,
-    spanId,
-    timestamp,
-    traceId,
-    userId,
-    workspaceId,
+    Object.hashAll([
+      conversationId,
+      customerId,
+      evaluationName,
+      explanation,
+      mapDeepHashCode(metadata),
+      organizationId,
+      responseId,
+      scoreLabel,
+      scoreValue,
+      spanId,
+      timestamp,
+      traceId,
+      userId,
+      workspaceId,
+    ]),
+    serviceAccountId,
   ]);
 
   @override
   String toString() =>
-      'GetSpanEvaluation(conversationId: $conversationId, customerId: $customerId, '
+      'GetSpanEvaluation(serviceAccountId: $serviceAccountId, conversationId: $conversationId, customerId: $customerId, '
       'evaluationName: $evaluationName, explanation: $explanation, '
       'metadata: ${metadata.length} keys, '
       'organizationId: $organizationId, responseId: $responseId, '

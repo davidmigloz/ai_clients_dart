@@ -43,7 +43,7 @@
 /// - **Libraries** (Beta): Document storage for RAG
 /// - **Prompts** (Beta): Versioned, shareable prompt templates
 /// - **Skills** (Beta): Versioned, shareable model instructions and assets
-/// - **Observability** (Beta): Campaigns, datasets, judges, chat completion events
+/// - **Observability** (Enterprise Public Preview): Traces, datasets, and evaluations
 /// - **Workflows** (Beta): Workflow execution, scheduling, managed deployments, and management
 /// - **RAG** (Beta): Ingestion pipeline configuration and search index management
 /// - **Users** (Beta): Current authenticated user identity
@@ -258,10 +258,17 @@ export 'src/models/observability/dataset_import_tasks.dart';
 export 'src/models/observability/dataset_preview.dart';
 export 'src/models/observability/dataset_previews.dart';
 export 'src/models/observability/dataset_record.dart';
+export 'src/models/observability/dataset_record_batch.dart';
 export 'src/models/observability/dataset_record_payload.dart';
 export 'src/models/observability/dataset_record_source.dart';
 export 'src/models/observability/dataset_records.dart';
+export 'src/models/observability/dataset_span_import.dart';
 export 'src/models/observability/delete_dataset_records_in_schema.dart';
+export 'src/models/observability/evaluation_filters.dart';
+export 'src/models/observability/evaluation_optimizations.dart';
+export 'src/models/observability/evaluation_projects.dart';
+export 'src/models/observability/evaluation_results.dart';
+export 'src/models/observability/evaluation_statistics.dart';
 export 'src/models/observability/feed_result.dart';
 export 'src/models/observability/field_group.dart';
 export 'src/models/observability/field_option_count_item.dart';
@@ -302,6 +309,8 @@ export 'src/models/observability/logs_request.dart';
 export 'src/models/observability/observability_error.dart';
 export 'src/models/observability/observability_error_code.dart';
 export 'src/models/observability/observability_error_detail.dart';
+export 'src/models/observability/online_evaluation.dart';
+export 'src/models/observability/online_scorers.dart';
 export 'src/models/observability/otel_field_definition.dart';
 export 'src/models/observability/paginated_result.dart';
 export 'src/models/observability/pagination_info.dart';
@@ -320,6 +329,7 @@ export 'src/models/observability/put_dataset_record_properties_in_schema.dart';
 export 'src/models/observability/put_judge_in_schema.dart';
 export 'src/models/observability/span_evaluations_request.dart';
 export 'src/models/observability/spans_request.dart';
+export 'src/models/observability/telemetry_aggregation.dart';
 export 'src/models/observability/traces_request.dart';
 export 'src/models/observability/update_dataset_record_payload_request.dart';
 // --- Models: OCR ---

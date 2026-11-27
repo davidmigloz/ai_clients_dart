@@ -25,6 +25,10 @@ class DatasetRecords {
     'records': records.toJson((e) => e.toJson()),
   };
 
+  /// Creates a copy with replaced values.
+  DatasetRecords copyWith({PaginatedResult<DatasetRecord>? records}) =>
+      DatasetRecords(records: records ?? this.records);
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

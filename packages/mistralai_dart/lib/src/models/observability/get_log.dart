@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 
 /// A log record captured by the observability system.
@@ -65,8 +66,12 @@ class GetLog {
   /// The `workspace_id` value.
   final String workspaceId;
 
+  /// Service account that generated the telemetry.
+  final String? serviceAccountId;
+
   /// Creates a [GetLog].
   const GetLog({
+    this.serviceAccountId,
     required this.body,
     required this.customerId,
     required this.eventName,
@@ -91,6 +96,7 @@ class GetLog {
 
   /// Creates a [GetLog] from JSON.
   factory GetLog.fromJson(Map<String, dynamic> json) => GetLog(
+    serviceAccountId: json['service_account_id'] as String?,
     body: json['body'] as String? ?? '',
     customerId: json['customer_id'] as String? ?? '',
     eventName: json['event_name'] as String? ?? '',
@@ -117,6 +123,7 @@ class GetLog {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (serviceAccountId != null) 'service_account_id': serviceAccountId,
     'body': body,
     'customer_id': customerId,
     'event_name': eventName,
@@ -141,6 +148,7 @@ class GetLog {
 
   /// Creates a copy with replaced values.
   GetLog copyWith({
+    Object? serviceAccountId = unsetCopyWithValue,
     String? body,
     String? customerId,
     String? eventName,
@@ -163,6 +171,9 @@ class GetLog {
     String? workspaceId,
   }) {
     return GetLog(
+      serviceAccountId: serviceAccountId == unsetCopyWithValue
+          ? this.serviceAccountId
+          : serviceAccountId as String?,
       body: body ?? this.body,
       customerId: customerId ?? this.customerId,
       eventName: eventName ?? this.eventName,
@@ -191,7 +202,8 @@ class GetLog {
     if (identical(this, other)) return true;
     if (other is! GetLog) return false;
     if (runtimeType != other.runtimeType) return false;
-    return body == other.body &&
+    return serviceAccountId == other.serviceAccountId &&
+        body == other.body &&
         customerId == other.customerId &&
         eventName == other.eventName &&
         mapsDeepEqual(logAttributes, other.logAttributes) &&
@@ -215,31 +227,34 @@ class GetLog {
 
   @override
   int get hashCode => Object.hashAll([
-    body,
-    customerId,
-    eventName,
-    mapDeepHashCode(logAttributes),
-    organizationId,
-    mapDeepHashCode(resourceAttributes),
-    resourceSchemaUrl,
-    mapDeepHashCode(scopeAttributes),
-    scopeName,
-    scopeSchemaUrl,
-    scopeVersion,
-    serviceName,
-    severityNumber,
-    severityText,
-    spanId,
-    timestamp,
-    traceFlags,
-    traceId,
-    userId,
-    workspaceId,
+    Object.hashAll([
+      body,
+      customerId,
+      eventName,
+      mapDeepHashCode(logAttributes),
+      organizationId,
+      mapDeepHashCode(resourceAttributes),
+      resourceSchemaUrl,
+      mapDeepHashCode(scopeAttributes),
+      scopeName,
+      scopeSchemaUrl,
+      scopeVersion,
+      serviceName,
+      severityNumber,
+      severityText,
+      spanId,
+      timestamp,
+      traceFlags,
+      traceId,
+      userId,
+      workspaceId,
+    ]),
+    serviceAccountId,
   ]);
 
   @override
   String toString() =>
-      'GetLog(body: $body, customerId: $customerId, eventName: $eventName, '
+      'GetLog(serviceAccountId: $serviceAccountId, body: $body, customerId: $customerId, eventName: $eventName, '
       'logAttributes: ${logAttributes.length} keys, '
       'organizationId: $organizationId, '
       'resourceAttributes: ${resourceAttributes.length} keys, '

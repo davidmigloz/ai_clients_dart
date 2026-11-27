@@ -148,6 +148,56 @@ enum ObservabilityErrorCode {
   /// Template error.
   templateError('TEMPLATE_ERROR'),
 
+  /// Judge writes frozen.
+  judgeWritesFrozen('JUDGE_WRITES_FROZEN'),
+
+  /// Dataset record id conflict.
+  datasetRecordIdConflict('DATASET_RECORD_ID_CONFLICT'),
+
+  /// Evaluation run output record conflict.
+  evaluationRunOutputRecordConflict('EVALUATION_RUN_OUTPUT_RECORD_CONFLICT'),
+
+  /// Evaluation run input record conflict.
+  evaluationRunInputRecordConflict('EVALUATION_RUN_INPUT_RECORD_CONFLICT'),
+
+  /// Project not found.
+  projectNotFound('PROJECT_NOT_FOUND'),
+
+  /// Pipeline config not found.
+  pipelineConfigNotFound('PIPELINE_CONFIG_NOT_FOUND'),
+
+  /// Pipeline config already exists.
+  pipelineConfigAlreadyExists('PIPELINE_CONFIG_ALREADY_EXISTS'),
+
+  /// Pipeline not found.
+  pipelineNotFound('PIPELINE_NOT_FOUND'),
+
+  /// Pipeline already exists.
+  pipelineAlreadyExists('PIPELINE_ALREADY_EXISTS'),
+
+  /// Scorer not found.
+  scorerNotFound('SCORER_NOT_FOUND'),
+
+  /// Scorer already exists.
+  scorerAlreadyExists('SCORER_ALREADY_EXISTS'),
+
+  /// Scorer config kind mismatch.
+  scorerConfigKindMismatch('SCORER_CONFIG_KIND_MISMATCH'),
+
+  /// Optimization not found.
+  optimizationNotFound('OPTIMIZATION_NOT_FOUND'),
+
+  /// Optimization trial key already exists.
+  optimizationTrialKeyAlreadyExists('OPTIMIZATION_TRIAL_KEY_ALREADY_EXISTS'),
+
+  /// Optimization trial observation already exists.
+  optimizationTrialObservationAlreadyExists(
+    'OPTIMIZATION_TRIAL_OBSERVATION_ALREADY_EXISTS',
+  ),
+
+  /// Ocsf not enabled.
+  ocsfNotEnabled('OCSF_NOT_ENABLED'),
+
   /// Unknown error code (forward-compatible fallback).
   unknown('UNKNOWN');
 

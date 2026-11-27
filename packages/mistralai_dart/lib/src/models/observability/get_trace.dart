@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 
 /// A trace captured by the observability system.
@@ -107,8 +108,12 @@ class GetTrace {
   /// The `workspace_id` value.
   final String workspaceId;
 
+  /// Service account that generated the telemetry.
+  final String? serviceAccountId;
+
   /// Creates a [GetTrace].
   GetTrace({
+    this.serviceAccountId,
     required this.agentId,
     required this.agentName,
     required this.cacheCreationInputTokens,
@@ -148,6 +153,7 @@ class GetTrace {
 
   /// Creates a [GetTrace] from JSON.
   factory GetTrace.fromJson(Map<String, dynamic> json) => GetTrace(
+    serviceAccountId: json['service_account_id'] as String?,
     agentId: json['agent_id'] as String? ?? '',
     agentName: json['agent_name'] as String? ?? '',
     cacheCreationInputTokens: json['cache_creation_input_tokens'] as int? ?? 0,
@@ -190,6 +196,7 @@ class GetTrace {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (serviceAccountId != null) 'service_account_id': serviceAccountId,
     'agent_id': agentId,
     'agent_name': agentName,
     'cache_creation_input_tokens': cacheCreationInputTokens,
@@ -228,6 +235,7 @@ class GetTrace {
 
   /// Creates a copy with replaced values.
   GetTrace copyWith({
+    Object? serviceAccountId = unsetCopyWithValue,
     String? agentId,
     String? agentName,
     int? cacheCreationInputTokens,
@@ -264,6 +272,9 @@ class GetTrace {
     String? workspaceId,
   }) {
     return GetTrace(
+      serviceAccountId: serviceAccountId == unsetCopyWithValue
+          ? this.serviceAccountId
+          : serviceAccountId as String?,
       agentId: agentId ?? this.agentId,
       agentName: agentName ?? this.agentName,
       cacheCreationInputTokens:
@@ -311,7 +322,8 @@ class GetTrace {
     if (identical(this, other)) return true;
     if (other is! GetTrace) return false;
     if (runtimeType != other.runtimeType) return false;
-    return agentId == other.agentId &&
+    return serviceAccountId == other.serviceAccountId &&
+        agentId == other.agentId &&
         agentName == other.agentName &&
         cacheCreationInputTokens == other.cacheCreationInputTokens &&
         cacheReadInputTokens == other.cacheReadInputTokens &&
@@ -349,45 +361,48 @@ class GetTrace {
 
   @override
   int get hashCode => Object.hashAll([
-    agentId,
-    agentName,
-    cacheCreationInputTokens,
-    cacheReadInputTokens,
-    conversationId,
-    customerId,
-    durationNs,
-    endTime,
-    environment,
-    errorCount,
-    evaluationCount,
-    firstTurnLastInputMessage,
-    firstTurnLastOutputMessage,
-    genAiSpanCount,
-    inputTokens,
-    lastTurnLastInputMessage,
-    lastTurnLastOutputMessage,
-    llmCallCount,
-    listHash(modelsUsed),
-    organizationId,
-    outputTokens,
-    retrievalCount,
-    rootSpanId,
-    rootSpanName,
-    serviceName,
-    spanCount,
-    startTime,
-    statusCode,
-    toolCallCount,
-    listHash(toolsUsed),
-    traceId,
-    userId,
-    workflowName,
-    workspaceId,
+    Object.hashAll([
+      agentId,
+      agentName,
+      cacheCreationInputTokens,
+      cacheReadInputTokens,
+      conversationId,
+      customerId,
+      durationNs,
+      endTime,
+      environment,
+      errorCount,
+      evaluationCount,
+      firstTurnLastInputMessage,
+      firstTurnLastOutputMessage,
+      genAiSpanCount,
+      inputTokens,
+      lastTurnLastInputMessage,
+      lastTurnLastOutputMessage,
+      llmCallCount,
+      listHash(modelsUsed),
+      organizationId,
+      outputTokens,
+      retrievalCount,
+      rootSpanId,
+      rootSpanName,
+      serviceName,
+      spanCount,
+      startTime,
+      statusCode,
+      toolCallCount,
+      listHash(toolsUsed),
+      traceId,
+      userId,
+      workflowName,
+      workspaceId,
+    ]),
+    serviceAccountId,
   ]);
 
   @override
   String toString() =>
-      'GetTrace(agentId: $agentId, agentName: $agentName, '
+      'GetTrace(serviceAccountId: $serviceAccountId, agentId: $agentId, agentName: $agentName, '
       'cacheCreationInputTokens: $cacheCreationInputTokens, '
       'cacheReadInputTokens: $cacheReadInputTokens, '
       'conversationId: $conversationId, customerId: $customerId, '

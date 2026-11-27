@@ -44,7 +44,7 @@ class DatasetRecordsResource extends ResourceBase {
   Future<DatasetRecord> get({required String datasetRecordId}) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/observability/dataset-records/$datasetRecordId',
+      '/v1/observability/dataset-records/${Uri.encodeComponent(datasetRecordId)}',
     );
     final headers = requestBuilder.buildHeaders();
 
@@ -60,7 +60,7 @@ class DatasetRecordsResource extends ResourceBase {
   Future<void> delete({required String datasetRecordId}) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/observability/dataset-records/$datasetRecordId',
+      '/v1/observability/dataset-records/${Uri.encodeComponent(datasetRecordId)}',
     );
     final headers = requestBuilder.buildHeaders();
 
@@ -89,13 +89,14 @@ class DatasetRecordsResource extends ResourceBase {
   }
 
   /// Runs a judge on a dataset record.
+  /// Historical API. New applications can use the current evaluation API.
   Future<JudgeOutput> liveJudging({
     required String datasetRecordId,
     required PostDatasetRecordJudgingInSchema request,
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/observability/dataset-records/$datasetRecordId/live-judging',
+      '/v1/observability/dataset-records/${Uri.encodeComponent(datasetRecordId)}/live-judging',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
@@ -118,7 +119,7 @@ class DatasetRecordsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/observability/dataset-records/$datasetRecordId/payload',
+      '/v1/observability/dataset-records/${Uri.encodeComponent(datasetRecordId)}/payload',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
@@ -138,7 +139,7 @@ class DatasetRecordsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/observability/dataset-records/$datasetRecordId/properties',
+      '/v1/observability/dataset-records/${Uri.encodeComponent(datasetRecordId)}/properties',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
