@@ -140,6 +140,9 @@ void main() {
       expect(requests[1].headers['authorization'], 'Bearer $_apiKey');
       expect(requests[2].headers['x-api-key'], _apiKey);
       expect(requests[2].headers['authorization'], isNull);
+      expect(requests[0].followRedirects, isTrue);
+      expect(requests[1].followRedirects, isTrue);
+      expect(requests[2].followRedirects, isFalse);
     },
   );
 
@@ -557,5 +560,32 @@ void main() {
     final identity = WhoamiResponse.fromJson(wire);
     expect(identity.principal, isA<UnknownWhoamiPrincipal>());
     expect(identity.toJson(), wire);
+  });
+
+  test('webhook create handles a redirect before decoding its body', () async {
+    reply = (_) => http.Response(
+      'Unexpected HTML containing $_webhookSecret',
+      307,
+      headers: {'location': 'https://example.test/replacement'},
+    );
+    await expectLater(
+      client.webhooks.create(
+        request: const CreateWebhookRequest(
+          provider: WebhookProvider.github,
+          name: 'fixture',
+          secret: _webhookSecret,
+        ),
+      ),
+      throwsA(
+        isA<ApiException>()
+            .having((error) => error.statusCode, 'HTTP status', 307)
+            .having(
+              (error) => error.message,
+              'message',
+              isNot(contains(_webhookSecret)),
+            ),
+      ),
+    );
+    expect(requests.single.followRedirects, isFalse);
   });
 }
