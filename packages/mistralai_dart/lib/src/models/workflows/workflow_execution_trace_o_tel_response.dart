@@ -211,7 +211,9 @@ class WorkflowExecutionTraceOTelResponse {
     return WorkflowExecutionTraceOTelResponse(
       searchKeys: searchKeys == unsetCopyWithValue
           ? this.searchKeys
-          : searchKeys as Map<String, String?>?,
+          : searchKeys == null
+          ? null
+          : Map<String, String?>.from(searchKeys as Map<Object?, Object?>),
       workflowName: workflowName ?? this.workflowName,
       executionId: executionId ?? this.executionId,
       rootExecutionId: rootExecutionId ?? this.rootExecutionId,

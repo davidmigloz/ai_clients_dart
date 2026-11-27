@@ -482,4 +482,61 @@ void main() {
       throwsArgumentError,
     );
   });
+
+  test('copyWith accepts empty collections and JSON number literals', () {
+    const create = DeploymentWorkerSpecInput(
+      repositoryUrl: 'https://github.com/mistral/example',
+      requestedRoles: ['workflow_reader'],
+    );
+    final clearedCreate = create.copyWith(requestedRoles: []);
+    expect(clearedCreate.toJson()['requested_roles'], isEmpty);
+    expect(
+      create.copyWith(requestedRoles: null).toJson(),
+      isNot(contains('requested_roles')),
+    );
+    const update = WorkflowsWorkerSpecUpdate(
+      requestedRoles: ['workflow_reader'],
+    );
+    expect(
+      update.copyWith(requestedRoles: []).toJson()['requested_roles'],
+      isEmpty,
+    );
+    const response = DeploymentWorkerSpecResponse(
+      githubUrl: 'https://github.com/mistral/example',
+      requestedRoles: ['workflow_reader'],
+    );
+    expect(response.copyWith(requestedRoles: []).requestedRoles, isEmpty);
+
+    const backend = DeploymentMistralCloudBackendSpec(
+      secrets: [
+        DeploymentSecretBinding(
+          envVarName: 'TEST',
+          reference: 'secret:workspace:TEST',
+        ),
+      ],
+    );
+    expect(backend.copyWith(secrets: []).toJson()['secrets'], isEmpty);
+
+    const request = WorkflowExecutionRequest(callContext: {'export': true});
+    expect(request.copyWith(callContext: {}).toJson()['call_context'], isEmpty);
+    const signal = SignalInvocationBody(
+      name: 'refresh',
+      callContext: {'export': true},
+    );
+    expect(signal.copyWith(callContext: {}).toJson()['call_context'], isEmpty);
+    const invocation = UpdateInvocationBody(
+      name: 'refresh',
+      callContext: {'export': true},
+    );
+    expect(
+      invocation.copyWith(callContext: {}).toJson()['call_context'],
+      isEmpty,
+    );
+
+    final execution = WorkflowExecutionResponse.fromJson(_executionWire);
+    expect(execution.copyWith(searchKeys: {}).searchKeys, isEmpty);
+
+    const element = TempoTraceAttributeArrayElement(doubleValue: 0.5);
+    expect(element.copyWith(doubleValue: 1).toJson()['doubleValue'], 1.0);
+  });
 }

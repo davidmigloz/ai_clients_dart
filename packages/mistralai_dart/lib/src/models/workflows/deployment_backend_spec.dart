@@ -166,7 +166,9 @@ class DeploymentMistralCloudBackendSpec extends DeploymentBackendSpec {
         : buildDirectory as String?,
     secrets: secrets == unsetCopyWithValue
         ? this.secrets
-        : secrets as List<DeploymentSecretBinding>?,
+        : secrets == null
+        ? null
+        : List<DeploymentSecretBinding>.from(secrets as Iterable<Object?>),
   );
 
   @override

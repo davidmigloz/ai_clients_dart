@@ -106,7 +106,9 @@ class WorkflowExecutionRequest {
     return WorkflowExecutionRequest(
       callContext: callContext == unsetCopyWithValue
           ? this.callContext
-          : callContext as Map<String, Object>?,
+          : callContext == null
+          ? null
+          : Map<String, Object>.from(callContext as Map<Object?, Object?>),
       traceparent: traceparent == unsetCopyWithValue
           ? this.traceparent
           : traceparent as String?,

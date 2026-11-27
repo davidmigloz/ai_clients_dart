@@ -148,7 +148,9 @@ class DeploymentWorkerSpecResponse {
       backendSpec: backendSpec ?? this.backendSpec,
       requestedRoles: requestedRoles == unsetCopyWithValue
           ? this.requestedRoles
-          : requestedRoles as List<String>?,
+          : requestedRoles == null
+          ? null
+          : List<String>.from(requestedRoles as Iterable<Object?>),
       commit: commit == unsetCopyWithValue
           ? this.commit
           : commit as GitCommitMetadata?,

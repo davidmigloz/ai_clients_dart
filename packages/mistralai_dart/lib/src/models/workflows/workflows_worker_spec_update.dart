@@ -108,7 +108,9 @@ class WorkflowsWorkerSpecUpdate {
           : backendSpec as DeploymentMistralCloudBackendSpec?,
       requestedRoles: requestedRoles == unsetCopyWithValue
           ? this.requestedRoles
-          : requestedRoles as List<String>?,
+          : requestedRoles == null
+          ? null
+          : List<String>.from(requestedRoles as Iterable<Object?>),
       entrypoint: entrypoint == unsetCopyWithValue
           ? this.entrypoint
           : entrypoint as String?,

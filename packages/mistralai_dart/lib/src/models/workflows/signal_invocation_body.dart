@@ -48,7 +48,9 @@ class SignalInvocationBody {
     return SignalInvocationBody(
       callContext: callContext == unsetCopyWithValue
           ? this.callContext
-          : callContext as Map<String, Object>?,
+          : callContext == null
+          ? null
+          : Map<String, Object>.from(callContext as Map<Object?, Object?>),
       name: name ?? this.name,
       input: input == unsetCopyWithValue ? this.input : input,
     );

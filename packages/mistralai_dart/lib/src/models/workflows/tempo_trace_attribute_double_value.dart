@@ -95,7 +95,7 @@ class TempoTraceAttributeArrayElement {
         : boolValue as bool?,
     doubleValue: doubleValue == unsetCopyWithValue
         ? this.doubleValue
-        : doubleValue as double?,
+        : (doubleValue as num?)?.toDouble(),
     intValue: intValue == unsetCopyWithValue
         ? this.intValue
         : intValue as String?,

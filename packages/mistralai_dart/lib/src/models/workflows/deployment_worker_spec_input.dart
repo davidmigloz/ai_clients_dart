@@ -118,7 +118,9 @@ class DeploymentWorkerSpecInput {
           : backendSpec as DeploymentMistralCloudBackendSpec?,
       requestedRoles: requestedRoles == unsetCopyWithValue
           ? this.requestedRoles
-          : requestedRoles as List<String>?,
+          : requestedRoles == null
+          ? null
+          : List<String>.from(requestedRoles as Iterable<Object?>),
       githubUrl: githubUrl ?? this.githubUrl,
       entrypoint: entrypoint == unsetCopyWithValue
           ? this.entrypoint
