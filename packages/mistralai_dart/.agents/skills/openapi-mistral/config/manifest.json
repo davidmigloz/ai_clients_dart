@@ -9995,6 +9995,326 @@
         "acknowledged"
       ],
       "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "AssignGroupToWorkspaceIn": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "AssignGroupToWorkspaceIn",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The current Admin operation uses AdminAssignGroupToWorkspaceIn. Its Dart mapping verifies the current payload."
+    },
+    "Campaign": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "Campaign",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "CreateCampaignRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "CreateCampaignRequest",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "CreateJudgeRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "CreateJudgeRequest",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "FeedResultChatCompletionEventPreview": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "FeedResultChatCompletionEventPreview",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "FetchCampaignStatusResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "FetchCampaignStatusResponse",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "FetchChatCompletionFieldOptionsResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "FetchChatCompletionFieldOptionsResponse",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "FetchFieldOptionCountsRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "FetchFieldOptionCountsRequest",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "FetchFieldOptionCountsResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "FetchFieldOptionCountsResponse",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "ImportDatasetFromCampaignRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "ImportDatasetFromCampaignRequest",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "ImportDatasetFromExplorerRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "ImportDatasetFromExplorerRequest",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "ImportDatasetFromPlaygroundRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "ImportDatasetFromPlaygroundRequest",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "Judge": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "Judge",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "JudgeChatCompletionEventRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "JudgeChatCompletionEventRequest",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "JudgeDatasetRecordRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "JudgeDatasetRecordRequest",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "ListCampaignSelectedEventsResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "ListCampaignSelectedEventsResponse",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "ListCampaignsResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "ListCampaignsResponse",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "ListChatCompletionFieldsResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "ListChatCompletionFieldsResponse",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "ListJudgesResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "ListJudgesResponse",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "PaginatedResultCampaignPreview": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "PaginatedResultCampaignPreview",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "PaginatedResultChatCompletionEventPreview": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "PaginatedResultChatCompletionEventPreview",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "PaginatedResultJudgePreview": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "PaginatedResultJudgePreview",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "SearchChatCompletionEventIdsRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "SearchChatCompletionEventIdsRequest",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "SearchChatCompletionEventIdsResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "SearchChatCompletionEventIdsResponse",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "SearchChatCompletionEventsRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "SearchChatCompletionEventsRequest",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "SearchChatCompletionEventsResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "SearchChatCompletionEventsResponse",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "UpdateGroupWorkspaceAssignmentIn": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "UpdateGroupWorkspaceAssignmentIn",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The current Admin operation uses AdminUpdateGroupWorkspaceAssignmentIn. Its Dart mapping verifies the current payload."
+    },
+    "UpdateJudgeRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "UpdateJudgeRequest",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November public snapshot removed this legacy campaign, judge, or chat event contract. The Dart compatibility surface follows the older contract pending confirmed retirement."
+    },
+    "UpdateUserGroupOrganizationRoleIn": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "UpdateUserGroupOrganizationRoleIn",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The current Admin operation uses AdminUpdateUserGroupOrganizationRoleIn. Its Dart mapping verifies the current payload."
+    },
+    "UserGroupTargetType": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "UserGroupTargetType",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November Admin contract uses operation-specific user-group references. The former target enum is absent."
+    },
+    "WorkspaceMemberIN": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "WorkspaceMemberIN",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The current Admin operation uses AdminWorkspaceMemberIN. Its Dart mapping verifies the current payload."
+    },
+    "WorkspaceMemberSingleIN": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "WorkspaceMemberSingleIN",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The current Admin operation uses AdminWorkspaceMemberSingleIN. Its Dart mapping verifies the current payload."
     }
   }
 }
