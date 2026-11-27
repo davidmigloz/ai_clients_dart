@@ -1,19 +1,20 @@
 // ignore_for_file: avoid_print
 /// Demonstrates the Interactions API for server-side state management.
 ///
-/// The Interactions API is an experimental API that provides:
+/// This example uses the stable v1 Gemini Developer API for:
 /// - Server-side conversation state management
 /// - Multi-turn conversations with managed context
 /// - Streaming responses with SSE events
-/// - Function calling with automatic result handling
-/// - Agent support (e.g., Deep Research)
+/// - Function call steps with typed arguments
 library;
 
 import 'package:googleai_dart/googleai_dart.dart';
 
 void main() async {
   // Initialize client from environment variable (GOOGLE_GENAI_API_KEY)
-  final client = GoogleAIClient.fromEnvironment();
+  final client = GoogleAIClient.fromEnvironment(
+    interactionsApiVersion: ApiVersion.v1,
+  );
 
   try {
     // Example 1: Simple interaction (non-streaming)
@@ -37,15 +38,15 @@ Future<void> simpleInteraction(GoogleAIClient client) async {
   print('=== Simple Interaction ===\n');
 
   final interaction = await client.interactions.create(
-    model: 'gemini-3.5-flash',
+    model: 'gemini-4-hydrogen',
     input: const InteractionInput.text('What is the capital of France?'),
   );
 
   print('Status: ${interaction.status}');
   print('Model: ${interaction.model}');
 
-  // Use the .text extension to get text from outputs
-  print('Response: ${interaction.text}');
+  // Use outputText to extract the final text response.
+  print('Response: ${interaction.outputText}');
 
   // Check usage
   if (interaction.usage != null) {
@@ -61,7 +62,7 @@ Future<void> streamingInteraction(GoogleAIClient client) async {
   print('=== Streaming Interaction ===\n');
 
   await for (final event in client.interactions.createStream(
-    model: 'gemini-3.5-flash',
+    model: 'gemini-4-hydrogen',
     input: const InteractionInput.text('Write a haiku about programming.'),
   )) {
     switch (event) {
@@ -96,20 +97,20 @@ Future<void> multiTurnConversation(GoogleAIClient client) async {
 
   // First turn
   final turn1 = await client.interactions.create(
-    model: 'gemini-3.5-flash',
+    model: 'gemini-4-hydrogen',
     input: const InteractionInput.text('My name is Alice.'),
   );
   print('Turn 1 - User: My name is Alice.');
-  print('Assistant: ${turn1.text}');
+  print('Assistant: ${turn1.outputText}');
 
   // Second turn - references the first interaction
   final turn2 = await client.interactions.create(
-    model: 'gemini-3.5-flash',
+    model: 'gemini-4-hydrogen',
     input: const InteractionInput.text('What is my name?'),
     previousInteractionId: turn1.id,
   );
   print('Turn 2 - User: What is my name?');
-  print('Assistant: ${turn2.text}');
+  print('Assistant: ${turn2.outputText}');
 
   print('');
 }
@@ -135,7 +136,7 @@ Future<void> functionCallingInteraction(GoogleAIClient client) async {
 
   // Stream the interaction to see function calls in real-time
   await for (final event in client.interactions.createStream(
-    model: 'gemini-3.5-flash',
+    model: 'gemini-4-hydrogen',
     input: const InteractionInput.text('What is the weather in Paris?'),
     tools: tools,
   )) {

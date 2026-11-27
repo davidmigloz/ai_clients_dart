@@ -25,16 +25,21 @@ class RequestBuilder {
   /// URL (e.g. `?k=a&k=b`) are preserved.
   ///
   /// Transforms the path based on the API mode and version.
-  /// Use `{version}` placeholder in paths, which gets replaced with the configured version.
+  /// Use the `{version}` placeholder in paths to insert [apiVersion] or the
+  /// configured version.
   /// - For Google AI: `/{version}/models/{model}:generateContent`
   /// - For Vertex AI: `/{version}/projects/{projectId}/locations/{location}/publishers/google/models/{model}:generateContent`
   Uri buildUrl(
     String path, {
+    ApiVersion? apiVersion,
     EndpointConfig? endpointConfig,
     Map<String, dynamic>? queryParams,
   }) {
     final baseUri = Uri.parse(config.baseUrl);
-    final combinedPath = _joinPaths(baseUri.path, _transformPath(path));
+    final combinedPath = _joinPaths(
+      baseUri.path,
+      _transformPath(path, apiVersion ?? config.apiVersion),
+    );
     final mergedParams = <String, dynamic>{
       ...baseUri.queryParametersAll,
       ...config.defaultQueryParams,
@@ -91,18 +96,15 @@ class RequestBuilder {
   ///
   /// Replaces `{version}` placeholder with the configured version,
   /// and for Vertex AI, injects project/location path segments.
-  String _transformPath(String path) {
+  String _transformPath(String path, ApiVersion apiVersion) {
     // Replace {version} placeholder with configured version
-    var transformedPath = path.replaceFirst(
-      '{version}',
-      config.apiVersion.value,
-    );
+    var transformedPath = path.replaceFirst('{version}', apiVersion.value);
 
     // For Vertex AI, transform the path to include project and location
     if (config.apiMode == ApiMode.vertexAI) {
       // Pattern: /{version}/models/{model}:action
       // Becomes: /{version}/projects/{projectId}/locations/{location}/publishers/google/models/{model}:action
-      final versionPattern = '/${config.apiVersion.value}/';
+      final versionPattern = '/${apiVersion.value}/';
 
       if (transformedPath.startsWith(versionPattern)) {
         final afterVersion = transformedPath.substring(versionPattern.length);

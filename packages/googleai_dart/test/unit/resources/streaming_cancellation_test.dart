@@ -97,6 +97,12 @@ Stream<dynamic> startStream(
     model: 'test',
     abortTrigger: abortTrigger,
   ),
+  'agent-interaction' => client.interactions.createWithAgentStream(
+    agent: 'deep-research-preview-04-2026',
+    input: const InteractionInput.text('Summarize the release notes.'),
+    background: true,
+    abortTrigger: abortTrigger,
+  ),
   _ => client.interactions.resumeStream('test', abortTrigger: abortTrigger),
 };
 
@@ -117,6 +123,7 @@ void main() {
     'dynamic',
     'tuned',
     'interaction',
+    'agent-interaction',
     'resume',
   ]) {
     test(
@@ -154,50 +161,50 @@ void main() {
     );
   }
 
-  for (final status in [200, 400]) {
-    test(
-      'abort releases a stalled $status response body and preserves a sibling',
-      () async {
-        final sent = transport.sent.stream.first;
-        final abort = Completer<void>();
-        final result = startStream(
-          client,
-          'model',
-          abortTrigger: abort.future,
-        ).toList();
-        final pending = await sent;
-        final bodyStarted = Completer<void>();
-        final bodyCanceled = Completer<void>();
-        final body = StreamController<List<int>>(
-          onListen: bodyStarted.complete,
-          onCancel: bodyCanceled.complete,
-        );
-        pending.response.complete(http.StreamedResponse(body.stream, status));
-        await bodyStarted.future;
-        // An incomplete UTF-8 sequence/SSE frame must not delay cancellation.
-        body.add([0xe2]);
-        final siblingSent = transport.sent.stream.first;
-        final sibling = startStream(client, 'model').toList();
-        final other = await siblingSent;
-        var siblingAborted = false;
-        unawaited(
-          (other.request as http.Abortable).abortTrigger!.then((_) {
-            siblingAborted = true;
-          }),
-        );
-        final aborted = expectLater(result, throwsA(isA<AbortedException>()));
-        abort.complete();
-        await aborted.timeout(deadline);
-        await bodyCanceled.future.timeout(deadline);
-        expect(siblingAborted, isFalse);
-        other.response.complete(
-          http.StreamedResponse(const Stream.empty(), 200),
-        );
-        expect(await sibling, isEmpty);
-        expect(transport.closeCount, 0);
-        await body.close();
-      },
-    );
+  for (final (endpoint, status) in [
+    ('model', 200),
+    ('model', 400),
+    ('agent-interaction', 200),
+  ]) {
+    test('$endpoint abort releases a stalled $status response body and '
+        'preserves a sibling', () async {
+      final sent = transport.sent.stream.first;
+      final abort = Completer<void>();
+      final result = startStream(
+        client,
+        endpoint,
+        abortTrigger: abort.future,
+      ).toList();
+      final pending = await sent;
+      final bodyStarted = Completer<void>();
+      final bodyCanceled = Completer<void>();
+      final body = StreamController<List<int>>(
+        onListen: bodyStarted.complete,
+        onCancel: bodyCanceled.complete,
+      );
+      pending.response.complete(http.StreamedResponse(body.stream, status));
+      await bodyStarted.future;
+      // An incomplete UTF-8 sequence/SSE frame must not delay cancellation.
+      body.add([0xe2]);
+      final siblingSent = transport.sent.stream.first;
+      final sibling = startStream(client, 'model').toList();
+      final other = await siblingSent;
+      var siblingAborted = false;
+      unawaited(
+        (other.request as http.Abortable).abortTrigger!.then((_) {
+          siblingAborted = true;
+        }),
+      );
+      final aborted = expectLater(result, throwsA(isA<AbortedException>()));
+      abort.complete();
+      await aborted.timeout(deadline);
+      await bodyCanceled.future.timeout(deadline);
+      expect(siblingAborted, isFalse);
+      other.response.complete(http.StreamedResponse(const Stream.empty(), 200));
+      expect(await sibling, isEmpty);
+      expect(transport.closeCount, 0);
+      await body.close();
+    });
   }
 
   test('listener cancellation releases an idle response body', () async {

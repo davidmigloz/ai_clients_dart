@@ -73,26 +73,33 @@ dependencies:
   googleai_dart: ^13.1.0
 ```
 
+Set `GOOGLE_GENAI_API_KEY` and create a Gemini Developer API interaction on
+the stable `v1` endpoint.
+
 ```dart
 import 'package:googleai_dart/googleai_dart.dart';
 
 Future<void> main() async {
-  final client = GoogleAIClient.fromEnvironment();
+  final client = GoogleAIClient.fromEnvironment(
+    interactionsApiVersion: ApiVersion.v1,
+  );
 
   try {
-    final response = await client.models.generateContent(
-      model: 'gemini-3.5-flash',
-      request: GenerateContentRequest(
-        contents: [Content.text('Explain why Dart works well for APIs.')],
-      ),
+    final interaction = await client.interactions.create(
+      model: 'gemini-4-hydrogen',
+      input: const InteractionInput.text('Explain why Dart works well for APIs.'),
     );
 
-    print(response.text);
+    print(interaction.outputText);
   } finally {
     client.close();
   }
 }
 ```
+
+[Runnable quickstart](example/example.dart) ·
+[GenerateContent example](example/generate_content.dart) ·
+[Vertex AI example](example/vertex_ai_example.dart)
 
 ## Configuration
 
@@ -100,6 +107,12 @@ Future<void> main() async {
 <summary><b>Configure Google AI, Vertex AI, auth providers, and retries</b></summary>
 
 Use `GoogleAIClient.fromEnvironment()` for the default `GOOGLE_GENAI_API_KEY` workflow. Switch to `GoogleAIConfig.googleAI(...)` or `GoogleAIConfig.vertexAI(...)` when you need alternate auth placement, custom headers, or Vertex-specific project routing.
+
+`apiVersion` selects the client-wide API version. Pass
+`interactionsApiVersion: ApiVersion.v1` to opt into stable Interactions on
+the Gemini Developer API while using the existing client-wide configuration
+for other resources. Managed agents and Live require Developer API `v1beta`.
+[Gemini API version matrix](https://aistudio.google.com/api-reference/api-versions)
 
 For Vertex AI, `location` selects the endpoint:
 
@@ -209,12 +222,45 @@ Vertex AI setup requirements:
 
 ## Usage
 
+### How do I continue or stream a Gemini interaction?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Pass the earlier interaction ID as `previousInteractionId` to continue a
+conversation the server has stored. Use `store: false` for a stateless request.
+`createStream(...)` yields typed server-sent events and accepts an
+`abortTrigger`. To replay a stored stream, call `resumeStream(...)` with the
+interaction ID and the last event ID you processed.
+
+```dart
+final first = await client.interactions.create(
+  model: 'gemini-4-hydrogen',
+  input: const InteractionInput.text('My favorite language is Dart.'),
+);
+
+final next = await client.interactions.create(
+  model: 'gemini-4-hydrogen',
+  input: const InteractionInput.text('What is my favorite language?'),
+  previousInteractionId: first.id,
+);
+print(next.outputText);
+```
+
+Select `ApiVersion.v1beta` for the managed-agent variants
+`createWithAgent(...)` and `createWithAgentStream(...)`.
+[Full example](example/interactions_example.dart) ·
+[Interactions guide](https://aistudio.google.com/docs/interactions-overview)
+
+</details>
+
 ### How do I generate text with Gemini?
 
 <details>
 <summary><b>Show example</b></summary>
 
-`client.models.generateContent(...)` is the core entry point for most Gemini use cases. The `response.text` extension keeps simple text generation ergonomic for Dart and Flutter code.
+Use `client.models.generateContent(...)` for the GenerateContent API. The
+`response.text` extension extracts generated text from the result.
 
 ```dart
 import 'package:googleai_dart/googleai_dart.dart';
@@ -240,6 +286,20 @@ Future<void> main() async {
 ```
 
 → [Full example](example/generate_content.dart)
+
+</details>
+
+### How do I use Vertex AI?
+
+<details>
+<summary><b>Show configuration</b></summary>
+
+Configure your Google Cloud project, location, and OAuth credentials with
+`GoogleAIConfig.vertexAI(...)`, then call `client.models.generateContent(...)`.
+`us` and `eu` select their dedicated multi-region endpoints. Check the model's
+availability in your selected location.
+[Vertex AI configuration](#configuration) ·
+[Full example](example/vertex_ai_example.dart)
 
 </details>
 
@@ -598,7 +658,7 @@ See the [example/](example/) directory for complete examples:
 | [`documents_example.dart`](example/documents_example.dart) | Document management within corpora |
 | [`embeddings_example.dart`](example/embeddings_example.dart) | Text embeddings |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
-| [`example.dart`](example/example.dart) | Quick-start usage |
+| [`example.dart`](example/example.dart) | Stable Interactions quickstart |
 | [`file_search_example.dart`](example/file_search_example.dart) | File search with semantic retrieval |
 | [`file_search_stores_example.dart`](example/file_search_stores_example.dart) | File search store management |
 | [`files_example.dart`](example/files_example.dart) | File uploads for prompts |
@@ -609,7 +669,7 @@ See the [example/](example/) directory for complete examples:
 | [`google_maps_example.dart`](example/google_maps_example.dart) | Google Maps grounding |
 | [`google_search_example.dart`](example/google_search_example.dart) | Grounding with Google Search |
 | [`image_generation_example.dart`](example/image_generation_example.dart) | Image generation |
-| [`interactions_example.dart`](example/interactions_example.dart) | Server-side conversation state management |
+| [`interactions_example.dart`](example/interactions_example.dart) | Stable Interactions, streaming, state and function calls |
 | [`live_example.dart`](example/live_example.dart) | Live API WebSocket sessions |
 | [`models_example.dart`](example/models_example.dart) | List and inspect models |
 | [`oauth_refresh_example.dart`](example/oauth_refresh_example.dart) | OAuth token refresh during retries |
@@ -637,7 +697,7 @@ See the [example/](example/) directory for complete examples:
 | Batches | ✅ Full |
 | Corpora | ✅ Full |
 | File Search Stores | ✅ Full |
-| Interactions (Experimental) | ✅ Full |
+| Interactions | Developer REST `v1` and `v1beta` for model interactions. Managed agents require `v1beta`. |
 | Agents (Experimental) | ✅ Full |
 | Webhooks (Experimental) | ✅ Full |
 | Auth Tokens | ✅ Full |

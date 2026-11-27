@@ -1,5 +1,6 @@
 import 'package:logging/logging.dart';
 import '../auth/auth_provider.dart';
+import '../models/copy_with_sentinel.dart';
 import '../platform/environment.dart';
 
 /// API version for the GoogleAI and Vertex AI APIs.
@@ -65,6 +66,12 @@ class GoogleAIConfig {
   /// API version (v1 or v1beta).
   final ApiVersion apiVersion;
 
+  /// API version for Interactions requests. Defaults to [apiVersion] when null.
+  ///
+  /// Set this to [ApiVersion.v1] to use stable Interactions while retaining
+  /// the configured version for other resources.
+  final ApiVersion? interactionsApiVersion;
+
   /// GCP project ID (required for Vertex AI).
   final String? projectId;
 
@@ -115,6 +122,7 @@ class GoogleAIConfig {
     this.baseUrl = 'https://generativelanguage.googleapis.com',
     this.apiMode = ApiMode.googleAI,
     this.apiVersion = ApiVersion.v1beta,
+    this.interactionsApiVersion,
     this.projectId,
     this.location,
     this.authProvider,
@@ -148,6 +156,7 @@ class GoogleAIConfig {
   /// ```
   const GoogleAIConfig.googleAI({
     ApiVersion apiVersion = ApiVersion.v1beta,
+    ApiVersion? interactionsApiVersion,
     required AuthProvider authProvider,
     Map<String, String> defaultHeaders = const {},
     Map<String, String> defaultQueryParams = const {},
@@ -170,6 +179,7 @@ class GoogleAIConfig {
          baseUrl: 'https://generativelanguage.googleapis.com',
          apiMode: ApiMode.googleAI,
          apiVersion: apiVersion,
+         interactionsApiVersion: interactionsApiVersion,
          authProvider: authProvider,
          defaultHeaders: defaultHeaders,
          defaultQueryParams: defaultQueryParams,
@@ -208,6 +218,7 @@ class GoogleAIConfig {
     required String projectId,
     String location = 'us-central1',
     ApiVersion apiVersion = ApiVersion.v1,
+    ApiVersion? interactionsApiVersion,
     required AuthProvider authProvider,
     Map<String, String> defaultHeaders = const {},
     Map<String, String> defaultQueryParams = const {},
@@ -230,6 +241,7 @@ class GoogleAIConfig {
          baseUrl: vertexAIBaseUrl(location),
          apiMode: ApiMode.vertexAI,
          apiVersion: apiVersion,
+         interactionsApiVersion: interactionsApiVersion,
          projectId: projectId,
          location: location,
          authProvider: authProvider,
@@ -251,6 +263,7 @@ class GoogleAIConfig {
   factory GoogleAIConfig.fromEnvironment({
     String envVarName = 'GOOGLE_GENAI_API_KEY',
     ApiVersion apiVersion = ApiVersion.v1beta,
+    ApiVersion? interactionsApiVersion,
     Duration timeout = const Duration(minutes: 2),
     RetryPolicy retryPolicy = RetryPolicy.defaultPolicy,
   }) {
@@ -264,6 +277,7 @@ class GoogleAIConfig {
     return GoogleAIConfig(
       authProvider: ApiKeyProvider(apiKey),
       apiVersion: apiVersion,
+      interactionsApiVersion: interactionsApiVersion,
       timeout: timeout,
       retryPolicy: retryPolicy,
     );
@@ -302,10 +316,14 @@ class GoogleAIConfig {
   /// If [location] is changed without an explicit [baseUrl], and the config
   /// uses [ApiMode.vertexAI], the base URL is automatically recalculated
   /// from the new location.
+  ///
+  /// Pass null to [interactionsApiVersion] to restore inheritance from
+  /// [apiVersion].
   GoogleAIConfig copyWith({
     String? baseUrl,
     ApiMode? apiMode,
     ApiVersion? apiVersion,
+    Object? interactionsApiVersion = unsetCopyWithValue,
     String? projectId,
     String? location,
     AuthProvider? authProvider,
@@ -328,6 +346,9 @@ class GoogleAIConfig {
       baseUrl: effectiveBaseUrl,
       apiMode: effectiveMode,
       apiVersion: apiVersion ?? this.apiVersion,
+      interactionsApiVersion: interactionsApiVersion == unsetCopyWithValue
+          ? this.interactionsApiVersion
+          : interactionsApiVersion as ApiVersion?,
       projectId: projectId ?? this.projectId,
       location: effectiveLocation,
       authProvider: authProvider ?? this.authProvider,
