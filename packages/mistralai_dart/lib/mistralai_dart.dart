@@ -369,6 +369,12 @@ export 'src/models/rag/vespa_schema_summary.dart';
 export 'src/models/registry/alias_list.dart';
 export 'src/models/registry/registry_share_relation.dart';
 export 'src/models/registry/registry_sharing_scope.dart';
+// --- Models: Responses ---
+export 'src/models/responses/response.dart';
+export 'src/models/responses/response_content.dart';
+export 'src/models/responses/response_item.dart';
+export 'src/models/responses/response_stream_event.dart';
+export 'src/models/responses/response_tool.dart';
 // --- Models: Managed Search (Public Preview) ---
 export 'src/models/search/managed_index.dart';
 export 'src/models/search/search_documents.dart';
