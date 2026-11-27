@@ -84,6 +84,25 @@ void main() {
       expect(choice.finishReason, FinishReason.toolCalls);
     });
 
+    test('round-trips chunk content in messages', () {
+      const json = {
+        'index': 0,
+        'messages': [
+          {
+            'role': 'assistant',
+            'content': [
+              {'type': 'text', 'text': 'Answer'},
+            ],
+          },
+        ],
+        'finish_reason': 'stop',
+      };
+      final choice = ChatChoice.fromJson(json);
+
+      expect(choice.messages?.single.content?.text, 'Answer');
+      expect(choice.toJson(), json);
+    });
+
     test('serializes to JSON', () {
       const choice = ChatChoice(
         index: 0,

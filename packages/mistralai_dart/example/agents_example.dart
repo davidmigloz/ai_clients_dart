@@ -192,12 +192,10 @@ Future<void> streamAgentResponseExample(MistralClient client) async {
     final stream = client.agents.completeStream(request: request);
 
     await for (final event in stream) {
-      if (event.choices.isNotEmpty) {
-        final delta = event.choices.first.delta;
-        if (delta.content != null) {
-          // Print content without newline to show streaming
-          stdout.write(delta.content);
-        }
+      final text = event.text;
+      if (text != null) {
+        // Print content without newline to show streaming
+        stdout.write(text);
       }
     }
     print('\n');

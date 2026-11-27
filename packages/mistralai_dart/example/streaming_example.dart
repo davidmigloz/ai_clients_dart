@@ -33,7 +33,7 @@ void main() async {
 
     // Process each chunk as it arrives
     await for (final chunk in stream) {
-      final content = chunk.choices.first.delta.content;
+      final content = chunk.text;
       if (content != null) {
         stdout.write(content);
       }

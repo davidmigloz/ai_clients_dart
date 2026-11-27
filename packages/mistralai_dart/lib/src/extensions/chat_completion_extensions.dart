@@ -23,11 +23,7 @@ extension ChatCompletionResponseExtensions on ChatCompletionResponse {
   /// final response = await client.chat.create(request: request);
   /// print(response.text); // Prints the generated text
   /// ```
-  String? get text {
-    final content = firstChoice?.message?.content;
-    if (content is MessageTextContent) return content.text;
-    return null;
-  }
+  String? get text => firstChoice?.message?.content?.text;
 
   /// All text content from all choices, concatenated.
   ///
@@ -36,9 +32,9 @@ extension ChatCompletionResponseExtensions on ChatCompletionResponse {
     final buffer = StringBuffer();
     var hasText = false;
     for (final choice in choices) {
-      final content = choice.message?.content;
-      if (content is MessageTextContent) {
-        buffer.write(content.text);
+      final text = choice.message?.content?.text;
+      if (text != null) {
+        buffer.write(text);
         hasText = true;
       }
     }
@@ -95,11 +91,7 @@ extension ChatCompletionResponseExtensions on ChatCompletionResponse {
 /// Convenience extensions for [ChatChoice].
 extension ChatChoiceExtensions on ChatChoice {
   /// The text content from this choice's message.
-  String? get text {
-    final content = message?.content;
-    if (content is MessageTextContent) return content.text;
-    return null;
-  }
+  String? get text => message?.content?.text;
 
   /// Tool calls from this choice's message.
   List<ToolCall> get toolCalls => message?.toolCalls ?? <ToolCall>[];

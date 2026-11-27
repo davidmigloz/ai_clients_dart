@@ -12,7 +12,10 @@ void main() {
         choices: [
           ChatChoiceDelta(
             index: 0,
-            delta: DeltaContent(role: 'assistant', content: 'Hello'),
+            delta: DeltaContent(
+              role: 'assistant',
+              content: MessageContent.text('Hello'),
+            ),
           ),
         ],
       );
@@ -41,11 +44,17 @@ void main() {
         choices: [
           ChatChoiceDelta(
             index: 0,
-            delta: DeltaContent(role: 'assistant', content: 'First'),
+            delta: DeltaContent(
+              role: 'assistant',
+              content: MessageContent.text('First'),
+            ),
           ),
           ChatChoiceDelta(
             index: 1,
-            delta: DeltaContent(role: 'assistant', content: 'Second'),
+            delta: DeltaContent(
+              role: 'assistant',
+              content: MessageContent.text('Second'),
+            ),
           ),
         ],
       );
@@ -90,7 +99,10 @@ void main() {
         choices: [
           ChatChoiceDelta(
             index: 0,
-            delta: DeltaContent(role: 'assistant', content: 'partial'),
+            delta: DeltaContent(
+              role: 'assistant',
+              content: MessageContent.text('partial'),
+            ),
           ),
         ],
       );
@@ -156,7 +168,10 @@ void main() {
     test('text returns delta content', () {
       const delta = ChatChoiceDelta(
         index: 0,
-        delta: DeltaContent(role: 'assistant', content: 'Test content'),
+        delta: DeltaContent(
+          role: 'assistant',
+          content: MessageContent.text('Test content'),
+        ),
       );
       expect(delta.text, 'Test content');
     });
@@ -182,7 +197,10 @@ void main() {
     test('isFinal returns true when finishReason exists', () {
       const notFinal = ChatChoiceDelta(
         index: 0,
-        delta: DeltaContent(role: 'assistant', content: 'x'),
+        delta: DeltaContent(
+          role: 'assistant',
+          content: MessageContent.text('x'),
+        ),
       );
       expect(notFinal.isFinal, isFalse);
 
@@ -206,7 +224,10 @@ void main() {
           choices: [
             ChatChoiceDelta(
               index: 0,
-              delta: DeltaContent(role: 'assistant', content: 'Hello'),
+              delta: DeltaContent(
+                role: 'assistant',
+                content: MessageContent.text('Hello'),
+              ),
             ),
           ],
         ),
@@ -218,7 +239,10 @@ void main() {
           choices: [
             ChatChoiceDelta(
               index: 0,
-              delta: DeltaContent(role: 'assistant', content: ' '),
+              delta: DeltaContent(
+                role: 'assistant',
+                content: MessageContent.text(' '),
+              ),
             ),
           ],
         ),
@@ -230,7 +254,10 @@ void main() {
           choices: [
             ChatChoiceDelta(
               index: 0,
-              delta: DeltaContent(role: 'assistant', content: 'World!'),
+              delta: DeltaContent(
+                role: 'assistant',
+                content: MessageContent.text('World!'),
+              ),
             ),
           ],
         ),

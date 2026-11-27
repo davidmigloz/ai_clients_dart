@@ -4,6 +4,7 @@ import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../metadata/finish_reason.dart';
 import '../tools/tool_call.dart';
+import 'message_content.dart';
 
 /// A choice delta in a streaming chat completion response.
 @immutable
@@ -67,7 +68,11 @@ class DeltaContent {
   final String? role;
 
   /// The content delta.
-  final String? content;
+  ///
+  /// Either [MessageTextContent] or, for example while a reasoning model is
+  /// thinking, [MessagePartsContent]. Use the `text` extension on the chunk or
+  /// choice to read only the answer text.
+  final MessageContent? content;
 
   /// Tool calls delta.
   final List<ToolCall>? toolCalls;
@@ -94,7 +99,9 @@ class DeltaContent {
   /// Creates a [DeltaContent] from JSON.
   factory DeltaContent.fromJson(Map<String, dynamic> json) => DeltaContent(
     role: json['role'] as String?,
-    content: json['content'] as String?,
+    content: json['content'] != null
+        ? MessageContent.fromJson(json['content'] as Object)
+        : null,
     toolCalls: (json['tool_calls'] as List?)
         ?.map((e) => ToolCall.fromJson(e as Map<String, dynamic>))
         .toList(),
@@ -106,7 +113,7 @@ class DeltaContent {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (role != null) 'role': role,
-    if (content != null) 'content': content,
+    if (content != null) 'content': content!.toJson(),
     if (toolCalls != null)
       'tool_calls': toolCalls!.map((e) => e.toJson()).toList(),
     if (toolCallId != null) 'tool_call_id': toolCallId,
@@ -115,6 +122,9 @@ class DeltaContent {
   };
 
   /// Creates a copy with replaced values.
+  ///
+  /// Pass a [MessageContent] or a plain string to replace the content, or
+  /// `null` to clear it. Omitting `content` keeps the existing value.
   DeltaContent copyWith({
     Object? role = unsetCopyWithValue,
     Object? content = unsetCopyWithValue,
@@ -124,7 +134,11 @@ class DeltaContent {
     Object? metadata = unsetCopyWithValue,
   }) => DeltaContent(
     role: role == unsetCopyWithValue ? this.role : role as String?,
-    content: content == unsetCopyWithValue ? this.content : content as String?,
+    content: switch (content) {
+      unsetCopyWithValue => this.content,
+      final String text => MessageContent.text(text),
+      _ => content as MessageContent?,
+    },
     toolCalls: toolCalls == unsetCopyWithValue
         ? this.toolCalls
         : toolCalls as List<ToolCall>?,
