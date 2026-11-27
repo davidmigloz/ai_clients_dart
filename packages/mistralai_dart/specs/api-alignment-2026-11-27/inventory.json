@@ -13093,7 +13093,7 @@
     },
     {
       "ticket": 599,
-      "disposition": "retired",
+      "disposition": "deprecated",
       "finding": "GET /v1/audio/voices offset listing is deprecated with a published sunset of March 31, 2027. Use cursor-based search for new callers."
     }
   ]
