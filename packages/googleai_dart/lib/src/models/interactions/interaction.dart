@@ -61,6 +61,9 @@ class Interaction {
   /// interaction. A stateless continuation must resend its original input.
   final String? continuationToken;
 
+  /// Ordered IDs of the hops combined by automatic continuation.
+  final List<String>? continuationIds;
+
   /// System instruction for the interaction.
   final String? systemInstruction;
 
@@ -121,6 +124,7 @@ class Interaction {
     this.object = 'interaction',
     this.previousInteractionId,
     this.continuationToken,
+    this.continuationIds,
     this.systemInstruction,
     this.tools,
     this.generationConfig,
@@ -160,6 +164,8 @@ class Interaction {
     object: json['object'] as String? ?? 'interaction',
     previousInteractionId: json['previous_interaction_id'] as String?,
     continuationToken: json['continuation_token'] as String?,
+    continuationIds: (json['continuation_ids'] as List<dynamic>?)
+        ?.cast<String>(),
     systemInstruction: json['system_instruction'] as String?,
     tools: (json['tools'] as List<dynamic>?)
         ?.map((e) => InteractionTool.fromJson(e as Map<String, dynamic>))
@@ -214,6 +220,7 @@ class Interaction {
     if (previousInteractionId != null)
       'previous_interaction_id': previousInteractionId,
     if (continuationToken != null) 'continuation_token': continuationToken,
+    if (continuationIds != null) 'continuation_ids': continuationIds,
     if (systemInstruction != null) 'system_instruction': systemInstruction,
     if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
     if (generationConfig != null)
@@ -249,6 +256,7 @@ class Interaction {
     Object? object = unsetCopyWithValue,
     Object? previousInteractionId = unsetCopyWithValue,
     Object? continuationToken = unsetCopyWithValue,
+    Object? continuationIds = unsetCopyWithValue,
     Object? systemInstruction = unsetCopyWithValue,
     Object? tools = unsetCopyWithValue,
     Object? generationConfig = unsetCopyWithValue,
@@ -292,6 +300,9 @@ class Interaction {
       continuationToken: continuationToken == unsetCopyWithValue
           ? this.continuationToken
           : continuationToken as String?,
+      continuationIds: continuationIds == unsetCopyWithValue
+          ? this.continuationIds
+          : continuationIds as List<String>?,
       systemInstruction: systemInstruction == unsetCopyWithValue
           ? this.systemInstruction
           : systemInstruction as String?,

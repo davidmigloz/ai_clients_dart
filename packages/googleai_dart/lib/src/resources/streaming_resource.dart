@@ -173,8 +173,15 @@ mixin StreamingResource on ResourceBase {
               (chunk) {
                 if (!stopped) bytesController!.add(chunk);
               },
-              onError: finish,
+              // Deliver bytes already received before the connection error so
+              // callers can use any complete SSE events they contain.
+              onError: (Object error, StackTrace trace) {
+                if (stopped) return;
+                bytesController!.addError(error, trace);
+                bytesController!.close().ignore();
+              },
               onDone: () => bytesController!.close().ignore(),
+              cancelOnError: true,
             );
             if (controller.isPaused) bodySubscription?.pause();
           },
