@@ -39,7 +39,7 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 ### Tools and media
 
 - Built-in web search, code interpreter, and document library tools
-- Audio transcription, text-to-speech, and voice management
+- Audio transcription, text-to-speech, voice management, and realtime WebSockets
 - OCR, moderations, and classifications
 
 ### Operational APIs
@@ -769,6 +769,69 @@ scheduled to retire on March 31, 2027.
 
 </details>
 
+### How do I use realtime audio?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Voxtral 3 realtime transcription and speech run over WebSockets in Public
+Preview. Use `client.audio.realtime.transcribeStream()` for incoming audio
+and `client.audio.realtimeSpeech.speakStream()` for incoming text. Ending
+the input stream lets the server finish and report usage. Cancel the
+subscription to stop both the input and the socket.
+
+```dart
+// pcmFrames is a Stream<List<int>> of raw 16 kHz signed 16-bit mono PCM.
+await for (final event in client.audio.realtime.transcribeStream(
+  model: 'voxtral-mini-transcribe-realtime-3-0',
+  audio: pcmFrames,
+  options: const RealtimeTranscriptionOptions(
+    audioFormat: RealtimeAudioFormat(
+      encoding: RealtimeAudioEncoding.pcmS16le,
+      sampleRate: 16000,
+    ),
+  ),
+)) {
+  if (event.type == 'transcription.text.delta') {
+    stdout.write(event.text ?? '');
+  }
+}
+```
+
+Use `connect()` to manage session updates, turn detection, intermediate
+flushes, or multiple speech generations on one socket. Close a connection
+you open directly. Transcription consumes raw mono PCM. When speech uses
+`SpeechOutputFormat.pcm`, its base64 chunks decode to raw float32
+little-endian mono.
+
+Native Dart clients use bearer credentials for both sockets. Browser
+transcription uses a short-lived, model-scoped credential. Use a server-side
+API key with `create_client_session` permission to call
+`backend.realtime.sessions.create()`, then pass only the secret value
+to the authenticated browser. Mistral documents the subprotocol handshake
+in its [realtime transcription client authentication guide](https://docs.mistral.ai/studio/audio/deprecated/speech_to_text/realtime_transcription/client_auth).
+Mint the token for the exact model your browser connects to. Realtime speech
+uses the native bearer path.
+
+```dart
+const model = 'voxtral-mini-transcribe-realtime-3-0';
+// Backend, using your workspace API key.
+final session = await backend.realtime.sessions.create(
+  request: const CreateRealtimeClientSessionRequest(model: model),
+);
+final token = session.clientSecret.value; // Return to the authenticated browser.
+
+// Browser, after retrieving token from your backend.
+final connection = await browser.audio.realtime.connect(
+  model: model,
+  clientToken: token,
+);
+```
+
+→ [Full example](example/realtime_audio_example.dart)
+
+</details>
+
 ### How do I use agents?
 
 <details>
@@ -1334,6 +1397,7 @@ See the [example/](example/) directory for complete examples:
 | [`classification_example.dart`](example/classification_example.dart) | Text classification |
 | [`ocr_example.dart`](example/ocr_example.dart) | Document text extraction |
 | [`audio_example.dart`](example/audio_example.dart) | Voxtral file transcription, SSE, speech, voice search, and WAV samples |
+| [`realtime_audio_example.dart`](example/realtime_audio_example.dart) | Realtime Voxtral transcription and speech over WebSockets |
 | [`agents_example.dart`](example/agents_example.dart) | AI agents (beta) |
 | [`conversations_example.dart`](example/conversations_example.dart) | Multi-turn conversations (beta) |
 | [`libraries_example.dart`](example/libraries_example.dart) | Library and document uploads (beta) |
@@ -1371,6 +1435,7 @@ See the [example/](example/) directory for complete examples:
 | Classifications | ✅ Full |
 | OCR | ✅ Full |
 | Audio (Transcription, Speech, Voices) | ✅ Full |
+| Voxtral realtime transcription and speech | Public Preview. Native STT and TTS, browser STT with a scoped token |
 | Agents (Beta) | ✅ Full |
 | Conversations (Beta) | ✅ Full |
 | Libraries (Beta) | ✅ Full |
